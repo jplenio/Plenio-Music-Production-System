@@ -4,9 +4,9 @@
 |---|---|
 | Date | 2026-09-25 |
 | Written for | the return from the Claude Code cloud session to the owner's Windows machine (Phase 5 checks that need ComfyUI, a GPU or a browser) |
-| Overall phase | **Phase 5 - Reusable Score / ABC editor** (prompt `07_PHASE_5_SCORE_EDITOR.md`, authorized by the owner on 2026-09-25) |
-| Sub-phase | Phase 5 implemented, unit and Vitest suites pass, host tests written, docs and report written; **the owner-machine checks of §3 remain** before Phase 5 is *Done* |
-| Phases done | 1A, 1B (design), 2 (Foundation), 3 (YuE2 Core), 4A (Cover/Instrumental design gate), 4B (YuE2 Cover) |
+| Overall phase | **Phase 5 done** (prompt `07_PHASE_5_SCORE_EDITOR.md`); next: Phase 6 - MiniMax, only on the owner's authorization |
+| Sub-phase | - (hard stop after Phase 5) |
+| Phases done | 1A, 1B (design), 2 (Foundation), 3 (YuE2 Core), 4A (Cover/Instrumental design gate), 4B (YuE2 Cover), 5 (Score / ABC editor) |
 | Prompt set | `D:\Daten2\Deepseek\ComfyUI-MiniMax\Plenio_Music_Production_System_Refactor_Prompts\` on the owner's machine (not in this repository): `01_PHASE_1A` ... `12_PHASE_10`, one phase per prompt, hard stop after each phase, the next phase only on the owner's explicit authorization |
 
 Read with: [README.md](README.md) (design index), [implementation-roadmap.md](implementation-roadmap.md), [score-editor-design.md](score-editor-design.md) (§15 = Phase 5 implementation record), [target-architecture.md](target-architecture.md) §0/§2/§18, the latest test report [../test-reports/2026-09-25-phase-5.md](../test-reports/2026-09-25-phase-5.md).
@@ -44,7 +44,7 @@ Read with: [README.md](README.md) (design index), [implementation-roadmap.md](im
 ## 3. What remains (Phase 5, on the owner's machine)
 
 1. ~~Full Python suite with ComfyUI~~ - done on the owner's machine: 557 passed, 3 skipped, all four new host tests pass. With `PLENIO_SMOKE=1` and `PLENIO_MODELS_DIR`: 559 passed, 1 skipped (coexistence).
-2. ~~Browser checks and V3 runs~~ - done by the owner (report §5): YuE2 Song all checks fine, YuE2 Cover through both review stops to a finished song. Open: confirm A/B in the cover score sheet. Original list: long YuE2 plan, keyboard-only, light theme; repeat of the checkpoint checks after the fixes (typing undo, play from a bar, A/B, Apply -> save -> reload).
+2. ~~Browser checks and V3 runs~~ - done by the owner (report §5): YuE2 Song all checks fine, YuE2 Cover through both review stops to a finished song. A/B confirmed. Original list: long YuE2 plan, keyboard-only, light theme; repeat of the checkpoint checks after the fixes (typing undo, play from a bar, A/B, Apply -> save -> reload).
 3. V3: one cover and one song with an editor-edited score, listened to.
 4. Record the results in the Phase 5 report, set the roadmap status to *Done*, and stop (prompt rule). Phase 6 only on the owner's authorization.
 
@@ -100,9 +100,7 @@ Manual checks done in a real ComfyUI with the SheetSage2 score of the M2 source:
 
 ## 9. Exact recommended next action
 
-On the owner's machine: `git pull`, then run §3 items 1-3; fix what they find; record the results in `docs/test-reports/2026-09-25-phase-5.md` and set Phase 5 to *Done*. Do not start Phase 6.
-
-**Next prompt file:** `07_PHASE_5_SCORE_EDITOR.md` (finish the owner-machine checks). After Phase 5 is done and the owner authorizes it: `08_PHASE_6_MINIMAX.md`.
+Phase 5 is done. Wait for the owner's authorization of **Phase 6 - MiniMax** (prompt `08_PHASE_6_MINIMAX.md`); do not start it before.
 
 ## 10. Context a new session would otherwise have to rediscover
 

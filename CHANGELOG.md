@@ -4,7 +4,7 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 ## Unreleased
 
-### Added (Phase 5 - Score / ABC editor)
+### Added (Phase 5 - Score / ABC editor; done 2026-09-25)
 
 - Score core: element view with ids and text positions (`core.score.model`), tolerant positions and diagnostics with line and bar range (`core.score.positions`), editing operations with invariant checks (`core.score.edit`: pitch, length, rest/note, chords, section rename/move/split/join), operation registry (`core.score.operations`); `/plenio/score/analyze` returns the element view and `display_abc`, `/plenio/score/transform` the new operations.
 - Song Sheet: optional `reference_audio` input for A/B listening (display only); the Cover template connects the source.

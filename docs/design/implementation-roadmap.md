@@ -79,7 +79,7 @@ Confirm or change D-01 … D-09 in [target-architecture.md](target-architecture.
 | **Tests** | score-model/route unit tests, transform invariants, display normalisation and offset-map tests (accidental cases), Vitest store/history/mapping tests, e2e flows (open, edit, apply, save/reload, run, conflict, approval), YuE2 and cover integration tests. |
 | **Completion criteria** | editing works on real SheetSage2 and YuE2 scores; no hidden stale copies; edits persist across save/reload; invalid edits are refused with bar-level feedback; the editor knows nothing about specific templates. |
 | **Effort** | **xhigh** |
-| **Status** | **Implemented; cloud-verifiable tests pass** (2026-09-25): backend element view, editing operations and routes, the tabbed editor with notation, ABC text, navigator, palette, undo/redo, playback and A/B; unit and Vitest suites pass, three defects they found are fixed; editor user guide and test report written ([../test-reports/2026-09-25-phase-5.md](../test-reports/2026-09-25-phase-5.md)). **Done** once the host tests, the browser checks (long YuE2 plan, keyboard-only, light theme) and the V3 runs pass on the owner's machine (report §5). |
+| **Status** | **Done** (2026-09-25): editor, routes and operations implemented; unit, Vitest, host and smoke suites pass (559 passed on the owner's machine); browser checks, a YuE2 Song and a YuE2 Cover run with A/B passed on the owner's machine ([../test-reports/2026-09-25-phase-5.md](../test-reports/2026-09-25-phase-5.md)). |
 
 ## Phase 6 — MiniMax
 
