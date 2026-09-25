@@ -108,3 +108,28 @@ export function viewUrl(fetcher: Fetcher, file: { filename: string; subfolder: s
   const route = `/view?${query.toString()}`
   return fetcher.apiURL ? fetcher.apiURL(route) : `/api${route}`
 }
+
+export interface EqResponse {
+  settings: import('../shared/eqCurve').EqSettings
+  frequency_hz: number[]
+  response_db: number[]
+  bands: number[][]
+}
+
+/** The exact response of EQ settings (the node's own filter design). */
+export function eqResponse(fetcher: Fetcher, settings: unknown, sampleRate: number, points = 200): Promise<EqResponse> {
+  return post<EqResponse>(fetcher, '/plenio/eq/response', { settings, sample_rate: sampleRate, points })
+}
+
+export interface EqPreset {
+  name: string
+  description: string
+  settings: import('../shared/eqCurve').EqSettings
+}
+
+/** Shipped EQ recipes (``manual``: band sets; ``match``: tone-match recipes). */
+export async function eqPresets(fetcher: Fetcher): Promise<{ manual: EqPreset[] }> {
+  const response = await fetcher.fetchApi('/plenio/presets/eq')
+  if (!response.ok) throw new PlenioApiError(`Request failed (${response.status})`)
+  return (await response.json()) as { manual: EqPreset[] }
+}

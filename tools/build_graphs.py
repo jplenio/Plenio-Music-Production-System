@@ -229,6 +229,52 @@ def minimax_render() -> Blueprint:
     )
 
 
+WARM_GENTLE = "Warm - gentle (workflow default)"
+MASTER_TARGET = "streaming (-14 LUFS, -1 dBTP)"
+MASTER_STYLE = "Balanced - gentle glue"
+
+
+def master() -> Blueprint:
+    g = Graph()
+    eq = g.add(
+        "PlenioEQ",
+        (0, 0),
+        size=(340, 200),
+        widgets={"mode": "match preset", "mode.preset": WARM_GENTLE},
+    )
+    loudness = g.add(
+        "PlenioLoudness",
+        (400, 0),
+        size=(340, 200),
+        widgets={"target": MASTER_TARGET, "compression": MASTER_STYLE, "sample_rate": "keep"},
+    )
+    g.link(eq, "audio", loudness, "audio")
+    return Blueprint(
+        "Plenio · Master",
+        "Plenio/Mastering",
+        "Finishes a song: a gentle tone match (EQ) and loudness for streaming (-14 LUFS, -1 dBTP true peak) with "
+        "gentle compression. Open the block to change the EQ curve or the compression style.",
+        g,
+        [
+            BlueprintInput("audio", "AUDIO", [(eq, "audio")]),
+            BlueprintInput("reference", "AUDIO", [(eq, "reference")]),
+            BlueprintInput(
+                "sample_rate",
+                "COMBO",
+                [(loudness, "sample_rate")],
+                widget=True,
+                default="keep",
+                label="sample rate",
+            ),
+        ],
+        [
+            BlueprintOutput("audio", "AUDIO", (loudness, "audio")),
+            BlueprintOutput("eq_report", "PLENIO_REPORT", (eq, "report")),
+            BlueprintOutput("loudness_report", "PLENIO_REPORT", (loudness, "report")),
+        ],
+    )
+
+
 def write_song() -> Blueprint:
     g = Graph()
     compose = g.add("PlenioComposePrompt", (0, 0), size=(300, 100))
@@ -808,6 +854,64 @@ def minimax_song(model_bp: Blueprint, write_bp: Blueprint, render_bp: Blueprint)
     return g
 
 
+ABOUT_ENHANCE = """# 4 · Enhance & Master
+
+**Load Audio -> EQ -> Loudness & Dynamics -> Export**
+
+Finishes an existing recording (for example a take you rendered earlier) without any music model.
+
+1. Upload the file in **Load Audio**.
+2. **EQ** starts with a gentle warm tone match (*match preset*). Choose *manual* to draw your own curve, *flat* for no EQ, or connect a **reference** recording and pick a reference recipe.
+3. **Loudness & Dynamics** brings the song to -14 LUFS with a true peak of at most -1 dBTP (streaming); pick another target or compression style if you like.
+4. Press **Run**. Export writes FLAC 24-bit and MP3 V0 to `output/plenio/enhanced`, copies the source file's tags and cover, keeps the unmastered source as `(original).flac`, and writes a release record with the measured loudness.
+
+The preview plays the result; compare it with the source in Load Audio. Nothing here needs a GPU.
+"""
+
+
+def enhance_master() -> Graph:
+    g = Graph()
+    about = g.add_frontend(
+        "MarkdownNote", (-560, 0), size=(480, 520), title="About this template", widgets=[ABOUT_ENHANCE]
+    )
+    source = g.add("LoadAudio", (0, 0), size=(340, 140), title="Source")
+    eq = g.add(
+        "PlenioEQ", (420, 0), size=(420, 420), widgets={"mode": "match preset", "mode.preset": WARM_GENTLE}
+    )
+    loudness = g.add(
+        "PlenioLoudness",
+        (900, 0),
+        size=(340, 220),
+        widgets={"target": MASTER_TARGET, "compression": MASTER_STYLE, "sample_rate": "keep"},
+    )
+    preview = g.add("PreviewAudio", (1300, 0), size=(360, 120))
+    export = g.add(
+        "PlenioExportRelease",
+        (1300, 180),
+        size=(360, 320),
+        autogrow={"reports": 2},
+        widgets={
+            "folder": "plenio/enhanced",
+            "naming": "{title}",
+            "mp3": True,
+            "tags": "copy from loaded file",
+        },
+    )
+    g.link(source, "AUDIO", eq, "audio")
+    g.link(eq, "audio", loudness, "audio")
+    g.link(loudness, "audio", preview, "audio")
+    g.link(loudness, "audio", export, "audio")
+    g.link(source, "AUDIO", export, "original")
+    g.link(eq, "report", export, "reports.report_0")
+    g.link(loudness, "report", export, "reports.report_1")
+    g.group("1 · SOURCE", [source])
+    g.group("2 · TONE", [eq])
+    g.group("3 · LOUDNESS", [loudness])
+    g.group("4 · EXPORT", [preview, export])
+    del about
+    return g
+
+
 def write_json(path: Path, data: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -816,7 +920,7 @@ def write_json(path: Path, data: dict) -> None:
 def main() -> int:
     model_bp, write_bp, plan_bp, render_bp = yue2_model(), write_song(), yue2_plan(), yue2_render()
     transcribe_bp, takes_bp = transcribe_score(), yue2_takes()
-    minimax_model_bp, minimax_render_bp = minimax_model(), minimax_render()
+    minimax_model_bp, minimax_render_bp, master_bp = minimax_model(), minimax_render(), master()
     blueprints = [
         model_bp,
         write_bp,
@@ -826,6 +930,7 @@ def main() -> int:
         takes_bp,
         minimax_model_bp,
         minimax_render_bp,
+        master_bp,
     ]
     for blueprint in blueprints:
         write_json(PROJECT / "subgraphs" / f"{blueprint.name}.json", blueprint_file(blueprint))
@@ -844,7 +949,11 @@ def main() -> int:
         PROJECT / "example_workflows" / "3 · MiniMax · Song.json",
         workflow(minimax, "3 · MiniMax · Song", [minimax_model_bp, write_bp, minimax_render_bp]),
     )
-    print(f"wrote {len(blueprints)} blueprints and 3 templates")
+    write_json(
+        PROJECT / "example_workflows" / "4 · Enhance & Master.json",
+        workflow(enhance_master(), "4 · Enhance & Master", []),
+    )
+    print(f"wrote {len(blueprints)} blueprints and 4 templates")
     return 0
 
 

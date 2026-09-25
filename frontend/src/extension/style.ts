@@ -15,6 +15,18 @@ const CSS = `
 .plenio-summary p { margin: 4px 0; }
 .plenio-summary pre { white-space: pre-wrap; font-size: 11px; }
 .plenio-summary code { font-family: var(--code-font, monospace); }
+.plenio-eq { display: flex; flex-direction: column; gap: 4px; font: 11px/1.4 var(--font-family, sans-serif);
+  color: var(--descrip-text, #999); }
+.plenio-eq-tools { display: flex; gap: 6px; align-items: center; min-width: 0; }
+.plenio-eq-tools select { max-width: 45%; background: var(--comfy-input-bg, #333); color: var(--input-text, #ddd);
+  border: 1px solid var(--border-color, #555); border-radius: 4px; font: inherit; }
+.plenio-eq-info { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.plenio-eq-plot { width: 100%; height: auto; background: var(--comfy-input-bg, #222); border-radius: 6px; touch-action: none; }
+.plenio-eq-plot .grid { stroke: var(--border-color, #444); stroke-width: 0.6; }
+.plenio-eq-plot .grid.zero { stroke-width: 1.2; }
+.plenio-eq-plot .curve { fill: none; stroke: #4aa3ff; stroke-width: 2; }
+.plenio-eq-plot .handle { fill: var(--comfy-menu-bg, #1a1a1a); stroke: #4aa3ff; stroke-width: 2; cursor: grab; }
+.plenio-eq-plot .handle.selected, .plenio-eq-plot .handle:focus { fill: #4aa3ff; outline: none; }
 `
 
 export function installStyles(): void {

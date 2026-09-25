@@ -1,0 +1,32 @@
+{
+ "schema": "plenio.study.restoration/1",
+ "files": [
+  {
+   "file": "Example Album - A Feeling With No Address.mp3",
+   "sample_rate": 44100,
+   "seconds": 241.15,
+   "loudness": {
+    "integrated_lufs": -13.95,
+    "true_peak_dbtp": -0.96,
+    "sample_peak_dbfs": -1.04,
+    "loudness_range_lu": 3.78,
+    "plr_db": 12.99,
+    "seconds": 241.151,
+    "meter": "BS.1770-4 / EBU Tech 3342 (Plenio)",
+    "valid": true
+   },
+   "inter_sample_over": false,
+   "clipping": {
+    "samples_at_full_scale": 0,
+    "clipped_runs_3plus": 0,
+    "longest_run": 0
+   },
+   "spectrum": {
+    "valid": true,
+    "rolloff_hz": 21032.6,
+    "hf_to_mid_db": -9.1,
+    "hf_to_mid_spread_db": 21.35
+   }
+  }
+ ]
+}

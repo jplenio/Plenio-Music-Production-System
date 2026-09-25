@@ -25,6 +25,7 @@ class OptionalPackage:
 
 KNOWN_PACKAGES: tuple[OptionalPackage, ...] = (
     OptionalPackage("av", "av", "Audio export (Export Release)", "python -m pip install av"),
+    OptionalPackage("PIL", "pillow", "Cover art (Export Release)", "python -m pip install pillow"),
     OptionalPackage(
         "scipy", "scipy", "Mastering DSP (EQ, Loudness & Dynamics)", "python -m pip install scipy"
     ),
@@ -65,7 +66,7 @@ def require(module: str, packages: tuple[OptionalPackage, ...] = KNOWN_PACKAGES)
     except ModuleNotFoundError as error:
         if error.name not in (module, module.split(".")[0]):
             raise
-        known = next((p for p in packages if p.module == module), None)
+        known = next((p for p in packages if p.module in (module, module.split(".")[0])), None)
         if known is None:
             raise PlenioDependencyError(
                 module, feature=f"This feature (module {module})", install=f"python -m pip install {module}"

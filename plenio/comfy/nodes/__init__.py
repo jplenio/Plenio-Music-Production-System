@@ -4,7 +4,9 @@ from .brief import PlenioSongBrief
 from .compose import PlenioComposePrompt
 from .cover_brief import PlenioCoverBrief
 from .engine import PlenioEngine
+from .eq import PlenioEQ
 from .export import PlenioExportRelease
+from .loudness import PlenioLoudness
 from .parse import PlenioParseDraft
 from .score_tools import PlenioScoreTools
 from .sheet import PlenioSongSheet
@@ -24,6 +26,8 @@ NODES = (
     PlenioTranscribeScore,
     PlenioTranscribeLyrics,
     PlenioVocalCheck,
+    PlenioEQ,
+    PlenioLoudness,
     PlenioExportRelease,
     PlenioSystemCheck,
 )

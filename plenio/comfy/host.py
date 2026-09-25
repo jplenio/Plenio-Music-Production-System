@@ -19,7 +19,7 @@ from .. import __version__
 from ..core.config import CONFIG_FILE_NAME, PlenioConfig
 from ..core.dependencies import probe
 from ..core.engines import EngineInfo, minimax, yue2
-from ..core.errors import PlenioModelError
+from ..core.errors import PlenioModelError, PlenioUserError
 from ..core.system import Device, SystemFacts
 
 log = logging.getLogger("plenio")
@@ -54,6 +54,17 @@ def output_directory() -> Path:
     import folder_paths
 
     return Path(folder_paths.get_output_directory())
+
+
+def input_file(name: str) -> Path:
+    """Path of ``name`` inside the ComfyUI input folder (refuses paths leaving it)."""
+    import folder_paths
+
+    root = Path(folder_paths.get_input_directory()).resolve()
+    path = (root / name).resolve()
+    if root not in path.parents or not path.is_file():
+        raise PlenioUserError(f"The input file {name!r} was not found in the ComfyUI input folder.")
+    return path
 
 
 def models_directory() -> Path:
@@ -213,6 +224,26 @@ def audio_facts(audio: Any) -> tuple[Any, int, float]:
 
 def audio_batch(audio: Any) -> int:
     return int(audio["waveform"].shape[0])
+
+
+def image_array(image: Any) -> Any:
+    """The first image of a ComfyUI ``IMAGE`` batch as numpy ``[height, width, channels]`` in 0..1."""
+    return image[0].detach().to("cpu").float().numpy()
+
+
+def audio_items(audio: Any) -> tuple[list[Any], int]:
+    """Every batch item as float64 numpy ``[channels, frames]`` and the sample rate (for the DSP)."""
+    waveform = audio["waveform"].detach().to("cpu").double()
+    return [item.numpy() for item in waveform], int(audio["sample_rate"])
+
+
+def make_audio(items: list[Any], rate: int) -> dict[str, Any]:
+    """ComfyUI ``AUDIO`` from equally long numpy items (float32 on the CPU, like the native audio nodes)."""
+    import numpy as np
+    import torch
+
+    stacked = np.stack([np.asarray(item, dtype=np.float32) for item in items])
+    return {"waveform": torch.from_numpy(np.ascontiguousarray(stacked)), "sample_rate": int(rate)}
 
 
 def mono_16k(audio: Any) -> Any:

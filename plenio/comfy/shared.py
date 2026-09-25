@@ -6,6 +6,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from ..core.assets import Asset, load_catalogue
+from ..core.audio.presets import Library
 from ..core.brief import TemplateLibrary
 from . import host
 
@@ -28,3 +29,9 @@ def template_library() -> TemplateLibrary:
 @lru_cache(maxsize=1)
 def asset_catalogue() -> dict[str, Asset]:
     return load_catalogue(RESOURCES / "assets.toml")
+
+
+@lru_cache(maxsize=1)
+def preset_library() -> Library:
+    """EQ and loudness presets shipped with Plenio (``resources/presets``)."""
+    return Library(RESOURCES / "presets")

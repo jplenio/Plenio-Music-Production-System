@@ -21,7 +21,7 @@ from ..core.errors import PlenioError, PlenioUserError
 from ..core.sheet import DOCUMENT_KINDS, evaluate_sheet, parse_sheet_state
 from ..core.system import check_system, to_markdown
 from . import host
-from .shared import template_library
+from .shared import preset_library, template_library
 
 log = logging.getLogger("plenio")
 
@@ -187,6 +187,34 @@ async def asr_note(request: web.Request) -> web.StreamResponse:
     return web.json_response({"note": asr_notes().get(request.match_info["draft_sha256"])})
 
 
+async def presets(request: web.Request) -> web.StreamResponse:
+    from ..core.audio import presets as audio_presets
+
+    return web.json_response(audio_presets.load(preset_library().folder, request.match_info["kind"]))
+
+
+async def eq_response(request: web.Request) -> web.StreamResponse:
+    """The EQ curve of ``settings`` at ``sample_rate`` (the curve widget draws exactly the node's response)."""
+    from ..core.audio import eq
+
+    data = await read_json(request)
+    rate = data.get("sample_rate", 48000)
+    settings = eq.parse_settings(data.get("settings", ""), rate if isinstance(rate, int) else None)
+    grid = eq.display_grid(int(rate), int(data.get("points", 256)))
+    bands = []
+    for band in settings["bands"]:
+        single = dict(settings, preamp_db=0.0, bands=[band])
+        bands.append([round(float(v), 3) for v in eq.response_db(single, int(rate), grid)])
+    return web.json_response(
+        {
+            "settings": settings,
+            "frequency_hz": [round(float(f), 2) for f in grid],
+            "response_db": [round(float(v), 3) for v in eq.response_db(settings, int(rate), grid)],
+            "bands": bands,
+        }
+    )
+
+
 ROUTES: tuple[tuple[str, str, Handler], ...] = (
     ("GET", "/plenio/system", system),
     ("POST", "/plenio/score/analyze", score_analyze),
@@ -197,6 +225,8 @@ ROUTES: tuple[tuple[str, str, Handler], ...] = (
     ("GET", "/plenio/templates/{template_id:.+}", template_get),
     ("POST", "/plenio/templates", template_save),
     ("GET", "/plenio/asr/notes/{draft_sha256}", asr_note),
+    ("GET", "/plenio/presets/{kind}", presets),
+    ("POST", "/plenio/eq/response", eq_response),
 )
 
 

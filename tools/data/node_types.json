@@ -1408,6 +1408,175 @@
    "category": "Plenio/Song",
    "display_name": "Cover Brief"
   },
+  "PlenioEQ": {
+   "input": {
+    "required": {
+     "audio": [
+      "AUDIO",
+      {
+       "tooltip": "The audio to equalise (every item of a batch)."
+      }
+     ],
+     "mode": [
+      "COMFY_DYNAMICCOMBO_V3",
+      {
+       "tooltip": "flat: no change; manual: your bands; match: a proposal fitted to the audio.",
+       "options": [
+        {
+         "key": "flat",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "manual",
+         "inputs": {
+          "required": {
+           "bands": [
+            "STRING",
+            {
+             "tooltip": "EQ bands (plenio.eq/1); edit them on the curve.",
+             "default": "{\"schema\": \"plenio.eq/1\", \"preamp_db\": 0.0, \"bands\": []}",
+             "multiline": true
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "match preset",
+         "inputs": {
+          "required": {
+           "preset": [
+            "COMBO",
+            {
+             "tooltip": "Tone match recipes (reference recipes need the reference input).",
+             "default": "Warm - gentle (workflow default)",
+             "multiselect": false,
+             "options": [
+              "Warm - gentle (workflow default)",
+              "Warm - subtle mastering",
+              "Warm - rounded mix",
+              "Warm - upper-mid softening",
+              "Bright - subtle mastering",
+              "Bright - gentle clarity",
+              "Bright - open mix",
+              "Reference - subtle mastering",
+              "Reference - balanced",
+              "Reference - broad match"
+             ]
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "custom match",
+         "inputs": {
+          "required": {
+           "target": [
+            "COMBO",
+            {
+             "tooltip": "warm / bright: a gentle tilt around 1 kHz; reference: the tone of the reference input.",
+             "default": "warm",
+             "multiselect": false,
+             "options": [
+              "warm",
+              "bright",
+              "reference"
+             ]
+            }
+           ],
+           "strength": [
+            "FLOAT",
+            {
+             "tooltip": "How far to move towards the target.",
+             "default": 0.35,
+             "min": 0.0,
+             "max": 1.0,
+             "step": 0.05
+            }
+           ],
+           "max_gain_db": [
+            "FLOAT",
+            {
+             "tooltip": "Largest boost or cut of the curve.",
+             "default": 2.0,
+             "min": 0.1,
+             "max": 6.0,
+             "step": 0.1
+            }
+           ],
+           "max_bands": [
+            "INT",
+            {
+             "tooltip": "Most peak bands the match may use.",
+             "default": 4,
+             "min": 1,
+             "max": 6
+            }
+           ],
+           "min_hz": [
+            "FLOAT",
+            {
+             "advanced": true,
+             "default": 40.0,
+             "min": 20.0,
+             "max": 1000.0,
+             "step": 1.0
+            }
+           ],
+           "max_hz": [
+            "FLOAT",
+            {
+             "advanced": true,
+             "default": 16000.0,
+             "min": 1000.0,
+             "max": 20000.0,
+             "step": 100.0
+            }
+           ]
+          }
+         }
+        }
+       ]
+      }
+     ]
+    },
+    "optional": {
+     "reference": [
+      "AUDIO",
+      {
+       "tooltip": "Reference recording for the 'reference' target."
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "audio",
+     "mode"
+    ],
+    "optional": [
+     "reference"
+    ]
+   },
+   "output": [
+    "AUDIO",
+    "PLENIO_REPORT"
+   ],
+   "output_name": [
+    "audio",
+    "report"
+   ],
+   "output_is_list": [
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Mastering",
+   "display_name": "EQ"
+  },
   "PlenioEngine": {
    "input": {
     "required": {
@@ -1446,14 +1615,6 @@
        "tooltip": "The finished audio (every item of a batch becomes one file)."
       }
      ],
-     "title": [
-      "STRING",
-      {
-       "tooltip": "Song title (from the Song Sheet).",
-       "forceInput": true,
-       "multiline": false
-      }
-     ],
      "folder": [
       "STRING",
       {
@@ -1486,10 +1647,30 @@
      ]
     },
     "optional": {
+     "title": [
+      "STRING",
+      {
+       "tooltip": "Song title (from the Song Sheet). Without it: the copied title or the source file name.",
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "original": [
+      "AUDIO",
+      {
+       "tooltip": "Also export this audio (for example the unmastered take) as '<name> (original).flac'."
+      }
+     ],
+     "cover": [
+      "IMAGE",
+      {
+       "tooltip": "Cover art (square crop, JPEG)."
+      }
+     ],
      "reports": [
       "COMFY_AUTOGROW_V3",
       {
-       "tooltip": "Reports to include in the release record (Song Sheets, drafts, score tools).",
+       "tooltip": "Reports to include in the release record (Song Sheets, mastering).",
        "template": {
         "input": {
          "required": {
@@ -1506,6 +1687,118 @@
         "max": 16
        }
       }
+     ],
+     "flac": [
+      "BOOLEAN",
+      {
+       "tooltip": "FLAC 24-bit (lossless).",
+       "default": true
+      }
+     ],
+     "mp3": [
+      "BOOLEAN",
+      {
+       "tooltip": "MP3 VBR V0 (LAME).",
+       "default": false
+      }
+     ],
+     "wav": [
+      "BOOLEAN",
+      {
+       "tooltip": "WAV 32-bit float (no clipping; few tags, no cover).",
+       "default": false
+      }
+     ],
+     "tags": [
+      "COMFY_DYNAMICCOMBO_V3",
+      {
+       "tooltip": "Metadata written into the files.",
+       "options": [
+        {
+         "key": "title only",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "tags",
+         "inputs": {
+          "required": {
+           "artist": [
+            "STRING",
+            {
+             "tooltip": "Artist",
+             "default": "",
+             "multiline": false
+            }
+           ],
+           "album": [
+            "STRING",
+            {
+             "tooltip": "Album",
+             "default": "",
+             "multiline": false
+            }
+           ],
+           "date": [
+            "STRING",
+            {
+             "tooltip": "Year or date",
+             "default": "",
+             "multiline": false
+            }
+           ],
+           "track": [
+            "STRING",
+            {
+             "tooltip": "Track number (for example 3 or 3/12)",
+             "default": "",
+             "multiline": false
+            }
+           ],
+           "genre": [
+            "STRING",
+            {
+             "tooltip": "Genre",
+             "default": "",
+             "multiline": false
+            }
+           ],
+           "comment": [
+            "STRING",
+            {
+             "tooltip": "Comment",
+             "default": "",
+             "multiline": false
+            }
+           ],
+           "album_artist": [
+            "STRING",
+            {
+             "tooltip": "Album artist",
+             "default": "",
+             "multiline": false
+            }
+           ],
+           "composer": [
+            "STRING",
+            {
+             "tooltip": "Composer",
+             "default": "",
+             "multiline": false
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "copy from loaded file",
+         "inputs": {
+          "required": {}
+         }
+        }
+       ]
+      }
      ]
     },
     "hidden": {
@@ -1520,13 +1813,19 @@
    "input_order": {
     "required": [
      "audio",
-     "title",
      "folder",
      "naming",
      "collision"
     ],
     "optional": [
-     "reports"
+     "title",
+     "original",
+     "cover",
+     "reports",
+     "flac",
+     "mp3",
+     "wav",
+     "tags"
     ],
     "hidden": [
      "prompt",
@@ -1548,6 +1847,284 @@
    "output_node": true,
    "category": "Plenio/Release",
    "display_name": "Export Release"
+  },
+  "PlenioLoudness": {
+   "input": {
+    "required": {
+     "audio": [
+      "AUDIO",
+      {
+       "tooltip": "The audio to master (every item of a batch)."
+      }
+     ],
+     "target": [
+      "COMFY_DYNAMICCOMBO_V3",
+      {
+       "tooltip": "Loudness target and true-peak ceiling.",
+       "options": [
+        {
+         "key": "streaming (-14 LUFS, -1 dBTP)",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "Apple Music / podcasts (-16 LUFS, -1 dBTP)",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "dynamic (-18 LUFS, -1 dBTP)",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "broadcast EBU R128 (-23 LUFS, -1 dBTP)",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "loud (-9 LUFS, -0.5 dBTP)",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "custom",
+         "inputs": {
+          "required": {
+           "lufs": [
+            "FLOAT",
+            {
+             "tooltip": "Integrated loudness (LUFS).",
+             "default": -14.0,
+             "min": -30.0,
+             "max": -5.0,
+             "step": 0.5
+            }
+           ],
+           "ceiling_dbtp": [
+            "FLOAT",
+            {
+             "tooltip": "True-peak ceiling (dBTP).",
+             "default": -1.0,
+             "min": -12.0,
+             "max": -0.1,
+             "step": 0.1
+            }
+           ]
+          }
+         }
+        }
+       ]
+      }
+     ],
+     "compression": [
+      "COMFY_DYNAMICCOMBO_V3",
+      {
+       "tooltip": "off: limiter only; a style: gentle genre presets; custom: your settings.",
+       "options": [
+        {
+         "key": "off",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "Balanced - gentle glue",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "Acoustic - gentle",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "Classical - preserve dynamics",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "Jazz - natural",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "Vocal pop - smooth",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "Pop - punchy",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "Rock - bus glue",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "Electronic - tight",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "Club - loud",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "Hip-hop - low-end punch",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "Ambient - spacious",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "Limiter only - transparent",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "custom",
+         "inputs": {
+          "required": {
+           "threshold_db": [
+            "FLOAT",
+            {
+             "tooltip": "Level above which the compressor works (dB).",
+             "default": -18.0,
+             "min": -60.0,
+             "max": 0.0,
+             "step": 0.5
+            }
+           ],
+           "ratio": [
+            "FLOAT",
+            {
+             "tooltip": "Compression ratio above the threshold.",
+             "default": 1.5,
+             "min": 1.0,
+             "max": 10.0,
+             "step": 0.1
+            }
+           ],
+           "knee_db": [
+            "FLOAT",
+            {
+             "advanced": true,
+             "default": 6.0,
+             "min": 0.0,
+             "max": 24.0,
+             "step": 0.5
+            }
+           ],
+           "attack_ms": [
+            "FLOAT",
+            {
+             "tooltip": "How fast the compressor reacts (ms).",
+             "default": 20.0,
+             "min": 1.0,
+             "max": 200.0,
+             "step": 1.0
+            }
+           ],
+           "release_ms": [
+            "FLOAT",
+            {
+             "tooltip": "How fast it lets go (ms).",
+             "default": 150.0,
+             "min": 10.0,
+             "max": 2000.0,
+             "step": 5.0
+            }
+           ],
+           "sidechain_hz": [
+            "FLOAT",
+            {
+             "advanced": true,
+             "default": 80.0,
+             "min": 0.0,
+             "max": 500.0,
+             "step": 5.0
+            }
+           ],
+           "detector": [
+            "COMBO",
+            {
+             "advanced": true,
+             "default": "RMS",
+             "multiselect": false,
+             "options": [
+              "RMS",
+              "Peak"
+             ]
+            }
+           ]
+          }
+         }
+        }
+       ]
+      }
+     ],
+     "sample_rate": [
+      "COMBO",
+      {
+       "tooltip": "Output sample rate (converted before limiting).",
+       "default": "keep",
+       "multiselect": false,
+       "options": [
+        "keep",
+        "44100",
+        "48000"
+       ]
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "audio",
+     "target",
+     "compression",
+     "sample_rate"
+    ]
+   },
+   "output": [
+    "AUDIO",
+    "PLENIO_REPORT"
+   ],
+   "output_name": [
+    "audio",
+    "report"
+   ],
+   "output_is_list": [
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Mastering",
+   "display_name": "Loudness & Dynamics"
   },
   "PlenioParseDraft": {
    "input": {

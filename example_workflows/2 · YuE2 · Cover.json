@@ -1791,8 +1791,23 @@
     {
      "localized_name": "title",
      "name": "title",
+     "shape": 7,
      "type": "STRING",
      "link": 54
+    },
+    {
+     "localized_name": "original",
+     "name": "original",
+     "shape": 7,
+     "type": "AUDIO",
+     "link": null
+    },
+    {
+     "localized_name": "cover",
+     "name": "cover",
+     "shape": 7,
+     "type": "IMAGE",
+     "link": null
     },
     {
      "localized_name": "reports.report_0",
@@ -1868,6 +1883,42 @@
       "name": "collision"
      },
      "link": null
+    },
+    {
+     "localized_name": "flac",
+     "name": "flac",
+     "type": "BOOLEAN",
+     "widget": {
+      "name": "flac"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "mp3",
+     "name": "mp3",
+     "type": "BOOLEAN",
+     "widget": {
+      "name": "mp3"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "wav",
+     "name": "wav",
+     "type": "BOOLEAN",
+     "widget": {
+      "name": "wav"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "tags",
+     "name": "tags",
+     "type": "COMFY_DYNAMICCOMBO_V3",
+     "widget": {
+      "name": "tags"
+     },
+     "link": null
     }
    ],
    "outputs": [
@@ -1890,7 +1941,11 @@
    "widgets_values": [
     "plenio",
     "{date} {title}",
-    "number"
+    "number",
+    true,
+    false,
+    false,
+    "title only"
    ]
   }
  ],
@@ -2332,7 +2387,7 @@
    10,
    7,
    21,
-   2,
+   4,
    "PLENIO_REPORT"
   ],
   [
@@ -2340,7 +2395,7 @@
    15,
    7,
    21,
-   3,
+   5,
    "PLENIO_REPORT"
   ],
   [
@@ -2348,7 +2403,7 @@
    8,
    2,
    21,
-   4,
+   6,
    "PLENIO_REPORT"
   ],
   [
@@ -2356,7 +2411,7 @@
    18,
    2,
    21,
-   5,
+   7,
    "PLENIO_REPORT"
   ],
   [
@@ -2364,7 +2419,7 @@
    19,
    3,
    21,
-   6,
+   8,
    "PLENIO_REPORT"
   ]
  ],

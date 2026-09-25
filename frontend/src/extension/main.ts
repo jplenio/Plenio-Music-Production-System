@@ -13,6 +13,7 @@ import type { Fetcher } from '../api/client'
 import { chain, type ComfyApp, type ComfyNode } from '../shared/comfy'
 import type { AsrNote, SheetPayload } from '../shared/sheetSession'
 import { dynamicComboNames, restoreWidgetValues, savedWidgetValues } from './dynamicCombo'
+import { addEqCurve } from './eqWidget'
 import { setAsrNote, setPayload } from './payloads'
 import { SHEET_STATE_TYPE, setFetcher, sheetStateWidget } from './sheetStateWidget'
 import { installStyles } from './style'
@@ -48,6 +49,17 @@ setFetcher(comfyApi)
     if (nodeData.name === 'PlenioTranscribeLyrics') {
       nodeType.prototype.onExecuted = chain(nodeType.prototype.onExecuted, function (this: ComfyNode, output) {
         for (const note of (output?.plenio_asr as AsrNote[] | undefined) ?? []) setAsrNote(note)
+      })
+    }
+    if (nodeData.name === 'PlenioEQ') {
+      const curves = new WeakMap<ComfyNode, ReturnType<typeof addEqCurve>>()
+      const created = (nodeType.prototype as ComfyNode & { onNodeCreated?: () => void }).onNodeCreated
+      ;(nodeType.prototype as ComfyNode & { onNodeCreated?: () => void }).onNodeCreated = function (this: ComfyNode) {
+        created?.call(this)
+        curves.set(this, addEqCurve(this, comfyApi))
+      }
+      nodeType.prototype.onExecuted = chain(nodeType.prototype.onExecuted, function (this: ComfyNode, output) {
+        curves.get(this)?.showExecuted(output)
       })
     }
     if (nodeData.name === 'PlenioSongSheet') {

@@ -1,7 +1,5 @@
-"""Release export: file naming, FLAC encoding, the release record and secret redaction.
-
-Phase 3 scope is FLAC 24-bit plus the record; MP3/WAV, tags and cover art
-follow with the audio production chain (Phase 7).
+"""Release export: file naming, encoding (FLAC, MP3, WAV via PyAV), tags and cover art, the release record
+and secret redaction.
 """
 
 from __future__ import annotations
@@ -97,31 +95,82 @@ def plan_path(folder: Path, relative: str, extension: str, *, collision: str = "
     raise PlenioUserError(f"Too many files named {parts[-1]!r}.")
 
 
-def write_flac(path: Path, samples: Any, sample_rate: int) -> dict[str, Any]:
-    """Encode ``samples`` (float array ``[channels, frames]`` in -1..1) as 24-bit FLAC."""
+FORMATS: dict[str, dict[str, Any]] = {
+    "flac": {
+        "extension": ".flac",
+        "container": "flac",
+        "codec": "flac",
+        "sample_format": "s32",
+        "bits": 24,
+        "options": {},
+    },
+    "mp3": {
+        "extension": ".mp3",
+        "container": "mp3",
+        "codec": "libmp3lame",
+        "sample_format": "s32p",
+        "bits": None,
+        "options": {"flags": "+qscale", "global_quality": "0"},  # LAME VBR V0 (ffmpeg -q:a 0)
+    },
+    "wav": {
+        "extension": ".wav",
+        "container": "wav",
+        "codec": "pcm_f32le",
+        "sample_format": "flt",
+        "bits": 32,
+        "options": {},
+    },
+}
+"""Export formats: FLAC 24-bit, MP3 VBR V0 (LAME), WAV 32-bit float. MP3 and 24-bit FLAC clip at full scale."""
+TAG_FIELDS = ("title", "artist", "album", "date", "track", "genre", "comment", "album_artist", "composer")
+"""Generic tag names; the muxer maps them (FLAC: Vorbis comments, MP3: ID3v2, WAV: RIFF INFO)."""
+
+
+def _frames(data: Any, sample_format: str) -> Any:
+    import numpy as np
+
+    if sample_format == "flt":
+        return np.ascontiguousarray(data.T.reshape(1, -1).astype(np.float32))
+    if sample_format == "s32":  # 24-bit samples in the upper bits of s32 (the FLAC encoder writes 24 bits)
+        ints = np.clip(np.round(data * (2**23 - 1)), -(2**23), 2**23 - 1).astype(np.int32) << 8
+        return np.ascontiguousarray(ints.T.reshape(1, -1))
+    ints = np.clip(np.round(data * (2**31 - 1)), -(2**31), 2**31 - 1).astype(np.int32)  # planar s32 for LAME
+    return np.ascontiguousarray(ints)
+
+
+def write_audio(
+    path: Path, samples: Any, sample_rate: int, kind: str = "flac", tags: Mapping[str, str] | None = None
+) -> dict[str, Any]:
+    """Encode ``samples`` (float ``[channels, frames]``, full scale 1.0) as ``kind`` with ``tags``; atomic."""
     av = require("av")
     import numpy as np
 
-    data = np.asarray(samples, dtype=np.float32)
+    if kind not in FORMATS:
+        raise PlenioUserError(f"Unknown export format {kind!r}; use one of {sorted(FORMATS)}.")
+    spec = FORMATS[kind]
+    data = np.asarray(samples, dtype=np.float64)
     if data.ndim != 2 or data.shape[0] not in (1, 2) or data.shape[1] == 0:
         raise PlenioUserError(
             f"Expected mono or stereo audio as [channels, frames], got shape {tuple(data.shape)}."
         )
     peak = float(np.max(np.abs(data)))
-    clipped = int(np.count_nonzero(np.abs(data) > 1.0))
-    ints = np.clip(np.round(data * (2**23 - 1)), -(2**23), 2**23 - 1).astype(np.int32) << 8
+    clipped = int(np.count_nonzero(np.abs(data) > 1.0)) if kind != "wav" else 0
     layout = "mono" if data.shape[0] == 1 else "stereo"
     path.parent.mkdir(parents=True, exist_ok=True)
     partial = path.with_name(path.name + ".part")
-    container = av.open(str(partial), mode="w", format="flac")
+    container = av.open(str(partial), mode="w", format=spec["container"])
     try:
-        stream = container.add_stream("flac", rate=sample_rate, layout=layout)
-        stream.codec_context.format = "s32"
-        interleaved = np.ascontiguousarray(ints.T)
+        for key, value in (tags or {}).items():
+            if key in TAG_FIELDS and str(value).strip():
+                container.metadata[key] = str(value).strip()
+        stream = container.add_stream(
+            spec["codec"], rate=sample_rate, layout=layout, options=dict(spec["options"])
+        )
+        stream.codec_context.format = spec["sample_format"]
         block = 1 << 16
-        for start in range(0, interleaved.shape[0], block):
-            chunk = np.ascontiguousarray(interleaved[start : start + block].reshape(1, -1))
-            frame = av.AudioFrame.from_ndarray(chunk, format="s32", layout=layout)
+        for start in range(0, data.shape[1], block):
+            chunk = _frames(data[:, start : start + block], spec["sample_format"])
+            frame = av.AudioFrame.from_ndarray(chunk, format=spec["sample_format"], layout=layout)
             frame.sample_rate = sample_rate
             frame.pts = start  # monotonic timestamps, one tick per sample
             for packet in stream.encode(frame):
@@ -132,14 +181,100 @@ def write_flac(path: Path, samples: Any, sample_rate: int) -> dict[str, Any]:
         container.close()
     partial.replace(path)
     return {
-        "format": "flac",
-        "bits": 24,
+        "format": kind,
+        "bits": spec["bits"],
         "sample_rate": sample_rate,
         "channels": int(data.shape[0]),
         "seconds": round(data.shape[1] / sample_rate, 3),
         "peak": round(peak, 4),
         "clipped_samples": clipped,
     }
+
+
+def write_flac(path: Path, samples: Any, sample_rate: int) -> dict[str, Any]:
+    """Encode ``samples`` (float array ``[channels, frames]`` in -1..1) as 24-bit FLAC."""
+    return write_audio(path, samples, sample_rate, "flac")
+
+
+def read_tags(path: Path) -> tuple[dict[str, str], bytes | None]:
+    """Tags (generic names) and embedded cover image bytes of an audio file (PyAV; no extra package)."""
+    av = require("av")
+    tags: dict[str, str] = {}
+    cover: bytes | None = None
+    with av.open(str(path)) as container:
+        found = {
+            **dict(container.metadata),
+            **(dict(container.streams.audio[0].metadata) if container.streams.audio else {}),
+        }
+        lowered = {k.lower(): v for k, v in found.items()}
+        aliases = {
+            "album_artist": ("album_artist", "albumartist", "album artist"),
+            "track": ("track", "tracknumber"),
+        }
+        for field in TAG_FIELDS:
+            for key in aliases.get(field, (field,)):
+                if lowered.get(key):
+                    tags[field] = str(lowered[key])
+                    break
+        for stream in container.streams.video:
+            if stream.disposition & av.stream.Disposition.attached_pic:
+                for packet in container.demux(stream):
+                    if packet.size:
+                        cover = bytes(packet)
+                        break
+                break
+    return tags, cover
+
+
+def cover_jpeg(image: Any, size: int = 1400) -> bytes:
+    """A square JPEG (at most ``size`` pixels) of an RGB image array ``[height, width, 3]`` in 0..1."""
+    import io
+
+    import numpy as np
+
+    pil = require("PIL.Image")
+    data = np.clip(np.asarray(image, dtype=np.float32) * 255.0 + 0.5, 0, 255).astype(np.uint8)
+    picture = pil.fromarray(data[..., :3])
+    side = min(picture.size)
+    left, top = (picture.width - side) // 2, (picture.height - side) // 2
+    picture = picture.crop((left, top, left + side, top + side))
+    if side > size:
+        picture = picture.resize((size, size), pil.Resampling.LANCZOS)
+    buffer = io.BytesIO()
+    picture.convert("RGB").save(buffer, format="JPEG", quality=92)
+    return buffer.getvalue()
+
+
+def embed_cover(path: Path, jpeg: bytes) -> bool:
+    """Embed ``jpeg`` as front cover (FLAC picture, MP3 APIC) with mutagen if it is installed.
+
+    mutagen is GPL-2.0-or-later and not bundled; without it the cover is only written next to the audio.
+    """
+    import importlib
+
+    try:  # mutagen has no type information; it is used through Any
+        flac: Any = importlib.import_module("mutagen.flac")
+        id3: Any = importlib.import_module("mutagen.id3")
+    except ImportError:
+        return False
+    if path.suffix == ".flac":
+        audio = flac.FLAC(str(path))
+        picture = flac.Picture()
+        picture.type, picture.mime, picture.desc, picture.data = 3, "image/jpeg", "Cover", jpeg
+        audio.clear_pictures()
+        audio.add_picture(picture)
+        audio.save()
+        return True
+    if path.suffix == ".mp3":
+        try:
+            tags = id3.ID3(str(path))
+        except id3.ID3NoHeaderError:
+            tags = id3.ID3()
+        tags.delall("APIC")
+        tags.add(id3.APIC(encoding=3, mime="image/jpeg", type=3, desc="Cover", data=jpeg))
+        tags.save(str(path))
+        return True
+    return False
 
 
 def file_facts(path: Path) -> dict[str, Any]:

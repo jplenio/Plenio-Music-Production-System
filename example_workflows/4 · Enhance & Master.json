@@ -1,0 +1,544 @@
+{
+ "id": "9d23be52-230b-5f08-8aad-bd5416d3dbd0",
+ "revision": 0,
+ "last_node_id": 6,
+ "last_link_id": 7,
+ "nodes": [
+  {
+   "id": 1,
+   "type": "MarkdownNote",
+   "pos": [
+    -560,
+    0
+   ],
+   "size": [
+    480,
+    520
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "title": "About this template",
+   "properties": {
+    "Node name for S&R": "MarkdownNote"
+   },
+   "widgets_values": [
+    "# 4 · Enhance & Master\n\n**Load Audio -> EQ -> Loudness & Dynamics -> Export**\n\nFinishes an existing recording (for example a take you rendered earlier) without any music model.\n\n1. Upload the file in **Load Audio**.\n2. **EQ** starts with a gentle warm tone match (*match preset*). Choose *manual* to draw your own curve, *flat* for no EQ, or connect a **reference** recording and pick a reference recipe.\n3. **Loudness & Dynamics** brings the song to -14 LUFS with a true peak of at most -1 dBTP (streaming); pick another target or compression style if you like.\n4. Press **Run**. Export writes FLAC 24-bit and MP3 V0 to `output/plenio/enhanced`, copies the source file's tags and cover, keeps the unmastered source as `(original).flac`, and writes a release record with the measured loudness.\n\nThe preview plays the result; compare it with the source in Load Audio. Nothing here needs a GPU.\n"
+   ]
+  },
+  {
+   "id": 2,
+   "type": "LoadAudio",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    340,
+    140
+   ],
+   "flags": {},
+   "order": 1,
+   "mode": 0,
+   "inputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "COMBO",
+     "widget": {
+      "name": "audio"
+     },
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "localized_name": "AUDIO",
+     "name": "AUDIO",
+     "type": "AUDIO",
+     "links": [
+      1,
+      5
+     ]
+    }
+   ],
+   "title": "Source",
+   "properties": {
+    "Node name for S&R": "LoadAudio"
+   },
+   "widgets_values": [
+    ""
+   ]
+  },
+  {
+   "id": 3,
+   "type": "PlenioEQ",
+   "pos": [
+    420,
+    0
+   ],
+   "size": [
+    420,
+    420
+   ],
+   "flags": {},
+   "order": 2,
+   "mode": 0,
+   "inputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "link": 1
+    },
+    {
+     "localized_name": "reference",
+     "name": "reference",
+     "shape": 7,
+     "type": "AUDIO",
+     "link": null
+    },
+    {
+     "localized_name": "mode",
+     "name": "mode",
+     "type": "COMFY_DYNAMICCOMBO_V3",
+     "widget": {
+      "name": "mode"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "mode.preset",
+     "name": "mode.preset",
+     "type": "COMBO",
+     "widget": {
+      "name": "mode.preset"
+     },
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "links": [
+      2
+     ]
+    },
+    {
+     "localized_name": "report",
+     "name": "report",
+     "type": "PLENIO_REPORT",
+     "links": [
+      6
+     ]
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "PlenioEQ"
+   },
+   "widgets_values": [
+    "match preset",
+    "Warm - gentle (workflow default)"
+   ]
+  },
+  {
+   "id": 4,
+   "type": "PlenioLoudness",
+   "pos": [
+    900,
+    0
+   ],
+   "size": [
+    340,
+    220
+   ],
+   "flags": {},
+   "order": 3,
+   "mode": 0,
+   "inputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "link": 2
+    },
+    {
+     "localized_name": "target",
+     "name": "target",
+     "type": "COMFY_DYNAMICCOMBO_V3",
+     "widget": {
+      "name": "target"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "compression",
+     "name": "compression",
+     "type": "COMFY_DYNAMICCOMBO_V3",
+     "widget": {
+      "name": "compression"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "sample_rate",
+     "name": "sample_rate",
+     "type": "COMBO",
+     "widget": {
+      "name": "sample_rate"
+     },
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "links": [
+      3,
+      4
+     ]
+    },
+    {
+     "localized_name": "report",
+     "name": "report",
+     "type": "PLENIO_REPORT",
+     "links": [
+      7
+     ]
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "PlenioLoudness"
+   },
+   "widgets_values": [
+    "streaming (-14 LUFS, -1 dBTP)",
+    "Balanced - gentle glue",
+    "keep"
+   ]
+  },
+  {
+   "id": 5,
+   "type": "PreviewAudio",
+   "pos": [
+    1300,
+    0
+   ],
+   "size": [
+    360,
+    120
+   ],
+   "flags": {},
+   "order": 4,
+   "mode": 0,
+   "inputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "link": 3
+    }
+   ],
+   "outputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "links": null
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "PreviewAudio"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 6,
+   "type": "PlenioExportRelease",
+   "pos": [
+    1300,
+    180
+   ],
+   "size": [
+    360,
+    320
+   ],
+   "flags": {},
+   "order": 5,
+   "mode": 0,
+   "inputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "link": 4
+    },
+    {
+     "localized_name": "title",
+     "name": "title",
+     "shape": 7,
+     "type": "STRING",
+     "link": null
+    },
+    {
+     "localized_name": "original",
+     "name": "original",
+     "shape": 7,
+     "type": "AUDIO",
+     "link": 5
+    },
+    {
+     "localized_name": "cover",
+     "name": "cover",
+     "shape": 7,
+     "type": "IMAGE",
+     "link": null
+    },
+    {
+     "localized_name": "reports.report_0",
+     "name": "reports.report_0",
+     "label": "report_0",
+     "shape": 7,
+     "type": "PLENIO_REPORT",
+     "link": 6
+    },
+    {
+     "localized_name": "reports.report_1",
+     "name": "reports.report_1",
+     "label": "report_1",
+     "shape": 7,
+     "type": "PLENIO_REPORT",
+     "link": 7
+    },
+    {
+     "localized_name": "reports.report_2",
+     "name": "reports.report_2",
+     "label": "report_2",
+     "shape": 7,
+     "type": "PLENIO_REPORT",
+     "link": null
+    },
+    {
+     "localized_name": "folder",
+     "name": "folder",
+     "type": "STRING",
+     "widget": {
+      "name": "folder"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "naming",
+     "name": "naming",
+     "type": "STRING",
+     "widget": {
+      "name": "naming"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "collision",
+     "name": "collision",
+     "type": "COMBO",
+     "widget": {
+      "name": "collision"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "flac",
+     "name": "flac",
+     "type": "BOOLEAN",
+     "widget": {
+      "name": "flac"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "mp3",
+     "name": "mp3",
+     "type": "BOOLEAN",
+     "widget": {
+      "name": "mp3"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "wav",
+     "name": "wav",
+     "type": "BOOLEAN",
+     "widget": {
+      "name": "wav"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "tags",
+     "name": "tags",
+     "type": "COMFY_DYNAMICCOMBO_V3",
+     "widget": {
+      "name": "tags"
+     },
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "localized_name": "files",
+     "name": "files",
+     "type": "STRING",
+     "links": null
+    },
+    {
+     "localized_name": "record",
+     "name": "record",
+     "type": "STRING",
+     "links": null
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "PlenioExportRelease"
+   },
+   "widgets_values": [
+    "plenio/enhanced",
+    "{title}",
+    "number",
+    true,
+    true,
+    false,
+    "copy from loaded file"
+   ]
+  }
+ ],
+ "links": [
+  [
+   1,
+   2,
+   0,
+   3,
+   0,
+   "AUDIO"
+  ],
+  [
+   2,
+   3,
+   0,
+   4,
+   0,
+   "AUDIO"
+  ],
+  [
+   3,
+   4,
+   0,
+   5,
+   0,
+   "AUDIO"
+  ],
+  [
+   4,
+   4,
+   0,
+   6,
+   0,
+   "AUDIO"
+  ],
+  [
+   5,
+   2,
+   0,
+   6,
+   2,
+   "AUDIO"
+  ],
+  [
+   6,
+   3,
+   1,
+   6,
+   4,
+   "PLENIO_REPORT"
+  ],
+  [
+   7,
+   4,
+   1,
+   6,
+   5,
+   "PLENIO_REPORT"
+  ]
+ ],
+ "groups": [
+  {
+   "id": 1,
+   "title": "1 · SOURCE",
+   "bounding": [
+    -30,
+    -70,
+    400,
+    240
+   ],
+   "color": "#3f789e",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 2,
+   "title": "2 · TONE",
+   "bounding": [
+    390,
+    -70,
+    480,
+    520
+   ],
+   "color": "#3f789e",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 3,
+   "title": "3 · LOUDNESS",
+   "bounding": [
+    870,
+    -70,
+    400,
+    320
+   ],
+   "color": "#3f789e",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 4,
+   "title": "4 · EXPORT",
+   "bounding": [
+    1270,
+    -70,
+    420,
+    600
+   ],
+   "color": "#3f789e",
+   "font_size": 24,
+   "flags": {}
+  }
+ ],
+ "definitions": {
+  "subgraphs": []
+ },
+ "config": {},
+ "extra": {
+  "ds": {
+   "scale": 0.75,
+   "offset": [
+    60,
+    80
+   ]
+  }
+ },
+ "version": 0.4
+}

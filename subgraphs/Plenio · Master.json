@@ -1,0 +1,400 @@
+{
+ "revision": 0,
+ "last_node_id": 1,
+ "last_link_id": 0,
+ "nodes": [
+  {
+   "id": 1,
+   "type": "259b88ba-7c57-57fb-b73e-58f691fe4b56",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    340,
+    200
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "link": null
+    },
+    {
+     "localized_name": "reference",
+     "name": "reference",
+     "type": "AUDIO",
+     "link": null
+    },
+    {
+     "localized_name": "sample_rate",
+     "name": "sample_rate",
+     "label": "sample rate",
+     "type": "COMBO",
+     "widget": {
+      "name": "sample_rate"
+     },
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "links": null
+    },
+    {
+     "localized_name": "eq_report",
+     "name": "eq_report",
+     "type": "PLENIO_REPORT",
+     "links": null
+    },
+    {
+     "localized_name": "loudness_report",
+     "name": "loudness_report",
+     "type": "PLENIO_REPORT",
+     "links": null
+    }
+   ],
+   "title": "Plenio · Master",
+   "properties": {},
+   "widgets_values": [
+    "keep"
+   ]
+  }
+ ],
+ "links": [],
+ "version": 0.4,
+ "definitions": {
+  "subgraphs": [
+   {
+    "id": "259b88ba-7c57-57fb-b73e-58f691fe4b56",
+    "version": 1,
+    "state": {
+     "lastGroupId": 0,
+     "lastNodeId": 2,
+     "lastLinkId": 7,
+     "lastRerouteId": 0
+    },
+    "revision": 0,
+    "config": {},
+    "name": "Plenio · Master",
+    "inputNode": {
+     "id": -10,
+     "bounding": [
+      -260,
+      0,
+      160,
+      100
+     ]
+    },
+    "outputNode": {
+     "id": -20,
+     "bounding": [
+      840,
+      0,
+      160,
+      100
+     ]
+    },
+    "inputs": [
+     {
+      "id": "98a543fe-8ef2-5ed3-a678-bb71d7736c3d",
+      "name": "audio",
+      "type": "AUDIO",
+      "linkIds": [
+       2
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     },
+     {
+      "id": "0715369d-ac39-5742-a605-e1944702949c",
+      "name": "reference",
+      "type": "AUDIO",
+      "linkIds": [
+       3
+      ],
+      "pos": [
+       0,
+       20
+      ]
+     },
+     {
+      "id": "88af35db-67c6-5f32-9faa-8c9c73452a51",
+      "name": "sample_rate",
+      "type": "COMBO",
+      "linkIds": [
+       4
+      ],
+      "pos": [
+       0,
+       40
+      ],
+      "label": "sample rate"
+     }
+    ],
+    "outputs": [
+     {
+      "id": "01a8890f-1800-5079-aa9e-ea10de89d3fa",
+      "name": "audio",
+      "type": "AUDIO",
+      "linkIds": [
+       5
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     },
+     {
+      "id": "3d87958a-7bb6-5f60-ae3b-c8f5ef1eb5b9",
+      "name": "eq_report",
+      "type": "PLENIO_REPORT",
+      "linkIds": [
+       6
+      ],
+      "pos": [
+       0,
+       20
+      ]
+     },
+     {
+      "id": "3ffa6f92-b084-5e12-8c53-356459d04231",
+      "name": "loudness_report",
+      "type": "PLENIO_REPORT",
+      "linkIds": [
+       7
+      ],
+      "pos": [
+       0,
+       40
+      ]
+     }
+    ],
+    "widgets": [],
+    "nodes": [
+     {
+      "id": 1,
+      "type": "PlenioEQ",
+      "pos": [
+       0,
+       0
+      ],
+      "size": [
+       340,
+       200
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "audio",
+        "name": "audio",
+        "type": "AUDIO",
+        "link": 2
+       },
+       {
+        "localized_name": "reference",
+        "name": "reference",
+        "shape": 7,
+        "type": "AUDIO",
+        "link": 3
+       },
+       {
+        "localized_name": "mode",
+        "name": "mode",
+        "type": "COMFY_DYNAMICCOMBO_V3",
+        "widget": {
+         "name": "mode"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "mode.preset",
+        "name": "mode.preset",
+        "type": "COMBO",
+        "widget": {
+         "name": "mode.preset"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "audio",
+        "name": "audio",
+        "type": "AUDIO",
+        "links": [
+         1
+        ]
+       },
+       {
+        "localized_name": "report",
+        "name": "report",
+        "type": "PLENIO_REPORT",
+        "links": [
+         6
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "PlenioEQ"
+      },
+      "widgets_values": [
+       "match preset",
+       "Warm - gentle (workflow default)"
+      ]
+     },
+     {
+      "id": 2,
+      "type": "PlenioLoudness",
+      "pos": [
+       400,
+       0
+      ],
+      "size": [
+       340,
+       200
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "audio",
+        "name": "audio",
+        "type": "AUDIO",
+        "link": 1
+       },
+       {
+        "localized_name": "target",
+        "name": "target",
+        "type": "COMFY_DYNAMICCOMBO_V3",
+        "widget": {
+         "name": "target"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "compression",
+        "name": "compression",
+        "type": "COMFY_DYNAMICCOMBO_V3",
+        "widget": {
+         "name": "compression"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "sample_rate",
+        "name": "sample_rate",
+        "type": "COMBO",
+        "widget": {
+         "name": "sample_rate"
+        },
+        "link": 4
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "audio",
+        "name": "audio",
+        "type": "AUDIO",
+        "links": [
+         5
+        ]
+       },
+       {
+        "localized_name": "report",
+        "name": "report",
+        "type": "PLENIO_REPORT",
+        "links": [
+         7
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "PlenioLoudness"
+      },
+      "widgets_values": [
+       "streaming (-14 LUFS, -1 dBTP)",
+       "Balanced - gentle glue",
+       "keep"
+      ]
+     }
+    ],
+    "groups": [],
+    "links": [
+     {
+      "id": 1,
+      "origin_id": 1,
+      "origin_slot": 0,
+      "target_id": 2,
+      "target_slot": 0,
+      "type": "AUDIO"
+     },
+     {
+      "id": 2,
+      "origin_id": -10,
+      "origin_slot": 0,
+      "target_id": 1,
+      "target_slot": 0,
+      "type": "AUDIO"
+     },
+     {
+      "id": 3,
+      "origin_id": -10,
+      "origin_slot": 1,
+      "target_id": 1,
+      "target_slot": 1,
+      "type": "AUDIO"
+     },
+     {
+      "id": 4,
+      "origin_id": -10,
+      "origin_slot": 2,
+      "target_id": 2,
+      "target_slot": 3,
+      "type": "COMBO"
+     },
+     {
+      "id": 5,
+      "origin_id": 2,
+      "origin_slot": 0,
+      "target_id": -20,
+      "target_slot": 0,
+      "type": "AUDIO"
+     },
+     {
+      "id": 6,
+      "origin_id": 1,
+      "origin_slot": 1,
+      "target_id": -20,
+      "target_slot": 1,
+      "type": "PLENIO_REPORT"
+     },
+     {
+      "id": 7,
+      "origin_id": 2,
+      "origin_slot": 1,
+      "target_id": -20,
+      "target_slot": 2,
+      "type": "PLENIO_REPORT"
+     }
+    ],
+    "extra": {},
+    "category": "Plenio/Mastering",
+    "description": "Finishes a song: a gentle tone match (EQ) and loudness for streaming (-14 LUFS, -1 dBTP true peak) with gentle compression. Open the block to change the EQ curve or the compression style."
+   }
+  ]
+ },
+ "extra": {}
+}
