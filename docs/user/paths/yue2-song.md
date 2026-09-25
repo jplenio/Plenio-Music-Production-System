@@ -1,9 +1,9 @@
 # 1 · YuE2 · Song
 
-A new song from a short brief: a local text model writes title, style and lyrics, YuE2 plans a score (ABC notation) and renders the song, and Export writes a 24-bit FLAC with a release record.
+A new song from a short brief: a local text model writes title, style and lyrics, YuE2 plans a score (ABC notation) and renders the song, Master finishes it, and Export writes a 24-bit FLAC with a release record.
 
 ```text
-Song Brief -> Write Song -> Song Sheet · Text -> YuE2 Plan -> Score Tools -> Song Sheet · Score -> YuE2 Render -> Export Release
+Song Brief -> Write Song -> Song Sheet · Text -> YuE2 Plan -> Score Tools -> Song Sheet · Score -> YuE2 Render -> Master -> Export Release
                                   ^ YuE2 Model (loader, optional instrumental adapter, Engine Profile) feeds all YuE2 steps
 ```
 
@@ -12,7 +12,7 @@ Song Brief -> Write Song -> Song Sheet · Text -> YuE2 Plan -> Score Tools -> So
 1. Open **1 · YuE2 · Song** from the template browser.
 2. In **Song Brief**, pick a template or describe the song. *length* and *vocals* (sung or instrumental) are set only here.
 3. Press **Run**. The first run downloads missing models (YuE2 3B int8, Gemma 4 E4B writer), then takes a few minutes.
-4. The song appears in the preview and in `output/plenio/` as `<date> <title>.flac` plus `<date> <title>.plenio.json`.
+4. The mastered song appears in the preview and in `output/plenio/` as `<date> <title>.flac`, with the unmastered take `<date> <title> (original).flac` and the record `<date> <title>.plenio.json`.
 
 Measured on an RTX 5060 Ti 16 GB: about 3 minutes for a 3-minute song, including writing and planning.
 
@@ -51,6 +51,16 @@ The audio itself is not guaranteed free of voice-like sounds. To measure it, add
 - **Lyrics**: `[Tag]` lines with sung lines beneath; no stage directions or repeat marks.
 - **Score length**: YuE2 plans roughly 8-10 seconds per sung line. If the plan is much longer or shorter than the brief's length, the score sheet warns.
 - **Budget**: style, lyrics and score share YuE2's context of 24 576 tokens with the music (25 tokens per second). The score sheet shows how many seconds of music fit.
+
+## Finishing: Master, cover art, files
+
+- **Plenio · Master** (group *FINISH*) masters every take before Export: a gentle warm tone match and -14 LUFS with a true peak of at most -1 dBTP. Open the block to change the EQ, the loudness target or the compression style; its *sample rate* is on the block. Details: [Mastering and audio formats](../concepts/mastering.md).
+- **Export Release** writes the mastered song, the unmastered take as `(original).flac` and the release record. Formats (FLAC, MP3, WAV) and tags are set on the node.
+- **Cover Art (optional)** paints a cover from the sheet's *artwork prompt* with FLUX.2 Klein 4B (4 steps, 1024 x 1024; about 16 GB of extra model files, Apache-2.0). It is bypassed: select *Cover Art* and *Cover preview* and press **Ctrl+B**. Export saves the cover next to the song and embeds it when mutagen is installed. The cover seed is fixed, so new takes keep the cover; change the seed for another one.
+
+## App mode
+
+Switch **Graph / App** at the top left for a simple form with the brief and the take seed; see [App mode](../concepts/app-mode.md). The app runs without review stops (the sheets' default here).
 
 ## Licence
 

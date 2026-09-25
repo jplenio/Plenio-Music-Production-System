@@ -7,8 +7,7 @@ from typing import Any
 
 from comfy_api.latest import io
 
-from ...core.system import check_system, to_markdown
-from .. import host
+from ..shared import system_report
 from ..types import ReportType
 
 
@@ -20,8 +19,9 @@ class PlenioSystemCheck(io.ComfyNode):
             display_name="System Check",
             category="Plenio/Utilities",
             description=(
-                "Shows ComfyUI and Plenio versions, GPUs and VRAM, optional packages, the offline/download "
-                "policy and transparent hardware recommendations. Nothing is changed automatically."
+                "Shows ComfyUI and Plenio versions, GPUs and VRAM, which model files of each template are "
+                "installed, optional packages and Plenio assets, the offline/download policy and the hardware "
+                "rule table with this machine's row. Nothing is changed automatically."
             ),
             inputs=[
                 io.Combo.Input(
@@ -43,8 +43,7 @@ class PlenioSystemCheck(io.ComfyNode):
 
     @classmethod
     def execute(cls, detail: str) -> io.NodeOutput:
-        report = check_system(host.system_facts())
-        markdown = to_markdown(report)
+        report, markdown = system_report()
         if detail == "full":
             markdown += (
                 "\n\n### Raw facts\n\n```json\n" + json.dumps(report.data["facts"], indent=2) + "\n```"

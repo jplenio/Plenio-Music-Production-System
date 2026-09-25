@@ -17,10 +17,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python -m pip install "pytest==8.4.*" "hypothesis==6.*" "ruff==0.13.*" "mypy==1.18.*" "jsonschema==4.*" tomli
+      # numpy, scipy, av and Pillow come with ComfyUI; the unit tests of the audio chain and covers need them
+      - run: python -m pip install "pytest==8.4.*" "hypothesis==6.*" "ruff==0.13.*" "mypy==1.18.*" "jsonschema==4.*" tomli numpy scipy av pillow
       - run: python -m ruff check .
       - run: python -m ruff format --check .
-      - run: python -m mypy
+      # numpy's stubs use Python 3.12 syntax (CURRENT_STATUS known issues): check with the CI interpreter's version
+      - run: python -m mypy --python-version 3.12
       - run: python -m pytest tests/unit tests/workflows tests/contract/test_data_schemas.py
 
   comfyui:

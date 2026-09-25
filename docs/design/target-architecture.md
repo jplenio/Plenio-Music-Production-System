@@ -371,7 +371,7 @@ Blueprints live in `subgraphs/` and appear in the node library [VF]. Templates e
 | **Plenio · MiniMax Render** | `MiniMaxMusic3TextEncode` → `EmptyMiniMaxMusic3LatentAudio` → `ConditioningZeroOut` → `KSampler` → `VAEDecodeAudio`/`VAEDecodeAudioTiled` (switch) | model, clip, vae, caption, lyrics, take seed, max seconds, tiled decode (A) | audio, seconds |
 | **Plenio · Transcribe Score** | `AudioEncoderLoader(sheetsage2)` → `SheetSage2AudioToABC(full)` | audio; encoder file (A) | score, audio_encoder |
 | **Plenio · Master** | Plenio EQ → Plenio Loudness & Dynamics (→ gated Repair in front, if adopted) | audio, reference (opt); loudness target (N), sample rate (N) | audio, report |
-| **Plenio · Cover Art** | FLUX.2 Klein 4B text-to-image (loaders, `CLIPTextEncode`, `ConditioningZeroOut`, `CFGGuider`, `RandomNoise`, `KSamplerSelect`, `Flux2Scheduler`, `EmptyFlux2LatentImage`, `SamplerCustomAdvanced`, `VAEDecode`) | prompt, seed, size | image |
+| **Plenio · Cover Art** | FLUX.2 Klein 4B text-to-image, distilled (loaders, `CLIPTextEncode`, `ConditioningZeroOut`, `CFGGuider` cfg 1, `RandomNoise`, `KSamplerSelect` euler, `Flux2Scheduler` 4 steps, `EmptyFlux2LatentImage`, `SamplerCustomAdvanced`, `VAEDecode`; as the native *Text to Image (Flux.2 Klein 4B Distilled)* template) | prompt, cover seed (fixed 0), size (square, 1024) | image |
 | **Plenio · Takes** *(optional)* | native `StartLoop` (N iterations) → `Math Expression` (take seed + iteration index) → engine Render → `EndLoop(accumulate)` | takes (N), engine render inputs | takes (list) |
 
 Rules for subgraphs:
@@ -438,6 +438,17 @@ Groups carry short titles and one MarkdownNote per group at most. The engine Mod
 
 App Mode (frontend ≥ 1.41.13 [UP]) is offered for the **no-review** use of each path (brief in, audio out). The graph view remains primary, because review and editing need the Song Sheet editor and App Mode documents only standard inputs [UP]. Phase 8 decides the App configurations.
 
+**Phase 8 decision (AS-13):** the templates carry an App configuration (`extra.linearData`: widget list + output nodes) and open in the graph view (`linearMode` unset); the user switches with *Graph / App*.
+
+| Template | App controls | App outputs |
+|---|---|---|
+| 0 · System Check | detail | System Check |
+| 1 · YuE2 · Song, 3 · MiniMax · Song | brief: template, description, genre, mood, tempo, length, vocals, and the sung options language, voice, theme; take seed | Preview (mastered), Export Release |
+| 4 · Enhance & Master | Load Audio file, EQ mode, loudness target, compression | Preview (mastered), Export Release |
+| 2 · YuE2 · Cover | none: two review stops need the editor | - |
+
+Verified in frontend 1.52.7 (browser check, Phase 8 report §3): legacy `[node id, widget name]` tuples resolve, including DynamicCombo children (`vocals.language`) and promoted subgraph widgets; slot labels become the app's labels (*take seed*); the configuration survives save/reload. Limit found: children of the DynamicCombo option that is **not** selected are dropped at load (with a console warning), so the app lists only the sung options; instrumental options are set in the graph.
+
 ---
 
 ## 11. Resource and model lifecycle (L)
@@ -455,7 +466,7 @@ App Mode (frontend ≥ 1.41.13 [UP]) is offered for the **no-review** use of eac
 | **VRAM pressure** | Rely on ComfyUI offloading; recommend int8 YuE2 (3.7 GB) on ≤16 GB cards; writer model recommendations by VRAM class in System Check; workers request memory before starting. |
 | **Optional dependencies** | Probed once at startup (log + System Check). Nodes always register. Execution without the dependency raises `PlenioDependencyError` with the exact install command. |
 | **Model discovery** | ComfyUI-format weights through native loaders (`folder_paths`). Plenio assets (ASR models, separation weights) under a registered `models/plenio/<kind>/` folder. |
-| **Downloads** | ComfyUI-format weights: `properties.models` (name, URL, directory) on loader nodes in templates, handled by the frontend's missing-model flow [VF]. Plenio assets (e.g. ASR model folders): `core.assets` fetches pinned Hugging Face revisions when a node that needs them runs, with size check (hash where published), resume and atomic rename; the node UI and log state file, size and licence. One global policy: `PLENIO_AUTO_DOWNLOAD` (default on; off = actionable error with the manual steps). A `tools` command pre-fetches assets. No per-node download switches. |
+| **Downloads** | ComfyUI-format weights: `properties.models` (name, URL, directory) on loader nodes in templates, handled by the frontend's missing-model flow [VF]; since Phase 8 generated from one model catalogue (`resources/models.toml`), which also feeds the System Check inventory and the model guide. Plenio assets (e.g. ASR model folders): `core.assets` fetches pinned Hugging Face revisions when a node that needs them runs, with size check (hash where published), resume and atomic rename; the node UI and log state file, size and licence. One global policy: `PLENIO_AUTO_DOWNLOAD` (default on; off = actionable error with the manual steps). A `tools` command pre-fetches assets. No per-node download switches. |
 | **Offline** | `PLENIO_OFFLINE=1` or `HF_HUB_OFFLINE=1`: no network access; a missing asset raises an error naming the exact folder and files to place. |
 | **Error recovery** | Interrupt checks in long loops; worker crash → error with diagnostics; downloads resume; no automatic re-runs of generation; conflicts stop with actionable choices. |
 | **Hardware recommendations** | System Check reports detected GPUs/VRAM/RAM and a transparent rule table (e.g. "≤16 GB: YuE2 int8 + Gemma 4 E4B int8 writer"). Recommendations are text; templates ship safe defaults; the user overrides by changing loader combos. Nothing is switched automatically. |
@@ -639,7 +650,7 @@ Remaining accepted trade-offs:
 | AS-10 | Blueprint JSONs in `subgraphs/` appear in the node library with name/description as intended on the pinned frontend | **verified (V2, Phase 2)**: served by `/global_subgraphs`, shown in node search as *Blueprint* under *Subgraph Blueprints / <category>* with the definition's description; name = file name; instances are runnable | 2 |
 | AS-11 | Isolated worker environment works on venv and portable (embedded Python) installs | **mechanism verified (Phase 4B)**: a private `--target` package folder first on `PYTHONPATH` of a worker (transformers 5.17 over the host's 5.5.4, host untouched) ran Qwen3-ASR; a managed installer in the product is still to be built with the first engine that ships | later |
 | AS-12 | Accidental normalisation + offset map lets abcjs render/play the native dialect correctly | editor tests on tricky scores | 5 |
-| AS-13 | App Mode can present the no-review path usefully | Phase 8 review | 8 |
+| AS-13 | App Mode can present the no-review path usefully | **verified in frontend 1.52.7 (Phase 8)**: controls, labels, outputs and save/reload work (§10.5); only the selected DynamicCombo option's children are shown; the owner's frontend 1.53.6 is still to be checked | 8 |
 | AS-14 | `Engine Profile` can detect YuE2 and MiniMax CLIP objects robustly across ComfyUI updates | **verified for YuE2 (Phase 3)**: detection by the tokenizer class; `tests/contract/test_yue2_tokenizer.py` loads the real checkpoint's tokenizer and confirms that the exact budget equals the native encoder arithmetic; the real run detected the loaded model. MiniMax in Phase 6 | 3 |
 | AS-15 | The CLIPLoader `type` needed for each writer model with `TextGenerate` is known | **resolved (Phase 3)**: ComfyUI's loader picks the Gemma 4 / Qwen 3.5 text model from the weights regardless of the type (code reading of `comfy/sd.py`); the real run loaded `gemma4_e4b_it_fp8_scaled` with type `stable_diffusion` and generated text | 3 |
 | AS-16 | Native loop nodes work inside a subgraph blueprint (otherwise *Takes* becomes a top-level group) | **verified with two limits (Phase 4B)**: the *YuE2 Takes* blueprint flattens to `wrapper:inner` ids and loops in the backend (host tests) and the frontend (`graphToPrompt`); a loop whose body is blocked by an `ExecutionBlocker` never finishes on ComfyUI 0.37.0, so the loop starts with the final lyrics; the body re-runs on every queue (Start Loop fingerprints as NaN) | 4B |

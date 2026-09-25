@@ -32,6 +32,12 @@ def test_system_route(server: ComfyServer) -> None:
     assert data["report"]["schema"] == "plenio.report/1"
     assert data["report"]["kind"] == "system_check"
     assert "## Plenio System Check" in data["markdown"]
+    # the inventory comes from ComfyUI's model folders (the test server has none of the files)
+    report = data["report"]["data"]
+    assert {row["template"] for row in report["templates"]} >= {"1 · YuE2 · Song", "4 · Enhance & Master"}
+    assert all(row["status"] == "missing" for row in report["models"])
+    assert "not downloaded" in report["facts"]["assets"]["faster-whisper-large-v3"]
+    assert "### Hardware rule table" in data["markdown"]
 
 
 def test_unknown_plenio_route_is_404(server: ComfyServer) -> None:

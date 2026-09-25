@@ -12,14 +12,17 @@ import logging
 import os
 import platform
 import sys
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
 from .. import __version__
+from ..core.assets import Asset, asset_folder, missing_files
 from ..core.config import CONFIG_FILE_NAME, PlenioConfig
 from ..core.dependencies import probe
 from ..core.engines import EngineInfo, minimax, yue2
 from ..core.errors import PlenioModelError, PlenioUserError
+from ..core.models import ModelFile, size_text, take_inventory
 from ..core.system import Device, SystemFacts
 
 log = logging.getLogger("plenio")
@@ -465,7 +468,34 @@ def _devices() -> tuple[Device, ...]:
     return tuple(devices)
 
 
-def system_facts() -> SystemFacts:
+def locate_model(folder: str, file: str) -> Path | None:
+    """The installed path of a model file in one of ComfyUI's model folders (extra paths included)."""
+    import folder_paths
+
+    try:
+        found = folder_paths.get_full_path(folder, file)
+    except KeyError:  # a folder name this ComfyUI does not know
+        return None
+    return Path(found) if found else None
+
+
+def _asset_states(assets: Mapping[str, Asset], config: PlenioConfig) -> dict[str, str]:
+    states = {}
+    for asset_id, asset in assets.items():
+        configured = config.asset_paths.get(asset_id)
+        if configured is not None:
+            complete = not missing_files(asset, configured)
+            states[asset_id] = f"configured folder ({'complete' if complete else 'files missing'})"
+        elif missing_files(asset, asset_folder(asset_root(config), asset)):
+            states[asset_id] = f"not downloaded (fetched on first use, {size_text(asset.total_size)})"
+        else:
+            states[asset_id] = "installed"
+    return states
+
+
+def system_facts(
+    models: Mapping[str, ModelFile] | None = None, assets: Mapping[str, Asset] | None = None
+) -> SystemFacts:
     import comfy.model_management
 
     try:
@@ -480,6 +510,7 @@ def system_facts() -> SystemFacts:
         torch_version = str(torch.__version__)
     except ImportError:
         torch_version = "not installed"
+    config = load_config()
     return SystemFacts(
         plenio_version=__version__,
         comfyui_version=comfyui_version(),
@@ -491,5 +522,7 @@ def system_facts() -> SystemFacts:
         devices=_devices(),
         ram_total_bytes=ram,
         packages=probe(),
-        config=load_config().summary(),
+        config=config.summary(),
+        models=dict(take_inventory(models, locate_model).found) if models else {},
+        assets=_asset_states(assets, config) if assets else {},
     )

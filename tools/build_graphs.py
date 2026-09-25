@@ -811,7 +811,7 @@ ABOUT_COVER = f"""# 2 · YuE2 · Cover
 
 **New lyrics** are understood only when they fit the melody - about one syllable per note - and the voice fits its range; Song Sheet · Text warns about both.
 
-**Takes:** *YuE2 Takes* renders *takes* versions (seeds take seed, +1, ...); **Check Vocals** keeps the first instrumental take without vocal notes, the preview plays all takes. N takes cost N renders. **Instrumental adapter:** for instrumental covers YuE2 renders with the instrumental LoRA. **Check sung lyrics** (optional, bypassed) measures what a sung take actually sang.
+**Takes:** *YuE2 Takes* renders *takes* versions (seeds take seed, +1, ...); **Check Vocals** keeps the first instrumental take without vocal notes, the preview plays all takes. N takes cost N renders. **Instrumental adapter:** for instrumental covers YuE2 renders with the instrumental LoRA of the *Instrumental adapter* node (the optional adapter inside the model block stays bypassed here). **Check sung lyrics** (optional, bypassed) measures what a sung take actually sang.
 
 {FINISH_TEXT}
 
@@ -866,7 +866,14 @@ def yue2_cover(bp: dict[str, Blueprint]) -> Graph:
         title="Song Sheet · Score",
         widgets={"review": "stop for review"},
     )
-    asr = g.add("PlenioTranscribeLyrics", (1380, 0), size=(340, 240), title="Transcribe Lyrics")
+    # The Cover Brief owns the lyrics language (the node ignores its own widget when the brief is linked).
+    asr = g.add(
+        "PlenioTranscribeLyrics",
+        (1380, 0),
+        size=(340, 240),
+        title="Transcribe Lyrics",
+        labels={"language": "language (Cover Brief decides)"},
+    )
     write = g.add_subgraph(bp["write"], (1380, 300), size=(360, 260))
     source_switch = g.add("ComfySwitchNode", (1800, 0), size=(260, 90), title="Original or new lyrics")
     tags_switch = g.add("ComfySwitchNode", (1800, 140), size=(260, 90), title="Instrumental: section tags")

@@ -137,10 +137,12 @@ class Readiness:
     template: str
     missing: tuple[ModelFile, ...]
     optional_missing: tuple[ModelFile, ...]
+    incomplete: tuple[ModelFile, ...] = ()
+    """Needed files whose size differs from the published one (an interrupted download?)."""
 
     @property
     def ready(self) -> bool:
-        return not self.missing
+        return not self.missing and not self.incomplete
 
     @property
     def missing_bytes(self) -> int:
@@ -159,6 +161,7 @@ def readiness(
                 name,
                 tuple(m for m in needed if inventory.status(m) == "missing"),
                 tuple(m for m in optional if inventory.status(m) == "missing"),
+                tuple(m for m in needed if inventory.status(m) == "size differs"),
             )
         )
     return result

@@ -1,9 +1,9 @@
 # 3 · MiniMax · Song
 
-A new song from a short brief with **MiniMax Music 3**: a local text model writes title, a structured caption and lyrics, MiniMax renders the song from caption and lyrics, and Export writes a 24-bit FLAC with a release record. MiniMax takes no score, so there is one Song Sheet.
+A new song from a short brief with **MiniMax Music 3**: a local text model writes title, a structured caption and lyrics, MiniMax renders the song from caption and lyrics, Master finishes it, and Export writes a 24-bit FLAC with a release record. MiniMax takes no score, so there is one Song Sheet.
 
 ```text
-Song Brief -> Write Song -> Song Sheet -> MiniMax Render -> Export Release
+Song Brief -> Write Song -> Song Sheet -> MiniMax Render -> Master -> Export Release
                                ^ MiniMax Model (diffusion model, text encoder, VAE, Engine Profile) feeds all MiniMax steps
 ```
 
@@ -12,7 +12,7 @@ Song Brief -> Write Song -> Song Sheet -> MiniMax Render -> Export Release
 1. Open **3 · MiniMax · Song** from the template browser.
 2. In **Song Brief**, pick a template or describe the song. *length* and *vocals* (sung or instrumental) are set only here.
 3. Press **Run**. The first run downloads missing models (MiniMax Music 3: diffusion model, int8 text encoder, VAE; the Gemma 4 E4B writer).
-4. The song appears in the preview and in `output/plenio/` with its release record.
+4. The mastered song appears in the preview and in `output/plenio/`, with the unmastered take as `(original).flac` and its release record.
 
 ## The caption
 
@@ -54,6 +54,16 @@ The audio itself is not guaranteed free of voice-like sounds; see [Instrumental]
 ## Memory
 
 If decoding runs out of memory, open the **MiniMax Render** block and turn on *tiled decode*.
+
+## Finishing: Master, cover art, files
+
+- **Plenio · Master** (group *FINISH*) masters every take before Export: a gentle warm tone match and -14 LUFS with a true peak of at most -1 dBTP. Open the block to change the EQ, the loudness target or the compression style; its *sample rate* is on the block. Details: [Mastering and audio formats](../concepts/mastering.md).
+- **Export Release** writes the mastered song, the unmastered take as `(original).flac` and the release record. Formats (FLAC, MP3, WAV) and tags are set on the node.
+- **Cover Art (optional)** paints a cover from the sheet's *artwork prompt* with FLUX.2 Klein 4B (4 steps, 1024 x 1024; about 16 GB of extra model files, Apache-2.0). It is bypassed: select *Cover Art* and *Cover preview* and press **Ctrl+B**. Export saves the cover next to the song and embeds it when mutagen is installed. The cover seed is fixed, so new takes keep the cover; change the seed for another one.
+
+## App mode
+
+Switch **Graph / App** at the top left for a simple form with the brief and the take seed; see [App mode](../concepts/app-mode.md). The app runs without review stops (the sheets' default here).
 
 ## Licence
 

@@ -8,6 +8,10 @@ from pathlib import Path
 from ..core.assets import Asset, load_catalogue
 from ..core.audio.presets import Library
 from ..core.brief import TemplateLibrary
+from ..core.models import ModelFile
+from ..core.models import load_catalogue as load_model_catalogue
+from ..core.reports import Report
+from ..core.system import check_system, to_markdown
 from . import host
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[2]
@@ -35,3 +39,15 @@ def asset_catalogue() -> dict[str, Asset]:
 def preset_library() -> Library:
     """EQ and loudness presets shipped with Plenio (``resources/presets``)."""
     return Library(RESOURCES / "presets")
+
+
+@lru_cache(maxsize=1)
+def model_catalogue() -> dict[str, ModelFile]:
+    """The model files the templates load (``resources/models.toml``)."""
+    return load_model_catalogue(RESOURCES / "models.toml")
+
+
+def system_report() -> tuple[Report, str]:
+    """The System Check report and its Markdown (node and route)."""
+    report = check_system(host.system_facts(model_catalogue(), asset_catalogue()), model_catalogue())
+    return report, to_markdown(report)

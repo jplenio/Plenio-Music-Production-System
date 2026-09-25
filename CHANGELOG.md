@@ -4,6 +4,29 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 ## Unreleased
 
+### Added (Phase 8 - Main workflows, subgraphs and UX)
+
+- Model catalogue `resources/models.toml` (`plenio.core.models`): every model file the templates load, with folder, download URL, size, licence and the templates that need it; the templates' download entries are generated from it.
+- Blueprint **Plenio · Cover Art** (FLUX.2 Klein 4B distilled, native nodes, 4 steps): paints a cover from the Song Sheet's artwork prompt; optional (bypassed) in the song templates, with a cover preview; Export embeds it.
+- Song templates finish with **Plenio · Master** before Export, which also keeps the unmastered take as `(original).flac`.
+- App Mode configurations for *0 · System Check*, *1 · YuE2 · Song*, *3 · MiniMax · Song* and *4 · Enhance & Master* (switch *Graph / App*).
+- Template thumbnails (`tools/build_thumbnails.py`); the System Check template is generated like the others.
+- **System Check**: which model files each template needs and which are missing or incomplete (with sizes), a model file table, Plenio assets, and the hardware rule table with the row for the machine marked.
+- Checks: template rules in the workflow validator (About note, groups, *(optional)* titles, App configuration, thumbnail), catalogue/template consistency tests, `tools/browser_check.mjs` (load, save/reload, optional blocks on/off with server validation, Master bypass, App Mode) and smoke tests S-1, S-2, S-6 and Cover Art for real models.
+- Docs: *Models and downloads*, *Troubleshooting*, *App mode*, rewritten *Getting started* and README, updated path guides and licensing; usability review (`docs/design/usability-review.md`); test report `docs/test-reports/2026-09-25-phase-8.md`.
+
+### Changed (Phase 8)
+
+- All templates regenerated: consistent groups (`1 · ...` to `FINISH`), one About note visible on open, the model block collapsed below the main row, *take seed* label; blueprint bodies use their own node-id ranges.
+- The System Check warns only about packages ComfyUI itself installs (av, Pillow, scipy); a missing optional package is listed as information.
+- CI: the unit job installs numpy, scipy, av and Pillow (as ComfyUI does) and runs mypy with `--python-version 3.12` (the known numpy-stub issue). Without them the job could not have passed since the cover and audio unit tests arrived; CI results are not visible from the cloud session.
+
+### Fixed (Phase 8)
+
+- The frontend no longer renumbers blueprint nodes when a template loads.
+- The EQ curve and the node summaries no longer write a value into saved workflows.
+- Cover template: the lyrics language widget of Transcribe Lyrics, which the Cover Brief overrides, is labelled so.
+
 ### Added (Phase 7 - Audio production chain)
 
 - `core.audio`: BS.1770-4 loudness (K-weighting exact at 48 kHz, gating), EBU Tech 3342 loudness range, 4x-oversampled true peak; band-edge Kaiser resampler; RBJ biquad EQ with response, spectral profile and tone-match fit; compressor, oversampled lookahead limiter and loudness targeting with budgets (ported from the legacy toolkit v3.1.3, checked against its outputs).

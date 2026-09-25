@@ -123,7 +123,8 @@ def test_inventory_and_readiness(tmp_path: Path) -> None:
     assert {m.file for m in minimax.missing} == {
         "minimax_music3_dit_fp16.safetensors",
         "minimax_music3_text_encoder_pruned_int8_convrot.safetensors",
-    }  # a file of the wrong size is reported, not counted as missing
+    }  # a file of the wrong size is reported as incomplete, not as missing
+    assert {m.file for m in minimax.incomplete} == {"minimax_music3_dav.safetensors"}
     assert minimax.missing_bytes == 4914197682 + 9196611886
     assert readiness(CATALOGUE, Inventory({}), ["4 · Enhance & Master"])[0].ready
 
@@ -132,3 +133,9 @@ def test_size_text() -> None:
     assert size_text(3960938800) == "4.0 GB"
     assert size_text(216696128) == "217 MB"
     assert size_text(0) == "size not recorded"
+
+
+def test_the_model_guide_lists_every_catalogued_file() -> None:
+    guide = (ROOT / "docs" / "user" / "models.md").read_text(encoding="utf-8")
+    missing = [m.file for m in CATALOGUE.values() if m.file.removesuffix(".safetensors") not in guide]
+    assert missing == []

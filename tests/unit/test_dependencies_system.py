@@ -48,10 +48,69 @@ def facts(**overrides: object) -> SystemFacts:
 def test_healthy_system() -> None:
     report = check_system(facts())
     assert report.status is Status.OK
-    assert any("int8_convrot" in rule for rule in report.data["recommendations"])
-    assert any("Several GPUs" in rule for rule in report.data["recommendations"])
+    recommendations = report.data["recommendations"]
+    assert "row '16-24 GB'" in recommendations[0]  # a 16 GB card reports just under 16 GiB
+    assert any("Several GPUs" in rule for rule in recommendations)
+    marked = [row["vram"] for row in report.data["rules"] if row["this_machine"]]
+    assert marked == ["16-24 GB"]
     markdown = to_markdown(report)
     assert "RTX 5060 Ti" in markdown and "### Recommendations" in markdown
+    assert "| **this machine** - 16-24 GB |" in markdown and "### Templates" not in markdown
+
+
+@pytest.mark.parametrize(
+    ("gib", "row"),
+    [(6.0, "below 8 GB"), (7.9, "8-12 GB"), (11.9, "12-16 GB"), (15.9, "16-24 GB"), (23.6, "24 GB and more")],
+)
+def test_rule_rows_follow_the_reported_vram(gib: float, row: str) -> None:
+    report = check_system(facts(devices=(Device(0, "GPU", "cuda", int(gib * GIB), None),)))
+    assert [r["vram"] for r in report.data["rules"] if r["this_machine"]] == [row]
+    assert len(report.data["rules"]) == 5 and all(r["basis"] for r in report.data["rules"])
+
+
+def test_template_inventory_and_optional_packages() -> None:
+    from pathlib import Path
+
+    from plenio.core.models import load_catalogue
+
+    catalogue = load_catalogue(Path(__file__).resolve().parents[2] / "resources" / "models.toml")
+    installed = {
+        "yue2_3b_int8_convrot.safetensors": 3960938800,
+        "gemma4_e4b_it_fp8_scaled.safetensors": 1,
+        "minimax_music3_dav.safetensors": 1000,  # interrupted download
+    }
+    report = check_system(
+        facts(
+            models=installed,
+            packages={"av": "18.1.0", "mutagen": None},
+            assets={"faster-whisper-large-v3": "not downloaded (fetched on first use, 3.1 GB)"},
+        ),
+        catalogue,
+    )
+    assert report.status is Status.OK  # an optional package or a missing model is no warning
+    rows = {row["template"]: row for row in report.data["templates"]}
+    assert list(rows) == sorted(rows) and set(rows) == {
+        "0 · System Check",
+        "1 · YuE2 · Song",
+        "2 · YuE2 · Cover",
+        "3 · MiniMax · Song",
+        "4 · Enhance & Master",
+    }
+    assert rows["1 · YuE2 · Song"]["ready"] and rows["4 · Enhance & Master"]["ready"]
+    assert not rows["3 · MiniMax · Song"]["ready"] and rows["3 · MiniMax · Song"]["missing_size"] == "14.1 GB"
+    assert "flux-2-klein-4b.safetensors" in rows["1 · YuE2 · Song"]["optional_missing"]
+    status = {row["file"]: row["status"] for row in report.data["models"]}
+    assert status["yue2_3b_int8_convrot.safetensors"] == "installed"
+    assert status["sheetsage2_bf16.safetensors"] == "missing"
+    assert "yue2_3b_bf16.safetensors" not in status  # alternatives appear in the rule table only
+    markdown = to_markdown(report)
+    assert "| 1 · YuE2 · Song | all installed; optional blocks: 4 not installed |" in markdown
+    assert (
+        "1 with an unexpected size (an interrupted download?): `minimax_music3_dav.safetensors`" in markdown
+    )
+    assert "Optional package 'mutagen' is not installed." in markdown
+    assert "faster-whisper-large-v3': not downloaded" in markdown
+    assert "| `sheetsage2_bf16.safetensors` | audio_encoders | 1.4 GB | CC BY-NC 4.0 | missing |" in markdown
 
 
 def test_warnings_for_old_comfyui_cpu_only_and_missing_packages() -> None:

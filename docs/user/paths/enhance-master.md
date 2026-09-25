@@ -27,11 +27,15 @@ Load Audio -> EQ -> Loudness & Dynamics -> Preview
 
 ## Using it after a song path
 
-The same stages are available as the **Plenio · Master** block (node library, *Plenio/Mastering*): put it between the render and **Export Release** in the YuE2 or MiniMax templates, and connect the unmastered take to Export's *original* input to keep both. Phase 8 builds this into the song templates.
+The song templates 1-3 finish with the same stages as the **Plenio · Master** block (node library, *Plenio/Mastering*): it sits between the render and **Export Release**, and Export keeps the unmastered take as `(original).flac`. Use this template to master a take again with other settings.
 
 ## Skipping a stage
 
 Bypass a node (Ctrl+B) or choose *flat* in the EQ: the audio then passes through unchanged - same samples, sample rate and length; Export still writes the tags you chose. Choose *keep* as the sample rate to never convert.
+
+## App mode
+
+Switch **Graph / App** at the top left: the app asks for the file, the EQ mode, the loudness target and the compression style ([App mode](../concepts/app-mode.md)).
 
 ## Good to know
 

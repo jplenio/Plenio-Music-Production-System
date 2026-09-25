@@ -1,13 +1,13 @@
 # 2 · YuE2 · Cover
 
-A new version of a recorded song: SheetSage2 transcribes the source into a score (melody, chords, sections, tempo), you decide what happens to the vocals and the harmony, and YuE2 renders the cover from the final score. Export writes a 24-bit FLAC with a release record.
+A new version of a recorded song: SheetSage2 transcribes the source into a score (melody, chords, sections, tempo), you decide what happens to the vocals and the harmony, and YuE2 renders the cover from the final score. Master finishes the best take, and Export writes a 24-bit FLAC with a release record.
 
 ```text
 Source -> (Excerpt) -> Transcribe Score -> Score Tools -> Song Sheet · Score
                                                              |
             Transcribe Lyrics (original lyrics) / Write Song (new lyrics) / section tags (instrumental)
                                                              |
-                                                     Song Sheet · Text -> YuE2 Takes -> Check Vocals -> Export
+                                                     Song Sheet · Text -> YuE2 Takes -> Check Vocals -> Master -> Export
 ```
 
 ## Quick start
@@ -48,15 +48,23 @@ Enable **Check sung lyrics** (bypassed by default) to measure what was sung: wor
 
 ## Instrumental covers and vocal checks
 
-For instrumental covers Plenio silences the Vocal voice of the score (the melody moves to an instrument, or is removed), writes only section tags, removes voice and language words from the style and renders with the **instrumental adapter** (a LoRA; bypass *Instrumental adapter* to switch it off). See [Instrumental](../concepts/instrumental.md).
+For instrumental covers Plenio silences the Vocal voice of the score (the melody moves to an instrument, or is removed), writes only section tags, removes voice and language words from the style and renders with the **instrumental adapter** (a LoRA; bypass *Instrumental adapter* to switch it off - the optional adapter inside the collapsed model block stays bypassed in this template). See [Instrumental](../concepts/instrumental.md).
 
 **YuE2 Takes** renders *takes* versions (seeds take seed, take seed + 1, ...). **Check Vocals** re-transcribes every take and keeps the first one without vocal notes; the preview plays all takes, best first. N takes cost N renders.
+
+## Finishing: Master, cover art, files
+
+- **Plenio · Master** (group *FINISH*) masters the take Check Vocals keeps before Export: a gentle warm tone match and -14 LUFS with a true peak of at most -1 dBTP. Open the block to change the EQ, the loudness target or the compression style; its *sample rate* is on the block. Details: [Mastering and audio formats](../concepts/mastering.md).
+- **Export Release** writes the mastered song, the unmastered take as `(original).flac` and the release record. Formats (FLAC, MP3, WAV) and tags are set on the node.
+- **Cover Art (optional)** paints a cover from the sheet's *artwork prompt* with FLUX.2 Klein 4B (4 steps, 1024 x 1024; about 16 GB of extra model files, Apache-2.0). It is bypassed: select *Cover Art* and *Cover preview* and press **Ctrl+B**. Export saves the cover next to the song and embeds it when mutagen is installed. The cover seed is fixed, so new takes keep the cover; change the seed for another one.
+
+This template has no App mode: its two review stops need the Song Sheet editor.
 
 ## Limits
 
 - Sources longer than 5:00 need a second SheetSage2 pass that does not fit a 16 GB card: trim them.
 - The original-lyrics ASR is a draft. It can mishear words, merge lines, and invent short phrases at the end of a passage; Plenio removes the typical inventions and shows unsure words, but read the lyrics before approving.
-- A take can end while the music still plays; Check Vocals reports it - fade it out when mastering.
+- A take can end while the music still plays; Check Vocals reports it (Master does not fade out yet).
 - The Song Sheet editor's section table shows the source's times; playing a section is not built in yet.
 
 ## Licence

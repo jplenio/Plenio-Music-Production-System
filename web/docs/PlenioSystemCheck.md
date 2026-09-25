@@ -6,9 +6,11 @@ Shows whether this ComfyUI installation is ready for Plenio.
 
 - ComfyUI, frontend, Python, torch and Plenio versions (Plenio supports ComfyUI 0.37.0 and newer)
 - GPUs with total and free VRAM, system RAM, the device ComfyUI uses for native models
-- optional Python packages and whether they are installed
+- **templates**: for each template whether its model files are installed, what is missing and how large it is; optional blocks (Cover Art, the adapter) are listed separately
+- **model files**: every file the templates load, with folder, size, licence and status (*installed*, *missing*, *size differs*), found in ComfyUI's model folders including `extra_model_paths.yaml`
+- Python packages (a missing `av`, `PIL` or `scipy` is a warning; `mutagen` is optional) and Plenio assets (the lyrics ASR: installed or fetched on first use)
 - the download policy: offline mode (`PLENIO_OFFLINE`, `HF_HUB_OFFLINE`) and automatic asset downloads (`PLENIO_AUTO_DOWNLOAD`)
-- hardware recommendations as a transparent rule table
+- the **hardware rule table** (VRAM of the largest GPU -> which files to choose for YuE2, MiniMax Music 3 and Cover Art), with the row for this machine marked and the basis of every row (measured, legacy toolkit rating, or design)
 
 ## Inputs
 

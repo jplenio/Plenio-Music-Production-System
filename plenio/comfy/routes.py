@@ -19,9 +19,7 @@ from ..core import score as score_rules
 from ..core.engines import rules_for
 from ..core.errors import PlenioError, PlenioUserError
 from ..core.sheet import DOCUMENT_KINDS, evaluate_sheet, parse_sheet_state
-from ..core.system import check_system, to_markdown
-from . import host
-from .shared import preset_library, template_library
+from .shared import preset_library, system_report, template_library
 
 log = logging.getLogger("plenio")
 
@@ -71,8 +69,8 @@ def _text(data: dict[str, Any], key: str, required: bool = True) -> str:
 
 
 async def system(request: web.Request) -> web.StreamResponse:
-    report = check_system(host.system_facts())
-    return web.json_response({"report": report.to_dict(), "markdown": to_markdown(report)})
+    report, markdown = system_report()
+    return web.json_response({"report": report.to_dict(), "markdown": markdown})
 
 
 async def score_analyze(request: web.Request) -> web.StreamResponse:

@@ -118,6 +118,7 @@ Confirm or change D-01 … D-09 in [target-architecture.md](target-architecture.
 | **Tests** | template/App validation, save/reload of every template, full smoke pass (S-1…S-7), dependency-combination checks (optional blocks on/off), usability checklist results. |
 | **Completion criteria** | a new user can choose the music model, make a song/cover, inspect and edit lyrics and score, and export — without seeing irrelevant controls; every parameter has one visible owner. |
 | **Effort** | **xhigh** |
+| **Status** | **Implemented** (2026-09-25): model catalogue, Cover Art blueprint, final templates 0-4 with Master, groups, notes, thumbnails and App configurations, System Check full, user guide set, usability review; all suites and 56/56 browser checks pass in the cloud ([../test-reports/2026-09-25-phase-8.md](../test-reports/2026-09-25-phase-8.md)). Open on the owner's machine: the full smoke pass with models, the checks in frontend 1.53.6, first-use runs. |
 
 ## Phase 9 — Full codebase audit
 
