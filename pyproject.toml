@@ -1,6 +1,6 @@
 [project]
 name = "comfyui-plenio-music"
-version = "0.2.0"
+version = "0.2.1"
 description = "Plenio Music Production System: song writing, YuE2 and MiniMax Music 3 generation, editable scores and release export for ComfyUI."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -25,8 +25,8 @@ Changelog = "https://github.com/jplenio/Plenio-Music-Production-System/blob/main
 [tool.comfy]
 PublisherId = "jplenio"
 DisplayName = "Plenio Music Production System"
-Icon = "https://raw.githubusercontent.com/jplenio/Plenio-Music-Production-System/main/assets/branding/Plenio-Music-Production-System-Icon.png"
-Banner = "https://raw.githubusercontent.com/jplenio/Plenio-Music-Production-System/main/assets/branding/Plenio-Music-Production-System-Banner.png"
+Icon = "https://raw.githubusercontent.com/jplenio/Plenio-Music-Production-System/main/assets/branding/icon.png"
+Banner = "https://raw.githubusercontent.com/jplenio/Plenio-Music-Production-System/main/assets/branding/banner.png"
 # Templates and blueprints have "·" in their names; `git ls-files` quotes such paths by default and
 # comfy-cli would skip them, so the two folders are included by directory.
 includes = ["example_workflows", "subgraphs"]

@@ -17,7 +17,7 @@ Published Registry versions are immutable: every fix is a new version.
 3. Publishing the release runs `.github/workflows/publish.yml`, which uploads the version to the Comfy Registry (publisher `jplenio`, package `comfyui-plenio-music`). It needs the repository secret `REGISTRY_ACCESS_TOKEN` (a token from the Registry's publisher page). The workflow can also be started by hand (*Actions → Publish to Comfy Registry → Run workflow*).
 4. Check the package page on the Registry and install it once through the ComfyUI Manager.
 
-The Registry's icon and banner are the raw GitHub URLs of `assets/branding/Plenio-Music-Production-System-Icon.png` and `assets/branding/Plenio-Music-Production-System-Banner.png` (`[tool.comfy]` in `pyproject.toml`); they must exist on `main` before publishing.
+The Registry's icon and banner are the raw GitHub URLs of `assets/branding/icon.png` and `assets/branding/banner.png` (`[tool.comfy]` in `pyproject.toml`); they must exist on `main` before publishing.
 
 ## Demo gallery
 

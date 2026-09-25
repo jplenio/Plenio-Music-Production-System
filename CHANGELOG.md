@@ -2,6 +2,12 @@
 
 All notable changes are listed here. Versions follow semantic versioning; published Registry versions are immutable.
 
+## 0.2.1 - 2026-09-25
+
+### Fixed
+
+- Registry icon and banner and the README banner point to the renamed images `assets/branding/icon.png` and `assets/branding/banner.png` (0.2.0 names no longer exist, so the Registry page showed no icon).
+
 ## 0.2.0 - 2026-09-25
 
 First public release. Plenio succeeds the [Music Production Toolkit](https://github.com/jplenio/ComfyUI-MiniMax-Music-Production-Toolkit) (formerly *MiniMax Music Production Toolkit*) as a new package with new node IDs; both can be installed side by side.

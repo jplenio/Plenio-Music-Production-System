@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/branding/Plenio-Music-Production-System-Banner.png" alt="Plenio Music Production System for ComfyUI - YuE2, YuE2 Cover and MiniMax Music 3" width="100%" />
+  <img src="assets/branding/banner.png" alt="Plenio Music Production System for ComfyUI - YuE2, YuE2 Cover and MiniMax Music 3" width="100%" />
 </p>
 
 # Plenio Music Production System 0.2 for ComfyUI
