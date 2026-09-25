@@ -19,7 +19,7 @@ Instrumental output is treated as a quality requirement. The strategy is **defen
 | Tag vocabulary / form | **Song path: the bare `[instrumental]` tag** (owner's listening: "much better, natural ending" against humming with section tags and loops with the adapter); covers: the final score's section tags. Timed tags do not control the length (63–387 s for an 80-s target). | [4A E4, E4b], owner verdicts 02–11 |
 | Length control of instrumental plans (Song path) | New deterministic Score Tools operation **fit length** (§3.2) instead of relying on the planner. | [4A E4] four tags gave plans of 188–363 s; timed tags 63–387 s |
 | Vocal detector for *Check Vocals* | **`score` only** (SheetSage2 re-transcription), **any `Vocal` note fails** (tolerance 0 s, advanced). `listen` (Gemma) dropped, `words` (ASR) rejected. | owner calibration on 25 takes: 6 of 8 voiced takes flagged (the 2 missed had a rare, faint voice), 0 false alarms; `listen` flagged a subset of `score` |
-| Ending check | Every take's report states whether it ends with the music still playing (tail loudness ≥ 0.5 × the take's median); Export warns and the Master stage (Phase 7) offers a fade-out. | [4A E4] |
+| Ending check | Every take's report states whether it ends with the music still playing (tail loudness ≥ 0.5 × the take's median); Export warns; the planned fade-out in the Master stage is not built yet (deferred, Phase 9 audit AUD-14). | [4A E4] |
 | Takes | Default N = 1; cost per take is 0.35–0.55 × the song length on the owner's GPU (§7). | [4A E4/E5] |
 
 ---

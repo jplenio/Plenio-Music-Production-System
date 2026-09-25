@@ -48,10 +48,10 @@ Polyphase resampling with a Kaiser low-pass designed from band edges: flat to 20
 | Format | Encoding | Tags | Cover | Clipping |
 |---|---|---|---|---|
 | FLAC | 24-bit integer, lossless (PyAV / libFLAC) | Vorbis comments: title, artist, album, date, track, genre, comment, album artist, composer | embedded with mutagen (optional) | samples above full scale are clipped; counted in the record |
-| MP3 | LAME VBR V0 (highest VBR quality; the bit rate follows the music) | ID3v2, same fields | embedded with mutagen (optional) | as FLAC |
+| MP3 | LAME VBR V0 (highest VBR quality; the bit rate follows the music), at most 48 kHz: 88.2/176.4 kHz audio is converted to 44.1 kHz, 96/192 kHz to 48 kHz for the MP3 only | ID3v2, same fields | embedded with mutagen (optional) | as FLAC |
 | WAV | 32-bit float | RIFF INFO: title, artist, album, date, track, genre, comment (no album artist / composer) | none | none - values above full scale are kept |
 
-24-bit samples are scaled by 2²³ (the decoders' convention), so a 24-bit source passes through export sample-exact. Files are written to a temporary name and renamed when complete; an interrupted export leaves no half-written song.
+24-bit samples are scaled by 2²³ (the decoders' convention), so a 24-bit source passes through export sample-exact. Files are written to a temporary name and renamed when complete; an interrupted export leaves no half-written song. All files of one export share one base name; with collision *number* the whole set is numbered, so the record and cover of an earlier export are never overwritten.
 
 **Tag copy** (*copy from loaded file*) reads the tags and the embedded cover with PyAV from the file of the workflow's single **Load Audio** node. With two or more Load Audio nodes the export stops and asks you to type the tags.
 

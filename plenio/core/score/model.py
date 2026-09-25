@@ -120,9 +120,15 @@ class ScoreModel:
     chords: tuple[ChordMark, ...]
     bars: dict[str, tuple[BarInfo, ...]]
     _by_id: dict[str, Element] = field(default_factory=dict, repr=False)
+    _voices: dict[str, list[Element]] = field(default_factory=dict, repr=False)
+    _positions: dict[str, int] = field(default_factory=dict, repr=False)
 
     def __post_init__(self) -> None:
         self._by_id = {element.id: element for element in self.elements}
+        self._voices = {}
+        for element in self.elements:
+            self._positions[element.id] = len(self._voices.setdefault(element.voice, []))
+            self._voices[element.voice].append(element)
 
     @property
     def bpm(self) -> int:
@@ -154,15 +160,15 @@ class ScoreModel:
         return [c for c in self.chords if c.bar == bar]
 
     def voice_elements(self, voice: str) -> list[Element]:
-        return [e for e in self.elements if e.voice == voice]
+        return list(self._voices.get(voice, ()))
 
     def chain(self, element_id: str) -> list[Element]:
         """The written segments of the sounding note that contains ``element_id`` (ties)."""
         element = self.element(element_id)
         if not element.is_note:
             return [element]
-        segments = self.voice_elements(element.voice)
-        index = segments.index(element)
+        segments = self._voices[element.voice]  # cached with each element's position (AUD-05)
+        index = self._positions[element.id]
         start = index
         while start > 0 and segments[start].tie_in:
             start -= 1

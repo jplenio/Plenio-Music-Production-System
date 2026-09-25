@@ -8,8 +8,9 @@ front matter block; a template fills only the brief fields the user left empty
 
 from __future__ import annotations
 
+import logging
 import re
-from collections.abc import Iterable, Mapping
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
@@ -17,6 +18,8 @@ from typing import Any
 from .errors import PlenioUserError
 from .files import atomic_write_text
 from .hashing import sha256_json
+
+log = logging.getLogger("plenio")
 
 BRIEF_SCHEMA = "plenio.brief/1"
 LENGTHS: dict[str, float] = {
@@ -417,9 +420,12 @@ class TemplateLibrary:
         self.package_dir = package_dir
         self.user_dir = user_dir
         self._templates: dict[str, Template] | None = None
+        self.problems: dict[str, str] = {}
+        """User template files that could not be read (id -> reason); they are skipped."""
 
     def _load(self) -> dict[str, Template]:
         templates: dict[str, Template] = {}
+        self.problems = {}
         for folder, source in ((self.package_dir, "package"), (self.user_dir, "user")):
             if folder is None or not folder.is_dir():
                 continue
@@ -428,7 +434,18 @@ class TemplateLibrary:
                     continue
                 relative = path.relative_to(folder).with_suffix("").as_posix()
                 template_id = relative if source == "package" else f"user/{relative}"
-                templates[template_id] = parse_template(path.read_text(encoding="utf-8"), template_id, source)
+                try:
+                    templates[template_id] = parse_template(
+                        path.read_text(encoding="utf-8"), template_id, source
+                    )
+                except (PlenioUserError, OSError, UnicodeDecodeError) as error:
+                    if source == "package":
+                        raise  # shipped templates are tested; a broken one is a packaging bug
+                    # A hand-edited user file must not stop Plenio from loading (the brief nodes list
+                    # the templates when ComfyUI registers them): skip it and say why.
+                    reason = str(error).splitlines()[0]
+                    self.problems[template_id] = reason
+                    log.warning("Plenio: skipped the user template %s: %s", path, reason)
         return templates
 
     def templates(self) -> dict[str, Template]:
@@ -470,21 +487,22 @@ class TemplateLibrary:
             raise PlenioUserError(
                 f"Template name {name!r} gives no usable file name.", hint="Use letters or digits."
             )
-        template = Template(
-            f"user/{slug}",
-            name.strip(),
-            "My templates",
-            {k: str(v).strip() for k, v in fields.items() if k in TEMPLATE_FIELDS and str(v).strip()},
-            "user",
-        )
-        atomic_write_text(self.user_dir / f"{slug}.md", render_template(template))
+        values: dict[str, str] = {}
+        for key, value in fields.items():
+            if key not in TEMPLATE_FIELDS:
+                continue
+            text = str(value).strip()
+            if key != "description":  # front matter holds one line per field
+                text = " ".join(text.split())
+            if text:
+                values[key] = text
+        template = Template(f"user/{slug}", " ".join(name.split()), "My templates", values, "user")
+        rendered = render_template(template)
+        parse_template(rendered, template.id, "user")  # refuse (before writing) what could not be read back
+        atomic_write_text(self.user_dir / f"{slug}.md", rendered)
         self.reload()
         return template
 
 
 def options(library: TemplateLibrary) -> list[str]:
     return ["none", *library.ids()]
-
-
-def describe_fields(fields: Iterable[str]) -> str:
-    return ", ".join(fields)

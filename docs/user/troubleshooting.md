@@ -10,6 +10,8 @@ Start with **0 · System Check**: it shows versions, GPUs, which model files of 
 | Red nodes, *missing node types* | ComfyUI older than 0.37.0 (the native YuE2, MiniMax, FLUX.2 and loop nodes are missing) | Update ComfyUI |
 | System Check: *older than the supported 0.37.0* | as above | Update ComfyUI |
 | System Check: *Package 'av' / 'PIL' / 'scipy' is not installed* | a broken ComfyUI environment (ComfyUI installs them) | Reinstall ComfyUI's requirements in its Python |
+| A template you saved in `user/plenio/templates` does not appear | the file could not be read (for example a front-matter line without `:`) | The ComfyUI log says *skipped the user template ...* with the reason; fix or delete the file and refresh |
+| System Check: *Plenio configuration error* | `user/plenio/config.toml` has an invalid value or key | Fix the file as the message says; until then Plenio uses its defaults |
 | System Check: *Optional package 'mutagen' is not installed* | fine: only needed to embed cover art | `<ComfyUI python> -m pip install mutagen` if you want embedded covers |
 
 ## Models

@@ -12,6 +12,7 @@ Nothing here is specific to a music model; engines decide how to use a score.
 from __future__ import annotations
 
 import re
+from bisect import bisect_left
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from fractions import Fraction
@@ -235,13 +236,25 @@ def analyze(text: str) -> Analysis:
                 current = key
         return str(current)
 
-    def notes_in(notes: list[Any], start: Fraction, end: Fraction) -> int:
-        return sum(1 for onset, _pitch, _duration in notes if start <= onset < end)
+    # Sorted onsets and bisection: counting per bar by scanning every note made the analysis (and the
+    # editor, which analyses after every edit) quadratic in the score length (audit AUD-05).
+    onsets = {
+        name: sorted(onset for onset, _pitch, _duration in v.notes)
+        for name, v in (("Vocal", vocal), ("Ins", ins))
+    }
+    chord_times = sorted(range(len(vocal.chords)), key=lambda i: vocal.chords[i][0])
+    chord_starts = [vocal.chords[i][0] for i in chord_times]
+
+    def notes_in(voice: str, start: Fraction, end: Fraction) -> int:
+        return bisect_left(onsets[voice], end) - bisect_left(onsets[voice], start)
 
     bars = []
     for index, (start, length, meter) in enumerate(vocal.bars, start=1):
         end = start + length
-        chords = tuple(chord for time, chord in vocal.chords if start <= time < end)
+        chords = tuple(
+            vocal.chords[i][1]
+            for i in sorted(chord_times[bisect_left(chord_starts, start) : bisect_left(chord_starts, end)])
+        )
         bars.append(
             Bar(
                 index,
@@ -250,8 +263,8 @@ def analyze(text: str) -> Analysis:
                 _meter(meter),
                 key_at(start),
                 chords,
-                notes_in(vocal.notes, start, end),
-                notes_in(ins.notes, start, end),
+                notes_in("Vocal", start, end),
+                notes_in("Ins", start, end),
             )
         )
     sections: list[Section] = []

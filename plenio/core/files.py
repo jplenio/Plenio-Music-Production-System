@@ -30,6 +30,16 @@ def read_toml(path: Path) -> dict[str, Any]:
     return data
 
 
+def _default_mode() -> int:
+    """The mode a normally created file gets (0o666 minus the process umask)."""
+    mask = os.umask(0)
+    os.umask(mask)
+    return 0o666 & ~mask
+
+
+_FILE_MODE = _default_mode()
+
+
 def atomic_write_bytes(path: Path, data: bytes) -> None:
     """Write ``data`` to ``path`` so that readers never see a partial file."""
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -39,6 +49,7 @@ def atomic_write_bytes(path: Path, data: bytes) -> None:
             temp.write(data)
             temp.flush()
             os.fsync(temp.fileno())
+        os.chmod(temp_name, _FILE_MODE)  # mkstemp creates 0600; records and covers are shared files (AUD-12)
         os.replace(temp_name, path)
     except BaseException:
         Path(temp_name).unlink(missing_ok=True)

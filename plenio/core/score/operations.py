@@ -6,6 +6,7 @@ whole-score operations are the same functions the Score Tools node uses.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Callable, Mapping
 from typing import Any
 
@@ -19,7 +20,12 @@ Operation = Callable[[str, Mapping[str, Any]], EditResult]
 
 def _int(operation: Mapping[str, Any], name: str, *, default: int | None = None) -> int:
     value = operation.get(name, default)
-    if isinstance(value, bool) or not isinstance(value, int | float) or int(value) != value:
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, int | float)
+        or not math.isfinite(value)  # JSON accepts Infinity/NaN; int() of them raised (AUD-08)
+        or int(value) != value
+    ):
         raise PlenioValidationError(f"The operation needs a whole number '{name}'.")
     return int(value)
 

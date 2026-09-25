@@ -23,7 +23,7 @@ from ...core.release import (
     expand_pattern,
     file_facts,
     naming_values,
-    plan_path,
+    plan_release,
     read_tags,
     workflow_licences,
     write_audio,
@@ -33,6 +33,8 @@ from .. import host
 from ..types import ReportType
 
 COLLISIONS = ("number", "overwrite", "error")
+ORIGINAL_SUFFIX = " (original).flac"
+RECORD_SUFFIX = ".plenio.json"
 TAG_MODES = ("title only", "tags", "copy from loaded file")
 EXTRA_TAGS = tuple(field for field in TAG_FIELDS if field != "title")
 
@@ -162,15 +164,23 @@ class PlenioExportRelease(io.ComfyNode):
         received = [r for r in (reports or {}).values() if r is not None]
         report_dicts = [r.to_dict() if isinstance(r, Report) else dict(r) for r in received]
         relative = expand_pattern(naming, naming_values(song_title, None))
+        takes = ["" if len(items) == 1 else f" take {index + 1}" for index in range(len(items))]
+        suffixes = [take + FORMATS[kind]["extension"] for take in takes for kind in kinds]
+        suffixes += [ORIGINAL_SUFFIX] * (original is not None) + [".jpg"] * (picture is not None)
+        # one base name for every file of this export, record included (AUD-04)
+        stem = plan_release(target_folder, relative, [*suffixes, RECORD_SUFFIX], collision=collision)
+
+        def file(suffix: str) -> Path:
+            return stem.with_name(stem.name + suffix)
+
         written: list[Path] = []
         facts: list[dict[str, Any]] = []
         loudness: list[dict[str, Any]] = []
         embedded = True
-        for index, samples in enumerate(items):
-            name = relative if len(items) == 1 else f"{relative} take {index + 1}"
+        for take, samples in zip(takes, items, strict=True):
             loudness.append(measure(samples, rate, cancel=host.raise_if_interrupted).to_dict())
             for kind in kinds:
-                path = plan_path(target_folder, name, FORMATS[kind]["extension"], collision=collision)
+                path = file(take + FORMATS[kind]["extension"])
                 audio_facts = write_audio(path, samples, rate, kind, metadata)
                 if picture is not None and kind != "wav":
                     embedded = embed_cover(path, picture) and embedded
@@ -178,14 +188,14 @@ class PlenioExportRelease(io.ComfyNode):
                 facts.append({**file_facts(path), **audio_facts})
         if original is not None:
             original_items, original_rate = host.audio_items(original)
-            path = plan_path(target_folder, f"{relative} (original)", ".flac", collision=collision)
+            path = file(ORIGINAL_SUFFIX)
             original_facts = write_audio(path, original_items[0], original_rate, "flac", metadata)
             facts.append({**file_facts(path), **original_facts, "role": "original"})
             written.append(path)
         cover_path = None
         warnings: list[str] = []
         if picture is not None:
-            cover_path = plan_path(target_folder, relative, ".jpg", collision=collision)
+            cover_path = file(".jpg")
             atomic_write_bytes(cover_path, picture)
             facts.append({**file_facts(cover_path), "role": "cover"})
             if not embedded:
@@ -221,7 +231,7 @@ class PlenioExportRelease(io.ComfyNode):
                 licences=licences,
             )
         )
-        record_path = written[0].with_suffix(".plenio.json")
+        record_path = file(RECORD_SUFFIX)
         atomic_write_text(record_path, json.dumps(record, indent=2, ensure_ascii=False))
         relative_names = [str(Path(p).relative_to(base)) for p in written]
         clipped = sum(int(f.get("clipped_samples", 0)) for f in facts)
@@ -232,6 +242,12 @@ class PlenioExportRelease(io.ComfyNode):
             )
         if wav and any(metadata.get(k) for k in ("album_artist", "composer")):
             warnings.append("WAV files cannot hold album artist and composer tags")
+        converted = {f["converted_from_rate"] for f in facts if f.get("converted_from_rate")}
+        if converted:
+            notes.append(
+                f"MP3 written at {', '.join(str(f['sample_rate']) for f in facts if f.get('converted_from_rate'))} Hz "
+                f"(MP3 cannot hold {', '.join(map(str, sorted(converted)))} Hz); FLAC and WAV keep the rate"
+            )
         summary = Report(
             "export",
             Status.WARNING if warnings else Status.OK,

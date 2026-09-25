@@ -18,7 +18,7 @@ from ..core import lyrics as lyrics_rules
 from ..core import score as score_rules
 from ..core.engines import rules_for
 from ..core.errors import PlenioError, PlenioUserError
-from ..core.sheet import DOCUMENT_KINDS, evaluate_sheet, parse_sheet_state
+from ..core.sheet import DOCUMENT_KINDS, REVIEW_MODES, evaluate_sheet, parse_sheet_state
 from .shared import preset_library, system_report, template_library
 
 log = logging.getLogger("plenio")
@@ -57,6 +57,26 @@ async def read_json(request: web.Request) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise PlenioUserError("The request body must be a JSON object.")
     return data
+
+
+def _number(data: dict[str, Any], key: str, low: float, high: float) -> float | None:
+    """An optional finite number within ``low..high`` (``None`` when absent or empty)."""
+    value = data.get(key)
+    if value is None or value == "":
+        return None
+    if isinstance(value, bool) or not isinstance(value, int | float) or not low <= float(value) <= high:
+        raise PlenioUserError(f"The field {key!r} must be a number between {low:g} and {high:g}.")
+    return float(value)
+
+
+def _engine_rules(engine: Any) -> Any:
+    """The rules module of ``engine`` (``None`` when no engine is given); unknown engines are the caller's error."""
+    if not engine:
+        return None
+    try:
+        return rules_for(str(engine))
+    except PlenioError as error:
+        raise PlenioUserError(error.message, hint=error.hint) from error
 
 
 def _text(data: dict[str, Any], key: str, required: bool = True) -> str:
@@ -101,10 +121,10 @@ async def lyrics_analyze(request: web.Request) -> web.StreamResponse:
     data = await read_json(request)
     text = _text(data, "lyrics")
     instrumental = bool(data.get("instrumental", False))
-    engine = data.get("engine")
+    rules = _engine_rules(data.get("engine"))
     findings = (
-        rules_for(str(engine)).check_lyrics(text, instrumental=instrumental)
-        if engine
+        rules.check_lyrics(text, instrumental=instrumental)
+        if rules is not None
         else lyrics_rules.check_lyrics(text, instrumental=instrumental)
     )
     parsed = lyrics_rules.parse_lyrics(text)
@@ -139,21 +159,26 @@ async def sheet_resolve(request: web.Request) -> web.StreamResponse:
     data = await read_json(request)
     state = parse_sheet_state(data.get("sheet_state") or "")
     upstream = data.get("upstream") or {}
-    owned = [k for k in data.get("owned", []) if k in DOCUMENT_KINDS]
-    if not isinstance(upstream, dict) or not owned:
-        raise PlenioUserError("The request needs 'owned' documents and an 'upstream' object.")
+    owned_value = data.get("owned", [])
+    owned = [k for k in owned_value if k in DOCUMENT_KINDS] if isinstance(owned_value, list) else []
+    context_value = data.get("context") or {}
+    if not isinstance(upstream, dict) or not owned or not isinstance(context_value, dict):
+        raise PlenioUserError("The request needs 'owned' documents, an 'upstream' and a 'context' object.")
+    review = str(data.get("review", "continue"))
+    if review not in REVIEW_MODES:
+        raise PlenioUserError(f"Unknown review mode {review!r}; use one of {list(REVIEW_MODES)}.")
     engine = data.get("engine")
-    context = {k: v for k, v in (data.get("context") or {}).items() if isinstance(v, str)}
+    context = {k: v for k, v in context_value.items() if isinstance(v, str)}
     evaluation = evaluate_sheet(
         state,
         {k: (v if isinstance(v, str) else None) for k, v in upstream.items()},
         owned,
-        review=str(data.get("review", "continue")),
-        rules=rules_for(str(engine)) if engine else None,
+        review=review,
+        rules=_engine_rules(engine),
         engine_id=str(engine) if engine else None,
         instrumental=bool(data.get("instrumental", False)),
-        max_seconds=float(data["max_seconds"]) if data.get("max_seconds") else None,
-        target_seconds=float(data["target_seconds"]) if data.get("target_seconds") else None,
+        max_seconds=_number(data, "max_seconds", 1, 3600) or None,
+        target_seconds=_number(data, "target_seconds", 1, 3600) or None,
         context=context,
     )
     return web.json_response(evaluation.payload())
@@ -163,7 +188,7 @@ async def templates_list(request: web.Request) -> web.StreamResponse:
     library = template_library()
     if request.query.get("reload") == "1":
         library.reload()
-    return web.json_response({"templates": library.listing()})
+    return web.json_response({"templates": library.listing(), "problems": dict(library.problems)})
 
 
 async def template_get(request: web.Request) -> web.StreamResponse:
@@ -196,18 +221,21 @@ async def eq_response(request: web.Request) -> web.StreamResponse:
     from ..core.audio import eq
 
     data = await read_json(request)
-    rate = data.get("sample_rate", 48000)
-    settings = eq.parse_settings(data.get("settings", ""), rate if isinstance(rate, int) else None)
-    grid = eq.display_grid(int(rate), int(data.get("points", 256)))
+    rate = int(_number(data, "sample_rate", 8000, 384000) or 48000)
+    points = _number(data, "points", 16, 2048)
+    if points is not None and points != int(points):
+        raise PlenioUserError("The field 'points' must be a whole number.")
+    settings = eq.parse_settings(data.get("settings", ""), rate)
+    grid = eq.display_grid(rate, int(points or 256))
     bands = []
     for band in settings["bands"]:
         single = dict(settings, preamp_db=0.0, bands=[band])
-        bands.append([round(float(v), 3) for v in eq.response_db(single, int(rate), grid)])
+        bands.append([round(float(v), 3) for v in eq.response_db(single, rate, grid)])
     return web.json_response(
         {
             "settings": settings,
             "frequency_hz": [round(float(f), 2) for f in grid],
-            "response_db": [round(float(v), 3) for v in eq.response_db(settings, int(rate), grid)],
+            "response_db": [round(float(v), 3) for v in eq.response_db(settings, rate, grid)],
             "bands": bands,
         }
     )

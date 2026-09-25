@@ -128,3 +128,14 @@ def test_parse_version() -> None:
     assert parse_version("0.37.0") == (0, 37, 0)
     assert parse_version("v1.53") == (1, 53, 0)
     assert parse_version("unknown") is None
+
+
+def test_a_configuration_error_is_reported_not_fatal() -> None:
+    """Audit AUD-06: an invalid config.toml made the System Check itself fail."""
+    report = check_system(
+        facts(
+            config={"offline": False, "auto_download": True, "error": "config.toml: unknown settings ['x']"}
+        )
+    )
+    assert report.status is Status.WARNING
+    assert any("Plenio configuration error" in m and "unknown settings" in m for m in report.messages)

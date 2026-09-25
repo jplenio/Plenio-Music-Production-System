@@ -35,7 +35,7 @@ Completion criterion (roadmap Phase 8): *a new user can choose the music model, 
 |---|---|
 | 0 · System Check | detail |
 | 1 · YuE2 · Song | Song Brief: template, description, genre, mood, tempo, length, vocals (+ language, voice, theme or melody, lead instrument), key, meter (SONG); writer model, draft seed, thinking (WRITE); review + editor (TEXT, SCORE); plan seed, planning, plan type; Score Tools operation (SCORE); take seed (RENDER); sample rate (Master), folder, naming, formats, tags (FINISH); checkpoint (MUSIC MODEL, collapsed); cover seed, size (COVER ART, optional) |
-| 2 · YuE2 · Cover | source file; excerpt start/duration (optional); Cover Brief: template, description, genre, mood, vocals (+ options), harmony, title; review + editor (both sheets); Transcribe Lyrics: engine, *language (Cover Brief decides)*, device; writer controls; take seed, takes, Check Vocals tolerance; Master, Export; adapter file and strengths; checkpoint; optional: check sung lyrics, Cover Art |
+| 2 · YuE2 · Cover | source file; excerpt start/duration (optional); Cover Brief: template, description, genre, mood, vocals (+ options), harmony, title; review + editor (both sheets); Transcribe Lyrics: engine, *source language (original lyrics: Cover Brief)*, device; writer controls; take seed, takes, Check Vocals tolerance; Master, Export; adapter file and strengths; checkpoint; optional: check sung lyrics, Cover Art |
 | 3 · MiniMax · Song | as template 1 without the score; tiled decode (RENDER); model, text encoder, vae (MUSIC MODEL) |
 | 4 · Enhance & Master | source file; EQ (+ preset or bands); loudness target, compression, sample rate; Export |
 
@@ -47,7 +47,7 @@ No MiniMax control appears in a YuE2 template and no cover control in a song tem
 |---|---|---|
 | intent, vocals, length | Song Brief / Cover Brief | the brief is the request; the sheets hold the final documents |
 | a fixed cover title | Cover Brief *title* (request) | the final title is the Song Sheet · Text document (A2) |
-| lyrics language of a cover | Cover Brief | Transcribe Lyrics' own widget is ignored when the brief is linked; labelled so in the template (F4) |
+| language of the source's singing | Cover Brief for original-lyrics covers, otherwise Transcribe Lyrics' *source language* | new-lyrics covers: the brief's language is that of the new text (AUD-02) |
 | writer model, draft seed | Write Song block | |
 | title / style (caption) / lyrics / artwork prompt | Song Sheet · Text (MiniMax: Song Sheet) | auto / edited / manual |
 | score, planning mode, render ceiling | Song Sheet · Score (YuE2) | |
@@ -66,7 +66,7 @@ Fixed in Phase 8:
 | F1 | Templates opened scrolled so far that the About note and the first group title were hidden (toolbar overlap) | initial view offset shows the note and group titles |
 | F2 | The frontend renumbered nodes on load because blueprint bodies and templates shared node ids | each blueprint body has its own id range; the browser check fails on renumbering |
 | F3 | The EQ curve and the node summaries (display-only widgets) wrote an extra value into saved workflows | the widgets opt out of serialisation |
-| F4 | Cover template: Transcribe Lyrics shows a *language* widget that the linked Cover Brief overrides | labelled *language (Cover Brief decides)* |
+| F4 | Cover template: Transcribe Lyrics shows a *language* widget that the linked Cover Brief overrides | labelled; corrected in the Phase 9 audit (AUD-02): the brief overrides it only for original-lyrics covers, the label now reads *source language (original lyrics: Cover Brief)* |
 | F5 | The collapsed model block kept a group sized for the expanded node | groups use the collapsed size |
 
 Accepted:

@@ -27,7 +27,8 @@ _RESERVED = {
 }
 _INVALID = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 _SECRET_KEY = re.compile(
-    r"(?i)(api[_-]?key|token|secret|password|passwd|authorization|auth|credential|cookie)"
+    # whole words of the key only: 'max_abc_tokens' and 'author' are settings, not secrets (AUD-07)
+    r"(?i)(?:^|[_\-.\s])(api[_-]?key|token|secret|password|passwd|authorization|auth|credentials?|cookie)(?:$|[_\-.\s])"
 )
 _SECRET_VALUE = re.compile(
     r"\b(hf_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{16,}|AIza[0-9A-Za-z_-]{30,}|ghp_[A-Za-z0-9]{30,})\b"
@@ -70,27 +71,34 @@ def naming_values(title: str, seed: int | None, now: time.struct_time | None = N
     }
 
 
-def plan_path(folder: Path, relative: str, extension: str, *, collision: str = "number") -> Path:
-    """Target path for ``relative`` (may contain sub-folders) under ``folder``.
+def plan_release(folder: Path, relative: str, suffixes: Sequence[str], *, collision: str = "number") -> Path:
+    """The base path (without extension) of a release whose files are ``base.name + suffix``.
 
-    ``collision``: ``number`` appends `` (2)``, `` (3)``...; ``overwrite`` replaces; ``error`` refuses.
+    All files of one export share one base name: with ``number`` the base gets `` (2)``, `` (3)``...
+    until *none* of its files exists, so no file of an earlier export - its record or cover
+    included - is overwritten and the files of one export never end up with different numbers
+    (audit AUD-04). ``overwrite`` replaces; ``error`` refuses when any of the files exists.
     """
     parts = [safe_filename(part) for part in re.split(r"[\\/]+", relative) if part.strip()]
     if not parts:
         raise PlenioUserError("The file name pattern produced an empty name.")
-    target = folder.joinpath(*parts[:-1], parts[-1] + extension)
-    resolved_folder = folder.resolve()
-    if resolved_folder not in target.resolve().parents:
+    base = folder.joinpath(*parts)
+    if folder.resolve() not in base.resolve().parents:
         raise PlenioUserError(f"The file name {relative!r} leaves the output folder.")
-    if not target.exists() or collision == "overwrite":
-        return target
+
+    def taken(candidate: Path) -> list[Path]:
+        return [p for p in (candidate.with_name(candidate.name + s) for s in suffixes) if p.exists()]
+
+    if collision == "overwrite" or not taken(base):
+        return base
     if collision == "error":
         raise PlenioUserError(
-            f"{target.name} already exists.", hint="Change the naming pattern or the collision policy."
+            f"{taken(base)[0].name} already exists.",
+            hint="Change the naming pattern or the collision policy.",
         )
     for number in range(2, 10000):
-        candidate = target.with_name(f"{parts[-1]} ({number}){extension}")
-        if not candidate.exists():
+        candidate = base.with_name(f"{parts[-1]} ({number})")
+        if not taken(candidate):
             return candidate
     raise PlenioUserError(f"Too many files named {parts[-1]!r}.")
 
@@ -122,6 +130,8 @@ FORMATS: dict[str, dict[str, Any]] = {
     },
 }
 """Export formats: FLAC 24-bit, MP3 VBR V0 (LAME), WAV 32-bit float. MP3 and 24-bit FLAC clip at full scale."""
+MP3_RATES = (8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000)
+"""The sample rates MPEG audio (LAME) can encode; other rates are converted for MP3 only (AUD-03)."""
 TAG_FIELDS = ("title", "artist", "album", "date", "track", "genre", "comment", "album_artist", "composer")
 """Generic tag names; the muxer maps them (FLAC: Vorbis comments, MP3: ID3v2, WAV: RIFF INFO)."""
 
@@ -139,10 +149,23 @@ def _frames(data: Any, sample_format: str) -> Any:
     return np.ascontiguousarray(ints)
 
 
+def mp3_rate(sample_rate: int) -> int:
+    """The rate an MP3 of ``sample_rate`` audio is written at (the same rate when LAME supports it)."""
+    if sample_rate in MP3_RATES:
+        return sample_rate
+    if sample_rate > MP3_RATES[-1]:
+        return 44100 if sample_rate % 44100 == 0 else 48000
+    return next(rate for rate in MP3_RATES if rate >= sample_rate)
+
+
 def write_audio(
     path: Path, samples: Any, sample_rate: int, kind: str = "flac", tags: Mapping[str, str] | None = None
 ) -> dict[str, Any]:
-    """Encode ``samples`` (float ``[channels, frames]``, full scale 1.0) as ``kind`` with ``tags``; atomic."""
+    """Encode ``samples`` (float ``[channels, frames]``, full scale 1.0) as ``kind`` with ``tags``; atomic.
+
+    MP3 at a rate LAME cannot encode (for example 96 kHz) is converted to the nearest MP3 rate first;
+    the facts say so.
+    """
     av = require("av")
     import numpy as np
 
@@ -154,12 +177,24 @@ def write_audio(
         raise PlenioUserError(
             f"Expected mono or stereo audio as [channels, frames], got shape {tuple(data.shape)}."
         )
+    if not np.all(np.isfinite(data)):
+        raise PlenioUserError(
+            "The audio contains NaN or infinite samples and cannot be exported.",
+            hint="The render or a processing step failed numerically; render the take again.",
+        )
+    source_rate = int(sample_rate)
+    if kind == "mp3" and mp3_rate(source_rate) != source_rate:
+        from .audio.resample import resample
+
+        sample_rate = mp3_rate(source_rate)
+        data = resample(data, source_rate, sample_rate)
     peak = float(np.max(np.abs(data)))
     clipped = int(np.count_nonzero(np.abs(data) > 1.0)) if kind != "wav" else 0
     layout = "mono" if data.shape[0] == 1 else "stereo"
     path.parent.mkdir(parents=True, exist_ok=True)
     partial = path.with_name(path.name + ".part")
     container = av.open(str(partial), mode="w", format=spec["container"])
+    completed = False
     try:
         for key, value in (tags or {}).items():
             if key in TAG_FIELDS and str(value).strip():
@@ -178,10 +213,13 @@ def write_audio(
                 container.mux(packet)
         for packet in stream.encode(None):
             container.mux(packet)
+        completed = True
     finally:
         container.close()
+        if not completed:
+            partial.unlink(missing_ok=True)  # no half-written file is left behind
     partial.replace(path)
-    return {
+    facts: dict[str, Any] = {
         "format": kind,
         "bits": spec["bits"],
         "sample_rate": sample_rate,
@@ -190,11 +228,9 @@ def write_audio(
         "peak": round(peak, 4),
         "clipped_samples": clipped,
     }
-
-
-def write_flac(path: Path, samples: Any, sample_rate: int) -> dict[str, Any]:
-    """Encode ``samples`` (float array ``[channels, frames]`` in -1..1) as 24-bit FLAC."""
-    return write_audio(path, samples, sample_rate, "flac")
+    if sample_rate != source_rate:
+        facts["converted_from_rate"] = source_rate
+    return facts
 
 
 def read_tags(path: Path) -> tuple[dict[str, str], bytes | None]:
@@ -291,7 +327,7 @@ def redact(value: Any) -> Any:
         return {
             k: (
                 "<redacted>"
-                if isinstance(k, str) and _SECRET_KEY.search(k) and not isinstance(v, (Mapping, list))
+                if isinstance(k, str) and isinstance(v, str) and v and _SECRET_KEY.search(k)
                 else redact(v)
             )
             for k, v in value.items()

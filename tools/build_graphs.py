@@ -866,13 +866,13 @@ def yue2_cover(bp: dict[str, Blueprint]) -> Graph:
         title="Song Sheet · Score",
         widgets={"review": "stop for review"},
     )
-    # The Cover Brief owns the lyrics language (the node ignores its own widget when the brief is linked).
+    # Original lyrics: the Cover Brief owns the source's language; new lyrics: this widget does (AUD-02).
     asr = g.add(
         "PlenioTranscribeLyrics",
         (1380, 0),
         size=(340, 240),
         title="Transcribe Lyrics",
-        labels={"language": "language (Cover Brief decides)"},
+        labels={"language": "source language (original lyrics: Cover Brief)"},
     )
     write = g.add_subgraph(bp["write"], (1380, 300), size=(360, 260))
     source_switch = g.add("ComfySwitchNode", (1800, 0), size=(260, 90), title="Original or new lyrics")

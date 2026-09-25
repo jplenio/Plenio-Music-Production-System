@@ -12,16 +12,13 @@ from ...core.errors import PlenioModelError, PlenioUserError
 from ...core.hashing import sha256_text
 from ...core.reports import Report, Status
 from ...core.score.timeline import Timeline, TimelineBar
+from ...core.timefmt import clock as _clock
 from .. import host
 from ..types import ReportType, TimelineType
 
 LONG_SOURCE_VRAM_BYTES = 24 * 2**30
 """Sources longer than one native SheetSage2 window (300 s) need a second window; on the owner's
 16 GB card that ran out of memory (Phase 4A E3). Larger cards are allowed to try."""
-
-
-def _clock(seconds: float) -> str:
-    return f"{int(seconds // 60)}:{int(round(seconds % 60)):02d}"
 
 
 class PlenioTranscribeScore(io.ComfyNode):

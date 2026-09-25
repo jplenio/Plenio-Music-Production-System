@@ -131,6 +131,7 @@ Confirm or change D-01 … D-09 in [target-architecture.md](target-architecture.
 | **Tests** | all suites re-run; new regression tests for every fixed defect. |
 | **Completion criteria** | findings classified by severity/confidence; confirmed significant defects fixed or explicitly deferred with reasons. |
 | **Effort** | **ultracode** |
+| **Status** | **Done** (2026-09-25): 18 findings (1 high, 5 medium, 10 low, 2 info), every high/medium/low one fixed with a regression test, three observations deferred with reasons; all suites, the browser checks and S-7 re-run ([../audit/2026-09-25-phase-9-audit.md](../audit/2026-09-25-phase-9-audit.md)). |
 
 ## Phase 10 — Final architecture acceptance review
 

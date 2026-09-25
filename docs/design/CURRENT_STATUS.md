@@ -3,13 +3,13 @@
 | | |
 |---|---|
 | Date | 2026-09-25 |
-| Written for | the return from the Claude Code cloud session to the owner's Windows machine (Phase 6-8 checks that need models, a GPU or the owner's frontend) |
-| Overall phase | **Phases 6, 7 and 8 implemented** (prompts `08_PHASE_6_MINIMAX.md`, `09_PHASE_7_*`, `10_PHASE_8_*`); next: owner-machine checks, then Phase 9 (full codebase audit) only on the owner's authorization |
-| Sub-phase | - (hard stop after Phase 8) |
-| Phases done | 1A, 1B (design), 2 (Foundation), 3 (YuE2 Core), 4A (Cover/Instrumental design gate), 4B (YuE2 Cover), 5 (Score / ABC editor); 6 (MiniMax), 7 (Audio production chain) and 8 (Main workflows and UX) implemented, owner checks open |
+| Written for | the return from the Claude Code cloud session to the owner's Windows machine (Phase 6-8 checks that need models, a GPU or the owner's frontend; Phase 9 audit fixes to re-check there) |
+| Overall phase | **Phase 9 (full codebase audit) done**; Phases 6, 7 and 8 implemented with owner-machine checks open; next: Phase 10 (final architecture acceptance review) only on the owner's authorization |
+| Sub-phase | - (hard stop after Phase 9) |
+| Phases done | 1A, 1B (design), 2 (Foundation), 3 (YuE2 Core), 4A (Cover/Instrumental design gate), 4B (YuE2 Cover), 5 (Score / ABC editor), 9 (audit); 6 (MiniMax), 7 (Audio production chain) and 8 (Main workflows and UX) implemented, owner checks open |
 | Prompt set | `D:\Daten2\Deepseek\ComfyUI-MiniMax\Plenio_Music_Production_System_Refactor_Prompts\` on the owner's machine (not in this repository): `01_PHASE_1A` ... `12_PHASE_10`, one phase per prompt, hard stop after each phase, the next phase only on the owner's explicit authorization |
 
-Read with: [README.md](README.md) (design index), [implementation-roadmap.md](implementation-roadmap.md), [score-editor-design.md](score-editor-design.md) (§15 = Phase 5 implementation record), [target-architecture.md](target-architecture.md) §0/§2/§18, the latest test reports [phase 6](../test-reports/2026-09-25-phase-6.md), [phase 7](../test-reports/2026-09-25-phase-7.md) and [phase 8](../test-reports/2026-09-25-phase-8.md), and the [usability review](usability-review.md).
+Read with: [README.md](README.md) (design index), [implementation-roadmap.md](implementation-roadmap.md), [score-editor-design.md](score-editor-design.md) (§15 = Phase 5 implementation record), [target-architecture.md](target-architecture.md) §0/§2/§18, the latest test reports [phase 6](../test-reports/2026-09-25-phase-6.md), [phase 7](../test-reports/2026-09-25-phase-7.md) and [phase 8](../test-reports/2026-09-25-phase-8.md), the [usability review](usability-review.md) and the [Phase 9 audit](../audit/2026-09-25-phase-9-audit.md).
 
 ---
 
@@ -40,6 +40,8 @@ Read with: [README.md](README.md) (design index), [implementation-roadmap.md](im
 - Checks: validator template rules, `tests/workflows` catalogue tests, `tools/browser_check.mjs` (56/56), smoke tests `tests/host/test_song_models.py` (S-1, S-2, S-6) and `tests/host/test_cover_art_models.py`.
 - Docs: `docs/user/{models,troubleshooting,getting-started}.md`, `docs/user/concepts/app-mode.md`, path guides, README; `docs/design/usability-review.md`.
 
+**Phase 9 - full codebase audit** ([report](../audit/2026-09-25-phase-9-audit.md)): full read of the product code, reproduction on real servers, fuzzing of the parsers (1 500 texts x 11 functions) and of the score operations (10 257 operations), audio edge cases, profiling. 18 findings - 1 high (a malformed user template made the whole Plenio import fail), 5 medium (ASR language of new-lyrics covers, MP3 above 48 kHz, release naming/overwritten records, quadratic editor, System Check with a broken config), 10 low, 2 info - all high/medium/low fixed with regression tests (`tests/unit/test_audit_regressions.py`, `tests/host/test_audit_regressions.py`, `tests/contract/test_audit_regressions.py` and additions to existing files); dead code removed; three observations deferred with reasons.
+
 ## 2. Partially implemented
 
 - MiniMax: instrumental caption wording (I-5) adopted from the legacy toolkit, not yet listened to.
@@ -54,7 +56,8 @@ Read with: [README.md](README.md) (design index), [implementation-roadmap.md](im
 3. Phase 6: template runs of *3 · MiniMax · Song* (sung and instrumental) with a listening verdict on I-5.
 4. Phase 7: *4 · Enhance & Master* in frontend 1.53.6 (curve widget, save/reload of a manual EQ, A/B); restoration gate on unprocessed takes and the C1 decision.
 5. Phase 8: the template checks in frontend 1.53.6 (`tools/browser_check.mjs` with a Playwright package and `--channel msedge`, or by hand: open, save, reload, Cover Art on/off, App mode of 0, 1, 3, 4); one first-use run of each template following only its About note; the System Check against the real models folder.
-6. Record the results in the Phase 6-8 reports, set the roadmap statuses to *Done*, and stop. Phase 9 only on the owner's authorization.
+6. Phase 9 fixes to see on the owner's machine: a cover with *new lyrics* and the phrasing reference transcribes the source in its own language (widget *source language*, default auto); an MP3 export of a 96 kHz file works; the editor on a long YuE2 plan reacts quickly.
+7. Record the results in the Phase 6-8 reports, set the roadmap statuses to *Done*, and stop. Phase 10 only on the owner's authorization.
 
 ## 4. Important architectural decisions since Phase 1
 
@@ -70,6 +73,7 @@ Read with: [README.md](README.md) (design index), [implementation-roadmap.md](im
 - Phase 6: each engine module owns its conditioning rules and budget description (`rules_for(engine).describe_budget`); MiniMax budget errors stop at the Song Sheet with the exact count; the caption is a multi-line style document.
 - Phase 7: Plenio's own loudness meter (no FFmpeg subprocess); resample before dynamics; one EQ node with tone match as a mode; mutagen stays optional (GPL, never installed); tag copy reads the one Load Audio file from the prompt; Export's format widgets are optional so API prompts of earlier phases keep working.
 - Phase 8: one model catalogue feeds templates, System Check and docs; optional blocks (Cover Art, adapter, excerpt, sung-lyrics check) are bypassed and titled *(optional)*; Master is part of every song template; App configurations only for paths without review stops, the graph stays primary; blueprint bodies own distinct node-id ranges; the System Check's rule table states the basis of each row (measured / legacy rating / design).
+- Phase 9: user files (templates, config) never stop Plenio from loading - they are skipped or reported; one base name per export; the Cover Brief decides the ASR language only for original lyrics; MP3 is converted when LAME cannot hold the rate.
 
 ## 5. Files and modules currently being worked on
 
@@ -91,7 +95,6 @@ Read with: [README.md](README.md) (design index), [implementation-roadmap.md](im
 - Shell pitfall on the owner's machine: bash heredocs with backslashes (`\d`, `\n`, `\a`, `\b`) inserted control characters into code; write code with file-writing tools, and scan for control characters before committing.
 
 - Export widget order changed in Phase 7: workflows saved from the earlier templates restore the Export node's widget values by position; re-add the node or start from the new templates.
-- Output files written through `atomic_write_*` (record JSON, cover JPEG) get mode 0600 on Linux (temporary-file default); audio files 0644. Harmless on Windows.
 - Cloud ComfyUI install (Phase 6/7): `download.pytorch.org` is blocked by the environment's network policy, so pip installed the CUDA torch build from PyPI (about 6.8 GB) instead of the planned CPU build (about 1-1.5 GB); it runs on the CPU. Only the cloud container is affected.
 
 - App mode (frontend 1.52.7) drops the children of the DynamicCombo option that is not selected; the song apps list the sung options only.
@@ -101,12 +104,12 @@ Read with: [README.md](README.md) (design index), [implementation-roadmap.md](im
 
 | Suite | Where | Result |
 |---|---|---|
-| Python (unit, contract, workflow, host) with ComfyUI 0.37.0 | cloud, final commit | **705 passed, 13 skipped** (models 3, legacy toolkit 1, smoke 7, jsonschema/soundfile 2) |
+| Python (unit, contract, workflow, host) with ComfyUI 0.37.0 | cloud, after the Phase 9 fixes | **738 passed, 13 skipped** (models 3, legacy toolkit 1, smoke 7, jsonschema/soundfile 2) |
 | Browser checks of all templates (`tools/browser_check.mjs`) | cloud (frontend 1.52.7, Chromium) | **56/56 passed** |
-| Smoke S-7 (real MiniMax take, CPU) | cloud | passed (85 s) |
-| Smoke prompts S-1, S-2, S-6, Cover Art | cloud, dummy model files | accepted by the server's validation (runs need the owner's GPU) |
+| Smoke S-7 (real MiniMax take, CPU) | cloud | passed |
+| Fuzzers: parsers (1 500 texts), score operations (10 257) | cloud | no crash, no invalid score |
 | ruff check / format, mypy strict | cloud | clean (mypy `--python-version 3.12`) |
-| Frontend `npm run check` | cloud | 58 tests passed, typecheck clean, build ok |
+| Frontend `npm run check` | cloud | 58 tests passed, build unchanged |
 | Workflows (`tools/workflow_validation.py`) | cloud | 10 blueprints + 5 templates valid |
 | Phase 5 suite | owner's machine | 557 passed, 3 skipped; with smoke 559 passed, 1 skipped |
 
@@ -120,7 +123,7 @@ Read with: [README.md](README.md) (design index), [implementation-roadmap.md](im
 
 ## 9. Exact recommended next action
 
-Run the owner-machine checks of §3 and record them in the Phase 6-8 reports. Phase 9 - Full codebase audit (prompt `11_PHASE_9_*`) starts only on the owner's explicit authorization.
+Run the owner-machine checks of §3 and record them in the Phase 6-8 reports. Phase 10 - Final architecture acceptance review (prompt `12_PHASE_10_*`) starts only on the owner's explicit authorization.
 
 ## 10. Context a new session would otherwise have to rediscover
 

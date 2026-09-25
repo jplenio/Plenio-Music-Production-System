@@ -16,12 +16,12 @@ from plenio.core.release import (
     RecordInput,
     build_record,
     expand_pattern,
-    plan_path,
+    plan_release,
     prompt_for_record,
     redact,
     safe_filename,
     workflow_licences,
-    write_flac,
+    write_audio,
 )
 from plenio.core.sheet import DocEntry, DocState, SheetState, evaluate_sheet, normalize_document
 
@@ -144,13 +144,13 @@ def test_naming_pattern_and_collisions(tmp_path: Path) -> None:
     assert name == "2026-09-25 Song"
     with pytest.raises(PlenioUserError):
         expand_pattern("{album}", {})
-    first = plan_path(tmp_path, "album/Song", ".flac")
+    first = plan_release(tmp_path, "album/Song", [".flac"])
     first.parent.mkdir(parents=True)
-    first.write_bytes(b"x")
-    assert plan_path(tmp_path, "album/Song", ".flac").name == "Song (2).flac"
-    assert plan_path(tmp_path, "album/Song", ".flac", collision="overwrite") == first
+    first.with_name("Song.flac").write_bytes(b"x")
+    assert plan_release(tmp_path, "album/Song", [".flac"]).name == "Song (2)"
+    assert plan_release(tmp_path, "album/Song", [".flac"], collision="overwrite") == first
     with pytest.raises(PlenioUserError):
-        plan_path(tmp_path, "album/Song", ".flac", collision="error")
+        plan_release(tmp_path, "album/Song", [".flac"], collision="error")
 
 
 def test_flac_is_24_bit_and_lossless_to_24_bit(tmp_path: Path) -> None:
@@ -160,14 +160,14 @@ def test_flac_is_24_bit_and_lossless_to_24_bit(tmp_path: Path) -> None:
     stereo = np.stack([0.5 * np.sin(2 * np.pi * 440 * t), 0.25 * np.sin(2 * np.pi * 220 * t)]).astype(
         np.float32
     )
-    facts = write_flac(tmp_path / "x.flac", stereo, rate)
+    facts = write_audio(tmp_path / "x.flac", stereo, rate, "flac")
     info = soundfile.info(str(tmp_path / "x.flac"))
     assert (info.subtype, info.samplerate, info.channels, info.frames) == ("PCM_24", rate, 2, rate // 2)
     data, _ = soundfile.read(str(tmp_path / "x.flac"), dtype="float32")
     assert float(np.max(np.abs(data.T - stereo))) < 2**-22
     assert facts["bits"] == 24 and facts["clipped_samples"] == 0
     with pytest.raises(PlenioUserError):
-        write_flac(tmp_path / "bad.flac", np.zeros((3, 10), dtype=np.float32), rate)
+        write_audio(tmp_path / "bad.flac", np.zeros((3, 10), dtype=np.float32), rate, "flac")
 
 
 def test_redaction() -> None:

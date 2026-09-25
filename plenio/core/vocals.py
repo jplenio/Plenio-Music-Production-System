@@ -183,5 +183,8 @@ def judge(
     notes = []
     chosen = padded[best]
     if chosen is not None and chosen.abrupt:
-        notes.append(f"take {best + 1} ends while the music is still playing; fade it out when mastering")
+        notes.append(
+            f"take {best + 1} ends while the music is still playing (Plenio has no fade-out yet): render more "
+            "takes, or fade it out in an audio editor"
+        )
     return CheckResult(verdicts, best, tolerance_s, tuple(notes))

@@ -23,6 +23,7 @@ from typing import Any, Protocol
 
 from .. import lyrics as lyrics_rules
 from ..diagnostics import Finding, error, info, warning
+from ..timefmt import clock as _clock
 
 ENGINE_ID = "minimax_music3"
 RULES_VERSION = "plenio.minimax-rules/1"
@@ -364,10 +365,6 @@ def validate_documents(
                 )
             )
     return Validation(tuple(findings), "full", ceiling, result)
-
-
-def _clock(seconds: float) -> str:
-    return f"{int(seconds // 60)}:{int(round(seconds % 60)):02d}"
 
 
 # --- writing guidance --------------------------------------------------------------------------

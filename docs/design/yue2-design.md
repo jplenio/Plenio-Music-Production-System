@@ -219,7 +219,7 @@ ComfyUI offloads the writer before YuE2 needs memory; Plenio never forces unload
 | Style rule violation | Parse (draft) / Song Sheet (final) | rule, offending text, suggested fix |
 | Invalid score | Song Sheet · Score | line, column, bar, upstream parser message |
 | Plan cut at the planner's token limit (Phase 4A: one adapter plan ran into `max_abc_tokens` = 8 192 and ended inside a group) | Song Sheet · Score | "the planner did not finish" instead of the generic parser message; re-plan with another seed, or Score Tools *fit length* (drops the incomplete group) — Phase 4B |
-| Take did not end by itself / ends while music plays (Phase 4A: all adapter takes) | render report, Export | warning with the rendered length vs. the score; fade-out in the Master stage (Phase 7) |
+| Take did not end by itself / ends while music plays (Phase 4A: all adapter takes) | render report, Export | warning with the rendered length vs. the score; a fade-out in the Master stage was planned for Phase 7 and is **not built** (deferred, Phase 9 audit AUD-14) |
 | Stale edit | Song Sheet | which document, what changed upstream, the three choices |
 | Budget exhausted | Song Sheet | token breakdown (prefix/abc/music) and what to shorten |
 | Missing checkpoint | native validation + download dialog | file name and folder |

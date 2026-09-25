@@ -885,7 +885,7 @@
     {
      "localized_name": "language",
      "name": "language",
-     "label": "language (Cover Brief decides)",
+     "label": "source language (original lyrics: Cover Brief)",
      "type": "STRING",
      "widget": {
       "name": "language"

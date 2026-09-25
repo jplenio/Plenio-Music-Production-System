@@ -222,6 +222,11 @@ def check_system(facts: SystemFacts, catalogue: Mapping[str, ModelFile] | None =
     for asset, state in sorted(facts.assets.items()):
         messages.append(f"Plenio asset '{asset}': {state}.")
     config = dict(facts.config)
+    if config.get("error"):
+        statuses.append(Status.WARNING)
+        messages.append(
+            f"Plenio configuration error (defaults are used until it is fixed): {config['error']}"
+        )
     messages.append(
         f"Offline mode: {'on' if config.get('offline') else 'off'}; "
         f"automatic asset downloads: {'on' if config.get('auto_download', True) else 'off'}."

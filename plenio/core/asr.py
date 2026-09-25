@@ -13,7 +13,7 @@ ComfyUI restart gives the same draft.
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -220,11 +220,3 @@ def weak_segments(result: AsrResult) -> set[int]:
         if 0 < len(words) <= WEAK_SEGMENT_MAX_WORDS and min(w.p for w in words) < WEAK_SEGMENT_WORD_P:
             weak.add(index)
     return weak
-
-
-def flatten_regions(regions: Sequence[tuple[float, float]]) -> list[float]:
-    """``clip_timestamps`` form of faster-whisper: ``[start, end, start, end, ...]``."""
-    out: list[float] = []
-    for start, end in regions:
-        out.extend([round(start, 2), round(end, 2)])
-    return out

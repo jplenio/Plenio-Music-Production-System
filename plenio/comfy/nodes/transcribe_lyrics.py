@@ -26,7 +26,7 @@ from ...core.asr import (
 )
 from ...core.assets import ensure_asset, missing_files
 from ...core.brief import CoverBrief
-from ...core.errors import PlenioUserError
+from ...core.errors import PlenioCancelledError, PlenioUserError
 from ...core.hashing import sha256_text
 from ...core.reports import Report, Status
 from ...core.sheet.resolve import normalize_document
@@ -77,6 +77,15 @@ def language_code(value: str) -> str:
         f"Unknown lyrics language {value!r}.",
         hint=f"Use 'auto', a language code or one of: {', '.join(LANGUAGES.values())}.",
     )
+
+
+def asr_language(widget: str, brief: Any) -> str:
+    """The language the ASR is told. A Cover Brief decides only for *original lyrics* covers: there its
+    language is the source's. For *new lyrics* its language is that of the new text, not of the
+    singing in the source (audit AUD-02), so the widget decides (default ``auto``)."""
+    if isinstance(brief, CoverBrief) and brief.use_source_lyrics:
+        return brief.language or "auto"
+    return widget
 
 
 def _model_folder(asset_id: str, progress: host.Progress) -> tuple[Path, str]:
@@ -186,7 +195,8 @@ class PlenioTranscribeLyrics(io.ComfyNode):
                 Brief.Input(
                     "brief",
                     optional=True,
-                    tooltip="Cover Brief: its lyrics language is used (the language widget is then ignored).",
+                    tooltip="Cover Brief: for original-lyrics covers its language is used (the language widget is "
+                    "then ignored); for new lyrics the widget names the source's language.",
                 ),
                 io.String.Input(
                     "expected_lyrics",
@@ -203,7 +213,8 @@ class PlenioTranscribeLyrics(io.ComfyNode):
                 io.String.Input(
                     "language",
                     default="auto",
-                    tooltip="'auto' detects the language, or name it (e.g. English, de).",
+                    tooltip="Language of the singing in this recording: 'auto' detects it, or name it (e.g. English, "
+                    "de). An original-lyrics Cover Brief overrides it.",
                 ),
                 io.Combo.Input(
                     "device",
@@ -239,8 +250,7 @@ class PlenioTranscribeLyrics(io.ComfyNode):
         brief: Any = None,
     ) -> io.NodeOutput:
         checking = expected_lyrics is not None
-        if isinstance(brief, CoverBrief):
-            language = brief.language or "auto"  # the brief owns the language
+        language = asr_language(language, brief)
         source = host.audio_sha256(audio)
         own_timeline = timeline if timeline is not None and timeline.source_sha256 == source else None
         warnings: list[str] = []
@@ -257,7 +267,11 @@ class PlenioTranscribeLyrics(io.ComfyNode):
             engine=engine, language=language_code(language), device=device, regions=regions
         )
         progress = host.Progress()
-        result = _run_asr(audio, settings, source, progress)
+        try:
+            result = _run_asr(audio, settings, source, progress)
+        except PlenioCancelledError:
+            host.raise_if_interrupted()  # ComfyUI's interrupt, not an error dialog (AUD-10)
+            raise
         progress.update(1.0)
         if result.settings.get("device_note"):
             warnings.append(str(result.settings["device_note"]))

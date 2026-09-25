@@ -14,6 +14,7 @@ from typing import Any, Protocol
 from .. import lyrics as lyrics_rules
 from .. import score as score_rules
 from ..diagnostics import Finding, error, info, warning
+from ..timefmt import clock as _clock
 
 ENGINE_ID = "yue2"
 RULES_VERSION = "plenio.yue2-rules/1"
@@ -330,10 +331,6 @@ def check_score(
             )
         )
     return findings, analysis.duration_s
-
-
-def _clock(seconds: float) -> str:
-    return f"{int(seconds // 60)}:{int(round(seconds % 60)):02d}"
 
 
 @dataclass(frozen=True)

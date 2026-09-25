@@ -322,3 +322,29 @@ def test_enhance_template_contains_the_chain(server: ComfyServer, log: Log) -> N
         "PlenioLoudness",
         "PreviewAudio",
     ]
+
+
+def test_hi_res_mp3_and_repeated_exports_keep_every_record(server: ComfyServer, log: Log) -> None:
+    """Audit AUD-03 (MP3 of 96 kHz audio crashed) and AUD-04 (one base name per export; an earlier
+    record was overwritten when the format set changed)."""
+    folder = f"plenio-production/{label()}"
+    name = f"hires-{label()}.flac"
+    rate = 96000
+    t = np.arange(rate * 3) / rate
+    music = 0.1 * np.vstack([np.sin(2 * np.pi * 220 * t), np.sin(2 * np.pi * 330 * t)])
+    (server.base / "input").mkdir(exist_ok=True)
+    write_audio(server.base / "input" / name, music, rate, "flac", {"title": "Hi Res"})
+    source = {"class_type": "LoadAudio", "inputs": {"audio": name}}
+    first = chain(folder=folder, source=source, export={"title": "Hi Res", "flac": False, "mp3": True})
+    entry = server.run(first)
+    base = server.output_dir / folder
+    record = record_of(server, folder, "Hi Res")
+    mp3 = next(f for f in record["files"] if f.get("format") == "mp3")
+    assert mp3["sample_rate"] == 48000 and mp3["converted_from_rate"] == 96000
+    assert "MP3 written at 48000 Hz" in entry["outputs"]["4"]["plenio_summary"][0]["markdown"]
+    second = chain(folder=folder, source=source, export={"title": "Hi Res", "flac": True, "mp3": False})
+    server.run(second)
+    # Hi Res.flac was free, but the export's record would have replaced the first one: numbered as a set
+    assert (base / "Hi Res (2).flac").exists() and not (base / "Hi Res.flac").exists()
+    assert record_of(server, folder, "Hi Res")["files"][0]["format"] == "mp3"
+    assert record_of(server, folder, "Hi Res (2)")["files"][0]["format"] == "flac"

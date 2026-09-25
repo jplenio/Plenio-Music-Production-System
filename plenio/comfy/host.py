@@ -21,7 +21,7 @@ from ..core.assets import Asset, asset_folder, missing_files
 from ..core.config import CONFIG_FILE_NAME, PlenioConfig
 from ..core.dependencies import probe
 from ..core.engines import EngineInfo, minimax, yue2
-from ..core.errors import PlenioModelError, PlenioUserError
+from ..core.errors import PlenioError, PlenioModelError, PlenioUserError
 from ..core.models import ModelFile, size_text, take_inventory
 from ..core.system import Device, SystemFacts
 
@@ -60,12 +60,20 @@ def output_directory() -> Path:
 
 
 def input_file(name: str) -> Path:
-    """Path of ``name`` inside the ComfyUI input folder (refuses paths leaving it)."""
+    """The file a Load Audio value names, resolved as Load Audio does (``x.flac``, ``sub/x.flac`` or an
+    annotated ``x.flac [output]``); refuses paths that leave ComfyUI's input, output and temp folders."""
     import folder_paths
 
-    root = Path(folder_paths.get_input_directory()).resolve()
-    path = (root / name).resolve()
-    if root not in path.parents or not path.is_file():
+    path = Path(folder_paths.get_annotated_filepath(name)).resolve()
+    roots = [
+        Path(folder).resolve()
+        for folder in (
+            folder_paths.get_input_directory(),
+            folder_paths.get_output_directory(),
+            folder_paths.get_temp_directory(),
+        )
+    ]
+    if not any(root in path.parents for root in roots) or not path.is_file():
         raise PlenioUserError(f"The input file {name!r} was not found in the ComfyUI input folder.")
     return path
 
@@ -337,6 +345,8 @@ def _beats(events: list[dict[str, Any]], duration: float, ss: Any) -> list[Any]:
     if len(beats) < 2:
         return beats
     period = float(median([b.time - a.time for a, b in zip(beats[-9:], beats[-8:], strict=False)]))
+    if not period > 0:  # repeated beat times: the extension below would never end (AUD-13)
+        return beats
     while beats[-1].time < duration - 1e-6:
         previous = beats[-1]
         beats.append(
@@ -510,7 +520,11 @@ def system_facts(
         torch_version = str(torch.__version__)
     except ImportError:
         torch_version = "not installed"
-    config = load_config()
+    try:
+        config = load_config()
+        config_error = ""
+    except PlenioError as error:  # the System Check is where a broken configuration must show up
+        config, config_error = PlenioConfig(), str(error)
     return SystemFacts(
         plenio_version=__version__,
         comfyui_version=comfyui_version(),
@@ -522,7 +536,7 @@ def system_facts(
         devices=_devices(),
         ram_total_bytes=ram,
         packages=probe(),
-        config=config.summary(),
+        config={**config.summary(), **({"error": config_error} if config_error else {})},
         models=dict(take_inventory(models, locate_model).found) if models else {},
         assets=_asset_states(assets, config) if assets else {},
     )

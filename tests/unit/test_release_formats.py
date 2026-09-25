@@ -114,3 +114,55 @@ def test_cover_art(tmp_path: Path) -> None:
         assert cover == jpeg and tags["title"] == "Neon Rain"
     write_audio(tmp_path / "c.wav", noise(0.5), 44100, "wav")
     assert embed_cover(tmp_path / "c.wav", jpeg) is False
+
+
+# --- Phase 9 audit regressions ------------------------------------------------------------
+
+
+def test_mp3_at_rates_lame_cannot_encode_is_converted(tmp_path: Path) -> None:
+    """AUD-03: MP3 of 96 kHz audio crashed with a raw PyAV error (LAME encodes at most 48 kHz)."""
+    from plenio.core.release import mp3_rate
+
+    assert [mp3_rate(r) for r in (44100, 48000, 88200, 96000, 176400, 192000, 37800)] == [
+        44100,
+        48000,
+        44100,
+        48000,
+        44100,
+        48000,
+        44100,
+    ]
+    x = noise(1.0, rate=96000)
+    facts = write_audio(tmp_path / "hi.mp3", x, 96000, "mp3", {"title": "Hi-res"})
+    assert facts["sample_rate"] == 48000 and facts["converted_from_rate"] == 96000
+    _data, rate = decode(tmp_path / "hi.mp3")
+    assert rate == 48000
+    flac = write_audio(tmp_path / "hi.flac", x, 96000, "flac")
+    assert flac["sample_rate"] == 96000 and "converted_from_rate" not in flac
+
+
+def test_nan_audio_is_refused_and_no_partial_file_is_left(tmp_path: Path) -> None:
+    """AUD-11: write_audio encoded NaN samples into garbage."""
+    x = noise(0.5)
+    x[0, 100] = np.nan
+    for kind in ("flac", "mp3", "wav"):
+        with pytest.raises(PlenioUserError, match="NaN or infinite"):
+            write_audio(tmp_path / f"bad.{kind}", x, 44100, kind)
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_one_base_name_for_all_files_of_a_release(tmp_path: Path) -> None:
+    """AUD-04: files of one export got different numbers, and an earlier record could be overwritten."""
+    from plenio.core.release import plan_release
+
+    (tmp_path / "Song.mp3").write_bytes(b"old")
+    (tmp_path / "Song.plenio.json").write_text("{}", encoding="utf-8")  # the record of an MP3-only export
+    stem = plan_release(tmp_path, "Song", [".flac", " (original).flac", ".plenio.json"])
+    assert stem.name == "Song (2)"  # Song.flac is free, but its record would overwrite Song.plenio.json
+    assert plan_release(tmp_path, "Other", [".flac", ".plenio.json"]).name == "Other"
+    assert plan_release(tmp_path, "Song", [".flac", ".plenio.json"], collision="overwrite").name == "Song"
+    with pytest.raises(PlenioUserError, match="Song.plenio.json already exists"):
+        plan_release(tmp_path, "Song", [".flac", ".plenio.json"], collision="error")
+    escaped = plan_release(tmp_path / "sub", "../../x", [".flac"])  # '..' parts become 'Untitled'
+    assert (tmp_path / "sub").resolve() in escaped.resolve().parents
+    assert plan_release(tmp_path, "a/b/Song", [".flac"]) == tmp_path / "a" / "b" / "Song"

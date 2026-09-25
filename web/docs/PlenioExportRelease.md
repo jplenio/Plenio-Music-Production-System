@@ -14,8 +14,8 @@ Writes the finished song into the ComfyUI output folder with a **release record*
 
 **original** - optional: also writes this audio (for example the unmastered take) as `<name> (original).flac`.
 
-**Naming** - *naming* pattern with `{title}`, `{date}`, `{time}`, `{seed}`; `/` makes sub-folders; *collision* decides what happens when a file exists (number, overwrite, error).
+**Naming** - *naming* pattern with `{title}`, `{date}`, `{time}`, `{seed}`; `/` makes sub-folders; *collision* decides what happens when a file exists (number, overwrite, error). All files of one export share one name: with *number* the whole set becomes `<name> (2)` when any of its files - audio, original, cover or record - already exists, so an earlier export is never overwritten.
 
 **Release record** (`<name>.plenio.json`) - the documents with their hashes, the executed graph (secrets redacted), all connected reports, every written file with size and SHA-256, the delivered audio's loudness (LUFS, true peak, loudness range), the tags, and the licences of the models used.
 
-Samples above full scale are clipped in FLAC and MP3; the node warns. Put **Loudness & Dynamics** before the export.
+Samples above full scale are clipped in FLAC and MP3; the node warns. MP3 holds at most 48 kHz: hi-res audio (88.2/96/192 kHz) is converted for the MP3 only (to 44.1 or 48 kHz); FLAC and WAV keep the rate, and the node notes the conversion. Audio with NaN or infinite samples is refused. Put **Loudness & Dynamics** before the export.

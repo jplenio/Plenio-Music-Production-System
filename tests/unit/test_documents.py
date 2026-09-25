@@ -125,6 +125,34 @@ def test_user_templates_are_saved_and_listed(tmp_path: Path) -> None:
         library.save_user_template("!!!", {})
 
 
+def test_a_broken_user_template_is_skipped_not_fatal(tmp_path: Path) -> None:
+    """Audit AUD-01: one hand-edited user file made the whole Plenio import fail."""
+    (tmp_path / "broken.md").write_text("---\nname: Broken\nno colon here\n---\nbody\n", encoding="utf-8")
+    (tmp_path / "odd.md").write_text("---\nbpm: 90\n---\n", encoding="utf-8")
+    (tmp_path / "good.md").write_text("---\nname: Good\ngenre: folk\n---\nA song.\n", encoding="utf-8")
+    library = TemplateLibrary(ROOT / "resources" / "templates", tmp_path)
+    assert library.get("user/good").fields["genre"] == "folk"
+    assert "user/broken" not in library.templates() and "user/odd" not in library.templates()
+    assert set(library.problems) == {"user/broken", "user/odd"}
+    assert "malformed front matter line" in library.problems["user/broken"]
+
+
+def test_saving_multi_line_values_writes_a_readable_template(tmp_path: Path) -> None:
+    """Audit AUD-01: a value with a line break produced a file that broke the library."""
+    library = TemplateLibrary(ROOT / "resources" / "templates", tmp_path)
+    saved = library.save_user_template(
+        "Two\nLines", {"genre": "indie\npop", "mood": "warm\r\nsoft", "description": "Line one.\nLine two."}
+    )
+    fresh = TemplateLibrary(ROOT / "resources" / "templates", tmp_path)
+    assert fresh.problems == {}
+    assert fresh.get(saved.id).fields == {
+        "genre": "indie pop",
+        "mood": "warm soft",
+        "description": "Line one.\nLine two.",
+    }
+    assert fresh.get(saved.id).name == "Two Lines"
+
+
 # --- YuE2 rules ------------------------------------------------------------------------
 
 

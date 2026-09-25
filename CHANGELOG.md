@@ -4,6 +4,23 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 ## Unreleased
 
+### Fixed (Phase 9 - full codebase audit, `docs/audit/2026-09-25-phase-9-audit.md`)
+
+- A malformed user brief template no longer stops Plenio from loading: unreadable user templates are skipped, logged and listed (`GET /plenio/templates` -> `problems`); saving a template writes only readable files (AUD-01).
+- Covers with new lyrics: Transcribe Lyrics no longer forces the ASR to the language of the new lyrics; the Cover Brief decides the language only for original-lyrics covers (AUD-02).
+- MP3 export of hi-res audio (88.2-192 kHz) is converted to 44.1/48 kHz for the MP3 instead of failing (AUD-03).
+- All files of one export share one name; with collision *number* the whole set is numbered, so an earlier export's record or cover is never overwritten (AUD-04).
+- Score analysis and the editor view are now roughly linear in the score length (160 bars: 486 -> 69 ms per view) (AUD-05).
+- The System Check reports an invalid Plenio configuration instead of failing (AUD-06).
+- Release records no longer redact settings like `max_abc_tokens` or an `author` field (AUD-07).
+- Routes answer malformed input with 400 and bound `points` of `/plenio/eq/response` (AUD-08); `m:ss` rounding (AUD-09); cancelling the ASR or a download is a normal ComfyUI interrupt (AUD-10); NaN audio is refused by the encoder and no `.part` file is left behind (AUD-11); written records and covers get the usual file mode (AUD-12); a zero beat period cannot hang the SheetSage2 grid (AUD-13); Check Vocals no longer promises a fade-out in Master (AUD-14); tag copy resolves annotated Load Audio values (AUD-17).
+- Removed dead code (`plan_path`, `write_flac`, `flatten_regions`, `describe_fields`).
+
+### Changed (Phase 9)
+
+- The release record is named after the export's base name (`<name>.plenio.json`, also for several takes).
+- Cover template: the Transcribe Lyrics widget is labelled *source language (original lyrics: Cover Brief)*.
+
 ### Added (Phase 8 - Main workflows, subgraphs and UX)
 
 - Model catalogue `resources/models.toml` (`plenio.core.models`): every model file the templates load, with folder, download URL, size, licence and the templates that need it; the templates' download entries are generated from it.
