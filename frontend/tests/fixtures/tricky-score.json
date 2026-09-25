@@ -1,0 +1,1054 @@
+{
+ "abc": "X:1\nT:\nM:4/4\nL:1/32\nQ:1/4=90\nV: Vocal clef=treble name=\"Vocal Melody\" snm=\"Vocal\"\nV: Ins clef=treble name=\"Ins Melody\" snm=\"Inst.\"\nK:D\n% intro\nV: Vocal\n\"D\"z32|\nV: Ins\nd8f8a16|\n% verse\nV: Vocal\n\"G\"^F8f8=F8f8|\"A7\"A16-A16|\nV: Ins\nZ2|\nV: Vocal\n\"Bm\"B8_B8B16|\"D\"d32|\nV: Ins\nD8F8A8d8|z32|\n% chorus\nV: Vocal\n\"G\"^c16-c16|\"D\"d32|\nV: Ins\nZ2|\n",
+ "view": {
+  "bar_starts_s": [
+   0.0,
+   2.6667,
+   5.3333,
+   8.0,
+   10.6667,
+   13.3333,
+   16.0
+  ],
+  "bars": [
+   {
+    "chords": [
+     "D"
+    ],
+    "duration_s": 2.667,
+    "index": 1,
+    "ins_notes": 3,
+    "key": "D",
+    "meter": "4/4",
+    "start_s": 0.0,
+    "vocal_notes": 0
+   },
+   {
+    "chords": [
+     "G"
+    ],
+    "duration_s": 2.667,
+    "index": 2,
+    "ins_notes": 0,
+    "key": "D",
+    "meter": "4/4",
+    "start_s": 2.667,
+    "vocal_notes": 4
+   },
+   {
+    "chords": [
+     "A7"
+    ],
+    "duration_s": 2.667,
+    "index": 3,
+    "ins_notes": 0,
+    "key": "D",
+    "meter": "4/4",
+    "start_s": 5.333,
+    "vocal_notes": 1
+   },
+   {
+    "chords": [
+     "Bm"
+    ],
+    "duration_s": 2.667,
+    "index": 4,
+    "ins_notes": 4,
+    "key": "D",
+    "meter": "4/4",
+    "start_s": 8.0,
+    "vocal_notes": 3
+   },
+   {
+    "chords": [
+     "D"
+    ],
+    "duration_s": 2.667,
+    "index": 5,
+    "ins_notes": 0,
+    "key": "D",
+    "meter": "4/4",
+    "start_s": 10.667,
+    "vocal_notes": 1
+   },
+   {
+    "chords": [
+     "G"
+    ],
+    "duration_s": 2.667,
+    "index": 6,
+    "ins_notes": 0,
+    "key": "D",
+    "meter": "4/4",
+    "start_s": 13.333,
+    "vocal_notes": 1
+   },
+   {
+    "chords": [
+     "D"
+    ],
+    "duration_s": 2.667,
+    "index": 7,
+    "ins_notes": 0,
+    "key": "D",
+    "meter": "4/4",
+    "start_s": 16.0,
+    "vocal_notes": 1
+   }
+  ],
+  "chords": [
+   {
+    "bar": 1,
+    "display": [
+     160,
+     163
+    ],
+    "duration_s": 2.6667,
+    "id": "C1.0",
+    "name": "D",
+    "pitches": [
+     50,
+     54,
+     57
+    ],
+    "source": [
+     152,
+     155
+    ],
+    "start_s": 0.0
+   },
+   {
+    "bar": 2,
+    "display": [
+     209,
+     212
+    ],
+    "duration_s": 2.6667,
+    "id": "C2.0",
+    "name": "G",
+    "pitches": [
+     55,
+     59,
+     62
+    ],
+    "source": [
+     193,
+     196
+    ],
+    "start_s": 2.6667
+   },
+   {
+    "bar": 3,
+    "display": [
+     224,
+     228
+    ],
+    "duration_s": 2.6667,
+    "id": "C3.0",
+    "name": "A7",
+    "pitches": [
+     57,
+     61,
+     64,
+     67
+    ],
+    "source": [
+     207,
+     211
+    ],
+    "start_s": 5.3333
+   },
+   {
+    "bar": 4,
+    "display": [
+     262,
+     266
+    ],
+    "duration_s": 2.6667,
+    "id": "C4.0",
+    "name": "Bm",
+    "pitches": [
+     59,
+     62,
+     66
+    ],
+    "source": [
+     240,
+     244
+    ],
+    "start_s": 8.0
+   },
+   {
+    "bar": 5,
+    "display": [
+     275,
+     278
+    ],
+    "duration_s": 2.6667,
+    "id": "C5.0",
+    "name": "D",
+    "pitches": [
+     50,
+     54,
+     57
+    ],
+    "source": [
+     253,
+     256
+    ],
+    "start_s": 10.6667
+   },
+   {
+    "bar": 6,
+    "display": [
+     331,
+     334
+    ],
+    "duration_s": 2.6667,
+    "id": "C6.0",
+    "name": "G",
+    "pitches": [
+     55,
+     59,
+     62
+    ],
+    "source": [
+     300,
+     303
+    ],
+    "start_s": 13.3333
+   },
+   {
+    "bar": 7,
+    "display": [
+     343,
+     346
+    ],
+    "duration_s": 2.6667,
+    "id": "C7.0",
+    "name": "D",
+    "pitches": [
+     50,
+     54,
+     57
+    ],
+    "source": [
+     312,
+     315
+    ],
+    "start_s": 16.0
+   }
+  ],
+  "diagnostics": [],
+  "dialect": "yue2-native",
+  "display_abc": "X:1\nT:\nM:4/4\nL:1/32\nQ:1/4=90\nV: Vocal clef=treble name=\"Vocal Melody\" snm=\"Vocal\"\nV: Ins clef=treble name=\"Ins Melody\" snm=\"Inst.\"\nK:D\n% intro\nV: Vocal\n\"^Intro\"\"D\"z32|\nV: Ins\nd8f8a16|\n% verse\nV: Vocal\n\"^Verse\"\"G\"^F8f8=F8=f8|\"A7\"A16-A16|\nV: Ins\nz32|z32|\nV: Vocal\n\"Bm\"B8_B8B16|\"D\"d32|\nV: Ins\nD8F8A8d8|z32|\n% chorus\nV: Vocal\n\"^Chorus\"\"G\"^c16-c16|\"D\"d32|\nV: Ins\nz32|z32|\n",
+  "duration_s": 18.667,
+  "elements": [
+   {
+    "bar": 1,
+    "chord": "D",
+    "display": [
+     163,
+     166
+    ],
+    "duration_q": 4.0,
+    "duration_s": 2.6667,
+    "id": "V1.0",
+    "kind": "rest",
+    "onset_q": 0.0,
+    "source": [
+     155,
+     158
+    ],
+    "start_s": 0.0,
+    "units": 32,
+    "voice": "Vocal"
+   },
+   {
+    "bar": 2,
+    "chord": "G",
+    "display": [
+     212,
+     215
+    ],
+    "duration_q": 1.0,
+    "duration_s": 0.6667,
+    "id": "V2.0",
+    "kind": "note",
+    "midi": 66,
+    "name": "F#4",
+    "onset_q": 4.0,
+    "source": [
+     196,
+     199
+    ],
+    "start_s": 2.6667,
+    "tie_in": false,
+    "tie_out": false,
+    "units": 8,
+    "voice": "Vocal"
+   },
+   {
+    "bar": 2,
+    "display": [
+     215,
+     217
+    ],
+    "duration_q": 1.0,
+    "duration_s": 0.6667,
+    "id": "V2.1",
+    "kind": "note",
+    "midi": 78,
+    "name": "F#5",
+    "onset_q": 5.0,
+    "source": [
+     199,
+     201
+    ],
+    "start_s": 3.3333,
+    "tie_in": false,
+    "tie_out": false,
+    "units": 8,
+    "voice": "Vocal"
+   },
+   {
+    "bar": 2,
+    "display": [
+     217,
+     220
+    ],
+    "duration_q": 1.0,
+    "duration_s": 0.6667,
+    "id": "V2.2",
+    "kind": "note",
+    "midi": 65,
+    "name": "F4",
+    "onset_q": 6.0,
+    "source": [
+     201,
+     204
+    ],
+    "start_s": 4.0,
+    "tie_in": false,
+    "tie_out": false,
+    "units": 8,
+    "voice": "Vocal"
+   },
+   {
+    "bar": 2,
+    "display": [
+     220,
+     223
+    ],
+    "duration_q": 1.0,
+    "duration_s": 0.6667,
+    "id": "V2.3",
+    "kind": "note",
+    "midi": 77,
+    "name": "F5",
+    "onset_q": 7.0,
+    "source": [
+     204,
+     206
+    ],
+    "start_s": 4.6667,
+    "tie_in": false,
+    "tie_out": false,
+    "units": 8,
+    "voice": "Vocal"
+   },
+   {
+    "bar": 3,
+    "chord": "A7",
+    "display": [
+     228,
+     232
+    ],
+    "duration_q": 2.0,
+    "duration_s": 1.3333,
+    "id": "V3.0",
+    "kind": "note",
+    "midi": 69,
+    "name": "A4",
+    "onset_q": 8.0,
+    "source": [
+     211,
+     215
+    ],
+    "start_s": 5.3333,
+    "tie_in": false,
+    "tie_out": true,
+    "units": 16,
+    "voice": "Vocal"
+   },
+   {
+    "bar": 3,
+    "display": [
+     232,
+     235
+    ],
+    "duration_q": 2.0,
+    "duration_s": 1.3333,
+    "id": "V3.1",
+    "kind": "note",
+    "midi": 69,
+    "name": "A4",
+    "onset_q": 10.0,
+    "source": [
+     215,
+     218
+    ],
+    "start_s": 6.6667,
+    "tie_in": true,
+    "tie_out": false,
+    "units": 16,
+    "voice": "Vocal"
+   },
+   {
+    "bar": 4,
+    "chord": "Bm",
+    "display": [
+     266,
+     268
+    ],
+    "duration_q": 1.0,
+    "duration_s": 0.6667,
+    "id": "V4.0",
+    "kind": "note",
+    "midi": 71,
+    "name": "B4",
+    "onset_q": 12.0,
+    "source": [
+     244,
+     246
+    ],
+    "start_s": 8.0,
+    "tie_in": false,
+    "tie_out": false,
+    "units": 8,
+    "voice": "Vocal"
+   },
+   {
+    "bar": 4,
+    "display": [
+     268,
+     271
+    ],
+    "duration_q": 1.0,
+    "duration_s": 0.6667,
+    "id": "V4.1",
+    "kind": "note",
+    "midi": 70,
+    "name": "A#4",
+    "onset_q": 13.0,
+    "source": [
+     246,
+     249
+    ],
+    "start_s": 8.6667,
+    "tie_in": false,
+    "tie_out": false,
+    "units": 8,
+    "voice": "Vocal"
+   },
+   {
+    "bar": 4,
+    "display": [
+     271,
+     274
+    ],
+    "duration_q": 2.0,
+    "duration_s": 1.3333,
+    "id": "V4.2",
+    "kind": "note",
+    "midi": 70,
+    "name": "A#4",
+    "onset_q": 14.0,
+    "source": [
+     249,
+     252
+    ],
+    "start_s": 9.3333,
+    "tie_in": false,
+    "tie_out": false,
+    "units": 16,
+    "voice": "Vocal"
+   },
+   {
+    "bar": 5,
+    "chord": "D",
+    "display": [
+     278,
+     281
+    ],
+    "duration_q": 4.0,
+    "duration_s": 2.6667,
+    "id": "V5.0",
+    "kind": "note",
+    "midi": 74,
+    "name": "D5",
+    "onset_q": 16.0,
+    "source": [
+     256,
+     259
+    ],
+    "start_s": 10.6667,
+    "tie_in": false,
+    "tie_out": false,
+    "units": 32,
+    "voice": "Vocal"
+   },
+   {
+    "bar": 6,
+    "chord": "G",
+    "display": [
+     334,
+     339
+    ],
+    "duration_q": 2.0,
+    "duration_s": 1.3333,
+    "id": "V6.0",
+    "kind": "note",
+    "midi": 73,
+    "name": "C#5",
+    "onset_q": 20.0,
+    "source": [
+     303,
+     308
+    ],
+    "start_s": 13.3333,
+    "tie_in": false,
+    "tie_out": true,
+    "units": 16,
+    "voice": "Vocal"
+   },
+   {
+    "bar": 6,
+    "display": [
+     339,
+     342
+    ],
+    "duration_q": 2.0,
+    "duration_s": 1.3333,
+    "id": "V6.1",
+    "kind": "note",
+    "midi": 73,
+    "name": "C#5",
+    "onset_q": 22.0,
+    "source": [
+     308,
+     311
+    ],
+    "start_s": 14.6667,
+    "tie_in": true,
+    "tie_out": false,
+    "units": 16,
+    "voice": "Vocal"
+   },
+   {
+    "bar": 7,
+    "chord": "D",
+    "display": [
+     346,
+     349
+    ],
+    "duration_q": 4.0,
+    "duration_s": 2.6667,
+    "id": "V7.0",
+    "kind": "note",
+    "midi": 74,
+    "name": "D5",
+    "onset_q": 24.0,
+    "source": [
+     315,
+     318
+    ],
+    "start_s": 16.0,
+    "tie_in": false,
+    "tie_out": false,
+    "units": 32,
+    "voice": "Vocal"
+   },
+   {
+    "bar": 1,
+    "display": [
+     175,
+     177
+    ],
+    "duration_q": 1.0,
+    "duration_s": 0.6667,
+    "id": "I1.0",
+    "kind": "note",
+    "midi": 74,
+    "name": "D5",
+    "onset_q": 0.0,
+    "source": [
+     167,
+     169
+    ],
+    "start_s": 0.0,
+    "tie_in": false,
+    "tie_out": false,
+    "units": 8,
+    "voice": "Ins"
+   },
+   {
+    "bar": 1,
+    "display": [
+     177,
+     179
+    ],
+    "duration_q": 1.0,
+    "duration_s": 0.6667,
+    "id": "I1.1",
+    "kind": "note",
+    "midi": 78,
+    "name": "F#5",
+    "onset_q": 1.0,
+    "source": [
+     169,
+     171
+    ],
+    "start_s": 0.6667,
+    "tie_in": false,
+    "tie_out": false,
+    "units": 8,
+    "voice": "Ins"
+   },
+   {
+    "bar": 1,
+    "display": [
+     179,
+     182
+    ],
+    "duration_q": 2.0,
+    "duration_s": 1.3333,
+    "id": "I1.2",
+    "kind": "note",
+    "midi": 81,
+    "name": "A5",
+    "onset_q": 2.0,
+    "source": [
+     171,
+     174
+    ],
+    "start_s": 1.3333,
+    "tie_in": false,
+    "tie_out": false,
+    "units": 16,
+    "voice": "Ins"
+   },
+   {
+    "bar": 2,
+    "display": [
+     244,
+     247
+    ],
+    "duration_q": 4.0,
+    "duration_s": 2.6667,
+    "id": "I2.0",
+    "kind": "bar_rest",
+    "onset_q": 4.0,
+    "source": [
+     227,
+     229
+    ],
+    "start_s": 2.6667,
+    "units": 32,
+    "voice": "Ins"
+   },
+   {
+    "bar": 3,
+    "display": [
+     248,
+     251
+    ],
+    "duration_q": 4.0,
+    "duration_s": 2.6667,
+    "id": "I3.0",
+    "kind": "bar_rest",
+    "onset_q": 8.0,
+    "source": [
+     227,
+     229
+    ],
+    "start_s": 5.3333,
+    "units": 32,
+    "voice": "Ins"
+   },
+   {
+    "bar": 4,
+    "display": [
+     290,
+     292
+    ],
+    "duration_q": 1.0,
+    "duration_s": 0.6667,
+    "id": "I4.0",
+    "kind": "note",
+    "midi": 62,
+    "name": "D4",
+    "onset_q": 12.0,
+    "source": [
+     268,
+     270
+    ],
+    "start_s": 8.0,
+    "tie_in": false,
+    "tie_out": false,
+    "units": 8,
+    "voice": "Ins"
+   },
+   {
+    "bar": 4,
+    "display": [
+     292,
+     294
+    ],
+    "duration_q": 1.0,
+    "duration_s": 0.6667,
+    "id": "I4.1",
+    "kind": "note",
+    "midi": 66,
+    "name": "F#4",
+    "onset_q": 13.0,
+    "source": [
+     270,
+     272
+    ],
+    "start_s": 8.6667,
+    "tie_in": false,
+    "tie_out": false,
+    "units": 8,
+    "voice": "Ins"
+   },
+   {
+    "bar": 4,
+    "display": [
+     294,
+     296
+    ],
+    "duration_q": 1.0,
+    "duration_s": 0.6667,
+    "id": "I4.2",
+    "kind": "note",
+    "midi": 69,
+    "name": "A4",
+    "onset_q": 14.0,
+    "source": [
+     272,
+     274
+    ],
+    "start_s": 9.3333,
+    "tie_in": false,
+    "tie_out": false,
+    "units": 8,
+    "voice": "Ins"
+   },
+   {
+    "bar": 4,
+    "display": [
+     296,
+     298
+    ],
+    "duration_q": 1.0,
+    "duration_s": 0.6667,
+    "id": "I4.3",
+    "kind": "note",
+    "midi": 74,
+    "name": "D5",
+    "onset_q": 15.0,
+    "source": [
+     274,
+     276
+    ],
+    "start_s": 10.0,
+    "tie_in": false,
+    "tie_out": false,
+    "units": 8,
+    "voice": "Ins"
+   },
+   {
+    "bar": 5,
+    "display": [
+     299,
+     302
+    ],
+    "duration_q": 4.0,
+    "duration_s": 2.6667,
+    "id": "I5.0",
+    "kind": "rest",
+    "onset_q": 16.0,
+    "source": [
+     277,
+     280
+    ],
+    "start_s": 10.6667,
+    "units": 32,
+    "voice": "Ins"
+   },
+   {
+    "bar": 6,
+    "display": [
+     358,
+     361
+    ],
+    "duration_q": 4.0,
+    "duration_s": 2.6667,
+    "id": "I6.0",
+    "kind": "bar_rest",
+    "onset_q": 20.0,
+    "source": [
+     327,
+     329
+    ],
+    "start_s": 13.3333,
+    "units": 32,
+    "voice": "Ins"
+   },
+   {
+    "bar": 7,
+    "display": [
+     362,
+     365
+    ],
+    "duration_q": 4.0,
+    "duration_s": 2.6667,
+    "id": "I7.0",
+    "kind": "bar_rest",
+    "onset_q": 24.0,
+    "source": [
+     327,
+     329
+    ],
+    "start_s": 16.0,
+    "units": 32,
+    "voice": "Ins"
+   }
+  ],
+  "has_chords": true,
+  "header": {
+   "key": "D",
+   "meter": "4/4",
+   "tempo_bpm": 90,
+   "unit": "1/32"
+  },
+  "notes": {
+   "Ins": [
+    {
+     "duration_s": 0.6667,
+     "id": "I1.0",
+     "midi": 74,
+     "segments": [
+      "I1.0"
+     ],
+     "start_s": 0.0
+    },
+    {
+     "duration_s": 0.6667,
+     "id": "I1.1",
+     "midi": 78,
+     "segments": [
+      "I1.1"
+     ],
+     "start_s": 0.6667
+    },
+    {
+     "duration_s": 1.3333,
+     "id": "I1.2",
+     "midi": 81,
+     "segments": [
+      "I1.2"
+     ],
+     "start_s": 1.3333
+    },
+    {
+     "duration_s": 0.6667,
+     "id": "I4.0",
+     "midi": 62,
+     "segments": [
+      "I4.0"
+     ],
+     "start_s": 8.0
+    },
+    {
+     "duration_s": 0.6667,
+     "id": "I4.1",
+     "midi": 66,
+     "segments": [
+      "I4.1"
+     ],
+     "start_s": 8.6667
+    },
+    {
+     "duration_s": 0.6667,
+     "id": "I4.2",
+     "midi": 69,
+     "segments": [
+      "I4.2"
+     ],
+     "start_s": 9.3333
+    },
+    {
+     "duration_s": 0.6667,
+     "id": "I4.3",
+     "midi": 74,
+     "segments": [
+      "I4.3"
+     ],
+     "start_s": 10.0
+    }
+   ],
+   "Vocal": [
+    {
+     "duration_s": 0.6667,
+     "id": "V2.0",
+     "midi": 66,
+     "segments": [
+      "V2.0"
+     ],
+     "start_s": 2.6667
+    },
+    {
+     "duration_s": 0.6667,
+     "id": "V2.1",
+     "midi": 78,
+     "segments": [
+      "V2.1"
+     ],
+     "start_s": 3.3333
+    },
+    {
+     "duration_s": 0.6667,
+     "id": "V2.2",
+     "midi": 65,
+     "segments": [
+      "V2.2"
+     ],
+     "start_s": 4.0
+    },
+    {
+     "duration_s": 0.6667,
+     "id": "V2.3",
+     "midi": 77,
+     "segments": [
+      "V2.3"
+     ],
+     "start_s": 4.6667
+    },
+    {
+     "duration_s": 2.6667,
+     "id": "V3.0",
+     "midi": 69,
+     "segments": [
+      "V3.0",
+      "V3.1"
+     ],
+     "start_s": 5.3333
+    },
+    {
+     "duration_s": 0.6667,
+     "id": "V4.0",
+     "midi": 71,
+     "segments": [
+      "V4.0"
+     ],
+     "start_s": 8.0
+    },
+    {
+     "duration_s": 0.6667,
+     "id": "V4.1",
+     "midi": 70,
+     "segments": [
+      "V4.1"
+     ],
+     "start_s": 8.6667
+    },
+    {
+     "duration_s": 1.3333,
+     "id": "V4.2",
+     "midi": 70,
+     "segments": [
+      "V4.2"
+     ],
+     "start_s": 9.3333
+    },
+    {
+     "duration_s": 2.6667,
+     "id": "V5.0",
+     "midi": 74,
+     "segments": [
+      "V5.0"
+     ],
+     "start_s": 10.6667
+    },
+    {
+     "duration_s": 2.6667,
+     "id": "V6.0",
+     "midi": 73,
+     "segments": [
+      "V6.0",
+      "V6.1"
+     ],
+     "start_s": 13.3333
+    },
+    {
+     "duration_s": 2.6667,
+     "id": "V7.0",
+     "midi": 74,
+     "segments": [
+      "V7.0"
+     ],
+     "start_s": 16.0
+    }
+   ]
+  },
+  "ok": true,
+  "sections": [
+   {
+    "bars": 1,
+    "end_s": 2.667,
+    "label": "intro",
+    "start_bar": 1,
+    "start_s": 0.0,
+    "tag": "[Intro]",
+    "vocal_notes": 0
+   },
+   {
+    "bars": 4,
+    "end_s": 13.333,
+    "label": "verse",
+    "start_bar": 2,
+    "start_s": 2.667,
+    "tag": "[Verse]",
+    "vocal_notes": 9
+   },
+   {
+    "bars": 2,
+    "end_s": 18.667,
+    "label": "chorus",
+    "start_bar": 6,
+    "start_s": 13.333,
+    "tag": "[Chorus]",
+    "vocal_notes": 2
+   }
+  ],
+  "sha256": "4626567ec84fe23bca9c2bcf1459a63b32e47fd2d5e4b5273d27ca1ad65dcb5c",
+  "voices": {
+   "Ins": {
+    "bars": 7,
+    "chords": 0,
+    "highest": 81,
+    "lowest": 62,
+    "notes": 7
+   },
+   "Vocal": {
+    "bars": 7,
+    "chords": 7,
+    "highest": 78,
+    "lowest": 65,
+    "notes": 11
+   }
+  }
+ }
+}

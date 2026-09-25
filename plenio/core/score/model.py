@@ -367,11 +367,17 @@ def display(model: ScoreModel) -> Display:
         if anchor:
             insertions.append((min(a.start for a in anchor), 0, _annotation(label)))
     for voice in VOICES:
-        state: dict[tuple[str, int], int] = {}
-        current = (0, "")
+        # Standard ABC state: accidentals per written note (letter and octave) until the bar
+        # line. ``None`` = unknown: readers disagree whether a bar's accidentals survive an
+        # inline key change, so the next such note is always written with its accidental.
+        state: dict[tuple[str, int], int | None] = {}
+        bar, key = 0, ""
         for element in model.voice_elements(voice):
-            if (element.bar, element.key) != current:
-                state, current = {}, (element.bar, element.key)
+            if element.bar != bar:
+                state = {}
+            elif element.key != key:
+                state = dict.fromkeys(state)
+            bar, key = element.bar, element.key
             if not element.is_note or element.midi is None:
                 continue
             alteration = element.midi - element.written

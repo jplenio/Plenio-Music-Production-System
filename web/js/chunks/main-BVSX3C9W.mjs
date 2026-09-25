@@ -185,7 +185,7 @@ const ee = (e, t, r) => {
     c.stopPropagation();
     const p = A(n);
     p === null && (o.textContent = "The stored state is unreadable; it will be replaced when you apply.");
-    const d = b(String(e.id)), z = (e.inputs ?? []).filter((u) => u.link != null).map((u) => u.name), _ = p ?? { schema: "plenio.sheet_state/1", docs: {} }, S = d?.owned ?? Q(z, _), W = String(e.widgets?.find((u) => u.name === "review")?.value ?? "continue"), { openSheetDialog: j } = await import("./open-Daqc1JCC.mjs");
+    const d = b(String(e.id)), z = (e.inputs ?? []).filter((u) => u.link != null).map((u) => u.name), _ = p ?? { schema: "plenio.sheet_state/1", docs: {} }, S = d?.owned ?? Q(z, _), W = String(e.widgets?.find((u) => u.name === "review")?.value ?? "continue"), { openSheetDialog: j } = await import("./open-CQv4PU0E.mjs");
     if (!x) throw new Error("Plenio: API not initialised");
     j({
       title: e.title || "Song Sheet",

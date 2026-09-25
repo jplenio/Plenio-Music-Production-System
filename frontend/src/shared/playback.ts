@@ -31,6 +31,13 @@ export interface ToneEvent {
   part: Voice | 'chord'
 }
 
+/**
+ * Seconds within which two score times are the same. The backend rounds times (bars and
+ * sections to 3 decimals, notes to 4), so a bar start and its first note may differ by
+ * 0.5 ms; the shortest native note lasts far longer (25 ms at 300 BPM, L:1/32).
+ */
+export const TIME_TOLERANCE = 1e-3
+
 export const MIN_SPEED = 0.25
 export const MAX_SPEED = 2
 
@@ -46,16 +53,17 @@ export function schedule(view: ScoreView, options: PlayOptions): ToneEvent[] {
   for (const voice of ['Vocal', 'Ins'] as Voice[]) {
     if (!options.voices[voice]) continue
     for (const note of view.notes?.[voice] ?? []) {
-      if (note.start_s < options.from - 1e-6 || note.start_s >= end) continue
+      if (note.start_s < options.from - TIME_TOLERANCE || note.start_s >= end - TIME_TOLERANCE) continue
       const duration = Math.min(note.duration_s, end - note.start_s)
-      events.push({ at: (note.start_s - options.from) / speed, duration: duration / speed, midi: note.midi, part: voice })
+      const at = Math.max(0, note.start_s - options.from)
+      events.push({ at: at / speed, duration: duration / speed, midi: note.midi, part: voice })
     }
   }
   if (options.voices.chords) {
     for (const chord of view.chords ?? []) {
       const chordEnd = Math.min(chord.start_s + chord.duration_s, end)
       const start = Math.max(chord.start_s, options.from)
-      if (chordEnd <= start) continue
+      if (chordEnd <= start + TIME_TOLERANCE) continue
       for (const midi of chord.pitches) {
         events.push({ at: (start - options.from) / speed, duration: (chordEnd - start) / speed, midi, part: 'chord' })
       }
@@ -76,8 +84,8 @@ export function sounding(view: ScoreView, time: number, voices: VoiceSwitches): 
       (e) =>
         e.kind === 'note' &&
         voices[e.voice] &&
-        e.start_s <= time + 1e-6 &&
-        time < e.start_s + e.duration_s - 1e-6
+        e.start_s <= time + TIME_TOLERANCE &&
+        time < e.start_s + e.duration_s - TIME_TOLERANCE
     )
     .map((e) => e.id)
 }

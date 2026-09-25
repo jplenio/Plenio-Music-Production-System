@@ -142,6 +142,8 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
   }
 
   // Changes made by the dialog (use draft, conflict choice) enter the history as one step.
+  // Synchronous, so that ``ownWrite`` tells the session's own writes apart (a queued watcher
+  // would run after the flag is reset, break typing groups and re-analyze every edit).
   watch(
     () => doc.text,
     (text) => {
@@ -151,7 +153,8 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
       history.seal()
       historyVersion.value++
       scheduleAnalyze(0)
-    }
+    },
+    { flush: 'sync' }
   )
 
   function dispose(): void {

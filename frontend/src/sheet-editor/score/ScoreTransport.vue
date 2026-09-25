@@ -5,7 +5,15 @@
  */
 import { computed, onBeforeUnmount, ref } from 'vue'
 
-import { type PlayOptions, type VoiceSwitches, schedule, scoreTime, sounding, sourceSecond } from '../../shared/playback'
+import {
+  type PlayOptions,
+  TIME_TOLERANCE,
+  type VoiceSwitches,
+  schedule,
+  scoreTime,
+  sounding,
+  sourceSecond
+} from '../../shared/playback'
 import { type ScoreView, clock, sectionOfBar } from '../../shared/scoreView'
 import { TonePlayer } from './player'
 
@@ -33,7 +41,7 @@ const canPlay = computed(() => !!props.view?.notes)
 function barAt(seconds: number): number {
   const bars = props.view?.bars ?? []
   let found = 1
-  for (const bar of bars) if (bar.start_s <= seconds + 1e-6) found = bar.index
+  for (const bar of bars) if (bar.start_s <= seconds + TIME_TOLERANCE) found = bar.index
   return found
 }
 

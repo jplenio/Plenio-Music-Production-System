@@ -481,7 +481,8 @@ def set_chord(text: str, element_id: str, name: str) -> EditResult:
     if vocal is None:
         raise PlenioValidationError(
             "Chord symbols belong to the Vocal voice and start where it has a note or rest; "
-            "this onset lies inside a Vocal note.",
+            "this onset lies inside a longer Vocal note or rest.",
+            hint="Select a note or rest that starts where the chord should start.",
         )
     events = bar_events(model, "Vocal", vocal.bar)
     position = next(i for i, e in enumerate(events) if e.element == vocal.id)
