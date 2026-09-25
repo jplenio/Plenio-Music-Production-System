@@ -111,7 +111,7 @@ Done by the owner (reported 2026-09-25): the Phase 9 fixes - a *new lyrics* cove
 |---|---|---|
 | Python (unit, contract, workflow, host) with ComfyUI 0.37.0 | cloud, end of Phase 10 | **754 passed, 12 skipped** (models 3, legacy toolkit 1, smoke 7, soundfile 1) |
 | Three full runs (flakiness) | cloud | no flaky test (the only failure was a first version of the new snapshot test that depended on the shared server's state) |
-| CI on GitHub (Ubuntu + Windows Python, ComfyUI host job, frontend) | GitHub Actions | green since `3a9fda1` (run 36188645235) |
+| CI on GitHub (Ubuntu + Windows Python, ComfyUI host job, frontend) | GitHub Actions | green since `3a9fda1` (run 36188645235); the Phase 10 commit `588b314`: all four jobs green (run 36191595006) |
 | Coverage | cloud | `plenio.core` 93.7 % of lines; `plenio` with the host tests 92 % (lines and branches) |
 | Browser checks of all templates (`tools/browser_check.mjs`) | cloud (frontend 1.52.7, Chromium) | **56/56 passed** |
 | Smoke S-7 (real MiniMax take, CPU) | cloud | passed |

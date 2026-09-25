@@ -152,7 +152,7 @@ Expected: only the skips whose reason names a missing file or package (for examp
 |---|---|
 | Python with ComfyUI 0.37.0, full suite | **754 passed, 12 skipped** (models 3, legacy toolkit 1, smoke 7, soundfile 1); jsonschema in the test process, as in CI |
 | Repeated full runs (flakiness) | three runs, no flaky test; the only failure was a first version of the new snapshot test that depended on the shared server's state (user templates and input files of other tests) and now uses a fresh server |
-| CI on GitHub | green since `3a9fda1` (run 36188645235); the review's final commit: see CURRENT_STATUS §7 |
+| CI on GitHub | green since `3a9fda1` (run 36188645235); the review's commit `588b314`: all four jobs green (run 36191595006) |
 | Coverage | as in section 2.3 |
 | Smoke S-7 | passed (real MiniMax take through Master and Export, CPU) |
 | ruff, mypy strict, workflow validation, frontend check | clean; 10 blueprints + 5 templates valid; 58 frontend tests |
