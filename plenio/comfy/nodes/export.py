@@ -183,12 +183,13 @@ class PlenioExportRelease(io.ComfyNode):
             facts.append({**file_facts(path), **original_facts, "role": "original"})
             written.append(path)
         cover_path = None
+        warnings: list[str] = []
         if picture is not None:
             cover_path = plan_path(target_folder, relative, ".jpg", collision=collision)
             atomic_write_bytes(cover_path, picture)
             facts.append({**file_facts(cover_path), "role": "cover"})
             if not embedded:
-                notes.append(
+                warnings.append(
                     "cover art saved next to the audio only: install mutagen to embed it (see the Export help)"
                 )
         licences = sorted(
@@ -224,7 +225,6 @@ class PlenioExportRelease(io.ComfyNode):
         atomic_write_text(record_path, json.dumps(record, indent=2, ensure_ascii=False))
         relative_names = [str(Path(p).relative_to(base)) for p in written]
         clipped = sum(int(f.get("clipped_samples", 0)) for f in facts)
-        warnings = list(notes)
         if clipped:
             warnings.append(
                 f"{clipped} samples above full scale were clipped in FLAC/MP3 (peak "
@@ -236,7 +236,7 @@ class PlenioExportRelease(io.ComfyNode):
             "export",
             Status.WARNING if warnings else Status.OK,
             f"Exported {len(written)} file(s) to {folder or 'output'}",
-            (*relative_names, *warnings),
+            (*relative_names, *notes, *warnings),
             {"files": facts, "record": str(record_path.relative_to(base))},
         )
         level = loudness[0]
@@ -252,6 +252,7 @@ class PlenioExportRelease(io.ComfyNode):
                     else "- loudness: not measurable (silent or too short)"
                 ),
                 *([f"- licence: {x}" for x in licences]),
+                *([f"- {n}" for n in notes]),
                 *([f"- warning: {w}" for w in warnings]),
             ]
         )

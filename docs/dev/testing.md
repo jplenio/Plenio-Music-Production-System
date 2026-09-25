@@ -7,8 +7,10 @@ Strategy and verification levels: [docs/design/testing-strategy.md](../design/te
 Tests run with **ComfyUI's Python** (it has torch, numpy, av, jsonschema). Dev tools are installed into a project-local folder so that ComfyUI's environment is not changed:
 
 ```bash
-<ComfyUI python> -m pip install --target .devdeps "pytest==8.4.*" "hypothesis==6.*" "ruff==0.13.*" "mypy==1.18.*"
+<ComfyUI python> -m pip install --target .devdeps "pytest==8.4.*" "hypothesis==6.*" "ruff==0.13.*" "mypy==1.18.*" "pyloudnorm==0.2.*"
 ```
+
+`pyloudnorm` is the loudness oracle of `tests/unit/test_audio.py` (skipped without it). `mutagen` is optional: with it installed, the cover-art tests also check embedding.
 
 Frontend: `cd frontend && npm ci`.
 
@@ -21,6 +23,7 @@ Frontend: `cd frontend && npm ci`.
 | host integration (starts real ComfyUI servers on the CPU) | `PLENIO_COMFYUI_ROOT=<ComfyUI> PYTHONPATH=.devdeps <python> -m pytest tests/host` |
 | side-by-side with the legacy toolkit | add `PLENIO_LEGACY_NODE_DIR=<installed legacy toolkit>` |
 | real-model smoke tests (GPU, slow) | add `PLENIO_SMOKE=1` and `PLENIO_MODELS_DIR=<models>` |
+| S-7 mastering smoke (CPU, no model) | `PLENIO_SMOKE=1 PLENIO_COMFYUI_ROOT=<ComfyUI> <python> -m pytest tests/host/test_master_smoke.py`; the take is the legacy MiniMax sample next to the project or `PLENIO_LEGACY_SAMPLE=<audio file>` |
 | lint / format / types | `PYTHONPATH=.devdeps <python> -m ruff check . && ... -m ruff format --check . && ... -m mypy` |
 | templates and blueprints | `<python> tools/workflow_validation.py` |
 | frontend | `cd frontend && npm run check` (types, Vitest, build) |
@@ -34,3 +37,8 @@ Host tests use an isolated base directory (`--base-directory`, `--disable-all-cu
 ## Refreshing the node-type snapshot
 
 After upgrading ComfyUI: `PLENIO_COMFYUI_ROOT=<ComfyUI> <python> tools/snapshot_node_types.py`, then re-run the workflow tests.
+
+## DSP golden data and studies
+
+- `tests/fixtures/dsp/golden-legacy-dsp.{npz,json}`: outputs of the legacy toolkit's EQ, compressor, limiter and tone match on a deterministic signal. Regenerate only when the port is meant to change: `<python with numpy+scipy> tools/studies/golden_legacy_dsp.py <legacy toolkit folder>` (the legacy modules are copied into a scratch folder; the legacy repository is not modified).
+- Restoration gate (Phase 7, C1): `<python> tools/studies/restoration_gate.py <out.json> <audio files ...>` measures clipping, inter-sample overs, spectral roll-off and HF balance. Run it on **unprocessed** takes (Export's `(original)` files).

@@ -131,10 +131,11 @@ def _frames(data: Any, sample_format: str) -> Any:
 
     if sample_format == "flt":
         return np.ascontiguousarray(data.T.reshape(1, -1).astype(np.float32))
+    # Full scale is 2**(bits-1), as in decoders, so a 24-bit source is written back sample-exact.
     if sample_format == "s32":  # 24-bit samples in the upper bits of s32 (the FLAC encoder writes 24 bits)
-        ints = np.clip(np.round(data * (2**23 - 1)), -(2**23), 2**23 - 1).astype(np.int32) << 8
+        ints = np.clip(np.round(data * 2**23), -(2**23), 2**23 - 1).astype(np.int32) << 8
         return np.ascontiguousarray(ints.T.reshape(1, -1))
-    ints = np.clip(np.round(data * (2**31 - 1)), -(2**31), 2**31 - 1).astype(np.int32)  # planar s32 for LAME
+    ints = np.clip(np.round(data * 2**31), -(2**31), 2**31 - 1).astype(np.int32)  # planar s32 for LAME
     return np.ascontiguousarray(ints)
 
 

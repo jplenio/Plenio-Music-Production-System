@@ -13,6 +13,19 @@ Everything that is **shipped** with Plenio and was not written for Plenio. Devel
 
 When the frontend bundles another library, it is added here with its licence text in the same change.
 
+### Runtime packages that are not shipped
+
+| Package | Used for | Licence | Notes |
+|---|---|---|---|
+| NumPy, SciPy, PyAV, Pillow | DSP (filters, resampling), audio encoding/decoding and tag reading, cover JPEG | BSD / BSD / BSD (FFmpeg: LGPL/GPL builds) / MIT-CMU | installed by ComfyUI itself; imported at runtime |
+| mutagen | embedding cover art into FLAC and MP3 (optional) | GPL-2.0-or-later | **not** installed or bundled by Plenio; imported only when the user installed it. Without it the cover is saved next to the audio |
+
+Development only (not shipped): `pyloudnorm` (MIT) is the loudness test oracle.
+
+### Code ported from the legacy toolkit
+
+The compressor, limiter, EQ filter design and tone-match fit in `plenio/core/audio/` and the presets in `resources/presets/` are ported from the owner's earlier toolkit *ComfyUI-MiniMax* v3.1.3 (commit `3d3d087`, MIT, written by Plenio's author). The golden outputs in `tests/fixtures/dsp/` were produced from a scratch copy of that toolkit (`tools/studies/golden_legacy_dsp.py`).
+
 ## Licence texts
 
 ### Vue (MIT)

@@ -222,7 +222,11 @@ def test_enhance_graph_copies_tags_from_the_loaded_file(server: ComfyServer, log
         export={"tags": "copy from loaded file", "mp3": True},
     )
     prompt["4"]["inputs"]["original"] = ["1", 0]
-    server.run(prompt)
+    entry = server.run(prompt)
+    summary = entry["outputs"]["4"]["plenio_summary"][0]
+    assert (
+        summary["status"] == "ok" and f"- tags copied from {name}" in summary["markdown"]
+    )  # a note, no warning
     base = server.output_dir / folder
     tags, _cover = read_tags(base / "Loaded Song.flac")
     assert tags == {"title": "Loaded Song", **TAGS}
@@ -232,6 +236,38 @@ def test_enhance_graph_copies_tags_from_the_loaded_file(server: ComfyServer, log
     assert level["integrated_lufs"] == pytest.approx(-14.0, abs=0.3)
     source_level = measure(music, rate).integrated_lufs
     assert source_level is not None and source_level < -18  # the master really changed the level
+
+
+def test_bypassed_stages_change_nothing(server: ComfyServer, log: Log) -> None:
+    """Flat EQ and a bypassed Loudness node (the frontend removes it and wires its input through):
+    the exported FLAC has the source's samples, sample rate and tags."""
+    folder = f"plenio-production/{label()}"
+    name = f"bypass-{label()}.flac"
+    rate = 44100
+    rng = np.random.default_rng(5)
+    music = np.round(0.3 * rng.standard_normal((2, rate * 3)).clip(-3, 3) * 2**23) / 2**23
+    (server.base / "input").mkdir(exist_ok=True)
+    write_audio(server.base / "input" / name, music, rate, "flac", {"title": "Bypassed", **TAGS})
+    prompt = chain(
+        folder=folder,
+        source={"class_type": "LoadAudio", "inputs": {"audio": name}},
+        export={"tags": "copy from loaded file"},
+    )
+    del prompt["3"]
+    prompt["4"]["inputs"]["audio"] = ["2", 0]
+    del prompt["4"]["inputs"]["reports.report_1"]
+    server.run(prompt)
+    path = server.output_dir / folder / "Bypassed.flac"
+    assert read_tags(path) == ({"title": "Bypassed", **TAGS}, None)
+    flac = next(f for f in record_of(server, folder, "Bypassed")["files"] if f.get("format") == "flac")
+    assert flac["sample_rate"] == rate and flac["bits"] == 24 and flac["channels"] == 2
+    import av
+
+    with av.open(str(path)) as container:
+        stream = container.streams.audio[0]
+        data = np.concatenate([f.to_ndarray() for f in container.decode(stream)], axis=-1)
+    decoded = data.reshape(-1, 2).T.astype(np.float64) / 2**31
+    assert decoded.shape == music.shape and np.array_equal(decoded, music)
 
 
 def test_copy_from_loaded_file_needs_a_load_audio_node(server: ComfyServer, log: Log) -> None:

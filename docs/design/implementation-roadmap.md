@@ -105,6 +105,7 @@ Confirm or change D-01 … D-09 in [target-architecture.md](target-architecture.
 | **Tests** | DSP regression suite (analytic responses, oracle loudness, true-peak at final rate, resampler specs), golden comparisons against legacy outputs (from a scratch copy), bypass identity, format/sample-rate tests, export matrix, smoke S-7. |
 | **Completion criteria** | mastering hits stated targets within tolerances; bypassing a stage never changes format, metadata or sample rate unexpectedly; restoration decision documented with data. |
 | **Effort** | **high** |
+| **Status** | **Implemented** (2026-09-25): DSP, EQ and Loudness & Dynamics nodes with the curve widget, full Export, *Plenio · Master*, *4 · Enhance & Master*, docs; DSP regression, golden, format, bypass-identity and host tests and smoke S-7 pass in the cloud; the template ran from the real frontend ([../test-reports/2026-09-25-phase-7.md](../test-reports/2026-09-25-phase-7.md)). Restoration decision C1 provisional (no Repair node) until unprocessed takes are measured on the owner's machine. |
 
 ## Phase 8 — Main workflows, subgraphs and UX
 

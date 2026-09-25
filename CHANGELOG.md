@@ -4,6 +4,24 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 ## Unreleased
 
+### Added (Phase 7 - Audio production chain)
+
+- `core.audio`: BS.1770-4 loudness (K-weighting exact at 48 kHz, gating), EBU Tech 3342 loudness range, 4x-oversampled true peak; band-edge Kaiser resampler; RBJ biquad EQ with response, spectral profile and tone-match fit; compressor, oversampled lookahead limiter and loudness targeting with budgets (ported from the legacy toolkit v3.1.3, checked against its outputs).
+- Nodes **EQ** (flat / manual bands / match preset / custom match, reference input; curve widget under the node: drag, wheel = Q, double-click adds a band) and **Loudness & Dynamics** (5 targets or custom, 12 compression styles or custom, output rate 44.1/48 kHz or keep); presets in `resources/presets/`; routes `GET /plenio/presets/{kind}` and `POST /plenio/eq/response`.
+- **Export Release**: MP3 VBR V0 and WAV 32-bit float next to FLAC 24-bit; tags (typed, or copied from the loaded file), cover art (JPEG next to the audio; embedded into FLAC/MP3 when the optional `mutagen` is installed), the original take as `(original).flac`, measured loudness and tags in the release record.
+- Blueprint *Plenio · Master*; template **4 · Enhance & Master**.
+- Tests: DSP regression suite (`tests/unit/test_audio.py`: BS.1770 table, EBU cases, pyloudnorm oracle, true peak, resampler pass/stop band, analytic EQ responses, compressor curve, limiter ceiling, golden legacy outputs, targeting budgets), format round trips (`tests/unit/test_release_formats.py`), host tests of the chain incl. bypass identity (`tests/host/test_production_path.py`), smoke S-7 (`tests/host/test_master_smoke.py`), Vitest for the curve helpers. Restoration-gate study script `tools/studies/restoration_gate.py`.
+- Docs: user guide *4 · Enhance & Master*, concept page *Mastering and audio formats* (methods and limits), help pages of EQ, Loudness & Dynamics and Export Release; test report `docs/test-reports/2026-09-25-phase-7.md`.
+
+### Changed (Phase 7)
+
+- Export Release has new widgets (*flac*, *mp3*, *wav*, *tags*) and optional *title*, *original* and *cover* inputs; templates 1-3 were regenerated. Workflows saved from the earlier templates keep their Export widget values by position - re-add the Export node or start from the new template.
+- 24-bit export scales by 2^23 (decoder convention) instead of 2^23-1, so a 24-bit source is written back sample-exact.
+
+### Fixed (Phase 7)
+
+- Sample-rate conversion no longer aliases content just above the new Nyquist frequency (the legacy converter let a 23 kHz tone through as a -6 dB alias at 21.1 kHz when converting 48 to 44.1 kHz).
+
 ### Added (Phase 6 - MiniMax Music 3)
 
 - `core.engines.minimax`: structured caption rules (Global Metadata, Vocal Details, Arrangement), exact 5 000-token prompt budget through the loaded text encoder (estimate without it), render ceiling at most 360 s, instrumental conventions (tags-only section map about twice as long as a sung song's, Vocal Details `n/a`).
