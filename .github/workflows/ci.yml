@@ -67,3 +67,30 @@ jobs:
       - run: npm run build
       - name: The committed build matches the sources
         run: git diff --exit-code -- ../web/js
+
+  package:
+    name: Registry package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install comfy-cli
+      - run: git config --global core.quotePath false
+      - run: comfy --skip-prompt --no-enable-telemetry node validate
+      - run: comfy --skip-prompt --no-enable-telemetry node pack
+      # every file ComfyUI loads must be in the zip (an unanchored .comfyignore pattern once dropped plenio/core/assets)
+      - name: The package holds every runtime file
+        run: |
+          python - <<'PY'
+          import subprocess, zipfile
+          names = set(zipfile.ZipFile("node.zip").namelist())
+          tracked = subprocess.check_output(["git", "ls-files", "-z"], text=True).split("\0")
+          runtime = ("plenio/", "web/", "subgraphs/", "example_workflows/", "resources/")
+          missing = [f for f in tracked if f.startswith(runtime) or f in ("__init__.py", "pyproject.toml", "LICENSE")]
+          missing = [f for f in missing if f not in names]
+          leaked = sorted({n.split("/")[0] for n in names} & {"tests", "tools", "frontend", "assets", ".github"})
+          print(len(names), "files; missing:", missing, "; leaked:", leaked)
+          raise SystemExit(1 if missing or leaked else 0)
+          PY

@@ -13,7 +13,7 @@ Published Registry versions are immutable: every fix is a new version.
 ## Publishing
 
 1. Commit and push to `main`.
-2. Create a GitHub release with the tag `v<version>` (for example `v0.2.0`) and the changelog section as its text.
+2. Create a GitHub release with the tag `v<version>` (for example `v0.2.0`) and the changelog section as its text. Attach: the packed node as `Plenio-Music-Production-System-v<version>.zip` (the content of `comfy node pack` under one top folder, so it unpacks straight into `custom_nodes`), the five templates as `Plenio <template> v<version>.json`, and `SHA256SUMS.txt`. Install the zip once into a fresh ComfyUI before attaching it (14 nodes, 10 blueprints, 5 templates, no import error).
 3. Publishing the release runs `.github/workflows/publish.yml`, which uploads the version to the Comfy Registry (publisher `jplenio`, package `comfyui-plenio-music`). It needs the repository secret `REGISTRY_ACCESS_TOKEN` (a token from the Registry's publisher page). The workflow can also be started by hand (*Actions → Publish to Comfy Registry → Run workflow*).
 4. Check the package page on the Registry and install it once through the ComfyUI Manager.
 
