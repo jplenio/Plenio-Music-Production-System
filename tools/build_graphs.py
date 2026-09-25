@@ -18,48 +18,55 @@ PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT / "tools"))
 
 from graph_builder import (  # noqa: E402
+    App,
     Blueprint,
     BlueprintInput,
     BlueprintOutput,
     Graph,
+    Node,
     blueprint_file,
     workflow,
 )
 
-YUE2_CHECKPOINT = "yue2_3b_int8_convrot.safetensors"
-YUE2_URL = "https://huggingface.co/Comfy-Org/YuE2/resolve/main/checkpoints/yue2_3b_int8_convrot.safetensors"
-LORA = "ar_lora_inst_v3abc_comfyui.safetensors"
-LORA_URL = (
-    "https://huggingface.co/Mothersuperior/YuE2-instrumental-cot-full-loras/resolve/"
-    "947f2f4b28978b2b6c3e316e6a87925c76bf3c4b/ar_lora_inst_v3abc_comfyui.safetensors"
-)
-SHEETSAGE = "sheetsage2_bf16.safetensors"
-SHEETSAGE_URL = (
-    "https://huggingface.co/Comfy-Org/YuE2/resolve/main/audio_encoders/sheetsage2_bf16.safetensors"
-)
-WRITER = "gemma4_e4b_it_fp8_scaled.safetensors"
-WRITER_URL = (
-    "https://huggingface.co/Comfy-Org/gemma-4/resolve/main/text_encoders/gemma4_e4b_it_fp8_scaled.safetensors"
-)
+sys.path.insert(0, str(PROJECT))
 
-MINIMAX_REPO = "https://huggingface.co/Comfy-Org/MiniMax-Music-3/resolve/main"
+from plenio.core.models import ModelFile, by_file, load_catalogue  # noqa: E402
+
+CATALOGUE = by_file(load_catalogue(PROJECT / "resources" / "models.toml"))
+
+
+def catalogued(name: str) -> ModelFile:
+    model = CATALOGUE[name]
+    if not model.default:
+        raise ValueError(f"{name} is an alternative, not a template default")
+    return model
+
+
+YUE2_CHECKPOINT = "yue2_3b_int8_convrot.safetensors"
+LORA = "ar_lora_inst_v3abc_comfyui.safetensors"
+SHEETSAGE = "sheetsage2_bf16.safetensors"
+WRITER = "gemma4_e4b_it_fp8_scaled.safetensors"
 MINIMAX_DIT = "minimax_music3_dit_fp16.safetensors"
 MINIMAX_TE = "minimax_music3_text_encoder_pruned_int8_convrot.safetensors"
 MINIMAX_VAE = "minimax_music3_dav.safetensors"
+FLUX = "flux-2-klein-4b.safetensors"
+FLUX_TE = "qwen_3_4b.safetensors"
+FLUX_VAE = "flux2-vae.safetensors"
 
 
-def model(name: str, url: str, directory: str) -> dict[str, list[dict[str, str]]]:
-    return {"models": [{"name": name, "url": url, "directory": directory}]}
+def model(name: str) -> dict[str, list[dict[str, str]]]:
+    """Loader ``properties.models``: ComfyUI's missing-model dialog offers these downloads."""
+    return {"models": [catalogued(name).download_entry()]}
 
 
 def yue2_model() -> Blueprint:
-    g = Graph()
+    g = Graph(first_id=101)
     loader = g.add(
         "CheckpointLoaderSimple",
         (0, 0),
         size=(320, 100),
         widgets={"ckpt_name": YUE2_CHECKPOINT},
-        properties=model(YUE2_CHECKPOINT, YUE2_URL, "checkpoints"),
+        properties=model(YUE2_CHECKPOINT),
     )
     lora = g.add(
         "LoraLoader",
@@ -68,7 +75,7 @@ def yue2_model() -> Blueprint:
         mode=4,
         title="Instrumental adapter (optional)",
         widgets={"lora_name": LORA, "strength_model": 0.0, "strength_clip": 1.0},
-        properties=model(LORA, LORA_URL, "loras"),
+        properties=model(LORA),
     )
     engine = g.add("PlenioEngine", (760, 0), size=(260, 60))
     g.link(loader, "MODEL", lora, "model")
@@ -100,27 +107,27 @@ def yue2_model() -> Blueprint:
 
 
 def minimax_model() -> Blueprint:
-    g = Graph()
+    g = Graph(first_id=201)
     unet = g.add(
         "UNETLoader",
         (0, 0),
         size=(340, 90),
         widgets={"unet_name": MINIMAX_DIT, "weight_dtype": "default"},
-        properties=model(MINIMAX_DIT, f"{MINIMAX_REPO}/diffusion_models/{MINIMAX_DIT}", "diffusion_models"),
+        properties=model(MINIMAX_DIT),
     )
     clip = g.add(
         "CLIPLoader",
         (0, 140),
         size=(340, 110),
         widgets={"clip_name": MINIMAX_TE, "type": "minimax", "device": "default"},
-        properties=model(MINIMAX_TE, f"{MINIMAX_REPO}/text_encoders/{MINIMAX_TE}", "text_encoders"),
+        properties=model(MINIMAX_TE),
     )
     vae = g.add(
         "VAELoader",
         (0, 300),
         size=(340, 60),
         widgets={"vae_name": MINIMAX_VAE},
-        properties=model(MINIMAX_VAE, f"{MINIMAX_REPO}/vae/{MINIMAX_VAE}", "vae"),
+        properties=model(MINIMAX_VAE),
     )
     engine = g.add("PlenioEngine", (400, 140), size=(260, 60))
     g.link(clip, "CLIP", engine, "clip")
@@ -156,7 +163,7 @@ def minimax_model() -> Blueprint:
 
 
 def minimax_render() -> Blueprint:
-    g = Graph()
+    g = Graph(first_id=301)
     encode = g.add(
         "MiniMaxMusic3TextEncode",
         (0, 0),
@@ -235,7 +242,7 @@ MASTER_STYLE = "Balanced - gentle glue"
 
 
 def master() -> Blueprint:
-    g = Graph()
+    g = Graph(first_id=401)
     eq = g.add(
         "PlenioEQ",
         (0, 0),
@@ -276,7 +283,7 @@ def master() -> Blueprint:
 
 
 def write_song() -> Blueprint:
-    g = Graph()
+    g = Graph(first_id=501)
     compose = g.add("PlenioComposePrompt", (0, 0), size=(300, 100))
     loader = g.add(
         "CLIPLoader",
@@ -284,7 +291,7 @@ def write_song() -> Blueprint:
         size=(300, 110),
         title="Writer model",
         widgets={"clip_name": WRITER, "type": "stable_diffusion", "device": "default"},
-        properties=model(WRITER, WRITER_URL, "text_encoders"),
+        properties=model(WRITER),
     )
     generate = g.add(
         "TextGenerate",
@@ -352,14 +359,14 @@ def write_song() -> Blueprint:
 
 
 def transcribe_score() -> Blueprint:
-    g = Graph()
+    g = Graph(first_id=601)
     loader = g.add(
         "AudioEncoderLoader",
         (0, 0),
         size=(320, 90),
         title="SheetSage2",
         widgets={"audio_encoder_name": SHEETSAGE},
-        properties=model(SHEETSAGE, SHEETSAGE_URL, "audio_encoders"),
+        properties=model(SHEETSAGE),
     )
     node = g.add("PlenioTranscribeScore", (380, 0), size=(320, 120))
     g.link(loader, "AUDIO_ENCODER", node, "audio_encoder")
@@ -381,7 +388,7 @@ def transcribe_score() -> Blueprint:
 
 
 def yue2_plan() -> Blueprint:
-    g = Graph()
+    g = Graph(first_id=701)
     plan = g.add(
         "YuE2GenerateABC",
         (0, 0),
@@ -413,7 +420,7 @@ def yue2_plan() -> Blueprint:
 
 
 def yue2_render() -> Blueprint:
-    g = Graph()
+    g = Graph(first_id=801)
     music = g.add("YuE2GenerateMusic", (0, 0), size=(340, 380), widgets={"seed": 0, "seed.control": "fixed"})
     latent = g.add("EmptyYuE2LatentAudio", (400, 0), size=(260, 80))
     zero = g.add("ConditioningZeroOut", (400, 130), size=(240, 50))
@@ -464,7 +471,7 @@ def yue2_render() -> Blueprint:
 
 def yue2_takes() -> Blueprint:
     """N renders of the same documents with the seeds take_seed, take_seed + 1, ... (native loop, AS-16)."""
-    g = Graph()
+    g = Graph(first_id=901)
     start = g.add(
         "StartLoop",
         (0, 0),
@@ -533,25 +540,192 @@ def yue2_takes() -> Blueprint:
     )
 
 
-ABOUT_YUE2 = """# 1 · YuE2 · Song
+COVER_SIZE = 1024
 
-**Brief -> Write Song -> Song Sheet · Text -> YuE2 Plan -> Song Sheet · Score -> YuE2 Render -> Export**
+
+def cover_art() -> Blueprint:
+    g = Graph(first_id=1001)
+    unet = g.add(
+        "UNETLoader",
+        (0, 0),
+        size=(340, 90),
+        widgets={"unet_name": FLUX, "weight_dtype": "default"},
+        properties=model(FLUX),
+    )
+    clip = g.add(
+        "CLIPLoader",
+        (0, 140),
+        size=(340, 110),
+        widgets={"clip_name": FLUX_TE, "type": "flux2", "device": "default"},
+        properties=model(FLUX_TE),
+    )
+    vae = g.add(
+        "VAELoader", (0, 300), size=(340, 60), widgets={"vae_name": FLUX_VAE}, properties=model(FLUX_VAE)
+    )
+    encode = g.add("CLIPTextEncode", (400, 0), size=(340, 160), widgets={"text": ""})
+    zero = g.add("ConditioningZeroOut", (400, 220), size=(240, 50))
+    guider = g.add("CFGGuider", (780, 0), size=(260, 100), widgets={"cfg": 1.0})
+    noise = g.add(
+        "RandomNoise", (780, 150), size=(260, 90), widgets={"noise_seed": 0, "noise_seed.control": "fixed"}
+    )
+    select = g.add("KSamplerSelect", (780, 290), size=(260, 60), widgets={"sampler_name": "euler"})
+    scheduler = g.add(
+        "Flux2Scheduler",
+        (780, 400),
+        size=(260, 110),
+        widgets={"steps": 4, "width": COVER_SIZE, "height": COVER_SIZE},
+    )
+    latent = g.add(
+        "EmptyFlux2LatentImage",
+        (780, 560),
+        size=(260, 110),
+        widgets={"width": COVER_SIZE, "height": COVER_SIZE, "batch_size": 1},
+    )
+    sample = g.add("SamplerCustomAdvanced", (1100, 0), size=(260, 110))
+    decode = g.add("VAEDecode", (1420, 0), size=(220, 50))
+    g.link(clip, "CLIP", encode, "clip")
+    g.link(encode, "CONDITIONING", zero, "conditioning")
+    g.link(unet, "MODEL", guider, "model")
+    g.link(encode, "CONDITIONING", guider, "positive")
+    g.link(zero, "CONDITIONING", guider, "negative")
+    g.link(noise, "NOISE", sample, "noise")
+    g.link(guider, "GUIDER", sample, "guider")
+    g.link(select, "SAMPLER", sample, "sampler")
+    g.link(scheduler, "SIGMAS", sample, "sigmas")
+    g.link(latent, "LATENT", sample, "latent_image")
+    g.link(sample, "output", decode, "samples")
+    g.link(vae, "VAE", decode, "vae")
+    return Blueprint(
+        "Plenio · Cover Art",
+        "Plenio/Artwork",
+        "Paints the cover from the Song Sheet's artwork prompt with FLUX.2 Klein 4B (distilled, 4 steps, "
+        "native nodes; Apache-2.0). The templates keep it bypassed because it needs about 16 GB of extra model "
+        "files: select it and press Ctrl+B to turn it on. The seed is fixed, so new takes keep the cover; "
+        "change it for another cover. Replace the block with any text-to-image block that takes a prompt and "
+        "gives an image.",
+        g,
+        [
+            BlueprintInput("text", "STRING", [(encode, "text")], label="prompt"),
+            BlueprintInput("noise_seed", "INT", [(noise, "noise_seed")], default=0, label="cover seed"),
+            BlueprintInput(
+                "size",
+                "INT",
+                [(scheduler, "width"), (scheduler, "height"), (latent, "width"), (latent, "height")],
+                default=COVER_SIZE,
+                label="size (square, px)",
+            ),
+        ],
+        [BlueprintOutput("IMAGE", "IMAGE", (decode, "IMAGE"))],
+    )
+
+
+# --- templates ------------------------------------------------------------------------------------
+
+GROUP = "#3f789e"
+MODEL_GROUP = "#444"
+OPTIONAL_GROUP = "#555"
+ABOUT_SIZE = (480, 760)
+
+
+def about_note(g: Graph, text: str, height: float = ABOUT_SIZE[1]) -> Node:
+    return g.add_frontend(
+        "MarkdownNote", (-560, 0), size=(ABOUT_SIZE[0], height), title="About this template", widgets=[text]
+    )
+
+
+def take_seed(g: Graph, pos: tuple[float, float]) -> Node:
+    return g.add(
+        "SeedNode",
+        pos,
+        size=(300, 90),
+        title="Take seed",
+        widgets={"seed": 1, "seed.control": "randomize"},
+        labels={"seed": "take seed"},
+    )
+
+
+def finish(
+    g: Graph,
+    blueprints: dict[str, Blueprint],
+    x: float,
+    *,
+    audio: tuple[Node, str],
+    title: tuple[Node, str],
+    artwork: tuple[Node, str],
+    reports: list[tuple[Node, str]],
+    group: str,
+    export_widgets: dict[str, object] | None = None,
+) -> tuple[Node, Node, Node]:
+    """Master -> Preview + Export (the unmastered take as the original), and the optional Cover Art."""
+    master = g.add_subgraph(blueprints["master"], (x, 0), size=(340, 170))
+    preview = g.add("PreviewAudio", (x, 230), size=(340, 120), title="Preview (mastered)")
+    all_reports = [*reports, (master, "eq_report"), (master, "loudness_report")]
+    export = g.add(
+        "PlenioExportRelease",
+        (x + 400, 0),
+        size=(380, 440),
+        autogrow={"reports": len(all_reports)},
+        widgets=export_widgets,
+    )
+    cover = g.add_subgraph(
+        blueprints["cover"], (x, 560), size=(340, 170), mode=4, title="Cover Art (optional)"
+    )
+    cover_preview = g.add(
+        "PreviewImage", (x + 400, 560), size=(300, 300), mode=4, title="Cover preview (optional)"
+    )
+    g.link(audio[0], audio[1], master, "audio")
+    g.link(master, "audio", preview, "audio")
+    g.link(master, "audio", export, "audio")
+    g.link(audio[0], audio[1], export, "original")
+    g.link(title[0], title[1], export, "title")
+    g.link(artwork[0], artwork[1], cover, "text")
+    g.link(cover, "IMAGE", export, "cover")
+    g.link(cover, "IMAGE", cover_preview, "images")
+    for index, (node, output) in enumerate(all_reports):
+        g.link(node, output, export, f"reports.report_{index}")
+    g.group(group, [master, preview, export])
+    g.group("COVER ART (optional)", [cover, cover_preview], color=OPTIONAL_GROUP)
+    return master, preview, export
+
+
+FINISH_TEXT = (
+    "**Finish:** *Plenio · Master* brings the take to -14 LUFS / -1 dBTP with a gentle tone match (open the "
+    "block to change the EQ or the loudness target). Export writes the mastered FLAC 24-bit, the unmastered "
+    "take as `(original).flac` and a release record to `output/plenio`."
+)
+COVER_TEXT = (
+    "**Cover art (optional, bypassed):** *Cover Art* paints a cover from the sheet's artwork prompt with "
+    "FLUX.2 Klein 4B (about 16 GB of extra model files, Apache-2.0). Select it and the cover preview and "
+    "press **Ctrl+B**; Export then embeds the cover."
+)
+APP_TEXT = (
+    "**App mode:** switch *Graph / App* at the top left for a simple form with the brief, the take seed and "
+    "the results (no review stops)."
+)
+
+ABOUT_YUE2 = f"""# 1 · YuE2 · Song
+
+**Brief -> Write Song -> Song Sheet · Text -> YuE2 Plan -> Song Sheet · Score -> YuE2 Render -> Master -> Export**
 
 1. Describe the song in **Song Brief** (or pick a template). *vocals* switches between a sung song and an instrumental.
-2. Press **Run**. The writer model drafts title, style and lyrics; YuE2 plans a score; YuE2 renders the song; Export writes a 24-bit FLAC and a release record to `output/plenio`.
+2. Press **Run**. The writer model drafts title, style and lyrics; YuE2 plans a score and renders the song.
 3. Run again for a **new take**: the take seed changes, the text and the score stay (they are cached).
 
 **Inspect and edit:** open a **Song Sheet** to see exactly what YuE2 receives. Edit a document there; your edit wins until its draft changes, then the run stops and asks you. Set *review* to *stop for review* to approve documents before rendering.
 
-**Models** (downloaded on first use by ComfyUI): YuE2 3B int8, a Gemma 4 writer model. YuE2 weights are **CC BY-NC 4.0 (non-commercial)**.
+{FINISH_TEXT}
+
+{COVER_TEXT}
+
+{APP_TEXT}
+
+**Models** (ComfyUI offers the downloads when you open the template): YuE2 3B int8 (4.0 GB), the Gemma 4 E4B writer. YuE2 weights are **CC BY-NC 4.0 (non-commercial)**. The model block below is collapsed; expand it to choose other files.
 """
 
 
-def yue2_song(model_bp: Blueprint, write_bp: Blueprint, plan_bp: Blueprint, render_bp: Blueprint) -> Graph:
+def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g = Graph()
-    about = g.add_frontend(
-        "MarkdownNote", (-560, 0), size=(480, 620), title="About this template", widgets=[ABOUT_YUE2]
-    )
+    about_note(g, ABOUT_YUE2)
     brief = g.add(
         "PlenioSongBrief",
         (0, 0),
@@ -562,24 +736,16 @@ def yue2_song(model_bp: Blueprint, write_bp: Blueprint, plan_bp: Blueprint, rend
             "vocals": "sung",
         },
     )
-    model_node = g.add_subgraph(model_bp, (0, 760), size=(380, 140))
-    write = g.add_subgraph(write_bp, (460, 0), size=(360, 220))
+    model_node = g.add_subgraph(bp["yue2_model"], (0, 760), size=(380, 140), collapsed=True)
+    write = g.add_subgraph(bp["write"], (460, 0), size=(360, 220))
     text_sheet = g.add("PlenioSongSheet", (900, 0), size=(420, 420), title="Song Sheet · Text")
-    plan = g.add_subgraph(plan_bp, (1400, 0), size=(340, 220))
+    plan = g.add_subgraph(bp["yue2_plan"], (1400, 0), size=(340, 220))
     tools = g.add(
         "PlenioScoreTools", (1400, 300), size=(340, 140), widgets={"operation": "prepare from brief"}
     )
     score_sheet = g.add("PlenioSongSheet", (1820, 0), size=(420, 420), title="Song Sheet · Score")
-    seed = g.add(
-        "SeedNode",
-        (2320, 0),
-        size=(300, 90),
-        title="Take seed",
-        widgets={"seed": 1, "seed.control": "randomize"},
-    )
-    render = g.add_subgraph(render_bp, (2320, 150), size=(320, 250))
-    preview = g.add("PreviewAudio", (2700, 0), size=(360, 120))
-    export = g.add("PlenioExportRelease", (2700, 200), size=(360, 220), autogrow={"reports": 2})
+    seed = take_seed(g, (2320, 0))
+    render = g.add_subgraph(bp["yue2_render"], (2320, 150), size=(320, 250))
     g.link(brief, "brief", write, "brief")
     g.link(model_node, "engine", write, "engine")
     for kind in ("title", "style", "lyrics", "artwork_prompt"):
@@ -604,27 +770,38 @@ def yue2_song(model_bp: Blueprint, write_bp: Blueprint, plan_bp: Blueprint, rend
     g.link(score_sheet, "planning_mode", render, "mode")
     g.link(score_sheet, "score_seconds", render, "max_duration")
     g.link(seed, "seed", render, "seed")
-    g.link(render, "AUDIO", preview, "audio")
-    g.link(render, "AUDIO", export, "audio")
-    g.link(text_sheet, "title", export, "title")
-    # Only the sheets' reports: they hold the final documents, and wiring draft reports here would force the
-    # writer and the planner to run even when the user replaced their documents manually.
-    for index, sheet in enumerate((text_sheet, score_sheet)):
-        g.link(sheet, "report", export, f"reports.report_{index}")
+    # Only the sheets' reports (and the master's): they hold the final documents, and wiring draft reports
+    # here would force the writer and the planner to run even when the user replaced their documents manually.
+    _master, preview, export = finish(
+        g,
+        bp,
+        2720,
+        audio=(render, "AUDIO"),
+        title=(text_sheet, "title"),
+        artwork=(text_sheet, "artwork_prompt"),
+        reports=[(text_sheet, "report"), (score_sheet, "report")],
+        group="6 · FINISH",
+    )
     g.group("1 · SONG", [brief])
     g.group("2 · WRITE", [write])
     g.group("3 · TEXT", [text_sheet])
     g.group("4 · SCORE", [plan, tools, score_sheet])
     g.group("5 · RENDER", [seed, render])
-    g.group("6 · EXPORT", [preview, export])
-    g.group("MUSIC MODEL", [model_node], color="#444")
-    del about
-    return g
+    g.group("MUSIC MODEL", [model_node], color=MODEL_GROUP)
+    return g, song_app(brief, seed, preview, export)
 
 
-ABOUT_COVER = """# 2 · YuE2 · Cover
+def song_app(brief: Node, seed: Node, preview: Node, export: Node) -> App:
+    # The sung options only: App Mode (frontend 1.52) drops controls of the option that is not selected,
+    # so the instrumental options are set in the graph.
+    controls = ["template", "description", "genre", "mood", "tempo", "length", "vocals"]
+    controls += ["vocals.language", "vocals.voice", "vocals.theme"]
+    return App([(brief, name) for name in controls] + [(seed, "seed")], [preview, export])
 
-**Source -> Transcribe Score -> Song Sheet · Score -> lyrics (ASR, writer or section tags) -> Song Sheet · Text -> YuE2 Takes -> Check Vocals -> Export**
+
+ABOUT_COVER = f"""# 2 · YuE2 · Cover
+
+**Source -> Transcribe Score -> Song Sheet · Score -> lyrics (ASR, writer or section tags) -> Song Sheet · Text -> YuE2 Takes -> Check Vocals -> Master -> Export**
 
 1. Load the **source** recording (upload in *Load Audio*; up to 5:00 - trim longer songs with the optional *Excerpt* node).
 2. In **Cover Brief** choose the target style and what happens to the vocals: *instrumental* (default; an instrument plays the melody, or accompaniment only), *original lyrics* (transcribed from the source) or *new lyrics* (written on the source's melody). *harmony* keeps or replaces the original chords.
@@ -632,21 +809,23 @@ ABOUT_COVER = """# 2 · YuE2 · Cover
 4. Run again: the lyrics are drafted (ASR of the original, the writer's new lyrics, or the section tags) and the run **stops at Song Sheet · Text**. Correct or replace the lyrics - your text always wins - and *Approve*.
 5. Run again to render. Each further run is a new take (the take seed changes).
 
-**New lyrics** are understood only when they fit the melody - about one syllable per note - and the voice fits its range; Song Sheet · Text warns about both. Turn on *phrasing reference* for a syllable target per line.
+**New lyrics** are understood only when they fit the melody - about one syllable per note - and the voice fits its range; Song Sheet · Text warns about both.
 
-**Takes:** *YuE2 Takes* renders *takes* versions (seeds take seed, +1, ...); **Check Vocals** keeps the first instrumental take without vocal notes, the preview plays all takes. N takes cost N renders. **Instrumental adapter:** for instrumental covers YuE2 renders with the instrumental LoRA (no voice in any adapter cover in the owner's listening; bypass *Instrumental adapter* to switch it off). **Check sung lyrics** (bypassed): measures what a sung take actually sang.
+**Takes:** *YuE2 Takes* renders *takes* versions (seeds take seed, +1, ...); **Check Vocals** keeps the first instrumental take without vocal notes, the preview plays all takes. N takes cost N renders. **Instrumental adapter:** for instrumental covers YuE2 renders with the instrumental LoRA. **Check sung lyrics** (optional, bypassed) measures what a sung take actually sang.
 
-**Models** (downloaded on first use): YuE2 3B int8, SheetSage2, the instrumental adapter, a Gemma 4 writer; the lyrics ASR (faster-whisper large-v3, 3 GB) is fetched by Plenio when first needed. YuE2, SheetSage2 and the adapter are **CC BY-NC 4.0 (non-commercial)**.
+{FINISH_TEXT}
+
+{COVER_TEXT}
+
+This path has no App mode: the two review stops need the Song Sheet editor.
+
+**Models** (downloaded on first use): YuE2 3B int8, SheetSage2, the instrumental adapter, the Gemma 4 E4B writer; the lyrics ASR (faster-whisper large-v3, 3.1 GB) is fetched by Plenio when first needed. YuE2, SheetSage2 and the adapter are **CC BY-NC 4.0 (non-commercial)**.
 """
 
 
-def yue2_cover(
-    model_bp: Blueprint, write_bp: Blueprint, transcribe_bp: Blueprint, takes_bp: Blueprint
-) -> Graph:
+def yue2_cover(bp: dict[str, Blueprint]) -> Graph:
     g = Graph()
-    g.add_frontend(
-        "MarkdownNote", (-560, 0), size=(480, 760), title="About this template", widgets=[ABOUT_COVER]
-    )
+    about_note(g, ABOUT_COVER, height=900)
     source = g.add(
         "LoadAudio", (0, 0), size=(360, 140), title="Source recording", widgets={"audio": "cover_source.flac"}
     )
@@ -660,23 +839,23 @@ def yue2_cover(
     )
     brief = g.add(
         "PlenioCoverBrief",
-        (0, 340),
+        (0, 400),
         size=(380, 520),
         widgets={"genre": "acoustic folk", "mood": "warm, intimate", "vocals": "instrumental"},
     )
-    model_node = g.add_subgraph(model_bp, (0, 900), size=(380, 140))
+    model_node = g.add_subgraph(bp["yue2_model"], (0, 1060), size=(380, 140), collapsed=True)
     adapter = g.add(
         "LoraLoader",
-        (0, 1080),
+        (0, 1140),
         size=(380, 130),
         title="Instrumental adapter",
         widgets={"lora_name": LORA, "strength_model": 0.0, "strength_clip": 1.0},
-        properties=model(LORA, LORA_URL, "loras"),
+        properties=model(LORA),
     )
     adapter_switch = g.add(
-        "ComfySwitchNode", (420, 1080), size=(260, 90), title="Adapter for instrumental covers"
+        "ComfySwitchNode", (420, 1140), size=(260, 90), title="Adapter for instrumental covers"
     )
-    transcribe = g.add_subgraph(transcribe_bp, (460, 0), size=(340, 160))
+    transcribe = g.add_subgraph(bp["transcribe"], (460, 0), size=(340, 160))
     tools = g.add(
         "PlenioScoreTools", (460, 220), size=(340, 140), widgets={"operation": "prepare from brief"}
     )
@@ -688,7 +867,7 @@ def yue2_cover(
         widgets={"review": "stop for review"},
     )
     asr = g.add("PlenioTranscribeLyrics", (1380, 0), size=(340, 240), title="Transcribe Lyrics")
-    write = g.add_subgraph(write_bp, (1380, 300), size=(360, 260))
+    write = g.add_subgraph(bp["write"], (1380, 300), size=(360, 260))
     source_switch = g.add("ComfySwitchNode", (1800, 0), size=(260, 90), title="Original or new lyrics")
     tags_switch = g.add("ComfySwitchNode", (1800, 140), size=(260, 90), title="Instrumental: section tags")
     text_sheet = g.add(
@@ -698,24 +877,17 @@ def yue2_cover(
         title="Song Sheet · Text",
         widgets={"review": "stop for review"},
     )
-    seed = g.add(
-        "SeedNode",
-        (2620, 0),
-        size=(300, 90),
-        title="Take seed",
-        widgets={"seed": 1, "seed.control": "randomize"},
-    )
-    render = g.add_subgraph(takes_bp, (2620, 150), size=(320, 280), title="YuE2 Takes")
+    seed = take_seed(g, (2620, 0))
+    render = g.add_subgraph(bp["yue2_takes"], (2620, 150), size=(320, 280), title="YuE2 Takes")
     check_vocals = g.add("PlenioVocalCheck", (3000, 0), size=(340, 160), title="Check Vocals · best take")
+    takes_preview = g.add("PreviewAudio", (3000, 220), size=(340, 120), title="Preview (all takes)")
     check_lyrics = g.add(
         "PlenioTranscribeLyrics",
-        (3000, 200),
+        (3000, 560),
         size=(340, 200),
         mode=4,
-        title="Check sung lyrics (sung covers)",
+        title="Check sung lyrics (optional)",
     )
-    preview = g.add("PreviewAudio", (3400, 0), size=(360, 120))
-    export = g.add("PlenioExportRelease", (3400, 200), size=(360, 220), autogrow={"reports": 5})
 
     g.link(source, "AUDIO", excerpt, "audio")
     g.link(excerpt, "AUDIO", transcribe, "audio")
@@ -765,46 +937,61 @@ def yue2_cover(
     g.link(render, "takes", check_vocals, "audio")
     g.link(transcribe, "AUDIO_ENCODER", check_vocals, "audio_encoder")
     g.link(brief, "brief", check_vocals, "brief")
+    g.link(check_vocals, "takes", takes_preview, "audio")
     g.link(check_vocals, "audio", check_lyrics, "audio")
     g.link(text_sheet, "lyrics", check_lyrics, "expected_lyrics")
-    g.link(check_vocals, "takes", preview, "audio")
-    g.link(check_vocals, "audio", export, "audio")
-    g.link(text_sheet, "title", export, "title")
-    for index, node in enumerate((score_sheet, text_sheet, transcribe, check_vocals, check_lyrics)):
-        g.link(node, "report", export, f"reports.report_{index}")
+    finish(
+        g,
+        bp,
+        3420,
+        audio=(check_vocals, "audio"),
+        title=(text_sheet, "title"),
+        artwork=(text_sheet, "artwork_prompt"),
+        reports=[
+            (score_sheet, "report"),
+            (text_sheet, "report"),
+            (transcribe, "report"),
+            (check_vocals, "report"),
+            (check_lyrics, "report"),
+        ],
+        group="7 · FINISH",
+    )
     g.group("1 · SOURCE", [source, excerpt])
     g.group("2 · COVER", [brief])
     g.group("3 · SCORE", [transcribe, tools, score_sheet])
     g.group("4 · LYRICS", [asr, write, source_switch, tags_switch])
     g.group("5 · TEXT", [text_sheet])
-    g.group("6 · RENDER", [seed, render, check_vocals])
-    g.group("7 · CHECK (optional)", [check_lyrics], color="#555")
-    g.group("8 · EXPORT", [preview, export])
-    g.group("MUSIC MODEL", [model_node, adapter, adapter_switch], color="#444")
+    g.group("6 · RENDER", [seed, render, check_vocals, takes_preview])
+    g.group("CHECK SUNG LYRICS (optional)", [check_lyrics], color=OPTIONAL_GROUP)
+    g.group("MUSIC MODEL", [model_node, adapter, adapter_switch], color=MODEL_GROUP)
     return g
 
 
-ABOUT_MINIMAX = """# 3 · MiniMax · Song
+ABOUT_MINIMAX = f"""# 3 · MiniMax · Song
 
-**Brief -> Write Song -> Song Sheet -> MiniMax Render -> Export**
+**Brief -> Write Song -> Song Sheet -> MiniMax Render -> Master -> Export**
 
 1. Describe the song in **Song Brief** (or pick a template). *vocals* switches between a sung song and an instrumental.
-2. Press **Run**. The writer model drafts title, a structured **caption** (Global Metadata, Vocal Details, Arrangement), lyrics and an artwork prompt; MiniMax Music 3 renders the song; Export writes a 24-bit FLAC and a release record to `output/plenio`.
+2. Press **Run**. The writer model drafts title, a structured **caption** (Global Metadata, Vocal Details, Arrangement), lyrics and an artwork prompt; MiniMax Music 3 renders the song.
 3. Run again for a **new take**: the take seed changes, the documents stay (they are cached).
 
 **Inspect and edit:** open the **Song Sheet** to see exactly what MiniMax receives. Caption and lyrics together must stay under **5 000 tokens** (the sheet counts them exactly with the loaded text encoder and stops before rendering if they do not fit). The render ceiling follows the brief's length, at most 6:00; the model can end earlier.
 
 **Instrumentals:** the lyrics are a map of section tags ([Intro], [Instrumental], [Solo], ...), about twice as long as a sung song's, and the caption's Vocal Details are *n/a*.
 
-**Models** (downloaded on first use by ComfyUI): MiniMax Music 3 (diffusion model, int8 text encoder, VAE), a Gemma 4 writer model. MiniMax Music 3 weights: **MiniMax-Music3 Community License**.
+{FINISH_TEXT}
+
+{COVER_TEXT}
+
+{APP_TEXT}
+
+**Models** (ComfyUI offers the downloads when you open the template): MiniMax Music 3 (diffusion model 4.9 GB, int8 text encoder 9.2 GB, VAE), the Gemma 4 E4B writer. MiniMax Music 3 weights: **MiniMax-Music3 Community License**. If decoding runs out of memory, turn on *tiled decode* in MiniMax Render.
 """
 
 
-def minimax_song(model_bp: Blueprint, write_bp: Blueprint, render_bp: Blueprint) -> Graph:
+def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g = Graph()
-    about = g.add_frontend(
-        "MarkdownNote", (-560, 0), size=(480, 620), title="About this template", widgets=[ABOUT_MINIMAX]
-    )
+    about_note(g, ABOUT_MINIMAX)
     brief = g.add(
         "PlenioSongBrief",
         (0, 0),
@@ -815,19 +1002,11 @@ def minimax_song(model_bp: Blueprint, write_bp: Blueprint, render_bp: Blueprint)
             "vocals": "sung",
         },
     )
-    model_node = g.add_subgraph(model_bp, (0, 760), size=(380, 160))
-    write = g.add_subgraph(write_bp, (460, 0), size=(360, 220))
+    model_node = g.add_subgraph(bp["minimax_model"], (0, 760), size=(380, 160), collapsed=True)
+    write = g.add_subgraph(bp["write"], (460, 0), size=(360, 220))
     sheet = g.add("PlenioSongSheet", (900, 0), size=(420, 420), title="Song Sheet")
-    seed = g.add(
-        "SeedNode",
-        (1400, 0),
-        size=(300, 90),
-        title="Take seed",
-        widgets={"seed": 1, "seed.control": "randomize"},
-    )
-    render = g.add_subgraph(render_bp, (1400, 150), size=(320, 250))
-    preview = g.add("PreviewAudio", (1800, 0), size=(360, 120))
-    export = g.add("PlenioExportRelease", (1800, 200), size=(360, 220), autogrow={"reports": 1})
+    seed = take_seed(g, (1400, 0))
+    render = g.add_subgraph(bp["minimax_render"], (1400, 150), size=(320, 250))
     g.link(brief, "brief", write, "brief")
     g.link(model_node, "engine", write, "engine")
     for kind in ("title", "style", "lyrics", "artwork_prompt"):
@@ -840,18 +1019,22 @@ def minimax_song(model_bp: Blueprint, write_bp: Blueprint, render_bp: Blueprint)
     g.link(sheet, "lyrics", render, "lyrics")
     g.link(sheet, "score_seconds", render, "max_duration")
     g.link(seed, "seed", render, "seed")
-    g.link(render, "AUDIO", preview, "audio")
-    g.link(render, "AUDIO", export, "audio")
-    g.link(sheet, "title", export, "title")
-    g.link(sheet, "report", export, "reports.report_0")
+    _master, preview, export = finish(
+        g,
+        bp,
+        1800,
+        audio=(render, "AUDIO"),
+        title=(sheet, "title"),
+        artwork=(sheet, "artwork_prompt"),
+        reports=[(sheet, "report")],
+        group="5 · FINISH",
+    )
     g.group("1 · SONG", [brief])
     g.group("2 · WRITE", [write])
     g.group("3 · SHEET", [sheet])
     g.group("4 · RENDER", [seed, render])
-    g.group("5 · EXPORT", [preview, export])
-    g.group("MUSIC MODEL", [model_node], color="#444")
-    del about
-    return g
+    g.group("MUSIC MODEL", [model_node], color=MODEL_GROUP)
+    return g, song_app(brief, seed, preview, export)
 
 
 ABOUT_ENHANCE = """# 4 · Enhance & Master
@@ -866,29 +1049,34 @@ Finishes an existing recording (for example a take you rendered earlier) without
 4. Press **Run**. Export writes FLAC 24-bit and MP3 V0 to `output/plenio/enhanced`, copies the source file's tags and cover, keeps the unmastered source as `(original).flac`, and writes a release record with the measured loudness.
 
 The preview plays the result; compare it with the source in Load Audio. Nothing here needs a GPU.
+
+**App mode:** switch *Graph / App* at the top left for a simple form (file, EQ, target, compression).
 """
 
 
-def enhance_master() -> Graph:
+def enhance_master() -> tuple[Graph, App]:
     g = Graph()
-    about = g.add_frontend(
-        "MarkdownNote", (-560, 0), size=(480, 520), title="About this template", widgets=[ABOUT_ENHANCE]
-    )
+    about_note(g, ABOUT_ENHANCE, height=560)
     source = g.add("LoadAudio", (0, 0), size=(340, 140), title="Source")
     eq = g.add(
-        "PlenioEQ", (420, 0), size=(420, 420), widgets={"mode": "match preset", "mode.preset": WARM_GENTLE}
+        "PlenioEQ",
+        (420, 0),
+        size=(420, 420),
+        widgets={"mode": "match preset", "mode.preset": WARM_GENTLE},
+        labels={"mode": "EQ"},
     )
     loudness = g.add(
         "PlenioLoudness",
         (900, 0),
         size=(340, 220),
         widgets={"target": MASTER_TARGET, "compression": MASTER_STYLE, "sample_rate": "keep"},
+        labels={"target": "loudness target"},
     )
-    preview = g.add("PreviewAudio", (1300, 0), size=(360, 120))
+    preview = g.add("PreviewAudio", (1320, 0), size=(360, 120), title="Preview (mastered)")
     export = g.add(
         "PlenioExportRelease",
-        (1300, 180),
-        size=(360, 320),
+        (1320, 180),
+        size=(380, 400),
         autogrow={"reports": 2},
         widgets={
             "folder": "plenio/enhanced",
@@ -905,11 +1093,37 @@ def enhance_master() -> Graph:
     g.link(eq, "report", export, "reports.report_0")
     g.link(loudness, "report", export, "reports.report_1")
     g.group("1 · SOURCE", [source])
-    g.group("2 · TONE", [eq])
-    g.group("3 · LOUDNESS", [loudness])
-    g.group("4 · EXPORT", [preview, export])
-    del about
-    return g
+    g.group("2 · MASTER", [eq, loudness])
+    g.group("3 · FINISH", [preview, export])
+    app = App(
+        [(source, "audio"), (eq, "mode"), (loudness, "target"), (loudness, "compression")], [preview, export]
+    )
+    return g, app
+
+
+ABOUT_SYSTEM = """# 0 · System Check
+
+Press **Run**. The node lists:
+
+- ComfyUI, frontend and Plenio versions, Python and torch
+- GPUs, VRAM and system RAM
+- which model files of each template are installed, and what is still missing
+- optional Python packages and the Plenio assets (lyrics ASR)
+- the offline and download policy (`PLENIO_OFFLINE`, `PLENIO_AUTO_DOWNLOAD`)
+- the hardware rule table, with the row for this machine marked
+
+Recommendations are text only. Plenio never changes a setting or a model on its own; you choose the model files in the loader nodes of each template.
+
+Set **detail** to `full` to include the raw facts as JSON, for example for a bug report.
+"""
+
+
+def system_check() -> tuple[Graph, App]:
+    g = Graph()
+    about_note(g, ABOUT_SYSTEM, height=520)
+    check = g.add("PlenioSystemCheck", (0, 0), size=(640, 720), title="System Check")
+    g.group("SYSTEM CHECK", [check])
+    return g, App([(check, "detail")], [check])
 
 
 def write_json(path: Path, data: dict) -> None:
@@ -917,43 +1131,59 @@ def write_json(path: Path, data: dict) -> None:
     path.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
-def main() -> int:
-    model_bp, write_bp, plan_bp, render_bp = yue2_model(), write_song(), yue2_plan(), yue2_render()
-    transcribe_bp, takes_bp = transcribe_score(), yue2_takes()
-    minimax_model_bp, minimax_render_bp, master_bp = minimax_model(), minimax_render(), master()
-    blueprints = [
-        model_bp,
-        write_bp,
-        plan_bp,
-        render_bp,
-        transcribe_bp,
-        takes_bp,
-        minimax_model_bp,
-        minimax_render_bp,
-        master_bp,
+def blueprints() -> dict[str, Blueprint]:
+    return {
+        "yue2_model": yue2_model(),
+        "write": write_song(),
+        "yue2_plan": yue2_plan(),
+        "yue2_render": yue2_render(),
+        "transcribe": transcribe_score(),
+        "yue2_takes": yue2_takes(),
+        "minimax_model": minimax_model(),
+        "minimax_render": minimax_render(),
+        "master": master(),
+        "cover": cover_art(),
+    }
+
+
+def templates(bp: dict[str, Blueprint]) -> list[tuple[str, Graph, list[Blueprint], App | None]]:
+    song, song_app_config = yue2_song(bp)
+    minimax, minimax_app = minimax_song(bp)
+    enhance, enhance_app = enhance_master()
+    check, check_app = system_check()
+    finish_bps = [bp["master"], bp["cover"]]
+    return [
+        ("0 · System Check", check, [], check_app),
+        (
+            "1 · YuE2 · Song",
+            song,
+            [bp["yue2_model"], bp["write"], bp["yue2_plan"], bp["yue2_render"], *finish_bps],
+            song_app_config,
+        ),
+        (
+            "2 · YuE2 · Cover",
+            yue2_cover(bp),
+            [bp["yue2_model"], bp["write"], bp["transcribe"], bp["yue2_takes"], *finish_bps],
+            None,
+        ),
+        (
+            "3 · MiniMax · Song",
+            minimax,
+            [bp["minimax_model"], bp["write"], bp["minimax_render"], *finish_bps],
+            minimax_app,
+        ),
+        ("4 · Enhance & Master", enhance, [], enhance_app),
     ]
-    for blueprint in blueprints:
+
+
+def main() -> int:
+    bp = blueprints()
+    for blueprint in bp.values():
         write_json(PROJECT / "subgraphs" / f"{blueprint.name}.json", blueprint_file(blueprint))
-    song = yue2_song(model_bp, write_bp, plan_bp, render_bp)
-    write_json(
-        PROJECT / "example_workflows" / "1 · YuE2 · Song.json",
-        workflow(song, "1 · YuE2 · Song", [model_bp, write_bp, plan_bp, render_bp]),
-    )
-    cover = yue2_cover(model_bp, write_bp, transcribe_bp, takes_bp)
-    write_json(
-        PROJECT / "example_workflows" / "2 · YuE2 · Cover.json",
-        workflow(cover, "2 · YuE2 · Cover", [model_bp, write_bp, transcribe_bp, takes_bp]),
-    )
-    minimax = minimax_song(minimax_model_bp, write_bp, minimax_render_bp)
-    write_json(
-        PROJECT / "example_workflows" / "3 · MiniMax · Song.json",
-        workflow(minimax, "3 · MiniMax · Song", [minimax_model_bp, write_bp, minimax_render_bp]),
-    )
-    write_json(
-        PROJECT / "example_workflows" / "4 · Enhance & Master.json",
-        workflow(enhance_master(), "4 · Enhance & Master", []),
-    )
-    print(f"wrote {len(blueprints)} blueprints and 4 templates")
+    shipped = templates(bp)
+    for name, graph, used, app in shipped:
+        write_json(PROJECT / "example_workflows" / f"{name}.json", workflow(graph, name, used, app))
+    print(f"wrote {len(bp)} blueprints and {len(shipped)} templates")
     return 0
 
 

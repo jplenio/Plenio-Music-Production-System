@@ -62,6 +62,7 @@ class Node:
     output_links: dict[int, list[int]] = field(default_factory=dict)
     color: str | None = None
     bgcolor: str | None = None
+    collapsed: bool = False
 
     def slot_index(self, name: str) -> int:
         for index, slot in enumerate(self.inputs):
@@ -83,7 +84,7 @@ class Node:
             "type": self.type,
             "pos": list(self.pos),
             "size": list(self.size),
-            "flags": {},
+            "flags": {"collapsed": True} if self.collapsed else {},
             "order": order,
             "mode": self.mode,
             "inputs": [slot.to_json(self.input_links.get(slot.name)) for slot in self.inputs],
@@ -128,12 +129,14 @@ def _widget_type(spec_type: Any) -> str:
 class Graph:
     """A graph (top level or subgraph body) under construction."""
 
-    def __init__(self, snapshot: Mapping[str, Any] | None = None):
+    def __init__(self, snapshot: Mapping[str, Any] | None = None, *, first_id: int = 1):
+        """``first_id``: blueprint bodies use their own id range, so that no inner node shares an id with
+        a template's top-level nodes or another blueprint's (the frontend renumbers such nodes on load)."""
         self.snapshot = snapshot or load_snapshot()
         self.nodes: list[Node] = []
         self.links: list[dict[str, Any]] = []
         self.groups: list[dict[str, Any]] = []
-        self._next_node = 1
+        self._next_node = first_id
         self._next_link = 1
 
     # --- nodes ------------------------------------------------------------------
@@ -149,6 +152,8 @@ class Graph:
         mode: int = 0,
         properties: Mapping[str, Any] | None = None,
         autogrow: Mapping[str, int] | None = None,
+        labels: Mapping[str, str] | None = None,
+        collapsed: bool = False,
     ) -> Node:
         info = self.snapshot["nodes"].get(node_type)
         if info is None:
@@ -223,11 +228,17 @@ class Graph:
                     sockets.append(Slot(name, str(spec_type), optional=optional))
         if values:
             raise KeyError(f"{node_type}: unknown widget values {sorted(values)}")
+        slots = sockets + widget_slots
+        for name, label in (labels or {}).items():
+            slot = next((s for s in slots if s.name == name), None)
+            if slot is None:
+                raise KeyError(f"{node_type}: no input {name!r} to label")
+            slot.label = label
         outputs = list(zip(info.get("output_name") or info["output"], info["output"], strict=True))
         node = Node(
             self._next_node,
             node_type,
-            sockets + widget_slots,
+            slots,
             outputs,
             widget_values,
             pos,
@@ -235,6 +246,7 @@ class Graph:
             title,
             mode,
             dict(properties or {}),
+            collapsed=collapsed,
         )
         self._next_node += 1
         self.nodes.append(node)
@@ -277,6 +289,7 @@ class Graph:
         title: str | None = None,
         widgets: Mapping[str, Any] | None = None,
         mode: int = 0,
+        collapsed: bool = False,
     ) -> Node:
         values = dict(widgets or {})
         inputs = [Slot(i.name, i.type, widget=i.widget, label=i.label) for i in blueprint.inputs]
@@ -293,6 +306,7 @@ class Graph:
             size,
             title or blueprint.name,
             mode,
+            collapsed=collapsed,
         )
         self._next_node += 1
         self.nodes.append(node)
@@ -321,10 +335,13 @@ class Graph:
         return link_id
 
     def group(self, title: str, nodes: list[Node], *, color: str = "#3f789e", padding: float = 30) -> None:
+        def extent(node: Node) -> tuple[float, float]:
+            return (min(node.size[0], 260), 30) if node.collapsed else node.size
+
         left = min(n.pos[0] for n in nodes) - padding
         top = min(n.pos[1] for n in nodes) - padding - 40
-        right = max(n.pos[0] + n.size[0] for n in nodes) + padding
-        bottom = max(n.pos[1] + n.size[1] for n in nodes) + padding
+        right = max(n.pos[0] + extent(n)[0] for n in nodes) + padding
+        bottom = max(n.pos[1] + extent(n)[1] for n in nodes) + padding
         self.groups.append(
             {
                 "id": len(self.groups) + 1,
@@ -491,7 +508,29 @@ def blueprint_file(blueprint: Blueprint) -> dict[str, Any]:
     }
 
 
-def workflow(graph: Graph, name: str, blueprints: list[Blueprint]) -> dict[str, Any]:
+@dataclass
+class App:
+    """An App Mode configuration (frontend ``extra.linearData``): the widgets shown as the app's
+    controls, in order, and the output nodes whose results it shows."""
+
+    inputs: list[tuple[Node, str]]
+    outputs: list[Node]
+
+    def to_json(self) -> dict[str, Any]:
+        for node, name in self.inputs:
+            if not any(slot.name == name and slot.widget for slot in node.inputs):
+                raise KeyError(f"App input {name!r} is not a widget of node {node.id} ({node.type})")
+        return {
+            "inputs": [[node.id, name] for node, name in self.inputs],
+            "outputs": [node.id for node in self.outputs],
+        }
+
+
+def workflow(graph: Graph, name: str, blueprints: list[Blueprint], app: App | None = None) -> dict[str, Any]:
+    # The view opens on the About note (x = -560) and the first groups.
+    extra: dict[str, Any] = {"ds": {"scale": 0.7, "offset": [640, 150]}}
+    if app is not None:
+        extra["linearData"] = app.to_json()
     return {
         "id": stable_uuid("workflow", name),
         "revision": 0,
@@ -512,6 +551,6 @@ def workflow(graph: Graph, name: str, blueprints: list[Blueprint]) -> dict[str, 
         "groups": graph.groups,
         "definitions": {"subgraphs": [b.definition() for b in blueprints]},
         "config": {},
-        "extra": {"ds": {"scale": 0.75, "offset": [60, 80]}},
+        "extra": extra,
         "version": 0.4,
     }

@@ -101,7 +101,7 @@
     "version": 1,
     "state": {
      "lastGroupId": 0,
-     "lastNodeId": 3,
+     "lastNodeId": 703,
      "lastLinkId": 9,
      "lastRerouteId": 0
     },
@@ -220,7 +220,7 @@
     "widgets": [],
     "nodes": [
      {
-      "id": 1,
+      "id": 701,
       "type": "YuE2GenerateABC",
       "pos": [
        0,
@@ -359,7 +359,7 @@
       ]
      },
      {
-      "id": 2,
+      "id": 702,
       "type": "PrimitiveString",
       "pos": [
        0,
@@ -402,7 +402,7 @@
       ]
      },
      {
-      "id": 3,
+      "id": 703,
       "type": "ComfySwitchNode",
       "pos": [
        400,
@@ -462,17 +462,17 @@
     "links": [
      {
       "id": 1,
-      "origin_id": 2,
+      "origin_id": 702,
       "origin_slot": 0,
-      "target_id": 3,
+      "target_id": 703,
       "target_slot": 0,
       "type": "STRING"
      },
      {
       "id": 2,
-      "origin_id": 1,
+      "origin_id": 701,
       "origin_slot": 0,
-      "target_id": 3,
+      "target_id": 703,
       "target_slot": 1,
       "type": "STRING"
      },
@@ -480,7 +480,7 @@
       "id": 3,
       "origin_id": -10,
       "origin_slot": 0,
-      "target_id": 1,
+      "target_id": 701,
       "target_slot": 0,
       "type": "CLIP"
      },
@@ -488,7 +488,7 @@
       "id": 4,
       "origin_id": -10,
       "origin_slot": 1,
-      "target_id": 1,
+      "target_id": 701,
       "target_slot": 1,
       "type": "STRING"
      },
@@ -496,7 +496,7 @@
       "id": 5,
       "origin_id": -10,
       "origin_slot": 2,
-      "target_id": 1,
+      "target_id": 701,
       "target_slot": 2,
       "type": "STRING"
      },
@@ -504,7 +504,7 @@
       "id": 6,
       "origin_id": -10,
       "origin_slot": 3,
-      "target_id": 1,
+      "target_id": 701,
       "target_slot": 3,
       "type": "INT"
      },
@@ -512,7 +512,7 @@
       "id": 7,
       "origin_id": -10,
       "origin_slot": 4,
-      "target_id": 3,
+      "target_id": 703,
       "target_slot": 2,
       "type": "BOOLEAN"
      },
@@ -520,13 +520,13 @@
       "id": 8,
       "origin_id": -10,
       "origin_slot": 5,
-      "target_id": 1,
+      "target_id": 701,
       "target_slot": 4,
       "type": "COMBO"
      },
      {
       "id": 9,
-      "origin_id": 3,
+      "origin_id": 703,
       "origin_slot": 0,
       "target_id": -20,
       "target_slot": 0,

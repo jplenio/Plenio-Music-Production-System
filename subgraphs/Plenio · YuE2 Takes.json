@@ -130,7 +130,7 @@
     "version": 1,
     "state": {
      "lastGroupId": 0,
-     "lastNodeId": 8,
+     "lastNodeId": 908,
      "lastLinkId": 22,
      "lastRerouteId": 0
     },
@@ -299,7 +299,7 @@
     "widgets": [],
     "nodes": [
      {
-      "id": 1,
+      "id": 901,
       "type": "StartLoop",
       "pos": [
        0,
@@ -399,7 +399,7 @@
       ]
      },
      {
-      "id": 2,
+      "id": 902,
       "type": "ComfyMathExpression",
       "pos": [
        0,
@@ -471,7 +471,7 @@
       ]
      },
      {
-      "id": 3,
+      "id": 903,
       "type": "YuE2GenerateMusic",
       "pos": [
        360,
@@ -629,7 +629,7 @@
       ]
      },
      {
-      "id": 4,
+      "id": 904,
       "type": "EmptyYuE2LatentAudio",
       "pos": [
        760,
@@ -681,7 +681,7 @@
       ]
      },
      {
-      "id": 5,
+      "id": 905,
       "type": "ConditioningZeroOut",
       "pos": [
        760,
@@ -718,7 +718,7 @@
       "widgets_values": []
      },
      {
-      "id": 6,
+      "id": 906,
       "type": "KSampler",
       "pos": [
        1060,
@@ -835,7 +835,7 @@
       ]
      },
      {
-      "id": 7,
+      "id": 907,
       "type": "VAEDecodeAudio",
       "pos": [
        1420,
@@ -878,7 +878,7 @@
       "widgets_values": []
      },
      {
-      "id": 8,
+      "id": 908,
       "type": "EndLoop",
       "pos": [
        1700,
@@ -946,81 +946,81 @@
     "links": [
      {
       "id": 1,
-      "origin_id": 1,
+      "origin_id": 901,
       "origin_slot": 0,
-      "target_id": 2,
+      "target_id": 902,
       "target_slot": 0,
       "type": "INT"
      },
      {
       "id": 2,
-      "origin_id": 2,
+      "origin_id": 902,
       "origin_slot": 1,
-      "target_id": 3,
+      "target_id": 903,
       "target_slot": 4,
       "type": "INT"
      },
      {
       "id": 3,
-      "origin_id": 2,
+      "origin_id": 902,
       "origin_slot": 1,
-      "target_id": 6,
+      "target_id": 906,
       "target_slot": 4,
       "type": "INT"
      },
      {
       "id": 4,
-      "origin_id": 3,
+      "origin_id": 903,
       "origin_slot": 1,
-      "target_id": 4,
+      "target_id": 904,
       "target_slot": 0,
       "type": "FLOAT"
      },
      {
       "id": 5,
-      "origin_id": 3,
+      "origin_id": 903,
       "origin_slot": 0,
-      "target_id": 5,
+      "target_id": 905,
       "target_slot": 0,
       "type": "CONDITIONING"
      },
      {
       "id": 6,
-      "origin_id": 3,
+      "origin_id": 903,
       "origin_slot": 0,
-      "target_id": 6,
+      "target_id": 906,
       "target_slot": 1,
       "type": "CONDITIONING"
      },
      {
       "id": 7,
-      "origin_id": 5,
+      "origin_id": 905,
       "origin_slot": 0,
-      "target_id": 6,
+      "target_id": 906,
       "target_slot": 2,
       "type": "CONDITIONING"
      },
      {
       "id": 8,
-      "origin_id": 4,
+      "origin_id": 904,
       "origin_slot": 0,
-      "target_id": 6,
+      "target_id": 906,
       "target_slot": 3,
       "type": "LATENT"
      },
      {
       "id": 9,
-      "origin_id": 6,
+      "origin_id": 906,
       "origin_slot": 0,
-      "target_id": 7,
+      "target_id": 907,
       "target_slot": 0,
       "type": "LATENT"
      },
      {
       "id": 10,
-      "origin_id": 7,
+      "origin_id": 907,
       "origin_slot": 0,
-      "target_id": 8,
+      "target_id": 908,
       "target_slot": 0,
       "type": "AUDIO"
      },
@@ -1028,7 +1028,7 @@
       "id": 11,
       "origin_id": -10,
       "origin_slot": 0,
-      "target_id": 6,
+      "target_id": 906,
       "target_slot": 0,
       "type": "MODEL"
      },
@@ -1036,7 +1036,7 @@
       "id": 12,
       "origin_id": -10,
       "origin_slot": 1,
-      "target_id": 3,
+      "target_id": 903,
       "target_slot": 0,
       "type": "CLIP"
      },
@@ -1044,7 +1044,7 @@
       "id": 13,
       "origin_id": -10,
       "origin_slot": 2,
-      "target_id": 7,
+      "target_id": 907,
       "target_slot": 1,
       "type": "VAE"
      },
@@ -1052,7 +1052,7 @@
       "id": 14,
       "origin_id": -10,
       "origin_slot": 3,
-      "target_id": 3,
+      "target_id": 903,
       "target_slot": 1,
       "type": "STRING"
      },
@@ -1060,7 +1060,7 @@
       "id": 15,
       "origin_id": -10,
       "origin_slot": 4,
-      "target_id": 3,
+      "target_id": 903,
       "target_slot": 2,
       "type": "STRING"
      },
@@ -1068,7 +1068,7 @@
       "id": 16,
       "origin_id": -10,
       "origin_slot": 4,
-      "target_id": 1,
+      "target_id": 901,
       "target_slot": 1,
       "type": "STRING"
      },
@@ -1076,7 +1076,7 @@
       "id": 17,
       "origin_id": -10,
       "origin_slot": 5,
-      "target_id": 3,
+      "target_id": 903,
       "target_slot": 3,
       "type": "STRING"
      },
@@ -1084,7 +1084,7 @@
       "id": 18,
       "origin_id": -10,
       "origin_slot": 6,
-      "target_id": 3,
+      "target_id": 903,
       "target_slot": 5,
       "type": "COMBO"
      },
@@ -1092,7 +1092,7 @@
       "id": 19,
       "origin_id": -10,
       "origin_slot": 7,
-      "target_id": 2,
+      "target_id": 902,
       "target_slot": 1,
       "type": "INT"
      },
@@ -1100,7 +1100,7 @@
       "id": 20,
       "origin_id": -10,
       "origin_slot": 8,
-      "target_id": 3,
+      "target_id": 903,
       "target_slot": 6,
       "type": "FLOAT"
      },
@@ -1108,13 +1108,13 @@
       "id": 21,
       "origin_id": -10,
       "origin_slot": 9,
-      "target_id": 1,
+      "target_id": 901,
       "target_slot": 3,
       "type": "INT"
      },
      {
       "id": 22,
-      "origin_id": 8,
+      "origin_id": 908,
       "origin_slot": 0,
       "target_id": -20,
       "target_slot": 0,

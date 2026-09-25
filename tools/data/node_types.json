@@ -31,6 +31,54 @@
    "category": "model/loaders",
    "display_name": "Load Audio Encoder"
   },
+  "CFGGuider": {
+   "input": {
+    "required": {
+     "model": [
+      "MODEL",
+      {}
+     ],
+     "positive": [
+      "CONDITIONING",
+      {}
+     ],
+     "negative": [
+      "CONDITIONING",
+      {}
+     ],
+     "cfg": [
+      "FLOAT",
+      {
+       "default": 8.0,
+       "min": 0.0,
+       "max": 100.0,
+       "step": 0.1,
+       "round": 0.01
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "model",
+     "positive",
+     "negative",
+     "cfg"
+    ]
+   },
+   "output": [
+    "GUIDER"
+   ],
+   "output_name": [
+    "GUIDER"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "model/sampling/guiders",
+   "display_name": "CFG Guider"
+  },
   "CLIPLoader": {
    "input": {
     "required": {
@@ -104,6 +152,44 @@
    "output_node": false,
    "category": "model/loaders",
    "display_name": "Load CLIP"
+  },
+  "CLIPTextEncode": {
+   "input": {
+    "required": {
+     "text": [
+      "STRING",
+      {
+       "multiline": true,
+       "dynamicPrompts": true,
+       "tooltip": "The text to be encoded."
+      }
+     ],
+     "clip": [
+      "CLIP",
+      {
+       "tooltip": "The CLIP model used for encoding the text."
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "text",
+     "clip"
+    ]
+   },
+   "output": [
+    "CONDITIONING"
+   ],
+   "output_name": [
+    "CONDITIONING"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "model/conditioning",
+   "display_name": "CLIP Text Encode (Prompt)"
   },
   "CheckpointLoaderSimple": {
    "input": {
@@ -300,6 +386,57 @@
    "category": "model/conditioning/transform",
    "display_name": "Conditioning Zero Out"
   },
+  "EmptyFlux2LatentImage": {
+   "input": {
+    "required": {
+     "width": [
+      "INT",
+      {
+       "default": 1024,
+       "min": 16,
+       "max": 16384,
+       "step": 16
+      }
+     ],
+     "height": [
+      "INT",
+      {
+       "default": 1024,
+       "min": 16,
+       "max": 16384,
+       "step": 16
+      }
+     ],
+     "batch_size": [
+      "INT",
+      {
+       "default": 1,
+       "min": 1,
+       "max": 4096
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "width",
+     "height",
+     "batch_size"
+    ]
+   },
+   "output": [
+    "LATENT"
+   ],
+   "output_name": [
+    "LATENT"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "model/latent/flux",
+   "display_name": "Empty Flux 2 Latent"
+  },
   "EmptyMiniMaxMusic3LatentAudio": {
    "input": {
     "required": {
@@ -472,6 +609,57 @@
    "category": "utilities/looping",
    "display_name": "End Loop"
   },
+  "Flux2Scheduler": {
+   "input": {
+    "required": {
+     "steps": [
+      "INT",
+      {
+       "default": 20,
+       "min": 1,
+       "max": 4096
+      }
+     ],
+     "width": [
+      "INT",
+      {
+       "default": 1024,
+       "min": 16,
+       "max": 16384,
+       "step": 1
+      }
+     ],
+     "height": [
+      "INT",
+      {
+       "default": 1024,
+       "min": 16,
+       "max": 16384,
+       "step": 1
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "steps",
+     "width",
+     "height"
+    ]
+   },
+   "output": [
+    "SIGMAS"
+   ],
+   "output_name": [
+    "SIGMAS"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "model/sampling/schedulers",
+   "display_name": null
+  },
   "KSampler": {
    "input": {
     "required": {
@@ -635,6 +823,82 @@
    "output_node": false,
    "category": "model/sampling",
    "display_name": "KSampler"
+  },
+  "KSamplerSelect": {
+   "input": {
+    "required": {
+     "sampler_name": [
+      "COMBO",
+      {
+       "multiselect": false,
+       "options": [
+        "euler",
+        "euler_cfg_pp",
+        "euler_ancestral",
+        "euler_ancestral_cfg_pp",
+        "heun",
+        "heunpp2",
+        "exp_heun_2_x0",
+        "exp_heun_2_x0_sde",
+        "dpm_2",
+        "dpm_2_ancestral",
+        "lms",
+        "dpm_fast",
+        "dpm_adaptive",
+        "dpmpp_2s_ancestral",
+        "dpmpp_2s_ancestral_cfg_pp",
+        "dpmpp_sde",
+        "dpmpp_sde_gpu",
+        "dpmpp_2m",
+        "dpmpp_2m_cfg_pp",
+        "dpmpp_2m_sde",
+        "dpmpp_2m_sde_gpu",
+        "dpmpp_2m_sde_heun",
+        "dpmpp_2m_sde_heun_gpu",
+        "dpmpp_3m_sde",
+        "dpmpp_3m_sde_gpu",
+        "ddpm",
+        "lcm",
+        "ipndm",
+        "ipndm_v",
+        "deis",
+        "cfgpp_ud10_ab",
+        "res_multistep",
+        "res_multistep_cfg_pp",
+        "res_multistep_ancestral",
+        "res_multistep_ancestral_cfg_pp",
+        "gradient_estimation",
+        "gradient_estimation_cfg_pp",
+        "er_sde",
+        "seeds_2",
+        "seeds_3",
+        "sa_solver",
+        "sa_solver_pece",
+        "ddim",
+        "uni_pc",
+        "uni_pc_bh2"
+       ]
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "sampler_name"
+    ]
+   },
+   "output": [
+    "SAMPLER"
+   ],
+   "output_name": [
+    "SAMPLER"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "model/sampling/samplers",
+   "display_name": null
   },
   "LoadAudio": {
    "input": {
@@ -3271,6 +3535,40 @@
    "category": "audio",
    "display_name": "Preview Audio"
   },
+  "PreviewImage": {
+   "input": {
+    "required": {
+     "images": [
+      "IMAGE"
+     ]
+    },
+    "hidden": {
+     "prompt": "PROMPT",
+     "extra_pnginfo": "EXTRA_PNGINFO"
+    }
+   },
+   "input_order": {
+    "required": [
+     "images"
+    ],
+    "hidden": [
+     "prompt",
+     "extra_pnginfo"
+    ]
+   },
+   "output": [
+    "IMAGE"
+   ],
+   "output_name": [
+    "images"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": true,
+   "category": "image",
+   "display_name": "Preview Image"
+  },
   "PrimitiveBoolean": {
    "input": {
     "required": {
@@ -3417,6 +3715,88 @@
    "output_node": false,
    "category": "utilities/primitive",
    "display_name": "Text (Multiline)"
+  },
+  "RandomNoise": {
+   "input": {
+    "required": {
+     "noise_seed": [
+      "INT",
+      {
+       "default": 0,
+       "min": 0,
+       "max": 18446744073709551615,
+       "control_after_generate": true
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "noise_seed"
+    ]
+   },
+   "output": [
+    "NOISE"
+   ],
+   "output_name": [
+    "NOISE"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "model/sampling/noise",
+   "display_name": null
+  },
+  "SamplerCustomAdvanced": {
+   "input": {
+    "required": {
+     "noise": [
+      "NOISE",
+      {}
+     ],
+     "guider": [
+      "GUIDER",
+      {}
+     ],
+     "sampler": [
+      "SAMPLER",
+      {}
+     ],
+     "sigmas": [
+      "SIGMAS",
+      {}
+     ],
+     "latent_image": [
+      "LATENT",
+      {}
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "noise",
+     "guider",
+     "sampler",
+     "sigmas",
+     "latent_image"
+    ]
+   },
+   "output": [
+    "LATENT",
+    "LATENT"
+   ],
+   "output_name": [
+    "output",
+    "denoised_output"
+   ],
+   "output_is_list": [
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "model/sampling/custom",
+   "display_name": null
   },
   "SaveAudio": {
    "input": {
@@ -4068,6 +4448,42 @@
    "output_node": false,
    "category": "model/loaders",
    "display_name": "Load Diffusion Model"
+  },
+  "VAEDecode": {
+   "input": {
+    "required": {
+     "samples": [
+      "LATENT",
+      {
+       "tooltip": "The latent to be decoded."
+      }
+     ],
+     "vae": [
+      "VAE",
+      {
+       "tooltip": "The VAE model used for decoding the latent."
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "samples",
+     "vae"
+    ]
+   },
+   "output": [
+    "IMAGE"
+   ],
+   "output_name": [
+    "IMAGE"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "model/latent",
+   "display_name": "VAE Decode"
   },
   "VAEDecodeAudio": {
    "input": {

@@ -9,7 +9,10 @@ ComfyUI's ``/object_info``):
   definition produces (incl. seed control values and DynamicCombo options);
 * blueprints: one wrapper node, name equal to the file name, a ``Plenio``
   category and a description, no legacy ``proxyWidgets`` entries;
-* templates: embedded subgraph definitions equal the blueprint files;
+* templates: embedded subgraph definitions equal the blueprint files; one "About this template"
+  note; every other top-level node inside a group; bypassed (optional) nodes titled "(optional)";
+  an App Mode configuration (``extra.linearData``) names existing widgets and output nodes; a
+  thumbnail ``<name>.jpg`` next to the template;
 * no absolute local paths, private addresses or secrets in any string.
 """
 
@@ -265,6 +268,7 @@ def validate_file(
             if not definition.get("description"):
                 problems.append(f"{where}: description missing")
     else:
+        _check_template(data, path, nodes_info, subgraph_ids, definitions, problems)
         for definition in definitions:
             blueprint = blueprints.get(definition.get("name", ""))
             if blueprint is not None and _normalised_definition(definition) != _normalised_definition(
@@ -275,6 +279,60 @@ def validate_file(
                     f"{definition['name']}.json (re-sync the template)"
                 )
     return problems
+
+
+ABOUT_TITLE = "About this template"
+
+
+def _inside(node: Mapping[str, Any], group: Mapping[str, Any]) -> bool:
+    x, y = node["pos"]
+    left, top, width, height = group["bounding"]
+    return left <= x <= left + width and top <= y <= top + height
+
+
+def _check_template(
+    data: Mapping[str, Any],
+    path: Path,
+    nodes_info: Mapping[str, Any],
+    subgraph_ids: set[str],
+    definitions: list[Mapping[str, Any]],
+    problems: list[str],
+) -> None:
+    where = path.name
+    nodes = data.get("nodes", [])
+    notes = [n for n in nodes if n["type"] in FRONTEND_ONLY_TYPES]
+    if [n.get("title") for n in notes] != [ABOUT_TITLE]:
+        problems.append(f"{where}: exactly one note titled {ABOUT_TITLE!r} (found {len(notes)})")
+    groups = data.get("groups", [])
+    for node in nodes:
+        if node["type"] in FRONTEND_ONLY_TYPES:
+            continue
+        label = f"{where} node {node['id']} ({node.get('title') or node['type']})"
+        containing = [g for g in groups if _inside(node, g)]
+        if not containing:
+            problems.append(f"{label}: outside every group")
+        if node.get("mode") == 4 and "(optional)" not in str(node.get("title", "")):
+            problems.append(f"{label}: bypassed, so its title must say '(optional)'")
+    by_id = {node["id"]: node for node in nodes}
+    app = (data.get("extra") or {}).get("linearData")
+    if app is not None:
+        for entry in app.get("inputs", []):
+            node = by_id.get(entry[0]) if isinstance(entry, list) and len(entry) >= 2 else None
+            if node is None:
+                problems.append(f"{where}: App input {entry!r} names no top-level node")
+                continue
+            widgets = {slot["name"] for slot in node.get("inputs", []) if slot.get("widget")}
+            if entry[1] not in widgets:
+                problems.append(f"{where}: App input {entry!r} is not a widget of that node")
+        for output in app.get("outputs", []):
+            node = by_id.get(output)
+            info = nodes_info.get(node["type"]) if node else None
+            if node is None or node["type"] in subgraph_ids or not (info or {}).get("output_node"):
+                problems.append(f"{where}: App output {output!r} is not an output node")
+            elif node.get("mode") == 4:
+                problems.append(f"{where}: App output {output!r} is bypassed")
+    if not path.with_suffix(".jpg").is_file():
+        problems.append(f"{where}: thumbnail {path.stem}.jpg missing (tools/build_thumbnails.py)")
 
 
 def load_blueprints(folder: Path) -> dict[str, dict[str, Any]]:

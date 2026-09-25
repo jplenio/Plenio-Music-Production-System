@@ -13,7 +13,7 @@
    ],
    "size": [
     480,
-    520
+    560
    ],
    "flags": {},
    "order": 0,
@@ -25,7 +25,7 @@
     "Node name for S&R": "MarkdownNote"
    },
    "widgets_values": [
-    "# 4 · Enhance & Master\n\n**Load Audio -> EQ -> Loudness & Dynamics -> Export**\n\nFinishes an existing recording (for example a take you rendered earlier) without any music model.\n\n1. Upload the file in **Load Audio**.\n2. **EQ** starts with a gentle warm tone match (*match preset*). Choose *manual* to draw your own curve, *flat* for no EQ, or connect a **reference** recording and pick a reference recipe.\n3. **Loudness & Dynamics** brings the song to -14 LUFS with a true peak of at most -1 dBTP (streaming); pick another target or compression style if you like.\n4. Press **Run**. Export writes FLAC 24-bit and MP3 V0 to `output/plenio/enhanced`, copies the source file's tags and cover, keeps the unmastered source as `(original).flac`, and writes a release record with the measured loudness.\n\nThe preview plays the result; compare it with the source in Load Audio. Nothing here needs a GPU.\n"
+    "# 4 · Enhance & Master\n\n**Load Audio -> EQ -> Loudness & Dynamics -> Export**\n\nFinishes an existing recording (for example a take you rendered earlier) without any music model.\n\n1. Upload the file in **Load Audio**.\n2. **EQ** starts with a gentle warm tone match (*match preset*). Choose *manual* to draw your own curve, *flat* for no EQ, or connect a **reference** recording and pick a reference recipe.\n3. **Loudness & Dynamics** brings the song to -14 LUFS with a true peak of at most -1 dBTP (streaming); pick another target or compression style if you like.\n4. Press **Run**. Export writes FLAC 24-bit and MP3 V0 to `output/plenio/enhanced`, copies the source file's tags and cover, keeps the unmastered source as `(original).flac`, and writes a release record with the measured loudness.\n\nThe preview plays the result; compare it with the source in Load Audio. Nothing here needs a GPU.\n\n**App mode:** switch *Graph / App* at the top left for a simple form (file, EQ, target, compression).\n"
    ]
   },
   {
@@ -103,6 +103,7 @@
     {
      "localized_name": "mode",
      "name": "mode",
+     "label": "EQ",
      "type": "COMFY_DYNAMICCOMBO_V3",
      "widget": {
       "name": "mode"
@@ -169,6 +170,7 @@
     {
      "localized_name": "target",
      "name": "target",
+     "label": "loudness target",
      "type": "COMFY_DYNAMICCOMBO_V3",
      "widget": {
       "name": "target"
@@ -226,7 +228,7 @@
    "id": 5,
    "type": "PreviewAudio",
    "pos": [
-    1300,
+    1320,
     0
    ],
    "size": [
@@ -252,6 +254,7 @@
      "links": null
     }
    ],
+   "title": "Preview (mastered)",
    "properties": {
     "Node name for S&R": "PreviewAudio"
    },
@@ -261,12 +264,12 @@
    "id": 6,
    "type": "PlenioExportRelease",
    "pos": [
-    1300,
+    1320,
     180
    ],
    "size": [
-    360,
-    320
+    380,
+    400
    ],
    "flags": {},
    "order": 5,
@@ -489,11 +492,11 @@
   },
   {
    "id": 2,
-   "title": "2 · TONE",
+   "title": "2 · MASTER",
    "bounding": [
     390,
     -70,
-    480,
+    880,
     520
    ],
    "color": "#3f789e",
@@ -502,25 +505,12 @@
   },
   {
    "id": 3,
-   "title": "3 · LOUDNESS",
+   "title": "3 · FINISH",
    "bounding": [
-    870,
+    1290,
     -70,
-    400,
-    320
-   ],
-   "color": "#3f789e",
-   "font_size": 24,
-   "flags": {}
-  },
-  {
-   "id": 4,
-   "title": "4 · EXPORT",
-   "bounding": [
-    1270,
-    -70,
-    420,
-    600
+    440,
+    680
    ],
    "color": "#3f789e",
    "font_size": 24,
@@ -533,10 +523,34 @@
  "config": {},
  "extra": {
   "ds": {
-   "scale": 0.75,
+   "scale": 0.7,
    "offset": [
-    60,
-    80
+    640,
+    150
+   ]
+  },
+  "linearData": {
+   "inputs": [
+    [
+     2,
+     "audio"
+    ],
+    [
+     3,
+     "mode"
+    ],
+    [
+     4,
+     "target"
+    ],
+    [
+     4,
+     "compression"
+    ]
+   ],
+   "outputs": [
+    5,
+    6
    ]
   }
  },

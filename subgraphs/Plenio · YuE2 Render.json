@@ -130,7 +130,7 @@
     "version": 1,
     "state": {
      "lastGroupId": 0,
-     "lastNodeId": 5,
+     "lastNodeId": 805,
      "lastLinkId": 18,
      "lastRerouteId": 0
     },
@@ -299,7 +299,7 @@
     "widgets": [],
     "nodes": [
      {
-      "id": 1,
+      "id": 801,
       "type": "YuE2GenerateMusic",
       "pos": [
        0,
@@ -458,7 +458,7 @@
       ]
      },
      {
-      "id": 2,
+      "id": 802,
       "type": "EmptyYuE2LatentAudio",
       "pos": [
        400,
@@ -510,7 +510,7 @@
       ]
      },
      {
-      "id": 3,
+      "id": 803,
       "type": "ConditioningZeroOut",
       "pos": [
        400,
@@ -547,7 +547,7 @@
       "widgets_values": []
      },
      {
-      "id": 4,
+      "id": 804,
       "type": "KSampler",
       "pos": [
        700,
@@ -664,7 +664,7 @@
       ]
      },
      {
-      "id": 5,
+      "id": 805,
       "type": "VAEDecodeAudio",
       "pos": [
        1060,
@@ -711,49 +711,49 @@
     "links": [
      {
       "id": 1,
-      "origin_id": 1,
+      "origin_id": 801,
       "origin_slot": 1,
-      "target_id": 2,
+      "target_id": 802,
       "target_slot": 0,
       "type": "FLOAT"
      },
      {
       "id": 2,
-      "origin_id": 1,
+      "origin_id": 801,
       "origin_slot": 0,
-      "target_id": 3,
+      "target_id": 803,
       "target_slot": 0,
       "type": "CONDITIONING"
      },
      {
       "id": 3,
-      "origin_id": 1,
+      "origin_id": 801,
       "origin_slot": 0,
-      "target_id": 4,
+      "target_id": 804,
       "target_slot": 1,
       "type": "CONDITIONING"
      },
      {
       "id": 4,
-      "origin_id": 3,
+      "origin_id": 803,
       "origin_slot": 0,
-      "target_id": 4,
+      "target_id": 804,
       "target_slot": 2,
       "type": "CONDITIONING"
      },
      {
       "id": 5,
-      "origin_id": 2,
+      "origin_id": 802,
       "origin_slot": 0,
-      "target_id": 4,
+      "target_id": 804,
       "target_slot": 3,
       "type": "LATENT"
      },
      {
       "id": 6,
-      "origin_id": 4,
+      "origin_id": 804,
       "origin_slot": 0,
-      "target_id": 5,
+      "target_id": 805,
       "target_slot": 0,
       "type": "LATENT"
      },
@@ -761,7 +761,7 @@
       "id": 7,
       "origin_id": -10,
       "origin_slot": 0,
-      "target_id": 4,
+      "target_id": 804,
       "target_slot": 0,
       "type": "MODEL"
      },
@@ -769,7 +769,7 @@
       "id": 8,
       "origin_id": -10,
       "origin_slot": 1,
-      "target_id": 1,
+      "target_id": 801,
       "target_slot": 0,
       "type": "CLIP"
      },
@@ -777,7 +777,7 @@
       "id": 9,
       "origin_id": -10,
       "origin_slot": 2,
-      "target_id": 5,
+      "target_id": 805,
       "target_slot": 1,
       "type": "VAE"
      },
@@ -785,7 +785,7 @@
       "id": 10,
       "origin_id": -10,
       "origin_slot": 3,
-      "target_id": 1,
+      "target_id": 801,
       "target_slot": 1,
       "type": "STRING"
      },
@@ -793,7 +793,7 @@
       "id": 11,
       "origin_id": -10,
       "origin_slot": 4,
-      "target_id": 1,
+      "target_id": 801,
       "target_slot": 2,
       "type": "STRING"
      },
@@ -801,7 +801,7 @@
       "id": 12,
       "origin_id": -10,
       "origin_slot": 5,
-      "target_id": 1,
+      "target_id": 801,
       "target_slot": 3,
       "type": "STRING"
      },
@@ -809,7 +809,7 @@
       "id": 13,
       "origin_id": -10,
       "origin_slot": 6,
-      "target_id": 1,
+      "target_id": 801,
       "target_slot": 5,
       "type": "COMBO"
      },
@@ -817,7 +817,7 @@
       "id": 14,
       "origin_id": -10,
       "origin_slot": 7,
-      "target_id": 1,
+      "target_id": 801,
       "target_slot": 4,
       "type": "INT"
      },
@@ -825,7 +825,7 @@
       "id": 15,
       "origin_id": -10,
       "origin_slot": 7,
-      "target_id": 4,
+      "target_id": 804,
       "target_slot": 4,
       "type": "INT"
      },
@@ -833,13 +833,13 @@
       "id": 16,
       "origin_id": -10,
       "origin_slot": 8,
-      "target_id": 1,
+      "target_id": 801,
       "target_slot": 6,
       "type": "FLOAT"
      },
      {
       "id": 17,
-      "origin_id": 5,
+      "origin_id": 805,
       "origin_slot": 0,
       "target_id": -20,
       "target_slot": 0,
@@ -847,7 +847,7 @@
      },
      {
       "id": 18,
-      "origin_id": 1,
+      "origin_id": 801,
       "origin_slot": 1,
       "target_id": -20,
       "target_slot": 1,

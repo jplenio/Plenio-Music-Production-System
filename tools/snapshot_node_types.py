@@ -56,6 +56,16 @@ NATIVE_NODES = [
     "EndLoop",
     "LoopIteration",
     "ComfyMathExpression",
+    # Cover Art (FLUX.2 Klein 4B, Phase 8)
+    "CLIPTextEncode",
+    "CFGGuider",
+    "RandomNoise",
+    "KSamplerSelect",
+    "Flux2Scheduler",
+    "EmptyFlux2LatentImage",
+    "SamplerCustomAdvanced",
+    "VAEDecode",
+    "PreviewImage",
 ]
 KEYS = (
     "input",

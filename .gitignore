@@ -14,3 +14,4 @@ frontend/coverage/
 .vscode/
 .idea/
 .coverage
+.browser-check/

@@ -14,7 +14,8 @@ function summaryElement(node: ComfyNode): HTMLElement {
   if (existing?.element) return existing.element
   const element = document.createElement('div')
   element.className = 'plenio-summary'
-  node.addDOMWidget(WIDGET_NAME, 'plenio_summary', element, { serialize: false, getValue: () => '', setValue: () => {} })
+  const widget = node.addDOMWidget(WIDGET_NAME, 'plenio_summary', element, { serialize: false, getValue: () => '', setValue: () => {} })
+  widget.serialize = false // display only: not part of the saved widget values
   return element
 }
 

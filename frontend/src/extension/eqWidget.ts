@@ -67,7 +67,8 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
   const plot = svg('svg', { viewBox: `0 0 ${PLOT.width} ${PLOT.height}`, class: 'plenio-eq-plot', role: 'img' })
   plot.setAttribute('aria-label', 'EQ response curve')
   root.append(toolbar, plot)
-  node.addDOMWidget(WIDGET, WIDGET, root, { serialize: false, getValue: () => '', setValue: () => {}, getMinHeight: () => 200 })
+  const curve = node.addDOMWidget(WIDGET, WIDGET, root, { serialize: false, getValue: () => '', setValue: () => {}, getMinHeight: () => 200 })
+  curve.serialize = false // display only: frontend 1.52 still saved a value for it (Phase 8 browser check)
 
   let shown: Shown = { sampleRate: 48000, frequencies: [], response: [], settings: flat(), readonly: true, note: '' }
   let selected: string | null = null

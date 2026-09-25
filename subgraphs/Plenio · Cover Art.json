@@ -1,0 +1,968 @@
+{
+ "revision": 0,
+ "last_node_id": 1,
+ "last_link_id": 0,
+ "nodes": [
+  {
+   "id": 1,
+   "type": "9dbb5617-ccf9-5537-b674-405adb29958c",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    340,
+    200
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [
+    {
+     "localized_name": "text",
+     "name": "text",
+     "label": "prompt",
+     "type": "STRING",
+     "widget": {
+      "name": "text"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "noise_seed",
+     "name": "noise_seed",
+     "label": "cover seed",
+     "type": "INT",
+     "widget": {
+      "name": "noise_seed"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "size",
+     "name": "size",
+     "label": "size (square, px)",
+     "type": "INT",
+     "widget": {
+      "name": "size"
+     },
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "localized_name": "IMAGE",
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": null
+    }
+   ],
+   "title": "Plenio · Cover Art",
+   "properties": {},
+   "widgets_values": [
+    "",
+    0,
+    1024
+   ]
+  }
+ ],
+ "links": [],
+ "version": 0.4,
+ "definitions": {
+  "subgraphs": [
+   {
+    "id": "9dbb5617-ccf9-5537-b674-405adb29958c",
+    "version": 1,
+    "state": {
+     "lastGroupId": 0,
+     "lastNodeId": 1012,
+     "lastLinkId": 19,
+     "lastRerouteId": 0
+    },
+    "revision": 0,
+    "config": {},
+    "name": "Plenio · Cover Art",
+    "inputNode": {
+     "id": -10,
+     "bounding": [
+      -260,
+      0,
+      160,
+      100
+     ]
+    },
+    "outputNode": {
+     "id": -20,
+     "bounding": [
+      1740,
+      0,
+      160,
+      60
+     ]
+    },
+    "inputs": [
+     {
+      "id": "c82dd3da-29a5-5ea7-ba3f-3d3511588f1c",
+      "name": "text",
+      "type": "STRING",
+      "linkIds": [
+       13
+      ],
+      "pos": [
+       0,
+       0
+      ],
+      "label": "prompt"
+     },
+     {
+      "id": "71b689b4-0f25-5b26-9e60-60ebc4569679",
+      "name": "noise_seed",
+      "type": "INT",
+      "linkIds": [
+       14
+      ],
+      "pos": [
+       0,
+       20
+      ],
+      "label": "cover seed"
+     },
+     {
+      "id": "8a63c875-4c66-57bc-b08e-ca65858b2956",
+      "name": "size",
+      "type": "INT",
+      "linkIds": [
+       15,
+       16,
+       17,
+       18
+      ],
+      "pos": [
+       0,
+       40
+      ],
+      "label": "size (square, px)"
+     }
+    ],
+    "outputs": [
+     {
+      "id": "2b7785ce-12d7-5840-a42c-7968e421b455",
+      "name": "IMAGE",
+      "type": "IMAGE",
+      "linkIds": [
+       19
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     }
+    ],
+    "widgets": [],
+    "nodes": [
+     {
+      "id": 1001,
+      "type": "UNETLoader",
+      "pos": [
+       0,
+       0
+      ],
+      "size": [
+       340,
+       90
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "unet_name",
+        "name": "unet_name",
+        "type": "COMBO",
+        "widget": {
+         "name": "unet_name"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "weight_dtype",
+        "name": "weight_dtype",
+        "type": "COMBO",
+        "widget": {
+         "name": "weight_dtype"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "MODEL",
+        "name": "MODEL",
+        "type": "MODEL",
+        "links": [
+         3
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "UNETLoader",
+       "models": [
+        {
+         "name": "flux-2-klein-4b.safetensors",
+         "url": "https://huggingface.co/Comfy-Org/flux2-klein/resolve/main/split_files/diffusion_models/flux-2-klein-4b.safetensors",
+         "directory": "diffusion_models"
+        }
+       ]
+      },
+      "widgets_values": [
+       "flux-2-klein-4b.safetensors",
+       "default"
+      ]
+     },
+     {
+      "id": 1002,
+      "type": "CLIPLoader",
+      "pos": [
+       0,
+       140
+      ],
+      "size": [
+       340,
+       110
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "clip_name",
+        "name": "clip_name",
+        "type": "COMBO",
+        "widget": {
+         "name": "clip_name"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "type",
+        "name": "type",
+        "type": "COMBO",
+        "widget": {
+         "name": "type"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "device",
+        "name": "device",
+        "type": "COMBO",
+        "widget": {
+         "name": "device"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "CLIP",
+        "name": "CLIP",
+        "type": "CLIP",
+        "links": [
+         1
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "CLIPLoader",
+       "models": [
+        {
+         "name": "qwen_3_4b.safetensors",
+         "url": "https://huggingface.co/Comfy-Org/flux2-klein/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors",
+         "directory": "text_encoders"
+        }
+       ]
+      },
+      "widgets_values": [
+       "qwen_3_4b.safetensors",
+       "flux2",
+       "default"
+      ]
+     },
+     {
+      "id": 1003,
+      "type": "VAELoader",
+      "pos": [
+       0,
+       300
+      ],
+      "size": [
+       340,
+       60
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "vae_name",
+        "name": "vae_name",
+        "type": "COMBO",
+        "widget": {
+         "name": "vae_name"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "VAE",
+        "name": "VAE",
+        "type": "VAE",
+        "links": [
+         12
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "VAELoader",
+       "models": [
+        {
+         "name": "flux2-vae.safetensors",
+         "url": "https://huggingface.co/Comfy-Org/flux2-dev/resolve/main/split_files/vae/flux2-vae.safetensors",
+         "directory": "vae"
+        }
+       ]
+      },
+      "widgets_values": [
+       "flux2-vae.safetensors"
+      ]
+     },
+     {
+      "id": 1004,
+      "type": "CLIPTextEncode",
+      "pos": [
+       400,
+       0
+      ],
+      "size": [
+       340,
+       160
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "clip",
+        "name": "clip",
+        "type": "CLIP",
+        "link": 1
+       },
+       {
+        "localized_name": "text",
+        "name": "text",
+        "type": "STRING",
+        "widget": {
+         "name": "text"
+        },
+        "link": 13
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "CONDITIONING",
+        "name": "CONDITIONING",
+        "type": "CONDITIONING",
+        "links": [
+         2,
+         4
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+       ""
+      ]
+     },
+     {
+      "id": 1005,
+      "type": "ConditioningZeroOut",
+      "pos": [
+       400,
+       220
+      ],
+      "size": [
+       240,
+       50
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "conditioning",
+        "name": "conditioning",
+        "type": "CONDITIONING",
+        "link": 2
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "CONDITIONING",
+        "name": "CONDITIONING",
+        "type": "CONDITIONING",
+        "links": [
+         5
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "ConditioningZeroOut"
+      },
+      "widgets_values": []
+     },
+     {
+      "id": 1006,
+      "type": "CFGGuider",
+      "pos": [
+       780,
+       0
+      ],
+      "size": [
+       260,
+       100
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "model",
+        "name": "model",
+        "type": "MODEL",
+        "link": 3
+       },
+       {
+        "localized_name": "positive",
+        "name": "positive",
+        "type": "CONDITIONING",
+        "link": 4
+       },
+       {
+        "localized_name": "negative",
+        "name": "negative",
+        "type": "CONDITIONING",
+        "link": 5
+       },
+       {
+        "localized_name": "cfg",
+        "name": "cfg",
+        "type": "FLOAT",
+        "widget": {
+         "name": "cfg"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "GUIDER",
+        "name": "GUIDER",
+        "type": "GUIDER",
+        "links": [
+         7
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "CFGGuider"
+      },
+      "widgets_values": [
+       1.0
+      ]
+     },
+     {
+      "id": 1007,
+      "type": "RandomNoise",
+      "pos": [
+       780,
+       150
+      ],
+      "size": [
+       260,
+       90
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "noise_seed",
+        "name": "noise_seed",
+        "type": "INT",
+        "widget": {
+         "name": "noise_seed"
+        },
+        "link": 14
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "NOISE",
+        "name": "NOISE",
+        "type": "NOISE",
+        "links": [
+         6
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "RandomNoise"
+      },
+      "widgets_values": [
+       0,
+       "fixed"
+      ]
+     },
+     {
+      "id": 1008,
+      "type": "KSamplerSelect",
+      "pos": [
+       780,
+       290
+      ],
+      "size": [
+       260,
+       60
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "sampler_name",
+        "name": "sampler_name",
+        "type": "COMBO",
+        "widget": {
+         "name": "sampler_name"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "SAMPLER",
+        "name": "SAMPLER",
+        "type": "SAMPLER",
+        "links": [
+         8
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "KSamplerSelect"
+      },
+      "widgets_values": [
+       "euler"
+      ]
+     },
+     {
+      "id": 1009,
+      "type": "Flux2Scheduler",
+      "pos": [
+       780,
+       400
+      ],
+      "size": [
+       260,
+       110
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "steps",
+        "name": "steps",
+        "type": "INT",
+        "widget": {
+         "name": "steps"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "width",
+        "name": "width",
+        "type": "INT",
+        "widget": {
+         "name": "width"
+        },
+        "link": 15
+       },
+       {
+        "localized_name": "height",
+        "name": "height",
+        "type": "INT",
+        "widget": {
+         "name": "height"
+        },
+        "link": 16
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "SIGMAS",
+        "name": "SIGMAS",
+        "type": "SIGMAS",
+        "links": [
+         9
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "Flux2Scheduler"
+      },
+      "widgets_values": [
+       4,
+       1024,
+       1024
+      ]
+     },
+     {
+      "id": 1010,
+      "type": "EmptyFlux2LatentImage",
+      "pos": [
+       780,
+       560
+      ],
+      "size": [
+       260,
+       110
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "width",
+        "name": "width",
+        "type": "INT",
+        "widget": {
+         "name": "width"
+        },
+        "link": 17
+       },
+       {
+        "localized_name": "height",
+        "name": "height",
+        "type": "INT",
+        "widget": {
+         "name": "height"
+        },
+        "link": 18
+       },
+       {
+        "localized_name": "batch_size",
+        "name": "batch_size",
+        "type": "INT",
+        "widget": {
+         "name": "batch_size"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "LATENT",
+        "name": "LATENT",
+        "type": "LATENT",
+        "links": [
+         10
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "EmptyFlux2LatentImage"
+      },
+      "widgets_values": [
+       1024,
+       1024,
+       1
+      ]
+     },
+     {
+      "id": 1011,
+      "type": "SamplerCustomAdvanced",
+      "pos": [
+       1100,
+       0
+      ],
+      "size": [
+       260,
+       110
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "noise",
+        "name": "noise",
+        "type": "NOISE",
+        "link": 6
+       },
+       {
+        "localized_name": "guider",
+        "name": "guider",
+        "type": "GUIDER",
+        "link": 7
+       },
+       {
+        "localized_name": "sampler",
+        "name": "sampler",
+        "type": "SAMPLER",
+        "link": 8
+       },
+       {
+        "localized_name": "sigmas",
+        "name": "sigmas",
+        "type": "SIGMAS",
+        "link": 9
+       },
+       {
+        "localized_name": "latent_image",
+        "name": "latent_image",
+        "type": "LATENT",
+        "link": 10
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "output",
+        "name": "output",
+        "type": "LATENT",
+        "links": [
+         11
+        ]
+       },
+       {
+        "localized_name": "denoised_output",
+        "name": "denoised_output",
+        "type": "LATENT",
+        "links": null
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "SamplerCustomAdvanced"
+      },
+      "widgets_values": []
+     },
+     {
+      "id": 1012,
+      "type": "VAEDecode",
+      "pos": [
+       1420,
+       0
+      ],
+      "size": [
+       220,
+       50
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "samples",
+        "name": "samples",
+        "type": "LATENT",
+        "link": 11
+       },
+       {
+        "localized_name": "vae",
+        "name": "vae",
+        "type": "VAE",
+        "link": 12
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "IMAGE",
+        "name": "IMAGE",
+        "type": "IMAGE",
+        "links": [
+         19
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+     }
+    ],
+    "groups": [],
+    "links": [
+     {
+      "id": 1,
+      "origin_id": 1002,
+      "origin_slot": 0,
+      "target_id": 1004,
+      "target_slot": 0,
+      "type": "CLIP"
+     },
+     {
+      "id": 2,
+      "origin_id": 1004,
+      "origin_slot": 0,
+      "target_id": 1005,
+      "target_slot": 0,
+      "type": "CONDITIONING"
+     },
+     {
+      "id": 3,
+      "origin_id": 1001,
+      "origin_slot": 0,
+      "target_id": 1006,
+      "target_slot": 0,
+      "type": "MODEL"
+     },
+     {
+      "id": 4,
+      "origin_id": 1004,
+      "origin_slot": 0,
+      "target_id": 1006,
+      "target_slot": 1,
+      "type": "CONDITIONING"
+     },
+     {
+      "id": 5,
+      "origin_id": 1005,
+      "origin_slot": 0,
+      "target_id": 1006,
+      "target_slot": 2,
+      "type": "CONDITIONING"
+     },
+     {
+      "id": 6,
+      "origin_id": 1007,
+      "origin_slot": 0,
+      "target_id": 1011,
+      "target_slot": 0,
+      "type": "NOISE"
+     },
+     {
+      "id": 7,
+      "origin_id": 1006,
+      "origin_slot": 0,
+      "target_id": 1011,
+      "target_slot": 1,
+      "type": "GUIDER"
+     },
+     {
+      "id": 8,
+      "origin_id": 1008,
+      "origin_slot": 0,
+      "target_id": 1011,
+      "target_slot": 2,
+      "type": "SAMPLER"
+     },
+     {
+      "id": 9,
+      "origin_id": 1009,
+      "origin_slot": 0,
+      "target_id": 1011,
+      "target_slot": 3,
+      "type": "SIGMAS"
+     },
+     {
+      "id": 10,
+      "origin_id": 1010,
+      "origin_slot": 0,
+      "target_id": 1011,
+      "target_slot": 4,
+      "type": "LATENT"
+     },
+     {
+      "id": 11,
+      "origin_id": 1011,
+      "origin_slot": 0,
+      "target_id": 1012,
+      "target_slot": 0,
+      "type": "LATENT"
+     },
+     {
+      "id": 12,
+      "origin_id": 1003,
+      "origin_slot": 0,
+      "target_id": 1012,
+      "target_slot": 1,
+      "type": "VAE"
+     },
+     {
+      "id": 13,
+      "origin_id": -10,
+      "origin_slot": 0,
+      "target_id": 1004,
+      "target_slot": 1,
+      "type": "STRING"
+     },
+     {
+      "id": 14,
+      "origin_id": -10,
+      "origin_slot": 1,
+      "target_id": 1007,
+      "target_slot": 0,
+      "type": "INT"
+     },
+     {
+      "id": 15,
+      "origin_id": -10,
+      "origin_slot": 2,
+      "target_id": 1009,
+      "target_slot": 1,
+      "type": "INT"
+     },
+     {
+      "id": 16,
+      "origin_id": -10,
+      "origin_slot": 2,
+      "target_id": 1009,
+      "target_slot": 2,
+      "type": "INT"
+     },
+     {
+      "id": 17,
+      "origin_id": -10,
+      "origin_slot": 2,
+      "target_id": 1010,
+      "target_slot": 0,
+      "type": "INT"
+     },
+     {
+      "id": 18,
+      "origin_id": -10,
+      "origin_slot": 2,
+      "target_id": 1010,
+      "target_slot": 1,
+      "type": "INT"
+     },
+     {
+      "id": 19,
+      "origin_id": 1012,
+      "origin_slot": 0,
+      "target_id": -20,
+      "target_slot": 0,
+      "type": "IMAGE"
+     }
+    ],
+    "extra": {},
+    "category": "Plenio/Artwork",
+    "description": "Paints the cover from the Song Sheet's artwork prompt with FLUX.2 Klein 4B (distilled, 4 steps, native nodes; Apache-2.0). The templates keep it bypassed because it needs about 16 GB of extra model files: select it and press Ctrl+B to turn it on. The seed is fixed, so new takes keep the cover; change it for another cover. Replace the block with any text-to-image block that takes a prompt and gives an image."
+   }
+  ]
+ },
+ "extra": {}
+}
