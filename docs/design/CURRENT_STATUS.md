@@ -40,11 +40,10 @@ Read with: [README.md](README.md) (design index), [implementation-roadmap.md](im
 ## 2. Partially implemented
 
 - **Editor UX**: long YuE2 plans (~200 s) not yet rendered in the browser (performance, AS-12); keyboard-only use and the light theme not yet checked.
-- **Host tests of Phase 5**: written in the cloud without ComfyUI; they may need small adjustments on the first real run.
 
 ## 3. What remains (Phase 5, on the owner's machine)
 
-1. Full Python suite with `PLENIO_COMFYUI_ROOT`, `PLENIO_MODELS_DIR`, `PLENIO_SMOKE=1` - above all the four new host tests (report §4).
+1. ~~Full Python suite with ComfyUI~~ - done on the owner's machine: 557 passed, 3 skipped, all four new host tests pass. Open: the smoke run with `PLENIO_MODELS_DIR` and `PLENIO_SMOKE=1`.
 2. Browser checks (report §5): long YuE2 plan, keyboard-only, light theme; repeat of the checkpoint checks after the fixes (typing undo, play from a bar, A/B, Apply -> save -> reload).
 3. V3: one cover and one song with an editor-edited score, listened to.
 4. Record the results in the Phase 5 report, set the roadmap status to *Done*, and stop (prompt rule). Phase 6 only on the owner's authorization.
