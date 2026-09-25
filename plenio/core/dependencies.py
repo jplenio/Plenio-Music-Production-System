@@ -25,6 +25,15 @@ class OptionalPackage:
 
 KNOWN_PACKAGES: tuple[OptionalPackage, ...] = (
     OptionalPackage("av", "av", "Audio export (Export Release)", "python -m pip install av"),
+    OptionalPackage(
+        "scipy", "scipy", "Mastering DSP (EQ, Loudness & Dynamics)", "python -m pip install scipy"
+    ),
+    OptionalPackage(
+        "mutagen",
+        "mutagen",
+        "Cover art embedded in exported files (optional; GPL-2.0-or-later, not bundled)",
+        "python -m pip install mutagen",
+    ),
 )
 
 

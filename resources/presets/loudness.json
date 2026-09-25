@@ -1,0 +1,296 @@
+{
+ "schema": "plenio.presets.loudness/1",
+ "source": "ported from the legacy toolkit v3.1.3 (web/mastering_presets.json, web/eq_presets.json; MIT, same author)",
+ "targets": [
+  {
+   "name": "streaming (-14 LUFS, -1 dBTP)",
+   "integrated_lufs": -14,
+   "ceiling_dbtp": -1,
+   "description": "Spotify, YouTube, Amazon and most streaming services normalise to about -14 LUFS."
+  },
+  {
+   "name": "Apple Music / podcasts (-16 LUFS, -1 dBTP)",
+   "integrated_lufs": -16,
+   "ceiling_dbtp": -1,
+   "description": "Apple Music Sound Check and podcast platforms normalise to about -16 LUFS."
+  },
+  {
+   "name": "dynamic (-18 LUFS, -1 dBTP)",
+   "integrated_lufs": -18,
+   "ceiling_dbtp": -1,
+   "description": "Acoustic, jazz and classical: more headroom for dynamics."
+  },
+  {
+   "name": "broadcast EBU R128 (-23 LUFS, -1 dBTP)",
+   "integrated_lufs": -23,
+   "ceiling_dbtp": -1,
+   "description": "European broadcast delivery (EBU R128)."
+  },
+  {
+   "name": "loud (-9 LUFS, -0.5 dBTP)",
+   "integrated_lufs": -9,
+   "ceiling_dbtp": -0.5,
+   "description": "Club and download masters; streaming services will turn it down."
+  }
+ ],
+ "compression": [
+  {
+   "name": "Balanced - gentle glue",
+   "compressor": {
+    "threshold_db": -18,
+    "ratio": 1.5,
+    "knee_db": 6,
+    "attack_ms": 20,
+    "release_ms": 150,
+    "sidechain_hz": 80,
+    "detector": "RMS",
+    "input_gain_db": 0
+   },
+   "limiter": {
+    "max_limiter_reduction_db": 6,
+    "lookahead_ms": 3,
+    "limiter_release_ms": 100,
+    "max_makeup_db": 18
+   },
+   "legacy_target": {
+    "integrated_lufs": -14,
+    "ceiling_dbtp": -1
+   }
+  },
+  {
+   "name": "Acoustic - gentle",
+   "compressor": {
+    "threshold_db": -20,
+    "ratio": 1.3,
+    "knee_db": 6,
+    "attack_ms": 35,
+    "release_ms": 220,
+    "sidechain_hz": 80,
+    "detector": "RMS",
+    "input_gain_db": 0
+   },
+   "limiter": {
+    "max_limiter_reduction_db": 3,
+    "lookahead_ms": 3,
+    "limiter_release_ms": 100,
+    "max_makeup_db": 18
+   },
+   "legacy_target": {
+    "integrated_lufs": -16,
+    "ceiling_dbtp": -1
+   }
+  },
+  {
+   "name": "Classical - preserve dynamics",
+   "compressor": null,
+   "limiter": {
+    "max_limiter_reduction_db": 2,
+    "lookahead_ms": 3,
+    "limiter_release_ms": 100,
+    "max_makeup_db": 18
+   },
+   "legacy_target": {
+    "integrated_lufs": -20,
+    "ceiling_dbtp": -1
+   }
+  },
+  {
+   "name": "Jazz - natural",
+   "compressor": {
+    "threshold_db": -18,
+    "ratio": 1.2,
+    "knee_db": 9,
+    "attack_ms": 40,
+    "release_ms": 250,
+    "sidechain_hz": 80,
+    "detector": "RMS",
+    "input_gain_db": 0
+   },
+   "limiter": {
+    "max_limiter_reduction_db": 3,
+    "lookahead_ms": 3,
+    "limiter_release_ms": 100,
+    "max_makeup_db": 18
+   },
+   "legacy_target": {
+    "integrated_lufs": -18,
+    "ceiling_dbtp": -1
+   }
+  },
+  {
+   "name": "Vocal pop - smooth",
+   "compressor": {
+    "threshold_db": -20,
+    "ratio": 2,
+    "knee_db": 9,
+    "attack_ms": 15,
+    "release_ms": 180,
+    "sidechain_hz": 80,
+    "detector": "RMS",
+    "input_gain_db": 0
+   },
+   "limiter": {
+    "max_limiter_reduction_db": 6,
+    "lookahead_ms": 3,
+    "limiter_release_ms": 100,
+    "max_makeup_db": 18
+   },
+   "legacy_target": {
+    "integrated_lufs": -14,
+    "ceiling_dbtp": -1
+   }
+  },
+  {
+   "name": "Pop - punchy",
+   "compressor": {
+    "threshold_db": -18,
+    "ratio": 2,
+    "knee_db": 6,
+    "attack_ms": 30,
+    "release_ms": 100,
+    "sidechain_hz": 100,
+    "detector": "RMS",
+    "input_gain_db": 0
+   },
+   "limiter": {
+    "max_limiter_reduction_db": 6,
+    "lookahead_ms": 3,
+    "limiter_release_ms": 100,
+    "max_makeup_db": 18
+   },
+   "legacy_target": {
+    "integrated_lufs": -12,
+    "ceiling_dbtp": -1
+   }
+  },
+  {
+   "name": "Rock - bus glue",
+   "compressor": {
+    "threshold_db": -18,
+    "ratio": 2,
+    "knee_db": 6,
+    "attack_ms": 30,
+    "release_ms": 120,
+    "sidechain_hz": 100,
+    "detector": "RMS",
+    "input_gain_db": 0
+   },
+   "limiter": {
+    "max_limiter_reduction_db": 6,
+    "lookahead_ms": 3,
+    "limiter_release_ms": 100,
+    "max_makeup_db": 18
+   },
+   "legacy_target": {
+    "integrated_lufs": -12,
+    "ceiling_dbtp": -1
+   }
+  },
+  {
+   "name": "Electronic - tight",
+   "compressor": {
+    "threshold_db": -18,
+    "ratio": 2.5,
+    "knee_db": 6,
+    "attack_ms": 15,
+    "release_ms": 80,
+    "sidechain_hz": 120,
+    "detector": "RMS",
+    "input_gain_db": 0
+   },
+   "limiter": {
+    "max_limiter_reduction_db": 6,
+    "lookahead_ms": 3,
+    "limiter_release_ms": 80,
+    "max_makeup_db": 18
+   },
+   "legacy_target": {
+    "integrated_lufs": -11,
+    "ceiling_dbtp": -1
+   }
+  },
+  {
+   "name": "Club - loud",
+   "compressor": {
+    "threshold_db": -20,
+    "ratio": 3,
+    "knee_db": 6,
+    "attack_ms": 10,
+    "release_ms": 70,
+    "sidechain_hz": 120,
+    "detector": "RMS",
+    "input_gain_db": 0
+   },
+   "limiter": {
+    "max_limiter_reduction_db": 8,
+    "lookahead_ms": 3,
+    "limiter_release_ms": 80,
+    "max_makeup_db": 18
+   },
+   "legacy_target": {
+    "integrated_lufs": -9,
+    "ceiling_dbtp": -1
+   }
+  },
+  {
+   "name": "Hip-hop - low-end punch",
+   "compressor": {
+    "threshold_db": -18,
+    "ratio": 2,
+    "knee_db": 6,
+    "attack_ms": 40,
+    "release_ms": 160,
+    "sidechain_hz": 150,
+    "detector": "RMS",
+    "input_gain_db": 0
+   },
+   "limiter": {
+    "max_limiter_reduction_db": 6,
+    "lookahead_ms": 3,
+    "limiter_release_ms": 100,
+    "max_makeup_db": 18
+   },
+   "legacy_target": {
+    "integrated_lufs": -12,
+    "ceiling_dbtp": -1
+   }
+  },
+  {
+   "name": "Ambient - spacious",
+   "compressor": {
+    "threshold_db": -18,
+    "ratio": 1.2,
+    "knee_db": 12,
+    "attack_ms": 60,
+    "release_ms": 400,
+    "sidechain_hz": 80,
+    "detector": "RMS",
+    "input_gain_db": 0
+   },
+   "limiter": {
+    "max_limiter_reduction_db": 3,
+    "lookahead_ms": 3,
+    "limiter_release_ms": 250,
+    "max_makeup_db": 18
+   },
+   "legacy_target": {
+    "integrated_lufs": -18,
+    "ceiling_dbtp": -1
+   }
+  },
+  {
+   "name": "Limiter only - transparent",
+   "compressor": null,
+   "limiter": {
+    "max_limiter_reduction_db": 3,
+    "lookahead_ms": 3,
+    "limiter_release_ms": 100,
+    "max_makeup_db": 18
+   },
+   "legacy_target": {
+    "integrated_lufs": -14,
+    "ceiling_dbtp": -1
+   }
+  }
+ ]
+}
