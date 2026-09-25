@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "plenio.report/1",
+  "title": "Plenio report",
+  "type": "object",
+  "required": ["schema", "kind", "status", "summary", "messages", "data", "source"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "plenio.report/1" },
+    "kind": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["ok", "warning", "error", "skipped"] },
+    "summary": { "type": "string" },
+    "messages": { "type": "array", "items": { "type": "string" } },
+    "data": { "type": "object" },
+    "source": {
+      "type": "object",
+      "required": ["node_type", "node_id"],
+      "additionalProperties": false,
+      "properties": {
+        "node_type": { "type": "string" },
+        "node_id": { "type": "string" }
+      }
+    }
+  }
+}

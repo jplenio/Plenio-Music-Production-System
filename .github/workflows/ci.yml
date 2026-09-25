@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  python:
+    name: Python (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install "pytest==8.4.*" "hypothesis==6.*" "ruff==0.13.*" "mypy==1.18.*" "jsonschema==4.*" tomli
+      - run: python -m ruff check .
+      - run: python -m ruff format --check .
+      - run: python -m mypy
+      - run: python -m pytest tests/unit tests/workflows tests/contract/test_data_schemas.py
+
+  comfyui:
+    name: ComfyUI 0.37.0 contract + host tests (CPU)
+    runs-on: ubuntu-latest
+    env:
+      PLENIO_COMFYUI_ROOT: ${{ github.workspace }}/ComfyUI
+      PLENIO_COMFYUI_PYTHON: python
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: plenio
+      - uses: actions/checkout@v4
+        with:
+          repository: Comfy-Org/ComfyUI
+          ref: v0.37.0
+          path: ComfyUI
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+      - run: python -m pip install -r ComfyUI/requirements.txt "pytest==8.4.*" "hypothesis==6.*" "jsonschema==4.*"
+      - working-directory: plenio
+        run: python -m pytest tests/contract tests/host
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: The committed build matches the sources
+        run: git diff --exit-code -- ../web/js

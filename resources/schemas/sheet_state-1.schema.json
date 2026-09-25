@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "plenio.sheet_state/1",
+  "title": "Plenio Song Sheet state (widget value)",
+  "type": "object",
+  "required": ["schema", "docs"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "plenio.sheet_state/1" },
+    "docs": {
+      "type": "object",
+      "propertyNames": { "enum": ["title", "style", "lyrics", "score", "artwork_prompt"] },
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["state", "text", "base_sha256"],
+            "additionalProperties": false,
+            "properties": {
+              "state": { "const": "edited" },
+              "text": { "type": "string" },
+              "base_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["state", "text"],
+            "additionalProperties": false,
+            "properties": {
+              "state": { "const": "manual" },
+              "text": { "type": "string" }
+            }
+          }
+        ]
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "approved_fingerprint": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    }
+  }
+}

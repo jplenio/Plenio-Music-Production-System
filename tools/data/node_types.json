@@ -1,0 +1,2920 @@
+{
+ "comfyui_version": "0.37.0",
+ "nodes": {
+  "CLIPLoader": {
+   "input": {
+    "required": {
+     "clip_name": [
+      []
+     ],
+     "type": [
+      [
+       "stable_diffusion",
+       "stable_cascade",
+       "sd3",
+       "stable_audio",
+       "mochi",
+       "ltxv",
+       "pixart",
+       "cosmos",
+       "lumina2",
+       "wan",
+       "hidream",
+       "chroma",
+       "ace",
+       "omnigen2",
+       "qwen_image",
+       "hunyuan_image",
+       "flux2",
+       "ovis",
+       "longcat_image",
+       "cogvideox",
+       "lens",
+       "pixeldit",
+       "ideogram4",
+       "boogu",
+       "krea2",
+       "joyimage",
+       "mage",
+       "minimax",
+       "yue2"
+      ]
+     ]
+    },
+    "optional": {
+     "device": [
+      [
+       "default",
+       "cpu"
+      ],
+      {
+       "advanced": true
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "clip_name",
+     "type"
+    ],
+    "optional": [
+     "device"
+    ]
+   },
+   "output": [
+    "CLIP"
+   ],
+   "output_name": [
+    "CLIP"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "model/loaders",
+   "display_name": "Load CLIP"
+  },
+  "CheckpointLoaderSimple": {
+   "input": {
+    "required": {
+     "ckpt_name": [
+      [],
+      {
+       "tooltip": "The name of the checkpoint (model) to load."
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "ckpt_name"
+    ]
+   },
+   "output": [
+    "MODEL",
+    "CLIP",
+    "VAE"
+   ],
+   "output_name": [
+    "MODEL",
+    "CLIP",
+    "VAE"
+   ],
+   "output_is_list": [
+    false,
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "model/loaders",
+   "display_name": "Load Checkpoint"
+  },
+  "ComfyMathExpression": {
+   "input": {
+    "required": {
+     "expression": [
+      "STRING",
+      {
+       "default": "a + b",
+       "multiline": true
+      }
+     ],
+     "values": [
+      "COMFY_AUTOGROW_V3",
+      {
+       "template": {
+        "input": {
+         "required": {
+          "value": [
+           "FLOAT,INT,BOOLEAN",
+           {}
+          ]
+         }
+        },
+        "names": [
+         "a",
+         "b",
+         "c",
+         "d",
+         "e",
+         "f",
+         "g",
+         "h",
+         "i",
+         "j",
+         "k",
+         "l",
+         "m",
+         "n",
+         "o",
+         "p",
+         "q",
+         "r",
+         "s",
+         "t",
+         "u",
+         "v",
+         "w",
+         "x",
+         "y",
+         "z"
+        ],
+        "min": 1
+       }
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "expression",
+     "values"
+    ]
+   },
+   "output": [
+    "FLOAT",
+    "INT",
+    "BOOLEAN"
+   ],
+   "output_name": [
+    "FLOAT",
+    "INT",
+    "BOOL"
+   ],
+   "output_is_list": [
+    false,
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "utilities",
+   "display_name": "Math Expression"
+  },
+  "ComfySwitchNode": {
+   "input": {
+    "required": {
+     "switch": [
+      "BOOLEAN",
+      {}
+     ]
+    },
+    "optional": {
+     "on_false": [
+      "COMFY_MATCHTYPE_V3",
+      {
+       "lazy": true,
+       "template": {
+        "template_id": "switch",
+        "allowed_types": "*"
+       }
+      }
+     ],
+     "on_true": [
+      "COMFY_MATCHTYPE_V3",
+      {
+       "lazy": true,
+       "template": {
+        "template_id": "switch",
+        "allowed_types": "*"
+       }
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "switch"
+    ],
+    "optional": [
+     "on_false",
+     "on_true"
+    ]
+   },
+   "output": [
+    "COMFY_MATCHTYPE_V3"
+   ],
+   "output_name": [
+    "output"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "utilities/logic",
+   "display_name": "If/Else Switch"
+  },
+  "ConditioningZeroOut": {
+   "input": {
+    "required": {
+     "conditioning": [
+      "CONDITIONING"
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "conditioning"
+    ]
+   },
+   "output": [
+    "CONDITIONING"
+   ],
+   "output_name": [
+    "CONDITIONING"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "model/conditioning/transform",
+   "display_name": "Conditioning Zero Out"
+  },
+  "EmptyYuE2LatentAudio": {
+   "input": {
+    "required": {
+     "seconds": [
+      "FLOAT",
+      {
+       "default": 120.0,
+       "min": 0.04,
+       "max": 1000.0,
+       "step": 0.04
+      }
+     ],
+     "batch_size": [
+      "INT",
+      {
+       "default": 1,
+       "min": 1,
+       "max": 4096
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "seconds",
+     "batch_size"
+    ]
+   },
+   "output": [
+    "LATENT"
+   ],
+   "output_name": [
+    "LATENT"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "model/latent/yue2",
+   "display_name": "Empty YuE2 Latent Audio"
+  },
+  "EndLoop": {
+   "input": {
+    "required": {
+     "accumulate": [
+      "BOOLEAN",
+      {
+       "tooltip": "Return output_value from every iteration when enabled; otherwise return only the final iteration.",
+       "default": false
+      }
+     ]
+    },
+    "optional": {
+     "output_value": [
+      "COMFY_MATCHTYPE_V3",
+      {
+       "tooltip": "Value returned by End Loop. It returns the final iteration or all iterations according to accumulate.",
+       "template": {
+        "template_id": "output_value",
+        "allowed_types": "*"
+       }
+      }
+     ],
+     "next_iteration_value": [
+      "COMFY_MATCHTYPE_V3",
+      {
+       "tooltip": "Value sent from End Loop back to Start Loop for the next iteration.",
+       "template": {
+        "template_id": "carried_value",
+        "allowed_types": "*"
+       }
+      }
+     ],
+     "terminations": [
+      "COMFY_AUTOGROW_V3",
+      {
+       "tooltip": "Connect outputs that must execute on every iteration. Their values are not returned.",
+       "template": {
+        "input": {
+         "required": {
+          "termination": [
+           "*",
+           {
+            "tooltip": "Connect a preview or side-effect output that must execute on every iteration. Its value is not returned."
+           }
+          ]
+         }
+        },
+        "prefix": "termination",
+        "min": 0,
+        "max": 50
+       }
+      }
+     ]
+    },
+    "hidden": {
+     "execution_list": [
+      "EXECUTION_LIST"
+     ],
+     "unique_id": [
+      "UNIQUE_ID"
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "accumulate"
+    ],
+    "optional": [
+     "output_value",
+     "next_iteration_value",
+     "terminations"
+    ],
+    "hidden": [
+     "execution_list",
+     "unique_id"
+    ]
+   },
+   "output": [
+    "COMFY_MATCHTYPE_V3"
+   ],
+   "output_name": [
+    "outputs"
+   ],
+   "output_is_list": [
+    true
+   ],
+   "output_node": false,
+   "category": "utilities/looping",
+   "display_name": "End Loop"
+  },
+  "KSampler": {
+   "input": {
+    "required": {
+     "model": [
+      "MODEL",
+      {
+       "tooltip": "The model used for denoising the input latent."
+      }
+     ],
+     "seed": [
+      "INT",
+      {
+       "default": 0,
+       "min": 0,
+       "max": 18446744073709551615,
+       "control_after_generate": true,
+       "tooltip": "The random seed used for creating the noise."
+      }
+     ],
+     "steps": [
+      "INT",
+      {
+       "default": 20,
+       "min": 1,
+       "max": 10000,
+       "tooltip": "The number of steps used in the denoising process."
+      }
+     ],
+     "cfg": [
+      "FLOAT",
+      {
+       "default": 8.0,
+       "min": 0.0,
+       "max": 100.0,
+       "step": 0.1,
+       "round": 0.01,
+       "tooltip": "The Classifier-Free Guidance scale balances creativity and adherence to the prompt. Higher values result in images more closely matching the prompt however too high values will negatively impact quality."
+      }
+     ],
+     "sampler_name": [
+      [
+       "euler",
+       "euler_cfg_pp",
+       "euler_ancestral",
+       "euler_ancestral_cfg_pp",
+       "heun",
+       "heunpp2",
+       "exp_heun_2_x0",
+       "exp_heun_2_x0_sde",
+       "dpm_2",
+       "dpm_2_ancestral",
+       "lms",
+       "dpm_fast",
+       "dpm_adaptive",
+       "dpmpp_2s_ancestral",
+       "dpmpp_2s_ancestral_cfg_pp",
+       "dpmpp_sde",
+       "dpmpp_sde_gpu",
+       "dpmpp_2m",
+       "dpmpp_2m_cfg_pp",
+       "dpmpp_2m_sde",
+       "dpmpp_2m_sde_gpu",
+       "dpmpp_2m_sde_heun",
+       "dpmpp_2m_sde_heun_gpu",
+       "dpmpp_3m_sde",
+       "dpmpp_3m_sde_gpu",
+       "ddpm",
+       "lcm",
+       "ipndm",
+       "ipndm_v",
+       "deis",
+       "cfgpp_ud10_ab",
+       "res_multistep",
+       "res_multistep_cfg_pp",
+       "res_multistep_ancestral",
+       "res_multistep_ancestral_cfg_pp",
+       "gradient_estimation",
+       "gradient_estimation_cfg_pp",
+       "er_sde",
+       "seeds_2",
+       "seeds_3",
+       "sa_solver",
+       "sa_solver_pece",
+       "ddim",
+       "uni_pc",
+       "uni_pc_bh2"
+      ],
+      {
+       "tooltip": "The algorithm used when sampling, this can affect the quality, speed, and style of the generated output."
+      }
+     ],
+     "scheduler": [
+      [
+       "simple",
+       "sgm_uniform",
+       "karras",
+       "exponential",
+       "ddim_uniform",
+       "beta",
+       "normal",
+       "linear_quadratic",
+       "kl_optimal"
+      ],
+      {
+       "tooltip": "The scheduler controls how noise is gradually removed to form the image."
+      }
+     ],
+     "positive": [
+      "CONDITIONING",
+      {
+       "tooltip": "The conditioning describing the attributes you want to include in the image."
+      }
+     ],
+     "negative": [
+      "CONDITIONING",
+      {
+       "tooltip": "The conditioning describing the attributes you want to exclude from the image."
+      }
+     ],
+     "latent_image": [
+      "LATENT",
+      {
+       "tooltip": "The latent image to denoise."
+      }
+     ],
+     "denoise": [
+      "FLOAT",
+      {
+       "default": 1.0,
+       "min": 0.0,
+       "max": 1.0,
+       "step": 0.01,
+       "tooltip": "The amount of denoising applied, lower values will maintain the structure of the initial image allowing for image to image sampling."
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "model",
+     "seed",
+     "steps",
+     "cfg",
+     "sampler_name",
+     "scheduler",
+     "positive",
+     "negative",
+     "latent_image",
+     "denoise"
+    ]
+   },
+   "output": [
+    "LATENT"
+   ],
+   "output_name": [
+    "LATENT"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "model/sampling",
+   "display_name": "KSampler"
+  },
+  "LoadAudio": {
+   "input": {
+    "required": {
+     "audio": [
+      "COMBO",
+      {
+       "multiselect": false,
+       "options": [],
+       "audio_upload": true
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "audio"
+    ]
+   },
+   "output": [
+    "AUDIO"
+   ],
+   "output_name": [
+    "AUDIO"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "audio",
+   "display_name": "Load Audio"
+  },
+  "LoopIteration": {
+   "input": {
+    "required": {
+     "iteration_index": [
+      "INT",
+      {}
+     ],
+     "is_first": [
+      "BOOLEAN",
+      {}
+     ],
+     "is_last": [
+      "BOOLEAN",
+      {}
+     ],
+     "reuse_cache": [
+      "BOOLEAN",
+      {}
+     ]
+    },
+    "optional": {
+     "list_item": [
+      "*",
+      {}
+     ],
+     "current_iteration_value": [
+      "*",
+      {}
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "iteration_index",
+     "is_first",
+     "is_last",
+     "reuse_cache"
+    ],
+    "optional": [
+     "list_item",
+     "current_iteration_value"
+    ]
+   },
+   "output": [
+    "INT",
+    "BOOLEAN",
+    "BOOLEAN",
+    "*",
+    "*"
+   ],
+   "output_name": [
+    "INT",
+    "BOOLEAN",
+    "BOOLEAN",
+    "*",
+    "*"
+   ],
+   "output_is_list": [
+    false,
+    false,
+    false,
+    false,
+    true
+   ],
+   "output_node": false,
+   "category": "sd",
+   "display_name": null
+  },
+  "LoraLoader": {
+   "input": {
+    "required": {
+     "model": [
+      "MODEL",
+      {
+       "tooltip": "The diffusion model the LoRA will be applied to."
+      }
+     ],
+     "clip": [
+      "CLIP",
+      {
+       "tooltip": "The CLIP model the LoRA will be applied to."
+      }
+     ],
+     "lora_name": [
+      [],
+      {
+       "tooltip": "The name of the LoRA."
+      }
+     ],
+     "strength_model": [
+      "FLOAT",
+      {
+       "default": 1.0,
+       "min": -100.0,
+       "max": 100.0,
+       "step": 0.01,
+       "tooltip": "How strongly to modify the diffusion model. This value can be negative."
+      }
+     ],
+     "strength_clip": [
+      "FLOAT",
+      {
+       "default": 1.0,
+       "min": -100.0,
+       "max": 100.0,
+       "step": 0.01,
+       "tooltip": "How strongly to modify the CLIP model. This value can be negative."
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "model",
+     "clip",
+     "lora_name",
+     "strength_model",
+     "strength_clip"
+    ]
+   },
+   "output": [
+    "MODEL",
+    "CLIP"
+   ],
+   "output_name": [
+    "MODEL",
+    "CLIP"
+   ],
+   "output_is_list": [
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "model/loaders",
+   "display_name": "Load LoRA (Model and CLIP)"
+  },
+  "PlenioComposePrompt": {
+   "input": {
+    "required": {
+     "brief": [
+      "PLENIO_BRIEF",
+      {
+       "tooltip": "From Song Brief."
+      }
+     ],
+     "engine": [
+      "PLENIO_ENGINE",
+      {
+       "tooltip": "From the music model block (Engine Profile)."
+      }
+     ],
+     "detail": [
+      "COMBO",
+      {
+       "tooltip": "How compact or rich the lyrics should be.",
+       "advanced": true,
+       "default": "standard",
+       "multiselect": false,
+       "options": [
+        "concise",
+        "standard",
+        "rich"
+       ]
+      }
+     ]
+    },
+    "optional": {
+     "score": [
+      "STRING",
+      {
+       "tooltip": "Optional score whose sections the lyrics must follow.",
+       "forceInput": true,
+       "multiline": false
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "brief",
+     "engine",
+     "detail"
+    ],
+    "optional": [
+     "score"
+    ]
+   },
+   "output": [
+    "STRING",
+    "PLENIO_REQUEST"
+   ],
+   "output_name": [
+    "prompt",
+    "request"
+   ],
+   "output_is_list": [
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Writing",
+   "display_name": "Compose Writing Prompt"
+  },
+  "PlenioEngine": {
+   "input": {
+    "required": {
+     "clip": [
+      "CLIP",
+      {
+       "tooltip": "CLIP output of the music model's loader."
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "clip"
+    ]
+   },
+   "output": [
+    "PLENIO_ENGINE"
+   ],
+   "output_name": [
+    "engine"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Model",
+   "display_name": "Engine Profile"
+  },
+  "PlenioExportRelease": {
+   "input": {
+    "required": {
+     "audio": [
+      "AUDIO",
+      {
+       "tooltip": "The finished audio (every item of a batch becomes one file)."
+      }
+     ],
+     "title": [
+      "STRING",
+      {
+       "tooltip": "Song title (from the Song Sheet).",
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "folder": [
+      "STRING",
+      {
+       "tooltip": "Sub-folder of the ComfyUI output folder.",
+       "default": "plenio",
+       "multiline": false
+      }
+     ],
+     "naming": [
+      "STRING",
+      {
+       "tooltip": "File name pattern: {title}, {date}, {time}, {seed}. '/' makes sub-folders.",
+       "default": "{date} {title}",
+       "multiline": false
+      }
+     ],
+     "collision": [
+      "COMBO",
+      {
+       "tooltip": "When the file exists: number (add ' (2)'), overwrite, or stop with an error.",
+       "advanced": true,
+       "default": "number",
+       "multiselect": false,
+       "options": [
+        "number",
+        "overwrite",
+        "error"
+       ]
+      }
+     ]
+    },
+    "optional": {
+     "reports": [
+      "COMFY_AUTOGROW_V3",
+      {
+       "tooltip": "Reports to include in the release record (Song Sheets, drafts, score tools).",
+       "template": {
+        "input": {
+         "required": {
+          "report": [
+           "PLENIO_REPORT",
+           {
+            "tooltip": "A Plenio report to include in the record."
+           }
+          ]
+         }
+        },
+        "prefix": "report_",
+        "min": 0,
+        "max": 16
+       }
+      }
+     ]
+    },
+    "hidden": {
+     "prompt": [
+      "PROMPT"
+     ],
+     "extra_pnginfo": [
+      "EXTRA_PNGINFO"
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "audio",
+     "title",
+     "folder",
+     "naming",
+     "collision"
+    ],
+    "optional": [
+     "reports"
+    ],
+    "hidden": [
+     "prompt",
+     "extra_pnginfo"
+    ]
+   },
+   "output": [
+    "STRING",
+    "STRING"
+   ],
+   "output_name": [
+    "files",
+    "record"
+   ],
+   "output_is_list": [
+    false,
+    false
+   ],
+   "output_node": true,
+   "category": "Plenio/Release",
+   "display_name": "Export Release"
+  },
+  "PlenioParseDraft": {
+   "input": {
+    "required": {
+     "text": [
+      "STRING",
+      {
+       "tooltip": "The writing model's answer.",
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "request": [
+      "PLENIO_REQUEST",
+      {
+       "tooltip": "From Compose Writing Prompt."
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "text",
+     "request"
+    ]
+   },
+   "output": [
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+    "PLENIO_REPORT"
+   ],
+   "output_name": [
+    "title",
+    "style",
+    "lyrics",
+    "artwork_prompt",
+    "report"
+   ],
+   "output_is_list": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Writing",
+   "display_name": "Parse Song Draft"
+  },
+  "PlenioScoreTools": {
+   "input": {
+    "required": {
+     "score": [
+      "STRING",
+      {
+       "tooltip": "Score in the native two-voice ABC dialect.",
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "operation": [
+      "COMFY_DYNAMICCOMBO_V3",
+      {
+       "tooltip": "prepare from brief: sung songs unchanged; instrumental songs get a silent Vocal voice (lead melody moved to Ins, or accompaniment only).",
+       "options": [
+        {
+         "key": "prepare from brief",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "strip chords",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "voices",
+         "inputs": {
+          "required": {
+           "vocal": [
+            "COMBO",
+            {
+             "tooltip": "What happens to the Vocal voice.",
+             "default": "keep",
+             "multiselect": false,
+             "options": [
+              "keep",
+              "silence Vocal",
+              "move Vocal melody to Ins"
+             ]
+            }
+           ],
+           "conflict": [
+            "COMBO",
+            {
+             "tooltip": "When moving: what wins where Ins already plays.",
+             "default": "replace Ins",
+             "multiselect": false,
+             "options": [
+              "replace Ins",
+              "keep Ins"
+             ]
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "transpose",
+         "inputs": {
+          "required": {
+           "semitones": [
+            "INT",
+            {
+             "tooltip": "Semitones up (+) or down (-).",
+             "default": 0,
+             "min": -12,
+             "max": 12
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "tempo",
+         "inputs": {
+          "required": {
+           "bpm": [
+            "INT",
+            {
+             "tooltip": "New quarter-note tempo.",
+             "default": 100,
+             "min": 20,
+             "max": 300
+            }
+           ]
+          }
+         }
+        }
+       ]
+      }
+     ]
+    },
+    "optional": {
+     "brief": [
+      "PLENIO_BRIEF",
+      {
+       "tooltip": "Needed by 'prepare from brief'."
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "score",
+     "operation"
+    ],
+    "optional": [
+     "brief"
+    ]
+   },
+   "output": [
+    "STRING",
+    "STRING",
+    "PLENIO_REPORT"
+   ],
+   "output_name": [
+    "score",
+    "section_tags",
+    "report"
+   ],
+   "output_is_list": [
+    false,
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Score",
+   "display_name": "Score Tools"
+  },
+  "PlenioSongBrief": {
+   "input": {
+    "required": {
+     "template": [
+      "COMBO",
+      {
+       "tooltip": "Optional starting point. Text fields you leave empty are taken from the template.",
+       "default": "none",
+       "multiselect": false,
+       "options": [
+        "none",
+        "african/afrobeat-classic-instrumental",
+        "african/afrobeats-vocal",
+        "african/amapiano-instrumental",
+        "african/desert-blues-vocal",
+        "african/ethio-jazz-instrumental",
+        "african/gqom-instrumental",
+        "african/highlife-instrumental",
+        "african/soukous-instrumental",
+        "alternative/alternative-rock-vocal",
+        "alternative/britpop-vocal",
+        "alternative/new-wave-vocal",
+        "alternative/uk-garage-vocal",
+        "ambient/ambient-choir-vocalise",
+        "ambient/ambient-guitar",
+        "ambient/chillout-pads-strings",
+        "ambient/dark-ambient-drone",
+        "asian/anime-opening-vocal",
+        "asian/bollywood-vocal",
+        "asian/chinese-traditional-instrumental",
+        "asian/city-pop-vocal",
+        "asian/enka-vocal",
+        "asian/game-jrpg-orchestral",
+        "asian/indian-classical-instrumental",
+        "asian/kpop-vocal",
+        "asian/mandopop-ballad-vocal",
+        "blues/blues-ballad-vocal",
+        "blues/boogie-woogie-instrumental",
+        "blues/chicago-blues-vocal",
+        "blues/delta-blues-vocal",
+        "blues/electric-blues-instrumental",
+        "cinematic/corporate-uplifting-instrumental",
+        "cinematic/documentary-underscore-instrumental",
+        "cinematic/emotional-piano-underscore",
+        "cinematic/epic-trailer-instrumental",
+        "cinematic/fantasy-adventure-orchestral",
+        "cinematic/horror-suspense-instrumental",
+        "cinematic/orchestral-action-instrumental",
+        "cinematic/sports-stadium-anthem",
+        "classical/baroque-concerto-instrumental",
+        "classical/cello-and-piano",
+        "classical/choral-sacred-vocal",
+        "classical/cinematic-romance",
+        "classical/gregorian-chant-vocal",
+        "classical/impressionist-piano-instrumental",
+        "classical/minimalism-instrumental",
+        "classical/mystical-neoclassical",
+        "classical/neoclassical-piano",
+        "classical/opera-aria-vocal",
+        "classical/piano-and-strings",
+        "classical/romantic-string-ensemble",
+        "classical/string-quartet-instrumental",
+        "classical/symphonic-orchestral-instrumental",
+        "comedy/comedy-rap-vocal",
+        "comedy/english-parody-pop-vocal",
+        "comedy/german-absurd-novelty",
+        "country/americana-vocal",
+        "country/bluegrass-instrumental",
+        "country/country-ballad-vocal",
+        "country/honky-tonk-vocal",
+        "country/modern-country-pop-vocal",
+        "country/outlaw-country-vocal",
+        "disco/classic-disco-vocal",
+        "disco/italo-disco-vocal",
+        "edm/big-room-festival-instrumental",
+        "edm/breakbeat-instrumental",
+        "edm/dance-anthem-instrumental",
+        "edm/drum-and-bass-instrumental",
+        "edm/dubstep-instrumental",
+        "edm/eurodance-vocal",
+        "edm/future-bass-vocal",
+        "edm/future-rave-sparse-vocals",
+        "edm/goa-trance-instrumental",
+        "edm/hardgroove-techno-instrumental",
+        "edm/hardstyle-instrumental",
+        "edm/jungle-instrumental",
+        "edm/liquid-drum-and-bass-sparse-vocals",
+        "edm/melodic-techno-instrumental",
+        "edm/neurofunk-dnb-instrumental",
+        "edm/progressive-trance-instrumental",
+        "edm/psytrance-instrumental",
+        "edm/uplifting-trance-instrumental",
+        "electronic/analog-space-electronic",
+        "electronic/berlin-school-sequencer",
+        "electronic/chiptune-instrumental",
+        "electronic/cinematic-electronica",
+        "electronic/downtempo-electronica",
+        "electronic/ebm-darkwave-vocal",
+        "electronic/electro-swing-vocal",
+        "electronic/idm-experimental-instrumental",
+        "electronic/lofi-hiphop-instrumental",
+        "electronic/minimal-electronic-german-vocals",
+        "electronic/peak-time-techno-sparse-vocals",
+        "electronic/synth-pop-vocal",
+        "electronic/synthwave",
+        "electronic/trip-hop",
+        "electronic/vaporwave-instrumental",
+        "european/alpine-volksmusik-instrumental",
+        "european/balkan-brass-instrumental",
+        "european/chanson-vocal",
+        "european/fado-vocal",
+        "european/flamenco-instrumental",
+        "european/irish-pub-session-instrumental",
+        "european/klezmer-instrumental",
+        "european/polka-instrumental",
+        "european/russian-folk-vocal",
+        "european/schlager-vocal",
+        "european/viennese-waltz-instrumental",
+        "folk/appalachian-folk-instrumental",
+        "folk/celtic-folk-vocal",
+        "folk/dark-fairytale-folk-vocal",
+        "folk/folk-punk-vocal",
+        "folk/melancholic-folk-ballad-vocal",
+        "folk/mystical-medieval-folk-vocal",
+        "folk/nordic-folk-vocal",
+        "folk/romantic-solo-guitar",
+        "folk/sea-shanty-vocal",
+        "funk/classic-funk-instrumental",
+        "funk/nu-disco-funk",
+        "gospel/contemporary-worship-vocal",
+        "gospel/german-worship-vocal",
+        "gospel/gospel-choir-vocal",
+        "gospel/hymn-choir-vocal",
+        "hiphop/boom-bap-hiphop-vocal",
+        "hiphop/cloud-rap-vocal",
+        "hiphop/drill-instrumental",
+        "hiphop/german-rap-vocal",
+        "hiphop/old-school-hiphop-vocal",
+        "hiphop/phonk-instrumental",
+        "hiphop/rnb-vocal",
+        "hiphop/trap-instrumental",
+        "house/acid-house-instrumental",
+        "house/afro-house-vocal",
+        "house/bass-house-instrumental",
+        "house/deep-house",
+        "house/disco-house-vocal",
+        "house/electro-house-instrumental",
+        "house/french-house-instrumental",
+        "house/melodic-house",
+        "house/organic-house",
+        "house/progressive-house-dreamy-bittersweet",
+        "house/progressive-house-melodic-trance",
+        "house/progressive-house-sparse-vocals",
+        "house/tech-house-instrumental",
+        "jazz/bebop-instrumental",
+        "jazz/cool-jazz-instrumental",
+        "jazz/dixieland-instrumental",
+        "jazz/gypsy-jazz-instrumental",
+        "jazz/jazz-funk",
+        "jazz/smooth-jazz-instrumental",
+        "jazz/smooth-jazz-vocal-late-night",
+        "jazz/smooth-jazz-vocal-positive-resolution",
+        "jazz/swing-big-band-instrumental",
+        "jazz/vocal-jazz-crooner",
+        "kids/children-song-vocal",
+        "kids/kids-adventure-song-vocal",
+        "kids/lullaby-vocal",
+        "kids/nursery-rhyme-german-vocal",
+        "latin/bachata-vocal",
+        "latin/bossa-nova-vocal",
+        "latin/cumbia-instrumental",
+        "latin/merengue-instrumental",
+        "latin/norteno-corrido-vocal",
+        "latin/reggaeton-vocal",
+        "latin/salsa-vocal",
+        "latin/samba-instrumental",
+        "latin/son-cubano-vocal",
+        "latin/tango-instrumental",
+        "meditation/focus-study-instrumental",
+        "meditation/meditation-healing-instrumental",
+        "meditation/nature-soundscape-instrumental",
+        "meditation/sleep-music-instrumental",
+        "metal/black-metal-instrumental",
+        "metal/death-metal-vocal",
+        "metal/doom-metal-instrumental",
+        "metal/folk-metal-vocal",
+        "metal/grunge-vocal",
+        "metal/heavy-metal-vocal",
+        "metal/industrial-metal-vocal",
+        "metal/melodic-metal-instrumental",
+        "metal/metalcore-vocal",
+        "metal/nu-metal-vocal",
+        "metal/power-metal-vocal",
+        "metal/progressive-djent-instrumental",
+        "metal/sludge-post-metal-instrumental",
+        "metal/symphonic-metal-vocal",
+        "metal/thrash-metal-vocal",
+        "musical/broadway-ballad-vocal",
+        "musical/german-musical-vocal",
+        "musical/musical-theatre-ensemble-vocal",
+        "pop/art-pop-vocal",
+        "pop/bedroom-pop-vocal",
+        "pop/dance-pop-vocal",
+        "pop/dream-pop-electronic-vocal",
+        "pop/german-pop-vocal",
+        "pop/hyperpop-vocal",
+        "pop/indie-pop-vocal",
+        "pop/power-ballad-vocal",
+        "pop/singer-songwriter-acoustic-vocal",
+        "punk/pop-punk-vocal",
+        "punk/post-punk-vocal",
+        "punk/punk-rock-vocal",
+        "punk/ska-punk-vocal",
+        "reggae/dancehall-vocal",
+        "reggae/dub-instrumental",
+        "reggae/rocksteady-vocal",
+        "reggae/roots-reggae-vocal",
+        "reggae/ska-jamaican-instrumental",
+        "rock/blues-rock-instrumental",
+        "rock/classic-rock-vocal",
+        "rock/garage-rock-vocal",
+        "rock/hard-rock-vocal",
+        "rock/indie-rock-vocal",
+        "rock/post-rock-instrumental",
+        "rock/progressive-rock-instrumental",
+        "rock/psychedelic-rock-instrumental",
+        "rock/rockabilly-vocal",
+        "rock/shoegaze-vocal",
+        "rock/southern-rock-vocal",
+        "rock/stoner-rock-instrumental",
+        "rock/surf-rock-instrumental",
+        "seasonal/christmas-carol-vocal",
+        "seasonal/christmas-pop-vocal",
+        "seasonal/german-christmas-vocal",
+        "seasonal/wedding-ceremony-instrumental",
+        "soul/doo-wop-vocal",
+        "soul/motown-soul-vocal",
+        "soul/neo-soul-vocal",
+        "soul/soul-ballad-vocal",
+        "world/andean-folk-instrumental",
+        "world/arabic-pop-vocal",
+        "world/bhangra-instrumental",
+        "world/calypso-soca-vocal",
+        "world/gamelan-instrumental",
+        "world/gnawa-instrumental",
+        "world/hawaiian-slack-key-instrumental",
+        "world/mariachi-vocal",
+        "world/mongolian-throat-singing-instrumental",
+        "world/qawwali-vocal",
+        "world/turkish-folk-instrumental"
+       ]
+      }
+     ],
+     "description": [
+      "STRING",
+      {
+       "tooltip": "What the song is about and how it should sound. Sent to the writing model.",
+       "default": "",
+       "multiline": true
+      }
+     ],
+     "genre": [
+      "STRING",
+      {
+       "tooltip": "Genre and sub-genre, e.g. 'indie pop'.",
+       "default": "",
+       "multiline": false
+      }
+     ],
+     "mood": [
+      "STRING",
+      {
+       "tooltip": "Mood words, e.g. 'warm, hopeful'.",
+       "default": "",
+       "multiline": false
+      }
+     ],
+     "tempo": [
+      "STRING",
+      {
+       "tooltip": "Tempo, e.g. '88 BPM' or 'midtempo'.",
+       "default": "",
+       "multiline": false
+      }
+     ],
+     "length": [
+      "COMBO",
+      {
+       "tooltip": "Target length. Guides the writing and, without a score, the render ceiling.",
+       "default": "standard (about 3:00)",
+       "multiselect": false,
+       "options": [
+        "short (about 1:30)",
+        "standard (about 3:00)",
+        "long (about 4:30)"
+       ]
+      }
+     ],
+     "vocals": [
+      "COMFY_DYNAMICCOMBO_V3",
+      {
+       "tooltip": "Sung song or instrumental. Instrumental hides all vocal settings.",
+       "options": [
+        {
+         "key": "sung",
+         "inputs": {
+          "required": {
+           "language": [
+            "STRING",
+            {
+             "tooltip": "Language of the lyrics, e.g. 'English'.",
+             "default": "",
+             "multiline": false
+            }
+           ],
+           "voice": [
+            "STRING",
+            {
+             "tooltip": "Vocal character, e.g. 'warm female voice'.",
+             "default": "",
+             "multiline": false
+            }
+           ],
+           "theme": [
+            "STRING",
+            {
+             "tooltip": "What the lyrics are about.",
+             "default": "",
+             "multiline": false
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "instrumental",
+         "inputs": {
+          "required": {
+           "melody": [
+            "COMBO",
+            {
+             "tooltip": "Whether an instrument carries a lead melody or the song is accompaniment only.",
+             "default": "instrument plays the lead",
+             "multiselect": false,
+             "options": [
+              "instrument plays the lead",
+              "accompaniment only"
+             ]
+            }
+           ],
+           "lead_instrument": [
+            "STRING",
+            {
+             "tooltip": "Optional lead instrument, e.g. 'saxophone'.",
+             "default": "",
+             "multiline": false
+            }
+           ]
+          }
+         }
+        }
+       ]
+      }
+     ],
+     "key": [
+      "STRING",
+      {
+       "tooltip": "Optional key, e.g. 'G major'. Music models that use a score take the key from the score.",
+       "advanced": true,
+       "default": "",
+       "multiline": false
+      }
+     ],
+     "meter": [
+      "STRING",
+      {
+       "tooltip": "Optional meter, e.g. '3/4'.",
+       "advanced": true,
+       "default": "",
+       "multiline": false
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "template",
+     "description",
+     "genre",
+     "mood",
+     "tempo",
+     "length",
+     "vocals",
+     "key",
+     "meter"
+    ]
+   },
+   "output": [
+    "PLENIO_BRIEF",
+    "STRING",
+    "FLOAT",
+    "BOOLEAN"
+   ],
+   "output_name": [
+    "brief",
+    "brief_text",
+    "max_seconds",
+    "instrumental"
+   ],
+   "output_is_list": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Song",
+   "display_name": "Song Brief"
+  },
+  "PlenioSongSheet": {
+   "input": {
+    "required": {
+     "review": [
+      "COMBO",
+      {
+       "tooltip": "stop for review: the documents are released only after you approve them in the editor.",
+       "default": "continue",
+       "multiselect": false,
+       "options": [
+        "continue",
+        "stop for review"
+       ]
+      }
+     ],
+     "sheet_state": [
+      "PLENIO_SHEET_STATE",
+      {
+       "tooltip": "Your edits and manual documents (edit them with the Song Sheet editor).",
+       "default": "",
+       "socketless": true
+      }
+     ]
+    },
+    "optional": {
+     "title": [
+      "STRING",
+      {
+       "tooltip": "Song title draft.",
+       "lazy": true,
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "style": [
+      "STRING",
+      {
+       "tooltip": "Style / caption draft for the music model.",
+       "lazy": true,
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "lyrics": [
+      "STRING",
+      {
+       "tooltip": "Lyrics draft with [Tag] sections.",
+       "lazy": true,
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "score": [
+      "STRING",
+      {
+       "tooltip": "Score draft (native two-voice ABC).",
+       "lazy": true,
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "artwork_prompt": [
+      "STRING",
+      {
+       "tooltip": "Cover image prompt draft.",
+       "lazy": true,
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "context_style": [
+      "STRING",
+      {
+       "tooltip": "Style owned by another sheet; shown and used for the token budget.",
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "context_lyrics": [
+      "STRING",
+      {
+       "tooltip": "Lyrics owned by another sheet; shown and used for the token budget.",
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "brief": [
+      "PLENIO_BRIEF",
+      {
+       "tooltip": "Vocal mode and length for validation."
+      }
+     ],
+     "engine": [
+      "PLENIO_ENGINE",
+      {
+       "tooltip": "Rules and exact token counts of the loaded music model."
+      }
+     ]
+    },
+    "hidden": {
+     "unique_id": [
+      "UNIQUE_ID"
+     ],
+     "prompt": [
+      "PROMPT"
+     ],
+     "extra_pnginfo": [
+      "EXTRA_PNGINFO"
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "review",
+     "sheet_state"
+    ],
+    "optional": [
+     "title",
+     "style",
+     "lyrics",
+     "score",
+     "artwork_prompt",
+     "context_style",
+     "context_lyrics",
+     "brief",
+     "engine"
+    ],
+    "hidden": [
+     "unique_id",
+     "prompt",
+     "extra_pnginfo"
+    ]
+   },
+   "output": [
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+    "STRING",
+    "COMBO",
+    "FLOAT",
+    "PLENIO_REPORT"
+   ],
+   "output_name": [
+    "title",
+    "style",
+    "lyrics",
+    "score",
+    "artwork_prompt",
+    "planning_mode",
+    "score_seconds",
+    "report"
+   ],
+   "output_is_list": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "output_node": true,
+   "category": "Plenio/Song",
+   "display_name": "Song Sheet"
+  },
+  "PlenioSystemCheck": {
+   "input": {
+    "required": {
+     "detail": [
+      "COMBO",
+      {
+       "tooltip": "summary: readable overview. full: also the raw facts as JSON.",
+       "default": "summary",
+       "multiselect": false,
+       "options": [
+        "summary",
+        "full"
+       ]
+      }
+     ]
+    },
+    "hidden": {
+     "prompt": [
+      "PROMPT"
+     ],
+     "extra_pnginfo": [
+      "EXTRA_PNGINFO"
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "detail"
+    ],
+    "hidden": [
+     "prompt",
+     "extra_pnginfo"
+    ]
+   },
+   "output": [
+    "PLENIO_REPORT"
+   ],
+   "output_name": [
+    "report"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": true,
+   "category": "Plenio/Utilities",
+   "display_name": "System Check"
+  },
+  "PreviewAny": {
+   "input": {
+    "required": {
+     "source": [
+      "*",
+      {}
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "source"
+    ]
+   },
+   "output": [
+    "STRING"
+   ],
+   "output_name": [
+    "STRING"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": true,
+   "category": "utilities",
+   "display_name": "Preview as Text"
+  },
+  "PreviewAudio": {
+   "input": {
+    "required": {
+     "audio": [
+      "AUDIO",
+      {}
+     ]
+    },
+    "hidden": {
+     "prompt": [
+      "PROMPT"
+     ],
+     "extra_pnginfo": [
+      "EXTRA_PNGINFO"
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "audio"
+    ],
+    "hidden": [
+     "prompt",
+     "extra_pnginfo"
+    ]
+   },
+   "output": [
+    "AUDIO"
+   ],
+   "output_name": [
+    "audio"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": true,
+   "category": "audio",
+   "display_name": "Preview Audio"
+  },
+  "PrimitiveBoolean": {
+   "input": {
+    "required": {
+     "value": [
+      "BOOLEAN",
+      {}
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "value"
+    ]
+   },
+   "output": [
+    "BOOLEAN"
+   ],
+   "output_name": [
+    "BOOLEAN"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "utilities/primitive",
+   "display_name": "Boolean"
+  },
+  "PrimitiveFloat": {
+   "input": {
+    "required": {
+     "value": [
+      "FLOAT",
+      {
+       "min": -9223372036854775807,
+       "max": 9223372036854775807,
+       "step": 0.1
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "value"
+    ]
+   },
+   "output": [
+    "FLOAT"
+   ],
+   "output_name": [
+    "FLOAT"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "utilities/primitive",
+   "display_name": "Float"
+  },
+  "PrimitiveInt": {
+   "input": {
+    "required": {
+     "value": [
+      "INT",
+      {
+       "min": -9223372036854775807,
+       "max": 9223372036854775807,
+       "control_after_generate": "fixed"
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "value"
+    ]
+   },
+   "output": [
+    "INT"
+   ],
+   "output_name": [
+    "INT"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "utilities/primitive",
+   "display_name": "Int"
+  },
+  "PrimitiveString": {
+   "input": {
+    "required": {
+     "value": [
+      "STRING",
+      {
+       "multiline": false
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "value"
+    ]
+   },
+   "output": [
+    "STRING"
+   ],
+   "output_name": [
+    "STRING"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "utilities/primitive",
+   "display_name": "Text"
+  },
+  "PrimitiveStringMultiline": {
+   "input": {
+    "required": {
+     "value": [
+      "STRING",
+      {
+       "multiline": true
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "value"
+    ]
+   },
+   "output": [
+    "STRING"
+   ],
+   "output_name": [
+    "STRING"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "utilities/primitive",
+   "display_name": "Text (Multiline)"
+  },
+  "SaveAudio": {
+   "input": {
+    "required": {
+     "audio": [
+      "AUDIO",
+      {}
+     ],
+     "filename_prefix": [
+      "STRING",
+      {
+       "default": "audio/ComfyUI",
+       "multiline": false
+      }
+     ]
+    },
+    "hidden": {
+     "prompt": [
+      "PROMPT"
+     ],
+     "extra_pnginfo": [
+      "EXTRA_PNGINFO"
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "audio",
+     "filename_prefix"
+    ],
+    "hidden": [
+     "prompt",
+     "extra_pnginfo"
+    ]
+   },
+   "output": [
+    "AUDIO"
+   ],
+   "output_name": [
+    "audio"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": true,
+   "category": "audio",
+   "display_name": "Save Audio (FLAC) (DEPRECATED)"
+  },
+  "SaveAudioAdvanced": {
+   "input": {
+    "required": {
+     "audio": [
+      "AUDIO",
+      {
+       "tooltip": "The audio to save."
+      }
+     ],
+     "filename_prefix": [
+      "STRING",
+      {
+       "tooltip": "The prefix for the file to save. May include formatting tokens such as %date:yyyy-MM-dd%.",
+       "default": "audio/ComfyUI",
+       "multiline": false
+      }
+     ],
+     "format": [
+      "COMFY_DYNAMICCOMBO_V3",
+      {
+       "tooltip": "The file format in which to save the audio.",
+       "options": [
+        {
+         "key": "flac",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "mp3",
+         "inputs": {
+          "required": {
+           "quality": [
+            "COMBO",
+            {
+             "default": "V0",
+             "multiselect": false,
+             "options": [
+              "V0",
+              "128k",
+              "320k"
+             ]
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "opus",
+         "inputs": {
+          "required": {
+           "quality": [
+            "COMBO",
+            {
+             "default": "128k",
+             "multiselect": false,
+             "options": [
+              "64k",
+              "96k",
+              "128k",
+              "192k",
+              "320k"
+             ]
+            }
+           ]
+          }
+         }
+        }
+       ]
+      }
+     ]
+    },
+    "hidden": {
+     "prompt": [
+      "PROMPT"
+     ],
+     "extra_pnginfo": [
+      "EXTRA_PNGINFO"
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "audio",
+     "filename_prefix",
+     "format"
+    ],
+    "hidden": [
+     "prompt",
+     "extra_pnginfo"
+    ]
+   },
+   "output": [
+    "AUDIO"
+   ],
+   "output_name": [
+    "audio"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": true,
+   "category": "audio",
+   "display_name": "Save Audio (Advanced)"
+  },
+  "SeedNode": {
+   "input": {
+    "required": {
+     "seed": [
+      "INT",
+      {
+       "min": 0,
+       "max": 9223372036854775807,
+       "control_after_generate": "fixed"
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "seed"
+    ]
+   },
+   "output": [
+    "INT"
+   ],
+   "output_name": [
+    "seed"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "utilities",
+   "display_name": "Seed"
+  },
+  "StartLoop": {
+   "input": {
+    "required": {
+     "mode": [
+      "COMFY_DYNAMICCOMBO_V3",
+      {
+       "tooltip": "The loop iteration mode.",
+       "options": [
+        {
+         "key": "simple",
+         "inputs": {
+          "required": {
+           "num_iterations": [
+            "INT",
+            {
+             "tooltip": "Number of times to execute the loop body.",
+             "default": 4,
+             "min": 0
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "For",
+         "inputs": {
+          "required": {
+           "start_iteration_index": [
+            "INT",
+            {
+             "tooltip": "Index of the first iteration when using For loop mode.",
+             "default": 0
+            }
+           ],
+           "max_iteration": [
+            "INT",
+            {
+             "tooltip": "The exclusive stopping value for iteration_index in For mode.",
+             "default": 4,
+             "max": 18446744073709551615
+            }
+           ],
+           "step": [
+            "INT",
+            {
+             "tooltip": "The index step size between each iteration when using For loop mode.",
+             "default": 1,
+             "min": 1
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "List",
+         "inputs": {
+          "required": {
+           "list": [
+            "COMFY_MATCHTYPE_V3",
+            {
+             "tooltip": "List of items the loop iterates on. The loop body executes once per item.",
+             "template": {
+              "template_id": "list_item",
+              "allowed_types": "*"
+             }
+            }
+           ]
+          }
+         }
+        }
+       ]
+      }
+     ],
+     "cache_iterations": [
+      "BOOLEAN",
+      {
+       "tooltip": "Reuse unchanged iteration results from previous executions. Disable to execute every iteration again.",
+       "advanced": true,
+       "default": false
+      }
+     ]
+    },
+    "optional": {
+     "parent_iteration": [
+      "INT",
+      {
+       "tooltip": "Connect iteration_index from an outer Start Loop to nest this loop.",
+       "forceInput": true
+      }
+     ],
+     "initial_iteration_value": [
+      "COMFY_MATCHTYPE_V3",
+      {
+       "tooltip": "Value exposed as current_iteration_value on the first iteration.",
+       "template": {
+        "template_id": "carried_value",
+        "allowed_types": "*"
+       }
+      }
+     ]
+    },
+    "hidden": {
+     "dynprompt": [
+      "DYNPROMPT"
+     ],
+     "execution_list": [
+      "EXECUTION_LIST"
+     ],
+     "unique_id": [
+      "UNIQUE_ID"
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "mode",
+     "cache_iterations"
+    ],
+    "optional": [
+     "parent_iteration",
+     "initial_iteration_value"
+    ],
+    "hidden": [
+     "dynprompt",
+     "execution_list",
+     "unique_id"
+    ]
+   },
+   "output": [
+    "INT",
+    "BOOLEAN",
+    "BOOLEAN",
+    "COMFY_MATCHTYPE_V3",
+    "COMFY_MATCHTYPE_V3"
+   ],
+   "output_name": [
+    "iteration_index",
+    "is_first",
+    "is_last",
+    "list_item",
+    "current_iteration_value"
+   ],
+   "output_is_list": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "utilities/looping",
+   "display_name": "Start Loop"
+  },
+  "TextGenerate": {
+   "input": {
+    "required": {
+     "clip": [
+      "CLIP",
+      {}
+     ],
+     "prompt": [
+      "STRING",
+      {
+       "default": "",
+       "multiline": true,
+       "dynamicPrompts": true
+      }
+     ],
+     "max_length": [
+      "INT",
+      {
+       "default": 512,
+       "min": 1,
+       "max": 32768
+      }
+     ],
+     "sampling_mode": [
+      "COMFY_DYNAMICCOMBO_V3",
+      {
+       "display_name": "Sampling Mode",
+       "options": [
+        {
+         "key": "on",
+         "inputs": {
+          "required": {
+           "temperature": [
+            "FLOAT",
+            {
+             "default": 0.7,
+             "min": 0.01,
+             "max": 2.0,
+             "step": 1e-06
+            }
+           ],
+           "top_k": [
+            "INT",
+            {
+             "default": 64,
+             "min": 0,
+             "max": 1000
+            }
+           ],
+           "top_p": [
+            "FLOAT",
+            {
+             "default": 0.95,
+             "min": 0.0,
+             "max": 1.0,
+             "step": 0.01
+            }
+           ],
+           "min_p": [
+            "FLOAT",
+            {
+             "default": 0.05,
+             "min": 0.0,
+             "max": 1.0,
+             "step": 0.01
+            }
+           ],
+           "repetition_penalty": [
+            "FLOAT",
+            {
+             "default": 1.05,
+             "min": 0.0,
+             "max": 5.0,
+             "step": 0.01
+            }
+           ],
+           "seed": [
+            "INT",
+            {
+             "default": 0,
+             "min": 0,
+             "max": 18446744073709551615
+            }
+           ]
+          },
+          "optional": {
+           "presence_penalty": [
+            "FLOAT",
+            {
+             "default": 0.0,
+             "min": 0.0,
+             "max": 5.0,
+             "step": 0.01
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "off",
+         "inputs": {
+          "required": {}
+         }
+        }
+       ]
+      }
+     ]
+    },
+    "optional": {
+     "image": [
+      "IMAGE",
+      {}
+     ],
+     "video": [
+      "IMAGE",
+      {
+       "tooltip": "Video frames as image batch. Assumed to be 24 FPS; subsampled to 1 FPS internally."
+      }
+     ],
+     "audio": [
+      "AUDIO",
+      {}
+     ],
+     "thinking": [
+      "BOOLEAN",
+      {
+       "tooltip": "Operate in thinking mode if the model supports it.",
+       "default": false
+      }
+     ],
+     "use_default_template": [
+      "BOOLEAN",
+      {
+       "tooltip": "Use the built in system prompt/template if the model has one.",
+       "advanced": true,
+       "default": true
+      }
+     ],
+     "mtp": [
+      "COMBO",
+      {
+       "tooltip": "Speculative decoding with the checkpoint's multi-token-prediction head. No effect without MTP weights. auto adapts the draft depth; 2-5 pins it. Sampled output stays correctly distributed but differs from non-MTP output for the same seed.",
+       "default": "auto",
+       "multiselect": false,
+       "options": [
+        "auto",
+        "off",
+        "2",
+        "3",
+        "4",
+        "5"
+       ]
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "clip",
+     "prompt",
+     "max_length",
+     "sampling_mode"
+    ],
+    "optional": [
+     "image",
+     "video",
+     "audio",
+     "thinking",
+     "use_default_template",
+     "mtp"
+    ]
+   },
+   "output": [
+    "STRING"
+   ],
+   "output_name": [
+    "generated_text"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "text",
+   "display_name": "Generate Text"
+  },
+  "UNETLoader": {
+   "input": {
+    "required": {
+     "unet_name": [
+      []
+     ],
+     "weight_dtype": [
+      [
+       "default",
+       "fp8_e4m3fn",
+       "fp8_e4m3fn_fast",
+       "fp8_e5m2"
+      ],
+      {
+       "advanced": true
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "unet_name",
+     "weight_dtype"
+    ]
+   },
+   "output": [
+    "MODEL"
+   ],
+   "output_name": [
+    "MODEL"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "model/loaders",
+   "display_name": "Load Diffusion Model"
+  },
+  "VAEDecodeAudio": {
+   "input": {
+    "required": {
+     "samples": [
+      "LATENT",
+      {}
+     ],
+     "vae": [
+      "VAE",
+      {}
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "samples",
+     "vae"
+    ]
+   },
+   "output": [
+    "AUDIO"
+   ],
+   "output_name": [
+    "AUDIO"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "model/latent",
+   "display_name": "VAE Decode Audio"
+  },
+  "VAEDecodeAudioTiled": {
+   "input": {
+    "required": {
+     "samples": [
+      "LATENT",
+      {}
+     ],
+     "vae": [
+      "VAE",
+      {}
+     ],
+     "tile_size": [
+      "INT",
+      {
+       "default": 512,
+       "min": 32,
+       "max": 8192,
+       "step": 8
+      }
+     ],
+     "overlap": [
+      "INT",
+      {
+       "default": 64,
+       "min": 0,
+       "max": 1024,
+       "step": 8
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "samples",
+     "vae",
+     "tile_size",
+     "overlap"
+    ]
+   },
+   "output": [
+    "AUDIO"
+   ],
+   "output_name": [
+    "AUDIO"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "model/latent",
+   "display_name": "VAE Decode Audio (Tiled)"
+  },
+  "VAELoader": {
+   "input": {
+    "required": {
+     "vae_name": [
+      [
+       "pixel_space"
+      ]
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "vae_name"
+    ]
+   },
+   "output": [
+    "VAE"
+   ],
+   "output_name": [
+    "VAE"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "model/loaders",
+   "display_name": "Load VAE"
+  },
+  "YuE2GenerateABC": {
+   "input": {
+    "required": {
+     "clip": [
+      "CLIP",
+      {}
+     ],
+     "style": [
+      "STRING",
+      {
+       "multiline": true,
+       "dynamicPrompts": true
+      }
+     ],
+     "lyrics": [
+      "STRING",
+      {
+       "multiline": true,
+       "dynamicPrompts": true
+      }
+     ],
+     "seed": [
+      "INT",
+      {
+       "default": 0,
+       "min": 0,
+       "max": 18446744073709551615,
+       "control_after_generate": true
+      }
+     ],
+     "mode": [
+      "COMBO",
+      {
+       "tooltip": "full: generates melody and chords; melody: generates melody only, recommended for covers.",
+       "multiselect": false,
+       "options": [
+        "full",
+        "melody"
+       ]
+      }
+     ],
+     "max_abc_tokens": [
+      "INT",
+      {
+       "advanced": true,
+       "default": 8192,
+       "min": 1,
+       "max": 20000
+      }
+     ],
+     "temperature": [
+      "FLOAT",
+      {
+       "advanced": true,
+       "default": 0.7,
+       "min": 0.0,
+       "max": 5.0,
+       "step": 0.05
+      }
+     ],
+     "top_p": [
+      "FLOAT",
+      {
+       "advanced": true,
+       "default": 0.9,
+       "min": 0.01,
+       "max": 1.0,
+       "step": 0.01
+      }
+     ],
+     "top_k": [
+      "INT",
+      {
+       "advanced": true,
+       "default": 30,
+       "min": 1,
+       "max": 32768
+      }
+     ],
+     "repetition_penalty": [
+      "FLOAT",
+      {
+       "advanced": true,
+       "default": 1.005,
+       "min": 0.01,
+       "max": 10.0,
+       "step": 0.005
+      }
+     ],
+     "penalty_window": [
+      "INT",
+      {
+       "tooltip": "Number of recent ABC tokens used to penalize repetition.",
+       "advanced": true,
+       "default": 100,
+       "min": 1,
+       "max": 20000
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "clip",
+     "style",
+     "lyrics",
+     "seed",
+     "mode",
+     "max_abc_tokens",
+     "temperature",
+     "top_p",
+     "top_k",
+     "repetition_penalty",
+     "penalty_window"
+    ]
+   },
+   "output": [
+    "STRING"
+   ],
+   "output_name": [
+    "abc"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "model/conditioning/yue2",
+   "display_name": "YuE2 Generate ABC"
+  },
+  "YuE2GenerateMusic": {
+   "input": {
+    "required": {
+     "clip": [
+      "CLIP",
+      {}
+     ],
+     "style": [
+      "STRING",
+      {
+       "multiline": true,
+       "dynamicPrompts": true
+      }
+     ],
+     "lyrics": [
+      "STRING",
+      {
+       "multiline": true,
+       "dynamicPrompts": true
+      }
+     ],
+     "abc": [
+      "STRING",
+      {
+       "tooltip": "Connect the ABC generator or supply an edited score. Leave empty to use off mode automatically.",
+       "default": "",
+       "multiline": true
+      }
+     ],
+     "seed": [
+      "INT",
+      {
+       "default": 0,
+       "min": 0,
+       "max": 18446744073709551615,
+       "control_after_generate": true
+      }
+     ],
+     "mode": [
+      "COMBO",
+      {
+       "tooltip": "full: generates melody and chords; melody: generates melody only, recommended for covers.",
+       "multiselect": false,
+       "options": [
+        "full",
+        "melody"
+       ]
+      }
+     ],
+     "max_duration": [
+      "FLOAT",
+      {
+       "tooltip": "Maximum duration in seconds. Automatically reduced for long prompts; generation can stop earlier.",
+       "default": 360.0,
+       "min": 0.04,
+       "max": 900.0,
+       "step": 0.04
+      }
+     ],
+     "temperature": [
+      "FLOAT",
+      {
+       "advanced": true,
+       "default": 1.0,
+       "min": 0.0,
+       "max": 5.0,
+       "step": 0.05
+      }
+     ],
+     "top_p": [
+      "FLOAT",
+      {
+       "advanced": true,
+       "default": 0.95,
+       "min": 0.01,
+       "max": 1.0,
+       "step": 0.01
+      }
+     ],
+     "top_k": [
+      "INT",
+      {
+       "advanced": true,
+       "default": 100,
+       "min": 1,
+       "max": 32768
+      }
+     ],
+     "repetition_penalty": [
+      "FLOAT",
+      {
+       "advanced": true,
+       "default": 1.2,
+       "min": 0.01,
+       "max": 10.0,
+       "step": 0.01
+      }
+     ]
+    },
+    "optional": {
+     "cfg_scale": [
+      "FLOAT",
+      {
+       "tooltip": "Autoregressive guidance for style and lyrics. 1.0 disables CFG, matching the ABC workflow. Use 1.01 to match the original off-mode guidance.",
+       "advanced": true,
+       "default": 1.0,
+       "min": 0.0,
+       "max": 100.0,
+       "step": 0.01
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "clip",
+     "style",
+     "lyrics",
+     "abc",
+     "seed",
+     "mode",
+     "max_duration",
+     "temperature",
+     "top_p",
+     "top_k",
+     "repetition_penalty"
+    ],
+    "optional": [
+     "cfg_scale"
+    ]
+   },
+   "output": [
+    "CONDITIONING",
+    "FLOAT"
+   ],
+   "output_name": [
+    "CONDITIONING",
+    "seconds"
+   ],
+   "output_is_list": [
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "model/conditioning/yue2",
+   "display_name": "YuE2 Generate Music"
+  }
+ }
+}

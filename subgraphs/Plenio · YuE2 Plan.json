@@ -1,0 +1,543 @@
+{
+ "revision": 0,
+ "last_node_id": 1,
+ "last_link_id": 0,
+ "nodes": [
+  {
+   "id": 1,
+   "type": "630d16a8-090b-5961-9853-4f71db8d2d06",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    340,
+    200
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [
+    {
+     "localized_name": "clip",
+     "name": "clip",
+     "type": "CLIP",
+     "link": null
+    },
+    {
+     "localized_name": "style",
+     "name": "style",
+     "type": "STRING",
+     "widget": {
+      "name": "style"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "lyrics",
+     "name": "lyrics",
+     "type": "STRING",
+     "widget": {
+      "name": "lyrics"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "seed",
+     "name": "seed",
+     "label": "plan seed",
+     "type": "INT",
+     "widget": {
+      "name": "seed"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "switch",
+     "name": "switch",
+     "label": "planning",
+     "type": "BOOLEAN",
+     "widget": {
+      "name": "switch"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "mode",
+     "name": "mode",
+     "label": "plan type",
+     "type": "COMBO",
+     "widget": {
+      "name": "mode"
+     },
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "localized_name": "score",
+     "name": "score",
+     "type": "*",
+     "links": null
+    }
+   ],
+   "title": "Plenio · YuE2 Plan",
+   "properties": {},
+   "widgets_values": [
+    null,
+    null,
+    0,
+    true,
+    "full"
+   ]
+  }
+ ],
+ "links": [],
+ "version": 0.4,
+ "definitions": {
+  "subgraphs": [
+   {
+    "id": "630d16a8-090b-5961-9853-4f71db8d2d06",
+    "version": 1,
+    "state": {
+     "lastGroupId": 0,
+     "lastNodeId": 3,
+     "lastLinkId": 9,
+     "lastRerouteId": 0
+    },
+    "revision": 0,
+    "config": {},
+    "name": "Plenio · YuE2 Plan",
+    "inputNode": {
+     "id": -10,
+     "bounding": [
+      -260,
+      0,
+      160,
+      160
+     ]
+    },
+    "outputNode": {
+     "id": -20,
+     "bounding": [
+      760,
+      0,
+      160,
+      60
+     ]
+    },
+    "inputs": [
+     {
+      "id": "4dad2419-2e25-5f68-b7cb-7d03a13b5594",
+      "name": "clip",
+      "type": "CLIP",
+      "linkIds": [
+       3
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     },
+     {
+      "id": "534fc1cb-6229-5e1f-a05f-c639a524b0cd",
+      "name": "style",
+      "type": "STRING",
+      "linkIds": [
+       4
+      ],
+      "pos": [
+       0,
+       20
+      ]
+     },
+     {
+      "id": "d8e2af5c-1bb3-5f2d-8e69-38290330ea55",
+      "name": "lyrics",
+      "type": "STRING",
+      "linkIds": [
+       5
+      ],
+      "pos": [
+       0,
+       40
+      ]
+     },
+     {
+      "id": "5f8b88b1-d5c4-51be-b377-18a2eb9858c0",
+      "name": "seed",
+      "type": "INT",
+      "linkIds": [
+       6
+      ],
+      "pos": [
+       0,
+       60
+      ],
+      "label": "plan seed"
+     },
+     {
+      "id": "4fd01d79-c347-5143-85ac-75440f6cb017",
+      "name": "switch",
+      "type": "BOOLEAN",
+      "linkIds": [
+       7
+      ],
+      "pos": [
+       0,
+       80
+      ],
+      "label": "planning"
+     },
+     {
+      "id": "2e8cab25-0bc8-5811-af87-75b17f492fdd",
+      "name": "mode",
+      "type": "COMBO",
+      "linkIds": [
+       8
+      ],
+      "pos": [
+       0,
+       100
+      ],
+      "label": "plan type"
+     }
+    ],
+    "outputs": [
+     {
+      "id": "25fa03e4-ddc0-5861-b55f-81cd313d787e",
+      "name": "score",
+      "type": "*",
+      "linkIds": [
+       9
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     }
+    ],
+    "widgets": [],
+    "nodes": [
+     {
+      "id": 1,
+      "type": "YuE2GenerateABC",
+      "pos": [
+       0,
+       0
+      ],
+      "size": [
+       340,
+       330
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "clip",
+        "name": "clip",
+        "type": "CLIP",
+        "link": 3
+       },
+       {
+        "localized_name": "style",
+        "name": "style",
+        "type": "STRING",
+        "widget": {
+         "name": "style"
+        },
+        "link": 4
+       },
+       {
+        "localized_name": "lyrics",
+        "name": "lyrics",
+        "type": "STRING",
+        "widget": {
+         "name": "lyrics"
+        },
+        "link": 5
+       },
+       {
+        "localized_name": "seed",
+        "name": "seed",
+        "type": "INT",
+        "widget": {
+         "name": "seed"
+        },
+        "link": 6
+       },
+       {
+        "localized_name": "mode",
+        "name": "mode",
+        "type": "COMBO",
+        "widget": {
+         "name": "mode"
+        },
+        "link": 8
+       },
+       {
+        "localized_name": "max_abc_tokens",
+        "name": "max_abc_tokens",
+        "type": "INT",
+        "widget": {
+         "name": "max_abc_tokens"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "temperature",
+        "name": "temperature",
+        "type": "FLOAT",
+        "widget": {
+         "name": "temperature"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "top_p",
+        "name": "top_p",
+        "type": "FLOAT",
+        "widget": {
+         "name": "top_p"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "top_k",
+        "name": "top_k",
+        "type": "INT",
+        "widget": {
+         "name": "top_k"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "repetition_penalty",
+        "name": "repetition_penalty",
+        "type": "FLOAT",
+        "widget": {
+         "name": "repetition_penalty"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "penalty_window",
+        "name": "penalty_window",
+        "type": "INT",
+        "widget": {
+         "name": "penalty_window"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "abc",
+        "name": "abc",
+        "type": "STRING",
+        "links": [
+         2
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "YuE2GenerateABC"
+      },
+      "widgets_values": [
+       null,
+       null,
+       0,
+       "fixed",
+       "full",
+       8192,
+       0.7,
+       0.9,
+       30,
+       1.005,
+       100
+      ]
+     },
+     {
+      "id": 2,
+      "type": "PrimitiveString",
+      "pos": [
+       0,
+       380
+      ],
+      "size": [
+       300,
+       60
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "value",
+        "name": "value",
+        "type": "STRING",
+        "widget": {
+         "name": "value"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "STRING",
+        "name": "STRING",
+        "type": "STRING",
+        "links": [
+         1
+        ]
+       }
+      ],
+      "title": "No score",
+      "properties": {
+       "Node name for S&R": "PrimitiveString"
+      },
+      "widgets_values": [
+       ""
+      ]
+     },
+     {
+      "id": 3,
+      "type": "ComfySwitchNode",
+      "pos": [
+       400,
+       0
+      ],
+      "size": [
+       260,
+       90
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "on_false",
+        "name": "on_false",
+        "shape": 7,
+        "type": "COMFY_MATCHTYPE_V3",
+        "link": 1
+       },
+       {
+        "localized_name": "on_true",
+        "name": "on_true",
+        "shape": 7,
+        "type": "COMFY_MATCHTYPE_V3",
+        "link": 2
+       },
+       {
+        "localized_name": "switch",
+        "name": "switch",
+        "type": "BOOLEAN",
+        "widget": {
+         "name": "switch"
+        },
+        "link": 7
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "output",
+        "name": "output",
+        "type": "COMFY_MATCHTYPE_V3",
+        "links": [
+         9
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "ComfySwitchNode"
+      },
+      "widgets_values": [
+       true
+      ]
+     }
+    ],
+    "groups": [],
+    "links": [
+     {
+      "id": 1,
+      "origin_id": 2,
+      "origin_slot": 0,
+      "target_id": 3,
+      "target_slot": 0,
+      "type": "STRING"
+     },
+     {
+      "id": 2,
+      "origin_id": 1,
+      "origin_slot": 0,
+      "target_id": 3,
+      "target_slot": 1,
+      "type": "STRING"
+     },
+     {
+      "id": 3,
+      "origin_id": -10,
+      "origin_slot": 0,
+      "target_id": 1,
+      "target_slot": 0,
+      "type": "CLIP"
+     },
+     {
+      "id": 4,
+      "origin_id": -10,
+      "origin_slot": 1,
+      "target_id": 1,
+      "target_slot": 1,
+      "type": "STRING"
+     },
+     {
+      "id": 5,
+      "origin_id": -10,
+      "origin_slot": 2,
+      "target_id": 1,
+      "target_slot": 2,
+      "type": "STRING"
+     },
+     {
+      "id": 6,
+      "origin_id": -10,
+      "origin_slot": 3,
+      "target_id": 1,
+      "target_slot": 3,
+      "type": "INT"
+     },
+     {
+      "id": 7,
+      "origin_id": -10,
+      "origin_slot": 4,
+      "target_id": 3,
+      "target_slot": 2,
+      "type": "BOOLEAN"
+     },
+     {
+      "id": 8,
+      "origin_id": -10,
+      "origin_slot": 5,
+      "target_id": 1,
+      "target_slot": 4,
+      "type": "COMBO"
+     },
+     {
+      "id": 9,
+      "origin_id": 3,
+      "origin_slot": 0,
+      "target_id": -20,
+      "target_slot": 0,
+      "type": "*"
+     }
+    ],
+    "extra": {},
+    "category": "Plenio/YuE2",
+    "description": "Plans the song's score (ABC) from style and lyrics with YuE2. With planning off, no score is made and YuE2 renders without a plan."
+   }
+  ]
+ },
+ "extra": {}
+}

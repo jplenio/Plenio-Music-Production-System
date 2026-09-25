@@ -1,0 +1,11 @@
+---
+name: Trap (instrumental)
+group: Hiphop
+genre: trap
+tempo: Uptempo (130-145 BPM)
+meter: 4/4
+vocals: instrumental
+length: standard (about 3:00)
+---
+
+Dark atmospheric trap: rolling triplet hi-hats, booming distorted 808 bass with glides, sharp snares and claps on the third beat, eerie plucked or bell synth melody and cinematic pads. Brooding energy, spacious mix, hypnotic four-bar repetition with drop-outs.

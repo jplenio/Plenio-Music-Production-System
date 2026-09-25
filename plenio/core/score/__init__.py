@@ -1,0 +1,41 @@
+"""Scores in the native two-voice ABC dialect: analysis, validation and deterministic operations."""
+
+from .native import (
+    DIALECT,
+    Analysis,
+    Bar,
+    Change,
+    Diagnostic,
+    Section,
+    analyze,
+    has_chords,
+    move_vocal_to_ins,
+    prepare,
+    section_tag,
+    section_tags,
+    set_tempo,
+    silence_voice,
+    strip_chords,
+    transpose,
+    validate,
+)
+
+__all__ = [
+    "DIALECT",
+    "Analysis",
+    "Bar",
+    "Change",
+    "Diagnostic",
+    "Section",
+    "analyze",
+    "has_chords",
+    "move_vocal_to_ins",
+    "prepare",
+    "section_tag",
+    "section_tags",
+    "set_tempo",
+    "silence_voice",
+    "strip_chords",
+    "transpose",
+    "validate",
+]

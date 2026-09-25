@@ -1,0 +1,42 @@
+{
+  "id": "0c9e7b52-1f4d-4a8e-b6c3-2d5f8a1e9b40",
+  "revision": 0,
+  "last_node_id": 2,
+  "last_link_id": 0,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "PlenioSystemCheck",
+      "pos": [460, 0],
+      "size": [520, 420],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [{"name": "detail", "type": "COMBO", "widget": {"name": "detail"}, "link": null}],
+      "outputs": [{"name": "report", "type": "PLENIO_REPORT", "links": null}],
+      "title": "System Check",
+      "properties": {"Node name for S&R": "PlenioSystemCheck"},
+      "widgets_values": ["summary"]
+    },
+    {
+      "id": 2,
+      "type": "MarkdownNote",
+      "pos": [0, 0],
+      "size": [420, 420],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "About: System Check",
+      "properties": {},
+      "widgets_values": ["# Plenio · System Check\n\nPress **Run**. The node lists:\n\n- ComfyUI, frontend and Plenio versions\n- GPUs, VRAM and system RAM\n- optional Python packages\n- the offline and download policy (`PLENIO_OFFLINE`, `PLENIO_AUTO_DOWNLOAD`)\n- hardware recommendations\n\nRecommendations are text only. Plenio never changes a setting or a model on its own; you choose the model files in the loader nodes of each template.\n\nSet **detail** to `full` to include the raw facts as JSON, for example for a bug report."]
+    }
+  ],
+  "links": [],
+  "groups": [],
+  "definitions": {"subgraphs": []},
+  "config": {},
+  "extra": {"ds": {"scale": 1, "offset": [40, 60]}},
+  "version": 0.4
+}

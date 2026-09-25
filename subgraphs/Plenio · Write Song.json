@@ -1,0 +1,792 @@
+{
+ "revision": 0,
+ "last_node_id": 1,
+ "last_link_id": 0,
+ "nodes": [
+  {
+   "id": 1,
+   "type": "ec9ff305-6d52-5283-8543-6c063df4002b",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    340,
+    200
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [
+    {
+     "localized_name": "brief",
+     "name": "brief",
+     "type": "PLENIO_BRIEF",
+     "link": null
+    },
+    {
+     "localized_name": "engine",
+     "name": "engine",
+     "type": "PLENIO_ENGINE",
+     "link": null
+    },
+    {
+     "localized_name": "clip_name",
+     "name": "clip_name",
+     "label": "writer model",
+     "type": "COMBO",
+     "widget": {
+      "name": "clip_name"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "sampling_mode.seed",
+     "name": "sampling_mode.seed",
+     "label": "draft seed",
+     "type": "INT",
+     "widget": {
+      "name": "sampling_mode.seed"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "thinking",
+     "name": "thinking",
+     "type": "BOOLEAN",
+     "widget": {
+      "name": "thinking"
+     },
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "localized_name": "title",
+     "name": "title",
+     "type": "STRING",
+     "links": null
+    },
+    {
+     "localized_name": "style",
+     "name": "style",
+     "type": "STRING",
+     "links": null
+    },
+    {
+     "localized_name": "lyrics",
+     "name": "lyrics",
+     "type": "STRING",
+     "links": null
+    },
+    {
+     "localized_name": "artwork_prompt",
+     "name": "artwork_prompt",
+     "type": "STRING",
+     "links": null
+    },
+    {
+     "localized_name": "report",
+     "name": "report",
+     "type": "PLENIO_REPORT",
+     "links": null
+    }
+   ],
+   "title": "Plenio · Write Song",
+   "properties": {},
+   "widgets_values": [
+    "gemma4_e4b_it_fp8_scaled.safetensors",
+    0,
+    false
+   ]
+  }
+ ],
+ "links": [],
+ "version": 0.4,
+ "definitions": {
+  "subgraphs": [
+   {
+    "id": "ec9ff305-6d52-5283-8543-6c063df4002b",
+    "version": 1,
+    "state": {
+     "lastGroupId": 0,
+     "lastNodeId": 4,
+     "lastLinkId": 14,
+     "lastRerouteId": 0
+    },
+    "revision": 0,
+    "config": {},
+    "name": "Plenio · Write Song",
+    "inputNode": {
+     "id": -10,
+     "bounding": [
+      -260,
+      0,
+      160,
+      140
+     ]
+    },
+    "outputNode": {
+     "id": -20,
+     "bounding": [
+      1160,
+      0,
+      160,
+      140
+     ]
+    },
+    "inputs": [
+     {
+      "id": "27ec0b2d-de7f-5ac0-a53e-2ce54760d1e8",
+      "name": "brief",
+      "type": "PLENIO_BRIEF",
+      "linkIds": [
+       5
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     },
+     {
+      "id": "127622e4-73b1-561a-8ba3-71b1eca866db",
+      "name": "engine",
+      "type": "PLENIO_ENGINE",
+      "linkIds": [
+       6
+      ],
+      "pos": [
+       0,
+       20
+      ]
+     },
+     {
+      "id": "42eecfc3-46d8-51a2-bf78-3ac3b128abcc",
+      "name": "clip_name",
+      "type": "COMBO",
+      "linkIds": [
+       7
+      ],
+      "pos": [
+       0,
+       40
+      ],
+      "label": "writer model"
+     },
+     {
+      "id": "03dd7cbe-2468-57e0-a705-0350f6f51970",
+      "name": "sampling_mode.seed",
+      "type": "INT",
+      "linkIds": [
+       8
+      ],
+      "pos": [
+       0,
+       60
+      ],
+      "label": "draft seed"
+     },
+     {
+      "id": "42a1c8f5-c11a-517e-9698-20337cb1f27a",
+      "name": "thinking",
+      "type": "BOOLEAN",
+      "linkIds": [
+       9
+      ],
+      "pos": [
+       0,
+       80
+      ]
+     }
+    ],
+    "outputs": [
+     {
+      "id": "83af0bd6-5b60-5716-b65b-b655fae5c985",
+      "name": "title",
+      "type": "STRING",
+      "linkIds": [
+       10
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     },
+     {
+      "id": "f4863bb9-c920-53ad-85f6-8691abd2647b",
+      "name": "style",
+      "type": "STRING",
+      "linkIds": [
+       11
+      ],
+      "pos": [
+       0,
+       20
+      ]
+     },
+     {
+      "id": "63eff83d-4a2d-5769-bb86-035840f5e5f7",
+      "name": "lyrics",
+      "type": "STRING",
+      "linkIds": [
+       12
+      ],
+      "pos": [
+       0,
+       40
+      ]
+     },
+     {
+      "id": "ec7851cf-2b74-5ae5-997a-2527c5264960",
+      "name": "artwork_prompt",
+      "type": "STRING",
+      "linkIds": [
+       13
+      ],
+      "pos": [
+       0,
+       60
+      ]
+     },
+     {
+      "id": "b8007133-9e7f-5668-814b-e78663102041",
+      "name": "report",
+      "type": "PLENIO_REPORT",
+      "linkIds": [
+       14
+      ],
+      "pos": [
+       0,
+       80
+      ]
+     }
+    ],
+    "widgets": [],
+    "nodes": [
+     {
+      "id": 1,
+      "type": "PlenioComposePrompt",
+      "pos": [
+       0,
+       0
+      ],
+      "size": [
+       300,
+       100
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "brief",
+        "name": "brief",
+        "type": "PLENIO_BRIEF",
+        "link": 5
+       },
+       {
+        "localized_name": "engine",
+        "name": "engine",
+        "type": "PLENIO_ENGINE",
+        "link": 6
+       },
+       {
+        "localized_name": "score",
+        "name": "score",
+        "shape": 7,
+        "type": "STRING",
+        "link": null
+       },
+       {
+        "localized_name": "detail",
+        "name": "detail",
+        "type": "COMBO",
+        "widget": {
+         "name": "detail"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "prompt",
+        "name": "prompt",
+        "type": "STRING",
+        "links": [
+         1
+        ]
+       },
+       {
+        "localized_name": "request",
+        "name": "request",
+        "type": "PLENIO_REQUEST",
+        "links": [
+         4
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "PlenioComposePrompt"
+      },
+      "widgets_values": [
+       "standard"
+      ]
+     },
+     {
+      "id": 2,
+      "type": "CLIPLoader",
+      "pos": [
+       0,
+       160
+      ],
+      "size": [
+       300,
+       110
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "clip_name",
+        "name": "clip_name",
+        "type": "COMBO",
+        "widget": {
+         "name": "clip_name"
+        },
+        "link": 7
+       },
+       {
+        "localized_name": "type",
+        "name": "type",
+        "type": "COMBO",
+        "widget": {
+         "name": "type"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "device",
+        "name": "device",
+        "type": "COMBO",
+        "widget": {
+         "name": "device"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "CLIP",
+        "name": "CLIP",
+        "type": "CLIP",
+        "links": [
+         2
+        ]
+       }
+      ],
+      "title": "Writer model",
+      "properties": {
+       "Node name for S&R": "CLIPLoader",
+       "models": [
+        {
+         "name": "gemma4_e4b_it_fp8_scaled.safetensors",
+         "url": "https://huggingface.co/Comfy-Org/gemma-4/resolve/main/text_encoders/gemma4_e4b_it_fp8_scaled.safetensors",
+         "directory": "text_encoders"
+        }
+       ]
+      },
+      "widgets_values": [
+       "gemma4_e4b_it_fp8_scaled.safetensors",
+       "stable_diffusion",
+       "default"
+      ]
+     },
+     {
+      "id": 3,
+      "type": "TextGenerate",
+      "pos": [
+       360,
+       0
+      ],
+      "size": [
+       340,
+       420
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "clip",
+        "name": "clip",
+        "type": "CLIP",
+        "link": 2
+       },
+       {
+        "localized_name": "image",
+        "name": "image",
+        "shape": 7,
+        "type": "IMAGE",
+        "link": null
+       },
+       {
+        "localized_name": "video",
+        "name": "video",
+        "shape": 7,
+        "type": "IMAGE",
+        "link": null
+       },
+       {
+        "localized_name": "audio",
+        "name": "audio",
+        "shape": 7,
+        "type": "AUDIO",
+        "link": null
+       },
+       {
+        "localized_name": "prompt",
+        "name": "prompt",
+        "type": "STRING",
+        "widget": {
+         "name": "prompt"
+        },
+        "link": 1
+       },
+       {
+        "localized_name": "max_length",
+        "name": "max_length",
+        "type": "INT",
+        "widget": {
+         "name": "max_length"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "sampling_mode",
+        "name": "sampling_mode",
+        "type": "COMFY_DYNAMICCOMBO_V3",
+        "widget": {
+         "name": "sampling_mode"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "sampling_mode.temperature",
+        "name": "sampling_mode.temperature",
+        "type": "FLOAT",
+        "widget": {
+         "name": "sampling_mode.temperature"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "sampling_mode.top_k",
+        "name": "sampling_mode.top_k",
+        "type": "INT",
+        "widget": {
+         "name": "sampling_mode.top_k"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "sampling_mode.top_p",
+        "name": "sampling_mode.top_p",
+        "type": "FLOAT",
+        "widget": {
+         "name": "sampling_mode.top_p"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "sampling_mode.min_p",
+        "name": "sampling_mode.min_p",
+        "type": "FLOAT",
+        "widget": {
+         "name": "sampling_mode.min_p"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "sampling_mode.repetition_penalty",
+        "name": "sampling_mode.repetition_penalty",
+        "type": "FLOAT",
+        "widget": {
+         "name": "sampling_mode.repetition_penalty"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "sampling_mode.seed",
+        "name": "sampling_mode.seed",
+        "type": "INT",
+        "widget": {
+         "name": "sampling_mode.seed"
+        },
+        "link": 8
+       },
+       {
+        "localized_name": "sampling_mode.presence_penalty",
+        "name": "sampling_mode.presence_penalty",
+        "type": "FLOAT",
+        "widget": {
+         "name": "sampling_mode.presence_penalty"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "thinking",
+        "name": "thinking",
+        "type": "BOOLEAN",
+        "widget": {
+         "name": "thinking"
+        },
+        "link": 9
+       },
+       {
+        "localized_name": "use_default_template",
+        "name": "use_default_template",
+        "type": "BOOLEAN",
+        "widget": {
+         "name": "use_default_template"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "mtp",
+        "name": "mtp",
+        "type": "COMBO",
+        "widget": {
+         "name": "mtp"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "generated_text",
+        "name": "generated_text",
+        "type": "STRING",
+        "links": [
+         3
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "TextGenerate"
+      },
+      "widgets_values": [
+       "",
+       2048,
+       "on",
+       0.8,
+       64,
+       0.95,
+       0.05,
+       1.05,
+       0,
+       0.0,
+       false,
+       true,
+       "auto"
+      ]
+     },
+     {
+      "id": 4,
+      "type": "PlenioParseDraft",
+      "pos": [
+       760,
+       0
+      ],
+      "size": [
+       300,
+       140
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "text",
+        "name": "text",
+        "type": "STRING",
+        "link": 3
+       },
+       {
+        "localized_name": "request",
+        "name": "request",
+        "type": "PLENIO_REQUEST",
+        "link": 4
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "title",
+        "name": "title",
+        "type": "STRING",
+        "links": [
+         10
+        ]
+       },
+       {
+        "localized_name": "style",
+        "name": "style",
+        "type": "STRING",
+        "links": [
+         11
+        ]
+       },
+       {
+        "localized_name": "lyrics",
+        "name": "lyrics",
+        "type": "STRING",
+        "links": [
+         12
+        ]
+       },
+       {
+        "localized_name": "artwork_prompt",
+        "name": "artwork_prompt",
+        "type": "STRING",
+        "links": [
+         13
+        ]
+       },
+       {
+        "localized_name": "report",
+        "name": "report",
+        "type": "PLENIO_REPORT",
+        "links": [
+         14
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "PlenioParseDraft"
+      },
+      "widgets_values": []
+     }
+    ],
+    "groups": [],
+    "links": [
+     {
+      "id": 1,
+      "origin_id": 1,
+      "origin_slot": 0,
+      "target_id": 3,
+      "target_slot": 4,
+      "type": "STRING"
+     },
+     {
+      "id": 2,
+      "origin_id": 2,
+      "origin_slot": 0,
+      "target_id": 3,
+      "target_slot": 0,
+      "type": "CLIP"
+     },
+     {
+      "id": 3,
+      "origin_id": 3,
+      "origin_slot": 0,
+      "target_id": 4,
+      "target_slot": 0,
+      "type": "STRING"
+     },
+     {
+      "id": 4,
+      "origin_id": 1,
+      "origin_slot": 1,
+      "target_id": 4,
+      "target_slot": 1,
+      "type": "PLENIO_REQUEST"
+     },
+     {
+      "id": 5,
+      "origin_id": -10,
+      "origin_slot": 0,
+      "target_id": 1,
+      "target_slot": 0,
+      "type": "PLENIO_BRIEF"
+     },
+     {
+      "id": 6,
+      "origin_id": -10,
+      "origin_slot": 1,
+      "target_id": 1,
+      "target_slot": 1,
+      "type": "PLENIO_ENGINE"
+     },
+     {
+      "id": 7,
+      "origin_id": -10,
+      "origin_slot": 2,
+      "target_id": 2,
+      "target_slot": 0,
+      "type": "COMBO"
+     },
+     {
+      "id": 8,
+      "origin_id": -10,
+      "origin_slot": 3,
+      "target_id": 3,
+      "target_slot": 12,
+      "type": "INT"
+     },
+     {
+      "id": 9,
+      "origin_id": -10,
+      "origin_slot": 4,
+      "target_id": 3,
+      "target_slot": 14,
+      "type": "BOOLEAN"
+     },
+     {
+      "id": 10,
+      "origin_id": 4,
+      "origin_slot": 0,
+      "target_id": -20,
+      "target_slot": 0,
+      "type": "STRING"
+     },
+     {
+      "id": 11,
+      "origin_id": 4,
+      "origin_slot": 1,
+      "target_id": -20,
+      "target_slot": 1,
+      "type": "STRING"
+     },
+     {
+      "id": 12,
+      "origin_id": 4,
+      "origin_slot": 2,
+      "target_id": -20,
+      "target_slot": 2,
+      "type": "STRING"
+     },
+     {
+      "id": 13,
+      "origin_id": 4,
+      "origin_slot": 3,
+      "target_id": -20,
+      "target_slot": 3,
+      "type": "STRING"
+     },
+     {
+      "id": 14,
+      "origin_id": 4,
+      "origin_slot": 4,
+      "target_id": -20,
+      "target_slot": 4,
+      "type": "PLENIO_REPORT"
+     }
+    ],
+    "extra": {},
+    "category": "Plenio/Writing",
+    "description": "Writes title, style, lyrics and an artwork prompt with a local text model (native Generate Text), following the rules of the loaded music model. Replace Generate Text with any other LLM node if you like."
+   }
+  ]
+ },
+ "extra": {}
+}

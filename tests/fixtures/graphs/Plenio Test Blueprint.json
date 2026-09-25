@@ -1,0 +1,64 @@
+{
+  "revision": 0,
+  "last_node_id": 2,
+  "last_link_id": 0,
+  "nodes": [
+    {
+      "id": 2,
+      "type": "5f0c1c2e-6d8a-4c1e-9f3b-7a2d4e6b8c01",
+      "pos": [0, 0],
+      "size": [320, 120],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [{"name": "text", "type": "STRING", "widget": {"name": "text"}, "link": null}],
+      "outputs": [{"name": "STRING", "type": "STRING", "links": null}],
+      "title": "Plenio Test Blueprint",
+      "properties": {},
+      "widgets_values": ["hello"]
+    }
+  ],
+  "links": [],
+  "version": 0.4,
+  "definitions": {
+    "subgraphs": [
+      {
+        "id": "5f0c1c2e-6d8a-4c1e-9f3b-7a2d4e6b8c01",
+        "version": 1,
+        "state": {"lastGroupId": 0, "lastNodeId": 1, "lastLinkId": 2, "lastRerouteId": 0},
+        "revision": 0,
+        "config": {},
+        "name": "Plenio Test Blueprint",
+        "inputNode": {"id": -10, "bounding": [-300, 0, 120, 60]},
+        "outputNode": {"id": -20, "bounding": [300, 0, 120, 60]},
+        "inputs": [{"id": "0b6e2d51-5f3a-4b8e-8c1d-2a9f7e4c6b11", "name": "text", "type": "STRING", "linkIds": [1], "pos": [-200, 20]}],
+        "outputs": [{"id": "7c2a9e14-3d6b-4f2e-a1c8-5e9b0d3f7a22", "name": "STRING", "type": "STRING", "linkIds": [2], "pos": [320, 20]}],
+        "widgets": [],
+        "nodes": [
+          {
+            "id": 1,
+            "type": "PrimitiveStringMultiline",
+            "pos": [-100, 0],
+            "size": [300, 100],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [{"name": "value", "type": "STRING", "widget": {"name": "value"}, "link": 1}],
+            "outputs": [{"name": "STRING", "type": "STRING", "links": [2]}],
+            "properties": {"Node name for S&R": "PrimitiveStringMultiline"},
+            "widgets_values": [""]
+          }
+        ],
+        "groups": [],
+        "links": [
+          {"id": 1, "origin_id": -10, "origin_slot": 0, "target_id": 1, "target_slot": 0, "type": "STRING"},
+          {"id": 2, "origin_id": 1, "origin_slot": 0, "target_id": -20, "target_slot": 0, "type": "STRING"}
+        ],
+        "extra": {},
+        "category": "Plenio/Tests",
+        "description": "Fixture used by the host tests (AS-10)."
+      }
+    ]
+  },
+  "extra": {}
+}

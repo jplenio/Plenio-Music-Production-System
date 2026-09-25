@@ -1,0 +1,6 @@
+# Runtime dependencies beyond ComfyUI's own requirements (numpy, av, tokenizers,
+# safetensors, huggingface_hub, Pillow, aiohttp are provided by ComfyUI).
+# Keep in sync with [project].dependencies in pyproject.toml.
+#
+# Nothing extra is needed yet. Optional features declare their own install
+# command in the error they raise (see docs/dev/coding-standards.md).

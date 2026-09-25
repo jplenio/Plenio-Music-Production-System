@@ -1,0 +1,25 @@
+{
+  "name": "plenio-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Frontend extension of the Plenio Music Production System (built into ../web/js).",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm run test && npm run build"
+  },
+  "dependencies": {
+    "vue": "3.5.43"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "6.0.1",
+    "happy-dom": "20.0.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "3.2.7",
+    "vue-tsc": "3.1.0"
+  }
+}

@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.devdeps/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+*.egg-info/
+build/
+dist/
+tests/.tmp/
+frontend/node_modules/
+frontend/coverage/
+.vscode/
+.idea/
+.coverage

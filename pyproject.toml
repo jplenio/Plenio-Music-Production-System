@@ -1,0 +1,67 @@
+[project]
+name = "comfyui-plenio-music"
+version = "0.1.0"
+description = "Plenio Music Production System: song writing, YuE2 and MiniMax Music 3 generation, editable scores and release export for ComfyUI."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Johannes Plenio" }]
+# Runtime dependencies beyond what ComfyUI itself installs. Keep in sync with requirements.txt.
+dependencies = []
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Topic :: Multimedia :: Sound/Audio",
+]
+
+[project.urls]
+# The public repository is created at the first release; see docs/dev/release.md.
+Repository = "https://github.com/jplenio/comfyui-plenio-music"
+
+[tool.comfy]
+PublisherId = "jplenio"
+DisplayName = "Plenio Music Production System"
+Icon = ""
+includes = []
+requires-comfyui = ">=0.37.0"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [".", "tools", "tests/host"]
+addopts = "--import-mode=importlib -p no:cacheprovider"
+markers = [
+  "comfy: needs an importable ComfyUI checkout (PLENIO_COMFYUI_ROOT)",
+  "host: starts a real ComfyUI server (PLENIO_COMFYUI_ROOT, slow)",
+  "smoke: runs real models on local hardware (PLENIO_SMOKE=1, very slow)",
+]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+extend-exclude = ["plenio/third_party", "frontend", "web", ".devdeps"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "N", "S307", "S102", "T20"]
+ignore = ["E501", "N999"]  # N999: the ComfyUI package folder name contains hyphens
+
+[tool.ruff.lint.isort]
+known-first-party = ["plenio", "harness", "workflow_validation"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["T20", "S101"]
+"tools/**" = ["T20"]
+
+[tool.mypy]
+python_version = "3.10"
+files = ["plenio/core"]
+exclude = ["plenio/third_party/"]
+strict = true
+warn_unused_ignores = true
+explicit_package_bases = true
+mypy_path = "."
+
+[[tool.mypy.overrides]]
+module = ["plenio.third_party.*"]
+follow_imports = "skip"

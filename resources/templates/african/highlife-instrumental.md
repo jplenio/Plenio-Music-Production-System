@@ -1,0 +1,11 @@
+---
+name: Highlife (instrumental)
+group: African
+genre: highlife
+tempo: Midtempo (100-120 BPM)
+meter: 4/4
+vocals: instrumental
+length: long (about 4:30)
+---
+
+Bright, joyful West-African Highlife: two intertwined clean electric guitars, warm horn section, melodic bass, light dancing percussion with cowbell and congas. Celebratory swinging grooves, memorable call-and-response horn motifs and a relaxed, sunlit live-band feel.

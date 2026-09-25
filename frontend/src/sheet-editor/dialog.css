@@ -1,0 +1,163 @@
+/* Song Sheet dialog. Scoped by the .plenio-overlay prefix; ComfyUI CSS variables for theming. */
+.plenio-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgb(0 0 0 / 55%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 13px/1.45 var(--font-family, sans-serif);
+}
+.plenio-overlay .plenio-dialog {
+  width: min(920px, 94vw);
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--comfy-menu-bg, #222);
+  color: var(--fg-color, #ddd);
+  border: 1px solid var(--border-color, #444);
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgb(0 0 0 / 50%);
+}
+.plenio-overlay header,
+.plenio-overlay footer,
+.plenio-overlay .doc-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.plenio-overlay header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color, #444);
+}
+.plenio-overlay header h2 {
+  margin: 0;
+  font-size: 16px;
+}
+.plenio-overlay .status {
+  color: var(--descrip-text, #999);
+}
+.plenio-overlay .status.bad,
+.plenio-overlay .error {
+  color: #e0685e;
+}
+.plenio-overlay .spacer {
+  flex: 1;
+}
+.plenio-overlay .body {
+  overflow: auto;
+  padding: 8px 16px;
+}
+.plenio-overlay .hint {
+  margin: 8px 16px 0;
+  color: var(--descrip-text, #999);
+}
+.plenio-overlay .doc {
+  margin: 10px 0 14px;
+}
+.plenio-overlay .doc h3 {
+  margin: 0;
+  font-size: 13px;
+}
+.plenio-overlay .badge {
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 9px;
+  background: var(--comfy-input-bg, #333);
+  color: var(--descrip-text, #aaa);
+}
+.plenio-overlay .badge[data-state='edited'],
+.plenio-overlay .badge[data-state='edited (merged)'] {
+  background: #2f5f8a;
+  color: #fff;
+}
+.plenio-overlay .badge[data-state='manual'] {
+  background: #7a5a1e;
+  color: #fff;
+}
+.plenio-overlay .badge[data-state='conflict'] {
+  background: #8a2f2f;
+  color: #fff;
+}
+.plenio-overlay textarea,
+.plenio-overlay pre {
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, #444);
+  background: var(--comfy-input-bg, #1b1b1b);
+  color: var(--input-text, #ddd);
+  font: inherit;
+  resize: vertical;
+}
+.plenio-overlay pre {
+  white-space: pre-wrap;
+  max-height: 220px;
+  overflow: auto;
+}
+.plenio-overlay .mono,
+.plenio-overlay pre {
+  font-family: var(--code-font, ui-monospace, monospace);
+  font-size: 12px;
+}
+.plenio-overlay .conflict {
+  margin-top: 6px;
+  padding: 8px;
+  border-radius: 6px;
+  background: rgb(138 47 47 / 25%);
+}
+.plenio-overlay .findings {
+  padding: 4px 16px;
+  max-height: 22vh;
+  overflow: auto;
+  border-top: 1px solid var(--border-color, #444);
+}
+.plenio-overlay .findings ul {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+.plenio-overlay li[data-severity='error'] strong {
+  color: #e0685e;
+}
+.plenio-overlay li[data-severity='warning'] strong {
+  color: #d8a31a;
+}
+.plenio-overlay li[data-severity='info'] {
+  color: var(--descrip-text, #999);
+}
+.plenio-overlay .where {
+  color: var(--descrip-text, #999);
+}
+.plenio-overlay footer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border-color, #444);
+}
+.plenio-overlay .facts {
+  color: var(--descrip-text, #999);
+}
+.plenio-overlay button {
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, #555);
+  background: var(--comfy-input-bg, #333);
+  color: var(--input-text, #ddd);
+  cursor: pointer;
+}
+.plenio-overlay button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.plenio-overlay button.primary {
+  background: #2f6fb0;
+  border-color: #2f6fb0;
+  color: #fff;
+}
+.plenio-overlay button.icon {
+  margin-left: auto;
+  font-size: 18px;
+  line-height: 1;
+  padding: 2px 8px;
+}

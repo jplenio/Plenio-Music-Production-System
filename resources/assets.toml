@@ -1,0 +1,6 @@
+# Catalogue of Plenio-owned assets (files that are not ComfyUI model weights).
+# Every asset is pinned to a full commit hash; sizes are mandatory, SHA-256 where published.
+# ComfyUI-format weights are declared in the templates (properties.models) instead.
+# The first entries (lyrics ASR models) arrive with the YuE2 Cover path.
+
+schema = "plenio.assets/1"
