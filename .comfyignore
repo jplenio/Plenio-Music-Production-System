@@ -1,0 +1,11 @@
+# What the Comfy Registry package leaves out (gitwildmatch, read by comfy-cli's `comfy node publish`).
+# The package keeps what ComfyUI loads - __init__.py, pyproject.toml, plenio/, web/, subgraphs/,
+# example_workflows/, resources/ - plus the licence files, README, CHANGELOG and the user guide.
+.github/
+.gitattributes
+tests/
+tools/
+frontend/
+assets/
+docs/*
+!docs/user/

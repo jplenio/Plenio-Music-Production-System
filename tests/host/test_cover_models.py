@@ -5,8 +5,7 @@ excerpt, then Transcribe Lyrics with faster-whisper large-v3 in its worker proce
 
 Needs ``PLENIO_SMOKE=1``, ``PLENIO_COMFYUI_ROOT``, ``PLENIO_MODELS_DIR`` (with
 ``audio_encoders/sheetsage2_bf16.safetensors`` and ``audio_encoders/whisper-large-v3``, or set
-``PLENIO_WHISPER_DIR``) and the legacy MiniMax sample (``PLENIO_LEGACY_SAMPLE``, default: the
-read-only legacy copy next to this project). About 2 minutes on an RTX 5060 Ti 16 GB.
+``PLENIO_WHISPER_DIR``) and the MiniMax sample in ``assets/sound-samples`` (or ``PLENIO_LEGACY_SAMPLE``). About 2 minutes on an RTX 5060 Ti 16 GB.
 """
 
 from __future__ import annotations
@@ -31,11 +30,7 @@ WHISPER = Path(os.environ.get("PLENIO_WHISPER_DIR", "") or MODELS / "audio_encod
 SHEETSAGE = MODELS / "audio_encoders" / "sheetsage2_bf16.safetensors"
 LEGACY_SAMPLE = Path(
     os.environ.get("PLENIO_LEGACY_SAMPLE", "")
-    or PROJECT.parent
-    / "ComfyUI-MiniMax"
-    / "assets"
-    / "sound-samples"
-    / "Example Album - A Feeling With No Address.mp3"
+    or PROJECT / "assets" / "sound-samples" / "Example Album - A Feeling With No Address.mp3"
 )
 FIXTURE = json.loads(
     (PROJECT / "tests" / "fixtures" / "cover" / "minimax-excerpt.json").read_text(encoding="utf-8")

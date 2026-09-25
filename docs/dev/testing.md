@@ -24,7 +24,7 @@ Frontend: `cd frontend && npm ci`.
 | side-by-side with the legacy toolkit | add `PLENIO_LEGACY_NODE_DIR=<installed legacy toolkit>` |
 | real-model smoke tests (GPU, slow) | add `PLENIO_SMOKE=1` and `PLENIO_MODELS_DIR=<models>` |
 | S-1, S-2, S-6 (YuE2 Song sung / instrumental, writer) and Cover Art | `PLENIO_SMOKE=1 PLENIO_MODELS_DIR=<models> ... pytest tests/host/test_song_models.py tests/host/test_cover_art_models.py` (GPU; `-s` prints timings) |
-| S-7 mastering smoke (CPU, no model) | `PLENIO_SMOKE=1 PLENIO_COMFYUI_ROOT=<ComfyUI> <python> -m pytest tests/host/test_master_smoke.py`; the take is the legacy MiniMax sample next to the project or `PLENIO_LEGACY_SAMPLE=<audio file>` |
+| S-7 mastering smoke (CPU, no model) | `PLENIO_SMOKE=1 PLENIO_COMFYUI_ROOT=<ComfyUI> <python> -m pytest tests/host/test_master_smoke.py`; the take is `assets/sound-samples/Example Album - A Feeling With No Address.mp3` or `PLENIO_LEGACY_SAMPLE=<audio file>` |
 | lint / format / types | `PYTHONPATH=.devdeps <python> -m ruff check . && ... -m ruff format --check . && ... -m mypy` |
 | templates and blueprints | `<python> tools/workflow_validation.py` |
 | frontend | `cd frontend && npm run check` (types, Vitest, build) |

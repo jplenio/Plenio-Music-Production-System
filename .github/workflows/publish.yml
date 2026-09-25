@@ -1,0 +1,24 @@
+name: Publish to Comfy Registry
+
+# Publishes the version in pyproject.toml when a GitHub release is published (or by hand).
+# Needs the repository secret REGISTRY_ACCESS_TOKEN (a Comfy Registry token of publisher jplenio).
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  publish-node:
+    name: Publish custom node
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # comfy-cli reads `git ls-files`; unquoted paths keep the files with "·" in their names
+      - run: git config --global core.quotePath false
+      - name: Publish to Comfy Registry
+        uses: Comfy-Org/publish-node-action@v1
+        with:
+          personal_access_token: ${{ secrets.REGISTRY_ACCESS_TOKEN }}

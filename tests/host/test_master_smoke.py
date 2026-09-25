@@ -1,7 +1,7 @@
 """S-7: a real take through Master (EQ + Loudness & Dynamics) and Export Release (V3 audio, no model).
 
-Uses the legacy toolkit's MiniMax sample (``PLENIO_LEGACY_SAMPLE``, default: the read-only legacy copy
-next to this project) or any audio file given there; the file is copied into the server's input folder.
+Uses the MiniMax sample in ``assets/sound-samples`` (made with the predecessor toolkit) or any audio
+file given in ``PLENIO_LEGACY_SAMPLE``; the file is copied into the server's input folder.
 Needs ``PLENIO_SMOKE=1`` and ``PLENIO_COMFYUI_ROOT``; runs on the CPU in about a minute.
 """
 
@@ -21,11 +21,7 @@ pytestmark = [pytest.mark.host, pytest.mark.smoke]
 
 SAMPLE = Path(
     os.environ.get("PLENIO_LEGACY_SAMPLE", "")
-    or PROJECT.parent
-    / "ComfyUI-MiniMax"
-    / "assets"
-    / "sound-samples"
-    / "Example Album - A Feeling With No Address.mp3"
+    or PROJECT / "assets" / "sound-samples" / "Example Album - A Feeling With No Address.mp3"
 )
 
 

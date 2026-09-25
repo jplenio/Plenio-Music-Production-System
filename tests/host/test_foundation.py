@@ -15,6 +15,7 @@ from typing import Any
 import pytest
 
 from harness import PACKAGE_NAME, ComfyServer, Log
+from plenio import __version__
 
 pytestmark = pytest.mark.host
 
@@ -27,7 +28,7 @@ def test_plenio_loads_without_errors(server: ComfyServer) -> None:
     assert info["output"] == ["PLENIO_REPORT"]
     text = server.log_text()
     assert "Cannot import" not in text and "Error while calling comfy_entrypoint" not in text
-    assert "Plenio 0.1.0" in text
+    assert f"Plenio {__version__}" in text
 
 
 def test_the_node_type_snapshot_matches_the_server(comfy_path: Path, tmp_path: Path) -> None:

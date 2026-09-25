@@ -2,7 +2,16 @@
 
 All notable changes are listed here. Versions follow semantic versioning; published Registry versions are immutable.
 
-## Unreleased
+## 0.2.0 - 2026-09-25
+
+First public release. Plenio succeeds the [Music Production Toolkit](https://github.com/jplenio/ComfyUI-MiniMax-Music-Production-Toolkit) (formerly *MiniMax Music Production Toolkit*) as a new package with new node IDs; both can be installed side by side.
+
+### Release (0.2.0)
+
+- Version 0.2.0, development status *Production/Stable*; published to the Comfy Registry as `comfyui-plenio-music` (installable from the ComfyUI Manager) by `.github/workflows/publish.yml` when a GitHub release is published.
+- The Registry package contains what ComfyUI loads plus the user guide (`.comfyignore`). Templates and blueprints are included by directory, because `git ls-files` quotes their names (`·`) and comfy-cli would have skipped all of them.
+- README rewritten for the release: templates, Song Sheet, score editor, covers, mastering, hardware table, installation, the move from the toolkit. Banner, icon and screenshots in `assets/branding/`.
+- Demo gallery (GitHub Pages from `docs/`): 35 songs and 8 covers with their SoundCloud links and cover images, made with the predecessor toolkit; the sample song with its prompt report in `assets/sound-samples/`, also used by the S-7 and cover smoke tests.
 
 ### Fixed (Phase 10 - final architecture acceptance review, `docs/audit/2026-09-25-phase-10-acceptance.md`)
 

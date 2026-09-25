@@ -1,6 +1,6 @@
 [project]
 name = "comfyui-plenio-music"
-version = "0.1.0"
+version = "0.2.0"
 description = "Plenio Music Production System: song writing, YuE2 and MiniMax Music 3 generation, editable scores and release export for ComfyUI."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -9,7 +9,7 @@ authors = [{ name = "Johannes Plenio" }]
 # Runtime dependencies beyond what ComfyUI itself installs. Keep in sync with requirements.txt.
 dependencies = []
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 5 - Production/Stable",
   "License :: OSI Approved :: Apache Software License",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
@@ -17,14 +17,19 @@ classifiers = [
 ]
 
 [project.urls]
-# The public repository is created at the first release; see docs/dev/release.md.
-Repository = "https://github.com/jplenio/comfyui-plenio-music"
+Repository = "https://github.com/jplenio/Plenio-Music-Production-System"
+Documentation = "https://github.com/jplenio/Plenio-Music-Production-System#readme"
+"Bug Tracker" = "https://github.com/jplenio/Plenio-Music-Production-System/issues"
+Changelog = "https://github.com/jplenio/Plenio-Music-Production-System/blob/main/CHANGELOG.md"
 
 [tool.comfy]
 PublisherId = "jplenio"
 DisplayName = "Plenio Music Production System"
-Icon = ""
-includes = []
+Icon = "https://raw.githubusercontent.com/jplenio/Plenio-Music-Production-System/main/assets/branding/icon.png"
+Banner = "https://raw.githubusercontent.com/jplenio/Plenio-Music-Production-System/main/assets/branding/banner.png"
+# Templates and blueprints have "·" in their names; `git ls-files` quotes such paths by default and
+# comfy-cli would skip them, so the two folders are included by directory.
+includes = ["example_workflows", "subgraphs"]
 requires-comfyui = ">=0.37.0"
 
 [tool.pytest.ini_options]

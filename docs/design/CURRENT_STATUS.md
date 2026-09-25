@@ -4,7 +4,7 @@
 |---|---|
 | Date | 2026-09-25 |
 | Written for | the return from the Claude Code cloud session to the owner's Windows machine (the real-model pass that the Phase 10 acceptance depends on) |
-| Overall phase | **Phase 10 (final architecture acceptance review) done: accepted with conditions**; the prompt set ends with Phase 10 |
+| Overall phase | **Phase 10 done (accepted with conditions); release 0.2.0 prepared** - publishing steps with the owner |
 | Sub-phase | - (hard stop after Phase 10) |
 | Phases done | 1A, 1B (design), 2 (Foundation), 3 (YuE2 Core), 4A (Cover/Instrumental design gate), 4B (YuE2 Cover), 5 (Score / ABC editor), 9 (audit), 10 (acceptance review); 6 (MiniMax), 7 (Audio production chain) and 8 (Main workflows and UX) implemented, their real-model checks open |
 | Prompt set | `D:\Daten2\Deepseek\ComfyUI-MiniMax\Plenio_Music_Production_System_Refactor_Prompts\` on the owner's machine (not in this repository): `01_PHASE_1A` ... `12_PHASE_10`, one phase per prompt, hard stop after each phase, the next phase only on the owner's explicit authorization |
@@ -94,7 +94,7 @@ Done by the owner (reported 2026-09-25): the Phase 9 fixes - a *new lyrics* cove
 - Dev tooling: `npm audit` reports a moderate advisory in vitest's mocker (dev-only; the fix is a major vitest upgrade, not done).
 - CodeMirror renders only visible lines (tests reading the DOM see a subset).
 - mypy with the configured `python_version = "3.10"` fails on the stubs of numpy releases that use 3.12 syntax (seen with the latest numpy in the cloud); CI runs `mypy --python-version 3.12`. The code itself passes the unit tests on Python 3.10 (Phase 10), but CI tests 3.12 only.
-- `pyproject.toml` and the README's install line name the planned public repository `jplenio/comfyui-plenio-music` (release decision, `docs/dev/release.md`), while the working remote is the private `jplenio/Plenio-Music-Production-System`.
+- Release 0.2.0 is prepared (`docs/dev/release.md`): the repository `jplenio/Plenio-Music-Production-System` becomes the public one (still private until the owner switches it); the Registry package `comfyui-plenio-music` is published by `.github/workflows/publish.yml` from a GitHub release and needs the secret `REGISTRY_ACCESS_TOKEN`; the README's images (`assets/branding/`) come from the owner.
 - CI: green since `3a9fda1`; before that every run was red (acceptance report ACC-01). Job logs are not reachable from the cloud session (their storage host is blocked); failures appear as annotations, readable through the API.
 - The tone-match EQ fit differs by up to 0.003 dB between CPUs (floating-point code paths; inaudible).
 - Shell pitfall on the owner's machine: bash heredocs with backslashes (`\d`, `\n`, `\a`, `\b`) inserted control characters into code; write code with file-writing tools, and scan for control characters before committing.

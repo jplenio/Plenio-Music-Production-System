@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Demo songs and covers made with YuE2 and MiniMax Music 3 in ComfyUI - the listening page of the Plenio Music Production System.">
+  <title>Plenio Music Production System — Demo Songs</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg:#0b0d10; --panel:#12161b; --panel2:#171c22; --line:#29313a;
+      --text:#edf2f7; --muted:#98a6b5; --accent:#d7e7ff; --max:1100px; --list:920px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
+    a{color:inherit}
+    header,main,footer{width:min(var(--max),calc(100% - 32px));margin-inline:auto}
+    header{padding:44px 0 22px}
+    .eyebrow{font-size:.78rem;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);font-weight:700}
+    h1{margin:.3rem 0 .55rem;font-size:clamp(1.9rem,4.2vw,3.2rem);line-height:1.02;letter-spacing:-.04em;max-width:900px}
+    .lead{max-width:880px;color:#bcc7d2;font-size:1.02rem;margin:.4rem 0 0}
+    .links,.stats,.filters,.badges{display:flex;flex-wrap:wrap;gap:8px}
+    .links{margin-top:16px}.links a{padding:8px 12px;border:1px solid var(--line);border-radius:10px;text-decoration:none;background:var(--panel);font-size:.92rem}
+    .links a:hover{border-color:#4a5968}
+    .stats{margin-top:14px}.stat{padding:6px 10px;border-radius:999px;background:var(--panel2);color:#c6d0da;font-size:.83rem;border:1px solid var(--line)}
+    .workflow-note{margin:14px 0 0;padding:13px 16px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(135deg,#121820,#101318);color:#b7c3cf;font-size:.9rem}
+    .controls{position:sticky;top:0;z-index:5;margin:10px 0 18px;padding:10px;background:rgba(11,13,16,.94);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:13px}
+    .filters{align-items:center}.filters input,.filters select{min-height:37px;padding:7px 9px;border-radius:9px;border:1px solid var(--line);background:#0f1318;color:var(--text);font-size:.92rem}
+    .filters input{flex:1 1 240px}.filters select{flex:0 1 180px}
+    .count{margin-left:auto;color:var(--muted);font-size:.88rem}
+    .list{display:flex;flex-direction:column;gap:16px;width:min(var(--list),100%);margin:0 auto;padding-bottom:48px}
+    .card{overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--panel);box-shadow:0 14px 38px rgba(0,0,0,.15);transition:border-color .16s,transform .16s,box-shadow .16s}
+    .card:hover{border-color:#435468;transform:translateY(-2px);box-shadow:0 20px 46px rgba(0,0,0,.28)}
+    .card iframe{display:block;width:100%;height:152px;border:0;background:#0d1014}
+    .player-head{background:#0d1014;padding:6px 8px 0}
+    .player-head iframe{border-radius:12px 12px 0 0}
+    .soundcloud-placeholder{padding:15px 18px;border-bottom:1px solid var(--line);color:#83909d;font-size:.88rem}
+    .row{display:flex;gap:16px;padding:14px 16px;align-items:flex-start}
+    .info{flex:1;min-width:0}
+    .title-row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+    .num{font-variant-numeric:tabular-nums;color:#5b6a79;font-size:.82rem;letter-spacing:.06em;font-weight:600}
+    h2{margin:0;font-size:1.28rem;line-height:1.15;letter-spacing:-.02em}
+    h2 a{text-decoration:none}h2 a:hover{color:var(--accent)}
+    .album-line{font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+    .badges{margin:8px 0 6px}
+    .badge{border:1px solid #34404c;background:#151b21;color:#c8d3dd;padding:3px 8px;border-radius:999px;font-size:.74rem}
+    .desc{margin:0;color:#a8b5c1;font-size:.92rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+    .thumb{flex:0 0 auto;width:96px;height:96px;border-radius:12px;object-fit:cover;opacity:.96;box-shadow:0 10px 26px rgba(0,0,0,.35);margin-top:2px}
+    .thumb-fallback{flex:0 0 auto;width:96px;height:96px;border-radius:12px;background:radial-gradient(circle at 30% 25%,#263443,#11171d 60%,#0b0d10);display:grid;place-items:center;color:#7f8d9a;font-size:.72rem;text-align:center;padding:10px}
+    details{margin:0 16px 14px;border-top:1px solid var(--line);padding-top:10px}
+    summary{cursor:pointer;color:#c8d3dd;font-size:.88rem;font-weight:650;user-select:none}
+    summary:hover{color:var(--accent)}
+    .detail-grid{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin:11px 0;font-size:.84rem}.detail-grid dt{color:#7f8d9a}.detail-grid dd{margin:0;color:#b9c4ce;overflow-wrap:anywhere}
+    .prompt,.cover-concept{margin-top:10px;padding:10px 12px;border-radius:10px;background:#0d1115;color:#9eabb8;font-size:.82rem;white-space:pre-wrap}
+    .cover-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:14px;margin-top:16px}
+    .cover-card .row{padding:12px 14px}
+    .cover-card h2{font-size:1.05rem}
+    .cover-card .thumb,.cover-card .thumb-fallback{width:64px;height:64px;border-radius:9px;font-size:.62rem;padding:6px}
+    .cover-card iframe{height:124px}
+    .cover-card details{margin:0 14px 12px}
+    .categories{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0 0}
+    .cat{display:inline-flex;align-items:center;gap:9px;padding:9px 14px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:#c6d0da;font:inherit;font-size:.94rem;cursor:pointer}
+    .cat:hover{border-color:#4a5968}
+    .cat[aria-pressed="true"]{background:#1c2733;border-color:#4a5968;color:#fff}
+    .cat-count{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.82rem}
+    .section-note{margin:12px 0 0;padding:13px 16px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(135deg,#121820,#101318);color:#b7c3cf;font-size:.9rem}
+    .groups{display:flex;flex-direction:column;gap:26px;width:min(var(--list),100%);margin:0 auto;padding-bottom:48px}
+    .group{border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#141a21,#101419);padding:18px}
+    .group-head h2{font-size:1.45rem}
+    .group-eyebrow{font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+    .group-meta{margin-top:2px;color:var(--muted);font-size:.86rem}
+    .group-comment{margin:12px 0 0;padding:11px 13px;border-left:3px solid #3a4a5c;background:#0f1318;border-radius:0 10px 10px 0;color:#bdc8d3;font-size:.92rem;white-space:pre-wrap}
+    .source-player{margin-top:12px}
+    .cover-title{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+    footer{padding:0 0 44px;color:#82909d;font-size:.86rem}
+    @media(max-width:640px){header{padding-top:34px}.controls{position:static}.count{width:100%;margin-left:0}.row{gap:12px;padding:12px 12px}.thumb,.thumb-fallback{width:62px;height:62px;border-radius:9px}h2{font-size:1.12rem}.desc{-webkit-line-clamp:2}details{margin:0 12px 12px}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Plenio Music Production System · ComfyUI · YuE2 · YuE2 Cover · MiniMax Music 3</div>
+  <h1>Generated music, and covers of your own tracks.</h1>
+  <p class="lead">Songs generated locally in ComfyUI with <strong>YuE2</strong> and <strong>MiniMax Music 3</strong> — the models the <strong>Plenio Music Production System</strong> drives. The second category shows <strong>cover versions</strong>: an original track, its score read straight out of the audio, and the covers made from it.</p>
+  <p class="lead"><strong>Where these tracks come from:</strong> they were produced with Plenio's predecessor, the <a href="https://github.com/jplenio/ComfyUI-MiniMax-Music-Production-Toolkit">Music Production Toolkit</a> (same music models; its own writer, restoration and mastering chain, listed under “Generation details”). Plenio replaces that toolkit; its own settings differ, see the repository.</p>
+  <div class="links">
+    <a id="repo-link" href="#">GitHub repository</a>
+    <a id="playlist-link" href="#" hidden>SoundCloud playlist</a>
+  </div>
+  <div id="stats" class="stats"></div>
+  <nav class="categories" id="categories" aria-label="Demo categories">
+    <button type="button" class="cat" data-cat="songs" aria-pressed="true">Generated songs <span class="cat-count" id="count-songs"></span></button>
+    <button type="button" class="cat" data-cat="covers" aria-pressed="false">Cover songs <span class="cat-count" id="count-covers"></span></button>
+  </nav>
+</header>
+<main>
+  <section id="section-songs">
+  <div class="section-note"><strong>Shared production settings (predecessor toolkit):</strong> MiniMax Music 3 · up to 300 s · 40 steps · CFG 1.7 · Euler / simple · PRE 12 kHz → FlashSR hybrid → gentle HF repair → POST 19 kHz · 44.1 kHz release targeting −14 LUFS / −1 dBTP. Track-specific seeds, prompts and musical metadata are under “Generation details”.</div>
+  <div class="controls">
+    <div class="filters">
+      <input id="search" type="search" placeholder="Search title, album, genre or description…" aria-label="Search demos">
+      <select id="album"><option value="">All collections</option></select>
+      <select id="genre"><option value="">All genres</option></select>
+      <select id="type"><option value="">Instrumental + vocal</option><option>Instrumental</option><option>Vocal</option></select>
+      <select id="sort"><option value="showcase">Showcase order</option><option value="album">Collection</option><option value="title">Title</option><option value="genre">Genre</option></select>
+      <div id="count" class="count"></div>
+    </div>
+  </div>
+  <section id="tracks" class="list" aria-live="polite"></section>
+  </section>
+
+  <section id="section-covers" hidden>
+    <div class="section-note"><strong>Cover songs:</strong> each original track was read by SheetSage2 into a score, and YuE2 then rendered a new version in a chosen style. Tempo and length below are <em>measured from the original audio</em>; the cover settings are the ones the run recorded. SoundCloud links appear as soon as a track is uploaded.</div>
+    <div class="controls">
+      <div class="filters">
+        <input id="cover-search" type="search" placeholder="Search original, genre, style template or instrument…" aria-label="Search cover demos">
+        <div id="cover-count" class="count"></div>
+      </div>
+    </div>
+    <div id="cover-groups" class="groups" aria-live="polite"></div>
+  </section>
+</main>
+<footer>
+  Audio is streamed from SoundCloud. Cover images can be stored in <code>docs/assets/demo-covers/</code>. Edit <code>docs/demo-tracks.js</code> only when you want to add, replace or update SoundCloud track/playlist URLs.
+</footer>
+<script src="demo-tracks.js"></script>
+<script src="demo-covers.js"></script>
+<script>
+(() => {
+  const cfg=window.MINIMAX_DEMO_CONFIG||{};
+  const all=[...(window.MINIMAX_DEMO_TRACKS||[])];
+  document.title=(cfg.pageTitle||"Plenio Music Production System — Demo Songs");
+  const repo=document.getElementById('repo-link');repo.href=cfg.repositoryUrl||'#';
+  const pl=document.getElementById('playlist-link');if(cfg.soundcloudPlaylistUrl){pl.href=cfg.soundcloudPlaylistUrl;pl.hidden=false;}
+  const albums=[...new Set(all.map(x=>x.album).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const genres=[...new Set(all.map(x=>x.genre).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const albumSel=document.getElementById('album'),genreSel=document.getElementById('genre');
+  for(const v of albums){const o=document.createElement('option');o.value=o.textContent=v;albumSel.append(o)}
+  for(const v of genres){const o=document.createElement('option');o.value=o.textContent=v;genreSel.append(o)}
+  const vocalCount=all.filter(x=>x.type==='Vocal').length;
+  const coverGroups=[...(window.DEMO_COVER_GROUPS||[])];
+  const coverCount=coverGroups.reduce((n,g)=>n+((g.covers||[]).length),0);
+  document.getElementById('stats').innerHTML=`<span class="stat">${all.length} generated songs</span><span class="stat">${albums.length} collections</span><span class="stat">${genres.length} genres</span><span class="stat">${all.length-vocalCount} instrumental</span><span class="stat">${vocalCount} vocal</span>`+(coverCount?`<span class="stat">${coverCount} cover songs</span><span class="stat">${coverGroups.length} originals</span>`:'');
+  const songsBadge=document.getElementById('count-songs');if(songsBadge)songsBadge.textContent=all.length;
+  const coversBadge=document.getElementById('count-covers');if(coversBadge)coversBadge.textContent=coverCount;
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function card(t){
+    const a=document.createElement('article');a.className='card';
+    const num=String(t.showcaseOrder??'').padStart(2,'0');
+
+    // Player first — play is the focus.
+    if(t.soundcloudUrl && /^https:\/\/(www\.)?soundcloud\.com\//i.test(t.soundcloudUrl.trim())){
+      const head=document.createElement('div');head.className='player-head';
+      const iframe=document.createElement('iframe');iframe.loading='lazy';iframe.allow='autoplay';iframe.title=`${t.title} — SoundCloud player`;
+      const base='https://w.soundcloud.com/player/?url='+encodeURIComponent(t.soundcloudUrl.trim())+'&color=%233f5060&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false';
+      iframe.src=base;head.append(iframe);a.append(head);
+    }else{
+      const ph=document.createElement('div');ph.className='soundcloud-placeholder';ph.textContent='SoundCloud link will appear here after upload.';a.append(ph);
+    }
+
+    // Info + small cover side by side.
+    const row=document.createElement('div');row.className='row';
+    const info=document.createElement('div');info.className='info';
+    const keyScale=[t.key,t.scale].filter(Boolean).join(' · ');
+    const titleLink=t.soundcloudUrl&&/^https:\/\/(www\.)?soundcloud\.com\//i.test(t.soundcloudUrl.trim())
+      ?`<a href="${esc(t.soundcloudUrl.trim())}" target="_blank" rel="noopener">${esc(t.title)}</a>`
+      :esc(t.title);
+    info.innerHTML=`<div class="title-row"><span class="num">${esc(num)}</span><h2>${titleLink}</h2></div><div class="album-line">${esc(t.album)} · ${esc(t.artist)}</div><div class="badges"><span class="badge">${esc(t.genre)}</span><span class="badge">${esc(t.type)}</span>${t.language&&t.language!=='—'?`<span class="badge">${esc(t.language)}</span>`:''}${t.variant?`<span class="badge">${esc(t.variant)}</span>`:''}${t.bpm?`<span class="badge">${esc(t.bpm)} BPM</span>`:''}${keyScale?`<span class="badge">${esc(keyScale)}</span>`:''}</div><p class="desc">${esc(t.description)}</p>`;
+    row.append(info);
+
+    const thumb=document.createElement('div');thumb.className='thumb-fallback';thumb.innerHTML=`<span>${esc(t.album)}<br>${esc(t.title)}</span>`;
+    if(t.cover){const img=new Image();img.className='thumb';img.alt=`Cover art for ${t.title}`;img.loading='lazy';const swap=()=>{if(img.parentNode!==row)thumb.replaceWith(img)};img.onload=swap;img.onerror=()=>{};img.src=t.cover;if(img.complete&&img.naturalWidth)swap();row.append(thumb);}
+    else{row.append(thumb);}
+    a.append(row);
+
+    const d=document.createElement('details');
+    d.innerHTML=`<summary>Generation details</summary><dl class="detail-grid"><dt>Collection</dt><dd>${esc(t.album)}</dd><dt>Style</dt><dd>${esc(t.style||t.genre)}</dd><dt>Seed</dt><dd>${esc(t.seed)}</dd><dt>MiniMax</dt><dd>${esc(t.steps)} steps · CFG ${esc(t.samplerCfg)} · ${esc(t.sampler)} / ${esc(t.scheduler)} · max ${esc(t.maxDurationSeconds)} s</dd><dt>Release</dt><dd>${esc(t.release?.sampleRate)} Hz · target ${esc(t.release?.targetLufs)} LUFS / ${esc(t.release?.targetTruePeakDbtp)} dBTP</dd></dl><div class="prompt"><strong>Starting prompt</strong>\n${esc(t.startingPrompt)}</div><div class="cover-concept"><strong>Cover concept</strong>\n${esc(t.coverConcept)}</div>`;
+    a.append(d);
+    return a;
+  }
+  const root=document.getElementById('tracks'),search=document.getElementById('search'),typeSel=document.getElementById('type'),sortSel=document.getElementById('sort'),count=document.getElementById('count');
+  function render(){
+    const q=search.value.trim().toLowerCase();
+    let list=all.filter(t=>(!albumSel.value||t.album===albumSel.value)&&(!genreSel.value||t.genre===genreSel.value)&&(!typeSel.value||t.type===typeSel.value)&&(!q||[t.title,t.album,t.genre,t.style,t.description,t.startingPrompt].join(' ').toLowerCase().includes(q)));
+    const cmp={showcase:(a,b)=>(a.showcaseOrder||999)-(b.showcaseOrder||999),album:(a,b)=>a.album.localeCompare(b.album)||a.title.localeCompare(b.title),title:(a,b)=>a.title.localeCompare(b.title),genre:(a,b)=>a.genre.localeCompare(b.genre)||a.title.localeCompare(b.title)}[sortSel.value];
+    list.sort(cmp);root.replaceChildren(...list.map(card));count.textContent=`${list.length} of ${all.length} tracks`;
+  }
+  for(const el of [search,albumSel,genreSel,typeSel,sortSel])el.addEventListener(el===search?'input':'change',render);
+  render();
+
+  // ---- Cover songs: one original track, the covers made from it underneath ------
+  const coverGroupsEl=document.getElementById('cover-groups');
+  const coverSearch=document.getElementById('cover-search');
+  const coverCountEl=document.getElementById('cover-count');
+
+  function isValidSoundcloud(url){return !!url&&/^https:\/\/(www\.)?soundcloud\.com\//i.test(String(url).trim());}
+
+  function soundcloudBlock(url,title,extraClass){
+    const wrap=document.createElement('div');
+    if(extraClass)wrap.classList.add(extraClass);
+    if(isValidSoundcloud(url)){
+      wrap.classList.add('player-head');
+      const iframe=document.createElement('iframe');iframe.loading='lazy';iframe.allow='autoplay';
+      iframe.title=`${title} — SoundCloud player`;
+      iframe.src='https://w.soundcloud.com/player/?url='+encodeURIComponent(String(url).trim())+'&color=%233f5060&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false';
+      wrap.append(iframe);
+    }else{
+      wrap.classList.add('soundcloud-placeholder');
+      wrap.textContent='SoundCloud link will appear here after upload.';
+    }
+    return wrap;
+  }
+
+  function humanTemplate(path){
+    const name=String(path).split('/').pop().replace(/\.(txt|md|prompt)$/i,'');
+    return name.replace(/[-_]+/g,' ').replace(/\b\w/g,m=>m.toUpperCase());
+  }
+
+  function coverLink(c){
+    return isValidSoundcloud(c.soundcloudUrl)
+      ?`<a href="${esc(String(c.soundcloudUrl).trim())}" target="_blank" rel="noopener">${esc(c.title)}</a>`
+      :esc(c.title);
+  }
+
+  function coverCard(c){
+    const art=document.createElement('article');art.className='card cover-card';
+    art.append(soundcloudBlock(c.soundcloudUrl,c.title));
+    const row=document.createElement('div');row.className='row';
+    const info=document.createElement('div');info.className='info';
+    const freedomShown=c.freedom!==''&&c.freedom!==undefined&&c.freedom!==null;
+    const badges=[c.genre,c.lyricsMode,c.leadInstrument,
+      c.coverMode?`${c.coverMode} conditioning`:'',c.tempoLabel,
+      freedomShown?`freedom ${c.freedom}`:''].filter(Boolean)
+      .map(x=>`<span class="badge">${esc(x)}</span>`).join('');
+    const styleLine=c.styleTemplate?`<p class="desc">Style template: ${esc(humanTemplate(c.styleTemplate))}</p>`:'';
+    info.innerHTML=`<div class="cover-title"><span class="num">${esc(c.variant||'')}</span><h2>${coverLink(c)}</h2></div>`
+      +(badges?`<div class="badges">${badges}</div>`:'')+styleLine;
+    row.append(info);
+    const thumb=document.createElement('div');thumb.className='thumb-fallback';thumb.innerHTML=`<span>${esc(c.variant||'')}</span>`;
+    if(c.coverArt){
+      const img=new Image();img.className='thumb';img.alt=`Cover art for ${c.title}`;img.loading='lazy';
+      const swap=()=>{if(img.parentNode!==row)thumb.replaceWith(img)};
+      img.onload=swap;img.onerror=()=>{};img.src=c.coverArt;
+      if(img.complete&&img.naturalWidth)swap();
+      row.append(thumb);
+    }else{row.append(thumb);}
+    art.append(row);
+    const details=document.createElement('details');
+    details.innerHTML=`<summary>Run details</summary><dl class="detail-grid">`
+      +`<dt>Model</dt><dd>${esc(c.model||'—')}</dd>`
+      +(c.file?`<dt>File</dt><dd>${esc(c.file)}</dd>`:'')
+      +(c.seed!=null?`<dt>Seed</dt><dd>${esc(c.seed)}</dd>`:'')
+      +(c.steps!=null?`<dt>Sampler</dt><dd>${esc(c.steps)} steps · CFG ${esc(c.cfg)} · ${esc(c.sampler)} / ${esc(c.scheduler)}</dd>`:'')
+      +(c.targetDurationSeconds?`<dt>Target</dt><dd>up to ${esc(c.targetDurationSeconds)} s · release ${esc(c.outputSampleRate)} Hz</dd>`:'')
+      +(c.styleTemplate?`<dt>Template</dt><dd>${esc(c.styleTemplate)}</dd>`:'')
+      +((c.scoreChanges||[]).length?`<dt>Score edits</dt><dd>${esc((c.scoreChanges||[]).join(' · '))}</dd>`:'')
+      +`</dl>`;
+    art.append(details);
+    return art;
+  }
+
+  function groupBlock(g){
+    const sec=document.createElement('article');sec.className='group';
+    const facts=[g.sourceBpm?`${g.sourceBpm} BPM measured`:'',g.sourceDurationSeconds?`${g.sourceDurationSeconds} s`:''].filter(Boolean).join(' · ');
+    const head=document.createElement('div');head.className='group-head';
+    head.innerHTML=`<div class="group-eyebrow">Original track</div><h2>${esc(g.title)}</h2>`
+      +`<div class="group-meta">${esc(g.sourceFile||'')}${facts?' · '+esc(facts):''}</div>`;
+    sec.append(head);
+    if(g.comment&&String(g.comment).trim()){
+      const note=document.createElement('p');note.className='group-comment';note.textContent=g.comment;sec.append(note);
+    }
+    sec.append(soundcloudBlock(g.soundcloudUrl,g.title,'source-player'));
+    const grid=document.createElement('div');grid.className='cover-grid';
+    for(const cover of (g.covers||[]))grid.append(coverCard(cover));
+    sec.append(grid);
+    return sec;
+  }
+
+  function coverHaystack(g,c){
+    return [g.title,g.sourceFile,c.title,c.variant,c.genre,c.styleTemplate,c.leadInstrument,c.tempoLabel]
+      .filter(Boolean).join(' ').toLowerCase();
+  }
+
+  function renderCovers(){
+    if(!coverGroupsEl)return;
+    const q=(coverSearch?.value||'').trim().toLowerCase();
+    let shown=0;
+    const blocks=[];
+    for(const g of coverGroups){
+      const covers=q?(g.covers||[]).filter(c=>coverHaystack(g,c).includes(q)):(g.covers||[]);
+      if(q&&!covers.length)continue;
+      shown+=covers.length;
+      blocks.push(groupBlock({...g,covers}));
+    }
+    coverGroupsEl.replaceChildren(...blocks);
+    if(coverCountEl)coverCountEl.textContent=q
+      ?`${shown} of ${coverCount} covers in ${blocks.length} original(s)`
+      :`${coverCount} covers from ${coverGroups.length} original track(s)`;
+  }
+
+  const sectionSongs=document.getElementById('section-songs');
+  const sectionCovers=document.getElementById('section-covers');
+  const categoriesEl=document.getElementById('categories');
+  function selectCategory(name){
+    const showSongs=name!=='covers';
+    if(sectionSongs)sectionSongs.hidden=!showSongs;
+    if(sectionCovers)sectionCovers.hidden=showSongs;
+    categoriesEl?.querySelectorAll('.cat').forEach(btn=>
+      btn.setAttribute('aria-pressed',String(btn.dataset.cat===(showSongs?'songs':'covers'))));
+  }
+  categoriesEl?.querySelectorAll('.cat').forEach(btn=>
+    btn.addEventListener('click',()=>selectCategory(btn.dataset.cat)));
+  if(!coverCount&&categoriesEl){const empty=categoriesEl.querySelector('[data-cat="covers"]');if(empty)empty.hidden=true;}
+  coverSearch?.addEventListener('input',renderCovers);
+  renderCovers();
+  selectCategory('songs');
+})();
+</script>
+</body>
+</html>
