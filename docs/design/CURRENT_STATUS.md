@@ -44,7 +44,7 @@ Read with: [README.md](README.md) (design index), [implementation-roadmap.md](im
 ## 3. What remains (Phase 5, on the owner's machine)
 
 1. ~~Full Python suite with ComfyUI~~ - done on the owner's machine: 557 passed, 3 skipped, all four new host tests pass. With `PLENIO_SMOKE=1` and `PLENIO_MODELS_DIR`: 559 passed, 1 skipped (coexistence).
-2. Browser checks (report §5): long YuE2 plan, keyboard-only, light theme; repeat of the checkpoint checks after the fixes (typing undo, play from a bar, A/B, Apply -> save -> reload).
+2. ~~Browser checks and V3 runs~~ - done by the owner (report §5): YuE2 Song all checks fine, YuE2 Cover through both review stops to a finished song. Open: confirm A/B in the cover score sheet. Original list: long YuE2 plan, keyboard-only, light theme; repeat of the checkpoint checks after the fixes (typing undo, play from a bar, A/B, Apply -> save -> reload).
 3. V3: one cover and one song with an editor-edited score, listened to.
 4. Record the results in the Phase 5 report, set the roadmap status to *Done*, and stop (prompt rule). Phase 6 only on the owner's authorization.
 
