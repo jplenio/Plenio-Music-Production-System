@@ -22,3 +22,21 @@ jobs:
         uses: Comfy-Org/publish-node-action@v1
         with:
           personal_access_token: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
+
+  release-assets:
+    name: Attach the release files
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install comfy-cli
+      - run: python tools/build_release_assets.py --out dist
+      # the zip (the same files as the Registry package), the five templates and SHA256SUMS.txt
+      - run: gh release upload "${{ github.event.release.tag_name }}" dist/*/* --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
