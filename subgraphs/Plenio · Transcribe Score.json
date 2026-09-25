@@ -1,0 +1,328 @@
+{
+ "revision": 0,
+ "last_node_id": 1,
+ "last_link_id": 0,
+ "nodes": [
+  {
+   "id": 1,
+   "type": "54cc5314-66fa-573b-8998-d1f85431a348",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    340,
+    200
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "localized_name": "score",
+     "name": "score",
+     "type": "STRING",
+     "links": null
+    },
+    {
+     "localized_name": "timeline",
+     "name": "timeline",
+     "type": "PLENIO_TIMELINE",
+     "links": null
+    },
+    {
+     "localized_name": "report",
+     "name": "report",
+     "type": "PLENIO_REPORT",
+     "links": null
+    },
+    {
+     "localized_name": "AUDIO_ENCODER",
+     "name": "AUDIO_ENCODER",
+     "type": "AUDIO_ENCODER",
+     "links": null
+    }
+   ],
+   "title": "Plenio · Transcribe Score",
+   "properties": {},
+   "widgets_values": []
+  }
+ ],
+ "links": [],
+ "version": 0.4,
+ "definitions": {
+  "subgraphs": [
+   {
+    "id": "54cc5314-66fa-573b-8998-d1f85431a348",
+    "version": 1,
+    "state": {
+     "lastGroupId": 0,
+     "lastNodeId": 2,
+     "lastLinkId": 6,
+     "lastRerouteId": 0
+    },
+    "revision": 0,
+    "config": {},
+    "name": "Plenio · Transcribe Score",
+    "inputNode": {
+     "id": -10,
+     "bounding": [
+      -260,
+      0,
+      160,
+      60
+     ]
+    },
+    "outputNode": {
+     "id": -20,
+     "bounding": [
+      800,
+      0,
+      160,
+      120
+     ]
+    },
+    "inputs": [
+     {
+      "id": "80e9055c-0e4e-52e1-901e-ca7138337679",
+      "name": "audio",
+      "type": "AUDIO",
+      "linkIds": [
+       2
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     }
+    ],
+    "outputs": [
+     {
+      "id": "b229290c-3690-5abe-b06f-c3fdf39b8f1b",
+      "name": "score",
+      "type": "STRING",
+      "linkIds": [
+       3
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     },
+     {
+      "id": "6429f299-1970-5d55-b4ac-b33ea03350cf",
+      "name": "timeline",
+      "type": "PLENIO_TIMELINE",
+      "linkIds": [
+       4
+      ],
+      "pos": [
+       0,
+       20
+      ]
+     },
+     {
+      "id": "bf1a6352-5a8e-5dce-b8c1-675a27b15d00",
+      "name": "report",
+      "type": "PLENIO_REPORT",
+      "linkIds": [
+       5
+      ],
+      "pos": [
+       0,
+       40
+      ]
+     },
+     {
+      "id": "ab7253fc-890f-592e-99d4-073638e179cd",
+      "name": "AUDIO_ENCODER",
+      "type": "AUDIO_ENCODER",
+      "linkIds": [
+       6
+      ],
+      "pos": [
+       0,
+       60
+      ]
+     }
+    ],
+    "widgets": [],
+    "nodes": [
+     {
+      "id": 1,
+      "type": "AudioEncoderLoader",
+      "pos": [
+       0,
+       0
+      ],
+      "size": [
+       320,
+       90
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "audio_encoder_name",
+        "name": "audio_encoder_name",
+        "type": "COMBO",
+        "widget": {
+         "name": "audio_encoder_name"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "AUDIO_ENCODER",
+        "name": "AUDIO_ENCODER",
+        "type": "AUDIO_ENCODER",
+        "links": [
+         1,
+         6
+        ]
+       }
+      ],
+      "title": "SheetSage2",
+      "properties": {
+       "Node name for S&R": "AudioEncoderLoader",
+       "models": [
+        {
+         "name": "sheetsage2_bf16.safetensors",
+         "url": "https://huggingface.co/Comfy-Org/YuE2/resolve/main/audio_encoders/sheetsage2_bf16.safetensors",
+         "directory": "audio_encoders"
+        }
+       ]
+      },
+      "widgets_values": [
+       "sheetsage2_bf16.safetensors"
+      ]
+     },
+     {
+      "id": 2,
+      "type": "PlenioTranscribeScore",
+      "pos": [
+       380,
+       0
+      ],
+      "size": [
+       320,
+       120
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "audio_encoder",
+        "name": "audio_encoder",
+        "type": "AUDIO_ENCODER",
+        "link": 1
+       },
+       {
+        "localized_name": "audio",
+        "name": "audio",
+        "type": "AUDIO",
+        "link": 2
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "score",
+        "name": "score",
+        "type": "STRING",
+        "links": [
+         3
+        ]
+       },
+       {
+        "localized_name": "timeline",
+        "name": "timeline",
+        "type": "PLENIO_TIMELINE",
+        "links": [
+         4
+        ]
+       },
+       {
+        "localized_name": "report",
+        "name": "report",
+        "type": "PLENIO_REPORT",
+        "links": [
+         5
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "PlenioTranscribeScore"
+      },
+      "widgets_values": []
+     }
+    ],
+    "groups": [],
+    "links": [
+     {
+      "id": 1,
+      "origin_id": 1,
+      "origin_slot": 0,
+      "target_id": 2,
+      "target_slot": 0,
+      "type": "AUDIO_ENCODER"
+     },
+     {
+      "id": 2,
+      "origin_id": -10,
+      "origin_slot": 0,
+      "target_id": 2,
+      "target_slot": 1,
+      "type": "AUDIO"
+     },
+     {
+      "id": 3,
+      "origin_id": 2,
+      "origin_slot": 0,
+      "target_id": -20,
+      "target_slot": 0,
+      "type": "STRING"
+     },
+     {
+      "id": 4,
+      "origin_id": 2,
+      "origin_slot": 1,
+      "target_id": -20,
+      "target_slot": 1,
+      "type": "PLENIO_TIMELINE"
+     },
+     {
+      "id": 5,
+      "origin_id": 2,
+      "origin_slot": 2,
+      "target_id": -20,
+      "target_slot": 2,
+      "type": "PLENIO_REPORT"
+     },
+     {
+      "id": 6,
+      "origin_id": 1,
+      "origin_slot": 0,
+      "target_id": -20,
+      "target_slot": 3,
+      "type": "AUDIO_ENCODER"
+     }
+    ],
+    "extra": {},
+    "category": "Plenio/Audio analysis",
+    "description": "Transcribes a recording into a native two-voice ABC score with SheetSage2 and keeps the beat grid (bar times, sung notes) for lyrics alignment. Also outputs the loaded SheetSage2 for Check Vocals. SheetSage2 weights are CC BY-NC 4.0."
+   }
+  ]
+ },
+ "extra": {}
+}

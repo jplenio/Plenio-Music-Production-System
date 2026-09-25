@@ -243,7 +243,7 @@ def test_edited_score_survives_takes_and_conflicts_with_a_new_plan(server: Comfy
 def test_instrumental_song_is_tags_only_with_a_silent_vocal_voice(server: ComfyServer, log: Log) -> None:
     entry = server.run(song_prompt(label=label(), vocals="instrumental"))
     render = events(log, "render")[-1]
-    assert render["lyrics"] == "[Verse]\n\n[Chorus]"
+    assert render["lyrics"] == "[instrumental]"  # the bare tag: YuE2 plans the form (owner verdict, Phase 4A)
     assert "voice" not in render["style"] and "English" not in render["style"]
     abc_lines = render["abc"].splitlines()
     vocal_music = [abc_lines[i + 1] for i, line in enumerate(abc_lines) if line == "V: Vocal"]

@@ -1,0 +1,193 @@
+{
+ "source": "M2 (83.02 s MiniMax excerpt) for covers; Song path from a brief",
+ "hardware": "RTX 5060 Ti 16 GB, ComfyUI 0.37.0, frontend 1.53.6",
+ "runs": [
+  {
+   "file": "2026-09-25 Fading Ember Serenade.flac",
+   "path": "cover",
+   "vocals": "instrumental",
+   "voice": null,
+   "harmony": "new accompaniment",
+   "takes": 2,
+   "seconds": 105.8,
+   "style": "acoustic folk, fingerpicked acoustic guitar, cello, gentle upright bass, lead acoustic guitar melody, warm, intimate, mellow, 121 BPM",
+   "lyrics_state": "auto",
+   "licences": [
+    "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only"
+   ],
+   "vocal_check": "take 1: no vocal notes found of 2",
+   "sheet_findings": []
+  },
+  {
+   "file": "2026-09-25 Whispers Through Autumn Leaves.flac",
+   "path": "cover",
+   "vocals": "original lyrics",
+   "voice": "soft female pop vocal",
+   "harmony": "new accompaniment",
+   "takes": 1,
+   "seconds": 84.04,
+   "style": "English, acoustic folk, soft female pop vocal, fingerpicked acoustic guitar, gentle cello backing, warm intimate feeling, 121 BPM",
+   "lyrics_state": "edited",
+   "licences": [
+    "CC BY-NC 4.0 (SheetSage2, Comfy-Org/YuE2 repackaging): non-commercial use only",
+    "CC BY-NC 4.0 (YuE2 instrumental adapter): non-commercial use only",
+    "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only"
+   ],
+   "vocal_check": "sung song: no vocal check",
+   "sung_lyrics_check": {
+    "wer": 0.0,
+    "reference_words": 123,
+    "heard_words": 123,
+    "sections": {
+     "[Verse]": 0.0,
+     "[Pre-Chorus]": 0.0,
+     "[Chorus]": 0.0,
+     "[Outro]": null
+    }
+   },
+   "sheet_findings": []
+  },
+  {
+   "file": "2026-09-25 Last Light Keeper's Watch.flac",
+   "path": "cover",
+   "vocals": "new lyrics",
+   "voice": "warm male baritone",
+   "harmony": "new accompaniment",
+   "takes": 1,
+   "seconds": 86.72,
+   "style": "English, acoustic folk, warm male baritone, fingerpicked acoustic guitar, cello, intimate production, 121 BPM",
+   "lyrics_state": "auto",
+   "licences": [
+    "CC BY-NC 4.0 (SheetSage2, Comfy-Org/YuE2 repackaging): non-commercial use only",
+    "CC BY-NC 4.0 (YuE2 instrumental adapter): non-commercial use only",
+    "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only"
+   ],
+   "vocal_check": "sung song: no vocal check",
+   "sung_lyrics_check": {
+    "wer": 1.1379,
+    "reference_words": 87,
+    "heard_words": 120,
+    "sections": {
+     "[Verse]": 1.333,
+     "[Pre-Chorus]": 1.0,
+     "[Chorus]": 1.057,
+     "[Outro]": null
+    }
+   },
+   "sheet_findings": []
+  },
+  {
+   "file": "2026-09-25 Last Watch On The Tower.flac",
+   "path": "cover",
+   "vocals": "new lyrics",
+   "voice": "warm male baritone",
+   "harmony": "new accompaniment",
+   "takes": 1,
+   "seconds": 84.76,
+   "style": "English, acoustic folk, warm male baritone, fingerpicked acoustic guitar, cello backing, intimate melancholic feel, 121 BPM",
+   "lyrics_state": "auto",
+   "licences": [
+    "CC BY-NC 4.0 (SheetSage2, Comfy-Org/YuE2 repackaging): non-commercial use only",
+    "CC BY-NC 4.0 (YuE2 instrumental adapter): non-commercial use only",
+    "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only"
+   ],
+   "vocal_check": "sung song: no vocal check",
+   "sung_lyrics_check": {
+    "wer": 1.1327,
+    "reference_words": 98,
+    "heard_words": 124,
+    "sections": {
+     "[Verse]": 1.279,
+     "[Pre-Chorus]": 1.0,
+     "[Chorus]": 1.03,
+     "[Outro]": null
+    }
+   },
+   "sheet_findings": [
+    "warning: [Chorus] has about 44 syllables for 61 melody notes (too few); YuE2 may not sing the words clearly. Write about one syllable per note (lines of about 5, 24, 8, 8, 5, 11 syllables).",
+    "warning: [Pre-Chorus] has about 28 syllables for 38 melody notes (too few); YuE2 may not sing the words clearly. Write about one syllable per note (lines of about 9, 15, 10, 4 syllables)."
+   ]
+  },
+  {
+   "file": "2026-09-25 Last Watch On The Tower (2).flac",
+   "path": "cover",
+   "vocals": "new lyrics",
+   "voice": "warm male baritone",
+   "harmony": "new accompaniment",
+   "takes": 1,
+   "seconds": 85.8,
+   "style": "English, acoustic folk, soft female vocal, fingerpicked acoustic guitar, cello backing, intimate melancholic feel, 121 BPM",
+   "lyrics_state": "auto",
+   "licences": [
+    "CC BY-NC 4.0 (SheetSage2, Comfy-Org/YuE2 repackaging): non-commercial use only",
+    "CC BY-NC 4.0 (YuE2 instrumental adapter): non-commercial use only",
+    "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only"
+   ],
+   "vocal_check": "sung song: no vocal check",
+   "sung_lyrics_check": {
+    "wer": 0.5,
+    "reference_words": 98,
+    "heard_words": 106,
+    "sections": {
+     "[Verse]": 0.442,
+     "[Pre-Chorus]": 0.273,
+     "[Chorus]": 0.727,
+     "[Outro]": null
+    }
+   },
+   "sheet_findings": [
+    "warning: [Chorus] has about 44 syllables for 61 melody notes (too few); YuE2 may not sing the words clearly. Write about one syllable per note (lines of about 5, 24, 8, 8, 5, 11 syllables).",
+    "warning: [Pre-Chorus] has about 28 syllables for 38 melody notes (too few); YuE2 may not sing the words clearly. Write about one syllable per note (lines of about 9, 15, 10, 4 syllables)."
+   ]
+  },
+  {
+   "file": "2026-09-25 Last Watch Of The Beam.flac",
+   "path": "cover",
+   "vocals": "new lyrics",
+   "voice": "",
+   "harmony": "new accompaniment",
+   "takes": 1,
+   "seconds": 82.32,
+   "style": "Acoustic folk, fingerpicked guitar, intimate female voice, English, warm mellow production, 121 BPM",
+   "lyrics_state": "auto",
+   "licences": [
+    "CC BY-NC 4.0 (SheetSage2, Comfy-Org/YuE2 repackaging): non-commercial use only",
+    "CC BY-NC 4.0 (YuE2 instrumental adapter): non-commercial use only",
+    "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only"
+   ],
+   "vocal_check": "sung song: no vocal check",
+   "sung_lyrics_check": {
+    "wer": 0.4216,
+    "reference_words": 102,
+    "heard_words": 102,
+    "sections": {
+     "[Verse]": 0.386,
+     "[Pre-Chorus]": 0.364,
+     "[Chorus]": 0.5,
+     "[Outro]": null
+    }
+   },
+   "sheet_findings": [
+    "warning: [Chorus] has about 48 syllables for 61 melody notes (too few); YuE2 may not sing the words clearly. Write about one syllable per note (lines of about 5, 24, 8, 8, 5, 11 syllables).",
+    "warning: [Pre-Chorus] has about 27 syllables for 38 melody notes (too few); YuE2 may not sing the words clearly. Write about one syllable per note (lines of about 9, 15, 10, 4 syllables)."
+   ]
+  },
+  {
+   "file": "2026-09-25 Rainy Evening Piano Dreams.flac",
+   "path": "song",
+   "vocals": "instrumental",
+   "voice": null,
+   "harmony": null,
+   "takes": null,
+   "seconds": 143.12,
+   "style": "lo-fi piano, ambient, soft upright piano, muted synth pads, melancholic, hazy, 80 BPM",
+   "lyrics_state": "auto",
+   "licences": [
+    "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only"
+   ],
+   "sheet_findings": [
+    "warning: The score lasts 2:20 but the brief asks for about 1:30. The plan follows the amount of lyrics: shorten or lengthen them, or edit the score."
+   ]
+  }
+ ]
+}

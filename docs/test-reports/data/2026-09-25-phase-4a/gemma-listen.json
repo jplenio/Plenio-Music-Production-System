@@ -1,0 +1,994 @@
+[
+  {
+    "file": "studies/e4-bare-lora-s1_00001.flac [output]",
+    "windows": [
+      [
+        35.74,
+        30.0
+      ],
+      [
+        142.98,
+        30.0
+      ],
+      [
+        250.21,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 32.3
+  },
+  {
+    "file": "studies/e4-bare-s1_00001.flac [output]",
+    "windows": [
+      [
+        22.84,
+        30.0
+      ],
+      [
+        91.34,
+        30.0
+      ],
+      [
+        159.85,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.0
+  },
+  {
+    "file": "studies/e4-bare-s2_00001.flac [output]",
+    "windows": [
+      [
+        19.82,
+        30.0
+      ],
+      [
+        79.3,
+        30.0
+      ],
+      [
+        138.77,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.1
+  },
+  {
+    "file": "studies/e4-tags-lora-s1_00001.flac [output]",
+    "windows": [
+      [
+        24.0,
+        30.0
+      ],
+      [
+        95.98,
+        30.0
+      ],
+      [
+        167.97,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.0
+  },
+  {
+    "file": "studies/e4-tags-lora-s2_00001.flac [output]",
+    "windows": [
+      [
+        42.73,
+        30.0
+      ],
+      [
+        170.91,
+        30.0
+      ],
+      [
+        299.1,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.0
+  },
+  {
+    "file": "studies/e4-tags-s1_00001.flac [output]",
+    "windows": [
+      [
+        25.48,
+        30.0
+      ],
+      [
+        101.92,
+        30.0
+      ],
+      [
+        178.36,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.0
+  },
+  {
+    "file": "studies/e4-tags-s2_00001.flac [output]",
+    "windows": [
+      [
+        18.46,
+        30.0
+      ],
+      [
+        73.82,
+        30.0
+      ],
+      [
+        129.19,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.1
+  },
+  {
+    "file": "studies/e4-timed-lora-s1_00001.flac [output]",
+    "windows": [
+      [
+        30.0,
+        30.0
+      ],
+      [
+        119.98,
+        30.0
+      ],
+      [
+        209.97,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.1
+  },
+  {
+    "file": "studies/e4-timed-s1_00001.flac [output]",
+    "windows": [
+      [
+        15.61,
+        30.0
+      ],
+      [
+        62.45,
+        30.0
+      ],
+      [
+        109.28,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.0
+  },
+  {
+    "file": "studies/e4-timed-s2_00001.flac [output]",
+    "windows": [
+      [
+        5.97,
+        30.0
+      ],
+      [
+        23.89,
+        30.0
+      ],
+      [
+        41.8,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.0
+  },
+  {
+    "file": "studies/e5-acc-keep-lora-s1_00001.flac [output]",
+    "windows": [
+      [
+        8.28,
+        30.0
+      ],
+      [
+        33.14,
+        30.0
+      ],
+      [
+        57.99,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.0
+  },
+  {
+    "file": "studies/e5-acc-keep-lora-s2_00001.flac [output]",
+    "windows": [
+      [
+        8.49,
+        30.0
+      ],
+      [
+        33.95,
+        30.0
+      ],
+      [
+        59.42,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.0
+  },
+  {
+    "file": "studies/e5-acc-keep-s1_00001.flac [output]",
+    "windows": [
+      [
+        8.54,
+        30.0
+      ],
+      [
+        34.16,
+        30.0
+      ],
+      [
+        59.78,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.1
+  },
+  {
+    "file": "studies/e5-acc-keep-s2_00001.flac [output]",
+    "windows": [
+      [
+        6.73,
+        30.0
+      ],
+      [
+        26.91,
+        30.0
+      ],
+      [
+        47.1,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.0
+  },
+  {
+    "file": "studies/e5-acc-new-s1_00001.flac [output]",
+    "windows": [
+      [
+        10.58,
+        30.0
+      ],
+      [
+        42.32,
+        30.0
+      ],
+      [
+        74.06,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.0
+  },
+  {
+    "file": "studies/e5-lead-keep-lora-s1_00001.flac [output]",
+    "windows": [
+      [
+        8.31,
+        30.0
+      ],
+      [
+        33.25,
+        30.0
+      ],
+      [
+        58.18,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.1
+  },
+  {
+    "file": "studies/e5-lead-keep-lora-s2_00001.flac [output]",
+    "windows": [
+      [
+        8.33,
+        30.0
+      ],
+      [
+        33.31,
+        30.0
+      ],
+      [
+        58.3,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.1
+  },
+  {
+    "file": "studies/e5-lead-keep-s1_00001.flac [output]",
+    "windows": [
+      [
+        8.36,
+        30.0
+      ],
+      [
+        33.44,
+        30.0
+      ],
+      [
+        58.52,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.0
+  },
+  {
+    "file": "studies/e5-lead-keep-s2_00001.flac [output]",
+    "windows": [
+      [
+        8.39,
+        30.0
+      ],
+      [
+        33.55,
+        30.0
+      ],
+      [
+        58.72,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.0
+  },
+  {
+    "file": "studies/e5-lead-new-lora-s1_00001.flac [output]",
+    "windows": [
+      [
+        8.29,
+        30.0
+      ],
+      [
+        33.15,
+        30.0
+      ],
+      [
+        58.02,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.1
+  },
+  {
+    "file": "studies/e5-lead-new-lora-s2_00001.flac [output]",
+    "windows": [
+      [
+        8.34,
+        30.0
+      ],
+      [
+        33.36,
+        30.0
+      ],
+      [
+        58.38,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.1
+  },
+  {
+    "file": "studies/e5-lead-new-s1_00001.flac [output]",
+    "windows": [
+      [
+        9.91,
+        30.0
+      ],
+      [
+        39.65,
+        30.0
+      ],
+      [
+        69.38,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.0
+  },
+  {
+    "file": "studies/e5-lead-new-s2_00001.flac [output]",
+    "windows": [
+      [
+        8.3,
+        30.0
+      ],
+      [
+        33.2,
+        30.0
+      ],
+      [
+        58.1,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.1
+  },
+  {
+    "file": "studies/e5-newlyrics-new-s1_00001.flac [output]",
+    "windows": [
+      [
+        8.32,
+        30.0
+      ],
+      [
+        33.3,
+        30.0
+      ],
+      [
+        58.27,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.1
+  },
+  {
+    "file": "studies/e5-original-keep-s1_00001.flac [output]",
+    "windows": [
+      [
+        8.27,
+        30.0
+      ],
+      [
+        33.07,
+        30.0
+      ],
+      [
+        57.88,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.1
+  },
+  {
+    "file": "studies/e5-original-new-s1_00001.flac [output]",
+    "windows": [
+      [
+        8.36,
+        30.0
+      ],
+      [
+        33.42,
+        30.0
+      ],
+      [
+        58.49,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.0
+  },
+  {
+    "file": "plenio/2026-09-25 The Unsaid Words Remain.flac [output]",
+    "windows": [
+      [
+        7.42,
+        30.0
+      ],
+      [
+        29.66,
+        30.0
+      ],
+      [
+        51.91,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "no"
+      ],
+      [
+        "no"
+      ],
+      [
+        "no"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.1
+  },
+  {
+    "file": "plenio/2026-09-25 Unsaid Words Hanging Still.flac [output]",
+    "windows": [
+      [
+        19.38,
+        30.0
+      ],
+      [
+        77.54,
+        30.0
+      ],
+      [
+        135.69,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.0
+  },
+  {
+    "file": "plenio/2026-09-25 Words We Never Said (2).flac [output]",
+    "windows": [
+      [
+        15.6,
+        30.0
+      ],
+      [
+        62.4,
+        30.0
+      ],
+      [
+        109.2,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.1
+  },
+  {
+    "file": "plenio/2026-09-25 Words We Never Said.flac [output]",
+    "windows": [
+      [
+        12.99,
+        30.0
+      ],
+      [
+        51.95,
+        30.0
+      ],
+      [
+        90.92,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.0
+  },
+  {
+    "file": "minimax-excerpt.flac",
+    "windows": [
+      [
+        8.3,
+        30.0
+      ],
+      [
+        33.21,
+        30.0
+      ],
+      [
+        58.11,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.1
+  },
+  {
+    "file": "minimax-sample.mp3",
+    "windows": [
+      [
+        24.12,
+        30.0
+      ],
+      [
+        96.46,
+        30.0
+      ],
+      [
+        168.81,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ],
+      [
+        "yes"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 4.0
+  }
+]

@@ -148,6 +148,7 @@ def evaluate_sheet(
     max_seconds: float | None = None,
     context: Mapping[str, str] | None = None,
     target_seconds: float | None = None,
+    extra_findings: Iterable[Finding] = (),
 ) -> SheetEvaluation:
     """Resolve the owned documents, validate them with the engine's rules and decide the review gate.
 
@@ -188,6 +189,7 @@ def evaluate_sheet(
     for kind in kinds:
         if resolution.docs[kind].status is DocStatus.MISSING and kind in ("style", "lyrics"):
             findings.append(info(f"No {kind} is connected or entered.", kind))
+    findings.extend(extra_findings)
     return SheetEvaluation(
         state,
         resolution,
@@ -201,4 +203,5 @@ def evaluate_sheet(
         review,
         engine_id,
         instrumental,
+        target_seconds,
     )

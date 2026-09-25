@@ -1,0 +1,1068 @@
+[
+  {
+    "file": "2026-09-25 The Unsaid Words Remain.flac",
+    "audio_seconds": 74.16,
+    "transcribe_seconds": 19.5,
+    "native_node_equal": true,
+    "transcription": {
+      "ok": true,
+      "errors": [],
+      "header": {
+        "meter": "4/4",
+        "unit": "1/32",
+        "tempo_bpm": 83,
+        "key": "Eb"
+      },
+      "bars": 27,
+      "abc_seconds": 78.07,
+      "sections": [
+        [
+          "intro",
+          1,
+          5
+        ],
+        [
+          "verse",
+          6,
+          9
+        ],
+        [
+          "chorus",
+          15,
+          8
+        ],
+        [
+          "outro",
+          23,
+          5
+        ]
+      ],
+      "voices": {
+        "Vocal": {
+          "notes": 0,
+          "bars": 27,
+          "lowest": null,
+          "highest": null,
+          "chords": 26
+        },
+        "Ins": {
+          "notes": 87,
+          "bars": 27,
+          "lowest": 48,
+          "highest": 82,
+          "chords": 0
+        }
+      },
+      "has_chords": true,
+      "meters": [
+        "4/4"
+      ],
+      "keys": [
+        "Eb"
+      ]
+    },
+    "grid": {
+      "first_beat_s": 0.0,
+      "decoded_beats": 104,
+      "last_decoded_beat_s": 74.13,
+      "extended_beats": 1,
+      "tail_period_s": 0.72,
+      "measures": 27,
+      "abc_bars": 27,
+      "bar0_start_s": -0.57,
+      "pickup_padded": true,
+      "diagnostics": [
+        "measure 26: padded final 3/4 span to declared 4/4 with trailing rest",
+        "measure 0: padded leading 1/8 span to 4/4 with preceding rest"
+      ],
+      "local_bpm_range": [
+        82.19,
+        157.89
+      ],
+      "constant_tempo_drift_s": {
+        "max_abs": 2.132,
+        "end": -1.921
+      }
+    },
+    "structure": [
+      [
+        0.0,
+        0.19,
+        "intro"
+      ],
+      [
+        0.19,
+        11.84,
+        "intro"
+      ],
+      [
+        11.84,
+        37.98,
+        "verse"
+      ],
+      [
+        37.98,
+        61.15,
+        "chorus"
+      ],
+      [
+        61.15,
+        74.16,
+        "outro"
+      ]
+    ],
+    "plan": {
+      "ok": true,
+      "errors": [],
+      "header": {
+        "meter": "4/4",
+        "unit": "1/16",
+        "tempo_bpm": 82,
+        "key": "Eb"
+      },
+      "bars": 27,
+      "abc_seconds": 79.02,
+      "sections": [
+        [
+          "intro",
+          1,
+          5
+        ],
+        [
+          "verse",
+          6,
+          9
+        ],
+        [
+          "chorus",
+          15,
+          8
+        ],
+        [
+          "outro",
+          23,
+          5
+        ]
+      ],
+      "voices": {
+        "Vocal": {
+          "notes": 0,
+          "bars": 27,
+          "lowest": null,
+          "highest": null,
+          "chords": 27
+        },
+        "Ins": {
+          "notes": 87,
+          "bars": 27,
+          "lowest": 63,
+          "highest": 82,
+          "chords": 0
+        }
+      },
+      "has_chords": true,
+      "meters": [
+        "4/4"
+      ],
+      "keys": [
+        "Eb"
+      ]
+    }
+  },
+  {
+    "file": "2026-09-25 Unsaid Words Hanging Still.flac",
+    "audio_seconds": 193.84,
+    "transcribe_seconds": 41.63,
+    "native_node_equal": true,
+    "transcription": {
+      "ok": true,
+      "errors": [],
+      "header": {
+        "meter": "4/4",
+        "unit": "1/16",
+        "tempo_bpm": 83,
+        "key": "Bb"
+      },
+      "bars": 68,
+      "abc_seconds": 196.63,
+      "sections": [
+        [
+          "intro",
+          1,
+          9
+        ],
+        [
+          "verse",
+          10,
+          8
+        ],
+        [
+          "chorus",
+          18,
+          12
+        ],
+        [
+          "verse",
+          30,
+          9
+        ],
+        [
+          "chorus",
+          39,
+          16
+        ],
+        [
+          "outro",
+          55,
+          14
+        ]
+      ],
+      "voices": {
+        "Vocal": {
+          "notes": 198,
+          "bars": 68,
+          "lowest": 70,
+          "highest": 82,
+          "chords": 74
+        },
+        "Ins": {
+          "notes": 220,
+          "bars": 68,
+          "lowest": 51,
+          "highest": 79,
+          "chords": 0
+        }
+      },
+      "has_chords": true,
+      "meters": [
+        "4/4"
+      ],
+      "keys": [
+        "Bb"
+      ]
+    },
+    "grid": {
+      "first_beat_s": 0.02,
+      "decoded_beats": 268,
+      "last_decoded_beat_s": 193.26,
+      "extended_beats": 1,
+      "tail_period_s": 0.73,
+      "measures": 68,
+      "abc_bars": 68,
+      "bar0_start_s": -0.5,
+      "pickup_padded": true,
+      "diagnostics": [
+        "measure 0: inferred 2/4 from downbeat span; declared numerators were [4, 4]",
+        "measure 67: padded final 2/4 span to declared 4/4 with trailing rest",
+        "measure 0: padded leading 2/4 span to 4/4 with preceding rest"
+      ],
+      "local_bpm_range": [
+        81.08,
+        230.77
+      ],
+      "constant_tempo_drift_s": {
+        "max_abs": 1.853,
+        "end": -0.725
+      }
+    },
+    "structure": [
+      [
+        0.02,
+        0.54,
+        "intro"
+      ],
+      [
+        0.54,
+        23.8,
+        "intro"
+      ],
+      [
+        23.8,
+        47.07,
+        "verse"
+      ],
+      [
+        47.07,
+        70.34,
+        "chorus"
+      ],
+      [
+        70.34,
+        81.97,
+        "chorus"
+      ],
+      [
+        81.97,
+        108.16,
+        "verse"
+      ],
+      [
+        108.16,
+        131.43,
+        "chorus"
+      ],
+      [
+        131.43,
+        154.7,
+        "chorus"
+      ],
+      [
+        154.7,
+        166.34,
+        "outro"
+      ],
+      [
+        166.34,
+        193.84,
+        "outro"
+      ]
+    ],
+    "plan": {
+      "ok": true,
+      "errors": [],
+      "header": {
+        "meter": "4/4",
+        "unit": "1/16",
+        "tempo_bpm": 82,
+        "key": "Bb"
+      },
+      "bars": 68,
+      "abc_seconds": 199.02,
+      "sections": [
+        [
+          "intro",
+          1,
+          9
+        ],
+        [
+          "verse",
+          10,
+          8
+        ],
+        [
+          "chorus",
+          18,
+          12
+        ],
+        [
+          "verse",
+          30,
+          9
+        ],
+        [
+          "chorus",
+          39,
+          8
+        ],
+        [
+          "outro",
+          47,
+          22
+        ]
+      ],
+      "voices": {
+        "Vocal": {
+          "notes": 196,
+          "bars": 68,
+          "lowest": 70,
+          "highest": 82,
+          "chords": 74
+        },
+        "Ins": {
+          "notes": 171,
+          "bars": 68,
+          "lowest": 46,
+          "highest": 79,
+          "chords": 0
+        }
+      },
+      "has_chords": true,
+      "meters": [
+        "4/4"
+      ],
+      "keys": [
+        "Bb"
+      ]
+    }
+  },
+  {
+    "file": "2026-09-25 Words We Never Said (2).flac",
+    "audio_seconds": 156.0,
+    "transcribe_seconds": 39.3,
+    "native_node_equal": true,
+    "transcription": {
+      "ok": true,
+      "errors": [],
+      "header": {
+        "meter": "4/4",
+        "unit": "1/16",
+        "tempo_bpm": 83,
+        "key": "Bb"
+      },
+      "bars": 55,
+      "abc_seconds": 159.04,
+      "sections": [
+        [
+          "intro",
+          1,
+          9
+        ],
+        [
+          "verse",
+          10,
+          8
+        ],
+        [
+          "chorus",
+          18,
+          8
+        ],
+        [
+          "verse",
+          26,
+          8
+        ],
+        [
+          "chorus",
+          34,
+          10
+        ],
+        [
+          "outro",
+          44,
+          12
+        ]
+      ],
+      "voices": {
+        "Vocal": {
+          "notes": 101,
+          "bars": 55,
+          "lowest": 67,
+          "highest": 81,
+          "chords": 55
+        },
+        "Ins": {
+          "notes": 268,
+          "bars": 55,
+          "lowest": 46,
+          "highest": 79,
+          "chords": 0
+        }
+      },
+      "has_chords": true,
+      "meters": [
+        "4/4"
+      ],
+      "keys": [
+        "Bb"
+      ]
+    },
+    "grid": {
+      "first_beat_s": 0.01,
+      "decoded_beats": 216,
+      "last_decoded_beat_s": 155.3,
+      "extended_beats": 1,
+      "tail_period_s": 0.72,
+      "measures": 55,
+      "abc_bars": 55,
+      "bar0_start_s": -0.53,
+      "pickup_padded": true,
+      "diagnostics": [
+        "measure 0: inferred 2/4 from downbeat span; declared numerators were [4, 4]",
+        "measure 54: padded final 2/4 span to declared 4/4 with trailing rest",
+        "measure 0: padded leading 2/4 span to 4/4 with preceding rest"
+      ],
+      "local_bpm_range": [
+        81.91,
+        222.22
+      ],
+      "constant_tempo_drift_s": {
+        "max_abs": 1.812,
+        "end": -1.035
+      }
+    },
+    "structure": [
+      [
+        0.01,
+        0.55,
+        "intro"
+      ],
+      [
+        0.55,
+        23.91,
+        "intro"
+      ],
+      [
+        23.91,
+        47.32,
+        "verse"
+      ],
+      [
+        47.32,
+        70.62,
+        "chorus"
+      ],
+      [
+        70.62,
+        93.85,
+        "verse"
+      ],
+      [
+        93.85,
+        122.81,
+        "chorus"
+      ],
+      [
+        122.81,
+        156.0,
+        "outro"
+      ]
+    ],
+    "plan": {
+      "ok": true,
+      "errors": [],
+      "header": {
+        "meter": "4/4",
+        "unit": "1/16",
+        "tempo_bpm": 82,
+        "key": "Bb"
+      },
+      "bars": 55,
+      "abc_seconds": 160.98,
+      "sections": [
+        [
+          "intro",
+          1,
+          9
+        ],
+        [
+          "verse",
+          10,
+          8
+        ],
+        [
+          "chorus",
+          18,
+          8
+        ],
+        [
+          "verse",
+          26,
+          8
+        ],
+        [
+          "chorus",
+          34,
+          8
+        ],
+        [
+          "outro",
+          42,
+          14
+        ]
+      ],
+      "voices": {
+        "Vocal": {
+          "notes": 100,
+          "bars": 55,
+          "lowest": 67,
+          "highest": 81,
+          "chords": 55
+        },
+        "Ins": {
+          "notes": 240,
+          "bars": 55,
+          "lowest": 46,
+          "highest": 79,
+          "chords": 0
+        }
+      },
+      "has_chords": true,
+      "meters": [
+        "4/4"
+      ],
+      "keys": [
+        "Bb"
+      ]
+    }
+  },
+  {
+    "file": "2026-09-25 Words We Never Said.flac",
+    "audio_seconds": 129.88,
+    "transcribe_seconds": 58.02,
+    "native_node_equal": true,
+    "transcription": {
+      "ok": true,
+      "errors": [],
+      "header": {
+        "meter": "4/4",
+        "unit": "1/16",
+        "tempo_bpm": 83,
+        "key": "Bb"
+      },
+      "bars": 46,
+      "abc_seconds": 133.01,
+      "sections": [
+        [
+          "intro",
+          1,
+          9
+        ],
+        [
+          "verse",
+          10,
+          8
+        ],
+        [
+          "chorus",
+          18,
+          5
+        ],
+        [
+          "verse",
+          23,
+          8
+        ],
+        [
+          "chorus",
+          31,
+          10
+        ],
+        [
+          "outro",
+          41,
+          6
+        ]
+      ],
+      "voices": {
+        "Vocal": {
+          "notes": 100,
+          "bars": 46,
+          "lowest": 67,
+          "highest": 82,
+          "chords": 52
+        },
+        "Ins": {
+          "notes": 146,
+          "bars": 46,
+          "lowest": 58,
+          "highest": 79,
+          "chords": 0
+        }
+      },
+      "has_chords": true,
+      "meters": [
+        "4/4"
+      ],
+      "keys": [
+        "Bb"
+      ]
+    },
+    "grid": {
+      "first_beat_s": 0.01,
+      "decoded_beats": 181,
+      "last_decoded_beat_s": 129.5,
+      "extended_beats": 1,
+      "tail_period_s": 0.72,
+      "measures": 46,
+      "abc_bars": 46,
+      "bar0_start_s": -0.56,
+      "pickup_padded": true,
+      "diagnostics": [
+        "measure 0: inferred 2/4 from downbeat span; declared numerators were [4, 4]",
+        "measure 45: padded final 3/4 span to declared 4/4 with trailing rest",
+        "measure 0: padded leading 2/4 span to 4/4 with preceding rest"
+      ],
+      "local_bpm_range": [
+        81.82,
+        210.53
+      ],
+      "constant_tempo_drift_s": {
+        "max_abs": 1.753,
+        "end": -1.54
+      }
+    },
+    "structure": [
+      [
+        0.01,
+        0.58,
+        "intro"
+      ],
+      [
+        0.58,
+        23.82,
+        "intro"
+      ],
+      [
+        23.82,
+        47.07,
+        "verse"
+      ],
+      [
+        47.07,
+        61.59,
+        "chorus"
+      ],
+      [
+        61.59,
+        84.77,
+        "verse"
+      ],
+      [
+        84.77,
+        99.22,
+        "chorus"
+      ],
+      [
+        99.22,
+        113.63,
+        "chorus"
+      ],
+      [
+        113.63,
+        129.88,
+        "outro"
+      ]
+    ],
+    "plan": {
+      "ok": true,
+      "errors": [],
+      "header": {
+        "meter": "4/4",
+        "unit": "1/16",
+        "tempo_bpm": 82,
+        "key": "Bb"
+      },
+      "bars": 46,
+      "abc_seconds": 134.63,
+      "sections": [
+        [
+          "intro",
+          1,
+          9
+        ],
+        [
+          "verse",
+          10,
+          8
+        ],
+        [
+          "chorus",
+          18,
+          5
+        ],
+        [
+          "verse",
+          23,
+          8
+        ],
+        [
+          "chorus",
+          31,
+          5
+        ],
+        [
+          "outro",
+          36,
+          11
+        ]
+      ],
+      "voices": {
+        "Vocal": {
+          "notes": 101,
+          "bars": 46,
+          "lowest": 67,
+          "highest": 82,
+          "chords": 52
+        },
+        "Ins": {
+          "notes": 150,
+          "bars": 46,
+          "lowest": 46,
+          "highest": 79,
+          "chords": 0
+        }
+      },
+      "has_chords": true,
+      "meters": [
+        "4/4"
+      ],
+      "keys": [
+        "Bb"
+      ]
+    }
+  },
+  {
+    "file": "minimax-excerpt.flac",
+    "audio_seconds": 83.02,
+    "transcribe_seconds": 46.3,
+    "native_node_equal": true,
+    "transcription": {
+      "ok": true,
+      "errors": [],
+      "header": {
+        "meter": "4/4",
+        "unit": "1/16",
+        "tempo_bpm": 121,
+        "key": "A"
+      },
+      "bars": 42,
+      "abc_seconds": 83.31,
+      "sections": [
+        [
+          "verse",
+          1,
+          16
+        ],
+        [
+          "pre-chorus",
+          17,
+          8
+        ],
+        [
+          "chorus",
+          25,
+          16
+        ],
+        [
+          "outro",
+          41,
+          2
+        ]
+      ],
+      "voices": {
+        "Vocal": {
+          "notes": 163,
+          "bars": 42,
+          "lowest": 66,
+          "highest": 81,
+          "chords": 42
+        },
+        "Ins": {
+          "notes": 25,
+          "bars": 42,
+          "lowest": 66,
+          "highest": 81,
+          "chords": 0
+        }
+      },
+      "has_chords": true,
+      "meters": [
+        "4/4"
+      ],
+      "keys": [
+        "A"
+      ]
+    },
+    "grid": {
+      "first_beat_s": 0.0,
+      "decoded_beats": 168,
+      "last_decoded_beat_s": 82.53,
+      "extended_beats": 1,
+      "tail_period_s": 0.495,
+      "measures": 42,
+      "abc_bars": 42,
+      "bar0_start_s": 0.0,
+      "pickup_padded": false,
+      "diagnostics": [],
+      "local_bpm_range": [
+        120.6,
+        121.83
+      ],
+      "constant_tempo_drift_s": {
+        "max_abs": 0.279,
+        "end": -0.272
+      }
+    },
+    "structure": [
+      [
+        0.0,
+        31.63,
+        "verse"
+      ],
+      [
+        31.63,
+        47.45,
+        "pre-chorus"
+      ],
+      [
+        47.45,
+        63.26,
+        "chorus"
+      ],
+      [
+        63.26,
+        79.06,
+        "chorus"
+      ],
+      [
+        79.06,
+        83.02,
+        "outro"
+      ]
+    ]
+  },
+  {
+    "file": "minimax-sample.mp3",
+    "audio_seconds": 241.15,
+    "transcribe_seconds": 68.85,
+    "native_node_equal": true,
+    "transcription": {
+      "ok": true,
+      "errors": [],
+      "header": {
+        "meter": "4/4",
+        "unit": "1/16",
+        "tempo_bpm": 122,
+        "key": "A"
+      },
+      "bars": 123,
+      "abc_seconds": 241.97,
+      "sections": [
+        [
+          "intro",
+          1,
+          10
+        ],
+        [
+          "verse",
+          11,
+          16
+        ],
+        [
+          "pre-chorus",
+          27,
+          8
+        ],
+        [
+          "chorus",
+          35,
+          18
+        ],
+        [
+          "verse",
+          53,
+          16
+        ],
+        [
+          "pre-chorus",
+          69,
+          10
+        ],
+        [
+          "chorus",
+          79,
+          16
+        ],
+        [
+          "bridge",
+          95,
+          12
+        ],
+        [
+          "chorus",
+          107,
+          17
+        ]
+      ],
+      "voices": {
+        "Vocal": {
+          "notes": 441,
+          "bars": 123,
+          "lowest": 66,
+          "highest": 81,
+          "chords": 126
+        },
+        "Ins": {
+          "notes": 152,
+          "bars": 123,
+          "lowest": 64,
+          "highest": 93,
+          "chords": 0
+        }
+      },
+      "has_chords": true,
+      "meters": [
+        "4/4"
+      ],
+      "keys": [
+        "A"
+      ]
+    },
+    "grid": {
+      "first_beat_s": 0.01,
+      "decoded_beats": 489,
+      "last_decoded_beat_s": 240.91,
+      "extended_beats": 1,
+      "tail_period_s": 0.49,
+      "measures": 123,
+      "abc_bars": 123,
+      "bar0_start_s": -1.58,
+      "pickup_padded": true,
+      "diagnostics": [
+        "measure 0: inferred 1/4 from downbeat span; declared numerators were [4]",
+        "measure 0: padded leading 1/4 span to 4/4 with preceding rest"
+      ],
+      "local_bpm_range": [
+        113.21,
+        122.45
+      ],
+      "constant_tempo_drift_s": {
+        "max_abs": 1.02,
+        "end": 1.02
+      }
+    },
+    "structure": [
+      [
+        0.01,
+        18.33,
+        "intro"
+      ],
+      [
+        18.33,
+        49.97,
+        "verse"
+      ],
+      [
+        49.97,
+        65.78,
+        "pre-chorus"
+      ],
+      [
+        65.78,
+        81.59,
+        "chorus"
+      ],
+      [
+        81.59,
+        101.35,
+        "chorus"
+      ],
+      [
+        101.35,
+        132.94,
+        "verse"
+      ],
+      [
+        132.94,
+        152.67,
+        "pre-chorus"
+      ],
+      [
+        152.67,
+        184.24,
+        "chorus"
+      ],
+      [
+        184.24,
+        207.9,
+        "bridge"
+      ],
+      [
+        207.9,
+        241.151,
+        "chorus"
+      ]
+    ]
+  }
+]

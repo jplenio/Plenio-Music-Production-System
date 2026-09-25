@@ -7,6 +7,8 @@ Song Sheet's outputs (WYSIWYG).
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Any
 
 import torch
@@ -31,6 +33,16 @@ V: Vocal
 V: Ins
 Z2|
 """
+
+COVER_STYLE = "English, acoustic folk pop, soft female vocal, fingerpicked guitar, warm piano, 121 BPM"
+ANSWERS_COVER = {
+    "cover-none": f"TITLE: Lanterns\nSTYLE: {COVER_STYLE}\nLYRICS:\nnone\nARTWORK: A lantern on a river.",
+    "cover-new": f"TITLE: Lanterns\nSTYLE: {COVER_STYLE}\nLYRICS:\n[Verse]\nPaper lanterns on the river\n\n"
+    "[Pre-Chorus]\nHear the bells across the bay\n\n[Chorus]\nLanterns floating through the dark\n\n[Outro]\n"
+    "ARTWORK: A lantern on a river.",
+    "cover-instrumental": "TITLE: Lanterns\nSTYLE: acoustic folk instrumental, warm piano lead melody, fingerpicked "
+    "guitar, 121 BPM\nLYRICS:\nnone\nARTWORK: A lantern on a river.",
+}
 
 ANSWERS = {
     "a": "TITLE: Neon Rain\nSTYLE: English, warm piano pop, expressive female voice, light drums, 88 BPM\n"
@@ -76,7 +88,110 @@ class PlenioTestFakeEngine(io.ComfyNode):
         return io.NodeOutput(FakeEngine())
 
 
+ANSWERS.update(ANSWERS_COVER)
+
+EVENTS_FILE = Path(__file__).resolve().parent / "minimax-excerpt.events.json"
+FAKE_RATE = 24000
+
+
+def fake_waveform(seconds: float, variant: int) -> torch.Tensor:
+    """Deterministic stereo test signal; the host tests recompute it to predict the ASR cache key."""
+    t = torch.arange(int(round(seconds * FAKE_RATE)), dtype=torch.float32) / FAKE_RATE
+    wave = 0.1 * torch.sin(2 * torch.pi * 220.0 * t + float(variant))
+    return wave.reshape(1, 1, -1).repeat(1, 2, 1)
+
+
+class _FakeSheetSageModel:
+    def __init__(self, mode: str):
+        self.mode = mode
+
+    def transcribe(self, waveform: torch.Tensor) -> list[dict[str, Any]]:
+        if self.mode == "fail":
+            raise ValueError("SheetSage2 needs at least two decoded beats to produce ABC.")
+        events = json.loads(EVENTS_FILE.read_text(encoding="utf-8"))["events"]
+        if self.mode == "no vocals":
+            for event in events:
+                melody = event["values"].get("melody")
+                if melody:
+                    event["values"]["melody"] = [n for n in melody if n["track"] != 0]
+        return list(events)
+
+
+class FakeSheetSage:
+    """Stands in for ComfyUI's SheetSage2AudioEncoder: replays recorded SheetSage2 events."""
+
+    model_sample_rate = FAKE_RATE
+    load_device = "cpu"
+    patcher = None
+
+    def __init__(self, mode: str):
+        self.model = _FakeSheetSageModel(mode)
+
+    def generate_abc(self, audio: torch.Tensor, sample_rate: int, melody_only: bool = True) -> list[str]:
+        from comfy.audio_encoders.sheetsage2_abc import events_to_abc
+
+        duration = audio.shape[-1] / sample_rate
+        return [events_to_abc(self.model.transcribe(audio), duration, melody_only=melody_only)]
+
+
 def make_nodes(record: Any) -> list[type[io.ComfyNode]]:
+    class PlenioTestFakeAudio(io.ComfyNode):
+        @classmethod
+        def define_schema(cls) -> io.Schema:
+            return io.Schema(
+                node_id="PlenioTestFakeAudio",
+                category="Plenio/Tests",
+                inputs=[
+                    io.Float.Input("seconds", default=83.02),
+                    io.Int.Input("variant", default=0, min=0, max=1000),
+                ],
+                outputs=[io.Audio.Output()],
+            )
+
+        @classmethod
+        def execute(cls, seconds: float, variant: int) -> io.NodeOutput:
+            record("audio", seconds=seconds, variant=variant)
+            return io.NodeOutput({"waveform": fake_waveform(seconds, variant), "sample_rate": FAKE_RATE})
+
+    class PlenioTestFakeSheetSage(io.ComfyNode):
+        @classmethod
+        def define_schema(cls) -> io.Schema:
+            return io.Schema(
+                node_id="PlenioTestFakeSheetSage",
+                category="Plenio/Tests",
+                inputs=[io.Combo.Input("mode", options=["normal", "no vocals", "fail"])],
+                outputs=[io.AudioEncoder.Output()],
+            )
+
+        @classmethod
+        def execute(cls, mode: str) -> io.NodeOutput:
+            record("sheetsage", mode=mode)
+            return io.NodeOutput(FakeSheetSage(mode))
+
+    class PlenioTestTimelineProbe(io.ComfyNode):
+        """Records a timeline and its vocal regions exactly (host tests derive ASR cache keys from them)."""
+
+        @classmethod
+        def define_schema(cls) -> io.Schema:
+            return io.Schema(
+                node_id="PlenioTestTimelineProbe",
+                category="Plenio/Tests",
+                inputs=[io.Custom("PLENIO_TIMELINE").Input("timeline")],
+                outputs=[],
+                is_output_node=True,
+            )
+
+        @classmethod
+        def execute(cls, timeline: Any) -> io.NodeOutput:
+            record(
+                "timeline",
+                source_sha256=timeline.source_sha256,
+                bars=len(timeline.bars),
+                vocal_notes=len(timeline.vocal_notes),
+                regions=[list(region) for region in timeline.vocal_regions()],
+            )
+            return io.NodeOutput()
+
     class PlenioTestFakeLLM(io.ComfyNode):
         @classmethod
         def define_schema(cls) -> io.Schema:
@@ -142,4 +257,12 @@ def make_nodes(record: Any) -> list[type[io.ComfyNode]]:
             wave = (0.1 * torch.sin(2 * torch.pi * 220 * t)).reshape(1, 1, -1).repeat(1, 2, 1)
             return io.NodeOutput({"waveform": wave, "sample_rate": 22050})
 
-    return [PlenioTestFakeEngine, PlenioTestFakeLLM, PlenioTestFakePlan, PlenioTestFakeRender]
+    return [
+        PlenioTestFakeEngine,
+        PlenioTestFakeLLM,
+        PlenioTestFakePlan,
+        PlenioTestFakeRender,
+        PlenioTestFakeAudio,
+        PlenioTestFakeSheetSage,
+        PlenioTestTimelineProbe,
+    ]

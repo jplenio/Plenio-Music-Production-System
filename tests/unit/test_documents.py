@@ -139,6 +139,15 @@ def test_style_rules() -> None:
     assert any("vocals" in e for e in errors) and any("language" in e for e in errors)
 
 
+def test_voice_types_count_as_vocal_character_but_their_instruments_do_not() -> None:
+    sung = "English, acoustic folk, warm male baritone, fingerpicked guitar, 121 BPM"
+    assert not severities(yue2.check_style(sung, instrumental=False), "info")  # the Phase 4B false info
+    assert severities(yue2.check_style("jazz, breathy mezzo-soprano, brushes", instrumental=True), "error")
+    for instrument in ("tenor sax", "tenor-sax", "baritone guitar", "alto flute", "soprano saxophone"):
+        style = f"cool jazz, {instrument} lead, upright bass, brushes"
+        assert not severities(yue2.check_style(style, instrumental=True), "error"), instrument
+
+
 def test_enforce_style_for_instrumentals() -> None:
     style, notes = yue2.enforce_style("English, lo-fi hip hop, female vocals, dusty drums", instrumental=True)
     assert style == "lo-fi hip hop, dusty drums" and notes
@@ -247,7 +256,8 @@ def test_parse_draft_instrumental_is_tags_only() -> None:
     brief = build_song_brief({"genre": "post-rock", "vocals": "instrumental"})
     _, request = compose(brief, ENGINE)
     draft = parse_draft(ANSWER, request)
-    assert draft.lyrics == "[Verse]\n\n[Chorus]"
+    assert draft.lyrics == "[instrumental]"  # Phase 4A: the bare tag, whatever the model wrote
+    assert any("[instrumental]" in note for note in draft.enforcements)
     assert "voice" not in draft.style and "English" not in draft.style
 
 

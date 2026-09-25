@@ -54,8 +54,70 @@ _ABC = re.compile(r"(?m)^(X:|K:|M:|L:|Q:|V:)")
 _NEGATION = re.compile(r"(?i)\b(no|not|without|never|avoid|don't|dont|non)\b")
 _VOCAL_TERMS = re.compile(
     r"(?i)\b(vocals?|vocalists?|voices?|voiced|singers?|singing|sung|sings?|rap|rapper|rapping|choirs?|chants?|"
-    r"humming|hum|lyrics?|a\s?cappella|falsetto|duet|crooner|belting|spoken word)\b"
+    r"humming|hum|lyrics?|a\s?cappella|falsetto|duet|crooner|belting|spoken word|"
+    # voice types, but not the instruments named after them (tenor sax, baritone guitar, alto flute)
+    r"(?:(?:mezzo-?)?soprano|alto|contralto|tenor|baritone|countertenor)"
+    r"(?![\s-]*(?:sax\w*|guitars?|ukuleles?|horns?|recorders?|trombones?|clarinets?|flutes?|banjos?|violins?)\b))\b"
 )
+_NOT_AN_INSTRUMENT = r"(?![\s-]*(?:sax\w*|guitars?|ukuleles?|horns?|recorders?|trombones?|clarinets?|flutes?|banjos?|violins?)\b)"
+_MALE_VOICE = re.compile(
+    r"(?i)\b(?:male|man|men|boy|baritone|basso|bass (?:voice|vocals?|singer)|(?:counter)?tenor)\b"
+    + _NOT_AN_INSTRUMENT
+)
+_FEMALE_VOICE = re.compile(
+    r"(?i)\b(?:female|woman|women|girl|(?:mezzo-?)?soprano|alto|contralto)\b" + _NOT_AN_INSTRUMENT
+)
+HIGH_MELODY_LOWEST = 60
+"""A melody whose lowest note is at or above C4 lies in a female register."""
+LOW_MELODY_HIGHEST = 60
+"""A melody whose highest note is at or below C4 lies in a male register."""
+_NOTE_NAMES = ("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
+
+
+def note_name(midi: int) -> str:
+    return f"{_NOTE_NAMES[midi % 12]}{midi // 12 - 1}"
+
+
+def voice_register(style: str) -> str:
+    """``male``, ``female`` or ``""`` (none or both named)."""
+    male, female = bool(_MALE_VOICE.search(style)), bool(_FEMALE_VOICE.search(style))
+    return "male" if male and not female else "female" if female and not male else ""
+
+
+def melody_register(lowest: int | None, highest: int | None) -> str:
+    """``high`` (female register), ``low`` (male register) or ``""`` for a vocal melody's range."""
+    if lowest is None or highest is None:
+        return ""
+    return "high" if lowest >= HIGH_MELODY_LOWEST else "low" if highest <= LOW_MELODY_HIGHEST else ""
+
+
+def check_register(style: str, lowest: int | None, highest: int | None) -> list[Finding]:
+    """Warn when the style asks for a voice whose register the (fixed) melody does not fit.
+
+    Phase 4B cover of M2 (melody F#4-A5): the same new lyrics were sung at WER 1.13 by a
+    "warm male baritone" and at WER 0.50 by a "soft female vocal". YuE2 does not transpose.
+    """
+    voice, melody = voice_register(style), melody_register(lowest, highest)
+    if not voice or not melody or lowest is None or highest is None:
+        return []
+    span = f"{note_name(lowest)}-{note_name(highest)}"
+    if voice == "male" and melody == "high":
+        advice = "transpose the score down an octave (Score Tools: transpose, -12) or ask for a female voice"
+    elif voice == "female" and melody == "low":
+        advice = "transpose the score up an octave (Score Tools: transpose, +12) or ask for a male voice"
+    else:
+        return []
+    return [
+        warning(
+            f"The style asks for a {voice} voice, but the vocal melody lies at {span}; YuE2 sings it as written and "
+            f"the words become hard to understand. {advice[0].upper()}{advice[1:]}.",
+            "style",
+            lowest=lowest,
+            highest=highest,
+        )
+    ]
+
+
 _LANGUAGES = re.compile(
     r"(?i)\b(english|german|deutsch|french|spanish|italian|portuguese|japanese|korean|chinese|mandarin|"
     r"cantonese|russian|dutch|swedish|polish|turkish|arabic|hindi)\b"
@@ -246,10 +308,17 @@ def check_score(
     if lyrics.strip():
         findings.extend(lyrics_rules.compare_sections(lyrics, [s.tag for s in analysis.sections]))
     if target_seconds and not 0.6 * target_seconds <= analysis.duration_s <= 1.5 * target_seconds:
+        advice = (
+            # instrumental plans ignore tags and timed tags (Phase 4A E4b); Score Tools fit length cuts whole sections
+            "YuE2 chooses the length of instrumental plans itself: use Score Tools 'fit length', delete sections in "
+            "the score, or plan again with another seed."
+            if instrumental
+            else "The plan follows the amount of lyrics: shorten or lengthen them, or edit the score."
+        )
         findings.append(
             warning(
                 f"The score lasts {_clock(analysis.duration_s)} but the brief asks for about {_clock(target_seconds)}. "
-                "The plan follows the amount of lyrics: shorten or lengthen them, or edit the score.",
+                + advice,
                 "score",
             )
         )
@@ -301,6 +370,14 @@ def validate_documents(
     elif score.strip():
         analysis = score_rules.analyze(score)
         duration = analysis.duration_s if analysis.ok else None
+        if analysis.ok and "lyrics" in check and lyrics.strip() and not instrumental:
+            findings += lyrics_rules.compare_sections(lyrics, [s.tag for s in analysis.sections])
+            # lyrics written for an existing melody (covers): do they fit its notes?
+            findings += lyrics_rules.syllable_fit(lyrics, score_rules.phrasing(score))
+        if analysis.ok and "style" in check and style.strip() and not instrumental:
+            vocal = analysis.voices.get("Vocal", {})
+            if vocal.get("notes"):
+                findings += check_register(style, vocal.get("lowest"), vocal.get("highest"))
     ceiling = (
         render_ceiling(duration) if duration else float(min(max_seconds or DEFAULT_MAX_SECONDS, MAX_SECONDS))
     )
@@ -389,7 +466,7 @@ def writing_rules(*, instrumental: bool, target_seconds: float) -> dict[str, Any
         + (", and no mention of vocals, voices, singers or languages." if instrumental else ".")
     )
     lyrics = (
-        "Lyrics: only section tags, one per line, blank line between them - no words at all."
+        "Lyrics: write only the tag [instrumental] - no words and no other tags (YuE2 plans the form itself)."
         if instrumental
         else "Lyrics: each section starts with a tag on its own line (for example [Verse]), followed by the sung "
         "lines; a blank line between sections. Only words to be sung: no stage directions, no notes, no "

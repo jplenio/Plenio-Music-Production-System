@@ -1,0 +1,218 @@
+[
+  {
+    "file": "2026-09-25 The Unsaid Words Remain.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "auto": {
+        "language": "si",
+        "language_probability": 0.664,
+        "seconds": 50.53,
+        "words": 36,
+        "mean_p": 0.503,
+        "wer": {
+          "reference_words": 0,
+          "hypothesis_words": 79,
+          "substitutions": 0,
+          "deletions": 0,
+          "insertions": 79,
+          "wer": null
+        }
+      },
+      "en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 8.05,
+        "words": 11,
+        "mean_p": 0.445,
+        "wer": {
+          "reference_words": 0,
+          "hypothesis_words": 9,
+          "substitutions": 0,
+          "deletions": 0,
+          "insertions": 9,
+          "wer": null
+        }
+      }
+    }
+  },
+  {
+    "file": "2026-09-25 Unsaid Words Hanging Still.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "auto": {
+        "language": "en",
+        "language_probability": 0.91,
+        "seconds": 5.75,
+        "words": 155,
+        "mean_p": 0.924,
+        "wer": {
+          "reference_words": 157,
+          "hypothesis_words": 155,
+          "substitutions": 5,
+          "deletions": 7,
+          "insertions": 5,
+          "wer": 0.1083
+        }
+      },
+      "en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 5.63,
+        "words": 155,
+        "mean_p": 0.924,
+        "wer": {
+          "reference_words": 157,
+          "hypothesis_words": 155,
+          "substitutions": 5,
+          "deletions": 7,
+          "insertions": 5,
+          "wer": 0.1083
+        }
+      }
+    }
+  },
+  {
+    "file": "2026-09-25 Words We Never Said (2).flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "auto": {
+        "language": "en",
+        "language_probability": 0.904,
+        "seconds": 3.9,
+        "words": 84,
+        "mean_p": 0.886,
+        "wer": {
+          "reference_words": 81,
+          "hypothesis_words": 84,
+          "substitutions": 23,
+          "deletions": 0,
+          "insertions": 3,
+          "wer": 0.321
+        }
+      },
+      "en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 3.75,
+        "words": 84,
+        "mean_p": 0.886,
+        "wer": {
+          "reference_words": 81,
+          "hypothesis_words": 84,
+          "substitutions": 23,
+          "deletions": 0,
+          "insertions": 3,
+          "wer": 0.321
+        }
+      }
+    }
+  },
+  {
+    "file": "2026-09-25 Words We Never Said.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "auto": {
+        "language": "en",
+        "language_probability": 0.958,
+        "seconds": 4.06,
+        "words": 82,
+        "mean_p": 0.897,
+        "wer": {
+          "reference_words": 81,
+          "hypothesis_words": 82,
+          "substitutions": 6,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.0864
+        }
+      },
+      "en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 3.36,
+        "words": 82,
+        "mean_p": 0.897,
+        "wer": {
+          "reference_words": 81,
+          "hypothesis_words": 82,
+          "substitutions": 6,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.0864
+        }
+      }
+    }
+  },
+  {
+    "file": "minimax-excerpt.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "auto": {
+        "language": "en",
+        "language_probability": 0.809,
+        "seconds": 4.1,
+        "words": 123,
+        "mean_p": 0.949,
+        "wer": {
+          "reference_words": 123,
+          "hypothesis_words": 123,
+          "substitutions": 1,
+          "deletions": 0,
+          "insertions": 0,
+          "wer": 0.0081
+        }
+      },
+      "en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 3.88,
+        "words": 123,
+        "mean_p": 0.949,
+        "wer": {
+          "reference_words": 123,
+          "hypothesis_words": 123,
+          "substitutions": 1,
+          "deletions": 0,
+          "insertions": 0,
+          "wer": 0.0081
+        }
+      }
+    }
+  },
+  {
+    "file": "minimax-sample.mp3",
+    "model": "whisper-large-v3",
+    "runs": {
+      "auto": {
+        "language": "en",
+        "language_probability": 0.901,
+        "seconds": 11.43,
+        "words": 336,
+        "mean_p": 0.942,
+        "wer": {
+          "reference_words": 335,
+          "hypothesis_words": 336,
+          "substitutions": 3,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.0119
+        }
+      },
+      "en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 11.37,
+        "words": 336,
+        "mean_p": 0.942,
+        "wer": {
+          "reference_words": 335,
+          "hypothesis_words": 336,
+          "substitutions": 3,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.0119
+        }
+      }
+    }
+  }
+]

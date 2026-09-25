@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Phase 1B design baseline — minimal text UI in Phase 3, full editor in Phase 5 |
+| Status | Phase 1B design baseline — minimal text UI in Phase 3, cover additions in 4B, **full editor in Phase 5: in progress (checkpoint 2026-09-25, see §15)** |
 | Date | 2026-09-25 |
 | Scope | The reusable editor used by the **Song Sheet** node: notation, raw ABC, lyrics, style/caption, title, artwork prompt; validation; approval |
 | Related | [target-architecture.md](target-architecture.md) §5–§6, §8.1 · [yue2-cover-design.md](yue2-cover-design.md) §4 |
@@ -244,3 +244,63 @@ Snapshot-based per document (scores are small text files), labelled with the ope
 | 3 | Song Sheet node with the minimal dialog: text areas for each document, validation list from `sheet.resolve`, state buttons (auto/edited/manual), Apply, Approve. Same backend contracts as the final editor. |
 | 4B | Cover needs (Phase 4A spec, [yue2-cover-design.md](yue2-cover-design.md) §14/§16): lyrics diff against the ASR draft with low-confidence words highlighted, section table with start times from the transcription timeline and *play this section of the source*, easy relabelling and moving of section boundaries (the most frequent transcription error in 4A: boundaries off by 2–8 bars), conflict dialog. |
 | 5 | Full editor: abcjs notation, CodeMirror ABC, operation palette, navigator, playback, A/B source, undo/redo. |
+
+---
+
+## 15. Phase 5 implementation record (checkpoint 2026-09-25)
+
+Implemented and checked by hand in a real ComfyUI (SheetSage2 score of the M2 cover source); the Phase 5 test suite is still to be written (see `docs/design/CURRENT_STATUS.md`).
+
+### 15.1 Backend (`plenio/core/score/`)
+
+| Module | Content |
+|---|---|
+| `positions.py` | tolerant walk of the text: lines, groups, bar slots with character offsets (also for invalid scores); `locate()` maps an upstream error message to line and bar range |
+| `model.py` | element view: every note/rest token is an element with id `V<bar>.<n>` / `I<bar>.<n>` (chords `C<bar>.<n>`), onset, length, sounding pitch (exactly the upstream rules), tie flags, source range; `display()` builds `display_abc`; `view()` returns elements, chords (with pitches for playback), sounding notes, bar start times, `display_abc` |
+| `edit.py` | editing operations; untouched bars stay byte-identical; rewritten bars use native spelling; every result is re-parsed and checked (grid, keys, notes outside the edited bars) |
+| `operations.py` | operation registry with parameter checks (`apply`) and `editor_view` (analysis + element view) |
+
+Diagnostics now carry `line`, `start`, `end` (the bar's text or the line), used by the ABC view's lint markers.
+
+Contract as implemented (differs from §4 in detail):
+
+- `POST /plenio/score/analyze` → the analysis of §4.1 plus, for valid scores, `elements` (with `source` and `display` ranges - these replace the separate `offset_map`), `chords`, `notes` (sounding notes per voice with their tied segments), `bar_starts_s`, `display_abc`.
+- `POST /plenio/score/transform` → `{abc, changes, warnings, select, analysis}`; `select` are the ids to select after the edit.
+- Operations: `shift_pitch` / `set_pitch` (`ids`, `semitones` or `midi`; the whole tied note), `set_duration` (`id`, `units`: longer only into following rests, shorter fills with a rest and removes a tie out), `note_to_rest` (`ids`), `rest_to_note` (`id`, optional `midi`; full-bar rests too), `set_chord` (`id`, `name`; at a Vocal onset), `remove_chord` (`chord`), `rename_section`, `move_section_boundary` (`section`, `start_bar`), `split_section` (`bar`, `label`), `merge_section` (`section`), and the Score Tools operations `transpose`, `set_tempo`, `strip_chords`, `silence_voice`, `move_vocal_to_ins`. Range transposition = `shift_pitch` over a multi-selection.
+- Measured on the real scores (M2 SheetSage2, two YuE2 plans; 1019 notes): every pitch, rest and shortening operation and every boundary move passed the invariant checks (the only refusal was correct).
+
+`display_abc` differs from the canonical text only for abcjs: accidentals that standard ABC would read differently are written out (native accidentals apply by letter across octaves), section names are annotations, and full-bar rests (`Z`, `Z2`..`Z4`) are written as plain rests bar by bar (abcjs draws `Z4` as one bar, which misaligned the voices, and `Z` with a bar count).
+
+### 15.2 Song Sheet
+
+New optional input `reference_audio` (display only): the node saves a temporary Opus copy (ComfyUI's `AudioSaveHelper`) and puts its `/view` parts into the payload; the cover template connects the source.
+
+### 15.3 Frontend (`frontend/src/`)
+
+| Module | Content |
+|---|---|
+| `sheet-editor/SheetDialog.vue` | tabs (Score, Lyrics, Style, Title & artwork), document states, conflicts, validation, **Revert**, Apply, Approve, close confirmation inside the dialog |
+| `sheet-editor/score/ScoreTab.vue` | the score editor: palette, view switch (notation / ABC / both), zoom, navigator, notation, ABC text, transport, status line (`aria-live`), diagnostics with bar links, keyboard shortcuts |
+| `score/useScoreSession.ts` | the session: one canonical text (the working copy), analysis per text (answers for an older text are dropped), last valid view, selection, undo/redo |
+| `score/NotationView.vue` | abcjs rendering of `display_abc`; click selects (Shift adds); selection and playback cursor as CSS classes on the SVG elements |
+| `score/AbcEditor.vue` | CodeMirror 6: line numbers, lint markers from the backend diagnostics, small ABC highlighting, cursor → notation selection; no CodeMirror history (one editor history) |
+| `score/ScoreNavigator.vue` | sections (rename, start one bar earlier/later, join, split at the selected bar) and a bar strip (section colouring, error bars) |
+| `score/ScorePalette.vue` | pitch ±1/±12, shorter/longer, rest/note, chord set/remove, whole-score operations, undo/redo |
+| `score/ScoreTransport.vue`, `player.ts` | playback from the selected bar with cursor, voice switches (Vocal, Ins, chords), speed, loop of the section; A/B with `reference_audio` at the same bar (timeline bar times) |
+| `LyricsFit.vue` | lyrics sections against the score's sections: syllables per vocal note |
+| `shared/scoreView.ts`, `history.ts`, `playback.ts` | pure helpers (element lookup by display/source position, neighbours, descriptions), the undo history, playback scheduling |
+| `score/prefs.ts` | layout, zoom, voices, speed in `localStorage` (never in the workflow) |
+
+Shortcuts (score editor): ←/→ previous/next element, Alt+↑/↓ other voice, ↑/↓ semitone, Shift+↑/↓ octave, `[`/`]` shorter/longer, R/Delete rest, N note, Space play/stop, Ctrl+Z / Ctrl+Y (also Ctrl+Shift+Z) undo/redo, Esc clears the selection.
+
+### 15.4 Deviations from this design
+
+- **Playback does not use the abcjs synth.** abcjs loads its soundfont from the internet at play time (a third-party download and a licence question). Plenio plays simple WebAudio tones from the backend's resolved pitches: offline, no download, and the accidental mismatch of §5.3 cannot affect playback. The UI says it is a guide to the notes.
+- The offset map of §4.1 is per element (`source` / `display` ranges).
+- Text documents other than the score use the browser's own undo in their text areas; the score has the snapshot history of §6.5.
+- Loop = the section of the selected bar (not an arbitrary selection).
+- Not built yet: the approximate `w:` underlay preview (§7, a later option), paging/virtualisation of very long scores (only the 83-s SheetSage2 score has been rendered in the browser so far; long YuE2 plans are still to be checked, AS-12).
+
+### 15.5 Checked by hand (real ComfyUI, SheetSage2 score)
+
+Rendering (202 notes, two voices, key and tempo, section annotations); click selection; ↑ on E5 in A major gives `=f4` (the needed natural) and the text view follows; undo returns to *auto*, redo; →; typing an unsupported length marks the bar (lint marker, bar strip, diagnostic with bar link) and the notation as stale; moving the chorus boundary one bar earlier; playback from bar 25 with cursor; A/B to the source at the same bar; Apply → workflow save/reload keeps the edited score.

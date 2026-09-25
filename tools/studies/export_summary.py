@@ -60,6 +60,19 @@ def main() -> int:
         [e1_summary(p) for p in sorted((s / "e1").glob("*.sheetsage.json"))],
     )
     write_json(args.out / "e2-asr.json", [asr_summary(p) for p in sorted((s / "e2").glob("*.asr.json"))])
+    if (s / "e2r").is_dir():
+        write_json(
+            args.out / "e2d-asr-vocal-regions.json",
+            [asr_summary(p) for p in sorted((s / "e2r").glob("*.asr.json"))],
+        )
+    if (s / "e3" / "asr").is_dir():
+        write_json(
+            args.out / "e3-asr-takes.json",
+            [asr_summary(p) for p in sorted((s / "e3" / "asr").glob("*.asr.json"))],
+        )
+    memory = s / "e3" / "memory" / "sheetsage-memory.json"
+    if memory.exists():
+        write_json(args.out / "e3-sheetsage-memory.json", read_json(memory))
     alignment = []
     for path in sorted((s / "e2b").glob("*.alignment.json")):
         data = read_json(path)

@@ -1,0 +1,574 @@
+[
+  {
+    "file": "e4-bare-lora-s1_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "si",
+        "language_probability": 0.732,
+        "seconds": 55.24,
+        "words": 494,
+        "mean_p": 0.872,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 4.87,
+        "words": 28,
+        "mean_p": 0.564,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e4-bare-s1_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "si",
+        "language_probability": 0.65,
+        "seconds": 38.97,
+        "words": 304,
+        "mean_p": 0.873,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 6.08,
+        "words": 73,
+        "mean_p": 0.847,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e4-bare-s2_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "si",
+        "language_probability": 0.506,
+        "seconds": 35.41,
+        "words": 280,
+        "mean_p": 0.862,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 6.54,
+        "words": 146,
+        "mean_p": 0.827,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e4-tags-lora-s1_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "si",
+        "language_probability": 0.727,
+        "seconds": 38.98,
+        "words": 342,
+        "mean_p": 0.866,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 3.43,
+        "words": 22,
+        "mean_p": 0.589,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e4-tags-lora-s2_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "en",
+        "language_probability": 0.794,
+        "seconds": 6.2,
+        "words": 31,
+        "mean_p": 0.587,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 6.04,
+        "words": 31,
+        "mean_p": 0.587,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e4-tags-s1_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "en",
+        "language_probability": 0.454,
+        "seconds": 9.97,
+        "words": 316,
+        "mean_p": 0.914,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 9.82,
+        "words": 316,
+        "mean_p": 0.914,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e4-tags-s2_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "en",
+        "language_probability": 0.422,
+        "seconds": 3.58,
+        "words": 30,
+        "mean_p": 0.533,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 3.44,
+        "words": 30,
+        "mean_p": 0.533,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e4-timed-lora-s1_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "si",
+        "language_probability": 0.802,
+        "seconds": 46.79,
+        "words": 418,
+        "mean_p": 0.872,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 4.14,
+        "words": 26,
+        "mean_p": 0.54,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e4-timed-s1_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "si",
+        "language_probability": 0.834,
+        "seconds": 27.47,
+        "words": 208,
+        "mean_p": 0.867,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 3.15,
+        "words": 29,
+        "mean_p": 0.687,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e4-timed-s2_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "si",
+        "language_probability": 0.491,
+        "seconds": 15.58,
+        "words": 114,
+        "mean_p": 0.869,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 2.33,
+        "words": 62,
+        "mean_p": 0.579,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e5-acc-keep-lora-s1_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "nn",
+        "language_probability": 0.245,
+        "seconds": 5.48,
+        "words": 103,
+        "mean_p": 0.766,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 1.42,
+        "words": 20,
+        "mean_p": 0.653,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e5-acc-keep-lora-s2_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "si",
+        "language_probability": 0.367,
+        "seconds": 15.69,
+        "words": 114,
+        "mean_p": 0.865,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 1.18,
+        "words": 6,
+        "mean_p": 0.532,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e5-acc-keep-s1_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "en",
+        "language_probability": 0.244,
+        "seconds": 1.41,
+        "words": 9,
+        "mean_p": 0.61,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 1.25,
+        "words": 9,
+        "mean_p": 0.61,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e5-acc-keep-s2_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "en",
+        "language_probability": 0.512,
+        "seconds": 1.33,
+        "words": 11,
+        "mean_p": 0.566,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 1.17,
+        "words": 11,
+        "mean_p": 0.566,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e5-acc-new-s1_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "en",
+        "language_probability": 0.448,
+        "seconds": 3.14,
+        "words": 55,
+        "mean_p": 0.711,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 2.97,
+        "words": 55,
+        "mean_p": 0.711,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e5-lead-keep-lora-s1_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "sn",
+        "language_probability": 0.241,
+        "seconds": 12.62,
+        "words": 9,
+        "mean_p": 0.792,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 1.15,
+        "words": 7,
+        "mean_p": 0.481,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e5-lead-keep-lora-s2_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "sn",
+        "language_probability": 0.283,
+        "seconds": 19.81,
+        "words": 9,
+        "mean_p": 0.854,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 1.23,
+        "words": 8,
+        "mean_p": 0.517,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e5-lead-keep-s1_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "si",
+        "language_probability": 0.45,
+        "seconds": 15.67,
+        "words": 114,
+        "mean_p": 0.856,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 1.96,
+        "words": 29,
+        "mean_p": 0.803,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e5-lead-keep-s2_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "si",
+        "language_probability": 0.378,
+        "seconds": 16.04,
+        "words": 114,
+        "mean_p": 0.86,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 1.36,
+        "words": 16,
+        "mean_p": 0.58,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e5-lead-new-lora-s1_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "sn",
+        "language_probability": 0.256,
+        "seconds": 19.97,
+        "words": 9,
+        "mean_p": 0.85,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 1.92,
+        "words": 25,
+        "mean_p": 0.546,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e5-lead-new-lora-s2_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "sn",
+        "language_probability": 0.315,
+        "seconds": 19.83,
+        "words": 9,
+        "mean_p": 0.849,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 1.19,
+        "words": 9,
+        "mean_p": 0.466,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e5-lead-new-s1_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "si",
+        "language_probability": 0.278,
+        "seconds": 17.19,
+        "words": 119,
+        "mean_p": 0.856,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 1.84,
+        "words": 11,
+        "mean_p": 0.611,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e5-lead-new-s2_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "si",
+        "language_probability": 0.435,
+        "seconds": 15.67,
+        "words": 114,
+        "mean_p": 0.86,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 1.23,
+        "words": 10,
+        "mean_p": 0.52,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e5-newlyrics-new-s1_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "en",
+        "language_probability": 0.938,
+        "seconds": 3.35,
+        "words": 100,
+        "mean_p": 0.922,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 3.19,
+        "words": 100,
+        "mean_p": 0.922,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e5-original-keep-s1_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "en",
+        "language_probability": 0.906,
+        "seconds": 4.08,
+        "words": 125,
+        "mean_p": 0.937,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 3.95,
+        "words": 125,
+        "mean_p": 0.937,
+        "wer": null
+      }
+    }
+  },
+  {
+    "file": "e5-original-new-s1_00001.flac",
+    "model": "whisper-large-v3",
+    "runs": {
+      "plenio": {
+        "language": "en",
+        "language_probability": 0.962,
+        "seconds": 4.13,
+        "words": 123,
+        "mean_p": 0.953,
+        "wer": null
+      },
+      "plenio_en": {
+        "language": "en",
+        "language_probability": 1,
+        "seconds": 3.98,
+        "words": 123,
+        "mean_p": 0.953,
+        "wer": null
+      }
+    }
+  }
+]

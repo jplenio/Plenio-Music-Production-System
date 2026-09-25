@@ -1,0 +1,78 @@
+[
+  {
+    "file": "minimax-excerpt.flac",
+    "windows": [
+      [
+        0.0,
+        30.0
+      ],
+      [
+        30.0,
+        30.0
+      ],
+      [
+        60.0,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "Blue light pooling on the sidewalk\nYour shadow stretched out long\nYou look like you've been waiting for a song that won't come on\nThere's a flicker in the storefront, buzzin' soft in half-dead glow\nAnd I'm three blocks from anywhere, but I'm exactly where I go"
+      ],
+      [
+        "Feel the bass kick through the gray\nHead tilted, you're already late\nFor a moment that can't hold its shape\nI'm reaching for the static on the wave\nNeon bleeding through the dark\nA feeling with no address\nYou'll be in your room by the morning\nBut right now, city holds us"
+      ],
+      [
+        "Neon light in through the dark\nI have smiled and a spark\nIf this is real or just a glow\nCatch it before it goes"
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 8.1
+  },
+  {
+    "file": "plenio/2026-09-25 Words We Never Said.flac [output]",
+    "windows": [
+      [
+        0.0,
+        30.0
+      ],
+      [
+        30.0,
+        30.0
+      ],
+      [
+        60.0,
+        30.0
+      ],
+      [
+        90.0,
+        30.0
+      ],
+      [
+        120.0,
+        30.0
+      ]
+    ],
+    "answers": [
+      [
+        "I keep thinking about the Tuesday after them"
+      ],
+      [
+        "Still like thirst won't in the well\nI had this pause heavy in my chest\nMaybe we should have put it to the test"
+      ],
+      [
+        "She is strange now looking back\nRecasts the hues\nAll the quiet things we left unsaid to you\nIf i just say what's heavy in my chest"
+      ],
+      [
+        "We were buried to the tears\nJust a silence now\nAnd the quiet grew"
+      ],
+      [
+        ""
+      ]
+    ],
+    "status": "success",
+    "error": [],
+    "seconds": 8.1
+  }
+]

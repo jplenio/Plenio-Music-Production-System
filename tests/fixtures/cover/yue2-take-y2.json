@@ -1,0 +1,1060 @@
+{
+"source": "2026-09-25 Words We Never Said (2).flac",
+"duration_s": 156.0,
+"abc": "X:1\nT:\nM:4/4\nL:1/16\nQ:1/4=83\nV: Vocal clef=treble name=\"Vocal Melody\" snm=\"Vocal\"\nV: Ins clef=treble name=\"Ins Melody\" snm=\"Inst.\"\nK:Bb\n% intro\nV: Vocal\nz8\"A#\"z8|\"A#\"z16|\"A#\"z16|\"D#\"z16|\nV: Ins\nZ|B,2F,B,2F2B,FG3GF2B,|B,,2F,B,2F2B,FG3GF2B,|E,2G,B,2E2B,EF3FE2B,|\nV: Vocal\n\"D#\"z16|\"A#\"z16|\"A#\"z16|\"D#\"z16|\nV: Ins\nE,2G,B,2E2B,ED2B,DC2B,|B,,2F,B,2F2B,FG3GF2B,|B,,2F,B,2F2B,FG2B,GF2B,|E,2G,B,2E2B,EF2B,FE2B,|\nV: Vocal\n\"D#\"z16|\nV: Ins\nE,2G,B,2E2B,ED2B,DC2B,|\n% verse\nV: Vocal\n\"A#\"z4dd3d2cc2c3|\"A#\"c3B3c4d4G2-|\"D#\"G2z12z2|\"D#\"z16|\nV: Ins\nZ2|z3B2e2Bef2Bfe2B|z3B2e2Bed2Bdc2B|\nV: Vocal\n\"A#\"z3Bd2dd3c4c2-|\"A#\"c2B4c4d4G2|\"D#\"z16|\"D#\"z8z3Bdf3|\nV: Ins\nZ2|z3B2e2Bef2Bfe2B|z3B2e2Bed2z4z|\n% chorus\nV: Vocal\n\"Gm7\"a8f6d2|\"D#\"gf6zB2d4d2|\"A#\"z16|\"A#\"z8z3cdf3|\nV: Ins\nZ2|z3B2f2Bfg3gf2B|z3B2f2Bfg2z4z|\nV: Vocal\n\"Gm7\"a6f4d6|\"D#\"gf3z4B4d2d2-|\"A#\"d2z12z2|\"A#\"z16|\nV: Ins\nZ2|z3B2f2Bfg3gf2B|z3B2f2Bfg3gf2B|\n% verse\nV: Vocal\n\"A#\"z3B2d3d3c3cB|\"A#\"cc4zBc4zd2G2-|\"D#\"G2z12z2|\"D#\"z16|\nV: Ins\nZ2|z3B2e2Bef2Bfe2B|z3B2e2Bed2Bdc2B|\nV: Vocal\n\"A#\"z3Bd2dd2c2c3B2-|\"A#\"B2c4c4d6-|\"D#\"d2G4z8z2|\"D#\"z8z3Bdf3|\nV: Ins\nZ2|z8ef3fe2B|z3B2e2Bed2z4z|\n% chorus\nV: Vocal\n\"Gm7\"a8f6d2|\"D#\"gf6zB2d4d2-|\"A#\"d2z12z2|\"A#\"z8z3cdf3|\nV: Ins\nZ2|z3Bzf2Bfg3gf2B|z3B2f2Bfg2z4z|\nV: Vocal\n\"Gm7\"a6f4d6|\"D#\"gf3z4B4d2d2-|\"A#\"d2z12z2|\"A#\"z8z3d2c2c-|\nV: Ins\nZ2|z3Bzf2Bfg3gf2B|z3B2f2Bfg2z4z|\nV: Vocal\n\"D#\"c2BB3G4z6|\"D#\"z6BBe2d4d2-|\nV: Ins\nZ2|\n% outro\nV: Vocal\n\"A#\"d2cB3z8z2|\"A#\"z16|\"A#\"z16|\"A#\"z16|\nV: Ins\nz8fg3gf2B|z3B2f2Bfg3gf2B|z2f4d2fg3gf2B|z2f4d2fg3gf2B|\nV: Vocal\n\"D#\"z16|\"D#\"z16|\"A#\"z16|\"A#\"z16|\nV: Ins\nz2f4d2ef3fe2B|z2f4d2ed3dc2B|z2f4d2fg3gf2B|z2f4d2fg3gf2B|\nV: Vocal\n\"D#\"z16|\"D#\"z16|\"A#\"z16|\"A#\"z16|\nV: Ins\nz2f4d2ef3fe2B|z2f4d2ed3dc3|d16|Z|\n",
+"bar_starts": [
+-0.53,
+0.55,
+3.47,
+6.38,
+9.31,
+12.24,
+15.16,
+18.07,
+20.99,
+23.91,
+26.84,
+29.77,
+32.69,
+35.62,
+38.55,
+41.47,
+44.39,
+47.32,
+50.24,
+53.16,
+56.07,
+58.98,
+61.89,
+64.8,
+67.72,
+70.62,
+73.53,
+76.44,
+79.33,
+82.24,
+85.15,
+88.04,
+90.95,
+93.85,
+96.75,
+99.65,
+102.55,
+105.44,
+108.33,
+111.23,
+114.12,
+117.02,
+119.92,
+122.81,
+125.7,
+128.6,
+131.49,
+134.38,
+137.27,
+140.16,
+143.05,
+145.93,
+148.81,
+151.7,
+154.58
+],
+"vocal_notes": [
+[
+24.64,
+24.823
+],
+[
+24.823,
+25.37
+],
+[
+25.37,
+25.74
+],
+[
+25.74,
+25.925
+],
+[
+25.925,
+26.293
+],
+[
+26.293,
+26.84
+],
+[
+26.84,
+27.387
+],
+[
+27.387,
+27.94
+],
+[
+27.94,
+28.675
+],
+[
+28.675,
+29.405
+],
+[
+29.405,
+30.14
+],
+[
+36.168,
+36.35
+],
+[
+36.35,
+36.715
+],
+[
+36.715,
+36.898
+],
+[
+36.898,
+37.445
+],
+[
+37.445,
+38.18
+],
+[
+38.18,
+38.915
+],
+[
+38.915,
+39.645
+],
+[
+39.645,
+40.375
+],
+[
+40.375,
+41.105
+],
+[
+41.105,
+41.47
+],
+[
+46.398,
+46.58
+],
+[
+46.58,
+46.765
+],
+[
+46.765,
+47.32
+],
+[
+47.32,
+48.78
+],
+[
+48.78,
+49.875
+],
+[
+49.875,
+50.24
+],
+[
+50.24,
+50.422
+],
+[
+50.422,
+51.51
+],
+[
+51.69,
+52.06
+],
+[
+52.06,
+52.795
+],
+[
+52.795,
+53.16
+],
+[
+58.068,
+58.25
+],
+[
+58.25,
+58.432
+],
+[
+58.432,
+58.98
+],
+[
+58.98,
+60.075
+],
+[
+60.075,
+60.805
+],
+[
+60.805,
+61.89
+],
+[
+61.89,
+62.072
+],
+[
+62.072,
+62.62
+],
+[
+63.36,
+64.08
+],
+[
+64.08,
+64.44
+],
+[
+64.44,
+65.165
+],
+[
+71.167,
+71.532
+],
+[
+71.532,
+72.08
+],
+[
+72.08,
+72.62
+],
+[
+72.62,
+73.165
+],
+[
+73.165,
+73.347
+],
+[
+73.347,
+73.53
+],
+[
+73.53,
+73.71
+],
+[
+73.71,
+74.433
+],
+[
+74.615,
+74.797
+],
+[
+74.797,
+75.528
+],
+[
+75.71,
+76.075
+],
+[
+76.075,
+76.8
+],
+[
+82.787,
+82.97
+],
+[
+82.97,
+83.33
+],
+[
+83.33,
+83.51
+],
+[
+83.51,
+83.87
+],
+[
+83.87,
+84.23
+],
+[
+84.23,
+84.78
+],
+[
+84.78,
+85.51
+],
+[
+85.51,
+86.235
+],
+[
+86.235,
+86.96
+],
+[
+86.96,
+88.405
+],
+[
+88.405,
+89.13
+],
+[
+92.94,
+93.12
+],
+[
+93.12,
+93.303
+],
+[
+93.303,
+93.85
+],
+[
+93.85,
+95.29
+],
+[
+95.29,
+96.385
+],
+[
+96.385,
+96.75
+],
+[
+96.75,
+96.933
+],
+[
+96.933,
+98.02
+],
+[
+98.2,
+98.56
+],
+[
+98.56,
+99.285
+],
+[
+99.285,
+100.01
+],
+[
+104.54,
+104.72
+],
+[
+104.72,
+104.9
+],
+[
+104.9,
+105.44
+],
+[
+105.44,
+106.525
+],
+[
+106.525,
+107.25
+],
+[
+107.25,
+108.33
+],
+[
+108.33,
+108.51
+],
+[
+108.51,
+109.05
+],
+[
+109.77,
+110.5
+],
+[
+110.5,
+110.865
+],
+[
+110.865,
+111.595
+],
+[
+116.11,
+116.472
+],
+[
+116.472,
+116.838
+],
+[
+116.838,
+117.38
+],
+[
+117.38,
+117.56
+],
+[
+117.56,
+118.105
+],
+[
+118.105,
+118.83
+],
+[
+120.995,
+121.177
+],
+[
+121.177,
+121.36
+],
+[
+121.36,
+121.72
+],
+[
+121.72,
+122.445
+],
+[
+122.445,
+123.17
+],
+[
+123.17,
+123.35
+],
+[
+123.35,
+123.89
+]
+],
+"reference": "[Intro]\n\n[Verse]\nI kept thinking of that rainy afternoon\nThe way the light hit dust motes in the room\n\n[Chorus]\nIf I’d just said what was heavy in my chest\nMaybe we wouldn't have put it to the test\n\n[Verse]\nIt feels strange now looking back across the years\nAt all the quiet things we left unshed tears\n\n[Chorus]\nIf I’d just said what was heavy in my chest\nMaybe we wouldn't have put it to the test\n\n[Outro]\nJust the silence now\nAnd the quiet growing",
+"words": [
+{
+"start": 23.08,
+"end": 24.48,
+"word": "I",
+"p": 0.79,
+"segment": 0
+},
+{
+"start": 24.48,
+"end": 24.88,
+"word": "kept",
+"p": 0.978,
+"segment": 0
+},
+{
+"start": 24.88,
+"end": 25.7,
+"word": "thinking",
+"p": 0.95,
+"segment": 0
+},
+{
+"start": 25.7,
+"end": 26.08,
+"word": "of",
+"p": 0.993,
+"segment": 0
+},
+{
+"start": 26.08,
+"end": 26.38,
+"word": "that",
+"p": 0.988,
+"segment": 0
+},
+{
+"start": 26.38,
+"end": 27.12,
+"word": "rainy",
+"p": 0.998,
+"segment": 0
+},
+{
+"start": 27.12,
+"end": 28.7,
+"word": "afternoon",
+"p": 0.998,
+"segment": 0
+},
+{
+"start": 34.96,
+"end": 36.08,
+"word": "The",
+"p": 0.123,
+"segment": 1
+},
+{
+"start": 36.08,
+"end": 36.54,
+"word": "way",
+"p": 0.908,
+"segment": 1
+},
+{
+"start": 36.54,
+"end": 36.72,
+"word": "the",
+"p": 0.915,
+"segment": 1
+},
+{
+"start": 36.72,
+"end": 37.14,
+"word": "light",
+"p": 0.993,
+"segment": 1
+},
+{
+"start": 37.14,
+"end": 37.58,
+"word": "hit",
+"p": 0.739,
+"segment": 1
+},
+{
+"start": 37.58,
+"end": 38.16,
+"word": "the",
+"p": 0.822,
+"segment": 1
+},
+{
+"start": 38.16,
+"end": 39.5,
+"word": "smoke's",
+"p": 0.724,
+"segment": 1
+},
+{
+"start": 39.5,
+"end": 39.72,
+"word": "in",
+"p": 0.979,
+"segment": 1
+},
+{
+"start": 39.72,
+"end": 40.38,
+"word": "the",
+"p": 0.988,
+"segment": 1
+},
+{
+"start": 40.38,
+"end": 41.28,
+"word": "room",
+"p": 0.995,
+"segment": 1
+},
+{
+"start": 45.28,
+"end": 46.4,
+"word": "If",
+"p": 0.753,
+"segment": 2
+},
+{
+"start": 46.4,
+"end": 46.56,
+"word": "I",
+"p": 0.939,
+"segment": 2
+},
+{
+"start": 46.56,
+"end": 47.08,
+"word": "just",
+"p": 0.947,
+"segment": 2
+},
+{
+"start": 47.08,
+"end": 47.54,
+"word": "said",
+"p": 0.985,
+"segment": 2
+},
+{
+"start": 47.54,
+"end": 48.96,
+"word": "what",
+"p": 0.974,
+"segment": 2
+},
+{
+"start": 48.96,
+"end": 49.94,
+"word": "was",
+"p": 0.993,
+"segment": 2
+},
+{
+"start": 49.94,
+"end": 50.48,
+"word": "heavy",
+"p": 0.998,
+"segment": 2
+},
+{
+"start": 50.48,
+"end": 51.7,
+"word": "in",
+"p": 0.977,
+"segment": 2
+},
+{
+"start": 51.7,
+"end": 52.1,
+"word": "my",
+"p": 0.999,
+"segment": 2
+},
+{
+"start": 52.1,
+"end": 52.9,
+"word": "chest",
+"p": 1.0,
+"segment": 2
+},
+{
+"start": 56.9,
+"end": 58.18,
+"word": "Maybe",
+"p": 0.034,
+"segment": 3
+},
+{
+"start": 58.18,
+"end": 58.44,
+"word": "we",
+"p": 0.963,
+"segment": 3
+},
+{
+"start": 58.44,
+"end": 60.2,
+"word": "wouldn't",
+"p": 0.924,
+"segment": 3
+},
+{
+"start": 60.2,
+"end": 60.8,
+"word": "have",
+"p": 0.993,
+"segment": 3
+},
+{
+"start": 60.8,
+"end": 61.9,
+"word": "put",
+"p": 0.951,
+"segment": 3
+},
+{
+"start": 61.9,
+"end": 62.34,
+"word": "in",
+"p": 0.481,
+"segment": 3
+},
+{
+"start": 62.34,
+"end": 63.32,
+"word": "to",
+"p": 0.938,
+"segment": 3
+},
+{
+"start": 63.32,
+"end": 63.98,
+"word": "the",
+"p": 0.988,
+"segment": 3
+},
+{
+"start": 63.98,
+"end": 64.72,
+"word": "test",
+"p": 0.998,
+"segment": 3
+},
+{
+"start": 69.98,
+"end": 71.26,
+"word": "If",
+"p": 0.777,
+"segment": 4
+},
+{
+"start": 71.26,
+"end": 71.58,
+"word": "I",
+"p": 0.939,
+"segment": 4
+},
+{
+"start": 71.58,
+"end": 72.12,
+"word": "just",
+"p": 0.787,
+"segment": 4
+},
+{
+"start": 72.12,
+"end": 72.76,
+"word": "said",
+"p": 0.967,
+"segment": 4
+},
+{
+"start": 72.76,
+"end": 73.24,
+"word": "what",
+"p": 0.983,
+"segment": 4
+},
+{
+"start": 73.24,
+"end": 73.46,
+"word": "was",
+"p": 0.991,
+"segment": 4
+},
+{
+"start": 73.46,
+"end": 74.02,
+"word": "heavy",
+"p": 0.992,
+"segment": 4
+},
+{
+"start": 74.02,
+"end": 74.96,
+"word": "in",
+"p": 0.992,
+"segment": 4
+},
+{
+"start": 74.96,
+"end": 75.68,
+"word": "my",
+"p": 0.998,
+"segment": 4
+},
+{
+"start": 75.68,
+"end": 76.22,
+"word": "chest",
+"p": 1.0,
+"segment": 4
+},
+{
+"start": 81.5,
+"end": 82.9,
+"word": "Maybe",
+"p": 0.073,
+"segment": 5
+},
+{
+"start": 82.9,
+"end": 83.34,
+"word": "we",
+"p": 0.94,
+"segment": 5
+},
+{
+"start": 83.34,
+"end": 84.0,
+"word": "wouldn't",
+"p": 0.937,
+"segment": 5
+},
+{
+"start": 84.0,
+"end": 84.36,
+"word": "have",
+"p": 0.994,
+"segment": 5
+},
+{
+"start": 84.36,
+"end": 84.84,
+"word": "put",
+"p": 0.905,
+"segment": 5
+},
+{
+"start": 84.84,
+"end": 85.74,
+"word": "it",
+"p": 0.974,
+"segment": 5
+},
+{
+"start": 85.74,
+"end": 86.2,
+"word": "to",
+"p": 0.987,
+"segment": 5
+},
+{
+"start": 86.2,
+"end": 86.94,
+"word": "the",
+"p": 0.982,
+"segment": 5
+},
+{
+"start": 86.94,
+"end": 88.48,
+"word": "test",
+"p": 0.991,
+"segment": 5
+},
+{
+"start": 91.58,
+"end": 92.98,
+"word": "If",
+"p": 0.632,
+"segment": 6
+},
+{
+"start": 92.98,
+"end": 93.08,
+"word": "I",
+"p": 0.916,
+"segment": 6
+},
+{
+"start": 93.08,
+"end": 93.48,
+"word": "just",
+"p": 0.915,
+"segment": 6
+},
+{
+"start": 93.48,
+"end": 94.22,
+"word": "said",
+"p": 0.991,
+"segment": 6
+},
+{
+"start": 94.22,
+"end": 95.42,
+"word": "what",
+"p": 0.976,
+"segment": 6
+},
+{
+"start": 95.42,
+"end": 96.42,
+"word": "was",
+"p": 0.994,
+"segment": 6
+},
+{
+"start": 96.42,
+"end": 96.96,
+"word": "heavy",
+"p": 0.998,
+"segment": 6
+},
+{
+"start": 96.96,
+"end": 98.24,
+"word": "in",
+"p": 0.983,
+"segment": 6
+},
+{
+"start": 98.24,
+"end": 98.58,
+"word": "my",
+"p": 0.999,
+"segment": 6
+},
+{
+"start": 98.58,
+"end": 99.36,
+"word": "chest",
+"p": 1.0,
+"segment": 6
+},
+{
+"start": 103.24,
+"end": 104.64,
+"word": "Maybe",
+"p": 0.213,
+"segment": 7
+},
+{
+"start": 104.64,
+"end": 104.96,
+"word": "we",
+"p": 0.98,
+"segment": 7
+},
+{
+"start": 104.96,
+"end": 106.58,
+"word": "wouldn't",
+"p": 0.938,
+"segment": 7
+},
+{
+"start": 106.58,
+"end": 107.32,
+"word": "have",
+"p": 0.994,
+"segment": 7
+},
+{
+"start": 107.32,
+"end": 108.36,
+"word": "put",
+"p": 0.841,
+"segment": 7
+},
+{
+"start": 108.36,
+"end": 108.62,
+"word": "it",
+"p": 0.832,
+"segment": 7
+},
+{
+"start": 108.62,
+"end": 109.74,
+"word": "to",
+"p": 0.993,
+"segment": 7
+},
+{
+"start": 109.74,
+"end": 110.42,
+"word": "the",
+"p": 0.997,
+"segment": 7
+},
+{
+"start": 110.42,
+"end": 111.22,
+"word": "test",
+"p": 1.0,
+"segment": 7
+},
+{
+"start": 114.78,
+"end": 116.18,
+"word": "Just",
+"p": 0.795,
+"segment": 8
+},
+{
+"start": 116.18,
+"end": 116.52,
+"word": "the",
+"p": 0.991,
+"segment": 8
+},
+{
+"start": 116.52,
+"end": 117.56,
+"word": "silence",
+"p": 0.998,
+"segment": 8
+},
+{
+"start": 117.56,
+"end": 118.24,
+"word": "now",
+"p": 0.996,
+"segment": 8
+},
+{
+"start": 118.24,
+"end": 120.7,
+"word": "And",
+"p": 0.391,
+"segment": 9
+},
+{
+"start": 120.7,
+"end": 121.08,
+"word": "the",
+"p": 0.991,
+"segment": 9
+},
+{
+"start": 121.08,
+"end": 121.5,
+"word": "quiet",
+"p": 0.998,
+"segment": 9
+},
+{
+"start": 121.5,
+"end": 122.6,
+"word": "growing",
+"p": 0.973,
+"segment": 9
+},
+{
+"start": 136.7,
+"end": 138.1,
+"word": "Thank",
+"p": 0.183,
+"segment": 10
+},
+{
+"start": 138.1,
+"end": 139.5,
+"word": "you.",
+"p": 0.999,
+"segment": 10
+}
+],
+"language": "en"
+}

@@ -1,6 +1,21 @@
 # Catalogue of Plenio-owned assets (files that are not ComfyUI model weights).
 # Every asset is pinned to a full commit hash; sizes are mandatory, SHA-256 where published.
 # ComfyUI-format weights are declared in the templates (properties.models) instead.
-# The first entries (lyrics ASR models) arrive with the YuE2 Cover path.
+# Lyrics ASR models arrived with the YuE2 Cover path (Phase 4B).
 
 schema = "plenio.assets/1"
+
+[[asset]]
+id = "faster-whisper-large-v3"
+kind = "asr"
+repo = "Systran/faster-whisper-large-v3"
+revision = "edaa852ec7e145841d8ffdb056a99866b5f0a478"
+licence = "MIT"
+description = "Whisper large-v3 converted for CTranslate2 (faster-whisper), lyrics ASR"
+files = [
+  { path = "config.json", size = 2394 },
+  { path = "model.bin", size = 3087284237, sha256 = "69f74147e3334731bc3a76048724833325d2ec74642fb52620eda87352e3d4f1" },
+  { path = "preprocessor_config.json", size = 340 },
+  { path = "tokenizer.json", size = 2480617 },
+  { path = "vocabulary.json", size = 1068114 },
+]

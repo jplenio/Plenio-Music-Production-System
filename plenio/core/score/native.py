@@ -20,6 +20,7 @@ from typing import Any
 from ...third_party import yue2_abc_tools as upstream
 from ..errors import PlenioValidationError
 from ..hashing import sha256_text
+from . import positions
 
 DIALECT = "yue2-native"
 VOICES = upstream.VOICES
@@ -34,15 +35,23 @@ class Diagnostic:
     message: str
     bar: int | None = None
     voice: str | None = None
+    line: int | None = None
+    """1-based line of the text the diagnostic refers to."""
+    start: int | None = None
+    end: int | None = None
+    """Character range in the text (the bar, or the line)."""
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        result: dict[str, Any] = {
             "severity": self.severity,
             "message": self.message,
             "bar": self.bar,
             "voice": self.voice,
             "where": f"bar {self.bar}" if self.bar else "score",
         }
+        if self.line is not None:
+            result.update(line=self.line, start=self.start, end=self.end)
+        return result
 
 
 @dataclass(frozen=True)
@@ -185,10 +194,20 @@ def _parse(text: str) -> upstream.Score:
         ) from error
 
 
-def _diagnostic_from(message: str) -> Diagnostic:
+def _diagnostic_from(message: str, text: str | None = None) -> Diagnostic:
     bar = re.search(r"bar (\d+)", message)
     voice = re.search(r"\b(Vocal|Ins)\b", message)
-    return Diagnostic("error", message, int(bar.group(1)) if bar else None, voice.group(1) if voice else None)
+    where = positions.locate(text, message) if text is not None else None
+    line, start, end = where if where is not None else (None, None, None)
+    return Diagnostic(
+        "error",
+        message,
+        int(bar.group(1)) if bar else None,
+        voice.group(1) if voice else None,
+        line,
+        start,
+        end,
+    )
 
 
 def _meter(meter: tuple[int, int]) -> str:
@@ -203,7 +222,7 @@ def analyze(text: str) -> Analysis:
     try:
         score = upstream.parse_abc(text)
     except upstream.AbcError as error:
-        return Analysis(False, digest, (_diagnostic_from(str(error)),))
+        return Analysis(False, digest, (_diagnostic_from(str(error), text),))
     lines = text.splitlines()
     seconds_per_quarter = Fraction(60, score.bpm)
     vocal, ins = score.voices["Vocal"], score.voices["Ins"]
@@ -722,3 +741,183 @@ def prepare(text: str, *, instrumental: bool, melody: str = "lead") -> Change:
     raise PlenioValidationError(
         f"Unknown instrumental melody option {melody!r}; use 'lead' or 'accompaniment'."
     )
+
+
+# --- length -------------------------------------------------------------------------
+
+
+def _group_spans(lines: list[str]) -> list[tuple[int, int]]:
+    """``(first line, end line)`` of every group, including its ``% label`` lines."""
+    spans: list[tuple[int, int]] = []
+    cursor = 8
+    while cursor < len(lines):
+        start = cursor
+        while cursor < len(lines) and lines[cursor].startswith("% "):
+            cursor += 1
+        for _voice in VOICES:
+            cursor += 1  # "V: <voice>"
+            while cursor < len(lines) and lines[cursor].startswith(("M:", "K:")):
+                cursor += 1
+            cursor += 1  # music line
+        spans.append((start, min(cursor, len(lines))))
+    return spans
+
+
+def repair_truncated(text: str) -> Change | None:
+    """Remove an incomplete last group (a plan cut off at the planner's token limit).
+
+    Returns ``None`` when the score is valid, or when removing the last group does not make it
+    valid (then the error is somewhere else and must be fixed by the user).
+    """
+    if analyze(text).ok:
+        return None
+    lines = text.splitlines()
+    starts = [
+        i
+        for i in range(8, len(lines))
+        if lines[i].startswith("% ")
+        and not lines[i - 1].startswith("% ")
+        or lines[i] == "V: Vocal"
+        and not lines[i - 1].startswith("% ")
+    ]
+    if not starts:
+        return None
+    candidate = "\n".join(lines[: starts[-1]]) + "\n"
+    analysis = analyze(candidate)
+    if not analysis.ok:
+        return None
+    return Change(
+        candidate,
+        (
+            f"the score ended inside its last group (a plan cut off at the planner's token limit); "
+            f"the incomplete group was removed, {len(analysis.bars)} bars remain",
+        ),
+        ("the planner did not finish this plan; the removed part may have been the ending",),
+    )
+
+
+FIT_TOLERANCE = 1.15
+
+
+def _core_sections(labels: list[str]) -> int:
+    """How many sections from the start form the shortest complete song: up to the first chorus
+    (or, without a chorus, the first verse)."""
+    for word in ("chorus", "verse"):
+        for index, label in enumerate(labels[:-1]):
+            if word in label.lower() and "pre" not in label.lower():
+                return index + 1
+    return 1
+
+
+def fit_length(text: str, target_seconds: float) -> Change:
+    """Shorten a score to about ``target_seconds`` at section boundaries.
+
+    Keeps whole sections from the start - at least up to the first chorus (or verse), so that a
+    complete song remains - and then more sections while the kept part plus the final section
+    (usually the outro, so the song still ends) stays within ``FIT_TOLERANCE`` x the target. Never
+    cuts inside a section. When a removed section changes key or meter, the final section is not
+    appended (its key would be wrong) and a warning says so.
+    """
+    analysis = validate(text)
+    sections = list(analysis.sections)
+    limit = target_seconds * FIT_TOLERANCE
+    if analysis.duration_s <= limit or len(sections) < 3:
+        return Change(
+            text, (f"length {analysis.duration_s:.0f} s fits about {target_seconds:.0f} s: unchanged",)
+        )
+    ending = sections[-1]
+    durations = [s.end_s - s.start_s for s in sections]
+    keep = min(_core_sections([s.label for s in sections]), len(sections) - 1)
+    while keep < len(sections) - 1 and sum(durations[: keep + 1]) + durations[-1] <= limit:
+        keep += 1
+    warnings: list[str] = []
+    if sum(durations[:keep]) + durations[-1] > limit:
+        warnings.append(
+            f"the shortest complete form ({', '.join(s.label for s in sections[:keep])} and the ending) lasts "
+            f"{sum(durations[:keep]) + durations[-1]:.0f} s, more than the {target_seconds:.0f} s target"
+        )
+    if keep >= len(sections) - 1:
+        return Change(text, ("no section can be removed",), tuple(warnings))
+    lines = text.splitlines()
+    spans = _group_spans(lines)
+    groups = _groups(lines)
+    section_of_group: list[int] = []
+    current = -1
+    for index, group in enumerate(groups):
+        if group.starts_section or index == 0:
+            current += 1
+        section_of_group.append(current)
+    kept_groups = [i for i, s in enumerate(section_of_group) if s < keep]
+    ending_groups = [i for i, s in enumerate(section_of_group) if s == len(sections) - 1]
+    removed = [i for i, s in enumerate(section_of_group) if keep <= s < len(sections) - 1]
+    changes_state = any(
+        lines[line].startswith(("M:", "K:")) for i in removed for line in range(spans[i][0], spans[i][1])
+    )
+    body: list[str] = []
+    for i in kept_groups:
+        body.extend(lines[spans[i][0] : spans[i][1]])
+    # A tie from the last kept bar would now lead into a different note.
+    for voice in VOICES:
+        line = groups[kept_groups[-1]].lines[voice] - spans[kept_groups[-1]][0]
+        position = len(body) - (spans[kept_groups[-1]][1] - spans[kept_groups[-1]][0]) + line
+        if body[position].endswith("-|"):
+            body[position] = body[position][:-2] + "|"
+            warnings.append(f"{voice}: a tie at the end of the kept part was removed")
+    appended = ending.label
+    if changes_state:
+        warnings.append("a removed section changes key or meter, so the ending was not appended")
+        appended = ""
+    else:
+        for i in ending_groups:
+            body.extend(lines[spans[i][0] : spans[i][1]])
+    result = "\n".join(lines[:8] + body) + "\n"
+    after = validate(result)
+    kept_labels = [s.label for s in sections[:keep]]
+    return Change(
+        result,
+        (
+            f"fitted to about {target_seconds:.0f} s: kept {', '.join(kept_labels)}"
+            + (f" and the ending ({appended})" if appended else "")
+            + f"; removed {len(sections) - keep - (1 if appended else 0)} section(s); "
+            f"{analysis.duration_s:.0f} s -> {after.duration_s:.0f} s",
+        ),
+        tuple(warnings),
+    )
+
+
+# --- phrasing -----------------------------------------------------------------------
+
+
+def phrasing(text: str, *, rest_quarters: float = 1.0) -> list[dict[str, Any]]:
+    """Per section: bars, vocal notes and phrases (split at Vocal rests of at least one beat).
+
+    Used to write new lyrics on an existing melody: roughly one syllable per note, one line per
+    phrase. Onsets are not syllables (melismas are allowed); the counts are guidance.
+    """
+    analysis = validate(text)
+    score = _parse(text)
+    bars = score.voices["Vocal"].bars
+    notes = sorted(score.voices["Vocal"].notes)
+    result = []
+    for section in analysis.sections:
+        start = bars[section.start_bar - 1][0]
+        last = bars[section.start_bar - 1 + section.bars - 1]
+        end = last[0] + last[1]
+        inside = [n for n in notes if start <= n[0] < end]
+        phrases: list[int] = []
+        previous_end = None
+        for onset, _pitch, duration in inside:
+            if previous_end is None or onset - previous_end >= Fraction(rest_quarters).limit_denominator(64):
+                phrases.append(0)
+            phrases[-1] += 1
+            previous_end = onset + duration
+        result.append(
+            {
+                "tag": section.tag,
+                "label": section.label,
+                "bars": section.bars,
+                "vocal_notes": len(inside),
+                "phrases": phrases,
+            }
+        )
+    return result

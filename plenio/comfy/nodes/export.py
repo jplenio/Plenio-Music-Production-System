@@ -19,6 +19,7 @@ from ...core.release import (
     file_facts,
     naming_values,
     plan_path,
+    workflow_licences,
     write_flac,
 )
 from ...core.reports import Report, Status
@@ -114,6 +115,7 @@ class PlenioExportRelease(io.ComfyNode):
                 for r in report_dicts
                 if r.get("data", {}).get("engine") in ENGINES
             }
+            | workflow_licences(cls.hidden.prompt)
         )
         record = build_record(
             RecordInput(

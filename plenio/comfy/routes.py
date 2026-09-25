@@ -77,32 +77,24 @@ async def system(request: web.Request) -> web.StreamResponse:
 
 async def score_analyze(request: web.Request) -> web.StreamResponse:
     data = await read_json(request)
-    return web.json_response(score_rules.analyze(_text(data, "abc")).to_dict())
-
-
-OPERATIONS: dict[str, Callable[[str, dict[str, Any]], score_rules.Change]] = {
-    "strip_chords": lambda abc, op: score_rules.strip_chords(abc),
-    "silence_voice": lambda abc, op: score_rules.silence_voice(abc, str(op.get("voice", "Vocal"))),
-    "move_vocal_to_ins": lambda abc, op: score_rules.move_vocal_to_ins(
-        abc, conflict=str(op.get("conflict", "replace"))
-    ),
-    "transpose": lambda abc, op: score_rules.transpose(abc, int(op.get("semitones", 0))),
-    "set_tempo": lambda abc, op: score_rules.set_tempo(abc, int(op.get("bpm", 100))),
-}
+    return web.json_response(score_rules.editor_view(_text(data, "abc")))
 
 
 async def score_transform(request: web.Request) -> web.StreamResponse:
     data = await read_json(request)
     operation = data.get("operation")
-    if not isinstance(operation, dict) or operation.get("op") not in OPERATIONS:
-        raise PlenioUserError("Unknown score operation.", hint=f"Use one of {sorted(OPERATIONS)}.")
-    change = OPERATIONS[operation["op"]](_text(data, "abc"), operation)
+    if not isinstance(operation, dict):
+        raise PlenioUserError(
+            "The request needs an 'operation' object.", hint=f"Use one of {sorted(score_rules.OPERATIONS)}."
+        )
+    result = score_rules.apply(_text(data, "abc"), operation)
     return web.json_response(
         {
-            "abc": change.abc,
-            "changes": list(change.changes),
-            "warnings": list(change.warnings),
-            "analysis": score_rules.analyze(change.abc).to_dict(),
+            "abc": result.abc,
+            "changes": list(result.changes),
+            "warnings": list(result.warnings),
+            "select": list(result.select),
+            "analysis": score_rules.editor_view(result.abc),
         }
     )
 
@@ -189,6 +181,12 @@ async def template_save(request: web.Request) -> web.StreamResponse:
     return web.json_response(template.to_dict())
 
 
+async def asr_note(request: web.Request) -> web.StreamResponse:
+    from .nodes.transcribe_lyrics import asr_notes
+
+    return web.json_response({"note": asr_notes().get(request.match_info["draft_sha256"])})
+
+
 ROUTES: tuple[tuple[str, str, Handler], ...] = (
     ("GET", "/plenio/system", system),
     ("POST", "/plenio/score/analyze", score_analyze),
@@ -198,6 +196,7 @@ ROUTES: tuple[tuple[str, str, Handler], ...] = (
     ("GET", "/plenio/templates", templates_list),
     ("GET", "/plenio/templates/{template_id:.+}", template_get),
     ("POST", "/plenio/templates", template_save),
+    ("GET", "/plenio/asr/notes/{draft_sha256}", asr_note),
 )
 
 

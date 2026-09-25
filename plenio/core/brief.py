@@ -128,6 +128,187 @@ class SongBrief:
         return "\n".join(lines)
 
 
+COVER_VOCALS = {
+    "original lyrics": "original",
+    "new lyrics": "new",
+    "instrumental": "instrumental",
+}
+HARMONY_OPTIONS = {"new accompaniment": "new", "keep original chords": "keep"}
+COVER_DEFAULT_MAX_SECONDS = 360.0
+
+
+@dataclass(frozen=True)
+class CoverBrief:
+    """The intent of a cover: the target style and how the vocals and the harmony are treated.
+
+    Melody, form, key and tempo come from the source's transcription (the score), so the brief has
+    no length, tempo, key or meter. ``vocals`` decides where the lyrics draft comes from; which
+    lyrics text is finally used is a state of the lyrics document in the Song Sheet.
+    """
+
+    description: str = ""
+    genre: str = ""
+    mood: str = ""
+    vocals: str = "instrumental"
+    language: str = ""
+    voice: str = ""
+    theme: str = ""
+    phrasing_reference: bool = False
+    melody: str = "lead"
+    lead_instrument: str = ""
+    harmony: str = "new"
+    title: str = ""
+    template: str = ""
+    from_template: tuple[str, ...] = field(default=(), compare=False)
+    kind: str = "cover"
+
+    @property
+    def instrumental(self) -> bool:
+        return self.vocals == "instrumental"
+
+    @property
+    def use_source_lyrics(self) -> bool:
+        return self.vocals == "original"
+
+    @property
+    def writes_lyrics(self) -> bool:
+        return self.vocals == "new"
+
+    @property
+    def target_seconds(self) -> float | None:
+        """Covers have no target length: the source defines it."""
+        return None
+
+    @property
+    def max_seconds(self) -> float:
+        return COVER_DEFAULT_MAX_SECONDS
+
+    @property
+    def length(self) -> str:
+        return "as the source"
+
+    def warnings(self) -> list[str]:
+        notes = []
+        if self.instrumental and self.melody == "accompaniment" and self.harmony == "new":
+            notes.append(
+                "Accompaniment only with a new harmony keeps neither the melody nor the chords: only the form, "
+                "the tempo and the instrumental line remain, and YuE2 tends to invent a melody (in the Phase 4A "
+                "study it sounded like gibberish singing). Keep the original chords or let an instrument play "
+                "the melody."
+            )
+        return notes
+
+    def to_dict(self) -> dict[str, Any]:
+        data = asdict(self)
+        data["from_template"] = list(self.from_template)
+        data["schema"] = BRIEF_SCHEMA
+        return data
+
+    @property
+    def fingerprint(self) -> str:
+        data = self.to_dict()
+        data.pop("from_template")
+        return sha256_json(data)
+
+    def to_text(self) -> str:
+        lines = ["Kind: cover of a recorded song (melody, form and tempo come from the source)"]
+        if self.description:
+            lines.append(f"Target style: {self.description}")
+        for label, value in (("Genre", self.genre), ("Mood", self.mood)):
+            if value:
+                lines.append(f"{label}: {value}")
+        if self.vocals == "original":
+            lines.append("Vocals: sung, with the original lyrics of the source")
+            lines.append(f"Language: {self.language or 'as the source (detected)'}")
+            if self.voice:
+                lines.append(f"Voice: {self.voice}")
+        elif self.vocals == "new":
+            lines.append("Vocals: sung, with new lyrics on the source's melody")
+            for label, value in (
+                ("Language", self.language),
+                ("Voice", self.voice),
+                ("Lyrics theme", self.theme),
+            ):
+                if value:
+                    lines.append(f"{label}: {value}")
+        else:
+            lines.append("Vocals: none (instrumental)")
+            lines.append(
+                "Melody: "
+                + (
+                    "an instrument plays the vocal melody"
+                    if self.melody == "lead"
+                    else "accompaniment only, no lead melody"
+                )
+            )
+            if self.lead_instrument:
+                lines.append(f"Lead instrument: {self.lead_instrument}")
+        lines.append(
+            "Harmony: "
+            + (
+                "new accompaniment (the original chords are not used)"
+                if self.harmony == "new"
+                else "original chords"
+            )
+        )
+        if self.title:
+            lines.append(f"Title: {self.title}")
+        return "\n".join(lines)
+
+
+def build_cover_brief(values: Mapping[str, Any], template: Template | None = None) -> CoverBrief:
+    """Create a cover brief; the template fills only empty style fields. Invalid choices raise."""
+    merged: dict[str, str] = {}
+    from_template: list[str] = []
+    for name in ("description", "genre", "mood", "language", "voice", "theme", "lead_instrument"):
+        value = str(values.get(name, "") or "").strip()
+        if not value and template is not None and template.fields.get(name) and name != "language":
+            value = template.fields[name]
+            from_template.append(name)
+        merged[name] = value
+    vocals = COVER_VOCALS.get(str(values.get("vocals", "")), str(values.get("vocals", "") or "instrumental"))
+    if vocals not in COVER_VOCALS.values():
+        raise PlenioUserError(
+            f"Unknown cover vocal mode {vocals!r}.", hint=f"Choose one of {list(COVER_VOCALS)}."
+        )
+    harmony = HARMONY_OPTIONS.get(str(values.get("harmony", "")), str(values.get("harmony", "") or "new"))
+    if harmony not in HARMONY_OPTIONS.values():
+        raise PlenioUserError(
+            f"Unknown harmony option {harmony!r}.", hint=f"Choose one of {list(HARMONY_OPTIONS)}."
+        )
+    melody_value = str(values.get("melody", "") or "")
+    melody = MELODY_OPTIONS.get(melody_value, melody_value or "lead")
+    if melody not in MELODY_OPTIONS.values():
+        raise PlenioUserError(
+            f"Unknown melody option {melody_value!r}.", hint=f"Choose one of {list(MELODY_OPTIONS)}."
+        )
+    language = merged["language"]
+    if language.lower() == "auto":
+        language = ""
+    brief = CoverBrief(
+        description=merged["description"],
+        genre=merged["genre"],
+        mood=merged["mood"],
+        vocals=vocals,
+        language=language if vocals != "instrumental" else "",
+        voice=merged["voice"] if vocals != "instrumental" else "",
+        theme=merged["theme"] if vocals == "new" else "",
+        phrasing_reference=bool(values.get("phrasing_reference", False)) and vocals == "new",
+        melody=melody if vocals == "instrumental" else "lead",
+        lead_instrument=merged["lead_instrument"] if vocals == "instrumental" else "",
+        harmony=harmony,
+        title=str(values.get("title", "") or "").strip(),
+        template=template.id if template else "",
+        from_template=tuple(from_template),
+    )
+    if not (brief.description or brief.genre):
+        raise PlenioUserError(
+            "The cover brief has no target style.",
+            hint="Choose a template or describe the target style (at least a genre or a description).",
+        )
+    return brief
+
+
 @dataclass(frozen=True)
 class Template:
     id: str

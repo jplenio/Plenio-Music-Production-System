@@ -173,7 +173,7 @@ Only the Song Sheets' reports are wired into Export Release: a draft or Score To
 | Option | Default | Notes |
 |---|---|---|
 | checkpoint | `yue2_3b_int8_convrot.safetensors` (like the official templates) | `yue2_3b_bf16` as quality option on ≥ 24 GB; quality delta [AS-Y2] |
-| adapter (LoraLoader on CLIP) | bypassed | instrumental AR LoRA ([instrumental-strategy.md](instrumental-strategy.md) §5); NAR sound LoRAs possible on MODEL |
+| adapter (LoraLoader on CLIP) | Song path: bypassed · Cover path: on for instrumental covers via a lazy switch (Phase 4A) | instrumental AR LoRA ([instrumental-strategy.md](instrumental-strategy.md) §0, §10): keys load completely; in the text path it produced long or unfinished plans and abrupt endings, in covers cleaner and more faithful takes; NAR sound LoRAs possible on MODEL |
 | Engine Profile | always | verifies the CLIP is YuE2 and exports the tokenizer handle |
 
 ---

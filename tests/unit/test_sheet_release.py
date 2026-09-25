@@ -12,12 +12,15 @@ from plenio.core.engines import yue2
 from plenio.core.errors import PlenioUserError
 from plenio.core.hashing import sha256_text
 from plenio.core.release import (
+    MODEL_LICENCES,
     RecordInput,
     build_record,
     expand_pattern,
     plan_path,
+    prompt_for_record,
     redact,
     safe_filename,
+    workflow_licences,
     write_flac,
 )
 from plenio.core.sheet import DocEntry, DocState, SheetState, evaluate_sheet, normalize_document
@@ -174,6 +177,41 @@ def test_redaction() -> None:
     redacted = redact(prompt)
     assert redacted["1"]["inputs"]["api_key"] == "<redacted>"
     assert "hf_" not in redacted["1"]["inputs"]["prompt"] and redacted["1"]["inputs"]["seed"] == 5
+
+
+def test_record_prompt_drops_run_time_fields() -> None:
+    # ComfyUI writes fingerprints into the prompt; native loop nodes fingerprint as NaN
+    prompt = {
+        "1": {
+            "class_type": "StartLoop",
+            "inputs": {"mode": "simple"},
+            "is_changed": [float("nan")],
+            "_loop_body": ["2"],
+            "_meta": {"title": "Takes"},
+        }
+    }
+    kept = prompt_for_record(prompt)
+    assert kept == {
+        "1": {"class_type": "StartLoop", "inputs": {"mode": "simple"}, "_meta": {"title": "Takes"}}
+    }
+    json.dumps(kept, allow_nan=False)
+
+
+def test_workflow_licences_name_the_non_commercial_model_files() -> None:
+    prompt = {
+        "1": {
+            "class_type": "AudioEncoderLoader",
+            "inputs": {"audio_encoder_name": "sheetsage2_bf16.safetensors"},
+        },
+        "2": {
+            "class_type": "LoraLoader",
+            "inputs": {"lora_name": "yue2\\ar_lora_inst_v3abc_comfyui.safetensors"},  # a subfolder
+        },
+        "3": {"class_type": "KSampler", "inputs": {"seed": 1, "model": ["2", 0]}},
+    }
+    assert workflow_licences(prompt) == set(MODEL_LICENCES.values())
+    assert workflow_licences({"1": {"inputs": {"text": "no model here"}}}) == set()
+    assert workflow_licences(None) == set()
 
 
 def test_record_collects_documents_and_is_json() -> None:

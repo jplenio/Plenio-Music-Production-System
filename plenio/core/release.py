@@ -167,6 +167,41 @@ def redact(value: Any) -> Any:
     return value
 
 
+MODEL_LICENCES = {
+    "sheetsage2_bf16.safetensors": "CC BY-NC 4.0 (SheetSage2, Comfy-Org/YuE2 repackaging): non-commercial use only",
+    "ar_lora_inst_v3abc_comfyui.safetensors": "CC BY-NC 4.0 (YuE2 instrumental adapter): non-commercial use only",
+}
+"""Model files whose licence restricts the use of the result, by file name (model cards, 2026-09-25)."""
+
+
+def workflow_licences(prompt: Mapping[str, Any] | None) -> set[str]:
+    """Licences of the known model files the prompt references (loaders' file-name inputs)."""
+    found: set[str] = set()
+    for node in (prompt or {}).values():
+        inputs = node.get("inputs", {}) if isinstance(node, Mapping) else {}
+        for value in inputs.values() if isinstance(inputs, Mapping) else ():
+            if isinstance(value, str):
+                licence = MODEL_LICENCES.get(value.replace("\\", "/").rsplit("/", 1)[-1].lower())
+                if licence:
+                    found.add(licence)
+    return found
+
+
+PROMPT_NODE_KEYS = ("class_type", "inputs", "_meta")
+"""What a release record keeps of each prompt node. ComfyUI also writes run-time fields into the
+prompt (``is_changed`` fingerprints - NaN for native loop nodes - and loop bookkeeping)."""
+
+
+def prompt_for_record(prompt: Mapping[str, Any]) -> dict[str, Any]:
+    """The API prompt as submitted: per node only its class, inputs and title; secrets redacted."""
+    nodes = {
+        str(node_id): {key: node[key] for key in PROMPT_NODE_KEYS if key in node}
+        for node_id, node in prompt.items()
+        if isinstance(node, Mapping)
+    }
+    return dict(redact(nodes))
+
+
 @dataclass(frozen=True)
 class RecordInput:
     versions: Mapping[str, str]
@@ -194,7 +229,7 @@ def build_record(data: RecordInput) -> dict[str, Any]:
         "audio": dict(data.audio),
         "files": [dict(f) for f in data.files],
         "licences": list(data.licences),
-        "prompt": redact(dict(data.prompt)) if data.prompt else None,
+        "prompt": prompt_for_record(data.prompt) if data.prompt else None,
     }
     record["fingerprint"] = sha256_text(canonical_json({k: v for k, v in record.items() if k != "created"}))
     return record

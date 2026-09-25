@@ -1,0 +1,1958 @@
+{
+"source": "2026-09-25 Unsaid Words Hanging Still.flac",
+"duration_s": 193.84,
+"abc": "X:1\nT:\nM:4/4\nL:1/16\nQ:1/4=83\nV: Vocal clef=treble name=\"Vocal Melody\" snm=\"Vocal\"\nV: Ins clef=treble name=\"Ins Melody\" snm=\"Inst.\"\nK:Bb\n% intro\nV: Vocal\nz12\"A#\"z4|\"A#\"z16|\"A#\"z16|\"D#\"z16|\nV: Ins\nZ|B,2F,B,2F2B,FG3GF3|z4zF2B,FG3GF3|E4zF2B,FG3GF3|\nV: Vocal\n\"D#\"z16|\"A#\"z16|\"A#\"z16|\"D#\"z16|\nV: Ins\nz4zF2B,FG3GF3|z4zF2B,FG3GF3|z4zF2B,FG3GF3|E4zF2B,FG3GF2B,|\nV: Vocal\n\"D#\"z16|\nV: Ins\nz3B,zF2B,z3B,zF2B|\n% verse\nV: Vocal\n\"A#\"z3Bd2dd3c2cB3|\"A#\"c2dd3z8z2|\"Gm7\"z3Bd2dd3cc2B3|\"Gm7\"c2dd3z8z2|\nV: Ins\nZ4|\nV: Vocal\n\"D#\"z2eee2dd3cc2B3|\"D#\"c2dc3z6zBB2-|\"Fsus4\"B4dc2c6zBd-|\"Fsus4\"d4-dzcc3z6|\nV: Ins\nZ4|\n% chorus\nV: Vocal\n\"D#\"z3Bb2a2gf2f3d2|\"A#\"d2dd2cc2-\"F\"c2z6|\"D#\"z4b2ag3f2f2dd-|\"Gm7\"df2f2d3\"F\"c4z4|\nV: Ins\nZ4|\nV: Vocal\n\"D#\"z3Bba2g3ff4d|\"Gm7\"d6cc-\"F\"c3z2cdd-|\"D#\"d2cB3B4z6|\"D#\"z3Bc2df3ccB2B2-|\nV: Ins\nZ4|\nV: Vocal\n\"A#\"B2z12z2|\"A#\"z16|\"D#\"z16|\"D#\"z16|\nV: Ins\nz4zf3fg3gf3|z4zf3fg3gf2B|B4zF3FG3GF3|z4zF3FG3GF3|\n% verse\nV: Vocal\n\"A#\"z2d2d2dd2c3cBcB-|\"A#\"Bc2ddd3z4\"A#maj7/G##\"z4|\"Gm7\"z3Bd2dd2c4cBc-|\"Gm7\"c2d4d2z8|\nV: Ins\nZ4|\nV: Vocal\n\"D#\"zBeeed2d2c2c3Bc-|\"D#\"c2d4cB3z3BBd-|\"Fsus4\"d2c4c4z4Bd-|\"Fsus4\"dc2c2B3c8-|\nV: Ins\nZ4|\nV: Vocal\n\"Fsus4\"c8z4B4|\nV: Ins\nZ|\n% chorus\nV: Vocal\n\"D#\"z3Bb2a2gf2f3d2|\"A#\"d2dd2cc2-\"F\"c2z6|\"D#\"z4b2ag3f2f2dd-|\"Gm7\"df2f2d2c\"F\"c4z4|\nV: Ins\nZ4|\nV: Vocal\n\"D#\"z3Bba2g3ff4d|\"Gm7\"d6cc-\"F\"c3z2cdd-|\"D#\"d2cB3B4z6|\"D#\"z3Bc2df3ccB2B2-|\nV: Ins\nZ4|\nV: Vocal\n\"A#\"B4z12|\"A#\"z16|\"D#\"z16|\"D#\"z16|\nV: Ins\nz4zF3FG3GF3|z3B,2F3FG3GFDB,|E,z2B,2F3FG3GF2B,|E,z2B,2F3FG3GFDB,|\nV: Vocal\n\"Gm7\"z16|\"Gm7\"z16|\"D#\"z16|\"D#\"z16|\nV: Ins\nG,z2B,2F3FG3GF2B,|z3B,2F3FG3GFDB,|E,z2B,2FG,B,FGG,B,GFG,B,|E,zG,B,2FG,B,FGG,B,GFG,B,|\n% outro\nV: Vocal\n\"A#\"z4d2dd3cc2B3|\"A#\"c2dd3z8z2|\"D#\"z6zBdc2c2B3-|\"D#\"BzB2z12|\nV: Ins\nd4z12|Z3|\nV: Vocal\n\"A#\"z16|\"A#\"z16|\"D#\"z16|\"D#\"z16|\nV: Ins\nB,2F,B,2F2B,FG3GF2B,|z2F,B,2F3FG3GFDB,|E,z2B,2E2B,FG3GF2B,|z3B,2E2B,FG3GFDB,|\nV: Vocal\n\"A#\"z16|\"A#\"z16|\"D#\"z16|\"D#\"z16|\nV: Ins\nB,z2B,2F2B,FG3GF2B,|z3B,2F3FG3GF2B,|z3B,2E2B,FG3GF2B,|z3B,2E2B,FG3GF2B,|\nV: Vocal\n\"A#\"z16|Z|\nV: Ins\nB,16|Z|\n",
+"bar_starts": [
+-0.5,
+0.54,
+3.43,
+6.34,
+9.25,
+12.16,
+15.07,
+17.97,
+20.89,
+23.8,
+26.71,
+29.61,
+32.52,
+35.43,
+38.34,
+41.25,
+44.16,
+47.07,
+49.97,
+52.88,
+55.79,
+58.7,
+61.61,
+64.52,
+67.43,
+70.34,
+73.24,
+76.16,
+79.07,
+81.97,
+84.88,
+87.79,
+90.7,
+93.61,
+96.52,
+99.43,
+102.33,
+105.25,
+108.16,
+111.06,
+113.97,
+116.88,
+119.79,
+122.7,
+125.61,
+128.52,
+131.43,
+134.33,
+137.24,
+140.16,
+143.06,
+145.97,
+148.88,
+151.79,
+154.7,
+157.62,
+160.52,
+163.43,
+166.34,
+169.24,
+172.15,
+175.06,
+177.97,
+180.88,
+183.79,
+186.7,
+189.61,
+192.51
+],
+"vocal_notes": [
+[
+24.34,
+24.52
+],
+[
+24.52,
+24.885
+],
+[
+24.885,
+25.067
+],
+[
+25.067,
+25.61
+],
+[
+25.61,
+25.97
+],
+[
+25.97,
+26.155
+],
+[
+26.155,
+26.71
+],
+[
+26.71,
+27.07
+],
+[
+27.07,
+27.25
+],
+[
+27.25,
+27.795
+],
+[
+30.157,
+30.34
+],
+[
+30.34,
+30.705
+],
+[
+30.705,
+30.887
+],
+[
+30.887,
+31.43
+],
+[
+31.43,
+31.61
+],
+[
+31.61,
+31.973
+],
+[
+31.973,
+32.52
+],
+[
+32.52,
+32.885
+],
+[
+32.885,
+33.068
+],
+[
+33.068,
+33.61
+],
+[
+35.795,
+35.977
+],
+[
+35.977,
+36.16
+],
+[
+36.16,
+36.525
+],
+[
+36.525,
+36.707
+],
+[
+36.707,
+37.25
+],
+[
+37.25,
+37.43
+],
+[
+37.43,
+37.793
+],
+[
+37.793,
+38.34
+],
+[
+38.34,
+38.705
+],
+[
+38.705,
+38.888
+],
+[
+38.888,
+39.435
+],
+[
+40.703,
+40.885
+],
+[
+40.885,
+41.97
+],
+[
+41.97,
+42.155
+],
+[
+42.155,
+42.525
+],
+[
+42.525,
+43.612
+],
+[
+43.795,
+43.977
+],
+[
+43.977,
+45.062
+],
+[
+45.245,
+45.428
+],
+[
+45.428,
+45.97
+],
+[
+47.61,
+47.79
+],
+[
+47.79,
+48.155
+],
+[
+48.155,
+48.52
+],
+[
+48.52,
+48.703
+],
+[
+48.703,
+49.068
+],
+[
+49.068,
+49.61
+],
+[
+49.61,
+49.97
+],
+[
+49.97,
+50.335
+],
+[
+50.335,
+50.517
+],
+[
+50.517,
+50.883
+],
+[
+50.883,
+51.065
+],
+[
+51.065,
+51.795
+],
+[
+53.61,
+53.97
+],
+[
+53.97,
+54.15
+],
+[
+54.15,
+54.7
+],
+[
+54.7,
+55.07
+],
+[
+55.07,
+55.43
+],
+[
+55.43,
+55.61
+],
+[
+55.61,
+55.972
+],
+[
+55.972,
+56.338
+],
+[
+56.338,
+56.7
+],
+[
+56.7,
+57.24
+],
+[
+57.24,
+57.97
+],
+[
+59.248,
+59.43
+],
+[
+59.43,
+59.612
+],
+[
+59.612,
+59.977
+],
+[
+59.977,
+60.52
+],
+[
+60.52,
+60.7
+],
+[
+60.7,
+61.428
+],
+[
+61.428,
+61.61
+],
+[
+61.61,
+62.7
+],
+[
+62.7,
+62.885
+],
+[
+62.885,
+63.61
+],
+[
+63.972,
+64.155
+],
+[
+64.155,
+64.337
+],
+[
+64.337,
+64.88
+],
+[
+64.88,
+65.06
+],
+[
+65.06,
+65.605
+],
+[
+65.605,
+66.335
+],
+[
+67.97,
+68.15
+],
+[
+68.15,
+68.515
+],
+[
+68.515,
+68.697
+],
+[
+68.697,
+69.245
+],
+[
+69.245,
+69.427
+],
+[
+69.427,
+69.61
+],
+[
+69.61,
+69.975
+],
+[
+69.975,
+70.7
+],
+[
+82.33,
+82.69
+],
+[
+82.69,
+83.06
+],
+[
+83.06,
+83.245
+],
+[
+83.245,
+83.613
+],
+[
+83.613,
+84.16
+],
+[
+84.16,
+84.34
+],
+[
+84.34,
+84.52
+],
+[
+84.52,
+84.7
+],
+[
+84.7,
+85.062
+],
+[
+85.062,
+85.427
+],
+[
+85.427,
+85.61
+],
+[
+85.61,
+85.79
+],
+[
+85.79,
+86.33
+],
+[
+88.338,
+88.52
+],
+[
+88.52,
+88.885
+],
+[
+88.885,
+89.067
+],
+[
+89.067,
+89.43
+],
+[
+89.43,
+90.153
+],
+[
+90.153,
+90.335
+],
+[
+90.335,
+90.517
+],
+[
+90.517,
+91.065
+],
+[
+91.065,
+91.79
+],
+[
+91.79,
+92.15
+],
+[
+93.79,
+93.97
+],
+[
+93.97,
+94.15
+],
+[
+94.15,
+94.33
+],
+[
+94.33,
+94.513
+],
+[
+94.513,
+94.877
+],
+[
+94.877,
+95.243
+],
+[
+95.243,
+95.608
+],
+[
+95.608,
+96.155
+],
+[
+96.155,
+96.338
+],
+[
+96.338,
+96.88
+],
+[
+96.88,
+97.605
+],
+[
+97.605,
+97.787
+],
+[
+97.787,
+98.33
+],
+[
+98.875,
+99.06
+],
+[
+99.06,
+99.245
+],
+[
+99.245,
+99.79
+],
+[
+99.79,
+100.515
+],
+[
+100.515,
+101.245
+],
+[
+101.97,
+102.15
+],
+[
+102.15,
+102.513
+],
+[
+102.513,
+102.877
+],
+[
+102.877,
+103.243
+],
+[
+103.243,
+103.79
+],
+[
+103.79,
+106.7
+],
+[
+107.43,
+108.16
+],
+[
+108.7,
+108.88
+],
+[
+108.88,
+109.245
+],
+[
+109.245,
+109.61
+],
+[
+109.61,
+109.79
+],
+[
+109.79,
+110.15
+],
+[
+110.15,
+110.695
+],
+[
+110.695,
+111.06
+],
+[
+111.06,
+111.425
+],
+[
+111.425,
+111.608
+],
+[
+111.608,
+111.972
+],
+[
+111.972,
+112.155
+],
+[
+112.155,
+112.88
+],
+[
+114.7,
+115.065
+],
+[
+115.065,
+115.248
+],
+[
+115.248,
+115.79
+],
+[
+115.79,
+116.15
+],
+[
+116.15,
+116.515
+],
+[
+116.515,
+116.697
+],
+[
+116.697,
+117.062
+],
+[
+117.062,
+117.427
+],
+[
+117.427,
+117.79
+],
+[
+117.79,
+118.15
+],
+[
+118.15,
+118.33
+],
+[
+118.33,
+119.06
+],
+[
+120.338,
+120.52
+],
+[
+120.52,
+120.7
+],
+[
+120.7,
+121.06
+],
+[
+121.06,
+121.605
+],
+[
+121.605,
+121.787
+],
+[
+121.787,
+122.517
+],
+[
+122.517,
+122.7
+],
+[
+122.7,
+123.785
+],
+[
+123.785,
+123.968
+],
+[
+123.968,
+124.697
+],
+[
+125.062,
+125.245
+],
+[
+125.245,
+125.427
+],
+[
+125.427,
+125.97
+],
+[
+125.97,
+126.15
+],
+[
+126.15,
+126.695
+],
+[
+126.695,
+127.425
+],
+[
+129.06,
+129.24
+],
+[
+129.24,
+129.605
+],
+[
+129.605,
+129.787
+],
+[
+129.787,
+130.335
+],
+[
+130.335,
+130.517
+],
+[
+130.517,
+130.7
+],
+[
+130.7,
+131.065
+],
+[
+131.065,
+132.16
+],
+[
+155.43,
+155.795
+],
+[
+155.795,
+155.977
+],
+[
+155.977,
+156.525
+],
+[
+156.525,
+156.707
+],
+[
+156.707,
+157.072
+],
+[
+157.072,
+157.62
+],
+[
+157.62,
+157.98
+],
+[
+157.98,
+158.16
+],
+[
+158.16,
+158.705
+],
+[
+161.797,
+161.98
+],
+[
+161.98,
+162.16
+],
+[
+162.16,
+162.52
+],
+[
+162.52,
+162.882
+],
+[
+162.882,
+163.61
+],
+[
+163.79,
+164.15
+]
+],
+"reference": "[Intro]\n(Instrumental suggestion: gentle fingerpicking pattern establishing mood)\n\n[Verse]\nI kept rehearsing what I meant to say\nAbout the way the mornings start to fray\nYou were just across the kitchen counter then\nAnd I never found the words again\n\n[Chorus]\nIf I had said it softly through the quiet air\nMaybe things would look a little less unfair\nA simple phrase to change the whole design\nBut the silence stayed and made the ending mine\n\n[Verse]\nI trace the outline of a different path we took\nA ghost of laughter in an old worn book\nI wonder if you ever felt the same slow pull\nWhen the story stalled and everything felt dull\n\n[Chorus]\nIf I had said it softly through the quiet air\nMaybe things would look a little less unfair\nA simple phrase to change the whole design\nBut the silence stayed and made the ending mine\n\n[Outro]\nJust the sound of my own breathing now\nA quiet shift somehow",
+"words": [
+{
+"start": 22.86,
+"end": 23.72,
+"word": "I",
+"p": 0.732,
+"segment": 0
+},
+{
+"start": 23.72,
+"end": 24.58,
+"word": "kept",
+"p": 0.931,
+"segment": 0
+},
+{
+"start": 24.58,
+"end": 25.64,
+"word": "rehearsing",
+"p": 0.99,
+"segment": 0
+},
+{
+"start": 25.64,
+"end": 26.0,
+"word": "what",
+"p": 0.995,
+"segment": 0
+},
+{
+"start": 26.0,
+"end": 26.22,
+"word": "I",
+"p": 0.99,
+"segment": 0
+},
+{
+"start": 26.22,
+"end": 26.68,
+"word": "meant",
+"p": 0.99,
+"segment": 0
+},
+{
+"start": 26.68,
+"end": 27.08,
+"word": "to",
+"p": 1.0,
+"segment": 0
+},
+{
+"start": 27.08,
+"end": 27.42,
+"word": "say",
+"p": 1.0,
+"segment": 0
+},
+{
+"start": 30.0,
+"end": 30.38,
+"word": "About",
+"p": 0.052,
+"segment": 1
+},
+{
+"start": 30.38,
+"end": 30.7,
+"word": "the",
+"p": 0.995,
+"segment": 1
+},
+{
+"start": 30.7,
+"end": 31.0,
+"word": "way",
+"p": 0.995,
+"segment": 1
+},
+{
+"start": 31.0,
+"end": 31.44,
+"word": "the",
+"p": 0.976,
+"segment": 1
+},
+{
+"start": 31.44,
+"end": 32.0,
+"word": "mornings",
+"p": 0.418,
+"segment": 1
+},
+{
+"start": 32.0,
+"end": 32.68,
+"word": "start",
+"p": 0.971,
+"segment": 1
+},
+{
+"start": 32.68,
+"end": 32.94,
+"word": "to",
+"p": 0.995,
+"segment": 1
+},
+{
+"start": 32.94,
+"end": 33.3,
+"word": "fray",
+"p": 0.978,
+"segment": 1
+},
+{
+"start": 34.86,
+"end": 35.86,
+"word": "You",
+"p": 0.845,
+"segment": 2
+},
+{
+"start": 35.86,
+"end": 35.98,
+"word": "were",
+"p": 0.963,
+"segment": 2
+},
+{
+"start": 35.98,
+"end": 36.34,
+"word": "just",
+"p": 0.997,
+"segment": 2
+},
+{
+"start": 36.34,
+"end": 36.64,
+"word": "across",
+"p": 0.998,
+"segment": 2
+},
+{
+"start": 36.64,
+"end": 37.24,
+"word": "the",
+"p": 0.997,
+"segment": 2
+},
+{
+"start": 37.24,
+"end": 37.74,
+"word": "kitchen",
+"p": 1.0,
+"segment": 2
+},
+{
+"start": 37.74,
+"end": 38.58,
+"word": "counter",
+"p": 0.995,
+"segment": 2
+},
+{
+"start": 38.58,
+"end": 38.98,
+"word": "then",
+"p": 0.915,
+"segment": 2
+},
+{
+"start": 40.0,
+"end": 40.8,
+"word": "And",
+"p": 0.835,
+"segment": 3
+},
+{
+"start": 40.8,
+"end": 41.04,
+"word": "I",
+"p": 0.967,
+"segment": 3
+},
+{
+"start": 41.04,
+"end": 42.08,
+"word": "never",
+"p": 0.955,
+"segment": 3
+},
+{
+"start": 42.08,
+"end": 42.84,
+"word": "found",
+"p": 0.997,
+"segment": 3
+},
+{
+"start": 42.84,
+"end": 43.78,
+"word": "the",
+"p": 0.967,
+"segment": 3
+},
+{
+"start": 43.78,
+"end": 44.46,
+"word": "words",
+"p": 1.0,
+"segment": 3
+},
+{
+"start": 44.46,
+"end": 45.5,
+"word": "again",
+"p": 0.99,
+"segment": 3
+},
+{
+"start": 46.64,
+"end": 47.64,
+"word": "If",
+"p": 0.951,
+"segment": 4
+},
+{
+"start": 47.64,
+"end": 47.8,
+"word": "I",
+"p": 0.971,
+"segment": 4
+},
+{
+"start": 47.8,
+"end": 48.24,
+"word": "had",
+"p": 0.729,
+"segment": 4
+},
+{
+"start": 48.24,
+"end": 48.58,
+"word": "said",
+"p": 0.982,
+"segment": 4
+},
+{
+"start": 48.58,
+"end": 48.82,
+"word": "it",
+"p": 0.989,
+"segment": 4
+},
+{
+"start": 48.82,
+"end": 49.44,
+"word": "softly",
+"p": 0.998,
+"segment": 4
+},
+{
+"start": 49.44,
+"end": 50.02,
+"word": "through",
+"p": 0.969,
+"segment": 4
+},
+{
+"start": 50.02,
+"end": 50.34,
+"word": "the",
+"p": 0.998,
+"segment": 4
+},
+{
+"start": 50.34,
+"end": 50.66,
+"word": "quiet",
+"p": 0.997,
+"segment": 4
+},
+{
+"start": 50.66,
+"end": 51.38,
+"word": "air",
+"p": 0.998,
+"segment": 4
+},
+{
+"start": 52.72,
+"end": 53.72,
+"word": "Maybe",
+"p": 0.974,
+"segment": 5
+},
+{
+"start": 53.72,
+"end": 54.28,
+"word": "things",
+"p": 0.997,
+"segment": 5
+},
+{
+"start": 54.28,
+"end": 54.82,
+"word": "would",
+"p": 0.903,
+"segment": 5
+},
+{
+"start": 54.82,
+"end": 55.3,
+"word": "look",
+"p": 0.997,
+"segment": 5
+},
+{
+"start": 55.3,
+"end": 55.42,
+"word": "a",
+"p": 0.999,
+"segment": 5
+},
+{
+"start": 55.42,
+"end": 55.92,
+"word": "little",
+"p": 0.996,
+"segment": 5
+},
+{
+"start": 55.92,
+"end": 56.48,
+"word": "less",
+"p": 0.999,
+"segment": 5
+},
+{
+"start": 56.48,
+"end": 57.24,
+"word": "unfair",
+"p": 1.0,
+"segment": 5
+},
+{
+"start": 57.24,
+"end": 57.76,
+"word": "A",
+"p": 0.018,
+"segment": 6
+},
+{
+"start": 57.76,
+"end": 59.56,
+"word": "simple",
+"p": 0.984,
+"segment": 6
+},
+{
+"start": 59.56,
+"end": 60.16,
+"word": "phrase",
+"p": 0.994,
+"segment": 6
+},
+{
+"start": 60.16,
+"end": 60.5,
+"word": "to",
+"p": 0.989,
+"segment": 6
+},
+{
+"start": 60.5,
+"end": 60.94,
+"word": "change",
+"p": 0.999,
+"segment": 6
+},
+{
+"start": 60.94,
+"end": 61.46,
+"word": "the",
+"p": 0.996,
+"segment": 6
+},
+{
+"start": 61.46,
+"end": 61.84,
+"word": "whole",
+"p": 0.997,
+"segment": 6
+},
+{
+"start": 61.84,
+"end": 62.86,
+"word": "design",
+"p": 0.987,
+"segment": 6
+},
+{
+"start": 62.86,
+"end": 64.0,
+"word": "Let",
+"p": 0.629,
+"segment": 7
+},
+{
+"start": 64.0,
+"end": 64.12,
+"word": "the",
+"p": 0.999,
+"segment": 7
+},
+{
+"start": 64.12,
+"end": 64.96,
+"word": "silence",
+"p": 0.999,
+"segment": 7
+},
+{
+"start": 64.96,
+"end": 65.68,
+"word": "stay",
+"p": 0.997,
+"segment": 7
+},
+{
+"start": 66.24,
+"end": 67.72,
+"word": "And",
+"p": 0.592,
+"segment": 8
+},
+{
+"start": 67.72,
+"end": 68.34,
+"word": "made",
+"p": 0.811,
+"segment": 8
+},
+{
+"start": 68.34,
+"end": 68.54,
+"word": "the",
+"p": 0.999,
+"segment": 8
+},
+{
+"start": 68.54,
+"end": 69.28,
+"word": "ending",
+"p": 0.993,
+"segment": 8
+},
+{
+"start": 69.28,
+"end": 70.24,
+"word": "mine",
+"p": 0.98,
+"segment": 8
+},
+{
+"start": 80.74,
+"end": 81.78,
+"word": "I",
+"p": 0.863,
+"segment": 9
+},
+{
+"start": 81.78,
+"end": 82.82,
+"word": "traced",
+"p": 0.821,
+"segment": 9
+},
+{
+"start": 82.82,
+"end": 83.1,
+"word": "the",
+"p": 0.998,
+"segment": 9
+},
+{
+"start": 83.1,
+"end": 83.62,
+"word": "outline",
+"p": 0.998,
+"segment": 9
+},
+{
+"start": 83.62,
+"end": 84.24,
+"word": "of",
+"p": 0.981,
+"segment": 9
+},
+{
+"start": 84.24,
+"end": 84.36,
+"word": "a",
+"p": 0.969,
+"segment": 9
+},
+{
+"start": 84.36,
+"end": 84.72,
+"word": "different",
+"p": 1.0,
+"segment": 9
+},
+{
+"start": 84.72,
+"end": 85.18,
+"word": "path",
+"p": 0.999,
+"segment": 9
+},
+{
+"start": 85.18,
+"end": 85.54,
+"word": "we",
+"p": 0.999,
+"segment": 9
+},
+{
+"start": 85.54,
+"end": 85.9,
+"word": "took",
+"p": 0.999,
+"segment": 9
+},
+{
+"start": 87.24,
+"end": 88.28,
+"word": "A",
+"p": 0.069,
+"segment": 10
+},
+{
+"start": 88.28,
+"end": 88.68,
+"word": "ghost",
+"p": 0.93,
+"segment": 10
+},
+{
+"start": 88.68,
+"end": 88.92,
+"word": "of",
+"p": 0.949,
+"segment": 10
+},
+{
+"start": 88.92,
+"end": 89.46,
+"word": "laughter",
+"p": 0.997,
+"segment": 10
+},
+{
+"start": 89.46,
+"end": 90.26,
+"word": "in",
+"p": 0.968,
+"segment": 10
+},
+{
+"start": 90.26,
+"end": 90.4,
+"word": "an",
+"p": 0.992,
+"segment": 10
+},
+{
+"start": 90.4,
+"end": 90.86,
+"word": "old",
+"p": 0.993,
+"segment": 10
+},
+{
+"start": 90.86,
+"end": 91.2,
+"word": "worn",
+"p": 0.834,
+"segment": 10
+},
+{
+"start": 91.2,
+"end": 91.86,
+"word": "book",
+"p": 0.998,
+"segment": 10
+},
+{
+"start": 91.86,
+"end": 93.54,
+"word": "I",
+"p": 0.887,
+"segment": 11
+},
+{
+"start": 93.54,
+"end": 94.1,
+"word": "wonder",
+"p": 0.999,
+"segment": 11
+},
+{
+"start": 94.1,
+"end": 94.42,
+"word": "if",
+"p": 0.998,
+"segment": 11
+},
+{
+"start": 94.42,
+"end": 94.62,
+"word": "you",
+"p": 0.999,
+"segment": 11
+},
+{
+"start": 94.62,
+"end": 95.06,
+"word": "ever",
+"p": 0.978,
+"segment": 11
+},
+{
+"start": 95.06,
+"end": 95.76,
+"word": "felt",
+"p": 0.996,
+"segment": 11
+},
+{
+"start": 95.76,
+"end": 96.1,
+"word": "the",
+"p": 0.995,
+"segment": 11
+},
+{
+"start": 96.1,
+"end": 96.54,
+"word": "same",
+"p": 1.0,
+"segment": 11
+},
+{
+"start": 96.54,
+"end": 96.94,
+"word": "slow",
+"p": 0.958,
+"segment": 11
+},
+{
+"start": 96.94,
+"end": 97.64,
+"word": "cool",
+"p": 0.808,
+"segment": 11
+},
+{
+"start": 97.64,
+"end": 98.8,
+"word": "When",
+"p": 0.919,
+"segment": 12
+},
+{
+"start": 98.8,
+"end": 99.02,
+"word": "the",
+"p": 0.996,
+"segment": 12
+},
+{
+"start": 99.02,
+"end": 99.62,
+"word": "story",
+"p": 0.859,
+"segment": 12
+},
+{
+"start": 99.62,
+"end": 100.72,
+"word": "stalled",
+"p": 0.957,
+"segment": 12
+},
+{
+"start": 100.72,
+"end": 102.0,
+"word": "and",
+"p": 0.836,
+"segment": 12
+},
+{
+"start": 102.0,
+"end": 102.6,
+"word": "everything",
+"p": 0.998,
+"segment": 12
+},
+{
+"start": 102.6,
+"end": 103.4,
+"word": "felt",
+"p": 0.905,
+"segment": 12
+},
+{
+"start": 103.4,
+"end": 103.94,
+"word": "dull",
+"p": 0.998,
+"segment": 12
+},
+{
+"start": 107.42,
+"end": 108.5,
+"word": "If",
+"p": 0.933,
+"segment": 13
+},
+{
+"start": 108.5,
+"end": 108.98,
+"word": "I",
+"p": 0.992,
+"segment": 13
+},
+{
+"start": 108.98,
+"end": 109.36,
+"word": "had",
+"p": 0.986,
+"segment": 13
+},
+{
+"start": 109.36,
+"end": 109.68,
+"word": "said",
+"p": 0.99,
+"segment": 13
+},
+{
+"start": 109.68,
+"end": 109.9,
+"word": "it",
+"p": 0.999,
+"segment": 13
+},
+{
+"start": 109.9,
+"end": 110.46,
+"word": "softly",
+"p": 1.0,
+"segment": 13
+},
+{
+"start": 110.46,
+"end": 111.08,
+"word": "through",
+"p": 0.997,
+"segment": 13
+},
+{
+"start": 111.08,
+"end": 111.4,
+"word": "the",
+"p": 0.999,
+"segment": 13
+},
+{
+"start": 111.4,
+"end": 111.76,
+"word": "quiet",
+"p": 0.999,
+"segment": 13
+},
+{
+"start": 111.76,
+"end": 112.46,
+"word": "air",
+"p": 1.0,
+"segment": 13
+},
+{
+"start": 113.7,
+"end": 114.86,
+"word": "Maybe",
+"p": 0.397,
+"segment": 14
+},
+{
+"start": 114.86,
+"end": 115.32,
+"word": "things",
+"p": 0.998,
+"segment": 14
+},
+{
+"start": 115.32,
+"end": 115.9,
+"word": "will",
+"p": 0.961,
+"segment": 14
+},
+{
+"start": 115.9,
+"end": 116.34,
+"word": "look",
+"p": 0.992,
+"segment": 14
+},
+{
+"start": 116.34,
+"end": 116.52,
+"word": "a",
+"p": 0.993,
+"segment": 14
+},
+{
+"start": 116.52,
+"end": 116.98,
+"word": "little",
+"p": 1.0,
+"segment": 14
+},
+{
+"start": 116.98,
+"end": 117.56,
+"word": "less",
+"p": 0.998,
+"segment": 14
+},
+{
+"start": 117.56,
+"end": 118.32,
+"word": "unfair",
+"p": 0.999,
+"segment": 14
+},
+{
+"start": 118.32,
+"end": 120.32,
+"word": "A",
+"p": 0.94,
+"segment": 15
+},
+{
+"start": 120.32,
+"end": 120.66,
+"word": "simple",
+"p": 0.998,
+"segment": 15
+},
+{
+"start": 120.66,
+"end": 121.3,
+"word": "phrase",
+"p": 0.999,
+"segment": 15
+},
+{
+"start": 121.3,
+"end": 121.6,
+"word": "to",
+"p": 0.997,
+"segment": 15
+},
+{
+"start": 121.6,
+"end": 122.0,
+"word": "change",
+"p": 1.0,
+"segment": 15
+},
+{
+"start": 122.0,
+"end": 122.56,
+"word": "the",
+"p": 0.999,
+"segment": 15
+},
+{
+"start": 122.56,
+"end": 122.94,
+"word": "whole",
+"p": 0.999,
+"segment": 15
+},
+{
+"start": 122.94,
+"end": 123.98,
+"word": "design",
+"p": 0.997,
+"segment": 15
+},
+{
+"start": 123.98,
+"end": 125.12,
+"word": "But",
+"p": 0.984,
+"segment": 16
+},
+{
+"start": 125.12,
+"end": 125.22,
+"word": "the",
+"p": 0.999,
+"segment": 16
+},
+{
+"start": 125.22,
+"end": 126.02,
+"word": "silence",
+"p": 0.999,
+"segment": 16
+},
+{
+"start": 126.02,
+"end": 126.76,
+"word": "stayed",
+"p": 0.999,
+"segment": 16
+},
+{
+"start": 127.38,
+"end": 128.86,
+"word": "And",
+"p": 0.668,
+"segment": 17
+},
+{
+"start": 128.86,
+"end": 129.42,
+"word": "made",
+"p": 0.999,
+"segment": 17
+},
+{
+"start": 129.42,
+"end": 129.64,
+"word": "the",
+"p": 1.0,
+"segment": 17
+},
+{
+"start": 129.64,
+"end": 130.4,
+"word": "ending",
+"p": 0.979,
+"segment": 17
+},
+{
+"start": 130.4,
+"end": 131.36,
+"word": "mine",
+"p": 0.971,
+"segment": 17
+},
+{
+"start": 154.56,
+"end": 155.5,
+"word": "Just",
+"p": 0.309,
+"segment": 18
+},
+{
+"start": 155.5,
+"end": 155.82,
+"word": "the",
+"p": 0.891,
+"segment": 18
+},
+{
+"start": 155.82,
+"end": 156.22,
+"word": "sound",
+"p": 0.998,
+"segment": 18
+},
+{
+"start": 156.22,
+"end": 156.58,
+"word": "of",
+"p": 0.985,
+"segment": 18
+},
+{
+"start": 156.58,
+"end": 156.8,
+"word": "my",
+"p": 0.997,
+"segment": 18
+},
+{
+"start": 156.8,
+"end": 157.22,
+"word": "own",
+"p": 0.981,
+"segment": 18
+},
+{
+"start": 157.22,
+"end": 157.9,
+"word": "breathing",
+"p": 0.977,
+"segment": 18
+},
+{
+"start": 157.9,
+"end": 158.36,
+"word": "now",
+"p": 0.979,
+"segment": 18
+},
+{
+"start": 160.24,
+"end": 161.18,
+"word": "A",
+"p": 0.868,
+"segment": 19
+},
+{
+"start": 161.18,
+"end": 162.12,
+"word": "quiet",
+"p": 0.996,
+"segment": 19
+},
+{
+"start": 162.12,
+"end": 162.6,
+"word": "shift",
+"p": 0.98,
+"segment": 19
+},
+{
+"start": 162.6,
+"end": 163.28,
+"word": "somehow",
+"p": 0.983,
+"segment": 19
+},
+{
+"start": 182.72,
+"end": 184.12,
+"word": "I'll",
+"p": 0.078,
+"segment": 20
+},
+{
+"start": 184.12,
+"end": 185.52,
+"word": "see",
+"p": 0.856,
+"segment": 20
+},
+{
+"start": 185.52,
+"end": 186.02,
+"word": "you",
+"p": 0.997,
+"segment": 20
+},
+{
+"start": 186.02,
+"end": 187.18,
+"word": "next",
+"p": 0.59,
+"segment": 20
+},
+{
+"start": 187.18,
+"end": 191.86,
+"word": "time.",
+"p": 0.687,
+"segment": 20
+}
+],
+"language": "en"
+}

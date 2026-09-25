@@ -1,0 +1,30 @@
+{
+  "file": "e4-tags-lora-s2_00001.flac",
+  "vram_gib": 15.9,
+  "runs": [
+    {
+      "seconds": 30.0,
+      "peak_gib": 16.49,
+      "time_s": 20.4,
+      "ok": true
+    },
+    {
+      "seconds": 120.0,
+      "peak_gib": 16.65,
+      "time_s": 35.5,
+      "ok": true
+    },
+    {
+      "seconds": 240.0,
+      "peak_gib": 16.83,
+      "time_s": 60.6,
+      "ok": true
+    },
+    {
+      "seconds": 300.0,
+      "peak_gib": 16.95,
+      "time_s": 75.1,
+      "ok": true
+    }
+  ]
+}

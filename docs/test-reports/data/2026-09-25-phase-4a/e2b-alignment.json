@@ -1,0 +1,189 @@
+[
+  {
+    "file": "2026-09-25 The Unsaid Words Remain.flac",
+    "config": "auto",
+    "asr_words": 36,
+    "scored_words": 0,
+    "score_sections": [
+      "intro",
+      "verse",
+      "chorus",
+      "outro"
+    ],
+    "reference_sections": [],
+    "section_accuracy": {
+      "grid": null,
+      "constant_tempo": null,
+      "grid_phrase_0.3": null,
+      "grid_phrase_0.5": null,
+      "grid_phrase_0.8": null,
+      "constant_tempo_phrase_0.5": null,
+      "grid_pickup_0.2": null,
+      "grid_pickup_0.3": null,
+      "grid_pickup_0.5": null
+    }
+  },
+  {
+    "file": "2026-09-25 Unsaid Words Hanging Still.flac",
+    "config": "auto",
+    "asr_words": 155,
+    "scored_words": 145,
+    "score_sections": [
+      "intro",
+      "verse",
+      "chorus",
+      "verse",
+      "chorus",
+      "outro"
+    ],
+    "reference_sections": [
+      "intro",
+      "verse",
+      "chorus",
+      "verse",
+      "chorus",
+      "outro"
+    ],
+    "section_accuracy": {
+      "grid": 0.9793,
+      "constant_tempo": 0.8552,
+      "grid_phrase_0.3": 1.0,
+      "grid_phrase_0.5": 1.0,
+      "grid_phrase_0.8": 1.0,
+      "constant_tempo_phrase_0.5": 0.931,
+      "grid_pickup_0.2": 1.0,
+      "grid_pickup_0.3": 1.0,
+      "grid_pickup_0.5": 1.0
+    }
+  },
+  {
+    "file": "2026-09-25 Words We Never Said (2).flac",
+    "config": "auto",
+    "asr_words": 84,
+    "scored_words": 58,
+    "score_sections": [
+      "intro",
+      "verse",
+      "chorus",
+      "verse",
+      "chorus",
+      "outro"
+    ],
+    "reference_sections": [
+      "verse",
+      "chorus",
+      "verse",
+      "chorus",
+      "outro"
+    ],
+    "section_accuracy": {
+      "grid": 0.7586,
+      "constant_tempo": 0.6552,
+      "grid_phrase_0.3": 0.8621,
+      "grid_phrase_0.5": 0.8621,
+      "grid_phrase_0.8": 0.8621,
+      "constant_tempo_phrase_0.5": 0.7414,
+      "grid_pickup_0.2": 0.8621,
+      "grid_pickup_0.3": 0.8621,
+      "grid_pickup_0.5": 0.8621
+    }
+  },
+  {
+    "file": "2026-09-25 Words We Never Said.flac",
+    "config": "auto",
+    "asr_words": 82,
+    "scored_words": 75,
+    "score_sections": [
+      "intro",
+      "verse",
+      "chorus",
+      "verse",
+      "chorus",
+      "outro"
+    ],
+    "reference_sections": [
+      "verse",
+      "chorus",
+      "verse",
+      "chorus",
+      "outro"
+    ],
+    "section_accuracy": {
+      "grid": 0.8,
+      "constant_tempo": 0.6133,
+      "grid_phrase_0.3": 0.8933,
+      "grid_phrase_0.5": 0.8933,
+      "grid_phrase_0.8": 0.8933,
+      "constant_tempo_phrase_0.5": 0.68,
+      "grid_pickup_0.2": 0.8933,
+      "grid_pickup_0.3": 0.8933,
+      "grid_pickup_0.5": 0.8933
+    }
+  },
+  {
+    "file": "minimax-excerpt.flac",
+    "config": "auto",
+    "asr_words": 123,
+    "scored_words": 122,
+    "score_sections": [
+      "verse",
+      "pre-chorus",
+      "chorus",
+      "outro"
+    ],
+    "reference_sections": [
+      "verse",
+      "pre-chorus",
+      "chorus"
+    ],
+    "section_accuracy": {
+      "grid": 0.959,
+      "constant_tempo": 0.959,
+      "grid_phrase_0.3": 0.8115,
+      "grid_phrase_0.5": 0.8115,
+      "grid_phrase_0.8": 0.8115,
+      "constant_tempo_phrase_0.5": 0.8115,
+      "grid_pickup_0.2": 1.0,
+      "grid_pickup_0.3": 1.0,
+      "grid_pickup_0.5": 1.0
+    }
+  },
+  {
+    "file": "minimax-sample.mp3",
+    "config": "auto",
+    "asr_words": 336,
+    "scored_words": 332,
+    "score_sections": [
+      "intro",
+      "verse",
+      "pre-chorus",
+      "chorus",
+      "verse",
+      "pre-chorus",
+      "chorus",
+      "bridge",
+      "chorus"
+    ],
+    "reference_sections": [
+      "verse",
+      "pre-chorus",
+      "chorus",
+      "verse",
+      "pre-chorus",
+      "chorus",
+      "bridge",
+      "chorus"
+    ],
+    "section_accuracy": {
+      "grid": 0.9488,
+      "constant_tempo": 0.9066,
+      "grid_phrase_0.3": 0.9187,
+      "grid_phrase_0.5": 0.9187,
+      "grid_phrase_0.8": 0.9187,
+      "constant_tempo_phrase_0.5": 0.9187,
+      "grid_pickup_0.2": 0.994,
+      "grid_pickup_0.3": 0.994,
+      "grid_pickup_0.5": 0.994
+    }
+  }
+]

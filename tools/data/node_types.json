@@ -1,6 +1,36 @@
 {
  "comfyui_version": "0.37.0",
  "nodes": {
+  "AudioEncoderLoader": {
+   "input": {
+    "required": {
+     "audio_encoder_name": [
+      "COMBO",
+      {
+       "multiselect": false,
+       "options": []
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "audio_encoder_name"
+    ]
+   },
+   "output": [
+    "AUDIO_ENCODER"
+   ],
+   "output_name": [
+    "AUDIO_ENCODER"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "model/loaders",
+   "display_name": "Load Audio Encoder"
+  },
   "CLIPLoader": {
    "input": {
     "required": {
@@ -738,7 +768,7 @@
      "brief": [
       "PLENIO_BRIEF",
       {
-       "tooltip": "From Song Brief."
+       "tooltip": "From Song Brief or Cover Brief."
       }
      ],
      "engine": [
@@ -766,7 +796,25 @@
      "score": [
       "STRING",
       {
-       "tooltip": "Optional score whose sections the lyrics must follow.",
+       "tooltip": "The final score: its sections (and for covers its phrasing and tempo) guide the lyrics.",
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "language": [
+      "STRING",
+      {
+       "tooltip": "Detected lyrics language (Transcribe Lyrics); requested only for original-lyrics covers whose brief says 'auto'.",
+       "lazy": true,
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "reference_lyrics": [
+      "STRING",
+      {
+       "tooltip": "The source's lyrics draft (Transcribe Lyrics: lyrics); requested only for new-lyrics covers with the phrasing reference. Sectioned lyrics give the writer a syllable target per line.",
+       "lazy": true,
        "forceInput": true,
        "multiline": false
       }
@@ -780,7 +828,9 @@
      "detail"
     ],
     "optional": [
-     "score"
+     "score",
+     "language",
+     "reference_lyrics"
     ]
    },
    "output": [
@@ -798,6 +848,435 @@
    "output_node": false,
    "category": "Plenio/Writing",
    "display_name": "Compose Writing Prompt"
+  },
+  "PlenioCoverBrief": {
+   "input": {
+    "required": {
+     "template": [
+      "COMBO",
+      {
+       "tooltip": "Optional target style. Style fields you leave empty are taken from the template.",
+       "default": "none",
+       "multiselect": false,
+       "options": [
+        "none",
+        "african/afrobeat-classic-instrumental",
+        "african/afrobeats-vocal",
+        "african/amapiano-instrumental",
+        "african/desert-blues-vocal",
+        "african/ethio-jazz-instrumental",
+        "african/gqom-instrumental",
+        "african/highlife-instrumental",
+        "african/soukous-instrumental",
+        "alternative/alternative-rock-vocal",
+        "alternative/britpop-vocal",
+        "alternative/new-wave-vocal",
+        "alternative/uk-garage-vocal",
+        "ambient/ambient-choir-vocalise",
+        "ambient/ambient-guitar",
+        "ambient/chillout-pads-strings",
+        "ambient/dark-ambient-drone",
+        "asian/anime-opening-vocal",
+        "asian/bollywood-vocal",
+        "asian/chinese-traditional-instrumental",
+        "asian/city-pop-vocal",
+        "asian/enka-vocal",
+        "asian/game-jrpg-orchestral",
+        "asian/indian-classical-instrumental",
+        "asian/kpop-vocal",
+        "asian/mandopop-ballad-vocal",
+        "blues/blues-ballad-vocal",
+        "blues/boogie-woogie-instrumental",
+        "blues/chicago-blues-vocal",
+        "blues/delta-blues-vocal",
+        "blues/electric-blues-instrumental",
+        "cinematic/corporate-uplifting-instrumental",
+        "cinematic/documentary-underscore-instrumental",
+        "cinematic/emotional-piano-underscore",
+        "cinematic/epic-trailer-instrumental",
+        "cinematic/fantasy-adventure-orchestral",
+        "cinematic/horror-suspense-instrumental",
+        "cinematic/orchestral-action-instrumental",
+        "cinematic/sports-stadium-anthem",
+        "classical/baroque-concerto-instrumental",
+        "classical/cello-and-piano",
+        "classical/choral-sacred-vocal",
+        "classical/cinematic-romance",
+        "classical/gregorian-chant-vocal",
+        "classical/impressionist-piano-instrumental",
+        "classical/minimalism-instrumental",
+        "classical/mystical-neoclassical",
+        "classical/neoclassical-piano",
+        "classical/opera-aria-vocal",
+        "classical/piano-and-strings",
+        "classical/romantic-string-ensemble",
+        "classical/string-quartet-instrumental",
+        "classical/symphonic-orchestral-instrumental",
+        "comedy/comedy-rap-vocal",
+        "comedy/english-parody-pop-vocal",
+        "comedy/german-absurd-novelty",
+        "country/americana-vocal",
+        "country/bluegrass-instrumental",
+        "country/country-ballad-vocal",
+        "country/honky-tonk-vocal",
+        "country/modern-country-pop-vocal",
+        "country/outlaw-country-vocal",
+        "disco/classic-disco-vocal",
+        "disco/italo-disco-vocal",
+        "edm/big-room-festival-instrumental",
+        "edm/breakbeat-instrumental",
+        "edm/dance-anthem-instrumental",
+        "edm/drum-and-bass-instrumental",
+        "edm/dubstep-instrumental",
+        "edm/eurodance-vocal",
+        "edm/future-bass-vocal",
+        "edm/future-rave-sparse-vocals",
+        "edm/goa-trance-instrumental",
+        "edm/hardgroove-techno-instrumental",
+        "edm/hardstyle-instrumental",
+        "edm/jungle-instrumental",
+        "edm/liquid-drum-and-bass-sparse-vocals",
+        "edm/melodic-techno-instrumental",
+        "edm/neurofunk-dnb-instrumental",
+        "edm/progressive-trance-instrumental",
+        "edm/psytrance-instrumental",
+        "edm/uplifting-trance-instrumental",
+        "electronic/analog-space-electronic",
+        "electronic/berlin-school-sequencer",
+        "electronic/chiptune-instrumental",
+        "electronic/cinematic-electronica",
+        "electronic/downtempo-electronica",
+        "electronic/ebm-darkwave-vocal",
+        "electronic/electro-swing-vocal",
+        "electronic/idm-experimental-instrumental",
+        "electronic/lofi-hiphop-instrumental",
+        "electronic/minimal-electronic-german-vocals",
+        "electronic/peak-time-techno-sparse-vocals",
+        "electronic/synth-pop-vocal",
+        "electronic/synthwave",
+        "electronic/trip-hop",
+        "electronic/vaporwave-instrumental",
+        "european/alpine-volksmusik-instrumental",
+        "european/balkan-brass-instrumental",
+        "european/chanson-vocal",
+        "european/fado-vocal",
+        "european/flamenco-instrumental",
+        "european/irish-pub-session-instrumental",
+        "european/klezmer-instrumental",
+        "european/polka-instrumental",
+        "european/russian-folk-vocal",
+        "european/schlager-vocal",
+        "european/viennese-waltz-instrumental",
+        "folk/appalachian-folk-instrumental",
+        "folk/celtic-folk-vocal",
+        "folk/dark-fairytale-folk-vocal",
+        "folk/folk-punk-vocal",
+        "folk/melancholic-folk-ballad-vocal",
+        "folk/mystical-medieval-folk-vocal",
+        "folk/nordic-folk-vocal",
+        "folk/romantic-solo-guitar",
+        "folk/sea-shanty-vocal",
+        "funk/classic-funk-instrumental",
+        "funk/nu-disco-funk",
+        "gospel/contemporary-worship-vocal",
+        "gospel/german-worship-vocal",
+        "gospel/gospel-choir-vocal",
+        "gospel/hymn-choir-vocal",
+        "hiphop/boom-bap-hiphop-vocal",
+        "hiphop/cloud-rap-vocal",
+        "hiphop/drill-instrumental",
+        "hiphop/german-rap-vocal",
+        "hiphop/old-school-hiphop-vocal",
+        "hiphop/phonk-instrumental",
+        "hiphop/rnb-vocal",
+        "hiphop/trap-instrumental",
+        "house/acid-house-instrumental",
+        "house/afro-house-vocal",
+        "house/bass-house-instrumental",
+        "house/deep-house",
+        "house/disco-house-vocal",
+        "house/electro-house-instrumental",
+        "house/french-house-instrumental",
+        "house/melodic-house",
+        "house/organic-house",
+        "house/progressive-house-dreamy-bittersweet",
+        "house/progressive-house-melodic-trance",
+        "house/progressive-house-sparse-vocals",
+        "house/tech-house-instrumental",
+        "jazz/bebop-instrumental",
+        "jazz/cool-jazz-instrumental",
+        "jazz/dixieland-instrumental",
+        "jazz/gypsy-jazz-instrumental",
+        "jazz/jazz-funk",
+        "jazz/smooth-jazz-instrumental",
+        "jazz/smooth-jazz-vocal-late-night",
+        "jazz/smooth-jazz-vocal-positive-resolution",
+        "jazz/swing-big-band-instrumental",
+        "jazz/vocal-jazz-crooner",
+        "kids/children-song-vocal",
+        "kids/kids-adventure-song-vocal",
+        "kids/lullaby-vocal",
+        "kids/nursery-rhyme-german-vocal",
+        "latin/bachata-vocal",
+        "latin/bossa-nova-vocal",
+        "latin/cumbia-instrumental",
+        "latin/merengue-instrumental",
+        "latin/norteno-corrido-vocal",
+        "latin/reggaeton-vocal",
+        "latin/salsa-vocal",
+        "latin/samba-instrumental",
+        "latin/son-cubano-vocal",
+        "latin/tango-instrumental",
+        "meditation/focus-study-instrumental",
+        "meditation/meditation-healing-instrumental",
+        "meditation/nature-soundscape-instrumental",
+        "meditation/sleep-music-instrumental",
+        "metal/black-metal-instrumental",
+        "metal/death-metal-vocal",
+        "metal/doom-metal-instrumental",
+        "metal/folk-metal-vocal",
+        "metal/grunge-vocal",
+        "metal/heavy-metal-vocal",
+        "metal/industrial-metal-vocal",
+        "metal/melodic-metal-instrumental",
+        "metal/metalcore-vocal",
+        "metal/nu-metal-vocal",
+        "metal/power-metal-vocal",
+        "metal/progressive-djent-instrumental",
+        "metal/sludge-post-metal-instrumental",
+        "metal/symphonic-metal-vocal",
+        "metal/thrash-metal-vocal",
+        "musical/broadway-ballad-vocal",
+        "musical/german-musical-vocal",
+        "musical/musical-theatre-ensemble-vocal",
+        "pop/art-pop-vocal",
+        "pop/bedroom-pop-vocal",
+        "pop/dance-pop-vocal",
+        "pop/dream-pop-electronic-vocal",
+        "pop/german-pop-vocal",
+        "pop/hyperpop-vocal",
+        "pop/indie-pop-vocal",
+        "pop/power-ballad-vocal",
+        "pop/singer-songwriter-acoustic-vocal",
+        "punk/pop-punk-vocal",
+        "punk/post-punk-vocal",
+        "punk/punk-rock-vocal",
+        "punk/ska-punk-vocal",
+        "reggae/dancehall-vocal",
+        "reggae/dub-instrumental",
+        "reggae/rocksteady-vocal",
+        "reggae/roots-reggae-vocal",
+        "reggae/ska-jamaican-instrumental",
+        "rock/blues-rock-instrumental",
+        "rock/classic-rock-vocal",
+        "rock/garage-rock-vocal",
+        "rock/hard-rock-vocal",
+        "rock/indie-rock-vocal",
+        "rock/post-rock-instrumental",
+        "rock/progressive-rock-instrumental",
+        "rock/psychedelic-rock-instrumental",
+        "rock/rockabilly-vocal",
+        "rock/shoegaze-vocal",
+        "rock/southern-rock-vocal",
+        "rock/stoner-rock-instrumental",
+        "rock/surf-rock-instrumental",
+        "seasonal/christmas-carol-vocal",
+        "seasonal/christmas-pop-vocal",
+        "seasonal/german-christmas-vocal",
+        "seasonal/wedding-ceremony-instrumental",
+        "soul/doo-wop-vocal",
+        "soul/motown-soul-vocal",
+        "soul/neo-soul-vocal",
+        "soul/soul-ballad-vocal",
+        "world/andean-folk-instrumental",
+        "world/arabic-pop-vocal",
+        "world/bhangra-instrumental",
+        "world/calypso-soca-vocal",
+        "world/gamelan-instrumental",
+        "world/gnawa-instrumental",
+        "world/hawaiian-slack-key-instrumental",
+        "world/mariachi-vocal",
+        "world/mongolian-throat-singing-instrumental",
+        "world/qawwali-vocal",
+        "world/turkish-folk-instrumental"
+       ]
+      }
+     ],
+     "description": [
+      "STRING",
+      {
+       "tooltip": "How the cover should sound.",
+       "default": "",
+       "multiline": true
+      }
+     ],
+     "genre": [
+      "STRING",
+      {
+       "tooltip": "Target genre, e.g. 'acoustic folk'.",
+       "default": "",
+       "multiline": false
+      }
+     ],
+     "mood": [
+      "STRING",
+      {
+       "tooltip": "Mood words, e.g. 'warm, intimate'.",
+       "default": "",
+       "multiline": false
+      }
+     ],
+     "vocals": [
+      "COMFY_DYNAMICCOMBO_V3",
+      {
+       "tooltip": "Instrumental (default), the original lyrics of the source, or new lyrics on its melody.",
+       "options": [
+        {
+         "key": "instrumental",
+         "inputs": {
+          "required": {
+           "melody": [
+            "COMBO",
+            {
+             "tooltip": "An instrument plays the vocal melody, or accompaniment only.",
+             "default": "instrument plays the lead",
+             "multiselect": false,
+             "options": [
+              "instrument plays the lead",
+              "accompaniment only"
+             ]
+            }
+           ],
+           "lead_instrument": [
+            "STRING",
+            {
+             "tooltip": "Optional lead instrument, e.g. 'piano'.",
+             "default": "",
+             "multiline": false
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "original lyrics",
+         "inputs": {
+          "required": {
+           "language": [
+            "STRING",
+            {
+             "tooltip": "Language of the source's lyrics; 'auto' detects it from the singing.",
+             "default": "auto",
+             "multiline": false
+            }
+           ],
+           "voice": [
+            "STRING",
+            {
+             "tooltip": "Vocal character, e.g. 'soft female voice'.",
+             "default": "",
+             "multiline": false
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "new lyrics",
+         "inputs": {
+          "required": {
+           "language": [
+            "STRING",
+            {
+             "tooltip": "Language of the new lyrics.",
+             "default": "English",
+             "multiline": false
+            }
+           ],
+           "voice": [
+            "STRING",
+            {
+             "tooltip": "Vocal character.",
+             "default": "",
+             "multiline": false
+            }
+           ],
+           "theme": [
+            "STRING",
+            {
+             "tooltip": "What the new lyrics are about.",
+             "default": "",
+             "multiline": false
+            }
+           ],
+           "phrasing_reference": [
+            "BOOLEAN",
+            {
+             "tooltip": "Show the writer the source's transcribed lyrics as a phrasing reference (runs the lyrics ASR).",
+             "default": false
+            }
+           ]
+          }
+         }
+        }
+       ]
+      }
+     ],
+     "harmony": [
+      "COMBO",
+      {
+       "tooltip": "new accompaniment: the source's chords are removed and YuE2 re-harmonises (melody mode). keep original chords: the chords stay (full mode).",
+       "default": "new accompaniment",
+       "multiselect": false,
+       "options": [
+        "new accompaniment",
+        "keep original chords"
+       ]
+      }
+     ],
+     "title": [
+      "STRING",
+      {
+       "tooltip": "Optional fixed title, e.g. 'Original Title (Jazz Cover)'. Empty: the writer proposes one.",
+       "advanced": true,
+       "default": "",
+       "multiline": false
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "template",
+     "description",
+     "genre",
+     "mood",
+     "vocals",
+     "harmony",
+     "title"
+    ]
+   },
+   "output": [
+    "PLENIO_BRIEF",
+    "STRING",
+    "BOOLEAN",
+    "BOOLEAN"
+   ],
+   "output_name": [
+    "brief",
+    "brief_text",
+    "use_source_lyrics",
+    "instrumental"
+   ],
+   "output_is_list": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Song",
+   "display_name": "Cover Brief"
   },
   "PlenioEngine": {
    "input": {
@@ -1016,6 +1495,23 @@
          "key": "strip chords",
          "inputs": {
           "required": {}
+         }
+        },
+        {
+         "key": "fit length",
+         "inputs": {
+          "required": {
+           "seconds": [
+            "FLOAT",
+            {
+             "tooltip": "Target length; whole sections are kept, the ending stays.",
+             "default": 90.0,
+             "min": 20.0,
+             "max": 900.0,
+             "step": 5.0
+            }
+           ]
+          }
          }
         },
         {
@@ -1628,6 +2124,26 @@
        "multiline": false
       }
      ],
+     "context_score": [
+      "STRING",
+      {
+       "tooltip": "Score owned by another sheet; shown, used for the budget and to check the lyrics' sections.",
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "timeline": [
+      "PLENIO_TIMELINE",
+      {
+       "tooltip": "From Transcribe Score: shows bar and section times of the source in the editor."
+      }
+     ],
+     "reference_audio": [
+      "AUDIO",
+      {
+       "tooltip": "The recording the score was transcribed from: the editor plays it from the selected bar (A/B with the notes). Display only; it never reaches the model."
+      }
+     ],
      "brief": [
       "PLENIO_BRIEF",
       {
@@ -1666,6 +2182,9 @@
      "artwork_prompt",
      "context_style",
      "context_lyrics",
+     "context_score",
+     "timeline",
+     "reference_audio",
      "brief",
      "engine"
     ],
@@ -1683,7 +2202,8 @@
     "STRING",
     "COMBO",
     "FLOAT",
-    "PLENIO_REPORT"
+    "PLENIO_REPORT",
+    "STRING"
    ],
    "output_name": [
     "title",
@@ -1693,9 +2213,11 @@
     "artwork_prompt",
     "planning_mode",
     "score_seconds",
-    "report"
+    "report",
+    "section_tags"
    ],
    "output_is_list": [
+    false,
     false,
     false,
     false,
@@ -1755,6 +2277,226 @@
    "output_node": true,
    "category": "Plenio/Utilities",
    "display_name": "System Check"
+  },
+  "PlenioTranscribeLyrics": {
+   "input": {
+    "required": {
+     "audio": [
+      "AUDIO",
+      {
+       "tooltip": "The source recording, or a rendered take for the lyrics check."
+      }
+     ],
+     "engine": [
+      "COMBO",
+      {
+       "tooltip": "ASR engine (runs in a separate process).",
+       "default": "faster-whisper large-v3",
+       "multiselect": false,
+       "options": [
+        "faster-whisper large-v3"
+       ]
+      }
+     ],
+     "language": [
+      "STRING",
+      {
+       "tooltip": "'auto' detects the language, or name it (e.g. English, de).",
+       "default": "auto",
+       "multiline": false
+      }
+     ],
+     "device": [
+      "COMBO",
+      {
+       "tooltip": "auto: GPU, falling back to the CPU (about 0.6 x the audio length) with a warning.",
+       "advanced": true,
+       "default": "auto",
+       "multiselect": false,
+       "options": [
+        "auto",
+        "cuda",
+        "cpu"
+       ]
+      }
+     ]
+    },
+    "optional": {
+     "score": [
+      "STRING",
+      {
+       "tooltip": "The final score: its sections become the tags.",
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "timeline": [
+      "PLENIO_TIMELINE",
+      {
+       "tooltip": "From Transcribe Score: bar times and where somebody sings."
+      }
+     ],
+     "brief": [
+      "PLENIO_BRIEF",
+      {
+       "tooltip": "Cover Brief: its lyrics language is used (the language widget is then ignored)."
+      }
+     ],
+     "expected_lyrics": [
+      "STRING",
+      {
+       "tooltip": "Lyrics a take was given: turns the node into the sung-lyrics check.",
+       "forceInput": true,
+       "multiline": false
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "audio",
+     "engine",
+     "language",
+     "device"
+    ],
+    "optional": [
+     "score",
+     "timeline",
+     "brief",
+     "expected_lyrics"
+    ]
+   },
+   "output": [
+    "STRING",
+    "STRING",
+    "STRING",
+    "PLENIO_REPORT"
+   ],
+   "output_name": [
+    "lyrics",
+    "transcript",
+    "language",
+    "report"
+   ],
+   "output_is_list": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Audio analysis",
+   "display_name": "Transcribe Lyrics"
+  },
+  "PlenioTranscribeScore": {
+   "input": {
+    "required": {
+     "audio_encoder": [
+      "AUDIO_ENCODER",
+      {
+       "tooltip": "SheetSage2 from Audio Encoder Loader."
+      }
+     ],
+     "audio": [
+      "AUDIO",
+      {
+       "tooltip": "The source recording (trim it first for a part of the song)."
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "audio_encoder",
+     "audio"
+    ]
+   },
+   "output": [
+    "STRING",
+    "PLENIO_TIMELINE",
+    "PLENIO_REPORT"
+   ],
+   "output_name": [
+    "score",
+    "timeline",
+    "report"
+   ],
+   "output_is_list": [
+    false,
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Audio analysis",
+   "display_name": "Transcribe Score"
+  },
+  "PlenioVocalCheck": {
+   "input": {
+    "required": {
+     "audio": [
+      "AUDIO",
+      {
+       "tooltip": "One take, or the list of takes from a loop (End Loop, accumulate)."
+      }
+     ],
+     "audio_encoder": [
+      "AUDIO_ENCODER",
+      {
+       "tooltip": "SheetSage2 (the cover path's loader can be reused)."
+      }
+     ],
+     "tolerance_seconds": [
+      "FLOAT",
+      {
+       "tooltip": "Seconds of vocal-like notes still accepted. 0 = any vocal note fails (calibrated against the owner's listening, Phase 4A).",
+       "advanced": true,
+       "default": 0.0,
+       "min": 0.0,
+       "max": 60.0,
+       "step": 0.5
+      }
+     ]
+    },
+    "optional": {
+     "brief": [
+      "PLENIO_BRIEF",
+      {
+       "tooltip": "Sung songs are not checked."
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "audio",
+     "audio_encoder",
+     "tolerance_seconds"
+    ],
+    "optional": [
+     "brief"
+    ]
+   },
+   "output": [
+    "AUDIO",
+    "BOOLEAN",
+    "PLENIO_REPORT",
+    "AUDIO"
+   ],
+   "output_name": [
+    "audio",
+    "passed",
+    "report",
+    "takes"
+   ],
+   "output_is_list": [
+    false,
+    false,
+    false,
+    true
+   ],
+   "output_node": false,
+   "category": "Plenio/Audio analysis",
+   "display_name": "Check Vocals"
   },
   "PreviewAny": {
    "input": {
@@ -2152,6 +2894,50 @@
    "category": "utilities",
    "display_name": "Seed"
   },
+  "SheetSage2AudioToABC": {
+   "input": {
+    "required": {
+     "audio_encoder": [
+      "AUDIO_ENCODER",
+      {}
+     ],
+     "audio": [
+      "AUDIO",
+      {}
+     ],
+     "mode": [
+      "COMBO",
+      {
+       "tooltip": "full: generates melody and chords; melody: generates melody only, recommended for covers.",
+       "multiselect": false,
+       "options": [
+        "melody",
+        "full"
+       ]
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "audio_encoder",
+     "audio",
+     "mode"
+    ]
+   },
+   "output": [
+    "STRING"
+   ],
+   "output_name": [
+    "abc"
+   ],
+   "output_is_list": [
+    true
+   ],
+   "output_node": false,
+   "category": "model/conditioning/yue2",
+   "display_name": "SheetSage2 Audio to ABC"
+  },
   "StartLoop": {
    "input": {
     "required": {
@@ -2489,6 +3275,54 @@
    "output_node": false,
    "category": "text",
    "display_name": "Generate Text"
+  },
+  "TrimAudioDuration": {
+   "input": {
+    "required": {
+     "audio": [
+      "AUDIO",
+      {}
+     ],
+     "start_index": [
+      "FLOAT",
+      {
+       "tooltip": "Start time in seconds, can be negative to count from the end (supports sub-seconds).",
+       "default": 0.0,
+       "min": -18446744073709551615,
+       "max": 18446744073709551615,
+       "step": 0.01
+      }
+     ],
+     "duration": [
+      "FLOAT",
+      {
+       "tooltip": "Duration in seconds",
+       "default": 60.0,
+       "min": 0.0,
+       "step": 0.01
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "audio",
+     "start_index",
+     "duration"
+    ]
+   },
+   "output": [
+    "AUDIO"
+   ],
+   "output_name": [
+    "AUDIO"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "audio",
+   "display_name": "Trim Audio Duration"
   },
   "UNETLoader": {
    "input": {

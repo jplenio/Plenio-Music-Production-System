@@ -33,6 +33,10 @@ LORA_URL = (
     "https://huggingface.co/Mothersuperior/YuE2-instrumental-cot-full-loras/resolve/"
     "947f2f4b28978b2b6c3e316e6a87925c76bf3c4b/ar_lora_inst_v3abc_comfyui.safetensors"
 )
+SHEETSAGE = "sheetsage2_bf16.safetensors"
+SHEETSAGE_URL = (
+    "https://huggingface.co/Comfy-Org/YuE2/resolve/main/audio_encoders/sheetsage2_bf16.safetensors"
+)
 WRITER = "gemma4_e4b_it_fp8_scaled.safetensors"
 WRITER_URL = (
     "https://huggingface.co/Comfy-Org/gemma-4/resolve/main/text_encoders/gemma4_e4b_it_fp8_scaled.safetensors"
@@ -135,6 +139,9 @@ def write_song() -> Blueprint:
         [
             BlueprintInput("brief", "PLENIO_BRIEF", [(compose, "brief")]),
             BlueprintInput("engine", "PLENIO_ENGINE", [(compose, "engine")]),
+            BlueprintInput("score", "STRING", [(compose, "score")]),
+            BlueprintInput("language", "STRING", [(compose, "language")]),
+            BlueprintInput("reference_lyrics", "STRING", [(compose, "reference_lyrics")]),
             BlueprintInput(
                 "clip_name",
                 "COMBO",
@@ -159,6 +166,35 @@ def write_song() -> Blueprint:
             BlueprintOutput("lyrics", "STRING", (parse, "lyrics")),
             BlueprintOutput("artwork_prompt", "STRING", (parse, "artwork_prompt")),
             BlueprintOutput("report", "PLENIO_REPORT", (parse, "report")),
+        ],
+    )
+
+
+def transcribe_score() -> Blueprint:
+    g = Graph()
+    loader = g.add(
+        "AudioEncoderLoader",
+        (0, 0),
+        size=(320, 90),
+        title="SheetSage2",
+        widgets={"audio_encoder_name": SHEETSAGE},
+        properties=model(SHEETSAGE, SHEETSAGE_URL, "audio_encoders"),
+    )
+    node = g.add("PlenioTranscribeScore", (380, 0), size=(320, 120))
+    g.link(loader, "AUDIO_ENCODER", node, "audio_encoder")
+    return Blueprint(
+        "Plenio · Transcribe Score",
+        "Plenio/Audio analysis",
+        "Transcribes a recording into a native two-voice ABC score with SheetSage2 and keeps the beat grid "
+        "(bar times, sung notes) for lyrics alignment. Also outputs the loaded SheetSage2 for Check Vocals. "
+        "SheetSage2 weights are CC BY-NC 4.0.",
+        g,
+        [BlueprintInput("audio", "AUDIO", [(node, "audio")])],
+        [
+            BlueprintOutput("score", "STRING", (node, "score")),
+            BlueprintOutput("timeline", "PLENIO_TIMELINE", (node, "timeline")),
+            BlueprintOutput("report", "PLENIO_REPORT", (node, "report")),
+            BlueprintOutput("AUDIO_ENCODER", "AUDIO_ENCODER", (loader, "AUDIO_ENCODER")),
         ],
     )
 
@@ -242,6 +278,77 @@ def yue2_render() -> Blueprint:
             BlueprintOutput("AUDIO", "AUDIO", (decode, "AUDIO")),
             BlueprintOutput("seconds", "FLOAT", (music, "seconds")),
         ],
+    )
+
+
+def yue2_takes() -> Blueprint:
+    """N renders of the same documents with the seeds take_seed, take_seed + 1, ... (native loop, AS-16)."""
+    g = Graph()
+    start = g.add(
+        "StartLoop",
+        (0, 0),
+        size=(300, 170),
+        widgets={"mode": "simple", "mode.num_iterations": 1, "cache_iterations": False},
+    )
+    seed = g.add(
+        "ComfyMathExpression",
+        (0, 230),
+        size=(300, 150),
+        title="take seed + iteration",
+        widgets={"expression": "a + b"},
+    )
+    music = g.add(
+        "YuE2GenerateMusic", (360, 0), size=(340, 380), widgets={"seed": 0, "seed.control": "fixed"}
+    )
+    latent = g.add("EmptyYuE2LatentAudio", (760, 0), size=(260, 80))
+    zero = g.add("ConditioningZeroOut", (760, 130), size=(240, 50))
+    sampler = g.add(
+        "KSampler",
+        (1060, 0),
+        size=(300, 260),
+        widgets={
+            "seed": 0,
+            "seed.control": "fixed",
+            "steps": 32,
+            "cfg": 1.0,
+            "sampler_name": "dpm_2",
+            "scheduler": "sgm_uniform",
+            "denoise": 1.0,
+        },
+    )
+    decode = g.add("VAEDecodeAudio", (1420, 0), size=(220, 60))
+    end = g.add("EndLoop", (1700, 0), size=(260, 120), widgets={"accumulate": True})
+    g.link(start, "iteration_index", seed, "values.a")
+    g.link(seed, "INT", music, "seed")
+    g.link(seed, "INT", sampler, "seed")
+    g.link(music, "seconds", latent, "seconds")
+    g.link(music, "CONDITIONING", zero, "conditioning")
+    g.link(music, "CONDITIONING", sampler, "positive")
+    g.link(zero, "CONDITIONING", sampler, "negative")
+    g.link(latent, "LATENT", sampler, "latent_image")
+    g.link(sampler, "LATENT", decode, "samples")
+    g.link(decode, "AUDIO", end, "output_value")
+    return Blueprint(
+        "Plenio · YuE2 Takes",
+        "Plenio/YuE2",
+        "Renders the final style, lyrics and score N times with the seeds take seed, take seed + 1, ... "
+        "(native loop). Connect the takes to Check Vocals, which keeps the best one. N takes cost N renders.",
+        g,
+        [
+            BlueprintInput("model", "MODEL", [(sampler, "model")]),
+            BlueprintInput("clip", "CLIP", [(music, "clip")]),
+            BlueprintInput("vae", "VAE", [(decode, "vae")]),
+            BlueprintInput("style", "STRING", [(music, "style")]),
+            # The loop starts only with the final lyrics: a native loop whose body is blocked (a Song
+            # Sheet waiting for review) never finishes in ComfyUI 0.37.0 (Phase 4B, measured).
+            BlueprintInput("lyrics", "STRING", [(music, "lyrics"), (start, "initial_iteration_value")]),
+            BlueprintInput("abc", "STRING", [(music, "abc")], label="score"),
+            BlueprintInput("mode", "COMBO", [(music, "mode")], label="planning mode"),
+            BlueprintInput("seed", "INT", [(seed, "values.b")], label="take seed"),
+            BlueprintInput("max_duration", "FLOAT", [(music, "max_duration")], label="max seconds"),
+            BlueprintInput("takes", "INT", [(start, "mode.num_iterations")], default=1),
+        ],
+        [BlueprintOutput("takes", "AUDIO", (end, "outputs"))],
     )
 
 
@@ -334,20 +441,190 @@ def yue2_song(model_bp: Blueprint, write_bp: Blueprint, plan_bp: Blueprint, rend
     return g
 
 
+ABOUT_COVER = """# 2 · YuE2 · Cover
+
+**Source -> Transcribe Score -> Song Sheet · Score -> lyrics (ASR, writer or section tags) -> Song Sheet · Text -> YuE2 Takes -> Check Vocals -> Export**
+
+1. Load the **source** recording (upload in *Load Audio*; up to 5:00 - trim longer songs with the optional *Excerpt* node).
+2. In **Cover Brief** choose the target style and what happens to the vocals: *instrumental* (default; an instrument plays the melody, or accompaniment only), *original lyrics* (transcribed from the source) or *new lyrics* (written on the source's melody). *harmony* keeps or replaces the original chords.
+3. Press **Run**: SheetSage2 transcribes the source and the run **stops at Song Sheet · Score**. Open it, check the score (fix section names and boundaries), then *Approve*.
+4. Run again: the lyrics are drafted (ASR of the original, the writer's new lyrics, or the section tags) and the run **stops at Song Sheet · Text**. Correct or replace the lyrics - your text always wins - and *Approve*.
+5. Run again to render. Each further run is a new take (the take seed changes).
+
+**New lyrics** are understood only when they fit the melody - about one syllable per note - and the voice fits its range; Song Sheet · Text warns about both. Turn on *phrasing reference* for a syllable target per line.
+
+**Takes:** *YuE2 Takes* renders *takes* versions (seeds take seed, +1, ...); **Check Vocals** keeps the first instrumental take without vocal notes, the preview plays all takes. N takes cost N renders. **Instrumental adapter:** for instrumental covers YuE2 renders with the instrumental LoRA (no voice in any adapter cover in the owner's listening; bypass *Instrumental adapter* to switch it off). **Check sung lyrics** (bypassed): measures what a sung take actually sang.
+
+**Models** (downloaded on first use): YuE2 3B int8, SheetSage2, the instrumental adapter, a Gemma 4 writer; the lyrics ASR (faster-whisper large-v3, 3 GB) is fetched by Plenio when first needed. YuE2, SheetSage2 and the adapter are **CC BY-NC 4.0 (non-commercial)**.
+"""
+
+
+def yue2_cover(
+    model_bp: Blueprint, write_bp: Blueprint, transcribe_bp: Blueprint, takes_bp: Blueprint
+) -> Graph:
+    g = Graph()
+    g.add_frontend(
+        "MarkdownNote", (-560, 0), size=(480, 760), title="About this template", widgets=[ABOUT_COVER]
+    )
+    source = g.add(
+        "LoadAudio", (0, 0), size=(360, 140), title="Source recording", widgets={"audio": "cover_source.flac"}
+    )
+    excerpt = g.add(
+        "TrimAudioDuration",
+        (0, 180),
+        size=(360, 110),
+        mode=4,
+        title="Excerpt (optional)",
+        widgets={"start_index": 0.0, "duration": 120.0},
+    )
+    brief = g.add(
+        "PlenioCoverBrief",
+        (0, 340),
+        size=(380, 520),
+        widgets={"genre": "acoustic folk", "mood": "warm, intimate", "vocals": "instrumental"},
+    )
+    model_node = g.add_subgraph(model_bp, (0, 900), size=(380, 140))
+    adapter = g.add(
+        "LoraLoader",
+        (0, 1080),
+        size=(380, 130),
+        title="Instrumental adapter",
+        widgets={"lora_name": LORA, "strength_model": 0.0, "strength_clip": 1.0},
+        properties=model(LORA, LORA_URL, "loras"),
+    )
+    adapter_switch = g.add(
+        "ComfySwitchNode", (420, 1080), size=(260, 90), title="Adapter for instrumental covers"
+    )
+    transcribe = g.add_subgraph(transcribe_bp, (460, 0), size=(340, 160))
+    tools = g.add(
+        "PlenioScoreTools", (460, 220), size=(340, 140), widgets={"operation": "prepare from brief"}
+    )
+    score_sheet = g.add(
+        "PlenioSongSheet",
+        (880, 0),
+        size=(420, 420),
+        title="Song Sheet · Score",
+        widgets={"review": "stop for review"},
+    )
+    asr = g.add("PlenioTranscribeLyrics", (1380, 0), size=(340, 240), title="Transcribe Lyrics")
+    write = g.add_subgraph(write_bp, (1380, 300), size=(360, 260))
+    source_switch = g.add("ComfySwitchNode", (1800, 0), size=(260, 90), title="Original or new lyrics")
+    tags_switch = g.add("ComfySwitchNode", (1800, 140), size=(260, 90), title="Instrumental: section tags")
+    text_sheet = g.add(
+        "PlenioSongSheet",
+        (2120, 0),
+        size=(420, 420),
+        title="Song Sheet · Text",
+        widgets={"review": "stop for review"},
+    )
+    seed = g.add(
+        "SeedNode",
+        (2620, 0),
+        size=(300, 90),
+        title="Take seed",
+        widgets={"seed": 1, "seed.control": "randomize"},
+    )
+    render = g.add_subgraph(takes_bp, (2620, 150), size=(320, 280), title="YuE2 Takes")
+    check_vocals = g.add("PlenioVocalCheck", (3000, 0), size=(340, 160), title="Check Vocals · best take")
+    check_lyrics = g.add(
+        "PlenioTranscribeLyrics",
+        (3000, 200),
+        size=(340, 200),
+        mode=4,
+        title="Check sung lyrics (sung covers)",
+    )
+    preview = g.add("PreviewAudio", (3400, 0), size=(360, 120))
+    export = g.add("PlenioExportRelease", (3400, 200), size=(360, 220), autogrow={"reports": 5})
+
+    g.link(source, "AUDIO", excerpt, "audio")
+    g.link(excerpt, "AUDIO", transcribe, "audio")
+    g.link(transcribe, "score", tools, "score")
+    g.link(brief, "brief", tools, "brief")
+    g.link(tools, "score", score_sheet, "score")
+    g.link(transcribe, "timeline", score_sheet, "timeline")
+    g.link(excerpt, "AUDIO", score_sheet, "reference_audio")  # A/B listening in the score editor
+    g.link(brief, "brief", score_sheet, "brief")
+    g.link(model_node, "engine", score_sheet, "engine")
+    g.link(excerpt, "AUDIO", asr, "audio")
+    g.link(score_sheet, "score", asr, "score")
+    g.link(transcribe, "timeline", asr, "timeline")
+    g.link(brief, "brief", asr, "brief")
+    g.link(brief, "brief", write, "brief")
+    g.link(model_node, "engine", write, "engine")
+    g.link(score_sheet, "score", write, "score")
+    g.link(asr, "language", write, "language")
+    g.link(asr, "lyrics", write, "reference_lyrics")  # sectioned: line-by-line syllable targets
+    g.link(brief, "use_source_lyrics", source_switch, "switch")
+    g.link(asr, "lyrics", source_switch, "on_true")
+    g.link(write, "lyrics", source_switch, "on_false")
+    g.link(brief, "instrumental", tags_switch, "switch")
+    g.link(score_sheet, "section_tags", tags_switch, "on_true")
+    g.link(source_switch, "output", tags_switch, "on_false")
+    for kind in ("title", "style", "artwork_prompt"):
+        g.link(write, kind, text_sheet, kind)
+    g.link(tags_switch, "output", text_sheet, "lyrics")
+    g.link(score_sheet, "score", text_sheet, "context_score")
+    g.link(transcribe, "timeline", text_sheet, "timeline")
+    g.link(brief, "brief", text_sheet, "brief")
+    g.link(model_node, "engine", text_sheet, "engine")
+    g.link(model_node, "MODEL", adapter, "model")
+    g.link(model_node, "CLIP", adapter, "clip")
+    g.link(brief, "instrumental", adapter_switch, "switch")
+    g.link(adapter, "CLIP", adapter_switch, "on_true")
+    g.link(model_node, "CLIP", adapter_switch, "on_false")
+    g.link(model_node, "MODEL", render, "model")
+    g.link(adapter_switch, "output", render, "clip")
+    g.link(model_node, "VAE", render, "vae")
+    g.link(text_sheet, "style", render, "style")
+    g.link(text_sheet, "lyrics", render, "lyrics")
+    g.link(score_sheet, "score", render, "abc")
+    g.link(score_sheet, "planning_mode", render, "mode")
+    g.link(score_sheet, "score_seconds", render, "max_duration")
+    g.link(seed, "seed", render, "seed")
+    g.link(render, "takes", check_vocals, "audio")
+    g.link(transcribe, "AUDIO_ENCODER", check_vocals, "audio_encoder")
+    g.link(brief, "brief", check_vocals, "brief")
+    g.link(check_vocals, "audio", check_lyrics, "audio")
+    g.link(text_sheet, "lyrics", check_lyrics, "expected_lyrics")
+    g.link(check_vocals, "takes", preview, "audio")
+    g.link(check_vocals, "audio", export, "audio")
+    g.link(text_sheet, "title", export, "title")
+    for index, node in enumerate((score_sheet, text_sheet, transcribe, check_vocals, check_lyrics)):
+        g.link(node, "report", export, f"reports.report_{index}")
+    g.group("1 · SOURCE", [source, excerpt])
+    g.group("2 · COVER", [brief])
+    g.group("3 · SCORE", [transcribe, tools, score_sheet])
+    g.group("4 · LYRICS", [asr, write, source_switch, tags_switch])
+    g.group("5 · TEXT", [text_sheet])
+    g.group("6 · RENDER", [seed, render, check_vocals])
+    g.group("7 · CHECK (optional)", [check_lyrics], color="#555")
+    g.group("8 · EXPORT", [preview, export])
+    g.group("MUSIC MODEL", [model_node, adapter, adapter_switch], color="#444")
+    return g
+
+
 def write_json(path: Path, data: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 def main() -> int:
-    blueprints = [yue2_model(), write_song(), yue2_plan(), yue2_render()]
+    model_bp, write_bp, plan_bp, render_bp = yue2_model(), write_song(), yue2_plan(), yue2_render()
+    transcribe_bp, takes_bp = transcribe_score(), yue2_takes()
+    blueprints = [model_bp, write_bp, plan_bp, render_bp, transcribe_bp, takes_bp]
     for blueprint in blueprints:
         write_json(PROJECT / "subgraphs" / f"{blueprint.name}.json", blueprint_file(blueprint))
-    song = yue2_song(*blueprints)
+    song = yue2_song(model_bp, write_bp, plan_bp, render_bp)
     write_json(
-        PROJECT / "example_workflows" / "1 · YuE2 · Song.json", workflow(song, "1 · YuE2 · Song", blueprints)
+        PROJECT / "example_workflows" / "1 · YuE2 · Song.json",
+        workflow(song, "1 · YuE2 · Song", [model_bp, write_bp, plan_bp, render_bp]),
     )
-    print(f"wrote {len(blueprints)} blueprints and 1 template")
+    cover = yue2_cover(model_bp, write_bp, transcribe_bp, takes_bp)
+    write_json(
+        PROJECT / "example_workflows" / "2 · YuE2 · Cover.json",
+        workflow(cover, "2 · YuE2 · Cover", [model_bp, write_bp, transcribe_bp, takes_bp]),
+    )
+    print(f"wrote {len(blueprints)} blueprints and 2 templates")
     return 0
 
 

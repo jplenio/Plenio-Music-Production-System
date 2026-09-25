@@ -39,12 +39,13 @@ class PlenioParseDraft(io.ComfyNode):
     @classmethod
     def execute(cls, text: str, request: Any) -> io.NodeOutput:
         draft = parse_draft(text, request)
-        findings = draft_findings(draft, request.engine_id, instrumental=request.instrumental)
-        status = (
-            Status.WARNING
-            if draft.enforcements or any(f["severity"] != "info" for f in findings)
-            else Status.OK
-        )
+        findings = draft_findings(draft, request)
+        if any(f["severity"] == "error" for f in findings):
+            status = Status.ERROR
+        elif draft.enforcements or any(f["severity"] != "info" for f in findings):
+            status = Status.WARNING
+        else:
+            status = Status.OK
         summary = f"Draft '{draft.title}': {len(draft.enforcements)} enforcement(s), checks: " + summarize(
             [Finding(f["severity"], f["message"], f["where"]) for f in findings]
         )

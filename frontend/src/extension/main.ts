@@ -11,8 +11,9 @@ import { app } from '../../../scripts/app.js'
 
 import type { Fetcher } from '../api/client'
 import { chain, type ComfyApp, type ComfyNode } from '../shared/comfy'
-import type { SheetPayload } from '../shared/sheetSession'
-import { setPayload } from './payloads'
+import type { AsrNote, SheetPayload } from '../shared/sheetSession'
+import { dynamicComboNames, restoreWidgetValues, savedWidgetValues } from './dynamicCombo'
+import { setAsrNote, setPayload } from './payloads'
 import { SHEET_STATE_TYPE, setFetcher, sheetStateWidget } from './sheetStateWidget'
 import { installStyles } from './style'
 import { addSummaryDisplay } from './summary'
@@ -32,6 +33,23 @@ setFetcher(comfyApi)
   beforeRegisterNodeDef(nodeType, nodeData) {
     if (!nodeData.name.startsWith('Plenio')) return
     addSummaryDisplay(nodeType)
+    const combos = dynamicComboNames(nodeData.input)
+    if (combos.size) {
+      // Frontend 1.53.6 restores the values of a node with a DynamicCombo out of order (see
+      // dynamicCombo.ts). Only configure itself still sees the saved values; onConfigure does not.
+      const configure = nodeType.prototype.configure
+      nodeType.prototype.configure = function (this: ComfyNode, info: Record<string, unknown>) {
+        const saved = savedWidgetValues(info)
+        const result = configure?.call(this, info)
+        restoreWidgetValues(this, saved, combos)
+        return result
+      }
+    }
+    if (nodeData.name === 'PlenioTranscribeLyrics') {
+      nodeType.prototype.onExecuted = chain(nodeType.prototype.onExecuted, function (this: ComfyNode, output) {
+        for (const note of (output?.plenio_asr as AsrNote[] | undefined) ?? []) setAsrNote(note)
+      })
+    }
     if (nodeData.name === 'PlenioSongSheet') {
       nodeType.prototype.onExecuted = chain(nodeType.prototype.onExecuted, function (this: ComfyNode, output) {
         const items = output?.plenio_sheet as SheetPayload[] | undefined

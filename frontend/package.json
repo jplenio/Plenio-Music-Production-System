@@ -12,11 +12,18 @@
     "check": "npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {
+    "@codemirror/commands": "6.11.1",
+    "@codemirror/language": "6.12.4",
+    "@codemirror/lint": "6.9.7",
+    "@codemirror/state": "6.7.6",
+    "@codemirror/view": "6.43.13",
+    "@lezer/highlight": "1.2.4",
+    "abcjs": "6.7.1",
     "vue": "3.5.43"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "6.0.1",
-    "happy-dom": "20.0.0",
+    "happy-dom": "20.14.5",
     "typescript": "5.9.3",
     "vite": "7.3.6",
     "vitest": "3.2.7",

@@ -5,6 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
+from ..core.assets import Asset, load_catalogue
 from ..core.brief import TemplateLibrary
 from . import host
 
@@ -22,3 +23,8 @@ def template_library() -> TemplateLibrary:
     ):  # outside a running ComfyUI (contract tests): package templates only
         user_dir = None
     return TemplateLibrary(RESOURCES / "templates", user_dir)
+
+
+@lru_cache(maxsize=1)
+def asset_catalogue() -> dict[str, Asset]:
+    return load_catalogue(RESOURCES / "assets.toml")

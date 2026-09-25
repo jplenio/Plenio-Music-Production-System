@@ -2,7 +2,7 @@
 import { createApp } from 'vue'
 
 import type { Fetcher } from '../api/client'
-import type { SheetPayload } from '../shared/sheetSession'
+import type { AsrNote, SheetPayload } from '../shared/sheetSession'
 import type { DocumentKind, SheetState } from '../shared/sheetState'
 import dialogCss from './dialog.css?inline'
 import SheetDialog from './SheetDialog.vue'
@@ -11,6 +11,7 @@ export interface OpenOptions {
   title: string
   state: SheetState
   payload: SheetPayload | null
+  asrNote?: AsrNote | null
   owned: DocumentKind[]
   review: string
   fetcher: Fetcher
@@ -37,6 +38,7 @@ export function openSheetDialog(options: OpenOptions): () => void {
     title: options.title,
     state: options.state,
     payload: options.payload,
+    asrNote: options.asrNote ?? null,
     owned: options.owned,
     review: options.review,
     fetcher: options.fetcher,

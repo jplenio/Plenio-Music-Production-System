@@ -6,12 +6,14 @@ from typing import Any
 
 from comfy_api.latest import io
 
-from ...core.diagnostics import has_errors
+from ...core import score as score_rules
+from ...core.brief import CoverBrief
+from ...core.diagnostics import has_errors, warning
 from ...core.engines import rules_for
 from ...core.errors import PlenioConflictError, PlenioValidationError
 from ...core.sheet import DOCUMENT_KINDS, REVIEW_MODES, evaluate_sheet, needs_upstream, parse_sheet_state
 from .. import host
-from ..types import Brief, Engine, ReportType, SheetState
+from ..types import Brief, Engine, ReportType, SheetState, TimelineType
 
 DOC_TOOLTIPS = {
     "title": "Song title draft.",
@@ -20,7 +22,7 @@ DOC_TOOLTIPS = {
     "score": "Score draft (native two-voice ABC).",
     "artwork_prompt": "Cover image prompt draft.",
 }
-CONTEXT = ("context_style", "context_lyrics")
+CONTEXT = ("context_style", "context_lyrics", "context_score")
 EVENT = "plenio.sheet"
 
 
@@ -43,6 +45,23 @@ class PlenioSongSheet(io.ComfyNode):
                 optional=True,
                 force_input=True,
                 tooltip="Lyrics owned by another sheet; shown and used for the token budget.",
+            ),
+            io.String.Input(
+                "context_score",
+                optional=True,
+                force_input=True,
+                tooltip="Score owned by another sheet; shown, used for the budget and to check the lyrics' sections.",
+            ),
+            TimelineType.Input(
+                "timeline",
+                optional=True,
+                tooltip="From Transcribe Score: shows bar and section times of the source in the editor.",
+            ),
+            io.Audio.Input(
+                "reference_audio",
+                optional=True,
+                tooltip="The recording the score was transcribed from: the editor plays it from the selected bar "
+                "(A/B with the notes). Display only; it never reaches the model.",
             ),
             Brief.Input("brief", optional=True, tooltip="Vocal mode and length for validation."),
             Engine.Input(
@@ -83,6 +102,10 @@ class PlenioSongSheet(io.ComfyNode):
                     display_name="score_seconds", tooltip="Render ceiling derived from the final score."
                 ),
                 ReportType.Output(display_name="report", tooltip="Final documents, states and validation."),
+                io.String.Output(
+                    display_name="section_tags",
+                    tooltip="The final score's section tags (the lyrics of an instrumental cover).",
+                ),
             ],
             hidden=[io.Hidden.unique_id],
             is_output_node=True,
@@ -106,6 +129,7 @@ class PlenioSongSheet(io.ComfyNode):
         ]
         upstream = {kind: kwargs.get(kind) for kind in owned}
         brief, engine = kwargs.get("brief"), kwargs.get("engine")
+        timeline = kwargs.get("timeline")
         context = {
             key.removeprefix("context_"): kwargs[key] for key in CONTEXT if kwargs.get(key) is not None
         }
@@ -121,8 +145,14 @@ class PlenioSongSheet(io.ComfyNode):
             max_seconds=brief.max_seconds if brief is not None else None,
             target_seconds=brief.target_seconds if brief is not None else None,
             context=context,
+            extra_findings=_cover_findings(brief, upstream, state),
         )
         payload = {**evaluation.payload(), "node_id": str(cls.hidden.unique_id)}
+        if timeline is not None:
+            payload["timeline"] = timeline.to_dict()
+        reference = kwargs.get("reference_audio")
+        if reference is not None:
+            payload["reference_audio"] = host.save_reference_audio(reference)
         if evaluation.conflicts or has_errors(evaluation.findings):
             host.send_event(EVENT, payload)  # the editor needs the new drafts to resolve the problem
         if evaluation.conflicts:
@@ -136,15 +166,39 @@ class PlenioSongSheet(io.ComfyNode):
             )
         report = evaluation.report()
         documents: list[Any] = [evaluation.text(kind) for kind in DOCUMENT_KINDS]
+        final_score = evaluation.text("score") if "score" in evaluation.owned else ""
+        tags = score_rules.section_tags(final_score) if final_score.strip() else ""
         derived: list[Any] = [evaluation.planning_mode, evaluation.score_seconds]
         if evaluation.waiting_for_approval:
             documents = [host.execution_blocker(None)] * len(DOCUMENT_KINDS)
             derived = [host.execution_blocker(None)] * 2
+            tags = host.execution_blocker(None)
         ui = {
             "plenio_sheet": [payload],
             "plenio_summary": [{"status": report.status.value, "markdown": _markdown(evaluation)}],
         }
-        return io.NodeOutput(*documents, *derived, report, ui=ui)
+        return io.NodeOutput(*documents, *derived, report, tags, ui=ui)
+
+
+def _cover_findings(brief: Any, upstream: dict[str, Any], state: Any) -> list[Any]:
+    """Cover-specific notes: brief warnings, and a sung cover whose score has no vocal melody."""
+    if not isinstance(brief, CoverBrief):
+        return []
+    findings = [warning(message, "brief") for message in brief.warnings()]
+    score = upstream.get("score")
+    if score is None and state.entry("score").state.value == "manual":
+        score = state.entry("score").text
+    if not brief.instrumental and score:
+        analysis = score_rules.analyze(score)
+        if analysis.ok and analysis.voices["Vocal"]["notes"] == 0:
+            findings.append(
+                warning(
+                    "The score has no vocal melody, but the cover is sung. Is the source instrumental? Choose "
+                    "'instrumental' in the Cover Brief or check the transcription.",
+                    "score",
+                )
+            )
+    return findings
 
 
 def _markdown(evaluation: Any) -> str:

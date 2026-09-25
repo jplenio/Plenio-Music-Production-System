@@ -298,6 +298,24 @@
      "link": 2
     },
     {
+     "localized_name": "score",
+     "name": "score",
+     "type": "STRING",
+     "link": null
+    },
+    {
+     "localized_name": "language",
+     "name": "language",
+     "type": "STRING",
+     "link": null
+    },
+    {
+     "localized_name": "reference_lyrics",
+     "name": "reference_lyrics",
+     "type": "STRING",
+     "link": null
+    },
+    {
      "localized_name": "clip_name",
      "name": "clip_name",
      "label": "writer model",
@@ -440,6 +458,27 @@
      "link": null
     },
     {
+     "localized_name": "context_score",
+     "name": "context_score",
+     "shape": 7,
+     "type": "STRING",
+     "link": null
+    },
+    {
+     "localized_name": "timeline",
+     "name": "timeline",
+     "shape": 7,
+     "type": "PLENIO_TIMELINE",
+     "link": null
+    },
+    {
+     "localized_name": "reference_audio",
+     "name": "reference_audio",
+     "shape": 7,
+     "type": "AUDIO",
+     "link": null
+    },
+    {
      "localized_name": "brief",
      "name": "brief",
      "shape": 7,
@@ -532,6 +571,12 @@
      "links": [
       31
      ]
+    },
+    {
+     "localized_name": "section_tags",
+     "name": "section_tags",
+     "type": "STRING",
+     "links": null
     }
    ],
    "title": "Song Sheet · Text",
@@ -765,6 +810,27 @@
      "link": 16
     },
     {
+     "localized_name": "context_score",
+     "name": "context_score",
+     "shape": 7,
+     "type": "STRING",
+     "link": null
+    },
+    {
+     "localized_name": "timeline",
+     "name": "timeline",
+     "shape": 7,
+     "type": "PLENIO_TIMELINE",
+     "link": null
+    },
+    {
+     "localized_name": "reference_audio",
+     "name": "reference_audio",
+     "shape": 7,
+     "type": "AUDIO",
+     "link": null
+    },
+    {
      "localized_name": "brief",
      "name": "brief",
      "shape": 7,
@@ -853,6 +919,12 @@
      "links": [
       32
      ]
+    },
+    {
+     "localized_name": "section_tags",
+     "name": "section_tags",
+     "type": "STRING",
+     "links": null
     }
    ],
    "title": "Song Sheet · Score",
@@ -1220,7 +1292,7 @@
    2,
    0,
    5,
-   7,
+   10,
    "PLENIO_BRIEF"
   ],
   [
@@ -1228,7 +1300,7 @@
    3,
    3,
    5,
-   8,
+   11,
    "PLENIO_ENGINE"
   ],
   [
@@ -1300,7 +1372,7 @@
    2,
    0,
    8,
-   7,
+   10,
    "PLENIO_BRIEF"
   ],
   [
@@ -1308,7 +1380,7 @@
    3,
    3,
    8,
-   8,
+   11,
    "PLENIO_ENGINE"
   ],
   [
@@ -1887,7 +1959,7 @@
     "state": {
      "lastGroupId": 0,
      "lastNodeId": 4,
-     "lastLinkId": 14,
+     "lastLinkId": 17,
      "lastRerouteId": 0
     },
     "revision": 0,
@@ -1899,7 +1971,7 @@
       -260,
       0,
       160,
-      140
+      200
      ]
     },
     "outputNode": {
@@ -1937,15 +2009,51 @@
       ]
      },
      {
-      "id": "42eecfc3-46d8-51a2-bf78-3ac3b128abcc",
-      "name": "clip_name",
-      "type": "COMBO",
+      "id": "499a71c3-5a9b-5cd9-b017-cb2d3a543162",
+      "name": "score",
+      "type": "STRING",
       "linkIds": [
        7
       ],
       "pos": [
        0,
        40
+      ]
+     },
+     {
+      "id": "750fee25-6333-55a6-a9f0-6521771a9bc1",
+      "name": "language",
+      "type": "STRING",
+      "linkIds": [
+       8
+      ],
+      "pos": [
+       0,
+       60
+      ]
+     },
+     {
+      "id": "ef21b44d-1f8f-5caf-8c9a-43857aa7f65f",
+      "name": "reference_lyrics",
+      "type": "STRING",
+      "linkIds": [
+       9
+      ],
+      "pos": [
+       0,
+       80
+      ]
+     },
+     {
+      "id": "42eecfc3-46d8-51a2-bf78-3ac3b128abcc",
+      "name": "clip_name",
+      "type": "COMBO",
+      "linkIds": [
+       10
+      ],
+      "pos": [
+       0,
+       100
       ],
       "label": "writer model"
      },
@@ -1954,11 +2062,11 @@
       "name": "sampling_mode.seed",
       "type": "INT",
       "linkIds": [
-       8
+       11
       ],
       "pos": [
        0,
-       60
+       120
       ],
       "label": "draft seed"
      },
@@ -1967,11 +2075,11 @@
       "name": "thinking",
       "type": "BOOLEAN",
       "linkIds": [
-       9
+       12
       ],
       "pos": [
        0,
-       80
+       140
       ]
      }
     ],
@@ -1981,7 +2089,7 @@
       "name": "title",
       "type": "STRING",
       "linkIds": [
-       10
+       13
       ],
       "pos": [
        0,
@@ -1993,7 +2101,7 @@
       "name": "style",
       "type": "STRING",
       "linkIds": [
-       11
+       14
       ],
       "pos": [
        0,
@@ -2005,7 +2113,7 @@
       "name": "lyrics",
       "type": "STRING",
       "linkIds": [
-       12
+       15
       ],
       "pos": [
        0,
@@ -2017,7 +2125,7 @@
       "name": "artwork_prompt",
       "type": "STRING",
       "linkIds": [
-       13
+       16
       ],
       "pos": [
        0,
@@ -2029,7 +2137,7 @@
       "name": "report",
       "type": "PLENIO_REPORT",
       "linkIds": [
-       14
+       17
       ],
       "pos": [
        0,
@@ -2071,7 +2179,21 @@
         "name": "score",
         "shape": 7,
         "type": "STRING",
-        "link": null
+        "link": 7
+       },
+       {
+        "localized_name": "language",
+        "name": "language",
+        "shape": 7,
+        "type": "STRING",
+        "link": 8
+       },
+       {
+        "localized_name": "reference_lyrics",
+        "name": "reference_lyrics",
+        "shape": 7,
+        "type": "STRING",
+        "link": 9
        },
        {
         "localized_name": "detail",
@@ -2130,7 +2252,7 @@
         "widget": {
          "name": "clip_name"
         },
-        "link": 7
+        "link": 10
        },
        {
         "localized_name": "type",
@@ -2299,7 +2421,7 @@
         "widget": {
          "name": "sampling_mode.seed"
         },
-        "link": 8
+        "link": 11
        },
        {
         "localized_name": "sampling_mode.presence_penalty",
@@ -2317,7 +2439,7 @@
         "widget": {
          "name": "thinking"
         },
-        "link": 9
+        "link": 12
        },
        {
         "localized_name": "use_default_template",
@@ -2401,7 +2523,7 @@
         "name": "title",
         "type": "STRING",
         "links": [
-         10
+         13
         ]
        },
        {
@@ -2409,7 +2531,7 @@
         "name": "style",
         "type": "STRING",
         "links": [
-         11
+         14
         ]
        },
        {
@@ -2417,7 +2539,7 @@
         "name": "lyrics",
         "type": "STRING",
         "links": [
-         12
+         15
         ]
        },
        {
@@ -2425,7 +2547,7 @@
         "name": "artwork_prompt",
         "type": "STRING",
         "links": [
-         13
+         16
         ]
        },
        {
@@ -2433,7 +2555,7 @@
         "name": "report",
         "type": "PLENIO_REPORT",
         "links": [
-         14
+         17
         ]
        }
       ],
@@ -2497,28 +2619,52 @@
       "id": 7,
       "origin_id": -10,
       "origin_slot": 2,
-      "target_id": 2,
-      "target_slot": 0,
-      "type": "COMBO"
+      "target_id": 1,
+      "target_slot": 2,
+      "type": "STRING"
      },
      {
       "id": 8,
       "origin_id": -10,
       "origin_slot": 3,
-      "target_id": 3,
-      "target_slot": 12,
-      "type": "INT"
+      "target_id": 1,
+      "target_slot": 3,
+      "type": "STRING"
      },
      {
       "id": 9,
       "origin_id": -10,
       "origin_slot": 4,
+      "target_id": 1,
+      "target_slot": 4,
+      "type": "STRING"
+     },
+     {
+      "id": 10,
+      "origin_id": -10,
+      "origin_slot": 5,
+      "target_id": 2,
+      "target_slot": 0,
+      "type": "COMBO"
+     },
+     {
+      "id": 11,
+      "origin_id": -10,
+      "origin_slot": 6,
+      "target_id": 3,
+      "target_slot": 12,
+      "type": "INT"
+     },
+     {
+      "id": 12,
+      "origin_id": -10,
+      "origin_slot": 7,
       "target_id": 3,
       "target_slot": 14,
       "type": "BOOLEAN"
      },
      {
-      "id": 10,
+      "id": 13,
       "origin_id": 4,
       "origin_slot": 0,
       "target_id": -20,
@@ -2526,7 +2672,7 @@
       "type": "STRING"
      },
      {
-      "id": 11,
+      "id": 14,
       "origin_id": 4,
       "origin_slot": 1,
       "target_id": -20,
@@ -2534,7 +2680,7 @@
       "type": "STRING"
      },
      {
-      "id": 12,
+      "id": 15,
       "origin_id": 4,
       "origin_slot": 2,
       "target_id": -20,
@@ -2542,7 +2688,7 @@
       "type": "STRING"
      },
      {
-      "id": 13,
+      "id": 16,
       "origin_id": 4,
       "origin_slot": 3,
       "target_id": -20,
@@ -2550,7 +2696,7 @@
       "type": "STRING"
      },
      {
-      "id": 14,
+      "id": 17,
       "origin_id": 4,
       "origin_slot": 4,
       "target_id": -20,

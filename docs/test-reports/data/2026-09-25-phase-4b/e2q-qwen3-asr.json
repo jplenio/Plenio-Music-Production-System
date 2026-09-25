@@ -1,0 +1,178 @@
+{
+ "study": "E2q (Phase 4B): Qwen3-ASR-1.7B-hf + Qwen3-ForcedAligner-0.6B-hf vs faster-whisper large-v3",
+ "script": "tools/studies/asr_qwen3.py, tools/studies/alignment.py",
+ "environment": "Qwen: transformers 5.17.0 in an isolated package folder (AS-11), torch 2.9.1+cu130, bf16, RTX 5060 Ti 16 GB",
+ "regions": "the vocal regions of the Whisper 'regions' run (E2d), each transcribed and aligned separately",
+ "files": [
+  {
+   "id": "Y1",
+   "file": "2026-09-25 Words We Never Said",
+   "qwen3-asr-1.7b/full": {
+    "words": 81,
+    "language": "English",
+    "wer": 0.0247,
+    "seconds": 25.76,
+    "peak_vram_gib": 6.46,
+    "placement_grid_pickup_0.3": 0.8608
+   },
+   "qwen3-asr-1.7b/regions": {
+    "words": 81,
+    "language": "English",
+    "wer": 0.037,
+    "seconds": 13.37,
+    "peak_vram_gib": 5.61,
+    "placement_grid_pickup_0.3": 0.8974
+   },
+   "whisper-large-v3/regions": {
+    "words": 81,
+    "language": "en",
+    "wer": 0.0864,
+    "seconds": 4.56,
+    "peak_vram_gib": null,
+    "placement_grid_pickup_0.3": 0.8919
+   }
+  },
+  {
+   "id": "Y2",
+   "file": "2026-09-25 Words We Never Said (2)",
+   "qwen3-asr-1.7b/full": {
+    "words": 82,
+    "language": "English",
+    "wer": 0.284,
+    "seconds": 10.23,
+    "peak_vram_gib": 6.65,
+    "placement_grid_pickup_0.3": 0.5254
+   },
+   "qwen3-asr-1.7b/regions": {
+    "words": 82,
+    "language": "English",
+    "wer": 0.284,
+    "seconds": 14.41,
+    "peak_vram_gib": 5.58,
+    "placement_grid_pickup_0.3": 0.8305
+   },
+   "whisper-large-v3/regions": {
+    "words": 82,
+    "language": "en",
+    "wer": 0.2963,
+    "seconds": 4.91,
+    "peak_vram_gib": null,
+    "placement_grid_pickup_0.3": 0.8621
+   }
+  },
+  {
+   "id": "Y3",
+   "file": "2026-09-25 Unsaid Words Hanging Still",
+   "qwen3-asr-1.7b/full": {
+    "words": 150,
+    "language": "English",
+    "wer": 0.0573,
+    "seconds": 17.08,
+    "peak_vram_gib": 7.22,
+    "placement_grid_pickup_0.3": 0.9797
+   },
+   "qwen3-asr-1.7b/regions": {
+    "words": 149,
+    "language": "English",
+    "wer": 0.051,
+    "seconds": 18.1,
+    "peak_vram_gib": 5.84,
+    "placement_grid_pickup_0.3": 1.0
+   },
+   "whisper-large-v3/regions": {
+    "words": 150,
+    "language": "en",
+    "wer": 0.0764,
+    "seconds": 6.38,
+    "peak_vram_gib": null,
+    "placement_grid_pickup_0.3": 1.0
+   }
+  },
+  {
+   "id": "Y4",
+   "file": "2026-09-25 The Unsaid Words Remain",
+   "qwen3-asr-1.7b/full": {
+    "words": 0,
+    "language": "",
+    "wer": null,
+    "seconds": 0.52,
+    "peak_vram_gib": 6.06,
+    "placement_grid_pickup_0.3": null
+   },
+   "qwen3-asr-1.7b/regions": {
+    "words": 0,
+    "language": null,
+    "wer": null,
+    "seconds": null,
+    "peak_vram_gib": null,
+    "placement_grid_pickup_0.3": null,
+    "skipped": "no vocal regions"
+   },
+   "whisper-large-v3/regions": {
+    "words": 0,
+    "language": null,
+    "wer": null,
+    "seconds": 0.0,
+    "peak_vram_gib": null,
+    "placement_grid_pickup_0.3": null,
+    "skipped": "no vocal notes in the transcription"
+   }
+  },
+  {
+   "id": "M1",
+   "file": "minimax-sample",
+   "qwen3-asr-1.7b/full": {
+    "words": 334,
+    "language": "English",
+    "wer": 0.0179,
+    "seconds": 39.19,
+    "peak_vram_gib": 8.63,
+    "placement_grid_pickup_0.3": 0.9544
+   },
+   "qwen3-asr-1.7b/regions": {
+    "words": 333,
+    "language": "English",
+    "wer": 0.0239,
+    "seconds": 43.54,
+    "peak_vram_gib": 5.87,
+    "placement_grid_pickup_0.3": 0.9815
+   },
+   "whisper-large-v3/regions": {
+    "words": 336,
+    "language": "en",
+    "wer": 0.0149,
+    "seconds": 13.08,
+    "peak_vram_gib": null,
+    "placement_grid_pickup_0.3": 1.0
+   }
+  },
+  {
+   "id": "M2",
+   "file": "minimax-excerpt",
+   "qwen3-asr-1.7b/full": {
+    "words": 123,
+    "language": "English",
+    "wer": 0.0081,
+    "seconds": 13.48,
+    "peak_vram_gib": 6.13,
+    "placement_grid_pickup_0.3": 0.9754
+   },
+   "qwen3-asr-1.7b/regions": {
+    "words": 122,
+    "language": "English",
+    "wer": 0.0,
+    "seconds": 16.62,
+    "peak_vram_gib": 5.74,
+    "placement_grid_pickup_0.3": 1.0
+   },
+   "whisper-large-v3/regions": {
+    "words": 124,
+    "language": "en",
+    "wer": 0.0163,
+    "seconds": 5.36,
+    "peak_vram_gib": null,
+    "placement_grid_pickup_0.3": 1.0
+   }
+  }
+ ]
+}

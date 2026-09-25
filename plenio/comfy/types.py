@@ -10,6 +10,7 @@ Brief = io.Custom("PLENIO_BRIEF")
 Engine = io.Custom("PLENIO_ENGINE")
 Request = io.Custom("PLENIO_REQUEST")
 ReportType = io.Custom("PLENIO_REPORT")
+TimelineType = io.Custom("PLENIO_TIMELINE")
 
 
 @io.comfytype(io_type="PLENIO_SHEET_STATE")

@@ -12,6 +12,10 @@ Environment variables:
 ``PLENIO_ASSET_DIR``            folder for Plenio assets (default: ``models/plenio``)
 ``PLENIO_WORKER_TIMEOUT``       seconds a worker may run in total
 ``PLENIO_WORKER_IDLE_TIMEOUT``  seconds a worker may go without reporting progress
+
+Config file only: ``[asset_paths]`` maps an asset id to an existing folder that
+already holds its files (for example a Whisper model you downloaded before);
+Plenio then uses that folder instead of ``<asset_dir>/<kind>/<id>``.
 """
 
 from __future__ import annotations
@@ -38,6 +42,8 @@ class PlenioConfig:
     asset_dir: Path | None = None
     worker_timeout_s: float = 3600.0
     worker_idle_timeout_s: float = 300.0
+    asset_paths: Mapping[str, Path] = field(default_factory=dict)
+    """Asset id -> an existing folder with the asset's files (config file ``[asset_paths]``)."""
     sources: Mapping[str, str] = field(default_factory=dict)
     """Where each non-default value came from (``file`` or the variable name)."""
 
@@ -58,6 +64,7 @@ class PlenioConfig:
             "asset_dir": str(self.asset_dir) if self.asset_dir else None,
             "worker_timeout_s": self.worker_timeout_s,
             "worker_idle_timeout_s": self.worker_idle_timeout_s,
+            "asset_paths": {key: str(value) for key, value in self.asset_paths.items()},
             "sources": dict(self.sources),
         }
 
@@ -84,7 +91,7 @@ def _parse_seconds(value: Any, name: str) -> float:
 def _apply_file(
     config: PlenioConfig, values: dict[str, Any], path: Path, sources: dict[str, str]
 ) -> PlenioConfig:
-    allowed = {"offline", "auto_download", "asset_dir", "workers"}
+    allowed = {"offline", "auto_download", "asset_dir", "workers", "asset_paths"}
     unknown = sorted(set(values) - allowed)
     if unknown:
         raise PlenioUserError(
@@ -100,6 +107,13 @@ def _apply_file(
         if not isinstance(values["asset_dir"], str) or not values["asset_dir"].strip():
             raise PlenioUserError(f"{path}: 'asset_dir' must be a non-empty path string.")
         updates["asset_dir"] = Path(values["asset_dir"]).expanduser()
+    paths = values.get("asset_paths", {})
+    if not isinstance(paths, dict) or not all(
+        isinstance(k, str) and isinstance(v, str) and v.strip() for k, v in paths.items()
+    ):
+        raise PlenioUserError(f"{path}: [asset_paths] must map asset ids to folder path strings.")
+    if paths:
+        updates["asset_paths"] = {key: Path(value).expanduser() for key, value in paths.items()}
     workers = values.get("workers", {})
     if not isinstance(workers, dict):
         raise PlenioUserError(f"{path}: [workers] must be a table.")

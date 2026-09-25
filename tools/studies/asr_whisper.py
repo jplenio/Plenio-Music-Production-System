@@ -4,8 +4,12 @@ The reference lyrics come from a Plenio release record next to the audio (``<ste
 or from ``<stem>.lyrics.txt``. Each file is transcribed once per configuration; results (words
 with times and probabilities, WER, language, run time) are written as JSON.
 
+The ``regions*`` configurations transcribe only where SheetSage2 found `Vocal` notes
+(``--regions`` = folder with ``<stem>.sheetsage.json``; gaps under 2 s merged, 0.5 s margin),
+passed to faster-whisper as ``clip_timestamps``.
+
 Usage:
-  <comfy python> tools/studies/asr_whisper.py --model <ct2 model dir> --out <dir> [--config NAME]... <audio>...
+  <comfy python> tools/studies/asr_whisper.py --model <ct2 model dir> --out <dir> [--config NAME]... [--regions <dir>] <audio>...
 """
 
 from __future__ import annotations
@@ -26,7 +30,27 @@ CONFIGS: dict[str, dict[str, Any]] = {
     # the settings Plenio's Transcribe Lyrics uses (deterministic: no temperature fallback)
     "plenio": {"language": None, "vad_filter": False, "temperature": 0.0},
     "plenio_en": {"language": "en", "vad_filter": False, "temperature": 0.0},
+    # only where the transcription has vocal notes; default temperature fallback with a fixed seed
+    "regions": {"language": None, "vad_filter": False, "regions": True, "seed": 0},
+    "regions_t0": {"language": None, "vad_filter": False, "regions": True, "temperature": 0.0},
 }
+
+
+def vocal_regions(
+    notes: list[list[float]], duration: float, gap: float = 2.0, pad: float = 0.5
+) -> list[float]:
+    """Merged [start, end] intervals of the vocal notes, flattened for ``clip_timestamps``."""
+    spans: list[list[float]] = []
+    for start, end, _ in sorted(notes):
+        if spans and start - spans[-1][1] <= gap:
+            spans[-1][1] = max(spans[-1][1], end)
+        else:
+            spans.append([start, end])
+    out: list[float] = []
+    for start, end in spans:
+        if end - start >= 0.5:
+            out.extend([round(max(0.0, start - pad), 2), round(min(duration, end + pad), 2)])
+    return out
 
 
 def reference_for(path: Path) -> str | None:
@@ -37,8 +61,29 @@ def reference_for(path: Path) -> str | None:
     return text.read_text(encoding="utf-8") if text.exists() else None
 
 
-def transcribe(model: Any, path: Path, config: dict[str, Any]) -> dict[str, Any]:
+def transcribe(
+    model: Any, path: Path, config: dict[str, Any], clips: list[float] | None = None
+) -> dict[str, Any]:
     started = time.perf_counter()
+    if config.get("regions") and not clips:
+        return {
+            "language": None,
+            "language_probability": 0.0,
+            "seconds": 0.0,
+            "text": "",
+            "segments": [],
+            "words": [],
+            "skipped": "no vocal notes in the transcription",
+        }
+    if "seed" in config:
+        import ctranslate2
+
+        ctranslate2.set_random_seed(config["seed"])
+    extra: dict[str, Any] = {}
+    if "temperature" in config:
+        extra["temperature"] = config["temperature"]
+    if config.get("regions"):
+        extra["clip_timestamps"] = clips
     segments, info = model.transcribe(
         str(path),
         language=config["language"],
@@ -46,7 +91,7 @@ def transcribe(model: Any, path: Path, config: dict[str, Any]) -> dict[str, Any]
         word_timestamps=True,
         beam_size=5,
         condition_on_previous_text=False,
-        **({"temperature": config["temperature"]} if "temperature" in config else {}),
+        **extra,
     )
     rows, words = [], []
     for segment in segments:
@@ -86,6 +131,7 @@ def main() -> int:
     parser.add_argument("--config", action="append", choices=sorted(CONFIGS))
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--compute-type", default="float16")
+    parser.add_argument("--regions", type=Path, help="folder with <stem>.sheetsage.json (vocal notes)")
     parser.add_argument("audio", nargs="+", type=Path)
     args = parser.parse_args()
     # CTranslate2 4.x needs the CUDA 12 cuBLAS (nvidia-cublas-cu12 wheel) and cuDNN 9 (next to torch).
@@ -107,8 +153,13 @@ def main() -> int:
             "reference": reference,
             "runs": {},
         }
+        clips = None
+        if args.regions and (args.regions / f"{path.stem}.sheetsage.json").exists():
+            data = read_json(args.regions / f"{path.stem}.sheetsage.json")
+            clips = vocal_regions(data["events"]["vocal_notes"], float(data["audio_seconds"]))
+            result["regions"] = clips
         for name in args.config or ["auto", "auto_vad"]:
-            run = transcribe(model, path, CONFIGS[name])
+            run = transcribe(model, path, CONFIGS[name], clips)
             run["wer"] = wer(reference, run["text"]) if reference else None
             result["runs"][name] = run
             score = run["wer"]["wer"] if run["wer"] else "-"

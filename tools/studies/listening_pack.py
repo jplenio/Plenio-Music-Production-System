@@ -33,8 +33,6 @@ def detectors(row: dict[str, Any]) -> str:
     parts = []
     if "score_detector" in row:
         parts.append(f"SheetSage2 vocal notes {row['score_detector']['vocal_notes']}")
-    if "words_detector" in row:
-        parts.append(f"ASR confident words/min {row['words_detector']['confident_per_min']}")
     if "listen_detector" in row:
         parts.append(f"Gemma yes {row['listen_detector']['yes']}/{row['listen_detector']['windows']}")
     if "sung_lyrics_wer" in row:
@@ -58,6 +56,15 @@ def main() -> int:
         "",
         "Please listen with headphones and fill in the last column (e.g. *no voice*, *humming at 1:20*, *lyrics ok*).",
         "The detector readings are what Plenio measured; your verdicts calibrate them.",
+        "",
+        "**Start here (the verdicts that decide defaults):**",
+        "",
+        "1. Vocals despite an instrumental score: 02 and 03 (adapter off, flagged) against 04 and 05 (adapter on). "
+        "03 is the one case where the two detectors disagree.",
+        "2. Adapter in covers: 15/16 against 17/18 (lead melody, new harmony) and 19/20 against 21/22 (lead, original chords).",
+        "3. Endings with the adapter on the Song path: 04, 05, 08, 11 (all measured as abrupt).",
+        "4. Lyrics: 12 and 13 (original lyrics, automatic draft), 14 (new lyrics).",
+        "5. Accompaniment only: 23 (new harmony, flagged as vocal) against 24-27 (original chords).",
         "",
         "| # | File | Condition | Listen for | Measured | Your verdict |",
         "|---|---|---|---|---|---|",

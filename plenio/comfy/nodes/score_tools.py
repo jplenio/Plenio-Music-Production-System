@@ -7,6 +7,7 @@ from typing import Any
 from comfy_api.latest import io
 
 from ...core import score as score_rules
+from ...core.preparation import prepare_for_brief
 from ...core.reports import Report, Status
 from ..types import Brief, ReportType
 
@@ -35,6 +36,19 @@ class PlenioScoreTools(io.ComfyNode):
                     options=[
                         io.DynamicCombo.Option("prepare from brief", []),
                         io.DynamicCombo.Option("strip chords", []),
+                        io.DynamicCombo.Option(
+                            "fit length",
+                            [
+                                io.Float.Input(
+                                    "seconds",
+                                    default=90.0,
+                                    min=20.0,
+                                    max=900.0,
+                                    step=5.0,
+                                    tooltip="Target length; whole sections are kept, the ending stays.",
+                                ),
+                            ],
+                        ),
                         io.DynamicCombo.Option(
                             "voices",
                             [
@@ -99,13 +113,11 @@ class PlenioScoreTools(io.ComfyNode):
                 "", "", report, ui={"plenio_summary": [{"status": "skipped", "markdown": report.summary}]}
             )
         if name == "prepare from brief":
-            if brief is None:
-                change = score_rules.prepare(score, instrumental=False)
-                change = score_rules.Change(change.abc, ("no brief connected: score unchanged",))
-            else:
-                change = score_rules.prepare(score, instrumental=brief.instrumental, melody=brief.melody)
+            change = prepare_for_brief(score, brief)
         elif name == "strip chords":
             change = score_rules.strip_chords(score)
+        elif name == "fit length":
+            change = score_rules.fit_length(score, float(operation.get("seconds", 90.0)))
         elif name == "voices":
             action = VOICE_ACTIONS[operation.get("vocal", "keep")]
             if action == "keep":

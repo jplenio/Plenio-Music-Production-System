@@ -2,7 +2,7 @@ import type { Fetcher } from '../api/client'
 import type { ComfyNode, InputSpec, WidgetConstructor } from '../shared/comfy'
 import { ownedBeforeRun } from '../shared/sheetSession'
 import { DOCUMENT_KINDS, parseState, serializeState, summarize } from '../shared/sheetState'
-import { getPayload, onPayload } from './payloads'
+import { getAsrNote, getPayload, onPayload } from './payloads'
 
 export const SHEET_STATE_TYPE = 'PLENIO_SHEET_STATE'
 
@@ -68,6 +68,7 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
       title: node.title || 'Song Sheet',
       state: current,
       payload,
+      asrNote: getAsrNote(payload?.docs.lyrics?.upstream_sha256),
       owned: owned.length ? owned : [...DOCUMENT_KINDS],
       review,
       fetcher,

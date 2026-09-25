@@ -10,6 +10,7 @@ from harness import PACKAGE_NAME, PROJECT, ComfyServer, Log, copy_package
 
 HERE = Path(__file__).resolve().parent
 FIXTURE_BLUEPRINT = PROJECT / "tests" / "fixtures" / "graphs" / "Plenio Test Blueprint.json"
+COVER_EVENTS = PROJECT / "tests" / "fixtures" / "cover" / "minimax-excerpt.events.json"
 
 
 @pytest.fixture(scope="session")
@@ -21,7 +22,13 @@ def server(tmp_path_factory: pytest.TempPathFactory, comfy_path: Path) -> Iterat
     shutil.copytree(
         HERE / "plenio_test_nodes", custom / "plenio_test_nodes", ignore=shutil.ignore_patterns("__pycache__")
     )
-    instance = ComfyServer(comfy_path, base, node_packs=[PACKAGE_NAME, "plenio_test_nodes"])
+    shutil.copy2(COVER_EVENTS, custom / "plenio_test_nodes" / COVER_EVENTS.name)
+    instance = ComfyServer(
+        comfy_path,
+        base,
+        node_packs=[PACKAGE_NAME, "plenio_test_nodes"],
+        extra_env={"PLENIO_OFFLINE": "1"},  # tests never download; missing assets are an expected error
+    )
     instance.start()
     yield instance
     instance.stop()

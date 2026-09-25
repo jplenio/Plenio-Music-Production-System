@@ -44,6 +44,47 @@ export interface SheetPayload {
   engine: string | null
   instrumental: boolean
   target_seconds?: number | null
+  timeline?: TimelinePayload
+  reference_audio?: { filename: string; subfolder: string; type: string }
+}
+
+/** Plenio timeline (plenio.timeline/1) as far as the editor uses it. */
+export interface TimelinePayload {
+  duration_s: number
+  bars: [number, number, string][]
+  sections: [string, number, number][]
+}
+
+/** What Transcribe Lyrics reports about the draft it produced (``plenio_asr``). */
+export interface AsrNote {
+  draft_sha256: string
+  engine: string
+  language: string
+  low_confidence: string[]
+  left_out: string[]
+}
+
+export interface SectionTime {
+  label: string
+  bars: number
+  start: string
+  end: string
+}
+
+function clock(seconds: number): string {
+  const minutes = Math.floor(seconds / 60)
+  const rest = Math.round(seconds - minutes * 60)
+  return `${minutes}:${String(rest).padStart(2, '0')}`
+}
+
+/** Start and end of every score section in the source (a timeline's bars are 1-based in sections). */
+export function sectionTimes(timeline: TimelinePayload | null | undefined): SectionTime[] {
+  if (!timeline?.bars?.length) return []
+  return (timeline.sections ?? []).map(([label, startBar, bars]) => {
+    const first = timeline.bars[Math.max(0, startBar - 1)]
+    const last = timeline.bars[Math.min(timeline.bars.length - 1, startBar - 1 + bars - 1)]
+    return { label, bars, start: clock(first?.[0] ?? 0), end: clock(last?.[1] ?? timeline.duration_s) }
+  })
 }
 
 export type Intent = 'keep' | 'auto' | 'manual' | 'rebase'

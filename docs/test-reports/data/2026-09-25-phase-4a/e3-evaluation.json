@@ -1,0 +1,1486 @@
+[
+  {
+    "name": "e4-tags-s1",
+    "condition": "tags",
+    "seed": 1,
+    "lora": false,
+    "render_seconds": 121.0,
+    "score_seconds": 256.94,
+    "ceiling_seconds": [
+      "254.8"
+    ],
+    "ending": {
+      "tail_to_median": 0.01,
+      "abrupt": false,
+      "seconds": 254.8
+    },
+    "take_seconds": 254.8,
+    "score_detector": {
+      "vocal_notes": 173,
+      "vocal_seconds": 71.3,
+      "vocal_notes_per_min": 40.7
+    },
+    "words_detector": {
+      "words": 315,
+      "confident_per_min": 70.2,
+      "mean_p": 0.916,
+      "language": [
+        "en",
+        0.454
+      ]
+    },
+    "listen_detector": {
+      "yes": 2,
+      "windows": 3,
+      "answers": [
+        "yes",
+        "yes",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e4-tags-s2",
+    "condition": "tags",
+    "seed": 2,
+    "lora": false,
+    "render_seconds": 77.8,
+    "score_seconds": 188.57,
+    "ceiling_seconds": [
+      "184.56"
+    ],
+    "ending": {
+      "tail_to_median": 0.1,
+      "abrupt": false,
+      "seconds": 184.56
+    },
+    "take_seconds": 184.56,
+    "score_detector": {
+      "vocal_notes": 65,
+      "vocal_seconds": 20.4,
+      "vocal_notes_per_min": 21.1
+    },
+    "words_detector": {
+      "words": 29,
+      "confident_per_min": 4.9,
+      "mean_p": 0.549,
+      "language": [
+        "en",
+        0.422
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e4-tags-lora-s1",
+    "condition": "tags-lora",
+    "seed": 1,
+    "lora": true,
+    "render_seconds": 103.5,
+    "score_seconds": 225.88,
+    "ceiling_seconds": [
+      "239.96"
+    ],
+    "ending": {
+      "tail_to_median": 1.09,
+      "abrupt": true,
+      "seconds": 239.96
+    },
+    "take_seconds": 239.96,
+    "score_detector": {
+      "vocal_notes": 0,
+      "vocal_seconds": 0,
+      "vocal_notes_per_min": 0.0
+    },
+    "words_detector": {
+      "words": 333,
+      "confident_per_min": 83.3,
+      "mean_p": 0.869,
+      "language": [
+        "si",
+        0.727
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e4-tags-lora-s2",
+    "condition": "tags-lora",
+    "seed": 2,
+    "lora": true,
+    "render_seconds": 236.8,
+    "score_seconds": 362.86,
+    "ceiling_seconds": [
+      "427.28"
+    ],
+    "ending": {
+      "tail_to_median": 1.0,
+      "abrupt": true,
+      "seconds": 427.28
+    },
+    "take_seconds": 427.28,
+    "score_detector": {
+      "vocal_notes": 0,
+      "vocal_seconds": 0,
+      "vocal_notes_per_min": 0.0
+    },
+    "words_detector": {
+      "words": 31,
+      "confident_per_min": 2.2,
+      "mean_p": 0.587,
+      "language": [
+        "en",
+        0.794
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e4-bare-s1",
+    "condition": "bare",
+    "seed": 1,
+    "lora": false,
+    "render_seconds": 97.7,
+    "score_seconds": 234.35,
+    "ceiling_seconds": [
+      "228.36"
+    ],
+    "ending": {
+      "tail_to_median": 0.0,
+      "abrupt": false,
+      "seconds": 228.36
+    },
+    "take_seconds": 228.36,
+    "score_detector": {
+      "vocal_notes": 0,
+      "vocal_seconds": 0,
+      "vocal_notes_per_min": 0.0
+    },
+    "words_detector": {
+      "words": 296,
+      "confident_per_min": 77.8,
+      "mean_p": 0.875,
+      "language": [
+        "si",
+        0.65
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e4-bare-s2",
+    "condition": "bare",
+    "seed": 2,
+    "lora": false,
+    "render_seconds": 82.5,
+    "score_seconds": 202.86,
+    "ceiling_seconds": [
+      "198.24"
+    ],
+    "ending": {
+      "tail_to_median": 0.0,
+      "abrupt": false,
+      "seconds": 198.24
+    },
+    "take_seconds": 198.24,
+    "score_detector": {
+      "vocal_notes": 1,
+      "vocal_seconds": 0.2,
+      "vocal_notes_per_min": 0.3
+    },
+    "words_detector": {
+      "words": 273,
+      "confident_per_min": 82.6,
+      "mean_p": 0.865,
+      "language": [
+        "si",
+        0.506
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e4-bare-lora-s1",
+    "condition": "bare-lora",
+    "seed": 1,
+    "lora": true,
+    "render_seconds": 179.2,
+    "score_seconds": 302.12,
+    "ceiling_seconds": [
+      "357.44"
+    ],
+    "ending": {
+      "tail_to_median": 1.07,
+      "abrupt": true,
+      "seconds": 357.44
+    },
+    "take_seconds": 357.44,
+    "score_detector": {
+      "vocal_notes": 0,
+      "vocal_seconds": 0,
+      "vocal_notes_per_min": 0.0
+    },
+    "words_detector": {
+      "words": 481,
+      "confident_per_min": 80.7,
+      "mean_p": 0.874,
+      "language": [
+        "si",
+        0.732
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e4-timed-s1",
+    "condition": "timed",
+    "seed": 1,
+    "lora": false,
+    "render_seconds": 60.1,
+    "score_seconds": 158.12,
+    "ceiling_seconds": [
+      "156.12"
+    ],
+    "ending": {
+      "tail_to_median": 0.02,
+      "abrupt": false,
+      "seconds": 156.12
+    },
+    "take_seconds": 156.12,
+    "score_detector": {
+      "vocal_notes": 2,
+      "vocal_seconds": 0.4,
+      "vocal_notes_per_min": 0.8
+    },
+    "words_detector": {
+      "words": 202,
+      "confident_per_min": 77.6,
+      "mean_p": 0.87,
+      "language": [
+        "si",
+        0.834
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e4-timed-s2",
+    "condition": "timed",
+    "seed": 2,
+    "lora": false,
+    "render_seconds": 21.8,
+    "score_seconds": 62.86,
+    "ceiling_seconds": [
+      "59.72"
+    ],
+    "ending": {
+      "tail_to_median": 0.16,
+      "abrupt": false,
+      "seconds": 59.72
+    },
+    "take_seconds": 59.72,
+    "score_detector": {
+      "vocal_notes": 0,
+      "vocal_seconds": 0,
+      "vocal_notes_per_min": 0.0
+    },
+    "words_detector": {
+      "words": 111,
+      "confident_per_min": 111.5,
+      "mean_p": 0.871,
+      "language": [
+        "si",
+        0.491
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e4-timed-lora-s1",
+    "condition": "timed-lora",
+    "seed": 1,
+    "lora": true,
+    "render_seconds": 142.2,
+    "score_seconds": 386.82,
+    "ceiling_seconds": [
+      "299.96"
+    ],
+    "ending": {
+      "tail_to_median": 1.21,
+      "abrupt": true,
+      "seconds": 299.96
+    },
+    "take_seconds": 299.96,
+    "score_detector": {
+      "vocal_notes": 0,
+      "vocal_seconds": 0,
+      "vocal_notes_per_min": 0.0
+    },
+    "words_detector": {
+      "words": 407,
+      "confident_per_min": 81.4,
+      "mean_p": 0.875,
+      "language": [
+        "si",
+        0.802
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e5-original-new-s1",
+    "condition": "original-new",
+    "seed": 1,
+    "lora": false,
+    "render_seconds": 31.0,
+    "score_seconds": 83.31,
+    "ceiling_seconds": [
+      "83.56"
+    ],
+    "ending": {
+      "tail_to_median": 0.28,
+      "abrupt": false,
+      "seconds": 83.56
+    },
+    "take_seconds": 83.56,
+    "score_detector": {
+      "vocal_notes": 163,
+      "vocal_seconds": 55.2,
+      "vocal_notes_per_min": 117.0
+    },
+    "identity": {
+      "bars": [
+        42,
+        43
+      ],
+      "key": [
+        "A",
+        "A"
+      ],
+      "tempo": [
+        121,
+        121
+      ],
+      "sections": [
+        "verse",
+        "pre-chorus",
+        "chorus",
+        "outro"
+      ],
+      "melody_vs_source_vocal": {
+        "f1": 0.885,
+        "offset": 0,
+        "precision": 0.814,
+        "recall": 0.969
+      },
+      "chord_roots_vs_source": 0.439
+    },
+    "words_detector": {
+      "words": 123,
+      "confident_per_min": 87.6,
+      "mean_p": 0.953,
+      "language": [
+        "en",
+        0.962
+      ]
+    },
+    "sung_lyrics_wer": {
+      "reference_words": 123,
+      "hypothesis_words": 123,
+      "substitutions": 1,
+      "deletions": 0,
+      "insertions": 0,
+      "wer": 0.0081
+    },
+    "listen_detector": {
+      "yes": 3,
+      "windows": 3,
+      "answers": [
+        "yes",
+        "yes",
+        "yes"
+      ]
+    }
+  },
+  {
+    "name": "e5-original-keep-s1",
+    "condition": "original-keep",
+    "seed": 1,
+    "lora": false,
+    "render_seconds": 29.4,
+    "score_seconds": 83.31,
+    "ceiling_seconds": [
+      "82.68"
+    ],
+    "ending": {
+      "tail_to_median": 0.73,
+      "abrupt": true,
+      "seconds": 82.68
+    },
+    "take_seconds": 82.68,
+    "score_detector": {
+      "vocal_notes": 168,
+      "vocal_seconds": 54.8,
+      "vocal_notes_per_min": 121.9
+    },
+    "identity": {
+      "bars": [
+        42,
+        42
+      ],
+      "key": [
+        "A",
+        "A"
+      ],
+      "tempo": [
+        121,
+        122
+      ],
+      "sections": [
+        "verse",
+        "pre-chorus",
+        "chorus",
+        "outro"
+      ],
+      "melody_vs_source_vocal": {
+        "f1": 0.933,
+        "offset": 0,
+        "precision": 0.885,
+        "recall": 0.988
+      },
+      "chord_roots_vs_source": 0.952
+    },
+    "words_detector": {
+      "words": 125,
+      "confident_per_min": 86.4,
+      "mean_p": 0.937,
+      "language": [
+        "en",
+        0.906
+      ]
+    },
+    "sung_lyrics_wer": {
+      "reference_words": 123,
+      "hypothesis_words": 125,
+      "substitutions": 2,
+      "deletions": 0,
+      "insertions": 2,
+      "wer": 0.0325
+    },
+    "listen_detector": {
+      "yes": 3,
+      "windows": 3,
+      "answers": [
+        "yes",
+        "yes",
+        "yes"
+      ]
+    }
+  },
+  {
+    "name": "e5-newlyrics-new-s1",
+    "condition": "newlyrics-new",
+    "seed": 1,
+    "lora": false,
+    "render_seconds": 29.1,
+    "score_seconds": 83.31,
+    "ceiling_seconds": [
+      "83.24"
+    ],
+    "ending": {
+      "tail_to_median": 0.39,
+      "abrupt": false,
+      "seconds": 83.24
+    },
+    "take_seconds": 83.24,
+    "score_detector": {
+      "vocal_notes": 165,
+      "vocal_seconds": 54.9,
+      "vocal_notes_per_min": 118.9
+    },
+    "identity": {
+      "bars": [
+        42,
+        42
+      ],
+      "key": [
+        "A",
+        "A"
+      ],
+      "tempo": [
+        121,
+        121
+      ],
+      "sections": [
+        "verse",
+        "chorus"
+      ],
+      "melody_vs_source_vocal": {
+        "f1": 0.931,
+        "offset": 0,
+        "precision": 0.876,
+        "recall": 0.994
+      },
+      "chord_roots_vs_source": 0.476
+    },
+    "words_detector": {
+      "words": 100,
+      "confident_per_min": 69.2,
+      "mean_p": 0.922,
+      "language": [
+        "en",
+        0.938
+      ]
+    },
+    "sung_lyrics_wer": {
+      "reference_words": 116,
+      "hypothesis_words": 100,
+      "substitutions": 7,
+      "deletions": 16,
+      "insertions": 0,
+      "wer": 0.1983
+    },
+    "listen_detector": {
+      "yes": 3,
+      "windows": 3,
+      "answers": [
+        "yes",
+        "yes",
+        "yes"
+      ]
+    }
+  },
+  {
+    "name": "e5-lead-new-s1",
+    "condition": "lead-new",
+    "seed": 1,
+    "lora": false,
+    "render_seconds": 35.4,
+    "score_seconds": 83.31,
+    "ceiling_seconds": [
+      "99.12"
+    ],
+    "ending": {
+      "tail_to_median": 0.45,
+      "abrupt": false,
+      "seconds": 99.12
+    },
+    "take_seconds": 99.12,
+    "score_detector": {
+      "vocal_notes": 0,
+      "vocal_seconds": 0,
+      "vocal_notes_per_min": 0.0
+    },
+    "identity": {
+      "bars": [
+        42,
+        51
+      ],
+      "key": [
+        "A",
+        "A"
+      ],
+      "tempo": [
+        121,
+        121
+      ],
+      "sections": [
+        "intro",
+        "verse",
+        "chorus",
+        "outro"
+      ],
+      "melody_vs_source_vocal": {
+        "f1": 0.751,
+        "offset": 0,
+        "precision": 0.623,
+        "recall": 0.945
+      },
+      "chord_roots_vs_source": 0.317
+    },
+    "words_detector": {
+      "words": 116,
+      "confident_per_min": 70.2,
+      "mean_p": 0.859,
+      "language": [
+        "si",
+        0.278
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e5-lead-new-s2",
+    "condition": "lead-new",
+    "seed": 2,
+    "lora": false,
+    "render_seconds": 29.1,
+    "score_seconds": 83.31,
+    "ceiling_seconds": [
+      "83.0"
+    ],
+    "ending": {
+      "tail_to_median": 0.56,
+      "abrupt": true,
+      "seconds": 83.0
+    },
+    "take_seconds": 83.0,
+    "score_detector": {
+      "vocal_notes": 0,
+      "vocal_seconds": 0,
+      "vocal_notes_per_min": 0.0
+    },
+    "identity": {
+      "bars": [
+        42,
+        43
+      ],
+      "key": [
+        "A",
+        "A"
+      ],
+      "tempo": [
+        121,
+        122
+      ],
+      "sections": [
+        "verse",
+        "chorus"
+      ],
+      "melody_vs_source_vocal": {
+        "f1": 0.867,
+        "offset": 0,
+        "precision": 0.852,
+        "recall": 0.883
+      },
+      "chord_roots_vs_source": 0.238
+    },
+    "words_detector": {
+      "words": 111,
+      "confident_per_min": 80.2,
+      "mean_p": 0.863,
+      "language": [
+        "si",
+        0.435
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e5-lead-new-lora-s1",
+    "condition": "lead-new-lora",
+    "seed": 1,
+    "lora": true,
+    "render_seconds": 30.1,
+    "score_seconds": 83.31,
+    "ceiling_seconds": [
+      "82.88"
+    ],
+    "ending": {
+      "tail_to_median": 0.51,
+      "abrupt": true,
+      "seconds": 82.88
+    },
+    "take_seconds": 82.88,
+    "score_detector": {
+      "vocal_notes": 0,
+      "vocal_seconds": 0,
+      "vocal_notes_per_min": 0.0
+    },
+    "identity": {
+      "bars": [
+        42,
+        43
+      ],
+      "key": [
+        "A",
+        "A"
+      ],
+      "tempo": [
+        121,
+        122
+      ],
+      "sections": [
+        "intro",
+        "chorus",
+        "outro"
+      ],
+      "melody_vs_source_vocal": {
+        "f1": 0.895,
+        "offset": 0,
+        "precision": 0.851,
+        "recall": 0.945
+      },
+      "chord_roots_vs_source": 0.463
+    },
+    "words_detector": {
+      "words": 9,
+      "confident_per_min": 5.8,
+      "mean_p": 0.85,
+      "language": [
+        "sn",
+        0.256
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e5-lead-new-lora-s2",
+    "condition": "lead-new-lora",
+    "seed": 2,
+    "lora": true,
+    "render_seconds": 29.0,
+    "score_seconds": 83.31,
+    "ceiling_seconds": [
+      "83.4"
+    ],
+    "ending": {
+      "tail_to_median": 0.5,
+      "abrupt": false,
+      "seconds": 83.4
+    },
+    "take_seconds": 83.4,
+    "score_detector": {
+      "vocal_notes": 0,
+      "vocal_seconds": 0,
+      "vocal_notes_per_min": 0.0
+    },
+    "identity": {
+      "bars": [
+        42,
+        43
+      ],
+      "key": [
+        "A",
+        "A"
+      ],
+      "tempo": [
+        121,
+        121
+      ],
+      "sections": [
+        "intro",
+        "verse",
+        "chorus",
+        "outro"
+      ],
+      "melody_vs_source_vocal": {
+        "f1": 0.922,
+        "offset": 0,
+        "precision": 0.874,
+        "recall": 0.975
+      },
+      "chord_roots_vs_source": 0.571
+    },
+    "words_detector": {
+      "words": 9,
+      "confident_per_min": 5.8,
+      "mean_p": 0.849,
+      "language": [
+        "sn",
+        0.315
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e5-lead-keep-s1",
+    "condition": "lead-keep",
+    "seed": 1,
+    "lora": false,
+    "render_seconds": 29.6,
+    "score_seconds": 83.31,
+    "ceiling_seconds": [
+      "83.6"
+    ],
+    "ending": {
+      "tail_to_median": 0.19,
+      "abrupt": false,
+      "seconds": 83.6
+    },
+    "take_seconds": 83.6,
+    "score_detector": {
+      "vocal_notes": 22,
+      "vocal_seconds": 6.2,
+      "vocal_notes_per_min": 15.8
+    },
+    "identity": {
+      "bars": [
+        42,
+        43
+      ],
+      "key": [
+        "A",
+        "A"
+      ],
+      "tempo": [
+        121,
+        121
+      ],
+      "sections": [
+        "intro",
+        "verse",
+        "interlude",
+        "outro"
+      ],
+      "melody_vs_source_vocal": {
+        "f1": 0.856,
+        "offset": 0,
+        "precision": 0.792,
+        "recall": 0.933
+      },
+      "chord_roots_vs_source": 0.929
+    },
+    "words_detector": {
+      "words": 111,
+      "confident_per_min": 79.7,
+      "mean_p": 0.859,
+      "language": [
+        "si",
+        0.45
+      ]
+    },
+    "listen_detector": {
+      "yes": 2,
+      "windows": 3,
+      "answers": [
+        "yes",
+        "yes",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e5-lead-keep-s2",
+    "condition": "lead-keep",
+    "seed": 2,
+    "lora": false,
+    "render_seconds": 29.4,
+    "score_seconds": 83.31,
+    "ceiling_seconds": [
+      "83.88"
+    ],
+    "ending": {
+      "tail_to_median": 0.06,
+      "abrupt": false,
+      "seconds": 83.88
+    },
+    "take_seconds": 83.88,
+    "score_detector": {
+      "vocal_notes": 0,
+      "vocal_seconds": 0,
+      "vocal_notes_per_min": 0.0
+    },
+    "identity": {
+      "bars": [
+        42,
+        43
+      ],
+      "key": [
+        "A",
+        "A"
+      ],
+      "tempo": [
+        121,
+        120
+      ],
+      "sections": [
+        "intro",
+        "verse",
+        "chorus",
+        "outro"
+      ],
+      "melody_vs_source_vocal": {
+        "f1": 0.889,
+        "offset": 0,
+        "precision": 0.849,
+        "recall": 0.933
+      },
+      "chord_roots_vs_source": 0.952
+    },
+    "words_detector": {
+      "words": 111,
+      "confident_per_min": 79.4,
+      "mean_p": 0.863,
+      "language": [
+        "si",
+        0.378
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e5-lead-keep-lora-s1",
+    "condition": "lead-keep-lora",
+    "seed": 1,
+    "lora": true,
+    "render_seconds": 45.4,
+    "score_seconds": 83.31,
+    "ceiling_seconds": [
+      "83.12"
+    ],
+    "ending": {
+      "tail_to_median": 0.49,
+      "abrupt": false,
+      "seconds": 83.12
+    },
+    "take_seconds": 83.12,
+    "score_detector": {
+      "vocal_notes": 0,
+      "vocal_seconds": 0,
+      "vocal_notes_per_min": 0.0
+    },
+    "identity": {
+      "bars": [
+        42,
+        43
+      ],
+      "key": [
+        "A",
+        "A"
+      ],
+      "tempo": [
+        121,
+        121
+      ],
+      "sections": [
+        "intro",
+        "verse",
+        "chorus",
+        "outro"
+      ],
+      "melody_vs_source_vocal": {
+        "f1": 0.888,
+        "offset": 0,
+        "precision": 0.833,
+        "recall": 0.951
+      },
+      "chord_roots_vs_source": 0.952
+    },
+    "words_detector": {
+      "words": 7,
+      "confident_per_min": 4.3,
+      "mean_p": 0.82,
+      "language": [
+        "sn",
+        0.241
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e5-lead-keep-lora-s2",
+    "condition": "lead-keep-lora",
+    "seed": 2,
+    "lora": true,
+    "render_seconds": 45.8,
+    "score_seconds": 83.31,
+    "ceiling_seconds": [
+      "83.28"
+    ],
+    "ending": {
+      "tail_to_median": 1.03,
+      "abrupt": true,
+      "seconds": 83.28
+    },
+    "take_seconds": 83.28,
+    "score_detector": {
+      "vocal_notes": 0,
+      "vocal_seconds": 0,
+      "vocal_notes_per_min": 0.0
+    },
+    "identity": {
+      "bars": [
+        42,
+        42
+      ],
+      "key": [
+        "A",
+        "A"
+      ],
+      "tempo": [
+        121,
+        121
+      ],
+      "sections": [
+        "intro",
+        "verse",
+        "chorus",
+        "outro"
+      ],
+      "melody_vs_source_vocal": {
+        "f1": 0.895,
+        "offset": 0,
+        "precision": 0.876,
+        "recall": 0.914
+      },
+      "chord_roots_vs_source": 0.952
+    },
+    "words_detector": {
+      "words": 9,
+      "confident_per_min": 5.8,
+      "mean_p": 0.854,
+      "language": [
+        "sn",
+        0.283
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e5-acc-new-s1",
+    "condition": "acc-new",
+    "seed": 1,
+    "lora": false,
+    "render_seconds": 37.0,
+    "score_seconds": 83.31,
+    "ceiling_seconds": [
+      "105.8"
+    ],
+    "ending": {
+      "tail_to_median": 0.73,
+      "abrupt": true,
+      "seconds": 105.8
+    },
+    "take_seconds": 105.8,
+    "score_detector": {
+      "vocal_notes": 63,
+      "vocal_seconds": 36.9,
+      "vocal_notes_per_min": 35.7
+    },
+    "identity": {
+      "bars": [
+        42,
+        54
+      ],
+      "key": [
+        "A",
+        "A"
+      ],
+      "tempo": [
+        121,
+        122
+      ],
+      "sections": [
+        "intro",
+        "verse",
+        "outro"
+      ],
+      "melody_vs_source_vocal": {
+        "f1": 0.051,
+        "offset": 0,
+        "precision": 0.047,
+        "recall": 0.055
+      },
+      "chord_roots_vs_source": 0.262
+    },
+    "words_detector": {
+      "words": 55,
+      "confident_per_min": 21.6,
+      "mean_p": 0.711,
+      "language": [
+        "en",
+        0.448
+      ]
+    },
+    "listen_detector": {
+      "yes": 2,
+      "windows": 3,
+      "answers": [
+        "yes",
+        "yes",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e5-acc-keep-s1",
+    "condition": "acc-keep",
+    "seed": 1,
+    "lora": false,
+    "render_seconds": 32.3,
+    "score_seconds": 83.31,
+    "ceiling_seconds": [
+      "85.4"
+    ],
+    "ending": {
+      "tail_to_median": 1.32,
+      "abrupt": true,
+      "seconds": 85.4
+    },
+    "take_seconds": 85.4,
+    "score_detector": {
+      "vocal_notes": 0,
+      "vocal_seconds": 0,
+      "vocal_notes_per_min": 0.0
+    },
+    "identity": {
+      "bars": [
+        42,
+        44
+      ],
+      "key": [
+        "A",
+        "A"
+      ],
+      "tempo": [
+        121,
+        119
+      ],
+      "sections": [
+        "intro",
+        "interlude",
+        "outro"
+      ],
+      "melody_vs_source_vocal": {
+        "f1": 0.129,
+        "offset": 1,
+        "precision": 0.13,
+        "recall": 0.129
+      },
+      "chord_roots_vs_source": 0.81
+    },
+    "words_detector": {
+      "words": 9,
+      "confident_per_min": 4.2,
+      "mean_p": 0.61,
+      "language": [
+        "en",
+        0.244
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e5-acc-keep-s2",
+    "condition": "acc-keep",
+    "seed": 2,
+    "lora": false,
+    "render_seconds": 22.8,
+    "score_seconds": 83.31,
+    "ceiling_seconds": [
+      "67.28"
+    ],
+    "ending": {
+      "tail_to_median": 0.41,
+      "abrupt": false,
+      "seconds": 67.28
+    },
+    "take_seconds": 67.28,
+    "score_detector": {
+      "vocal_notes": 0,
+      "vocal_seconds": 0,
+      "vocal_notes_per_min": 0.0
+    },
+    "identity": {
+      "bars": [
+        42,
+        35
+      ],
+      "key": [
+        "A",
+        "A"
+      ],
+      "tempo": [
+        121,
+        90
+      ],
+      "sections": [
+        "intro",
+        "verse"
+      ],
+      "melody_vs_source_vocal": {
+        "f1": 0.075,
+        "offset": 1,
+        "precision": 0.097,
+        "recall": 0.061
+      },
+      "chord_roots_vs_source": 0.912
+    },
+    "words_detector": {
+      "words": 11,
+      "confident_per_min": 6.2,
+      "mean_p": 0.566,
+      "language": [
+        "en",
+        0.512
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e5-acc-keep-lora-s1",
+    "condition": "acc-keep-lora",
+    "seed": 1,
+    "lora": true,
+    "render_seconds": 29.7,
+    "score_seconds": 83.31,
+    "ceiling_seconds": [
+      "82.84"
+    ],
+    "ending": {
+      "tail_to_median": 1.04,
+      "abrupt": true,
+      "seconds": 82.84
+    },
+    "take_seconds": 82.84,
+    "score_detector": {
+      "vocal_notes": 0,
+      "vocal_seconds": 0,
+      "vocal_notes_per_min": 0.0
+    },
+    "identity": {
+      "bars": [
+        42,
+        44
+      ],
+      "key": [
+        "A",
+        "A"
+      ],
+      "tempo": [
+        121,
+        122
+      ],
+      "sections": [
+        "intro",
+        "verse",
+        "outro"
+      ],
+      "melody_vs_source_vocal": {
+        "f1": 0.13,
+        "offset": 1,
+        "precision": 0.102,
+        "recall": 0.178
+      },
+      "chord_roots_vs_source": 0.857
+    },
+    "words_detector": {
+      "words": 103,
+      "confident_per_min": 60.1,
+      "mean_p": 0.766,
+      "language": [
+        "nn",
+        0.245
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  },
+  {
+    "name": "e5-acc-keep-lora-s2",
+    "condition": "acc-keep-lora",
+    "seed": 2,
+    "lora": true,
+    "render_seconds": 29.6,
+    "score_seconds": 83.31,
+    "ceiling_seconds": [
+      "84.88"
+    ],
+    "ending": {
+      "tail_to_median": 0.07,
+      "abrupt": false,
+      "seconds": 84.88
+    },
+    "take_seconds": 84.88,
+    "score_detector": {
+      "vocal_notes": 0,
+      "vocal_seconds": 0,
+      "vocal_notes_per_min": 0.0
+    },
+    "identity": {
+      "bars": [
+        42,
+        43
+      ],
+      "key": [
+        "A",
+        "A"
+      ],
+      "tempo": [
+        121,
+        119
+      ],
+      "sections": [
+        "intro",
+        "verse"
+      ],
+      "melody_vs_source_vocal": {
+        "f1": 0.081,
+        "offset": -1,
+        "precision": 0.067,
+        "recall": 0.104
+      },
+      "chord_roots_vs_source": 0.833
+    },
+    "words_detector": {
+      "words": 111,
+      "confident_per_min": 78.5,
+      "mean_p": 0.868,
+      "language": [
+        "si",
+        0.367
+      ]
+    },
+    "listen_detector": {
+      "yes": 0,
+      "windows": 3,
+      "answers": [
+        "no",
+        "no",
+        "no"
+      ]
+    }
+  }
+]

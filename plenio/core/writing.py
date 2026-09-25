@@ -14,8 +14,9 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from . import lyrics as lyrics_rules
-from .brief import SongBrief
+from .brief import CoverBrief, SongBrief
 from .engines import EngineInfo, rules_for
+from .engines.yue2 import melody_register, note_name
 from .errors import PlenioValidationError
 
 REQUEST_SCHEMA = "plenio.request/1"
@@ -44,6 +45,12 @@ _LABEL_TAG = re.compile(
 )
 
 
+LYRICS_MODES = ("write", "tags", "none")
+INSTRUMENTAL_TAG = "instrumental"
+"""Lyrics of an instrumental song: the single tag ``[instrumental]`` (Phase 4A: fewer vocal-like
+sounds than section tags, and the owner preferred these takes)."""
+
+
 @dataclass(frozen=True)
 class Request:
     engine_id: str
@@ -52,6 +59,12 @@ class Request:
     instrumental: bool
     sections: tuple[str, ...]
     fixed_title: str = ""
+    kind: str = "song"
+    lyrics_mode: str = "write"
+    """``write``: the LLM writes the lyrics; ``tags``: the lyrics are ``sections`` as tags (set by
+    Plenio); ``none``: no lyrics from the LLM (original-lyrics covers take them from the source)."""
+    enforce_sections: bool = False
+    """The lyrics must have exactly ``sections`` (a cover's score defines them)."""
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -62,6 +75,9 @@ class Request:
             "instrumental": self.instrumental,
             "sections": list(self.sections),
             "fixed_title": self.fixed_title,
+            "kind": self.kind,
+            "lyrics_mode": self.lyrics_mode,
+            "enforce_sections": self.enforce_sections,
         }
 
 
@@ -84,18 +100,42 @@ class Draft:
 
 
 def compose(
-    brief: SongBrief,
+    brief: SongBrief | CoverBrief,
     engine: EngineInfo,
     *,
     detail: str = "standard",
     score_sections: Sequence[str] = (),
     fixed_title: str = "",
+    phrasing: Sequence[Mapping[str, Any]] = (),
+    language_hint: str = "",
+    reference_lyrics: str = "",
+    score_tempo: int | None = None,
+    vocal_range: tuple[int, int] | None = None,
 ) -> tuple[str, Request]:
-    """The writing prompt for ``brief`` under the rules of ``engine``."""
+    """The writing prompt for ``brief`` under the rules of ``engine``.
+
+    Songs: the LLM writes title, style and lyrics; instrumental songs get the single tag
+    ``[instrumental]`` from Plenio. Covers: the score defines the sections (see ``_compose_cover``).
+    """
+    if isinstance(brief, CoverBrief):
+        return _compose_cover(
+            brief,
+            engine,
+            detail=detail,
+            score_sections=score_sections,
+            phrasing=phrasing,
+            language_hint=language_hint,
+            reference_lyrics=reference_lyrics,
+            score_tempo=score_tempo,
+            vocal_range=vocal_range,
+        )
     rules = rules_for(engine.engine_id).writing_rules(
         instrumental=brief.instrumental, target_seconds=brief.target_seconds
     )
-    sections = tuple(s.strip("[]") for s in score_sections) or tuple(rules["sections"])
+    if brief.instrumental:
+        sections: tuple[str, ...] = (INSTRUMENTAL_TAG,)
+    else:
+        sections = tuple(s.strip("[]") for s in score_sections) or tuple(rules["sections"])
     request = Request(
         engine.engine_id,
         engine.rules_version,
@@ -103,8 +143,8 @@ def compose(
         brief.instrumental,
         sections,
         fixed_title.strip(),
+        lyrics_mode="tags" if brief.instrumental else "write",
     )
-    section_line = " ".join(f"[{s}]" for s in sections)
     parts = [
         f"You are a professional songwriter preparing a song for the AI music model {rules['engine']}.",
         "Write the song described in the brief below and follow the rules exactly.",
@@ -118,31 +158,181 @@ def compose(
         else f'- Title: use exactly "{request.fixed_title}".',
         f"- {rules['style']}",
         f"- {rules['lyrics']}",
-        f"- Sections, in this order: {section_line}"
-        + (
-            " (these follow the score and must not change)."
-            if score_sections
-            else " (adapt only if the brief asks for it)."
-        ),
-        "- Artwork: one sentence describing a square cover image; no text or letters in the image.",
     ]
+    if not brief.instrumental:
+        section_line = " ".join(f"[{s}]" for s in sections)
+        parts.append(
+            f"- Sections, in this order: {section_line}"
+            + (
+                " (these follow the score and must not change)."
+                if score_sections
+                else " (adapt only if the brief asks for it)."
+            )
+        )
+    parts.append("- Artwork: one sentence describing a square cover image; no text or letters in the image.")
     if DETAIL.get(detail):
         parts.append(f"- {DETAIL[detail]}")
-    parts += [
-        "",
-        f"Example style: {rules['example_style']}",
-        "",
+    example = f"[{INSTRUMENTAL_TAG}]" if brief.instrumental else f"[{sections[0]}]\n<lines>\n..."
+    parts += ["", f"Example style: {rules['example_style']}", "", *_layout(example)]
+    return "\n".join(parts), request
+
+
+def _layout(lyrics_example: str) -> list[str]:
+    return [
         "Write your answer in exactly this layout. Keep the four labels TITLE:, STYLE:, LYRICS: and ARTWORK: "
         "and replace the text in angle brackets; write nothing before or after it.",
         "",
         "TITLE: <the title>",
         "STYLE: <the style line>",
         "LYRICS:",
-        f"[{sections[0]}]",
-        "<lines>" if not brief.instrumental else f"[{sections[1] if len(sections) > 1 else sections[0]}]",
-        "...",
+        lyrics_example,
         "ARTWORK: <one sentence>",
     ]
+
+
+def melody_register_hint(vocal_range: tuple[int, int] | None) -> str:
+    """The voice rule for a cover whose melody lies in one register (YuE2 does not transpose)."""
+    if vocal_range is None:
+        return ""
+    lowest, highest = vocal_range
+    register = melody_register(lowest, highest)
+    span = f"{note_name(lowest)}-{note_name(highest)}"
+    if register == "high":
+        return f"The vocal melody lies high ({span}): describe a female or high voice in the style, not a male one."
+    if register == "low":
+        return f"The vocal melody lies low ({span}): describe a male or low voice in the style, not a female one."
+    return ""
+
+
+def reference_lines(reference_lyrics: str, sections: Sequence[str]) -> list[str]:
+    """Per section, the source's sung lines with their syllable counts: the most direct fit guide.
+
+    Empty when the reference is not sectioned like the score (then the phrase map is used).
+    """
+    parsed = lyrics_rules.parse_lyrics(reference_lyrics)
+    by_tag = {section.tag.lower(): section for section in parsed.sections}
+    if not parsed.sections or not all(s.lower() in by_tag for s in sections):
+        return []
+    lines: list[str] = []
+    for tag in sections:
+        section = by_tag[tag.lower()]
+        if not section.lines:
+            lines.append(f"[{tag}]: no singing - leave the section empty")
+            continue
+        lines.append(f"[{tag}]: {len(section.lines)} line(s)")
+        for line in section.lines:
+            lines.append(f"    {lyrics_rules.estimate_syllables(line)} syllables, like: {line}")
+    return lines
+
+
+def phrasing_lines(phrasing: Sequence[Mapping[str, Any]]) -> list[str]:
+    """One line per score section: how many lyric lines and about how many syllables each."""
+    lines = []
+    for section in phrasing:
+        phrases = [int(n) for n in section.get("phrases", [])]
+        if not phrases:
+            lines.append(f"{section['tag']}: no singing - leave the section empty")
+            continue
+        sizes = ", ".join(str(n) for n in phrases)
+        lines.append(f"{section['tag']}: {len(phrases)} line(s) of about {sizes} syllables")
+    return lines
+
+
+def _compose_cover(
+    brief: CoverBrief,
+    engine: EngineInfo,
+    *,
+    detail: str,
+    score_sections: Sequence[str],
+    phrasing: Sequence[Mapping[str, Any]],
+    language_hint: str,
+    reference_lyrics: str,
+    score_tempo: int | None,
+    vocal_range: tuple[int, int] | None = None,
+) -> tuple[str, Request]:
+    """Cover prompt: melody, form and tempo come from the score; the LLM describes the new version.
+
+    Original-lyrics covers take their lyrics from the source (the LLM writes title, style and
+    artwork only); new-lyrics covers are written against the score's phrasing; instrumental covers
+    use the score's section tags.
+    """
+    if not score_sections:
+        raise PlenioValidationError(
+            "A cover is written against its final score, but no score is connected.",
+            hint="Connect the score output of Song Sheet · Score to Write Song.",
+        )
+    rules = rules_for(engine.engine_id).writing_rules(instrumental=brief.instrumental, target_seconds=180.0)
+    sections = tuple(s.strip("[]") for s in score_sections)
+    mode = {"original": "none", "new": "write", "instrumental": "tags"}[brief.vocals]
+    request = Request(
+        engine.engine_id,
+        engine.rules_version,
+        brief.fingerprint,
+        brief.instrumental,
+        sections,
+        brief.title.strip(),
+        kind="cover",
+        lyrics_mode=mode,
+        enforce_sections=mode == "write",
+    )
+    tempo = (
+        f" The source's tempo is {score_tempo} BPM: write exactly '{score_tempo} BPM'." if score_tempo else ""
+    )
+    parts = [
+        f"You are a professional arranger preparing a cover version for the AI music model {rules['engine']}.",
+        "The melody, the song form and the tempo come from the source recording; you describe the new version.",
+        "",
+        "BRIEF",
+        brief.to_text(),
+        "",
+        "RULES",
+        "- Title: 1 to 6 words, no quotes."
+        if not request.fixed_title
+        else f'- Title: use exactly "{request.fixed_title}".',
+        f"- {rules['style']}{tempo}",
+    ]
+    register = melody_register_hint(vocal_range) if not brief.instrumental else ""
+    if register:
+        parts.append(f"- {register}")
+    language = brief.language or language_hint
+    if not brief.instrumental and language:
+        parts.append(f"- The lyrics are in {language}: name the language first in the style.")
+    if mode == "write":
+        section_line = " ".join(f"[{s}]" for s in sections)
+        parts += [
+            f"- Lyrics: new lyrics on the existing melody, with exactly these sections in this order: {section_line}. "
+            "Each section starts with its tag on its own line, a blank line between sections, only words to be "
+            "sung (no stage directions, no repeat marks).",
+        ]
+        targets = reference_lines(reference_lyrics, sections) if reference_lyrics.strip() else []
+        if targets:
+            parts += [
+                "- Fit the melody exactly: the melody was sung with the source lines below. Write the same "
+                "number of lines per section, each new line with the SAME number of syllables as the source "
+                "line it replaces (count them). Do not copy the source words:",
+                *[f"  {line}" for line in targets],
+            ]
+        else:
+            parts += [
+                "- Fit the melody: one line per phrase, one syllable per note (count them):",
+                *[f"  {line}" for line in phrasing_lines(phrasing)],
+            ]
+            if reference_lyrics.strip():
+                parts.append("- The source's lyrics, for phrasing and meaning only (do not copy them):")
+                parts += [f"  {line}" for line in reference_lyrics.strip().splitlines() if line.strip()]
+        if brief.theme:
+            parts.append(f"- Theme of the new lyrics: {brief.theme}")
+        example = f"[{sections[0]}]\n<lines>\n..."
+    else:
+        reason = (
+            "the original lyrics of the source are used" if mode == "none" else "the cover is instrumental"
+        )
+        parts.append(f"- Lyrics: {reason}; write only the word none after LYRICS:.")
+        example = "none"
+    parts.append("- Artwork: one sentence describing a square cover image; no text or letters in the image.")
+    if DETAIL.get(detail):
+        parts.append(f"- {DETAIL[detail]}")
+    parts += ["", f"Example style: {rules['example_style']}", "", *_layout(example)]
     return "\n".join(parts), request
 
 
@@ -277,7 +467,8 @@ def parse_draft(text: str, request: Request) -> Draft:
         lyrics_text, artwork = _split_trailing_sentence(blocks["LYRICS"])
         if artwork:
             blocks["LYRICS"], blocks["ARTWORK"] = lyrics_text, artwork
-    missing = [name.lower() for name in ("STYLE", "LYRICS") if not blocks.get(name)]
+    required = ("STYLE", "LYRICS") if request.lyrics_mode == "write" else ("STYLE",)
+    missing = [name.lower() for name in required if not blocks.get(name)]
     if missing:
         raise PlenioValidationError(
             f"The writing model's answer has no {' and no '.join(missing)} block.",
@@ -302,26 +493,48 @@ def parse_draft(text: str, request: Request) -> Draft:
         notes.append("the style was joined into one line and cleaned")
     style, style_notes = rules_for(request.engine_id).enforce_style(style, instrumental=request.instrumental)
     notes.extend(style_notes)
-    lyrics = _clean_lyrics(blocks["LYRICS"], notes)
-    if request.instrumental:
-        parsed = lyrics_rules.parse_lyrics(lyrics)
-        if parsed.words:
-            tags = parsed.tags or list(request.sections)
-            lyrics = lyrics_rules.tags_only(tags)
+    if request.lyrics_mode == "none":
+        lyrics = ""
+    elif request.lyrics_mode == "tags":
+        lyrics = lyrics_rules.tags_only(request.sections)
+        written = lyrics_rules.parse_lyrics(_clean_lyrics(blocks.get("LYRICS", ""), []))
+        if written.words or (written.sections and written.tags != list(request.sections)):
             notes.append(
-                f"instrumental: {parsed.words} word(s) were removed from the lyrics, only section tags remain"
+                f"instrumental: the lyrics are the tags {lyrics.replace(chr(10) * 2, ' ')} "
+                f"(the model's {written.words} word(s) and its tags were not used)"
             )
-        elif not parsed.sections:
-            lyrics = lyrics_rules.tags_only(request.sections)
-            notes.append("instrumental: section tags were taken from the section plan")
+    else:
+        lyrics = _clean_lyrics(blocks["LYRICS"], notes)
     artwork = re.sub(r"\s+", " ", blocks.get("ARTWORK", "")).strip()
     return Draft(title[:80], style, lyrics, artwork, tuple(notes))
 
 
-def draft_findings(draft: Draft, engine_id: str, *, instrumental: bool) -> list[Mapping[str, Any]]:
-    """Engine checks on the draft (the Song Sheet repeats them on the final documents)."""
-    rules = rules_for(engine_id)
-    findings = rules.check_style(draft.style, instrumental=instrumental) + rules.check_lyrics(
-        draft.lyrics, instrumental=instrumental
+def _section_key(tag: str) -> str:
+    return re.sub(r"\s*\d+$", "", tag.strip("[]").strip()).lower()
+
+
+def section_mismatch(lyrics: str, sections: Sequence[str]) -> str | None:
+    """A message when the lyrics' sections differ from the required ones (order and number)."""
+    have = [_section_key(t) for t in lyrics_rules.parse_lyrics(lyrics).tags]
+    want = [_section_key(t) for t in sections]
+    if have == want:
+        return None
+    return (
+        f"The lyrics have the sections {['[' + t + ']' for t in have]} but the score has "
+        f"{['[' + t + ']' for t in want]}; they must match in number and order. Run again with another draft "
+        "seed or edit the lyrics in the Song Sheet."
     )
-    return [f.to_dict() for f in findings]
+
+
+def draft_findings(draft: Draft, request: Request) -> list[Mapping[str, Any]]:
+    """Engine checks on the draft (the Song Sheet repeats them on the final documents)."""
+    rules = rules_for(request.engine_id)
+    findings = rules.check_style(draft.style, instrumental=request.instrumental)
+    if request.lyrics_mode != "none":
+        findings += rules.check_lyrics(draft.lyrics, instrumental=request.instrumental)
+    result = [f.to_dict() for f in findings]
+    if request.enforce_sections:
+        mismatch = section_mismatch(draft.lyrics, request.sections)
+        if mismatch:
+            result.append({"severity": "error", "message": mismatch, "where": "lyrics"})
+    return result

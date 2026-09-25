@@ -1,0 +1,1568 @@
+{
+"source": "minimax-excerpt.flac",
+"duration_s": 83.02,
+"abc": "X:1\nT:\nM:4/4\nL:1/16\nQ:1/4=121\nV: Vocal clef=treble name=\"Vocal Melody\" snm=\"Vocal\"\nV: Ins clef=treble name=\"Ins Melody\" snm=\"Inst.\"\nK:A\n% verse\nV: Vocal\n\"Amaj7/C#\"e4e4e2e2e2c2|\"D\"e4f4z2A2B2A2|\"E\"B2B2B2c2z8|\"A\"z12z2B2|\nV: Ins\nZ4|\nV: Vocal\n\"Amaj7/C#\"e2e2e2e2e2c2e2c2|\"D\"e4f4c2d2c2c2-|\"A\"c2z12z2|\"A\"z8z2c4e2|\nV: Ins\nZ4|\nV: Vocal\n\"Amaj7/C#\"e2e2e2c2e4f4|\"D\"c2B2B2A2B2B4B2|\"E\"c2z12z2|\"A\"z8z2A2A4|\nV: Ins\nZ4|\nV: Vocal\n\"Amaj7/C#\"a4g4f2f2e2e2-|\"D\"e2A2A2A2d2c2B2A2|\"A\"A4z12|\"A\"z8c4e4|\nV: Ins\nZ4|\n% pre-chorus\nV: Vocal\n\"F#m7\"f4g4f2e2e2c2-|\"D\"c2z2c4c2A2z4|\"E\"B4B4B2e4c2-|\"A\"c2z2c2c2c2B2A4|\nV: Ins\nZ4|\nV: Vocal\n\"A\"e6e2c2c4c2-|\"D\"c2z4c2c2B2A2A2|\"E\"B4B2B4G4A2-|\"A\"A2z6a2gg3f2|\nV: Ins\nZ4|\n% chorus\nV: Vocal\n\"C#m\"f2e4e4c4d2-|\"D\"d2z8z2c2g2-|\"E\"g2f2e4e4f2c2-|\"A\"c2c2c2c2c2B2A2F2|\nV: Ins\nZ4|\nV: Vocal\n\"Amaj7/C#\"F4c4z2A2A2A2-|\"D\"A2z2c2B2B2A2A4|\"E\"z16|\"A\"z8a3g3f2|\nV: Ins\nZ4|\nV: Vocal\n\"C#m\"f2e4e4c4d2-|\"D\"d2z8A2g4|\"E\"g4f2f2e2e4c2-|\"A\"c2z4c2c2B2A2A2-|\nV: Ins\nZ4|\nV: Vocal\n\"Amaj7/C#\"A2z4A2c2B2A2A2-|\"D\"A2c2c2c2c2B2A4|\"E\"z16|\"A\"z16|\nV: Ins\nZ2|z12z2A2|z2A2z2A2A2A2A2F2|\n% outro\nV: Vocal\n\"A\"z16|\"A\"z16|\nV: Ins\ne2A2e2A2e2Af2Aa2|e2A2e2A2e2Af2Aa2|\n",
+"bar_starts": [
+0.0,
+1.97,
+3.94,
+5.93,
+7.9,
+9.88,
+11.86,
+13.84,
+15.82,
+17.79,
+19.77,
+21.74,
+23.73,
+25.7,
+27.68,
+29.66,
+31.63,
+33.61,
+35.58,
+37.57,
+39.54,
+41.51,
+43.49,
+45.46,
+47.45,
+49.42,
+51.4,
+53.37,
+55.35,
+57.33,
+59.3,
+61.28,
+63.26,
+65.23,
+67.21,
+69.18,
+71.16,
+73.14,
+75.12,
+77.09,
+79.06,
+81.05
+],
+"vocal_notes": [
+[
+0.0,
+0.49
+],
+[
+0.49,
+0.98
+],
+[
+0.98,
+1.23
+],
+[
+1.23,
+1.48
+],
+[
+1.48,
+1.725
+],
+[
+1.725,
+1.97
+],
+[
+1.97,
+2.46
+],
+[
+2.46,
+2.96
+],
+[
+3.21,
+3.46
+],
+[
+3.46,
+3.7
+],
+[
+3.7,
+3.94
+],
+[
+3.94,
+4.19
+],
+[
+4.19,
+4.44
+],
+[
+4.44,
+4.69
+],
+[
+4.69,
+4.94
+],
+[
+7.655,
+7.9
+],
+[
+7.9,
+8.15
+],
+[
+8.15,
+8.4
+],
+[
+8.4,
+8.645
+],
+[
+8.645,
+8.89
+],
+[
+8.89,
+9.135
+],
+[
+9.135,
+9.38
+],
+[
+9.38,
+9.63
+],
+[
+9.63,
+9.88
+],
+[
+9.88,
+10.38
+],
+[
+10.38,
+10.87
+],
+[
+10.87,
+11.12
+],
+[
+11.12,
+11.37
+],
+[
+11.37,
+11.615
+],
+[
+11.615,
+12.105
+],
+[
+15.07,
+15.57
+],
+[
+15.57,
+15.82
+],
+[
+15.82,
+16.06
+],
+[
+16.06,
+16.3
+],
+[
+16.3,
+16.55
+],
+[
+16.55,
+16.8
+],
+[
+16.8,
+17.3
+],
+[
+17.3,
+17.79
+],
+[
+17.79,
+18.04
+],
+[
+18.04,
+18.29
+],
+[
+18.29,
+18.535
+],
+[
+18.535,
+18.78
+],
+[
+18.78,
+19.025
+],
+[
+19.025,
+19.52
+],
+[
+19.52,
+19.77
+],
+[
+19.77,
+20.015
+],
+[
+22.985,
+23.23
+],
+[
+23.23,
+23.73
+],
+[
+23.73,
+24.22
+],
+[
+24.22,
+24.71
+],
+[
+24.71,
+24.96
+],
+[
+24.96,
+25.21
+],
+[
+25.21,
+25.455
+],
+[
+25.455,
+25.945
+],
+[
+25.945,
+26.19
+],
+[
+26.19,
+26.44
+],
+[
+26.44,
+26.69
+],
+[
+26.69,
+26.935
+],
+[
+26.935,
+27.18
+],
+[
+27.18,
+27.43
+],
+[
+27.43,
+27.68
+],
+[
+27.68,
+28.17
+],
+[
+30.65,
+31.14
+],
+[
+31.14,
+31.63
+],
+[
+31.63,
+32.13
+],
+[
+32.13,
+32.62
+],
+[
+32.62,
+32.865
+],
+[
+32.865,
+33.11
+],
+[
+33.11,
+33.36
+],
+[
+33.36,
+33.855
+],
+[
+34.1,
+34.59
+],
+[
+34.59,
+34.84
+],
+[
+34.84,
+35.09
+],
+[
+35.58,
+36.08
+],
+[
+36.08,
+36.57
+],
+[
+36.57,
+36.82
+],
+[
+36.82,
+37.32
+],
+[
+37.32,
+37.815
+],
+[
+38.06,
+38.305
+],
+[
+38.305,
+38.55
+],
+[
+38.55,
+38.8
+],
+[
+38.8,
+39.05
+],
+[
+39.05,
+39.54
+],
+[
+39.54,
+40.28
+],
+[
+40.28,
+40.53
+],
+[
+40.53,
+40.775
+],
+[
+40.775,
+41.265
+],
+[
+41.265,
+41.76
+],
+[
+42.255,
+42.5
+],
+[
+42.5,
+42.75
+],
+[
+42.75,
+43.0
+],
+[
+43.0,
+43.245
+],
+[
+43.245,
+43.49
+],
+[
+43.49,
+43.98
+],
+[
+43.98,
+44.23
+],
+[
+44.23,
+44.725
+],
+[
+44.725,
+45.215
+],
+[
+45.215,
+45.715
+],
+[
+46.46,
+46.705
+],
+[
+46.705,
+46.828
+],
+[
+46.828,
+47.2
+],
+[
+47.2,
+47.45
+],
+[
+47.45,
+47.695
+],
+[
+47.695,
+48.185
+],
+[
+48.185,
+48.68
+],
+[
+48.68,
+49.175
+],
+[
+49.175,
+49.665
+],
+[
+50.9,
+51.15
+],
+[
+51.15,
+51.645
+],
+[
+51.645,
+51.89
+],
+[
+51.89,
+52.38
+],
+[
+52.38,
+52.88
+],
+[
+52.88,
+53.125
+],
+[
+53.125,
+53.615
+],
+[
+53.615,
+53.86
+],
+[
+53.86,
+54.11
+],
+[
+54.11,
+54.36
+],
+[
+54.36,
+54.61
+],
+[
+54.61,
+54.86
+],
+[
+54.86,
+55.105
+],
+[
+55.105,
+55.35
+],
+[
+55.35,
+55.85
+],
+[
+55.85,
+56.34
+],
+[
+56.585,
+56.83
+],
+[
+56.83,
+57.08
+],
+[
+57.08,
+57.575
+],
+[
+57.82,
+58.065
+],
+[
+58.065,
+58.31
+],
+[
+58.31,
+58.56
+],
+[
+58.56,
+58.81
+],
+[
+58.81,
+59.3
+],
+[
+62.26,
+62.635
+],
+[
+62.635,
+63.01
+],
+[
+63.01,
+63.26
+],
+[
+63.26,
+63.505
+],
+[
+63.505,
+64.0
+],
+[
+64.0,
+64.495
+],
+[
+64.495,
+64.985
+],
+[
+64.985,
+65.48
+],
+[
+66.465,
+66.71
+],
+[
+66.71,
+67.21
+],
+[
+67.21,
+67.7
+],
+[
+67.7,
+67.95
+],
+[
+67.95,
+68.2
+],
+[
+68.2,
+68.445
+],
+[
+68.445,
+68.935
+],
+[
+68.935,
+69.43
+],
+[
+69.925,
+70.17
+],
+[
+70.17,
+70.415
+],
+[
+70.415,
+70.66
+],
+[
+70.66,
+70.91
+],
+[
+70.91,
+71.405
+],
+[
+71.895,
+72.14
+],
+[
+72.14,
+72.39
+],
+[
+72.39,
+72.64
+],
+[
+72.64,
+72.89
+],
+[
+72.89,
+73.385
+],
+[
+73.385,
+73.63
+],
+[
+73.63,
+73.88
+],
+[
+73.88,
+74.13
+],
+[
+74.13,
+74.375
+],
+[
+74.375,
+74.62
+],
+[
+74.62,
+75.12
+]
+],
+"reference": "[verse]\nBlue light pooling on the sidewalk, your shadow stretched out long\nYou look like you've been waiting for a song that won't come on\nThere's a flicker in the storefront, buzzing soft and half-dead glow\nAnd I'm three blocks from anywhere, but I'm exactly where I go\n[pre-chorus]\nFeel the bass kick through the grate\nHead tilted, you're already late\nFor a moment that can't hold its shape\nI'm reaching for the static on the wave\n[chorus]\nNeon bleeding through the dark, a feeling with no address\nYou'll be a rumor by the morning, but right now, city, hold us\nNeon bleeding through the dark, a half-smile and a spark\nIf this is real or just the glow, catch it before it goes\n[post-chorus]\n",
+"words": [
+{
+"start": 0.0,
+"end": 0.0,
+"word": "Blue",
+"p": 0.208,
+"segment": 0
+},
+{
+"start": 0.0,
+"end": 0.58,
+"word": "light",
+"p": 0.952,
+"segment": 0
+},
+{
+"start": 0.58,
+"end": 1.26,
+"word": "pooling",
+"p": 0.856,
+"segment": 0
+},
+{
+"start": 1.26,
+"end": 1.54,
+"word": "on",
+"p": 0.996,
+"segment": 0
+},
+{
+"start": 1.54,
+"end": 1.72,
+"word": "the",
+"p": 0.988,
+"segment": 0
+},
+{
+"start": 1.72,
+"end": 2.42,
+"word": "sidewalk,",
+"p": 0.985,
+"segment": 0
+},
+{
+"start": 2.82,
+"end": 3.18,
+"word": "your",
+"p": 0.919,
+"segment": 0
+},
+{
+"start": 3.18,
+"end": 3.66,
+"word": "shadow",
+"p": 0.901,
+"segment": 0
+},
+{
+"start": 3.66,
+"end": 3.88,
+"word": "stretched",
+"p": 0.973,
+"segment": 0
+},
+{
+"start": 3.88,
+"end": 4.36,
+"word": "out",
+"p": 0.999,
+"segment": 0
+},
+{
+"start": 4.36,
+"end": 4.76,
+"word": "long",
+"p": 0.856,
+"segment": 0
+},
+{
+"start": 6.76,
+"end": 7.52,
+"word": "You",
+"p": 0.624,
+"segment": 1
+},
+{
+"start": 7.52,
+"end": 7.96,
+"word": "look",
+"p": 0.995,
+"segment": 1
+},
+{
+"start": 7.96,
+"end": 8.24,
+"word": "like",
+"p": 0.999,
+"segment": 1
+},
+{
+"start": 8.24,
+"end": 8.52,
+"word": "you've",
+"p": 0.989,
+"segment": 1
+},
+{
+"start": 8.52,
+"end": 8.7,
+"word": "been",
+"p": 0.998,
+"segment": 1
+},
+{
+"start": 8.7,
+"end": 9.1,
+"word": "waiting",
+"p": 0.994,
+"segment": 1
+},
+{
+"start": 9.1,
+"end": 9.38,
+"word": "for",
+"p": 0.998,
+"segment": 1
+},
+{
+"start": 9.38,
+"end": 9.66,
+"word": "a",
+"p": 0.998,
+"segment": 1
+},
+{
+"start": 9.66,
+"end": 10.08,
+"word": "song",
+"p": 1.0,
+"segment": 1
+},
+{
+"start": 10.08,
+"end": 10.46,
+"word": "that",
+"p": 0.986,
+"segment": 1
+},
+{
+"start": 10.46,
+"end": 11.0,
+"word": "won't",
+"p": 0.996,
+"segment": 1
+},
+{
+"start": 11.0,
+"end": 11.24,
+"word": "come",
+"p": 0.999,
+"segment": 1
+},
+{
+"start": 11.24,
+"end": 11.78,
+"word": "on",
+"p": 0.987,
+"segment": 1
+},
+{
+"start": 14.7,
+"end": 15.46,
+"word": "There's",
+"p": 0.988,
+"segment": 2
+},
+{
+"start": 15.46,
+"end": 15.56,
+"word": "a",
+"p": 0.995,
+"segment": 2
+},
+{
+"start": 15.56,
+"end": 16.18,
+"word": "flicker",
+"p": 0.996,
+"segment": 2
+},
+{
+"start": 16.18,
+"end": 16.38,
+"word": "in",
+"p": 0.996,
+"segment": 2
+},
+{
+"start": 16.38,
+"end": 16.54,
+"word": "the",
+"p": 0.993,
+"segment": 2
+},
+{
+"start": 16.54,
+"end": 17.3,
+"word": "storefront,",
+"p": 0.942,
+"segment": 2
+},
+{
+"start": 17.58,
+"end": 18.0,
+"word": "buzzing",
+"p": 0.91,
+"segment": 2
+},
+{
+"start": 18.0,
+"end": 18.34,
+"word": "soft",
+"p": 0.934,
+"segment": 2
+},
+{
+"start": 18.34,
+"end": 18.64,
+"word": "and",
+"p": 0.763,
+"segment": 2
+},
+{
+"start": 18.64,
+"end": 18.88,
+"word": "half",
+"p": 0.996,
+"segment": 2
+},
+{
+"start": 18.88,
+"end": 19.2,
+"word": "-dead",
+"p": 0.854,
+"segment": 2
+},
+{
+"start": 19.2,
+"end": 19.62,
+"word": "glow",
+"p": 0.961,
+"segment": 2
+},
+{
+"start": 22.34,
+"end": 23.1,
+"word": "And",
+"p": 0.978,
+"segment": 3
+},
+{
+"start": 23.1,
+"end": 23.42,
+"word": "I'm",
+"p": 0.996,
+"segment": 3
+},
+{
+"start": 23.42,
+"end": 23.74,
+"word": "three",
+"p": 0.945,
+"segment": 3
+},
+{
+"start": 23.74,
+"end": 24.32,
+"word": "blocks",
+"p": 0.999,
+"segment": 3
+},
+{
+"start": 24.32,
+"end": 24.76,
+"word": "from",
+"p": 0.999,
+"segment": 3
+},
+{
+"start": 24.76,
+"end": 25.36,
+"word": "anywhere,",
+"p": 0.997,
+"segment": 3
+},
+{
+"start": 25.72,
+"end": 26.0,
+"word": "but",
+"p": 0.999,
+"segment": 3
+},
+{
+"start": 26.0,
+"end": 26.42,
+"word": "I'm",
+"p": 0.999,
+"segment": 3
+},
+{
+"start": 26.42,
+"end": 26.8,
+"word": "exactly",
+"p": 1.0,
+"segment": 3
+},
+{
+"start": 26.8,
+"end": 27.22,
+"word": "where",
+"p": 1.0,
+"segment": 3
+},
+{
+"start": 27.22,
+"end": 27.48,
+"word": "I",
+"p": 1.0,
+"segment": 3
+},
+{
+"start": 27.48,
+"end": 27.74,
+"word": "go",
+"p": 0.998,
+"segment": 3
+},
+{
+"start": 30.0,
+"end": 30.82,
+"word": "Feel",
+"p": 0.75,
+"segment": 4
+},
+{
+"start": 30.82,
+"end": 31.18,
+"word": "the",
+"p": 0.998,
+"segment": 4
+},
+{
+"start": 31.18,
+"end": 31.78,
+"word": "bass",
+"p": 0.985,
+"segment": 4
+},
+{
+"start": 31.78,
+"end": 32.14,
+"word": "kick",
+"p": 0.988,
+"segment": 4
+},
+{
+"start": 32.14,
+"end": 32.66,
+"word": "through",
+"p": 0.994,
+"segment": 4
+},
+{
+"start": 32.66,
+"end": 33.14,
+"word": "the",
+"p": 0.998,
+"segment": 4
+},
+{
+"start": 33.14,
+"end": 33.5,
+"word": "grate,",
+"p": 0.291,
+"segment": 4
+},
+{
+"start": 33.7,
+"end": 34.1,
+"word": "head",
+"p": 0.982,
+"segment": 4
+},
+{
+"start": 34.1,
+"end": 34.86,
+"word": "tilted",
+"p": 0.99,
+"segment": 4
+},
+{
+"start": 34.86,
+"end": 36.04,
+"word": "You're",
+"p": 0.82,
+"segment": 5
+},
+{
+"start": 36.04,
+"end": 36.6,
+"word": "already",
+"p": 1.0,
+"segment": 5
+},
+{
+"start": 36.6,
+"end": 37.42,
+"word": "late",
+"p": 0.998,
+"segment": 5
+},
+{
+"start": 37.42,
+"end": 38.02,
+"word": "for",
+"p": 0.871,
+"segment": 5
+},
+{
+"start": 38.02,
+"end": 38.3,
+"word": "a",
+"p": 0.999,
+"segment": 5
+},
+{
+"start": 38.3,
+"end": 38.78,
+"word": "moment",
+"p": 1.0,
+"segment": 5
+},
+{
+"start": 38.78,
+"end": 39.1,
+"word": "that",
+"p": 0.998,
+"segment": 5
+},
+{
+"start": 39.1,
+"end": 40.12,
+"word": "can't",
+"p": 0.999,
+"segment": 5
+},
+{
+"start": 40.12,
+"end": 40.44,
+"word": "hold",
+"p": 1.0,
+"segment": 5
+},
+{
+"start": 40.44,
+"end": 40.96,
+"word": "its",
+"p": 0.989,
+"segment": 5
+},
+{
+"start": 40.96,
+"end": 41.4,
+"word": "shape",
+"p": 0.999,
+"segment": 5
+},
+{
+"start": 41.4,
+"end": 42.32,
+"word": "I'm",
+"p": 0.997,
+"segment": 6
+},
+{
+"start": 42.32,
+"end": 42.64,
+"word": "reaching",
+"p": 0.99,
+"segment": 6
+},
+{
+"start": 42.64,
+"end": 43.0,
+"word": "for",
+"p": 1.0,
+"segment": 6
+},
+{
+"start": 43.0,
+"end": 43.24,
+"word": "the",
+"p": 1.0,
+"segment": 6
+},
+{
+"start": 43.24,
+"end": 43.92,
+"word": "static",
+"p": 1.0,
+"segment": 6
+},
+{
+"start": 43.92,
+"end": 44.36,
+"word": "on",
+"p": 0.998,
+"segment": 6
+},
+{
+"start": 44.36,
+"end": 44.72,
+"word": "the",
+"p": 0.999,
+"segment": 6
+},
+{
+"start": 44.72,
+"end": 45.38,
+"word": "wave",
+"p": 0.993,
+"segment": 6
+},
+{
+"start": 45.38,
+"end": 47.06,
+"word": "Neon",
+"p": 0.961,
+"segment": 7
+},
+{
+"start": 47.06,
+"end": 47.56,
+"word": "bleeding",
+"p": 0.994,
+"segment": 7
+},
+{
+"start": 47.56,
+"end": 48.22,
+"word": "through",
+"p": 0.999,
+"segment": 7
+},
+{
+"start": 48.22,
+"end": 48.7,
+"word": "the",
+"p": 1.0,
+"segment": 7
+},
+{
+"start": 48.7,
+"end": 49.4,
+"word": "dark",
+"p": 0.999,
+"segment": 7
+},
+{
+"start": 49.4,
+"end": 50.92,
+"word": "A",
+"p": 0.844,
+"segment": 8
+},
+{
+"start": 50.92,
+"end": 51.4,
+"word": "feeling",
+"p": 1.0,
+"segment": 8
+},
+{
+"start": 51.4,
+"end": 52.0,
+"word": "with",
+"p": 1.0,
+"segment": 8
+},
+{
+"start": 52.0,
+"end": 52.46,
+"word": "no",
+"p": 1.0,
+"segment": 8
+},
+{
+"start": 52.46,
+"end": 53.12,
+"word": "address",
+"p": 0.999,
+"segment": 8
+},
+{
+"start": 53.12,
+"end": 53.72,
+"word": "You'll",
+"p": 0.949,
+"segment": 9
+},
+{
+"start": 53.72,
+"end": 53.88,
+"word": "be",
+"p": 1.0,
+"segment": 9
+},
+{
+"start": 53.88,
+"end": 54.14,
+"word": "a",
+"p": 0.997,
+"segment": 9
+},
+{
+"start": 54.14,
+"end": 54.56,
+"word": "rumor",
+"p": 0.977,
+"segment": 9
+},
+{
+"start": 54.56,
+"end": 54.88,
+"word": "by",
+"p": 1.0,
+"segment": 9
+},
+{
+"start": 54.88,
+"end": 55.06,
+"word": "the",
+"p": 0.999,
+"segment": 9
+},
+{
+"start": 55.06,
+"end": 55.72,
+"word": "morning",
+"p": 0.999,
+"segment": 9
+},
+{
+"start": 55.72,
+"end": 56.58,
+"word": "But",
+"p": 0.847,
+"segment": 10
+},
+{
+"start": 56.58,
+"end": 56.9,
+"word": "right",
+"p": 0.999,
+"segment": 10
+},
+{
+"start": 56.9,
+"end": 57.22,
+"word": "now,",
+"p": 1.0,
+"segment": 10
+},
+{
+"start": 57.36,
+"end": 57.92,
+"word": "city",
+"p": 0.976,
+"segment": 10
+},
+{
+"start": 57.92,
+"end": 58.46,
+"word": "hold",
+"p": 0.605,
+"segment": 10
+},
+{
+"start": 58.46,
+"end": 59.0,
+"word": "us",
+"p": 0.998,
+"segment": 10
+},
+{
+"start": 62.02,
+"end": 62.94,
+"word": "Neon",
+"p": 0.543,
+"segment": 11
+},
+{
+"start": 62.94,
+"end": 63.4,
+"word": "bleeding",
+"p": 0.94,
+"segment": 11
+},
+{
+"start": 63.4,
+"end": 64.02,
+"word": "through",
+"p": 0.993,
+"segment": 11
+},
+{
+"start": 64.02,
+"end": 64.52,
+"word": "the",
+"p": 0.999,
+"segment": 11
+},
+{
+"start": 64.52,
+"end": 65.26,
+"word": "dark",
+"p": 0.998,
+"segment": 11
+},
+{
+"start": 65.26,
+"end": 66.42,
+"word": "A",
+"p": 0.684,
+"segment": 12
+},
+{
+"start": 66.42,
+"end": 66.84,
+"word": "half",
+"p": 0.997,
+"segment": 12
+},
+{
+"start": 66.84,
+"end": 67.3,
+"word": "smile",
+"p": 0.932,
+"segment": 12
+},
+{
+"start": 67.3,
+"end": 68.04,
+"word": "and",
+"p": 0.997,
+"segment": 12
+},
+{
+"start": 68.04,
+"end": 68.48,
+"word": "a",
+"p": 0.999,
+"segment": 12
+},
+{
+"start": 68.48,
+"end": 68.94,
+"word": "spark",
+"p": 0.999,
+"segment": 12
+},
+{
+"start": 68.94,
+"end": 69.98,
+"word": "If",
+"p": 0.982,
+"segment": 13
+},
+{
+"start": 69.98,
+"end": 70.2,
+"word": "this",
+"p": 0.999,
+"segment": 13
+},
+{
+"start": 70.2,
+"end": 70.52,
+"word": "is",
+"p": 0.999,
+"segment": 13
+},
+{
+"start": 70.52,
+"end": 71.06,
+"word": "real",
+"p": 1.0,
+"segment": 13
+},
+{
+"start": 71.06,
+"end": 71.92,
+"word": "or",
+"p": 0.703,
+"segment": 13
+},
+{
+"start": 71.92,
+"end": 72.22,
+"word": "just",
+"p": 0.999,
+"segment": 13
+},
+{
+"start": 72.22,
+"end": 72.44,
+"word": "a",
+"p": 0.949,
+"segment": 13
+},
+{
+"start": 72.44,
+"end": 72.9,
+"word": "glow",
+"p": 0.987,
+"segment": 13
+},
+{
+"start": 72.9,
+"end": 73.4,
+"word": "Catch",
+"p": 0.9,
+"segment": 14
+},
+{
+"start": 73.4,
+"end": 73.66,
+"word": "it",
+"p": 0.998,
+"segment": 14
+},
+{
+"start": 73.66,
+"end": 74.02,
+"word": "before",
+"p": 0.999,
+"segment": 14
+},
+{
+"start": 74.02,
+"end": 74.42,
+"word": "it",
+"p": 1.0,
+"segment": 14
+},
+{
+"start": 74.42,
+"end": 74.8,
+"word": "goes",
+"p": 0.967,
+"segment": 14
+}
+],
+"language": "en"
+}

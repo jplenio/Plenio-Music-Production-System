@@ -39,7 +39,11 @@ Two sheets are needed because the score is planned from the final text: **Song S
 
 ## Instrumental songs
 
-Set *vocals* to *instrumental* and choose *instrument plays the lead* or *accompaniment only*. Plenio then guarantees an instrumental **conditioning**: lyrics with section tags only, a style without vocal or language words, and a score whose Vocal voice is silent (the melody moves to the instrument, or is removed). The audio itself is not guaranteed free of voice-like sounds; that check arrives with *Check Vocals*.
+Set *vocals* to *instrumental* and choose *instrument plays the lead* or *accompaniment only*. Plenio then guarantees an instrumental **conditioning**: the lyrics are the single tag `[instrumental]` (YuE2 plans the form itself - bare tags gave the most instrument-like takes in the owner's listening), a style without vocal or language words, and a score whose Vocal voice is silent (the melody moves to the instrument, or is removed).
+
+YuE2 chooses the length of instrumental plans itself (63-387 s for an 80-s request in Phase 4A). When a plan is more than 1.5 times the brief's length, Score Tools removes whole sections (*fit length*) and says what it removed - or why it could not: in one Phase 4B run the shortest complete form (intro, verse, interlude, chorus, ending) already lasted 140 s for a 90-s request. Delete sections in Song Sheet · Score or plan again with another seed.
+
+The audio itself is not guaranteed free of voice-like sounds. To measure it, add *Audio Encoder Loader* (SheetSage2) and *Check Vocals* after the render - see [Instrumental](../concepts/instrumental.md).
 
 ## What the checks mean
 

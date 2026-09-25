@@ -1,5 +1,6 @@
 """Scores in the native two-voice ABC dialect: analysis, validation and deterministic operations."""
 
+from .edit import EditResult
 from .native import (
     DIALECT,
     Analysis,
@@ -8,9 +9,12 @@ from .native import (
     Diagnostic,
     Section,
     analyze,
+    fit_length,
     has_chords,
     move_vocal_to_ins,
+    phrasing,
     prepare,
+    repair_truncated,
     section_tag,
     section_tags,
     set_tempo,
@@ -19,18 +23,26 @@ from .native import (
     transpose,
     validate,
 )
+from .operations import OPERATIONS, apply, editor_view
 
 __all__ = [
     "DIALECT",
+    "OPERATIONS",
+    "EditResult",
+    "apply",
+    "editor_view",
     "Analysis",
     "Bar",
     "Change",
     "Diagnostic",
     "Section",
     "analyze",
+    "fit_length",
     "has_chords",
     "move_vocal_to_ins",
+    "phrasing",
     "prepare",
+    "repair_truncated",
     "section_tag",
     "section_tags",
     "set_tempo",

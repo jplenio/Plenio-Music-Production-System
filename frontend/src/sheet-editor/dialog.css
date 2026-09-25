@@ -10,8 +10,8 @@
   font: 13px/1.45 var(--font-family, sans-serif);
 }
 .plenio-overlay .plenio-dialog {
-  width: min(920px, 94vw);
-  max-height: 92vh;
+  width: min(1280px, 96vw);
+  height: min(900px, 94vh);
   display: flex;
   flex-direction: column;
   background: var(--comfy-menu-bg, #222);
@@ -48,6 +48,8 @@
 .plenio-overlay .body {
   overflow: auto;
   padding: 8px 16px;
+  flex: 1;
+  min-height: 0;
 }
 .plenio-overlay .hint {
   margin: 8px 16px 0;
@@ -160,4 +162,295 @@
   font-size: 18px;
   line-height: 1;
   padding: 2px 8px;
+}
+.plenio-overlay .asr {
+  margin: 4px 0;
+  font-size: 12px;
+  color: var(--descrip-text, #aaa);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.plenio-overlay .asr mark {
+  background: rgba(230, 180, 60, 0.3);
+  color: inherit;
+  border-radius: 3px;
+  padding: 0 3px;
+  margin-right: 3px;
+}
+.plenio-overlay .diff {
+  font-family: var(--plenio-mono, ui-monospace, monospace);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: normal;
+}
+.plenio-overlay .diff ins {
+  background: rgba(80, 170, 90, 0.3);
+  text-decoration: none;
+}
+.plenio-overlay .diff del {
+  background: rgba(200, 70, 70, 0.3);
+}
+.plenio-overlay .sections table {
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.plenio-overlay .sections th,
+.plenio-overlay .sections td {
+  text-align: left;
+  padding: 2px 12px 2px 0;
+}
+
+/* --- tabs and layout (Phase 5) --- */
+.plenio-overlay .tabs {
+  display: flex;
+  gap: 4px;
+  margin-left: 12px;
+  flex: 1;
+}
+.plenio-overlay .tabs button {
+  border-radius: 6px 6px 0 0;
+  border-bottom-color: transparent;
+}
+.plenio-overlay .tabs button.active {
+  background: #2f6fb0;
+  border-color: #2f6fb0;
+  color: #fff;
+}
+.plenio-overlay button:focus-visible,
+.plenio-overlay input:focus-visible,
+.plenio-overlay select:focus-visible,
+.plenio-overlay textarea:focus-visible,
+.plenio-overlay .notation-wrap:focus-visible {
+  outline: 2px solid #4c9aff;
+  outline-offset: 1px;
+}
+.plenio-overlay .confirm {
+  margin: 8px 16px 0;
+  padding: 8px 10px;
+  border: 1px solid #c79a3a;
+  border-radius: 6px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.plenio-overlay .link {
+  border: none;
+  background: none;
+  padding: 0 2px;
+  color: #6fa8dc;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.plenio-overlay .facts.ok {
+  color: #6fbf73;
+}
+.plenio-overlay .facts.bad,
+.plenio-overlay .bad {
+  color: #e0685e;
+}
+
+/* --- score editor --- */
+.plenio-overlay .score-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.plenio-overlay .palette,
+.plenio-overlay .view-tools,
+.plenio-overlay .transport {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+.plenio-overlay .palette .group {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding-right: 10px;
+  border-right: 1px solid var(--border-color, #444);
+}
+.plenio-overlay .palette .group:last-child {
+  border-right: none;
+}
+.plenio-overlay .palette .whole summary {
+  cursor: pointer;
+}
+.plenio-overlay .whole-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+.plenio-overlay input.chord {
+  width: 110px;
+}
+.plenio-overlay input.tempo {
+  width: 60px;
+}
+.plenio-overlay input,
+.plenio-overlay select {
+  background: var(--comfy-input-bg, #333);
+  color: var(--input-text, #ddd);
+  border: 1px solid var(--border-color, #555);
+  border-radius: 5px;
+  padding: 2px 5px;
+}
+.plenio-overlay input[type='checkbox'],
+.plenio-overlay input[type='range'] {
+  padding: 0;
+}
+.plenio-overlay .score-main {
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+  gap: 10px;
+  height: max(380px, calc(min(900px, 94vh) - 330px));
+}
+.plenio-overlay .score-views {
+  display: grid;
+  grid-template-rows: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+}
+.plenio-overlay .score-main[data-layout='notation'] .score-views,
+.plenio-overlay .score-main[data-layout='text'] .score-views {
+  grid-template-rows: minmax(0, 1fr);
+}
+.plenio-overlay .notation-wrap {
+  position: relative;
+  overflow: auto;
+  border: 1px solid var(--border-color, #444);
+  border-radius: 6px;
+  background: var(--comfy-input-bg, #1e1e1e);
+  color: var(--input-text, #e6e6e6);
+  min-height: 0;
+}
+.plenio-overlay .notation-wrap.stale .notation {
+  opacity: 0.45;
+}
+.plenio-overlay .stale-note {
+  position: sticky;
+  top: 0;
+  margin: 0;
+  padding: 4px 8px;
+  background: #5a2626;
+  color: #fff;
+  z-index: 1;
+}
+.plenio-overlay .notation svg .plenio-selected,
+.plenio-overlay .notation svg .plenio-selected path {
+  fill: #4c9aff !important;
+}
+.plenio-overlay .notation svg .plenio-playing,
+.plenio-overlay .notation svg .plenio-playing path {
+  fill: #6fbf73 !important;
+}
+.plenio-overlay .notation svg .abcjs-note,
+.plenio-overlay .notation svg .abcjs-rest {
+  cursor: pointer;
+}
+.plenio-overlay .abc-editor {
+  min-height: 0;
+  overflow: hidden;
+}
+.plenio-overlay .abc-editor .cm-editor {
+  height: 100%;
+}
+.plenio-overlay .navigator {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: auto;
+  min-height: 0;
+}
+.plenio-overlay .navigator ol.sections {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.plenio-overlay .navigator li {
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, #444);
+}
+.plenio-overlay .navigator li.current {
+  border-color: #2f6fb0;
+}
+.plenio-overlay .navigator .section-head {
+  display: flex;
+  flex-direction: column;
+}
+.plenio-overlay .navigator .section-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 3px;
+}
+.plenio-overlay .navigator .section-tools button,
+.plenio-overlay .navigator .split button {
+  font-size: 11px;
+  padding: 1px 6px;
+}
+.plenio-overlay .navigator input.rename {
+  width: 100%;
+}
+.plenio-overlay .navigator .split input {
+  width: 90px;
+}
+.plenio-overlay .bar-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+.plenio-overlay .bar-strip .bar {
+  min-width: 26px;
+  font-size: 10px;
+  padding: 1px 2px;
+  border-radius: 3px;
+}
+.plenio-overlay .bar-strip .bar.alt {
+  background: #2c3440;
+}
+.plenio-overlay .bar-strip .bar.selected {
+  background: #2f6fb0;
+  color: #fff;
+}
+.plenio-overlay .bar-strip .bar.error {
+  border-color: #e0685e;
+  color: #e0685e;
+}
+.plenio-overlay .status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+}
+.plenio-overlay .status .change {
+  color: #6fbf73;
+}
+.plenio-overlay .diagnostics {
+  margin: 0;
+  padding-left: 18px;
+}
+.plenio-overlay .lyrics-fit table,
+.plenio-overlay .sections table {
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.plenio-overlay .lyrics-fit th,
+.plenio-overlay .lyrics-fit td {
+  text-align: left;
+  padding: 2px 12px 2px 0;
+}
+.plenio-overlay .lyrics-fit tr.mismatch td {
+  color: #e0685e;
+}
+.plenio-overlay .lyrics-fit h4 {
+  margin: 8px 0 4px;
+  font-size: 12px;
 }
