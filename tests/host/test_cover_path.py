@@ -366,7 +366,9 @@ def test_section_edits_in_the_editor_change_the_asr_lyrics_draft(
     ]
     chorus_start = view["sections"][2]["start_bar"]
     renamed = transform(score_doc["text"], {"op": "rename_section", "section": 2, "label": "bridge"})
-    moved = transform(renamed, {"op": "move_section_boundary", "section": 3, "start_bar": chorus_start - 1})
+    # One bar later: the words of the chorus's first bar move into the bridge. (One bar earlier would
+    # change nothing here - bar 24 is the chorus pickup, which the pickup rule already puts into the chorus.)
+    moved = transform(renamed, {"op": "move_section_boundary", "section": 3, "start_bar": chorus_start + 1})
 
     def run(score_text: str, seed: int) -> dict[str, Any]:
         state = sheet_state(
