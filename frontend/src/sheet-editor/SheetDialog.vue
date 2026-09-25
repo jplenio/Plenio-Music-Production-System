@@ -44,7 +44,7 @@ const TAB_OF: Record<DocumentKind, Tab> = {
   artwork_prompt: 'details'
 }
 const TAB_LABELS: Record<Tab, string> = { lyrics: 'Lyrics', score: 'Score', style: 'Style', details: 'Title & artwork' }
-const LABELS: Record<DocumentKind, string> = {
+const BASE_LABELS: Record<DocumentKind, string> = {
   title: 'Title',
   style: 'Style',
   lyrics: 'Lyrics',
@@ -52,6 +52,12 @@ const LABELS: Record<DocumentKind, string> = {
   artwork_prompt: 'Artwork prompt'
 }
 const ROWS: Record<DocumentKind, number> = { title: 1, style: 3, lyrics: 16, score: 18, artwork_prompt: 3 }
+
+// The engine names the style document (MiniMax Music 3: a multi-line caption); the editor knows no engines.
+const caption = computed(() => props.payload?.style_label === 'caption')
+const LABELS = computed<Record<DocumentKind, string>>(() => ({ ...BASE_LABELS, style: caption.value ? 'Caption' : 'Style' }))
+const tabLabel = (tab: Tab) => (tab === 'style' && caption.value ? 'Caption' : TAB_LABELS[tab])
+const rowsOf = (kind: DocumentKind) => (kind === 'style' && caption.value ? 14 : ROWS[kind])
 
 const working = reactive<WorkingDoc[]>(startSession(props.state, props.payload, props.owned))
 const result = ref<SheetPayload | null>(props.payload)
@@ -223,7 +229,7 @@ onBeforeUnmount(() => {
             :class="{ active: tab === item }"
             @click="tab = item"
           >
-            {{ TAB_LABELS[item] }}
+            {{ tabLabel(item) }}
           </button>
         </div>
         <button class="icon" title="Close (Esc)" aria-label="Close" @click="close">×</button>
@@ -266,7 +272,7 @@ onBeforeUnmount(() => {
           <textarea
             v-else
             v-model="doc.text"
-            :rows="ROWS[doc.kind]"
+            :rows="rowsOf(doc.kind)"
             spellcheck="false"
             :aria-label="LABELS[doc.kind]"
             @input="onInput(doc)"

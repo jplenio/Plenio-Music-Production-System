@@ -1,4 +1,4 @@
-"""Model fakes for the YuE2 Song path: engine, writer, planner and renderer.
+"""Model fakes for the YuE2 and MiniMax paths: engines, writer, planner and renderers.
 
 They run on the CPU in milliseconds and record what they receive, so host
 tests can assert laziness, caching and that the renderer gets exactly the
@@ -62,6 +62,25 @@ class FakeTokenizer:
         return len(abc) // 3
 
 
+MINIMAX_CAPTION = (
+    "Global Metadata\nbpm is 92. key is D, and scale is minor. Indie pop / dream pop.\nHazy verses open into a "
+    "wide chorus; warm, close production.\n\nVocal Details\nEnglish lyrics; airy female lead, soft in the verses, "
+    "fuller in the chorus.\n\nArrangement\nJangly guitars and a round bass carry the verses; drums and synth pads "
+    "join in the chorus."
+)
+ANSWERS_MINIMAX = {
+    "minimax": f"TITLE: Neon Rain\nSTYLE:\n{MINIMAX_CAPTION}\nLYRICS:\n[Verse]\nCity lights are fading slow\n"
+    "Footsteps keep the time\n\n[Chorus]\nWe run through neon rain\nARTWORK: A rainy street at night.",
+}
+
+
+class FakeMiniMaxTokenizer:
+    """One token per character of the native prompt's text (the exact count comes from the adapter)."""
+
+    def prompt_tokens(self, caption: str, lyrics: str) -> int:
+        return 12 + len(caption) + len(lyrics)
+
+
 class FakeEngine:
     engine_id = "yue2"
     rules_version = "plenio.yue2-rules/1"
@@ -73,22 +92,29 @@ class FakeEngine:
         return {"engine_id": self.engine_id, "rules_version": self.rules_version, "model": self.model}
 
 
+class FakeMiniMaxEngine(FakeEngine):
+    engine_id = "minimax_music3"
+    rules_version = "plenio.minimax-rules/1"
+    tokenizer = FakeMiniMaxTokenizer()  # type: ignore[assignment]
+
+
 class PlenioTestFakeEngine(io.ComfyNode):
     @classmethod
     def define_schema(cls) -> io.Schema:
         return io.Schema(
             node_id="PlenioTestFakeEngine",
             category="Plenio/Tests",
-            inputs=[],
+            inputs=[io.Combo.Input("engine", options=["yue2", "minimax_music3"], optional=True)],
             outputs=[io.Custom("PLENIO_ENGINE").Output(display_name="engine")],
         )
 
     @classmethod
-    def execute(cls) -> io.NodeOutput:
-        return io.NodeOutput(FakeEngine())
+    def execute(cls, engine: str = "yue2") -> io.NodeOutput:
+        return io.NodeOutput(FakeMiniMaxEngine() if engine == "minimax_music3" else FakeEngine())
 
 
 ANSWERS.update(ANSWERS_COVER)
+ANSWERS.update(ANSWERS_MINIMAX)
 
 EVENTS_FILE = Path(__file__).resolve().parent / "minimax-excerpt.events.json"
 FAKE_RATE = 24000
@@ -257,8 +283,31 @@ def make_nodes(record: Any) -> list[type[io.ComfyNode]]:
             wave = (0.1 * torch.sin(2 * torch.pi * 220 * t)).reshape(1, 1, -1).repeat(1, 2, 1)
             return io.NodeOutput({"waveform": wave, "sample_rate": 22050})
 
+    class PlenioTestFakeMiniMaxRender(io.ComfyNode):
+        @classmethod
+        def define_schema(cls) -> io.Schema:
+            return io.Schema(
+                node_id="PlenioTestFakeMiniMaxRender",
+                category="Plenio/Tests",
+                inputs=[
+                    io.String.Input("caption", force_input=True),
+                    io.String.Input("lyrics", force_input=True),
+                    io.Float.Input("max_duration", force_input=True),
+                    io.Int.Input("seed", default=0, min=0, max=10**9),
+                ],
+                outputs=[io.Audio.Output()],
+            )
+
+        @classmethod
+        def execute(cls, caption: str, lyrics: str, max_duration: float, seed: int) -> io.NodeOutput:
+            record("minimax_render", caption=caption, lyrics=lyrics, max_duration=max_duration, seed=seed)
+            t = torch.arange(44100) / 44100.0
+            wave = (0.1 * torch.sin(2 * torch.pi * 330 * t)).reshape(1, 1, -1).repeat(1, 2, 1)
+            return io.NodeOutput({"waveform": wave, "sample_rate": 44100})
+
     return [
         PlenioTestFakeEngine,
+        PlenioTestFakeMiniMaxRender,
         PlenioTestFakeLLM,
         PlenioTestFakePlan,
         PlenioTestFakeRender,

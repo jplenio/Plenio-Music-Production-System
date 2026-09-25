@@ -25,6 +25,7 @@ DEFAULT_MAX_SECONDS = 360.0
 MIN_MUSIC_SECONDS = 30.0
 PLANNING_MODES = ("full", "melody")
 DOCUMENTS = ("title", "style", "lyrics", "score", "artwork_prompt")
+STYLE_LABEL = "style"
 STYLE_TARGET_WORDS, STYLE_WARN_WORDS, STYLE_MAX_WORDS = 40, 60, 120
 TAG_VOCABULARY = (
     "Intro",
@@ -196,6 +197,12 @@ def budget(tokenizer: Tokenizer, style: str, lyrics: str, score: str) -> Budget:
     abc = tokenizer.abc_tokens(score) if has_score else 0
     used = prefix + abc + 2  # ABC_END, MUSIC_START
     return Budget(prefix, abc, CONTEXT_TOKENS - used)
+
+
+def describe_budget(data: Mapping[str, Any]) -> str:
+    """One line for node summaries (``Budget.to_dict()``)."""
+    used = int(data["prefix_tokens"]) + int(data["abc_tokens"])
+    return f"{float(data['music_seconds']):.0f} s of music fit ({used} tokens used)"
 
 
 # --- document rules ---------------------------------------------------------------------

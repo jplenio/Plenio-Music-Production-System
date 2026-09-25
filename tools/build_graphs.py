@@ -42,6 +42,11 @@ WRITER_URL = (
     "https://huggingface.co/Comfy-Org/gemma-4/resolve/main/text_encoders/gemma4_e4b_it_fp8_scaled.safetensors"
 )
 
+MINIMAX_REPO = "https://huggingface.co/Comfy-Org/MiniMax-Music-3/resolve/main"
+MINIMAX_DIT = "minimax_music3_dit_fp16.safetensors"
+MINIMAX_TE = "minimax_music3_text_encoder_pruned_int8_convrot.safetensors"
+MINIMAX_VAE = "minimax_music3_dav.safetensors"
+
 
 def model(name: str, url: str, directory: str) -> dict[str, list[dict[str, str]]]:
     return {"models": [{"name": name, "url": url, "directory": directory}]}
@@ -90,6 +95,136 @@ def yue2_model() -> Blueprint:
             BlueprintOutput("CLIP", "CLIP", (lora, "CLIP")),
             BlueprintOutput("VAE", "VAE", (loader, "VAE")),
             BlueprintOutput("engine", "PLENIO_ENGINE", (engine, "engine")),
+        ],
+    )
+
+
+def minimax_model() -> Blueprint:
+    g = Graph()
+    unet = g.add(
+        "UNETLoader",
+        (0, 0),
+        size=(340, 90),
+        widgets={"unet_name": MINIMAX_DIT, "weight_dtype": "default"},
+        properties=model(MINIMAX_DIT, f"{MINIMAX_REPO}/diffusion_models/{MINIMAX_DIT}", "diffusion_models"),
+    )
+    clip = g.add(
+        "CLIPLoader",
+        (0, 140),
+        size=(340, 110),
+        widgets={"clip_name": MINIMAX_TE, "type": "minimax", "device": "default"},
+        properties=model(MINIMAX_TE, f"{MINIMAX_REPO}/text_encoders/{MINIMAX_TE}", "text_encoders"),
+    )
+    vae = g.add(
+        "VAELoader",
+        (0, 300),
+        size=(340, 60),
+        widgets={"vae_name": MINIMAX_VAE},
+        properties=model(MINIMAX_VAE, f"{MINIMAX_REPO}/vae/{MINIMAX_VAE}", "vae"),
+    )
+    engine = g.add("PlenioEngine", (400, 140), size=(260, 60))
+    g.link(clip, "CLIP", engine, "clip")
+    return Blueprint(
+        "Plenio · MiniMax Model",
+        "Plenio/Model",
+        "Loads MiniMax Music 3 (diffusion model, int8 text encoder, audio VAE) and identifies it for the Plenio "
+        "nodes. MiniMax-Music3 Community License.",
+        g,
+        [
+            BlueprintInput(
+                "unet_name", "COMBO", [(unet, "unet_name")], widget=True, default=MINIMAX_DIT, label="model"
+            ),
+            BlueprintInput(
+                "clip_name",
+                "COMBO",
+                [(clip, "clip_name")],
+                widget=True,
+                default=MINIMAX_TE,
+                label="text encoder",
+            ),
+            BlueprintInput(
+                "vae_name", "COMBO", [(vae, "vae_name")], widget=True, default=MINIMAX_VAE, label="vae"
+            ),
+        ],
+        [
+            BlueprintOutput("MODEL", "MODEL", (unet, "MODEL")),
+            BlueprintOutput("CLIP", "CLIP", (clip, "CLIP")),
+            BlueprintOutput("VAE", "VAE", (vae, "VAE")),
+            BlueprintOutput("engine", "PLENIO_ENGINE", (engine, "engine")),
+        ],
+    )
+
+
+def minimax_render() -> Blueprint:
+    g = Graph()
+    encode = g.add(
+        "MiniMaxMusic3TextEncode",
+        (0, 0),
+        size=(340, 330),
+        widgets={
+            "caption": "",
+            "lyrics": "",
+            "seed": 0,
+            "seed.control": "fixed",
+            "max_duration": 120.0,
+            "cfg_scale": 1.7,
+            "top_k": 50,
+        },
+    )
+    latent = g.add("EmptyMiniMaxMusic3LatentAudio", (400, 0), size=(280, 80))
+    zero = g.add("ConditioningZeroOut", (400, 130), size=(240, 50))
+    sampler = g.add(
+        "KSampler",
+        (720, 0),
+        size=(300, 260),
+        widgets={
+            "seed": 0,
+            "seed.control": "fixed",
+            "steps": 30,
+            "cfg": 1.7,
+            "sampler_name": "euler",
+            "scheduler": "simple",
+            "denoise": 1.0,
+        },
+    )
+    decode = g.add("VAEDecodeAudio", (1080, 0), size=(220, 60))
+    tiled = g.add(
+        "VAEDecodeAudioTiled", (1080, 110), size=(260, 90), widgets={"tile_size": 1536, "overlap": 64}
+    )
+    switch = g.add(
+        "ComfySwitchNode", (1380, 0), size=(260, 90), title="Tiled decode", widgets={"switch": False}
+    )
+    g.link(encode, "seconds", latent, "seconds")
+    g.link(encode, "CONDITIONING", zero, "conditioning")
+    g.link(encode, "CONDITIONING", sampler, "positive")
+    g.link(zero, "CONDITIONING", sampler, "negative")
+    g.link(latent, "LATENT", sampler, "latent_image")
+    g.link(sampler, "LATENT", decode, "samples")
+    g.link(sampler, "LATENT", tiled, "samples")
+    g.link(decode, "AUDIO", switch, "on_false")
+    g.link(tiled, "AUDIO", switch, "on_true")
+    return Blueprint(
+        "Plenio · MiniMax Render",
+        "Plenio/MiniMax",
+        "Renders the final caption and lyrics with MiniMax Music 3 exactly as given (native nodes, 30 steps). The "
+        "take seed drives both the token and the audio sampling; max seconds is the ceiling, the model may end "
+        "earlier. Turn on tiled decode if decoding runs out of memory.",
+        g,
+        [
+            BlueprintInput("model", "MODEL", [(sampler, "model")]),
+            BlueprintInput("clip", "CLIP", [(encode, "clip")]),
+            BlueprintInput("vae", "VAE", [(decode, "vae"), (tiled, "vae")]),
+            BlueprintInput("caption", "STRING", [(encode, "caption")]),
+            BlueprintInput("lyrics", "STRING", [(encode, "lyrics")]),
+            BlueprintInput("seed", "INT", [(encode, "seed"), (sampler, "seed")], label="take seed"),
+            BlueprintInput("max_duration", "FLOAT", [(encode, "max_duration")], label="max seconds"),
+            BlueprintInput(
+                "switch", "BOOLEAN", [(switch, "switch")], widget=True, default=False, label="tiled decode"
+            ),
+        ],
+        [
+            BlueprintOutput("AUDIO", "AUDIO", (switch, "output")),
+            BlueprintOutput("seconds", "FLOAT", (encode, "seconds")),
         ],
     )
 
@@ -603,6 +738,76 @@ def yue2_cover(
     return g
 
 
+ABOUT_MINIMAX = """# 3 · MiniMax · Song
+
+**Brief -> Write Song -> Song Sheet -> MiniMax Render -> Export**
+
+1. Describe the song in **Song Brief** (or pick a template). *vocals* switches between a sung song and an instrumental.
+2. Press **Run**. The writer model drafts title, a structured **caption** (Global Metadata, Vocal Details, Arrangement), lyrics and an artwork prompt; MiniMax Music 3 renders the song; Export writes a 24-bit FLAC and a release record to `output/plenio`.
+3. Run again for a **new take**: the take seed changes, the documents stay (they are cached).
+
+**Inspect and edit:** open the **Song Sheet** to see exactly what MiniMax receives. Caption and lyrics together must stay under **5 000 tokens** (the sheet counts them exactly with the loaded text encoder and stops before rendering if they do not fit). The render ceiling follows the brief's length, at most 6:00; the model can end earlier.
+
+**Instrumentals:** the lyrics are a map of section tags ([Intro], [Instrumental], [Solo], ...), about twice as long as a sung song's, and the caption's Vocal Details are *n/a*.
+
+**Models** (downloaded on first use by ComfyUI): MiniMax Music 3 (diffusion model, int8 text encoder, VAE), a Gemma 4 writer model. MiniMax Music 3 weights: **MiniMax-Music3 Community License**.
+"""
+
+
+def minimax_song(model_bp: Blueprint, write_bp: Blueprint, render_bp: Blueprint) -> Graph:
+    g = Graph()
+    about = g.add_frontend(
+        "MarkdownNote", (-560, 0), size=(480, 620), title="About this template", widgets=[ABOUT_MINIMAX]
+    )
+    brief = g.add(
+        "PlenioSongBrief",
+        (0, 0),
+        size=(380, 620),
+        widgets={
+            "template": "pop/singer-songwriter-acoustic-vocal",
+            "length": "short (about 1:30)",
+            "vocals": "sung",
+        },
+    )
+    model_node = g.add_subgraph(model_bp, (0, 760), size=(380, 160))
+    write = g.add_subgraph(write_bp, (460, 0), size=(360, 220))
+    sheet = g.add("PlenioSongSheet", (900, 0), size=(420, 420), title="Song Sheet")
+    seed = g.add(
+        "SeedNode",
+        (1400, 0),
+        size=(300, 90),
+        title="Take seed",
+        widgets={"seed": 1, "seed.control": "randomize"},
+    )
+    render = g.add_subgraph(render_bp, (1400, 150), size=(320, 250))
+    preview = g.add("PreviewAudio", (1800, 0), size=(360, 120))
+    export = g.add("PlenioExportRelease", (1800, 200), size=(360, 220), autogrow={"reports": 1})
+    g.link(brief, "brief", write, "brief")
+    g.link(model_node, "engine", write, "engine")
+    for kind in ("title", "style", "lyrics", "artwork_prompt"):
+        g.link(write, kind, sheet, kind)
+    g.link(brief, "brief", sheet, "brief")
+    g.link(model_node, "engine", sheet, "engine")
+    for source, name in ((model_node, "MODEL"), (model_node, "CLIP"), (model_node, "VAE")):
+        g.link(source, name, render, name.lower())
+    g.link(sheet, "style", render, "caption")
+    g.link(sheet, "lyrics", render, "lyrics")
+    g.link(sheet, "score_seconds", render, "max_duration")
+    g.link(seed, "seed", render, "seed")
+    g.link(render, "AUDIO", preview, "audio")
+    g.link(render, "AUDIO", export, "audio")
+    g.link(sheet, "title", export, "title")
+    g.link(sheet, "report", export, "reports.report_0")
+    g.group("1 · SONG", [brief])
+    g.group("2 · WRITE", [write])
+    g.group("3 · SHEET", [sheet])
+    g.group("4 · RENDER", [seed, render])
+    g.group("5 · EXPORT", [preview, export])
+    g.group("MUSIC MODEL", [model_node], color="#444")
+    del about
+    return g
+
+
 def write_json(path: Path, data: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -611,7 +816,17 @@ def write_json(path: Path, data: dict) -> None:
 def main() -> int:
     model_bp, write_bp, plan_bp, render_bp = yue2_model(), write_song(), yue2_plan(), yue2_render()
     transcribe_bp, takes_bp = transcribe_score(), yue2_takes()
-    blueprints = [model_bp, write_bp, plan_bp, render_bp, transcribe_bp, takes_bp]
+    minimax_model_bp, minimax_render_bp = minimax_model(), minimax_render()
+    blueprints = [
+        model_bp,
+        write_bp,
+        plan_bp,
+        render_bp,
+        transcribe_bp,
+        takes_bp,
+        minimax_model_bp,
+        minimax_render_bp,
+    ]
     for blueprint in blueprints:
         write_json(PROJECT / "subgraphs" / f"{blueprint.name}.json", blueprint_file(blueprint))
     song = yue2_song(model_bp, write_bp, plan_bp, render_bp)
@@ -624,7 +839,12 @@ def main() -> int:
         PROJECT / "example_workflows" / "2 · YuE2 · Cover.json",
         workflow(cover, "2 · YuE2 · Cover", [model_bp, write_bp, transcribe_bp, takes_bp]),
     )
-    print(f"wrote {len(blueprints)} blueprints and 2 templates")
+    minimax = minimax_song(minimax_model_bp, write_bp, minimax_render_bp)
+    write_json(
+        PROJECT / "example_workflows" / "3 · MiniMax · Song.json",
+        workflow(minimax, "3 · MiniMax · Song", [minimax_model_bp, write_bp, minimax_render_bp]),
+    )
+    print(f"wrote {len(blueprints)} blueprints and 3 templates")
     return 0
 
 

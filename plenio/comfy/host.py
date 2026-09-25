@@ -18,7 +18,7 @@ from typing import Any
 from .. import __version__
 from ..core.config import CONFIG_FILE_NAME, PlenioConfig
 from ..core.dependencies import probe
-from ..core.engines import EngineInfo, yue2
+from ..core.engines import EngineInfo, minimax, yue2
 from ..core.errors import PlenioModelError
 from ..core.system import Device, SystemFacts
 
@@ -140,6 +140,17 @@ class _YuE2Tokenizer:
         return len(tokens["abc_ids"])
 
 
+class _MiniMaxTokenizer:
+    """Exact MiniMax Music 3 prompt counts: the native prompt built and tokenized as the encoder does."""
+
+    def __init__(self, tokenizer: Any):
+        self._tokenizer = tokenizer
+
+    def prompt_tokens(self, caption: str, lyrics: str) -> int:
+        tokens = self._tokenizer.tokenize_with_weights(caption, lyrics=lyrics)
+        return len(tokens["minimax_music3"][0])
+
+
 def detect_engine(clip: Any) -> EngineInfo:
     """Identify the music model behind a CLIP object and return its engine descriptor."""
     import hashlib
@@ -156,10 +167,25 @@ def detect_engine(clip: Any) -> EngineInfo:
         return EngineInfo(
             yue2.ENGINE_ID, yue2.RULES_VERSION, yue2.capabilities(), model, _YuE2Tokenizer(tokenizer)
         )
+    if kind.__name__ == "MiniMaxMusic3Tokenizer" and kind.__module__.endswith("text_encoders.minimax_music"):
+        raw = getattr(tokenizer, "tokenizer_json", b"")
+        model = {
+            "text_encoder": type(getattr(clip, "cond_stage_model", None)).__name__,
+            "tokenizer": f"{kind.__module__}.{kind.__name__}",
+            "tokenizer_sha256": hashlib.sha256(bytes(raw)).hexdigest() if raw else None,
+        }
+        return EngineInfo(
+            minimax.ENGINE_ID,
+            minimax.RULES_VERSION,
+            minimax.capabilities(),
+            model,
+            _MiniMaxTokenizer(tokenizer),
+        )
     detected = f"{kind.__module__}.{kind.__name__}" if tokenizer is not None else "no tokenizer"
     raise PlenioModelError(
         f"The connected model is not a supported music model (text encoder tokenizer: {detected}).",
-        hint="Connect the CLIP output of the YuE2 Model block (checkpoint yue2_3b_int8_convrot.safetensors).",
+        hint="Connect the CLIP output of a Plenio Model block: YuE2 (checkpoint yue2_3b_int8_convrot.safetensors) "
+        "or MiniMax Music 3 (text encoder minimax_music3_text_encoder_pruned_int8_convrot.safetensors, type minimax).",
     )
 
 

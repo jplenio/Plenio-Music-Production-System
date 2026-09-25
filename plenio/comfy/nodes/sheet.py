@@ -148,6 +148,8 @@ class PlenioSongSheet(io.ComfyNode):
             extra_findings=_cover_findings(brief, upstream, state),
         )
         payload = {**evaluation.payload(), "node_id": str(cls.hidden.unique_id)}
+        if engine is not None:
+            payload["style_label"] = getattr(rules_for(engine.engine_id), "STYLE_LABEL", "style")
         if timeline is not None:
             payload["timeline"] = timeline.to_dict()
         reference = kwargs.get("reference_audio")
@@ -206,10 +208,9 @@ def _markdown(evaluation: Any) -> str:
     for kind in evaluation.owned:
         doc = evaluation.resolution.docs[kind]
         lines.append(f"- {kind.replace('_', ' ')}: {doc.status.value}")
-    if evaluation.validation and evaluation.validation.get("budget"):
-        budget = evaluation.validation["budget"]
+    if evaluation.validation and evaluation.validation.get("budget") and evaluation.engine_id:
         lines.append(
-            f"- budget: {budget['music_seconds']:.0f} s of music fit ({budget['prefix_tokens'] + budget['abc_tokens']} tokens used)"
+            f"- budget: {rules_for(evaluation.engine_id).describe_budget(evaluation.validation['budget'])}"
         )
     if "score" in evaluation.owned:
         lines.append(f"- render: {evaluation.planning_mode}, ceiling {evaluation.score_seconds:.0f} s")

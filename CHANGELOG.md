@@ -4,6 +4,18 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 ## Unreleased
 
+### Added (Phase 6 - MiniMax Music 3)
+
+- `core.engines.minimax`: structured caption rules (Global Metadata, Vocal Details, Arrangement), exact 5 000-token prompt budget through the loaded text encoder (estimate without it), render ceiling at most 360 s, instrumental conventions (tags-only section map about twice as long as a sung song's, Vocal Details `n/a`).
+- Engine Profile detects MiniMax Music 3 (CLIPLoader type `minimax`).
+- Blueprints *Plenio · MiniMax Model* and *Plenio · MiniMax Render* (native nodes, 30 steps, optional tiled decode); template **3 · MiniMax · Song**.
+- Writing: multi-line captions are kept by Parse; the editor labels the style document *Caption* for engines that call it so.
+- Tests: MiniMax unit and host tests; contract test for the real tokenizer and smoke test S-5 (owner's machine). Docs: user guide *3 · MiniMax · Song*; test report `docs/test-reports/2026-09-25-phase-6.md`.
+
+### Fixed (Phase 6)
+
+- The Song Sheet's budget summary no longer assumes YuE2 fields.
+
 ### Added (Phase 5 - Score / ABC editor; done 2026-09-25)
 
 - Score core: element view with ids and text positions (`core.score.model`), tolerant positions and diagnostics with line and bar range (`core.score.positions`), editing operations with invariant checks (`core.score.edit`: pitch, length, rest/note, chords, section rename/move/split/join), operation registry (`core.score.operations`); `/plenio/score/analyze` returns the element view and `display_abc`, `/plenio/score/transform` the new operations.

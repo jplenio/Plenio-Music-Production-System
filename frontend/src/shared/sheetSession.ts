@@ -42,6 +42,8 @@ export interface SheetPayload {
   score_seconds: number
   validation: Record<string, unknown> | null
   engine: string | null
+  /** What the engine calls the style document (``caption`` for MiniMax Music 3). */
+  style_label?: string
   instrumental: boolean
   target_seconds?: number | null
   timeline?: TimelinePayload

@@ -9,10 +9,10 @@ from __future__ import annotations
 from types import ModuleType
 
 from ..errors import PlenioModelError
-from . import yue2
+from . import minimax, yue2
 from .base import EngineInfo
 
-ENGINES: dict[str, ModuleType] = {yue2.ENGINE_ID: yue2}
+ENGINES: dict[str, ModuleType] = {yue2.ENGINE_ID: yue2, minimax.ENGINE_ID: minimax}
 
 
 def rules_for(engine_id: str) -> ModuleType:

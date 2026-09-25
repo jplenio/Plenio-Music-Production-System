@@ -92,6 +92,7 @@ Confirm or change D-01 … D-09 in [target-architecture.md](target-architecture.
 | **Tests** | rules/budget unit tests, blueprint/template validation, host tests (Song Sheet with caption documents), smoke S-5. |
 | **Completion criteria** | MiniMax song from brief to FLAC; budget errors caught in the Song Sheet before render; no MiniMax-specific code outside its engine module and blueprints. |
 | **Effort** | **high** |
+| **Status** | **Implemented** (2026-09-25): engine rules, detection, blueprints, template, docs; unit and host tests pass in the cloud ([../test-reports/2026-09-25-phase-6.md](../test-reports/2026-09-25-phase-6.md)). Open on the owner's machine: tokenizer contract test, smoke S-5, template runs, instrumental listening (I-5). |
 
 ## Phase 7 — Audio production chain
 

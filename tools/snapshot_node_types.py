@@ -31,6 +31,8 @@ NATIVE_NODES = [
     "YuE2GenerateABC",
     "YuE2GenerateMusic",
     "EmptyYuE2LatentAudio",
+    "MiniMaxMusic3TextEncode",
+    "EmptyMiniMaxMusic3LatentAudio",
     "KSampler",
     "ConditioningZeroOut",
     "VAEDecodeAudio",

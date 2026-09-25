@@ -10,7 +10,7 @@ Press **Edit Song Sheet…** to see and edit the documents:
 
 **review** = *stop for review* holds the documents back until you **Approve** exactly what you see.
 
-The sheet validates the documents with the rules of the connected engine (style, lyrics, score, exact token budget). For a score it also outputs the render mode (chords -> full, otherwise melody), a render ceiling derived from the score's length and the score's **section tags** (the lyrics of an instrumental cover).
+The sheet validates the documents with the rules of the connected engine (style, lyrics, score, exact token budget). With MiniMax Music 3 the style document is the **caption** (Global Metadata, Vocal Details, Arrangement); caption and lyrics must stay under 5 000 tokens, counted exactly with the loaded text encoder, and the render ceiling follows the brief (at most 6:00). For a score it also outputs the render mode (chords -> full, otherwise melody), a render ceiling derived from the score's length and the score's **section tags** (the lyrics of an instrumental cover).
 
 For covers (the score comes from *Song Sheet · Score* as context) the text sheet also checks:
 

@@ -133,7 +133,8 @@ def compose(
         instrumental=brief.instrumental, target_seconds=brief.target_seconds
     )
     if brief.instrumental:
-        sections: tuple[str, ...] = (INSTRUMENTAL_TAG,)
+        # YuE2: the single tag [instrumental]; engines that need a section map (MiniMax) provide one.
+        sections: tuple[str, ...] = tuple(rules.get("instrumental_sections") or (INSTRUMENTAL_TAG,))
     else:
         sections = tuple(s.strip("[]") for s in score_sections) or tuple(rules["sections"])
     request = Request(
@@ -172,18 +173,27 @@ def compose(
     parts.append("- Artwork: one sentence describing a square cover image; no text or letters in the image.")
     if DETAIL.get(detail):
         parts.append(f"- {DETAIL[detail]}")
-    example = f"[{INSTRUMENTAL_TAG}]" if brief.instrumental else f"[{sections[0]}]\n<lines>\n..."
-    parts += ["", f"Example style: {rules['example_style']}", "", *_layout(example)]
+    example = lyrics_rules.tags_only(sections) if brief.instrumental else f"[{sections[0]}]\n<lines>\n..."
+    parts += [*_example_style(rules), "", *_layout(example, multiline=bool(rules.get("style_multiline")))]
     return "\n".join(parts), request
 
 
-def _layout(lyrics_example: str) -> list[str]:
+def _example_style(rules: Mapping[str, Any]) -> list[str]:
+    example = str(rules["example_style"])
+    return ["", "Example style:", example] if "\n" in example else ["", f"Example style: {example}"]
+
+
+def _layout(lyrics_example: str, *, multiline: bool = False) -> list[str]:
     return [
         "Write your answer in exactly this layout. Keep the four labels TITLE:, STYLE:, LYRICS: and ARTWORK: "
         "and replace the text in angle brackets; write nothing before or after it.",
         "",
         "TITLE: <the title>",
-        "STYLE: <the style line>",
+        *(
+            ["STYLE:", "<the style, on several lines as described>"]
+            if multiline
+            else ["STYLE: <the style line>"]
+        ),
         "LYRICS:",
         lyrics_example,
         "ARTWORK: <one sentence>",
@@ -332,7 +342,7 @@ def _compose_cover(
     parts.append("- Artwork: one sentence describing a square cover image; no text or letters in the image.")
     if DETAIL.get(detail):
         parts.append(f"- {DETAIL[detail]}")
-    parts += ["", f"Example style: {rules['example_style']}", "", *_layout(example)]
+    parts += [*_example_style(rules), "", *_layout(example, multiline=bool(rules.get("style_multiline")))]
     return "\n".join(parts), request
 
 
@@ -487,11 +497,19 @@ def parse_draft(text: str, request: Request) -> Draft:
         title = "Untitled"
         notes.append("no title was given; 'Untitled' is used")
     style_raw = blocks["STYLE"]
-    style = re.sub(r"\s+", " ", style_raw.replace("*", "")).strip().strip("\"'“”")
-    style = re.sub(r"(?i)^style\s*:\s*", "", style).rstrip(".")
-    if style != style_raw.strip():
-        notes.append("the style was joined into one line and cleaned")
-    style, style_notes = rules_for(request.engine_id).enforce_style(style, instrumental=request.instrumental)
+    engine_rules = rules_for(request.engine_id)
+    if getattr(engine_rules, "STYLE_MULTILINE", False):
+        # a structured caption keeps its lines; only markdown emphasis and outer quotes go
+        style = "\n".join(line.replace("*", "").strip() for line in style_raw.strip().split("\n"))
+        style = re.sub(r"(?i)^style\s*:\s*", "", style.strip().strip("\"'“”"))
+        if style != style_raw.strip():
+            notes.append("the style was cleaned (markdown emphasis removed)")
+    else:
+        style = re.sub(r"\s+", " ", style_raw.replace("*", "")).strip().strip("\"'“”")
+        style = re.sub(r"(?i)^style\s*:\s*", "", style).rstrip(".")
+        if style != style_raw.strip():
+            notes.append("the style was joined into one line and cleaned")
+    style, style_notes = engine_rules.enforce_style(style, instrumental=request.instrumental)
     notes.extend(style_notes)
     if request.lyrics_mode == "none":
         lyrics = ""

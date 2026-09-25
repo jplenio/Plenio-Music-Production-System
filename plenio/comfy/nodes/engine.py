@@ -18,7 +18,7 @@ class PlenioEngine(io.ComfyNode):
             display_name="Engine Profile",
             category="Plenio/Model",
             description=(
-                "Detects the music model behind a CLIP (YuE2) and outputs its rules and an exact tokenizer, so "
+                "Detects the music model behind a CLIP (YuE2 or MiniMax Music 3) and outputs its rules and an exact tokenizer, so "
                 "that writing, validation and budgets always follow the model that is actually loaded."
             ),
             inputs=[io.Clip.Input("clip", tooltip="CLIP output of the music model's loader.")],
