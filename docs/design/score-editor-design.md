@@ -249,7 +249,7 @@ Snapshot-based per document (scores are small text files), labelled with the ope
 
 ## 15. Phase 5 implementation record (checkpoint 2026-09-25)
 
-Implemented and checked by hand in a real ComfyUI (SheetSage2 score of the M2 cover source); the Phase 5 test suite is still to be written (see `docs/design/CURRENT_STATUS.md`).
+Implemented and checked by hand in a real ComfyUI (SheetSage2 score of the M2 cover source); tested in §15.6.
 
 ### 15.1 Backend (`plenio/core/score/`)
 
@@ -304,3 +304,14 @@ Shortcuts (score editor): ←/→ previous/next element, Alt+↑/↓ other voice
 ### 15.5 Checked by hand (real ComfyUI, SheetSage2 score)
 
 Rendering (202 notes, two voices, key and tempo, section annotations); click selection; ↑ on E5 in A major gives `=f4` (the needed natural) and the text view follows; undo returns to *auto*, redo; →; typing an unsupported length marks the bar (lint marker, bar strip, diagnostic with bar link) and the notation as stale; moving the chorus boundary one bar earlier; playback from bar 25 with cursor; A/B to the source at the same bar; Apply → workflow save/reload keeps the edited score.
+
+### 15.6 Tests and fixes (cloud session, 2026-09-25)
+
+`tests/unit/test_score_editor.py` (162 tests) and `frontend/tests/scoreEditor.test.ts` (31 tests); host tests for the routes and the Song/Cover integration are written for the owner's machine. Details and the remaining checks: [../test-reports/2026-09-25-phase-5.md](../test-reports/2026-09-25-phase-5.md).
+
+Changes the tests led to:
+
+- `display_abc`: after an inline key change in a bar, the next note of a letter that had an accidental earlier in that bar is written with its accidental (readers disagree whether the old one survives the key change).
+- The score session's watcher on the document text runs synchronously (`flush: 'sync'`); the queued default made the session's own writes look external, which broke typing groups and re-analysed after every operation.
+- Playback compares score times with a 1 ms tolerance (`TIME_TOLERANCE`): bar times arrive with 3 decimals, note times with 4.
+

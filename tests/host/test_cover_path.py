@@ -14,6 +14,8 @@ fails - that is how the tests prove the ASR was not requested.
 from __future__ import annotations
 
 import json
+import urllib.parse
+import urllib.request
 import uuid
 from pathlib import Path
 from typing import Any
@@ -337,6 +339,87 @@ def test_an_edited_score_is_what_is_rendered_and_what_the_lyrics_follow(
     assert render["abc"] == edited.strip()
     assert tags(render["lyrics"]) == ["[Verse]", "[Bridge]", "[Chorus]", "[Outro]"]
     assert sheet_payload(entry, "7")["docs"]["score"]["status"] == "edited"
+
+
+def test_section_edits_in_the_editor_change_the_asr_lyrics_draft(
+    server: ComfyServer, log: Log, primed: dict[str, Any]
+) -> None:
+    """Rename and boundary move through /plenio/score/transform re-section the ASR lyrics draft;
+    a lyrics correction based on the old draft then stops with a conflict."""
+    first = server.run(cover_prompt(vocals="original"))
+    score_doc = sheet_payload(first, "7")["docs"]["score"]
+    old_lyrics = sheet_payload(first, "14")["docs"]["lyrics"]
+
+    def transform(text: str, operation: dict[str, Any]) -> str:
+        status, result = server.request(
+            "POST", "/plenio/score/transform", {"abc": text, "operation": operation}
+        )
+        assert status == 200, result
+        return str(result["abc"])
+
+    status, view = server.request("POST", "/plenio/score/analyze", {"abc": score_doc["text"]})
+    assert status == 200 and [s["label"] for s in view["sections"]] == [
+        "verse",
+        "pre-chorus",
+        "chorus",
+        "outro",
+    ]
+    chorus_start = view["sections"][2]["start_bar"]
+    renamed = transform(score_doc["text"], {"op": "rename_section", "section": 2, "label": "bridge"})
+    moved = transform(renamed, {"op": "move_section_boundary", "section": 3, "start_bar": chorus_start - 1})
+
+    def run(score_text: str, seed: int) -> dict[str, Any]:
+        state = sheet_state(
+            {"score": {"state": "edited", "text": score_text, "base_sha256": score_doc["upstream_sha256"]}}
+        )
+        return server.run(cover_prompt(vocals="original", score_state=state, take_seed=seed))
+
+    renamed_lyrics = sheet_payload(run(renamed, 31), "14")["docs"]["lyrics"]
+    entry = run(moved, 32)
+    moved_lyrics = sheet_payload(entry, "14")["docs"]["lyrics"]
+    assert tags(moved_lyrics["text"]) == ["[Verse]", "[Bridge]", "[Chorus]", "[Outro]"]
+    assert (
+        len(
+            {
+                old_lyrics["upstream_sha256"],
+                renamed_lyrics["upstream_sha256"],
+                moved_lyrics["upstream_sha256"],
+            }
+        )
+        == 3
+    )
+    render = events(log, "render")[-1]
+    assert render["abc"] == sheet_payload(entry, "7")["docs"]["score"]["text"] == moved.strip()
+    assert render["lyrics"] == moved_lyrics["text"]
+    corrected = old_lyrics["text"].replace("Blue light pooling", "Blue light pouring")
+    text_state = sheet_state(
+        {"lyrics": {"state": "edited", "text": corrected, "base_sha256": old_lyrics["upstream_sha256"]}}
+    )
+    score_state = sheet_state(
+        {"score": {"state": "edited", "text": moved, "base_sha256": score_doc["upstream_sha256"]}}
+    )
+    error = server.run_expect_error(
+        cover_prompt(vocals="original", score_state=score_state, text_state=text_state)
+    )
+    assert error["node_type"] == "PlenioSongSheet"
+    assert "conflict" in error["exception_message"] and "lyrics" in error["exception_message"]
+
+
+def test_the_score_sheet_carries_the_source_for_ab_listening(
+    server: ComfyServer, log: Log, primed: dict[str, Any]
+) -> None:
+    """``reference_audio`` is display only: a temporary Opus copy in the payload, served by /view."""
+    prompt = cover_prompt(vocals="original", take_seed=41)
+    prompt["7"]["inputs"]["reference_audio"] = ["1", 0]
+    entry = server.run(prompt)
+    payload = sheet_payload(entry, "7")
+    reference = payload["reference_audio"]
+    assert reference["type"] == "temp" and reference["filename"].endswith(".opus")
+    query = urllib.parse.urlencode(reference)
+    with urllib.request.urlopen(f"{server.url}/view?{query}", timeout=30) as response:  # noqa: S310 - local
+        assert response.status == 200 and len(response.read()) > 1000
+    assert "reference_audio" not in sheet_payload(entry, "14")
+    assert events(log, "render")[-1]["abc"] == payload["docs"]["score"]["text"]
 
 
 def test_fully_manual_lyrics_never_run_the_asr(server: ComfyServer, log: Log, primed: dict[str, Any]) -> None:

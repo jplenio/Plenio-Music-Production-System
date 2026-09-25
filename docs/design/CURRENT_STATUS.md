@@ -3,13 +3,13 @@
 | | |
 |---|---|
 | Date | 2026-09-25 |
-| Written for | the move of the development session from the owner's Windows machine to a Claude Code cloud session |
+| Written for | the return from the Claude Code cloud session to the owner's Windows machine (Phase 5 checks that need ComfyUI, a GPU or a browser) |
 | Overall phase | **Phase 5 - Reusable Score / ABC editor** (prompt `07_PHASE_5_SCORE_EDITOR.md`, authorized by the owner on 2026-09-25) |
-| Sub-phase | Phase 5 implementation: core, routes and the editor UI are implemented and checked by hand; **tests, integration tests, user documentation and the phase report remain** |
+| Sub-phase | Phase 5 implemented, unit and Vitest suites pass, host tests written, docs and report written; **the owner-machine checks of §3 remain** before Phase 5 is *Done* |
 | Phases done | 1A, 1B (design), 2 (Foundation), 3 (YuE2 Core), 4A (Cover/Instrumental design gate), 4B (YuE2 Cover) |
 | Prompt set | `D:\Daten2\Deepseek\ComfyUI-MiniMax\Plenio_Music_Production_System_Refactor_Prompts\` on the owner's machine (not in this repository): `01_PHASE_1A` ... `12_PHASE_10`, one phase per prompt, hard stop after each phase, the next phase only on the owner's explicit authorization |
 
-Read with: [README.md](README.md) (design index), [implementation-roadmap.md](implementation-roadmap.md), [score-editor-design.md](score-editor-design.md) (§15 = Phase 5 implementation record), [target-architecture.md](target-architecture.md) §0/§2/§18, the latest test report [../test-reports/2026-09-25-phase-4b.md](../test-reports/2026-09-25-phase-4b.md).
+Read with: [README.md](README.md) (design index), [implementation-roadmap.md](implementation-roadmap.md), [score-editor-design.md](score-editor-design.md) (§15 = Phase 5 implementation record), [target-architecture.md](target-architecture.md) §0/§2/§18, the latest test report [../test-reports/2026-09-25-phase-5.md](../test-reports/2026-09-25-phase-5.md).
 
 ---
 
@@ -33,21 +33,21 @@ Read with: [README.md](README.md) (design index), [implementation-roadmap.md](im
 - Frontend: tabbed Song Sheet editor; score tab with abcjs notation, CodeMirror ABC text with lint markers, navigator, palette with shortcuts, undo/redo, WebAudio playback with cursor, voice switches, speed, section loop, A/B with the source; lyrics fit per section; Revert; close confirmation.
 - Bundled libraries recorded in `THIRD_PARTY.md` (abcjs 6.7.1, CodeMirror 6 and its dependencies, all MIT).
 
+- Phase 5 tests (cloud session): `tests/unit/test_score_editor.py` (162), `frontend/tests/scoreEditor.test.ts` (31, with the backend's editor view as fixture `frontend/tests/fixtures/tricky-score.json`); fixes they found: session watcher (typing groups, double analysis), playback time tolerance, `display_abc` after inline key changes, chord refusal message (report §3).
+- Host tests written (not yet run): score routes and an editor-edited score reaching the renderer (`tests/host/test_song_path.py`), section edits re-sectioning the ASR lyrics draft and `reference_audio` (`tests/host/test_cover_path.py`).
+- Docs: `docs/user/concepts/score-editor.md`, Song Sheet concept and help page, test report `docs/test-reports/2026-09-25-phase-5.md`, CHANGELOG, roadmap status.
+
 ## 2. Partially implemented
 
-- **Tests for Phase 5**: none written yet for the new modules (only the import-boundary tests cover them). Evidence so far: a fuzz run of every operation on three real scores (M2 SheetSage2 score, YuE2 plans Y2/Y3: 1019 notes; later re-run on 642 operations) with all invariant checks passing, and manual browser checks (§5).
-- **Editor UX**: works on the 83-s SheetSage2 score; long YuE2 plans (~200 s) not yet rendered in the browser (performance, AS-12); accessibility and theming reviewed only by eye (dark theme).
-- **Docs**: design and dev docs updated; the user guide for the editor and the Song Sheet concept/help page are not updated for the full editor yet.
+- **Editor UX**: long YuE2 plans (~200 s) not yet rendered in the browser (performance, AS-12); keyboard-only use and the light theme not yet checked.
+- **Host tests of Phase 5**: written in the cloud without ComfyUI; they may need small adjustments on the first real run.
 
-## 3. What remains (Phase 5)
+## 3. What remains (Phase 5, on the owner's machine)
 
-1. `tests/unit/test_score_editor.py` (new): positions and `locate()` (incl. invalid texts), element ids and pitches vs. the upstream parser on all fixtures, tie chains, `display_abc` ranges and accidental normalisation cases (letter-wide accidental across octaves, tied continuation across a bar line, inline key change), full-bar rest expansion, every edit operation (result, invariants, byte-identical untouched bars, refusals with clear messages), section operations, operation registry parameter errors, round trip (`build(view text)` = same elements).
-2. Frontend Vitest: `history.ts`, `scoreView.ts` (lookup by display/source position, neighbours, describe), `playback.ts` (schedule, sounding, speed), `prefs.ts` (blocked storage), `useScoreSession.ts` with a fake fetcher (stale answers dropped, operation after a concurrent edit refused, undo/redo, external document replacement enters the history), `dynamicCombo.ts` already tested.
-3. Host tests: routes `/plenio/score/analyze` / `/plenio/score/transform` with the new operations and error responses; Song Sheet `reference_audio` in the payload; workflow save/reload of an edited score (widget value round trip - checked by hand).
-4. Integration: YuE2 Song path - a score edited through `/plenio/score/transform` and applied as *edited* reaches the renderer and survives a new take, a new plan gives a conflict; YuE2 Cover - a section rename/boundary move in the score sheet changes the ASR lyrics draft (and conflicts with an edited lyrics document).
-5. Browser checks with a long YuE2 plan; keyboard-only use; light theme.
-6. Docs: user guide page for the editor (`docs/user/concepts/score-editor.md` or an extension of `song-sheet.md`), `web/docs/PlenioSongSheet.md` (reference_audio, editor), test report `docs/test-reports/<date>-phase-5.md`, CHANGELOG, roadmap status *Done*.
-7. Stop after the component and integrations are tested and documented (prompt rule).
+1. Full Python suite with `PLENIO_COMFYUI_ROOT`, `PLENIO_MODELS_DIR`, `PLENIO_SMOKE=1` - above all the four new host tests (report §4).
+2. Browser checks (report §5): long YuE2 plan, keyboard-only, light theme; repeat of the checkpoint checks after the fixes (typing undo, play from a bar, A/B, Apply -> save -> reload).
+3. V3: one cover and one song with an editor-edited score, listened to.
+4. Record the results in the Phase 5 report, set the roadmap status to *Done*, and stop (prompt rule). Phase 6 only on the owner's authorization.
 
 ## 4. Important architectural decisions since Phase 1
 
@@ -77,18 +77,19 @@ Manual checks done in a real ComfyUI with the SheetSage2 score of the M2 source:
 - Editor chunk size about 1.4 MB (370 kB gzip), loaded only when a sheet opens.
 - Dev tooling: `npm audit` reports a moderate advisory in vitest's mocker (dev-only; the fix is a major vitest upgrade, not done).
 - CodeMirror renders only visible lines (tests reading the DOM see a subset).
+- mypy with the configured `python_version = "3.10"` fails on the stubs of numpy releases that use 3.12 syntax (seen with the latest numpy in the cloud); the owner's pinned `.devdeps` numpy works. Pin numpy for mypy or raise the target when the minimum Python is decided.
 - `pyproject.toml` still names the planned public repository `jplenio/comfyui-plenio-music` (release decision, `docs/dev/release.md`), while the working remote is `jplenio/Plenio-Music-Production-System`.
 - Shell pitfall on the owner's machine: bash heredocs with backslashes (`\d`, `\n`, `\a`, `\b`) inserted control characters into code; write code with file-writing tools, and scan for control characters before committing.
 
 ## 7. Tests executed at this checkpoint
 
-| Suite | Result |
-|---|---|
-| Python (unit, contract, workflow, host, smoke) with `PLENIO_COMFYUI_ROOT`, `PLENIO_MODELS_DIR`, `PLENIO_SMOKE=1` on the owner's machine | **393 passed, 1 skipped** (coexistence test: needs an installed legacy toolkit) |
-| ruff check / ruff format --check / mypy (37 files) | clean |
-| Frontend `npm run check` (vue-tsc, Vitest, build) | 22 tests passed, typecheck clean, build ok |
-| Edit-operation fuzz on real scores (script, not a test file) | 642 operations, all invariant checks passed |
-| Workflows (`tools/workflow_validation.py`) | 9/9 blueprints and templates valid |
+| Suite | Where | Result |
+|---|---|---|
+| Python (unit, contract, workflow, host, smoke) with ComfyUI | owner's machine, before Phase 5 tests | 393 passed, 1 skipped |
+| Python without ComfyUI (host/comfy/smoke skip) | cloud, after Phase 5 tests | **500 passed, 58 skipped** |
+| ruff check / format, mypy strict (37 files) | cloud | clean (mypy run with `--python-version 3.12`, see report §2) |
+| Frontend `npm run check` (vue-tsc, Vitest, build) | cloud | **53 tests passed**, typecheck clean, build ok (`web/js/` rebuilt and committed) |
+| Workflows (`tools/workflow_validation.py`) | owner's machine | 9/9 valid (no graph changes since) |
 
 ## 8. Tests that need the local GPU / ComfyUI environment
 
@@ -96,13 +97,13 @@ Manual checks done in a real ComfyUI with the SheetSage2 score of the M2 source:
 - **Contract tests** marked `comfy` (ComfyUI importable; e.g. the YuE2 tokenizer test also needs `PLENIO_MODELS_DIR`).
 - **Smoke tests** (`PLENIO_SMOKE=1`, `tests/host/test_cover_models.py`): GPU, SheetSage2, faster-whisper large-v3, the legacy MiniMax sample.
 - **Real template runs and browser checks** (`tools/dev_server.py --gpu --models <dir> --port 8190 --base <dir>`): YuE2 3B, Gemma 4 writer, instrumental LoRA, SheetSage2; owner's RTX 5060 Ti 16 GB, models in `F:\ComfyUI\models`, ComfyUI 0.37.0 in `D:\Daten2\ComfyUI` (frontend 1.53.6, Python 3.12.9).
-- Everything in §3 items 1-2 runs without ComfyUI (pure Python with numpy; Node for the frontend).
+- Everything else (unit, workflow, Vitest) runs without ComfyUI (pure Python with numpy; Node for the frontend).
 
 ## 9. Exact recommended next action
 
-Continue **Phase 5** (do not start Phase 6): write the tests of §3 items 1 and 2 first (pure, runnable in the cloud), fix what they find, then items 3-4 (host tests; run them where a ComfyUI checkout is available, otherwise mark them for the owner's machine), then §3 items 5-6, then the Phase 5 report and stop.
+On the owner's machine: `git pull`, then run §3 items 1-3; fix what they find; record the results in `docs/test-reports/2026-09-25-phase-5.md` and set Phase 5 to *Done*. Do not start Phase 6.
 
-**Next prompt file:** `07_PHASE_5_SCORE_EDITOR.md` (continue; Phase 5 is not complete). After Phase 5 is done and the owner authorizes it: `08_PHASE_6_MINIMAX.md`.
+**Next prompt file:** `07_PHASE_5_SCORE_EDITOR.md` (finish the owner-machine checks). After Phase 5 is done and the owner authorizes it: `08_PHASE_6_MINIMAX.md`.
 
 ## 10. Context a new session would otherwise have to rediscover
 

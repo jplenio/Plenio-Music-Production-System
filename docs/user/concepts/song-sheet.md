@@ -36,4 +36,8 @@ Each shows the other's documents as read-only context and checks against them: i
 - with a timeline connected (covers), the **sections of the source** with start and end times;
 - the exact **token budget** of YuE2 and the render ceiling of a score.
 
+A sheet that owns a score has a **Score** tab: notation and ABC text of the same score, note-by-note editing, sections, playback and - with **reference_audio** connected - A/B against the source recording. See [Score editor](score-editor.md).
+
+**Apply** stores your documents in the node (and so in the workflow); **Revert** discards the changes made since the editor opened; closing with unapplied changes asks first.
+
 The editor never decides musical validity itself: it asks the same backend functions the node uses.

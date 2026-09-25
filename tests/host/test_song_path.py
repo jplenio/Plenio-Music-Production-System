@@ -297,6 +297,79 @@ def test_score_routes(server: ComfyServer) -> None:
     assert status == 200 and lyrics["sections"][0]["score_section"] == "verse"
 
 
+def test_score_editor_routes(server: ComfyServer) -> None:
+    """The element view and the editor operations over HTTP, with their refusals."""
+    abc = (ROOT / "tests" / "fixtures" / "abc" / "upstream-score.abc").read_text(encoding="utf-8")
+    status, view = server.request("POST", "/plenio/score/analyze", {"abc": abc})
+    assert status == 200 and view["ok"]
+    assert {"elements", "chords", "notes", "bar_starts_s", "display_abc"} <= set(view)
+    first = view["elements"][0]
+    assert (first["id"], first["midi"], first["name"]) == ("V1.0", 64, "E4")
+    assert abc[first["source"][0] : first["source"][1]] == "E2"
+    assert len(view["bar_starts_s"]) == 8 and '"^Verse"' in view["display_abc"]
+
+    def transform(text: str, operation: dict[str, Any]) -> tuple[int, Any]:
+        return server.request("POST", "/plenio/score/transform", {"abc": text, "operation": operation})
+
+    status, result = transform(abc, {"op": "shift_pitch", "ids": ["V1.0"], "semitones": 1})
+    assert status == 200
+    assert result["changes"] == ["bar 1 Vocal: E4 -> F4"] and result["select"] == ["V1.0"]
+    assert result["analysis"]["elements"][0]["midi"] == 65
+    status, moved = transform(abc, {"op": "move_section_boundary", "section": 2, "start_bar": 4})
+    assert status == 200 and [s["start_bar"] for s in moved["analysis"]["sections"]] == [1, 4]
+    status, renamed = transform(abc, {"op": "rename_section", "section": 2, "label": "Bridge"})
+    assert status == 200 and "% bridge" in renamed["abc"]
+    # refusals: 400 with the message and the hint the editor shows
+    status, refused = transform(abc, {"op": "set_duration", "id": "V1.0", "units": 16})
+    assert status == 400 and "cannot grow by 14" in refused["error"]["message"]
+    assert refused["error"]["hint"].startswith("Turn the following note into a rest")
+    status, refused = transform(abc, {"op": "shift_pitch", "ids": ["V1.0"]})
+    assert status == 400 and "whole number 'semitones'" in refused["error"]["message"]
+    status, refused = server.request("POST", "/plenio/score/transform", {"abc": abc})
+    assert status == 400 and "'operation' object" in refused["error"]["message"]
+    status, refused = server.request("POST", "/plenio/score/analyze", {})
+    assert status == 400 and "'abc'" in refused["error"]["message"]
+    # an invalid score: an analysis with positioned diagnostics (no element view), no transform
+    broken = abc.replace("E2G2A2G2E2D2C4|", "E2G2A2G2E2D2C2|", 1)
+    status, invalid = server.request("POST", "/plenio/score/analyze", {"abc": broken})
+    assert status == 200 and not invalid["ok"] and "elements" not in invalid
+    diagnostic = invalid["diagnostics"][0]
+    assert diagnostic["line"] == 11 and broken[diagnostic["start"] : diagnostic["end"]] == '"C"E2G2A2G2E2D2C2'
+    status, refused = transform(broken, {"op": "shift_pitch", "ids": ["V1.0"], "semitones": 1})
+    assert status == 400 and "not valid native two-voice ABC" in refused["error"]["message"]
+
+
+def test_a_score_edited_in_the_editor_reaches_the_renderer(server: ComfyServer, log: Log) -> None:
+    """Editor operation -> Apply (edited) -> render; a new take keeps it, a new plan conflicts."""
+    name = label()
+    first = server.run(song_prompt(label=name))
+    draft = sheet_payload(first, "9")["docs"]["score"]
+    status, view = server.request("POST", "/plenio/score/analyze", {"abc": draft["text"]})
+    assert status == 200 and view["ok"]
+    note = next(e for e in view["elements"] if e["voice"] == "Vocal" and e["kind"] == "note")
+    status, edited = server.request(
+        "POST",
+        "/plenio/score/transform",
+        {"abc": draft["text"], "operation": {"op": "shift_pitch", "ids": [note["id"]], "semitones": 2}},
+    )
+    assert status == 200
+    moved = next(e for e in edited["analysis"]["elements"] if e["id"] == edited["select"][0])
+    assert moved["midi"] == note["midi"] + 2
+    state = sheet_state(
+        {"score": {"state": "edited", "text": edited["abc"], "base_sha256": draft["upstream_sha256"]}}
+    )
+    entry = server.run(song_prompt(label=name, score_state=state, take_seed=8))
+    score = sheet_payload(entry, "9")["docs"]["score"]
+    assert score["status"] == "edited"
+    assert events(log, "render")[-1]["abc"] == score["text"] == edited["abc"].strip()
+    server.run(song_prompt(label=name, score_state=state, take_seed=9))
+    assert events(log, "render")[-1]["abc"] == score["text"] and events(log, "render")[-1]["seed"] == 9
+    assert len(events(log, "plan")) == 1
+    error = server.run_expect_error(song_prompt(label=name, score_state=state, plan_seed=11))
+    assert error["node_type"] == "PlenioSongSheet"
+    assert "conflict" in error["exception_message"] and "score" in error["exception_message"]
+
+
 def test_template_routes(server: ComfyServer) -> None:
     listing = server.get("/plenio/templates")["templates"]
     assert len(listing) >= 239

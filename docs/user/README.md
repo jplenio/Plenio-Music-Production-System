@@ -9,6 +9,7 @@
 Concepts:
 
 - [Song Sheet](concepts/song-sheet.md) - which text and score reach the model, edits, conflicts, review
+- [Score editor](concepts/score-editor.md) - correcting a score note by note, sections, playback and A/B
 - [Instrumental](concepts/instrumental.md) - what Plenio guarantees for instrumentals and what it checks
 
 Guides for the other paths (MiniMax Song, Enhance & Master) are added as the paths are released.

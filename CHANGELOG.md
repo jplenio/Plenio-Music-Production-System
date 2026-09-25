@@ -4,13 +4,21 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 ## Unreleased
 
-### In progress (Phase 5 - Score / ABC editor; checkpoint 2026-09-25)
+### Added (Phase 5 - Score / ABC editor)
 
 - Score core: element view with ids and text positions (`core.score.model`), tolerant positions and diagnostics with line and bar range (`core.score.positions`), editing operations with invariant checks (`core.score.edit`: pitch, length, rest/note, chords, section rename/move/split/join), operation registry (`core.score.operations`); `/plenio/score/analyze` returns the element view and `display_abc`, `/plenio/score/transform` the new operations.
-- Song Sheet: optional `reference_audio` input for A/B listening; the Cover template connects the source.
+- Song Sheet: optional `reference_audio` input for A/B listening (display only); the Cover template connects the source.
 - Song Sheet editor: tabs; score tab with abcjs notation, CodeMirror ABC text (lint markers), navigator, operation palette with shortcuts, undo/redo, playback with cursor (offline WebAudio tones), voice switches, speed, section loop, A/B with the source; lyrics fit per section; Revert and a close confirmation.
 - Bundled libraries: abcjs 6.7.1, CodeMirror 6 (MIT; `THIRD_PARTY.md`). Dev tooling: happy-dom 20.14.5 (security update).
-- Still to do: Phase 5 tests, integration tests, editor user guide, phase report.
+- Tests: `tests/unit/test_score_editor.py` (162), `frontend/tests/scoreEditor.test.ts` (31), host tests for the score routes, an editor-edited score in the Song path, section edits and `reference_audio` in the Cover path.
+- Docs: user guide *Score editor*, Song Sheet concept and help page, test report `docs/test-reports/2026-09-25-phase-5.md`.
+
+### Fixed (Phase 5)
+
+- Score editor: a burst of typing is one undo step again, and a palette operation no longer triggers a second analysis (the session's document watcher runs synchronously).
+- Playback from a bar starts with that bar's first note, and the cursor marks one note at a note boundary (1 ms time tolerance for the backend's rounded times).
+- `display_abc` writes a letter's accidental again after an inline key change in the same bar.
+- Clearer refusal when a chord symbol would start inside a Vocal note or rest.
 
 ### Added (Phase 4B - YuE2 Cover)
 
