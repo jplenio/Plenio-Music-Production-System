@@ -1,0 +1,11 @@
+# Text files are checked out with LF on every platform. The vendored parser is hash-pinned and tests
+# compare fixtures byte for byte; with Git's Windows default (core.autocrlf=true) a checkout got CRLF
+# and the hash test failed on the Windows CI runner (Phase 10 review).
+* text=auto eol=lf
+
+*.jpg binary
+*.png binary
+*.npz binary
+*.flac binary
+*.mp3 binary
+*.wav binary

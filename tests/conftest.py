@@ -26,6 +26,23 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
             item.add_marker(pytest.mark.skip(reason="set PLENIO_SMOKE=1 to run real-model smoke tests"))
 
 
+def pytest_terminal_summary(terminalreporter: pytest.TerminalReporter) -> None:
+    """On GitHub Actions, list every failure as an annotation, readable without opening the job log."""
+    if os.environ.get("GITHUB_ACTIONS") != "true":
+        return
+    for report in terminalreporter.stats.get("failed", []) + terminalreporter.stats.get("error", []):
+        crash = getattr(report.longrepr, "reprcrash", None)
+        path = Path(crash.path if crash else report.location[0])
+        try:
+            path = path.resolve().relative_to(ROOT)
+        except ValueError:
+            pass
+        line = crash.lineno if crash else (report.location[1] or 0) + 1
+        message = f"{report.nodeid}: {crash.message if crash else report.longrepr}"[:1000]
+        message = message.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+        terminalreporter.write_line(f"::error file={path.as_posix()},line={line}::{message}")
+
+
 @pytest.fixture(scope="session")
 def comfy_path() -> Path:
     """Make ComfyUI importable in-process (contract tests of the adapter layer)."""

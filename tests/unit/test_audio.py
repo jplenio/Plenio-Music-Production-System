@@ -359,9 +359,12 @@ def test_port_matches_the_legacy_tone_match() -> None:
     )
     legacy = meta["fit_settings"]["bands"]  # type: ignore[index]
     assert len(proposal["bands"]) == len(legacy)
+    # The fit's optimum is flat: numpy's and OpenBLAS's CPU-specific code paths (AVX-512, AVX2, SSE) move
+    # the bands by up to 0.003 dB and 0.2 % in frequency with the same fit error (Phase 10 review; the CI
+    # runners have no AVX-512). A different algorithm would place different bands.
     for ours, theirs in zip(proposal["bands"], legacy, strict=True):
-        assert ours["frequency_hz"] == pytest.approx(theirs["frequency_hz"], rel=1e-3)
-        assert ours["gain_db"] == pytest.approx(theirs["gain_db"], abs=1e-3)
+        assert ours["frequency_hz"] == pytest.approx(theirs["frequency_hz"], rel=5e-3)
+        assert ours["gain_db"] == pytest.approx(theirs["gain_db"], abs=0.01)
     assert report["after_error_db"] == pytest.approx(meta["fit_report"]["after_error_db"], abs=1e-3)  # type: ignore[index]
 
 
