@@ -15,6 +15,7 @@ import os
 import sys
 import tempfile
 from pathlib import Path
+from typing import Any
 
 PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT / "tests" / "host"))
@@ -79,10 +80,9 @@ KEYS = (
 )
 
 
-def main() -> int:
-    root = Path(os.environ["PLENIO_COMFYUI_ROOT"])
-    base = Path(tempfile.mkdtemp(prefix="plenio-snapshot-"))
-    (base / "custom_nodes").mkdir()
+def take_snapshot(root: Path, base: Path) -> dict[str, Any]:
+    """The snapshot as this tool writes it, from a fresh server (Plenio only, no user data) in ``base``."""
+    (base / "custom_nodes").mkdir(parents=True)
     copy_package(base / "custom_nodes")
     server = ComfyServer(root, base, node_packs=[PACKAGE_NAME])
     server.start()
@@ -94,16 +94,21 @@ def main() -> int:
     wanted = sorted(set(NATIVE_NODES) | {name for name in info if name.startswith("Plenio")})
     missing = [name for name in wanted if name not in info]
     if missing:
-        print(f"missing node types: {missing}", file=sys.stderr)
-        return 1
-    snapshot = {
+        raise SystemExit(f"missing node types: {missing}")
+    return {
         "comfyui_version": version,
         "nodes": {name: {key: info[name].get(key) for key in KEYS} for name in wanted},
     }
+
+
+def main() -> int:
+    root = Path(os.environ["PLENIO_COMFYUI_ROOT"])
+    snapshot = take_snapshot(root, Path(tempfile.mkdtemp(prefix="plenio-snapshot-")))
     target = PROJECT / "tools" / "data" / "node_types.json"
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(snapshot, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"wrote {len(wanted)} node types from ComfyUI {version} to {target.relative_to(PROJECT)}")
+    nodes, version = len(snapshot["nodes"]), snapshot["comfyui_version"]
+    print(f"wrote {nodes} node types from ComfyUI {version} to {target.relative_to(PROJECT)}")
     return 0
 
 

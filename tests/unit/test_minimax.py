@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from plenio.core.brief import build_song_brief
-from plenio.core.engines import ENGINES, EngineInfo, minimax, rules_for
+from plenio.core.engines import ENGINES, MODULE_INTERFACE, WRITING_RULE_KEYS, EngineInfo, minimax, rules_for
 from plenio.core.sheet import SheetState, evaluate_sheet
 from plenio.core.writing import compose, draft_findings, parse_draft
 
@@ -43,6 +43,17 @@ def test_registered_with_its_facts() -> None:
     assert caps["score"] is False and caps["prompt_tokens"] == 5000 and caps["max_seconds"] == 360.0
     assert minimax.MAX_SECONDS == 9000 / 25
     assert "style" in minimax.DOCUMENTS and "score" not in minimax.DOCUMENTS
+
+
+@pytest.mark.parametrize("engine_id", sorted(ENGINES))
+def test_every_engine_module_provides_the_shared_interface(engine_id: str) -> None:
+    """The extension point of target-architecture 7.3, checked: shared code calls these names."""
+    module = rules_for(engine_id)
+    assert [name for name in MODULE_INTERFACE if not hasattr(module, name)] == []
+    assert module.ENGINE_ID == engine_id
+    for instrumental in (False, True):
+        rules = module.writing_rules(instrumental=instrumental, target_seconds=180.0)
+        assert [key for key in WRITING_RULE_KEYS if key not in rules] == []
 
 
 def test_render_ceiling() -> None:

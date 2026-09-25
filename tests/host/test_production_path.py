@@ -78,10 +78,19 @@ def chain(
     }
 
 
+RECORD_SCHEMA = Path(__file__).resolve().parents[2] / "resources" / "schemas" / "record-1.schema.json"
+
+
 def record_of(server: ComfyServer, folder: str, name: str) -> dict[str, Any]:
+    """The release record the Export node wrote, checked against its schema when jsonschema is installed."""
     data: dict[str, Any] = json.loads(
         (server.output_dir / folder / f"{name}.plenio.json").read_text(encoding="utf-8")
     )
+    try:
+        import jsonschema
+    except ImportError:  # ComfyUI does not ship it; the CI host job installs it
+        return data
+    jsonschema.validate(data, json.loads(RECORD_SCHEMA.read_text(encoding="utf-8")))
     return data
 
 

@@ -14,6 +14,24 @@ from .base import EngineInfo
 
 ENGINES: dict[str, ModuleType] = {yue2.ENGINE_ID: yue2, minimax.ENGINE_ID: minimax}
 
+MODULE_INTERFACE = (
+    "ENGINE_ID",
+    "RULES_VERSION",
+    "LICENCE",
+    "STYLE_LABEL",
+    "capabilities",
+    "writing_rules",
+    "enforce_style",
+    "check_style",
+    "check_lyrics",
+    "validate_documents",
+    "describe_budget",
+)
+"""What shared code uses of an engine module; a new engine provides all of it (target-architecture
+section 7.3). ``writing_rules()`` returns at least ``WRITING_RULE_KEYS``. Checked by the unit tests."""
+
+WRITING_RULE_KEYS = ("engine", "style", "lyrics", "sections", "example_style")
+
 
 def rules_for(engine_id: str) -> ModuleType:
     try:
@@ -25,4 +43,4 @@ def rules_for(engine_id: str) -> ModuleType:
         ) from error
 
 
-__all__ = ["ENGINES", "EngineInfo", "rules_for"]
+__all__ = ["ENGINES", "MODULE_INTERFACE", "WRITING_RULE_KEYS", "EngineInfo", "rules_for"]

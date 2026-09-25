@@ -510,6 +510,8 @@ Verified in frontend 1.52.7 (browser check, Phase 8 report §3): legacy `[node i
 
 ## 13. Documentation architecture (O)
 
+*Phase 10:* this is the Phase 1B plan. The shipped set: `docs/user/README.md` (index), `docs/user/{getting-started,models,configuration,licensing,troubleshooting}.md`, `docs/user/paths/*`, `docs/user/concepts/{song-sheet,score-editor,instrumental,mastering,app-mode}.md` (takes and seeds are explained in the path guides), `docs/dev/*` (with `extending.md`), `docs/design`, `docs/adr`, `docs/test-reports`, `docs/audit`; no `locales/` yet.
+
 ```text
 README.md                      # what Plenio is, 3 paths, install, licence summary, links
 docs/
@@ -549,6 +551,8 @@ Principles: English display names, descriptions and tooltips live in the V3 sche
 
 ## 15. Repository structure (B)
 
+*Phase 10:* the Phase 1B plan; the layout as built is in [docs/dev/repository-layout.md](../dev/repository-layout.md) (single modules instead of packages for brief, writing and lyrics; engine writing rules in `core/engines/*` instead of `resources/writing/`; model catalogue `resources/models.toml`; tests in `unit/`, `contract/`, `workflows/`, `host/`).
+
 ```text
 Plenio-Music-Production-System/          # the custom-node folder (installed under custom_nodes/)
 ├── __init__.py                          # re-exports comfy_entrypoint from plenio.comfy.extension
@@ -587,6 +591,8 @@ Plenio-Music-Production-System/          # the custom-node folder (installed und
 ---
 
 ## 16. Extension points
+
+*Phase 10:* the touch points as built, with the tests that catch a forgotten step, are in [docs/dev/extending.md](../dev/extending.md). Not built as a seam: *new score dialect* (`core.score` implements the native dialect only; a second dialect would first split `core/score/native.py`), *document registry* (the kinds are a tuple in `core/sheet/state.py`).
 
 | Extension | Where | What to add |
 |---|---|---|

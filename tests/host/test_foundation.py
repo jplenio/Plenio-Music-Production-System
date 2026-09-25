@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import uuid
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -16,6 +17,8 @@ import pytest
 from harness import PACKAGE_NAME, ComfyServer, Log
 
 pytestmark = pytest.mark.host
+
+PROJECT = Path(__file__).resolve().parents[2]
 
 
 def test_plenio_loads_without_errors(server: ComfyServer) -> None:
@@ -25,6 +28,26 @@ def test_plenio_loads_without_errors(server: ComfyServer) -> None:
     text = server.log_text()
     assert "Cannot import" not in text and "Error while calling comfy_entrypoint" not in text
     assert "Plenio 0.1.0" in text
+
+
+def test_the_node_type_snapshot_matches_the_server(comfy_path: Path, tmp_path: Path) -> None:
+    """The offline workflow validator (CI without ComfyUI) checks graphs against tools/data/node_types.json.
+    Phase 9 changed Transcribe Lyrics tooltips without refreshing it (Phase 10 review). A fresh server
+    as the tool uses it: user templates and input files of other tests change combo options."""
+    from snapshot_node_types import take_snapshot
+
+    committed = json.loads((PROJECT / "tools" / "data" / "node_types.json").read_text(encoding="utf-8"))
+    live = take_snapshot(comfy_path, tmp_path / "comfy")
+    assert sorted(n for n in live["nodes"] if n.startswith("Plenio")) == sorted(
+        n for n in committed["nodes"] if n.startswith("Plenio")
+    )
+    same_comfyui = committed["comfyui_version"] == live["comfyui_version"]  # native nodes change with it
+    stale = [
+        name
+        for name, entry in live["nodes"].items()
+        if (name.startswith("Plenio") or same_comfyui) and committed["nodes"].get(name) != entry
+    ]
+    assert stale == [], f"re-run tools/snapshot_node_types.py (changed: {stale})"
 
 
 def test_system_route(server: ComfyServer) -> None:

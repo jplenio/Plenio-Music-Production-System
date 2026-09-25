@@ -139,3 +139,14 @@ def test_the_model_guide_lists_every_catalogued_file() -> None:
     guide = (ROOT / "docs" / "user" / "models.md").read_text(encoding="utf-8")
     missing = [m.file for m in CATALOGUE.values() if m.file.removesuffix(".safetensors") not in guide]
     assert missing == []
+
+
+def test_release_records_name_every_non_commercial_model_file() -> None:
+    """Licences live in the catalogue, in the engine modules and in core.release.MODEL_LICENCES (which the
+    record reads). A non-commercial model added to the catalogue only would be missing from records
+    (Phase 10 review): every such file is either the engine's own checkpoint or listed for the record."""
+    from plenio.core.release import MODEL_LICENCES
+
+    engine_checkpoints = {"yue2_3b_int8_convrot.safetensors", "yue2_3b_bf16.safetensors"}  # yue2.LICENCE
+    non_commercial = {m.file for m in CATALOGUE.values() if m.non_commercial}
+    assert non_commercial - engine_checkpoints == set(MODEL_LICENCES)

@@ -3,13 +3,13 @@
 | | |
 |---|---|
 | Date | 2026-09-25 |
-| Written for | the return from the Claude Code cloud session to the owner's Windows machine (Phase 6-8 checks that need models, a GPU or the owner's frontend; Phase 9 audit fixes to re-check there) |
-| Overall phase | **Phase 9 (full codebase audit) done**; Phases 6, 7 and 8 implemented with owner-machine checks open; next: Phase 10 (final architecture acceptance review) only on the owner's authorization |
-| Sub-phase | - (hard stop after Phase 9) |
-| Phases done | 1A, 1B (design), 2 (Foundation), 3 (YuE2 Core), 4A (Cover/Instrumental design gate), 4B (YuE2 Cover), 5 (Score / ABC editor), 9 (audit); 6 (MiniMax), 7 (Audio production chain) and 8 (Main workflows and UX) implemented, owner checks open |
+| Written for | the return from the Claude Code cloud session to the owner's Windows machine (the real-model pass that the Phase 10 acceptance depends on) |
+| Overall phase | **Phase 10 (final architecture acceptance review) done: accepted with conditions**; the prompt set ends with Phase 10 |
+| Sub-phase | - (hard stop after Phase 10) |
+| Phases done | 1A, 1B (design), 2 (Foundation), 3 (YuE2 Core), 4A (Cover/Instrumental design gate), 4B (YuE2 Cover), 5 (Score / ABC editor), 9 (audit), 10 (acceptance review); 6 (MiniMax), 7 (Audio production chain) and 8 (Main workflows and UX) implemented, their real-model checks open |
 | Prompt set | `D:\Daten2\Deepseek\ComfyUI-MiniMax\Plenio_Music_Production_System_Refactor_Prompts\` on the owner's machine (not in this repository): `01_PHASE_1A` ... `12_PHASE_10`, one phase per prompt, hard stop after each phase, the next phase only on the owner's explicit authorization |
 
-Read with: [README.md](README.md) (design index), [implementation-roadmap.md](implementation-roadmap.md), [score-editor-design.md](score-editor-design.md) (§15 = Phase 5 implementation record), [target-architecture.md](target-architecture.md) §0/§2/§18, the latest test reports [phase 6](../test-reports/2026-09-25-phase-6.md), [phase 7](../test-reports/2026-09-25-phase-7.md) and [phase 8](../test-reports/2026-09-25-phase-8.md), the [usability review](usability-review.md) and the [Phase 9 audit](../audit/2026-09-25-phase-9-audit.md).
+Read with: the [Phase 10 acceptance report](../audit/2026-09-25-phase-10-acceptance.md) (verdict, conditions, limitations), [README.md](README.md) (design index), [implementation-roadmap.md](implementation-roadmap.md), [docs/dev/extending.md](../dev/extending.md), [score-editor-design.md](score-editor-design.md) (§15 = Phase 5 implementation record), [target-architecture.md](target-architecture.md) §0/§2/§18, the test reports [phase 6](../test-reports/2026-09-25-phase-6.md), [phase 7](../test-reports/2026-09-25-phase-7.md) and [phase 8](../test-reports/2026-09-25-phase-8.md), the [usability review](usability-review.md) and the [Phase 9 audit](../audit/2026-09-25-phase-9-audit.md).
 
 ---
 
@@ -42,6 +42,8 @@ Read with: [README.md](README.md) (design index), [implementation-roadmap.md](im
 
 **Phase 9 - full codebase audit** ([report](../audit/2026-09-25-phase-9-audit.md)): full read of the product code, reproduction on real servers, fuzzing of the parsers (1 500 texts x 11 functions) and of the score operations (10 257 operations), audio edge cases, profiling. 18 findings - 1 high (a malformed user template made the whole Plenio import fail), 5 medium (ASR language of new-lyrics covers, MP3 above 48 kHz, release naming/overwritten records, quadratic editor, System Check with a broken config), 10 low, 2 info - all high/medium/low fixed with regression tests (`tests/unit/test_audit_regressions.py`, `tests/host/test_audit_regressions.py`, `tests/contract/test_audit_regressions.py` and additions to existing files); dead code removed; three observations deferred with reasons.
 
+**Phase 10 - final architecture acceptance review** ([report](../audit/2026-09-25-phase-10-acceptance.md)): **accepted with conditions**. Measured: no import cycles, layer rules hold, `plenio.core` 93.7 % line coverage, the adapter layer 73-100 % with the host tests (subprocess coverage), CI history through the GitHub API, CI environment reproduced (fresh clone, CPU without AVX-512, CRLF checkout, non-root, Python 3.10), generated files reproducible, 183 doc links intact, three full runs without a flaky test. Findings: the CI had been red on all 16 commits (ACC-01, fixed: first green run `3a9fda1`), the owner's reported pass ran a Phase 5 checkout with every host test skipped (ACC-02, open), the release record schema was not pinned (ACC-03, fixed), a stale node snapshot, Score Tools without host coverage, an implicit engine interface and licence facts in three places (ACC-04...07, tests added); `docs/dev/extending.md` lists the extension points with their guards.
+
 ## 2. Partially implemented
 
 - MiniMax: instrumental caption wording (I-5) adopted from the legacy toolkit, not yet listened to.
@@ -49,15 +51,15 @@ Read with: [README.md](README.md) (design index), [implementation-roadmap.md](im
 - App mode shows only the sung options of *vocals* (frontend limit, documented).
 - File sizes of the writer and the adapter are not in the catalogue (no source here); licences of the FLUX.2 text encoder and VAE to be confirmed on the model cards before a public release.
 
-## 3. What remains (Phases 6-8, on the owner's machine)
+## 3. What remains (the acceptance conditions, on the owner's machine)
 
-1. Full suite with ComfyUI and `PLENIO_MODELS_DIR` (tokenizer contract tests).
-2. **Full smoke pass** with `PLENIO_SMOKE=1`: S-1, S-2, S-6 (`tests/host/test_song_models.py`), S-3/S-4 (`test_cover_models.py`), S-5 (`test_minimax_models.py`), S-7 (`test_master_smoke.py`), Cover Art (`test_cover_art_models.py`, needs the three FLUX.2 Klein files).
-3. Phase 6: template runs of *3 · MiniMax · Song* (sung and instrumental) with a listening verdict on I-5.
-4. Phase 7: *4 · Enhance & Master* in frontend 1.53.6 (curve widget, save/reload of a manual EQ, A/B); restoration gate on unprocessed takes and the C1 decision.
-5. Phase 8: the template checks in frontend 1.53.6 (`tools/browser_check.mjs` with a Playwright package and `--channel msedge`, or by hand: open, save, reload, Cover Art on/off, App mode of 0, 1, 3, 4); one first-use run of each template following only its About note; the System Check against the real models folder.
-6. Phase 9 fixes to see on the owner's machine: a cover with *new lyrics* and the phrasing reference transcribes the source in its own language (widget *source language*, default auto); an MP3 export of a 96 kHz file works; the editor on a long YuE2 plan reacts quickly.
-7. Record the results in the Phase 6-8 reports, set the roadmap statuses to *Done*, and stop. Phase 10 only on the owner's authorization.
+Done by the owner (reported 2026-09-25): the Phase 9 fixes - a *new lyrics* cover transcribes the source in its own language (the transcription itself not always exact), MP3 export of a 96 kHz file, editor speed on a long YuE2 plan - and the templates in frontend 1.53.6 ("passt"). The reported full-suite run does **not** count: it ran a checkout at Phase 5 (560 tests) without `PLENIO_COMFYUI_ROOT`, so every host and smoke test was skipped.
+
+1. **Update the checkout that runs the tests** (`git pull origin main`; 766 tests are collected now) and run the **full suite with the real models**: `PLENIO_COMFYUI_ROOT`, `PLENIO_MODELS_DIR`, `PLENIO_SMOKE=1` (commands in the acceptance report §6). This covers the tokenizer contract tests, S-1...S-7 and Cover Art.
+2. Template runs of *3 · MiniMax · Song* (sung and instrumental) with a listening verdict on I-5; MiniMax has never run with the real model.
+3. *4 · Enhance & Master*: curve widget, save/reload of a manual EQ, A/B; restoration gate on unprocessed takes and the C1 decision.
+4. One first-use run of each template following only its About note; the System Check against the real models folder.
+5. Record the results in the Phase 6-8 reports and set the roadmap statuses of Phases 6-8 to *Done*.
 
 ## 4. Important architectural decisions since Phase 1
 
@@ -74,12 +76,13 @@ Read with: [README.md](README.md) (design index), [implementation-roadmap.md](im
 - Phase 7: Plenio's own loudness meter (no FFmpeg subprocess); resample before dynamics; one EQ node with tone match as a mode; mutagen stays optional (GPL, never installed); tag copy reads the one Load Audio file from the prompt; Export's format widgets are optional so API prompts of earlier phases keep working.
 - Phase 8: one model catalogue feeds templates, System Check and docs; optional blocks (Cover Art, adapter, excerpt, sung-lyrics check) are bypassed and titled *(optional)*; Master is part of every song template; App configurations only for paths without review stops, the graph stays primary; blueprint bodies own distinct node-id ranges; the System Check's rule table states the basis of each row (measured / legacy rating / design).
 - Phase 9: user files (templates, config) never stop Plenio from loading - they are skipped or reported; one base name per export; the Cover Brief decides the ASR language only for original lyrics; MP3 is converted when LAME cannot hold the rate.
+- Phase 10: text files are checked out with LF everywhere (`.gitattributes`); the release record has a pinned schema (`resources/schemas/record-1.schema.json`); the engine module interface is written down (`MODULE_INTERFACE`) and tested; extension points and their guards are in `docs/dev/extending.md`.
 
-## 5. Files and modules currently being worked on
+## 5. Files and modules changed last (Phase 10)
 
-- Backend: `plenio/core/models.py`, `plenio/core/system.py`, `plenio/comfy/{host,shared,routes}.py`, `plenio/comfy/nodes/system_check.py`, `resources/models.toml`.
-- Graphs: `tools/build_graphs.py`, `tools/graph_builder.py` (collapsed nodes, slot labels, App configs, id ranges), `tools/workflow_validation.py`, `tools/build_thumbnails.py`, `tools/browser_check.mjs`; snapshot `tools/data/node_types.json` (FLUX.2 nodes added).
-- Frontend: `frontend/src/extension/{eqWidget,summary}.ts` (display widgets not serialised).
+- CI and tests: `.gitattributes`, `tests/conftest.py` (GitHub annotations), `tests/unit/test_audio.py` (tone-match tolerance), `tests/host/test_score_tools_node.py`, `tests/host/test_foundation.py` (snapshot), `tests/contract/test_data_schemas.py` and `tests/host/test_production_path.py` (record schema), `tests/unit/test_minimax.py` (engine interface), `tests/unit/test_models_catalogue.py` (licences).
+- Code: `plenio/core/engines/__init__.py` (`MODULE_INTERFACE`, `WRITING_RULE_KEYS`), `tools/snapshot_node_types.py` (`take_snapshot`), `tools/data/node_types.json` (refreshed).
+- Docs: `docs/audit/2026-09-25-phase-10-acceptance.md`, `docs/dev/extending.md`, annotations in `target-architecture.md` §13/§15/§16.
 - Built output committed: `web/js/plenio.js`, `web/js/chunks/*.mjs`; generated: `subgraphs/*.json`, `example_workflows/*.json`, `example_workflows/*.jpg`.
 
 ## 6. Known issues
@@ -90,8 +93,10 @@ Read with: [README.md](README.md) (design index), [implementation-roadmap.md](im
 - Editor chunk size about 1.4 MB (370 kB gzip), loaded only when a sheet opens.
 - Dev tooling: `npm audit` reports a moderate advisory in vitest's mocker (dev-only; the fix is a major vitest upgrade, not done).
 - CodeMirror renders only visible lines (tests reading the DOM see a subset).
-- mypy with the configured `python_version = "3.10"` fails on the stubs of numpy releases that use 3.12 syntax (seen with the latest numpy in the cloud); the owner's pinned `.devdeps` numpy works. Pin numpy for mypy or raise the target when the minimum Python is decided.
-- `pyproject.toml` still names the planned public repository `jplenio/comfyui-plenio-music` (release decision, `docs/dev/release.md`), while the working remote is `jplenio/Plenio-Music-Production-System`.
+- mypy with the configured `python_version = "3.10"` fails on the stubs of numpy releases that use 3.12 syntax (seen with the latest numpy in the cloud); CI runs `mypy --python-version 3.12`. The code itself passes the unit tests on Python 3.10 (Phase 10), but CI tests 3.12 only.
+- `pyproject.toml` and the README's install line name the planned public repository `jplenio/comfyui-plenio-music` (release decision, `docs/dev/release.md`), while the working remote is the private `jplenio/Plenio-Music-Production-System`.
+- CI: green since `3a9fda1`; before that every run was red (acceptance report ACC-01). Job logs are not reachable from the cloud session (their storage host is blocked); failures appear as annotations, readable through the API.
+- The tone-match EQ fit differs by up to 0.003 dB between CPUs (floating-point code paths; inaudible).
 - Shell pitfall on the owner's machine: bash heredocs with backslashes (`\d`, `\n`, `\a`, `\b`) inserted control characters into code; write code with file-writing tools, and scan for control characters before committing.
 
 - Export widget order changed in Phase 7: workflows saved from the earlier templates restore the Export node's widget values by position; re-add the node or start from the new templates.
@@ -104,14 +109,19 @@ Read with: [README.md](README.md) (design index), [implementation-roadmap.md](im
 
 | Suite | Where | Result |
 |---|---|---|
-| Python (unit, contract, workflow, host) with ComfyUI 0.37.0 | cloud, after the Phase 9 fixes | **738 passed, 13 skipped** (models 3, legacy toolkit 1, smoke 7, jsonschema/soundfile 2) |
+| Python (unit, contract, workflow, host) with ComfyUI 0.37.0 | cloud, end of Phase 10 | **754 passed, 12 skipped** (models 3, legacy toolkit 1, smoke 7, soundfile 1) |
+| Three full runs (flakiness) | cloud | no flaky test (the only failure was a first version of the new snapshot test that depended on the shared server's state) |
+| CI on GitHub (Ubuntu + Windows Python, ComfyUI host job, frontend) | GitHub Actions | green since `3a9fda1` (run 36188645235) |
+| Coverage | cloud | `plenio.core` 93.7 % of lines; `plenio` with the host tests 92 % (lines and branches) |
 | Browser checks of all templates (`tools/browser_check.mjs`) | cloud (frontend 1.52.7, Chromium) | **56/56 passed** |
 | Smoke S-7 (real MiniMax take, CPU) | cloud | passed |
-| Fuzzers: parsers (1 500 texts), score operations (10 257) | cloud | no crash, no invalid score |
+| Python 3.10 (unit, workflow, data contracts) | cloud | 655 passed, 7 skipped |
+| Fuzzers: parsers (1 500 texts), score operations (10 257) | cloud (Phase 9) | no crash, no invalid score |
 | ruff check / format, mypy strict | cloud | clean (mypy `--python-version 3.12`) |
 | Frontend `npm run check` | cloud | 58 tests passed, build unchanged |
 | Workflows (`tools/workflow_validation.py`) | cloud | 10 blueprints + 5 templates valid |
 | Phase 5 suite | owner's machine | 557 passed, 3 skipped; with smoke 559 passed, 1 skipped |
+| Full suite reported on 2026-09-25 | owner's machine | not valid (Phase 5 checkout, host tests skipped) |
 
 ## 8. Tests that need the local GPU / ComfyUI environment
 
@@ -123,12 +133,12 @@ Read with: [README.md](README.md) (design index), [implementation-roadmap.md](im
 
 ## 9. Exact recommended next action
 
-Run the owner-machine checks of §3 and record them in the Phase 6-8 reports. Phase 10 - Final architecture acceptance review (prompt `12_PHASE_10_*`) starts only on the owner's explicit authorization.
+Run the owner-machine checks of §3 (first the full suite with the real models on the current commit) and record them in the Phase 6-8 reports. The refactor prompt set ends with Phase 10; further work (a public release, the optional Qwen3-ASR engine, fade-out, Repair node C1) needs the owner's decision and authorization.
 
 ## 10. Context a new session would otherwise have to rediscover
 
 - **Owner rules**: the legacy repository (`ComfyUI-MiniMax`, owner's machine) is read-only; reply to the owner in **German**, write code and docs in **English**; never install into the owner's ComfyUI environment (dev tools live in the untracked `.devdeps/`); downloads beyond what the owner approved need consent; one phase per authorization with a hard stop; commits: the owner asked for checkpoint commits pushed to `origin/main` (earlier rule "commit only at the end" was lifted for checkpoints).
-- **Dev setup (cloud)**: Python 3.12 with `numpy`, `scipy`, `av`, `pyloudnorm 0.2.0`, `mutagen`, `pytest 8.4.2`, `hypothesis 6.168.1`, `ruff 0.13.3`, `mypy 1.18.2`, `coverage`; a ComfyUI 0.37.0 checkout with its own venv for host tests (`PLENIO_COMFYUI_ROOT`); run `pytest` from the repository root (config in `pyproject.toml`; markers `comfy`/`host`/`smoke` skip without their environment). Frontend: `cd frontend && npm ci && npm run check` (writes `web/js/`, which is committed).
+- **Dev setup (cloud)**: Python 3.12 with `numpy`, `scipy`, `av`, `pyloudnorm 0.2.0`, `mutagen`, `pytest 8.4.2`, `hypothesis 6.168.1`, `ruff 0.13.3`, `mypy 1.18.2`, `coverage`; a ComfyUI 0.37.0 checkout with its own venv for host tests (`PLENIO_COMFYUI_ROOT`); run `pytest` from the repository root (config in `pyproject.toml`; markers `comfy`/`host`/`smoke` skip without their environment). Frontend: `cd frontend && npm ci && npm run check` (writes `web/js/`, which is committed). CI results: `https://api.github.com/repos/jplenio/Plenio-Music-Production-System/actions/runs` (jobs and annotations are readable; logs are not). A test run in a folder whose name is a valid Python identifier makes pytest import the repository's `__init__.py` (clone into a folder with a hyphen, as ComfyUI and CI do).
 - **Generated files**: never hand-edit `subgraphs/*.json`, `example_workflows/*.json` or the thumbnails; change `tools/build_graphs.py` (model files: `resources/models.toml`), run it and `tools/build_thumbnails.py`, validate with `tools/workflow_validation.py`. After node schema changes re-run `tools/snapshot_node_types.py` (needs ComfyUI) - the snapshot `tools/data/node_types.json` is committed.
 - **Dialect facts**: native two-voice ABC (`Vocal`, `Ins`), fixed 8-line header, groups of 1-4 bars per voice, `% label` comments start sections, accidentals apply by letter across octaves within a bar, unmarked tied continuations keep their pitch, supported lengths {1,2,3,4,6,8,12,16,24,32,48} units, chords only in `Vocal`; the vendored upstream parser `plenio/third_party/yue2_abc_tools.py` is the authority.
 - **Fixtures**: `tests/fixtures/abc/upstream-*.abc`, `tests/fixtures/cover/*.json` (real SheetSage2 transcription of M2 with events, YuE2 plans Y2/Y3 with vocal notes and ASR words).

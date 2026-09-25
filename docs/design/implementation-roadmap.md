@@ -144,6 +144,7 @@ Confirm or change D-01 … D-09 in [target-architecture.md](target-architecture.
 | **Tests** | actual test results referenced; no new speculative work. |
 | **Completion criteria** | verdict based on concrete evidence. |
 | **Effort** | **max** |
+| **Status** | **Done** (2026-09-25): **accepted with conditions** - the owner-machine real-model pass on the current commit, a green and required CI, the release items ([../audit/2026-09-25-phase-10-acceptance.md](../audit/2026-09-25-phase-10-acceptance.md)). Found and fixed: the CI had been red on all 16 commits (ACC-01), the release record schema was not pinned (ACC-03), plus four low findings with tests. |
 
 ---
 

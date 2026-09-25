@@ -3272,7 +3272,7 @@
      "language": [
       "STRING",
       {
-       "tooltip": "'auto' detects the language, or name it (e.g. English, de).",
+       "tooltip": "Language of the singing in this recording: 'auto' detects it, or name it (e.g. English, de). An original-lyrics Cover Brief overrides it.",
        "default": "auto",
        "multiline": false
       }
@@ -3310,7 +3310,7 @@
      "brief": [
       "PLENIO_BRIEF",
       {
-       "tooltip": "Cover Brief: its lyrics language is used (the language widget is then ignored)."
+       "tooltip": "Cover Brief: for original-lyrics covers its language is used (the language widget is then ignored); for new lyrics the widget names the source's language."
       }
      ],
      "expected_lyrics": [

@@ -13,4 +13,6 @@ plenio.comfy.nodes ->  plenio.comfy.host  ->  ComfyUI internals
 - **Graph assets** - blueprints in `subgraphs/` and templates in `example_workflows/` are the orchestration layer; there is no Plenio orchestration engine.
 - **Frontend** - TypeScript sources in `frontend/`, built into `web/js/plenio.js`. It edits documents and displays results; all musical truth is computed by the backend.
 
+How to add an engine, template, model, score operation, ASR engine, mastering stage, format or document type: [extending.md](extending.md).
+
 Rules that bind every phase are listed in [target-architecture.md section 2](../design/target-architecture.md). The most important: native first, one owner per setting, manual text wins, what leaves the Song Sheet reaches the model unchanged, no silent degradation, ComfyUI owns GPU memory.

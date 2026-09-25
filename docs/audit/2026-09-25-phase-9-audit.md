@@ -100,6 +100,16 @@ Severity: **high** - Plenio (or a whole feature) stops working for a plausible u
 | ruff, mypy strict | clean |
 | Fuzzers (parsers, score operations) | no crash, no invalid score |
 
+### Owner-machine checks after the audit (reported 2026-09-25, recorded in the Phase 10 review)
+
+| Check | Owner's result |
+|---|---|
+| Cover with *new lyrics*: the source is transcribed in its own language (AUD-02) | language correct; the transcription itself is not always exact |
+| MP3 export of a 96 kHz file (AUD-03) | works |
+| Editor on a long YuE2 plan (AUD-05) | reacts quickly |
+| Templates in frontend 1.53.6 | "passt" (method not stated) |
+| Full suite and smoke pass | **not valid**: the run was made in a checkout at Phase 5 (560 tests collected, the Phase 6-9 tests absent) and without `PLENIO_COMFYUI_ROOT`, so every host and smoke test was skipped - open |
+
 ## 7. Residual risks (not testable here)
 
 - GPU and real-model paths (S-1 to S-6, Cover Art) run only on the owner's machine; their prompts pass the server's validation.

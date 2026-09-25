@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "plenio.record/1",
+  "title": "Plenio release record",
+  "description": "Written by Export Release next to the audio (<name>.plenio.json). Each entry of 'reports' is a plenio.report/1.",
+  "type": "object",
+  "required": ["schema", "created", "title", "versions", "documents", "reports", "audio", "files", "licences", "prompt", "fingerprint"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "plenio.record/1" },
+    "created": { "type": "string", "minLength": 1 },
+    "title": { "type": "string" },
+    "versions": {
+      "type": "object",
+      "required": ["plenio"],
+      "additionalProperties": { "type": "string" }
+    },
+    "documents": {
+      "type": "object",
+      "propertyNames": { "enum": ["title", "style", "lyrics", "score", "artwork_prompt"] },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["state", "status", "sha256", "text"],
+        "additionalProperties": false,
+        "properties": {
+          "state": { "enum": ["auto", "edited", "manual"] },
+          "status": { "type": "string" },
+          "sha256": { "$ref": "#/$defs/sha256" },
+          "text": { "type": "string" }
+        }
+      }
+    },
+    "reports": { "type": "array", "items": { "type": "object", "required": ["schema", "kind", "status"] } },
+    "audio": {
+      "type": "object",
+      "required": ["sample_rate", "items", "seconds", "loudness", "tags"],
+      "properties": {
+        "sample_rate": { "type": "integer", "minimum": 1 },
+        "items": { "type": "integer", "minimum": 1 },
+        "seconds": { "type": "number", "minimum": 0 },
+        "loudness": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/loudness" } },
+        "tags": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "bytes", "sha256"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "bytes": { "type": "integer", "minimum": 0 },
+          "sha256": { "$ref": "#/$defs/sha256" },
+          "role": { "enum": ["original", "cover"] },
+          "format": { "enum": ["flac", "mp3", "wav"] },
+          "bits": { "type": ["integer", "null"] },
+          "sample_rate": { "type": "integer", "minimum": 1 },
+          "channels": { "type": "integer", "minimum": 1 },
+          "seconds": { "type": "number", "minimum": 0 },
+          "peak": { "type": "number", "minimum": 0 },
+          "clipped_samples": { "type": "integer", "minimum": 0 },
+          "converted_from_rate": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "licences": { "type": "array", "items": { "type": "string" } },
+    "prompt": {
+      "type": ["object", "null"],
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "class_type": { "type": "string" },
+          "inputs": { "type": "object" },
+          "_meta": { "type": "object" }
+        }
+      }
+    },
+    "fingerprint": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "loudness": {
+      "type": "object",
+      "required": ["integrated_lufs", "true_peak_dbtp", "sample_peak_dbfs", "loudness_range_lu", "plr_db", "seconds", "meter", "valid"],
+      "additionalProperties": false,
+      "properties": {
+        "integrated_lufs": { "type": ["number", "null"] },
+        "true_peak_dbtp": { "type": ["number", "null"] },
+        "sample_peak_dbfs": { "type": ["number", "null"] },
+        "loudness_range_lu": { "type": ["number", "null"] },
+        "plr_db": { "type": ["number", "null"] },
+        "seconds": { "type": "number", "minimum": 0 },
+        "meter": { "type": "string" },
+        "valid": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -4,6 +4,17 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 ## Unreleased
 
+### Fixed (Phase 10 - final architecture acceptance review, `docs/audit/2026-09-25-phase-10-acceptance.md`)
+
+- CI was red on every commit: the tone-match golden test assumed one CPU's floating-point path (the runners have no AVX-512) and Windows checkouts changed the hash-pinned vendored parser. `.gitattributes` checks text files out with LF everywhere; the test tolerance is CPU-independent; failures are also reported as GitHub annotations (ACC-01).
+- The node-type snapshot (`tools/data/node_types.json`) was stale since Phase 9; refreshed (ACC-04).
+
+### Added (Phase 10)
+
+- `resources/schemas/record-1.schema.json`: the release record's pinned schema, checked on a full record and on every record the host tests export (ACC-03).
+- Tests: every Score Tools operation through a real server (ACC-05); the snapshot against a fresh server (ACC-04); the engine module interface (`MODULE_INTERFACE`, ACC-06); the catalogue and the record licences stay consistent (ACC-07).
+- `docs/dev/extending.md`: where each kind of extension goes and which test catches a forgotten step.
+
 ### Fixed (Phase 9 - full codebase audit, `docs/audit/2026-09-25-phase-9-audit.md`)
 
 - A malformed user brief template no longer stops Plenio from loading: unreadable user templates are skipped, logged and listed (`GET /plenio/templates` -> `problems`); saving a template writes only readable files (AUD-01).
