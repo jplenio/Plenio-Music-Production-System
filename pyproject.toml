@@ -25,8 +25,8 @@ Changelog = "https://github.com/jplenio/Plenio-Music-Production-System/blob/main
 [tool.comfy]
 PublisherId = "jplenio"
 DisplayName = "Plenio Music Production System"
-Icon = "https://raw.githubusercontent.com/jplenio/Plenio-Music-Production-System/main/assets/branding/icon.png"
-Banner = "https://raw.githubusercontent.com/jplenio/Plenio-Music-Production-System/main/assets/branding/banner.png"
+Icon = "https://raw.githubusercontent.com/jplenio/Plenio-Music-Production-System/main/assets/branding/Plenio-Music-Production-System-Icon.png"
+Banner = "https://raw.githubusercontent.com/jplenio/Plenio-Music-Production-System/main/assets/branding/Plenio-Music-Production-System-Banner.png"
 # Templates and blueprints have "·" in their names; `git ls-files` quotes such paths by default and
 # comfy-cli would skip them, so the two folders are included by directory.
 includes = ["example_workflows", "subgraphs"]

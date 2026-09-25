@@ -1,8 +1,8 @@
-# Plenio Music Production System 0.2 for ComfyUI
-
 <p align="center">
-  <img src="assets/branding/banner.png" alt="Plenio Music Production System for ComfyUI - YuE2, YuE2 Cover and MiniMax Music 3" width="100%" />
+  <img src="assets/branding/Plenio-Music-Production-System-Banner.png" alt="Plenio Music Production System for ComfyUI - YuE2, YuE2 Cover and MiniMax Music 3" width="100%" />
 </p>
+
+# Plenio Music Production System 0.2 for ComfyUI
 
 **Make songs locally in ComfyUI - and see exactly what the music model is given.** Describe a song and a local language model writes it. YuE2 or MiniMax Music 3 performs it, Plenio masters it and exports it with tags, cover art and a record of how it was made. You can also turn an existing recording into a new version of itself, or finish and master a file you already have.
 
@@ -42,10 +42,16 @@ Open them from ComfyUI's template browser (listed under this package's name):
 Every template reads left to right in numbered groups: **SONG → WRITE → SHEET → RENDER → FINISH**. An *About this template* note explains the path in a few steps, and optional blocks (Cover Art, the instrumental adapter) are marked *(optional)* and switched off until you want them. Templates 0, 1, 3 and 4 also run as a simple form in ComfyUI's **App mode**.
 
 <p align="center">
-  <img src="assets/branding/screenshot-yue2-song.png" alt="The YuE2 Song template in ComfyUI: brief, writer, Song Sheets, render and finish in numbered groups" width="100%" />
+  <img src="assets/branding/Screenshot%20YuE2-graph.png" alt="The 1 · YuE2 · Song template in ComfyUI: brief, writer, Song Sheets, render and finish in numbered groups" width="100%" />
 </p>
 
-*1 · YuE2 · Song: the brief on the left, the Song Sheets in the middle, render, mastering and export on the right.*
+*1 · YuE2 · Song: the brief on the left, the writer and the Song Sheets in the middle, render, mastering and export on the right; the model block sits collapsed below.*
+
+**App mode** - the same templates as a simple form, without the graph:
+
+| 1 · YuE2 · Song | 3 · MiniMax · Song | 4 · Enhance & Master |
+|---|---|---|
+| <img src="assets/branding/Screenshot%20YuE2-appmode.png" alt="1 · YuE2 · Song in App mode: brief fields, take seed and the finished song" width="100%" /> | <img src="assets/branding/Screenshot%20Minimax-appmode.png" alt="3 · MiniMax · Song in App mode" width="100%" /> | <img src="assets/branding/Screenshot%20SoundEnhance-appmode.png" alt="4 · Enhance & Master in App mode" width="100%" /> |
 
 ### Make a new song
 
@@ -60,23 +66,33 @@ Every template reads left to right in numbered groups: **SONG → WRITE → SHEE
 2. Choose the target style in the **Cover Brief**, the vocals (*instrumental* by default, the instrument plays the vocal melody) and the harmony.
 3. Queue: the run stops at **Song Sheet · Score** and later at **Song Sheet · Text**, so you can inspect and edit the transcribed score and the lyrics before YuE2 renders.
 
-### Edit the score
-
 <p align="center">
-  <img src="assets/branding/screenshot-score-editor.png" alt="The Song Sheet editor: notation, ABC text, section navigator and playback" width="100%" />
+  <img src="assets/branding/Screenshot%20YuE2-cover-graph.png" alt="The 2 · YuE2 · Cover template: source, Cover Brief, score, lyrics, render and finish" width="100%" />
 </p>
 
-*The Song Sheet editor: notation and ABC side by side, sections, validation and playback.*
+*2 · YuE2 · Cover: source and Cover Brief, then Song Sheet · Score and Song Sheet · Text with their review stops, render, mastering and export.*
+
+### Edit the score
 
 Open a Song Sheet and choose the score tab: select notes in the notation or the text, change pitch or length, transpose, set the tempo, remove chords, move the vocal line to the instrument, and rename, move, split or merge sections. Undo and redo work, and every result is validated before it is kept. See the [score editor guide](docs/user/concepts/score-editor.md).
+
+### Make a song with MiniMax Music 3
+
+The same brief and writer, one Song Sheet with the structured caption (Global Metadata, Vocal Details, Arrangement) and the lyrics; the sheet checks the exact 5,000-token prompt budget with the model's own tokenizer before rendering.
+
+<p align="center">
+  <img src="assets/branding/Screenshot%20Minimax-graph.png" alt="The 3 · MiniMax · Song template: brief, writer, Song Sheet, MiniMax render and finish" width="100%" />
+</p>
+
+*3 · MiniMax · Song: one Song Sheet between the writer and the MiniMax Music 3 render.*
 
 ### Finish a recording
 
 <p align="center">
-  <img src="assets/branding/screenshot-enhance-master.png" alt="The Enhance & Master template: load a file, EQ with its curve, loudness and export" width="100%" />
+  <img src="assets/branding/Screenshot%20SoundEnhance-graph.png" alt="The 4 · Enhance & Master template: load a file, EQ, loudness and export" width="100%" />
 </p>
 
-*4 · Enhance & Master: load a file, shape it with the EQ curve, set the loudness target and export with its own tags and cover.*
+*4 · Enhance & Master: load a file, shape it with the EQ (manual bands with the curve, or tone match), set the loudness target and export with the file's own tags and cover.*
 
 ## Mastering and export
 
