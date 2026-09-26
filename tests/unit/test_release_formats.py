@@ -114,6 +114,54 @@ def test_cover_art(tmp_path: Path) -> None:
     assert embed_cover(tmp_path / "c.wav", jpeg) is False
 
 
+def id3_frames(data: bytes) -> tuple[int, list[tuple[bytes, bytes]]]:
+    """Major version and (id, body) of the frames of an ID3v2.3 tag at the start of ``data``."""
+    assert data[:3] == b"ID3"
+    size = sum((b & 0x7F) << (7 * (3 - i)) for i, b in enumerate(data[6:10]))
+    tag, frames, index = data[10 : 10 + size], [], 0
+    while index + 10 <= len(tag) and tag[index]:
+        length = int.from_bytes(tag[index + 4 : index + 8], "big")
+        frames.append((tag[index : index + 4], tag[index + 10 : index + 10 + length]))
+        index += 10 + length
+    return data[3], frames
+
+
+def test_mp3_covers_are_id3v23_front_covers(tmp_path: Path) -> None:
+    """0.2.2 owner report: the cover was in the MP3 (ID3v2.4, UTF-8), but Windows and many players read
+    no 2.4 tags. MP3s are written with ID3v2.3; a 2.4 tag is converted when the cover is embedded; the
+    comment becomes a COMM frame (ffmpeg writes it as TXXX, which players do not show)."""
+    av = pytest.importorskip("av")
+    jpeg = b"\xff\xd8\xff\xe0" + bytes(200)
+    tags = {**TAGS, "title": "Grüße ✓", "comment": "Schön"}
+    path = tmp_path / "v23.mp3"
+    write_audio(path, noise(0.5), 44100, "mp3", tags)
+    embed_cover(path, jpeg)
+    major, frames = id3_frames(path.read_bytes())
+    ids = [frame_id for frame_id, _ in frames]
+    assert major == 3 and ids.count(b"APIC") == 1 and b"COMM" in ids and b"TXXX" not in ids
+    apic = dict(frames)[b"APIC"]
+    assert apic.startswith(b"\x00image/jpeg\x00\x03") and apic.endswith(jpeg)  # Latin-1, front cover
+    assert all(body[0] in (0, 1) for frame_id, body in frames if frame_id[:1] == b"T")  # no UTF-8 (2.4 only)
+    assert read_tags(path)[0]["title"] == "Grüße ✓" and read_tags(path)[0]["comment"] == "Schön"
+    # an ID3v2.4 file (ffmpeg's default, for example a file from elsewhere) is converted
+    old = tmp_path / "v24.mp3"
+    container = av.open(str(old), "w", format="mp3")
+    container.metadata["title"] = "Grüße ✓"
+    container.metadata["date"] = "2026-09-26"
+    stream = container.add_stream("libmp3lame", rate=44100, layout="stereo")
+    frame = av.AudioFrame.from_ndarray(np.zeros((2, 4410), np.float32), format="fltp", layout="stereo")
+    frame.sample_rate, frame.pts = 44100, 0
+    for packet in [*stream.encode(frame), *stream.encode(None)]:
+        container.mux(packet)
+    container.close()
+    assert old.read_bytes()[3] == 4
+    embed_cover(old, jpeg)
+    major, frames = id3_frames(old.read_bytes())
+    assert major == 3 and dict(frames)[b"TYER"] == b"\x002026" and [i for i, _ in frames].count(b"APIC") == 1
+    tags_back, cover = read_tags(old)
+    assert tags_back["title"] == "Grüße ✓" and cover == jpeg
+
+
 # --- Phase 9 audit regressions ------------------------------------------------------------
 
 

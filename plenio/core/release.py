@@ -120,6 +120,9 @@ FORMATS: dict[str, dict[str, Any]] = {
         "sample_format": "s32p",
         "bits": None,
         "options": {"flags": "+qscale", "global_quality": "0"},  # LAME VBR V0 (ffmpeg -q:a 0)
+        # ID3v2.3: Windows Explorer, Windows Media Player and many car radios and phones do not read
+        # ffmpeg's default ID3v2.4 (UTF-8) tags - neither the title nor the cover (0.2.2 owner report)
+        "container_options": {"id3v2_version": "3"},
     },
     "wav": {
         "extension": ".wav",
@@ -194,7 +197,9 @@ def write_audio(
     layout = "mono" if data.shape[0] == 1 else "stereo"
     path.parent.mkdir(parents=True, exist_ok=True)
     partial = path.with_name(path.name + ".part")
-    container = av.open(str(partial), mode="w", format=spec["container"])
+    container = av.open(
+        str(partial), mode="w", format=spec["container"], options=dict(spec.get("container_options", {}))
+    )
     completed = False
     try:
         for key, value in (tags or {}).items():
@@ -367,13 +372,15 @@ def _unsyncsafe(data: bytes) -> int:
 
 
 def _mp3_with_picture(mp3: bytes, jpeg: bytes) -> bytes:
-    """The MP3 with an ID3v2 tag whose APIC frames are replaced by one front cover.
+    """The MP3 with an ID3v2.3 tag whose APIC frames are replaced by one front cover.
 
-    Keeps the frames of an existing ID3v2.3/2.4 tag (ffmpeg writes 2.4); a tag with unsynchronisation
-    or an extended header is replaced by a new 2.4 tag with the cover only.
+    ID3v2.3 because many players (Windows Explorer, Windows Media Player, car radios) read no 2.4 tags.
+    The frames of an existing 2.3 tag are kept as they are; those of a 2.4 tag (ffmpeg's default) are
+    converted (see :func:`_id3v24_frame_to_v23`). A tag with unsynchronisation or an extended header is
+    replaced by a tag with the cover only.
     """
     frames: list[bytes] = []
-    major, audio = 4, mp3
+    audio = mp3
     if mp3[:3] == b"ID3" and mp3[3] in (3, 4) and not mp3[5] & 0xC0:
         major = mp3[3]
         size = _unsyncsafe(mp3[6:10])
@@ -386,18 +393,96 @@ def _mp3_with_picture(mp3: bytes, jpeg: bytes) -> bytes:
                 if major == 4
                 else int.from_bytes(tag[index + 4 : index + 8], "big")
             )
-            if frame_id != b"APIC":
-                frames.append(tag[index : index + 10 + length])
+            frame = tag[index : index + 10 + length]
             index += 10 + length
+            if frame_id == b"APIC":
+                continue
+            converted = frame if major == 3 else _id3v24_frame_to_v23(frame)
+            if converted is not None and converted[:4] == b"TXXX":
+                converted = _comment_frame(converted)
+            if converted is not None:
+                frames.append(converted)
     elif mp3[:3] == b"ID3":
         size = _unsyncsafe(mp3[6:10])
         audio = mp3[10 + size + (10 if mp3[5] & 0x10 else 0) :]
-    encoding = 3 if major == 4 else 0  # UTF-8 in ID3v2.4, ISO-8859-1 in 2.3 (the description is ASCII)
-    body = bytes([encoding]) + b"image/jpeg\x00" + bytes([3]) + b"Cover\x00" + jpeg
-    frame_size = _syncsafe(len(body)) if major == 4 else len(body).to_bytes(4, "big")
-    frames.append(b"APIC" + frame_size + b"\x00\x00" + body)
+    body = b"\x00image/jpeg\x00" + bytes([3]) + b"Cover\x00" + jpeg  # ISO-8859-1, front cover
+    frames.append(b"APIC" + len(body).to_bytes(4, "big") + b"\x00\x00" + body)
     content = b"".join(frames)
-    return b"ID3" + bytes([major, 0, 0]) + _syncsafe(len(content)) + content + audio
+    return b"ID3" + bytes([3, 0, 0]) + _syncsafe(len(content)) + content + audio
+
+
+def _comment_frame(frame: bytes) -> bytes:
+    """ffmpeg writes the comment as ``TXXX:comment``, which players do not show; as a COMM frame they do."""
+    description, value = _split_encoded(frame[10], frame[11:])
+    if description.lower() != "comment":
+        return frame
+    encoded = _id3v23_pair("", value)
+    body = encoded[:1] + b"eng" + encoded[1:]
+    return b"COMM" + len(body).to_bytes(4, "big") + b"\x00\x00" + body
+
+
+def _id3_text(encoding: int, data: bytes) -> str:
+    codec = {0: "latin-1", 1: "utf-16", 2: "utf-16-be", 3: "utf-8"}.get(encoding, "latin-1")
+    return data.decode(codec, errors="replace").rstrip("\x00")
+
+
+def _id3v23_text(text: str) -> bytes:
+    """Encoding byte and text for ID3v2.3: ISO-8859-1 when it fits, otherwise UTF-16 with BOM."""
+    try:
+        return b"\x00" + text.encode("latin-1")
+    except UnicodeEncodeError:
+        return b"\x01" + text.encode("utf-16")
+
+
+def _id3v24_frame_to_v23(frame: bytes) -> bytes | None:
+    """A 2.4 frame as a 2.3 frame: text in 2.3 encodings (no UTF-8), several values joined with ``/``,
+    TDRC as TYER. Frames with 2.4-only format flags, or of a kind this does not convert, are dropped."""
+    frame_id, flags, data = frame[:4], frame[8:10], frame[10:]
+    if flags[1] or not data:  # compression, encryption, unsynchronisation, data length indicator
+        return None
+    body: bytes | None = None
+    if frame_id == b"TXXX":
+        description, value = _split_encoded(data[0], data[1:])
+        body = _id3v23_pair(description, value)
+    elif frame_id == b"COMM" and len(data) >= 4:
+        description, value = _split_encoded(data[0], data[4:])
+        encoded = _id3v23_pair(description, value)
+        body = encoded[:1] + data[1:4] + encoded[1:]
+    elif frame_id[:1] == b"T":
+        text = "/".join(v for v in _id3_text(data[0], data[1:]).split("\x00") if v)
+        if frame_id == b"TDRC":
+            frame_id, text = b"TYER", text[:4]
+        elif frame_id not in _ID3V23_TEXT_FRAMES:
+            return None
+        body = _id3v23_text(text)
+    if body is None:
+        return None
+    return frame_id + len(body).to_bytes(4, "big") + b"\x00\x00" + body
+
+
+_ID3V23_TEXT_FRAMES = {
+    b"TALB", b"TBPM", b"TCOM", b"TCON", b"TCOP", b"TENC", b"TEXT", b"TIT1", b"TIT2", b"TIT3", b"TKEY",
+    b"TLAN", b"TLEN", b"TPE1", b"TPE2", b"TPE3", b"TPE4", b"TPOS", b"TPUB", b"TRCK", b"TSRC", b"TSSE",
+}  # fmt: skip
+
+
+def _split_encoded(encoding: int, data: bytes) -> tuple[str, str]:
+    """``description`` and ``value`` of a TXXX/COMM body (the terminator depends on the encoding)."""
+    wide = encoding in (1, 2)
+    index = data.find(b"\x00\x00" if wide else b"\x00")
+    while wide and index > 0 and index % 2:
+        index = data.find(b"\x00\x00", index + 1)
+    if index < 0:
+        return _id3_text(encoding, data), ""
+    return _id3_text(encoding, data[:index]), _id3_text(encoding, data[index + (2 if wide else 1) :])
+
+
+def _id3v23_pair(description: str, value: str) -> bytes:
+    """Encoding byte, terminated description and value in one 2.3 encoding."""
+    try:
+        return b"\x00" + description.encode("latin-1") + b"\x00" + value.encode("latin-1")
+    except UnicodeEncodeError:
+        return b"\x01" + description.encode("utf-16") + b"\x00\x00" + value.encode("utf-16")
 
 
 def file_facts(path: Path) -> dict[str, Any]:

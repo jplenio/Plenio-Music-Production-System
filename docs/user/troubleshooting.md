@@ -50,7 +50,7 @@ Start with **0 · System Check**: it shows versions, GPUs, which model files of 
 |---|---|---|
 | Loudness warning *limiter reduction budget* | reaching the target would need more limiting than the style allows | Choose a lower target or a style with more limiter room; the song is not squashed on purpose |
 | *samples above full scale were clipped* | a boost without a limiter before FLAC/MP3 | Keep **Plenio · Master** (or Loudness & Dynamics) before Export |
-| Cover saved as `.jpg` but not inside the file | the file is a WAV (it has no place for a cover), or it was exported by Plenio 0.2.1 or older without mutagen | export as FLAC or MP3; 0.2.2 embeds the cover itself |
+| Cover saved as `.jpg` but not inside the file | the file is a WAV (it has no place for a cover), or it was exported by Plenio 0.2.1 or older (MP3: its ID3v2.4 tag is not read by Windows and many players) | export as FLAC or MP3 again with 0.2.2: it embeds the cover itself and writes MP3 tags as ID3v2.3 |
 | *'copy from loaded file' needs exactly one Load Audio node* | tag copy reads the file of the single Load Audio node | Choose *tags* and type them, or keep one Load Audio node |
 | WAV files miss album artist and composer | RIFF INFO has no fields for them | Use FLAC or MP3 for full tags |
 

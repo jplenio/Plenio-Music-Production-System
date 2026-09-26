@@ -15,6 +15,7 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 ### Changed
 
+- **MP3 tags are ID3v2.3** instead of ffmpeg's default ID3v2.4 (UTF-8): Windows Explorer, Windows Media Player and many players, phones and car radios read no 2.4 tags, so an MP3's embedded cover (and title) did not show there. Embedding a cover into a 2.4 file converts its tag to 2.3; the comment is written as a COMM frame (ffmpeg wrote it as `TXXX:comment`, which players do not show).
 - **Cover art is embedded by Plenio itself** into FLAC (picture block) and MP3 (ID3 APIC) - the mastered files and the `(original).flac` - with every tag option (*title only*, *tags*, *copy from loaded file*). The optional GPL package mutagen is no longer used; the System Check lists `faster-whisper` as the optional package instead. Embedding twice replaces the picture, other tags are kept.
 - Node summaries (Song Brief, Cover Brief, EQ, Loudness, Score Tools, ...) stay current: ComfyUI re-sends the summary of a cached node on every run (`has_intermediate_output`), and the last summary is kept in the node, so it is back after a reload, a tab switch or App mode. Before, a cached node showed its summary only after the run that executed it.
 - Workflows saved with 0.2.0/0.2.1: the frontend inserts the new *mode* of Song Brief and Cover Brief when a workflow is loaded (as *one song/one cover, stop to review* - their earlier behaviour: the same song, new takes); the sheets keep their saved *review*. API-format prompts need the new `mode` input.
