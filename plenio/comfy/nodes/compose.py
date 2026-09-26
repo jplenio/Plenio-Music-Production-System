@@ -27,6 +27,8 @@ class PlenioComposePrompt(io.ComfyNode):
     def define_schema(cls) -> io.Schema:
         return io.Schema(
             node_id="PlenioComposePrompt",
+            # the summary is re-sent on every run, also when the node is cached (ComfyUI keeps its UI)
+            has_intermediate_output=True,
             display_name="Compose Writing Prompt",
             category="Plenio/Writing",
             description=(

@@ -34,6 +34,7 @@ export interface ComfyNode {
   addDOMWidget(name: string, type: string, element: HTMLElement, options?: DOMWidgetOptions): ComfyWidget
   setDirtyCanvas?(foreground: boolean, background?: boolean): void
   onExecuted?: (output: Record<string, unknown>) => void
+  onConfigure?: (info: Record<string, unknown>) => void
   configure?: (info: Record<string, unknown>) => unknown
 }
 

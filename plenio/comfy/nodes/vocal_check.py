@@ -39,6 +39,8 @@ class PlenioVocalCheck(io.ComfyNode):
     def define_schema(cls) -> io.Schema:
         return io.Schema(
             node_id="PlenioVocalCheck",
+            # the summary is re-sent on every run, also when the node is cached (ComfyUI keeps its UI)
+            has_intermediate_output=True,
             display_name="Check Vocals",
             category="Plenio/Audio analysis",
             description=(

@@ -26,6 +26,8 @@ class PlenioLoudness(io.ComfyNode):
         styles = library.style_names()
         return io.Schema(
             node_id="PlenioLoudness",
+            # the summary is re-sent on every run, also when the node is cached (ComfyUI keeps its UI)
+            has_intermediate_output=True,
             display_name="Loudness & Dynamics",
             category="Plenio/Mastering",
             description=(

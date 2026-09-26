@@ -20,6 +20,8 @@ class PlenioScoreTools(io.ComfyNode):
     def define_schema(cls) -> io.Schema:
         return io.Schema(
             node_id="PlenioScoreTools",
+            # the summary is re-sent on every run, also when the node is cached (ComfyUI keeps its UI)
+            has_intermediate_output=True,
             display_name="Score Tools",
             category="Plenio/Score",
             description=(

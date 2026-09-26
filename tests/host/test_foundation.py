@@ -164,3 +164,35 @@ def test_custom_widget_value_reaches_execute(server: ComfyServer, log: Log, valu
     entry = server.run({"1": {"class_type": "PlenioTestWidgetEcho", "inputs": {"sheet_state": state}}})
     assert entry["outputs"]["1"]["received"] == [state]
     assert log.events()[-1] == {"node": "echo", "value": state, "type": "str"}
+
+
+def test_cached_nodes_send_their_summary_again(server: ComfyServer) -> None:
+    """0.2.2: the summary of a cached node (Song Brief, EQ, ...) was shown only after the run that
+    executed it - after a reload or tab switch it stayed empty. `has_intermediate_output` makes
+    ComfyUI re-send the cached UI on every run."""
+    prompt = {
+        "1": {
+            "class_type": "PlenioSongBrief",
+            "inputs": {
+                "template": "none",
+                "description": f"A cached summary {uuid.uuid4().hex[:6]}",
+                "genre": "piano pop",
+                "mood": "",
+                "tempo": "",
+                "length": "short (about 1:30)",
+                "vocals": "sung",
+                "vocals.language": "English",
+                "vocals.voice": "",
+                "vocals.theme": "",
+                "key": "",
+                "meter": "",
+            },
+        },
+        "2": {"class_type": "PlenioTestSink", "inputs": {"value": ["1", 1], "label": "summary"}},
+    }
+    first = server.run(prompt)
+    prompt["2"]["inputs"]["label"] = "summary again"  # the sink runs again, the brief is cached
+    second = server.run(prompt)
+    cached = [m[1]["nodes"] for m in second["status"]["messages"] if m[0] == "execution_cached"][0]
+    assert "1" in cached
+    assert second["outputs"]["1"]["plenio_summary"] == first["outputs"]["1"]["plenio_summary"]

@@ -17,6 +17,8 @@ class PlenioParseDraft(io.ComfyNode):
     def define_schema(cls) -> io.Schema:
         return io.Schema(
             node_id="PlenioParseDraft",
+            # the summary is re-sent on every run, also when the node is cached (ComfyUI keeps its UI)
+            has_intermediate_output=True,
             display_name="Parse Song Draft",
             category="Plenio/Writing",
             description=(

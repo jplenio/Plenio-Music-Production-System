@@ -19,15 +19,30 @@ function summaryElement(node: ComfyNode): HTMLElement {
   return element
 }
 
-/** Show the `plenio_summary` UI payload of an executed Plenio node as rendered Markdown. */
+function show(node: ComfyNode, item: Summary): void {
+  if (!item.markdown) return
+  const element = summaryElement(node)
+  element.dataset.status = item.status ?? ''
+  element.innerHTML = renderMarkdown(item.markdown)
+  node.setDirtyCanvas?.(true, true)
+}
+
+/** Show the `plenio_summary` UI payload of an executed Plenio node as rendered Markdown.
+ *
+ * The last summary is kept in the node's properties, so it is back after a page reload, a tab
+ * switch or App mode (the node is re-created then); every run replaces it - also for cached nodes,
+ * whose summary the backend re-sends (`has_intermediate_output`). */
 export function addSummaryDisplay(nodeType: ComfyNodeType): void {
   nodeType.prototype.onExecuted = chain(nodeType.prototype.onExecuted, function (this: ComfyNode, output) {
     const items = output?.[SUMMARY_KEY] as Summary[] | undefined
     const item = items?.[items.length - 1]
     if (!item?.markdown) return
-    const element = summaryElement(this)
-    element.dataset.status = item.status ?? ''
-    element.innerHTML = renderMarkdown(item.markdown)
-    this.setDirtyCanvas?.(true, true)
+    this.properties = this.properties ?? {}
+    this.properties[SUMMARY_KEY] = { markdown: item.markdown, status: item.status ?? '' }
+    show(this, item)
+  })
+  nodeType.prototype.onConfigure = chain(nodeType.prototype.onConfigure, function (this: ComfyNode) {
+    const saved = this.properties?.[SUMMARY_KEY] as Summary | undefined
+    if (saved?.markdown) show(this, saved)
   })
 }
