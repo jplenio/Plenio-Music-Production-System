@@ -82,7 +82,7 @@ def test_template_inventory_and_optional_packages() -> None:
     report = check_system(
         facts(
             models=installed,
-            packages={"av": "18.1.0", "mutagen": None},
+            packages={"av": "18.1.0", "faster_whisper": None},
             assets={"faster-whisper-large-v3": "not downloaded (fetched on first use, 3.1 GB)"},
         ),
         catalogue,
@@ -108,7 +108,7 @@ def test_template_inventory_and_optional_packages() -> None:
     assert (
         "1 with an unexpected size (an interrupted download?): `minimax_music3_dav.safetensors`" in markdown
     )
-    assert "Optional package 'mutagen' is not installed." in markdown
+    assert "Optional package 'faster_whisper' is not installed." in markdown
     assert "faster-whisper-large-v3': not downloaded" in markdown
     assert "| `sheetsage2_bf16.safetensors` | audio_encoders | 1.4 GB | CC BY-NC 4.0 | missing |" in markdown
 

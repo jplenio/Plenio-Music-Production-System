@@ -30,10 +30,10 @@ KNOWN_PACKAGES: tuple[OptionalPackage, ...] = (
         "scipy", "scipy", "Mastering DSP (EQ, Loudness & Dynamics)", "python -m pip install scipy"
     ),
     OptionalPackage(
-        "mutagen",
-        "mutagen",
-        "Cover art embedded in exported files (optional; GPL-2.0-or-later, not bundled)",
-        "python -m pip install mutagen",
+        "faster_whisper",
+        "faster-whisper",
+        "Lyrics transcription of covers with lyrics (Transcribe Lyrics; optional)",
+        "python -m pip install faster-whisper",
     ),
 )
 

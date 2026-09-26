@@ -206,12 +206,7 @@ def test_cover_and_original_are_exported(server: ComfyServer, log: Log) -> None:
     record = record_of(server, folder, "Covered")
     roles = {f.get("role") for f in record["files"]}
     assert {"cover", "original"} <= roles
-    try:
-        import mutagen  # noqa: F401
-    except ImportError:  # without mutagen the cover is only a file next to the audio
-        assert read_tags(base / "Covered.flac")[1] is None
-        return
-    for suffix in ("flac", "mp3"):
+    for suffix in ("flac", "mp3"):  # embedded without an extra package (0.2.2)
         _tags, cover = read_tags(base / f"Covered.{suffix}")
         assert cover is not None and cover == (base / "Covered.jpg").read_bytes()
 

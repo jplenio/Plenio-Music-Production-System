@@ -1,7 +1,7 @@
 """Cover Art with the real FLUX.2 Klein 4B files on local hardware (V3, Phase 8).
 
 The nodes of the *Plenio · Cover Art* block paint a cover from an artwork prompt; Export Release saves
-it next to a short audio file (and embeds it when mutagen is installed). Needs ``PLENIO_SMOKE=1``,
+it next to a short audio file (and embeds it into the audio). Needs ``PLENIO_SMOKE=1``,
 ``PLENIO_COMFYUI_ROOT`` and ``PLENIO_MODELS_DIR`` with the three FLUX.2 Klein files.
 """
 
@@ -117,9 +117,4 @@ def test_cover_art_is_painted_and_exported(gpu_server: ComfyServer) -> None:
     record = json.loads((base / "Cover Art Smoke.plenio.json").read_text(encoding="utf-8"))
     assert any(f.get("role") == "cover" for f in record["files"])
     _tags, embedded = read_tags(base / "Cover Art Smoke.flac")
-    try:
-        import mutagen  # noqa: F401
-    except ImportError:
-        assert embedded is None
-    else:
-        assert embedded == (base / "Cover Art Smoke.jpg").read_bytes()
+    assert embedded == (base / "Cover Art Smoke.jpg").read_bytes()

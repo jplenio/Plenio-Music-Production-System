@@ -198,10 +198,6 @@ class PlenioExportRelease(io.ComfyNode):
             cover_path = file(".jpg")
             atomic_write_bytes(cover_path, picture)
             facts.append({**file_facts(cover_path), "role": "cover"})
-            if not embedded:
-                warnings.append(
-                    "cover art saved next to the audio only: install mutagen to embed it (see the Export help)"
-                )
         licences = sorted(
             {
                 ENGINES[r["data"]["engine"]].LICENCE

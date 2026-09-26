@@ -100,18 +100,16 @@ def test_cover_art(tmp_path: Path) -> None:
     from PIL import Image
 
     assert Image.open(io.BytesIO(jpeg)).size == (300, 300)  # square centre crop
-    write_audio(tmp_path / "c.flac", noise(0.5), 44100, "flac", TAGS)
-    try:
-        import mutagen  # noqa: F401
-    except ImportError:
-        assert embed_cover(tmp_path / "c.flac", jpeg) is False
-        return
-    for kind in ("flac", "mp3"):
+    for kind in ("flac", "mp3"):  # written by Plenio itself (0.2.2; before: only with mutagen installed)
         path = tmp_path / f"c.{kind}"
         write_audio(path, noise(0.5), 44100, kind, TAGS)
         assert embed_cover(path, jpeg) is True
+        assert embed_cover(path, cover_jpeg(image[::-1])) is True  # replaces, never adds a second picture
         tags, cover = read_tags(path)
-        assert cover == jpeg and tags["title"] == "Neon Rain"
+        assert (
+            cover == cover_jpeg(image[::-1]) and tags == read_tags(path)[0] and tags["title"] == "Neon Rain"
+        )
+        assert tags["album"] == TAGS["album"]  # the other tags are kept
     write_audio(tmp_path / "c.wav", noise(0.5), 44100, "wav")
     assert embed_cover(tmp_path / "c.wav", jpeg) is False
 

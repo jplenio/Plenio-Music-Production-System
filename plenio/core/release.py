@@ -14,6 +14,7 @@ from typing import Any
 
 from .dependencies import require
 from .errors import PlenioUserError
+from .files import atomic_write_bytes
 from .hashing import canonical_json, sha256_text
 
 RECORD_SCHEMA = "plenio.record/1"
@@ -283,35 +284,120 @@ def cover_jpeg(image: Any, size: int = 1400) -> bytes:
 
 
 def embed_cover(path: Path, jpeg: bytes) -> bool:
-    """Embed ``jpeg`` as front cover (FLAC picture, MP3 APIC) with mutagen if it is installed.
+    """Embed ``jpeg`` as the front cover of a FLAC (PICTURE block) or MP3 (ID3v2 APIC frame); atomic.
 
-    mutagen is GPL-2.0-or-later and not bundled; without it the cover is only written next to the audio.
+    Written by Plenio itself (no extra package). Returns False for formats without cover art (WAV).
     """
-    import importlib
-
-    try:  # mutagen has no type information; it is used through Any
-        flac: Any = importlib.import_module("mutagen.flac")
-        id3: Any = importlib.import_module("mutagen.id3")
-    except ImportError:
+    if path.suffix.lower() == ".flac":
+        data = _flac_with_picture(path.read_bytes(), jpeg)
+    elif path.suffix.lower() == ".mp3":
+        data = _mp3_with_picture(path.read_bytes(), jpeg)
+    else:
         return False
-    if path.suffix == ".flac":
-        audio = flac.FLAC(str(path))
-        picture = flac.Picture()
-        picture.type, picture.mime, picture.desc, picture.data = 3, "image/jpeg", "Cover", jpeg
-        audio.clear_pictures()
-        audio.add_picture(picture)
-        audio.save()
-        return True
-    if path.suffix == ".mp3":
-        try:
-            tags = id3.ID3(str(path))
-        except id3.ID3NoHeaderError:
-            tags = id3.ID3()
-        tags.delall("APIC")
-        tags.add(id3.APIC(encoding=3, mime="image/jpeg", type=3, desc="Cover", data=jpeg))
-        tags.save(str(path))
-        return True
-    return False
+    atomic_write_bytes(path, data)
+    return True
+
+
+def _jpeg_size(jpeg: bytes) -> tuple[int, int]:
+    """Width and height from the JPEG's start-of-frame marker (0, 0 when it has none)."""
+    index = 2
+    while index + 9 < len(jpeg):
+        if jpeg[index] != 0xFF:
+            index += 1
+            continue
+        marker = jpeg[index + 1]
+        length = int.from_bytes(jpeg[index + 2 : index + 4], "big")
+        if 0xC0 <= marker <= 0xCF and marker not in (0xC4, 0xC8, 0xCC):
+            height = int.from_bytes(jpeg[index + 5 : index + 7], "big")
+            width = int.from_bytes(jpeg[index + 7 : index + 9], "big")
+            return width, height
+        index += 2 + length
+    return 0, 0
+
+
+def _flac_with_picture(flac: bytes, jpeg: bytes) -> bytes:
+    """The FLAC stream with its PICTURE blocks replaced by one front cover (FLAC format, METADATA_BLOCK_PICTURE)."""
+    if flac[:4] != b"fLaC":
+        raise PlenioUserError("Not a FLAC file: the cover cannot be embedded.")
+    blocks: list[tuple[int, bytes]] = []
+    index = 4
+    while True:
+        header = flac[index]
+        kind, length = header & 0x7F, int.from_bytes(flac[index + 1 : index + 4], "big")
+        if kind != 6:  # 6 = PICTURE: replaced below
+            blocks.append((kind, flac[index + 4 : index + 4 + length]))
+        index += 4 + length
+        if header & 0x80:
+            break
+    width, height = _jpeg_size(jpeg)
+    mime, description = b"image/jpeg", b"Cover"
+    picture = b"".join(
+        [
+            (3).to_bytes(4, "big"),  # front cover
+            len(mime).to_bytes(4, "big"),
+            mime,
+            len(description).to_bytes(4, "big"),
+            description,
+            width.to_bytes(4, "big"),
+            height.to_bytes(4, "big"),
+            (24).to_bytes(4, "big"),  # colour depth
+            (0).to_bytes(4, "big"),  # not an indexed-colour image
+            len(jpeg).to_bytes(4, "big"),
+            jpeg,
+        ]
+    )
+    if len(picture) >= 1 << 24:
+        raise PlenioUserError("The cover image is too large to embed (16 MB limit of a FLAC block).")
+    streaminfo, others = blocks[:1], blocks[1:]
+    ordered = [*streaminfo, (6, picture), *others]
+    out = [b"fLaC"]
+    for position, (kind, body) in enumerate(ordered):
+        last = 0x80 if position == len(ordered) - 1 else 0
+        out.append(bytes([last | kind]) + len(body).to_bytes(3, "big") + body)
+    out.append(flac[index:])
+    return b"".join(out)
+
+
+def _syncsafe(value: int) -> bytes:
+    return bytes([(value >> 21) & 0x7F, (value >> 14) & 0x7F, (value >> 7) & 0x7F, value & 0x7F])
+
+
+def _unsyncsafe(data: bytes) -> int:
+    return (data[0] << 21) | (data[1] << 14) | (data[2] << 7) | data[3]
+
+
+def _mp3_with_picture(mp3: bytes, jpeg: bytes) -> bytes:
+    """The MP3 with an ID3v2 tag whose APIC frames are replaced by one front cover.
+
+    Keeps the frames of an existing ID3v2.3/2.4 tag (ffmpeg writes 2.4); a tag with unsynchronisation
+    or an extended header is replaced by a new 2.4 tag with the cover only.
+    """
+    frames: list[bytes] = []
+    major, audio = 4, mp3
+    if mp3[:3] == b"ID3" and mp3[3] in (3, 4) and not mp3[5] & 0xC0:
+        major = mp3[3]
+        size = _unsyncsafe(mp3[6:10])
+        tag, audio = mp3[10 : 10 + size], mp3[10 + size + (10 if mp3[5] & 0x10 else 0) :]
+        index = 0
+        while index + 10 <= len(tag) and tag[index] != 0:
+            frame_id = tag[index : index + 4]
+            length = (
+                _unsyncsafe(tag[index + 4 : index + 8])
+                if major == 4
+                else int.from_bytes(tag[index + 4 : index + 8], "big")
+            )
+            if frame_id != b"APIC":
+                frames.append(tag[index : index + 10 + length])
+            index += 10 + length
+    elif mp3[:3] == b"ID3":
+        size = _unsyncsafe(mp3[6:10])
+        audio = mp3[10 + size + (10 if mp3[5] & 0x10 else 0) :]
+    encoding = 3 if major == 4 else 0  # UTF-8 in ID3v2.4, ISO-8859-1 in 2.3 (the description is ASCII)
+    body = bytes([encoding]) + b"image/jpeg\x00" + bytes([3]) + b"Cover\x00" + jpeg
+    frame_size = _syncsafe(len(body)) if major == 4 else len(body).to_bytes(4, "big")
+    frames.append(b"APIC" + frame_size + b"\x00\x00" + body)
+    content = b"".join(frames)
+    return b"ID3" + bytes([major, 0, 0]) + _syncsafe(len(content)) + content + audio
 
 
 def file_facts(path: Path) -> dict[str, Any]:
