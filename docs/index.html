@@ -3,317 +3,443 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Demo songs and covers made with YuE2 and MiniMax Music 3 in ComfyUI - the listening page of the Plenio Music Production System.">
+  <meta name="description" content="Demo songs made locally in ComfyUI with YuE2 and MiniMax Music 3 - the listening page of the Plenio Music Production System.">
+  <meta name="theme-color" content="#0a0c10">
   <title>Plenio Music Production System — Demo Songs</title>
   <style>
-    :root {
-      color-scheme: dark;
-      --bg:#0b0d10; --panel:#12161b; --panel2:#171c22; --line:#29313a;
-      --text:#edf2f7; --muted:#98a6b5; --accent:#d7e7ff; --max:1100px; --list:920px;
+    :root{
+      color-scheme:dark;
+      --bg:#0a0c10;--bg2:#0e1117;--panel:#12161d;--panel2:#171c25;--line:#252c37;--line2:#323b48;
+      --text:#eef2f7;--soft:#c3ccd7;--muted:#8d99a8;--faint:#5f6b7a;
+      --accent:#8ab4ff;--accent2:#c49bff;--ok:#7fd6a8;
+      --radius:18px;--max:1180px;
+      --shadow:0 18px 50px rgba(0,0,0,.35);
     }
     *{box-sizing:border-box}
+    [hidden]{display:none!important}
     html{scroll-behavior:smooth}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+    body::before{content:"";position:fixed;inset:0 0 auto 0;height:620px;pointer-events:none;z-index:-1;
+      background:radial-gradient(900px 420px at 12% -8%,rgba(138,180,255,.16),transparent 70%),radial-gradient(760px 380px at 92% -4%,rgba(196,155,255,.13),transparent 70%)}
     a{color:inherit}
-    header,main,footer{width:min(var(--max),calc(100% - 32px));margin-inline:auto}
-    header{padding:44px 0 22px}
-    .eyebrow{font-size:.78rem;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);font-weight:700}
-    h1{margin:.3rem 0 .55rem;font-size:clamp(1.9rem,4.2vw,3.2rem);line-height:1.02;letter-spacing:-.04em;max-width:900px}
-    .lead{max-width:880px;color:#bcc7d2;font-size:1.02rem;margin:.4rem 0 0}
-    .links,.stats,.filters,.badges{display:flex;flex-wrap:wrap;gap:8px}
-    .links{margin-top:16px}.links a{padding:8px 12px;border:1px solid var(--line);border-radius:10px;text-decoration:none;background:var(--panel);font-size:.92rem}
-    .links a:hover{border-color:#4a5968}
-    .stats{margin-top:14px}.stat{padding:6px 10px;border-radius:999px;background:var(--panel2);color:#c6d0da;font-size:.83rem;border:1px solid var(--line)}
-    .workflow-note{margin:14px 0 0;padding:13px 16px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(135deg,#121820,#101318);color:#b7c3cf;font-size:.9rem}
-    .controls{position:sticky;top:0;z-index:5;margin:10px 0 18px;padding:10px;background:rgba(11,13,16,.94);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:13px}
-    .filters{align-items:center}.filters input,.filters select{min-height:37px;padding:7px 9px;border-radius:9px;border:1px solid var(--line);background:#0f1318;color:var(--text);font-size:.92rem}
-    .filters input{flex:1 1 240px}.filters select{flex:0 1 180px}
-    .count{margin-left:auto;color:var(--muted);font-size:.88rem}
-    .list{display:flex;flex-direction:column;gap:16px;width:min(var(--list),100%);margin:0 auto;padding-bottom:48px}
-    .card{overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--panel);box-shadow:0 14px 38px rgba(0,0,0,.15);transition:border-color .16s,transform .16s,box-shadow .16s}
-    .card:hover{border-color:#435468;transform:translateY(-2px);box-shadow:0 20px 46px rgba(0,0,0,.28)}
-    .card iframe{display:block;width:100%;height:152px;border:0;background:#0d1014}
-    .player-head{background:#0d1014;padding:6px 8px 0}
-    .player-head iframe{border-radius:12px 12px 0 0}
-    .soundcloud-placeholder{padding:15px 18px;border-bottom:1px solid var(--line);color:#83909d;font-size:.88rem}
-    .row{display:flex;gap:16px;padding:14px 16px;align-items:flex-start}
-    .info{flex:1;min-width:0}
-    .title-row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-    .num{font-variant-numeric:tabular-nums;color:#5b6a79;font-size:.82rem;letter-spacing:.06em;font-weight:600}
-    h2{margin:0;font-size:1.28rem;line-height:1.15;letter-spacing:-.02em}
-    h2 a{text-decoration:none}h2 a:hover{color:var(--accent)}
-    .album-line{font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-top:2px}
-    .badges{margin:8px 0 6px}
-    .badge{border:1px solid #34404c;background:#151b21;color:#c8d3dd;padding:3px 8px;border-radius:999px;font-size:.74rem}
-    .desc{margin:0;color:#a8b5c1;font-size:.92rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-    .thumb{flex:0 0 auto;width:96px;height:96px;border-radius:12px;object-fit:cover;opacity:.96;box-shadow:0 10px 26px rgba(0,0,0,.35);margin-top:2px}
-    .thumb-fallback{flex:0 0 auto;width:96px;height:96px;border-radius:12px;background:radial-gradient(circle at 30% 25%,#263443,#11171d 60%,#0b0d10);display:grid;place-items:center;color:#7f8d9a;font-size:.72rem;text-align:center;padding:10px}
-    details{margin:0 16px 14px;border-top:1px solid var(--line);padding-top:10px}
-    summary{cursor:pointer;color:#c8d3dd;font-size:.88rem;font-weight:650;user-select:none}
+    :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+    .wrap{width:min(var(--max),calc(100% - 32px));margin-inline:auto}
+
+    /* ---- hero ---- */
+    header{padding:56px 0 8px}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+    .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 12px var(--ok)}
+    h1{margin:.55rem 0 .7rem;font-size:clamp(2.1rem,5vw,3.6rem);line-height:1.02;letter-spacing:-.045em;font-weight:800;max-width:920px}
+    h1 .grad{background:linear-gradient(92deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+    .lead{max-width:760px;color:var(--soft);font-size:1.06rem;margin:0}
+    .links{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border:1px solid var(--line2);border-radius:12px;text-decoration:none;background:var(--panel);font-size:.92rem;font-weight:600;color:var(--text);cursor:pointer;transition:border-color .15s,background .15s}
+    .btn:hover{border-color:#4a5870;background:var(--panel2)}
+    .btn.primary{background:linear-gradient(135deg,#2a3f63,#3b2f5c);border-color:#4f5f86}
+    .btn svg{width:16px;height:16px}
+
+    /* ---- category tabs ---- */
+    .tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:34px 0 0}
+    .tab{position:relative;text-align:left;padding:16px 18px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(180deg,var(--panel),var(--bg2));color:var(--text);font:inherit;cursor:pointer;transition:border-color .15s,transform .15s}
+    .tab:hover{border-color:var(--line2);transform:translateY(-1px)}
+    .tab[aria-selected="true"]{border-color:#56688a;background:linear-gradient(180deg,#18202d,#121722);box-shadow:0 0 0 1px rgba(138,180,255,.18),var(--shadow)}
+    .tab-kicker{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+    .tab-title{display:block;font-size:1.08rem;font-weight:700;margin-top:4px;letter-spacing:-.01em}
+    .tab-sub{display:block;font-size:.84rem;color:var(--muted);margin-top:2px}
+    .tab .new{position:absolute;top:14px;right:14px;font-size:.66rem;font-weight:800;letter-spacing:.08em;padding:3px 8px;border-radius:999px;background:rgba(127,214,168,.14);color:var(--ok);border:1px solid rgba(127,214,168,.35)}
+
+    main{padding:26px 0 40px}
+    .section-intro{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:end;margin-bottom:16px}
+    .section-intro h2{margin:0;font-size:1.6rem;letter-spacing:-.03em}
+    .section-intro p{margin:.35rem 0 0;color:var(--soft);max-width:760px;font-size:.96rem}
+    .facts{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}
+    .fact{padding:6px 11px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--soft);font-size:.8rem}
+    .fact b{color:var(--text);font-weight:700}
+
+    /* ---- filters ---- */
+    .controls{position:sticky;top:0;z-index:5;margin:18px 0 22px;padding:12px;background:rgba(10,12,16,.86);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:16px}
+    .filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .filters input,.filters select{min-height:40px;padding:8px 11px;border-radius:11px;border:1px solid var(--line);background:var(--bg2);color:var(--text);font:inherit;font-size:.92rem}
+    .filters input{flex:1 1 240px}.filters select{flex:0 1 190px}
+    .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+    .chip{padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--soft);font:inherit;font-size:.82rem;cursor:pointer}
+    .chip:hover{border-color:var(--line2)}
+    .chip[aria-pressed="true"]{background:#1d2635;border-color:#56688a;color:#fff}
+    .count{margin-left:auto;color:var(--muted);font-size:.86rem;font-variant-numeric:tabular-nums}
+
+    /* ---- album cards ---- */
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(262px,1fr));gap:18px;align-items:start}
+    .album{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);overflow:hidden;transition:border-color .16s,transform .16s,box-shadow .16s}
+    .album:hover{border-color:var(--line2);transform:translateY(-3px);box-shadow:var(--shadow)}
+    .art{position:relative;aspect-ratio:1/1;background:var(--bg2);overflow:hidden}
+    .art img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s}
+    .album:hover .art img{transform:scale(1.035)}
+    .art-fallback{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:18px;color:rgba(255,255,255,.92)}
+    .art-fallback .g{font-size:1.5rem;font-weight:800;letter-spacing:-.03em;line-height:1.05}
+    .art-fallback .s{font-size:.78rem;opacity:.75;margin-top:4px}
+    .art .num{position:absolute;top:12px;left:12px;padding:3px 8px;border-radius:8px;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);font-size:.72rem;font-weight:700;font-variant-numeric:tabular-nums;color:#e6ebf2}
+    .play{position:absolute;right:14px;bottom:14px;width:52px;height:52px;border-radius:50%;border:0;display:grid;place-items:center;cursor:pointer;
+      background:rgba(255,255,255,.94);color:#0b0d12;box-shadow:0 10px 26px rgba(0,0,0,.45);transition:transform .15s,background .15s}
+    .play:hover{transform:scale(1.07)}
+    .play svg{width:22px;height:22px;margin-left:3px}
+    .soon{position:absolute;right:12px;top:12px;padding:5px 10px;border-radius:999px;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);font-size:.72rem;color:#d7dee8;border:1px solid rgba(255,255,255,.14)}
+    .player{background:#0d1014;border-top:1px solid var(--line)}
+    .player iframe{display:block;width:100%;height:120px;border:0}
+    .body{padding:14px 16px 6px;flex:1;display:flex;flex-direction:column}
+    .album h3{margin:0;font-size:1.08rem;line-height:1.22;letter-spacing:-.015em}
+    .album h3 a{text-decoration:none}.album h3 a:hover{color:var(--accent)}
+    .sub{color:var(--muted);font-size:.82rem;margin-top:3px}
+    .badges{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+    .badge{border:1px solid var(--line2);background:var(--bg2);color:var(--soft);padding:2px 8px;border-radius:999px;font-size:.72rem;white-space:nowrap}
+    .badge.type{border-color:transparent;background:rgba(138,180,255,.12);color:#b9d0ff}
+    .badge.type.inst{background:rgba(196,155,255,.12);color:#dac4ff}
+    .desc{margin:6px 0 0;color:#a9b5c2;font-size:.86rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+    details{margin:auto 16px 14px;border-top:1px solid var(--line);padding-top:10px}
+    details summary{cursor:pointer;color:var(--soft);font-size:.84rem;font-weight:600;user-select:none;list-style:none;display:flex;align-items:center;gap:6px}
+    details summary::-webkit-details-marker{display:none}
+    details summary::before{content:"";width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s}
+    details[open] summary::before{transform:rotate(45deg)}
     summary:hover{color:var(--accent)}
-    .detail-grid{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin:11px 0;font-size:.84rem}.detail-grid dt{color:#7f8d9a}.detail-grid dd{margin:0;color:#b9c4ce;overflow-wrap:anywhere}
-    .prompt,.cover-concept{margin-top:10px;padding:10px 12px;border-radius:10px;background:#0d1115;color:#9eabb8;font-size:.82rem;white-space:pre-wrap}
-    .cover-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:14px;margin-top:16px}
-    .cover-card .row{padding:12px 14px}
-    .cover-card h2{font-size:1.05rem}
-    .cover-card .thumb,.cover-card .thumb-fallback{width:64px;height:64px;border-radius:9px;font-size:.62rem;padding:6px}
-    .cover-card iframe{height:124px}
-    .cover-card details{margin:0 14px 12px}
-    .categories{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0 0}
-    .cat{display:inline-flex;align-items:center;gap:9px;padding:9px 14px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:#c6d0da;font:inherit;font-size:.94rem;cursor:pointer}
-    .cat:hover{border-color:#4a5968}
-    .cat[aria-pressed="true"]{background:#1c2733;border-color:#4a5968;color:#fff}
-    .cat-count{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.82rem}
-    .section-note{margin:12px 0 0;padding:13px 16px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(135deg,#121820,#101318);color:#b7c3cf;font-size:.9rem}
-    .groups{display:flex;flex-direction:column;gap:26px;width:min(var(--list),100%);margin:0 auto;padding-bottom:48px}
-    .group{border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#141a21,#101419);padding:18px}
-    .group-head h2{font-size:1.45rem}
-    .group-eyebrow{font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
-    .group-meta{margin-top:2px;color:var(--muted);font-size:.86rem}
-    .group-comment{margin:12px 0 0;padding:11px 13px;border-left:3px solid #3a4a5c;background:#0f1318;border-radius:0 10px 10px 0;color:#bdc8d3;font-size:.92rem;white-space:pre-wrap}
-    .source-player{margin-top:12px}
-    .cover-title{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
-    footer{padding:0 0 44px;color:#82909d;font-size:.86rem}
-    @media(max-width:640px){header{padding-top:34px}.controls{position:static}.count{width:100%;margin-left:0}.row{gap:12px;padding:12px 12px}.thumb,.thumb-fallback{width:62px;height:62px;border-radius:9px}h2{font-size:1.12rem}.desc{-webkit-line-clamp:2}details{margin:0 12px 12px}}
+    .dl{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;margin:11px 0 4px;font-size:.8rem}
+    .dl dt{color:var(--faint)}.dl dd{margin:0;color:var(--soft);overflow-wrap:anywhere}
+    .block{margin-top:9px;padding:10px 12px;border-radius:11px;background:var(--bg2);border:1px solid var(--line);color:#a5b1be;font-size:.8rem;white-space:pre-wrap;max-height:260px;overflow:auto}
+    .block strong{display:block;color:var(--soft);margin-bottom:4px;font-size:.76rem;letter-spacing:.06em;text-transform:uppercase}
+    .empty{padding:40px;text-align:center;color:var(--muted);border:1px dashed var(--line2);border-radius:var(--radius)}
+
+    /* ---- covers ---- */
+    .groups{display:flex;flex-direction:column;gap:22px}
+    .group{border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,#131922,#0f131a);padding:20px}
+    .group-head{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline}
+    .group-eyebrow{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;width:100%}
+    .group-head h3{margin:0;font-size:1.4rem;letter-spacing:-.02em}
+    .group-meta{color:var(--muted);font-size:.84rem}
+    .group-comment{margin:12px 0 0;padding:11px 13px;border-left:3px solid #3a4a5c;background:var(--bg2);border-radius:0 10px 10px 0;color:var(--soft);font-size:.9rem;white-space:pre-wrap}
+    .source-player{margin-top:14px;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+    .source-player iframe{display:block;width:100%;height:120px;border:0}
+    .placeholder{padding:13px 16px;color:var(--muted);font-size:.86rem;background:var(--bg2)}
+    .source-play{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:0;background:var(--bg2);color:var(--text);font:inherit;font-weight:600;cursor:pointer;text-align:left}
+    .source-play:hover{background:var(--panel2)}
+    .source-play .play{position:static;width:40px;height:40px;box-shadow:none}
+    .source-play .play svg{width:18px;height:18px}
+    .cover-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-top:16px;align-items:start}
+
+    footer{padding:10px 0 50px;color:var(--faint);font-size:.84rem}
+    footer a{color:var(--muted)}
+    @media(max-width:760px){
+      header{padding-top:38px}
+      .tabs{grid-template-columns:1fr;gap:8px}
+      .tab{padding:12px 14px}
+      .section-intro{grid-template-columns:1fr}
+      .controls{position:static}
+      .count{width:100%;margin-left:0}
+      .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+      .album h3{font-size:.98rem}
+      .desc{-webkit-line-clamp:2}
+      .play{width:44px;height:44px;right:10px;bottom:10px}
+    }
+    @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
   </style>
 </head>
 <body>
-<header>
-  <div class="eyebrow">Plenio Music Production System · ComfyUI · YuE2 · YuE2 Cover · MiniMax Music 3</div>
-  <h1>Generated music, and covers of your own tracks.</h1>
-  <p class="lead">Songs generated locally in ComfyUI with <strong>YuE2</strong> and <strong>MiniMax Music 3</strong> — the models the <strong>Plenio Music Production System</strong> drives. The second category shows <strong>cover versions</strong>: an original track, its score read straight out of the audio, and the covers made from it.</p>
-  <p class="lead"><strong>Where these tracks come from:</strong> they were produced with Plenio's predecessor, the <a href="https://github.com/jplenio/ComfyUI-MiniMax-Music-Production-Toolkit">Music Production Toolkit</a> (same music models; its own writer, restoration and mastering chain, listed under “Generation details”). Plenio replaces that toolkit; its own settings differ, see the repository.</p>
+<header class="wrap">
+  <div class="eyebrow"><span class="dot"></span>Plenio Music Production System · ComfyUI</div>
+  <h1>Music made locally in ComfyUI — <span class="grad">listen to what it sounds like.</span></h1>
+  <p class="lead">Songs generated on one desktop GPU with <strong>YuE2</strong> and <strong>MiniMax Music 3</strong>, and cover versions of existing tracks. The newest collection is made with <strong>Plenio 0.2.2</strong> itself: one song per genre, straight out of the templates.</p>
   <div class="links">
-    <a id="repo-link" href="#">GitHub repository</a>
-    <a id="playlist-link" href="#" hidden>SoundCloud playlist</a>
+    <a class="btn primary" id="repo-link" href="https://github.com/jplenio/Plenio-Music-Production-System"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>GitHub repository</a>
+    <a class="btn" id="playlist-link" href="#" hidden><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 3.5v9l9-4.5z"/></svg><span>SoundCloud playlist</span></a>
   </div>
-  <div id="stats" class="stats"></div>
-  <nav class="categories" id="categories" aria-label="Demo categories">
-    <button type="button" class="cat" data-cat="songs" aria-pressed="true">Generated songs <span class="cat-count" id="count-songs"></span></button>
-    <button type="button" class="cat" data-cat="covers" aria-pressed="false">Cover songs <span class="cat-count" id="count-covers"></span></button>
+  <nav class="tabs" role="tablist" aria-label="Demo collections">
+    <button class="tab" role="tab" id="tab-plenio" data-cat="plenio" aria-controls="section-plenio" aria-selected="true">
+      <span class="new">NEW</span>
+      <span class="tab-kicker">Plenio 0.2.2 · YuE2</span>
+      <span class="tab-title">Songs from Plenio</span>
+      <span class="tab-sub" id="sub-plenio"></span>
+    </button>
+    <button class="tab" role="tab" id="tab-songs" data-cat="songs" aria-controls="section-songs" aria-selected="false">
+      <span class="tab-kicker">MiniMax Music 3</span>
+      <span class="tab-title">Generated songs</span>
+      <span class="tab-sub" id="sub-songs"></span>
+    </button>
+    <button class="tab" role="tab" id="tab-covers" data-cat="covers" aria-controls="section-covers" aria-selected="false">
+      <span class="tab-kicker">YuE2 Cover</span>
+      <span class="tab-title">Cover songs</span>
+      <span class="tab-sub" id="sub-covers"></span>
+    </button>
   </nav>
 </header>
-<main>
-  <section id="section-songs">
-  <div class="section-note"><strong>Shared production settings (predecessor toolkit):</strong> MiniMax Music 3 · up to 300 s · 40 steps · CFG 1.7 · Euler / simple · PRE 12 kHz → FlashSR hybrid → gentle HF repair → POST 19 kHz · 44.1 kHz release targeting −14 LUFS / −1 dBTP. Track-specific seeds, prompts and musical metadata are under “Generation details”.</div>
-  <div class="controls">
-    <div class="filters">
-      <input id="search" type="search" placeholder="Search title, album, genre or description…" aria-label="Search demos">
-      <select id="album"><option value="">All collections</option></select>
-      <select id="genre"><option value="">All genres</option></select>
-      <select id="type"><option value="">Instrumental + vocal</option><option>Instrumental</option><option>Vocal</option></select>
-      <select id="sort"><option value="showcase">Showcase order</option><option value="album">Collection</option><option value="title">Title</option><option value="genre">Genre</option></select>
-      <div id="count" class="count"></div>
-    </div>
-  </div>
-  <section id="tracks" class="list" aria-live="polite"></section>
-  </section>
 
-  <section id="section-covers" hidden>
-    <div class="section-note"><strong>Cover songs:</strong> each original track was read by SheetSage2 into a score, and YuE2 then rendered a new version in a chosen style. Tempo and length below are <em>measured from the original audio</em>; the cover settings are the ones the run recorded. SoundCloud links appear as soon as a track is uploaded.</div>
+<main class="wrap">
+  <!-- Plenio 0.2.2 · YuE2 -->
+  <section id="section-plenio" role="tabpanel" aria-labelledby="tab-plenio">
+    <div class="section-intro">
+      <div>
+        <h2>Songs from Plenio 0.2.2</h2>
+        <p>Made with the <strong>1 · YuE2 · Song</strong> template in the mode <em>new song every run</em>: pick a genre template, set the number of runs, press Run once. Gemma 4 writes title, style and lyrics, YuE2 plans a score and renders it, Plenio masters to −14 LUFS and paints the cover with FLUX.2 Klein. No hand edits — the documents under “How it was made” are exactly what the model received.</p>
+      </div>
+    </div>
+    <div class="facts" id="facts-plenio"></div>
     <div class="controls">
       <div class="filters">
-        <input id="cover-search" type="search" placeholder="Search original, genre, style template or instrument…" aria-label="Search cover demos">
+        <input id="p-search" type="search" placeholder="Search title, genre, style or lyrics…" aria-label="Search the Plenio songs">
+        <select id="p-type" aria-label="Vocal or instrumental"><option value="">Vocal + instrumental</option><option>Vocal</option><option>Instrumental</option></select>
+        <div class="count" id="p-count"></div>
+      </div>
+      <div class="chips" id="p-groups" role="group" aria-label="Genre families"></div>
+    </div>
+    <div class="grid" id="p-grid" aria-live="polite"></div>
+  </section>
+
+  <!-- MiniMax Music 3 (predecessor toolkit) -->
+  <section id="section-songs" role="tabpanel" aria-labelledby="tab-songs" hidden>
+    <div class="section-intro">
+      <div>
+        <h2>Generated with MiniMax Music 3</h2>
+        <p>Made with Plenio's predecessor, the <a href="https://github.com/jplenio/ComfyUI-MiniMax-Music-Production-Toolkit">Music Production Toolkit</a> (same music model; its own writer, restoration and mastering chain). Shared settings: up to 300 s · 40 steps · CFG 1.7 · Euler / simple · FlashSR restoration · 44.1 kHz release at −14 LUFS / −1 dBTP.</p>
+      </div>
+    </div>
+    <div class="facts" id="facts-songs"></div>
+    <div class="controls">
+      <div class="filters">
+        <input id="search" type="search" placeholder="Search title, album, genre or description…" aria-label="Search the MiniMax songs">
+        <select id="album" aria-label="Collection"><option value="">All collections</option></select>
+        <select id="genre" aria-label="Genre"><option value="">All genres</option></select>
+        <select id="type" aria-label="Vocal or instrumental"><option value="">Vocal + instrumental</option><option>Vocal</option><option>Instrumental</option></select>
+        <select id="sort" aria-label="Sort"><option value="showcase">Showcase order</option><option value="album">Collection</option><option value="title">Title</option><option value="genre">Genre</option></select>
+        <div id="count" class="count"></div>
+      </div>
+    </div>
+    <div class="grid" id="tracks" aria-live="polite"></div>
+  </section>
+
+  <!-- YuE2 Cover (predecessor toolkit) -->
+  <section id="section-covers" role="tabpanel" aria-labelledby="tab-covers" hidden>
+    <div class="section-intro">
+      <div>
+        <h2>Covers of existing tracks</h2>
+        <p>Each original was read by SheetSage2 into a score, and YuE2 rendered a new version in a chosen style (predecessor toolkit). Tempo and length are measured from the original audio; the cover settings are the ones each run recorded.</p>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="filters">
+        <input id="cover-search" type="search" placeholder="Search original, genre, style template or instrument…" aria-label="Search the covers">
         <div id="cover-count" class="count"></div>
       </div>
     </div>
     <div id="cover-groups" class="groups" aria-live="polite"></div>
   </section>
 </main>
-<footer>
-  Audio is streamed from SoundCloud. Cover images can be stored in <code>docs/assets/demo-covers/</code>. Edit <code>docs/demo-tracks.js</code> only when you want to add, replace or update SoundCloud track/playlist URLs.
+
+<footer class="wrap">
+  Audio is streamed from SoundCloud; a player loads only when you press play. Model licences: YuE2 is CC BY-NC 4.0 (non-commercial), MiniMax Music 3 the MiniMax-Music3 Community License. Created by <a href="https://github.com/jplenio">Johannes Plenio</a> · <a href="https://github.com/jplenio/Plenio-Music-Production-System">Plenio Music Production System</a>
 </footer>
+
+<script src="demo-plenio.js"></script>
 <script src="demo-tracks.js"></script>
 <script src="demo-covers.js"></script>
 <script>
 (() => {
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const isSC=url=>!!url&&/^https:\/\/(www\.)?soundcloud\.com\//i.test(String(url).trim());
+  const scSrc=(url,autoplay)=>'https://w.soundcloud.com/player/?url='+encodeURIComponent(String(url).trim())
+    +`&color=%238ab4ff&auto_play=${autoplay?'true':'false'}&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false`;
+  const mmss=s=>{s=Math.round(Number(s)||0);return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`};
+  const PLAY='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z"/></svg>';
+  const assetUrl=p=>p?String(p).split('/').map(encodeURIComponent).join('/'):'';
+
+  // Stable colour per genre family for the artwork fallback (until the cover image is uploaded).
+  const HUES={Pop:215,Rock:12,Alternative:275,Soul:330,Punk:350,African:32,Asian:190,World:160,Reggae:120,Ambient:245,Seasonal:0};
+  function hueOf(key){if(key in HUES)return HUES[key];let h=0;for(const c of String(key))h=(h*31+c.charCodeAt(0))%360;return h}
+
+  function iframe(url,title,autoplay){
+    const f=document.createElement('iframe');f.loading='lazy';f.allow='autoplay';f.title=`${title} — SoundCloud player`;f.src=scSrc(url,autoplay);return f;
+  }
+
+  /** One album card: artwork (image or gradient), play button that loads the SoundCloud player, text, details. */
+  function albumCard({num,title,titleLang,url,art,family,genre,sub,badges,desc,details}){
+    const card=document.createElement('article');card.className='album';
+    const artEl=document.createElement('div');artEl.className='art';
+    const hue=hueOf(family||genre);
+    const fb=document.createElement('div');fb.className='art-fallback';
+    fb.style.background=`radial-gradient(circle at 28% 22%,hsl(${hue} 70% 58% / .75),transparent 58%),radial-gradient(circle at 80% 85%,hsl(${(hue+50)%360} 65% 45% / .7),transparent 55%),linear-gradient(160deg,hsl(${hue} 35% 18%),hsl(${(hue+30)%360} 30% 9%))`;
+    fb.innerHTML=`<div class="g">${esc(genre)}</div><div class="s">${esc(family||'')}</div>`;
+    artEl.append(fb);
+    if(art){const img=new Image();img.alt=`Cover art for ${title}`;img.loading='lazy';img.decoding='async';img.onload=()=>fb.remove();img.onerror=()=>img.remove();img.src=assetUrl(art);artEl.prepend(img)}
+    if(num){const n=document.createElement('span');n.className='num';n.textContent=num;artEl.append(n)}
+    const player=document.createElement('div');player.className='player';player.hidden=true;
+    if(isSC(url)){
+      const b=document.createElement('button');b.className='play';b.type='button';b.innerHTML=PLAY;b.setAttribute('aria-label',`Play ${title}`);
+      b.addEventListener('click',()=>{player.replaceChildren(iframe(url,title,true));player.hidden=false;b.remove()});
+      artEl.append(b);
+    }else{const s=document.createElement('span');s.className='soon';s.textContent='Coming to SoundCloud';artEl.append(s)}
+    card.append(artEl,player);
+    const body=document.createElement('div');body.className='body';
+    const t=isSC(url)?`<a href="${esc(String(url).trim())}" target="_blank" rel="noopener">${esc(title)}</a>`:esc(title);
+    body.innerHTML=`<h3 dir="auto"${titleLang?` lang="${esc(titleLang)}"`:''}>${t}</h3>`+(sub?`<div class="sub">${esc(sub)}</div>`:'')
+      +`<div class="badges">${badges.filter(Boolean).map(b=>typeof b==='string'?`<span class="badge">${esc(b)}</span>`:`<span class="badge ${esc(b.cls)}">${esc(b.text)}</span>`).join('')}</div>`
+      +(desc?`<p class="desc">${esc(desc)}</p>`:'');
+    card.append(body);
+    if(details){const d=document.createElement('details');d.innerHTML=details;card.append(d)}
+    return card;
+  }
+  const typeBadge=type=>type?{text:type,cls:type==='Instrumental'?'type inst':'type'}:'';
+  const LANG={Arabic:'ar',Japanese:'ja',German:'de',Hindi:'hi',Hinglish:'hi'};
+
+  // ============================== Plenio 0.2.2 · YuE2 ==============================
+  const pCfg=window.PLENIO_DEMO_CONFIG||{};
+  const pAll=[...(window.PLENIO_DEMO_SONGS||[])].sort((a,b)=>(a.showcaseOrder||999)-(b.showcaseOrder||999));
+  const pFamilies=[...new Set(pAll.map(t=>t.group).filter(Boolean))];
+  const pGenres=new Set(pAll.map(t=>t.genre));
+  const pVocal=pAll.filter(t=>t.type==='Vocal').length;
+  const pLangs=new Set(pAll.map(t=>t.language).filter(Boolean));
+  const pMinutes=Math.round(pAll.reduce((n,t)=>n+(t.seconds||0),0)/60);
+  document.getElementById('sub-plenio').textContent=`${pAll.length} songs · ${pGenres.size} genres`;
+  document.getElementById('facts-plenio').innerHTML=[
+    `<b>${pAll.length}</b> songs`,`<b>${pGenres.size}</b> genres`,`<b>${pVocal}</b> vocal · <b>${pAll.length-pVocal}</b> instrumental`,
+    `<b>${pLangs.size}</b> languages`,`<b>${pMinutes}</b> minutes`,'YuE2 3B int8 · Gemma 4 E4B · FLUX.2 Klein','−14 LUFS / −1 dBTP'
+  ].map(x=>`<span class="fact">${x}</span>`).join('');
+
+  let pFamily='';
+  const chipsEl=document.getElementById('p-groups');
+  for(const fam of ['',...pFamilies]){
+    const b=document.createElement('button');b.type='button';b.className='chip';b.dataset.family=fam;
+    b.textContent=fam||'All genres';b.setAttribute('aria-pressed',String(fam===''));
+    b.addEventListener('click',()=>{pFamily=fam;chipsEl.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',String(c.dataset.family===fam)));renderPlenio()});
+    chipsEl.append(b);
+  }
+  function plenioDetails(t){
+    const seeds=[t.draftSeed!=null?`draft ${t.draftSeed}`:'',t.planSeed!=null?`plan ${t.planSeed}`:'',t.takeSeed!=null?`take ${t.takeSeed}`:''].filter(Boolean).join(' · ');
+    const l=t.loudness||{};
+    return `<summary>How it was made</summary><dl class="dl">`
+      +`<dt>Template</dt><dd>${esc(t.template)}</dd>`
+      +`<dt>Mode</dt><dd>${esc(t.mode)} · ${esc(t.length)}</dd>`
+      +(t.sections?.length?`<dt>Form</dt><dd>${esc(t.sections.join(' → '))}</dd>`:'')
+      +(seeds?`<dt>Seeds</dt><dd>${esc(seeds)}</dd>`:'')
+      +`<dt>Master</dt><dd>${esc(l.integratedLufs)} LUFS · true peak ${esc(l.truePeakDbtp)} dBTP · LRA ${esc(l.loudnessRangeLu)} LU</dd>`
+      +`<dt>Plenio</dt><dd>${esc(t.plenioVersion)}</dd>`
+      +(t.licence?`<dt>Licence</dt><dd>${esc(t.licence)}</dd>`:'')
+      +`</dl>`
+      +(t.style?`<div class="block" dir="auto"><strong>Style (what YuE2 received)</strong>${esc(t.style)}</div>`:'')
+      +(t.lyrics?`<div class="block" dir="auto"><strong>Lyrics</strong>${esc(t.lyrics)}</div>`:'')
+      +(t.templateDescription?`<div class="block"><strong>Genre template</strong>${esc(t.templateDescription)}</div>`:'')
+      +(t.artworkPrompt?`<div class="block"><strong>Cover prompt</strong>${esc(t.artworkPrompt)}</div>`:'');
+  }
+  function plenioCard(t){
+    return albumCard({
+      num:String(t.showcaseOrder).padStart(2,'0'),title:t.title,titleLang:LANG[t.language]||'',url:t.soundcloudUrl,art:t.coverArt,
+      family:t.group,genre:t.genre,sub:`${t.genre} · ${t.group}`,
+      badges:[typeBadge(t.type),t.language,t.bpm?`${t.bpm} BPM`:'',t.key?`Key ${t.key}`:'',t.seconds?mmss(t.seconds):''],
+      desc:t.comment||'',details:plenioDetails(t)});
+  }
+  const pSearch=document.getElementById('p-search'),pType=document.getElementById('p-type'),pGrid=document.getElementById('p-grid'),pCount=document.getElementById('p-count');
+  function renderPlenio(){
+    const q=pSearch.value.trim().toLowerCase();
+    const list=pAll.filter(t=>(!pFamily||t.group===pFamily)&&(!pType.value||t.type===pType.value)
+      &&(!q||[t.title,t.genre,t.group,t.style,t.lyrics,t.template,t.language].join(' ').toLowerCase().includes(q)));
+    pGrid.replaceChildren(...(list.length?list.map(plenioCard):[Object.assign(document.createElement('div'),{className:'empty',textContent:'No song matches the filter.'})]));
+    pCount.textContent=`${list.length} of ${pAll.length} songs`;
+  }
+  pSearch.addEventListener('input',renderPlenio);pType.addEventListener('change',renderPlenio);
+  renderPlenio();
+
+  // ============================== MiniMax Music 3 ==============================
   const cfg=window.MINIMAX_DEMO_CONFIG||{};
   const all=[...(window.MINIMAX_DEMO_TRACKS||[])];
-  document.title=(cfg.pageTitle||"Plenio Music Production System — Demo Songs");
-  const repo=document.getElementById('repo-link');repo.href=cfg.repositoryUrl||'#';
-  const pl=document.getElementById('playlist-link');if(cfg.soundcloudPlaylistUrl){pl.href=cfg.soundcloudPlaylistUrl;pl.hidden=false;}
   const albums=[...new Set(all.map(x=>x.album).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
   const genres=[...new Set(all.map(x=>x.genre).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
   const albumSel=document.getElementById('album'),genreSel=document.getElementById('genre');
   for(const v of albums){const o=document.createElement('option');o.value=o.textContent=v;albumSel.append(o)}
   for(const v of genres){const o=document.createElement('option');o.value=o.textContent=v;genreSel.append(o)}
   const vocalCount=all.filter(x=>x.type==='Vocal').length;
-  const coverGroups=[...(window.DEMO_COVER_GROUPS||[])];
-  const coverCount=coverGroups.reduce((n,g)=>n+((g.covers||[]).length),0);
-  document.getElementById('stats').innerHTML=`<span class="stat">${all.length} generated songs</span><span class="stat">${albums.length} collections</span><span class="stat">${genres.length} genres</span><span class="stat">${all.length-vocalCount} instrumental</span><span class="stat">${vocalCount} vocal</span>`+(coverCount?`<span class="stat">${coverCount} cover songs</span><span class="stat">${coverGroups.length} originals</span>`:'');
-  const songsBadge=document.getElementById('count-songs');if(songsBadge)songsBadge.textContent=all.length;
-  const coversBadge=document.getElementById('count-covers');if(coversBadge)coversBadge.textContent=coverCount;
-  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  function card(t){
-    const a=document.createElement('article');a.className='card';
-    const num=String(t.showcaseOrder??'').padStart(2,'0');
-
-    // Player first — play is the focus.
-    if(t.soundcloudUrl && /^https:\/\/(www\.)?soundcloud\.com\//i.test(t.soundcloudUrl.trim())){
-      const head=document.createElement('div');head.className='player-head';
-      const iframe=document.createElement('iframe');iframe.loading='lazy';iframe.allow='autoplay';iframe.title=`${t.title} — SoundCloud player`;
-      const base='https://w.soundcloud.com/player/?url='+encodeURIComponent(t.soundcloudUrl.trim())+'&color=%233f5060&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false';
-      iframe.src=base;head.append(iframe);a.append(head);
-    }else{
-      const ph=document.createElement('div');ph.className='soundcloud-placeholder';ph.textContent='SoundCloud link will appear here after upload.';a.append(ph);
-    }
-
-    // Info + small cover side by side.
-    const row=document.createElement('div');row.className='row';
-    const info=document.createElement('div');info.className='info';
+  document.getElementById('sub-songs').textContent=`${all.length} songs · ${albums.length} collections`;
+  document.getElementById('facts-songs').innerHTML=[`<b>${all.length}</b> songs`,`<b>${albums.length}</b> collections`,`<b>${genres.length}</b> genres`,`<b>${vocalCount}</b> vocal · <b>${all.length-vocalCount}</b> instrumental`].map(x=>`<span class="fact">${x}</span>`).join('');
+  function minimaxCard(t){
     const keyScale=[t.key,t.scale].filter(Boolean).join(' · ');
-    const titleLink=t.soundcloudUrl&&/^https:\/\/(www\.)?soundcloud\.com\//i.test(t.soundcloudUrl.trim())
-      ?`<a href="${esc(t.soundcloudUrl.trim())}" target="_blank" rel="noopener">${esc(t.title)}</a>`
-      :esc(t.title);
-    info.innerHTML=`<div class="title-row"><span class="num">${esc(num)}</span><h2>${titleLink}</h2></div><div class="album-line">${esc(t.album)} · ${esc(t.artist)}</div><div class="badges"><span class="badge">${esc(t.genre)}</span><span class="badge">${esc(t.type)}</span>${t.language&&t.language!=='—'?`<span class="badge">${esc(t.language)}</span>`:''}${t.variant?`<span class="badge">${esc(t.variant)}</span>`:''}${t.bpm?`<span class="badge">${esc(t.bpm)} BPM</span>`:''}${keyScale?`<span class="badge">${esc(keyScale)}</span>`:''}</div><p class="desc">${esc(t.description)}</p>`;
-    row.append(info);
-
-    const thumb=document.createElement('div');thumb.className='thumb-fallback';thumb.innerHTML=`<span>${esc(t.album)}<br>${esc(t.title)}</span>`;
-    if(t.cover){const img=new Image();img.className='thumb';img.alt=`Cover art for ${t.title}`;img.loading='lazy';const swap=()=>{if(img.parentNode!==row)thumb.replaceWith(img)};img.onload=swap;img.onerror=()=>{};img.src=t.cover;if(img.complete&&img.naturalWidth)swap();row.append(thumb);}
-    else{row.append(thumb);}
-    a.append(row);
-
-    const d=document.createElement('details');
-    d.innerHTML=`<summary>Generation details</summary><dl class="detail-grid"><dt>Collection</dt><dd>${esc(t.album)}</dd><dt>Style</dt><dd>${esc(t.style||t.genre)}</dd><dt>Seed</dt><dd>${esc(t.seed)}</dd><dt>MiniMax</dt><dd>${esc(t.steps)} steps · CFG ${esc(t.samplerCfg)} · ${esc(t.sampler)} / ${esc(t.scheduler)} · max ${esc(t.maxDurationSeconds)} s</dd><dt>Release</dt><dd>${esc(t.release?.sampleRate)} Hz · target ${esc(t.release?.targetLufs)} LUFS / ${esc(t.release?.targetTruePeakDbtp)} dBTP</dd></dl><div class="prompt"><strong>Starting prompt</strong>\n${esc(t.startingPrompt)}</div><div class="cover-concept"><strong>Cover concept</strong>\n${esc(t.coverConcept)}</div>`;
-    a.append(d);
-    return a;
+    return albumCard({
+      num:String(t.showcaseOrder??'').padStart(2,'0'),title:t.title,url:t.soundcloudUrl,art:t.cover,family:t.album,genre:t.genre,
+      sub:`${t.album} · ${t.artist}`,
+      badges:[typeBadge(t.type),t.language&&t.language!=='—'?t.language:'',t.bpm?`${t.bpm} BPM`:'',keyScale],
+      desc:t.description,
+      details:`<summary>Generation details</summary><dl class="dl"><dt>Collection</dt><dd>${esc(t.album)}</dd><dt>Style</dt><dd>${esc(t.style||t.genre)}</dd><dt>Seed</dt><dd>${esc(t.seed)}</dd><dt>MiniMax</dt><dd>${esc(t.steps)} steps · CFG ${esc(t.samplerCfg)} · ${esc(t.sampler)} / ${esc(t.scheduler)} · max ${esc(t.maxDurationSeconds)} s</dd><dt>Release</dt><dd>${esc(t.release?.sampleRate)} Hz · ${esc(t.release?.targetLufs)} LUFS / ${esc(t.release?.targetTruePeakDbtp)} dBTP</dd></dl><div class="block"><strong>Starting prompt</strong>${esc(t.startingPrompt)}</div><div class="block"><strong>Cover concept</strong>${esc(t.coverConcept)}</div>`});
   }
   const root=document.getElementById('tracks'),search=document.getElementById('search'),typeSel=document.getElementById('type'),sortSel=document.getElementById('sort'),count=document.getElementById('count');
   function render(){
     const q=search.value.trim().toLowerCase();
-    let list=all.filter(t=>(!albumSel.value||t.album===albumSel.value)&&(!genreSel.value||t.genre===genreSel.value)&&(!typeSel.value||t.type===typeSel.value)&&(!q||[t.title,t.album,t.genre,t.style,t.description,t.startingPrompt].join(' ').toLowerCase().includes(q)));
+    const list=all.filter(t=>(!albumSel.value||t.album===albumSel.value)&&(!genreSel.value||t.genre===genreSel.value)&&(!typeSel.value||t.type===typeSel.value)&&(!q||[t.title,t.album,t.genre,t.style,t.description,t.startingPrompt].join(' ').toLowerCase().includes(q)));
     const cmp={showcase:(a,b)=>(a.showcaseOrder||999)-(b.showcaseOrder||999),album:(a,b)=>a.album.localeCompare(b.album)||a.title.localeCompare(b.title),title:(a,b)=>a.title.localeCompare(b.title),genre:(a,b)=>a.genre.localeCompare(b.genre)||a.title.localeCompare(b.title)}[sortSel.value];
-    list.sort(cmp);root.replaceChildren(...list.map(card));count.textContent=`${list.length} of ${all.length} tracks`;
+    list.sort(cmp);root.replaceChildren(...list.map(minimaxCard));count.textContent=`${list.length} of ${all.length} songs`;
   }
   for(const el of [search,albumSel,genreSel,typeSel,sortSel])el.addEventListener(el===search?'input':'change',render);
   render();
 
-  // ---- Cover songs: one original track, the covers made from it underneath ------
-  const coverGroupsEl=document.getElementById('cover-groups');
-  const coverSearch=document.getElementById('cover-search');
-  const coverCountEl=document.getElementById('cover-count');
-
-  function isValidSoundcloud(url){return !!url&&/^https:\/\/(www\.)?soundcloud\.com\//i.test(String(url).trim());}
-
-  function soundcloudBlock(url,title,extraClass){
-    const wrap=document.createElement('div');
-    if(extraClass)wrap.classList.add(extraClass);
-    if(isValidSoundcloud(url)){
-      wrap.classList.add('player-head');
-      const iframe=document.createElement('iframe');iframe.loading='lazy';iframe.allow='autoplay';
-      iframe.title=`${title} — SoundCloud player`;
-      iframe.src='https://w.soundcloud.com/player/?url='+encodeURIComponent(String(url).trim())+'&color=%233f5060&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false';
-      wrap.append(iframe);
-    }else{
-      wrap.classList.add('soundcloud-placeholder');
-      wrap.textContent='SoundCloud link will appear here after upload.';
-    }
-    return wrap;
-  }
-
-  function humanTemplate(path){
-    const name=String(path).split('/').pop().replace(/\.(txt|md|prompt)$/i,'');
-    return name.replace(/[-_]+/g,' ').replace(/\b\w/g,m=>m.toUpperCase());
-  }
-
-  function coverLink(c){
-    return isValidSoundcloud(c.soundcloudUrl)
-      ?`<a href="${esc(String(c.soundcloudUrl).trim())}" target="_blank" rel="noopener">${esc(c.title)}</a>`
-      :esc(c.title);
-  }
-
+  // ============================== YuE2 covers ==============================
+  const coverGroups=[...(window.DEMO_COVER_GROUPS||[])];
+  const coverCount=coverGroups.reduce((n,g)=>n+((g.covers||[]).length),0);
+  document.getElementById('sub-covers').textContent=`${coverCount} covers · ${coverGroups.length} originals`;
+  const humanTemplate=p=>String(p).split('/').pop().replace(/\.(txt|md|prompt)$/i,'').replace(/[-_]+/g,' ').replace(/\b\w/g,m=>m.toUpperCase());
   function coverCard(c){
-    const art=document.createElement('article');art.className='card cover-card';
-    art.append(soundcloudBlock(c.soundcloudUrl,c.title));
-    const row=document.createElement('div');row.className='row';
-    const info=document.createElement('div');info.className='info';
-    const freedomShown=c.freedom!==''&&c.freedom!==undefined&&c.freedom!==null;
-    const badges=[c.genre,c.lyricsMode,c.leadInstrument,
-      c.coverMode?`${c.coverMode} conditioning`:'',c.tempoLabel,
-      freedomShown?`freedom ${c.freedom}`:''].filter(Boolean)
-      .map(x=>`<span class="badge">${esc(x)}</span>`).join('');
-    const styleLine=c.styleTemplate?`<p class="desc">Style template: ${esc(humanTemplate(c.styleTemplate))}</p>`:'';
-    info.innerHTML=`<div class="cover-title"><span class="num">${esc(c.variant||'')}</span><h2>${coverLink(c)}</h2></div>`
-      +(badges?`<div class="badges">${badges}</div>`:'')+styleLine;
-    row.append(info);
-    const thumb=document.createElement('div');thumb.className='thumb-fallback';thumb.innerHTML=`<span>${esc(c.variant||'')}</span>`;
-    if(c.coverArt){
-      const img=new Image();img.className='thumb';img.alt=`Cover art for ${c.title}`;img.loading='lazy';
-      const swap=()=>{if(img.parentNode!==row)thumb.replaceWith(img)};
-      img.onload=swap;img.onerror=()=>{};img.src=c.coverArt;
-      if(img.complete&&img.naturalWidth)swap();
-      row.append(thumb);
-    }else{row.append(thumb);}
-    art.append(row);
-    const details=document.createElement('details');
-    details.innerHTML=`<summary>Run details</summary><dl class="detail-grid">`
-      +`<dt>Model</dt><dd>${esc(c.model||'—')}</dd>`
-      +(c.file?`<dt>File</dt><dd>${esc(c.file)}</dd>`:'')
-      +(c.seed!=null?`<dt>Seed</dt><dd>${esc(c.seed)}</dd>`:'')
-      +(c.steps!=null?`<dt>Sampler</dt><dd>${esc(c.steps)} steps · CFG ${esc(c.cfg)} · ${esc(c.sampler)} / ${esc(c.scheduler)}</dd>`:'')
-      +(c.targetDurationSeconds?`<dt>Target</dt><dd>up to ${esc(c.targetDurationSeconds)} s · release ${esc(c.outputSampleRate)} Hz</dd>`:'')
-      +(c.styleTemplate?`<dt>Template</dt><dd>${esc(c.styleTemplate)}</dd>`:'')
-      +((c.scoreChanges||[]).length?`<dt>Score edits</dt><dd>${esc((c.scoreChanges||[]).join(' · '))}</dd>`:'')
-      +`</dl>`;
-    art.append(details);
-    return art;
+    return albumCard({
+      num:c.variant||'',title:c.title,url:c.soundcloudUrl,art:c.coverArt,family:c.genre,genre:c.genre||'Cover',
+      sub:c.styleTemplate?`Style: ${humanTemplate(c.styleTemplate)}`:'',
+      badges:[c.lyricsMode,c.leadInstrument,c.coverMode?`${c.coverMode} conditioning`:'',c.tempoLabel,(c.freedom!==''&&c.freedom!=null)?`freedom ${c.freedom}`:''],
+      desc:'',
+      details:`<summary>Run details</summary><dl class="dl"><dt>Model</dt><dd>${esc(c.model||'—')}</dd>`
+        +(c.file?`<dt>File</dt><dd>${esc(c.file)}</dd>`:'')+(c.seed!=null?`<dt>Seed</dt><dd>${esc(c.seed)}</dd>`:'')
+        +(c.steps!=null?`<dt>Sampler</dt><dd>${esc(c.steps)} steps · CFG ${esc(c.cfg)} · ${esc(c.sampler)} / ${esc(c.scheduler)}</dd>`:'')
+        +(c.targetDurationSeconds?`<dt>Target</dt><dd>up to ${esc(c.targetDurationSeconds)} s · ${esc(c.outputSampleRate)} Hz</dd>`:'')
+        +(c.styleTemplate?`<dt>Template</dt><dd>${esc(c.styleTemplate)}</dd>`:'')
+        +((c.scoreChanges||[]).length?`<dt>Score edits</dt><dd>${esc(c.scoreChanges.join(' · '))}</dd>`:'')+`</dl>`});
   }
-
   function groupBlock(g){
     const sec=document.createElement('article');sec.className='group';
-    const facts=[g.sourceBpm?`${g.sourceBpm} BPM measured`:'',g.sourceDurationSeconds?`${g.sourceDurationSeconds} s`:''].filter(Boolean).join(' · ');
-    const head=document.createElement('div');head.className='group-head';
-    head.innerHTML=`<div class="group-eyebrow">Original track</div><h2>${esc(g.title)}</h2>`
-      +`<div class="group-meta">${esc(g.sourceFile||'')}${facts?' · '+esc(facts):''}</div>`;
-    sec.append(head);
-    if(g.comment&&String(g.comment).trim()){
-      const note=document.createElement('p');note.className='group-comment';note.textContent=g.comment;sec.append(note);
-    }
-    sec.append(soundcloudBlock(g.soundcloudUrl,g.title,'source-player'));
-    const grid=document.createElement('div');grid.className='cover-grid';
-    for(const cover of (g.covers||[]))grid.append(coverCard(cover));
-    sec.append(grid);
+    const facts=[g.sourceBpm?`${g.sourceBpm} BPM measured`:'',g.sourceDurationSeconds?mmss(g.sourceDurationSeconds):''].filter(Boolean).join(' · ');
+    sec.innerHTML=`<div class="group-head"><div class="group-eyebrow">Original track</div><h3>${esc(g.title)}</h3><div class="group-meta">${esc(facts)}</div></div>`;
+    if(g.comment&&String(g.comment).trim()){const n=document.createElement('p');n.className='group-comment';n.textContent=g.comment;sec.append(n)}
+    const src=document.createElement('div');src.className='source-player';
+    if(isSC(g.soundcloudUrl)){
+      const b=document.createElement('button');b.type='button';b.className='source-play';
+      b.innerHTML=`<span class="play" aria-hidden="true">${PLAY}</span><span>Play the original</span>`;
+      b.addEventListener('click',()=>src.replaceChildren(iframe(g.soundcloudUrl,g.title,true)));src.append(b);
+    }else{src.classList.add('placeholder');src.textContent='The original is coming to SoundCloud.'}
+    sec.append(src);
+    const grid=document.createElement('div');grid.className='cover-grid';for(const c of (g.covers||[]))grid.append(coverCard(c));sec.append(grid);
     return sec;
   }
-
-  function coverHaystack(g,c){
-    return [g.title,g.sourceFile,c.title,c.variant,c.genre,c.styleTemplate,c.leadInstrument,c.tempoLabel]
-      .filter(Boolean).join(' ').toLowerCase();
-  }
-
+  const coverGroupsEl=document.getElementById('cover-groups'),coverSearch=document.getElementById('cover-search'),coverCountEl=document.getElementById('cover-count');
   function renderCovers(){
-    if(!coverGroupsEl)return;
-    const q=(coverSearch?.value||'').trim().toLowerCase();
-    let shown=0;
-    const blocks=[];
+    const q=coverSearch.value.trim().toLowerCase();let shown=0;const blocks=[];
     for(const g of coverGroups){
-      const covers=q?(g.covers||[]).filter(c=>coverHaystack(g,c).includes(q)):(g.covers||[]);
-      if(q&&!covers.length)continue;
-      shown+=covers.length;
-      blocks.push(groupBlock({...g,covers}));
+      const covers=q?(g.covers||[]).filter(c=>[g.title,g.sourceFile,c.title,c.variant,c.genre,c.styleTemplate,c.leadInstrument,c.tempoLabel].filter(Boolean).join(' ').toLowerCase().includes(q)):(g.covers||[]);
+      if(q&&!covers.length)continue;shown+=covers.length;blocks.push(groupBlock({...g,covers}));
     }
     coverGroupsEl.replaceChildren(...blocks);
-    if(coverCountEl)coverCountEl.textContent=q
-      ?`${shown} of ${coverCount} covers in ${blocks.length} original(s)`
-      :`${coverCount} covers from ${coverGroups.length} original track(s)`;
+    coverCountEl.textContent=q?`${shown} of ${coverCount} covers`:`${coverCount} covers from ${coverGroups.length} originals`;
   }
+  coverSearch.addEventListener('input',renderCovers);renderCovers();
 
-  const sectionSongs=document.getElementById('section-songs');
-  const sectionCovers=document.getElementById('section-covers');
-  const categoriesEl=document.getElementById('categories');
-  function selectCategory(name){
-    const showSongs=name!=='covers';
-    if(sectionSongs)sectionSongs.hidden=!showSongs;
-    if(sectionCovers)sectionCovers.hidden=showSongs;
-    categoriesEl?.querySelectorAll('.cat').forEach(btn=>
-      btn.setAttribute('aria-pressed',String(btn.dataset.cat===(showSongs?'songs':'covers'))));
+  // ============================== tabs ==============================
+  const CATS=['plenio','songs','covers'];
+  const playlists={plenio:pCfg.soundcloudPlaylistUrl,songs:cfg.soundcloudPlaylistUrl,covers:''};
+  const pl=document.getElementById('playlist-link');
+  const repo=document.getElementById('repo-link');if(cfg.repositoryUrl)repo.href=cfg.repositoryUrl;
+  function select(cat,push){
+    if(!CATS.includes(cat))cat='plenio';
+    for(const c of CATS){
+      document.getElementById(`section-${c}`).hidden=c!==cat;
+      document.getElementById(`tab-${c}`).setAttribute('aria-selected',String(c===cat));
+    }
+    const url=playlists[cat];pl.hidden=!isSC(url);if(isSC(url))pl.href=url;
+    if(push)history.replaceState(null,'',`#${cat}`);
   }
-  categoriesEl?.querySelectorAll('.cat').forEach(btn=>
-    btn.addEventListener('click',()=>selectCategory(btn.dataset.cat)));
-  if(!coverCount&&categoriesEl){const empty=categoriesEl.querySelector('[data-cat="covers"]');if(empty)empty.hidden=true;}
-  coverSearch?.addEventListener('input',renderCovers);
-  renderCovers();
-  selectCategory('songs');
+  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>select(t.dataset.cat,true)));
+  document.querySelector('.tabs').addEventListener('keydown',e=>{
+    if(!['ArrowLeft','ArrowRight'].includes(e.key))return;
+    const i=CATS.indexOf(document.querySelector('.tab[aria-selected="true"]').dataset.cat);
+    const next=CATS[(i+(e.key==='ArrowRight'?1:CATS.length-1))%CATS.length];select(next,true);document.getElementById(`tab-${next}`).focus();
+  });
+  if(!coverCount)document.getElementById('tab-covers').hidden=true;
+  addEventListener('hashchange',()=>select(location.hash.slice(1),false));
+  select(location.hash.slice(1)||'plenio',false);
 })();
 </script>
 </body>

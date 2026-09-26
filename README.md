@@ -10,7 +10,7 @@ Everything runs on your own machine, inside ComfyUI's own nodes: no cloud servic
 
 ## Listen first
 
-**🎧 [Open the demo gallery](https://jplenio.github.io/Plenio-Music-Production-System/)** - 35 generated songs and 8 cover versions, with search, filters and the settings behind each track. Instrumental and vocal, YuE2, YuE2 Cover and MiniMax Music 3.
+**🎧 [Open the demo gallery](https://jplenio.github.io/Plenio-Music-Production-System/)** - 30 songs made with Plenio 0.2.2 and YuE2 (one per genre, straight out of the templates), 35 MiniMax Music 3 songs and 8 cover versions, with search, filters and everything the model received for each track.
 
 **🔊 [SoundCloud playlist](https://soundcloud.com/pelenio/sets/minimax-music-3-comfyui)** · a sample file with its full prompt report: [`assets/sound-samples`](assets/sound-samples/)
 

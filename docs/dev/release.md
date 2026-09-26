@@ -21,4 +21,9 @@ The Registry's icon and banner are the raw GitHub URLs of `assets/branding/icon.
 
 ## Demo gallery
 
-The listening page is GitHub Pages from the `docs/` folder of `main` (`docs/index.html`, `docs/demo-tracks.js`, `docs/demo-covers.js`, images in `docs/assets/demo-covers/`, `docs/.nojekyll` so the other documents are not processed). Audio is streamed from SoundCloud: a track's `soundcloudUrl` is its public SoundCloud URL, and the playlist button uses `soundcloudPlaylistUrl`. The catalog was built with the predecessor toolkit's scripts; new entries are added by hand in the same format.
+The listening page is GitHub Pages from the `docs/` folder of `main` (`docs/index.html`, `docs/.nojekyll` so the other documents are not processed); every push to `main` publishes it. Three collections, one tab each (`#plenio`, `#songs`, `#covers` link to them):
+
+- **Songs from Plenio** - `docs/demo-plenio.js`, covers in `docs/assets/demo-plenio/`. Built by `python tools/build_demo_catalog.py <folder with *.plenio.json>` from the release records of a batch: one song per brief template (length against the brief, Song Sheet warnings, a render that matches the template's vocals, distinct titles; `--pick TEMPLATE=FILE` overrides a choice). It also writes the upload checklist `docs/demo-plenio-upload.md` (files, SoundCloud titles, descriptions, tags, alternatives per genre). Running it again keeps the `soundcloudUrl` and `comment` values typed into the catalog and its config.
+- **MiniMax Music 3** and **YuE2 Cover** - `docs/demo-tracks.js`, `docs/demo-covers.js`, images in `docs/assets/demo-covers/`; built with the predecessor toolkit's scripts, new entries are added by hand in the same format.
+
+Audio is streamed from SoundCloud: a track's `soundcloudUrl` is its public SoundCloud URL (a player loads when the visitor presses play; without a URL the card says *Coming to SoundCloud*), and the playlist button of a tab uses that catalog's `soundcloudPlaylistUrl`. The page loads nothing else from third parties.
