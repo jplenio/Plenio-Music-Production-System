@@ -28,6 +28,44 @@ LENGTHS: dict[str, float] = {
     "long (about 4:30)": 270.0,
 }
 DEFAULT_LENGTH = "standard (about 3:00)"
+
+_DURATION = re.compile(
+    r"(?P<a>\d+(?:[.,]\d+)?)(?::(?P<a_sec>\d{2}))?"
+    r"(?:\s*(?:-|–|to|bis)\s*(?P<b>\d+(?:[.,]\d+)?)(?::(?P<b_sec>\d{2}))?)?"
+    r"\s*(?P<unit>s\b|sec|second|sekunde|m\b|min|minute)?",
+    re.IGNORECASE,
+)
+
+
+def resolve_length(value: str) -> tuple[str, str | None]:
+    """The length option for ``value`` and a note when it was not one of the options.
+
+    Free-form durations (``"2-3 minutes"`` from the predecessor toolkit's parameters, ``"90 s"``,
+    ``"3:30"``) take the option nearest to their middle; anything else raises.
+    """
+    text = str(value or "").strip()
+    if not text:
+        return DEFAULT_LENGTH, None
+    if text in LENGTHS:
+        return text, None
+    match = _DURATION.search(text)
+    if match is None:
+        raise PlenioUserError(f"Unknown length {text!r}.", hint=f"Choose one of {list(LENGTHS)}.")
+
+    def seconds(number: str, sec: str | None) -> float:
+        amount = float(number.replace(",", "."))
+        if sec is not None:
+            return amount * 60 + int(sec)
+        unit = (match.group("unit") or "").lower()
+        return amount if unit.startswith("s") else amount * 60
+
+    low = seconds(match.group("a"), match.group("a_sec"))
+    high = seconds(match.group("b"), match.group("b_sec")) if match.group("b") else low
+    target = (low + high) / 2
+    chosen = min(LENGTHS, key=lambda option: abs(LENGTHS[option] - target))
+    return chosen, f"length {text!r} is not one of the options; used {chosen!r}"
+
+
 VOCALS = ("sung", "instrumental")
 MELODY_OPTIONS = {"instrument plays the lead": "lead", "accompaniment only": "accompaniment"}
 TEXT_FIELDS = (
@@ -340,9 +378,7 @@ def build_song_brief(values: Mapping[str, str], template: Template | None = None
             value = template.fields[name]
             from_template.append(name)
         merged[name] = value
-    length = merged["length"] or DEFAULT_LENGTH
-    if length not in LENGTHS:
-        raise PlenioUserError(f"Unknown length {length!r}.", hint=f"Choose one of {list(LENGTHS)}.")
+    length, _note = resolve_length(merged["length"])
     vocals = merged["vocals"] or "sung"
     if vocals not in VOCALS:
         raise PlenioUserError(f"Unknown vocal mode {vocals!r}.", hint=f"Choose one of {list(VOCALS)}.")

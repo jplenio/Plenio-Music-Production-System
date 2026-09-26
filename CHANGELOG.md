@@ -2,6 +2,12 @@
 
 All notable changes are listed here. Versions follow semantic versioning; published Registry versions are immutable.
 
+## 0.2.2 - 2026-09-26
+
+### Fixed
+
+- Song Brief: a length that is not one of the three options - for example `2-3 minutes`, which ComfyUI can carry over from a run of the predecessor toolkit (App mode *Reuse Parameters*, an old job's parameters) - stopped the whole prompt at validation with the same error on every input. A free-form duration now takes the nearest option (`2-3 minutes` -> *standard (about 3:00)*), and the node shows a note; text that names no duration is still refused.
+
 ## 0.2.1 - 2026-09-25
 
 ### Fixed

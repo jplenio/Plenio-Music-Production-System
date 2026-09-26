@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from plenio.core import lyrics
-from plenio.core.brief import LENGTHS, TemplateLibrary, build_song_brief, parse_template
+from plenio.core.brief import LENGTHS, TemplateLibrary, build_song_brief, parse_template, resolve_length
 from plenio.core.engines import EngineInfo, rules_for, yue2
 from plenio.core.errors import PlenioModelError, PlenioUserError, PlenioValidationError
 from plenio.core.writing import compose, parse_draft
@@ -321,3 +321,24 @@ def test_real_writer_answers_are_parsed(name: str, title: str, inferred: bool) -
     assert any("inferred" in note for note in draft.enforcements) == inferred
     if name == "gemma4-labels.txt":
         assert "Style is everything they told me" in draft.lyrics  # not taken for a STYLE label
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        ("2-3 minutes", "standard (about 3:00)"),  # the predecessor toolkit's length options
+        ("30 seconds", "short (about 1:30)"),
+        ("4-5 minutes", "long (about 4:30)"),
+        ("3:30", "standard (about 3:00)"),
+        ("90 s", "short (about 1:30)"),
+    ],
+)
+def test_a_free_form_length_takes_the_nearest_option(value: str, expected: str) -> None:
+    """A length from other parameters (for example the toolkit's '2-3 minutes', reused in App mode)
+    stopped the whole run at validation; it now takes the nearest option, with a note."""
+    length, note = resolve_length(value)
+    assert length == expected and note and value in note
+    assert resolve_length("long (about 4:30)") == ("long (about 4:30)", None)
+    assert build_song_brief({"genre": "pop", "length": value}).length == expected
+    with pytest.raises(PlenioUserError, match="Unknown length"):
+        resolve_length("quick")

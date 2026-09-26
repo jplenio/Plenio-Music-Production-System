@@ -6,7 +6,7 @@ from typing import Any
 
 from comfy_api.latest import io
 
-from ...core.brief import DEFAULT_LENGTH, LENGTHS, MELODY_OPTIONS, build_song_brief, options
+from ...core.brief import DEFAULT_LENGTH, LENGTHS, MELODY_OPTIONS, build_song_brief, options, resolve_length
 from ...core.errors import PlenioError
 from ..shared import template_library
 from ..types import Brief
@@ -114,8 +114,11 @@ class PlenioSongBrief(io.ComfyNode):
                 template_library().get(str(template))
             except PlenioError as error:
                 return str(error)
-        if "length" in kwargs and kwargs["length"] not in LENGTHS:
-            return f"Unknown length {kwargs['length']!r}; choose one of {list(LENGTHS)}."
+        if "length" in kwargs:
+            try:
+                resolve_length(str(kwargs["length"]))  # a free-form duration takes the nearest option
+            except PlenioError as error:
+                return f"{error} Choose one of {list(LENGTHS)}."
         return True
 
     @classmethod
@@ -132,6 +135,7 @@ class PlenioSongBrief(io.ComfyNode):
         meter: str = "",
     ) -> io.NodeOutput:
         chosen = None if template == "none" else template_library().get(template)
+        length, length_note = resolve_length(length)
         values = {
             "description": description,
             "genre": genre,
@@ -153,5 +157,12 @@ class PlenioSongBrief(io.ComfyNode):
             brief.to_text(),
             brief.max_seconds,
             brief.instrumental,
-            ui={"plenio_summary": [{"status": "ok", "markdown": _summary(brief)}]},
+            ui={
+                "plenio_summary": [
+                    {
+                        "status": "warning" if length_note else "ok",
+                        "markdown": (f"**Note:** {length_note}\n\n" if length_note else "") + _summary(brief),
+                    }
+                ]
+            },
         )

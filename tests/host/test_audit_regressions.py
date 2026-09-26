@@ -135,3 +135,32 @@ def test_tag_copy_accepts_an_annotated_load_audio_value(server: ComfyServer) -> 
     server.run(prompt)
     tags, _cover = read_tags(server.output_dir / folder / "Annotated.flac")
     assert tags["artist"] == "Plenio"
+
+
+def test_a_free_form_length_passes_validation_with_a_note(server: ComfyServer) -> None:
+    """A length like '2-3 minutes' (the predecessor toolkit's option, reused from other parameters)
+    failed the prompt's validation; it now takes the nearest option and the node says so."""
+    prompt = {
+        "1": {
+            "class_type": "PlenioSongBrief",
+            "inputs": {
+                "template": "none",
+                "description": "A song about rain",
+                "genre": "piano pop",
+                "mood": "",
+                "tempo": "",
+                "length": "2-3 minutes",
+                "vocals": "sung",
+                "vocals.language": "English",
+                "vocals.voice": "",
+                "vocals.theme": "",
+                "key": "",
+                "meter": "",
+            },
+        },
+        "2": {"class_type": "PlenioTestSink", "inputs": {"value": ["1", 1], "label": "brief"}},
+    }
+    entry = server.run(prompt)
+    assert "standard (about 3:00)" in entry["outputs"]["2"]["received"][0]
+    summary = entry["outputs"]["1"]["plenio_summary"][0]
+    assert summary["status"] == "warning" and "2-3 minutes" in summary["markdown"]

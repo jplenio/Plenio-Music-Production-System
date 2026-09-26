@@ -1,7 +1,7 @@
 {
   "name": "plenio-frontend",
   "private": true,
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Frontend extension of the Plenio Music Production System (built into ../web/js).",
   "license": "Apache-2.0",
   "type": "module",
