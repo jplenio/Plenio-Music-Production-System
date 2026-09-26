@@ -73,7 +73,7 @@ The cover template has the same choice (*one cover, stop to review* is its defau
 2. Choose the **mode** in the **Song Brief** (see [Two ways to work](#two-ways-to-work)).
 3. Fill in the brief: pick one of about 240 genre templates or describe your own idea; set mood, tempo, length (1:00 to 6:00), vocals (language, voice, theme) or *instrumental*.
 4. Queue. The writer (Gemma 4 through ComfyUI's native text generation) drafts title, style and lyrics; YuE2 plans a score; the Song Sheets show both.
-5. *New song every run:* every further run is the next song of the series. *One song, stop to review:* approve the sheets, then every further run is a new take - the take seed changes, the draft and the plan stay cached and your edits stay valid.
+5. *New song every run:* every further run is the next song of the series (set the **Draft seed** to *randomize* for even more variety). *One song, stop to review:* approve the sheets, then every further run is a new take - the take seed changes, the draft and the plan stay cached and your edits stay valid.
 
 ### Make a cover
 

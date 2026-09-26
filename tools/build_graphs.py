@@ -649,6 +649,21 @@ def song_sheet(g: Graph, pos: tuple[float, float], title: str) -> Node:
     )
 
 
+def draft_seed(g: Graph, write: Node, pos: tuple[float, float]) -> Node:
+    """The writer's seed as its own node: *fixed* keeps the draft (and an approval) across runs, *randomize*
+    writes a new draft every run. Native Generate Text has no randomize control on its seed."""
+    seed = g.add(
+        "SeedNode",
+        pos,
+        size=(300, 90),
+        title="Draft seed",
+        widgets={"seed": 0, "seed.control": "fixed"},
+        labels={"seed": "draft seed"},
+    )
+    g.link(seed, "seed", write, "sampling_mode.seed")
+    return seed
+
+
 def take_seed(g: Graph, pos: tuple[float, float]) -> Node:
     return g.add(
         "SeedNode",
@@ -720,7 +735,7 @@ APP_TEXT = (
     "renders a series."
 )
 SONG_MODES_TEXT = """1. Choose the **mode** in **Song Brief**:
-   - *new song every run* - every run writes and renders a **different song** from the brief, without stops. For a series, set the batch count next to **Run** (App mode: *Number of runs*) - one click, many songs.
+   - *new song every run* - every run writes and renders a **different song** from the brief, without stops (set the **Draft seed** to *randomize* for even more variety). For a series, set the batch count next to **Run** (App mode: *Number of runs*) - one click, many songs.
    - *one song, stop to review* - the run **stops at the Song Sheet{sheets}**: open it, check or edit the documents, *Approve*, run again. Once approved, every further run is a **new take** of the same song (the documents stay cached).
 2. Describe the song (or pick a template). *vocals* switches between a sung song and an instrumental; *length* runs from 1:00 to 6:00."""
 
@@ -759,6 +774,7 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     )
     model_node = g.add_subgraph(bp["yue2_model"], (0, 760), size=(380, 140), collapsed=True)
     write = g.add_subgraph(bp["write"], (460, 0), size=(360, 220))
+    draft = draft_seed(g, write, (460, 280))
     text_sheet = song_sheet(g, (900, 0), "Song Sheet · Text")
     plan = g.add_subgraph(bp["yue2_plan"], (1400, 0), size=(340, 220))
     tools = g.add(
@@ -804,21 +820,21 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         group="6 · FINISH",
     )
     g.group("1 · SONG", [brief])
-    g.group("2 · WRITE", [write])
+    g.group("2 · WRITE", [write, draft])
     g.group("3 · TEXT", [text_sheet])
     g.group("4 · SCORE", [plan, tools, score_sheet])
     g.group("5 · RENDER", [seed, render])
     g.group("MUSIC MODEL", [model_node], color=MODEL_GROUP)
-    return g, song_app(brief, seed, [text_sheet, score_sheet], preview, export)
+    return g, song_app(brief, seed, draft, [text_sheet, score_sheet], preview, export)
 
 
-def song_app(brief: Node, seed: Node, sheets: list[Node], preview: Node, export: Node) -> App:
+def song_app(brief: Node, seed: Node, draft: Node, sheets: list[Node], preview: Node, export: Node) -> App:
     # The sung options only: App Mode (frontend 1.52) drops controls of the option that is not selected,
     # so the instrumental options are set in the graph. The sheets' editor buttons work in App mode too:
     # 'one song, stop to review' is reviewed there.
     controls = ["mode", "template", "description", "genre", "mood", "tempo", "length", "vocals"]
     controls += ["vocals.language", "vocals.voice", "vocals.theme"]
-    inputs = [(brief, name) for name in controls] + [(seed, "seed")]
+    inputs = [(brief, name) for name in controls] + [(seed, "seed"), (draft, "seed")]
     return App(inputs + [(sheet, "sheet_state") for sheet in sheets], [preview, export])
 
 
@@ -898,6 +914,7 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         labels={"language": "source language (original lyrics: Cover Brief)"},
     )
     write = g.add_subgraph(bp["write"], (1380, 300), size=(360, 260))
+    draft = draft_seed(g, write, (1380, 620))
     source_switch = g.add("ComfySwitchNode", (1800, 0), size=(260, 90), title="Original or new lyrics")
     tags_switch = g.add("ComfySwitchNode", (1800, 140), size=(260, 90), title="Instrumental: section tags")
     text_sheet = song_sheet(g, (2120, 0), "Song Sheet · Text")
@@ -983,7 +1000,7 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g.group("1 · SOURCE", [source, excerpt])
     g.group("2 · COVER", [brief])
     g.group("3 · SCORE", [transcribe, tools, score_sheet])
-    g.group("4 · LYRICS", [asr, write, source_switch, tags_switch])
+    g.group("4 · LYRICS", [asr, write, draft, source_switch, tags_switch])
     g.group("5 · TEXT", [text_sheet])
     g.group("6 · RENDER", [seed, render, check_vocals, takes_preview])
     g.group("CHECK SUNG LYRICS (optional)", [check_lyrics], color=OPTIONAL_GROUP)
@@ -992,7 +1009,7 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     # editor buttons.
     controls = ["mode", "template", "description", "genre", "mood", "vocals"]
     controls += ["vocals.melody", "vocals.lead_instrument", "harmony"]
-    inputs = [(source, "audio"), *[(brief, name) for name in controls], (seed, "seed")]
+    inputs = [(source, "audio"), *[(brief, name) for name in controls], (seed, "seed"), (draft, "seed")]
     inputs += [(score_sheet, "sheet_state"), (text_sheet, "sheet_state")]
     return g, App(inputs, [takes_preview, preview, export])
 
@@ -1034,6 +1051,7 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     )
     model_node = g.add_subgraph(bp["minimax_model"], (0, 760), size=(380, 160), collapsed=True)
     write = g.add_subgraph(bp["write"], (460, 0), size=(360, 220))
+    draft = draft_seed(g, write, (460, 280))
     sheet = song_sheet(g, (900, 0), "Song Sheet")
     seed = take_seed(g, (1400, 0))
     render = g.add_subgraph(bp["minimax_render"], (1400, 150), size=(320, 250))
@@ -1060,11 +1078,11 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         group="5 · FINISH",
     )
     g.group("1 · SONG", [brief])
-    g.group("2 · WRITE", [write])
+    g.group("2 · WRITE", [write, draft])
     g.group("3 · SHEET", [sheet])
     g.group("4 · RENDER", [seed, render])
     g.group("MUSIC MODEL", [model_node], color=MODEL_GROUP)
-    return g, song_app(brief, seed, [sheet], preview, export)
+    return g, song_app(brief, seed, draft, [sheet], preview, export)
 
 
 ABOUT_ENHANCE = """# 4 · Enhance & Master

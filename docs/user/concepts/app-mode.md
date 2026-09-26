@@ -7,8 +7,8 @@ Switch with **Graph / App** at the top left of the canvas (ComfyUI shows a short
 | Template | The app shows | Results |
 |---|---|---|
 | 0 · System Check | detail | the System Check report |
-| 1 · YuE2 · Song | **mode**, template, description, genre, mood, tempo, length, vocals, language, voice, theme, take seed, the buttons **Song Sheet · Text** and **Song Sheet · Score** | the mastered song (preview) and the export summary |
-| 2 · YuE2 · Cover | the source file, **mode**, template, description, genre, mood, vocals, melody, lead instrument, harmony, take seed, the buttons **Song Sheet · Score** and **Song Sheet · Text** | all takes, the mastered song and the export summary |
+| 1 · YuE2 · Song | **mode**, template, description, genre, mood, tempo, length, vocals, language, voice, theme, take seed, draft seed, the buttons **Song Sheet · Text** and **Song Sheet · Score** | the mastered song (preview) and the export summary |
+| 2 · YuE2 · Cover | the source file, **mode**, template, description, genre, mood, vocals, melody, lead instrument, harmony, take seed, draft seed, the buttons **Song Sheet · Score** and **Song Sheet · Text** | all takes, the mastered song and the export summary |
 | 3 · MiniMax · Song | as 1 · YuE2 · Song, with one button **Song Sheet** | the same |
 | 4 · Enhance & Master | the audio file, EQ, loudness target, compression | the mastered song and the export summary |
 
@@ -22,6 +22,7 @@ Switch with **Graph / App** at the top left of the canvas (ComfyUI shows a short
 - The app runs the whole template, including the Song Sheets with their current settings. A sheet that stops - for review, with a conflict between your edit and a new draft, or with an invalid document - says so on its button; open it from there.
 - The app shows the options of the default *vocals* choice: a **sung** song in the song templates, **instrumental** in the cover template. The options of the other choices (for example melody and lead instrument of an instrumental song, or the language of new cover lyrics) are set in the graph view - ComfyUI's App mode does not show options of a choice that is not selected.
 - Model files, the writer model, mastering targets and export formats are set in the graph; the app keeps them.
+- The draft seed is *fixed* (the same text every run; *randomize* writes a new draft every run - more variety in a series, but in *one song, stop to review* every run then needs a new approval).
 - The take seed is set to *randomize*, so every run is a new take; in the mode *one song, stop to review* the documents stay cached as long as the brief is unchanged.
 
 *Build an app* (top bar) lets you change which controls the app shows; ComfyUI saves your choice in the workflow.

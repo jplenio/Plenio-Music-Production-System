@@ -24,7 +24,7 @@ Source -> (Excerpt) -> Transcribe Score -> Score Tools -> Song Sheet · Score
 - **one cover, stop to review** (default): the two review stops above. For a transcription you have not checked this is the safe way - the lyrics follow the score's sections.
 - **new cover every run**: no stops. Every run writes a **new version** from the brief - a new title and style, and with *new lyrics* new lyrics on the same melody - and renders it; the batch count next to **Run** (App mode: *Number of runs*) makes a series with one click. The source is transcribed once and reused. With *original lyrics* the words stay the source's; with *instrumental* each version gets a new style.
 
-The two sheets' *review* is *as the brief says*. A useful mix: review the score once (set *Song Sheet · Score* to *stop for review* and approve it), then let *new cover every run* write versions on the checked score.
+The **Draft seed** (node in *4 · LYRICS*, also in App mode) is *fixed* by default; *randomize* lets the writer draw a new title, style and new lyrics every run even with an unchanged brief. The two sheets' *review* is *as the brief says*. A useful mix: review the score once (set *Song Sheet · Score* to *stop for review* and approve it), then let *new cover every run* write versions on the checked score.
 
 Measured on an RTX 5060 Ti 16 GB for an 83-second source: transcription under 20 s, lyrics draft 30-80 s (the ASR model loads once), one take about 30-40 s, two takes 2 minutes including the checks.
 

@@ -206,6 +206,12 @@ def test_the_sheets_follow_the_brief_mode(name: str, mode: str) -> None:
     assert brief["widgets_values"][0] == mode
     for sheet in (n for n in nodes if n["type"] == "PlenioSongSheet"):
         assert sheet["widgets_values"][0] == "as the brief says", sheet["title"]
+    # the writer's seed is its own node (fixed by default; randomize is one click away), linked to Write Song
+    draft = next(n for n in nodes if n.get("title") == "Draft seed")
+    assert draft["type"] == "SeedNode" and draft["widgets_values"][1] == "fixed"
+    (link,) = [link for link in TEMPLATES[name]["links"] if link[1] == draft["id"]]
+    target = next(n for n in nodes if n["id"] == link[3])
+    assert target["inputs"][link[4]]["name"] == "sampling_mode.seed"
 
 
 @pytest.mark.parametrize("name", ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song"])

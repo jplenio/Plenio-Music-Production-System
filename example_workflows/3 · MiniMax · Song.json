@@ -1,8 +1,8 @@
 {
  "id": "b96be7a0-0f56-5627-8df4-99ad092a11ce",
  "revision": 0,
- "last_node_id": 12,
- "last_link_id": 26,
+ "last_node_id": 13,
+ "last_link_id": 27,
  "nodes": [
   {
    "id": 1,
@@ -25,7 +25,7 @@
     "Node name for S&R": "MarkdownNote"
    },
    "widgets_values": [
-    "# 3 · MiniMax · Song\n\n**Brief -> Write Song -> Song Sheet -> MiniMax Render -> Master -> Export**\n\n1. Choose the **mode** in **Song Brief**:\n   - *new song every run* - every run writes and renders a **different song** from the brief, without stops. For a series, set the batch count next to **Run** (App mode: *Number of runs*) - one click, many songs.\n   - *one song, stop to review* - the run **stops at the Song Sheet**: open it, check or edit the documents, *Approve*, run again. Once approved, every further run is a **new take** of the same song (the documents stay cached).\n2. Describe the song (or pick a template). *vocals* switches between a sung song and an instrumental; *length* runs from 1:00 to 6:00.\n3. Press **Run**. The writer model drafts title, a structured **caption** (Global Metadata, Vocal Details, Arrangement), lyrics and an artwork prompt; MiniMax Music 3 renders the song.\n\n**Inspect and edit:** open the **Song Sheet** to see exactly what MiniMax receives; its *review* follows the brief's mode (*as the brief says*). Caption and lyrics together must stay under **5 000 tokens** (the sheet counts them exactly with the loaded text encoder and stops before rendering if they do not fit). The render ceiling follows the brief's length, at most 6:00; the model can end earlier.\n\n**Instrumentals:** the lyrics are a map of section tags ([Intro], [Instrumental], [Solo], ...), about twice as long as a sung song's, and the caption's Vocal Details are *n/a*.\n\n**Finish:** *Plenio · Master* brings the take to -14 LUFS / -1 dBTP with a gentle tone match (open the block to change the EQ or the loudness target). Export writes the mastered FLAC 24-bit, the unmastered take as `(original).flac` and a release record to `output/plenio`.\n\n**Cover art (optional, bypassed):** *Cover Art* paints a cover from the sheet's artwork prompt with FLUX.2 Klein 4B (about 16 GB of extra model files, Apache-2.0). Select it and the cover preview and press **Ctrl+B**; Export then embeds the cover in the FLAC and MP3 files and saves it as `.jpg`.\n\n**App mode:** switch *Graph / App* at the top left for a simple form: the mode, the brief, the take seed, the Song Sheet buttons (review and edit, also in the app) and the results. *Number of runs* next to Run renders a series.\n\n**Models** (ComfyUI offers the downloads when you open the template): MiniMax Music 3 (diffusion model 4.9 GB, int8 text encoder 9.2 GB, VAE), the Gemma 4 E4B writer. MiniMax Music 3 weights: **MiniMax-Music3 Community License**. If decoding runs out of memory, turn on *tiled decode* in MiniMax Render.\n"
+    "# 3 · MiniMax · Song\n\n**Brief -> Write Song -> Song Sheet -> MiniMax Render -> Master -> Export**\n\n1. Choose the **mode** in **Song Brief**:\n   - *new song every run* - every run writes and renders a **different song** from the brief, without stops (set the **Draft seed** to *randomize* for even more variety). For a series, set the batch count next to **Run** (App mode: *Number of runs*) - one click, many songs.\n   - *one song, stop to review* - the run **stops at the Song Sheet**: open it, check or edit the documents, *Approve*, run again. Once approved, every further run is a **new take** of the same song (the documents stay cached).\n2. Describe the song (or pick a template). *vocals* switches between a sung song and an instrumental; *length* runs from 1:00 to 6:00.\n3. Press **Run**. The writer model drafts title, a structured **caption** (Global Metadata, Vocal Details, Arrangement), lyrics and an artwork prompt; MiniMax Music 3 renders the song.\n\n**Inspect and edit:** open the **Song Sheet** to see exactly what MiniMax receives; its *review* follows the brief's mode (*as the brief says*). Caption and lyrics together must stay under **5 000 tokens** (the sheet counts them exactly with the loaded text encoder and stops before rendering if they do not fit). The render ceiling follows the brief's length, at most 6:00; the model can end earlier.\n\n**Instrumentals:** the lyrics are a map of section tags ([Intro], [Instrumental], [Solo], ...), about twice as long as a sung song's, and the caption's Vocal Details are *n/a*.\n\n**Finish:** *Plenio · Master* brings the take to -14 LUFS / -1 dBTP with a gentle tone match (open the block to change the EQ or the loudness target). Export writes the mastered FLAC 24-bit, the unmastered take as `(original).flac` and a release record to `output/plenio`.\n\n**Cover art (optional, bypassed):** *Cover Art* paints a cover from the sheet's artwork prompt with FLUX.2 Klein 4B (about 16 GB of extra model files, Apache-2.0). Select it and the cover preview and press **Ctrl+B**; Export then embeds the cover in the FLAC and MP3 files and saves it as `.jpg`.\n\n**App mode:** switch *Graph / App* at the top left for a simple form: the mode, the brief, the take seed, the Song Sheet buttons (review and edit, also in the app) and the results. *Number of runs* next to Run renders a series.\n\n**Models** (ComfyUI offers the downloads when you open the template): MiniMax Music 3 (diffusion model 4.9 GB, int8 text encoder 9.2 GB, VAE), the Gemma 4 E4B writer. MiniMax Music 3 weights: **MiniMax-Music3 Community License**. If decoding runs out of memory, turn on *tiled decode* in MiniMax Render.\n"
    ]
   },
   {
@@ -167,8 +167,8 @@
      "name": "brief",
      "type": "PLENIO_BRIEF",
      "links": [
-      1,
-      7
+      2,
+      8
      ]
     },
     {
@@ -263,7 +263,7 @@
      "name": "MODEL",
      "type": "MODEL",
      "links": [
-      9
+      10
      ]
     },
     {
@@ -271,7 +271,7 @@
      "name": "CLIP",
      "type": "CLIP",
      "links": [
-      10
+      11
      ]
     },
     {
@@ -279,7 +279,7 @@
      "name": "VAE",
      "type": "VAE",
      "links": [
-      11
+      12
      ]
     },
     {
@@ -287,8 +287,8 @@
      "name": "engine",
      "type": "PLENIO_ENGINE",
      "links": [
-      2,
-      8
+      3,
+      9
      ]
     }
    ],
@@ -319,13 +319,13 @@
      "localized_name": "brief",
      "name": "brief",
      "type": "PLENIO_BRIEF",
-     "link": 1
+     "link": 2
     },
     {
      "localized_name": "engine",
      "name": "engine",
      "type": "PLENIO_ENGINE",
-     "link": 2
+     "link": 3
     },
     {
      "localized_name": "score",
@@ -363,7 +363,7 @@
      "widget": {
       "name": "sampling_mode.seed"
      },
-     "link": null
+     "link": 1
     },
     {
      "localized_name": "thinking",
@@ -381,7 +381,7 @@
      "name": "title",
      "type": "STRING",
      "links": [
-      3
+      4
      ]
     },
     {
@@ -389,7 +389,7 @@
      "name": "style",
      "type": "STRING",
      "links": [
-      4
+      5
      ]
     },
     {
@@ -397,7 +397,7 @@
      "name": "lyrics",
      "type": "STRING",
      "links": [
-      5
+      6
      ]
     },
     {
@@ -405,7 +405,7 @@
      "name": "artwork_prompt",
      "type": "STRING",
      "links": [
-      6
+      7
      ]
     },
     {
@@ -425,6 +425,51 @@
   },
   {
    "id": 5,
+   "type": "SeedNode",
+   "pos": [
+    460,
+    280
+   ],
+   "size": [
+    300,
+    90
+   ],
+   "flags": {},
+   "order": 4,
+   "mode": 0,
+   "inputs": [
+    {
+     "localized_name": "seed",
+     "name": "seed",
+     "label": "draft seed",
+     "type": "INT",
+     "widget": {
+      "name": "seed"
+     },
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "localized_name": "seed",
+     "name": "seed",
+     "type": "INT",
+     "links": [
+      1
+     ]
+    }
+   ],
+   "title": "Draft seed",
+   "properties": {
+    "Node name for S&R": "SeedNode"
+   },
+   "widgets_values": [
+    0,
+    "fixed"
+   ]
+  },
+  {
+   "id": 6,
    "type": "PlenioSongSheet",
    "pos": [
     900,
@@ -435,7 +480,7 @@
     420
    ],
    "flags": {},
-   "order": 4,
+   "order": 5,
    "mode": 0,
    "inputs": [
     {
@@ -443,21 +488,21 @@
      "name": "title",
      "shape": 7,
      "type": "STRING",
-     "link": 3
+     "link": 4
     },
     {
      "localized_name": "style",
      "name": "style",
      "shape": 7,
      "type": "STRING",
-     "link": 4
+     "link": 5
     },
     {
      "localized_name": "lyrics",
      "name": "lyrics",
      "shape": 7,
      "type": "STRING",
-     "link": 5
+     "link": 6
     },
     {
      "localized_name": "score",
@@ -471,7 +516,7 @@
      "name": "artwork_prompt",
      "shape": 7,
      "type": "STRING",
-     "link": 6
+     "link": 7
     },
     {
      "localized_name": "context_style",
@@ -513,14 +558,14 @@
      "name": "brief",
      "shape": 7,
      "type": "PLENIO_BRIEF",
-     "link": 7
+     "link": 8
     },
     {
      "localized_name": "engine",
      "name": "engine",
      "shape": 7,
      "type": "PLENIO_ENGINE",
-     "link": 8
+     "link": 9
     },
     {
      "localized_name": "review",
@@ -548,7 +593,7 @@
      "name": "title",
      "type": "STRING",
      "links": [
-      20
+      21
      ]
     },
     {
@@ -556,7 +601,7 @@
      "name": "style",
      "type": "STRING",
      "links": [
-      12
+      13
      ]
     },
     {
@@ -564,7 +609,7 @@
      "name": "lyrics",
      "type": "STRING",
      "links": [
-      13
+      14
      ]
     },
     {
@@ -578,7 +623,7 @@
      "name": "artwork_prompt",
      "type": "STRING",
      "links": [
-      21
+      22
      ]
     },
     {
@@ -592,7 +637,7 @@
      "name": "score_seconds",
      "type": "FLOAT",
      "links": [
-      14
+      15
      ]
     },
     {
@@ -600,7 +645,7 @@
      "name": "report",
      "type": "PLENIO_REPORT",
      "links": [
-      24
+      25
      ]
     },
     {
@@ -620,7 +665,7 @@
    ]
   },
   {
-   "id": 6,
+   "id": 7,
    "type": "SeedNode",
    "pos": [
     1400,
@@ -631,7 +676,7 @@
     90
    ],
    "flags": {},
-   "order": 5,
+   "order": 6,
    "mode": 0,
    "inputs": [
     {
@@ -651,7 +696,7 @@
      "name": "seed",
      "type": "INT",
      "links": [
-      15
+      16
      ]
     }
    ],
@@ -665,7 +710,7 @@
    ]
   },
   {
-   "id": 7,
+   "id": 8,
    "type": "3e8cc93d-dba7-57fc-9584-25d46a862896",
    "pos": [
     1400,
@@ -676,26 +721,26 @@
     250
    ],
    "flags": {},
-   "order": 6,
+   "order": 7,
    "mode": 0,
    "inputs": [
     {
      "localized_name": "model",
      "name": "model",
      "type": "MODEL",
-     "link": 9
+     "link": 10
     },
     {
      "localized_name": "clip",
      "name": "clip",
      "type": "CLIP",
-     "link": 10
+     "link": 11
     },
     {
      "localized_name": "vae",
      "name": "vae",
      "type": "VAE",
-     "link": 11
+     "link": 12
     },
     {
      "localized_name": "caption",
@@ -704,7 +749,7 @@
      "widget": {
       "name": "caption"
      },
-     "link": 12
+     "link": 13
     },
     {
      "localized_name": "lyrics",
@@ -713,7 +758,7 @@
      "widget": {
       "name": "lyrics"
      },
-     "link": 13
+     "link": 14
     },
     {
      "localized_name": "seed",
@@ -723,7 +768,7 @@
      "widget": {
       "name": "seed"
      },
-     "link": 15
+     "link": 16
     },
     {
      "localized_name": "max_duration",
@@ -733,7 +778,7 @@
      "widget": {
       "name": "max_duration"
      },
-     "link": 14
+     "link": 15
     },
     {
      "localized_name": "switch",
@@ -752,8 +797,8 @@
      "name": "AUDIO",
      "type": "AUDIO",
      "links": [
-      16,
-      19
+      17,
+      20
      ]
     },
     {
@@ -774,7 +819,7 @@
    ]
   },
   {
-   "id": 8,
+   "id": 9,
    "type": "259b88ba-7c57-57fb-b73e-58f691fe4b56",
    "pos": [
     1800,
@@ -785,14 +830,14 @@
     170
    ],
    "flags": {},
-   "order": 7,
+   "order": 8,
    "mode": 0,
    "inputs": [
     {
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
-     "link": 16
+     "link": 17
     },
     {
      "localized_name": "reference",
@@ -817,8 +862,8 @@
      "name": "audio",
      "type": "AUDIO",
      "links": [
-      17,
-      18
+      18,
+      19
      ]
     },
     {
@@ -826,7 +871,7 @@
      "name": "eq_report",
      "type": "PLENIO_REPORT",
      "links": [
-      25
+      26
      ]
     },
     {
@@ -834,7 +879,7 @@
      "name": "loudness_report",
      "type": "PLENIO_REPORT",
      "links": [
-      26
+      27
      ]
     }
    ],
@@ -845,7 +890,7 @@
    ]
   },
   {
-   "id": 9,
+   "id": 10,
    "type": "PreviewAudio",
    "pos": [
     1800,
@@ -856,14 +901,14 @@
     120
    ],
    "flags": {},
-   "order": 8,
+   "order": 9,
    "mode": 0,
    "inputs": [
     {
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
-     "link": 17
+     "link": 18
     }
    ],
    "outputs": [
@@ -881,7 +926,7 @@
    "widgets_values": []
   },
   {
-   "id": 10,
+   "id": 11,
    "type": "PlenioExportRelease",
    "pos": [
     2200,
@@ -892,35 +937,35 @@
     440
    ],
    "flags": {},
-   "order": 9,
+   "order": 10,
    "mode": 0,
    "inputs": [
     {
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
-     "link": 18
+     "link": 19
     },
     {
      "localized_name": "title",
      "name": "title",
      "shape": 7,
      "type": "STRING",
-     "link": 20
+     "link": 21
     },
     {
      "localized_name": "original",
      "name": "original",
      "shape": 7,
      "type": "AUDIO",
-     "link": 19
+     "link": 20
     },
     {
      "localized_name": "cover",
      "name": "cover",
      "shape": 7,
      "type": "IMAGE",
-     "link": 22
+     "link": 23
     },
     {
      "localized_name": "reports.report_0",
@@ -928,7 +973,7 @@
      "label": "report_0",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 24
+     "link": 25
     },
     {
      "localized_name": "reports.report_1",
@@ -936,7 +981,7 @@
      "label": "report_1",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 25
+     "link": 26
     },
     {
      "localized_name": "reports.report_2",
@@ -944,7 +989,7 @@
      "label": "report_2",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 26
+     "link": 27
     },
     {
      "localized_name": "reports.report_3",
@@ -1046,7 +1091,7 @@
    ]
   },
   {
-   "id": 11,
+   "id": 12,
    "type": "9dbb5617-ccf9-5537-b674-405adb29958c",
    "pos": [
     1800,
@@ -1057,7 +1102,7 @@
     170
    ],
    "flags": {},
-   "order": 10,
+   "order": 11,
    "mode": 4,
    "inputs": [
     {
@@ -1068,7 +1113,7 @@
      "widget": {
       "name": "text"
      },
-     "link": 21
+     "link": 22
     },
     {
      "localized_name": "noise_seed",
@@ -1097,8 +1142,8 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      22,
-      23
+      23,
+      24
      ]
     }
    ],
@@ -1111,7 +1156,7 @@
    ]
   },
   {
-   "id": 12,
+   "id": 13,
    "type": "PreviewImage",
    "pos": [
     2200,
@@ -1122,14 +1167,14 @@
     300
    ],
    "flags": {},
-   "order": 11,
+   "order": 12,
    "mode": 4,
    "inputs": [
     {
      "localized_name": "images",
      "name": "images",
      "type": "IMAGE",
-     "link": 23
+     "link": 24
     }
    ],
    "outputs": [
@@ -1150,6 +1195,14 @@
  "links": [
   [
    1,
+   5,
+   0,
+   4,
+   6,
+   "INT"
+  ],
+  [
+   2,
    2,
    0,
    4,
@@ -1157,7 +1210,7 @@
    "PLENIO_BRIEF"
   ],
   [
-   2,
+   3,
    3,
    3,
    4,
@@ -1165,116 +1218,108 @@
    "PLENIO_ENGINE"
   ],
   [
-   3,
+   4,
    4,
    0,
-   5,
+   6,
    0,
-   "STRING"
-  ],
-  [
-   4,
-   4,
-   1,
-   5,
-   1,
    "STRING"
   ],
   [
    5,
    4,
-   2,
-   5,
-   2,
+   1,
+   6,
+   1,
    "STRING"
   ],
   [
    6,
    4,
-   3,
-   5,
-   4,
+   2,
+   6,
+   2,
    "STRING"
   ],
   [
    7,
-   2,
-   0,
-   5,
-   10,
-   "PLENIO_BRIEF"
+   4,
+   3,
+   6,
+   4,
+   "STRING"
   ],
   [
    8,
-   3,
-   3,
-   5,
-   11,
-   "PLENIO_ENGINE"
+   2,
+   0,
+   6,
+   10,
+   "PLENIO_BRIEF"
   ],
   [
    9,
    3,
-   0,
-   7,
-   0,
-   "MODEL"
+   3,
+   6,
+   11,
+   "PLENIO_ENGINE"
   ],
   [
    10,
    3,
-   1,
-   7,
-   1,
-   "CLIP"
+   0,
+   8,
+   0,
+   "MODEL"
   ],
   [
    11,
    3,
+   1,
+   8,
+   1,
+   "CLIP"
+  ],
+  [
+   12,
+   3,
    2,
-   7,
+   8,
    2,
    "VAE"
   ],
   [
-   12,
-   5,
+   13,
+   6,
    1,
-   7,
+   8,
    3,
    "STRING"
   ],
   [
-   13,
-   5,
+   14,
+   6,
    2,
-   7,
+   8,
    4,
    "STRING"
   ],
   [
-   14,
-   5,
-   6,
-   7,
-   6,
-   "FLOAT"
-  ],
-  [
    15,
    6,
-   0,
-   7,
-   5,
-   "INT"
+   6,
+   8,
+   6,
+   "FLOAT"
   ],
   [
    16,
    7,
    0,
    8,
-   0,
-   "AUDIO"
+   5,
+   "INT"
   ],
   [
    17,
@@ -1286,7 +1331,7 @@
   ],
   [
    18,
-   8,
+   9,
    0,
    10,
    0,
@@ -1294,65 +1339,73 @@
   ],
   [
    19,
-   7,
+   9,
    0,
-   10,
-   2,
+   11,
+   0,
    "AUDIO"
   ],
   [
    20,
-   5,
+   8,
    0,
-   10,
-   1,
-   "STRING"
+   11,
+   2,
+   "AUDIO"
   ],
   [
    21,
-   5,
-   4,
-   11,
+   6,
    0,
+   11,
+   1,
    "STRING"
   ],
   [
    22,
-   11,
+   6,
+   4,
+   12,
    0,
-   10,
+   "STRING"
+  ],
+  [
+   23,
+   12,
+   0,
+   11,
    3,
    "IMAGE"
   ],
   [
-   23,
-   11,
-   0,
+   24,
    12,
+   0,
+   13,
    0,
    "IMAGE"
   ],
   [
-   24,
-   5,
+   25,
+   6,
    7,
-   10,
+   11,
    4,
    "PLENIO_REPORT"
   ],
   [
-   25,
-   8,
+   26,
+   9,
    1,
-   10,
+   11,
    5,
    "PLENIO_REPORT"
   ],
   [
-   26,
-   8,
+   27,
+   9,
    2,
-   10,
+   11,
    6,
    "PLENIO_REPORT"
   ]
@@ -1404,7 +1457,7 @@
     430,
     -70,
     420,
-    320
+    470
    ],
    "color": "#3f789e",
    "font_size": 24,
@@ -4706,17 +4759,21 @@
      "vocals.theme"
     ],
     [
-     6,
+     7,
      "seed"
     ],
     [
      5,
+     "seed"
+    ],
+    [
+     6,
      "sheet_state"
     ]
    ],
    "outputs": [
-    9,
-    10
+    10,
+    11
    ]
   }
  },

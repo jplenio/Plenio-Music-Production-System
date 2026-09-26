@@ -18,6 +18,7 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 - **Cover art is embedded by Plenio itself** into FLAC (picture block) and MP3 (ID3 APIC) - the mastered files and the `(original).flac` - with every tag option (*title only*, *tags*, *copy from loaded file*). The optional GPL package mutagen is no longer used; the System Check lists `faster-whisper` as the optional package instead. Embedding twice replaces the picture, other tags are kept.
 - Node summaries (Song Brief, Cover Brief, EQ, Loudness, Score Tools, ...) stay current: ComfyUI re-sends the summary of a cached node on every run (`has_intermediate_output`), and the last summary is kept in the node, so it is back after a reload, a tab switch or App mode. Before, a cached node showed its summary only after the run that executed it.
 - Workflows saved with 0.2.0/0.2.1: the frontend inserts the new *mode* of Song Brief and Cover Brief when a workflow is loaded (as *one song/one cover, stop to review* - their earlier behaviour: the same song, new takes); the sheets keep their saved *review*. API-format prompts need the new `mode` input.
+- **Draft seed** as its own node in the song and cover templates (group WRITE / LYRICS, and in App mode), linked to *Write Song*: *fixed* (default) keeps the draft, *randomize* writes a new draft every run. Native Generate Text offers no randomize control on its seed.
 - A Song Sheet conflict in the mode *new song every run* explains that a series brings a new draft every run (make the document manual, or use the draft).
 
 ### Fixed

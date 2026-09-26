@@ -44,6 +44,7 @@ As in [1 · YuE2 · Song](yue2-song.md#a-series-or-one-song-the-mode):
 
 - **new song every run:** every run is a different song from the brief; the batch count next to **Run** (App mode: *Number of runs*) makes a series with one click. Each song is exported under its own title.
 - **one song, stop to review:** the run stops at the **Song Sheet** until you press **Approve**; after that every run is a new take (the take seed changes, the documents are cached).
+- **Draft seed** (node in *2 · WRITE*, also in App mode): *fixed* keeps the draft, *randomize* writes a new draft every run - more variety in a series; keep it *fixed* when you review.
 - Edit documents in the **Song Sheet** (your edit wins until its draft changes, then the run stops with a conflict; in a series, make a fixed document *manual*). The sheet's *review* follows the brief (*as the brief says*); set it to *continue* or *stop for review* to override. See [Song Sheet](../concepts/song-sheet.md).
 
 ## Instrumental songs
