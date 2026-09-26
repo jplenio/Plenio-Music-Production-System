@@ -67,10 +67,11 @@ class PlenioConflictError(PlenioUserError):
         "compare and merge in the Song Sheet editor",
     )
 
-    def __init__(self, message: str, *, documents: Sequence[str]):
+    def __init__(self, message: str, *, documents: Sequence[str], hint: str | None = None):
+        choices = "Open the Song Sheet and choose for each document: " + "; ".join(self.CHOICES) + "."
         super().__init__(
             message,
-            hint="Open the Song Sheet and choose for each document: " + "; ".join(self.CHOICES) + ".",
+            hint=choices + (f" {hint}" if hint else ""),
             details={"documents": list(documents)},
         )
         self.documents = list(documents)

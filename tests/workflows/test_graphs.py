@@ -166,16 +166,46 @@ def test_loaders_match_the_model_catalogue(name: str) -> None:
 
 def test_app_configurations() -> None:
     apps = {name: t["extra"].get("linearData") for name, t in TEMPLATES.items()}
-    assert apps["2 · YuE2 · Cover"] is None  # two review stops need the Song Sheet editor
-    for name in ("0 · System Check", "1 · YuE2 · Song", "3 · MiniMax · Song", "4 · Enhance & Master"):
+    for name in TEMPLATES:
         assert apps[name]["inputs"] and apps[name]["outputs"], name
-    nodes = {n["id"]: n for n in TEMPLATES["1 · YuE2 · Song"]["nodes"]}
-    shown = [nodes[i]["type"] for i, _name in apps["1 · YuE2 · Song"]["inputs"]]
-    assert set(shown) == {"PlenioSongBrief", "SeedNode"}  # brief and take seed only: no model files
-    assert {nodes[i]["type"] for i in apps["1 · YuE2 · Song"]["outputs"]} == {
-        "PreviewAudio",
-        "PlenioExportRelease",
-    }
+    # 0.2.2: the mode comes first; the Song Sheet editor buttons make the review stops usable in the app
+    # (the cover path has an app since then). Brief, take seed and sheets only: no model files.
+    sheets = {"1 · YuE2 · Song": 2, "2 · YuE2 · Cover": 2, "3 · MiniMax · Song": 1}
+    for name, count in sheets.items():
+        nodes = {n["id"]: n for n in TEMPLATES[name]["nodes"]}
+        shown = [(nodes[i]["type"], widget) for i, widget in apps[name]["inputs"]]
+        brief = [widget for kind, widget in shown if kind.endswith("Brief")]
+        assert brief[0] == "mode", name
+        assert [kind for kind, widget in shown if widget == "sheet_state"] == ["PlenioSongSheet"] * count
+        assert {kind for kind, _ in shown} <= {
+            "PlenioSongBrief",
+            "PlenioCoverBrief",
+            "SeedNode",
+            "PlenioSongSheet",
+            "LoadAudio",
+        }
+        assert {nodes[i]["type"] for i in apps[name]["outputs"]} == {"PreviewAudio", "PlenioExportRelease"}
+        for node in nodes.values():
+            if node["type"] == "PlenioSongSheet":  # the app shows the sheet's title on its button
+                slot = next(s for s in node["inputs"] if s["name"] == "sheet_state")
+                assert slot["label"] == node["title"]
+
+
+@pytest.mark.parametrize(
+    ("name", "mode"),
+    [
+        ("1 · YuE2 · Song", "new song every run"),
+        ("2 · YuE2 · Cover", "one cover, stop to review"),
+        ("3 · MiniMax · Song", "new song every run"),
+    ],
+)
+def test_the_sheets_follow_the_brief_mode(name: str, mode: str) -> None:
+    """0.2.2 work mode: the brief decides; every Song Sheet of a template is set to 'as the brief says'."""
+    nodes = TEMPLATES[name]["nodes"]
+    brief = next(n for n in nodes if n["type"] in ("PlenioSongBrief", "PlenioCoverBrief"))
+    assert brief["widgets_values"][0] == mode
+    for sheet in (n for n in nodes if n["type"] == "PlenioSongSheet"):
+        assert sheet["widgets_values"][0] == "as the brief says", sheet["title"]
 
 
 @pytest.mark.parametrize("name", ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song"])

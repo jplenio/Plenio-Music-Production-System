@@ -176,20 +176,21 @@ class PlenioExportRelease(io.ComfyNode):
         written: list[Path] = []
         facts: list[dict[str, Any]] = []
         loudness: list[dict[str, Any]] = []
-        embedded = True
         for take, samples in zip(takes, items, strict=True):
             loudness.append(measure(samples, rate, cancel=host.raise_if_interrupted).to_dict())
             for kind in kinds:
                 path = file(take + FORMATS[kind]["extension"])
                 audio_facts = write_audio(path, samples, rate, kind, metadata)
                 if picture is not None and kind != "wav":
-                    embedded = embed_cover(path, picture) and embedded
+                    embed_cover(path, picture)  # FLAC picture block / ID3 APIC; WAV keeps the .jpg only
                 written.append(path)
                 facts.append({**file_facts(path), **audio_facts})
         if original is not None:
             original_items, original_rate = host.audio_items(original)
             path = file(ORIGINAL_SUFFIX)
             original_facts = write_audio(path, original_items[0], original_rate, "flac", metadata)
+            if picture is not None:
+                embed_cover(path, picture)
             facts.append({**file_facts(path), **original_facts, "role": "original"})
             written.append(path)
         cover_path = None

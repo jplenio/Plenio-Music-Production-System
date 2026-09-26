@@ -2,6 +2,9 @@
 
 The intent of a cover. Melody, song form and tempo come from the source recording; the brief says what the new version sounds like and what happens to the vocals and the harmony.
 
+- **mode**
+  - *one cover, stop to review* (default) - Song Sheets set to *as the brief says* stop for review (the score, then the lyrics); after approval every run is a new take.
+  - *new cover every run* - no stops; every run writes a new version (title, style and - with *new lyrics* - the lyrics) and renders it. The transcription of the source is reused. The batch count next to **Run** makes a series.
 - **template** - an optional target style. Style fields you leave empty are taken from the template (never the language).
 - **description, genre, mood** - the target style. At least a genre or a description is needed.
 - **vocals**

@@ -1246,6 +1246,18 @@
   "PlenioCoverBrief": {
    "input": {
     "required": {
+     "mode": [
+      "COMBO",
+      {
+       "tooltip": "one cover, stop to review: Song Sheet · Score and Song Sheet · Text stop so you can check the transcription and the lyrics; later runs keep them and render new takes. new cover every run: each run writes a different version (title, style and - for new lyrics - the lyrics) and renders it without stops; the transcription of the source is reused.",
+       "default": "one cover, stop to review",
+       "multiselect": false,
+       "options": [
+        "new cover every run",
+        "one cover, stop to review"
+       ]
+      }
+     ],
      "template": [
       "COMBO",
       {
@@ -1641,6 +1653,7 @@
    },
    "input_order": {
     "required": [
+     "mode",
      "template",
      "description",
      "genre",
@@ -2593,6 +2606,18 @@
   "PlenioSongBrief": {
    "input": {
     "required": {
+     "mode": [
+      "COMBO",
+      {
+       "tooltip": "new song every run: each run writes and renders a different song from this brief, without stops - set the batch count next to Run for a whole series. one song, stop to review: the Song Sheets stop so you can check and edit the documents before rendering; later runs keep them and render new takes.",
+       "default": "new song every run",
+       "multiselect": false,
+       "options": [
+        "new song every run",
+        "one song, stop to review"
+       ]
+      }
+     ],
      "template": [
       "COMBO",
       {
@@ -2882,9 +2907,16 @@
        "default": "standard (about 3:00)",
        "multiselect": false,
        "options": [
+        "very short (about 1:00)",
         "short (about 1:30)",
+        "about 2:00",
+        "about 2:30",
         "standard (about 3:00)",
-        "long (about 4:30)"
+        "about 3:30",
+        "about 4:00",
+        "long (about 4:30)",
+        "about 5:00",
+        "very long (about 6:00)"
        ]
       }
      ],
@@ -2976,6 +3008,7 @@
    },
    "input_order": {
     "required": [
+     "mode",
      "template",
      "description",
      "genre",
@@ -3015,10 +3048,11 @@
      "review": [
       "COMBO",
       {
-       "tooltip": "stop for review: the documents are released only after you approve them in the editor.",
-       "default": "continue",
+       "tooltip": "as the brief says: stop for review when the brief's mode is 'one song/cover, stop to review', continue for 'new song/cover every run'. stop for review: the documents are released only after you approve them in the editor. continue: never stop for review.",
+       "default": "as the brief says",
        "multiselect": false,
        "options": [
+        "as the brief says",
         "continue",
         "stop for review"
        ]

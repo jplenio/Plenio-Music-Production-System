@@ -23,10 +23,20 @@ log = logging.getLogger("plenio")
 
 BRIEF_SCHEMA = "plenio.brief/1"
 LENGTHS: dict[str, float] = {
+    "very short (about 1:00)": 60.0,
     "short (about 1:30)": 90.0,
+    "about 2:00": 120.0,
+    "about 2:30": 150.0,
     "standard (about 3:00)": 180.0,
+    "about 3:30": 210.0,
+    "about 4:00": 240.0,
     "long (about 4:30)": 270.0,
+    "about 5:00": 300.0,
+    "very long (about 6:00)": 360.0,
 }
+"""Target lengths of a song (seconds). The three named ones are also used by the template library;
+the writer's section plan and line count, the render headroom and the engines' ceilings follow the
+seconds (MiniMax Music 3 renders at most 6:00; the Song Sheet checks YuE2's context budget)."""
 DEFAULT_LENGTH = "standard (about 3:00)"
 
 _DURATION = re.compile(
@@ -67,6 +77,24 @@ def resolve_length(value: str) -> tuple[str, str | None]:
 
 
 VOCALS = ("sung", "instrumental")
+SONG_MODES = {"new song every run": "batch", "one song, stop to review": "careful"}
+COVER_MODES = {"new cover every run": "batch", "one cover, stop to review": "careful"}
+"""The work mode, the first choice of a brief. *batch*: every run writes and renders a new song
+(the brief draws a new variation, the Song Sheets do not stop). *careful*: one song - the Song
+Sheets stop for review, and later runs keep the approved documents and render new takes."""
+
+
+def resolve_mode(value: str | None, modes: Mapping[str, str] = SONG_MODES) -> str:
+    """``batch`` or ``careful`` for a mode option (either brief's wording); empty means careful."""
+    text = str(value or "").strip()
+    if not text:
+        return "careful"
+    found = {**SONG_MODES, **COVER_MODES}.get(text, text if text in ("batch", "careful") else None)
+    if found is None:
+        raise PlenioUserError(f"Unknown mode {text!r}.", hint=f"Choose one of {list(modes)}.")
+    return found
+
+
 MELODY_OPTIONS = {"instrument plays the lead": "lead", "accompaniment only": "accompaniment"}
 TEXT_FIELDS = (
     "description",
@@ -103,6 +131,9 @@ class SongBrief:
     template: str = ""
     from_template: tuple[str, ...] = field(default=(), compare=False)
     kind: str = "song"
+    mode: str = "careful"
+    variation: int | None = None
+    """batch mode: drawn anew for every run, so the writer is asked for a new song."""
 
     @property
     def instrumental(self) -> bool:
@@ -202,6 +233,8 @@ class CoverBrief:
     template: str = ""
     from_template: tuple[str, ...] = field(default=(), compare=False)
     kind: str = "cover"
+    mode: str = "careful"
+    variation: int | None = None
 
     @property
     def instrumental(self) -> bool:
@@ -297,7 +330,13 @@ class CoverBrief:
         return "\n".join(lines)
 
 
-def build_cover_brief(values: Mapping[str, Any], template: Template | None = None) -> CoverBrief:
+def build_cover_brief(
+    values: Mapping[str, Any],
+    template: Template | None = None,
+    *,
+    mode: str = "careful",
+    variation: int | None = None,
+) -> CoverBrief:
     """Create a cover brief; the template fills only empty style fields. Invalid choices raise."""
     merged: dict[str, str] = {}
     from_template: list[str] = []
@@ -341,6 +380,8 @@ def build_cover_brief(values: Mapping[str, Any], template: Template | None = Non
         title=str(values.get("title", "") or "").strip(),
         template=template.id if template else "",
         from_template=tuple(from_template),
+        mode=resolve_mode(mode, COVER_MODES),
+        variation=variation if resolve_mode(mode, COVER_MODES) == "batch" else None,
     )
     if not (brief.description or brief.genre):
         raise PlenioUserError(
@@ -368,7 +409,13 @@ class Template:
         }
 
 
-def build_song_brief(values: Mapping[str, str], template: Template | None = None) -> SongBrief:
+def build_song_brief(
+    values: Mapping[str, str],
+    template: Template | None = None,
+    *,
+    mode: str = "careful",
+    variation: int | None = None,
+) -> SongBrief:
     """Create a brief; fields left empty take the template's value. Invalid choices raise."""
     merged: dict[str, str] = {}
     from_template: list[str] = []
@@ -394,6 +441,8 @@ def build_song_brief(values: Mapping[str, str], template: Template | None = None
         melody=melody,
         template=template.id if template else "",
         from_template=tuple(from_template),
+        mode=resolve_mode(mode),
+        variation=variation if resolve_mode(mode) == "batch" else None,
     )
     if not (brief.description or brief.genre):
         raise PlenioUserError(

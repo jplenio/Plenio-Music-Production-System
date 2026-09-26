@@ -167,6 +167,9 @@ async def sheet_resolve(request: web.Request) -> web.StreamResponse:
     review = str(data.get("review", "continue"))
     if review not in REVIEW_MODES:
         raise PlenioUserError(f"Unknown review mode {review!r}; use one of {list(REVIEW_MODES)}.")
+    brief_mode = data.get("brief_mode")  # the brief's work mode, for 'as the brief says'
+    if brief_mode not in (None, "batch", "careful"):
+        raise PlenioUserError(f"Unknown brief mode {brief_mode!r}; use 'batch' or 'careful'.")
     engine = data.get("engine")
     context = {k: v for k, v in context_value.items() if isinstance(v, str)}
     evaluation = evaluate_sheet(
@@ -174,6 +177,7 @@ async def sheet_resolve(request: web.Request) -> web.StreamResponse:
         {k: (v if isinstance(v, str) else None) for k, v in upstream.items()},
         owned,
         review=review,
+        brief_mode=brief_mode,
         rules=_engine_rules(engine),
         engine_id=str(engine) if engine else None,
         instrumental=bool(data.get("instrumental", False)),

@@ -2,14 +2,30 @@
 
 from __future__ import annotations
 
+import secrets
 from typing import Any
 
 from comfy_api.latest import io
 
-from ...core.brief import COVER_VOCALS, HARMONY_OPTIONS, MELODY_OPTIONS, build_cover_brief, options
+from ...core.brief import (
+    COVER_MODES,
+    COVER_VOCALS,
+    HARMONY_OPTIONS,
+    MELODY_OPTIONS,
+    build_cover_brief,
+    options,
+)
 from ...core.errors import PlenioError
 from ..shared import template_library
 from ..types import Brief
+from .brief import draw_variation, mode_line
+
+MODE_TOOLTIP = (
+    "one cover, stop to review: Song Sheet · Score and Song Sheet · Text stop so you can check the transcription "
+    "and the lyrics; later runs keep them and render new takes. new cover every run: each run writes a different "
+    "version (title, style and - for new lyrics - the lyrics) and renders it without stops; the transcription "
+    "of the source is reused."
+)
 
 
 def _summary(brief: Any) -> str:
@@ -18,7 +34,7 @@ def _summary(brief: Any) -> str:
         "new": "New lyrics",
         "instrumental": "Instrumental" + (" · accompaniment only" if brief.melody == "accompaniment" else ""),
     }[brief.vocals]
-    lines = [f"**Cover: {mode}**, harmony {brief.harmony}", "", brief.to_text()]
+    lines = [f"**Cover: {mode}**, harmony {brief.harmony}", "", mode_line(brief), "", brief.to_text()]
     lines += [f"\n- warning: {w}" for w in brief.warnings()]
     return "\n".join(lines)
 
@@ -33,11 +49,18 @@ class PlenioCoverBrief(io.ComfyNode):
             display_name="Cover Brief",
             category="Plenio/Song",
             description=(
-                "The intent of a cover: the target style, what happens to the vocals (original lyrics, new "
-                "lyrics or instrumental) and to the harmony. Melody, form and tempo come from the source. "
+                "The intent of a cover: the work mode (one cover with review stops, or a new version every run), "
+                "the target style, what happens to the vocals (original lyrics, new lyrics or instrumental) and "
+                "to the harmony. Melody, form and tempo come from the source. "
                 "Which lyrics text is finally used is decided in the Song Sheet, not here."
             ),
             inputs=[
+                io.Combo.Input(
+                    "mode",
+                    options=list(COVER_MODES),
+                    default="one cover, stop to review",
+                    tooltip=MODE_TOOLTIP,
+                ),
                 io.Combo.Input(
                     "template",
                     options=options(template_library()),
@@ -128,7 +151,14 @@ class PlenioCoverBrief(io.ComfyNode):
         )
 
     @classmethod
+    def fingerprint_inputs(cls, **kwargs: Any) -> Any:
+        # new cover every run: the brief runs again (a new variation) and with it everything after it
+        return secrets.token_hex(8) if kwargs.get("mode") == "new cover every run" else ""
+
+    @classmethod
     def validate_inputs(cls, **kwargs: Any) -> bool | str:
+        if kwargs.get("mode", "one cover, stop to review") not in COVER_MODES:
+            return f"Unknown mode {kwargs.get('mode')!r}. Choose one of {list(COVER_MODES)}."
         template = kwargs.get("template", "none")
         if template != "none":
             try:
@@ -142,6 +172,7 @@ class PlenioCoverBrief(io.ComfyNode):
     @classmethod
     def execute(
         cls,
+        mode: str,
         template: str,
         description: str,
         genre: str,
@@ -151,12 +182,12 @@ class PlenioCoverBrief(io.ComfyNode):
         title: str = "",
     ) -> io.NodeOutput:
         chosen = None if template == "none" else template_library().get(template)
-        mode = vocals.get("vocals", "instrumental")
+        vocal_mode = vocals.get("vocals", "instrumental")
         values = {
             "description": description,
             "genre": genre,
             "mood": mood,
-            "vocals": COVER_VOCALS.get(mode, mode),
+            "vocals": COVER_VOCALS.get(vocal_mode, vocal_mode),
             "language": vocals.get("language", ""),
             "voice": vocals.get("voice", ""),
             "theme": vocals.get("theme", ""),
@@ -166,7 +197,7 @@ class PlenioCoverBrief(io.ComfyNode):
             "harmony": harmony,
             "title": title,
         }
-        brief = build_cover_brief(values, chosen)
+        brief = build_cover_brief(values, chosen, mode=mode, variation=draw_variation(mode))
         status = "warning" if brief.warnings() else "ok"
         return io.NodeOutput(
             brief,

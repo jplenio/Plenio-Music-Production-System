@@ -233,7 +233,7 @@ def make_nodes(record: Any) -> list[type[io.ComfyNode]]:
 
         @classmethod
         def execute(cls, prompt: str, variant: str) -> io.NodeOutput:
-            record("llm", variant=variant, prompt_chars=len(prompt))
+            record("llm", variant=variant, prompt_chars=len(prompt), prompt=prompt)
             return io.NodeOutput(ANSWERS[variant])
 
     class PlenioTestFakePlan(io.ComfyNode):

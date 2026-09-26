@@ -17,8 +17,8 @@ When the frontend bundles another library, it is added here with its licence tex
 
 | Package | Used for | Licence | Notes |
 |---|---|---|---|
-| NumPy, SciPy, PyAV, Pillow | DSP (filters, resampling), audio encoding/decoding and tag reading, cover JPEG | BSD / BSD / BSD (FFmpeg: LGPL/GPL builds) / MIT-CMU | installed by ComfyUI itself; imported at runtime |
-| mutagen | embedding cover art into FLAC and MP3 (optional) | GPL-2.0-or-later | **not** installed or bundled by Plenio; imported only when the user installed it. Without it the cover is saved next to the audio |
+| NumPy, SciPy, PyAV, Pillow | DSP (filters, resampling), audio encoding/decoding and tag reading, cover JPEG | BSD / BSD / BSD (FFmpeg: LGPL/GPL builds) / MIT-CMU | installed by ComfyUI itself; imported at runtime. Cover art is embedded into FLAC and MP3 by Plenio's own code (no tagging library) |
+| faster-whisper | lyrics transcription of covers with lyrics (optional) | MIT | **not** installed or bundled by Plenio; imported only when the user installed it |
 
 Development only (not shipped): `pyloudnorm` (MIT) is the loudness test oracle.
 

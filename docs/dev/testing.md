@@ -10,7 +10,7 @@ Tests run with **ComfyUI's Python** (it has torch, numpy, av, jsonschema). Dev t
 <ComfyUI python> -m pip install --target .devdeps "pytest==8.4.*" "hypothesis==6.*" "ruff==0.13.*" "mypy==1.18.*" "pyloudnorm==0.2.*"
 ```
 
-`pyloudnorm` is the loudness oracle of `tests/unit/test_audio.py` (skipped without it). `mutagen` is optional: with it installed, the cover-art tests also check embedding.
+`pyloudnorm` is the loudness oracle of `tests/unit/test_audio.py` (skipped without it). The cover-art tests read the embedded picture back with PyAV (Pillow is needed for the JPEG).
 
 Frontend: `cd frontend && npm ci`.
 

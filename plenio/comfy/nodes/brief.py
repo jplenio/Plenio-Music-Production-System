@@ -2,14 +2,30 @@
 
 from __future__ import annotations
 
+import secrets
 from typing import Any
 
 from comfy_api.latest import io
 
-from ...core.brief import DEFAULT_LENGTH, LENGTHS, MELODY_OPTIONS, build_song_brief, options, resolve_length
+from ...core.brief import (
+    DEFAULT_LENGTH,
+    LENGTHS,
+    MELODY_OPTIONS,
+    SONG_MODES,
+    build_song_brief,
+    options,
+    resolve_length,
+    resolve_mode,
+)
 from ...core.errors import PlenioError
 from ..shared import template_library
 from ..types import Brief
+
+MODE_TOOLTIP = (
+    "new song every run: each run writes and renders a different song from this brief, without stops - set "
+    "the batch count next to Run for a whole series. one song, stop to review: the Song Sheets stop so you "
+    "can check and edit the documents before rendering; later runs keep them and render new takes."
+)
 
 TEXT = {
     "description": "What the song is about and how it should sound. Sent to the writing model.",
@@ -21,11 +37,23 @@ TEXT = {
 }
 
 
+def mode_line(brief: Any) -> str:
+    """The summary line of the work mode (Song Brief and Cover Brief)."""
+    if brief.mode == "batch":
+        return f"Mode: new {brief.kind} every run (series variation {brief.variation}; the Song Sheets do not stop)"
+    return f"Mode: one {brief.kind}, stop to review (the Song Sheets stop for approval; later runs are new takes)"
+
+
+def draw_variation(mode: str) -> int | None:
+    """A new series variation for every batch run; none in the careful mode."""
+    return secrets.randbelow(9999) + 1 if resolve_mode(mode) == "batch" else None
+
+
 def _summary(brief: Any) -> str:
     source = f" (from template: {', '.join(brief.from_template)})" if brief.from_template else ""
     return (
         f"**{'Instrumental' if brief.instrumental else 'Sung'} song**, {brief.length}{source}\n\n"
-        + brief.to_text()
+        f"{mode_line(brief)}\n\n" + brief.to_text()
     )
 
 
@@ -39,10 +67,14 @@ class PlenioSongBrief(io.ComfyNode):
             display_name="Song Brief",
             category="Plenio/Song",
             description=(
-                "The intent of a new song: description, genre, mood, tempo, length and vocals. A template fills "
-                "only the fields you leave empty. The only place where sung/instrumental and the length are set."
+                "The intent of a new song: the work mode (a new song every run, or one song with review stops), "
+                "description, genre, mood, tempo, length and vocals. A template fills only the fields you leave "
+                "empty. The only place where the work mode, sung/instrumental and the length are set."
             ),
             inputs=[
+                io.Combo.Input(
+                    "mode", options=list(SONG_MODES), default="new song every run", tooltip=MODE_TOOLTIP
+                ),
                 io.Combo.Input(
                     "template",
                     options=options(template_library()),
@@ -107,9 +139,16 @@ class PlenioSongBrief(io.ComfyNode):
         )
 
     @classmethod
+    def fingerprint_inputs(cls, **kwargs: Any) -> Any:
+        # new song every run: the brief runs again (a new variation) and with it everything after it
+        return secrets.token_hex(8) if kwargs.get("mode") == "new song every run" else ""
+
+    @classmethod
     def validate_inputs(cls, **kwargs: Any) -> bool | str:
         # ComfyUI passes every input (incl. the DynamicCombo values) and then skips its own combo
         # checks, so the combos are checked here. Templates saved after startup stay valid.
+        if kwargs.get("mode", "one song, stop to review") not in SONG_MODES:
+            return f"Unknown mode {kwargs.get('mode')!r}. Choose one of {list(SONG_MODES)}."
         template = kwargs.get("template", "none")
         if template != "none":
             try:
@@ -126,6 +165,7 @@ class PlenioSongBrief(io.ComfyNode):
     @classmethod
     def execute(
         cls,
+        mode: str,
         template: str,
         description: str,
         genre: str,
@@ -153,7 +193,7 @@ class PlenioSongBrief(io.ComfyNode):
             "melody": vocals.get("melody", ""),
             "lead_instrument": vocals.get("lead_instrument", ""),
         }
-        brief = build_song_brief(values, chosen)
+        brief = build_song_brief(values, chosen, mode=mode, variation=draw_variation(mode))
         return io.NodeOutput(
             brief,
             brief.to_text(),

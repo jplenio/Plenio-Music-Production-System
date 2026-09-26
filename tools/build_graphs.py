@@ -633,6 +633,22 @@ def about_note(g: Graph, text: str, height: float = ABOUT_SIZE[1]) -> Node:
     )
 
 
+FOLLOW_BRIEF = {"review": "as the brief says"}
+"""The sheets stop for review in the brief's mode 'one song/cover, stop to review' only."""
+
+
+def song_sheet(g: Graph, pos: tuple[float, float], title: str) -> Node:
+    """A Song Sheet that follows the brief's mode; its editor button carries the title (App mode label)."""
+    return g.add(
+        "PlenioSongSheet",
+        pos,
+        size=(420, 420),
+        title=title,
+        widgets=FOLLOW_BRIEF,
+        labels={"sheet_state": title},
+    )
+
+
 def take_seed(g: Graph, pos: tuple[float, float]) -> Node:
     return g.add(
         "SeedNode",
@@ -696,22 +712,26 @@ FINISH_TEXT = (
 COVER_TEXT = (
     "**Cover art (optional, bypassed):** *Cover Art* paints a cover from the sheet's artwork prompt with "
     "FLUX.2 Klein 4B (about 16 GB of extra model files, Apache-2.0). Select it and the cover preview and "
-    "press **Ctrl+B**; Export then embeds the cover."
+    "press **Ctrl+B**; Export then embeds the cover in the FLAC and MP3 files and saves it as `.jpg`."
 )
 APP_TEXT = (
-    "**App mode:** switch *Graph / App* at the top left for a simple form with the brief, the take seed and "
-    "the results (no review stops)."
+    "**App mode:** switch *Graph / App* at the top left for a simple form: the mode, the brief, the take seed, "
+    "the Song Sheet buttons (review and edit, also in the app) and the results. *Number of runs* next to Run "
+    "renders a series."
 )
+SONG_MODES_TEXT = """1. Choose the **mode** in **Song Brief**:
+   - *new song every run* - every run writes and renders a **different song** from the brief, without stops. For a series, set the batch count next to **Run** (App mode: *Number of runs*) - one click, many songs.
+   - *one song, stop to review* - the run **stops at the Song Sheet{sheets}**: open it, check or edit the documents, *Approve*, run again. Once approved, every further run is a **new take** of the same song (the documents stay cached).
+2. Describe the song (or pick a template). *vocals* switches between a sung song and an instrumental; *length* runs from 1:00 to 6:00."""
 
 ABOUT_YUE2 = f"""# 1 · YuE2 · Song
 
 **Brief -> Write Song -> Song Sheet · Text -> YuE2 Plan -> Song Sheet · Score -> YuE2 Render -> Master -> Export**
 
-1. Describe the song in **Song Brief** (or pick a template). *vocals* switches between a sung song and an instrumental.
-2. Press **Run**. The writer model drafts title, style and lyrics; YuE2 plans a score and renders the song.
-3. Run again for a **new take**: the take seed changes, the text and the score stay (they are cached).
+{SONG_MODES_TEXT.format(sheets="s (Text, then Score)")}
+3. Press **Run**. The writer model drafts title, style and lyrics; YuE2 plans a score and renders the song.
 
-**Inspect and edit:** open a **Song Sheet** to see exactly what YuE2 receives. Edit a document there; your edit wins until its draft changes, then the run stops and asks you. Set *review* to *stop for review* to approve documents before rendering.
+**Inspect and edit:** open a **Song Sheet** to see exactly what YuE2 receives. Edit a document there; your edit wins until its draft changes, then the run stops and asks you. The sheets' *review* follows the brief's mode (*as the brief says*); set it to *continue* or *stop for review* to decide per sheet.
 
 {FINISH_TEXT}
 
@@ -731,6 +751,7 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         (0, 0),
         size=(380, 620),
         widgets={
+            "mode": "new song every run",
             "template": "pop/singer-songwriter-acoustic-vocal",
             "length": "short (about 1:30)",
             "vocals": "sung",
@@ -738,12 +759,12 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     )
     model_node = g.add_subgraph(bp["yue2_model"], (0, 760), size=(380, 140), collapsed=True)
     write = g.add_subgraph(bp["write"], (460, 0), size=(360, 220))
-    text_sheet = g.add("PlenioSongSheet", (900, 0), size=(420, 420), title="Song Sheet · Text")
+    text_sheet = song_sheet(g, (900, 0), "Song Sheet · Text")
     plan = g.add_subgraph(bp["yue2_plan"], (1400, 0), size=(340, 220))
     tools = g.add(
         "PlenioScoreTools", (1400, 300), size=(340, 140), widgets={"operation": "prepare from brief"}
     )
-    score_sheet = g.add("PlenioSongSheet", (1820, 0), size=(420, 420), title="Song Sheet · Score")
+    score_sheet = song_sheet(g, (1820, 0), "Song Sheet · Score")
     seed = take_seed(g, (2320, 0))
     render = g.add_subgraph(bp["yue2_render"], (2320, 150), size=(320, 250))
     g.link(brief, "brief", write, "brief")
@@ -788,15 +809,17 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g.group("4 · SCORE", [plan, tools, score_sheet])
     g.group("5 · RENDER", [seed, render])
     g.group("MUSIC MODEL", [model_node], color=MODEL_GROUP)
-    return g, song_app(brief, seed, preview, export)
+    return g, song_app(brief, seed, [text_sheet, score_sheet], preview, export)
 
 
-def song_app(brief: Node, seed: Node, preview: Node, export: Node) -> App:
+def song_app(brief: Node, seed: Node, sheets: list[Node], preview: Node, export: Node) -> App:
     # The sung options only: App Mode (frontend 1.52) drops controls of the option that is not selected,
-    # so the instrumental options are set in the graph.
-    controls = ["template", "description", "genre", "mood", "tempo", "length", "vocals"]
+    # so the instrumental options are set in the graph. The sheets' editor buttons work in App mode too:
+    # 'one song, stop to review' is reviewed there.
+    controls = ["mode", "template", "description", "genre", "mood", "tempo", "length", "vocals"]
     controls += ["vocals.language", "vocals.voice", "vocals.theme"]
-    return App([(brief, name) for name in controls] + [(seed, "seed")], [preview, export])
+    inputs = [(brief, name) for name in controls] + [(seed, "seed")]
+    return App(inputs + [(sheet, "sheet_state") for sheet in sheets], [preview, export])
 
 
 ABOUT_COVER = f"""# 2 · YuE2 · Cover
@@ -804,10 +827,11 @@ ABOUT_COVER = f"""# 2 · YuE2 · Cover
 **Source -> Transcribe Score -> Song Sheet · Score -> lyrics (ASR, writer or section tags) -> Song Sheet · Text -> YuE2 Takes -> Check Vocals -> Master -> Export**
 
 1. Load the **source** recording (upload in *Load Audio*; up to 5:00 - trim longer songs with the optional *Excerpt* node).
-2. In **Cover Brief** choose the target style and what happens to the vocals: *instrumental* (default; an instrument plays the melody, or accompaniment only), *original lyrics* (transcribed from the source) or *new lyrics* (written on the source's melody). *harmony* keeps or replaces the original chords.
-3. Press **Run**: SheetSage2 transcribes the source and the run **stops at Song Sheet · Score**. Open it, check the score (fix section names and boundaries), then *Approve*.
-4. Run again: the lyrics are drafted (ASR of the original, the writer's new lyrics, or the section tags) and the run **stops at Song Sheet · Text**. Correct or replace the lyrics - your text always wins - and *Approve*.
-5. Run again to render. Each further run is a new take (the take seed changes).
+2. In **Cover Brief** choose the **mode** - *one cover, stop to review* (default, steps 4-6) or *new cover every run*: every run writes and renders a **different version** (title, style and - with new lyrics - the lyrics) without stops; the batch count next to **Run** makes a series. Then the target style and what happens to the vocals: *instrumental* (default; an instrument plays the melody, or accompaniment only), *original lyrics* (transcribed from the source) or *new lyrics* (written on the source's melody). *harmony* keeps or replaces the original chords.
+3. Press **Run**: SheetSage2 transcribes the source (once; later runs reuse it).
+4. The run **stops at Song Sheet · Score**. Open it, check the score (fix section names and boundaries), then *Approve*.
+5. Run again: the lyrics are drafted (ASR of the original, the writer's new lyrics, or the section tags) and the run **stops at Song Sheet · Text**. Correct or replace the lyrics - your text always wins - and *Approve*.
+6. Run again to render. Each further run is a new take (the take seed changes).
 
 **New lyrics** are understood only when they fit the melody - about one syllable per note - and the voice fits its range; Song Sheet · Text warns about both.
 
@@ -817,13 +841,13 @@ ABOUT_COVER = f"""# 2 · YuE2 · Cover
 
 {COVER_TEXT}
 
-This path has no App mode: the two review stops need the Song Sheet editor.
+**App mode:** switch *Graph / App* at the top left for a simple form: the source file, the mode, the cover style, the take seed, the two Song Sheet buttons (the review stops work in the app) and the results. The options of *original lyrics* and *new lyrics* are set in the graph.
 
 **Models** (downloaded on first use): YuE2 3B int8, SheetSage2, the instrumental adapter, the Gemma 4 E4B writer; the lyrics ASR (faster-whisper large-v3, 3.1 GB) is fetched by Plenio when first needed. YuE2, SheetSage2 and the adapter are **CC BY-NC 4.0 (non-commercial)**.
 """
 
 
-def yue2_cover(bp: dict[str, Blueprint]) -> Graph:
+def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g = Graph()
     about_note(g, ABOUT_COVER, height=900)
     source = g.add(
@@ -841,7 +865,12 @@ def yue2_cover(bp: dict[str, Blueprint]) -> Graph:
         "PlenioCoverBrief",
         (0, 400),
         size=(380, 520),
-        widgets={"genre": "acoustic folk", "mood": "warm, intimate", "vocals": "instrumental"},
+        widgets={
+            "mode": "one cover, stop to review",
+            "genre": "acoustic folk",
+            "mood": "warm, intimate",
+            "vocals": "instrumental",
+        },
     )
     model_node = g.add_subgraph(bp["yue2_model"], (0, 1060), size=(380, 140), collapsed=True)
     adapter = g.add(
@@ -859,13 +888,7 @@ def yue2_cover(bp: dict[str, Blueprint]) -> Graph:
     tools = g.add(
         "PlenioScoreTools", (460, 220), size=(340, 140), widgets={"operation": "prepare from brief"}
     )
-    score_sheet = g.add(
-        "PlenioSongSheet",
-        (880, 0),
-        size=(420, 420),
-        title="Song Sheet · Score",
-        widgets={"review": "stop for review"},
-    )
+    score_sheet = song_sheet(g, (880, 0), "Song Sheet · Score")
     # Original lyrics: the Cover Brief owns the source's language; new lyrics: this widget does (AUD-02).
     asr = g.add(
         "PlenioTranscribeLyrics",
@@ -877,13 +900,7 @@ def yue2_cover(bp: dict[str, Blueprint]) -> Graph:
     write = g.add_subgraph(bp["write"], (1380, 300), size=(360, 260))
     source_switch = g.add("ComfySwitchNode", (1800, 0), size=(260, 90), title="Original or new lyrics")
     tags_switch = g.add("ComfySwitchNode", (1800, 140), size=(260, 90), title="Instrumental: section tags")
-    text_sheet = g.add(
-        "PlenioSongSheet",
-        (2120, 0),
-        size=(420, 420),
-        title="Song Sheet · Text",
-        widgets={"review": "stop for review"},
-    )
+    text_sheet = song_sheet(g, (2120, 0), "Song Sheet · Text")
     seed = take_seed(g, (2620, 0))
     render = g.add_subgraph(bp["yue2_takes"], (2620, 150), size=(320, 280), title="YuE2 Takes")
     check_vocals = g.add("PlenioVocalCheck", (3000, 0), size=(340, 160), title="Check Vocals · best take")
@@ -947,7 +964,7 @@ def yue2_cover(bp: dict[str, Blueprint]) -> Graph:
     g.link(check_vocals, "takes", takes_preview, "audio")
     g.link(check_vocals, "audio", check_lyrics, "audio")
     g.link(text_sheet, "lyrics", check_lyrics, "expected_lyrics")
-    finish(
+    _master, preview, export = finish(
         g,
         bp,
         3420,
@@ -971,18 +988,23 @@ def yue2_cover(bp: dict[str, Blueprint]) -> Graph:
     g.group("6 · RENDER", [seed, render, check_vocals, takes_preview])
     g.group("CHECK SUNG LYRICS (optional)", [check_lyrics], color=OPTIONAL_GROUP)
     g.group("MUSIC MODEL", [model_node, adapter, adapter_switch], color=MODEL_GROUP)
-    return g
+    # The instrumental options (the default) only, as in song_app; the two review stops use the sheets'
+    # editor buttons.
+    controls = ["mode", "template", "description", "genre", "mood", "vocals"]
+    controls += ["vocals.melody", "vocals.lead_instrument", "harmony"]
+    inputs = [(source, "audio"), *[(brief, name) for name in controls], (seed, "seed")]
+    inputs += [(score_sheet, "sheet_state"), (text_sheet, "sheet_state")]
+    return g, App(inputs, [takes_preview, preview, export])
 
 
 ABOUT_MINIMAX = f"""# 3 · MiniMax · Song
 
 **Brief -> Write Song -> Song Sheet -> MiniMax Render -> Master -> Export**
 
-1. Describe the song in **Song Brief** (or pick a template). *vocals* switches between a sung song and an instrumental.
-2. Press **Run**. The writer model drafts title, a structured **caption** (Global Metadata, Vocal Details, Arrangement), lyrics and an artwork prompt; MiniMax Music 3 renders the song.
-3. Run again for a **new take**: the take seed changes, the documents stay (they are cached).
+{SONG_MODES_TEXT.format(sheets="")}
+3. Press **Run**. The writer model drafts title, a structured **caption** (Global Metadata, Vocal Details, Arrangement), lyrics and an artwork prompt; MiniMax Music 3 renders the song.
 
-**Inspect and edit:** open the **Song Sheet** to see exactly what MiniMax receives. Caption and lyrics together must stay under **5 000 tokens** (the sheet counts them exactly with the loaded text encoder and stops before rendering if they do not fit). The render ceiling follows the brief's length, at most 6:00; the model can end earlier.
+**Inspect and edit:** open the **Song Sheet** to see exactly what MiniMax receives; its *review* follows the brief's mode (*as the brief says*). Caption and lyrics together must stay under **5 000 tokens** (the sheet counts them exactly with the loaded text encoder and stops before rendering if they do not fit). The render ceiling follows the brief's length, at most 6:00; the model can end earlier.
 
 **Instrumentals:** the lyrics are a map of section tags ([Intro], [Instrumental], [Solo], ...), about twice as long as a sung song's, and the caption's Vocal Details are *n/a*.
 
@@ -1004,6 +1026,7 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         (0, 0),
         size=(380, 620),
         widgets={
+            "mode": "new song every run",
             "template": "pop/singer-songwriter-acoustic-vocal",
             "length": "short (about 1:30)",
             "vocals": "sung",
@@ -1011,7 +1034,7 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     )
     model_node = g.add_subgraph(bp["minimax_model"], (0, 760), size=(380, 160), collapsed=True)
     write = g.add_subgraph(bp["write"], (460, 0), size=(360, 220))
-    sheet = g.add("PlenioSongSheet", (900, 0), size=(420, 420), title="Song Sheet")
+    sheet = song_sheet(g, (900, 0), "Song Sheet")
     seed = take_seed(g, (1400, 0))
     render = g.add_subgraph(bp["minimax_render"], (1400, 150), size=(320, 250))
     g.link(brief, "brief", write, "brief")
@@ -1041,7 +1064,7 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g.group("3 · SHEET", [sheet])
     g.group("4 · RENDER", [seed, render])
     g.group("MUSIC MODEL", [model_node], color=MODEL_GROUP)
-    return g, song_app(brief, seed, preview, export)
+    return g, song_app(brief, seed, [sheet], preview, export)
 
 
 ABOUT_ENHANCE = """# 4 · Enhance & Master
@@ -1155,6 +1178,7 @@ def blueprints() -> dict[str, Blueprint]:
 
 def templates(bp: dict[str, Blueprint]) -> list[tuple[str, Graph, list[Blueprint], App | None]]:
     song, song_app_config = yue2_song(bp)
+    cover, cover_app = yue2_cover(bp)
     minimax, minimax_app = minimax_song(bp)
     enhance, enhance_app = enhance_master()
     check, check_app = system_check()
@@ -1169,9 +1193,9 @@ def templates(bp: dict[str, Blueprint]) -> list[tuple[str, Graph, list[Blueprint
         ),
         (
             "2 · YuE2 · Cover",
-            yue2_cover(bp),
+            cover,
             [bp["yue2_model"], bp["write"], bp["transcribe"], bp["yue2_takes"], *finish_bps],
-            None,
+            cover_app,
         ),
         (
             "3 · MiniMax · Song",

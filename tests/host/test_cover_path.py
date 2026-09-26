@@ -81,8 +81,10 @@ def cover_prompt(
     score_review: str = "continue",
     text_review: str = "continue",
     take_seed: int = 1,
+    mode: str = "one cover, stop to review",
 ) -> dict[str, Any]:
     brief_inputs = {
+        "mode": mode,
         "template": "none",
         "description": "",
         "genre": genre,
@@ -295,7 +297,8 @@ def test_a_new_take_reuses_score_asr_and_draft(server: ComfyServer, log: Log, pr
     entry = server.run(cover_prompt(vocals="original", take_seed=12))
     assert events(log, "sheetsage") == [] and events(log, "llm") == [] and events(log, "audio") == []
     assert [e["seed"] for e in events(log, "render")] == [12]
-    assert "8" not in entry["outputs"]  # Transcribe Lyrics came from ComfyUI's cache
+    cached = [m[1]["nodes"] for m in entry["status"]["messages"] if m[0] == "execution_cached"][0]
+    assert "8" in cached  # Transcribe Lyrics came from ComfyUI's cache (its summary is re-sent since 0.2.2)
 
 
 def test_corrected_lyrics_win_and_conflict_when_the_score_sections_change(
@@ -465,6 +468,25 @@ def test_new_lyrics_are_written_against_the_final_score(server: ComfyServer, log
 
 
 # --- instrumental ----------------------------------------------------------------------------------
+
+
+def test_new_cover_every_run_writes_new_lyrics_on_the_same_transcription(
+    server: ComfyServer, log: Log
+) -> None:
+    """0.2.2 work mode *new cover every run*: no review stops; each run a new version from the writer,
+    while the source's transcription is computed at most once."""
+    prompt = cover_prompt(
+        vocals="new",
+        genre=f"jazz {uuid.uuid4().hex[:6]}",
+        mode="new cover every run",
+        score_review="as the brief says",
+        text_review="as the brief says",
+    )
+    server.run(prompt)
+    server.run(prompt)
+    prompts = [e["prompt"] for e in events(log, "llm")]
+    assert len(prompts) == 2 and prompts[0] != prompts[1] and all("Series:" in p for p in prompts)
+    assert len(events(log, "render")) == 2 and len(events(log, "sheetsage")) <= 1
 
 
 def test_instrumental_cover_is_tags_only_with_a_silent_vocal_voice(server: ComfyServer, log: Log) -> None:

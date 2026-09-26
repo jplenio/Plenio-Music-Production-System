@@ -11,7 +11,14 @@ from ...core.brief import CoverBrief
 from ...core.diagnostics import has_errors, warning
 from ...core.engines import rules_for
 from ...core.errors import PlenioConflictError, PlenioValidationError
-from ...core.sheet import DOCUMENT_KINDS, REVIEW_MODES, evaluate_sheet, needs_upstream, parse_sheet_state
+from ...core.sheet import (
+    BRIEF_REVIEW,
+    DOCUMENT_KINDS,
+    REVIEW_MODES,
+    evaluate_sheet,
+    needs_upstream,
+    parse_sheet_state,
+)
 from .. import host
 from ..types import Brief, Engine, ReportType, SheetState, TimelineType
 
@@ -70,8 +77,10 @@ class PlenioSongSheet(io.ComfyNode):
             io.Combo.Input(
                 "review",
                 options=list(REVIEW_MODES),
-                default="continue",
-                tooltip="stop for review: the documents are released only after you approve them in the editor.",
+                default=BRIEF_REVIEW,
+                tooltip="as the brief says: stop for review when the brief's mode is 'one song/cover, stop to "
+                "review', continue for 'new song/cover every run'. stop for review: the documents are released "
+                "only after you approve them in the editor. continue: never stop for review.",
             ),
             SheetState.Input(
                 "sheet_state",
@@ -138,6 +147,7 @@ class PlenioSongSheet(io.ComfyNode):
             upstream,
             owned,
             review=review,
+            brief_mode=getattr(brief, "mode", None),
             rules=rules_for(engine.engine_id) if engine is not None else None,
             engine_id=engine.engine_id if engine is not None else None,
             instrumental=bool(brief.instrumental) if brief is not None else False,
@@ -159,7 +169,15 @@ class PlenioSongSheet(io.ComfyNode):
             host.send_event(EVENT, payload)  # the editor needs the new drafts to resolve the problem
         if evaluation.conflicts:
             reasons = "; ".join(f"{doc.kind}: {doc.reason}" for doc in evaluation.resolution.conflicts)
-            raise PlenioConflictError(f"Song Sheet conflict - {reasons}.", documents=evaluation.conflicts)
+            hint = (
+                f"In the mode 'new {brief.kind} every run' each run brings a new draft: set the document to "
+                "automatic (Use draft), or make it manual - the whole series then uses your text."
+                if getattr(brief, "mode", None) == "batch"
+                else None
+            )
+            raise PlenioConflictError(
+                f"Song Sheet conflict - {reasons}.", documents=evaluation.conflicts, hint=hint
+            )
         if evaluation.has_errors:
             raise PlenioValidationError(
                 "The Song Sheet documents are not valid.",

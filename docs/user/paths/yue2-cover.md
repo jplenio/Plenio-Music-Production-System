@@ -14,10 +14,17 @@ Source -> (Excerpt) -> Transcribe Score -> Score Tools -> Song Sheet · Score
 
 1. Open **2 · YuE2 · Cover** from the template browser.
 2. Upload the source in **Source recording**. Up to 5:00 is transcribed in one pass; for longer songs enable **Excerpt** (Trim Audio Duration) and cover one part at a time.
-3. In **Cover Brief** set the target style and the **vocals**: *instrumental* (default), *original lyrics* or *new lyrics*. **harmony**: *new accompaniment* (YuE2 re-harmonises) or *keep original chords*.
+3. In **Cover Brief** choose the **mode** (below; the default *one cover, stop to review* is described here), the target style and the **vocals**: *instrumental* (default), *original lyrics* or *new lyrics*. **harmony**: *new accompaniment* (YuE2 re-harmonises) or *keep original chords*.
 4. Press **Run**. SheetSage2 transcribes the source; the run **stops at Song Sheet · Score**. Open it, check the score - above all the section names and boundaries, because the lyrics follow them - and press **Approve**.
 5. Run again. The lyrics are drafted and the run **stops at Song Sheet · Text**. Check and correct the lyrics (your text always wins), then **Approve**.
 6. Run again to render. Each further run is a new take (the take seed changes).
+
+## One cover or a series: the mode
+
+- **one cover, stop to review** (default): the two review stops above. For a transcription you have not checked this is the safe way - the lyrics follow the score's sections.
+- **new cover every run**: no stops. Every run writes a **new version** from the brief - a new title and style, and with *new lyrics* new lyrics on the same melody - and renders it; the batch count next to **Run** (App mode: *Number of runs*) makes a series with one click. The source is transcribed once and reused. With *original lyrics* the words stay the source's; with *instrumental* each version gets a new style.
+
+The two sheets' *review* is *as the brief says*. A useful mix: review the score once (set *Song Sheet · Score* to *stop for review* and approve it), then let *new cover every run* write versions on the checked score.
 
 Measured on an RTX 5060 Ti 16 GB for an 83-second source: transcription under 20 s, lyrics draft 30-80 s (the ASR model loads once), one take about 30-40 s, two takes 2 minutes including the checks.
 
@@ -56,9 +63,11 @@ For instrumental covers Plenio silences the Vocal voice of the score (the melody
 
 - **Plenio · Master** (group *FINISH*) masters the take Check Vocals keeps before Export: a gentle warm tone match and -14 LUFS with a true peak of at most -1 dBTP. Open the block to change the EQ, the loudness target or the compression style; its *sample rate* is on the block. Details: [Mastering and audio formats](../concepts/mastering.md).
 - **Export Release** writes the mastered song, the unmastered take as `(original).flac` and the release record. Formats (FLAC, MP3, WAV) and tags are set on the node.
-- **Cover Art (optional)** paints a cover from the sheet's *artwork prompt* with FLUX.2 Klein 4B (4 steps, 1024 x 1024; about 16 GB of extra model files, Apache-2.0). It is bypassed: select *Cover Art* and *Cover preview* and press **Ctrl+B**. Export saves the cover next to the song and embeds it when mutagen is installed. The cover seed is fixed, so new takes keep the cover; change the seed for another one.
+- **Cover Art (optional)** paints a cover from the sheet's *artwork prompt* with FLUX.2 Klein 4B (4 steps, 1024 x 1024; about 16 GB of extra model files, Apache-2.0). It is bypassed: select *Cover Art* and *Cover preview* and press **Ctrl+B**. Export embeds the cover in the FLAC and MP3 files and saves it next to the song as `.jpg`. The cover seed is fixed, so new takes keep the cover; change the seed for another one.
 
-This template has no App mode: its two review stops need the Song Sheet editor.
+## App mode
+
+Switch **Graph / App** at the top left for a simple form: the source file, the mode, the cover style, *vocals* with the options of an instrumental cover, *harmony*, the take seed and the buttons **Song Sheet · Score** and **Song Sheet · Text** - the two review stops work in the app, the editor opens from the buttons. The options of *original lyrics* and *new lyrics* (language, voice, theme) are set in the graph. See [App mode](../concepts/app-mode.md).
 
 ## Limits
 

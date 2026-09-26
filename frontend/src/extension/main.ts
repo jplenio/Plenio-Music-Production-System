@@ -14,6 +14,7 @@ import { chain, type ComfyApp, type ComfyNode } from '../shared/comfy'
 import type { AsrNote, SheetPayload } from '../shared/sheetSession'
 import { dynamicComboNames, restoreWidgetValues, savedWidgetValues } from './dynamicCombo'
 import { addEqCurve } from './eqWidget'
+import { MODE_BEFORE_0_2_2, migrateWidgetValues } from './migrate'
 import { setAsrNote, setPayload } from './payloads'
 import { SHEET_STATE_TYPE, setFetcher, sheetStateWidget } from './sheetStateWidget'
 import { installStyles } from './style'
@@ -35,13 +36,15 @@ setFetcher(comfyApi)
     if (!nodeData.name.startsWith('Plenio')) return
     addSummaryDisplay(nodeType)
     const combos = dynamicComboNames(nodeData.input)
-    if (combos.size) {
+    if (combos.size || nodeData.name in MODE_BEFORE_0_2_2) {
       // Frontend 1.53.6 restores the values of a node with a DynamicCombo out of order (see
       // dynamicCombo.ts). Only configure itself still sees the saved values; onConfigure does not.
+      // Values saved by an older Plenio are brought to the current layout first (migrate.ts).
       const configure = nodeType.prototype.configure
       nodeType.prototype.configure = function (this: ComfyNode, info: Record<string, unknown>) {
-        const saved = savedWidgetValues(info)
-        const result = configure?.call(this, info)
+        const current = migrateWidgetValues(nodeData, info)
+        const saved = savedWidgetValues(current)
+        const result = configure?.call(this, current)
         restoreWidgetValues(this, saved, combos)
         return result
       }

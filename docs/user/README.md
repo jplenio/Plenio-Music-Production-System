@@ -1,6 +1,6 @@
 # Plenio user guide
 
-- [Getting started](getting-started.md) - install, first run, choosing a template, how templates are laid out
+- [Getting started](getting-started.md) - install, first run, choosing a template, how templates are laid out, the two ways to work (a new song every run, or one song with review stops)
 - [Models and downloads](models.md) - which files each template needs, where they go, alternatives for smaller GPUs
 - [Configuration](configuration.md) - offline mode, downloads, worker limits
 - [Licensing](licensing.md) - what the model licences mean for your songs
@@ -16,4 +16,4 @@ Concepts:
 - [Score editor](concepts/score-editor.md) - correcting a score note by note, sections, playback and A/B
 - [Instrumental](concepts/instrumental.md) - what Plenio guarantees for instrumentals and what it checks
 - [Mastering and audio formats](concepts/mastering.md) - metering, EQ, dynamics, resampling, export formats and their limits
-- [App mode](concepts/app-mode.md) - the templates as simple forms
+- [App mode](concepts/app-mode.md) - the templates as simple forms, with the mode and the Song Sheet buttons

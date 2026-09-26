@@ -15,7 +15,19 @@ from .resolve import DocStatus, Resolution, approval_matches, resolve
 from .state import DOCUMENT_KINDS, SheetState
 
 PAYLOAD_SCHEMA = "plenio.sheet_payload/1"
-REVIEW_MODES = ("continue", "stop for review")
+BRIEF_REVIEW = "as the brief says"
+REVIEW_MODES = (BRIEF_REVIEW, "continue", "stop for review")
+"""*as the brief says* follows the brief's work mode: one song (careful) stops for review, a new song
+every run (batch) continues; without a brief it continues."""
+
+
+def effective_review(review: str, brief_mode: str | None) -> str:
+    """``continue`` or ``stop for review`` for a review setting and the brief's mode (``None``: no brief)."""
+    if review not in REVIEW_MODES:
+        raise ValueError(f"unknown review mode {review!r}")
+    if review == BRIEF_REVIEW:
+        return "stop for review" if brief_mode == "careful" else "continue"
+    return review
 
 
 @dataclass(frozen=True)
@@ -141,6 +153,7 @@ def evaluate_sheet(
     owned: Iterable[str],
     *,
     review: str = "continue",
+    brief_mode: str | None = None,
     rules: ModuleType | None = None,
     engine_id: str | None = None,
     instrumental: bool = False,
@@ -152,12 +165,12 @@ def evaluate_sheet(
 ) -> SheetEvaluation:
     """Resolve the owned documents, validate them with the engine's rules and decide the review gate.
 
-    ``context`` holds display-only documents (for example the text sheet's
+    ``review`` *as the brief says* takes the rule from ``brief_mode`` (see :func:`effective_review`);
+    the evaluation holds the rule that applies. ``context`` holds display-only documents (for example the text sheet's
     style and lyrics shown next to the score); they count for the budget but
     are validated by the sheet that owns them.
     """
-    if review not in REVIEW_MODES:
-        raise ValueError(f"unknown review mode {review!r}")
+    review = effective_review(review, brief_mode)
     kinds = tuple(k for k in DOCUMENT_KINDS if k in set(owned))
     resolution = resolve(state, upstream, kinds)
     findings: list[Finding] = []

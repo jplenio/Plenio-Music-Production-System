@@ -10,15 +10,22 @@ Song Brief -> Write Song -> Song Sheet · Text -> YuE2 Plan -> Score Tools -> So
 ## Quick start
 
 1. Open **1 · YuE2 · Song** from the template browser.
-2. In **Song Brief**, pick a template or describe the song. *length* and *vocals* (sung or instrumental) are set only here.
+2. In **Song Brief**, choose the **mode** (below), then pick a template or describe the song. *length* (1:00 to 6:00) and *vocals* (sung or instrumental) are set only here.
 3. Press **Run**. The first run downloads missing models (YuE2 3B int8, Gemma 4 E4B writer), then takes a few minutes.
 4. The mastered song appears in the preview and in `output/plenio/` as `<date> <title>.flac`, with the unmastered take `<date> <title> (original).flac` and the record `<date> <title>.plenio.json`.
 
 Measured on an RTX 5060 Ti 16 GB: about 3 minutes for a 3-minute song, including writing and planning.
 
-## New takes
+## A series or one song: the mode
 
-Run again: the **Take seed** changes, the text and the score stay the same (they are cached). To get new text, change the *draft seed* in **Write Song**; for a new score, change the *plan seed* in **YuE2 Plan**.
+| Mode | A run | Next run |
+|---|---|---|
+| **new song every run** (template default) | writes, plans and renders a song straight through - the sheets do not stop | a **different song** from the same brief: the writer is asked for a new title, story, images and hook (a new *series variation*, shown in the brief's summary) |
+| **one song, stop to review** | stops at **Song Sheet · Text**; after *Approve* and another run, at **Song Sheet · Score**; after that *Approve* the song is rendered | a **new take** of the approved song: the take seed changes, the text and the score stay (they are cached) |
+
+**Many songs with one click:** in the mode *new song every run*, set the batch count next to **Run** (App mode: *Number of runs*) to 10 and press Run once - ComfyUI queues ten runs, and each one is a new song, exported under its own title (a repeated title gets ` (2)`). The brief, the length and the vocals stay the same for the whole series.
+
+**One song, carefully:** in the mode *one song, stop to review*, nothing is rendered before you approved the text and the score. Afterwards, new takes: to get new text, change the *draft seed* in **Write Song**; for a new score, change the *plan seed* in **YuE2 Plan** (both mean reviewing again).
 
 ## Inspect and edit what YuE2 receives
 
@@ -33,7 +40,9 @@ Each **Song Sheet** shows the documents that go to YuE2, exactly as they will be
 
 In a conflict you choose: keep your edit (manual), use the new draft, or merge by hand.
 
-**Review:** set *review* on a sheet to *stop for review*. The run then stops after that sheet until you press **Approve** in the editor; approving is valid only for exactly the documents you saw.
+**Review:** the sheets' *review* is set to *as the brief says*: they stop in the mode *one song, stop to review* and continue in *new song every run*. Set a single sheet to *stop for review* or *continue* to override the brief (for example: review only the text, never the score). A stopped run waits after that sheet until you press **Approve** in the editor; approving is valid only for exactly the documents you saw.
+
+**Edits in a series:** in the mode *new song every run* each run brings a new draft, so an *edited* document conflicts on the next run. Make it *manual* instead - the whole series then uses your text (for example a fixed style line while the lyrics change).
 
 Two sheets are needed because the score is planned from the final text: **Song Sheet · Text** owns title, style, lyrics and artwork prompt; **Song Sheet · Score** owns the score and shows the text as context.
 
@@ -56,11 +65,11 @@ The audio itself is not guaranteed free of voice-like sounds. To measure it, add
 
 - **Plenio · Master** (group *FINISH*) masters every take before Export: a gentle warm tone match and -14 LUFS with a true peak of at most -1 dBTP. Open the block to change the EQ, the loudness target or the compression style; its *sample rate* is on the block. Details: [Mastering and audio formats](../concepts/mastering.md).
 - **Export Release** writes the mastered song, the unmastered take as `(original).flac` and the release record. Formats (FLAC, MP3, WAV) and tags are set on the node.
-- **Cover Art (optional)** paints a cover from the sheet's *artwork prompt* with FLUX.2 Klein 4B (4 steps, 1024 x 1024; about 16 GB of extra model files, Apache-2.0). It is bypassed: select *Cover Art* and *Cover preview* and press **Ctrl+B**. Export saves the cover next to the song and embeds it when mutagen is installed. The cover seed is fixed, so new takes keep the cover; change the seed for another one.
+- **Cover Art (optional)** paints a cover from the sheet's *artwork prompt* with FLUX.2 Klein 4B (4 steps, 1024 x 1024; about 16 GB of extra model files, Apache-2.0). It is bypassed: select *Cover Art* and *Cover preview* and press **Ctrl+B**. Export embeds the cover in the FLAC and MP3 files and saves it next to the song as `.jpg`. The cover seed is fixed, so new takes of one song keep the cover (change the seed for another one); every song of a series gets its own cover, painted from its own artwork prompt.
 
 ## App mode
 
-Switch **Graph / App** at the top left for a simple form with the brief and the take seed; see [App mode](../concepts/app-mode.md). The app runs without review stops (the sheets' default here).
+Switch **Graph / App** at the top left for a simple form with the mode, the brief, the take seed and the buttons **Song Sheet · Text** and **Song Sheet · Score** - review and editing work in the app as in the graph; see [App mode](../concepts/app-mode.md).
 
 ## Licence
 

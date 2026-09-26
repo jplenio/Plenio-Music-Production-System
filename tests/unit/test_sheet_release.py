@@ -23,7 +23,15 @@ from plenio.core.release import (
     workflow_licences,
     write_audio,
 )
-from plenio.core.sheet import DocEntry, DocState, SheetState, evaluate_sheet, normalize_document
+from plenio.core.sheet import (
+    BRIEF_REVIEW,
+    DocEntry,
+    DocState,
+    SheetState,
+    effective_review,
+    evaluate_sheet,
+    normalize_document,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 SONG = (ROOT / "tests" / "fixtures" / "abc" / "upstream-score.abc").read_text(encoding="utf-8")
@@ -121,6 +129,23 @@ def test_sheet_without_engine_checks_generic_rules() -> None:
 def test_unknown_review_mode() -> None:
     with pytest.raises(ValueError):
         evaluate_sheet(SheetState(), {}, [], review="maybe")
+
+
+@pytest.mark.parametrize(
+    ("brief_mode", "expected"),
+    [("careful", "stop for review"), ("batch", "continue"), (None, "continue")],
+)
+def test_review_as_the_brief_says(brief_mode: str | None, expected: str) -> None:
+    """0.2.2 work mode: 'one song, stop to review' stops the sheets, 'new song every run' does not;
+    a sheet without a brief continues. The payload carries the rule that applied (for the editor)."""
+    assert effective_review(BRIEF_REVIEW, brief_mode) == expected
+    assert effective_review("continue", "careful") == "continue"  # an explicit setting wins
+    assert effective_review("stop for review", "batch") == "stop for review"
+    evaluation = evaluate_sheet(
+        SheetState(), {"lyrics": LYRICS}, ["lyrics"], review=BRIEF_REVIEW, brief_mode=brief_mode
+    )
+    assert evaluation.review == expected and evaluation.payload()["review"] == expected
+    assert evaluation.waiting_for_approval is (expected == "stop for review")
 
 
 # --- release -------------------------------------------------------------------------

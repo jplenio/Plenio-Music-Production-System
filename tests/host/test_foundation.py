@@ -174,6 +174,7 @@ def test_cached_nodes_send_their_summary_again(server: ComfyServer) -> None:
         "1": {
             "class_type": "PlenioSongBrief",
             "inputs": {
+                "mode": "one song, stop to review",
                 "template": "none",
                 "description": f"A cached summary {uuid.uuid4().hex[:6]}",
                 "genre": "piano pop",

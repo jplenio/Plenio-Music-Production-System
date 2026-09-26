@@ -17,7 +17,7 @@ Nothing else changes: Brief, Compose, Parse, Song Sheet and the editor adapt thr
 
 ## New template
 
-1. A function in `tools/build_graphs.py` that returns the graph and its App configuration (`App`: widget list and output nodes); follow the anatomy of the existing templates (numbered groups, one *About this template* note, collapsed model block, *(optional)* titles for bypassed blocks).
+1. A function in `tools/build_graphs.py` that returns the graph and its App configuration (`App`: widget list and output nodes); follow the anatomy of the existing templates (numbered groups, one *About this template* note, collapsed model block, *(optional)* titles for bypassed blocks). Song Sheets come from `song_sheet()` (review *as the brief says*, the title as the editor button's label) and belong into the app, the brief's *mode* first (`tests/workflows/test_graphs.py::test_app_configurations`).
 2. `python tools/build_graphs.py`, `python tools/build_thumbnails.py` (needs Pillow), `python tools/workflow_validation.py`. Never edit the JSON by hand.
 3. Model files the template loads: `templates` / `optional_templates` in `resources/models.toml` (the System Check's readiness table follows).
 

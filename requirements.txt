@@ -4,4 +4,4 @@
 #
 # Nothing extra is needed. Optional features declare their own install
 # command in the error they raise (see docs/dev/coding-standards.md); for example
-# mutagen (GPL-2.0, embeds cover art) is optional and never installed by Plenio.
+# faster-whisper (MIT, lyrics transcription of covers) is optional and never installed by Plenio.

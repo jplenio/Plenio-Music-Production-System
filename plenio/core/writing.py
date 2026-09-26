@@ -171,6 +171,7 @@ def compose(
             )
         )
     parts.append("- Artwork: one sentence describing a square cover image; no text or letters in the image.")
+    parts += series_lines(brief)
     if DETAIL.get(detail):
         parts.append(f"- {DETAIL[detail]}")
     example = lyrics_rules.tags_only(sections) if brief.instrumental else f"[{sections[0]}]\n<lines>\n..."
@@ -340,10 +341,39 @@ def _compose_cover(
         parts.append(f"- Lyrics: {reason}; write only the word none after LYRICS:.")
         example = "none"
     parts.append("- Artwork: one sentence describing a square cover image; no text or letters in the image.")
+    parts += series_lines(brief)
     if DETAIL.get(detail):
         parts.append(f"- {DETAIL[detail]}")
     parts += [*_example_style(rules), "", *_layout(example, multiline=bool(rules.get("style_multiline")))]
     return "\n".join(parts), request
+
+
+SERIES_ANGLES = (
+    "a personal story told in the first person",
+    "a portrait of someone else, seen from the outside",
+    "one single moment, described in close-up",
+    "a journey from one place to another",
+    "words addressed directly to someone",
+    "a memory, looking back",
+    "a place or an object that carries the feeling",
+    "a turning point: before and after",
+)
+"""Batch mode: one of these is suggested per song, so a series from one brief does not repeat itself."""
+
+
+def series_lines(brief: Any) -> list[str]:
+    """The writer's rule for a song of a batch series (``brief.variation`` set); nothing otherwise."""
+    variation = getattr(brief, "variation", None)
+    if variation is None:
+        return []
+    lines = [
+        f"- Series: this brief is used for a series of different songs (variation {variation}). Write a new "
+        "song with its own title, story, images and hook - not the first idea that comes to mind."
+    ]
+    if not brief.instrumental and getattr(brief, "vocals", "") != "original":
+        angle = SERIES_ANGLES[variation % len(SERIES_ANGLES)]
+        lines.append(f"- Angle for this song, if it fits the brief: {angle}.")
+    return lines
 
 
 def _strip_thinking(text: str) -> tuple[str, bool]:

@@ -78,6 +78,7 @@ def brief(vocals: str) -> dict[str, Any]:
     return {
         "class_type": "PlenioSongBrief",
         "inputs": {
+            "mode": "one song, stop to review",
             "template": "none",
             "description": "A short, bright song about a slow morning at home.",
             "genre": "acoustic pop",

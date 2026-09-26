@@ -11,7 +11,7 @@
 - **Comfy CLI:** `comfy node install comfyui-plenio-music`.
 - **By hand:** `git clone https://github.com/jplenio/Plenio-Music-Production-System` inside `ComfyUI/custom_nodes`, then restart ComfyUI.
 
-Plenio installs no Python packages. Optional: `python -m pip install faster-whisper` (covers with lyrics) and `python -m pip install mutagen` (cover art embedded in the files), in the Python that runs ComfyUI.
+Plenio installs no Python packages. Optional: `python -m pip install faster-whisper` (covers with lyrics), in the Python that runs ComfyUI. Cover art is embedded in FLAC and MP3 without any extra package.
 
 ## First run
 
@@ -50,20 +50,29 @@ Every template reads from left to right in numbered groups, with the same anatom
 - The **MUSIC MODEL** block is collapsed: expand it (the dot at its top left, or right-click > *Expand*), then open it with the icon at its top right to change the model files.
 - **Plenio · Master** finishes every song (tone match, -14 LUFS / -1 dBTP) before Export; Export also keeps the unmastered take as `(original).flac`.
 
+## Two ways to work
+
+The first field of the **Song Brief** - and of the **Cover Brief** - is the **mode**. It decides what a run does:
+
+- **new song every run** (default of the song templates): every run writes and renders a **different song** from the same brief, without stopping. To make a series with one click, set the batch count next to **Run** (in App mode: *Number of runs*) - ten runs, ten songs, each exported under its own title (a repeated title gets ` (2)`, ` (3)`, ...).
+- **one song, stop to review**: the run stops at each **Song Sheet**. Open it, check or edit the documents, press *Approve*, and run again; YuE2 stops twice (text, then score). Once everything is approved, every further run is a **new take** of the same song.
+
+The cover template offers *one cover, stop to review* (its default) and *new cover every run* (a new title, style and - for new lyrics - new lyrics on the same transcription every run). The Song Sheets' *review* is set to **as the brief says**; set a single sheet to *continue* or *stop for review* to override the brief.
+
 ## Where your songs go
 
 Export writes into ComfyUI's output folder, `output/plenio/` (Enhance & Master: `output/plenio/enhanced/`):
 
 - `<date> <title>.flac` (and MP3/WAV if chosen) - the mastered song, with tags
 - `<date> <title> (original).flac` - the unmastered take
-- `<date> <title>.jpg` - the cover, if Cover Art is on
+- `<date> <title>.jpg` - the cover, if Cover Art is on (it is also embedded in the FLAC and MP3 files)
 - `<date> <title>.plenio.json` - the release record: the documents, seeds and settings of the run, reports, measured loudness and model licences
 
 (Enhance & Master names the files after the title alone; change *naming* in Export as you like.)
 
 ## App mode
 
-Templates 0, 1, 3 and 4 also work as a simple form: switch **Graph / App** at the top left of the canvas. The app shows the brief (or the file), the take seed and the results; see [App mode](concepts/app-mode.md). Use the graph view to review and edit Song Sheets.
+Every template also works as a simple form: switch **Graph / App** at the top left of the canvas. The app shows the mode, the brief (or the file), the take seed, buttons that open the Song Sheets - for review and editing, as in the graph - and the results; see [App mode](concepts/app-mode.md).
 
 ## Next steps
 

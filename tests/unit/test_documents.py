@@ -7,10 +7,20 @@ from pathlib import Path
 import pytest
 
 from plenio.core import lyrics
-from plenio.core.brief import LENGTHS, TemplateLibrary, build_song_brief, parse_template, resolve_length
+from plenio.core.brief import (
+    COVER_MODES,
+    LENGTHS,
+    SONG_MODES,
+    TemplateLibrary,
+    build_cover_brief,
+    build_song_brief,
+    parse_template,
+    resolve_length,
+    resolve_mode,
+)
 from plenio.core.engines import EngineInfo, rules_for, yue2
 from plenio.core.errors import PlenioModelError, PlenioUserError, PlenioValidationError
-from plenio.core.writing import compose, parse_draft
+from plenio.core.writing import SERIES_ANGLES, compose, parse_draft
 
 ROOT = Path(__file__).resolve().parents[2]
 SONG = (ROOT / "tests" / "fixtures" / "abc" / "upstream-score.abc").read_text(encoding="utf-8")
@@ -326,11 +336,12 @@ def test_real_writer_answers_are_parsed(name: str, title: str, inferred: bool) -
 @pytest.mark.parametrize(
     ("value", "expected"),
     [
-        ("2-3 minutes", "standard (about 3:00)"),  # the predecessor toolkit's length options
-        ("30 seconds", "short (about 1:30)"),
+        ("2-3 minutes", "about 2:30"),  # the predecessor toolkit's length options
+        ("30 seconds", "very short (about 1:00)"),
         ("4-5 minutes", "long (about 4:30)"),
-        ("3:30", "standard (about 3:00)"),
+        ("3:20", "about 3:30"),
         ("90 s", "short (about 1:30)"),
+        ("10 minutes", "very long (about 6:00)"),
     ],
 )
 def test_a_free_form_length_takes_the_nearest_option(value: str, expected: str) -> None:
@@ -342,3 +353,52 @@ def test_a_free_form_length_takes_the_nearest_option(value: str, expected: str) 
     assert build_song_brief({"genre": "pop", "length": value}).length == expected
     with pytest.raises(PlenioUserError, match="Unknown length"):
         resolve_length("quick")
+
+
+def test_every_length_reaches_the_writer_and_the_render_headroom() -> None:
+    """0.2.2: ten lengths from 1:00 to 6:00 instead of three; each one changes the plan it asks for."""
+    from plenio.core.engines import minimax
+
+    assert list(LENGTHS.values()) == sorted(LENGTHS.values()) and len(LENGTHS) == 10
+    assert {"short (about 1:30)", "standard (about 3:00)", "long (about 4:30)"} <= set(LENGTHS)  # templates
+    lines = []
+    for length, seconds in LENGTHS.items():
+        brief = build_song_brief({"genre": "pop", "length": length})
+        assert brief.target_seconds == seconds and brief.max_seconds > seconds
+        lines.append(yue2.lyric_lines(seconds))
+        assert minimax.render_ceiling(brief.max_seconds) <= minimax.MAX_SECONDS
+    assert lines == sorted(lines) and lines[0] < lines[-1]
+
+
+# --- 0.2.2: work mode --------------------------------------------------------------------------
+
+
+def test_work_modes() -> None:
+    assert set(SONG_MODES.values()) == set(COVER_MODES.values()) == {"batch", "careful"}
+    assert (
+        resolve_mode("new song every run") == "batch"
+        and resolve_mode("one cover, stop to review") == "careful"
+    )
+    assert resolve_mode("") == "careful" and resolve_mode("batch") == "batch"
+    with pytest.raises(PlenioUserError, match="Unknown mode"):
+        resolve_mode("sometimes")
+    careful = build_song_brief({"genre": "pop"}, mode="one song, stop to review", variation=7)
+    assert careful.mode == "careful" and careful.variation is None  # careful: always the same brief
+    assert build_song_brief({"genre": "pop"}) == careful  # the default of older callers
+    batch = build_song_brief({"genre": "pop"}, mode="new song every run", variation=7)
+    assert batch.mode == "batch" and batch.variation == 7 and batch.fingerprint != careful.fingerprint
+    assert batch.to_dict()["mode"] == "batch"  # recorded in the release record
+    cover = build_cover_brief({"genre": "folk"}, mode="new cover every run", variation=3)
+    assert (cover.mode, cover.variation) == ("batch", 3)
+
+
+def test_a_series_asks_the_writer_for_a_different_song_each_run() -> None:
+    values = {"genre": "indie pop", "vocals": "sung", "language": "English"}
+    careful, _ = compose(build_song_brief(values), ENGINE)
+    assert "Series" not in careful and "Angle" not in careful
+    prompts = [compose(build_song_brief(values, mode="batch", variation=v), ENGINE)[0] for v in (1, 2)]
+    assert all("variation" in p and "Series" in p for p in prompts)
+    assert prompts[0] != prompts[1] and SERIES_ANGLES[1] in prompts[0] and SERIES_ANGLES[2] in prompts[1]
+    instrumental = build_song_brief({"genre": "ambient", "vocals": "instrumental"}, mode="batch", variation=1)
+    prompt, _ = compose(instrumental, ENGINE)
+    assert "Series" in prompt and "Angle" not in prompt  # no story for an instrumental

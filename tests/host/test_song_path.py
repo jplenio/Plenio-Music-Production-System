@@ -38,6 +38,7 @@ def song_prompt(
     plan_seed: int = 0,
     take_seed: int = 1,
     vocals: str = "sung",
+    mode: str = "one song, stop to review",
 ) -> dict[str, Any]:
     vocals_inputs = (
         {"vocals.language": "English", "vocals.voice": "", "vocals.theme": ""}
@@ -48,6 +49,7 @@ def song_prompt(
         "1": {
             "class_type": "PlenioSongBrief",
             "inputs": {
+                "mode": mode,
                 "template": "none",
                 "description": f"A song about rain ({label})",
                 "genre": "piano pop",
@@ -221,6 +223,54 @@ def test_review_gate_blocks_and_releases(server: ComfyServer, log: Log) -> None:
     )
     assert events(log, "llm") == []  # draft cached; only the sheet re-ran
     assert len(events(log, "plan")) == 1 and len(events(log, "render")) == 1
+
+
+def test_new_song_every_run_writes_a_new_song_without_stops(server: ComfyServer, log: Log) -> None:
+    """0.2.2 work mode *new song every run*: the identical prompt queued twice (the Run button's batch
+    count) writes and renders two songs; the sheets (*as the brief says*) do not stop."""
+    name = label()
+    prompt = song_prompt(
+        label=name,
+        mode="new song every run",
+        text_review="as the brief says",
+        score_review="as the brief says",
+    )
+    entries = [server.run(prompt), server.run(prompt)]
+    prompts = [e["prompt"] for e in events(log, "llm")]
+    assert len(prompts) == 2 and prompts[0] != prompts[1] and all("Series:" in p for p in prompts)
+    assert len(events(log, "plan")) == 2 and len(events(log, "render")) == 2
+    for entry in entries:
+        assert sheet_payload(entry, "6")["review"] == "continue" and not sheet_payload(entry, "9")["waiting"]
+    folder = server.output_dir / "plenio-test" / name
+    assert (folder / "Neon Rain.flac").is_file() and (folder / "Neon Rain (2).flac").is_file()  # nothing lost
+    summary = entries[1]["outputs"]["1"]["plenio_summary"][0]["markdown"]
+    assert "new song every run" in summary and "variation" in summary
+    # an edit made on an earlier song's draft conflicts; the error explains what a series does
+    edited = {"lyrics": {"state": "edited", "text": "[Verse]\nMine", "base_sha256": "0" * 64}}
+    stale = song_prompt(label=name, mode="new song every run", text_state=sheet_state(edited))
+    message = server.run_expect_error(stale)["exception_message"]
+    assert "conflict" in message and "new song every run" in message and "manual" in message
+
+
+def test_one_song_stops_at_both_sheets_as_the_brief_says(server: ComfyServer, log: Log) -> None:
+    """0.2.2 work mode *one song, stop to review*: text, then score are approved; afterwards every run
+    is a new take of the same song (brief and documents cached)."""
+    name = label()
+    follow = {"text_review": "as the brief says", "score_review": "as the brief says"}
+    first = server.run(song_prompt(label=name, **follow))
+    text = sheet_payload(first, "6")
+    assert text["review"] == "stop for review" and text["waiting"] and events(log, "plan") == []
+    text_state = sheet_state(approved=text["fingerprint"])
+    second = server.run(song_prompt(label=name, text_state=text_state, **follow))
+    score = sheet_payload(second, "9")
+    assert score["waiting"] and events(log, "render") == [] and len(events(log, "llm")) == 1
+    score_state = sheet_state(approved=score["fingerprint"])
+    server.run(song_prompt(label=name, text_state=text_state, score_state=score_state, **follow))
+    assert [e["seed"] for e in events(log, "render")] == [1]
+    log.clear()
+    server.run(song_prompt(label=name, text_state=text_state, score_state=score_state, take_seed=2, **follow))
+    assert events(log, "llm") == [] and events(log, "plan") == []
+    assert [e["seed"] for e in events(log, "render")] == [2]
 
 
 def test_edited_score_survives_takes_and_conflicts_with_a_new_plan(server: ComfyServer, log: Log) -> None:

@@ -4,9 +4,25 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 ## 0.2.2 - 2026-09-26
 
+### Added
+
+- **Work mode** - the new first field of Song Brief and Cover Brief:
+  - *new song every run* (default of the song templates) / *new cover every run*: every run writes and renders a different song from the same brief without stopping - the brief draws a new *series variation* each run, and the writer is asked for a new title, story, images and hook (with a changing angle for sung songs). Queue several runs (batch count next to Run, App mode *Number of runs*) for a series with one click; every song is exported under its own name. A cover series reuses the source's transcription.
+  - *one song, stop to review* / *one cover, stop to review* (default of the cover template): the Song Sheets stop for review; once approved, every run is a new take of the same song.
+- Song Sheet *review*: new option **as the brief says** (the new default, used by all templates) - stops in the brief's *stop to review* mode, continues in *every run* and without a brief; *continue* and *stop for review* still override it per sheet. The sheet payload and report hold the rule that applied; `/plenio/sheet/resolve` accepts an optional `brief_mode`.
+- **App mode**: the song apps start with the mode and include the Song Sheet buttons (labelled with the sheet's title) - the editor opens from the app, so reviewing and approving work without the graph. **2 · YuE2 · Cover** has an app now (source file, mode, cover style, take seed, both sheets; all takes, the mastered song and the export).
+- Song Brief **lengths**: ten options instead of three - *very short (about 1:00)*, *short (about 1:30)*, *about 2:00*, *about 2:30*, *standard (about 3:00)*, *about 3:30*, *about 4:00*, *long (about 4:30)*, *about 5:00*, *very long (about 6:00)*. The writer's section plan and line count, the render headroom and the engines' ceilings follow the seconds; the three earlier names are unchanged, so existing workflows and templates keep their values.
+
+### Changed
+
+- **Cover art is embedded by Plenio itself** into FLAC (picture block) and MP3 (ID3 APIC) - the mastered files and the `(original).flac` - with every tag option (*title only*, *tags*, *copy from loaded file*). The optional GPL package mutagen is no longer used; the System Check lists `faster-whisper` as the optional package instead. Embedding twice replaces the picture, other tags are kept.
+- Node summaries (Song Brief, Cover Brief, EQ, Loudness, Score Tools, ...) stay current: ComfyUI re-sends the summary of a cached node on every run (`has_intermediate_output`), and the last summary is kept in the node, so it is back after a reload, a tab switch or App mode. Before, a cached node showed its summary only after the run that executed it.
+- Workflows saved with 0.2.0/0.2.1: the frontend inserts the new *mode* of Song Brief and Cover Brief when a workflow is loaded (as *one song/one cover, stop to review* - their earlier behaviour: the same song, new takes); the sheets keep their saved *review*. API-format prompts need the new `mode` input.
+- A Song Sheet conflict in the mode *new song every run* explains that a series brings a new draft every run (make the document manual, or use the draft).
+
 ### Fixed
 
-- Song Brief: a length that is not one of the three options - for example `2-3 minutes`, which ComfyUI can carry over from a run of the predecessor toolkit (App mode *Reuse Parameters*, an old job's parameters) - stopped the whole prompt at validation with the same error on every input. A free-form duration now takes the nearest option (`2-3 minutes` -> *standard (about 3:00)*), and the node shows a note; text that names no duration is still refused.
+- Song Brief: a length that is not one of the options - for example `2-3 minutes`, which ComfyUI can carry over from a run of the predecessor toolkit (App mode *Reuse Parameters*, an old job's parameters) - stopped the whole prompt at validation with the same error on every input. A free-form duration now takes the nearest option (`2-3 minutes` -> *about 2:30*), and the node shows a note; text that names no duration is still refused.
 
 ## 0.2.1 - 2026-09-25
 

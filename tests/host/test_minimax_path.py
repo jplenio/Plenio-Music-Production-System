@@ -37,6 +37,7 @@ def minimax_prompt(
         "1": {
             "class_type": "PlenioSongBrief",
             "inputs": {
+                "mode": "one song, stop to review",
                 "template": "none",
                 "description": f"A song about rain ({label})",
                 "genre": "dream pop",

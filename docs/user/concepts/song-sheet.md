@@ -25,11 +25,19 @@ Each shows the other's documents as read-only context and checks against them: i
 
 ## Review
 
-*review* = **stop for review** stops the run after the sheet until you **Approve** in the editor. The approval is bound to exactly the documents you saw (a fingerprint); if anything changes, the sheet waits again. The Cover template stops at both sheets by default.
+| *review* | The sheet stops for approval |
+|---|---|
+| **as the brief says** (default) | when the brief's **mode** is *one song, stop to review* or *one cover, stop to review*; not in *new song every run* / *new cover every run*; not without a brief |
+| **stop for review** | always |
+| **continue** | never |
+
+A stopped run waits after the sheet until you **Approve** in the editor. The approval is bound to exactly the documents you saw (a fingerprint); if anything changes, the sheet waits again. The templates set every sheet to *as the brief says*, so the mode in the brief decides for the whole path: the song templates start with *new song every run* (no stops), the cover template with *one cover, stop to review* (both sheets stop).
+
+**Edits in a series:** in the mode *new song every run* every run brings a new draft, so an *edited* document conflicts on the next run (the error says so). Use *manual* for a text the whole series should keep, or *Use draft* to let the series write it.
 
 ## The editor
 
-**Edit Song Sheet…** opens the editor with the draft, your text, the state badges and the findings of the engine's rules (updated while you type). It also shows:
+**Edit Song Sheet…** (on the node, and in App mode on the sheet's button) opens the editor with the draft, your text, the state badges and the findings of the engine's rules (updated while you type). It also shows:
 
 - **Changes against the draft**, word by word;
 - for ASR lyrics, the **unsure words** and what the ASR **left out** as not sung;

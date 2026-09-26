@@ -25,7 +25,7 @@ A cover image made with the optional Cover Art block (FLUX.2 Klein 4B) is under 
 
 ## Optional Python packages
 
-Plenio installs no Python packages. **mutagen**, which embeds cover art into FLAC and MP3, is optional and GPL-2.0-or-later; Plenio only imports it when you installed it yourself. Without it the cover is saved next to the audio.
+Plenio installs no Python packages. Cover art is embedded into FLAC and MP3 by Plenio's own code (since 0.2.2; earlier versions used the optional GPL package mutagen, which is no longer used). The optional **faster-whisper** (MIT) is only needed for covers with lyrics.
 
 ## Covers
 

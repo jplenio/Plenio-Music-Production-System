@@ -21,6 +21,8 @@ Free description of the song (sent to the writing model).
 
 Other fields: `mood`, `key`, `melody` (`instrument plays the lead` / `accompaniment only`), `lead_instrument`.
 
+`length` accepts every option of the Song Brief (since 0.2.2 from `very short (about 1:00)` to `very long (about 6:00)`); the shipped templates use the three named ones above. The work mode is not part of a template: it belongs to the workflow, not to the song.
+
 ## Provenance
 
 The 239 templates were imported once (2026-09-25) from the legacy toolkit's `prompts/user` library with `tools/import_legacy_templates.py` and then edited:

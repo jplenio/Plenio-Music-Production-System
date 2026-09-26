@@ -2,13 +2,13 @@
 
 The single place that decides which documents condition the music model. What leaves the sheet reaches the model unchanged, and the release record stores exactly these texts.
 
-Press **Edit Song Sheet…** to see and edit the documents:
+Press **Edit Song Sheet…** (also available in App mode) to see and edit the documents:
 
 - **auto** - the upstream draft is used.
 - **edited** - your edit is used while its draft is unchanged. When the draft changes, the run stops with a **conflict** so that your edit is never replaced silently.
 - **manual** - your text is always used and the upstream draft is not computed (for lyrics in a cover: the ASR does not run).
 
-**review** = *stop for review* holds the documents back until you **Approve** exactly what you see.
+**review** - *as the brief says* (default) stops when the connected brief's mode is *one song / one cover, stop to review* and continues for *new song / new cover every run* (and without a brief); *stop for review* always holds the documents back until you **Approve** exactly what you see; *continue* never stops. In a series (*new song every run*) an *edited* document conflicts with the next run's new draft - make it *manual* to keep it for the whole series.
 
 The sheet validates the documents with the rules of the connected engine (style, lyrics, score, exact token budget). With MiniMax Music 3 the style document is the **caption** (Global Metadata, Vocal Details, Arrangement); caption and lyrics must stay under 5 000 tokens, counted exactly with the loaded text encoder, and the render ceiling follows the brief (at most 6:00). For a score it also outputs the render mode (chords -> full, otherwise melody), a render ceiling derived from the score's length and the score's **section tags** (the lyrics of an instrumental cover).
 

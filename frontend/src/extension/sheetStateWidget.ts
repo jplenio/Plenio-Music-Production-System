@@ -61,7 +61,9 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
     const connected = inputs.filter((slot) => slot.link != null).map((slot) => slot.name)
     const current = state ?? { schema: 'plenio.sheet_state/1' as const, docs: {} }
     const owned = payload?.owned ?? ownedBeforeRun(connected, current)
-    const review = String(node.widgets?.find((w) => w.name === 'review')?.value ?? 'continue')
+    // 'as the brief says' is resolved by the backend: the rule of the last run applies
+    const setting = String(node.widgets?.find((w) => w.name === 'review')?.value ?? 'continue')
+    const review = setting === 'as the brief says' ? (payload?.review ?? 'continue') : setting
     const { openSheetDialog } = await import('../sheet-editor/open')
     if (!fetcher) throw new Error('Plenio: API not initialised')
     openSheetDialog({

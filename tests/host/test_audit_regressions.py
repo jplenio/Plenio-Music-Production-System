@@ -144,6 +144,7 @@ def test_a_free_form_length_passes_validation_with_a_note(server: ComfyServer) -
         "1": {
             "class_type": "PlenioSongBrief",
             "inputs": {
+                "mode": "one song, stop to review",
                 "template": "none",
                 "description": "A song about rain",
                 "genre": "piano pop",
@@ -161,6 +162,6 @@ def test_a_free_form_length_passes_validation_with_a_note(server: ComfyServer) -
         "2": {"class_type": "PlenioTestSink", "inputs": {"value": ["1", 1], "label": "brief"}},
     }
     entry = server.run(prompt)
-    assert "standard (about 3:00)" in entry["outputs"]["2"]["received"][0]
+    assert "about 2:30" in entry["outputs"]["2"]["received"][0]
     summary = entry["outputs"]["1"]["plenio_summary"][0]
     assert summary["status"] == "warning" and "2-3 minutes" in summary["markdown"]

@@ -4,7 +4,7 @@
 |---|---|
 | Date | 2026-09-25 |
 | Written for | the return from the Claude Code cloud session to the owner's Windows machine (the real-model pass that the Phase 10 acceptance depends on) |
-| Overall phase | **Phase 10 done (accepted with conditions); release 0.2.0 prepared** - publishing steps with the owner |
+| Overall phase | **Phase 10 done (accepted with conditions); 0.2.0 and 0.2.1 released; 0.2.2 prepared** (section 0) |
 | Sub-phase | - (hard stop after Phase 10) |
 | Phases done | 1A, 1B (design), 2 (Foundation), 3 (YuE2 Core), 4A (Cover/Instrumental design gate), 4B (YuE2 Cover), 5 (Score / ABC editor), 9 (audit), 10 (acceptance review); 6 (MiniMax), 7 (Audio production chain) and 8 (Main workflows and UX) implemented, their real-model checks open |
 | Prompt set | `D:\Daten2\Deepseek\ComfyUI-MiniMax\Plenio_Music_Production_System_Refactor_Prompts\` on the owner's machine (not in this repository): `01_PHASE_1A` ... `12_PHASE_10`, one phase per prompt, hard stop after each phase, the next phase only on the owner's explicit authorization |
@@ -12,6 +12,16 @@
 Read with: the [Phase 10 acceptance report](../audit/2026-09-25-phase-10-acceptance.md) (verdict, conditions, limitations), [README.md](README.md) (design index), [implementation-roadmap.md](implementation-roadmap.md), [docs/dev/extending.md](../dev/extending.md), [score-editor-design.md](score-editor-design.md) (§15 = Phase 5 implementation record), [target-architecture.md](target-architecture.md) §0/§2/§18, the test reports [phase 6](../test-reports/2026-09-25-phase-6.md), [phase 7](../test-reports/2026-09-25-phase-7.md) and [phase 8](../test-reports/2026-09-25-phase-8.md), the [usability review](usability-review.md) and the [Phase 9 audit](../audit/2026-09-25-phase-9-audit.md).
 
 ---
+
+## 0. Releases after the acceptance review
+
+- **0.2.1** (2026-09-25): renamed branding images (Registry icon and banner).
+- **0.2.2** (2026-09-26, owner's requests after the first real use; details in `CHANGELOG.md`):
+  - **Work mode** as the first field of Song Brief and Cover Brief: *new song every run* (batch - `fingerprint_inputs` re-runs the brief every time, the brief carries a random *series variation*, `plenio.core.writing.series_lines` asks the writer for a new song with a rotating angle) and *one song, stop to review* (careful - constant brief, the Song Sheets stop). The Song Sheet's new review option *as the brief says* (`plenio.core.sheet.effective_review`) makes the brief decide for all sheets; the templates use it. Workflows saved before get the careful mode on load (`frontend/src/extension/migrate.ts`).
+  - **App mode**: the Song Sheet's DOM widget (the *Edit Song Sheet…* button) works in App mode (verified in the browser with frontend 1.52.7: stop, open, Approve, run again); the song apps show the mode and the sheet buttons, and the cover template has an app now.
+  - Ten **lengths** (1:00 ... 6:00); the engines were already continuous in seconds.
+  - **Cover art** embedded by Plenio's own FLAC/ID3 writer (`plenio.core.release.embed_cover`) for every tag option; mutagen is no longer used.
+  - Node **summaries** re-sent for cached nodes (`has_intermediate_output`) and kept in the node's properties across reloads.
 
 ## 1. What has been completed
 
