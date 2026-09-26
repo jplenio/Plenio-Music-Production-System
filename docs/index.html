@@ -251,6 +251,16 @@
   const HUES={Pop:215,Rock:12,Alternative:275,Soul:330,Punk:350,African:32,Asian:190,World:160,Reggae:120,Ambient:245,Seasonal:0};
   function hueOf(key){if(key in HUES)return HUES[key];let h=0;for(const c of String(key))h=(h*31+c.charCodeAt(0))%360;return h}
 
+  // Artwork of a SoundCloud track (oEmbed), for songs whose cover is not stored in the repository.
+  const artCache=new Map();
+  function soundcloudArtwork(url){
+    const key=String(url).trim();
+    if(!artCache.has(key))artCache.set(key,fetch('https://soundcloud.com/oembed?format=json&url='+encodeURIComponent(key))
+      .then(r=>r.ok?r.json():null).then(d=>d?.thumbnail_url?String(d.thumbnail_url).replace(/-(large|t\d+x\d+)\./,'-t500x500.'):'')
+      .catch(()=>''));
+    return artCache.get(key);
+  }
+
   function iframe(url,title,autoplay){
     const f=document.createElement('iframe');f.loading='lazy';f.allow='autoplay';f.title=`${title} — SoundCloud player`;f.src=scSrc(url,autoplay);return f;
   }
@@ -264,7 +274,9 @@
     fb.style.background=`radial-gradient(circle at 28% 22%,hsl(${hue} 70% 58% / .75),transparent 58%),radial-gradient(circle at 80% 85%,hsl(${(hue+50)%360} 65% 45% / .7),transparent 55%),linear-gradient(160deg,hsl(${hue} 35% 18%),hsl(${(hue+30)%360} 30% 9%))`;
     fb.innerHTML=`<div class="g">${esc(genre)}</div><div class="s">${esc(family||'')}</div>`;
     artEl.append(fb);
-    if(art){const img=new Image();img.alt=`Cover art for ${title}`;img.loading='lazy';img.decoding='async';img.onload=()=>fb.remove();img.onerror=()=>img.remove();img.src=assetUrl(art);artEl.prepend(img)}
+    const showArt=src=>{const img=new Image();img.alt=`Cover art for ${title}`;img.loading='lazy';img.decoding='async';img.onload=()=>fb.remove();img.onerror=()=>img.remove();img.src=src;artEl.prepend(img)};
+    if(art)showArt(assetUrl(art));
+    else if(isSC(url))soundcloudArtwork(url).then(src=>{if(src)showArt(src)});
     if(num){const n=document.createElement('span');n.className='num';n.textContent=num;artEl.append(n)}
     const player=document.createElement('div');player.className='player';player.hidden=true;
     if(isSC(url)){
@@ -287,7 +299,8 @@
 
   // ============================== Plenio 0.2.2 · YuE2 ==============================
   const pCfg=window.PLENIO_DEMO_CONFIG||{};
-  const pAll=[...(window.PLENIO_DEMO_SONGS||[])].sort((a,b)=>(a.showcaseOrder||999)-(b.showcaseOrder||999));
+  // Songs appear once they are on SoundCloud; the catalog keeps the others for later.
+  const pAll=[...(window.PLENIO_DEMO_SONGS||[])].filter(t=>isSC(t.soundcloudUrl)).sort((a,b)=>(a.showcaseOrder||999)-(b.showcaseOrder||999));
   const pFamilies=[...new Set(pAll.map(t=>t.group).filter(Boolean))];
   const pGenres=new Set(pAll.map(t=>t.genre));
   const pVocal=pAll.filter(t=>t.type==='Vocal').length;
@@ -326,7 +339,7 @@
   }
   function plenioCard(t){
     return albumCard({
-      num:String(t.showcaseOrder).padStart(2,'0'),title:t.title,titleLang:LANG[t.language]||'',url:t.soundcloudUrl,art:t.coverArt,
+      num:String(pAll.indexOf(t)+1).padStart(2,'0'),title:t.title,titleLang:LANG[t.language]||'',url:t.soundcloudUrl,art:t.coverArt,
       family:t.group,genre:t.genre,sub:`${t.genre} · ${t.group}`,
       badges:[typeBadge(t.type),t.language,t.bpm?`${t.bpm} BPM`:'',t.key?`Key ${t.key}`:'',t.seconds?mmss(t.seconds):''],
       desc:t.comment||'',details:plenioDetails(t)});

@@ -8,11 +8,12 @@
 // 1. Upload the MP3 named in "uploadFile" to SoundCloud, public, into one playlist.
 // 2. Paste the NORMAL SoundCloud track URL into that track's "soundcloudUrl".
 // 3. Paste the playlist URL into "soundcloudPlaylistUrl" below.
-// 4. Copy the JPG named in "coverFile" into docs/assets/demo-plenio/ (file names unchanged).
+// Only tracks with a soundcloudUrl are shown on the page. Their cover is the SoundCloud artwork,
+// unless the JPG named in "coverFile" is stored in docs/assets/demo-plenio/ (then run the tool again).
 //
 window.PLENIO_DEMO_CONFIG = {
   "artist": "Pelenio",
-  "soundcloudPlaylistUrl": "",
+  "soundcloudPlaylistUrl": "https://soundcloud.com/pelenio/sets/yue2-songs-one-ai-song-per",
   "album": "World of AI Music"
 };
 
@@ -54,7 +55,7 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Faded Light On Coastline.mp3",
     "coverFile": "2026-09-26 Faded Light On Coastline.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Faded Light On Coastline.jpg",
+    "coverArt": "",
     "soundcloudUrl": "",
     "comment": ""
   },
@@ -95,7 +96,7 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Neuer Weg Jetzt Beginnen.mp3",
     "coverFile": "2026-09-26 Neuer Weg Jetzt Beginnen.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Neuer Weg Jetzt Beginnen.jpg",
+    "coverArt": "",
     "soundcloudUrl": "",
     "comment": ""
   },
@@ -136,8 +137,8 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Corner Booth Sunlight Glow.mp3",
     "coverFile": "2026-09-26 Corner Booth Sunlight Glow.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Corner Booth Sunlight Glow.jpg",
-    "soundcloudUrl": "",
+    "coverArt": "",
+    "soundcloudUrl": "https://soundcloud.com/pelenio/corner-booth-sunlight-glow-2",
     "comment": ""
   },
   {
@@ -177,7 +178,7 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Unsaid Words Hanging Still.mp3",
     "coverFile": "2026-09-26 Unsaid Words Hanging Still.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Unsaid Words Hanging Still.jpg",
+    "coverArt": "",
     "soundcloudUrl": "",
     "comment": ""
   },
@@ -218,7 +219,7 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Open Road Calling Loud (2).mp3",
     "coverFile": "2026-09-26 Open Road Calling Loud (2).jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Open Road Calling Loud (2).jpg",
+    "coverArt": "",
     "soundcloudUrl": "",
     "comment": ""
   },
@@ -260,7 +261,7 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Fading Maps And Open Roads.mp3",
     "coverFile": "2026-09-26 Fading Maps And Open Roads.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Fading Maps And Open Roads.jpg",
+    "coverArt": "",
     "soundcloudUrl": "",
     "comment": ""
   },
@@ -302,8 +303,8 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Concrete Sky Anthem.mp3",
     "coverFile": "2026-09-26 Concrete Sky Anthem.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Concrete Sky Anthem.jpg",
-    "soundcloudUrl": "",
+    "coverArt": "",
+    "soundcloudUrl": "https://soundcloud.com/pelenio/concrete-sky-anthem-1",
     "comment": ""
   },
   {
@@ -343,8 +344,8 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Slow Bloom In My Soul.mp3",
     "coverFile": "2026-09-26 Slow Bloom In My Soul.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Slow Bloom In My Soul.jpg",
-    "soundcloudUrl": "",
+    "coverArt": "",
+    "soundcloudUrl": "https://soundcloud.com/pelenio/slow-bloom-in-my-soul-8",
     "comment": ""
   },
   {
@@ -384,7 +385,7 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Clockwork Chaos Crew.mp3",
     "coverFile": "2026-09-26 Clockwork Chaos Crew.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Clockwork Chaos Crew.jpg",
+    "coverArt": "",
     "soundcloudUrl": "",
     "comment": ""
   },
@@ -422,7 +423,7 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Sun Down Lagos Groove.mp3",
     "coverFile": "2026-09-26 Sun Down Lagos Groove.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Sun Down Lagos Groove.jpg",
+    "coverArt": "",
     "soundcloudUrl": "",
     "comment": ""
   },
@@ -463,8 +464,8 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Feel The Rhythm Now.mp3",
     "coverFile": "2026-09-26 Feel The Rhythm Now.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Feel The Rhythm Now.jpg",
-    "soundcloudUrl": "",
+    "coverArt": "",
+    "soundcloudUrl": "https://soundcloud.com/pelenio/feel-the-rhythm-now-5",
     "comment": ""
   },
   {
@@ -504,7 +505,7 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Rhythms Of Kinshasa Night.mp3",
     "coverFile": "2026-09-26 Rhythms Of Kinshasa Night.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Rhythms Of Kinshasa Night.jpg",
+    "coverArt": "",
     "soundcloudUrl": "",
     "comment": ""
   },
@@ -546,8 +547,8 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Hikari e Mukau Tabi.mp3",
     "coverFile": "2026-09-26 Hikari e Mukau Tabi.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Hikari e Mukau Tabi.jpg",
-    "soundcloudUrl": "",
+    "coverArt": "",
+    "soundcloudUrl": "https://soundcloud.com/pelenio/hikari-e-mukau-tabi-6",
     "comment": ""
   },
   {
@@ -586,7 +587,7 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Rang De Dil Mera.mp3",
     "coverFile": "2026-09-26 Rang De Dil Mera.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Rang De Dil Mera.jpg",
+    "coverArt": "",
     "soundcloudUrl": "",
     "comment": ""
   },
@@ -625,8 +626,8 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Whispers Of Jade Moonlight.mp3",
     "coverFile": "2026-09-26 Whispers Of Jade Moonlight.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Whispers Of Jade Moonlight.jpg",
-    "soundcloudUrl": "",
+    "coverArt": "",
+    "soundcloudUrl": "https://soundcloud.com/pelenio/whispers-of-jade-moonlight-11",
     "comment": ""
   },
   {
@@ -666,7 +667,7 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 真夜中のドライヴ.mp3",
     "coverFile": "2026-09-26 真夜中のドライヴ.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 真夜中のドライヴ.jpg",
+    "coverArt": "",
     "soundcloudUrl": "",
     "comment": ""
   },
@@ -706,8 +707,8 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Echoes Of Distant Shores.mp3",
     "coverFile": "2026-09-26 Echoes Of Distant Shores.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Echoes Of Distant Shores.jpg",
-    "soundcloudUrl": "",
+    "coverArt": "",
+    "soundcloudUrl": "https://soundcloud.com/pelenio/echoes-of-distant-shores-4",
     "comment": ""
   },
   {
@@ -747,8 +748,8 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 نبض قلبي البعيد.mp3",
     "coverFile": "2026-09-26 نبض قلبي البعيد.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 نبض قلبي البعيد.jpg",
-    "soundcloudUrl": "",
+    "coverArt": "",
+    "soundcloudUrl": "https://soundcloud.com/pelenio/nbdk-lhn-lrwh-12",
     "comment": ""
   },
   {
@@ -788,7 +789,7 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Sunset Over Waikiki Shore.mp3",
     "coverFile": "2026-09-26 Sunset Over Waikiki Shore.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Sunset Over Waikiki Shore.jpg",
+    "coverArt": "",
     "soundcloudUrl": "",
     "comment": ""
   },
@@ -829,8 +830,8 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Steppe Wind Whispers Deep.mp3",
     "coverFile": "2026-09-26 Steppe Wind Whispers Deep.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Steppe Wind Whispers Deep.jpg",
-    "soundcloudUrl": "",
+    "coverArt": "",
+    "soundcloudUrl": "https://soundcloud.com/pelenio/steppe-wind-whispers-deep-9",
     "comment": ""
   },
   {
@@ -868,8 +869,8 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Eastern Fire Dance Rises.mp3",
     "coverFile": "2026-09-26 Eastern Fire Dance Rises.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Eastern Fire Dance Rises.jpg",
-    "soundcloudUrl": "",
+    "coverArt": "",
+    "soundcloudUrl": "https://soundcloud.com/pelenio/eastern-fire-dance-rises-3",
     "comment": ""
   },
   {
@@ -908,7 +909,7 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Echoes Through Concrete Halls.mp3",
     "coverFile": "2026-09-26 Echoes Through Concrete Halls.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Echoes Through Concrete Halls.jpg",
+    "coverArt": "",
     "soundcloudUrl": "",
     "comment": ""
   },
@@ -949,8 +950,8 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Sunny Days Kingston Vibe.mp3",
     "coverFile": "2026-09-26 Sunny Days Kingston Vibe.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Sunny Days Kingston Vibe.jpg",
-    "soundcloudUrl": "",
+    "coverArt": "",
+    "soundcloudUrl": "https://soundcloud.com/pelenio/sunny-days-kingston-vibe-10",
     "comment": ""
   },
   {
@@ -989,7 +990,7 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Drifting Into Stillness.mp3",
     "coverFile": "2026-09-26 Drifting Into Stillness.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Drifting Into Stillness.jpg",
+    "coverArt": "",
     "soundcloudUrl": "",
     "comment": ""
   },
@@ -1029,7 +1030,7 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Fading Light Echoes (4).mp3",
     "coverFile": "2026-09-26 Fading Light Echoes (4).jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Fading Light Echoes (4).jpg",
+    "coverArt": "",
     "soundcloudUrl": "",
     "comment": ""
   },
@@ -1068,7 +1069,7 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Fading Light Embers.mp3",
     "coverFile": "2026-09-26 Fading Light Embers.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Fading Light Embers.jpg",
+    "coverArt": "",
     "soundcloudUrl": "",
     "comment": ""
   },
@@ -1106,7 +1107,7 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Subterranean Echoes Drift.mp3",
     "coverFile": "2026-09-26 Subterranean Echoes Drift.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Subterranean Echoes Drift.jpg",
+    "coverArt": "",
     "soundcloudUrl": "",
     "comment": ""
   },
@@ -1146,7 +1147,7 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Winter Light Gentle Peace.mp3",
     "coverFile": "2026-09-26 Winter Light Gentle Peace.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Winter Light Gentle Peace.jpg",
+    "coverArt": "",
     "soundcloudUrl": "",
     "comment": ""
   },
@@ -1187,7 +1188,7 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Snowy Welcome Home Tonight.mp3",
     "coverFile": "2026-09-26 Snowy Welcome Home Tonight.jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Snowy Welcome Home Tonight.jpg",
+    "coverArt": "",
     "soundcloudUrl": "",
     "comment": ""
   },
@@ -1228,8 +1229,8 @@ window.PLENIO_DEMO_SONGS = [
     "licence": "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only",
     "uploadFile": "2026-09-26 Kerzenschein Weihnachtsnacht (2).mp3",
     "coverFile": "2026-09-26 Kerzenschein Weihnachtsnacht (2).jpg",
-    "coverArt": "assets/demo-plenio/2026-09-26 Kerzenschein Weihnachtsnacht (2).jpg",
-    "soundcloudUrl": "",
+    "coverArt": "",
+    "soundcloudUrl": "https://soundcloud.com/pelenio/kerzenschein-weihnachtsnacht-7",
     "comment": ""
   }
 ];

@@ -70,7 +70,9 @@ def load(path: Path) -> dict[str, Any]:
     brief = node(prompt, "PlenioSongBrief")
     docs = {k: v.get("text", "") for k, v in record.get("documents", {}).items()}
     loudness = (record.get("audio", {}).get("loudness") or [{}])[0]
-    files = {Path(f["name"]).suffix: f["name"] for f in record.get("files", []) if f.get("role") != "original"}
+    files = {
+        Path(f["name"]).suffix: f["name"] for f in record.get("files", []) if f.get("role") != "original"
+    }
     warnings = [m for r in record.get("reports", []) for m in r.get("messages", [])]
     template = brief.get("template", "none")
     meta = template_meta(template)
@@ -172,6 +174,7 @@ def entry(song: dict[str, Any], order: int, kept: dict[str, Any]) -> dict[str, A
     genre = genre_name(meta.get("name") or song["template"].split("/")[-1])
     instrumental = song["vocals"] == "instrumental"
     lyrics = "" if instrumental else docs.get("lyrics", "")
+    cover = song["files"].get(".jpg", "")
     item = {
         "id": ident,
         "showcaseOrder": order,
@@ -203,7 +206,8 @@ def entry(song: dict[str, Any], order: int, kept: dict[str, Any]) -> dict[str, A
         "licence": "; ".join(song["licences"]),
         "uploadFile": song["files"].get(".mp3", ""),
         "coverFile": song["files"].get(".jpg", ""),
-        "coverArt": f"{COVERS}/{song['files'].get('.jpg', '')}" if song["files"].get(".jpg") else "",
+        # a cover stored in the repository; without it the page shows the SoundCloud artwork
+        "coverArt": f"{COVERS}/{cover}" if cover and (PROJECT / "docs" / COVERS / cover).is_file() else "",
         "soundcloudUrl": "",
         "comment": "",
     }
@@ -240,7 +244,8 @@ HEADER = """// Plenio Music Production System - demo songs made with Plenio {ver
 // 1. Upload the MP3 named in "uploadFile" to SoundCloud, public, into one playlist.
 // 2. Paste the NORMAL SoundCloud track URL into that track's "soundcloudUrl".
 // 3. Paste the playlist URL into "soundcloudPlaylistUrl" below.
-// 4. Copy the JPG named in "coverFile" into docs/assets/demo-plenio/ (file names unchanged).
+// Only tracks with a soundcloudUrl are shown on the page. Their cover is the SoundCloud artwork,
+// unless the JPG named in "coverFile" is stored in docs/assets/demo-plenio/ (then run the tool again).
 //
 """
 
