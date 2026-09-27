@@ -3,8 +3,8 @@
 | | |
 |---|---|
 | Date | 2026-09-27 |
-| Written for | **Phase 11C**: the milestones M1-M7 of the next-release plan (next: M7/D13, the release work) |
-| Overall phase | **Phase 11A (design), Phase 11B (critical implementation, O1-O7) and M1-M6 done** (score editor, YuE2 · DAW, brief templates + manual lyrics, EQ UX, Refine + UniverSR, Stems + BS-RoFormer); L1/L2 ran with the real weights (numbers below), the listening verdicts are open; 0.2.2 is the released baseline; the Phase 10 owner-machine checks (§8.3) are still open |
+| Written for | **Phase 11C**: the milestones M1-M7 of the next-release plan - **all done**, 0.3.0 is prepared; next: the owner's L1-L4 verdicts, then the release (tag, Registry publish) |
+| Overall phase | **Phase 11A (design), Phase 11B (critical implementation, O1-O7) and M1-M7 done** (score editor, YuE2 · DAW, brief templates + manual lyrics, EQ UX, Refine + UniverSR, Stems + BS-RoFormer, docs + version 0.3.0); L1/L2 ran with the real weights (numbers below), the listening verdicts are open; 0.2.2 is the released baseline; the Phase 10 owner-machine checks (§8.3) are still open |
 | Sub-phase | - (hard stop after Phase 11B) |
 | Commits | Phase 11A `c5b8af3`; Phase 11B `9588977` (O1) · `a035c2f` (O2) · `0139957` (O3) · `a041315` (O4) · `c2f4668` (O5) · `299964d` (O6) · `6578313` (O7) · `7b0eb39` (help pages) · `f8dfa3d` (docs); M1/D1 `f1f968a` (+ docs `e47da84`); M1/D2 `d7621a2` (+ docs `c3048e8`); M1/D3 `e5354bd` (+ docs `9bcb8d5`); M2 `db3bc00` (+ docs `81fa0ad`); M3 `d3fe3e1` (+ docs `ff67444`); M4 `c026f9b` (+ docs `6535890`); M5 `a115d95` (+ docs `2b85d1f`); M6 `641aeea` + L1/L2 tools and measurements `2bb1b61` (+ docs this checkpoint). **All local, not pushed** (owner instruction for Phase 11B; kept for Phase 11C so far). |
 | Prompt set | `D:\Daten2\Deepseek\ComfyUI-MiniMax\Plenio_Music_Production_System_Refactor_Prompts_Next_Release\` on the owner's machine: `13_PHASE_11A`, `14_PHASE_11B`, `15_PHASE_11C` |
@@ -41,7 +41,7 @@ Detail, files and "done when" criteria: [next-release-plan.md §16.2](next-relea
 | 4 | **M4** EQ UX | ~~D8~~ (**done**, `c026f9b`) | **complete** |
 | 5 | **M5** Refine in the templates | ~~D9 UniverSR adapter + study tooling~~ (**done**, `a115d95`) → ~~D10 blueprint, template defaults, System Check~~ (**done**) | **complete** (pending L1) |
 | 6 | **M6** Stems in the templates | ~~D11 BS-RoFormer adapter~~ (**done**, `641aeea`) → ~~D12 effects, mixer widget, blueprint, wiring~~ (**done**; L2 measured, listening verdict open) | **complete** (pending L2) |
-| 7 | **M7** documentation and release 0.3.0 | D13 | 3 h |
+| 7 | **M7** documentation and release 0.3.0 | ~~D13~~ (**done**: README, CHANGELOG, guides, `extending.md`, App-mode docs, version 0.3.0, test report) | **complete** |
 | - | optional **F1** | route or retire the Phase 5 operations (owner decision) | - |
 
 Rules that bind every milestone: use the canonical engine (`canonical`/`ops`) for all graphical edits - **no second score model** in TypeScript, the piano roll only does geometry and commits one operation per gesture; the ABC text stays the only stored score; never accept malformed ABC (the gate exists - keep it in force); keep the new stages bypassed/collapsed until used; remove `is_experimental` from a node only when its milestone is accepted.
@@ -77,9 +77,9 @@ Rules that bind every milestone: use the canonical engine (`canonical`/`ops`) fo
 
 | Suite | Command (bash, repository root; `PY=/d/Daten2/ComfyUI/.venv/Scripts/python.exe`) | Result |
 |---|---|---|
-| unit + workflow + contract | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/unit tests/workflows tests/contract` | 939 passed, 4 skipped (after M6 and the study tool test) |
-| host (real server, fakes) | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/host` | 113 passed, 8 skipped (after M6) |
-| frontend | `cd frontend && npm run check` | vue-tsc clean, 146 Vitest passed, build ok (after M6, the mixer widget included) |
+| unit + workflow + contract | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/unit tests/workflows tests/contract` | 943 passed, 4 skipped (after M7 and the version bump) |
+| host (real server, fakes) | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/host` | 113 passed, 8 skipped (after M7) |
+| frontend | `cd frontend && npm run check` | vue-tsc clean, 146 Vitest passed, build ok (after M7) |
 | study tool (smoke, real adapter) | `$PY tools/studies/sr_study.py --out <json> --models <dir with models/audio_sr> ...` | runs end to end with *resample only* and with a tiny UniverSR checkpoint (RTF 122x CPU for resample only; a tiny model is not a quality statement) |
 | **L1 with the released weights** | `$PY tools/studies/sr_study.py --models F:/ComfyUI/models --pack <dir> --targets .devdeps/l1-targets <48 kHz YuE2 take>` | simulation set: LSD 16-24 kHz **11.0 dB** (UniverSR) vs 113.4 dB (resample only), RTF 0.41, 2 776 MB peak VRAM, 0.00 LU loudness change, true peak −0.836 dBTP; target set: both arms **resample only** ("input already full band") - see §5 |
 | **L2 with the released weights** | `$PY tools/studies/stem_study.py --models F:/ComfyUI/models --write-audio <dir> <unmastered MiniMax take>` | 113.5 s audio in **32.9 s** (RTF 3.45), **1 699 MB** peak VRAM on the RTX 5060 Ti 16 GB; residual **0.73 %** of the song's energy; neutral mix and muted range exact to **−162.6 dBFS** (float64 rounding) |
@@ -102,9 +102,12 @@ Rules that bind every milestone: use the canonical engine (`canonical`/`ops`) fo
 
 ## 6. Exact next task
 
-**M7 / D13 - documentation and release 0.3.0** (plan §16.2, §13): README/CHANGELOG and the user guides link the new stages (the user README list, `getting-started`, the path guides), `docs/dev/extending.md` documents the audio adapters (a new model kind/file, `audio_models.register`) and the canonical score operations; App mode gets its documentation (`docs/user/concepts/app-mode.md` exists - check it against the shipped templates); `pyproject.toml` and `frontend/package.json` go to 0.3.0; a test report under `docs/test-reports/` records the run and the L1-L4 state; the plan's §17 and this file are the last update. The owner's open verdicts (L1 listening, L2 listening, L3/L4 runs) stay open and are named as such - nothing is marked accepted that was not accepted.
+**M7 / D13 - documentation and release 0.3.0.** README (0.3 feature set, the DAW template, the two new stages, the docs list, the honest limits), CHANGELOG 0.3.0, `docs/dev/extending.md` (the audio-model adapter path and the canonical score operations), `docs/user/concepts/app-mode.md` (template 5 and the DAW caveat), version 0.3.0 in `pyproject.toml`, `frontend/package.json` and `plenio/__init__.py`, and the phase test report `docs/test-reports/2026-09-27-phase-11c.md` with the L1/L2 numbers. What remains is **not** implementation work:
 
-The **M6 leftovers** are part of that: the Stems block is in every template but its `is_experimental` flag is lifted only after L2; the stereo/mono widget checks of the mixer in the real frontend belong to L4.
+1. **The owner's L1 listening verdict** on the blind pack (`D:/Daten2/ComfyUI/output/plenio-l1-pack/...`, key + README inside) - and, if the verdict is "the model only when the input really is band-limited", the decision about the MiniMax template's Refine default (keep / force with a stricter rule / drop). This is the open design decision of the phase; no code change without it.
+2. **The owner's L2 listening check** of the stems and the example mix (`D:/Daten2/ComfyUI/output/plenio-l2/...`); then `is_experimental` can come off Separate Stems and Stem Mixer (and Load Audio Model / Refine after L1).
+3. **L3** full runs (the DAW template, a song with the Stems block active) and **L4** frontend 1.53.6 (the mixer widget, the DAW layout, the MIDI dialog, the brief panel, the EQ panel, the score gate) in a real browser - the Phase 10 conditions (§8.3) belong with them.
+4. Then the release itself: the owner toggles the repository to public, tags `v0.3.0`, and `.github/workflows/publish.yml` publishes to the Registry (needs `REGISTRY_ACCESS_TOKEN`). Nothing was pushed in this phase; all commits are local.
 
 ---
 
