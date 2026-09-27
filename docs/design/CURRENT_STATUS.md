@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | Date | 2026-09-27 |
-| Written for | **Phase 11C** (DeepSeek 4.1 Flash): the DEEPSEEK-SUITABLE milestones M1-M7 of the next-release plan |
-| Overall phase | **Phase 11A (next-release design) and Phase 11B (critical implementation, O1-O7) done**; 0.2.2 is the released baseline; the Phase 10 owner-machine checks (§8.3) are still open |
+| Written for | **Phase 11C**: the milestones M1-M7 of the next-release plan (next: M1/D2) |
+| Overall phase | **Phase 11A (next-release design) and Phase 11B (critical implementation, O1-O7) done; M1/D1 (piano roll + chord lane) done**; 0.2.2 is the released baseline; the Phase 10 owner-machine checks (§8.3) are still open |
 | Sub-phase | - (hard stop after Phase 11B) |
-| Commits | Phase 11A `c5b8af3`; Phase 11B `9588977` (O1) · `a035c2f` (O2) · `0139957` (O3) · `a041315` (O4) · `c2f4668` (O5) · `299964d` (O6) · `6578313` (O7) · `7b0eb39` (help pages) · this checkpoint. **All local, not pushed** (owner instruction for Phase 11B). |
+| Commits | Phase 11A `c5b8af3`; Phase 11B `9588977` (O1) · `a035c2f` (O2) · `0139957` (O3) · `a041315` (O4) · `c2f4668` (O5) · `299964d` (O6) · `6578313` (O7) · `7b0eb39` (help pages) · `f8dfa3d` (docs); M1/D1 `f1f968a` · this checkpoint. **All local, not pushed** (owner instruction for Phase 11B; kept for D1). |
 | Prompt set | `D:\Daten2\Deepseek\ComfyUI-MiniMax\Plenio_Music_Production_System_Refactor_Prompts_Next_Release\` on the owner's machine: `13_PHASE_11A`, `14_PHASE_11B`, `15_PHASE_11C` |
 
 Read with: [next-release-plan.md](next-release-plan.md) - **§16.2 (the milestones, in order), §17 (as implemented, verification)**, §9 (canonical score engine), §10 (DAW), §4 (refine), §6 (stems), §7/§8 (lyrics, brief); then [score-editor-design.md](score-editor-design.md) §15 (the Phase 5 editor the milestones extend), [target-architecture.md](target-architecture.md) §2 (rules R1-R12), [docs/dev/testing.md](../dev/testing.md).
@@ -33,7 +33,7 @@ Detail, files and "done when" criteria: [next-release-plan.md §16.2](next-relea
 
 | Order | Milestone | Tasks | Effort |
 |---|---|---|---|
-| 1 | **M1** graphical score editor in Review mode | D1 piano roll + chord lane → D2 layouts + inspector (+ bar/key/section operations in the UI) → D3 MIDI UI (+ chord recognition for foreign MIDI) | 10 h |
+| 1 | **M1** graphical score editor in Review mode | ~~D1 piano roll + chord lane~~ (**done**, `f1f968a`) → D2 layouts + inspector (+ bar/key/section operations in the UI) → D3 MIDI UI (+ chord recognition for foreign MIDI) | 5 h left |
 | 2 | **M2** YuE2 · DAW template | D4 *new score from brief* + template 5 → D5 Guide track | 4 h |
 | 3 | **M3** Song Brief and manual-lyrics UX | D6 ghost text / template actions / frontend `custom` migration → D7 *Use my own lyrics* | 4 h |
 | 4 | **M4** EQ UX | D8 | 3.5 h |
@@ -43,6 +43,10 @@ Detail, files and "done when" criteria: [next-release-plan.md §16.2](next-relea
 | - | optional **F1** | route or retire the Phase 5 operations (owner decision) | - |
 
 Rules that bind every milestone: use the canonical engine (`canonical`/`ops`) for all graphical edits - **no second score model** in TypeScript, the piano roll only does geometry and commits one operation per gesture; the ABC text stays the only stored score; never accept malformed ABC (the gate exists - keep it in force); keep the new stages bypassed/collapsed until used; remove `is_experimental` from a node only when its milestone is accepted.
+
+### 2.1 Done in Phase 11C
+
+**M1/D1 - piano roll and chord lane** (`f1f968a`): `frontend/src/sheet-editor/score/pianoRoll.ts` (pure: geometry, hit testing, gesture → exactly one canonical operation, keys, selection mapping) and `PianoRoll.vue` (SVG, ghost while dragging, windowed drawing, snap, zoom, active track Vocal/Ins, chord lane with inline name editing) in `ScoreTab.vue`, above the notation (on/off and zoom in the editor prefs). Gestures: move (`move_notes`), resize (`resize_note`, Review mode *rests*, Alt = *overwrite*), draw / double-click (`insert_note`), Delete (`delete`), Shift+Delete (`delete_close_gap`), arrows (`set_note_pitch`, `move_notes`, `resize_note`), chords (`move_chord`, `put_chord`, `delete_chord`). One selection with the staff and the ABC text (element ids; the session turns canonical result ids into segments via `elementSelection`). The reveals in the notation and the ABC text scroll only their own pane now (they scrolled the dialog). Tests: `frontend/tests/pianoRoll.test.ts` (21), session test updated; **checked in the real frontend** (ComfyUI 0.37.0, isolated `tools/dev_server.py --test-nodes`): select, move, draw into Ins, ↑/Delete/Ctrl+Z, chord add, invalid text → stale roll + Apply off → revert, refused resize → ghost removed + reason. User guide: `docs/user/concepts/score-editor.md` (piano roll, delete rule, commit gate).
 
 ## 3. Files and components (Phase 11B)
 
@@ -59,7 +63,7 @@ Rules that bind every milestone: use the canonical engine (`canonical`/`ops`) fo
 |---|---|---|
 | unit + workflow + contract | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/unit tests/workflows tests/contract` | 848 passed, 4 skipped |
 | host (real server, fakes) | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/host` | 101 passed, 8 skipped (smoke and legacy) |
-| frontend | `cd frontend && npm run check` | vue-tsc clean, 67 Vitest passed, build ok |
+| frontend | `cd frontend && npm run check` | vue-tsc clean, 67 Vitest passed, build ok (after M1/D1: 88 passed) |
 | lint | `PYTHONPATH=.devdeps $PY -m ruff check . && ... ruff format --check .` | clean |
 | types | `PYTHONPATH=.devdeps $PY -m mypy --python-version 3.12` | only `type-arg` errors for bare `np.ndarray` (local numpy 2.2 stubs), the same class as the 23 pre-existing ones; nothing else |
 | workflows | `$PY tools/workflow_validation.py` | all ok |
@@ -67,14 +71,14 @@ Rules that bind every milestone: use the canonical engine (`canonical`/`ops`) fo
 
 ## 5. Limitations and local validation still required
 
-- **Not run in this phase:** the browser checks (`tools/browser_check.mjs`) - the dialog's gate banner and the disabled Apply/Approve are covered by Vitest, not by a real browser; frontend 1.53.6.
+- **Not run:** `tools/browser_check.mjs` and frontend 1.53.6. The score editor (piano roll, gate banner, disabled Apply, revert) was checked by hand in the real frontend of ComfyUI 0.37.0 during M1/D1.
 - **No real audio models:** Refine and Stems ran only with fakes (pointwise SR engine, fixed-fraction separator). The refine defaults are **provisional** until L1; the < 0.1 LU criterion is reported, not enforced.
 - **mypy in CI:** the new audio modules use bare `np.ndarray` like the existing ones; CI (older numpy stubs) is expected to accept them, but CI did not run (nothing pushed).
 - **Owner checklist (plan §15):** L1 SR study (needs M5), L2 separation (needs M6), L3 full runs incl. the DAW template (needs M2), L4 frontend 1.53.6 (ghost text, piano roll, mixer and EQ widgets, the score gate) - plus the still open Phase 10 conditions (§8.3).
 
 ## 6. Exact next task
 
-**M1 / D1 - piano roll and chord lane** (plan §16.2): add `frontend/src/sheet-editor/score/PianoRoll.vue` and `ChordLane.vue` that render `session.lastValid.model` (v2) next to the staff in `ScoreTab.vue`; selection shared with the staff through `segments` (`modelNoteOfSegment`, `knownIds`); gestures draw a ghost locally and commit exactly one canonical operation on release through `session.operate` (`insert_note`, `move_notes`, `resize_note` with `mode: "rests"` in Review, `delete`, Shift+Delete `delete_close_gap`, `put_chord`/`move_chord`/`delete_chord`); snap from `model.grid`; with Vitest `pianoRoll.test.ts` first (geometry and op mapping), then the component.
+**M1 / D2 - editor layouts and inspector** (plan §16.2): *Review* layout (staff + piano roll + navigator + lyrics fit + inspector, ABC text behind *Advanced*) and *Text* layout, default from the node property `plenio_editor_layout`; an inspector for the selected note/chord (pitch, onset, length, voice, chord) that commits canonical operations (`set_note_pitch`, `move_notes` incl. `track`, `resize_note`, `put_chord`); bar/key/section operations in the UI (`insert_measures`, `delete_measures`, `duplicate_measures`, `change_meter`, `put_key`/`delete_key`, `rename_section_at`/`start_section`/`remove_section`/`move_section_start`); transport loop and metronome. Build on `PianoRoll.vue` (keep its "one gesture = one operation" rule) and write the Vitest first (`inspector.test.ts`).
 
 ---
 

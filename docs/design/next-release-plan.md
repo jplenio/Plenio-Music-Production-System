@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Design Phase 11A (2026-09-27); **Phase 11B implemented** (OPUS-CRITICAL O1-O7, §17); Phase 11C (DEEPSEEK-SUITABLE, milestones M1-M7 in §16.2) not started. |
+| Status | Design Phase 11A (2026-09-27); **Phase 11B implemented** (OPUS-CRITICAL O1-O7, §17); Phase 11C (milestones M1-M7 in §16.2): M1/D1 done, the rest not started. |
 | Date | 2026-09-27 |
 | Baseline | Plenio 0.2.2 (`main` at `eaaa174`), ComfyUI 0.37.0, frontend 1.52.7 (cloud) / 1.53.6 (owner) |
 | Scope | audio refinement / super-resolution, EQ UX, optional stems before mastering, authoritative manual lyrics, Song Brief template precedence, a shared canonical score engine with a YuE2 · DAW workflow and graphical Review editing |
@@ -663,7 +663,8 @@ L1 → L4 of §15; then the Refine defaults are fixed from L1, and the release i
 | O5 brief precedence + manual-lyrics contract + I12 | **done** (`c2f4668`); ghost text and the frontend `custom` migration → D6 |
 | O6 Refine architecture | **done** (`299964d`); real engine → D9, wiring → D10 |
 | O7 stem interfaces | **done** (`6578313`, help pages `7b0eb39`); separation engine → D11, effects/widget/blueprint → D12 |
-| M1 … M7 (D1 … D13) | not started |
+| M1 / D1 piano roll + chord lane | **done** (2026-09-27, `f1f968a`): `frontend/src/sheet-editor/score/pianoRoll.ts` (pure geometry, hit test, gesture/key → one canonical operation, selection mapping) and `PianoRoll.vue` in the Score tab; checked by Vitest and in a real ComfyUI 0.37.0 frontend |
+| M1 / D2, D3; M2 … M7 | not started |
 | L1 … L4 | not started |
 
 All Phase 11B commits are **local only** (not pushed; owner instruction for this phase).
