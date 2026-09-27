@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | Date | 2026-09-27 |
-| Written for | **Phase 11C**: the milestones M1-M7 of the next-release plan (next: M1/D2) |
-| Overall phase | **Phase 11A (next-release design) and Phase 11B (critical implementation, O1-O7) done; M1/D1 (piano roll + chord lane) done**; 0.2.2 is the released baseline; the Phase 10 owner-machine checks (§8.3) are still open |
+| Written for | **Phase 11C**: the milestones M1-M7 of the next-release plan (next: M1/D3) |
+| Overall phase | **Phase 11A (next-release design) and Phase 11B (critical implementation, O1-O7) done; M1/D1 (piano roll + chord lane) and M1/D2 (layouts + inspector) done**; 0.2.2 is the released baseline; the Phase 10 owner-machine checks (§8.3) are still open |
 | Sub-phase | - (hard stop after Phase 11B) |
-| Commits | Phase 11A `c5b8af3`; Phase 11B `9588977` (O1) · `a035c2f` (O2) · `0139957` (O3) · `a041315` (O4) · `c2f4668` (O5) · `299964d` (O6) · `6578313` (O7) · `7b0eb39` (help pages) · `f8dfa3d` (docs); M1/D1 `f1f968a` · this checkpoint. **All local, not pushed** (owner instruction for Phase 11B; kept for D1). |
+| Commits | Phase 11A `c5b8af3`; Phase 11B `9588977` (O1) · `a035c2f` (O2) · `0139957` (O3) · `a041315` (O4) · `c2f4668` (O5) · `299964d` (O6) · `6578313` (O7) · `7b0eb39` (help pages) · `f8dfa3d` (docs); M1/D1 `f1f968a` (+ docs `e47da84`); M1/D2 `d7621a2` · this checkpoint. **All local, not pushed** (owner instruction for Phase 11B; kept for Phase 11C so far). |
 | Prompt set | `D:\Daten2\Deepseek\ComfyUI-MiniMax\Plenio_Music_Production_System_Refactor_Prompts_Next_Release\` on the owner's machine: `13_PHASE_11A`, `14_PHASE_11B`, `15_PHASE_11C` |
 
 Read with: [next-release-plan.md](next-release-plan.md) - **§16.2 (the milestones, in order), §17 (as implemented, verification)**, §9 (canonical score engine), §10 (DAW), §4 (refine), §6 (stems), §7/§8 (lyrics, brief); then [score-editor-design.md](score-editor-design.md) §15 (the Phase 5 editor the milestones extend), [target-architecture.md](target-architecture.md) §2 (rules R1-R12), [docs/dev/testing.md](../dev/testing.md).
@@ -33,7 +33,7 @@ Detail, files and "done when" criteria: [next-release-plan.md §16.2](next-relea
 
 | Order | Milestone | Tasks | Effort |
 |---|---|---|---|
-| 1 | **M1** graphical score editor in Review mode | ~~D1 piano roll + chord lane~~ (**done**, `f1f968a`) → D2 layouts + inspector (+ bar/key/section operations in the UI) → D3 MIDI UI (+ chord recognition for foreign MIDI) | 5 h left |
+| 1 | **M1** graphical score editor in Review mode | ~~D1 piano roll + chord lane~~ (**done**, `f1f968a`) → ~~D2 layouts + inspector~~ (**done**, `d7621a2`) → D3 MIDI UI (+ chord recognition for foreign MIDI) | 2 h left |
 | 2 | **M2** YuE2 · DAW template | D4 *new score from brief* + template 5 → D5 Guide track | 4 h |
 | 3 | **M3** Song Brief and manual-lyrics UX | D6 ghost text / template actions / frontend `custom` migration → D7 *Use my own lyrics* | 4 h |
 | 4 | **M4** EQ UX | D8 | 3.5 h |
@@ -47,6 +47,8 @@ Rules that bind every milestone: use the canonical engine (`canonical`/`ops`) fo
 ### 2.1 Done in Phase 11C
 
 **M1/D1 - piano roll and chord lane** (`f1f968a`): `frontend/src/sheet-editor/score/pianoRoll.ts` (pure: geometry, hit testing, gesture → exactly one canonical operation, keys, selection mapping) and `PianoRoll.vue` (SVG, ghost while dragging, windowed drawing, snap, zoom, active track Vocal/Ins, chord lane with inline name editing) in `ScoreTab.vue`, above the notation (on/off and zoom in the editor prefs). Gestures: move (`move_notes`), resize (`resize_note`, Review mode *rests*, Alt = *overwrite*), draw / double-click (`insert_note`), Delete (`delete`), Shift+Delete (`delete_close_gap`), arrows (`set_note_pitch`, `move_notes`, `resize_note`), chords (`move_chord`, `put_chord`, `delete_chord`). One selection with the staff and the ABC text (element ids; the session turns canonical result ids into segments via `elementSelection`). The reveals in the notation and the ABC text scroll only their own pane now (they scrolled the dialog). Tests: `frontend/tests/pianoRoll.test.ts` (21), session test updated; **checked in the real frontend** (ComfyUI 0.37.0, isolated `tools/dev_server.py --test-nodes`): select, move, draw into Ins, ↑/Delete/Ctrl+Z, chord add, invalid text → stale roll + Apply off → revert, refused resize → ghost removed + reason. User guide: `docs/user/concepts/score-editor.md` (piano roll, delete rule, commit gate).
+
+**M1/D2 - layouts and inspector** (`d7621a2`): layouts *Review* (piano roll, notation, inspector, navigator with *Lyrics fit* when the song has lyrics; ABC text under *ABC text (advanced)*) and *Text* (ABC text + notation); the node property `plenio_editor_layout` (`review`, `text`; `daw` opens *review* until M2) chooses the layout a sheet opens in, else the viewer's last (editor prefs, which also read the 0.2.x values). `Inspector.vue` with pure `frontend/src/sheet-editor/score/inspector.ts`: note fields (voice, pitch `C#5`/MIDI, start bar + units, length units/note value with *over the next note*, chord at the note, → rest, close gap), chord fields (name, start, remove) and bar fields (+ before, + after, duplicate, delete, meter of empty bars, key from the bar, remove the change) - each one canonical operation. Transport metronome (`playback.schedule` clicks, player sound). Backend: `duplicate_measures` copies a section only when the block holds all of it (the browser check found a second "verse" after duplicating bar 1). Tests: `frontend/tests/inspector.test.ts` (15), prefs migration, `test_duplicating_part_of_a_section_extends_it`; checked by hand in the real frontend (ComfyUI 0.37.0): both layouts incl. the node property, pitch/length from the inspector, duplicate, key change + removal (inline `[K:G]` in both voices, pitches kept), insert bar + 3/4 meter (own group with `M:` lines). The navigator keeps the Phase 5 section operations (F1). User guide updated.
 
 ## 3. Files and components (Phase 11B)
 
@@ -63,7 +65,7 @@ Rules that bind every milestone: use the canonical engine (`canonical`/`ops`) fo
 |---|---|---|
 | unit + workflow + contract | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/unit tests/workflows tests/contract` | 848 passed, 4 skipped |
 | host (real server, fakes) | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/host` | 101 passed, 8 skipped (smoke and legacy) |
-| frontend | `cd frontend && npm run check` | vue-tsc clean, 67 Vitest passed, build ok (after M1/D1: 88 passed) |
+| frontend | `cd frontend && npm run check` | vue-tsc clean, 67 Vitest passed, build ok (after M1/D1: 88; after M1/D2: 103 passed) |
 | lint | `PYTHONPATH=.devdeps $PY -m ruff check . && ... ruff format --check .` | clean |
 | types | `PYTHONPATH=.devdeps $PY -m mypy --python-version 3.12` | only `type-arg` errors for bare `np.ndarray` (local numpy 2.2 stubs), the same class as the 23 pre-existing ones; nothing else |
 | workflows | `$PY tools/workflow_validation.py` | all ok |
@@ -71,14 +73,14 @@ Rules that bind every milestone: use the canonical engine (`canonical`/`ops`) fo
 
 ## 5. Limitations and local validation still required
 
-- **Not run:** `tools/browser_check.mjs` and frontend 1.53.6. The score editor (piano roll, gate banner, disabled Apply, revert) was checked by hand in the real frontend of ComfyUI 0.37.0 during M1/D1.
+- **Not run:** `tools/browser_check.mjs` and frontend 1.53.6. The score editor (piano roll, gate banner, disabled Apply, revert; layouts, inspector, bar/key/meter edits) was checked by hand in the real frontend of ComfyUI 0.37.0 during M1/D1 and D2. The metronome's sound was not listened to (its schedule is tested).
 - **No real audio models:** Refine and Stems ran only with fakes (pointwise SR engine, fixed-fraction separator). The refine defaults are **provisional** until L1; the < 0.1 LU criterion is reported, not enforced.
 - **mypy in CI:** the new audio modules use bare `np.ndarray` like the existing ones; CI (older numpy stubs) is expected to accept them, but CI did not run (nothing pushed).
 - **Owner checklist (plan §15):** L1 SR study (needs M5), L2 separation (needs M6), L3 full runs incl. the DAW template (needs M2), L4 frontend 1.53.6 (ghost text, piano roll, mixer and EQ widgets, the score gate) - plus the still open Phase 10 conditions (§8.3).
 
 ## 6. Exact next task
 
-**M1 / D2 - editor layouts and inspector** (plan §16.2): *Review* layout (staff + piano roll + navigator + lyrics fit + inspector, ABC text behind *Advanced*) and *Text* layout, default from the node property `plenio_editor_layout`; an inspector for the selected note/chord (pitch, onset, length, voice, chord) that commits canonical operations (`set_note_pitch`, `move_notes` incl. `track`, `resize_note`, `put_chord`); bar/key/section operations in the UI (`insert_measures`, `delete_measures`, `duplicate_measures`, `change_meter`, `put_key`/`delete_key`, `rename_section_at`/`start_section`/`remove_section`/`move_section_start`); transport loop and metronome. Build on `PianoRoll.vue` (keep its "one gesture = one operation" rule) and write the Vitest first (`inspector.test.ts`).
+**M1 / D3 - MIDI UI** (plan §16.2): in the Score tab, *Export MIDI* (`exportMidi` from `frontend/src/api/client.ts`: base64 → download with the returned file name; title from the sheet's title document when there is one) and *Import MIDI* (file picker → `importMidi` with the file as base64; a dialog that lists the file's tracks with a role per track - vocal, ins, chords, guide, none - and the grid; the import report before the text is replaced; the imported ABC replaces the working text as one undo step, never silently). Optional: template-matching chord recognition for foreign MIDI as a pure core function `plenio/core/score/chords.py` (best effort, labelled in the report), used when a chords-role track has notes but no `plenio:chord` events. Write `midiDialog.test.ts` first; the routes and the SMF core exist since O4.
 
 ---
 
