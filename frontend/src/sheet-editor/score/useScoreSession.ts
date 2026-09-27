@@ -141,6 +141,29 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
     scheduleAnalyze()
   }
 
+  /**
+   * Replace the whole text as one undo step (an import, a dialog decision). When ``view`` is the
+   * backend's analysis of exactly this text it is taken as it is; otherwise it is checked again.
+   */
+  function replaceText(text: string, label: string, view: ScoreView | null = null): boolean {
+    if (text === doc.text) return false
+    history.seal()
+    write(text, label)
+    history.seal()
+    clearTimeout(timer)
+    requested = text
+    pending.value = false
+    notes.value = []
+    if (view && view.ok) {
+      // the route computed this view for exactly this text, in the same response
+      accept(view, text)
+      error.value = null
+    } else {
+      scheduleAnalyze(0)
+    }
+    return true
+  }
+
   async function operate(operation: ScoreOperation): Promise<boolean> {
     const text = doc.text
     if (view.value && !view.value.ok) {
@@ -249,6 +272,7 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
     commitBlock,
     canRevert,
     typed,
+    replaceText,
     operate,
     undo,
     redo,

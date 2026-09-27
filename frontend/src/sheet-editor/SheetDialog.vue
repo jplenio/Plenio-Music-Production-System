@@ -100,6 +100,10 @@ const scoreText = computed(() => scoreDoc.value?.text ?? contextScore.value ?? n
 const lyricsText = computed(
   () => working.find((doc) => doc.kind === 'lyrics')?.text ?? props.payload?.context?.lyrics ?? null
 )
+/** The song's title: the MIDI export takes its file name from it. */
+const songTitle = computed(
+  () => working.find((doc) => doc.kind === 'title')?.text ?? props.payload?.context?.title ?? null
+)
 const timeline = computed(() => sectionTimes(props.payload?.timeline))
 const asr = computed(() => {
   const note = props.asrNote ?? fetchedNote.value
@@ -294,6 +298,7 @@ onBeforeUnmount(() => {
             :readonly="false"
             :layout-default="layout ?? null"
             :lyrics="lyricsText"
+            :title="songTitle"
             @edited="onInput(doc)"
             @gate="(text: string, reason: string | null) => (scoreGate = { text, reason })"
           />

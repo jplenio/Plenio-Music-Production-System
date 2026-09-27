@@ -683,3 +683,47 @@
   margin: 8px 0 4px;
   font-size: 12px;
 }
+/* --- MIDI import dialog (M1/D3) --- */
+.plenio-overlay .midi-dialog {
+  width: min(720px, 92vw);
+  height: auto;
+  max-height: min(700px, 92vh);
+}
+.plenio-overlay .midi-dialog .body h3 {
+  margin: 14px 0 4px;
+  font-size: 13px;
+}
+.plenio-overlay .midi-dialog .tracks {
+  border-collapse: collapse;
+  width: 100%;
+}
+.plenio-overlay .midi-dialog .tracks th,
+.plenio-overlay .midi-dialog .tracks td {
+  text-align: left;
+  padding: 3px 12px 3px 0;
+  border-bottom: 1px solid var(--border-color, #3a3a3a);
+}
+.plenio-overlay .midi-dialog .tracks .number {
+  display: inline-block;
+  min-width: 18px;
+  color: var(--descrip-text, #999);
+}
+.plenio-overlay .midi-dialog .controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  align-items: center;
+  margin: 10px 0 0;
+}
+.plenio-overlay .midi-dialog .report {
+  margin: 4px 0;
+  padding-left: 18px;
+  color: var(--descrip-text, #bbb);
+}
+.plenio-overlay .midi-tools {
+  display: inline-flex;
+  gap: 4px;
+}
+.plenio-overlay .hidden-file {
+  display: none;
+}

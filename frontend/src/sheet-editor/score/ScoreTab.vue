@@ -13,7 +13,14 @@
  */
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
-import { type Fetcher, type ScoreOperation, viewUrl } from '../../api/client'
+import {
+  type Fetcher,
+  type GuideNote,
+  type MidiImportResult,
+  type ScoreOperation,
+  exportMidi,
+  viewUrl
+} from '../../api/client'
 import type { VoiceSwitches } from '../../shared/playback'
 import {
   describe,
@@ -28,14 +35,16 @@ import type { SheetPayload, WorkingDoc } from '../../shared/sheetSession'
 import LyricsFit from '../LyricsFit.vue'
 import AbcEditor from './AbcEditor.vue'
 import Inspector from './Inspector.vue'
+import MidiDialog from './MidiDialog.vue'
 import NotationView from './NotationView.vue'
 import PianoRoll from './PianoRoll.vue'
 import ScoreNavigator from './ScoreNavigator.vue'
 import ScorePalette from './ScorePalette.vue'
 import ScoreTransport from './ScoreTransport.vue'
 import { type Layout, focusOf, initialLayout } from './inspector'
+import { downloadBytes, fromBase64, toBase64 } from './midiImport'
 import { loadPrefs, savePrefs } from './prefs'
-import { useScoreSession } from './useScoreSession'
+import { describeError, useScoreSession } from './useScoreSession'
 
 const props = defineProps<{
   doc: WorkingDoc
@@ -46,11 +55,17 @@ const props = defineProps<{
   layoutDefault?: string | null
   /** The song's lyrics (this sheet's or the other sheet's), for the lyrics fit next to the sections. */
   lyrics?: string | null
+  /** The sheet's title document: the MIDI export takes its file name from it. */
+  title?: string | null
+  /** The Guide notes kept in the node's properties; ``undefined``: this sheet keeps none. */
+  guide?: GuideNote[]
 }>()
 const emit = defineEmits<{
   edited: []
   /** The commit gate for ``text``: why it cannot be applied/approved (``null``: it can). */
   gate: [text: string, reason: string | null]
+  /** The Guide notes an import brought in (stored in the node's properties). */
+  guideChange: [guide: GuideNote[]]
 }>()
 
 const session = useScoreSession(props.doc, { fetcher: props.fetcher, onEdit: () => emit('edited') })
@@ -147,6 +162,68 @@ const rollZoom = computed<number>({
   get: () => prefs.value.rollZoom,
   set: (value) => (prefs.value = { ...prefs.value, rollZoom: value })
 })
+
+// --- MIDI (next-release plan §10.4 / D3): export the score, import a file as a new score ---
+const midiFile = ref<HTMLInputElement | null>(null)
+const midiRequest = ref<{ data: string; filename: string } | null>(null)
+const midiError = ref<string | null>(null)
+const midiBusy = ref(false)
+const keepsGuide = computed(() => props.guide !== undefined)
+const midiBlock = computed(() => {
+  if (props.readonly) return 'This score belongs to the other sheet.'
+  if (session.commitBlock) return session.commitBlock
+  return props.doc.text.trim() ? null : 'There is no score to export yet.'
+})
+
+/** The score (and the Guide notes) as a standard MIDI file, downloaded under the title's name. */
+async function exportScore(): Promise<void> {
+  const block = midiBlock.value
+  if (block) {
+    midiError.value = block
+    return
+  }
+  midiBusy.value = true
+  midiError.value = null
+  try {
+    const file = await exportMidi(props.fetcher, {
+      abc: props.doc.text,
+      title: props.title ?? '',
+      guide: props.guide ?? []
+    })
+    downloadBytes(file.filename, fromBase64(file.data))
+  } catch (e) {
+    midiError.value = describeError(e)
+  } finally {
+    midiBusy.value = false
+  }
+}
+
+function chooseMidi(): void {
+  midiError.value = null
+  midiFile.value?.click()
+}
+
+async function onMidiFile(event: Event): Promise<void> {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = '' // the same file can be chosen again
+  if (!file) return
+  try {
+    midiRequest.value = { data: toBase64(new Uint8Array(await file.arrayBuffer())), filename: file.name }
+  } catch (e) {
+    midiError.value = describeError(e)
+  }
+}
+
+/** Replace the score with the imported one (one undo step) and take its Guide notes over. */
+function insertMidi(result: MidiImportResult, keepGuide: boolean): void {
+  if (props.readonly) return
+  const name = midiRequest.value?.filename ?? 'file'
+  session.replaceText(result.abc, `import MIDI (${name})`, result.analysis)
+  if (keepGuide && props.guide !== undefined && result.guide.length) emit('guideChange', result.guide)
+  midiRequest.value = null
+  midiError.value = null
+}
 
 function isTextTarget(target: EventTarget | null): boolean {
   const element = target as HTMLElement | null
@@ -279,6 +356,30 @@ function onKey(event: KeyboardEvent): void {
         zoom
         <input v-model.number="prefs.zoom" type="range" min="0.6" max="1.8" step="0.1" aria-label="Notation zoom" />
       </label>
+      <span class="midi-tools" role="group" aria-label="MIDI">
+        <button
+          :disabled="midiBusy || !!midiBlock"
+          :title="midiBlock ?? 'Download this score as a standard MIDI file (Vocal, Instrument, Chords and the Guide track)'"
+          @click="exportScore"
+        >
+          Export MIDI
+        </button>
+        <button
+          :disabled="readonly"
+          :title="readonly ? 'This score belongs to the other sheet.' : 'Read a MIDI file as the score (the report is shown before anything is replaced)'"
+          @click="chooseMidi"
+        >
+          Import MIDI…
+        </button>
+        <input
+          ref="midiFile"
+          class="hidden-file"
+          type="file"
+          accept=".mid,.midi,audio/midi,audio/x-midi"
+          aria-label="MIDI file"
+          @change="onMidiFile"
+        />
+      </span>
       <span v-if="session.pending" class="facts">checking…</span>
       <span v-else-if="session.view?.ok" class="facts ok">✓ valid</span>
       <span v-else-if="invalid" class="facts bad">✖ {{ diagnostics.length }} error(s)</span>
@@ -391,6 +492,17 @@ function onKey(event: KeyboardEvent): void {
       <span v-for="(note, index) in session.notes" :key="index" class="change">{{ note }}</span>
     </p>
     <p v-if="session.error" class="error" role="alert">{{ session.error }}</p>
+    <p v-if="midiError" class="error" role="alert">MIDI: {{ midiError }}</p>
+    <MidiDialog
+      v-if="midiRequest"
+      :fetcher="fetcher"
+      :data="midiRequest.data"
+      :filename="midiRequest.filename"
+      :view="shown"
+      :keeps-guide="keepsGuide"
+      @close="midiRequest = null"
+      @insert="insertMidi"
+    />
     <ul v-if="diagnostics.length" class="diagnostics">
       <li v-for="(d, index) in diagnostics" :key="index" :data-severity="d.severity">
         <strong>{{ d.severity }}</strong>

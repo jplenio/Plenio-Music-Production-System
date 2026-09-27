@@ -435,12 +435,64 @@ def test_canonical_score_routes(server: ComfyServer) -> None:
     status, imported = server.request("POST", "/plenio/score/midi/import", {"data": exported["data"]})
     assert status == 200 and imported["report"] == [] and imported["guide"] == [[0, 8, 40]]
     assert imported["analysis"]["ok"] and imported["abc"] == abc
+    assert [(t["name"], t["role"]) for t in imported["tracks"]] == [
+        ("My Song", None),
+        ("Vocal", "vocal"),
+        ("Instrument", "ins"),
+        ("Chords", "chords"),
+        ("Guide", "guide"),
+    ]
+    assert imported["tracks"][0]["notes"] == 0 and imported["tracks"][4]["notes"] == 1
     status, refused = server.request("POST", "/plenio/score/midi/import", {"data": "not base64!"})
     assert status == 400 and "base64" in refused["error"]["message"]
     status, refused = server.request(
         "POST", "/plenio/score/midi/import", {"data": base64.b64encode(b"RIFF").decode()}
     )
     assert status == 400 and "not a readable MIDI file" in refused["error"]["message"]
+
+
+def test_midi_import_lists_tracks_maps_roles_and_reads_chords(server: ComfyServer) -> None:
+    """The import route: the file's tracks (D3), an explicit mapping and chord recognition."""
+    import base64
+
+    from plenio.core.score.midi import _chunk, _meta, _track
+
+    def note(tick: int, length: int, pitch: int, channel: int = 0) -> list[tuple[int, int, bytes]]:
+        return [
+            (tick, 2, bytes([0x90 | channel, pitch, 100])),
+            (tick + length, 1, bytes([0x80 | channel, pitch, 0])),
+        ]
+
+    conductor = [(0, 0, _meta(0x51, (500_000).to_bytes(3, "big"))), (0, 1, _meta(0x58, bytes([4, 2, 24, 8])))]
+    vocal = note(0, 384, 72)
+    pads = note(0, 384, 60, 1) + note(0, 384, 64, 1) + note(0, 384, 67, 1)
+    bass = note(0, 384, 40, 2)
+    data = (
+        _chunk(b"MThd", (1).to_bytes(2, "big") + (4).to_bytes(2, "big") + (96).to_bytes(2, "big"))
+        + _track(conductor, 384)
+        + _track([(0, 0, _meta(0x03, b"Vocal")), *vocal], 384)
+        + _track([(0, 0, _meta(0x03, b"Pads")), *pads], 384)
+        + _track([(0, 0, _meta(0x03, b"Bass")), *bass], 384)
+    )
+    encoded = base64.b64encode(data).decode()
+    status, listed = server.request("POST", "/plenio/score/midi/import", {"data": encoded})
+    assert status == 200
+    assert [(t["index"], t["name"], t["notes"], t["role"]) for t in listed["tracks"]] == [
+        (0, "", 0, None),
+        (1, "Vocal", 1, "vocal"),
+        (2, "Pads", 3, None),
+        (3, "Bass", 1, None),
+    ]
+    assert any("was not imported" in line for line in listed["report"])
+    status, mapped = server.request(
+        "POST",
+        "/plenio/score/midi/import",
+        {"data": encoded, "mapping": {"1": "vocal", "2": "chords", "3": "guide"}, "chords": True},
+    )
+    assert status == 200
+    assert mapped["guide"] == [[0, 32, 40]]
+    assert any("best effort" in line for line in mapped["report"])
+    assert mapped["analysis"]["model"]["tracks"]["chords"][0]["name"] == "C"
 
 
 def test_a_score_edited_in_the_editor_reaches_the_renderer(server: ComfyServer, log: Log) -> None:

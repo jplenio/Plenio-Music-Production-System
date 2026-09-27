@@ -482,6 +482,29 @@ describe('score session', () => {
     expect(session.redoLabel).toBe('document replaced')
   })
 
+  it('replaces the whole text as one undo step, with or without a known view', async () => {
+    const edits = vi.fn()
+    const session = await start(edits)
+    await backend.calls[0].answer(VIEW)
+    const imported = 'X:1\nIMPORTED'
+    expect(session.replaceText(imported, 'import MIDI (sketch.mid)', viewFor('imported'))).toBe(true)
+    await settle()
+    expect(doc.text).toBe(imported)
+    expect(edits).toHaveBeenCalledTimes(1)
+    expect(session.view?.sha256).toBe('imported')
+    expect(session.lastValid?.sha256).toBe('imported')
+    expect(session.undoLabel).toBe('import MIDI (sketch.mid)')
+    // the view came with the import: no second round trip
+    expect(backend.calls.map((call) => call.route)).toEqual(['/plenio/score/analyze'])
+    session.undo()
+    expect(doc.text).toBe(ABC)
+    // without a view the replaced text is checked as usual
+    expect(session.replaceText(imported, 'again')).toBe(true)
+    await settle()
+    expect(backend.calls.at(-1)?.body.abc).toBe(imported)
+    expect(session.replaceText(imported, 'again')).toBe(false) // the same text: nothing happens
+  })
+
   it('does not analyze an empty text', async () => {
     doc.text = '   '
     const session = await start()

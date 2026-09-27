@@ -132,7 +132,7 @@ async def score_midi_export(request: web.Request) -> web.StreamResponse:
 
 
 async def score_midi_import(request: web.Request) -> web.StreamResponse:
-    """A MIDI file (base64) as a score: its ABC, the Guide notes and the import report."""
+    """A MIDI file (base64) as a score: its ABC, the Guide notes, the tracks and the import report."""
     from ..core.score import canonical, midi
 
     data = await read_json(request)
@@ -144,13 +144,21 @@ async def score_midi_import(request: web.Request) -> web.StreamResponse:
     except (ValueError, TypeError) as error:
         raise PlenioUserError("The field 'data' is not valid base64.") from error
     grid = int(_number(data, "grid", 4, 64) or 32)
-    result = midi.import_midi(raw, mapping=midi.mapping_from_json(data.get("mapping")), grid=grid)
+    result = midi.import_midi(
+        raw,
+        mapping=midi.mapping_from_json(data.get("mapping")),
+        grid=grid,
+        chords_from_notes=bool(data.get("chords", False)),
+    )
     abc = canonical.to_abc(result.score)
     return web.json_response(
         {
             "abc": abc,
             "guide": [[g.onset, g.duration, g.pitch] for g in result.guide],
             "report": list(result.report),
+            "tracks": [
+                {"index": t.index, "name": t.name, "notes": t.notes, "role": t.role} for t in result.tracks
+            ],
             "analysis": score_rules.editor_view(abc),
         }
     )

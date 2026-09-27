@@ -90,18 +90,29 @@ export function exportMidi(
   return post(fetcher, '/plenio/score/midi/export', request)
 }
 
+export interface MidiTrack {
+  /** 0-based track index, as the mapping's keys use it. */
+  index: number
+  name: string
+  notes: number
+  /** The role the track's name suggests, or ``null``. */
+  role: string | null
+}
+
 export interface MidiImportResult {
   abc: string
   guide: GuideNote[]
   /** Every lossy step of the import (quantisation, cut notes, dropped tempo changes ...). */
   report: string[]
+  /** The file's tracks as the import saw them (the dialog lists these). */
+  tracks: MidiTrack[]
   analysis: ScoreView
 }
 
 /** A MIDI file (base64) as a score. ``mapping``: track index -> vocal | ins | chords | guide | null. */
 export function importMidi(
   fetcher: Fetcher,
-  request: { data: string; mapping?: Record<string, string | null>; grid?: number }
+  request: { data: string; mapping?: Record<string, string | null>; grid?: number; chords?: boolean }
 ): Promise<MidiImportResult> {
   return post(fetcher, '/plenio/score/midi/import', request)
 }

@@ -146,7 +146,59 @@ def test_mapping_overrides_track_names_and_guide_keeps_polyphony() -> None:
         midi.import_midi(data, mapping={1: "drums"})
 
 
-def test_running_status_and_note_on_velocity_zero() -> None:
+def test_track_infos_describe_the_file_for_the_import_dialog() -> None:
+    data = smf(
+        [(0, 0, _meta(0x58, bytes([4, 2, 24, 8])))],
+        note(0, 96, 72),
+        note(0, 96, 60, 1) + note(0, 96, 64, 1) + note(0, 96, 67, 1),
+        note(0, 96, 40),
+        names=("", "Lead", "Pads", "Bass"),
+    )
+    result = midi.import_midi(data)
+    assert [(t.index, t.name, t.notes, t.role) for t in result.tracks] == [
+        (0, "", 0, None),
+        (1, "Lead", 1, None),
+        (2, "Pads", 3, None),
+        (3, "Bass", 1, None),
+    ]
+    named = midi.import_midi(smf(note(0, 96, 60), names=("Vocal",)))
+    assert [(t.name, t.notes, t.role) for t in named.tracks] == [("Vocal", 1, "vocal")]
+    # an explicit mapping does not change what the file *suggests* (the dialog shows both)
+    mapped = midi.import_midi(smf(note(0, 96, 60), names=("Vocal",)), mapping={0: "guide"})
+    assert mapped.tracks[0].role == "vocal" and mapped.guide
+
+
+def test_chords_are_read_from_the_notes_when_asked() -> None:
+    voicing = note(0, 96, 60, 2) + note(0, 96, 64, 2) + note(0, 96, 67, 2)
+    later = note(96, 96, 57, 2) + note(96, 96, 60, 2) + note(96, 96, 64, 2)
+    data = smf(
+        [(0, 0, _meta(0x58, bytes([4, 2, 24, 8])))],
+        note(0, 192, 72),
+        voicing + later,
+        names=("", "Vocal", "Pads"),
+    )
+    plain = midi.import_midi(data, mapping={1: "vocal", 2: "chords"})
+    assert plain.score.chords == ()
+    assert any("turn on chord recognition" in line for line in plain.report)
+    read = midi.import_midi(data, mapping={1: "vocal", 2: "chords"}, chords_from_notes=True)
+    assert [(chord.onset, chord.name) for chord in read.score.chords] == [(0, "C"), (8, "Am")]
+    assert any("best effort" in line for line in read.report)
+    assert c.from_abc(c.to_abc(read.score)) == read.score  # the recognised symbols print and re-parse
+
+
+def test_chord_text_events_win_over_recognition() -> None:
+    voicing = note(0, 96, 60, 2) + note(0, 96, 64, 2) + note(0, 96, 67, 2)
+    data = smf(
+        [(0, 0, _meta(0x58, bytes([4, 2, 24, 8])))],
+        note(0, 192, 72),
+        voicing + [(0, 0, _meta(0x01, b"plenio:chord Fm"))],
+        names=("", "Vocal", "Chords"),
+    )
+    # the written symbol stands; recognition runs only when the file has no chord events at all
+    result = midi.import_midi(data, chords_from_notes=True)
+    assert [chord.name for chord in result.score.chords] == ["Fm"]
+    assert not any("best effort" in line for line in result.report)
+
     body = bytes([0x00, 0x90, 60, 100, 0x60, 60, 0, 0x00, 62, 100, 0x60, 0x80, 62, 0]) + bytes(
         [0, 0xFF, 0x2F, 0]
     )

@@ -30,6 +30,7 @@ from typing import Any
 from ...third_party import yue2_abc_tools as upstream
 from ..errors import PlenioValidationError
 from . import canonical as c
+from . import chords as chord_templates
 from .canonical import ChordSymbol, KeyChange, Note, Score, Section
 from .model import _chord_pitches
 
@@ -56,10 +57,23 @@ class GuideNote:
 
 
 @dataclass(frozen=True)
+class TrackInfo:
+    """What the import knows about one track of a file (the import dialog shows this)."""
+
+    index: int
+    """0-based, as the keys of ``mapping``."""
+    name: str
+    notes: int
+    role: str | None
+    """The role the track's name suggests (``vocal``, ``ins``, ``chords``, ``guide``), else ``None``."""
+
+
+@dataclass(frozen=True)
 class MidiImport:
     score: Score
     guide: tuple[GuideNote, ...] = ()
     report: tuple[str, ...] = ()
+    tracks: tuple[TrackInfo, ...] = ()
 
 
 # --- bytes ------------------------------------------------------------------------------
@@ -276,6 +290,11 @@ def export_midi(score: Score, *, guide: Sequence[GuideNote] = (), title: str = "
 # --- import -----------------------------------------------------------------------------
 
 
+def _name_role(track: _Track) -> str | None:
+    """The role a track's name suggests (``None`` for anything else)."""
+    return NAME_TO_ROLE.get(track.name.strip().lower())
+
+
 def _roles(
     tracks: Sequence[_Track], mapping: Mapping[int, str | None] | None, report: list[str]
 ) -> dict[int, str]:
@@ -289,7 +308,7 @@ def _roles(
             if role:
                 roles[index] = role
             continue
-        role = NAME_TO_ROLE.get(track.name.strip().lower())
+        role = _name_role(track)
         has_notes = any(e.kind == "on" for e in track.events)
         if role and role not in roles.values():
             roles[index] = role
@@ -404,12 +423,18 @@ def _layout(count: int, firsts: set[int]) -> tuple[int, ...]:
 
 
 def import_midi(
-    data: bytes, *, mapping: Mapping[int, str | None] | None = None, grid: int = 32
+    data: bytes,
+    *,
+    mapping: Mapping[int, str | None] | None = None,
+    grid: int = 32,
+    chords_from_notes: bool = False,
 ) -> MidiImport:
     """A score (plus Guide notes and a report of every lossy step) from a standard MIDI file.
 
     ``mapping`` assigns track indices (0-based) to ``vocal``, ``ins``, ``chords``, ``guide`` or ``None``
-    (not imported); ``grid`` is the note value foreign timing is quantised to (1/``grid`` note).
+    (not imported); ``grid`` is the note value foreign timing is quantised to (1/``grid`` note);
+    ``chords_from_notes`` reads chord symbols from the notes of the *Chords* track when the file
+    carries no ``plenio:chord`` text events (``core.score.chords``, best effort, reported).
     """
     if grid not in (4, 8, 16, 32, 64):
         raise PlenioValidationError("The import grid must be 1/4, 1/8, 1/16, 1/32 or 1/64 notes.")
@@ -446,6 +471,10 @@ def import_midi(
         return _grid(tick, step) * snap
 
     roles = _roles(tracks, mapping, report)
+    infos = tuple(
+        TrackInfo(index, track.name, len(_pairs(track.events, track.end)), _name_role(track))
+        for index, track in enumerate(tracks)
+    )
     tempos = sorted(
         (e.tick, int.from_bytes(e.data[:3], "big")) for e in metas if e.meta == 0x51 and len(e.data) >= 3
     )
@@ -482,10 +511,6 @@ def import_midi(
                     report.append(f"chord text {name!r} is not a supported chord symbol and was skipped")
                 else:
                     chords[at(event.tick)] = name
-        if not chords and pitched["chords"]:
-            report.append(
-                "the Chords track has notes but no plenio:chord text events; no chord symbols were read"
-            )
     end_units = max(
         [
             math.ceil(Fraction(max((t.end for t in tracks), default=0)) / ticks_per_unit),
@@ -511,6 +536,23 @@ def import_midi(
     if 0 not in keys:
         keys[0] = "C"
         report.append("no key signature at the start: C major assumed")
+    if not chords and pitched["chords"]:
+        if chords_from_notes:
+            reading = chord_templates.recognize_chords(
+                pitched["chords"], keys=sorted(keys.items()), default_key=keys[0]
+            )
+            chords = {chord.onset: chord.name for chord in reading.chords}
+            note = f"chord symbols were read from the notes of the Chords track (best effort, {len(chords)} symbol(s))"
+            if reading.merged:
+                note += f"; {reading.merged} onset(s) are covered by the symbol before them"
+            if reading.skipped:
+                note += f"; {reading.skipped} onset(s) did not match a supported chord"
+            report.append(note)
+        else:
+            report.append(
+                "the Chords track has notes but no plenio:chord text events; turn on chord recognition "
+                "to read symbols from the notes"
+            )
     sections: dict[int, str] = {}
     for event in sorted((e for e in metas if e.meta == 0x06), key=lambda e: e.tick):
         label = " ".join(_text(event.data).split())
@@ -556,7 +598,7 @@ def import_midi(
     guide = tuple(
         sorted((GuideNote(o, e - o, p) for o, e, p in pitched["guide"]), key=lambda g: (g.onset, g.pitch))
     )
-    return MidiImport(score, guide, tuple(report))
+    return MidiImport(score, guide, tuple(report), infos)
 
 
 MAX_FILE_BYTES = 8 * 1024 * 1024
@@ -611,6 +653,7 @@ __all__ = [
     "MAX_FILE_BYTES",
     "GuideNote",
     "MidiImport",
+    "TrackInfo",
     "export_midi",
     "filename_for",
     "guide_from_json",

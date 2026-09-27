@@ -13,7 +13,7 @@ Typical uses:
 | Part | What it does |
 |---|---|
 | **Palette** (top) | undo/redo; pitch −8va, −1, +1, +8va; shorter / longer; rest / note; chord symbol set / remove; *Whole score*: transpose, tempo, remove chords, let the instrument play the melody, silence the Vocal voice |
-| **View** | the layout *Review* or *Text* (see below); in *Review*: *piano roll* and *ABC text (advanced)* on/off; notation zoom |
+| **View** | the layout *Review* or *Text* (see below); in *Review*: *piano roll* and *ABC text (advanced)* on/off; notation zoom; *Export MIDI* and *Import MIDI…* (see below) |
 | **Piano roll** | both voices over time (Vocal blue, Ins orange) with a chord lane and the bars and sections above; draw, move, resize and delete notes and chord symbols with the mouse (see below) |
 | **Inspector** (right, *Review*) | the selected note(s), chord symbol and bar as fields: voice, pitch, start, length, chord; insert, duplicate or delete bars, meter, key (see below) |
 | **Navigator** | the sections (go to, rename, start one bar earlier / later, join to the one before, new section at the selected bar) and a bar strip (sections in colour, bars with errors marked); in *Review* with the song's lyrics: *Lyrics fit* (the lyrics next to the score's sections) |
@@ -96,6 +96,19 @@ Rules the editor keeps for you:
 Type in the ABC view like in any code editor. The analysis follows after a short pause. While the text is invalid, the notation and the piano roll show the **last valid score** (dimmed) with the note *"The text has errors - the notation shows the last valid score"*, the bar with the error is underlined and marked in the bar strip, and the diagnostic links to it. Palette operations and roll gestures work only on a valid text, and **Apply** and **Approve** are off (their tooltip says why): an invalid text never replaces the score in the node. **Revert to last valid** puts the last valid text back (one undo step).
 
 One undo history covers both kinds of edits: a burst of typing is one step, each palette operation is one step (its tooltip names the step), and a document replaced by the dialog (for example *use the new draft* after a conflict) is one step too.
+
+## MIDI files
+
+A score goes in and out as a standard MIDI file, so a sketch from any DAW can become the score - and the score can go back to a DAW.
+
+| Button | What it does |
+|---|---|
+| **Export MIDI** | Downloads the score as a type-1 MIDI file named after the song's title. Tracks: *Vocal*, *Instrument*, *Chords* (block voicings plus `plenio:chord` text events) and the *Guide* track; tempo, time and key signatures and the section markers sit in the conductor track. Off while the text is invalid - the same gate as Apply. |
+| **Import MIDI…** | Reads a `.mid`/`.midi` file and shows what the import found **before** anything is replaced: the file's tracks with a role each, the grid, whether to read chords from the notes, and the import report. *Insert* replaces the score (one undo step; the diagnostics of the imported text come with it). |
+
+Roles: *Vocal* and *Instrument* become the two YuE2 voices (one voice each - where notes overlap, the highest sounds, and the report says how many were shortened, split or dropped); *Chords* becomes chord symbols; *Guide* is kept for playback and MIDI only and is **never sent to YuE2**; *do not import* leaves a track out. A Plenio file carries the unit and the bar layout in a text event, so it comes back exactly as it was.
+
+Foreign files are read deterministically and reported: note starts and ends are quantised to the grid (1/16, or the score's own length), only the first tempo is used, later time signatures take effect at bar starts, markers become sections - every lossy step is listed. *Read chords from the notes* matches the notes of a *Chords* track against the supported chord symbols (best effort: what fits nothing is counted, not guessed); written `plenio:chord` events always win.
 
 ## Sections
 
