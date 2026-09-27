@@ -178,7 +178,11 @@ class PlenioSongSheet(io.ComfyNode):
             raise PlenioConflictError(
                 f"Song Sheet conflict - {reasons}.", documents=evaluation.conflicts, hint=hint
             )
-        if evaluation.has_errors:
+        if evaluation.has_errors and not evaluation.waiting_for_approval:
+            # A pending review stop wins over document errors: the run stops at the sheet and the editor
+            # shows the findings (for example I12: an unfilled DAW skeleton is an error, but composing it
+            # is exactly what the review stop is for - plan §10.2). Nothing renders either way: the
+            # outputs stay blocked, and an approved set with errors raises on the next run.
             raise PlenioValidationError(
                 "The Song Sheet documents are not valid.",
                 diagnostics=[f.to_dict() for f in evaluation.findings if f.severity == "error"],

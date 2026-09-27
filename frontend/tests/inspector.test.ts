@@ -135,7 +135,7 @@ describe('each field commits one canonical operation', () => {
   it('opens the layout of the node, else the remembered one', () => {
     expect(initialLayout('text', 'review')).toBe('text')
     expect(initialLayout('review', 'text')).toBe('review')
-    expect(initialLayout('daw', 'text')).toBe('review') // until the DAW layout exists
+    expect(initialLayout('daw', 'text')).toBe('daw')
     expect(initialLayout(undefined, 'text')).toBe('text')
     expect(initialLayout(42, 'review')).toBe('review')
   })

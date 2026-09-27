@@ -197,14 +197,15 @@ export function removeKeyOp(model: ScoreModelView, measure: ModelMeasure): Score
 
 // --- layout -----------------------------------------------------------------------------------
 
-export type Layout = 'review' | 'text'
+export type Layout = 'review' | 'daw' | 'text'
 
 /**
  * The layout a sheet opens in: the node's ``plenio_editor_layout`` (a template's intent: ``review``,
- * ``text``; ``daw`` opens *review* until the DAW layout exists), else the viewer's last choice.
+ * ``daw``, ``text``), else the viewer's last choice.
  */
 export function initialLayout(nodeLayout: unknown, remembered: Layout): Layout {
   if (nodeLayout === 'text') return 'text'
-  if (nodeLayout === 'review' || nodeLayout === 'daw') return 'review'
+  if (nodeLayout === 'daw') return 'daw'
+  if (nodeLayout === 'review') return 'review'
   return remembered
 }

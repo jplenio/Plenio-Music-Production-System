@@ -47,10 +47,11 @@ def test_shipped_catalogue() -> None:
         "1 · YuE2 · Song",
         "2 · YuE2 · Cover",
         "3 · MiniMax · Song",
+        "5 · YuE2 · DAW",
     ]
     # the FLUX.2 files serve only the optional Cover Art block
     flux = [m for m in CATALOGUE.values() if m.file.startswith(("flux", "qwen_3_4b")) and m.default]
-    assert len(flux) == 3 and all(not m.templates and len(m.optional_templates) == 3 for m in flux)
+    assert len(flux) == 3 and all(not m.templates and len(m.optional_templates) == 4 for m in flux)
     # alternatives are never template defaults
     assert all(not m.templates and not m.optional_templates for m in CATALOGUE.values() if not m.default)
 
@@ -113,7 +114,7 @@ def test_inventory_and_readiness(tmp_path: Path) -> None:
     assert inventory.status(files["gemma4_e4b_it_fp8_scaled.safetensors"]) == "installed"
     assert inventory.status(files["minimax_music3_dav.safetensors"]) == "size differs"
     assert inventory.status(files["sheetsage2_bf16.safetensors"]) == "missing"
-    song, cover, minimax = readiness(CATALOGUE, inventory, template_names(CATALOGUE))
+    song, cover, minimax, daw = readiness(CATALOGUE, inventory, template_names(CATALOGUE))
     assert song.template == "1 · YuE2 · Song" and song.ready
     assert {m.file for m in song.optional_missing} >= {"flux-2-klein-4b.safetensors"}
     assert not cover.ready and {m.file for m in cover.missing} == {
@@ -126,6 +127,12 @@ def test_inventory_and_readiness(tmp_path: Path) -> None:
     }  # a file of the wrong size is reported as incomplete, not as missing
     assert {m.file for m in minimax.incomplete} == {"minimax_music3_dav.safetensors"}
     assert minimax.missing_bytes == 4914197682 + 9196611886
+    # the DAW template needs the same music model and writer as the song template
+    assert daw.template == "5 · YuE2 · DAW" and daw.ready
+    assert {m.file for m in daw.optional_missing} >= {
+        "flux-2-klein-4b.safetensors",
+        "ar_lora_inst_v3abc_comfyui.safetensors",
+    }
     assert readiness(CATALOGUE, Inventory({}), ["4 · Enhance & Master"])[0].ready
 
 

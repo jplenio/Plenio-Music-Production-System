@@ -87,6 +87,14 @@ CARDS = {
         "no music model needed",
         (70, 180, 130),
     ),
+    "5 · YuE2 · DAW": Card(
+        "5",
+        "YuE2 · DAW",
+        "Compose the score yourself",
+        ("Brief", "Write", "Empty score", "Piano roll · MIDI", "Render", "Master · Export"),
+        "YuE2 3B · CC BY-NC 4.0",
+        (60, 190, 200),
+    ),
 }
 
 

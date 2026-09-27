@@ -1,7 +1,7 @@
 /** Mount the Song Sheet dialog (loaded lazily, only when a sheet is opened). */
 import { createApp } from 'vue'
 
-import type { Fetcher } from '../api/client'
+import type { Fetcher, GuideNote } from '../api/client'
 import type { AsrNote, SheetPayload } from '../shared/sheetSession'
 import type { DocumentKind, SheetState } from '../shared/sheetState'
 import dialogCss from './dialog.css?inline'
@@ -17,7 +17,9 @@ export interface OpenOptions {
   fetcher: Fetcher
   /** The Song Sheet node's ``plenio_editor_layout`` property. */
   layout?: string | null
-  onApply: (state: SheetState) => void
+  /** The Guide notes of the node's ``plenio_guide`` property (playback and MIDI only). */
+  guide?: GuideNote[]
+  onApply: (state: SheetState, guide: GuideNote[]) => void
 }
 
 function installCss(): void {
@@ -45,8 +47,9 @@ export function openSheetDialog(options: OpenOptions): () => void {
     review: options.review,
     fetcher: options.fetcher,
     layout: options.layout ?? null,
-    onApply: (state: SheetState) => {
-      options.onApply(state)
+    guide: options.guide ?? [],
+    onApply: (state: SheetState, guide: GuideNote[]) => {
+      options.onApply(state, guide)
       close()
     },
     onClose: close

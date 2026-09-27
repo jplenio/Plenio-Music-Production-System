@@ -1,6 +1,6 @@
 import "../../../scripts/api.js";
 import "../../../scripts/app.js";
-import { E as p } from "./chunks/main-COr2Rxv6.mjs";
+import { E as p } from "./chunks/main-CqX6EkTS.mjs";
 export {
   p as EXTENSION_NAME
 };

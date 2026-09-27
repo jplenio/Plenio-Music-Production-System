@@ -6,8 +6,20 @@ import { type ToneEvent, frequency } from '../../shared/playback'
 
 const LOOKAHEAD_S = 0.25
 const TICK_MS = 30
-const LEVEL: Record<ToneEvent['part'], number> = { Vocal: 0.22, Ins: 0.16, chord: 0.045, click: 0.1 }
-const WAVE: Record<ToneEvent['part'], OscillatorType> = { Vocal: 'triangle', Ins: 'sine', chord: 'sine', click: 'square' }
+const LEVEL: Record<ToneEvent['part'], number> = {
+  Vocal: 0.22,
+  Ins: 0.16,
+  chord: 0.045,
+  click: 0.1,
+  guide: 0.1
+}
+const WAVE: Record<ToneEvent['part'], OscillatorType> = {
+  Vocal: 'triangle',
+  Ins: 'sine',
+  chord: 'sine',
+  click: 'square',
+  guide: 'sine'
+}
 
 export class TonePlayer {
   private context: AudioContext | null = null

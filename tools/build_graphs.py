@@ -1085,6 +1085,111 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     return g, song_app(brief, seed, draft, [sheet], preview, export)
 
 
+ABOUT_DAW = f"""# 5 · YuE2 · DAW
+
+**Brief -> Write Song -> Song Sheet · Text -> Score Tools (new score from brief) -> Song Sheet · DAW -> YuE2 Render -> Master -> Export**
+
+Write the song yourself: the lyrics come from the writer (or from you - open the lyrics tab and *use my own lyrics*), and the **score** is yours. YuE2 reads exactly two voices and the chord symbols:
+
+- **Vocal** -> `V: Vocal` - the sung melody, one voice.
+- **Instrument** -> `V: Ins` - the instrumental melody, one voice.
+- **Chords** -> the chord symbols over the Vocal voice.
+- **Guide** -> **not sent to YuE2**: your own notes for playback and for MIDI export (a sketch piano, a bass line).
+
+How to work:
+
+1. In **Song Brief** describe the song (genre, mood, length, tempo, key, meter). *one song, stop to review* is the default: nothing is rendered before you have approved the score.
+2. Press **Run**. The writer drafts title, style and lyrics; *Score Tools* builds an **empty score** from the brief - one `verse` of the right length in the brief's meter and key, all rests.
+3. The run **stops at Song Sheet · DAW**. Open it and compose: draw notes in the piano roll (or import a MIDI file), set chord symbols in the chord lane, split the score into sections in the navigator, and correct the lyrics in *Song Sheet · Text*. **Approve** both sheets.
+4. Run again: YuE2 renders **exactly the score you approved** (`Vocal`, `Ins` and the chord symbols - never the Guide track), and Master and Export finish the song.
+
+**Empty score:** a score of rests cannot be rendered - YuE2 needs at least one note (the Song Sheet says so). Draw the first note or import a MIDI file.
+
+{FINISH_TEXT}
+
+**App mode:** the mode, the brief, the take seed, both Song Sheet buttons and the results - the app is usable for a first run, but the score is drawn in the graph's sheet editor.
+
+**Models:** YuE2 3B int8 (4.0 GB, **CC BY-NC 4.0, non-commercial**) and the Gemma 4 E4B writer. The model block below is collapsed; expand it to choose other files.
+"""
+
+
+def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
+    g = Graph()
+    about_note(g, ABOUT_DAW, height=980)
+    brief = g.add(
+        "PlenioSongBrief",
+        (0, 0),
+        size=(380, 620),
+        widgets={
+            "mode": "one song, stop to review",
+            "template": "pop/singer-songwriter-acoustic-vocal",
+            "length": "short (about 1:30)",
+            "vocals": "sung",
+        },
+    )
+    model_node = g.add_subgraph(bp["yue2_model"], (0, 760), size=(380, 140), collapsed=True)
+    write = g.add_subgraph(bp["write"], (460, 0), size=(360, 220))
+    draft = draft_seed(g, write, (460, 280))
+    text_sheet = song_sheet(g, (900, 0), "Song Sheet · Text")
+    tools = g.add(
+        "PlenioScoreTools",
+        (1400, 0),
+        size=(340, 150),
+        title="Score Tools · new score from brief",
+        widgets={"operation": "new score from brief"},
+    )
+    # The DAW layout: track headers, piano roll, staff, inspector and the MIDI tools.
+    score_sheet = g.add(
+        "PlenioSongSheet",
+        (1820, 0),
+        size=(420, 420),
+        title="Song Sheet · DAW",
+        widgets=FOLLOW_BRIEF,
+        labels={"sheet_state": "Song Sheet · DAW"},
+        properties={"plenio_editor_layout": "daw"},
+    )
+    seed = take_seed(g, (2320, 0))
+    render = g.add_subgraph(bp["yue2_render"], (2320, 150), size=(320, 250))
+    g.link(brief, "brief", write, "brief")
+    g.link(model_node, "engine", write, "engine")
+    for kind in ("title", "style", "lyrics", "artwork_prompt"):
+        g.link(write, kind, text_sheet, kind)
+    g.link(brief, "brief", text_sheet, "brief")
+    g.link(model_node, "engine", text_sheet, "engine")
+    # The score input of Score Tools stays unconnected: 'new score from brief' builds the skeleton.
+    g.link(brief, "brief", tools, "brief")
+    g.link(tools, "score", score_sheet, "score")
+    g.link(text_sheet, "style", score_sheet, "context_style")
+    g.link(text_sheet, "lyrics", score_sheet, "context_lyrics")
+    g.link(brief, "brief", score_sheet, "brief")
+    g.link(model_node, "engine", score_sheet, "engine")
+    for source, name in ((model_node, "MODEL"), (model_node, "CLIP"), (model_node, "VAE")):
+        g.link(source, name, render, name.lower())
+    g.link(text_sheet, "style", render, "style")
+    g.link(text_sheet, "lyrics", render, "lyrics")
+    g.link(score_sheet, "score", render, "abc")
+    g.link(score_sheet, "planning_mode", render, "mode")
+    g.link(score_sheet, "score_seconds", render, "max_duration")
+    g.link(seed, "seed", render, "seed")
+    _master, preview, export = finish(
+        g,
+        bp,
+        2720,
+        audio=(render, "AUDIO"),
+        title=(text_sheet, "title"),
+        artwork=(text_sheet, "artwork_prompt"),
+        reports=[(text_sheet, "report"), (score_sheet, "report")],
+        group="6 · FINISH",
+    )
+    g.group("1 · SONG", [brief])
+    g.group("2 · WRITE", [write, draft])
+    g.group("3 · TEXT", [text_sheet])
+    g.group("4 · DAW", [tools, score_sheet])
+    g.group("5 · RENDER", [seed, render])
+    g.group("MUSIC MODEL", [model_node], color=MODEL_GROUP)
+    return g, song_app(brief, seed, draft, [text_sheet, score_sheet], preview, export)
+
+
 ABOUT_ENHANCE = """# 4 · Enhance & Master
 
 **Load Audio -> EQ -> Loudness & Dynamics -> Export**
@@ -1198,6 +1303,7 @@ def templates(bp: dict[str, Blueprint]) -> list[tuple[str, Graph, list[Blueprint
     song, song_app_config = yue2_song(bp)
     cover, cover_app = yue2_cover(bp)
     minimax, minimax_app = minimax_song(bp)
+    daw, daw_app = yue2_daw(bp)
     enhance, enhance_app = enhance_master()
     check, check_app = system_check()
     finish_bps = [bp["master"], bp["cover"]]
@@ -1222,6 +1328,12 @@ def templates(bp: dict[str, Blueprint]) -> list[tuple[str, Graph, list[Blueprint
             minimax_app,
         ),
         ("4 · Enhance & Master", enhance, [], enhance_app),
+        (
+            "5 · YuE2 · DAW",
+            daw,
+            [bp["yue2_model"], bp["write"], bp["yue2_render"], *finish_bps],
+            daw_app,
+        ),
     ]
 
 

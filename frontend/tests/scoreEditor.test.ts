@@ -248,7 +248,7 @@ describe('editor preferences', () => {
       layout: 'text',
       advanced: false,
       zoom: 1.4,
-      voices: { Vocal: false, Ins: true, chords: true },
+      voices: { Vocal: false, Ins: true, chords: true, guide: true },
       speed: 0.5,
       roll: true,
       rollZoom: 48,

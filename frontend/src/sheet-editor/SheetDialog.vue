@@ -6,7 +6,7 @@
  */
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 
-import { type Fetcher, PlenioApiError, getAsrNote, resolveSheet } from '../api/client'
+import { type Fetcher, type GuideNote, PlenioApiError, getAsrNote, resolveSheet } from '../api/client'
 import {
   type AsrNote,
   type Finding,
@@ -23,6 +23,7 @@ import { type DocumentKind, type SheetState, serializeState } from '../shared/sh
 import { LINE_BREAK, changedWords, wordDiff } from '../shared/wordDiff'
 import LyricsFit from './LyricsFit.vue'
 import ScoreTab from './score/ScoreTab.vue'
+import { sameGuide } from './score/tracks'
 
 const props = defineProps<{
   title: string
@@ -34,8 +35,10 @@ const props = defineProps<{
   fetcher: Fetcher
   /** The node's ``plenio_editor_layout`` property (the score editor's layout). */
   layout?: string | null
+  /** The Guide notes of the node's ``plenio_guide`` property (playback and MIDI only). */
+  guide?: GuideNote[]
 }>()
-const emit = defineEmits<{ apply: [state: SheetState]; close: [] }>()
+const emit = defineEmits<{ apply: [state: SheetState, guide: GuideNote[]]; close: [] }>()
 
 type Tab = 'lyrics' | 'score' | 'style' | 'details'
 const TAB_OF: Record<DocumentKind, Tab> = {
@@ -143,6 +146,7 @@ function onInput(doc: WorkingDoc) {
 function revert(): void {
   const fresh = startSession(props.state, props.payload, props.owned)
   fresh.forEach((doc, index) => Object.assign(working[index], doc))
+  guide.value = [...(props.guide ?? [])]
   revision.value++
 }
 
@@ -150,7 +154,13 @@ const unresolvedConflicts = computed(() =>
   working.filter((doc) => isConflict(doc.kind) && doc.intent === 'keep').map((doc) => doc.kind)
 )
 const pending = computed(() => nextState(props.state, props.payload, working))
-const dirty = computed(() => serializeState(pending.value) !== serializeState(props.state))
+const guide = ref<GuideNote[]>([...(props.guide ?? [])])
+function setGuide(next: GuideNote[]): void {
+  guide.value = next
+}
+const dirty = computed(
+  () => serializeState(pending.value) !== serializeState(props.state) || !sameGuide(guide.value, props.guide ?? [])
+)
 const findings = computed<Finding[]>(() => (result.value?.findings ?? []).filter((f) => f.severity !== 'info'))
 const infos = computed<Finding[]>(() => (result.value?.findings ?? []).filter((f) => f.severity === 'info'))
 const hasErrors = computed(() => findings.value.some((f) => f.severity === 'error'))
@@ -205,11 +215,13 @@ watch(
 
 function apply() {
   if (applyBlock.value) return
-  emit('apply', withApproval(pending.value, props.state.review?.approved_fingerprint ?? null))
+  emit('apply', withApproval(pending.value, props.state.review?.approved_fingerprint ?? null), guide.value)
 }
 async function approve() {
   await validate()
-  if (canApprove.value) emit('apply', withApproval(pending.value, result.value?.fingerprint ?? null))
+  if (canApprove.value) {
+    emit('apply', withApproval(pending.value, result.value?.fingerprint ?? null), guide.value)
+  }
 }
 function close() {
   if (dirty.value) confirmClose.value = true
@@ -299,7 +311,9 @@ onBeforeUnmount(() => {
             :layout-default="layout ?? null"
             :lyrics="lyricsText"
             :title="songTitle"
+            :guide="guide"
             @edited="onInput(doc)"
+            @guide-change="setGuide"
             @gate="(text: string, reason: string | null) => (scoreGate = { text, reason })"
           />
           <textarea

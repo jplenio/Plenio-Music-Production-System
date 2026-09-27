@@ -6,6 +6,7 @@
 import { computed, onBeforeUnmount, ref } from 'vue'
 
 import {
+  type GuidePlayback,
   type PlayOptions,
   TIME_TOLERANCE,
   type VoiceSwitches,
@@ -22,6 +23,8 @@ const props = defineProps<{
   bar: number | null
   reference: string | null
   timelineBars: [number, number, string][] | undefined
+  /** The Guide notes to play (score seconds); only with ``voices.guide``. */
+  guide?: GuidePlayback[]
 }>()
 const voices = defineModel<VoiceSwitches>('voices', { required: true })
 const speed = defineModel<number>('speed', { required: true })
@@ -60,7 +63,14 @@ function playNotes(from?: number): void {
   if (!view) return
   stop()
   const [start, end] = loopRange()
-  options = { from: from ?? start, to: end, voices: { ...voices.value }, speed: speed.value, metronome: metronome.value }
+  options = {
+    from: from ?? start,
+    to: end,
+    voices: { ...voices.value },
+    speed: speed.value,
+    metronome: metronome.value,
+    guide: props.guide ?? []
+  }
   const current = options
   try {
     player.play(schedule(view, current), {
@@ -150,6 +160,15 @@ onBeforeUnmount(() => player.close())
       <label><input v-model="voices.Vocal" type="checkbox" /> Vocal</label>
       <label><input v-model="voices.Ins" type="checkbox" /> Ins</label>
       <label><input v-model="voices.chords" type="checkbox" /> chords</label>
+      <label v-if="guide?.length" title="The Guide track: playback and MIDI only, never sent to YuE2">
+        <input
+          :checked="voices.guide !== false"
+          type="checkbox"
+          aria-label="Play the Guide track"
+          @change="voices = { ...voices, guide: ($event.target as HTMLInputElement).checked }"
+        />
+        Guide
+      </label>
     </span>
     <label title="Practice speed; the score's tempo is not changed">
       speed

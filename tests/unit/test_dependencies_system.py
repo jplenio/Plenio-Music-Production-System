@@ -95,8 +95,10 @@ def test_template_inventory_and_optional_packages() -> None:
         "2 · YuE2 · Cover",
         "3 · MiniMax · Song",
         "4 · Enhance & Master",
+        "5 · YuE2 · DAW",
     }
     assert rows["1 · YuE2 · Song"]["ready"] and rows["4 · Enhance & Master"]["ready"]
+    assert rows["5 · YuE2 · DAW"]["ready"]  # the same model and writer as the song template
     assert not rows["3 · MiniMax · Song"]["ready"] and rows["3 · MiniMax · Song"]["missing_size"] == "14.1 GB"
     assert "flux-2-klein-4b.safetensors" in rows["1 · YuE2 · Song"]["optional_missing"]
     status = {row["file"]: row["status"] for row in report.data["models"]}

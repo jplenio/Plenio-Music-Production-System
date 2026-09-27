@@ -7,8 +7,11 @@ from typing import Any
 from comfy_api.latest import io
 
 from ...core import score as score_rules
+from ...core.brief import CoverBrief, SongBrief
+from ...core.errors import PlenioUserError
 from ...core.preparation import prepare_for_brief
 from ...core.reports import Report, Status
+from ...core.score import skeleton
 from ..types import Brief, ReportType
 
 VOICE_ACTIONS = {"keep": "keep", "silence Vocal": "silence", "move Vocal melody to Ins": "move"}
@@ -30,13 +33,21 @@ class PlenioScoreTools(io.ComfyNode):
             ),
             inputs=[
                 io.String.Input(
-                    "score", force_input=True, tooltip="Score in the native two-voice ABC dialect."
+                    "score",
+                    force_input=True,
+                    optional=True,
+                    tooltip="Score in the native two-voice ABC dialect; not needed by 'new score from brief'.",
                 ),
-                Brief.Input("brief", optional=True, tooltip="Needed by 'prepare from brief'."),
+                Brief.Input(
+                    "brief",
+                    optional=True,
+                    tooltip="Needed by 'prepare from brief' and 'new score from brief'.",
+                ),
                 io.DynamicCombo.Input(
                     "operation",
                     options=[
                         io.DynamicCombo.Option("prepare from brief", []),
+                        io.DynamicCombo.Option("new score from brief", []),
                         io.DynamicCombo.Option("strip chords", []),
                         io.DynamicCombo.Option(
                             "fit length",
@@ -91,7 +102,8 @@ class PlenioScoreTools(io.ComfyNode):
                     ],
                     tooltip=(
                         "prepare from brief: sung songs unchanged; instrumental songs get a silent Vocal voice "
-                        "(lead melody moved to Ins, or accompaniment only)."
+                        "(lead melody moved to Ins, or accompaniment only). new score from brief: an all-rest "
+                        "score built from the brief (the DAW workflow)."
                     ),
                 ),
             ],
@@ -107,14 +119,30 @@ class PlenioScoreTools(io.ComfyNode):
         )
 
     @classmethod
-    def execute(cls, score: str, operation: dict[str, Any], brief: Any = None) -> io.NodeOutput:
+    def execute(cls, operation: dict[str, Any], score: str | None = None, brief: Any = None) -> io.NodeOutput:
         name = operation.get("operation", "prepare from brief")
-        if not score.strip():
+        warnings: list[str] = []
+        if name == "new score from brief":
+            if isinstance(brief, CoverBrief):
+                raise PlenioUserError(
+                    "'new score from brief' builds a song's score; a cover takes its score from the source.",
+                    hint="Use 'prepare from brief' for a cover, or the YuE2 · DAW template for a new song.",
+                )
+            if not isinstance(brief, SongBrief):
+                raise PlenioUserError(
+                    "'new score from brief' needs a Song Brief.",
+                    hint="Connect Song Brief, or choose one of the score operations.",
+                )
+            built = skeleton.from_brief(brief)
+            change = score_rules.Change(built.abc, built.report, ())
+            if score and score.strip():
+                warnings.append("the connected score was ignored: this operation builds a new one")
+        elif not score or not score.strip():
             report = Report("score_tools", Status.SKIPPED, f"{name}: no score (planning is off)")
             return io.NodeOutput(
                 "", "", report, ui={"plenio_summary": [{"status": "skipped", "markdown": report.summary}]}
             )
-        if name == "prepare from brief":
+        elif name == "prepare from brief":
             change = prepare_for_brief(score, brief)
         elif name == "strip chords":
             change = score_rules.strip_chords(score)
@@ -138,19 +166,20 @@ class PlenioScoreTools(io.ComfyNode):
             raise ValueError(f"unknown operation {name!r}")
         analysis = score_rules.validate(change.abc)
         tags = score_rules.section_tags(change.abc)
-        status = Status.WARNING if change.warnings else Status.OK
+        warnings += list(change.warnings)
+        status = Status.WARNING if warnings else Status.OK
         report = Report(
             "score_tools",
             status,
             f"{name}: " + "; ".join(change.changes),
-            tuple(change.warnings),
+            tuple(warnings),
             {"operation": name, "changes": list(change.changes), "analysis": analysis.to_dict()},
         )
         markdown = "\n".join(
             [
                 f"**{name}**",
                 *[f"- {c}" for c in change.changes],
-                *[f"- warning: {w}" for w in change.warnings],
+                *[f"- warning: {w}" for w in warnings],
             ]
         )
         return io.NodeOutput(

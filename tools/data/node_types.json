@@ -2632,21 +2632,19 @@
   "PlenioScoreTools": {
    "input": {
     "required": {
-     "score": [
-      "STRING",
-      {
-       "tooltip": "Score in the native two-voice ABC dialect.",
-       "forceInput": true,
-       "multiline": false
-      }
-     ],
      "operation": [
       "COMFY_DYNAMICCOMBO_V3",
       {
-       "tooltip": "prepare from brief: sung songs unchanged; instrumental songs get a silent Vocal voice (lead melody moved to Ins, or accompaniment only).",
+       "tooltip": "prepare from brief: sung songs unchanged; instrumental songs get a silent Vocal voice (lead melody moved to Ins, or accompaniment only). new score from brief: an all-rest score built from the brief (the DAW workflow).",
        "options": [
         {
          "key": "prepare from brief",
+         "inputs": {
+          "required": {}
+         }
+        },
+        {
+         "key": "new score from brief",
          "inputs": {
           "required": {}
          }
@@ -2743,20 +2741,28 @@
      ]
     },
     "optional": {
+     "score": [
+      "STRING",
+      {
+       "tooltip": "Score in the native two-voice ABC dialect; not needed by 'new score from brief'.",
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
      "brief": [
       "PLENIO_BRIEF",
       {
-       "tooltip": "Needed by 'prepare from brief'."
+       "tooltip": "Needed by 'prepare from brief' and 'new score from brief'."
       }
      ]
     }
    },
    "input_order": {
     "required": [
-     "score",
      "operation"
     ],
     "optional": [
+     "score",
      "brief"
     ]
    },

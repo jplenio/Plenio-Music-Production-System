@@ -6,14 +6,17 @@
 import type { VoiceSwitches } from '../../shared/playback'
 
 export interface EditorPrefs {
-  /** *review*: piano roll, notation, inspector (ABC text under *Advanced*); *text*: ABC text and notation. */
-  layout: 'review' | 'text'
-  /** Show the ABC text in the *review* layout. */
+  /**
+   * *review*: piano roll, notation, inspector (ABC text under *Advanced*); *daw*: the same with the
+   * track headers and the Guide track; *text*: ABC text and notation.
+   */
+  layout: 'review' | 'daw' | 'text'
+  /** Show the ABC text in the *review* and *daw* layouts. */
   advanced: boolean
   zoom: number
   voices: VoiceSwitches
   speed: number
-  /** Show the piano roll with its chord lane (review layout). */
+  /** Show the piano roll with its chord lane (review and daw layouts). */
   roll: boolean
   /** Piano-roll zoom: pixels per quarter note. */
   rollZoom: number
@@ -27,7 +30,7 @@ export function defaultPrefs(): EditorPrefs {
     layout: 'review',
     advanced: false,
     zoom: 1,
-    voices: { Vocal: true, Ins: true, chords: true },
+    voices: { Vocal: true, Ins: true, chords: true, guide: true },
     speed: 1,
     roll: true,
     rollZoom: 48,
@@ -39,6 +42,7 @@ export function defaultPrefs(): EditorPrefs {
 function layoutOf(data: { layout?: unknown; advanced?: unknown }): Pick<EditorPrefs, 'layout' | 'advanced'> {
   const layout = data.layout
   if (layout === 'text') return { layout: 'text', advanced: data.advanced === true }
+  if (layout === 'daw') return { layout: 'daw', advanced: data.advanced === true }
   if (layout === 'both') return { layout: 'review', advanced: true }
   return { layout: 'review', advanced: data.advanced === true }
 }
@@ -55,7 +59,8 @@ export function loadPrefs(storage: Pick<Storage, 'getItem'> | null = safeStorage
       voices: {
         Vocal: data.voices?.Vocal !== false,
         Ins: data.voices?.Ins !== false,
-        chords: data.voices?.chords !== false
+        chords: data.voices?.chords !== false,
+        guide: data.voices?.guide !== false
       },
       speed: typeof data.speed === 'number' && data.speed >= 0.25 && data.speed <= 2 ? data.speed : defaults.speed,
       roll: data.roll !== false,

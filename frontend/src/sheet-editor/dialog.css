@@ -727,3 +727,55 @@
 .plenio-overlay .hidden-file {
   display: none;
 }
+/* --- DAW layout: track headers (M2/D4-D5) --- */
+.plenio-overlay .track-panel {
+  border: 1px solid var(--border-color, #444);
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: var(--comfy-input-bg, #1e1e1e);
+}
+.plenio-overlay .track-panel h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+}
+.plenio-overlay .track-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.plenio-overlay .track-panel li {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+.plenio-overlay .track-panel .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.plenio-overlay .track-panel .track-name {
+  font-weight: 600;
+}
+.plenio-overlay .track-panel .destination,
+.plenio-overlay .track-panel .count {
+  color: var(--descrip-text, #999);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.plenio-overlay .track-panel .destination.unsent {
+  color: #d8a31a;
+}
+.plenio-overlay .track-panel li.guide {
+  border-top: 1px dashed var(--border-color, #444);
+  padding-top: 3px;
+}
+.plenio-overlay .track-panel .hint {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: var(--descrip-text, #999);
+}

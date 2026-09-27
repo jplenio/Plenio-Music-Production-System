@@ -9,6 +9,7 @@
 - [2 · YuE2 · Cover](paths/yue2-cover.md) - covers of a recording: original lyrics, new lyrics or instrumental
 - [3 · MiniMax · Song](paths/minimax-song.md) - new songs with MiniMax Music 3: structured caption, exact 5 000-token budget
 - [4 · Enhance & Master](paths/enhance-master.md) - EQ, loudness and dynamics, FLAC/MP3/WAV with tags and cover for any recording
+- [5 · YuE2 · DAW](paths/yue2-daw.md) - compose the score yourself: two voices, chord symbols and the Guide track
 
 Concepts:
 

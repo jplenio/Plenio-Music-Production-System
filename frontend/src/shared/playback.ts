@@ -11,6 +11,15 @@ export interface VoiceSwitches {
   Vocal: boolean
   Ins: boolean
   chords: boolean
+  /** The Guide track: playback and MIDI only, never sent to YuE2 (DAW layout). */
+  guide?: boolean
+}
+
+/** A note of the Guide track with its time already in score seconds. */
+export interface GuidePlayback {
+  start_s: number
+  duration_s: number
+  midi: number
 }
 
 export interface PlayOptions {
@@ -23,6 +32,8 @@ export interface PlayOptions {
   speed: number
   /** Click on every beat (the first beat of a bar higher). */
   metronome?: boolean
+  /** The Guide notes to play (only with ``voices.guide``). */
+  guide?: GuidePlayback[]
 }
 
 export interface ToneEvent {
@@ -30,7 +41,7 @@ export interface ToneEvent {
   at: number
   duration: number
   midi: number
-  part: Voice | 'chord' | 'click'
+  part: Voice | 'chord' | 'click' | 'guide'
 }
 
 /** Length of a metronome click in real seconds (independent of the speed). */
@@ -72,6 +83,18 @@ export function schedule(view: ScoreView, options: PlayOptions): ToneEvent[] {
       for (const midi of chord.pitches) {
         events.push({ at: (start - options.from) / speed, duration: (chordEnd - start) / speed, midi, part: 'chord' })
       }
+    }
+  }
+  if (options.voices.guide) {
+    for (const note of options.guide ?? []) {
+      if (note.start_s < options.from - TIME_TOLERANCE || note.start_s >= end - TIME_TOLERANCE) continue
+      const duration = Math.min(note.duration_s, end - note.start_s)
+      events.push({
+        at: Math.max(0, note.start_s - options.from) / speed,
+        duration: duration / speed,
+        midi: note.midi,
+        part: 'guide'
+      })
     }
   }
   if (options.metronome) {

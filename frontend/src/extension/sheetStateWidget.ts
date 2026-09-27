@@ -65,6 +65,7 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
     const setting = String(node.widgets?.find((w) => w.name === 'review')?.value ?? 'continue')
     const review = setting === 'as the brief says' ? (payload?.review ?? 'continue') : setting
     const { openSheetDialog } = await import('../sheet-editor/open')
+    const { parseGuide, serializeGuide } = await import('../sheet-editor/score/tracks')
     if (!fetcher) throw new Error('Plenio: API not initialised')
     openSheetDialog({
       title: node.title || 'Song Sheet',
@@ -76,8 +77,11 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
       fetcher,
       // a template's choice of the score editor's layout (review, text; daw with the DAW template)
       layout: typeof node.properties?.plenio_editor_layout === 'string' ? node.properties.plenio_editor_layout : null,
-      onApply: (next) => {
+      // the Guide track (playback and MIDI only), kept in the node's properties with the workflow
+      guide: parseGuide(node.properties?.plenio_guide),
+      onApply: (next, guide) => {
         widget.value = serializeState(next)
+        node.properties = { ...(node.properties ?? {}), plenio_guide: serializeGuide(guide) }
         node.setDirtyCanvas?.(true, true)
       }
     })

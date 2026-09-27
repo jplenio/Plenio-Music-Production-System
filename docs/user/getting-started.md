@@ -30,6 +30,7 @@ Each music model has its own template, so every workflow shows only the controls
 | 2 · YuE2 · Cover | new versions of a recording you own or may use | [guide](paths/yue2-cover.md) |
 | 3 · MiniMax · Song | new songs with MiniMax Music 3 | [guide](paths/minimax-song.md) |
 | 4 · Enhance & Master | finishing an existing audio file | [guide](paths/enhance-master.md) |
+| 5 · YuE2 · DAW | composing the score yourself and rendering it with YuE2 | [guide](paths/yue2-daw.md) |
 
 When you open a template, ComfyUI offers to download the model files it is missing ([Models and downloads](models.md)).
 

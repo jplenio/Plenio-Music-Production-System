@@ -589,6 +589,7 @@
     {
      "localized_name": "score",
      "name": "score",
+     "shape": 7,
      "type": "STRING",
      "link": 4
     },

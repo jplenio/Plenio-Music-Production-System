@@ -7,6 +7,7 @@ Deterministic operations on a score in the native two-voice ABC dialect (Vocal a
   - instrumentals: a silent Vocal voice (the melody moves to Ins, or accompaniment only);
   - instrumental songs whose plan is much longer than the brief's length: *fit length* is applied;
   - a plan that ends in the middle of a bar group is repaired (the incomplete last group is removed).
+- **new score from brief** - an empty score to compose in (the *5 · YuE2 · DAW* template): the brief's length and tempo give the number of measures, its *meter* and *key* fields are read (defaults 4/4, C major, 100 BPM, each reported), and the score has one `verse` section of rests and `L:1/32`. The *score* input stays unconnected for this operation. A score that has only rests cannot be rendered: draw notes or import a MIDI file before the run renders.
 - **strip chords** - removes all chord symbols (for a new accompaniment).
 - **fit length** - removes whole sections until the score is close to the given seconds; the first section up to the first chorus and the ending are kept. It never cuts inside a section and reports what it removed or why it could not shorten.
 - **voices** - keep, silence Vocal, or move the Vocal melody to Ins (with a policy for bars where Ins already plays).

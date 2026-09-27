@@ -41,9 +41,11 @@ import PianoRoll from './PianoRoll.vue'
 import ScoreNavigator from './ScoreNavigator.vue'
 import ScorePalette from './ScorePalette.vue'
 import ScoreTransport from './ScoreTransport.vue'
+import TrackPanel from './TrackPanel.vue'
 import { type Layout, focusOf, initialLayout } from './inspector'
 import { downloadBytes, fromBase64, toBase64 } from './midiImport'
 import { loadPrefs, savePrefs } from './prefs'
+import { guideNotes } from './tracks'
 import { describeError, useScoreSession } from './useScoreSession'
 
 const props = defineProps<{
@@ -100,7 +102,13 @@ const errorBars = computed(() =>
 const selectedBar = computed(
   () => focusOf(shown.value, session.selection, session.primary?.bar ?? null).measure?.n ?? session.primary?.bar ?? null
 )
-const review = computed(() => layout.value === 'review')
+const review = computed(() => layout.value !== 'text')
+const daw = computed(() => layout.value === 'daw')
+const guide = computed(() => props.guide ?? [])
+const guideSeconds = computed(() => guideNotes(props.guide, shown.value?.model))
+/** The Guide notes are played with the score when the track panel's switch is on. */
+const playGuide = computed(() => (daw.value ? (prefs.value.voices.guide ?? true) : false))
+const transportGuide = computed(() => (playGuide.value ? guideSeconds.value : []))
 const showRoll = computed(() => review.value && prefs.value.roll && !!(shown.value?.model || shown.value?.model_error))
 const metronome = computed<boolean>({
   get: () => prefs.value.metronome,
@@ -156,6 +164,11 @@ function selectFromRoll(ids: string[]): void {
   session.select(ids)
   const element = elementById(shown.value, ids[0])
   if (element) revealRange.value = [element.source[0], element.source[1]]
+}
+
+function clearGuide(): void {
+  if (props.readonly || !props.guide?.length) return
+  emit('guideChange', [])
 }
 
 const rollZoom = computed<number>({
@@ -325,8 +338,8 @@ function onKey(event: KeyboardEvent): void {
       <span class="layouts" role="radiogroup" aria-label="Layout">
         <button
           role="radio"
-          :aria-checked="review"
-          :class="{ active: review }"
+          :aria-checked="layout === 'review'"
+          :class="{ active: layout === 'review' }"
           title="Piano roll, notation and inspector; the ABC text under Advanced"
           @click="chooseLayout('review')"
         >
@@ -334,8 +347,17 @@ function onKey(event: KeyboardEvent): void {
         </button>
         <button
           role="radio"
-          :aria-checked="!review"
-          :class="{ active: !review }"
+          :aria-checked="daw"
+          :class="{ active: daw }"
+          title="Review plus the track headers: Vocal, Instrument, Chords and the Guide track (never sent to YuE2)"
+          @click="chooseLayout('daw')"
+        >
+          DAW
+        </button>
+        <button
+          role="radio"
+          :aria-checked="layout === 'text'"
+          :class="{ active: layout === 'text' }"
           title="The ABC text with its diagnostics, and the notation"
           @click="chooseLayout('text')"
         >
@@ -415,6 +437,15 @@ function onKey(event: KeyboardEvent): void {
       :data-text="review ? (prefs.advanced ? 'shown' : 'hidden') : 'main'"
     >
       <div class="side">
+        <TrackPanel
+          v-if="daw"
+          v-model:voices="voices"
+          :view="shown"
+          :guide-count="guide.length"
+          :keeps-guide="keepsGuide"
+          :readonly="readonly"
+          @clear-guide="clearGuide"
+        />
         <ScoreNavigator
           :view="shown"
           :bar="selectedBar"
@@ -485,6 +516,7 @@ function onKey(event: KeyboardEvent): void {
       :bar="selectedBar"
       :reference="reference"
       :timeline-bars="timelineBars"
+      :guide="transportGuide"
       @cursor="(ids: string[]) => (cursor = ids)"
     />
     <p class="status" aria-live="polite">

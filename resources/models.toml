@@ -25,7 +25,7 @@ bytes = 3960938800
 licence = "CC BY-NC 4.0"
 role = "YuE2 3B music model (int8)"
 default = true
-templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover"]
+templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "5 · YuE2 · DAW"]
 
 [[model]]
 id = "yue2-3b-bf16"
@@ -48,7 +48,7 @@ licence = "CC BY-NC 4.0"
 role = "YuE2 instrumental adapter (community LoRA)"
 default = true
 templates = ["2 · YuE2 · Cover"]
-optional_templates = ["1 · YuE2 · Song"]
+optional_templates = ["1 · YuE2 · Song", "5 · YuE2 · DAW"]
 
 [[model]]
 id = "sheetsage2"
@@ -72,7 +72,7 @@ bytes = 0
 licence = "Apache-2.0"
 role = "Gemma 4 E4B writer (title, style or caption, lyrics, artwork prompt)"
 default = true
-templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song"]
+templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song", "5 · YuE2 · DAW"]
 
 # --- MiniMax Music 3 ------------------------------------------------------------------------------
 
@@ -132,7 +132,7 @@ licence = "Apache-2.0"
 role = "FLUX.2 Klein 4B image model (distilled, cover art)"
 default = true
 templates = []
-optional_templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song"]
+optional_templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song", "5 · YuE2 · DAW"]
 
 [[model]]
 id = "flux2-klein-4b-fp8"
@@ -155,7 +155,7 @@ licence = "Apache-2.0"
 role = "Qwen3 4B text encoder of FLUX.2 Klein"
 default = true
 templates = []
-optional_templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song"]
+optional_templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song", "5 · YuE2 · DAW"]
 
 [[model]]
 id = "flux2-text-encoder-fp4"
@@ -178,4 +178,4 @@ licence = "Apache-2.0"
 role = "FLUX.2 image VAE"
 default = true
 templates = []
-optional_templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song"]
+optional_templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song", "5 · YuE2 · DAW"]

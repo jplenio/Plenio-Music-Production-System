@@ -170,7 +170,7 @@ def test_app_configurations() -> None:
         assert apps[name]["inputs"] and apps[name]["outputs"], name
     # 0.2.2: the mode comes first; the Song Sheet editor buttons make the review stops usable in the app
     # (the cover path has an app since then). Brief, take seed and sheets only: no model files.
-    sheets = {"1 · YuE2 · Song": 2, "2 · YuE2 · Cover": 2, "3 · MiniMax · Song": 1}
+    sheets = {"1 · YuE2 · Song": 2, "2 · YuE2 · Cover": 2, "3 · MiniMax · Song": 1, "5 · YuE2 · DAW": 2}
     for name, count in sheets.items():
         nodes = {n["id"]: n for n in TEMPLATES[name]["nodes"]}
         shown = [(nodes[i]["type"], widget) for i, widget in apps[name]["inputs"]]
@@ -197,6 +197,7 @@ def test_app_configurations() -> None:
         ("1 · YuE2 · Song", "new song every run"),
         ("2 · YuE2 · Cover", "one cover, stop to review"),
         ("3 · MiniMax · Song", "new song every run"),
+        ("5 · YuE2 · DAW", "one song, stop to review"),
     ],
 )
 def test_the_sheets_follow_the_brief_mode(name: str, mode: str) -> None:
@@ -214,7 +215,9 @@ def test_the_sheets_follow_the_brief_mode(name: str, mode: str) -> None:
     assert target["inputs"][link[4]]["name"] == "sampling_mode.seed"
 
 
-@pytest.mark.parametrize("name", ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song"])
+@pytest.mark.parametrize(
+    "name", ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song", "5 · YuE2 · DAW"]
+)
 def test_song_templates_master_then_export_with_the_raw_take_as_original(name: str) -> None:
     template = TEMPLATES[name]
     titles = {n["id"]: n.get("title") or n["type"] for n in template["nodes"]}
@@ -227,6 +230,32 @@ def test_song_templates_master_then_export_with_the_raw_take_as_original(name: s
     assert links[inputs["original"]][1:3] == links[master_input][1:3]  # the same take, unmastered
     cover = next(n for n in template["nodes"] if titles[n["id"]] == "Cover Art (optional)")
     assert cover["mode"] == 4 and titles[links[inputs["cover"]][1]] == "Cover Art (optional)"
+
+
+def test_the_daw_template_composes_its_own_score() -> None:
+    """M2: template 5 builds an empty score from the brief, opens the DAW layout and renders exactly it."""
+    template = TEMPLATES["5 · YuE2 · DAW"]
+    nodes = template["nodes"]
+    titles = {n["id"]: n.get("title") or n["type"] for n in nodes}
+    links = {link[0]: link for link in template["links"]}
+    score_sheet = next(
+        n for n in nodes if n["type"] == "PlenioSongSheet" and n.get("title") == "Song Sheet · DAW"
+    )
+    assert score_sheet["properties"]["plenio_editor_layout"] == "daw"
+    tools = next(n for n in nodes if n["type"] == "PlenioScoreTools")
+    assert tools["widgets_values"][0] == "new score from brief"
+    # the score input of Score Tools stays unconnected: the skeleton comes from the brief
+    slot = next(s for s in tools["inputs"] if s["name"] == "score")
+    assert slot.get("link") is None
+    (brief_link,) = [link for link in template["links"] if link[3] == tools["id"] and link[4] == 1]
+    assert titles[brief_link[1]] == "PlenioSongBrief"
+    # the sheet hands the score to the renderer, and the renderer to Master
+    score_out = next(i for i, s in enumerate(score_sheet["outputs"]) if s["name"] == "score")
+    assert any(link[1] == score_sheet["id"] and link[2] == score_out for link in template["links"])
+    render = next(n for n in nodes if n.get("title") == "Plenio · YuE2 Render")
+    abc_slot = next(s for s in render["inputs"] if s["name"] == "abc")
+    assert links[abc_slot["link"]][1:3] == [score_sheet["id"], score_out]
+    assert any(n.get("title") == "Plenio · Master" for n in nodes)
 
 
 def test_thumbnails_are_400px_jpegs() -> None:
