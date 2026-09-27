@@ -2779,6 +2779,45 @@
    "category": "Plenio/Score",
    "display_name": "Score Tools"
   },
+  "PlenioSeparateStems": {
+   "input": {
+    "required": {
+     "audio": [
+      "AUDIO",
+      {
+       "tooltip": "The song before mastering."
+      }
+     ],
+     "model": [
+      "PLENIO_AUDIO_MODEL",
+      {
+       "tooltip": "Load Audio Model (separation)."
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "audio",
+     "model"
+    ]
+   },
+   "output": [
+    "PLENIO_STEMS",
+    "PLENIO_REPORT"
+   ],
+   "output_name": [
+    "stems",
+    "report"
+   ],
+   "output_is_list": [
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Audio",
+   "display_name": "Separate Stems"
+  },
   "PlenioSongBrief": {
    "input": {
     "required": {
@@ -3411,6 +3450,47 @@
    "output_node": true,
    "category": "Plenio/Song",
    "display_name": "Song Sheet"
+  },
+  "PlenioStemMixer": {
+   "input": {
+    "required": {
+     "stems": [
+      "PLENIO_STEMS",
+      {
+       "tooltip": "From Separate Stems."
+      }
+     ],
+     "mix": [
+      "STRING",
+      {
+       "tooltip": "The mixer settings (plenio.stem_mix/1 JSON); empty: neutral.",
+       "default": "",
+       "multiline": true
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "stems",
+     "mix"
+    ]
+   },
+   "output": [
+    "AUDIO",
+    "PLENIO_REPORT"
+   ],
+   "output_name": [
+    "audio",
+    "report"
+   ],
+   "output_is_list": [
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Audio",
+   "display_name": "Stem Mixer"
   },
   "PlenioSystemCheck": {
    "input": {

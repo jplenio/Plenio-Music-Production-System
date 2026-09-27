@@ -12,6 +12,7 @@ from .parse import PlenioParseDraft
 from .refine import PlenioRefine
 from .score_tools import PlenioScoreTools
 from .sheet import PlenioSongSheet
+from .stems import PlenioSeparateStems, PlenioStemMixer
 from .system_check import PlenioSystemCheck
 from .transcribe_lyrics import PlenioTranscribeLyrics
 from .transcribe_score import PlenioTranscribeScore
@@ -32,9 +33,11 @@ NODES = (
     PlenioLoudness,
     PlenioExportRelease,
     PlenioSystemCheck,
-    # experimental (next release): audio refinement
+    # experimental (next release): audio refinement and stems
     PlenioAudioModelLoader,
     PlenioRefine,
+    PlenioSeparateStems,
+    PlenioStemMixer,
 )
 
 __all__ = ["NODES"]

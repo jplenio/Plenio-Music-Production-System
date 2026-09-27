@@ -30,6 +30,10 @@ ALL_NODES = {
     "PlenioLoudness",
     "PlenioExportRelease",
     "PlenioSystemCheck",
+    "PlenioAudioModelLoader",
+    "PlenioRefine",
+    "PlenioSeparateStems",
+    "PlenioStemMixer",
 }
 
 
