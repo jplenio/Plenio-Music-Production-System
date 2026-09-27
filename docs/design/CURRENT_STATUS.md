@@ -9,6 +9,8 @@
 | Commits | Phase 11A `c5b8af3`; Phase 11B `9588977` (O1) · `a035c2f` (O2) · `0139957` (O3) · `a041315` (O4) · `c2f4668` (O5) · `299964d` (O6) · `6578313` (O7) · `7b0eb39` (help pages) · `f8dfa3d` (docs); M1/D1 `f1f968a` (+ docs `e47da84`); M1/D2 `d7621a2` · this checkpoint. **All local, not pushed** (owner instruction for Phase 11B; kept for Phase 11C so far). |
 | Prompt set | `D:\Daten2\Deepseek\ComfyUI-MiniMax\Plenio_Music_Production_System_Refactor_Prompts_Next_Release\` on the owner's machine: `13_PHASE_11A`, `14_PHASE_11B`, `15_PHASE_11C` |
 
+**Continuing implementer (DeepSeek 4.1 Flash): start with [deepseek-handoff.md](deepseek-handoff.md).**
+
 Read with: [next-release-plan.md](next-release-plan.md) - **§16.2 (the milestones, in order), §17 (as implemented, verification)**, §9 (canonical score engine), §10 (DAW), §4 (refine), §6 (stems), §7/§8 (lyrics, brief); then [score-editor-design.md](score-editor-design.md) §15 (the Phase 5 editor the milestones extend), [target-architecture.md](target-architecture.md) §2 (rules R1-R12), [docs/dev/testing.md](../dev/testing.md).
 
 ---

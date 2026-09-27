@@ -17,6 +17,7 @@ Engineering source of truth for the Plenio Music Production System. Later phases
 | [testing-strategy.md](testing-strategy.md) | 1B | verification levels, test layers, matrices, smoke tests |
 | [implementation-roadmap.md](implementation-roadmap.md) | 1B | phases 2–10 with scope, tests, completion criteria, effort |
 | [next-release-plan.md](next-release-plan.md) | 11A, **11B implemented** (§17) | next release (0.3.0) design: audio refinement / super-resolution, EQ UX, optional stems, manual lyrics, brief template precedence, canonical score engine, YuE2 · DAW; OPUS-CRITICAL tasks (done) and the DEEPSEEK-SUITABLE milestones M1-M7 (§16.2) |
+| [deepseek-handoff.md](deepseek-handoff.md) | 11C | handoff to DeepSeek 4.1 Flash: binding rules, what exists, milestone order M1/D3 → M7 with acceptance criteria, checks, pitfalls, stop conditions |
 | [CURRENT_STATUS.md](CURRENT_STATUS.md) | checkpoint | **where the project stands now**: phase, done, open, known issues, tests, next action (handoff checkpoint 2026-09-27, Phase 11B) |
 | `data/legacy-node-inventory.json` | 1A | machine-readable legacy node inventory |
 
