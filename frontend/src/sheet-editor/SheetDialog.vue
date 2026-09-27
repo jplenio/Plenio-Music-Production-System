@@ -20,6 +20,7 @@ import {
   withApproval
 } from '../shared/sheetSession'
 import { type DocumentKind, type SheetState, serializeState } from '../shared/sheetState'
+import { SECTION_TAGS, withTag } from '../shared/lyricsTags'
 import { LINE_BREAK, changedWords, wordDiff } from '../shared/wordDiff'
 import LyricsFit from './LyricsFit.vue'
 import ScoreTab from './score/ScoreTab.vue'
@@ -131,6 +132,21 @@ function useDraft(doc: WorkingDoc) {
 }
 function makeManual(doc: WorkingDoc) {
   doc.intent = 'manual'
+}
+
+/**
+ * *Use my own lyrics* (plan §7): the document becomes manual, so the writer is not consulted any
+ * more and these words reach YuE2 verbatim. The text he has (a draft or his own words) stays as it
+ * is - nothing is replaced, and the editor's checks keep running.
+ */
+function useOwnLyrics(doc: WorkingDoc): void {
+  doc.intent = 'manual'
+}
+
+/** Append a section tag as its own line (YuE2 sings section by section; see Score). */
+function insertTag(doc: WorkingDoc, tag: string): void {
+  doc.text = withTag(doc.text, tag)
+  onInput(doc)
 }
 function keepEdit(doc: WorkingDoc) {
   doc.intent = 'manual'
@@ -294,7 +310,17 @@ onBeforeUnmount(() => {
             <button :disabled="draftOf(doc.kind) === null" title="Discard your edit and use the draft" @click="useDraft(doc)">
               Use draft
             </button>
-            <button title="Always use your text; the draft is no longer computed" @click="makeManual(doc)">Make manual</button>
+            <button
+              v-if="doc.kind === 'lyrics'"
+              :disabled="doc.intent === 'manual'"
+              title="Keep exactly these words: the writer is not consulted any more (your lyrics reach YuE2 unchanged)"
+              @click="useOwnLyrics(doc)"
+            >
+              Use my own lyrics
+            </button>
+            <button v-else title="Always use your text; the draft is no longer computed" @click="makeManual(doc)">
+              Make manual
+            </button>
           </div>
           <div v-if="isConflict(doc.kind) && doc.intent === 'keep'" class="conflict">
             The draft changed after you edited this document ({{ docInfo(doc.kind)?.reason }}).
@@ -324,6 +350,13 @@ onBeforeUnmount(() => {
             :aria-label="LABELS[doc.kind]"
             @input="onInput(doc)"
           />
+          <p v-if="doc.kind === 'lyrics'" class="tag-helpers">
+            <span>Section tags (YuE2 sings section by section):</span>
+            <button v-for="tag in SECTION_TAGS" :key="tag" :title="`Add [${tag}]`" @click="insertTag(doc, tag)">
+              [{{ tag }}]
+            </button>
+            <span v-if="doc.intent === 'manual'" class="facts">the writer is not consulted - these are your lyrics</span>
+          </p>
           <p v-if="doc.kind === 'lyrics' && asr" class="asr">
             <span>Transcribed ({{ asr.language }}).</span>
             <span v-if="asr.low_confidence.length">

@@ -55,11 +55,13 @@ export function docState(state: SheetState, kind: DocumentKind): DocState {
   return state.docs[kind]?.state ?? 'auto'
 }
 
-/** One-line summary for the node, e.g. "lyrics edited · style manual". */
+/** One-line summary for the node, e.g. "lyrics: yours (manual) · style manual". */
 export function summarize(state: SheetState | null): string {
   if (state === null) return 'Song Sheet state is unreadable - open the editor to repair it.'
-  const parts = DOCUMENT_KINDS.filter((kind) => docState(state, kind) !== 'auto').map(
-    (kind) => `${kind.replace('_', ' ')} ${docState(state, kind)}`
+  const parts = DOCUMENT_KINDS.filter((kind) => docState(state, kind) !== 'auto').map((kind) =>
+    kind === 'lyrics' && docState(state, kind) === 'manual'
+      ? 'lyrics: yours (manual)'
+      : `${kind.replace('_', ' ')} ${docState(state, kind)}`
   )
   const approved = state.review?.approved_fingerprint ? ' · approved' : ''
   return (parts.length ? parts.join(' · ') : 'all documents automatic') + approved

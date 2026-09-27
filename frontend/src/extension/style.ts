@@ -27,6 +27,16 @@ const CSS = `
 .plenio-eq-plot .curve { fill: none; stroke: #4aa3ff; stroke-width: 2; }
 .plenio-eq-plot .handle { fill: var(--comfy-menu-bg, #1a1a1a); stroke: #4aa3ff; stroke-width: 2; cursor: grab; }
 .plenio-eq-plot .handle.selected, .plenio-eq-plot .handle:focus { fill: #4aa3ff; outline: none; }
+.plenio-brief-template { display: flex; flex-direction: column; gap: 3px; font: 11px/1.35 var(--font-family, sans-serif);
+  color: var(--descrip-text, #999); padding: 2px 4px; overflow: hidden; }
+.plenio-brief-template .line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.plenio-brief-template .line[data-state="ok"] { color: #8fb6d9; }
+.plenio-brief-template .line[data-state="error"] { color: #d0453b; }
+.plenio-brief-template .hint { color: #c79a3a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.plenio-brief-template .actions { display: flex; gap: 4px; }
+.plenio-brief-template button { padding: 1px 6px; border-radius: 5px; border: 1px solid var(--border-color, #555);
+  background: var(--comfy-input-bg, #333); color: var(--input-text, #ddd); cursor: pointer; font: inherit; }
+.plenio-brief-template button:disabled { opacity: 0.45; cursor: default; }
 `
 
 export function installStyles(): void {

@@ -334,6 +334,45 @@ def test_invalid_document_stops_with_the_findings(server: ComfyServer, log: Log)
     assert events(log, "plan") == []
 
 
+def test_the_brief_fields_route_answers_the_one_precedence_rule(server: ComfyServer) -> None:
+    """The editor's *Template fills:* line and the explicit actions come from the backend rule (M3/D6)."""
+    from plenio.core.brief import LENGTHS
+
+    template = "pop/singer-songwriter-acoustic-vocal"
+    status, plain = server.request(
+        "POST",
+        "/plenio/brief/fields",
+        {"template": "none", "fields": {"genre": "indie pop", "tempo": "", "description": "a song"}},
+    )
+    assert status == 200
+    assert plain["template"] == "none" and plain["fields"] == {} and plain["fills"] == []
+    assert plain["sources"]["genre"] == "typed" and plain["sources"]["tempo"] == "empty"
+    assert plain["choices"] == []
+    status, filled = server.request(
+        "POST",
+        "/plenio/brief/fields",
+        {
+            "template": template,
+            "fields": {"genre": "indie pop", "tempo": "", "length": "very short (about 1:00)"},
+        },
+    )
+    assert status == 200
+    assert filled["template"] == template
+    assert filled["sources"]["genre"] == "typed" and filled["sources"]["tempo"] == "template"
+    assert {fill["field"] for fill in filled["fills"]} >= {"tempo", "description"}
+    assert all(fill["value"] == fill["template"] for fill in filled["fills"])
+    # the widget value differs from the template's suggestion: the action can offer it
+    hints = {choice["field"]: choice for choice in filled["choices"]}
+    assert set(hints) >= {"length", "vocals"}
+    assert hints["length"]["current"] == "very short (about 1:00)"
+    assert hints["length"]["suggested"] in LENGTHS  # the template's own length
+    # a free-form length the template library does not know is refused, not guessed
+    status, bad = server.request("POST", "/plenio/brief/fields", {"template": "nope", "fields": {}})
+    assert status == 400 and "Unknown brief template" in bad["error"]["message"]
+    status, bad = server.request("POST", "/plenio/brief/fields", {"fields": []})
+    assert status == 400 and "must be an object" in bad["error"]["message"]
+
+
 def test_sheet_resolve_route_matches_the_node(server: ComfyServer, log: Log) -> None:
     entry = server.run(song_prompt(label=label()))
     payload = sheet_payload(entry, "6")

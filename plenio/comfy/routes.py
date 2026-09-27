@@ -246,6 +246,50 @@ async def template_get(request: web.Request) -> web.StreamResponse:
     return web.json_response(template_library().get(request.match_info["template_id"]).to_dict())
 
 
+async def brief_fields(request: web.Request) -> web.StreamResponse:
+    """What a brief's template fills, by the one precedence rule (typed > template > empty).
+
+    The editor shows the template's texts as a *Template fills:* line and offers the explicit actions
+    (*copy the text*, *use the choices*, *reset*). The rule itself lives in ``core.brief`` - this route
+    exists so the frontend never computes a second answer to "what would this brief resolve to?".
+    """
+    from ..core.brief import (
+        DEFAULT_LENGTH,
+        TEXT_FIELDS,
+        field_sources,
+        resolve_text_fields,
+        template_choice_hints,
+    )
+
+    data = await read_json(request)
+    values = data.get("fields", {})
+    if not isinstance(values, dict):
+        raise PlenioUserError("The field 'fields' must be an object of widget values.")
+    fields = {name: value for name, value in values.items() if isinstance(value, str)}
+    template_id = str(data.get("template") or "").strip()
+    template = None if template_id in ("", "none") else template_library().get(template_id)
+    merged, from_template, notes = resolve_text_fields(fields, template, TEXT_FIELDS)
+    choices = template_choice_hints(fields, template)
+    return web.json_response(
+        {
+            "template": template.id if template else "none",
+            "sources": field_sources(fields, template),
+            "fields": dict(template.fields) if template else {},
+            "fills": [
+                {"field": name, "value": merged[name], "template": template.fields[name]}
+                for name in from_template
+                if name in TEXT_FIELDS
+            ],
+            "choices": [
+                {"field": name, "suggested": suggested, "current": str(fields.get(name, "") or "")}
+                for name, suggested in choices.items()
+            ],
+            "length_default": DEFAULT_LENGTH,
+            "notes": notes,
+        }
+    )
+
+
 async def template_save(request: web.Request) -> web.StreamResponse:
     data = await read_json(request)
     fields = data.get("fields")
@@ -303,6 +347,7 @@ ROUTES: tuple[tuple[str, str, Handler], ...] = (
     ("GET", "/plenio/templates", templates_list),
     ("GET", "/plenio/templates/{template_id:.+}", template_get),
     ("POST", "/plenio/templates", template_save),
+    ("POST", "/plenio/brief/fields", brief_fields),
     ("GET", "/plenio/asr/notes/{draft_sha256}", asr_note),
     ("GET", "/plenio/presets/{kind}", presets),
     ("POST", "/plenio/eq/response", eq_response),

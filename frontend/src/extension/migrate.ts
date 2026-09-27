@@ -5,12 +5,28 @@
  * 0.2.2 made the work mode the first widget of Song Brief and Cover Brief. A node saved before has
  * one value less, starting with the template. It gets the careful mode: its old behaviour - the
  * documents stay cached and every run is a new take - and its Song Sheets keep their saved review.
+ *
+ * The predecessor toolkit's placeholder ``custom`` ("let the model decide", arriving through
+ * *Reuse parameters* of old jobs) is cleared from the text fields here as well: the backend treats
+ * it as empty with a note, and the widget should not show a word the writer never sees (plan §8.3).
  */
 import type { ComfyNodeDef } from '../shared/comfy'
+import { TEXT_FIELDS, isLegacyPlaceholder, WIDGET_OF } from './briefTemplate'
 
 export const MODE_BEFORE_0_2_2: Readonly<Record<string, string>> = {
   PlenioSongBrief: 'one song, stop to review',
   PlenioCoverBrief: 'one cover, stop to review'
+}
+
+/** Names of the brief's text widgets (by widget name; the vocals group's children are prefixed). */
+const TEXT_WIDGETS: ReadonlySet<string> = new Set(TEXT_FIELDS.map((field) => WIDGET_OF[field]))
+
+/** The fields a saved workflow carried as the legacy ``custom`` placeholder. */
+export function legacyPlaceholderFields(name: string, values: unknown): string[] {
+  if (!(name in MODE_BEFORE_0_2_2) || !values || typeof values !== 'object' || Array.isArray(values)) return []
+  return Object.entries(values as Record<string, unknown>)
+    .filter(([widget, value]) => TEXT_WIDGETS.has(widget) && isLegacyPlaceholder(value))
+    .map(([widget]) => widget)
 }
 
 /** The options of a combo input of a node definition (V3 `["COMBO", {options}]` or the older list form). */
@@ -41,6 +57,13 @@ export function migrateWidgetValues(
   }
   if (named && typeof named === 'object' && !Array.isArray(named) && !('mode' in named)) {
     migrated = { ...migrated, widgets_values_named: { mode: legacy, ...(named as Record<string, unknown>) } }
+  }
+  // the legacy placeholder goes; left alone where a value would have to be guessed from a position
+  const cleared = legacyPlaceholderFields(nodeData.name, migrated.widgets_values_named)
+  if (cleared.length) {
+    const named = { ...(migrated.widgets_values_named as Record<string, unknown>) }
+    for (const widget of cleared) named[widget] = ''
+    migrated = { ...migrated, widgets_values_named: named }
   }
   return migrated
 }

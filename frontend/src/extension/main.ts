@@ -12,6 +12,7 @@ import { app } from '../../../scripts/app.js'
 import type { Fetcher } from '../api/client'
 import { chain, type ComfyApp, type ComfyNode } from '../shared/comfy'
 import type { AsrNote, SheetPayload } from '../shared/sheetSession'
+import { BRIEF_NODES, installBriefTemplatePanel } from './briefTemplate'
 import { dynamicComboNames, restoreWidgetValues, savedWidgetValues } from './dynamicCombo'
 import { addEqCurve } from './eqWidget'
 import { MODE_BEFORE_0_2_2, migrateWidgetValues } from './migrate'
@@ -64,6 +65,10 @@ setFetcher(comfyApi)
       nodeType.prototype.onExecuted = chain(nodeType.prototype.onExecuted, function (this: ComfyNode, output) {
         curves.get(this)?.showExecuted(output)
       })
+    }
+    if (BRIEF_NODES.has(nodeData.name)) {
+      // the template panel: what the template fills, and the explicit actions (M3/D6)
+      installBriefTemplatePanel(nodeType, comfyApi)
     }
     if (nodeData.name === 'PlenioSongSheet') {
       nodeType.prototype.onExecuted = chain(nodeType.prototype.onExecuted, function (this: ComfyNode, output) {

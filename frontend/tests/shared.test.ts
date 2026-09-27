@@ -85,7 +85,7 @@ describe('sheet state widget', () => {
     const saved = '{"schema":"plenio.sheet_state/1","docs":{"lyrics":{"state":"manual","text":"x"}}}'
     widget.value = saved
     expect(widget.value).toBe(saved)
-    expect(widget.element?.querySelector('.plenio-sheet-summary')?.textContent).toBe('lyrics manual')
+    expect(widget.element?.querySelector('.plenio-sheet-summary')?.textContent).toBe('lyrics: yours (manual)')
     widget.value = 17
     expect(widget.value).toBe('')
   })

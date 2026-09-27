@@ -14,6 +14,8 @@ This is the precedence everywhere in Plenio: **manual > edited (while its draft 
 
 A draft that is not needed is not computed: with manual lyrics in a cover, Transcribe Lyrics does not run (unless another node still needs its language), and with a manual score SheetSage2 is not asked for a score.
 
+**Your own lyrics.** In the Lyrics tab, **Use my own lyrics** switches the document to *manual* in one click - the writer is not consulted any more, the text is yours, and the node's summary says so (`lyrics: yours (manual)`). Section tags (`[Verse]`, `[Chorus]`, …) can be inserted under the editor; see [Brief templates](brief-templates.md). In *new song every run*, a manual lyrics document is used for every song of the series (new titles and styles, the same words).
+
 ## Two sheets per path
 
 The score is made from the text (Song path: YuE2 plans from the lyrics) or the text is made against the score (Cover path: lyrics are placed into the score's sections). So each path has two sheets:

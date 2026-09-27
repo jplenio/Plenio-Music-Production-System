@@ -229,7 +229,11 @@ def _markdown(evaluation: Any) -> str:
     lines = [f"**{evaluation.status_line()}**"]
     for kind in evaluation.owned:
         doc = evaluation.resolution.docs[kind]
-        lines.append(f"- {kind.replace('_', ' ')}: {doc.status.value}")
+        # 'lyrics: yours (manual)': the words are the user's and the writer is not consulted (plan §7)
+        if kind == "lyrics" and doc.status.value == "manual":
+            lines.append("- lyrics: yours (manual)")
+        else:
+            lines.append(f"- {kind.replace('_', ' ')}: {doc.status.value}")
     if evaluation.validation and evaluation.validation.get("budget") and evaluation.engine_id:
         lines.append(
             f"- budget: {rules_for(evaluation.engine_id).describe_budget(evaluation.validation['budget'])}"

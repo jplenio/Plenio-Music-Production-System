@@ -165,6 +165,37 @@ export interface EqPreset {
   settings: import('../shared/eqCurve').EqSettings
 }
 
+export interface BriefFill {
+  field: string
+  value: string
+  template: string
+}
+
+export interface BriefChoice {
+  field: string
+  suggested: string
+  current: string
+}
+
+/** What a brief's template fills, by the one precedence rule (typed > template > empty). */
+export interface BriefFields {
+  template: string
+  sources: Record<string, 'typed' | 'template' | 'empty'>
+  fields: Record<string, string>
+  fills: BriefFill[]
+  choices: BriefChoice[]
+  length_default: string
+  notes: string[]
+}
+
+/** Ask the backend what the template would fill (the rule lives in `core.brief`, not in the frontend). */
+export function briefFields(
+  fetcher: Fetcher,
+  request: { fields: Record<string, string>; template: string }
+): Promise<BriefFields> {
+  return post(fetcher, '/plenio/brief/fields', request)
+}
+
 /** Shipped EQ recipes (``manual``: band sets; ``match``: tone-match recipes). */
 export async function eqPresets(fetcher: Fetcher): Promise<{ manual: EqPreset[] }> {
   const response = await fetcher.fetchApi('/plenio/presets/eq')
