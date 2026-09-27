@@ -55,6 +55,7 @@ def audio(seconds: float = 0.2, rate: int = 48000) -> np.ndarray:
 def test_the_blind_pack_names_what_the_files_hold(tmp_path: Path) -> None:
     study = load_tool("sr_study")
     limited = audio()
+    original = limited + 0.4 * np.sin(2 * np.pi * 19000 * np.arange(limited.shape[1]) / 48000)
     refined = limited + 0.001 * np.sin(2 * np.pi * 9000 * np.arange(limited.shape[1]) / 48000)
     arms = {
         "resample only": {"report": {"notes": []}},
@@ -62,24 +63,38 @@ def test_the_blind_pack_names_what_the_files_hold(tmp_path: Path) -> None:
         "broken": {"report": {"notes": ["input already full band (22050 Hz) - resample only"]}},
     }
     outputs = {"resample only": limited.copy(), "universr[1]": refined, "broken": limited.copy()}
-    facts = study.write_pack(tmp_path, tmp_path / "reference.flac", limited, arms, outputs, 48000)
+    facts = study.write_pack(
+        tmp_path,
+        tmp_path / "reference.flac",
+        limited,
+        arms,
+        outputs,
+        48000,
+        reference_audio=original,
+        edge_hz=14500.0,
+    )
 
     folder = tmp_path / "reference"
     assert (folder / "key.json").is_file() and (folder / "README.md").is_file()
-    key = json.loads((folder / "key.json").read_text(encoding="utf-8"))["pairs"]
-    assert set(key) == {"universr[1]"}  # the baseline returned the input, the broken arm only resampled
+    assert (folder / "reference.flac").is_file()  # the untouched original for the comparison
+    key = json.loads((folder / "key.json").read_text(encoding="utf-8"))
+    assert key["edge_hz"] == 14500.0 and key["pairs"]
+    pairs = key["pairs"]
+    assert set(pairs) == {"universr[1]"}  # the baseline returned the input, the broken arm only resampled
     assert facts["resample only"] == {"skipped": "the arm returned the input unchanged"}
     assert "input already full band" in facts["broken"]["skipped"]
 
-    pair = key["universr[1]"]
+    pair = pairs["universr[1]"]
     assert {pair["band-limited"], pair["refined"]} == {1, 2}
     back_limited, rate = decode(folder / f"{pair['band-limited']}.flac")
     back_refined, _rate = decode(folder / f"{pair['refined']}.flac")
+    back_reference, _rate = decode(folder / "reference.flac")
     assert rate == 48000
     assert back_limited.shape == limited.shape
     # 24-bit FLAC: the quantisation step is 2**-23, so the comparison asks for that and no more
     assert np.allclose(back_limited, limited, atol=2**-23)
     assert np.allclose(back_refined, refined, atol=2**-23)
+    assert np.allclose(back_reference, original, atol=2**-23)
     assert not np.allclose(back_limited, back_refined, atol=2**-23)  # there is something to hear
 
 

@@ -379,11 +379,22 @@ def run_study(
                 **_measure(limited, samples, result, OUTPUT_RATE, seconds, _peak_vram()),
             }
         if pack is not None:
-            entry["pack"] = write_pack(pack, path, limited, entry["arms"], outputs, OUTPUT_RATE)
+            entry["pack"] = write_pack(
+                pack,
+                path,
+                limited,
+                entry["arms"],
+                outputs,
+                OUTPUT_RATE,
+                reference_audio=samples,
+                edge_hz=edge_hz,
+            )
         report["simulation"][path.name] = entry
     for path in targets:
         samples, rate = decode(path)
+        at_output = samples if rate == OUTPUT_RATE else resample(samples, rate, OUTPUT_RATE)
         entry = {"input": str(path), "input_bandwidth_hz": _bandwidth(samples, rate), "arms": {}}
+        target_outputs: dict[str, np.ndarray] = {}
         for arm in arms:
             if arm.directory is not None:
                 candidate = arm.directory / path.name
@@ -396,10 +407,24 @@ def run_study(
             started = time.perf_counter()
             result, stage = arm.run(samples, rate)
             seconds = time.perf_counter() - started
+            target_outputs[arm.name] = result
             entry["arms"][arm.name] = {
                 "report": stage,
                 **_measure(samples, None, result, OUTPUT_RATE, seconds, _peak_vram()),
             }
+        if pack is not None:
+            # no untouched original here: the target *is* the input, and an arm that only resampled
+            # (the usual case for material that is already full band) writes no pair
+            entry["pack"] = write_pack(
+                pack,
+                path,
+                at_output,
+                entry["arms"],
+                target_outputs,
+                OUTPUT_RATE,
+                reference_audio=None,
+                edge_hz=None,
+            )
         report["targets"][path.name] = entry
     report["summary"] = summarize(report)
     return report
@@ -412,8 +437,11 @@ def write_pack(
     arms: dict[str, dict[str, Any]],
     outputs: dict[str, np.ndarray],
     rate: int,
+    *,
+    reference_audio: np.ndarray | None = None,
+    edge_hz: float | None = None,
 ) -> dict[str, Any]:
-    """The blind A/B pair(s) for one simulation entry: the band-limited input against a refined arm.
+    """The blind A/B material for one entry: the input against a refined arm, plus the reference.
 
     Both files are the same length and level (Refine does not normalise), so the only difference is
     what the arm added. The order is shuffled with a fixed seed; ``key.json`` names the winner and
@@ -428,10 +456,15 @@ def write_pack(
     pairs: dict[str, np.ndarray] = {}
     for arm_name, facts in arms.items():
         note = (facts.get("report") or {}).get("notes")
+        produced = outputs.get(arm_name)
         if note:
             results[arm_name] = {"skipped": note[0]}
-        elif arm_name in outputs and not np.allclose(outputs[arm_name], limited, atol=0.0):
-            pairs[arm_name] = outputs[arm_name]
+        elif (
+            produced is not None
+            and produced.shape == limited.shape
+            and not np.allclose(produced, limited, atol=0.0)
+        ):
+            pairs[arm_name] = produced
         else:
             results[arm_name] = {"skipped": "the arm returned the input unchanged"}
     if not pairs:
@@ -445,19 +478,38 @@ def write_pack(
         write_audio(folder / "1.flac", limited if first else refined, rate, "flac", {"title": "1"})
         write_audio(folder / "2.flac", refined if first else limited, rate, "flac", {"title": "2"})
         key[arm_name] = {"band-limited": 1 if first else 2, "refined": 2 if first else 1}
-    (folder / "key.json").write_text(
-        json.dumps({"reference": str(reference), "pairs": key}, indent=1, sort_keys=True) + "\n",
-        encoding="utf-8",
+    if (
+        reference_audio is not None
+        and reference_audio.shape == limited.shape
+        and not np.allclose(reference_audio, limited, atol=0.0)
+    ):
+        # the untouched original: what the band-limited file lost, and what the arm tries to rebuild
+        write_audio(folder / "reference.flac", reference_audio, rate, "flac", {"title": "reference"})
+    facts = {
+        "reference": str(reference),
+        "input_bandwidth_hz": _bandwidth(limited, rate),
+        "edge_hz": edge_hz,
+        "pairs": key,
+    }
+    (folder / "key.json").write_text(json.dumps(facts, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    context = (
+        f"Both were cut at **{edge_hz / 1000:.1f} kHz** first (the highs are gone in *both* files), so the "
+        "difference you hear is what the Refine arm put back.\n\n"
+        "`reference.flac` is the untouched original - the best possible answer. Compare how close each "
+        "of the two gets to it.\n"
+        if edge_hz and reference_audio is not None
+        else "One of the two files ran through a Refine arm, the other is its input.\n"
     )
     (folder / "README.md").write_text(
         f"# Blind A/B: {reference.name}\n\n"
-        "`1.flac` and `2.flac` are the same recording at the same level; one is band-limited at "
-        "the MiniMax edge, the other ran through a Refine arm.\n\n"
+        f"`1.flac` and `2.flac` are the same recording at the same level. {context}\n"
         "Listen (headphones help) and answer:\n\n"
         "1. Which file sounds more open - 1 or 2?\n"
-        "2. Does the winner sound natural, or does it hiss, fizz or smear (cymbals, sibilance)?\n"
-        "3. Is the difference worth the run time (see the JSON report's real-time factor)?\n\n"
-        "Afterwards open `key.json`; it names the arm and which number it was.\n",
+        "2. Which one is closer to `reference.flac` (if present)?\n"
+        "3. Does the winner sound natural, or does it hiss, fizz or smear (cymbals, sibilance)?\n"
+        "4. Is the difference worth the run time (see the JSON report's real-time factor)?\n\n"
+        "Afterwards open `key.json`; it names the arm, which number it was, and the bandwidth the "
+        "stage measured before it ran.\n",
         encoding="utf-8",
     )
     return {"folder": str(folder), "key": key, **results}

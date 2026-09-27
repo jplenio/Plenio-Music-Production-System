@@ -235,6 +235,16 @@ def _key_signature(key: str) -> bytes:
     return bytes([count & 0xFF, 1 if key.endswith("m") else 0])
 
 
+def _guide_key(note: GuideNote) -> tuple[int, int, int]:
+    """The canonical guide order: two notes at the same onset *and* pitch have no order in the file.
+
+    The MIDI round trip pairs note-offs with note-ons by pitch, so simultaneous same-pitch notes come
+    back as the same multiset in an arbitrary order (found by the hypothesis test, 2026-09-28). Both
+    sides sort by ``(onset, pitch, duration)`` so the round trip is canonical and deterministic.
+    """
+    return (note.onset, note.pitch, note.duration)
+
+
 def export_midi(score: Score, *, guide: Sequence[GuideNote] = (), title: str = "") -> bytes:
     """The score (and optional Guide notes) as a type-1 standard MIDI file."""
     c.validate(score)
@@ -282,7 +292,9 @@ def export_midi(score: Score, *, guide: Sequence[GuideNote] = (), title: str = "
         voicings += [(chord.onset, until - chord.onset, pitch) for pitch in _chord_pitches(chord.name)]
     tracks.append(notes_track("chords", voicings, texts))
     if guide:
-        tracks.append(notes_track("guide", ((g.onset, g.duration, g.pitch) for g in guide)))
+        tracks.append(
+            notes_track("guide", ((g.onset, g.duration, g.pitch) for g in sorted(guide, key=_guide_key)))
+        )
     header = _chunk(b"MThd", (1).to_bytes(2, "big") + len(tracks).to_bytes(2, "big") + ppq.to_bytes(2, "big"))
     return header + b"".join(tracks)
 
@@ -595,9 +607,7 @@ def import_midi(
             "The MIDI file cannot be read as a score.",
             diagnostics=[{"severity": "error", "message": problem, "where": "midi"} for problem in found],
         )
-    guide = tuple(
-        sorted((GuideNote(o, e - o, p) for o, e, p in pitched["guide"]), key=lambda g: (g.onset, g.pitch))
-    )
+    guide = tuple(sorted((GuideNote(o, e - o, p) for o, e, p in pitched["guide"]), key=_guide_key))
     return MidiImport(score, guide, tuple(report), infos)
 
 
@@ -630,7 +640,7 @@ def guide_from_json(value: object) -> tuple[GuideNote, ...]:
                 f"Guide note {item!r} is not [onset >= 0, duration >= 1, pitch 0-127]."
             )
         notes.append(GuideNote(item[0], item[1], item[2]))
-    return tuple(sorted(notes, key=lambda g: (g.onset, g.pitch)))
+    return tuple(sorted(notes, key=_guide_key))
 
 
 def mapping_from_json(value: object) -> dict[int, str | None] | None:

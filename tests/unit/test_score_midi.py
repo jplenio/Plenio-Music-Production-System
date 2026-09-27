@@ -46,7 +46,9 @@ def test_round_trip_of_every_valid_score_with_guide_notes(
     guide = tuple(
         sorted(
             (GuideNote(o, min(d, score.total - o), p) for o, d, p in raw_guide if o < score.total),
-            key=lambda g: (g.onset, g.pitch),
+            # (onset, pitch, duration): the same canonical order the exporter and the importer use -
+            # two notes at the same onset *and* pitch have no order of their own in a MIDI file
+            key=lambda g: (g.onset, g.pitch, g.duration),
         )
     )
     data = midi.export_midi(score, guide=guide)

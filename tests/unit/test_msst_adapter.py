@@ -36,6 +36,47 @@ def test_the_separator_follows_the_core_contract() -> None:
     assert msst.SAMPLE_RATE == 44100
 
 
+def test_the_stem_order_comes_from_the_config_not_a_constant() -> None:
+    """The owner's listening check (2026-09-28) caught the swap: the released config trains
+    ``drums, bass, other, vocals``, so a constant order mislabels every stem."""
+    released = json.loads((msst.VENDOR / msst.CONFIG_NAME).read_text(encoding="utf-8"))
+    assert released["training"]["instruments"] == ["drums", "bass", "other", "vocals"]
+    names = msst.instruments_of(released, released["model"])
+    assert names == ("drums", "bass", "other", "vocals")
+
+    # a fake model whose output dimension follows that order: index 0 drums, 3 vocals
+    separator = msst.BSRoformerSeparator(
+        model=FakeModel(shares=(0.4, 0.3, 0.2, 0.1)),
+        stems=names,
+        chunk_frames=4096,
+        overlap_frames=1024,
+    )
+    rate = 44100
+    t = np.arange(rate // 2) / rate
+    audio = np.stack([0.4 * np.sin(2 * np.pi * 300 * t), 0.4 * np.sin(2 * np.pi * 700 * t)])
+    stems = separator.separate(audio, rate)
+    assert list(stems) == ["vocals", "drums", "bass", "other"]  # the widget's documented order
+    energy = float((audio**2).mean())
+    for name, share in (("drums", 0.4), ("bass", 0.3), ("other", 0.2), ("vocals", 0.1)):
+        ratio = float((stems[name].astype(np.float64) ** 2).mean()) / energy
+        assert ratio == pytest.approx(share**2, rel=1e-3), name  # name and audio belong together
+
+
+def test_a_config_that_does_not_fit_the_model_is_refused() -> None:
+    with pytest.raises(PlenioModelError) as wrong_count:
+        msst.instruments_of({"training": {"instruments": ["vocals", "drums"]}}, {"num_stems": 4})
+    assert "names 2" in wrong_count.value.message
+    with pytest.raises(PlenioModelError) as residual:
+        msst.instruments_of(
+            {"training": {"instruments": ["vocals", "drums", "bass", "rest"]}}, {"num_stems": 4}
+        )
+    assert "not contain 'rest'" in residual.value.message
+    with pytest.raises(PlenioModelError):
+        msst.instruments_of({"training": {"instruments": ["vocals", "drums", "bass", 7]}}, {})
+    # a config without the list falls back to the documented order
+    assert msst.instruments_of({}, {"num_stems": 4}) == msst.STEMS
+
+
 class FakeModel:
     """Mimics the upstream model: ``[batch, stems, channels, samples]``, each stem a known share."""
 

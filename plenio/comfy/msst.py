@@ -19,6 +19,7 @@ checkpoint through ComfyUI's model management (R9), no new Python packages:
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -26,12 +27,20 @@ from typing import Any
 import numpy as np
 
 from ..core.audio.resample import resample
+from ..core.audio.stems import REST
 from ..core.dependencies import require
 from ..core.errors import PlenioDependencyError, PlenioModelError
 from . import host
 
 NAME = "BS-RoFormer 4-stem"
 STEMS: tuple[str, ...] = ("vocals", "drums", "bass", "other")
+"""The documented stem order (MUSDB18-HQ) - and the fallback for a config that names no instruments.
+
+The order of a checkpoint's output dimension is the **config's** ``training.instruments`` order, not
+this constant: the released BS-RoFormer lists ``drums, bass, other, vocals``, so a hardcoded order
+silently swaps the stems (found by the owner's listening check, 2026-09-28). ``instruments_of`` reads
+the truth; ``separate`` returns the documented order where the names allow it.
+"""
 SAMPLE_RATE = 44100
 FILE_NAMES = (
     "model_bs_roformer_ep_17_sdr_9.6568.ckpt",
@@ -81,7 +90,12 @@ class BSRoformerSeparator:
     """Optional packages that were replaced by the vendored stand-ins."""
 
     def separate(self, samples: np.ndarray, rate: int) -> dict[str, np.ndarray]:
-        """``{stem: [channels, frames]}`` at ``rate`` and the input's length, float32."""
+        """``{stem: [channels, frames]}`` at ``rate`` and the input's length, float32.
+
+        Every stem is labeled by the checkpoint's own instrument order (:func:`instruments_of`), so the
+        names match the audio; where the names are the documented ones the result is returned in the
+        documented order (vocals, drums, bass, other).
+        """
         torch = _require_torch()
         data = np.ascontiguousarray(samples, dtype=np.float64)
         frames = int(data.shape[1])
@@ -125,6 +139,10 @@ class BSRoformerSeparator:
                 back = np.pad(back, ((0, 0), (0, frames - back.shape[1])))
             result[name] = np.ascontiguousarray(back[:, :frames], dtype=np.float32)
         host.soft_empty_cache()
+        if set(self.stems) == set(STEMS):
+            # the names are the documented ones: hand them back in the documented order (the mixer
+            # widget, the report and the strips read it) - the audio is matched by name, not index
+            result = {name: result[name] for name in STEMS}
         return result
 
     def _forward(self, torch: Any, piece: np.ndarray) -> dict[str, np.ndarray]:
@@ -148,6 +166,37 @@ class BSRoformerSeparator:
                 array = array[:, : piece.shape[1]]
             result[name] = array
         return result
+
+
+def instruments_of(config: Mapping[str, Any], model_config: Mapping[str, Any]) -> tuple[str, ...]:
+    """The stem order of the checkpoint's output dimension (the order it was trained in).
+
+        MSST configs list it under ``training.instruments``; a checkpoint without a config falls back to
+    the released ``audio_config.json``, and a config without the list to :data:`STEMS`. A list that does
+    not match the model's ``num_stems`` is refused instead of guessed.
+    """
+    training = config.get("training") if isinstance(config.get("training"), dict) else {}
+    listed = training.get("instruments") or config.get("instruments")
+    if listed is None:
+        names = STEMS
+    else:
+        if not isinstance(listed, (list, tuple)) or not all(
+            isinstance(item, str) and item.strip() for item in listed
+        ):
+            raise PlenioModelError(f"{NAME}: 'instruments' must be a list of stem names.")
+        names = tuple(item.strip() for item in listed)
+    if len(set(names)) != len(names) or REST in names:
+        raise PlenioModelError(
+            f"{NAME}: the stem names must be unique and must not contain '{REST}'.",
+            hint="'rest' is the residual Plenio adds itself; a config that names it is not usable.",
+        )
+    expected = model_config.get("num_stems")
+    if expected is not None and int(expected) != len(names):
+        raise PlenioModelError(
+            f"{NAME}: the model has {int(expected)} stems, its config names {len(names)}.",
+            hint="Use the released checkpoint with its config, or a config that matches the model.",
+        )
+    return names
 
 
 def load(path: Path) -> BSRoformerSeparator:
@@ -180,6 +229,7 @@ def load(path: Path) -> BSRoformerSeparator:
         device=str(device),
         chunk_frames=chunk,
         overlap_frames=chunk // num_overlap,
+        stems=instruments_of(config, model_config),
         substitutes=tuple(sorted(substitutes)),
     )
 
@@ -236,6 +286,7 @@ __all__ = [
     "SAMPLE_RATE",
     "STEMS",
     "BSRoformerSeparator",
+    "instruments_of",
     "load",
     "matches",
 ]

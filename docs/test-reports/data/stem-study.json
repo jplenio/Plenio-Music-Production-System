@@ -3,83 +3,93 @@
  "model": "model_bs_roformer_ep_17_sdr_9.6568.ckpt",
  "schema": "plenio.stem-study/1",
  "songs": {
-  "2026-09-26 Words We Never Said (original).flac": {
+  "2026-09-26 Neuer Morgen Jetzt (original).flac": {
    "example_mix": {
     "buses": [
      "reverb"
     ],
-    "peak_db": -0.46,
-    "peak_dbfs": -0.46,
-    "rms_dbfs": -22.22
+    "peak_db": -1.24,
+    "peak_dbfs": -1.24,
+    "rms_dbfs": -16.7
    },
-   "input": "D:\\Daten2\\ComfyUI\\output\\plenio\\2026-09-26 Words We Never Said (original).flac",
+   "input": "D:\\Daten2\\ComfyUI\\output\\plenio0.2.2\\2026-09-26 Neuer Morgen Jetzt (original).flac",
    "input_level": {
-    "peak_dbfs": -0.46,
-    "rms_dbfs": -21.99
+    "peak_dbfs": 0.0,
+    "rms_dbfs": -16.27
    },
    "muted_range": {
-    "length_seconds": 113.511,
-    "max_difference_after_range_dbfs": -162.56,
+    "length_seconds": 153.6,
+    "max_difference_after_range_dbfs": -168.58,
     "seconds": 2.0
    },
    "neutral": {
-    "max_difference_dbfs": -162.56,
+    "max_difference_dbfs": -168.58,
     "neutral": true,
-    "peak_db": -0.46
+    "peak_db": 0.0
    },
    "peak_vram_mb": 1698.6,
-   "rate": 44100,
-   "real_time_factor": 3.4508,
-   "residual_energy_share": 0.0073,
-   "seconds_audio": 113.511,
-   "separation_seconds": 32.894,
+   "rate": 48000,
+   "real_time_factor": 3.7615,
+   "residual_energy_share": 0.0006,
+   "seconds_audio": 153.6,
+   "separation_seconds": 40.835,
    "stems": {
     "bass": {
-     "peak_dbfs": -1.64,
-     "rms_dbfs": -29.25
+     "centroid_hz": 79.9,
+     "low_share": 0.9987,
+     "peak_dbfs": -8.63,
+     "rms_dbfs": -22.51
     },
     "drums": {
-     "peak_dbfs": -5.86,
-     "rms_dbfs": -36.44
+     "centroid_hz": 202.0,
+     "low_share": 0.9382,
+     "peak_dbfs": -1.18,
+     "rms_dbfs": -22.28
     },
     "other": {
-     "peak_dbfs": -3.79,
-     "rms_dbfs": -28.0
+     "centroid_hz": 549.9,
+     "low_share": 0.1631,
+     "peak_dbfs": -3.74,
+     "rms_dbfs": -24.72
     },
     "rest": {
-     "peak_dbfs": -15.35,
-     "rms_dbfs": -43.38
+     "centroid_hz": 1017.5,
+     "low_share": 0.5754,
+     "peak_dbfs": -20.6,
+     "rms_dbfs": -48.64
     },
     "vocals": {
-     "peak_dbfs": -0.44,
-     "rms_dbfs": -25.86
+     "centroid_hz": 849.2,
+     "low_share": 0.1038,
+     "peak_dbfs": -3.33,
+     "rms_dbfs": -21.41
     }
    },
    "written": [
-    "D:\\Daten2\\ComfyUI\\output\\plenio-l2\\2026-09-26 Words We Never Said (original)\\bass.flac",
-    "D:\\Daten2\\ComfyUI\\output\\plenio-l2\\2026-09-26 Words We Never Said (original)\\drums.flac",
-    "D:\\Daten2\\ComfyUI\\output\\plenio-l2\\2026-09-26 Words We Never Said (original)\\mix-example.flac",
-    "D:\\Daten2\\ComfyUI\\output\\plenio-l2\\2026-09-26 Words We Never Said (original)\\neutral-mix.flac",
-    "D:\\Daten2\\ComfyUI\\output\\plenio-l2\\2026-09-26 Words We Never Said (original)\\other.flac",
-    "D:\\Daten2\\ComfyUI\\output\\plenio-l2\\2026-09-26 Words We Never Said (original)\\rest.flac",
-    "D:\\Daten2\\ComfyUI\\output\\plenio-l2\\2026-09-26 Words We Never Said (original)\\vocals.flac"
+    "D:\\Daten2\\ComfyUI\\output\\plenio-l2\\2026-09-26 Neuer Morgen Jetzt (original)\\bass.flac",
+    "D:\\Daten2\\ComfyUI\\output\\plenio-l2\\2026-09-26 Neuer Morgen Jetzt (original)\\drums.flac",
+    "D:\\Daten2\\ComfyUI\\output\\plenio-l2\\2026-09-26 Neuer Morgen Jetzt (original)\\mix-example.flac",
+    "D:\\Daten2\\ComfyUI\\output\\plenio-l2\\2026-09-26 Neuer Morgen Jetzt (original)\\neutral-mix.flac",
+    "D:\\Daten2\\ComfyUI\\output\\plenio-l2\\2026-09-26 Neuer Morgen Jetzt (original)\\other.flac",
+    "D:\\Daten2\\ComfyUI\\output\\plenio-l2\\2026-09-26 Neuer Morgen Jetzt (original)\\rest.flac",
+    "D:\\Daten2\\ComfyUI\\output\\plenio-l2\\2026-09-26 Neuer Morgen Jetzt (original)\\vocals.flac"
    ]
   }
  },
  "source": "BS-RoFormer 4-stem",
  "stems": [
-  "vocals",
   "drums",
   "bass",
-  "other"
+  "other",
+  "vocals"
  ],
  "summary": {
-  "muted_range_max_difference_dbfs": -162.56,
-  "neutral_max_difference_dbfs": -162.56,
+  "muted_range_max_difference_dbfs": -168.58,
+  "neutral_max_difference_dbfs": -168.58,
   "peak_vram_mb": 1698.6,
-  "real_time_factor": 3.4508,
-  "residual_energy_share": 0.0073,
-  "seconds_audio": 113.5,
+  "real_time_factor": 3.7615,
+  "residual_energy_share": 0.0006,
+  "seconds_audio": 153.6,
   "songs": 1
  }
 }

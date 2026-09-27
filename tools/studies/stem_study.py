@@ -124,6 +124,29 @@ def _level(samples: np.ndarray) -> dict[str, Any]:
     return {"peak_dbfs": _db(peak), "rms_dbfs": _db(rms)}
 
 
+def _timbre(samples: np.ndarray, rate: int, frames: int = 48) -> dict[str, Any]:
+    """A cheap fingerprint that makes the labels checkable: the bass stem is the low one.
+
+    (The owner's listening check of 2026-09-28 found the stems swapped, so the report now carries
+    numbers that would have shown it: a spectral centroid and the share of energy below 200 Hz.)
+    """
+    mono = samples.mean(axis=0)
+    size = 16384
+    if mono.size < 2 * size:
+        return {"centroid_hz": None, "low_share": None}
+    starts = np.linspace(0, mono.size - size, num=min(frames, mono.size // size)).astype(int)
+    window = np.hanning(size)
+    power = np.zeros(size // 2 + 1)
+    for start in starts:
+        power += np.abs(np.fft.rfft(mono[start : start + size] * window)) ** 2
+    freqs = np.fft.rfftfreq(size, 1 / rate)
+    total = float(power.sum()) + 1e-30
+    return {
+        "centroid_hz": round(float((power * freqs).sum() / total), 1),
+        "low_share": round(float(power[freqs < 200].sum() / total), 4),
+    }
+
+
 def _difference_db(result: np.ndarray, reference: np.ndarray, *, frames: int | None = None) -> float | None:
     """The largest sample difference as dBFS (``None`` when both are exactly equal / empty)."""
     width = frames if frames is not None else reference.shape[1]
@@ -152,7 +175,7 @@ def measure_song(separator: Any, path: Path, *, write_audio: Path | None) -> dic
         "separation_seconds": round(seconds, 3),
         "real_time_factor": round((data.shape[1] / rate) / seconds, 4) if seconds > 0 else None,
         "peak_vram_mb": None if peak_vram is None else round(peak_vram / 1024 / 1024, 1),
-        "stems": {name: _level(stem) for name, stem in container.strips()},
+        "stems": {name: {**_level(stem), **_timbre(stem, rate)} for name, stem in container.strips()},
         "residual_energy_share": round(float((container.residual.astype(float) ** 2).sum()) / energy, 4)
         if energy
         else None,

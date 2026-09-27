@@ -25,8 +25,8 @@
      "loudness_change_lu": 0.0,
      "lsd_16_24_db": 113.38554850603339,
      "onset_pre_echo_ms": 32.0,
-     "peak_vram_mb": 220.1,
-     "real_time_factor": 121.7359,
+     "peak_vram_mb": 229.2,
+     "real_time_factor": 118.66,
      "report": {
       "bandwidth_in_hz": 14865.2,
       "bandwidth_out_hz": 14865.2,
@@ -43,7 +43,7 @@
       "pre_hz": null,
       "provisional_defaults": true,
       "schema": "plenio.refine/1",
-      "seconds": 0.462,
+      "seconds": 0.472,
       "seed": 0,
       "settings": {
        "crossover_hz": 0.0,
@@ -54,7 +54,7 @@
       },
       "sr_gain": null
      },
-     "seconds": 0.462
+     "seconds": 0.474
     },
     "universr[1]": {
      "fizz": {
@@ -70,7 +70,7 @@
      "lsd_16_24_db": 11.001843245218128,
      "onset_pre_echo_ms": 32.0,
      "peak_vram_mb": 2775.7,
-     "real_time_factor": 0.4135,
+     "real_time_factor": 0.4084,
      "report": {
       "bandwidth_in_hz": 14865.2,
       "bandwidth_out_hz": 20173.8,
@@ -87,7 +87,7 @@
       "pre_hz": 12000.0,
       "provisional_defaults": true,
       "schema": "plenio.refine/1",
-      "seconds": 136.009,
+      "seconds": 137.706,
       "seed": 0,
       "settings": {
        "crossover_hz": 0.0,
@@ -98,7 +98,7 @@
       },
       "sr_gain": 1.0
      },
-     "seconds": 136.014
+     "seconds": 137.712
     }
    },
    "input": "D:\\Daten2\\ComfyUI\\output\\plenio\\2026-09-27 Words We Never Said (2) (original).flac",
@@ -116,51 +116,260 @@
      "skipped": "the arm returned the input unchanged"
     }
    }
+  },
+  "song_32_08-EDM2_00001.flac": {
+   "arms": {
+    "resample only": {
+     "fizz": {
+      "envelope_correlation": 0.7564,
+      "flatness": 0.0586
+     },
+     "loudness": {
+      "integrated_lufs": -14.615,
+      "peak": 1.064455,
+      "true_peak_dbtp": 0.62
+     },
+     "loudness_change_lu": 0.0,
+     "lsd_16_24_db": 97.13851246194666,
+     "onset_pre_echo_ms": 32.0,
+     "peak_vram_mb": 220.1,
+     "real_time_factor": 113.0059,
+     "report": {
+      "bandwidth_in_hz": 14894.5,
+      "bandwidth_out_hz": 14894.5,
+      "crossover_hz": null,
+      "engine": "resample only",
+      "frames": 3162001,
+      "input_rate": 48000,
+      "loudness_change_lu": 0.0,
+      "notes": [],
+      "output_rate": 48000,
+      "peak_in": 1.064455,
+      "peak_out": 1.064455,
+      "post_hz": null,
+      "pre_hz": null,
+      "provisional_defaults": true,
+      "schema": "plenio.refine/1",
+      "seconds": 0.583,
+      "seed": 0,
+      "settings": {
+       "crossover_hz": 0.0,
+       "post_hz": 0.0,
+       "pre_hz": 0.0,
+       "seed": 0,
+       "sr_gain": 1.0
+      },
+      "sr_gain": null
+     },
+     "seconds": 0.583
+    },
+    "universr[1]": {
+     "fizz": {
+      "envelope_correlation": 0.3122,
+      "flatness": 0.3773
+     },
+     "loudness": {
+      "integrated_lufs": -14.619,
+      "peak": 1.067594,
+      "true_peak_dbtp": 0.737
+     },
+     "loudness_change_lu": -0.004,
+     "lsd_16_24_db": 34.64905376482226,
+     "onset_pre_echo_ms": 32.0,
+     "peak_vram_mb": 2775.7,
+     "real_time_factor": 0.4113,
+     "report": {
+      "bandwidth_in_hz": 14894.5,
+      "bandwidth_out_hz": 23953.1,
+      "crossover_hz": 14394.53125,
+      "engine": "UniverSR",
+      "frames": 3162001,
+      "input_rate": 48000,
+      "loudness_change_lu": -0.004,
+      "notes": [],
+      "output_rate": 48000,
+      "peak_in": 1.064455,
+      "peak_out": 1.067594,
+      "post_hz": null,
+      "pre_hz": 12000.0,
+      "provisional_defaults": true,
+      "schema": "plenio.refine/1",
+      "seconds": 160.139,
+      "seed": 0,
+      "settings": {
+       "crossover_hz": 0.0,
+       "post_hz": 0.0,
+       "pre_hz": 0.0,
+       "seed": 0,
+       "sr_gain": 1.0
+      },
+      "sr_gain": 1.0
+     },
+     "seconds": 160.145
+    }
+   },
+   "input": "D:\\Daten2\\ComfyUI\\output\\audio_minimax3\\2026-08-23\\32khz\\song_32_08-EDM2_00001.flac",
+   "input_bandwidth_hz": 14894.5,
+   "input_lsd_16_24_db": 97.13851246194666,
+   "pack": {
+    "folder": "D:\\Daten2\\ComfyUI\\output\\plenio-l1-pack\\song_32_08-EDM2_00001",
+    "key": {
+     "universr[1]": {
+      "band-limited": 2,
+      "refined": 1
+     }
+    },
+    "resample only": {
+     "skipped": "the arm returned the input unchanged"
+    }
+   }
   }
  },
  "summary": {
   "simulation": {
    "resample only": {
-    "files": 1,
-    "fizz_correlation": 0.8961,
-    "fizz_flatness": 0.1526,
+    "files": 2,
+    "fizz_correlation": 0.8262,
+    "fizz_flatness": 0.1056,
     "loudness_change_lu": 0.0,
-    "lsd_16_24_db": 113.3855,
-    "real_time_factor": 121.7359,
-    "true_peak_dbtp": -0.842
+    "lsd_16_24_db": 105.262,
+    "real_time_factor": 115.8329,
+    "true_peak_dbtp": -0.111
    },
    "universr[1]": {
-    "files": 1,
-    "fizz_correlation": 0.5237,
-    "fizz_flatness": 0.4632,
-    "loudness_change_lu": 0.0,
-    "lsd_16_24_db": 11.0018,
-    "real_time_factor": 0.4135,
-    "true_peak_dbtp": -0.836
+    "files": 2,
+    "fizz_correlation": 0.418,
+    "fizz_flatness": 0.4203,
+    "loudness_change_lu": -0.002,
+    "lsd_16_24_db": 22.8254,
+    "real_time_factor": 0.4098,
+    "true_peak_dbtp": -0.0495
    }
   },
   "targets": {
    "resample only": {
-    "files": 1,
-    "fizz_correlation": 0.727,
-    "fizz_flatness": 0.0007,
-    "loudness_change_lu": -0.062,
+    "files": 2,
+    "fizz_correlation": 0.7513,
+    "fizz_flatness": 0.0004,
+    "loudness_change_lu": -0.1145,
     "lsd_16_24_db": null,
-    "real_time_factor": 47.4723,
-    "true_peak_dbtp": -0.37
+    "real_time_factor": 45.1568,
+    "true_peak_dbtp": 0.3535
    },
    "universr[1]": {
-    "files": 1,
-    "fizz_correlation": 0.727,
-    "fizz_flatness": 0.0007,
-    "loudness_change_lu": -0.062,
+    "files": 2,
+    "fizz_correlation": 0.7513,
+    "fizz_flatness": 0.0004,
+    "loudness_change_lu": -0.1145,
     "lsd_16_24_db": null,
-    "real_time_factor": 47.2504,
-    "true_peak_dbtp": -0.37
+    "real_time_factor": 46.1302,
+    "true_peak_dbtp": 0.3535
    }
   }
  },
  "targets": {
+  "minimax-edm2-32khz.flac": {
+   "arms": {
+    "resample only": {
+     "fizz": {
+      "envelope_correlation": 0.7756,
+      "flatness": 0.0002
+     },
+     "loudness": {
+      "integrated_lufs": -14.542,
+      "peak": 1.085426,
+      "true_peak_dbtp": 1.077
+     },
+     "loudness_change_lu": -0.167,
+     "onset_pre_echo_ms": 32.0,
+     "peak_vram_mb": 229.2,
+     "real_time_factor": 46.8304,
+     "report": {
+      "bandwidth_in_hz": 22050.0,
+      "bandwidth_out_hz": 21328.1,
+      "crossover_hz": null,
+      "engine": "resample only",
+      "frames": 3162001,
+      "input_rate": 44100,
+      "loudness_change_lu": 0.0,
+      "notes": [],
+      "output_rate": 48000,
+      "peak_in": 0.999481,
+      "peak_out": 1.085426,
+      "post_hz": null,
+      "pre_hz": null,
+      "provisional_defaults": true,
+      "schema": "plenio.refine/1",
+      "seconds": 1.407,
+      "seed": 0,
+      "settings": {
+       "crossover_hz": 0.0,
+       "post_hz": 0.0,
+       "pre_hz": 0.0,
+       "seed": 0,
+       "sr_gain": 1.0
+      },
+      "sr_gain": null
+     },
+     "seconds": 1.407
+    },
+    "universr[1]": {
+     "fizz": {
+      "envelope_correlation": 0.7756,
+      "flatness": 0.0002
+     },
+     "loudness": {
+      "integrated_lufs": -14.542,
+      "peak": 1.085426,
+      "true_peak_dbtp": 1.077
+     },
+     "loudness_change_lu": -0.167,
+     "onset_pre_echo_ms": 32.0,
+     "peak_vram_mb": 229.2,
+     "real_time_factor": 46.6816,
+     "report": {
+      "bandwidth_in_hz": 22050.0,
+      "bandwidth_out_hz": 21328.1,
+      "crossover_hz": null,
+      "engine": "UniverSR",
+      "frames": 3162001,
+      "input_rate": 44100,
+      "loudness_change_lu": 0.0,
+      "notes": [
+       "input already full band (22050 Hz) - resample only"
+      ],
+      "output_rate": 48000,
+      "peak_in": 0.999481,
+      "peak_out": 1.085426,
+      "post_hz": null,
+      "pre_hz": null,
+      "provisional_defaults": true,
+      "schema": "plenio.refine/1",
+      "seconds": 1.411,
+      "seed": 0,
+      "settings": {
+       "crossover_hz": 0.0,
+       "post_hz": 0.0,
+       "pre_hz": 0.0,
+       "seed": 0,
+       "sr_gain": 1.0
+      },
+      "sr_gain": null
+     },
+     "seconds": 1.411
+    }
+   },
+   "input": ".devdeps\\l1-targets\\minimax-edm2-32khz.flac",
+   "input_bandwidth_hz": 22050.0,
+   "pack": {
+    "resample only": {
+     "skipped": "the arm returned the input unchanged"
+    },
+    "universr[1]": {
+     "skipped": "input already full band (22050 Hz) - resample only"
+    }
+   }
+  },
   "minimax-words-we-never-said.flac": {
    "arms": {
     "resample only": {
@@ -176,7 +385,7 @@
      "loudness_change_lu": -0.062,
      "onset_pre_echo_ms": 32.0,
      "peak_vram_mb": 229.2,
-     "real_time_factor": 47.4723,
+     "real_time_factor": 43.4832,
      "report": {
       "bandwidth_in_hz": 22050.0,
       "bandwidth_out_hz": 21410.2,
@@ -193,7 +402,7 @@
       "pre_hz": null,
       "provisional_defaults": true,
       "schema": "plenio.refine/1",
-      "seconds": 2.391,
+      "seconds": 2.607,
       "seed": 0,
       "settings": {
        "crossover_hz": 0.0,
@@ -204,7 +413,7 @@
       },
       "sr_gain": null
      },
-     "seconds": 2.391
+     "seconds": 2.61
     },
     "universr[1]": {
      "fizz": {
@@ -219,7 +428,7 @@
      "loudness_change_lu": -0.062,
      "onset_pre_echo_ms": 32.0,
      "peak_vram_mb": 229.2,
-     "real_time_factor": 47.2504,
+     "real_time_factor": 45.5788,
      "report": {
       "bandwidth_in_hz": 22050.0,
       "bandwidth_out_hz": 21410.2,
@@ -238,7 +447,7 @@
       "pre_hz": null,
       "provisional_defaults": true,
       "schema": "plenio.refine/1",
-      "seconds": 2.398,
+      "seconds": 2.49,
       "seed": 0,
       "settings": {
        "crossover_hz": 0.0,
@@ -249,11 +458,19 @@
       },
       "sr_gain": null
      },
-     "seconds": 2.402
+     "seconds": 2.49
     }
    },
    "input": ".devdeps\\l1-targets\\minimax-words-we-never-said.flac",
-   "input_bandwidth_hz": 22050.0
+   "input_bandwidth_hz": 22050.0,
+   "pack": {
+    "resample only": {
+     "skipped": "the arm returned the input unchanged"
+    },
+    "universr[1]": {
+     "skipped": "input already full band (22050 Hz) - resample only"
+    }
+   }
   }
  }
 }
