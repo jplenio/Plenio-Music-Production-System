@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | Date | 2026-09-27 |
-| Written for | **Phase 11C**: the milestones M1-M7 of the next-release plan (next: M1/D3) |
-| Overall phase | **Phase 11A (next-release design) and Phase 11B (critical implementation, O1-O7) done; M1/D1 (piano roll + chord lane) and M1/D2 (layouts + inspector) done**; 0.2.2 is the released baseline; the Phase 10 owner-machine checks (§8.3) are still open |
+| Written for | **Phase 11C**: the milestones M1-M7 of the next-release plan (next: M2/D4) |
+| Overall phase | **Phase 11A (next-release design), Phase 11B (critical implementation, O1-O7) and M1 (graphical score editor in Review mode, D1-D3) done**; 0.2.2 is the released baseline; the Phase 10 owner-machine checks (§8.3) are still open |
 | Sub-phase | - (hard stop after Phase 11B) |
-| Commits | Phase 11A `c5b8af3`; Phase 11B `9588977` (O1) · `a035c2f` (O2) · `0139957` (O3) · `a041315` (O4) · `c2f4668` (O5) · `299964d` (O6) · `6578313` (O7) · `7b0eb39` (help pages) · `f8dfa3d` (docs); M1/D1 `f1f968a` (+ docs `e47da84`); M1/D2 `d7621a2` · this checkpoint. **All local, not pushed** (owner instruction for Phase 11B; kept for Phase 11C so far). |
+| Commits | Phase 11A `c5b8af3`; Phase 11B `9588977` (O1) · `a035c2f` (O2) · `0139957` (O3) · `a041315` (O4) · `c2f4668` (O5) · `299964d` (O6) · `6578313` (O7) · `7b0eb39` (help pages) · `f8dfa3d` (docs); M1/D1 `f1f968a` (+ docs `e47da84`); M1/D2 `d7621a2` (+ docs `c3048e8`); M1/D3 `e5354bd` (+ docs this checkpoint). **All local, not pushed** (owner instruction for Phase 11B; kept for Phase 11C so far). |
 | Prompt set | `D:\Daten2\Deepseek\ComfyUI-MiniMax\Plenio_Music_Production_System_Refactor_Prompts_Next_Release\` on the owner's machine: `13_PHASE_11A`, `14_PHASE_11B`, `15_PHASE_11C` |
 
 **Continuing implementer (DeepSeek 4.1 Flash): start with [deepseek-handoff.md](deepseek-handoff.md).**
@@ -35,7 +35,7 @@ Detail, files and "done when" criteria: [next-release-plan.md §16.2](next-relea
 
 | Order | Milestone | Tasks | Effort |
 |---|---|---|---|
-| 1 | **M1** graphical score editor in Review mode | ~~D1 piano roll + chord lane~~ (**done**, `f1f968a`) → ~~D2 layouts + inspector~~ (**done**, `d7621a2`) → D3 MIDI UI (+ chord recognition for foreign MIDI) | 2 h left |
+| 1 | **M1** graphical score editor in Review mode | ~~D1 piano roll + chord lane~~ (**done**, `f1f968a`) → ~~D2 layouts + inspector~~ (**done**, `d7621a2`) → ~~D3 MIDI UI + chord recognition~~ (**done**, `e5354bd`) | **complete** |
 | 2 | **M2** YuE2 · DAW template | D4 *new score from brief* + template 5 → D5 Guide track | 4 h |
 | 3 | **M3** Song Brief and manual-lyrics UX | D6 ghost text / template actions / frontend `custom` migration → D7 *Use my own lyrics* | 4 h |
 | 4 | **M4** EQ UX | D8 | 3.5 h |
@@ -52,22 +52,24 @@ Rules that bind every milestone: use the canonical engine (`canonical`/`ops`) fo
 
 **M1/D2 - layouts and inspector** (`d7621a2`): layouts *Review* (piano roll, notation, inspector, navigator with *Lyrics fit* when the song has lyrics; ABC text under *ABC text (advanced)*) and *Text* (ABC text + notation); the node property `plenio_editor_layout` (`review`, `text`; `daw` opens *review* until M2) chooses the layout a sheet opens in, else the viewer's last (editor prefs, which also read the 0.2.x values). `Inspector.vue` with pure `frontend/src/sheet-editor/score/inspector.ts`: note fields (voice, pitch `C#5`/MIDI, start bar + units, length units/note value with *over the next note*, chord at the note, → rest, close gap), chord fields (name, start, remove) and bar fields (+ before, + after, duplicate, delete, meter of empty bars, key from the bar, remove the change) - each one canonical operation. Transport metronome (`playback.schedule` clicks, player sound). Backend: `duplicate_measures` copies a section only when the block holds all of it (the browser check found a second "verse" after duplicating bar 1). Tests: `frontend/tests/inspector.test.ts` (15), prefs migration, `test_duplicating_part_of_a_section_extends_it`; checked by hand in the real frontend (ComfyUI 0.37.0): both layouts incl. the node property, pitch/length from the inspector, duplicate, key change + removal (inline `[K:G]` in both voices, pitches kept), insert bar + 3/4 meter (own group with `M:` lines). The navigator keeps the Phase 5 section operations (F1). User guide updated.
 
+**M1/D3 - MIDI export and import UI** (`e5354bd`): the Score tab's view row carries *Export MIDI* (downloads the score and the Guide notes as a type-1 file named after the title document; off while the text is invalid, like Apply) and *Import MIDI…*; the import dialog (`MidiDialog.vue` + the pure `midiImport.ts`: role choices, explicit mapping, grid from the score's own unit, base64) shows the file's tracks with a role each (Vocal, Instrument, Chords, Guide, do not import), the grid, *read chords from the notes* and the import report **before** anything is replaced; *Insert* replaces the text as one undo step (`useScoreSession.replaceText`, which takes the imported view so there is no second round trip) and hands the Guide notes to the sheet. Backend: `midi.import_midi(..., chords_from_notes=)` and `TrackInfo` (index, name, notes, role) on `MidiImport`; the import route returns `tracks` and takes `chords`; the new pure `plenio/core/score/chords.py` reads chord symbols from a Chords track's notes by template matching (key-aware spelling, slash bass for a non-root bass, repeated harmony merged, what fits nothing counted; written `plenio:chord` events always win). Tests: `tests/unit/test_score_chords.py` (9), `test_score_midi.py` (+3), host `test_song_path.py::test_midi_import_lists_tracks_maps_roles_and_reads_chords` (+ the extended route test), `frontend/tests/midiDialog.test.ts` (11) and a `replaceText` session test. **Not run:** a browser check of the dialog (see §5).
+
 ## 3. Files and components (Phase 11B)
 
-- **New core:** `plenio/core/score/canonical.py`, `ops.py`, `midi.py`; `plenio/core/audio/refine.py`, `stems.py`.
+- **New core:** `plenio/core/score/canonical.py`, `ops.py`, `midi.py`, `chords.py` (M1/D3); `plenio/core/audio/refine.py`, `stems.py`.
 - **Changed core:** `plenio/core/score/operations.py` (dispatch, `model_view`, `editor_view`), `plenio/core/brief.py`, `plenio/core/sheet/evaluate.py`, `plenio/core/engines/yue2.py`, `plenio/core/models.py` (audio model folders).
 - **ComfyUI layer:** `plenio/comfy/audio_models.py` (new), `nodes/audio_model.py`, `nodes/refine.py`, `nodes/stems.py` (new), `nodes/__init__.py`, `types.py`, `host.py` (folders, `model_files`), `routes.py` (MIDI), `nodes/brief.py`, `nodes/cover_brief.py` (notes in the summary).
-- **Frontend:** `src/shared/scoreView.ts`, `src/sheet-editor/score/useScoreSession.ts`, `ScoreTab.vue`, `SheetDialog.vue`, `dialog.css`, `src/api/client.ts`; built output `web/js/`.
-- **Tests:** unit `test_score_canonical.py`, `test_score_ops.py`, `test_score_view.py`, `test_score_midi.py`, `test_precedence.py`, `test_refine.py`, `test_stems.py`; `tests/support/score_strategies.py` (on the pytest path); host `test_refine_node.py`, `test_stems_node.py`, additions to `test_song_path.py`, `conftest.py` (an unreadable model file per audio folder), `plenio_test_nodes/fakes.py`, `test_audit_regressions.py`; frontend `tests/scoreEditor.test.ts`, `tests/fixtures/tricky-score.json` (regenerated from `editor_view`).
+- **Frontend:** `src/shared/scoreView.ts`, `src/sheet-editor/score/useScoreSession.ts` (also `replaceText`, M1/D3), `ScoreTab.vue`, `MidiDialog.vue` + `midiImport.ts` (M1/D3), `SheetDialog.vue`, `dialog.css`, `src/api/client.ts`; built output `web/js/`.
+- **Tests:** unit `test_score_canonical.py`, `test_score_ops.py`, `test_score_view.py`, `test_score_midi.py`, `test_score_chords.py` (M1/D3), `test_precedence.py`, `test_refine.py`, `test_stems.py`; `tests/support/score_strategies.py` (on the pytest path); host `test_refine_node.py`, `test_stems_node.py`, additions to `test_song_path.py`, `conftest.py` (an unreadable model file per audio folder), `plenio_test_nodes/fakes.py`, `test_audit_regressions.py`; frontend `tests/scoreEditor.test.ts`, `tests/fixtures/tricky-score.json` (regenerated from `editor_view`).
 - **Generated:** `tools/data/node_types.json`. Templates and blueprints are unchanged (the new nodes are not wired yet).
 
 ## 4. Tests run at this checkpoint (owner's machine, Windows 11, Python 3.12.9 of ComfyUI 0.37.0, CPU)
 
 | Suite | Command (bash, repository root; `PY=/d/Daten2/ComfyUI/.venv/Scripts/python.exe`) | Result |
 |---|---|---|
-| unit + workflow + contract | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/unit tests/workflows tests/contract` | 848 passed, 4 skipped |
-| host (real server, fakes) | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/host` | 101 passed, 8 skipped (smoke and legacy) |
-| frontend | `cd frontend && npm run check` | vue-tsc clean, 67 Vitest passed, build ok (after M1/D1: 88; after M1/D2: 103 passed) |
+| unit + workflow + contract | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/unit tests/workflows tests/contract` | 862 passed, 4 skipped (after M1/D3) |
+| host (real server, fakes) | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/host` | 102 passed, 8 skipped (after M1/D3) |
+| frontend | `cd frontend && npm run check` | vue-tsc clean, 115 Vitest passed, build ok (after M1/D3; 88 after D1, 103 after D2) |
 | lint | `PYTHONPATH=.devdeps $PY -m ruff check . && ... ruff format --check .` | clean |
 | types | `PYTHONPATH=.devdeps $PY -m mypy --python-version 3.12` | only `type-arg` errors for bare `np.ndarray` (local numpy 2.2 stubs), the same class as the 23 pre-existing ones; nothing else |
 | workflows | `$PY tools/workflow_validation.py` | all ok |
@@ -75,14 +77,14 @@ Rules that bind every milestone: use the canonical engine (`canonical`/`ops`) fo
 
 ## 5. Limitations and local validation still required
 
-- **Not run:** `tools/browser_check.mjs` and frontend 1.53.6. The score editor (piano roll, gate banner, disabled Apply, revert; layouts, inspector, bar/key/meter edits) was checked by hand in the real frontend of ComfyUI 0.37.0 during M1/D1 and D2. The metronome's sound was not listened to (its schedule is tested).
+- **Not run:** `tools/browser_check.mjs` and frontend 1.53.6. The score editor (piano roll, gate banner, disabled Apply, revert; layouts, inspector, bar/key/meter edits) was checked by hand in the real frontend of ComfyUI 0.37.0 during M1/D1 and D2. **M1/D3:** the MIDI dialog is covered by Vitest with a mounted component and a fake fetcher (tracks, role change → new request, grid, chord switch, report, Insert, a refused file) and by the host route test; a browser check of the dialog itself (real file picker, real download) was **not** run - no browser automation is available in this session. The owner's L4 check covers it. The metronome's sound was not listened to (its schedule is tested).
 - **No real audio models:** Refine and Stems ran only with fakes (pointwise SR engine, fixed-fraction separator). The refine defaults are **provisional** until L1; the < 0.1 LU criterion is reported, not enforced.
 - **mypy in CI:** the new audio modules use bare `np.ndarray` like the existing ones; CI (older numpy stubs) is expected to accept them, but CI did not run (nothing pushed).
 - **Owner checklist (plan §15):** L1 SR study (needs M5), L2 separation (needs M6), L3 full runs incl. the DAW template (needs M2), L4 frontend 1.53.6 (ghost text, piano roll, mixer and EQ widgets, the score gate) - plus the still open Phase 10 conditions (§8.3).
 
 ## 6. Exact next task
 
-**M1 / D3 - MIDI UI** (plan §16.2): in the Score tab, *Export MIDI* (`exportMidi` from `frontend/src/api/client.ts`: base64 → download with the returned file name; title from the sheet's title document when there is one) and *Import MIDI* (file picker → `importMidi` with the file as base64; a dialog that lists the file's tracks with a role per track - vocal, ins, chords, guide, none - and the grid; the import report before the text is replaced; the imported ABC replaces the working text as one undo step, never silently). Optional: template-matching chord recognition for foreign MIDI as a pure core function `plenio/core/score/chords.py` (best effort, labelled in the report), used when a chords-role track has notes but no `plenio:chord` events. Write `midiDialog.test.ts` first; the routes and the SMF core exist since O4.
+**M2 / D4 - Score Tools *new score from brief* and template 5 · YuE2 · DAW** (plan §16.2, §10.2-10.3): `plenio/core/score/skeleton.py` builds an all-rest score from the brief (length and tempo -> measures; meter and key parsed from the brief's text fields with the documented defaults 4/4, C, 100 BPM, reported); Score Tools' `score` input becomes optional for this operation only; template 5 in `tools/build_graphs.py` with the groups of §10.2, the DAW layout (node property `plenio_editor_layout = "daw"`), App mode and a thumbnail. Then D5 (the Guide track in the Song Sheet node's properties with playback and MIDI export/import). Unit tests of the skeleton, host `test_daw_path.py`, workflow tests, `docs/user/paths/yue2-daw.md`.
 
 ---
 

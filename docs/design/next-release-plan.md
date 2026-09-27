@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Design Phase 11A (2026-09-27); **Phase 11B implemented** (OPUS-CRITICAL O1-O7, §17); Phase 11C (milestones M1-M7 in §16.2): M1/D1 and M1/D2 done, the rest not started. |
+| Status | Design Phase 11A (2026-09-27); **Phase 11B implemented** (OPUS-CRITICAL O1-O7, §17); Phase 11C (milestones M1-M7 in §16.2): **M1 done** (D1, D2, D3), the rest not started. |
 | Date | 2026-09-27 |
 | Baseline | Plenio 0.2.2 (`main` at `eaaa174`), ComfyUI 0.37.0, frontend 1.52.7 (cloud) / 1.53.6 (owner) |
 | Scope | audio refinement / super-resolution, EQ UX, optional stems before mastering, authoritative manual lyrics, Song Brief template precedence, a shared canonical score engine with a YuE2 · DAW workflow and graphical Review editing |
@@ -665,7 +665,8 @@ L1 → L4 of §15; then the Refine defaults are fixed from L1, and the release i
 | O7 stem interfaces | **done** (`6578313`, help pages `7b0eb39`); separation engine → D11, effects/widget/blueprint → D12 |
 | M1 / D1 piano roll + chord lane | **done** (2026-09-27, `f1f968a`): `frontend/src/sheet-editor/score/pianoRoll.ts` (pure geometry, hit test, gesture/key → one canonical operation, selection mapping) and `PianoRoll.vue` in the Score tab; checked by Vitest and in a real ComfyUI 0.37.0 frontend |
 | M1 / D2 layouts + inspector | **done** (`d7621a2`): Review/Text layouts (node property `plenio_editor_layout`, else the viewer's last), `Inspector.vue` + pure `inspector.ts` (note, chord and bar fields → one canonical operation each: voice, pitch, start, length, chord, rest/close gap, insert/duplicate/delete bars, meter, key), metronome; `duplicate_measures` now copies a section only when the block holds all of it |
-| M1 / D3; M2 … M7 | not started |
+| M1 / D3 MIDI UI | **done** (2026-09-27, `e5354bd`): the Score tab exports the score (download, file name from the title, gate-aware) and imports a file through a dialog that shows the file's tracks with a role each (Vocal / Instrument / Chords / Guide / do not import), the grid, *read chords from the notes* and the import report **before** anything is replaced; *Insert* replaces the text as one undo step (`useScoreSession.replaceText` carries the imported view). Backend: the import route returns the tracks (`TrackInfo`), takes an explicit mapping and reads chord symbols from a Chords track's notes with the new pure `plenio/core/score/chords.py` (template matching, key-aware spelling, slash bass, merging; what fits nothing is counted, not guessed; written `plenio:chord` events win). Tests: `test_score_chords.py` (9), additions to `test_score_midi.py`, host `test_song_path.py` (route lists tracks/maps/reads chords), Vitest `midiDialog.test.ts` (11) and a `replaceText` session test. **M1 is complete.** |
+| M2 … M7 | not started |
 | L1 … L4 | not started |
 
 All Phase 11B commits are **local only** (not pushed; owner instruction for this phase).
