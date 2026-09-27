@@ -2,6 +2,35 @@
 
 All notable changes are listed here. Versions follow semantic versioning; published Registry versions are immutable.
 
+## 0.3.0 - 2026-09-27
+
+### Added
+
+- **5 · YuE2 · DAW** - compose the score yourself: draw notes in the **piano roll**, set chord symbols in the chord lane, split the score into sections, and let YuE2 render exactly what you approved. *Score Tools* builds an empty score from the brief (right length, meter and key), the DAW sheet carries a **track panel** (Vocal, Instrument, Chords and a **Guide** track that is played with the score but never sent to YuE2) and both sheets still stop for review.
+- **The score editor grew into an editing tool**: a **piano roll** with draw, move, resize (Review mode: into rests, Alt: overwrite), delete (Delete = rest, Shift+Delete = close the gap) and arrow-key nudges; a **chord lane** with inline names; a **navigator** for sections; a **Bar inspector** (insert/duplicate/delete bars, meter of empty bars, key changes); **Undo/redo** and a commit gate that refuses malformed notation with a reason and offers *Revert to last valid*; and **MIDI export and import** (own SMF reader/writer, tracks with a role each, chord symbols read from a Chords track, lossy steps reported).
+- **Refine (48 kHz)** - an optional stage between the render and the master: measure the input's bandwidth, run a **super-resolution model** (UniverSR, vendored, MIT inference code) on the part the render did not deliver and join it with a complementary crossover; or *resample only* without a model. Every template has the block (bypassed; **on** in *3 · MiniMax · Song*), the report names engine, bandwidth before/after, crossover and loudness change. Experimental until the owner's listening check (L1).
+- **Stems** - an optional block before mastering: **Separate Stems** (BS-RoFormer 4-stem, vendored MIT inference code) splits the song into vocals, drums, bass and other and keeps the **residual** *rest*, so that the **Stem Mixer** with neutral settings returns the song unchanged. The mixer has a strip per stem (fader, mute/solo, compression, reverb and delay sends), draws the last separation as a waveform on which you **drag muted time ranges**, and writes one JSON value (`plenio.stem_mix/1`) that you can also edit under *Advanced*. A send without its bus is refused, never silently ignored. Experimental until the owner's listening check (L2).
+- **Brief template panel**: under the template selector in Song Brief and Cover Brief - the *Template fills:* line, what the template suggests, *Copy template text*, *Use template choices* and *Reset all to template*; and **Use my own lyrics** in the Lyrics tab (manual lyrics are never replaced, and the sheet says `lyrics: yours (manual)`).
+- **EQ panel on the node**: the curve is now the editor - handles (drag for frequency and gain, Shift for fine, wheel for Q, double-click for 0 dB or a new bell, Delete to remove), a band strip with an inline editor, *Edit these bands* for match proposals, the last run's spectrum behind the curve, undo/redo, a gain-range switch (±6/±12/±18 dB) and *bands as text*.
+- Two measurement tools for the owner's local checks: `tools/studies/sr_study.py` (Refine arms, blind A/B pack) and `tools/studies/stem_study.py` (separation speed, VRAM, the mixer contracts and the listening material).
+- Two new model files are catalogued for the new stages: `audio_sr/pytorch_model.bin` (UniverSR, CC BY 4.0 weights) and `audio_separation/model_bs_roformer_ep_17_sdr_9.6568.ckpt` (BS-RoFormer, MIT trainer); ComfyUI's missing-model dialog offers them when a template uses the block.
+
+### Changed
+
+- The templates gained the new optional blocks: **REFINE (48 kHz)** in all five (active in MiniMax, bypassed elsewhere) and **STEMS (optional)** in all five (bypassed); both are collapsed, and *4 · Enhance & Master* now reads *Load Audio → Stems (optional) → Refine (optional) → EQ → Loudness & Dynamics → Export*.
+- Plenio now has 18 nodes (was 14): *Load Audio Model*, *Refine (48 kHz)*, *Separate Stems* and *Stem Mixer* (all four marked experimental).
+- The Song Sheet review stop now wins over a document error: a run that would stop for approval stops instead of failing (the DAW template's first run needs exactly that).
+- The ABC text stays the only stored score; the piano roll, the chord lane and the inspector commit canonical operations, and no graphical edit can write text the upstream parser refuses.
+
+### Fixed
+
+- `duplicate_measures` copies a section only when the block holds all of it; duplicating part of it extends the section instead of creating a second one with the same name (found by a browser check).
+
+### Notes on this release
+
+- The Refine defaults and the separation's quality are **not** decided here: both stages ship as *experimental*, measured on the owner's machine (L1/L2), with the listening verdicts still open. The measurement reports are in `docs/test-reports/data/`.
+- On the two real takes measured so far, Refine's model engine reports *input already full band* and only resamples - see `docs/design/CURRENT_STATUS.md` §5.
+
 ## 0.2.2 - 2026-09-26
 
 ### Added

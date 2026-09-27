@@ -15,6 +15,26 @@ Where each kind of extension goes, which files it touches and which check catche
 
 Nothing else changes: Brief, Compose, Parse, Song Sheet and the editor adapt through `rules_for(engine_id)` and the `PLENIO_ENGINE` wire; the editor shows the style document under the engine's `STYLE_LABEL`. Known coupling: the cover writer (`plenio/core/writing.py`) uses YuE2's melody-register rule; a second cover engine moves that rule into its `writing_rules()`.
 
+## New audio model (Refine, Stems)
+
+The audio stages after rendering are one reusable shape: a **kind** (what a model is for), a **folder**
+(`models/audio_sr`, `models/audio_separation`), an **adapter** that knows the file, and a stage that
+runs it. Adding a second engine means adding an adapter, not a node.
+
+| Step | Files | Guard |
+|---|---|---|
+| Adapter: `matches(file name)`, `load(path) -> engine` with the stage's contract (`input_rate`, `condition_hz`, `chunk_seconds`, `upsample` for Refine; `separate(samples, rate)` for Stems) | `plenio/comfy/<engine>.py`; register in `audio_models._ensure_registered()` (`plenio/comfy/audio_models.py`: `Adapter`, `register`, `load`, `require`) | unit test with a **fake model** for the contract, and that importing the adapter does not import torch (the registry is imported by the extension) |
+| Model folder | `AUDIO_MODEL_FOLDERS` in `plenio/core/models.py`; registered with ComfyUI by `host.register_model_folders()` (a newly registered folder lists *no* files unless the extensions are set too) | host tests (`tests/host/conftest.py` writes an unreadable file per audio folder) |
+| Vendored inference code (only when the upstream licence allows it) | `plenio/third_party/<name>/` with the upstream `LICENSE`, a `NOTICE.md` (pinned commit, per-file SHA-256, the deliberate changes), absolute imports made relative, `_compat.py` stand-ins for missing optional packages installed **only when the host lacks them** | `plenio/third_party` is excluded from ruff/mypy; the stand-ins and their honouring are unit-tested |
+| Weights | one entry in `resources/models.toml` (`folder`, pinned URL, size, licence, role, `templates`/`optional_templates`); `.bin`, `.ckpt` and GitHub release URLs are accepted next to `.safetensors` | `tests/unit/test_models_catalogue.py`, `test_the_model_guide_lists_every_catalogued_file`, System Check readiness |
+| Stage node and wiring | `plenio/comfy/nodes/<stage>.py` (the node keeps `is_experimental` until the owner's listening check accepts it), blueprint + group in `tools/build_graphs.py`, report into Export | `tools/workflow_validation.py`, `tests/workflows/test_graphs.py`, host tests with a fake model |
+| Measurement | `tools/studies/<stage>_study.py` for the real-weight run (numbers, JSON report, listening material) | the report is committed; the listening verdict is the owner's |
+| Docs | `docs/user/concepts/<stage>.md`, `docs/user/models.md`, `web/docs/<NodeId>.md` | `tests/unit/test_help_pages.py`, the model-guide test |
+
+**Never** claim quality that was not measured: the adapters report what they did (bandwidth before/after,
+residual share, gain reduction) and the studies record the rest; `PROVISIONAL`/`is_experimental` markers
+come off only with the owner's verdict.
+
 ## New template
 
 1. A function in `tools/build_graphs.py` that returns the graph and its App configuration (`App`: widget list and output nodes); follow the anatomy of the existing templates (numbered groups, one *About this template* note, collapsed model block, *(optional)* titles for bypassed blocks). Song Sheets come from `song_sheet()` (review *as the brief says*, the title as the editor button's label) and belong into the app, the brief's *mode* first (`tests/workflows/test_graphs.py::test_app_configurations`).
@@ -27,7 +47,20 @@ One entry in `resources/models.toml` (file, folder, pinned URL, size, licence, r
 
 ## New score operation
 
-`plenio/core/score/edit.py` (the operation, with its invariants and refusals) and one entry in `OPERATIONS` (`plenio/core/score/operations.py`); the `/plenio/score/transform` route and the editor's session pick it up; a button or shortcut in `frontend/src/sheet-editor/score/ScorePalette.vue` or `ScoreTab.vue`. Whole-score operations that the graph should offer also become a DynamicCombo option of Score Tools (`plenio/comfy/nodes/score_tools.py`, covered by `tests/host/test_score_tools_node.py`). Tests: `tests/unit/test_score_editor.py` (untouched bars byte-identical, refusals) and the operation fuzzing described in the Phase 9 audit.
+Two paths exist and the difference matters:
+
+- **Canonical operations (use these for anything graphical).** `plenio/core/score/ops.py` edits the *model* (`canonical.Score`) and prints a new text; `transform(text, op)` is the commit path. Ids are stable element ids (`vocal:<onset>`, `ins:<onset>`, `chord:<onset>`, bars 1-based) and the names are disjoint from the Phase 5 ones. The text is re-parsed and validated after every edit (S6), and unchanged measures stay byte-identical (S2/S5). Guards: `tests/unit/test_score_ops.py` (examples + a hypothesis state machine) and `tests/unit/test_score_canonical.py`.
+- **The Phase 5 operations** (`plenio/core/score/edit.py`, element ids) are the older path and are kept unchanged until F1 decides their fate (owner decision); their tests pin exact texts and ids.
+
+A new canonical operation needs: the operation in `ops.py`, its entry in the dispatch table, the view
+contract if it shows up in the editor (`plenio/core/score/operations.py` builds `view.model` with
+tracks/segments → element ids), the gesture in the frontend (`pianoRoll.ts` for the roll,
+`inspector.ts` for the fields, both committing **one** operation per gesture through
+`useScoreSession.ts`), and tests on both sides - `frontend/tests/pianoRoll.test.ts`,
+`inspector.test.ts` and the session tests. The editor's commit gate refuses a malformed text with a
+reason and offers *Revert to last valid*; do not let any gesture write text the upstream parser refuses.
+Whole-score operations the graph should offer also become a DynamicCombo option of Score Tools
+(`plenio/comfy/nodes/score_tools.py`), e.g. *new score from brief* (`plenio/core/score/skeleton.py`).
 
 ## New ASR engine
 
