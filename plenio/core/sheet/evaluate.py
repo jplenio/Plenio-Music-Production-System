@@ -147,6 +147,21 @@ class SheetEvaluation:
         )
 
 
+def _manual_lyrics_note(resolution: Resolution, kinds: tuple[str, ...]) -> list[Finding]:
+    """Manual lyrics with drafted title/style: the writer could not read the user's lyrics (plan §7).
+
+    The writer runs before the sheet (no graph cycle), so what it drafted follows the brief only.
+    """
+    lyrics = resolution.docs.get("lyrics") if "lyrics" in kinds else None
+    if lyrics is None or lyrics.status is not DocStatus.MANUAL:
+        return []
+    drafted = [k for k in ("title", "style") if k in kinds and resolution.docs[k].status is DocStatus.AUTO]
+    if not drafted:
+        return []
+    subject = "Title and style were" if len(drafted) == 2 else f"The {drafted[0]} was"
+    return [info(f"{subject} drafted from the brief, not from your lyrics.", "lyrics")]
+
+
 def evaluate_sheet(
     state: SheetState,
     upstream: Mapping[str, str | None],
@@ -202,6 +217,7 @@ def evaluate_sheet(
     for kind in kinds:
         if resolution.docs[kind].status is DocStatus.MISSING and kind in ("style", "lyrics"):
             findings.append(info(f"No {kind} is connected or entered.", kind))
+    findings.extend(_manual_lyrics_note(resolution, kinds))
     findings.extend(extra_findings)
     return SheetEvaluation(
         state,

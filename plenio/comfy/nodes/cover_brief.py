@@ -34,7 +34,8 @@ def _summary(brief: Any) -> str:
         "new": "New lyrics",
         "instrumental": "Instrumental" + (" · accompaniment only" if brief.melody == "accompaniment" else ""),
     }[brief.vocals]
-    lines = [f"**Cover: {mode}**, harmony {brief.harmony}", "", mode_line(brief), "", brief.to_text()]
+    lines = [f"**Note:** {note}\n" for note in brief.notes]
+    lines += [f"**Cover: {mode}**, harmony {brief.harmony}", "", mode_line(brief), "", brief.to_text()]
     lines += [f"\n- warning: {w}" for w in brief.warnings()]
     return "\n".join(lines)
 
@@ -198,7 +199,7 @@ class PlenioCoverBrief(io.ComfyNode):
             "title": title,
         }
         brief = build_cover_brief(values, chosen, mode=mode, variation=draw_variation(mode))
-        status = "warning" if brief.warnings() else "ok"
+        status = "warning" if brief.warnings() or brief.notes else "ok"
         return io.NodeOutput(
             brief,
             brief.to_text(),

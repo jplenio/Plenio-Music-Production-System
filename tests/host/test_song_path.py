@@ -191,6 +191,30 @@ def test_all_manual_documents_skip_the_writer(server: ComfyServer, log: Log) -> 
     assert sheet_payload(entry, "6")["docs"]["title"]["status"] == "manual"
 
 
+def test_manual_lyrics_survive_every_new_draft(server: ComfyServer, log: Log) -> None:
+    """Plan §7: another draft, a changed brief and a new song every run never replace manual lyrics."""
+    mine = "[Verse]\nEvery word is mine\n\n[Chorus]\nMine alone"
+    state = sheet_state({"lyrics": {"state": "manual", "text": mine}})
+    name = label()
+    entry = server.run(song_prompt(label=name, text_state=state))
+    payload = sheet_payload(entry, "6")
+    assert payload["docs"]["lyrics"]["status"] == "manual"
+    assert any(f["message"].startswith("Title and style were drafted") for f in payload["findings"])
+    server.run(song_prompt(label=name, text_state=state, variant="b"))  # the writer drafts other lyrics
+    server.run(song_prompt(label=name + " (new brief)", text_state=state))  # a changed brief
+    batch = song_prompt(
+        label=name,
+        text_state=state,
+        mode="new song every run",
+        text_review="as the brief says",
+        score_review="as the brief says",
+    )
+    server.run(batch)
+    server.run(batch)
+    renders = events(log, "render")
+    assert len(renders) == 5 and all(r["lyrics"] == mine for r in renders)
+
+
 def test_edited_document_survives_until_its_draft_changes(server: ComfyServer, log: Log) -> None:
     name = label()
     first = server.run(song_prompt(label=name))

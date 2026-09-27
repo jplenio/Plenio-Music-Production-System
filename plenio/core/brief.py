@@ -4,6 +4,17 @@ A brief is the structured intent of a song. It is model independent: engines
 and the writing prompt interpret it. Templates are Markdown files with a small
 front matter block; a template fills only the brief fields the user left empty
 (one rule, the same in the editor and headless).
+
+Precedence (next-release plan §8), stateless and deterministic:
+
+- text fields: **typed value** if non-empty, else the **template value** if the template
+  defines it, else **empty** (the writer decides). A template never writes into a widget, so
+  changing it cannot destroy an edit, and clearing a field returns it to the template value.
+- choice fields (length, vocals, melody): always the widget value; the template's differing
+  choice is only a hint (``template_choice_hints``).
+- the predecessor toolkit's placeholder ``custom`` ("let the model decide", arriving through
+  *Reuse parameters* of old jobs) counts as empty and is reported in ``notes``; the writer never
+  sees the word.
 """
 
 from __future__ import annotations
@@ -22,6 +33,8 @@ from .hashing import sha256_json
 log = logging.getLogger("plenio")
 
 BRIEF_SCHEMA = "plenio.brief/1"
+LEGACY_PLACEHOLDER = "custom"
+LEGACY_NOTE = "'custom' is the predecessor toolkit's placeholder; treated as empty"
 LENGTHS: dict[str, float] = {
     "very short (about 1:00)": 60.0,
     "short (about 1:30)": 90.0,
@@ -130,6 +143,8 @@ class SongBrief:
     lead_instrument: str = ""
     template: str = ""
     from_template: tuple[str, ...] = field(default=(), compare=False)
+    notes: tuple[str, ...] = field(default=(), compare=False)
+    """Presentation: what the brief normalised (e.g. the legacy ``custom`` placeholder)."""
     kind: str = "song"
     mode: str = "careful"
     variation: int | None = None
@@ -151,6 +166,7 @@ class SongBrief:
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
         data["from_template"] = list(self.from_template)
+        data["notes"] = list(self.notes)
         data["schema"] = BRIEF_SCHEMA
         data["target_seconds"] = self.target_seconds
         return data
@@ -159,6 +175,7 @@ class SongBrief:
     def fingerprint(self) -> str:
         data = self.to_dict()
         data.pop("from_template")
+        data.pop("notes")
         return sha256_json(data)
 
     def to_text(self) -> str:
@@ -232,6 +249,7 @@ class CoverBrief:
     title: str = ""
     template: str = ""
     from_template: tuple[str, ...] = field(default=(), compare=False)
+    notes: tuple[str, ...] = field(default=(), compare=False)
     kind: str = "cover"
     mode: str = "careful"
     variation: int | None = None
@@ -275,6 +293,7 @@ class CoverBrief:
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
         data["from_template"] = list(self.from_template)
+        data["notes"] = list(self.notes)
         data["schema"] = BRIEF_SCHEMA
         return data
 
@@ -282,6 +301,7 @@ class CoverBrief:
     def fingerprint(self) -> str:
         data = self.to_dict()
         data.pop("from_template")
+        data.pop("notes")
         return sha256_json(data)
 
     def to_text(self) -> str:
@@ -330,6 +350,59 @@ class CoverBrief:
         return "\n".join(lines)
 
 
+def typed_value(values: Mapping[str, Any], name: str) -> tuple[str, bool]:
+    """The user's value of a text field and whether it was the legacy ``custom`` placeholder."""
+    value = str(values.get(name, "") or "").strip()
+    if value.lower() == LEGACY_PLACEHOLDER:
+        return "", True
+    return value, False
+
+
+def resolve_text_fields(
+    values: Mapping[str, Any],
+    template: Template | None,
+    names: tuple[str, ...],
+    *,
+    no_template: tuple[str, ...] = (),
+) -> tuple[dict[str, str], list[str], list[str]]:
+    """``(effective values, fields taken from the template, notes)`` by the precedence rule."""
+    merged: dict[str, str] = {}
+    from_template: list[str] = []
+    legacy: list[str] = []
+    for name in names:
+        value, was_placeholder = typed_value(values, name)
+        if was_placeholder:
+            legacy.append(name)
+        if not value and template is not None and template.fields.get(name) and name not in no_template:
+            value = template.fields[name]
+            from_template.append(name)
+        merged[name] = value
+    notes = [f"{', '.join(legacy)}: {LEGACY_NOTE}"] if legacy else []
+    return merged, from_template, notes
+
+
+def field_sources(values: Mapping[str, Any], template: Template | None) -> dict[str, str]:
+    """Where the effective value of every Song Brief text field comes from: ``typed``, ``template``
+    or ``empty`` (the editor shows template values as ghost text in empty fields)."""
+    merged, from_template, _notes = resolve_text_fields(values, template, TEXT_FIELDS)
+    return {
+        name: "template" if name in from_template else "typed" if merged[name] else "empty"
+        for name in TEXT_FIELDS
+    }
+
+
+def template_choice_hints(values: Mapping[str, Any], template: Template | None) -> dict[str, str]:
+    """Choice fields whose template value differs from the widget value (``use template choices``)."""
+    if template is None:
+        return {}
+    hints = {}
+    for name in ("length", "vocals", "melody"):
+        suggested = template.fields.get(name, "")
+        if suggested and str(values.get(name, "") or "").strip() != suggested:
+            hints[name] = suggested
+    return hints
+
+
 def build_cover_brief(
     values: Mapping[str, Any],
     template: Template | None = None,
@@ -338,14 +411,12 @@ def build_cover_brief(
     variation: int | None = None,
 ) -> CoverBrief:
     """Create a cover brief; the template fills only empty style fields. Invalid choices raise."""
-    merged: dict[str, str] = {}
-    from_template: list[str] = []
-    for name in ("description", "genre", "mood", "language", "voice", "theme", "lead_instrument"):
-        value = str(values.get(name, "") or "").strip()
-        if not value and template is not None and template.fields.get(name) and name != "language":
-            value = template.fields[name]
-            from_template.append(name)
-        merged[name] = value
+    merged, from_template, notes = resolve_text_fields(
+        values,
+        template,
+        ("description", "genre", "mood", "language", "voice", "theme", "lead_instrument"),
+        no_template=("language",),
+    )
     vocals = COVER_VOCALS.get(str(values.get("vocals", "")), str(values.get("vocals", "") or "instrumental"))
     if vocals not in COVER_VOCALS.values():
         raise PlenioUserError(
@@ -380,6 +451,7 @@ def build_cover_brief(
         title=str(values.get("title", "") or "").strip(),
         template=template.id if template else "",
         from_template=tuple(from_template),
+        notes=tuple(notes),
         mode=resolve_mode(mode, COVER_MODES),
         variation=variation if resolve_mode(mode, COVER_MODES) == "batch" else None,
     )
@@ -417,14 +489,7 @@ def build_song_brief(
     variation: int | None = None,
 ) -> SongBrief:
     """Create a brief; fields left empty take the template's value. Invalid choices raise."""
-    merged: dict[str, str] = {}
-    from_template: list[str] = []
-    for name in TEMPLATE_FIELDS:
-        value = str(values.get(name, "") or "").strip()
-        if not value and template is not None and template.fields.get(name):
-            value = template.fields[name]
-            from_template.append(name)
-        merged[name] = value
+    merged, from_template, notes = resolve_text_fields(values, template, TEMPLATE_FIELDS)
     length, _note = resolve_length(merged["length"])
     vocals = merged["vocals"] or "sung"
     if vocals not in VOCALS:
@@ -441,6 +506,7 @@ def build_song_brief(
         melody=melody,
         template=template.id if template else "",
         from_template=tuple(from_template),
+        notes=tuple(notes),
         mode=resolve_mode(mode),
         variation=variation if resolve_mode(mode) == "batch" else None,
     )

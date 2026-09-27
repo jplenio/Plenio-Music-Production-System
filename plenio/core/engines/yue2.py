@@ -301,10 +301,19 @@ def check_score(
     analysis = score_rules.analyze(score)
     if not analysis.ok:
         return [error(d.message, f"score bar {d.bar}" if d.bar else "score") for d in analysis.errors], None
+    vocal_notes = analysis.voices["Vocal"]["notes"]
+    if not vocal_notes and not analysis.voices["Ins"]["notes"]:
+        # I12 (next-release plan §9.5): a score of rests cannot be rendered (e.g. an unfilled DAW skeleton)
+        return [
+            error(
+                "The score contains only rests; YuE2 cannot render a score without notes. "
+                "Add notes in the score editor, or remove the score to render without a plan.",
+                "score",
+            )
+        ], analysis.duration_s
     findings: list[Finding] = [
         warning(d.message, "score") for d in analysis.diagnostics if d.severity == "warning"
     ]
-    vocal_notes = analysis.voices["Vocal"]["notes"]
     if instrumental and vocal_notes:
         findings.append(
             error(

@@ -194,6 +194,7 @@ class PlenioSongBrief(io.ComfyNode):
             "lead_instrument": vocals.get("lead_instrument", ""),
         }
         brief = build_song_brief(values, chosen, mode=mode, variation=draw_variation(mode))
+        notes = [note for note in (length_note, *brief.notes) if note]
         return io.NodeOutput(
             brief,
             brief.to_text(),
@@ -202,8 +203,8 @@ class PlenioSongBrief(io.ComfyNode):
             ui={
                 "plenio_summary": [
                     {
-                        "status": "warning" if length_note else "ok",
-                        "markdown": (f"**Note:** {length_note}\n\n" if length_note else "") + _summary(brief),
+                        "status": "warning" if notes else "ok",
+                        "markdown": "".join(f"**Note:** {note}\n\n" for note in notes) + _summary(brief),
                     }
                 ]
             },
