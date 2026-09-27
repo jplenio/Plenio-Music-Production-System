@@ -817,23 +817,29 @@ def finish(
     reports: list[tuple[Node, str]],
     group: str,
     export_widgets: dict[str, object] | None = None,
+    cover_y: float = 560,
+    export_size: tuple[float, float] = (380, 440),
 ) -> tuple[Node, Node, Node]:
-    """Master -> Preview + Export (the unmastered take as the original), and the optional Cover Art."""
+    """Master -> Preview + Export (the unmastered take as the original), and the optional Cover Art.
+
+    ``cover_y``/``export_size`` carry the owner's layout choices (2026-09-28): the optional blocks sit
+    under the wired path, and a taller export shows more report slots.
+    """
     master = g.add_subgraph(blueprints["master"], (x, 0), size=(340, 170))
     preview = g.add("PreviewAudio", (x, 230), size=(340, 120), title="Preview (mastered)")
     all_reports = [*reports, (master, "eq_report"), (master, "loudness_report")]
     export = g.add(
         "PlenioExportRelease",
         (x + 400, 0),
-        size=(380, 440),
+        size=export_size,
         autogrow={"reports": len(all_reports)},
         widgets=export_widgets,
     )
     cover = g.add_subgraph(
-        blueprints["cover"], (x, 560), size=(340, 170), mode=4, title="Cover Art (optional)"
+        blueprints["cover"], (x, cover_y), size=(340, 170), mode=4, title="Cover Art (optional)"
     )
     cover_preview = g.add(
-        "PreviewImage", (x + 400, 560), size=(300, 300), mode=4, title="Cover preview (optional)"
+        "PreviewImage", (x + 400, cover_y), size=(300, 300), mode=4, title="Cover preview (optional)"
     )
     g.link(audio[0], audio[1], master, "audio")
     g.link(master, "audio", preview, "audio")
@@ -921,9 +927,9 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     )
     score_sheet = song_sheet(g, (1820, 0), "Song Sheet · Score")
     seed = take_seed(g, (2320, 0))
-    render = g.add_subgraph(bp["yue2_render"], (2320, 150), size=(320, 250))
-    audio, stems_node = stems_stage(g, bp, 2320, audio=(render, "AUDIO"), y=430)
-    audio, refine_node = refine_stage(g, bp, 2320, audio=audio, y=620)
+    render = g.add_subgraph(bp["yue2_render"], (2320, 150), size=(320, 310))
+    audio, stems_node = stems_stage(g, bp, 2320, audio=(render, "AUDIO"), y=665)
+    audio, refine_node = refine_stage(g, bp, 2320, audio=audio, y=815)
     g.link(brief, "brief", write, "brief")
     g.link(model_node, "engine", write, "engine")
     for kind in ("title", "style", "lyrics", "artwork_prompt"):
@@ -965,6 +971,7 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             (refine_node, "report"),
         ],
         group="6 · FINISH",
+        cover_y=650,
     )
     g.group("1 · SONG", [brief])
     g.group("2 · WRITE", [write, draft])
@@ -1020,7 +1027,7 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     )
     excerpt = g.add(
         "TrimAudioDuration",
-        (0, 180),
+        (0, 230),
         size=(360, 110),
         mode=4,
         title="Excerpt (optional)",
@@ -1028,7 +1035,7 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     )
     brief = g.add(
         "PlenioCoverBrief",
-        (0, 400),
+        (0, 480),
         size=(380, 520),
         widgets={
             "mode": "one cover, stop to review",
@@ -1037,17 +1044,17 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             "vocals": "instrumental",
         },
     )
-    model_node = g.add_subgraph(bp["yue2_model"], (0, 1060), size=(380, 140), collapsed=True)
+    model_node = g.add_subgraph(bp["yue2_model"], (0, 1175), size=(380, 140), collapsed=True)
     adapter = g.add(
         "LoraLoader",
-        (0, 1140),
+        (0, 1255),
         size=(380, 130),
         title="Instrumental adapter",
         widgets={"lora_name": LORA, "strength_model": 0.0, "strength_clip": 1.0},
         properties=model(LORA),
     )
     adapter_switch = g.add(
-        "ComfySwitchNode", (420, 1140), size=(260, 90), title="Adapter for instrumental covers"
+        "ComfySwitchNode", (420, 1255), size=(260, 90), title="Adapter for instrumental covers"
     )
     transcribe = g.add_subgraph(bp["transcribe"], (460, 0), size=(340, 160))
     tools = g.add(
@@ -1065,15 +1072,15 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     write = g.add_subgraph(bp["write"], (1380, 300), size=(360, 260))
     draft = draft_seed(g, write, (1380, 620))
     source_switch = g.add("ComfySwitchNode", (1800, 0), size=(260, 90), title="Original or new lyrics")
-    tags_switch = g.add("ComfySwitchNode", (1800, 140), size=(260, 90), title="Instrumental: section tags")
-    text_sheet = song_sheet(g, (2120, 0), "Song Sheet · Text")
+    tags_switch = g.add("ComfySwitchNode", (1800, 165), size=(260, 90), title="Instrumental: section tags")
+    text_sheet = song_sheet(g, (2135, 10), "Song Sheet · Text")
     seed = take_seed(g, (2620, 0))
-    render = g.add_subgraph(bp["yue2_takes"], (2620, 150), size=(320, 280), title="YuE2 Takes")
+    render = g.add_subgraph(bp["yue2_takes"], (2620, 170), size=(320, 330), title="YuE2 Takes")
     check_vocals = g.add("PlenioVocalCheck", (3000, 0), size=(340, 160), title="Check Vocals · best take")
     takes_preview = g.add("PreviewAudio", (3000, 220), size=(340, 120), title="Preview (all takes)")
     check_lyrics = g.add(
         "PlenioTranscribeLyrics",
-        (3000, 560),
+        (3015, 845),
         size=(340, 200),
         mode=4,
         title="Check sung lyrics (optional)",
@@ -1130,8 +1137,8 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g.link(check_vocals, "takes", takes_preview, "audio")
     g.link(check_vocals, "audio", check_lyrics, "audio")
     g.link(text_sheet, "lyrics", check_lyrics, "expected_lyrics")
-    audio, stems_node = stems_stage(g, bp, 3420, audio=(check_vocals, "audio"), y=430)
-    audio, refine_node = refine_stage(g, bp, 3420, audio=audio, y=620)
+    audio, stems_node = stems_stage(g, bp, 3420, audio=(check_vocals, "audio"), y=715)
+    audio, refine_node = refine_stage(g, bp, 3420, audio=audio, y=905)
     _master, preview, export = finish(
         g,
         bp,
@@ -1150,6 +1157,8 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             (refine_node, "report"),
         ],
         group="7 · FINISH",
+        cover_y=715,
+        export_size=(380, 520),
     )
     g.group("1 · SOURCE", [source, excerpt])
     g.group("2 · COVER", [brief])
@@ -1205,7 +1214,7 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             "vocals": "sung",
         },
     )
-    model_node = g.add_subgraph(bp["minimax_model"], (0, 760), size=(380, 160), collapsed=True)
+    model_node = g.add_subgraph(bp["minimax_model"], (0, 830), size=(380, 160), collapsed=True)
     write = g.add_subgraph(bp["write"], (460, 0), size=(360, 220))
     draft = draft_seed(g, write, (460, 280))
     sheet = song_sheet(g, (900, 0), "Song Sheet")
@@ -1240,6 +1249,7 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             (refine_node, "report"),
         ],
         group="5 · FINISH",
+        cover_y=650,
     )
     g.group("1 · SONG", [brief])
     g.group("2 · WRITE", [write, draft])
@@ -1293,7 +1303,7 @@ def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             "vocals": "sung",
         },
     )
-    model_node = g.add_subgraph(bp["yue2_model"], (0, 760), size=(380, 140), collapsed=True)
+    model_node = g.add_subgraph(bp["yue2_model"], (0, 830), size=(380, 140), collapsed=True)
     write = g.add_subgraph(bp["write"], (460, 0), size=(360, 220))
     draft = draft_seed(g, write, (460, 280))
     text_sheet = song_sheet(g, (900, 0), "Song Sheet · Text")
@@ -1315,13 +1325,14 @@ def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         properties={"plenio_editor_layout": "daw"},
     )
     seed = take_seed(g, (2320, 0))
-    render = g.add_subgraph(bp["yue2_render"], (2320, 150), size=(320, 250))
+    render = g.add_subgraph(bp["yue2_render"], (2320, 150), size=(320, 310))
     g.link(brief, "brief", write, "brief")
     g.link(model_node, "engine", write, "engine")
     for kind in ("title", "style", "lyrics", "artwork_prompt"):
         g.link(write, kind, text_sheet, kind)
     g.link(brief, "brief", text_sheet, "brief")
     g.link(model_node, "engine", text_sheet, "engine")
+    # The score input of Score Tools stays unconnected: 'new score from brief' builds the skeleton.
     # The score input of Score Tools stays unconnected: 'new score from brief' builds the skeleton.
     g.link(brief, "brief", tools, "brief")
     g.link(tools, "score", score_sheet, "score")
@@ -1337,8 +1348,8 @@ def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g.link(score_sheet, "planning_mode", render, "mode")
     g.link(score_sheet, "score_seconds", render, "max_duration")
     g.link(seed, "seed", render, "seed")
-    audio, stems_node = stems_stage(g, bp, 2320, audio=(render, "AUDIO"), y=430)
-    audio, refine_node = refine_stage(g, bp, 2320, audio=audio, y=620)
+    audio, stems_node = stems_stage(g, bp, 2320, audio=(render, "AUDIO"), y=670)
+    audio, refine_node = refine_stage(g, bp, 2320, audio=audio, y=820)
     _master, preview, export = finish(
         g,
         bp,
@@ -1354,6 +1365,8 @@ def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             (refine_node, "report"),
         ],
         group="6 · FINISH",
+        cover_y=655,
+        export_size=(385, 530),
     )
     g.group("1 · SONG", [brief])
     g.group("2 · WRITE", [write, draft])
@@ -1393,21 +1406,21 @@ def enhance_master(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     eq = g.add(
         "PlenioEQ",
         (880, 0),
-        size=(420, 420),
+        size=(605, 540),
         widgets={"mode": "match preset", "mode.preset": WARM_GENTLE},
         labels={"mode": "EQ"},
     )
     loudness = g.add(
         "PlenioLoudness",
-        (1360, 0),
-        size=(340, 220),
+        (1530, 0),
+        size=(425, 245),
         widgets={"target": MASTER_TARGET, "compression": MASTER_STYLE, "sample_rate": "keep"},
         labels={"target": "loudness target"},
     )
-    preview = g.add("PreviewAudio", (1780, 0), size=(360, 120), title="Preview (mastered)")
+    preview = g.add("PreviewAudio", (2115, 0), size=(360, 120), title="Preview (mastered)")
     export = g.add(
         "PlenioExportRelease",
-        (1780, 180),
+        (2115, 180),
         size=(380, 400),
         autogrow={"reports": 5},
         widgets={
