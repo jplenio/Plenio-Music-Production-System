@@ -831,6 +831,9 @@ class _Printer:
                 parts.append("Z" if size == 1 else f"Z{size}")
                 empty -= size
 
+        # A line with a rewritten measure is written in the native style around it: unchanged
+        # full-measure rests written plainly ("Z", "Z3") join the runs of empty measures.
+        rewritten = not all(self.raw[voice][first : first + count])
         measure = first
         while measure < first + count:
             if self.raw[voice][measure]:
@@ -838,6 +841,10 @@ class _Printer:
                 origin = self.origins[measure]
                 assert origin is not None
                 slot = self.source.slots[voice][origin]
+                if rewritten and _REST_RUN.fullmatch(slot.raw):
+                    empty += 1
+                    measure += 1
+                    continue
                 whole = slot.run == 1 or (
                     slot.part == 0
                     and measure + slot.run <= first + count
