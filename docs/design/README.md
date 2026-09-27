@@ -16,6 +16,7 @@ Engineering source of truth for the Plenio Music Production System. Later phases
 | [../audit/2026-09-25-phase-10-acceptance.md](../audit/2026-09-25-phase-10-acceptance.md) | 10 | final architecture acceptance review: verdict (accepted with conditions), evidence, findings, remaining limitations, extension points |
 | [testing-strategy.md](testing-strategy.md) | 1B | verification levels, test layers, matrices, smoke tests |
 | [implementation-roadmap.md](implementation-roadmap.md) | 1B | phases 2–10 with scope, tests, completion criteria, effort |
+| [next-release-plan.md](next-release-plan.md) | 11A | next release (0.3.0) design: audio refinement / super-resolution, EQ UX, optional stems, manual lyrics, brief template precedence, canonical score engine, YuE2 · DAW; ordered OPUS-CRITICAL / DEEPSEEK-SUITABLE tasks |
 | [CURRENT_STATUS.md](CURRENT_STATUS.md) | checkpoint | **where the project stands now**: phase, done, open, known issues, tests, next action (handoff checkpoint 2026-09-25) |
 | `data/legacy-node-inventory.json` | 1A | machine-readable legacy node inventory |
 
