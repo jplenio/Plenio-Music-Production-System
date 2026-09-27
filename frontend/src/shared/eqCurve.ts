@@ -73,6 +73,22 @@ export interface Plot {
   width: number
   height: number
   maxHz: number
+  /** Half-height of the dB axis (default ``PLOT_DB``); the gain-range toggle changes it. */
+  db?: number
+}
+
+export function plotDb(plot: Plot): number {
+  return plot.db ?? PLOT_DB
+}
+
+/** The dB axis of a gain range: a little headroom above the handles' limit. */
+export type GainRange = 6 | 12 | 18
+export const GAIN_RANGES: GainRange[] = [6, 12, 18]
+export const PLOT_DB_BY_RANGE: Record<GainRange, number> = { 6: 8, 12: 14, 18: 20 }
+
+/** ``plot`` with the dB axis of a gain range. */
+export function withRange(plot: Plot, range: GainRange): Plot {
+  return { ...plot, db: PLOT_DB_BY_RANGE[range] ?? PLOT_DB }
 }
 
 export function xOf(plot: Plot, hz: number): number {
@@ -84,11 +100,18 @@ export function hzOf(plot: Plot, x: number): number {
 }
 
 export function yOf(plot: Plot, db: number): number {
-  return (1 - (clamp(db, -PLOT_DB, PLOT_DB) + PLOT_DB) / (2 * PLOT_DB)) * plot.height
+  const span = plotDb(plot)
+  return (1 - (clamp(db, -span, span) + span) / (2 * span)) * plot.height
 }
 
 export function dbOf(plot: Plot, y: number): number {
-  return (1 - clamp(y / plot.height, 0, 1)) * 2 * PLOT_DB - PLOT_DB
+  const span = plotDb(plot)
+  return (1 - clamp(y / plot.height, 0, 1)) * 2 * span - span
+}
+
+/** A drag with Shift: the movement is damped, so a fine correction stays possible. */
+export function fineValue(from: number, to: number, fine: boolean): number {
+  return fine ? from + (to - from) * 0.2 : to
 }
 
 /** SVG path of a response curve. */
@@ -162,4 +185,131 @@ export function describeBand(band: Band): string {
   const hz = band.frequency_hz >= 1000 ? `${round(band.frequency_hz / 1000, 2)} kHz` : `${Math.round(band.frequency_hz)} Hz`
   const gain = GAIN_TYPES.includes(band.type) ? ` ${band.gain_db > 0 ? '+' : ''}${band.gain_db} dB` : ''
   return `${band.type.replace('_', ' ')} ${hz}${gain}, Q ${band.q}`
+}
+
+/** The chip of a band in the strip under the curve: ``● 2 Bell 1.20 kHz +2.0 dB Q 1.0``. */
+export function bandChip(band: Band, index: number): string {
+  const name = BAND_NAMES[band.type] ?? band.type
+  const hz = band.frequency_hz >= 1000 ? `${(band.frequency_hz / 1000).toFixed(2)} kHz` : `${Math.round(band.frequency_hz)} Hz`
+  const gain = GAIN_TYPES.includes(band.type) ? ` ${band.gain_db > 0 ? '+' : ''}${band.gain_db.toFixed(1)} dB` : ''
+  const shape = band.type === 'peak' || band.type === 'notch' ? ` Q ${band.q}` : ''
+  return `● ${index + 1} ${name} ${hz}${gain}${shape}${band.enabled ? '' : ' (off)'}`
+}
+
+/** The names of the band types as the band strip shows them. */
+export const BAND_NAMES: Record<BandType, string> = {
+  peak: 'Bell',
+  low_shelf: 'Low shelf',
+  high_shelf: 'High shelf',
+  highpass: 'Low cut',
+  lowpass: 'High cut',
+  notch: 'Notch'
+}
+
+/** One field of a band, edited in the strip's inline editor (clamped like a drag). */
+export function editBand(
+  settings: EqSettings,
+  id: string,
+  patch: Partial<Band>,
+  sampleRate = 48000
+): EqSettings {
+  return {
+    ...settings,
+    bands: settings.bands.map((band) => {
+      if (band.id !== id) return band
+      const next = { ...band, ...patch }
+      return {
+        ...next,
+        frequency_hz: round(clamp(Number(next.frequency_hz ?? band.frequency_hz), MIN_HZ, maxBandHz(sampleRate)), 1),
+        gain_db: round(clamp(Number(next.gain_db ?? band.gain_db), -MAX_GAIN_DB, MAX_GAIN_DB), 1),
+        q: round(clamp(Number(next.q ?? band.q), 0.2, 10), 3),
+        slope: round(clamp(Number(next.slope ?? band.slope), 0.1, 4), 2),
+        enabled: next.enabled !== false
+      }
+    })
+  }
+}
+
+/** A handle that was double-clicked: gain back to 0 (filters keep their gain). */
+export function resetBandGain(settings: EqSettings, id: string): EqSettings {
+  return editBand(settings, id, { gain_db: 0 })
+}
+
+// --- the spectrum behind the curve ------------------------------------------------------------------
+
+/**
+ * A filled path of a power spectrum (dB), normalised so that its own maximum sits at ``top_db``.
+ * The spectrum is a *shape*, not a loudness reading: it appears behind the curve as a reference.
+ */
+export function spectrumPath(
+  plot: Plot,
+  frequencies: number[],
+  powerDb: number[],
+  { heightFraction = 0.7 }: { heightFraction?: number } = {}
+): string {
+  if (!frequencies.length || frequencies.length !== powerDb.length) return ''
+  const values = powerDb.filter((value) => Number.isFinite(value))
+  if (!values.length) return ''
+  const high = Math.max(...values)
+  const low = Math.min(...values)
+  const span = Math.max(high - low, 1e-6)
+  // the shape sits in the lower part of the plot: a silence-gated profile is not a level reading
+  const bottom = plot.height - 4
+  const top = bottom - Math.max(12, plot.height * clamp(heightFraction, 0.1, 0.95))
+  const points = frequencies.map((hz, index) => {
+    const value = powerDb[index]
+    const norm = Number.isFinite(value) ? (value - low) / span : 0
+    return `${xOf(plot, hz).toFixed(1)},${(bottom - norm * (bottom - top)).toFixed(1)}`
+  })
+  return `M${points.join(' L')} L${plot.width.toFixed(1)},${bottom.toFixed(1)} L0,${bottom.toFixed(1)} Z`
+}
+
+// --- undo history of the bands -----------------------------------------------------------------------
+
+/** A small history of ``plenio.eq/1`` settings (widget-local; the widget value is the store). */
+export class EqHistory {
+  private entries: EqSettings[]
+  private index = 0
+
+  constructor(initial: EqSettings, private readonly limit = 50) {
+    this.entries = [initial]
+  }
+
+  get current(): EqSettings {
+    return this.entries[this.index]
+  }
+
+  get canUndo(): boolean {
+    return this.index > 0
+  }
+
+  get canRedo(): boolean {
+    return this.index < this.entries.length - 1
+  }
+
+  /** Record a new state (a duplicate of the current one is ignored). */
+  push(settings: EqSettings): void {
+    if (serialize(settings) === serialize(this.current)) return
+    this.entries = this.entries.slice(0, this.index + 1)
+    this.entries.push(settings)
+    if (this.entries.length > this.limit) this.entries.shift()
+    this.index = this.entries.length - 1
+  }
+
+  undo(): EqSettings | null {
+    if (!this.canUndo) return null
+    this.index -= 1
+    return this.current
+  }
+
+  redo(): EqSettings | null {
+    if (!this.canRedo) return null
+    this.index += 1
+    return this.current
+  }
+
+  reset(settings: EqSettings): void {
+    this.entries = [settings]
+    this.index = 0
+  }
 }

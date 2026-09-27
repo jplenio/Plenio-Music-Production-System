@@ -1,20 +1,30 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  type Band,
+  EqHistory,
   MAX_BANDS,
+  PLOT_DB,
   addBand,
+  bandChip,
   curvePath,
   dbOf,
   describeBand,
+  editBand,
+  fineValue,
   flat,
   hzOf,
   maxBandHz,
   moveBand,
   parseSettings,
+  plotDb,
   removeBand,
+  resetBandGain,
   scaleQ,
   serialize,
   setType,
+  spectrumPath,
+  withRange,
   xOf,
   yOf
 } from '../src/shared/eqCurve'
@@ -73,5 +83,79 @@ describe('band edits', () => {
     s = removeBand(s, 'band-3')
     const again = addBand(s, 5000)!
     expect(new Set(again.bands.map((b) => b.id)).size).toBe(MAX_BANDS)
+  })
+})
+
+describe('the panel helpers (M4/D8)', () => {
+  const PANEL = { width: 560, height: 260, maxHz: 20000 }
+
+  it('scales the dB axis with the gain range', () => {
+    expect(plotDb(PANEL)).toBe(PLOT_DB) // the default stays for callers that pass no range
+    expect(withRange(PANEL, 6).db).toBe(8)
+    expect(withRange(PANEL, 18).db).toBe(20)
+    expect(yOf(withRange(PANEL, 6), 8)).toBe(0)
+    expect(dbOf(withRange(PANEL, 6), 0)).toBe(8)
+    expect(yOf(PANEL, 0)).toBe(130)
+  })
+
+  it('damps a drag while Shift is held', () => {
+    expect(fineValue(100, 200, false)).toBe(200)
+    expect(fineValue(100, 200, true)).toBe(120)
+  })
+
+  it('edits one band field of the strip editor at a time, clamped', () => {
+    let s = addBand(flat(), 1000, 3)! as { schema: string; preamp_db: number; bands: Band[] }
+    s = editBand(s, 'band-1', { type: 'high_shelf' })
+    expect(s.bands[0].type).toBe('high_shelf')
+    s = editBand(s, 'band-1', { frequency_hz: 99999, gain_db: 40, q: 100 })
+    expect(s.bands[0]).toMatchObject({ frequency_hz: 20000, gain_db: 12, q: 10 })
+    s = editBand(s, 'band-1', { enabled: false })
+    expect(s.bands[0].enabled).toBe(false)
+    expect(editBand(s, 'band-2', { gain_db: 6 })).toEqual(s) // an unknown id changes nothing
+    expect(resetBandGain(s, 'band-1').bands[0].gain_db).toBe(0)
+  })
+
+  it('labels the band chips of the strip', () => {
+    const band = {
+      id: 'band-2',
+      enabled: true,
+      type: 'peak' as const,
+      frequency_hz: 1200,
+      gain_db: 2,
+      q: 1,
+      slope: 1
+    }
+    expect(bandChip(band, 1)).toBe('● 2 Bell 1.20 kHz +2.0 dB Q 1')
+    expect(bandChip({ ...band, type: 'highpass', enabled: false }, 0)).toBe('● 1 Low cut 1.20 kHz (off)')
+  })
+
+  it('draws the spectrum area behind the curve and refuses mismatched data', () => {
+    const path = spectrumPath(PANEL, [20, 200, 2000, 20000], [-60, -40, -20, -70])
+    expect(path.startsWith('M0.0,')).toBe(true)
+    expect(path.endsWith('L560.0,256.0 L0,256.0 Z')).toBe(true)
+    expect(path.split('L').length).toBe(6)
+    expect(spectrumPath(PANEL, [20, 200], [-40])).toBe('')
+    expect(spectrumPath(PANEL, [], [])).toBe('')
+    expect(spectrumPath(PANEL, [20, 200], [Number.NaN, Number.NaN])).toBe('')
+  })
+
+  it('keeps a widget-local undo history of the bands', () => {
+    const history = new EqHistory(flat())
+    expect([history.canUndo, history.canRedo]).toEqual([false, false])
+    const one = addBand(flat(), 100)!
+    history.push(one)
+    history.push(one) // a duplicate changes nothing
+    expect(history.canUndo).toBe(true)
+    const two = addBand(one, 5000)!
+    history.push(two)
+    expect(serialize(history.undo() ?? flat())).toBe(serialize(one))
+    expect(serialize(history.redo() ?? flat())).toBe(serialize(two))
+    expect(history.canRedo).toBe(false)
+    expect(history.undo()).not.toBeNull()
+    history.push(addBand(one, 300)!)
+    expect(history.canRedo).toBe(false) // a new edit drops the redo branch
+    history.reset(flat())
+    expect([history.canUndo, history.canRedo]).toEqual([false, false])
+    expect(serialize(history.current)).toBe(serialize(flat()))
   })
 })

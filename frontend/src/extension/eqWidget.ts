@@ -1,33 +1,52 @@
 /**
- * The EQ curve under a Plenio EQ node: the response the node applies (computed by the backend), with
- * band handles in *manual* mode. Drag a handle to change frequency and gain, use the wheel (or + / -)
- * for Q, double-click the plot to add a band, Delete / right-click to remove it. The bands live in the
- * node's own ``mode.bands`` text widget, so the workflow stores them like any other widget value; this
- * display is not serialised. In the match modes the last applied proposal is shown read-only.
+ * The EQ panel under a Plenio EQ node (next-release plan §5): a large direct-manipulation curve with
+ * the last run's spectrum behind it, a band strip whose chips open an inline editor, a toolbar
+ * (preset, gain range, undo/redo, reset, bypass-compare, the raw bands as text) and the mode row.
+ *
+ * The bands live in the node's own ``mode.bands`` text widget (``plenio.eq/1``) - that value is the
+ * store, and this panel is display only (never serialised). The curve itself is the node's exact
+ * response, computed by the backend (``/plenio/eq/response``); a match proposal is shown read-only
+ * until *Edit these bands* copies it into *manual*.
  */
 import { type EqPreset, type Fetcher, eqPresets, eqResponse } from '../api/client'
 import type { ComfyNode, ComfyWidget } from '../shared/comfy'
 import {
+  type BandType,
+  BAND_NAMES,
   type EqSettings,
+  EqHistory,
+  GAIN_RANGES,
+  GAIN_TYPES,
+  type GainRange,
+  MAX_BANDS,
   type Plot,
   addBand,
+  bandChip,
   curvePath,
   dbOf,
   describeBand,
+  editBand,
+  fineValue,
   flat,
   hzOf,
   moveBand,
   parseSettings,
   removeBand,
+  resetBandGain,
   scaleQ,
   serialize,
+  spectrumPath,
+  withRange,
   xOf,
   yOf
 } from '../shared/eqCurve'
 
 const SVG = 'http://www.w3.org/2000/svg'
-const WIDGET = 'plenio_eq_curve'
-const PLOT: Plot = { width: 360, height: 150, maxHz: 20000 }
+const WIDGET = 'plenio_eq_panel'
+const BANDS_WIDGET = 'mode.bands'
+const PLOT_SIZE = { width: 560, height: 260 }
+/** Colour per band (the strip, the handles and the envelope of a clicked chip agree). */
+const BAND_COLORS = ['#4aa3ff', '#f0a35e', '#6fbf73', '#d873c8', '#e0c65a', '#5ac8c8', '#b28df0', '#e08a8a']
 let presets: Promise<EqPreset[]> | null = null
 
 interface Shown {
@@ -37,6 +56,8 @@ interface Shown {
   settings: EqSettings
   readonly: boolean
   note: string
+  beforeDb?: number[]
+  afterDb?: number[]
 }
 
 function svg(name: string, attributes: Record<string, string | number>): SVGElement {
@@ -45,44 +66,86 @@ function svg(name: string, attributes: Record<string, string | number>): SVGElem
   return element
 }
 
+function element(tag: string, className?: string, text?: string): HTMLElement {
+  const node = document.createElement(tag)
+  if (className) node.className = className
+  if (text !== undefined) node.textContent = text
+  return node
+}
+
+function button(className: string, text: string, label: string): HTMLButtonElement {
+  const node = document.createElement('button') as HTMLButtonElement
+  node.className = className
+  node.textContent = text
+  node.setAttribute('aria-label', label)
+  return node
+}
+
 function widget(node: ComfyNode, name: string): ComfyWidget | undefined {
   return node.widgets?.find((w) => w.name === name)
 }
 
-function mode(node: ComfyNode): string {
-  return String(widget(node, 'mode')?.value ?? 'flat')
-}
-
 export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(output: Record<string, unknown>): void } {
-  const root = document.createElement('div')
-  root.className = 'plenio-eq'
-  const toolbar = document.createElement('div')
-  toolbar.className = 'plenio-eq-tools'
-  const presetSelect = document.createElement('select')
+  const root = element('div', 'plenio-eq')
+  const toolbar = element('div', 'plenio-eq-tools')
+  const presetSelect = element('select') as HTMLSelectElement
   presetSelect.setAttribute('aria-label', 'EQ preset')
-  const info = document.createElement('span')
-  info.className = 'plenio-eq-info'
+  const rangeSelect = element('select') as HTMLSelectElement
+  rangeSelect.setAttribute('aria-label', 'Gain range')
+  for (const range of GAIN_RANGES) rangeSelect.append(new Option(`±${range} dB`, String(range)))
+  const undoButton = button('', '↶', 'Undo the last band change')
+  const redoButton = button('', '↷', 'Redo the last band change')
+  const resetButton = button('', 'reset', 'Remove every band')
+  const compareButton = button('', 'compare', 'Show the curve without the EQ (bypass)')
+  const textButton = button('', 'bands as text', 'Show or hide the plenio.eq/1 JSON widget')
+  const info = element('span', 'plenio-eq-info')
   info.setAttribute('aria-live', 'polite')
-  toolbar.append(presetSelect, info)
-  const plot = svg('svg', { viewBox: `0 0 ${PLOT.width} ${PLOT.height}`, class: 'plenio-eq-plot', role: 'img' })
+  toolbar.append(presetSelect, rangeSelect, undoButton, redoButton, resetButton, compareButton, textButton, info)
+
+  const modeRow = element('div', 'plenio-eq-mode')
+  const plot = svg('svg', {
+    viewBox: `0 0 ${PLOT_SIZE.width} ${PLOT_SIZE.height}`,
+    class: 'plenio-eq-plot',
+    role: 'img',
+    preserveAspectRatio: 'none'
+  })
   plot.setAttribute('aria-label', 'EQ response curve')
-  root.append(toolbar, plot)
-  const curve = node.addDOMWidget(WIDGET, WIDGET, root, { serialize: false, getValue: () => '', setValue: () => {}, getMinHeight: () => 200 })
-  curve.serialize = false // display only: frontend 1.52 still saved a value for it (Phase 8 browser check)
+  const strip = element('div', 'plenio-eq-strip')
+  const editor = element('div', 'plenio-eq-editor')
+  const editorFields = element('div', 'plenio-eq-fields')
+  editor.append(editorFields)
+  root.append(toolbar, modeRow, plot, strip, editor)
+
+  const panel = node.addDOMWidget(WIDGET, WIDGET, root, {
+    serialize: false,
+    getValue: () => '',
+    setValue: () => {},
+    getMinHeight: () => 420,
+    getMaxHeight: () => 620
+  })
+  panel.serialize = false
 
   let shown: Shown = { sampleRate: 48000, frequencies: [], response: [], settings: flat(), readonly: true, note: '' }
   let selected: string | null = null
+  let compare = false
+  let range: GainRange = 12
   let request = 0
   let timer: ReturnType<typeof setTimeout> | undefined
+  let dragStart: { hz: number; db: number } | null = null
+  const history = new EqHistory(flat())
 
-  const bandsWidget = () => widget(node, 'mode.bands')
+  const bandsWidget = () => widget(node, BANDS_WIDGET)
+  const currentRange = () => range
+  const limit = (): Plot => withRange({ ...PLOT_SIZE, maxHz: Math.min(20000, shown.sampleRate / 2) }, currentRange())
 
-  function writeBands(settings: EqSettings): void {
+  /** Write bands into the node's widget (the store) and remember the step for undo. */
+  function writeBands(settings: EqSettings, { record = true } = {}): void {
     const target = bandsWidget()
     if (!target) return
     const text = serialize(settings)
     target.value = text
     target.callback?.(text)
+    if (record) history.push(settings)
     shown = { ...shown, settings }
     draw()
     refresh(0)
@@ -91,11 +154,19 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
   async function refresh(delay = 120): Promise<void> {
     clearTimeout(timer)
     timer = setTimeout(async () => {
-      const current = mode(node)
+      const current = String(widget(node, 'mode')?.value ?? 'flat')
       if (current !== 'manual') {
-        shown = current === 'flat'
-          ? { ...shown, settings: flat(), response: shown.frequencies.map(() => 0), readonly: true, note: 'flat: no change' }
-          : { ...shown, readonly: true, note: shown.note || 'the applied proposal appears here after a run' }
+        if (current === 'flat') {
+          shown = {
+            ...shown,
+            settings: flat(),
+            response: shown.frequencies.map(() => 0),
+            readonly: true,
+            note: 'flat: no change'
+          }
+        } else {
+          shown = { ...shown, readonly: true }
+        }
         draw()
         return
       }
@@ -105,6 +176,8 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
         draw()
         return
       }
+      // bands typed into the text widget are adopted as the new baseline (nothing to undo into)
+      if (serialize(settings) !== serialize(history.current)) history.reset(settings)
       const id = ++request
       try {
         const result = await eqResponse(fetcher, settings, shown.sampleRate)
@@ -126,50 +199,192 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
 
   function draw(): void {
     plot.replaceChildren()
-    const limit = { ...PLOT, maxHz: Math.min(PLOT.maxHz, shown.sampleRate / 2) }
-    for (const db of [-12, -6, 0, 6, 12]) {
-      plot.append(svg('line', { x1: 0, x2: PLOT.width, y1: yOf(limit, db), y2: yOf(limit, db), class: db ? 'grid' : 'grid zero' }))
+    const box = limit()
+    for (const db of [-box.db!, -box.db! / 2, 0, box.db! / 2, box.db!]) {
+      plot.append(
+        svg('line', { x1: 0, x2: box.width, y1: yOf(box, db), y2: yOf(box, db), class: db ? 'grid' : 'grid zero' })
+      )
     }
     for (const hz of [100, 1000, 10000]) {
-      plot.append(svg('line', { x1: xOf(limit, hz), x2: xOf(limit, hz), y1: 0, y2: PLOT.height, class: 'grid' }))
+      plot.append(svg('line', { x1: xOf(box, hz), x2: xOf(box, hz), y1: 0, y2: box.height, class: 'grid' }))
     }
-    if (shown.frequencies.length) {
-      plot.append(svg('path', { d: curvePath(limit, shown.frequencies, shown.response), class: 'curve' }))
+    // the last run's spectrum behind the curve: grey before, accent after
+    if (shown.beforeDb?.length === shown.frequencies.length) {
+      plot.append(svg('path', { d: spectrumPath(box, shown.frequencies, shown.beforeDb), class: 'spectrum before' }))
     }
-    if (!shown.readonly) {
-      for (const band of shown.settings.bands) {
+    if (shown.afterDb?.length === shown.frequencies.length) {
+      plot.append(svg('path', { d: spectrumPath(box, shown.frequencies, shown.afterDb), class: 'spectrum after' }))
+    }
+    if (compare) {
+      plot.append(svg('line', { x1: 0, x2: box.width, y1: yOf(box, 0), y2: yOf(box, 0), class: 'curve flat' }))
+    } else if (shown.frequencies.length) {
+      plot.append(svg('path', { d: curvePath(box, shown.frequencies, shown.response), class: 'curve' }))
+    }
+    if (!shown.readonly && !compare) {
+      shown.settings.bands.forEach((band, index) => {
+        const colour = BAND_COLORS[index % BAND_COLORS.length]
+        const gain = GAIN_TYPES.includes(band.type) ? band.gain_db : 0
         const handle = svg('circle', {
-          cx: xOf(limit, band.frequency_hz),
-          cy: yOf(limit, ['peak', 'low_shelf', 'high_shelf'].includes(band.type) ? band.gain_db : 0),
-          r: band.id === selected ? 7 : 5.5,
+          cx: xOf(box, band.frequency_hz),
+          cy: yOf(box, gain),
+          r: band.id === selected ? 9 : 7,
           class: band.id === selected ? 'handle selected' : 'handle',
-          tabindex: 0
+          style: `stroke: ${colour}`,
+          tabindex: 0,
+          'data-band': band.id
         })
-        handle.setAttribute('aria-label', describeBand(band))
-        handle.addEventListener('pointerdown', (event) => startDrag(event as PointerEvent, band.id, limit))
+        handle.setAttribute('aria-label', `Band ${index + 1}: ${describeBand(band)}`)
+        if (!band.enabled) handle.classList.add('disabled')
+        handle.append(svg('title', {}))
+        handle.lastChild!.textContent = `Band ${index + 1}: ${describeBand(band)}`
+        handle.addEventListener('pointerdown', (event) => startDrag(event as PointerEvent, band.id))
+        handle.addEventListener('dblclick', (event) => {
+          event.stopPropagation()
+          writeBands(resetBandGain(shown.settings, band.id))
+        })
         handle.addEventListener('focus', () => select(band.id))
         handle.addEventListener('keydown', (event) => onKey(event as KeyboardEvent, band.id))
         handle.addEventListener('wheel', (event) => {
           event.preventDefault()
-          writeBands(scaleQ(shown.settings, band.id, (event as WheelEvent).deltaY < 0 ? 1.15 : 1 / 1.15))
+          const factor = (event as WheelEvent).deltaY < 0 ? 1.15 : 1 / 1.15
+          writeBands(scaleQ(shown.settings, band.id, factor))
         })
         handle.addEventListener('contextmenu', (event) => {
           event.preventDefault()
           writeBands(removeBand(shown.settings, band.id))
         })
         plot.append(handle)
-      }
+      })
     }
+    drawStrip()
+    drawEditor()
+    drawModeRow()
     const band = shown.settings.bands.find((b) => b.id === selected)
     info.textContent =
       shown.note ||
-      (band
-        ? describeBand(band)
-        : shown.readonly
-          ? `${shown.settings.bands.length} band(s)`
-          : 'double-click to add a band; drag, wheel = Q, right-click = remove')
+      (compare
+        ? 'compare: the curve is off (the node still applies it)'
+        : band
+          ? describeBand(band)
+          : shown.readonly
+            ? `${shown.settings.bands.length} band(s)`
+            : `drag a handle, Shift = fine, wheel = Q, double-click = add · ${shown.settings.bands.length}/${MAX_BANDS}`)
     presetSelect.disabled = shown.readonly
+    undoButton.disabled = !history.canUndo
+    redoButton.disabled = !history.canRedo
+    resetButton.disabled = shown.readonly || !shown.settings.bands.length
+    rangeSelect.value = String(range)
+    compareButton.classList.toggle('active', compare)
+    textButton.classList.toggle('active', isTextShown())
     node.setDirtyCanvas?.(true, true)
+  }
+
+  /** The band strip: one chip per band; a click opens the inline editor. */
+  function drawStrip(): void {
+    strip.replaceChildren()
+    if (shown.readonly && !shown.settings.bands.length) {
+      strip.append(element('span', 'plenio-eq-hint', shown.note || 'no bands'))
+      return
+    }
+    shown.settings.bands.forEach((band, index) => {
+      const chip = element('button', 'plenio-eq-chip', bandChip(band, index)) as HTMLButtonElement
+      chip.style.borderLeftColor = BAND_COLORS[index % BAND_COLORS.length]
+      chip.classList.toggle('selected', band.id === selected)
+      chip.classList.toggle('disabled', !band.enabled)
+      chip.setAttribute('aria-label', `Edit band ${index + 1}`)
+      chip.addEventListener('click', (event) => {
+        event.stopPropagation()
+        selected = selected === band.id ? null : band.id
+        draw()
+      })
+      strip.append(chip)
+    })
+  }
+
+  /** The inline editor of the selected band: type, frequency, gain, Q and the enable switch. */
+  function drawEditor(): void {
+    editorFields.replaceChildren()
+    const band = shown.settings.bands.find((b) => b.id === selected)
+    if (!band || shown.readonly) {
+      editor.style.display = 'none'
+      return
+    }
+    editor.style.display = ''
+    const label = element('span', 'name', `Band ${shown.settings.bands.indexOf(band) + 1}`)
+    const type = element('select') as HTMLSelectElement
+    type.setAttribute('aria-label', 'Band type')
+    for (const [value, name] of Object.entries(BAND_NAMES)) type.append(new Option(name, value))
+    type.value = band.type
+    type.addEventListener('change', () => writeBands(editBand(shown.settings, band.id, { type: type.value as BandType })))
+    const enabled = element('input') as HTMLInputElement
+    enabled.type = 'checkbox'
+    enabled.checked = band.enabled
+    enabled.setAttribute('aria-label', 'Band enabled')
+    enabled.addEventListener('change', () => writeBands(editBand(shown.settings, band.id, { enabled: enabled.checked })))
+    const fields: [string, string, number, ((value: string) => void)][] = [
+      [
+        'Hz',
+        `${band.frequency_hz}`,
+        70,
+        (value) => writeBands(editBand(shown.settings, band.id, { frequency_hz: Number(value) }))
+      ],
+      ['dB', `${band.gain_db}`, 60, (value) => writeBands(editBand(shown.settings, band.id, { gain_db: Number(value) }))],
+      ['Q', `${band.q}`, 60, (value) => writeBands(editBand(shown.settings, band.id, { q: Number(value) }))]
+    ]
+    editorFields.append(label, type, enabled)
+    for (const [name, value, width, commit] of fields) {
+      const field = element('input', 'number') as HTMLInputElement
+      field.value = value
+      field.style.width = `${width}px`
+      field.setAttribute('aria-label', `Band ${name}`)
+      field.addEventListener('keydown', (event) => {
+        if ((event as KeyboardEvent).key === 'Enter') commit(field.value)
+      })
+      field.addEventListener('blur', () => commit(field.value))
+      if (name !== 'Hz' && !GAIN_TYPES.includes(band.type)) field.disabled = true
+      editorFields.append(field)
+    }
+    const remove = button('', 'remove', 'Remove this band')
+    remove.addEventListener('click', (event) => {
+      event.stopPropagation()
+      selected = null
+      writeBands(removeBand(shown.settings, band.id))
+    })
+    editorFields.append(remove)
+  }
+
+  /** The mode row: in match modes the applied proposal plus *Edit these bands*. */
+  function drawModeRow(): void {
+    modeRow.replaceChildren()
+    const name = String(widget(node, 'mode')?.value ?? 'flat')
+    if (name === 'manual' || name === 'flat') {
+      modeRow.style.display = 'none'
+      return
+    }
+    modeRow.style.display = ''
+    modeRow.append(
+      element('span', 'plenio-eq-hint', `applied proposal (${shown.settings.bands.length} band(s), ${name})`)
+    )
+    const edit = button('', 'Edit these bands', 'Copy the proposal into manual bands and edit it')
+    edit.disabled = !shown.settings.bands.length
+    edit.addEventListener('click', (event) => {
+      event.stopPropagation()
+      // switching the combo recreates the bands widget, so the value is written afterwards
+      const combo = widget(node, 'mode')
+      if (!combo) return
+      combo.value = 'manual'
+      combo.callback?.('manual')
+      const created = bandsWidget()
+      if (created) {
+        const text = serialize(shown.settings)
+        created.value = text
+        created.callback?.(text)
+      }
+      history.reset(shown.settings)
+      watch()
+      void refresh(0)
+    })
+    modeRow.append(edit)
   }
 
   function select(id: string | null): void {
@@ -177,20 +392,48 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
     draw()
   }
 
-  function startDrag(event: PointerEvent, id: string, limit: Plot): void {
+  /** Show or hide the raw ``mode.bands`` widget (the value itself is never touched). */
+  function isTextShown(): boolean {
+    return !(widget(node, BANDS_WIDGET) as { plenioHidden?: boolean } | undefined)?.plenioHidden
+  }
+
+  function setTextShown(shown_: boolean): void {
+    const target = widget(node, BANDS_WIDGET) as (ComfyWidget & { plenioHidden?: boolean }) | undefined
+    if (!target) return
+    target.plenioHidden = !shown_
+    if (shown_) {
+      // restore the widget's own size calculation when it can be computed again
+      delete target.computeSize
+    } else {
+      target.computeSize = () => [0, -4]
+    }
+    node.setDirtyCanvas?.(true, true)
+  }
+
+  function startDrag(event: PointerEvent, id: string): void {
     event.preventDefault()
     event.stopPropagation()
     select(id)
+    const band = shown.settings.bands.find((b) => b.id === id)
+    if (!band) return
+    dragStart = { hz: band.frequency_hz, db: band.gain_db }
     const box = plot.getBoundingClientRect()
     const move = (e: PointerEvent) => {
-      const x = ((e.clientX - box.left) / box.width) * PLOT.width
-      const y = ((e.clientY - box.top) / box.height) * PLOT.height
-      shown = { ...shown, settings: moveBand(shown.settings, id, hzOf(limit, x), dbOf(limit, y), shown.sampleRate) }
+      const scaleX = PLOT_SIZE.width / (box.width || PLOT_SIZE.width)
+      const scaleY = PLOT_SIZE.height / (box.height || PLOT_SIZE.height)
+      const x = (e.clientX - box.left) * scaleX
+      const y = (e.clientY - box.top) * scaleY
+      const grabX = xOf(limit(), dragStart!.hz)
+      const grabY = yOf(limit(), dragStart!.db)
+      const hz = hzOf(limit(), fineValue(grabX, x, e.shiftKey))
+      const db = dbOf(limit(), fineValue(grabY, y, e.shiftKey))
+      shown = { ...shown, settings: moveBand(shown.settings, id, hz, db, shown.sampleRate) }
       draw()
     }
     const up = () => {
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
+      dragStart = null
       writeBands(shown.settings)
     }
     window.addEventListener('pointermove', move)
@@ -209,6 +452,7 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
     else if (event.key === 'ArrowLeft') next = moveBand(shown.settings, id, band.frequency_hz / ratio, band.gain_db, shown.sampleRate)
     else if (event.key === '+') next = scaleQ(shown.settings, id, 1.15)
     else if (event.key === '-') next = scaleQ(shown.settings, id, 1 / 1.15)
+    else if (event.key === '0') next = resetBandGain(shown.settings, id)
     else if (event.key === 'Delete' || event.key === 'Backspace') next = removeBand(shown.settings, id)
     if (next) {
       event.preventDefault()
@@ -217,17 +461,18 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
   }
 
   plot.addEventListener('dblclick', (event) => {
-    if (shown.readonly) return
+    if (shown.readonly || compare) return
     const box = plot.getBoundingClientRect()
-    const limit = { ...PLOT, maxHz: Math.min(PLOT.maxHz, shown.sampleRate / 2) }
-    const x = (((event as MouseEvent).clientX - box.left) / box.width) * PLOT.width
-    const y = (((event as MouseEvent).clientY - box.top) / box.height) * PLOT.height
-    const next = addBand(shown.settings, hzOf(limit, x), dbOf(limit, y), shown.sampleRate)
+    const scaleX = PLOT_SIZE.width / (box.width || PLOT_SIZE.width)
+    const scaleY = PLOT_SIZE.height / (box.height || PLOT_SIZE.height)
+    const x = ((event as MouseEvent).clientX - box.left) * scaleX
+    const y = ((event as MouseEvent).clientY - box.top) * scaleY
+    const next = addBand(shown.settings, hzOf(limit(), x), dbOf(limit(), y), shown.sampleRate)
     if (next) {
       selected = next.bands[next.bands.length - 1].id
       writeBands(next)
     } else {
-      shown = { ...shown, note: 'the EQ has at most 8 bands' }
+      shown = { ...shown, note: `the EQ has at most ${MAX_BANDS} bands` }
       draw()
     }
   })
@@ -240,41 +485,78 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
   presetSelect.addEventListener('change', async () => {
     const item = (await presets)?.find((p) => p.name === presetSelect.value)
     presetSelect.value = ''
-    if (item) writeBands({ ...item.settings, bands: item.settings.bands.slice(0, 8) })
+    if (item) writeBands({ ...item.settings, bands: item.settings.bands.slice(0, MAX_BANDS) })
+  })
+  rangeSelect.addEventListener('change', () => {
+    const value = Number(rangeSelect.value)
+    range = GAIN_RANGES.find((candidate) => candidate === value) ?? 12
+    draw()
+  })
+  undoButton.addEventListener('click', () => {
+    const previous = history.undo()
+    if (previous) writeBands(previous, { record: false })
+  })
+  redoButton.addEventListener('click', () => {
+    const next = history.redo()
+    if (next) writeBands(next, { record: false })
+  })
+  resetButton.addEventListener('click', () => {
+    selected = null
+    writeBands(flat())
+  })
+  compareButton.addEventListener('click', () => {
+    compare = !compare
+    draw()
+  })
+  textButton.addEventListener('click', () => {
+    setTextShown(!isTextShown())
+    draw()
   })
 
-  // follow mode changes and typed bands
-  const watch = (name: string) => {
-    const target = widget(node, name)
-    if (!target) return
-    const original = target.callback
-    target.callback = (value: unknown) => {
-      original?.(value)
-      setTimeout(() => {
-        watch('mode.bands')
-        void refresh()
-      })
+  // follow mode changes and typed bands; re-apply the text toggle after a combo switch
+  function watch(): void {
+    for (const name of ['mode', BANDS_WIDGET]) {
+      const target = widget(node, name)
+      if (!target || (target as { plenioWatched?: boolean }).plenioWatched) continue
+      ;(target as { plenioWatched?: boolean }).plenioWatched = true
+      const original = target.callback
+      target.callback = (value: unknown) => {
+        original?.(value)
+        setTimeout(() => {
+          if (!isTextShown()) setTextShown(false)
+          void refresh()
+        })
+      }
     }
   }
-  watch('mode')
-  watch('mode.bands')
+  watch()
+  setTextShown(false)
   void refresh(0)
 
   return {
     showExecuted(output) {
       const items = output?.plenio_eq as
-        | { settings: EqSettings; sample_rate: number; frequency_hz: number[]; response_db: number[] }[]
+        | {
+            settings: EqSettings
+            sample_rate: number
+            frequency_hz: number[]
+            response_db: number[]
+            spectrum_before_db?: number[]
+            spectrum_after_db?: number[]
+          }[]
         | undefined
       const last = items?.[items.length - 1]
       if (!last) return
-      const manual = mode(node) === 'manual'
+      const manual = String(widget(node, 'mode')?.value ?? 'flat') === 'manual'
       shown = {
         sampleRate: last.sample_rate,
         frequencies: last.frequency_hz,
         response: last.response_db,
         settings: last.settings,
         readonly: !manual,
-        note: manual ? '' : `applied: ${last.settings.bands.length} band(s)`
+        note: manual ? '' : `applied: ${last.settings.bands.length} band(s)`,
+        beforeDb: last.spectrum_before_db,
+        afterDb: last.spectrum_after_db
       }
       if (!manual) draw()
       else void refresh(0)

@@ -168,6 +168,20 @@ def test_manual_eq_is_applied_and_shown(server: ComfyServer, log: Log) -> None:
     shown = entry["outputs"]["2"]["plenio_eq"][0]
     assert shown["settings"]["preamp_db"] == -6.0 and shown["response_db"][0] == pytest.approx(-6.0)
     assert report_data(record_of(server, folder, "EQ"), "eq")["data"]["mode"] == "manual"
+    # the panel's spectrum (M4/D8): 1/6-octave long-term profiles before and after the EQ
+    assert shown["spectrum_frequency_hz"] == shown["frequency_hz"]
+    before, after = shown["spectrum_before_db"], shown["spectrum_after_db"]
+    assert len(before) == len(after) == len(shown["frequency_hz"])
+    # a -6 dB preamp moves the whole profile down (the fit is a shape, the preamp is level)
+    assert after[0] == pytest.approx(before[0] - 6.0, abs=0.6)
+    assert all(a <= b + 0.6 for a, b in zip(after, before, strict=True))
+
+
+def test_the_eq_flat_mode_ships_no_spectrum(server: ComfyServer, log: Log) -> None:
+    """Flat returns the audio unchanged and needs no Welch pass (the panel then shows no spectra)."""
+    entry = server.run(chain(folder=f"plenio-production/{label()}", eq={"mode": "flat"}))
+    shown = entry["outputs"]["2"]["plenio_eq"][0]
+    assert "spectrum_before_db" not in shown and shown["settings"]["bands"] == []
 
 
 def test_tone_match_preset_and_reference_errors(server: ComfyServer, log: Log) -> None:

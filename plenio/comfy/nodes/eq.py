@@ -157,6 +157,7 @@ class PlenioEQ(io.ComfyNode):
             eq.apply(item, rate, settings, cancel=host.raise_if_interrupted)
             for item, settings in zip(items, proposals, strict=True)
         ]
+        spectrum = _spectrum_grid(items[0], out[0], rate) if name != "flat" else {}
         summary = f"EQ {name}: " + ", ".join(f"{len(p['bands'])} band(s)" for p in proposals)
         report = Report(
             "eq",
@@ -165,7 +166,9 @@ class PlenioEQ(io.ComfyNode):
             tuple(d["reason"] for d in details if d.get("reason")),
             {"mode": name, "sample_rate": rate, "settings": proposals, "match": details},
         )
-        return io.NodeOutput(host.make_audio(out, rate), report, ui=_ui(report, proposals[0], rate))
+        return io.NodeOutput(
+            host.make_audio(out, rate), report, ui=_ui(report, proposals[0], rate, spectrum=spectrum)
+        )
 
 
 def _match_params(mode: dict[str, Any], name: str) -> dict[str, Any]:
@@ -182,7 +185,26 @@ def _match_params(mode: dict[str, Any], name: str) -> dict[str, Any]:
     }
 
 
-def _ui(report: Report, settings: dict[str, Any], rate: int) -> dict[str, Any]:
+def _spectrum_grid(before: Any, after: Any, rate: int) -> dict[str, Any]:
+    """1/6-octave long-term profiles of the input and the output of the first item (plan §5).
+
+    The curve widget draws them behind the response so a match proposal can be judged: grey = before,
+    accent = after. Costs one Welch pass per item at most; the first (or only) item is enough for a
+    picture of the tone.
+    """
+    grid = eq.display_grid(rate)
+    return {
+        "spectrum_frequency_hz": [round(float(f), 2) for f in grid],
+        "spectrum_before_db": [
+            round(float(v), 2) for v in eq.spectral_profile(before, rate, grid)["power_db"]
+        ],
+        "spectrum_after_db": [round(float(v), 2) for v in eq.spectral_profile(after, rate, grid)["power_db"]],
+    }
+
+
+def _ui(
+    report: Report, settings: dict[str, Any], rate: int, *, spectrum: dict[str, Any] | None = None
+) -> dict[str, Any]:
     grid = eq.display_grid(rate)
     curve = eq.response_db(settings, rate, grid)
     return {
@@ -193,6 +215,7 @@ def _ui(report: Report, settings: dict[str, Any], rate: int) -> dict[str, Any]:
                 "sample_rate": rate,
                 "frequency_hz": [round(float(f), 2) for f in grid],
                 "response_db": [round(float(v), 3) for v in curve],
+                **(spectrum or {}),
             }
         ],
     }

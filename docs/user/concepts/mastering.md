@@ -31,6 +31,16 @@ Audio shorter than one 400 ms block, or silent, is reported as *not measurable*;
 - **Tone match**: the audio's long-term spectrum (1/6-octave smoothing; fitted between 40 Hz and 16 kHz by default) is compared with a target - a gentle tilt around 1 kHz (*warm* -0.75 dB/octave, *bright* +0.75 dB/octave, relative to the audio itself) or the spectrum of a *reference* recording, with the level difference removed first. A least-squares fit places up to *max bands* peak filters; *strength* scales the correction and *max gain* bounds the summed curve. The report shows the error before and after.
 - No normalisation: a boost can raise the peak; clipping is only possible at the export of FLAC/MP3 if no limiter follows (the export warns).
 
+**Editing the curve.** The panel under the node works like a visual EQ:
+
+- **handles**: drag = frequency and gain (**Shift** = fine), wheel or Alt-drag = Q, double-click a handle = gain back to 0, double-click an empty place = a new bell, **Delete** or right-click = remove, arrow keys and `+`/`-`/`0` for the keyboard;
+- **band strip**: one chip per band (`● 2 Bell 1.20 kHz +2.0 dB Q 1`); a click opens the inline editor with the type (bell, low/high shelf, low/high cut, notch), frequency, gain, Q and an enable switch (a disabled band stays in the value but is not applied);
+- **toolbar**: preset menu, gain range (±6 / ±12 / ±18 dB), undo/redo, reset, **compare** (shows the flat line without touching the value) and *bands as text* (shows the raw `plenio.eq/1` JSON widget, hidden by default - it stays the stored value either way);
+- **modes**: *flat*, *manual*, *match preset*, *custom match*; a match proposal is shown read-only with **Edit these bands**, which copies it into *manual* and switches the mode;
+- **spectrum**: the last run's long-term spectrum behind the curve - grey before, blue after the EQ (from the node's UI payload); *flat* sends none (nothing is measured there).
+
+The bands live in the node's `mode.bands` widget, so a saved workflow restores exactly the EQ you see, and the panel itself is never serialised.
+
 ## Compressor and limiter
 
 Ported from the legacy toolkit v3.1.3 (same author, MIT), verified sample by sample against its outputs (difference below 2·10⁻⁶ of full scale; see the test report).
