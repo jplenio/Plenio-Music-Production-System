@@ -46,7 +46,8 @@ class PlenioAudioModelLoader(io.ComfyNode):
             ],
             outputs=[
                 AudioModelType.Output(
-                    display_name="model", tooltip="The loaded model, for Refine (super-resolution) or Separate Stems."
+                    display_name="model",
+                    tooltip="The loaded model, for Refine (super-resolution) or Separate Stems.",
                 )
             ],
         )
