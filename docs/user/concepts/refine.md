@@ -60,7 +60,7 @@ ComfyUI's missing-model dialog offers the download when you open *3 · MiniMax �
 
 ## The study (owner, local)
 
-`tools/studies/sr_study.py` measures the arms on your material and writes a JSON report; `tools/studies/listening_pack.py` builds the blind A/B/X pack. The commands and the decision rule are in [the plan §4.5](../design/next-release-plan.md) and in `CURRENT_STATUS.md`'s local checklist (L1). Nothing becomes a default before that verdict.
+`tools/studies/sr_study.py` measures the arms on your material, writes a JSON report and - with `--pack <dir>` - the **blind A/B material** (two level-matched files, `key.json`, `README.md` with the question). The commands and the decision rule are in [the plan §4.5](../design/next-release-plan.md) and in `CURRENT_STATUS.md`'s local checklist (L1). Nothing becomes a default before that verdict.
 
 ## Limits
 

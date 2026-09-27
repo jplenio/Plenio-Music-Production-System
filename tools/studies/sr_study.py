@@ -26,7 +26,13 @@ wins >= 70 % of the blind trials on >= 10 takes and shows no metric regression.
     <python with numpy, scipy, av and (for the model arm) torch> \\
         tools/studies/sr_study.py --out docs/test-reports/data/sr-study.json \\
         --models F:/ComfyUI/models --settings docs/test-reports/data/sr-study-settings.json \\
-        [--edge-hz 14500] reference/*.flac [--targets minimax-takes/]
+        [--edge-hz 14500] [--pack <dir>] reference/*.flac [--targets minimax-takes/]
+
+With ``--pack <dir>`` the tool also writes the **blind A/B material** for the listening half of L1:
+per simulation entry two level-matched files (``1.flac``/``2.flac``, order shuffled reproducibly) -
+the band-limited input against the refined arm - plus ``key.json`` (do not open before judging) and
+``README.md`` with the question. An arm that only resampled ("input already full band") writes no
+pair and says so: there would be nothing to hear.
 
 The settings file (optional) overrides the parameter grid, for example::
 
@@ -213,6 +219,13 @@ def load_engine(models_dir: Path | None) -> Any:
     The tool is standalone, so the folder is read directly (``--models`` or ComfyUI's models folder)
     instead of ComfyUI's folder registry.
     """
+    try:
+        from _common import import_comfy_if_available
+    except ImportError:  # run from another folder
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from _common import import_comfy_if_available
+
+    import_comfy_if_available()  # before the load: the adapter asks ComfyUI for the device
     from plenio.comfy import audio_models, host, universr
     from plenio.core.errors import PlenioError
     from plenio.core.models import AUDIO_MODEL_FOLDERS
@@ -333,6 +346,7 @@ def run_study(
     targets: list[Path],
     *,
     edge_hz: float,
+    pack: Path | None = None,
 ) -> dict[str, Any]:
     report: dict[str, Any] = {
         "schema": "plenio.sr-study/1",
@@ -353,15 +367,19 @@ def run_study(
             "input_lsd_16_24_db": log_spectral_distance(samples, limited, rate),
             "arms": {},
         }
+        outputs: dict[str, np.ndarray] = {}
         for arm in arms:
             _reset_vram()
             started = time.perf_counter()
             result, stage = arm.run(limited, rate)
             seconds = time.perf_counter() - started
+            outputs[arm.name] = result
             entry["arms"][arm.name] = {
                 "report": stage,
                 **_measure(limited, samples, result, OUTPUT_RATE, seconds, _peak_vram()),
             }
+        if pack is not None:
+            entry["pack"] = write_pack(pack, path, limited, entry["arms"], outputs, OUTPUT_RATE)
         report["simulation"][path.name] = entry
     for path in targets:
         samples, rate = decode(path)
@@ -385,6 +403,64 @@ def run_study(
         report["targets"][path.name] = entry
     report["summary"] = summarize(report)
     return report
+
+
+def write_pack(
+    pack: Path,
+    reference: Path,
+    limited: np.ndarray,
+    arms: dict[str, dict[str, Any]],
+    outputs: dict[str, np.ndarray],
+    rate: int,
+) -> dict[str, Any]:
+    """The blind A/B pair(s) for one simulation entry: the band-limited input against a refined arm.
+
+    Both files are the same length and level (Refine does not normalise), so the only difference is
+    what the arm added. The order is shuffled with a fixed seed; ``key.json`` names the winner and
+    ``README.md`` asks the question. Arms that changed nothing (the baseline, or an arm that only
+    resampled because the input was full band) write no pair - there would be nothing to hear.
+    """
+    import random
+
+    from plenio.core.release import safe_filename, write_audio
+
+    results: dict[str, Any] = {}
+    pairs: dict[str, np.ndarray] = {}
+    for arm_name, facts in arms.items():
+        note = (facts.get("report") or {}).get("notes")
+        if note:
+            results[arm_name] = {"skipped": note[0]}
+        elif arm_name in outputs and not np.allclose(outputs[arm_name], limited, atol=0.0):
+            pairs[arm_name] = outputs[arm_name]
+        else:
+            results[arm_name] = {"skipped": "the arm returned the input unchanged"}
+    if not pairs:
+        return results
+    folder = pack / safe_filename(reference.stem)
+    folder.mkdir(parents=True, exist_ok=True)
+    rng = random.Random(0xA11CE)
+    key: dict[str, Any] = {}
+    for arm_name, refined in pairs.items():
+        first = bool(rng.random() < 0.5)
+        write_audio(folder / "1.flac", limited if first else refined, rate, "flac", {"title": "1"})
+        write_audio(folder / "2.flac", refined if first else limited, rate, "flac", {"title": "2"})
+        key[arm_name] = {"band-limited": 1 if first else 2, "refined": 2 if first else 1}
+    (folder / "key.json").write_text(
+        json.dumps({"reference": str(reference), "pairs": key}, indent=1, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    (folder / "README.md").write_text(
+        f"# Blind A/B: {reference.name}\n\n"
+        "`1.flac` and `2.flac` are the same recording at the same level; one is band-limited at "
+        "the MiniMax edge, the other ran through a Refine arm.\n\n"
+        "Listen (headphones help) and answer:\n\n"
+        "1. Which file sounds more open - 1 or 2?\n"
+        "2. Does the winner sound natural, or does it hiss, fizz or smear (cymbals, sibilance)?\n"
+        "3. Is the difference worth the run time (see the JSON report's real-time factor)?\n\n"
+        "Afterwards open `key.json`; it names the arm and which number it was.\n",
+        encoding="utf-8",
+    )
+    return {"folder": str(folder), "key": key, **results}
 
 
 def _bandwidth(samples: np.ndarray, rate: int) -> float | None:
@@ -450,6 +526,11 @@ def main(argv: list[str] | None = None) -> int:
         metavar="NAME=DIR",
         help="an arm whose files another tool produced (e.g. flashsr=/path/to/refined)",
     )
+    parser.add_argument(
+        "--pack",
+        type=Path,
+        help="write the blind A/B material (two level-matched files, key.json, README.md) here",
+    )
     parser.add_argument("--only", action="append", default=[], help="arm names to keep")
     args = parser.parse_args(argv)
 
@@ -460,8 +541,11 @@ def main(argv: list[str] | None = None) -> int:
     targets = sorted(p for p in (args.targets.glob("*") if args.targets else []) if p.is_file())
     if not args.references and not targets:
         raise SystemExit("nothing to measure: pass reference files and/or --targets")
-    report = run_study(arms, list(args.references), targets, edge_hz=args.edge_hz)
+    report = run_study(arms, list(args.references), targets, edge_hz=args.edge_hz, pack=args.pack)
     report["arms"] = [arm.name for arm in arms]
+    report["devices"] = {
+        arm.name: str(getattr(arm.engine, "device", "")) for arm in arms if arm.engine is not None
+    }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=1, sort_keys=True) + "\n", encoding="utf-8")
     print(f"wrote {args.out}")

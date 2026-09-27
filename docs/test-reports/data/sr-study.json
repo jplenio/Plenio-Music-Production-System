@@ -1,0 +1,259 @@
+{
+ "arms": [
+  "resample only",
+  "universr[1]"
+ ],
+ "devices": {
+  "universr[1]": "cuda:0"
+ },
+ "edge_hz": 14500.0,
+ "output_rate": 48000,
+ "schema": "plenio.sr-study/1",
+ "simulation": {
+  "2026-09-27 Words We Never Said (2) (original).flac": {
+   "arms": {
+    "resample only": {
+     "fizz": {
+      "envelope_correlation": 0.8961,
+      "flatness": 0.1526
+     },
+     "loudness": {
+      "integrated_lufs": -16.459,
+      "peak": 0.904479,
+      "true_peak_dbtp": -0.842
+     },
+     "loudness_change_lu": 0.0,
+     "lsd_16_24_db": 113.38554850603339,
+     "onset_pre_echo_ms": 32.0,
+     "peak_vram_mb": 220.1,
+     "real_time_factor": 121.7359,
+     "report": {
+      "bandwidth_in_hz": 14865.2,
+      "bandwidth_out_hz": 14865.2,
+      "crossover_hz": null,
+      "engine": "resample only",
+      "frames": 2699520,
+      "input_rate": 48000,
+      "loudness_change_lu": 0.0,
+      "notes": [],
+      "output_rate": 48000,
+      "peak_in": 0.904479,
+      "peak_out": 0.904479,
+      "post_hz": null,
+      "pre_hz": null,
+      "provisional_defaults": true,
+      "schema": "plenio.refine/1",
+      "seconds": 0.462,
+      "seed": 0,
+      "settings": {
+       "crossover_hz": 0.0,
+       "post_hz": 0.0,
+       "pre_hz": 0.0,
+       "seed": 0,
+       "sr_gain": 1.0
+      },
+      "sr_gain": null
+     },
+     "seconds": 0.462
+    },
+    "universr[1]": {
+     "fizz": {
+      "envelope_correlation": 0.5237,
+      "flatness": 0.4632
+     },
+     "loudness": {
+      "integrated_lufs": -16.459,
+      "peak": 0.904457,
+      "true_peak_dbtp": -0.836
+     },
+     "loudness_change_lu": 0.0,
+     "lsd_16_24_db": 11.001843245218128,
+     "onset_pre_echo_ms": 32.0,
+     "peak_vram_mb": 2775.7,
+     "real_time_factor": 0.4135,
+     "report": {
+      "bandwidth_in_hz": 14865.2,
+      "bandwidth_out_hz": 20173.8,
+      "crossover_hz": 14365.234375,
+      "engine": "UniverSR",
+      "frames": 2699520,
+      "input_rate": 48000,
+      "loudness_change_lu": -0.0,
+      "notes": [],
+      "output_rate": 48000,
+      "peak_in": 0.904479,
+      "peak_out": 0.904457,
+      "post_hz": null,
+      "pre_hz": 12000.0,
+      "provisional_defaults": true,
+      "schema": "plenio.refine/1",
+      "seconds": 136.009,
+      "seed": 0,
+      "settings": {
+       "crossover_hz": 0.0,
+       "post_hz": 0.0,
+       "pre_hz": 0.0,
+       "seed": 0,
+       "sr_gain": 1.0
+      },
+      "sr_gain": 1.0
+     },
+     "seconds": 136.014
+    }
+   },
+   "input": "D:\\Daten2\\ComfyUI\\output\\plenio\\2026-09-27 Words We Never Said (2) (original).flac",
+   "input_bandwidth_hz": 14865.2,
+   "input_lsd_16_24_db": 113.38554850603339,
+   "pack": {
+    "folder": "D:\\Daten2\\ComfyUI\\output\\plenio-l1-pack\\2026-09-27 Words We Never Said (2) (original)",
+    "key": {
+     "universr[1]": {
+      "band-limited": 2,
+      "refined": 1
+     }
+    },
+    "resample only": {
+     "skipped": "the arm returned the input unchanged"
+    }
+   }
+  }
+ },
+ "summary": {
+  "simulation": {
+   "resample only": {
+    "files": 1,
+    "fizz_correlation": 0.8961,
+    "fizz_flatness": 0.1526,
+    "loudness_change_lu": 0.0,
+    "lsd_16_24_db": 113.3855,
+    "real_time_factor": 121.7359,
+    "true_peak_dbtp": -0.842
+   },
+   "universr[1]": {
+    "files": 1,
+    "fizz_correlation": 0.5237,
+    "fizz_flatness": 0.4632,
+    "loudness_change_lu": 0.0,
+    "lsd_16_24_db": 11.0018,
+    "real_time_factor": 0.4135,
+    "true_peak_dbtp": -0.836
+   }
+  },
+  "targets": {
+   "resample only": {
+    "files": 1,
+    "fizz_correlation": 0.727,
+    "fizz_flatness": 0.0007,
+    "loudness_change_lu": -0.062,
+    "lsd_16_24_db": null,
+    "real_time_factor": 47.4723,
+    "true_peak_dbtp": -0.37
+   },
+   "universr[1]": {
+    "files": 1,
+    "fizz_correlation": 0.727,
+    "fizz_flatness": 0.0007,
+    "loudness_change_lu": -0.062,
+    "lsd_16_24_db": null,
+    "real_time_factor": 47.2504,
+    "true_peak_dbtp": -0.37
+   }
+  }
+ },
+ "targets": {
+  "minimax-words-we-never-said.flac": {
+   "arms": {
+    "resample only": {
+     "fizz": {
+      "envelope_correlation": 0.727,
+      "flatness": 0.0007
+     },
+     "loudness": {
+      "integrated_lufs": -19.198,
+      "peak": 0.956263,
+      "true_peak_dbtp": -0.37
+     },
+     "loudness_change_lu": -0.062,
+     "onset_pre_echo_ms": 32.0,
+     "peak_vram_mb": 229.2,
+     "real_time_factor": 47.4723,
+     "report": {
+      "bandwidth_in_hz": 22050.0,
+      "bandwidth_out_hz": 21410.2,
+      "crossover_hz": null,
+      "engine": "resample only",
+      "frames": 5448516,
+      "input_rate": 44100,
+      "loudness_change_lu": 0.0,
+      "notes": [],
+      "output_rate": 48000,
+      "peak_in": 0.948385,
+      "peak_out": 0.956263,
+      "post_hz": null,
+      "pre_hz": null,
+      "provisional_defaults": true,
+      "schema": "plenio.refine/1",
+      "seconds": 2.391,
+      "seed": 0,
+      "settings": {
+       "crossover_hz": 0.0,
+       "post_hz": 0.0,
+       "pre_hz": 0.0,
+       "seed": 0,
+       "sr_gain": 1.0
+      },
+      "sr_gain": null
+     },
+     "seconds": 2.391
+    },
+    "universr[1]": {
+     "fizz": {
+      "envelope_correlation": 0.727,
+      "flatness": 0.0007
+     },
+     "loudness": {
+      "integrated_lufs": -19.198,
+      "peak": 0.956263,
+      "true_peak_dbtp": -0.37
+     },
+     "loudness_change_lu": -0.062,
+     "onset_pre_echo_ms": 32.0,
+     "peak_vram_mb": 229.2,
+     "real_time_factor": 47.2504,
+     "report": {
+      "bandwidth_in_hz": 22050.0,
+      "bandwidth_out_hz": 21410.2,
+      "crossover_hz": null,
+      "engine": "UniverSR",
+      "frames": 5448516,
+      "input_rate": 44100,
+      "loudness_change_lu": 0.0,
+      "notes": [
+       "input already full band (22050 Hz) - resample only"
+      ],
+      "output_rate": 48000,
+      "peak_in": 0.948385,
+      "peak_out": 0.956263,
+      "post_hz": null,
+      "pre_hz": null,
+      "provisional_defaults": true,
+      "schema": "plenio.refine/1",
+      "seconds": 2.398,
+      "seed": 0,
+      "settings": {
+       "crossover_hz": 0.0,
+       "post_hz": 0.0,
+       "pre_hz": 0.0,
+       "seed": 0,
+       "sr_gain": 1.0
+      },
+      "sr_gain": null
+     },
+     "seconds": 2.402
+    }
+   },
+   "input": ".devdeps\\l1-targets\\minimax-words-we-never-said.flac",
+   "input_bandwidth_hz": 22050.0
+  }
+ }
+}

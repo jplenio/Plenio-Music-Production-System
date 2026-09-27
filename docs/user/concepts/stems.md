@@ -97,11 +97,14 @@ refused with a message rather than guessed at.
 
 ## What is measured, what is not
 
-- The authors report **MUSDB18-HQ SDR 9.66** for this checkpoint. Plenio has not re-measured it.
+- The authors report **MUSDB18-HQ SDR 9.66** for this checkpoint. Plenio has not re-measured the separation quality itself.
 - Everything the mixer guarantees (neutral = input, solo/mute rules, range merging, bus determinism, lengths and
   rates) is covered by tests that run without the model.
 - The **listening check (L2)** on real songs with the real weights is an owner task; until it is accepted, the
-  block is marked **experimental**. The checklist is in `CURRENT_STATUS.md` (L2) and the plan §6.
+  block is marked **experimental**. `tools/studies/stem_study.py` produces the numbers (speed, VRAM, the
+  neutral-mix and muted-range contracts) and - with `--write-audio <dir>` - the material for the verdict: the
+  neutral mix, the four stems, the residual and one example mix as 24-bit FLAC. The checklist is in
+  `CURRENT_STATUS.md` (L2) and the plan §6.
 
 ## Limits
 

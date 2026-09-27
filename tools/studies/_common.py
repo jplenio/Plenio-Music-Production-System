@@ -33,6 +33,18 @@ def import_comfy() -> None:
         sys.path.insert(0, root)
 
 
+def import_comfy_if_available() -> None:
+    """Put ComfyUI on ``sys.path`` when ``PLENIO_COMFYUI_ROOT`` names it.
+
+    The audio adapters ask the host for the torch device (``plenio.comfy.host``);
+    without ComfyUI importable that silently answers "cpu", so a model arm would run
+    on the CPU and report an empty VRAM. Call this before loading a model.
+    """
+    root = os.environ.get("PLENIO_COMFYUI_ROOT", "").strip()
+    if root and root not in sys.path:
+        sys.path.insert(0, root)
+
+
 def load_audio(path: Path) -> tuple[Any, int]:
     """Decode exactly like the native LoadAudio node: (channels, samples) float32, sample rate."""
     import_comfy()
