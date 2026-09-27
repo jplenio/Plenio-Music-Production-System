@@ -126,6 +126,9 @@ LOADER_WIDGETS = {
     "CLIPLoader": "clip_name",
     "VAELoader": "vae_name",
     "AudioEncoderLoader": "audio_encoder_name",
+    # Plenio's own audio model loader (Refine's UniverSR, later the separator); its file widget
+    # lives inside the 'kind' dynamic combo.
+    "PlenioAudioModelLoader": "kind.model",
 }
 
 
@@ -143,7 +146,10 @@ def model_files(template: dict[str, Any]) -> tuple[dict[str, dict[str, Any]], se
                 walk(definitions[node["type"]]["nodes"], off)
             elif node["type"] in LOADER_WIDGETS:
                 (entry,) = node["properties"]["models"]
-                assert entry["name"] == node["widgets_values"][0], node
+                # the file widget: the first value for ComfyUI's own loaders; Plenio's audio model
+                # loader puts its file after the dynamic combo's 'kind' value
+                index = 1 if node["type"] == "PlenioAudioModelLoader" else 0
+                assert entry["name"] == node["widgets_values"][index], node
                 entries[entry["name"]] = entry
                 (optional if off else required).add(entry["name"])
 
@@ -256,6 +262,37 @@ def test_the_daw_template_composes_its_own_score() -> None:
     abc_slot = next(s for s in render["inputs"] if s["name"] == "abc")
     assert links[abc_slot["link"]][1:3] == [score_sheet["id"], score_out]
     assert any(n.get("title") == "Plenio · Master" for n in nodes)
+
+
+def test_refine_runs_in_minimax_and_stays_bypassed_elsewhere() -> None:
+    """M5/D10: Refine (48 kHz) with UniverSR is on in MiniMax and bypassed (collapsed) elsewhere (plan §4.6)."""
+    for name, active in (
+        ("1 · YuE2 · Song", False),
+        ("2 · YuE2 · Cover", False),
+        ("3 · MiniMax · Song", True),
+        ("4 · Enhance & Master", False),
+        ("5 · YuE2 · DAW", False),
+    ):
+        template = TEMPLATES[name]
+        wrapper = next(n for n in template["nodes"] if "Refine" in str(n.get("title", "")))
+        assert (wrapper.get("mode") != 4) is active, name
+        assert wrapper["flags"]["collapsed"] is True, name
+        if not active:
+            assert "(optional)" in str(wrapper["title"]), name
+        group = next(g for g in template["groups"] if "REFINE" in g["title"])
+        assert ("48 kHz" in group["title"]) is active, name
+        definition = next(d for d in template["definitions"]["subgraphs"] if d["id"] == wrapper["type"])
+        assert definition["name"] == "Plenio · Refine (48 kHz)"
+        loader = next(n for n in definition["nodes"] if n["type"] == "PlenioAudioModelLoader")
+        assert loader["widgets_values"][1] == "pytorch_model.bin"
+        assert loader["properties"]["models"][0]["directory"] == "audio_sr"
+        stage = next(n for n in definition["nodes"] if n["type"] == "PlenioRefine")
+        assert stage["widgets_values"][0] == "model"  # the engine widget: the connected model
+        # the stage's report reaches the release record
+        export = next(n for n in template["nodes"] if n["type"] == "PlenioExportRelease")
+        reports = [slot for slot in export["inputs"] if slot["name"].startswith("reports.")]
+        sources = {link[1] for link in template["links"] if link[0] in {s["link"] for s in reports}}
+        assert wrapper["id"] in sources, name
 
 
 def test_thumbnails_are_400px_jpegs() -> None:

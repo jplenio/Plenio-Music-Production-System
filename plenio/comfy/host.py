@@ -93,6 +93,14 @@ def register_model_folders() -> None:
     for folder in (ASSET_FOLDER, *AUDIO_MODEL_FOLDERS.values()):
         if folder not in folder_paths.folder_names_and_paths:
             folder_paths.add_model_folder_path(folder, str(models_directory() / folder))
+        if folder in AUDIO_MODEL_FOLDERS.values():
+            # ComfyUI registers a new folder with *no* extensions, so it would list nothing; the
+            # audio model folders take the same files as the built-in ones (.safetensors, .bin, ...).
+            paths, extensions = folder_paths.folder_names_and_paths[folder]
+            folder_paths.folder_names_and_paths[folder] = (
+                paths,
+                set(extensions) | set(folder_paths.supported_pt_extensions),
+            )
 
 
 def model_files(folder: str) -> list[str]:
@@ -150,6 +158,24 @@ def free_memory(required_bytes: int, device: str | None = None) -> None:
 
     target = torch.device(device) if device else comfy.model_management.get_torch_device()
     comfy.model_management.free_memory(required_bytes, target)
+
+
+def torch_device() -> str:
+    """The device ComfyUI wants models on ("cpu" outside a ComfyUI host)."""
+    try:
+        import comfy.model_management
+    except ImportError:
+        return "cpu"
+    return str(comfy.model_management.get_torch_device())
+
+
+def soft_empty_cache() -> None:
+    """Let ComfyUI decide what to free after a model ran (R9); silent outside a ComfyUI host."""
+    try:
+        import comfy.model_management
+    except ImportError:
+        return
+    comfy.model_management.soft_empty_cache()
 
 
 def send_event(event: str, data: dict[str, Any]) -> None:

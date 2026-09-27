@@ -99,14 +99,16 @@ def test_template_inventory_and_optional_packages() -> None:
     }
     assert rows["1 · YuE2 · Song"]["ready"] and rows["4 · Enhance & Master"]["ready"]
     assert rows["5 · YuE2 · DAW"]["ready"]  # the same model and writer as the song template
-    assert not rows["3 · MiniMax · Song"]["ready"] and rows["3 · MiniMax · Song"]["missing_size"] == "14.1 GB"
+    assert not rows["3 · MiniMax · Song"]["ready"]
+    # 14.1 GB of MiniMax files plus the 229 MB UniverSR weights of Refine (plan §4.6)
+    assert rows["3 · MiniMax · Song"]["missing_size"] == "14.3 GB"
     assert "flux-2-klein-4b.safetensors" in rows["1 · YuE2 · Song"]["optional_missing"]
     status = {row["file"]: row["status"] for row in report.data["models"]}
     assert status["yue2_3b_int8_convrot.safetensors"] == "installed"
     assert status["sheetsage2_bf16.safetensors"] == "missing"
     assert "yue2_3b_bf16.safetensors" not in status  # alternatives appear in the rule table only
     markdown = to_markdown(report)
-    assert "| 1 · YuE2 · Song | all installed; optional blocks: 4 not installed |" in markdown
+    assert "| 1 · YuE2 · Song | all installed; optional blocks: 5 not installed |" in markdown
     assert (
         "1 with an unexpected size (an interrupted download?): `minimax_music3_dav.safetensors`" in markdown
     )

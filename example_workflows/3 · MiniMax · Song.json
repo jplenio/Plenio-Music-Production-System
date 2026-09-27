@@ -1,8 +1,8 @@
 {
  "id": "b96be7a0-0f56-5627-8df4-99ad092a11ce",
  "revision": 0,
- "last_node_id": 13,
- "last_link_id": 27,
+ "last_node_id": 14,
+ "last_link_id": 29,
  "nodes": [
   {
    "id": 1,
@@ -25,7 +25,7 @@
     "Node name for S&R": "MarkdownNote"
    },
    "widgets_values": [
-    "# 3 · MiniMax · Song\n\n**Brief -> Write Song -> Song Sheet -> MiniMax Render -> Master -> Export**\n\n1. Choose the **mode** in **Song Brief**:\n   - *new song every run* - every run writes and renders a **different song** from the brief, without stops (set the **Draft seed** to *randomize* for even more variety). For a series, set the batch count next to **Run** (App mode: *Number of runs*) - one click, many songs.\n   - *one song, stop to review* - the run **stops at the Song Sheet**: open it, check or edit the documents, *Approve*, run again. Once approved, every further run is a **new take** of the same song (the documents stay cached).\n2. Describe the song (or pick a template). *vocals* switches between a sung song and an instrumental; *length* runs from 1:00 to 6:00.\n3. Press **Run**. The writer model drafts title, a structured **caption** (Global Metadata, Vocal Details, Arrangement), lyrics and an artwork prompt; MiniMax Music 3 renders the song.\n\n**Inspect and edit:** open the **Song Sheet** to see exactly what MiniMax receives; its *review* follows the brief's mode (*as the brief says*). Caption and lyrics together must stay under **5 000 tokens** (the sheet counts them exactly with the loaded text encoder and stops before rendering if they do not fit). The render ceiling follows the brief's length, at most 6:00; the model can end earlier.\n\n**Instrumentals:** the lyrics are a map of section tags ([Intro], [Instrumental], [Solo], ...), about twice as long as a sung song's, and the caption's Vocal Details are *n/a*.\n\n**Finish:** *Plenio · Master* brings the take to -14 LUFS / -1 dBTP with a gentle tone match (open the block to change the EQ or the loudness target). Export writes the mastered FLAC 24-bit, the unmastered take as `(original).flac` and a release record to `output/plenio`.\n\n**Cover art (optional, bypassed):** *Cover Art* paints a cover from the sheet's artwork prompt with FLUX.2 Klein 4B (about 16 GB of extra model files, Apache-2.0). Select it and the cover preview and press **Ctrl+B**; Export then embeds the cover in the FLAC and MP3 files and saves it as `.jpg`.\n\n**App mode:** switch *Graph / App* at the top left for a simple form: the mode, the brief, the take seed, the Song Sheet buttons (review and edit, also in the app) and the results. *Number of runs* next to Run renders a series.\n\n**Models** (ComfyUI offers the downloads when you open the template): MiniMax Music 3 (diffusion model 4.9 GB, int8 text encoder 9.2 GB, VAE), the Gemma 4 E4B writer. MiniMax Music 3 weights: **MiniMax-Music3 Community License**. If decoding runs out of memory, turn on *tiled decode* in MiniMax Render.\n"
+    "# 3 · MiniMax · Song\n\n**Brief -> Write Song -> Song Sheet -> MiniMax Render -> Refine (48 kHz) -> Master -> Export**\n\n1. Choose the **mode** in **Song Brief**:\n   - *new song every run* - every run writes and renders a **different song** from the brief, without stops (set the **Draft seed** to *randomize* for even more variety). For a series, set the batch count next to **Run** (App mode: *Number of runs*) - one click, many songs.\n   - *one song, stop to review* - the run **stops at the Song Sheet**: open it, check or edit the documents, *Approve*, run again. Once approved, every further run is a **new take** of the same song (the documents stay cached).\n2. Describe the song (or pick a template). *vocals* switches between a sung song and an instrumental; *length* runs from 1:00 to 6:00.\n3. Press **Run**. The writer model drafts title, a structured **caption** (Global Metadata, Vocal Details, Arrangement), lyrics and an artwork prompt; MiniMax Music 3 renders the song.\n\n**Inspect and edit:** open the **Song Sheet** to see exactly what MiniMax receives; its *review* follows the brief's mode (*as the brief says*). Caption and lyrics together must stay under **5 000 tokens** (the sheet counts them exactly with the loaded text encoder and stops before rendering if they do not fit). The render ceiling follows the brief's length, at most 6:00; the model can end earlier.\n\n**Instrumentals:** the lyrics are a map of section tags ([Intro], [Instrumental], [Solo], ...), about twice as long as a sung song's, and the caption's Vocal Details are *n/a*.\n\n**Finish:** *Plenio · Master* brings the take to -14 LUFS / -1 dBTP with a gentle tone match (open the block to change the EQ or the loudness target). Export writes the mastered FLAC 24-bit, the unmastered take as `(original).flac` and a release record to `output/plenio`.\n\n**Cover art (optional, bypassed):** *Cover Art* paints a cover from the sheet's artwork prompt with FLUX.2 Klein 4B (about 16 GB of extra model files, Apache-2.0). Select it and the cover preview and press **Ctrl+B**; Export then embeds the cover in the FLAC and MP3 files and saves it as `.jpg`.\n\n**App mode:** switch *Graph / App* at the top left for a simple form: the mode, the brief, the take seed, the Song Sheet buttons (review and edit, also in the app) and the results. *Number of runs* next to Run renders a series.\n\n**Models** (ComfyUI offers the downloads when you open the template): MiniMax Music 3 (diffusion model 4.9 GB, int8 text encoder 9.2 GB, VAE), the Gemma 4 E4B writer. MiniMax Music 3 weights: **MiniMax-Music3 Community License**. If decoding runs out of memory, turn on *tiled decode* in MiniMax Render.\n"
    ]
   },
   {
@@ -593,7 +593,7 @@
      "name": "title",
      "type": "STRING",
      "links": [
-      21
+      22
      ]
     },
     {
@@ -623,7 +623,7 @@
      "name": "artwork_prompt",
      "type": "STRING",
      "links": [
-      22
+      23
      ]
     },
     {
@@ -645,7 +645,7 @@
      "name": "report",
      "type": "PLENIO_REPORT",
      "links": [
-      25
+      26
      ]
     },
     {
@@ -797,8 +797,7 @@
      "name": "AUDIO",
      "type": "AUDIO",
      "links": [
-      17,
-      20
+      17
      ]
     },
     {
@@ -820,16 +819,18 @@
   },
   {
    "id": 9,
-   "type": "259b88ba-7c57-57fb-b73e-58f691fe4b56",
+   "type": "d0897a69-045d-5c2a-95eb-7a0481b8318b",
    "pos": [
     1800,
-    0
+    430
    ],
    "size": [
     340,
     170
    ],
-   "flags": {},
+   "flags": {
+    "collapsed": true
+   },
    "order": 8,
    "mode": 0,
    "inputs": [
@@ -838,6 +839,51 @@
      "name": "audio",
      "type": "AUDIO",
      "link": 17
+    }
+   ],
+   "outputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "links": [
+      18,
+      21
+     ]
+    },
+    {
+     "localized_name": "report",
+     "name": "report",
+     "type": "PLENIO_REPORT",
+     "links": [
+      27
+     ]
+    }
+   ],
+   "title": "Plenio · Refine (48 kHz)",
+   "properties": {},
+   "widgets_values": []
+  },
+  {
+   "id": 10,
+   "type": "259b88ba-7c57-57fb-b73e-58f691fe4b56",
+   "pos": [
+    2320,
+    0
+   ],
+   "size": [
+    340,
+    170
+   ],
+   "flags": {},
+   "order": 9,
+   "mode": 0,
+   "inputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "link": 18
     },
     {
      "localized_name": "reference",
@@ -862,8 +908,8 @@
      "name": "audio",
      "type": "AUDIO",
      "links": [
-      18,
-      19
+      19,
+      20
      ]
     },
     {
@@ -871,7 +917,7 @@
      "name": "eq_report",
      "type": "PLENIO_REPORT",
      "links": [
-      26
+      28
      ]
     },
     {
@@ -879,7 +925,7 @@
      "name": "loudness_report",
      "type": "PLENIO_REPORT",
      "links": [
-      27
+      29
      ]
     }
    ],
@@ -890,10 +936,10 @@
    ]
   },
   {
-   "id": 10,
+   "id": 11,
    "type": "PreviewAudio",
    "pos": [
-    1800,
+    2320,
     230
    ],
    "size": [
@@ -901,14 +947,14 @@
     120
    ],
    "flags": {},
-   "order": 9,
+   "order": 10,
    "mode": 0,
    "inputs": [
     {
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
-     "link": 18
+     "link": 19
     }
    ],
    "outputs": [
@@ -926,10 +972,10 @@
    "widgets_values": []
   },
   {
-   "id": 11,
+   "id": 12,
    "type": "PlenioExportRelease",
    "pos": [
-    2200,
+    2720,
     0
    ],
    "size": [
@@ -937,35 +983,35 @@
     440
    ],
    "flags": {},
-   "order": 10,
+   "order": 11,
    "mode": 0,
    "inputs": [
     {
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
-     "link": 19
+     "link": 20
     },
     {
      "localized_name": "title",
      "name": "title",
      "shape": 7,
      "type": "STRING",
-     "link": 21
+     "link": 22
     },
     {
      "localized_name": "original",
      "name": "original",
      "shape": 7,
      "type": "AUDIO",
-     "link": 20
+     "link": 21
     },
     {
      "localized_name": "cover",
      "name": "cover",
      "shape": 7,
      "type": "IMAGE",
-     "link": 23
+     "link": 24
     },
     {
      "localized_name": "reports.report_0",
@@ -973,7 +1019,7 @@
      "label": "report_0",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 25
+     "link": 26
     },
     {
      "localized_name": "reports.report_1",
@@ -981,7 +1027,7 @@
      "label": "report_1",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 26
+     "link": 27
     },
     {
      "localized_name": "reports.report_2",
@@ -989,12 +1035,20 @@
      "label": "report_2",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 27
+     "link": 28
     },
     {
      "localized_name": "reports.report_3",
      "name": "reports.report_3",
      "label": "report_3",
+     "shape": 7,
+     "type": "PLENIO_REPORT",
+     "link": 29
+    },
+    {
+     "localized_name": "reports.report_4",
+     "name": "reports.report_4",
+     "label": "report_4",
      "shape": 7,
      "type": "PLENIO_REPORT",
      "link": null
@@ -1091,10 +1145,10 @@
    ]
   },
   {
-   "id": 12,
+   "id": 13,
    "type": "9dbb5617-ccf9-5537-b674-405adb29958c",
    "pos": [
-    1800,
+    2320,
     560
    ],
    "size": [
@@ -1102,7 +1156,7 @@
     170
    ],
    "flags": {},
-   "order": 11,
+   "order": 12,
    "mode": 4,
    "inputs": [
     {
@@ -1113,7 +1167,7 @@
      "widget": {
       "name": "text"
      },
-     "link": 22
+     "link": 23
     },
     {
      "localized_name": "noise_seed",
@@ -1142,8 +1196,8 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      23,
-      24
+      24,
+      25
      ]
     }
    ],
@@ -1156,10 +1210,10 @@
    ]
   },
   {
-   "id": 13,
+   "id": 14,
    "type": "PreviewImage",
    "pos": [
-    2200,
+    2720,
     560
    ],
    "size": [
@@ -1167,14 +1221,14 @@
     300
    ],
    "flags": {},
-   "order": 12,
+   "order": 13,
    "mode": 4,
    "inputs": [
     {
      "localized_name": "images",
      "name": "images",
      "type": "IMAGE",
-     "link": 24
+     "link": 25
     }
    ],
    "outputs": [
@@ -1339,7 +1393,7 @@
   ],
   [
    19,
-   9,
+   10,
    0,
    11,
    0,
@@ -1347,75 +1401,104 @@
   ],
   [
    20,
-   8,
+   10,
    0,
-   11,
-   2,
+   12,
+   0,
    "AUDIO"
   ],
   [
    21,
-   6,
+   9,
    0,
-   11,
-   1,
-   "STRING"
+   12,
+   2,
+   "AUDIO"
   ],
   [
    22,
    6,
-   4,
-   12,
    0,
+   12,
+   1,
    "STRING"
   ],
   [
    23,
-   12,
+   6,
+   4,
+   13,
    0,
-   11,
+   "STRING"
+  ],
+  [
+   24,
+   13,
+   0,
+   12,
    3,
    "IMAGE"
   ],
   [
-   24,
-   12,
-   0,
+   25,
    13,
+   0,
+   14,
    0,
    "IMAGE"
   ],
   [
-   25,
+   26,
    6,
    7,
-   11,
+   12,
    4,
-   "PLENIO_REPORT"
-  ],
-  [
-   26,
-   9,
-   1,
-   11,
-   5,
    "PLENIO_REPORT"
   ],
   [
    27,
    9,
-   2,
-   11,
+   1,
+   12,
+   5,
+   "PLENIO_REPORT"
+  ],
+  [
+   28,
+   10,
+   1,
+   12,
    6,
+   "PLENIO_REPORT"
+  ],
+  [
+   29,
+   10,
+   2,
+   12,
+   7,
    "PLENIO_REPORT"
   ]
  ],
  "groups": [
   {
    "id": 1,
-   "title": "5 · FINISH",
+   "title": "REFINE (48 kHz)",
    "bounding": [
     1770,
+    360,
+    320,
+    130
+   ],
+   "color": "#3f789e",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 2,
+   "title": "5 · FINISH",
+   "bounding": [
+    2290,
     -70,
     840,
     540
@@ -1425,10 +1508,10 @@
    "flags": {}
   },
   {
-   "id": 2,
+   "id": 3,
    "title": "COVER ART (optional)",
    "bounding": [
-    1770,
+    2290,
     490,
     760,
     400
@@ -1438,7 +1521,7 @@
    "flags": {}
   },
   {
-   "id": 3,
+   "id": 4,
    "title": "1 · SONG",
    "bounding": [
     -30,
@@ -1451,7 +1534,7 @@
    "flags": {}
   },
   {
-   "id": 4,
+   "id": 5,
    "title": "2 · WRITE",
    "bounding": [
     430,
@@ -1464,7 +1547,7 @@
    "flags": {}
   },
   {
-   "id": 5,
+   "id": 6,
    "title": "3 · SHEET",
    "bounding": [
     870,
@@ -1477,7 +1560,7 @@
    "flags": {}
   },
   {
-   "id": 6,
+   "id": 7,
    "title": "4 · RENDER",
    "bounding": [
     1370,
@@ -1490,7 +1573,7 @@
    "flags": {}
   },
   {
-   "id": 7,
+   "id": 8,
    "title": "MUSIC MODEL",
    "bounding": [
     -30,
@@ -4700,6 +4783,294 @@
     "extra": {},
     "category": "Plenio/Artwork",
     "description": "Paints the cover from the Song Sheet's artwork prompt with FLUX.2 Klein 4B (distilled, 4 steps, native nodes; Apache-2.0). The templates keep it bypassed because it needs about 16 GB of extra model files: select it and press Ctrl+B to turn it on. The seed is fixed, so new takes keep the cover; change it for another cover. Replace the block with any text-to-image block that takes a prompt and gives an image."
+   },
+   {
+    "id": "d0897a69-045d-5c2a-95eb-7a0481b8318b",
+    "version": 1,
+    "state": {
+     "lastGroupId": 0,
+     "lastNodeId": 702,
+     "lastLinkId": 4,
+     "lastRerouteId": 0
+    },
+    "revision": 0,
+    "config": {},
+    "name": "Plenio · Refine (48 kHz)",
+    "inputNode": {
+     "id": -10,
+     "bounding": [
+      -260,
+      0,
+      160,
+      60
+     ]
+    },
+    "outputNode": {
+     "id": -20,
+     "bounding": [
+      840,
+      0,
+      160,
+      80
+     ]
+    },
+    "inputs": [
+     {
+      "id": "8cee3b9b-5a37-520c-ac40-bde1a9d73185",
+      "name": "audio",
+      "type": "AUDIO",
+      "linkIds": [
+       2
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     }
+    ],
+    "outputs": [
+     {
+      "id": "590904b2-9fa7-51aa-bdc8-c4065a188107",
+      "name": "audio",
+      "type": "AUDIO",
+      "linkIds": [
+       3
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     },
+     {
+      "id": "7d592758-5053-5ca3-94e4-eb01dc0bab41",
+      "name": "report",
+      "type": "PLENIO_REPORT",
+      "linkIds": [
+       4
+      ],
+      "pos": [
+       0,
+       20
+      ]
+     }
+    ],
+    "widgets": [],
+    "nodes": [
+     {
+      "id": 701,
+      "type": "PlenioAudioModelLoader",
+      "pos": [
+       0,
+       0
+      ],
+      "size": [
+       340,
+       130
+      ],
+      "flags": {
+       "collapsed": true
+      },
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "kind",
+        "name": "kind",
+        "type": "COMFY_DYNAMICCOMBO_V3",
+        "widget": {
+         "name": "kind"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "kind.model",
+        "name": "kind.model",
+        "type": "COMBO",
+        "widget": {
+         "name": "kind.model"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "model",
+        "name": "model",
+        "type": "PLENIO_AUDIO_MODEL",
+        "links": [
+         1
+        ]
+       }
+      ],
+      "title": "Super-resolution model",
+      "properties": {
+       "Node name for S&R": "PlenioAudioModelLoader",
+       "models": [
+        {
+         "name": "pytorch_model.bin",
+         "url": "https://huggingface.co/woongzip1/universr-audio/resolve/main/pytorch_model.bin",
+         "directory": "audio_sr"
+        }
+       ]
+      },
+      "widgets_values": [
+       "super-resolution",
+       "pytorch_model.bin"
+      ]
+     },
+     {
+      "id": 702,
+      "type": "PlenioRefine",
+      "pos": [
+       400,
+       0
+      ],
+      "size": [
+       340,
+       260
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "audio",
+        "name": "audio",
+        "type": "AUDIO",
+        "link": 2
+       },
+       {
+        "localized_name": "model",
+        "name": "model",
+        "shape": 7,
+        "type": "PLENIO_AUDIO_MODEL",
+        "link": 1
+       },
+       {
+        "localized_name": "engine",
+        "name": "engine",
+        "label": "engine",
+        "type": "COMBO",
+        "widget": {
+         "name": "engine"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "crossover_hz",
+        "name": "crossover_hz",
+        "type": "FLOAT",
+        "widget": {
+         "name": "crossover_hz"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "sr_gain",
+        "name": "sr_gain",
+        "type": "FLOAT",
+        "widget": {
+         "name": "sr_gain"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "pre_hz",
+        "name": "pre_hz",
+        "type": "FLOAT",
+        "widget": {
+         "name": "pre_hz"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "post_hz",
+        "name": "post_hz",
+        "type": "FLOAT",
+        "widget": {
+         "name": "post_hz"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "seed",
+        "name": "seed",
+        "type": "INT",
+        "widget": {
+         "name": "seed"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "audio",
+        "name": "audio",
+        "type": "AUDIO",
+        "links": [
+         3
+        ]
+       },
+       {
+        "localized_name": "report",
+        "name": "report",
+        "type": "PLENIO_REPORT",
+        "links": [
+         4
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "PlenioRefine"
+      },
+      "widgets_values": [
+       "model",
+       0.0,
+       1.0,
+       0.0,
+       0.0,
+       0
+      ]
+     }
+    ],
+    "groups": [],
+    "links": [
+     {
+      "id": 1,
+      "origin_id": 701,
+      "origin_slot": 0,
+      "target_id": 702,
+      "target_slot": 1,
+      "type": "PLENIO_AUDIO_MODEL"
+     },
+     {
+      "id": 2,
+      "origin_id": -10,
+      "origin_slot": 0,
+      "target_id": 702,
+      "target_slot": 0,
+      "type": "AUDIO"
+     },
+     {
+      "id": 3,
+      "origin_id": 702,
+      "origin_slot": 0,
+      "target_id": -20,
+      "target_slot": 0,
+      "type": "AUDIO"
+     },
+     {
+      "id": 4,
+      "origin_id": 702,
+      "origin_slot": 1,
+      "target_id": -20,
+      "target_slot": 1,
+      "type": "PLENIO_REPORT"
+     }
+    ],
+    "extra": {},
+    "category": "Plenio/Audio",
+    "description": "Brings the song to 48 kHz and extends the missing top octave with UniverSR (vocoder-free flow matching), keeping everything below the measured bandwidth from the render (complementary crossover). Same duration, no normalisation; the report shows engine, bandwidth before and after, crossover, loudness change and timing. The defaults are provisional until the measurement study (L1)."
    }
   ]
  },
@@ -4772,8 +5143,8 @@
     ]
    ],
    "outputs": [
-    10,
-    11
+    11,
+    12
    ]
   }
  },

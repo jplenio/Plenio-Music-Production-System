@@ -1,8 +1,8 @@
 {
  "id": "a5f390ed-d4cb-5c2e-8537-2f04fa3ebe66",
  "revision": 0,
- "last_node_id": 15,
- "last_link_id": 36,
+ "last_node_id": 16,
+ "last_link_id": 38,
  "nodes": [
   {
    "id": 1,
@@ -574,7 +574,7 @@
      "name": "title",
      "type": "STRING",
      "links": [
-      29
+      30
      ]
     },
     {
@@ -606,7 +606,7 @@
      "name": "artwork_prompt",
      "type": "STRING",
      "links": [
-      30
+      31
      ]
     },
     {
@@ -626,7 +626,7 @@
      "name": "report",
      "type": "PLENIO_REPORT",
      "links": [
-      33
+      34
      ]
     },
     {
@@ -887,7 +887,7 @@
      "name": "report",
      "type": "PLENIO_REPORT",
      "links": [
-      34
+      35
      ]
     },
     {
@@ -1050,8 +1050,7 @@
      "name": "AUDIO",
      "type": "AUDIO",
      "links": [
-      25,
-      28
+      25
      ]
     },
     {
@@ -1074,6 +1073,53 @@
   },
   {
    "id": 11,
+   "type": "d0897a69-045d-5c2a-95eb-7a0481b8318b",
+   "pos": [
+    2320,
+    440
+   ],
+   "size": [
+    340,
+    170
+   ],
+   "flags": {
+    "collapsed": true
+   },
+   "order": 10,
+   "mode": 4,
+   "inputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "link": 25
+    }
+   ],
+   "outputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "links": [
+      26,
+      29
+     ]
+    },
+    {
+     "localized_name": "report",
+     "name": "report",
+     "type": "PLENIO_REPORT",
+     "links": [
+      36
+     ]
+    }
+   ],
+   "title": "Refine (optional)",
+   "properties": {},
+   "widgets_values": []
+  },
+  {
+   "id": 12,
    "type": "259b88ba-7c57-57fb-b73e-58f691fe4b56",
    "pos": [
     2720,
@@ -1084,14 +1130,14 @@
     170
    ],
    "flags": {},
-   "order": 10,
+   "order": 11,
    "mode": 0,
    "inputs": [
     {
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
-     "link": 25
+     "link": 26
     },
     {
      "localized_name": "reference",
@@ -1116,8 +1162,8 @@
      "name": "audio",
      "type": "AUDIO",
      "links": [
-      26,
-      27
+      27,
+      28
      ]
     },
     {
@@ -1125,7 +1171,7 @@
      "name": "eq_report",
      "type": "PLENIO_REPORT",
      "links": [
-      35
+      37
      ]
     },
     {
@@ -1133,7 +1179,7 @@
      "name": "loudness_report",
      "type": "PLENIO_REPORT",
      "links": [
-      36
+      38
      ]
     }
    ],
@@ -1144,7 +1190,7 @@
    ]
   },
   {
-   "id": 12,
+   "id": 13,
    "type": "PreviewAudio",
    "pos": [
     2720,
@@ -1155,14 +1201,14 @@
     120
    ],
    "flags": {},
-   "order": 11,
+   "order": 12,
    "mode": 0,
    "inputs": [
     {
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
-     "link": 26
+     "link": 27
     }
    ],
    "outputs": [
@@ -1180,7 +1226,7 @@
    "widgets_values": []
   },
   {
-   "id": 13,
+   "id": 14,
    "type": "PlenioExportRelease",
    "pos": [
     3120,
@@ -1191,35 +1237,35 @@
     440
    ],
    "flags": {},
-   "order": 12,
+   "order": 13,
    "mode": 0,
    "inputs": [
     {
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
-     "link": 27
+     "link": 28
     },
     {
      "localized_name": "title",
      "name": "title",
      "shape": 7,
      "type": "STRING",
-     "link": 29
+     "link": 30
     },
     {
      "localized_name": "original",
      "name": "original",
      "shape": 7,
      "type": "AUDIO",
-     "link": 28
+     "link": 29
     },
     {
      "localized_name": "cover",
      "name": "cover",
      "shape": 7,
      "type": "IMAGE",
-     "link": 31
+     "link": 32
     },
     {
      "localized_name": "reports.report_0",
@@ -1227,7 +1273,7 @@
      "label": "report_0",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 33
+     "link": 34
     },
     {
      "localized_name": "reports.report_1",
@@ -1235,7 +1281,7 @@
      "label": "report_1",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 34
+     "link": 35
     },
     {
      "localized_name": "reports.report_2",
@@ -1243,7 +1289,7 @@
      "label": "report_2",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 35
+     "link": 36
     },
     {
      "localized_name": "reports.report_3",
@@ -1251,12 +1297,20 @@
      "label": "report_3",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 36
+     "link": 37
     },
     {
      "localized_name": "reports.report_4",
      "name": "reports.report_4",
      "label": "report_4",
+     "shape": 7,
+     "type": "PLENIO_REPORT",
+     "link": 38
+    },
+    {
+     "localized_name": "reports.report_5",
+     "name": "reports.report_5",
+     "label": "report_5",
      "shape": 7,
      "type": "PLENIO_REPORT",
      "link": null
@@ -1353,7 +1407,7 @@
    ]
   },
   {
-   "id": 14,
+   "id": 15,
    "type": "9dbb5617-ccf9-5537-b674-405adb29958c",
    "pos": [
     2720,
@@ -1364,7 +1418,7 @@
     170
    ],
    "flags": {},
-   "order": 13,
+   "order": 14,
    "mode": 4,
    "inputs": [
     {
@@ -1375,7 +1429,7 @@
      "widget": {
       "name": "text"
      },
-     "link": 30
+     "link": 31
     },
     {
      "localized_name": "noise_seed",
@@ -1404,8 +1458,8 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      31,
-      32
+      32,
+      33
      ]
     }
    ],
@@ -1418,7 +1472,7 @@
    ]
   },
   {
-   "id": 15,
+   "id": 16,
    "type": "PreviewImage",
    "pos": [
     3120,
@@ -1429,14 +1483,14 @@
     300
    ],
    "flags": {},
-   "order": 14,
+   "order": 15,
    "mode": 4,
    "inputs": [
     {
      "localized_name": "images",
      "name": "images",
      "type": "IMAGE",
-     "link": 32
+     "link": 33
     }
    ],
    "outputs": [
@@ -1665,7 +1719,7 @@
   ],
   [
    27,
-   11,
+   12,
    0,
    13,
    0,
@@ -1673,80 +1727,109 @@
   ],
   [
    28,
-   10,
+   12,
    0,
-   13,
-   2,
+   14,
+   0,
    "AUDIO"
   ],
   [
    29,
-   6,
+   11,
    0,
-   13,
-   1,
-   "STRING"
+   14,
+   2,
+   "AUDIO"
   ],
   [
    30,
    6,
-   4,
-   14,
    0,
+   14,
+   1,
    "STRING"
   ],
   [
    31,
-   14,
+   6,
+   4,
+   15,
    0,
-   13,
+   "STRING"
+  ],
+  [
+   32,
+   15,
+   0,
+   14,
    3,
    "IMAGE"
   ],
   [
-   32,
-   14,
-   0,
+   33,
    15,
+   0,
+   16,
    0,
    "IMAGE"
   ],
   [
-   33,
+   34,
    6,
    7,
-   13,
+   14,
    4,
    "PLENIO_REPORT"
   ],
   [
-   34,
+   35,
    8,
    7,
-   13,
+   14,
    5,
-   "PLENIO_REPORT"
-  ],
-  [
-   35,
-   11,
-   1,
-   13,
-   6,
    "PLENIO_REPORT"
   ],
   [
    36,
    11,
-   2,
-   13,
+   1,
+   14,
+   6,
+   "PLENIO_REPORT"
+  ],
+  [
+   37,
+   12,
+   1,
+   14,
    7,
+   "PLENIO_REPORT"
+  ],
+  [
+   38,
+   12,
+   2,
+   14,
+   8,
    "PLENIO_REPORT"
   ]
  ],
  "groups": [
   {
    "id": 1,
+   "title": "REFINE (optional)",
+   "bounding": [
+    2290,
+    370,
+    320,
+    130
+   ],
+   "color": "#555",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 2,
    "title": "6 · FINISH",
    "bounding": [
     2690,
@@ -1759,7 +1842,7 @@
    "flags": {}
   },
   {
-   "id": 2,
+   "id": 3,
    "title": "COVER ART (optional)",
    "bounding": [
     2690,
@@ -1772,7 +1855,7 @@
    "flags": {}
   },
   {
-   "id": 3,
+   "id": 4,
    "title": "1 · SONG",
    "bounding": [
     -30,
@@ -1785,7 +1868,7 @@
    "flags": {}
   },
   {
-   "id": 4,
+   "id": 5,
    "title": "2 · WRITE",
    "bounding": [
     430,
@@ -1798,7 +1881,7 @@
    "flags": {}
   },
   {
-   "id": 5,
+   "id": 6,
    "title": "3 · TEXT",
    "bounding": [
     870,
@@ -1811,7 +1894,7 @@
    "flags": {}
   },
   {
-   "id": 6,
+   "id": 7,
    "title": "4 · DAW",
    "bounding": [
     1370,
@@ -1824,7 +1907,7 @@
    "flags": {}
   },
   {
-   "id": 7,
+   "id": 8,
    "title": "5 · RENDER",
    "bounding": [
     2290,
@@ -1837,7 +1920,7 @@
    "flags": {}
   },
   {
-   "id": 8,
+   "id": 9,
    "title": "MUSIC MODEL",
    "bounding": [
     -30,
@@ -4915,6 +4998,294 @@
     "extra": {},
     "category": "Plenio/Artwork",
     "description": "Paints the cover from the Song Sheet's artwork prompt with FLUX.2 Klein 4B (distilled, 4 steps, native nodes; Apache-2.0). The templates keep it bypassed because it needs about 16 GB of extra model files: select it and press Ctrl+B to turn it on. The seed is fixed, so new takes keep the cover; change it for another cover. Replace the block with any text-to-image block that takes a prompt and gives an image."
+   },
+   {
+    "id": "d0897a69-045d-5c2a-95eb-7a0481b8318b",
+    "version": 1,
+    "state": {
+     "lastGroupId": 0,
+     "lastNodeId": 702,
+     "lastLinkId": 4,
+     "lastRerouteId": 0
+    },
+    "revision": 0,
+    "config": {},
+    "name": "Plenio · Refine (48 kHz)",
+    "inputNode": {
+     "id": -10,
+     "bounding": [
+      -260,
+      0,
+      160,
+      60
+     ]
+    },
+    "outputNode": {
+     "id": -20,
+     "bounding": [
+      840,
+      0,
+      160,
+      80
+     ]
+    },
+    "inputs": [
+     {
+      "id": "8cee3b9b-5a37-520c-ac40-bde1a9d73185",
+      "name": "audio",
+      "type": "AUDIO",
+      "linkIds": [
+       2
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     }
+    ],
+    "outputs": [
+     {
+      "id": "590904b2-9fa7-51aa-bdc8-c4065a188107",
+      "name": "audio",
+      "type": "AUDIO",
+      "linkIds": [
+       3
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     },
+     {
+      "id": "7d592758-5053-5ca3-94e4-eb01dc0bab41",
+      "name": "report",
+      "type": "PLENIO_REPORT",
+      "linkIds": [
+       4
+      ],
+      "pos": [
+       0,
+       20
+      ]
+     }
+    ],
+    "widgets": [],
+    "nodes": [
+     {
+      "id": 701,
+      "type": "PlenioAudioModelLoader",
+      "pos": [
+       0,
+       0
+      ],
+      "size": [
+       340,
+       130
+      ],
+      "flags": {
+       "collapsed": true
+      },
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "kind",
+        "name": "kind",
+        "type": "COMFY_DYNAMICCOMBO_V3",
+        "widget": {
+         "name": "kind"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "kind.model",
+        "name": "kind.model",
+        "type": "COMBO",
+        "widget": {
+         "name": "kind.model"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "model",
+        "name": "model",
+        "type": "PLENIO_AUDIO_MODEL",
+        "links": [
+         1
+        ]
+       }
+      ],
+      "title": "Super-resolution model",
+      "properties": {
+       "Node name for S&R": "PlenioAudioModelLoader",
+       "models": [
+        {
+         "name": "pytorch_model.bin",
+         "url": "https://huggingface.co/woongzip1/universr-audio/resolve/main/pytorch_model.bin",
+         "directory": "audio_sr"
+        }
+       ]
+      },
+      "widgets_values": [
+       "super-resolution",
+       "pytorch_model.bin"
+      ]
+     },
+     {
+      "id": 702,
+      "type": "PlenioRefine",
+      "pos": [
+       400,
+       0
+      ],
+      "size": [
+       340,
+       260
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "audio",
+        "name": "audio",
+        "type": "AUDIO",
+        "link": 2
+       },
+       {
+        "localized_name": "model",
+        "name": "model",
+        "shape": 7,
+        "type": "PLENIO_AUDIO_MODEL",
+        "link": 1
+       },
+       {
+        "localized_name": "engine",
+        "name": "engine",
+        "label": "engine",
+        "type": "COMBO",
+        "widget": {
+         "name": "engine"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "crossover_hz",
+        "name": "crossover_hz",
+        "type": "FLOAT",
+        "widget": {
+         "name": "crossover_hz"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "sr_gain",
+        "name": "sr_gain",
+        "type": "FLOAT",
+        "widget": {
+         "name": "sr_gain"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "pre_hz",
+        "name": "pre_hz",
+        "type": "FLOAT",
+        "widget": {
+         "name": "pre_hz"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "post_hz",
+        "name": "post_hz",
+        "type": "FLOAT",
+        "widget": {
+         "name": "post_hz"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "seed",
+        "name": "seed",
+        "type": "INT",
+        "widget": {
+         "name": "seed"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "audio",
+        "name": "audio",
+        "type": "AUDIO",
+        "links": [
+         3
+        ]
+       },
+       {
+        "localized_name": "report",
+        "name": "report",
+        "type": "PLENIO_REPORT",
+        "links": [
+         4
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "PlenioRefine"
+      },
+      "widgets_values": [
+       "model",
+       0.0,
+       1.0,
+       0.0,
+       0.0,
+       0
+      ]
+     }
+    ],
+    "groups": [],
+    "links": [
+     {
+      "id": 1,
+      "origin_id": 701,
+      "origin_slot": 0,
+      "target_id": 702,
+      "target_slot": 1,
+      "type": "PLENIO_AUDIO_MODEL"
+     },
+     {
+      "id": 2,
+      "origin_id": -10,
+      "origin_slot": 0,
+      "target_id": 702,
+      "target_slot": 0,
+      "type": "AUDIO"
+     },
+     {
+      "id": 3,
+      "origin_id": 702,
+      "origin_slot": 0,
+      "target_id": -20,
+      "target_slot": 0,
+      "type": "AUDIO"
+     },
+     {
+      "id": 4,
+      "origin_id": 702,
+      "origin_slot": 1,
+      "target_id": -20,
+      "target_slot": 1,
+      "type": "PLENIO_REPORT"
+     }
+    ],
+    "extra": {},
+    "category": "Plenio/Audio",
+    "description": "Brings the song to 48 kHz and extends the missing top octave with UniverSR (vocoder-free flow matching), keeping everything below the measured bandwidth from the render (complementary crossover). Same duration, no normalisation; the report shows engine, bandwidth before and after, crossover, loudness change and timing. The defaults are provisional until the measurement study (L1)."
    }
   ]
  },
@@ -4991,8 +5362,8 @@
     ]
    ],
    "outputs": [
-    12,
-    13
+    13,
+    14
    ]
   }
  },

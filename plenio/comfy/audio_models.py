@@ -7,9 +7,10 @@ management (R9) and returns the engine object the pure core expects:
 - super-resolution: ``core.audio.refine.Engine`` (``upsample(chunk, seed)`` at the engine's rate);
 - separation: ``core.audio.stems.Separator`` (``separate(audio, rate) -> {name: stem}``).
 
-The first adapters (UniverSR, BS-RoFormer 4-stem) arrive with tasks D9 and D11; until then every
-file is refused with a clear message, and Refine's *resample only* engine needs no file. Model
-code is imported only when a model is loaded (optional dependencies stay optional).
+The vendored adapters (UniverSR for super-resolution since D9, BS-RoFormer 4-stem for separation
+since D11) register themselves when this module is first used; a file no adapter recognises is
+refused with a clear message, and Refine's *resample only* engine needs no file at all. Model code
+is imported only when a model is loaded (optional dependencies stay optional).
 """
 
 from __future__ import annotations
@@ -46,6 +47,16 @@ class Adapter:
 
 
 _ADAPTERS: dict[str, Adapter] = {}
+_REGISTERED = False
+
+
+def _ensure_registered() -> None:
+    """Import the adapter modules once (they import torch only when a model is loaded)."""
+    global _REGISTERED
+    if _REGISTERED:
+        return
+    _REGISTERED = True
+    from . import universr  # noqa: F401  (registers the super-resolution adapter, D9)
 
 
 def register(adapter: Adapter) -> None:
@@ -55,6 +66,7 @@ def register(adapter: Adapter) -> None:
 
 
 def adapters(kind: str) -> list[Adapter]:
+    _ensure_registered()
     return [a for a in _ADAPTERS.values() if a.kind == kind]
 
 

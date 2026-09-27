@@ -1,0 +1,37 @@
+model:
+  in_channels: 2
+  out_channels: 2
+  dims:
+  - 96
+  - 192
+  - 384
+  - 768
+  depths:
+  - 2
+  - 2
+  - 4
+  - 2
+  drop_path: 0
+  time_dim: 256
+  cond_dim: 384
+  total_freq_bins: 512
+  hr_freq_bins: 432
+  feature_enc_layers: 4
+  cond_dropout_prob: 0.1
+  sr_to_lr_bins:
+    8: 80
+    12: 128
+    16: 170
+    24: 256
+transform:
+  window_fn: hann
+  n_fft: 1024
+  sampling_rate: 48000
+  hop_length: 512
+  alpha: 0.2
+  beta: 1
+  comp_eps: 0.0001
+path:
+  class_path: universr.flow.path.OriginalCFMPath
+  init_args:
+    sigma_min: 0.0001

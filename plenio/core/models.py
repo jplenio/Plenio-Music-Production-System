@@ -20,6 +20,9 @@ from .files import read_toml
 SCHEMA = "plenio.models/1"
 AUDIO_MODEL_FOLDERS = {"super-resolution": "audio_sr", "separation": "audio_separation"}
 """Plenio's own model folders (registered with ComfyUI) for Load Audio Model, by model kind."""
+FILE_SUFFIXES = (".safetensors", ".bin")
+"""Allowed catalogued file names. ``.bin`` covers released PyTorch state dicts (UniverSR); the
+adapters load them with ``weights_only=True`` only."""
 FOLDERS = frozenset(
     {
         "checkpoints",
@@ -82,8 +85,10 @@ def parse_catalogue(data: Mapping[str, Any], source: str) -> dict[str, ModelFile
         if not _ID.fullmatch(model.id) or model.id in models:
             raise PlenioUserError(f"{where}: id {model.id!r} must be a unique lower-case identifier.")
         pure = PurePosixPath(model.file)
-        if len(pure.parts) != 1 or model.file in files or not model.file.endswith(".safetensors"):
-            raise PlenioUserError(f"{where}: file {model.file!r} must be a unique .safetensors file name.")
+        if len(pure.parts) != 1 or model.file in files or not model.file.endswith(FILE_SUFFIXES):
+            raise PlenioUserError(
+                f"{where}: file {model.file!r} must be a unique {' or '.join(FILE_SUFFIXES)} file name."
+            )
         if model.folder not in FOLDERS:
             raise PlenioUserError(f"{where}: unknown model folder {model.folder!r}.")
         if not _URL.fullmatch(model.url) or not model.url.endswith("/" + model.file):

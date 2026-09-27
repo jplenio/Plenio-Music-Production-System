@@ -325,7 +325,7 @@ def test_preset_and_eq_routes(server: ComfyServer) -> None:
 
 
 def test_enhance_template_contains_the_chain(server: ComfyServer, log: Log) -> None:
-    """The shipped template is the graph the tests above run (Load Audio, EQ, Loudness, Export)."""
+    """The shipped template is the graph the tests above run (Load Audio, Refine, EQ, Loudness, Export)."""
     template = json.loads(
         (Path(__file__).resolve().parents[2] / "example_workflows" / "4 · Enhance & Master.json").read_text(
             encoding="utf-8"
@@ -339,7 +339,11 @@ def test_enhance_template_contains_the_chain(server: ComfyServer, log: Log) -> N
         "PlenioExportRelease",
         "PlenioLoudness",
         "PreviewAudio",
+        template["definitions"]["subgraphs"][0]["id"],  # the Refine (optional) wrapper (M5/D10)
     ]
+    refine = template["definitions"]["subgraphs"][0]
+    assert refine["name"] == "Plenio · Refine (48 kHz)"
+    assert [n["type"] for n in refine["nodes"]] == ["PlenioAudioModelLoader", "PlenioRefine"]
 
 
 def test_hi_res_mp3_and_repeated_exports_keep_every_record(server: ComfyServer, log: Log) -> None:

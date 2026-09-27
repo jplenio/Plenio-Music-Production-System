@@ -1,8 +1,8 @@
 {
  "id": "9d23be52-230b-5f08-8aad-bd5416d3dbd0",
  "revision": 0,
- "last_node_id": 6,
- "last_link_id": 7,
+ "last_node_id": 7,
+ "last_link_id": 9,
  "nodes": [
   {
    "id": 1,
@@ -25,7 +25,7 @@
     "Node name for S&R": "MarkdownNote"
    },
    "widgets_values": [
-    "# 4 · Enhance & Master\n\n**Load Audio -> EQ -> Loudness & Dynamics -> Export**\n\nFinishes an existing recording (for example a take you rendered earlier) without any music model.\n\n1. Upload the file in **Load Audio**.\n2. **EQ** starts with a gentle warm tone match (*match preset*). Choose *manual* to draw your own curve, *flat* for no EQ, or connect a **reference** recording and pick a reference recipe.\n3. **Loudness & Dynamics** brings the song to -14 LUFS with a true peak of at most -1 dBTP (streaming); pick another target or compression style if you like.\n4. Press **Run**. Export writes FLAC 24-bit and MP3 V0 to `output/plenio/enhanced`, copies the source file's tags and cover, keeps the unmastered source as `(original).flac`, and writes a release record with the measured loudness.\n\nThe preview plays the result; compare it with the source in Load Audio. Nothing here needs a GPU.\n\n**App mode:** switch *Graph / App* at the top left for a simple form (file, EQ, target, compression).\n"
+    "# 4 · Enhance & Master\n\n**Load Audio -> Refine (optional) -> EQ -> Loudness & Dynamics -> Export**\n\nFinishes an existing recording (for example a take you rendered earlier) without any music model.\n\n1. Upload the file in **Load Audio**.\n2. For a **band-limited** source (an old MP3, a phone recording) select the *Refine (optional)* block and press **Ctrl+B**: it brings the file to 48 kHz and extends the missing top octave with UniverSR (the user guide *Refine (48 kHz)* covers the settings).\n2. **EQ** starts with a gentle warm tone match (*match preset*). Choose *manual* to draw your own curve, *flat* for no EQ, or connect a **reference** recording and pick a reference recipe.\n3. **Loudness & Dynamics** brings the song to -14 LUFS with a true peak of at most -1 dBTP (streaming); pick another target or compression style if you like.\n4. Press **Run**. Export writes FLAC 24-bit and MP3 V0 to `output/plenio/enhanced`, copies the source file's tags and cover, keeps the unmastered source as `(original).flac`, and writes a release record with the measured loudness.\n\nThe preview plays the result; compare it with the source in Load Audio. Nothing here needs a GPU.\n\n**App mode:** switch *Graph / App* at the top left for a simple form (file, EQ, target, compression).\n"
    ]
   },
   {
@@ -60,7 +60,7 @@
      "type": "AUDIO",
      "links": [
       1,
-      5
+      6
      ]
     }
    ],
@@ -74,9 +74,55 @@
   },
   {
    "id": 3,
-   "type": "PlenioEQ",
+   "type": "d0897a69-045d-5c2a-95eb-7a0481b8318b",
    "pos": [
     420,
+    200
+   ],
+   "size": [
+    340,
+    170
+   ],
+   "flags": {
+    "collapsed": true
+   },
+   "order": 2,
+   "mode": 4,
+   "inputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "link": 1
+    }
+   ],
+   "outputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "links": [
+      2
+     ]
+    },
+    {
+     "localized_name": "report",
+     "name": "report",
+     "type": "PLENIO_REPORT",
+     "links": [
+      7
+     ]
+    }
+   ],
+   "title": "Refine (optional)",
+   "properties": {},
+   "widgets_values": []
+  },
+  {
+   "id": 4,
+   "type": "PlenioEQ",
+   "pos": [
+    880,
     0
    ],
    "size": [
@@ -84,14 +130,14 @@
     420
    ],
    "flags": {},
-   "order": 2,
+   "order": 3,
    "mode": 0,
    "inputs": [
     {
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
-     "link": 1
+     "link": 2
     },
     {
      "localized_name": "reference",
@@ -126,7 +172,7 @@
      "name": "audio",
      "type": "AUDIO",
      "links": [
-      2
+      3
      ]
     },
     {
@@ -134,7 +180,7 @@
      "name": "report",
      "type": "PLENIO_REPORT",
      "links": [
-      6
+      8
      ]
     }
    ],
@@ -147,10 +193,10 @@
    ]
   },
   {
-   "id": 4,
+   "id": 5,
    "type": "PlenioLoudness",
    "pos": [
-    900,
+    1360,
     0
    ],
    "size": [
@@ -158,14 +204,14 @@
     220
    ],
    "flags": {},
-   "order": 3,
+   "order": 4,
    "mode": 0,
    "inputs": [
     {
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
-     "link": 2
+     "link": 3
     },
     {
      "localized_name": "target",
@@ -202,8 +248,8 @@
      "name": "audio",
      "type": "AUDIO",
      "links": [
-      3,
-      4
+      4,
+      5
      ]
     },
     {
@@ -211,7 +257,7 @@
      "name": "report",
      "type": "PLENIO_REPORT",
      "links": [
-      7
+      9
      ]
     }
    ],
@@ -225,10 +271,10 @@
    ]
   },
   {
-   "id": 5,
+   "id": 6,
    "type": "PreviewAudio",
    "pos": [
-    1320,
+    1780,
     0
    ],
    "size": [
@@ -236,14 +282,14 @@
     120
    ],
    "flags": {},
-   "order": 4,
+   "order": 5,
    "mode": 0,
    "inputs": [
     {
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
-     "link": 3
+     "link": 4
     }
    ],
    "outputs": [
@@ -261,10 +307,10 @@
    "widgets_values": []
   },
   {
-   "id": 6,
+   "id": 7,
    "type": "PlenioExportRelease",
    "pos": [
-    1320,
+    1780,
     180
    ],
    "size": [
@@ -272,14 +318,14 @@
     400
    ],
    "flags": {},
-   "order": 5,
+   "order": 6,
    "mode": 0,
    "inputs": [
     {
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
-     "link": 4
+     "link": 5
     },
     {
      "localized_name": "title",
@@ -293,7 +339,7 @@
      "name": "original",
      "shape": 7,
      "type": "AUDIO",
-     "link": 5
+     "link": 6
     },
     {
      "localized_name": "cover",
@@ -308,7 +354,7 @@
      "label": "report_0",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 6
+     "link": 7
     },
     {
      "localized_name": "reports.report_1",
@@ -316,12 +362,20 @@
      "label": "report_1",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 7
+     "link": 8
     },
     {
      "localized_name": "reports.report_2",
      "name": "reports.report_2",
      "label": "report_2",
+     "shape": 7,
+     "type": "PLENIO_REPORT",
+     "link": 9
+    },
+    {
+     "localized_name": "reports.report_3",
+     "name": "reports.report_3",
+     "label": "report_3",
      "shape": 7,
      "type": "PLENIO_REPORT",
      "link": null
@@ -445,7 +499,7 @@
   ],
   [
    4,
-   4,
+   5,
    0,
    6,
    0,
@@ -453,32 +507,61 @@
   ],
   [
    5,
-   2,
+   5,
    0,
-   6,
-   2,
+   7,
+   0,
    "AUDIO"
   ],
   [
    6,
+   2,
+   0,
+   7,
+   2,
+   "AUDIO"
+  ],
+  [
+   7,
    3,
    1,
-   6,
+   7,
    4,
    "PLENIO_REPORT"
   ],
   [
-   7,
+   8,
    4,
    1,
-   6,
+   7,
    5,
+   "PLENIO_REPORT"
+  ],
+  [
+   9,
+   5,
+   1,
+   7,
+   6,
    "PLENIO_REPORT"
   ]
  ],
  "groups": [
   {
    "id": 1,
+   "title": "REFINE (optional)",
+   "bounding": [
+    390,
+    130,
+    320,
+    130
+   ],
+   "color": "#555",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 2,
    "title": "1 · SOURCE",
    "bounding": [
     -30,
@@ -491,10 +574,10 @@
    "flags": {}
   },
   {
-   "id": 2,
+   "id": 3,
    "title": "2 · MASTER",
    "bounding": [
-    390,
+    850,
     -70,
     880,
     520
@@ -504,10 +587,10 @@
    "flags": {}
   },
   {
-   "id": 3,
+   "id": 4,
    "title": "3 · FINISH",
    "bounding": [
-    1290,
+    1750,
     -70,
     440,
     680
@@ -518,7 +601,296 @@
   }
  ],
  "definitions": {
-  "subgraphs": []
+  "subgraphs": [
+   {
+    "id": "d0897a69-045d-5c2a-95eb-7a0481b8318b",
+    "version": 1,
+    "state": {
+     "lastGroupId": 0,
+     "lastNodeId": 702,
+     "lastLinkId": 4,
+     "lastRerouteId": 0
+    },
+    "revision": 0,
+    "config": {},
+    "name": "Plenio · Refine (48 kHz)",
+    "inputNode": {
+     "id": -10,
+     "bounding": [
+      -260,
+      0,
+      160,
+      60
+     ]
+    },
+    "outputNode": {
+     "id": -20,
+     "bounding": [
+      840,
+      0,
+      160,
+      80
+     ]
+    },
+    "inputs": [
+     {
+      "id": "8cee3b9b-5a37-520c-ac40-bde1a9d73185",
+      "name": "audio",
+      "type": "AUDIO",
+      "linkIds": [
+       2
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     }
+    ],
+    "outputs": [
+     {
+      "id": "590904b2-9fa7-51aa-bdc8-c4065a188107",
+      "name": "audio",
+      "type": "AUDIO",
+      "linkIds": [
+       3
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     },
+     {
+      "id": "7d592758-5053-5ca3-94e4-eb01dc0bab41",
+      "name": "report",
+      "type": "PLENIO_REPORT",
+      "linkIds": [
+       4
+      ],
+      "pos": [
+       0,
+       20
+      ]
+     }
+    ],
+    "widgets": [],
+    "nodes": [
+     {
+      "id": 701,
+      "type": "PlenioAudioModelLoader",
+      "pos": [
+       0,
+       0
+      ],
+      "size": [
+       340,
+       130
+      ],
+      "flags": {
+       "collapsed": true
+      },
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "kind",
+        "name": "kind",
+        "type": "COMFY_DYNAMICCOMBO_V3",
+        "widget": {
+         "name": "kind"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "kind.model",
+        "name": "kind.model",
+        "type": "COMBO",
+        "widget": {
+         "name": "kind.model"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "model",
+        "name": "model",
+        "type": "PLENIO_AUDIO_MODEL",
+        "links": [
+         1
+        ]
+       }
+      ],
+      "title": "Super-resolution model",
+      "properties": {
+       "Node name for S&R": "PlenioAudioModelLoader",
+       "models": [
+        {
+         "name": "pytorch_model.bin",
+         "url": "https://huggingface.co/woongzip1/universr-audio/resolve/main/pytorch_model.bin",
+         "directory": "audio_sr"
+        }
+       ]
+      },
+      "widgets_values": [
+       "super-resolution",
+       "pytorch_model.bin"
+      ]
+     },
+     {
+      "id": 702,
+      "type": "PlenioRefine",
+      "pos": [
+       400,
+       0
+      ],
+      "size": [
+       340,
+       260
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "audio",
+        "name": "audio",
+        "type": "AUDIO",
+        "link": 2
+       },
+       {
+        "localized_name": "model",
+        "name": "model",
+        "shape": 7,
+        "type": "PLENIO_AUDIO_MODEL",
+        "link": 1
+       },
+       {
+        "localized_name": "engine",
+        "name": "engine",
+        "label": "engine",
+        "type": "COMBO",
+        "widget": {
+         "name": "engine"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "crossover_hz",
+        "name": "crossover_hz",
+        "type": "FLOAT",
+        "widget": {
+         "name": "crossover_hz"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "sr_gain",
+        "name": "sr_gain",
+        "type": "FLOAT",
+        "widget": {
+         "name": "sr_gain"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "pre_hz",
+        "name": "pre_hz",
+        "type": "FLOAT",
+        "widget": {
+         "name": "pre_hz"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "post_hz",
+        "name": "post_hz",
+        "type": "FLOAT",
+        "widget": {
+         "name": "post_hz"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "seed",
+        "name": "seed",
+        "type": "INT",
+        "widget": {
+         "name": "seed"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "audio",
+        "name": "audio",
+        "type": "AUDIO",
+        "links": [
+         3
+        ]
+       },
+       {
+        "localized_name": "report",
+        "name": "report",
+        "type": "PLENIO_REPORT",
+        "links": [
+         4
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "PlenioRefine"
+      },
+      "widgets_values": [
+       "model",
+       0.0,
+       1.0,
+       0.0,
+       0.0,
+       0
+      ]
+     }
+    ],
+    "groups": [],
+    "links": [
+     {
+      "id": 1,
+      "origin_id": 701,
+      "origin_slot": 0,
+      "target_id": 702,
+      "target_slot": 1,
+      "type": "PLENIO_AUDIO_MODEL"
+     },
+     {
+      "id": 2,
+      "origin_id": -10,
+      "origin_slot": 0,
+      "target_id": 702,
+      "target_slot": 0,
+      "type": "AUDIO"
+     },
+     {
+      "id": 3,
+      "origin_id": 702,
+      "origin_slot": 0,
+      "target_id": -20,
+      "target_slot": 0,
+      "type": "AUDIO"
+     },
+     {
+      "id": 4,
+      "origin_id": 702,
+      "origin_slot": 1,
+      "target_id": -20,
+      "target_slot": 1,
+      "type": "PLENIO_REPORT"
+     }
+    ],
+    "extra": {},
+    "category": "Plenio/Audio",
+    "description": "Brings the song to 48 kHz and extends the missing top octave with UniverSR (vocoder-free flow matching), keeping everything below the measured bandwidth from the render (complementary crossover). Same duration, no normalisation; the report shows engine, bandwidth before and after, crossover, loudness change and timing. The defaults are provisional until the measurement study (L1)."
+   }
+  ]
  },
  "config": {},
  "extra": {
@@ -536,21 +908,21 @@
      "audio"
     ],
     [
-     3,
+     4,
      "mode"
     ],
     [
-     4,
+     5,
      "target"
     ],
     [
-     4,
+     5,
      "compression"
     ]
    ],
    "outputs": [
-    5,
-    6
+    6,
+    7
    ]
   }
  },

@@ -34,7 +34,16 @@ The list below is the model catalogue Plenio's templates are built from (`resour
 | `minimax_music3_text_encoder_pruned_int8_convrot.safetensors` | `text_encoders` | 9.2 GB | MiniMax-Music3 Community License | needed |
 | `minimax_music3_dav.safetensors` | `vae` | 217 MB | MiniMax-Music3 Community License | needed |
 | `gemma4_e4b_it_fp8_scaled.safetensors` | `text_encoders` | (see the model card) | Apache-2.0 | needed (writer) |
+| `pytorch_model.bin` (UniverSR) | `audio_sr` | 229 MB | CC BY 4.0 (weights); MIT (code) | **needed**: Refine (48 kHz) runs by default in this template |
 | FLUX.2 Klein files (below) | | 16.1 GB | Apache-2.0 | optional: Cover Art, bypassed |
+
+### Refine (48 kHz), the optional block of templates 1, 2, 4 and 5
+
+| File | Folder | Size | Licence |
+|---|---|---|---|
+| `pytorch_model.bin` (UniverSR audio) | `audio_sr` | 229 MB | CC BY 4.0 (weights), MIT (inference code; vendored in `plenio/third_party/universr`) |
+
+The block stays bypassed there until you turn it on; the one file serves every template. Plenio's *resample only* engine needs no model at all.
 
 ### Cover Art (optional block of templates 1-3)
 
@@ -58,6 +67,7 @@ No model files.
 | instrumental adapter | [Mothersuperior/YuE2-instrumental-cot-full-loras](https://huggingface.co/Mothersuperior/YuE2-instrumental-cot-full-loras) (pinned revision in the template) |
 | writer | [Comfy-Org/gemma-4](https://huggingface.co/Comfy-Org/gemma-4) |
 | MiniMax Music 3 | [Comfy-Org/MiniMax-Music-3](https://huggingface.co/Comfy-Org/MiniMax-Music-3) |
+| UniverSR audio (Refine) | [woongzip1/universr-audio](https://huggingface.co/woongzip1/universr-audio) - released as `pytorch_model.bin` (CC BY 4.0; the inference code is MIT and vendored) |
 | FLUX.2 Klein 4B, its text encoder | [Comfy-Org/flux2-klein](https://huggingface.co/Comfy-Org/flux2-klein) |
 | FLUX.2 VAE | [Comfy-Org/flux2-dev](https://huggingface.co/Comfy-Org/flux2-dev) |
 | faster-whisper large-v3 | [Systran/faster-whisper-large-v3](https://huggingface.co/Systran/faster-whisper-large-v3) (pinned revision) |

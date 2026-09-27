@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import numpy as np
 import pytest
 
 from harness import ComfyServer, Log
@@ -88,3 +89,47 @@ def test_load_audio_model_refuses_a_file_no_engine_reads(server: ComfyServer) ->
         in error["exception_message"]
     )
     assert "resample only" in error["exception_message"]
+
+
+def test_the_vendored_universr_adapter_runs_a_checkpoint(server: ComfyServer, log: Log) -> None:
+    """D9 with real engine code: Load Audio Model loads a checkpoint and Refine runs it (tiny, CPU)."""
+    pytest.importorskip("torch", reason="the adapter needs PyTorch")
+    checkpoint = server.base / "models" / "audio_sr" / "tiny-universr.bin"
+    if not checkpoint.is_file():
+        pytest.skip("the tiny UniverSR checkpoint could not be built (torch/einops missing)")
+    prompt = refine_prompt(engine="model", model=None, seed=5)
+    prompt["4"] = {
+        "class_type": "PlenioAudioModelLoader",
+        "inputs": {"kind": "super-resolution", "kind.model": "tiny-universr.bin"},
+    }
+    prompt["2"]["inputs"]["model"] = ["4", 0]
+    entry = server.run(prompt, timeout=900.0)
+    probe = events(log, "probe")[-1]
+    assert probe["rate"] == 48000
+    assert probe["shape"] == [1, 2, int(round(SECONDS * 48000))]
+    assert np.isfinite(probe["peak"]) and probe["peak"] > 0
+    summary = entry["outputs"]["2"]["plenio_summary"][0]["markdown"]
+    assert "UniverSR" in summary and "provisional" in summary
+    # the report of the stage names the engine and the measured bandwidth
+    assert "24000 -> 48000 Hz" in summary
+    assert "UniverSR" in str(entry["outputs"]["2"]["plenio_summary"][0])
+
+
+def test_the_adapter_is_deterministic_for_one_seed(server: ComfyServer, log: Log) -> None:
+    """R12: the same seed gives the same result (the engine is the only stochastic part)."""
+    pytest.importorskip("torch", reason="the adapter needs PyTorch")
+    checkpoint = server.base / "models" / "audio_sr" / "tiny-universr.bin"
+    if not checkpoint.is_file():
+        pytest.skip("the tiny UniverSR checkpoint could not be built (torch/einops missing)")
+    peaks = []
+    for _ in range(2):
+        prompt = refine_prompt(engine="model", model=None, seed=3)
+        prompt["1"] = {"class_type": "PlenioTestFakeAudio", "inputs": {"seconds": 1.0, "variant": 1}}
+        prompt["4"] = {
+            "class_type": "PlenioAudioModelLoader",
+            "inputs": {"kind": "super-resolution", "kind.model": "tiny-universr.bin"},
+        }
+        prompt["2"]["inputs"]["model"] = ["4", 0]
+        server.run(prompt, timeout=900.0)
+        peaks.append(events(log, "probe")[-1])
+    assert peaks[0] == peaks[1]

@@ -239,6 +239,8 @@ def minimax_render() -> Blueprint:
 WARM_GENTLE = "Warm - gentle (workflow default)"
 MASTER_TARGET = "streaming (-14 LUFS, -1 dBTP)"
 MASTER_STYLE = "Balanced - gentle glue"
+REFINE_MODEL = "pytorch_model.bin"
+"""The UniverSR weights as the catalogue names them (Hugging Face serves that file name)."""
 
 
 def master() -> Blueprint:
@@ -280,6 +282,72 @@ def master() -> Blueprint:
             BlueprintOutput("loudness_report", "PLENIO_REPORT", (loudness, "report")),
         ],
     )
+
+
+def refine() -> Blueprint:
+    """Refine (48 kHz): the loader (collapsed) and the stage, wrapped for the templates (D10)."""
+    g = Graph(first_id=701)
+    loader = g.add(
+        "PlenioAudioModelLoader",
+        (0, 0),
+        size=(340, 130),
+        collapsed=True,
+        title="Super-resolution model",
+        widgets={"kind": "super-resolution", "kind.model": REFINE_MODEL},
+        properties=model(REFINE_MODEL),
+    )
+    stage = g.add(
+        "PlenioRefine",
+        (400, 0),
+        size=(340, 260),
+        widgets={"engine": "model"},
+        labels={"engine": "engine"},
+    )
+    g.link(loader, "model", stage, "model")
+    return Blueprint(
+        "Plenio · Refine (48 kHz)",
+        "Plenio/Audio",
+        "Brings the song to 48 kHz and extends the missing top octave with UniverSR (vocoder-free flow "
+        "matching), keeping everything below the measured bandwidth from the render (complementary crossover). "
+        "Same duration, no normalisation; the report shows engine, bandwidth before and after, crossover, "
+        "loudness change and timing. The defaults are provisional until the measurement study (L1).",
+        g,
+        [BlueprintInput("audio", "AUDIO", [(stage, "audio")])],
+        [
+            BlueprintOutput("audio", "AUDIO", (stage, "audio")),
+            BlueprintOutput("report", "PLENIO_REPORT", (stage, "report")),
+        ],
+    )
+
+
+def refine_stage(
+    g: Graph,
+    blueprints: dict[str, Blueprint],
+    x: float,
+    *,
+    audio: tuple[Node, str],
+    active: bool = False,
+    y: float = 430,
+) -> tuple[tuple[Node, str], Node]:
+    """The REFINE block of a template (plan §11): bypassed and collapsed unless it is on by default.
+
+    Returns the audio source and the node, so the caller can pass both to ``finish`` (its report).
+    """
+    node = g.add_subgraph(
+        blueprints["refine"],
+        (x, y),
+        size=(340, 170),
+        title="Plenio · Refine (48 kHz)" if active else "Refine (optional)",
+        mode=0 if active else 4,
+        collapsed=True,
+    )
+    g.link(audio[0], audio[1], node, "audio")
+    g.group(
+        "REFINE (48 kHz)" if active else "REFINE (optional)",
+        [node],
+        color=GROUP if active else OPTIONAL_GROUP,
+    )
+    return (node, "audio"), node
 
 
 def write_song() -> Blueprint:
@@ -783,6 +851,7 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     score_sheet = song_sheet(g, (1820, 0), "Song Sheet · Score")
     seed = take_seed(g, (2320, 0))
     render = g.add_subgraph(bp["yue2_render"], (2320, 150), size=(320, 250))
+    audio, refine_node = refine_stage(g, bp, 2320, audio=(render, "AUDIO"), y=440)
     g.link(brief, "brief", write, "brief")
     g.link(model_node, "engine", write, "engine")
     for kind in ("title", "style", "lyrics", "artwork_prompt"):
@@ -813,10 +882,10 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         g,
         bp,
         2720,
-        audio=(render, "AUDIO"),
+        audio=audio,
         title=(text_sheet, "title"),
         artwork=(text_sheet, "artwork_prompt"),
-        reports=[(text_sheet, "report"), (score_sheet, "report")],
+        reports=[(text_sheet, "report"), (score_sheet, "report"), (refine_node, "report")],
         group="6 · FINISH",
     )
     g.group("1 · SONG", [brief])
@@ -981,11 +1050,12 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g.link(check_vocals, "takes", takes_preview, "audio")
     g.link(check_vocals, "audio", check_lyrics, "audio")
     g.link(text_sheet, "lyrics", check_lyrics, "expected_lyrics")
+    audio, refine_node = refine_stage(g, bp, 3420, audio=(check_vocals, "audio"), y=430)
     _master, preview, export = finish(
         g,
         bp,
-        3420,
-        audio=(check_vocals, "audio"),
+        3880,
+        audio=audio,
         title=(text_sheet, "title"),
         artwork=(text_sheet, "artwork_prompt"),
         reports=[
@@ -994,6 +1064,7 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             (transcribe, "report"),
             (check_vocals, "report"),
             (check_lyrics, "report"),
+            (refine_node, "report"),
         ],
         group="7 · FINISH",
     )
@@ -1016,7 +1087,7 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
 
 ABOUT_MINIMAX = f"""# 3 · MiniMax · Song
 
-**Brief -> Write Song -> Song Sheet -> MiniMax Render -> Master -> Export**
+**Brief -> Write Song -> Song Sheet -> MiniMax Render -> Refine (48 kHz) -> Master -> Export**
 
 {SONG_MODES_TEXT.format(sheets="")}
 3. Press **Run**. The writer model drafts title, a structured **caption** (Global Metadata, Vocal Details, Arrangement), lyrics and an artwork prompt; MiniMax Music 3 renders the song.
@@ -1067,14 +1138,16 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g.link(sheet, "lyrics", render, "lyrics")
     g.link(sheet, "score_seconds", render, "max_duration")
     g.link(seed, "seed", render, "seed")
+    # MiniMax renders a band-limited signal: Refine runs with UniverSR by default (plan §4.6)
+    audio, refine_node = refine_stage(g, bp, 1800, audio=(render, "AUDIO"), active=True, y=430)
     _master, preview, export = finish(
         g,
         bp,
-        1800,
-        audio=(render, "AUDIO"),
+        2320,
+        audio=audio,
         title=(sheet, "title"),
         artwork=(sheet, "artwork_prompt"),
-        reports=[(sheet, "report")],
+        reports=[(sheet, "report"), (refine_node, "report")],
         group="5 · FINISH",
     )
     g.group("1 · SONG", [brief])
@@ -1171,14 +1244,15 @@ def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g.link(score_sheet, "planning_mode", render, "mode")
     g.link(score_sheet, "score_seconds", render, "max_duration")
     g.link(seed, "seed", render, "seed")
+    audio, refine_node = refine_stage(g, bp, 2320, audio=(render, "AUDIO"), y=440)
     _master, preview, export = finish(
         g,
         bp,
         2720,
-        audio=(render, "AUDIO"),
+        audio=audio,
         title=(text_sheet, "title"),
         artwork=(text_sheet, "artwork_prompt"),
-        reports=[(text_sheet, "report"), (score_sheet, "report")],
+        reports=[(text_sheet, "report"), (score_sheet, "report"), (refine_node, "report")],
         group="6 · FINISH",
     )
     g.group("1 · SONG", [brief])
@@ -1192,11 +1266,12 @@ def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
 
 ABOUT_ENHANCE = """# 4 · Enhance & Master
 
-**Load Audio -> EQ -> Loudness & Dynamics -> Export**
+**Load Audio -> Refine (optional) -> EQ -> Loudness & Dynamics -> Export**
 
 Finishes an existing recording (for example a take you rendered earlier) without any music model.
 
 1. Upload the file in **Load Audio**.
+2. For a **band-limited** source (an old MP3, a phone recording) select the *Refine (optional)* block and press **Ctrl+B**: it brings the file to 48 kHz and extends the missing top octave with UniverSR (the user guide *Refine (48 kHz)* covers the settings).
 2. **EQ** starts with a gentle warm tone match (*match preset*). Choose *manual* to draw your own curve, *flat* for no EQ, or connect a **reference** recording and pick a reference recipe.
 3. **Loudness & Dynamics** brings the song to -14 LUFS with a true peak of at most -1 dBTP (streaming); pick another target or compression style if you like.
 4. Press **Run**. Export writes FLAC 24-bit and MP3 V0 to `output/plenio/enhanced`, copies the source file's tags and cover, keeps the unmastered source as `(original).flac`, and writes a release record with the measured loudness.
@@ -1207,30 +1282,32 @@ The preview plays the result; compare it with the source in Load Audio. Nothing 
 """
 
 
-def enhance_master() -> tuple[Graph, App]:
+def enhance_master(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g = Graph()
     about_note(g, ABOUT_ENHANCE, height=560)
     source = g.add("LoadAudio", (0, 0), size=(340, 140), title="Source")
+    # for band-limited uploads (old MP3s): Refine is available, bypassed (plan §11)
+    audio, refine_node = refine_stage(g, bp, 420, audio=(source, "AUDIO"), y=200)
     eq = g.add(
         "PlenioEQ",
-        (420, 0),
+        (880, 0),
         size=(420, 420),
         widgets={"mode": "match preset", "mode.preset": WARM_GENTLE},
         labels={"mode": "EQ"},
     )
     loudness = g.add(
         "PlenioLoudness",
-        (900, 0),
+        (1360, 0),
         size=(340, 220),
         widgets={"target": MASTER_TARGET, "compression": MASTER_STYLE, "sample_rate": "keep"},
         labels={"target": "loudness target"},
     )
-    preview = g.add("PreviewAudio", (1320, 0), size=(360, 120), title="Preview (mastered)")
+    preview = g.add("PreviewAudio", (1780, 0), size=(360, 120), title="Preview (mastered)")
     export = g.add(
         "PlenioExportRelease",
-        (1320, 180),
+        (1780, 180),
         size=(380, 400),
-        autogrow={"reports": 2},
+        autogrow={"reports": 3},
         widgets={
             "folder": "plenio/enhanced",
             "naming": "{title}",
@@ -1238,13 +1315,14 @@ def enhance_master() -> tuple[Graph, App]:
             "tags": "copy from loaded file",
         },
     )
-    g.link(source, "AUDIO", eq, "audio")
+    g.link(audio[0], audio[1], eq, "audio")
     g.link(eq, "audio", loudness, "audio")
     g.link(loudness, "audio", preview, "audio")
     g.link(loudness, "audio", export, "audio")
     g.link(source, "AUDIO", export, "original")
-    g.link(eq, "report", export, "reports.report_0")
-    g.link(loudness, "report", export, "reports.report_1")
+    g.link(refine_node, "report", export, "reports.report_0")
+    g.link(eq, "report", export, "reports.report_1")
+    g.link(loudness, "report", export, "reports.report_2")
     g.group("1 · SOURCE", [source])
     g.group("2 · MASTER", [eq, loudness])
     g.group("3 · FINISH", [preview, export])
@@ -1296,6 +1374,7 @@ def blueprints() -> dict[str, Blueprint]:
         "minimax_render": minimax_render(),
         "master": master(),
         "cover": cover_art(),
+        "refine": refine(),
     }
 
 
@@ -1304,9 +1383,9 @@ def templates(bp: dict[str, Blueprint]) -> list[tuple[str, Graph, list[Blueprint
     cover, cover_app = yue2_cover(bp)
     minimax, minimax_app = minimax_song(bp)
     daw, daw_app = yue2_daw(bp)
-    enhance, enhance_app = enhance_master()
+    enhance, enhance_app = enhance_master(bp)
     check, check_app = system_check()
-    finish_bps = [bp["master"], bp["cover"]]
+    finish_bps = [bp["master"], bp["cover"], bp["refine"]]
     return [
         ("0 · System Check", check, [], check_app),
         (
@@ -1327,7 +1406,12 @@ def templates(bp: dict[str, Blueprint]) -> list[tuple[str, Graph, list[Blueprint
             [bp["minimax_model"], bp["write"], bp["minimax_render"], *finish_bps],
             minimax_app,
         ),
-        ("4 · Enhance & Master", enhance, [], enhance_app),
+        (
+            "4 · Enhance & Master",
+            enhance,
+            [bp["refine"]],
+            enhance_app,
+        ),
         (
             "5 · YuE2 · DAW",
             daw,

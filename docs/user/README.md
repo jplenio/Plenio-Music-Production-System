@@ -15,6 +15,7 @@ Concepts:
 
 - [Song Sheet](concepts/song-sheet.md) - which text and score reach the model, edits, conflicts, review
 - [Brief templates](concepts/brief-templates.md) - what a template fills, the explicit actions, writing your own lyrics
+- [Refine (48 kHz)](concepts/refine.md) - the super-resolution stage: engines, settings, licence, limits
 - [Score editor](concepts/score-editor.md) - correcting a score note by note, sections, playback and A/B
 - [Instrumental](concepts/instrumental.md) - what Plenio guarantees for instrumentals and what it checks
 - [Mastering and audio formats](concepts/mastering.md) - metering, EQ, dynamics, resampling, export formats and their limits
