@@ -833,6 +833,360 @@
    "tempo_bpm": 90,
    "unit": "1/32"
   },
+  "model": {
+   "grid": {
+    "snap": 1,
+    "units_per_quarter": 8.0
+   },
+   "groups": [
+    1,
+    2,
+    2,
+    2
+   ],
+   "keys": [
+    {
+     "key": "D",
+     "onset": 0
+    }
+   ],
+   "measures": [
+    {
+     "key": "D",
+     "length": 32,
+     "meter": "4/4",
+     "n": 1,
+     "onset": 0
+    },
+    {
+     "key": "D",
+     "length": 32,
+     "meter": "4/4",
+     "n": 2,
+     "onset": 32
+    },
+    {
+     "key": "D",
+     "length": 32,
+     "meter": "4/4",
+     "n": 3,
+     "onset": 64
+    },
+    {
+     "key": "D",
+     "length": 32,
+     "meter": "4/4",
+     "n": 4,
+     "onset": 96
+    },
+    {
+     "key": "D",
+     "length": 32,
+     "meter": "4/4",
+     "n": 5,
+     "onset": 128
+    },
+    {
+     "key": "D",
+     "length": 32,
+     "meter": "4/4",
+     "n": 6,
+     "onset": 160
+    },
+    {
+     "key": "D",
+     "length": 32,
+     "meter": "4/4",
+     "n": 7,
+     "onset": 192
+    }
+   ],
+   "sections": [
+    {
+     "bars": 1,
+     "first_bar": 1,
+     "implicit": false,
+     "label": "intro"
+    },
+    {
+     "bars": 4,
+     "first_bar": 2,
+     "implicit": false,
+     "label": "verse"
+    },
+    {
+     "bars": 2,
+     "first_bar": 6,
+     "implicit": false,
+     "label": "chorus"
+    }
+   ],
+   "tempo": 90,
+   "total": 224,
+   "tracks": {
+    "chords": [
+     {
+      "id": "chord:0",
+      "name": "D",
+      "onset": 0,
+      "pitches": [
+       50,
+       54,
+       57
+      ]
+     },
+     {
+      "id": "chord:32",
+      "name": "G",
+      "onset": 32,
+      "pitches": [
+       55,
+       59,
+       62
+      ]
+     },
+     {
+      "id": "chord:64",
+      "name": "A7",
+      "onset": 64,
+      "pitches": [
+       57,
+       61,
+       64,
+       67
+      ]
+     },
+     {
+      "id": "chord:96",
+      "name": "Bm",
+      "onset": 96,
+      "pitches": [
+       59,
+       62,
+       66
+      ]
+     },
+     {
+      "id": "chord:128",
+      "name": "D",
+      "onset": 128,
+      "pitches": [
+       50,
+       54,
+       57
+      ]
+     },
+     {
+      "id": "chord:160",
+      "name": "G",
+      "onset": 160,
+      "pitches": [
+       55,
+       59,
+       62
+      ]
+     },
+     {
+      "id": "chord:192",
+      "name": "D",
+      "onset": 192,
+      "pitches": [
+       50,
+       54,
+       57
+      ]
+     }
+    ],
+    "ins": [
+     {
+      "duration": 8,
+      "id": "ins:0",
+      "name": "D5",
+      "onset": 0,
+      "pitch": 74,
+      "segments": [
+       "I1.0"
+      ]
+     },
+     {
+      "duration": 8,
+      "id": "ins:8",
+      "name": "F#5",
+      "onset": 8,
+      "pitch": 78,
+      "segments": [
+       "I1.1"
+      ]
+     },
+     {
+      "duration": 16,
+      "id": "ins:16",
+      "name": "A5",
+      "onset": 16,
+      "pitch": 81,
+      "segments": [
+       "I1.2"
+      ]
+     },
+     {
+      "duration": 8,
+      "id": "ins:96",
+      "name": "D4",
+      "onset": 96,
+      "pitch": 62,
+      "segments": [
+       "I4.0"
+      ]
+     },
+     {
+      "duration": 8,
+      "id": "ins:104",
+      "name": "F#4",
+      "onset": 104,
+      "pitch": 66,
+      "segments": [
+       "I4.1"
+      ]
+     },
+     {
+      "duration": 8,
+      "id": "ins:112",
+      "name": "A4",
+      "onset": 112,
+      "pitch": 69,
+      "segments": [
+       "I4.2"
+      ]
+     },
+     {
+      "duration": 8,
+      "id": "ins:120",
+      "name": "D5",
+      "onset": 120,
+      "pitch": 74,
+      "segments": [
+       "I4.3"
+      ]
+     }
+    ],
+    "vocal": [
+     {
+      "duration": 8,
+      "id": "vocal:32",
+      "name": "F#4",
+      "onset": 32,
+      "pitch": 66,
+      "segments": [
+       "V2.0"
+      ]
+     },
+     {
+      "duration": 8,
+      "id": "vocal:40",
+      "name": "F#5",
+      "onset": 40,
+      "pitch": 78,
+      "segments": [
+       "V2.1"
+      ]
+     },
+     {
+      "duration": 8,
+      "id": "vocal:48",
+      "name": "F4",
+      "onset": 48,
+      "pitch": 65,
+      "segments": [
+       "V2.2"
+      ]
+     },
+     {
+      "duration": 8,
+      "id": "vocal:56",
+      "name": "F5",
+      "onset": 56,
+      "pitch": 77,
+      "segments": [
+       "V2.3"
+      ]
+     },
+     {
+      "duration": 32,
+      "id": "vocal:64",
+      "name": "A4",
+      "onset": 64,
+      "pitch": 69,
+      "segments": [
+       "V3.0",
+       "V3.1"
+      ]
+     },
+     {
+      "duration": 8,
+      "id": "vocal:96",
+      "name": "B4",
+      "onset": 96,
+      "pitch": 71,
+      "segments": [
+       "V4.0"
+      ]
+     },
+     {
+      "duration": 8,
+      "id": "vocal:104",
+      "name": "A#4",
+      "onset": 104,
+      "pitch": 70,
+      "segments": [
+       "V4.1"
+      ]
+     },
+     {
+      "duration": 16,
+      "id": "vocal:112",
+      "name": "A#4",
+      "onset": 112,
+      "pitch": 70,
+      "segments": [
+       "V4.2"
+      ]
+     },
+     {
+      "duration": 32,
+      "id": "vocal:128",
+      "name": "D5",
+      "onset": 128,
+      "pitch": 74,
+      "segments": [
+       "V5.0"
+      ]
+     },
+     {
+      "duration": 32,
+      "id": "vocal:160",
+      "name": "C#5",
+      "onset": 160,
+      "pitch": 73,
+      "segments": [
+       "V6.0",
+       "V6.1"
+      ]
+     },
+     {
+      "duration": 32,
+      "id": "vocal:192",
+      "name": "D5",
+      "onset": 192,
+      "pitch": 74,
+      "segments": [
+       "V7.0"
+      ]
+     }
+    ]
+   },
+   "unit": "1/32",
+   "version": 2
+  },
   "notes": {
    "Ins": [
     {

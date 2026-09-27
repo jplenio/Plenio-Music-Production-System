@@ -32,9 +32,20 @@ const props = defineProps<{
   payload: SheetPayload | null
   readonly: boolean
 }>()
-const emit = defineEmits<{ edited: [] }>()
+const emit = defineEmits<{
+  edited: []
+  /** The commit gate for ``text``: why it cannot be applied/approved (``null``: it can). */
+  gate: [text: string, reason: string | null]
+}>()
 
 const session = useScoreSession(props.doc, { fetcher: props.fetcher, onEdit: () => emit('edited') })
+watch(
+  () => [props.doc.text, session.commitBlock] as const,
+  ([text, reason]) => {
+    if (!props.readonly) emit('gate', text, reason)
+  },
+  { immediate: true }
+)
 const prefs = ref(loadPrefs())
 const cursor = ref<string[]>([])
 const revealRange = ref<[number, number] | null>(null)
@@ -205,6 +216,15 @@ function onKey(event: KeyboardEvent): void {
       <span v-else-if="invalid" class="facts bad">✖ {{ diagnostics.length }} error(s)</span>
       <span v-if="readonly" class="badge">read-only: owned by the other sheet</span>
     </div>
+    <p v-if="invalid && !readonly" class="gate" role="status">
+      The ABC text has errors: the notation shows the last valid score, and Apply and Approve are off until
+      the text is valid again.
+      <button v-if="session.canRevert" @click="session.revertToLastValid()">Revert to last valid</button>
+    </p>
+    <p v-else-if="session.view?.ok && session.view.model_error && !readonly" class="gate" role="status">
+      This score is valid for YuE2 but outside the editor's supported subset ({{ session.view.model_error.message }});
+      edit it as ABC text.
+    </p>
     <div class="score-main" :data-layout="prefs.layout">
       <ScoreNavigator
         :view="shown"

@@ -64,6 +64,14 @@ const result = ref<SheetPayload | null>(props.payload)
 const error = ref<string | null>(null)
 const busy = ref(false)
 const confirmClose = ref(false)
+// The score's commit gate, as the score tab last reported it for a text (the tab unmounts when
+// another tab is shown; the gate holds while the text is unchanged).
+const scoreGate = ref<{ text: string; reason: string | null } | null>(null)
+const scoreBlock = computed(() => {
+  const doc = working.find((d) => d.kind === 'score')
+  const gate = scoreGate.value
+  return doc && gate?.reason && gate.text === doc.text ? gate.reason : null
+})
 const fetchedNote = ref<AsrNote | null>(null)
 const revision = ref(0)
 let timer: ReturnType<typeof setTimeout> | undefined
@@ -137,7 +145,15 @@ const findings = computed<Finding[]>(() => (result.value?.findings ?? []).filter
 const infos = computed<Finding[]>(() => (result.value?.findings ?? []).filter((f) => f.severity === 'info'))
 const hasErrors = computed(() => findings.value.some((f) => f.severity === 'error'))
 const canApprove = computed(
-  () => !busy.value && !hasErrors.value && !unresolvedConflicts.value.length && !!result.value?.fingerprint
+  () =>
+    !busy.value &&
+    !hasErrors.value &&
+    !unresolvedConflicts.value.length &&
+    !scoreBlock.value &&
+    !!result.value?.fingerprint
+)
+const applyBlock = computed(() =>
+  unresolvedConflicts.value.length ? 'Resolve the conflicts first.' : scoreBlock.value
 )
 const statusIcon = computed(() => {
   if (unresolvedConflicts.value.length) return '⇄ conflict'
@@ -178,6 +194,7 @@ watch(
 )
 
 function apply() {
+  if (applyBlock.value) return
   emit('apply', withApproval(pending.value, props.state.review?.approved_fingerprint ?? null))
 }
 async function approve() {
@@ -240,7 +257,9 @@ onBeforeUnmount(() => {
       </p>
       <div v-if="confirmClose" class="confirm" role="alertdialog" aria-label="Unapplied changes">
         You have changes that are not applied yet.
-        <button class="primary" @click="apply">Apply</button>
+        <button class="primary" :disabled="!!applyBlock" :title="applyBlock ?? 'Save your documents into the node'" @click="apply">
+          Apply
+        </button>
         <button @click="emit('close')">Discard</button>
         <button @click="confirmClose = false">Keep editing</button>
       </div>
@@ -268,6 +287,7 @@ onBeforeUnmount(() => {
             :payload="payload"
             :readonly="false"
             @edited="onInput(doc)"
+            @gate="(text: string, reason: string | null) => (scoreGate = { text, reason })"
           />
           <textarea
             v-else
@@ -340,6 +360,7 @@ onBeforeUnmount(() => {
         <p v-if="unresolvedConflicts.length" class="error">
           Resolve the conflict in: {{ unresolvedConflicts.join(', ') }}.
         </p>
+        <p v-if="scoreBlock" class="error">Score: {{ scoreBlock }}</p>
         <ul>
           <li v-for="(f, i) in findings" :key="i" :data-severity="f.severity">
             <strong>{{ f.severity }}</strong> <span class="where">{{ f.where }}</span> {{ f.message }}
@@ -354,14 +375,14 @@ onBeforeUnmount(() => {
         <span class="spacer" />
         <button :disabled="!dirty" title="Discard every change made in this editor" @click="revert">Revert</button>
         <button @click="close">Close</button>
-        <button class="primary" :disabled="!!unresolvedConflicts.length" title="Save your documents into the node" @click="apply">
+        <button class="primary" :disabled="!!applyBlock" :title="applyBlock ?? 'Save your documents into the node'" @click="apply">
           Apply
         </button>
         <button
           v-if="review === 'stop for review'"
           class="primary"
           :disabled="!canApprove"
-          title="Release exactly these documents for the next run"
+          :title="scoreBlock ?? 'Release exactly these documents for the next run'"
           @click="approve"
         >
           Approve

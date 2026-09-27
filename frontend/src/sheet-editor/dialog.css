@@ -339,6 +339,15 @@
   color: #fff;
   z-index: 1;
 }
+.plenio-overlay .gate {
+  margin: 4px 0;
+  padding: 4px 8px;
+  border-left: 3px solid #e0685e;
+  background: rgba(224, 104, 94, 0.12);
+}
+.plenio-overlay .gate button {
+  margin-left: 8px;
+}
 .plenio-overlay .notation svg .plenio-selected,
 .plenio-overlay .notation svg .plenio-selected path {
   fill: #4c9aff !important;

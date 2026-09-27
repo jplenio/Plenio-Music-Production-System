@@ -12,6 +12,8 @@ import {
   elementAtSource,
   elementById,
   firstElementOfBar,
+  knownIds,
+  modelNoteOfSegment,
   neighbour,
   nextDuration,
   otherVoice,
@@ -19,7 +21,7 @@ import {
 } from '../src/shared/scoreView'
 import type { WorkingDoc } from '../src/shared/sheetSession'
 import { defaultPrefs, loadPrefs, savePrefs } from '../src/sheet-editor/score/prefs'
-import { useScoreSession } from '../src/sheet-editor/score/useScoreSession'
+import { commitBlockOf, useScoreSession } from '../src/sheet-editor/score/useScoreSession'
 // The editor view of the TRICKY score of tests/unit/test_score_editor.py, as the backend
 // returns it (test_frontend_fixture_is_current keeps it up to date).
 import fixture from './fixtures/tricky-score.json'
@@ -472,5 +474,96 @@ describe('score session', () => {
     expect(backend.calls).toHaveLength(0)
     expect(session.view).toBeNull()
     expect(session.pending).toBe(false)
+    expect(session.commitBlock).toBeNull()
+  })
+
+  it('blocks the commit while the text is unchecked or invalid and reverts to the last valid text', async () => {
+    const edits = vi.fn()
+    const session = await start(edits)
+    expect(session.commitBlock).toBe('The score is still being checked.')
+    await backend.calls[0].answer(VIEW)
+    expect(session.commitBlock).toBeNull()
+    expect(session.canRevert).toBe(false)
+
+    session.typed('X:1\nbroken')
+    expect(session.commitBlock).toBe('The score is still being checked.')
+    await vi.advanceTimersByTimeAsync(300)
+    const diagnostic = {
+      severity: 'error' as const,
+      message: 'Incomplete native two-voice ABC',
+      bar: null,
+      voice: null,
+      where: 'score',
+      line: 2,
+      start: 4,
+      end: 10
+    }
+    await backend.calls[1].answer({ ...viewFor('broken', false), diagnostics: [diagnostic] })
+    expect(session.commitBlock).toBe(
+      'The ABC text is not valid (line 2: Incomplete native two-voice ABC). Fix it, or revert to the last valid score.'
+    )
+    expect(session.lastValid?.sha256).toBe(VIEW.sha256)
+    expect(session.canRevert).toBe(true)
+
+    // the notation's operations are refused while the text is invalid (nothing is sent)
+    expect(await session.operate({ op: 'delete', ids: ['vocal:32'] })).toBe(false)
+    expect(backend.calls).toHaveLength(2)
+    expect(session.error).toContain('revert to the last valid score')
+
+    expect(session.revertToLastValid()).toBe(true)
+    expect(doc.text).toBe(ABC)
+    expect(session.commitBlock).toBeNull()
+    expect(session.current?.sha256).toBe(VIEW.sha256) // its view is known: no new analysis
+    await settle()
+    expect(backend.calls).toHaveLength(2)
+    expect(session.undoLabel).toBe('revert to the last valid score')
+    expect(edits).toHaveBeenCalledTimes(2)
+    session.undo()
+    expect(doc.text).toBe('X:1\nbroken')
+  })
+
+  it('blocks the commit when the check itself failed', async () => {
+    const session = await start()
+    await backend.calls[0].answer({ error: { message: 'Server unavailable' } }, 500)
+    expect(session.commitBlock).toBe('The score could not be checked: Server unavailable')
+  })
+
+  it('keeps canonical note and chord ids in the selection', async () => {
+    const session = await start()
+    await backend.calls[0].answer(VIEW)
+    const note = VIEW.model!.tracks.vocal[0]
+    expect(modelNoteOfSegment(VIEW, note.segments[0])?.id).toBe(note.id)
+    session.select([note.id, 'chord:0', 'V2.0', 'ins:9999'])
+    session.typed(ABC + ' ')
+    await vi.advanceTimersByTimeAsync(300)
+    await backend.calls[1].answer(viewFor('typed'))
+    expect(session.selection).toEqual([note.id, 'chord:0', 'V2.0'])
+    expect(knownIds(VIEW).has('ins:9999')).toBe(false)
+  })
+
+  it('takes the canonical ids of a canonical operation as the new selection', async () => {
+    const session = await start()
+    await backend.calls[0].answer(VIEW)
+    const done = session.operate({ op: 'insert_note', track: 'ins', onset: 32, duration: 8, pitch: 60 })
+    await backend.calls[1].answer(transformAnswer('EDITED', { select: ['ins:32'], changes: ['bar 2 Ins: C4 (8 units) inserted'] }))
+    expect(await done).toBe(true)
+    expect(session.selection).toEqual(['ins:32'])
+    expect(session.undoLabel).toBe('bar 2 Ins: C4 (8 units) inserted')
+  })
+})
+
+describe('commit gate', () => {
+  const base = { text: 'X:1', view: VIEW, pending: false, busy: false, checkFailed: null }
+
+  it('lets a checked valid text through and blocks everything else', () => {
+    expect(commitBlockOf(base)).toBeNull()
+    expect(commitBlockOf({ ...base, text: '' })).toBeNull()
+    expect(commitBlockOf({ ...base, pending: true })).toContain('being checked')
+    expect(commitBlockOf({ ...base, busy: true })).toContain('being checked')
+    expect(commitBlockOf({ ...base, view: null })).toContain('not been checked')
+    expect(commitBlockOf({ ...base, checkFailed: 'offline' })).toContain('could not be checked: offline')
+    expect(commitBlockOf({ ...base, view: { ...VIEW, ok: false, diagnostics: [] } })).toBe(
+      'The ABC text is not valid. Fix it, or revert to the last valid score.'
+    )
   })
 })

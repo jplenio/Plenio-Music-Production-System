@@ -6,12 +6,16 @@
  * - Every view comes from the backend for exactly the current text; an answer for an older
  *   text is dropped, so the notation never shows a stale score as if it were current.
  * - The last *valid* view stays visible while the text is invalid (marked as such).
+ * - Commit gate (next-release plan §9.7): while the text is invalid, unchecked or being checked,
+ *   ``commitBlock`` names the reason; the dialog disables Apply/Approve for the score with it,
+ *   the notation's operations are refused, and ``revertToLastValid`` restores the last valid
+ *   text. An invalid text therefore never replaces the last valid score in the node.
  */
 import { computed, reactive, ref, shallowRef, watch } from 'vue'
 
 import { type Fetcher, PlenioApiError, type ScoreOperation, analyzeScore, transformScore } from '../../api/client'
 import { History } from '../../shared/history'
-import { type ScoreView, elementById } from '../../shared/scoreView'
+import { type ScoreView, elementById, knownIds } from '../../shared/scoreView'
 import type { WorkingDoc } from '../../shared/sheetSession'
 
 export interface ScoreSessionOptions {
@@ -26,12 +30,34 @@ export function describeError(error: unknown): string {
   return String(error instanceof Error ? error.message : error)
 }
 
+/** Why the current text cannot be committed (``null``: it can). */
+export function commitBlockOf(state: {
+  text: string
+  view: ScoreView | null
+  pending: boolean
+  busy: boolean
+  checkFailed: string | null
+}): string | null {
+  if (!state.text.trim()) return null // an empty document is the sheet's concern (missing score)
+  if (state.pending || state.busy) return 'The score is still being checked.'
+  if (state.checkFailed) return `The score could not be checked: ${state.checkFailed}`
+  if (!state.view) return 'The score has not been checked yet.'
+  if (!state.view.ok) {
+    const first = state.view.diagnostics.find((d) => d.severity === 'error')
+    const where = first ? ` (${first.line ? `line ${first.line}` : first.where}: ${first.message})` : ''
+    return `The ABC text is not valid${where}. Fix it, or revert to the last valid score.`
+  }
+  return null
+}
+
 export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
   const view = shallowRef<ScoreView | null>(null)
   const lastValid = shallowRef<ScoreView | null>(null)
+  const lastValidText = ref<string | null>(null)
   const pending = ref(false)
   const busy = ref(false)
   const error = ref<string | null>(null)
+  const checkFailed = ref<string | null>(null)
   const notes = ref<string[]>([])
   const selection = ref<string[]>([])
   const history = new History(doc.text)
@@ -46,6 +72,29 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
   const canRedo = computed(() => (historyVersion.value, history.canRedo))
   const undoLabel = computed(() => (historyVersion.value, history.undoLabel))
   const redoLabel = computed(() => (historyVersion.value, history.redoLabel))
+  const commitBlock = computed(() =>
+    commitBlockOf({
+      text: doc.text,
+      view: view.value,
+      pending: pending.value,
+      busy: busy.value,
+      checkFailed: checkFailed.value
+    })
+  )
+  const canRevert = computed(
+    () => lastValidText.value !== null && lastValidText.value !== doc.text && !!view.value && !view.value.ok
+  )
+
+  function accept(result: ScoreView, text: string): void {
+    view.value = result
+    checkFailed.value = null
+    if (result.ok) {
+      lastValid.value = result
+      lastValidText.value = text
+      const known = knownIds(result)
+      selection.value = selection.value.filter((id) => known.has(id))
+    }
+  }
 
   async function analyze(): Promise<void> {
     const text = doc.text
@@ -58,15 +107,13 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
     try {
       const result = await analyzeScore(options.fetcher, text)
       if (requested !== text || doc.text !== text) return // an older text: drop it
-      view.value = result
-      if (result.ok) {
-        lastValid.value = result
-        const known = new Set((result.elements ?? []).map((e) => e.id))
-        selection.value = selection.value.filter((id) => known.has(id))
-      }
+      accept(result, text)
       error.value = null
     } catch (e) {
-      if (doc.text === text) error.value = describeError(e)
+      if (doc.text === text) {
+        error.value = describeError(e)
+        checkFailed.value = error.value
+      }
     } finally {
       if (doc.text === text) pending.value = false
     }
@@ -96,6 +143,10 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
 
   async function operate(operation: ScoreOperation): Promise<boolean> {
     const text = doc.text
+    if (view.value && !view.value.ok) {
+      error.value = 'The ABC text is not valid; fix it or revert to the last valid score before editing the notation.'
+      return false
+    }
     busy.value = true
     error.value = null
     try {
@@ -110,8 +161,7 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
       clearTimeout(timer)
       pending.value = false
       requested = result.abc
-      view.value = result.analysis
-      if (result.analysis.ok) lastValid.value = result.analysis
+      accept(result.analysis, result.abc)
       notes.value = [...result.changes, ...result.warnings.map((w) => `warning: ${w}`)]
       if (result.select.length) selection.value = result.select
       return true
@@ -136,6 +186,23 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
 
   const undo = () => restore(history.undo())
   const redo = () => restore(history.redo())
+
+  /** Replace an invalid text by the last valid one (one undo step; its view is already known). */
+  function revertToLastValid(): boolean {
+    const text = lastValidText.value
+    if (text === null || text === doc.text || !lastValid.value) return false
+    history.seal()
+    write(text, 'revert to the last valid score')
+    history.seal()
+    clearTimeout(timer)
+    requested = text
+    pending.value = false
+    view.value = lastValid.value
+    checkFailed.value = null
+    error.value = null
+    notes.value = ['reverted to the last valid score']
+    return true
+  }
 
   function select(ids: string[]): void {
     selection.value = ids
@@ -166,6 +233,7 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
   return reactive({
     view,
     lastValid,
+    lastValidText,
     current,
     pending,
     busy,
@@ -177,10 +245,13 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
     canRedo,
     undoLabel,
     redoLabel,
+    commitBlock,
+    canRevert,
     typed,
     operate,
     undo,
     redo,
+    revertToLastValid,
     select,
     analyze,
     dispose

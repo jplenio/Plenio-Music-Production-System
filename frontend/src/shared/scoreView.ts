@@ -77,6 +77,59 @@ export interface PlaybackNote {
   duration_s: number
 }
 
+/** A sounding note of the canonical model (ties do not exist; times in integer units of L). */
+export interface ModelNote {
+  /** ``vocal:<onset>`` or ``ins:<onset>`` - the id the canonical operations take. */
+  id: string
+  onset: number
+  duration: number
+  pitch: number
+  name: string
+  /** Ids of the written segments (``V12.3`` ...) in the element view (staff and ABC views). */
+  segments: string[]
+}
+
+export interface ModelChord {
+  /** ``chord:<onset>`` */
+  id: string
+  onset: number
+  name: string
+  pitches: number[]
+}
+
+export interface ModelMeasure {
+  n: number
+  onset: number
+  length: number
+  meter: string
+  key: string
+}
+
+export interface ModelSection {
+  label: string
+  first_bar: number
+  bars: number
+  /** The untitled first section of a score whose first group has no ``% label`` line. */
+  implicit: boolean
+}
+
+/**
+ * The canonical score model (view contract v2, next-release plan §9.9): what the piano roll,
+ * chord lane and inspector render. Derived by the backend from exactly the current text.
+ */
+export interface ScoreModelView {
+  version: 2
+  unit: string
+  tempo: number
+  total: number
+  grid: { units_per_quarter: number; snap: number }
+  measures: ModelMeasure[]
+  groups: number[]
+  keys: { onset: number; key: string }[]
+  sections: ModelSection[]
+  tracks: { vocal: ModelNote[]; ins: ModelNote[]; chords: ModelChord[] }
+}
+
 export interface ScoreView {
   ok: boolean
   sha256: string
@@ -92,6 +145,24 @@ export interface ScoreView {
   notes?: Record<Voice, PlaybackNote[]>
   bar_starts_s?: number[]
   display_abc?: string
+  /** The canonical model; ``null`` for a valid score outside the supported subset (see ``model_error``). */
+  model?: ScoreModelView | null
+  model_error?: { message: string; diagnostics: ScoreDiagnostic[] }
+}
+
+/** Every id a view knows: element ids (staff/ABC) and canonical note and chord ids. */
+export function knownIds(view: ScoreView): Set<string> {
+  const ids = new Set((view.elements ?? []).map((e) => e.id))
+  const tracks = view.model?.tracks
+  if (tracks) for (const item of [...tracks.vocal, ...tracks.ins, ...tracks.chords]) ids.add(item.id)
+  return ids
+}
+
+/** The canonical note a written segment belongs to (staff/ABC selection -> piano roll). */
+export function modelNoteOfSegment(view: ScoreView | null, elementId: string): ModelNote | null {
+  const tracks = view?.model?.tracks
+  if (!tracks) return null
+  return [...tracks.vocal, ...tracks.ins].find((n) => n.segments.includes(elementId)) ?? null
 }
 
 /** Native note lengths in units of the score's L: field (upstream DURATIONS). */
