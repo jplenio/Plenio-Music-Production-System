@@ -8,6 +8,7 @@ errors) or 500 (bugs).
 
 from __future__ import annotations
 
+import base64
 import logging
 from collections.abc import Awaitable, Callable
 from typing import Any
@@ -113,6 +114,44 @@ async def score_transform(request: web.Request) -> web.StreamResponse:
             "warnings": list(result.warnings),
             "select": list(result.select),
             "analysis": score_rules.editor_view(result.abc),
+        }
+    )
+
+
+async def score_midi_export(request: web.Request) -> web.StreamResponse:
+    """The score (and the editor's Guide notes) as a standard MIDI file, base64 in JSON."""
+    from ..core.score import canonical, midi
+
+    data = await read_json(request)
+    score = canonical.from_abc(_text(data, "abc"))
+    title = _text(data, "title", required=False)
+    payload = midi.export_midi(score, guide=midi.guide_from_json(data.get("guide")), title=title)
+    return web.json_response(
+        {"filename": midi.filename_for(title), "data": base64.b64encode(payload).decode("ascii")}
+    )
+
+
+async def score_midi_import(request: web.Request) -> web.StreamResponse:
+    """A MIDI file (base64) as a score: its ABC, the Guide notes and the import report."""
+    from ..core.score import canonical, midi
+
+    data = await read_json(request)
+    encoded = _text(data, "data")
+    if len(encoded) > midi.MAX_FILE_BYTES * 4 // 3 + 4:
+        raise PlenioUserError("The MIDI file is too large (8 MB at most).")
+    try:
+        raw = base64.b64decode(encoded, validate=True)
+    except (ValueError, TypeError) as error:
+        raise PlenioUserError("The field 'data' is not valid base64.") from error
+    grid = int(_number(data, "grid", 4, 64) or 32)
+    result = midi.import_midi(raw, mapping=midi.mapping_from_json(data.get("mapping")), grid=grid)
+    abc = canonical.to_abc(result.score)
+    return web.json_response(
+        {
+            "abc": abc,
+            "guide": [[g.onset, g.duration, g.pitch] for g in result.guide],
+            "report": list(result.report),
+            "analysis": score_rules.editor_view(abc),
         }
     )
 
@@ -249,6 +288,8 @@ ROUTES: tuple[tuple[str, str, Handler], ...] = (
     ("GET", "/plenio/system", system),
     ("POST", "/plenio/score/analyze", score_analyze),
     ("POST", "/plenio/score/transform", score_transform),
+    ("POST", "/plenio/score/midi/export", score_midi_export),
+    ("POST", "/plenio/score/midi/import", score_midi_import),
     ("POST", "/plenio/lyrics/analyze", lyrics_analyze),
     ("POST", "/plenio/sheet/resolve", sheet_resolve),
     ("GET", "/plenio/templates", templates_list),

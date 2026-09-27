@@ -79,6 +79,33 @@ export function transformScore(fetcher: Fetcher, abc: string, operation: ScoreOp
   return post<TransformResult>(fetcher, '/plenio/score/transform', { abc, operation })
 }
 
+/** A Guide-track note ``[onset, duration, pitch]`` in units of the score's L (never sent to YuE2). */
+export type GuideNote = [number, number, number]
+
+/** The score (and Guide notes) as a standard MIDI file; ``data`` is base64. */
+export function exportMidi(
+  fetcher: Fetcher,
+  request: { abc: string; title?: string; guide?: GuideNote[] }
+): Promise<{ filename: string; data: string }> {
+  return post(fetcher, '/plenio/score/midi/export', request)
+}
+
+export interface MidiImportResult {
+  abc: string
+  guide: GuideNote[]
+  /** Every lossy step of the import (quantisation, cut notes, dropped tempo changes ...). */
+  report: string[]
+  analysis: ScoreView
+}
+
+/** A MIDI file (base64) as a score. ``mapping``: track index -> vocal | ins | chords | guide | null. */
+export function importMidi(
+  fetcher: Fetcher,
+  request: { data: string; mapping?: Record<string, string | null>; grid?: number }
+): Promise<MidiImportResult> {
+  return post(fetcher, '/plenio/score/midi/import', request)
+}
+
 export interface LyricsSectionInfo {
   tag: string
   lines: number

@@ -389,6 +389,36 @@ def test_score_editor_routes(server: ComfyServer) -> None:
     assert status == 400 and "not valid native two-voice ABC" in refused["error"]["message"]
 
 
+def test_canonical_score_routes(server: ComfyServer) -> None:
+    """View contract v2, a canonical operation and the MIDI boundary over HTTP."""
+    import base64
+
+    abc = (ROOT / "tests" / "fixtures" / "abc" / "upstream-score.abc").read_text(encoding="utf-8")
+    status, view = server.request("POST", "/plenio/score/analyze", {"abc": abc})
+    assert status == 200 and view["model"]["version"] == 2
+    first = view["model"]["tracks"]["vocal"][0]
+    assert first["id"] == "vocal:0" and first["segments"] == ["V1.0"]
+    status, result = server.request(
+        "POST", "/plenio/score/transform", {"abc": abc, "operation": {"op": "delete", "ids": ["vocal:0"]}}
+    )
+    assert status == 200 and result["changes"] == ["bar 1 Vocal: E4 -> rest"]
+    assert result["abc"].splitlines()[10].startswith('"C"z2G2')
+    status, exported = server.request(
+        "POST", "/plenio/score/midi/export", {"abc": abc, "title": "My Song", "guide": [[0, 8, 40]]}
+    )
+    assert status == 200 and exported["filename"] == "My Song.mid"
+    assert base64.b64decode(exported["data"])[:4] == b"MThd"
+    status, imported = server.request("POST", "/plenio/score/midi/import", {"data": exported["data"]})
+    assert status == 200 and imported["report"] == [] and imported["guide"] == [[0, 8, 40]]
+    assert imported["analysis"]["ok"] and imported["abc"] == abc
+    status, refused = server.request("POST", "/plenio/score/midi/import", {"data": "not base64!"})
+    assert status == 400 and "base64" in refused["error"]["message"]
+    status, refused = server.request(
+        "POST", "/plenio/score/midi/import", {"data": base64.b64encode(b"RIFF").decode()}
+    )
+    assert status == 400 and "not a readable MIDI file" in refused["error"]["message"]
+
+
 def test_a_score_edited_in_the_editor_reaches_the_renderer(server: ComfyServer, log: Log) -> None:
     """Editor operation -> Apply (edited) -> render; a new take keeps it, a new plan conflicts."""
     name = label()
