@@ -307,6 +307,10 @@
   gap: 10px;
   height: max(380px, calc(min(900px, 94vh) - 330px));
 }
+.plenio-overlay .score-main.with-roll {
+  /* the piano roll (about 300 px) sits above: keep roll, notation and text in the dialog */
+  height: max(260px, calc(min(900px, 94vh) - 620px));
+}
 .plenio-overlay .score-views {
   display: grid;
   grid-template-rows: minmax(0, 3fr) minmax(0, 2fr);
@@ -338,6 +342,148 @@
   background: #5a2626;
   color: #fff;
   z-index: 1;
+}
+/* --- piano roll --- */
+.plenio-overlay .roll {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  outline: none;
+}
+.plenio-overlay .roll:focus-visible .roll-scroll {
+  border-color: #4c9aff;
+}
+.plenio-overlay .roll-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+.plenio-overlay .roll-tools .group {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.plenio-overlay .roll-tools button.active.vocal {
+  background: #2d5d9f;
+  color: #fff;
+}
+.plenio-overlay .roll-tools button.active.ins {
+  background: #a0612a;
+  color: #fff;
+}
+.plenio-overlay .roll-tools .hint {
+  color: var(--descrip-text, #999);
+  font-size: 11px;
+}
+.plenio-overlay .roll-scroll {
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 1px solid var(--border-color, #444);
+  border-radius: 6px;
+  background: var(--comfy-input-bg, #1e1e1e);
+  user-select: none;
+}
+.plenio-overlay .roll.stale .roll-svg {
+  opacity: 0.45;
+}
+.plenio-overlay .roll-svg {
+  display: block;
+  touch-action: none;
+}
+.plenio-overlay .roll-svg .row {
+  fill: rgba(255, 255, 255, 0.025);
+}
+.plenio-overlay .roll-svg .row.black {
+  fill: rgba(0, 0, 0, 0.22);
+}
+.plenio-overlay .roll-svg .row.c {
+  fill: rgba(255, 255, 255, 0.06);
+}
+.plenio-overlay .roll-svg .lane {
+  fill: rgba(255, 255, 255, 0.04);
+}
+.plenio-overlay .roll-svg line.bar {
+  stroke: rgba(255, 255, 255, 0.35);
+}
+.plenio-overlay .roll-svg line.beat {
+  stroke: rgba(255, 255, 255, 0.1);
+}
+.plenio-overlay .roll-svg text {
+  font-size: 10px;
+  fill: var(--descrip-text, #aaa);
+  pointer-events: none;
+}
+.plenio-overlay .roll-svg .section-label {
+  fill: #9ecbff;
+  font-style: italic;
+}
+.plenio-overlay .roll-svg .note {
+  cursor: grab;
+  stroke: rgba(0, 0, 0, 0.5);
+}
+.plenio-overlay .roll-svg .note.vocal {
+  fill: #4c9aff;
+}
+.plenio-overlay .roll-svg .note.ins {
+  fill: #f0a35e;
+}
+.plenio-overlay .roll-svg .note.selected {
+  stroke: #fff;
+  stroke-width: 2;
+}
+.plenio-overlay .roll-svg .note.playing {
+  fill: #ffd84c;
+}
+.plenio-overlay .roll-svg .note.dragged,
+.plenio-overlay .roll-svg .chord.dragged {
+  opacity: 0.3;
+}
+.plenio-overlay .roll-svg .ghost {
+  fill-opacity: 0.55;
+  stroke: #fff;
+  stroke-dasharray: 3 2;
+  pointer-events: none;
+}
+.plenio-overlay .roll-svg .ghost.vocal {
+  fill: #4c9aff;
+}
+.plenio-overlay .roll-svg .ghost.ins {
+  fill: #f0a35e;
+}
+.plenio-overlay .roll-svg .chord rect {
+  fill: rgba(158, 203, 255, 0.18);
+  stroke: rgba(158, 203, 255, 0.5);
+  cursor: grab;
+}
+.plenio-overlay .roll-svg .chord text {
+  fill: var(--input-text, #e6e6e6);
+  font-size: 11px;
+}
+.plenio-overlay .roll-svg .chord.selected rect {
+  stroke: #fff;
+  stroke-width: 2;
+}
+.plenio-overlay .roll-svg .chord.ghost rect {
+  stroke-dasharray: 3 2;
+}
+.plenio-overlay .roll-svg .keys-bg {
+  fill: var(--comfy-menu-bg, #252525);
+}
+.plenio-overlay .roll.readonly .roll-svg .note,
+.plenio-overlay .roll.stale .roll-svg .note {
+  cursor: default;
+}
+.plenio-overlay .roll-scroll .chord-edit {
+  position: absolute;
+  width: 80px;
+  height: 20px;
+  font-size: 11px;
+}
+.plenio-overlay .roll-note {
+  margin: 0;
+  color: var(--descrip-text, #999);
 }
 .plenio-overlay .gate {
   margin: 4px 0;

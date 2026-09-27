@@ -1,6 +1,6 @@
 # Score editor
 
-The **Score** tab of the Song Sheet editor (*Edit Song Sheet…* on a sheet that owns a score) shows the score as notation and as ABC text, lets you correct it note by note, and plays it - against the source recording in covers. Everything you change is a change of **one text**: the native two-voice ABC that YuE2 reads. The notation, the note list, the sections and the playback are always computed by the backend from exactly that text; the editor keeps no second copy that could drift.
+The **Score** tab of the Song Sheet editor (*Edit Song Sheet…* on a sheet that owns a score) shows the score as a piano roll, as notation and as ABC text, lets you correct it note by note - by dragging notes in the roll or with the palette - and plays it, against the source recording in covers. Everything you change is a change of **one text**: the native two-voice ABC that YuE2 reads. The notation, the note list, the sections and the playback are always computed by the backend from exactly that text; the editor keeps no second copy that could drift.
 
 Typical uses:
 
@@ -13,7 +13,8 @@ Typical uses:
 | Part | What it does |
 |---|---|
 | **Palette** (top) | undo/redo; pitch −8va, −1, +1, +8va; shorter / longer; rest / note; chord symbol set / remove; *Whole score*: transpose, tempo, remove chords, let the instrument play the melody, silence the Vocal voice |
-| **View** | *notation and ABC text*, *notation* or *ABC text*; notation zoom |
+| **View** | *notation and ABC text*, *notation* or *ABC text*; *piano roll* on/off; notation zoom |
+| **Piano roll** | both voices over time (Vocal blue, Ins orange) with a chord lane and the bars and sections above; draw, move, resize and delete notes and chord symbols with the mouse (see below) |
 | **Navigator** | the sections (go to, rename, start one bar earlier / later, join to the one before, new section at the selected bar) and a bar strip (sections in colour, bars with errors marked) |
 | **Notation** | click a note or rest to select it, Shift+click to add to the selection |
 | **ABC text** | the canonical text with line numbers; errors are underlined at their bar; the cursor selects the note under it |
@@ -21,9 +22,30 @@ Typical uses:
 | **Status line** | what is selected (voice, bar, pitch, length, chord) and what the last edit did |
 | **Diagnostics** | the backend's findings, each with a link to its bar |
 
-## Editing notes
+## The piano roll
 
-Select a note, then use the palette or the keyboard:
+The roll shows every sounding note of both voices as a bar: its left edge is where the note starts, its length is how long it sounds (tied notes are one bar), its height is its pitch (the rows are the semitones, C rows are marked and labelled). Above the notes are the **chord lane** and the bar numbers with the section names.
+
+| Gesture | Result |
+|---|---|
+| click a note | select it (Shift/Ctrl+click adds to the selection); the notation and the ABC text select it too |
+| drag a note | move it in time and pitch (all selected notes together); where it lands it replaces what its voice played there, and the place it left becomes a rest |
+| drag the right end of a note | make it longer or shorter; longer only grows into rests - hold **Alt** to play over the following note (it is shortened or removed) |
+| drag on an empty place | draw a new note into the voice chosen under *draw into* (Vocal or Ins) |
+| double-click an empty place | a new note of one beat |
+| click an empty place / Esc | clear the selection |
+| drag a chord symbol | move it; a chord already at that place is replaced |
+| double-click the chord lane | type a new chord symbol (Enter adds it, Esc cancels); double-click a chord to rename it, an empty name removes it |
+
+While you drag, a dashed **ghost** shows the result; nothing changes before you let go. Then the backend checks the edit and writes the text; if it refuses (for example a note that cannot grow because another note follows), the ghost disappears and the reason is shown.
+
+Keys with the roll focused: ↑/↓ semitone (Shift: octave), ←/→ move by the grid (Shift: a beat), Alt+←/→ shorter/longer, **Delete** turns the selected notes into rests (and removes selected chord symbols), **Shift+Delete** deletes and lets the note before take the time (*close the gap*). **snap** sets the grid (*auto* is the score's finest length); **−/+** zoom. Only the visible part of a long score is drawn.
+
+Deleting a note never shortens a bar: the note's time becomes a rest. *Close the gap* only happens with Shift+Delete, and only when a note of the same voice ends exactly where the deleted one started - otherwise the time stays a rest and the status line says why.
+
+## Editing notes with the palette and the keyboard
+
+Select a note, then use the palette or the keyboard (in the notation):
 
 | Key | Action |
 |---|---|
@@ -48,7 +70,7 @@ Rules the editor keeps for you:
 
 ## Editing the text
 
-Type in the ABC view like in any code editor. The analysis follows after a short pause. While the text is invalid, the notation shows the **last valid score** with the note *"The text has errors - the notation shows the last valid score"*, the bar with the error is underlined and marked in the bar strip, and the diagnostic links to it. Palette operations work only on a valid text.
+Type in the ABC view like in any code editor. The analysis follows after a short pause. While the text is invalid, the notation and the piano roll show the **last valid score** (dimmed) with the note *"The text has errors - the notation shows the last valid score"*, the bar with the error is underlined and marked in the bar strip, and the diagnostic links to it. Palette operations and roll gestures work only on a valid text, and **Apply** and **Approve** are off (their tooltip says why): an invalid text never replaces the score in the node. **Revert to last valid** puts the last valid text back (one undo step).
 
 One undo history covers both kinds of edits: a burst of typing is one step, each palette operation is one step (its tooltip names the step), and a document replaced by the dialog (for example *use the new draft* after a conflict) is one step too.
 
@@ -73,9 +95,10 @@ With **reference_audio** connected to the Song Sheet (the Cover template connect
 
 ## Preferences
 
-Layout, zoom, voices and speed are remembered in this browser only (not in the workflow). A blocked or cleared browser storage simply gives the defaults.
+Layout, zoom, piano roll (on/off and its zoom), voices and speed are remembered in this browser only (not in the workflow). A blocked or cleared browser storage simply gives the defaults.
 
 ## Limits
 
 - Very long scores (several minutes of YuE2 plan) render as one page; scrolling is fine, but paging is not built yet.
-- The editor edits notes, rests, lengths, chord symbols and sections. Meter and key changes, and adding or removing bars, are done in the ABC text.
+- The editor edits notes, rests, lengths, chord symbols and sections. Meter and key changes, and adding or removing bars, are done in the ABC text for now (the operations exist; their buttons come with the inspector).
+- A score that YuE2 accepts but whose bars are not a whole number of the score's shortest length (`L:`) cannot be shown in the piano roll; it is edited as text (the roll says so).

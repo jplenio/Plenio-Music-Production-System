@@ -1,8 +1,10 @@
 <script setup lang="ts">
 /**
- * The Score tab of the Song Sheet editor: notation, ABC text, navigator, operations,
- * playback and validation for one score document. It knows nothing about templates or
- * engines - only the native score dialect and the backend's operations.
+ * The Score tab of the Song Sheet editor: piano roll, notation, ABC text, navigator,
+ * operations, playback and validation for one score document. It knows nothing about templates
+ * or engines - only the native score dialect and the backend's operations. The piano roll, the
+ * staff and the ABC text share one selection (element ids of written segments; the roll maps
+ * them to canonical notes) and every edit goes through the one score session.
  */
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
@@ -20,6 +22,7 @@ import {
 import type { SheetPayload, WorkingDoc } from '../../shared/sheetSession'
 import AbcEditor from './AbcEditor.vue'
 import NotationView from './NotationView.vue'
+import PianoRoll from './PianoRoll.vue'
 import ScoreNavigator from './ScoreNavigator.vue'
 import ScorePalette from './ScorePalette.vue'
 import ScoreTransport from './ScoreTransport.vue'
@@ -101,6 +104,22 @@ async function operate(operation: ScoreOperation): Promise<void> {
   if (props.readonly) return
   await session.operate(operation)
 }
+
+/** The piano roll's commit: one canonical operation; ``false`` when refused (the ghost goes away). */
+function operateRoll(operation: ScoreOperation): Promise<boolean> {
+  return props.readonly ? Promise.resolve(false) : session.operate(operation)
+}
+
+function selectFromRoll(ids: string[]): void {
+  session.select(ids)
+  const element = elementById(shown.value, ids[0])
+  if (element) revealRange.value = [element.source[0], element.source[1]]
+}
+
+const rollZoom = computed<number>({
+  get: () => prefs.value.rollZoom,
+  set: (value) => (prefs.value = { ...prefs.value, rollZoom: value })
+})
 
 function isTextTarget(target: EventTarget | null): boolean {
   const element = target as HTMLElement | null
@@ -207,6 +226,10 @@ function onKey(event: KeyboardEvent): void {
           <option value="text">ABC text</option>
         </select>
       </label>
+      <label title="The piano roll and chord lane above the notation">
+        <input v-model="prefs.roll" type="checkbox" aria-label="Show the piano roll" />
+        piano roll
+      </label>
       <label title="Zoom of the notation">
         zoom
         <input v-model.number="prefs.zoom" type="range" min="0.6" max="1.8" step="0.1" aria-label="Notation zoom" />
@@ -225,7 +248,20 @@ function onKey(event: KeyboardEvent): void {
       This score is valid for YuE2 but outside the editor's supported subset ({{ session.view.model_error.message }});
       edit it as ABC text.
     </p>
-    <div class="score-main" :data-layout="prefs.layout">
+    <PianoRoll
+      v-if="prefs.roll && (shown?.model || shown?.model_error)"
+      v-model:zoom="rollZoom"
+      :view="shown"
+      :selection="session.selection"
+      :playing="cursor"
+      :operate="operateRoll"
+      :readonly="readonly"
+      :stale="invalid"
+      :busy="session.busy"
+      resize-mode="rests"
+      @select="selectFromRoll"
+    />
+    <div class="score-main" :class="{ 'with-roll': prefs.roll && !!shown?.model }" :data-layout="prefs.layout">
       <ScoreNavigator
         :view="shown"
         :bar="selectedBar"

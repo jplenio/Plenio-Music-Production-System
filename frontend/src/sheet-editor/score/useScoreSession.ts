@@ -15,7 +15,7 @@ import { computed, reactive, ref, shallowRef, watch } from 'vue'
 
 import { type Fetcher, PlenioApiError, type ScoreOperation, analyzeScore, transformScore } from '../../api/client'
 import { History } from '../../shared/history'
-import { type ScoreView, elementById, knownIds } from '../../shared/scoreView'
+import { type ScoreView, elementById, elementSelection, knownIds } from '../../shared/scoreView'
 import type { WorkingDoc } from '../../shared/sheetSession'
 
 export interface ScoreSessionOptions {
@@ -163,7 +163,8 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
       requested = result.abc
       accept(result.analysis, result.abc)
       notes.value = [...result.changes, ...result.warnings.map((w) => `warning: ${w}`)]
-      if (result.select.length) selection.value = result.select
+      // canonical operations select notes by canonical id; the staff selects written segments
+      if (result.select.length) selection.value = elementSelection(result.analysis, result.select)
       return true
     } catch (e) {
       error.value = describeError(e)

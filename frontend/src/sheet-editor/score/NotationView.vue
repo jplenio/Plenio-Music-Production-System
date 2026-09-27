@@ -100,10 +100,20 @@ function render(): void {
   }
 }
 
-/** Scroll the notation so that the element is visible. */
+/**
+ * Scroll the notation pane (never the dialog around it) so that the element is visible;
+ * ``scrollIntoView`` would also scroll the dialog and move the piano roll under the pointer.
+ */
 function reveal(id: string): void {
   const [first] = elementsOf(id)
-  first?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
+  const pane = host.value?.parentElement
+  if (!first || !pane) return
+  const box = pane.getBoundingClientRect()
+  const rect = first.getBoundingClientRect()
+  if (rect.top < box.top) pane.scrollTop += rect.top - box.top - 8
+  else if (rect.bottom > box.bottom) pane.scrollTop += rect.bottom - box.bottom + 8
+  if (rect.left < box.left) pane.scrollLeft += rect.left - box.left - 8
+  else if (rect.right > box.right) pane.scrollLeft += rect.right - box.right + 8
 }
 
 defineExpose({ reveal })

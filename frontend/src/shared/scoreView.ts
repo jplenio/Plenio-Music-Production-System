@@ -158,6 +158,21 @@ export function knownIds(view: ScoreView): Set<string> {
   return ids
 }
 
+/**
+ * The selection in the staff's language: canonical note ids (``vocal:32``, as canonical operations
+ * return them) become the element ids of their written segments; element and chord ids stay.
+ */
+export function elementSelection(view: ScoreView | null, ids: readonly string[]): string[] {
+  const tracks = view?.model?.tracks
+  const notes = new Map(tracks ? [...tracks.vocal, ...tracks.ins].map((n) => [n.id, n]) : [])
+  const result: string[] = []
+  for (const id of ids) {
+    const note = notes.get(id)
+    for (const item of note && note.segments.length ? note.segments : [id]) if (!result.includes(item)) result.push(item)
+  }
+  return result
+}
+
 /** The canonical note a written segment belongs to (staff/ABC selection -> piano roll). */
 export function modelNoteOfSegment(view: ScoreView | null, elementId: string): ModelNote | null {
   const tracks = view?.model?.tracks

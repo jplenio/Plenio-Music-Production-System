@@ -248,9 +248,13 @@ describe('editor preferences', () => {
       layout: 'text',
       zoom: 1.4,
       voices: { Vocal: false, Ins: true, chords: true },
-      speed: 0.5
+      speed: 0.5,
+      roll: true,
+      rollZoom: 48
     })
-    const wrong = JSON.stringify({ layout: 'huge', zoom: 9, voices: 'all', speed: '1' })
+    const roll = JSON.stringify({ roll: false, rollZoom: 96 })
+    expect(loadPrefs({ getItem: () => roll })).toMatchObject({ roll: false, rollZoom: 96 })
+    const wrong = JSON.stringify({ layout: 'huge', zoom: 9, voices: 'all', speed: '1', rollZoom: 5000 })
     expect(loadPrefs({ getItem: () => wrong })).toEqual(defaultPrefs())
   })
 
@@ -541,13 +545,13 @@ describe('score session', () => {
     expect(knownIds(VIEW).has('ins:9999')).toBe(false)
   })
 
-  it('takes the canonical ids of a canonical operation as the new selection', async () => {
+  it('turns the canonical ids of a canonical operation into the staff selection', async () => {
     const session = await start()
     await backend.calls[0].answer(VIEW)
-    const done = session.operate({ op: 'insert_note', track: 'ins', onset: 32, duration: 8, pitch: 60 })
-    await backend.calls[1].answer(transformAnswer('EDITED', { select: ['ins:32'], changes: ['bar 2 Ins: C4 (8 units) inserted'] }))
+    const done = session.operate({ op: 'insert_note', track: 'vocal', onset: 64, duration: 32, pitch: 69 })
+    await backend.calls[1].answer(transformAnswer('EDITED', { select: ['vocal:64'], changes: ['bar 2 Ins: C4 (8 units) inserted'] }))
     expect(await done).toBe(true)
-    expect(session.selection).toEqual(['ins:32'])
+    expect(session.selection).toEqual(['V3.0', 'V3.1']) // the staff's written segments of vocal:64
     expect(session.undoLabel).toBe('bar 2 Ins: C4 (8 units) inserted')
   })
 })

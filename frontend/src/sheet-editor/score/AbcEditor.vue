@@ -138,10 +138,24 @@ watch(
     const current = view.state.selection.main
     if (current.from === from && current.to === to) return
     external = true
-    view.dispatch({ selection: EditorSelection.single(from, to), scrollIntoView: true })
+    view.dispatch({ selection: EditorSelection.single(from, to) })
     external = false
+    scrollInside(view, from)
   }
 )
+
+/**
+ * Scroll the editor itself so that ``pos`` is visible. (CodeMirror's ``scrollIntoView`` also
+ * scrolls every scrollable ancestor - the dialog - which moved the piano roll away under the
+ * pointer when a selection there revealed the note in the text.)
+ */
+function scrollInside(editor: EditorView, pos: number): void {
+  const dom = editor.scrollDOM
+  const block = editor.lineBlockAt(pos)
+  if (block.top < dom.scrollTop || block.bottom > dom.scrollTop + dom.clientHeight) {
+    dom.scrollTop = Math.max(0, block.top - dom.clientHeight / 3)
+  }
+}
 </script>
 
 <template>

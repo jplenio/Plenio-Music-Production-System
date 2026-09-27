@@ -1,5 +1,5 @@
 /**
- * Viewer preferences of the score editor (layout, zoom, voices, speed). They live in this
+ * Viewer preferences of the score editor (layout, zoom, voices, speed, piano roll). They live in this
  * browser's localStorage only - never in the workflow - and a blocked or empty storage
  * simply gives the defaults.
  */
@@ -10,12 +10,16 @@ export interface EditorPrefs {
   zoom: number
   voices: VoiceSwitches
   speed: number
+  /** Show the piano roll with its chord lane. */
+  roll: boolean
+  /** Piano-roll zoom: pixels per quarter note. */
+  rollZoom: number
 }
 
 const KEY = 'plenio.score-editor.prefs'
 
 export function defaultPrefs(): EditorPrefs {
-  return { layout: 'both', zoom: 1, voices: { Vocal: true, Ins: true, chords: true }, speed: 1 }
+  return { layout: 'both', zoom: 1, voices: { Vocal: true, Ins: true, chords: true }, speed: 1, roll: true, rollZoom: 48 }
 }
 
 export function loadPrefs(storage: Pick<Storage, 'getItem'> | null = safeStorage()): EditorPrefs {
@@ -32,7 +36,10 @@ export function loadPrefs(storage: Pick<Storage, 'getItem'> | null = safeStorage
         Ins: data.voices?.Ins !== false,
         chords: data.voices?.chords !== false
       },
-      speed: typeof data.speed === 'number' && data.speed >= 0.25 && data.speed <= 2 ? data.speed : defaults.speed
+      speed: typeof data.speed === 'number' && data.speed >= 0.25 && data.speed <= 2 ? data.speed : defaults.speed,
+      roll: data.roll !== false,
+      rollZoom:
+        typeof data.rollZoom === 'number' && data.rollZoom >= 12 && data.rollZoom <= 240 ? data.rollZoom : defaults.rollZoom
     }
   } catch {
     return defaults
