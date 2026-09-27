@@ -34,7 +34,7 @@ requires-comfyui = ">=0.37.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = [".", "tools", "tests/host"]
+pythonpath = [".", "tools", "tests/host", "tests/support"]
 addopts = "--import-mode=importlib -p no:cacheprovider"
 markers = [
   "comfy: needs an importable ComfyUI checkout (PLENIO_COMFYUI_ROOT)",
@@ -52,7 +52,7 @@ select = ["E", "F", "W", "I", "B", "UP", "N", "S307", "S102", "T20"]
 ignore = ["E501", "N999"]  # N999: the ComfyUI package folder name contains hyphens
 
 [tool.ruff.lint.isort]
-known-first-party = ["plenio", "harness", "workflow_validation"]
+known-first-party = ["plenio", "harness", "workflow_validation", "score_strategies"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["T20", "S101"]
