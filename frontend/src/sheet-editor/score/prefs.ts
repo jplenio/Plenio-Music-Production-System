@@ -1,25 +1,46 @@
 /**
- * Viewer preferences of the score editor (layout, zoom, voices, speed, piano roll). They live in this
- * browser's localStorage only - never in the workflow - and a blocked or empty storage
- * simply gives the defaults.
+ * Viewer preferences of the score editor (layout, zoom, voices, speed, piano roll, metronome).
+ * They live in this browser's localStorage only - never in the workflow - and a blocked or empty
+ * storage simply gives the defaults.
  */
 import type { VoiceSwitches } from '../../shared/playback'
 
 export interface EditorPrefs {
-  layout: 'both' | 'notation' | 'text'
+  /** *review*: piano roll, notation, inspector (ABC text under *Advanced*); *text*: ABC text and notation. */
+  layout: 'review' | 'text'
+  /** Show the ABC text in the *review* layout. */
+  advanced: boolean
   zoom: number
   voices: VoiceSwitches
   speed: number
-  /** Show the piano roll with its chord lane. */
+  /** Show the piano roll with its chord lane (review layout). */
   roll: boolean
   /** Piano-roll zoom: pixels per quarter note. */
   rollZoom: number
+  metronome: boolean
 }
 
 const KEY = 'plenio.score-editor.prefs'
 
 export function defaultPrefs(): EditorPrefs {
-  return { layout: 'both', zoom: 1, voices: { Vocal: true, Ins: true, chords: true }, speed: 1, roll: true, rollZoom: 48 }
+  return {
+    layout: 'review',
+    advanced: false,
+    zoom: 1,
+    voices: { Vocal: true, Ins: true, chords: true },
+    speed: 1,
+    roll: true,
+    rollZoom: 48,
+    metronome: false
+  }
+}
+
+/** The layout of stored preferences, including those of 0.2.x (``both``/``notation``/``text``). */
+function layoutOf(data: { layout?: unknown; advanced?: unknown }): Pick<EditorPrefs, 'layout' | 'advanced'> {
+  const layout = data.layout
+  if (layout === 'text') return { layout: 'text', advanced: data.advanced === true }
+  if (layout === 'both') return { layout: 'review', advanced: true }
+  return { layout: 'review', advanced: data.advanced === true }
 }
 
 export function loadPrefs(storage: Pick<Storage, 'getItem'> | null = safeStorage()): EditorPrefs {
@@ -29,7 +50,7 @@ export function loadPrefs(storage: Pick<Storage, 'getItem'> | null = safeStorage
     if (!raw) return defaults
     const data = JSON.parse(raw) as Partial<EditorPrefs>
     return {
-      layout: data.layout === 'notation' || data.layout === 'text' ? data.layout : 'both',
+      ...layoutOf(data),
       zoom: typeof data.zoom === 'number' && data.zoom >= 0.6 && data.zoom <= 1.8 ? data.zoom : defaults.zoom,
       voices: {
         Vocal: data.voices?.Vocal !== false,
@@ -39,7 +60,8 @@ export function loadPrefs(storage: Pick<Storage, 'getItem'> | null = safeStorage
       speed: typeof data.speed === 'number' && data.speed >= 0.25 && data.speed <= 2 ? data.speed : defaults.speed,
       roll: data.roll !== false,
       rollZoom:
-        typeof data.rollZoom === 'number' && data.rollZoom >= 12 && data.rollZoom <= 240 ? data.rollZoom : defaults.rollZoom
+        typeof data.rollZoom === 'number' && data.rollZoom >= 12 && data.rollZoom <= 240 ? data.rollZoom : defaults.rollZoom,
+      metronome: data.metronome === true
     }
   } catch {
     return defaults

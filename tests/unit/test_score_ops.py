@@ -220,6 +220,13 @@ def test_duplicate_measures_copies_notes_chords_and_sections() -> None:
     assert abc.count('"F"a4-a4g8|f16|') == 2
 
 
+def test_duplicating_part_of_a_section_extends_it() -> None:
+    abc, _ = run(SMALL, op="duplicate_measures", bar=1, count=1)
+    assert score_of(abc).sections == (Section(0, "verse"), Section(3, "chorus"))  # no second verse
+    abc, _ = run(SMALL, op="duplicate_measures", bar=1, count=2)  # the whole verse
+    assert score_of(abc).sections == (Section(0, "verse"), Section(2, "verse"), Section(4, "chorus"))
+
+
 def test_meter_changes_only_on_empty_measures() -> None:
     with pytest.raises(PlenioValidationError, match="Only empty bars"):
         ops.transform(SMALL, {"op": "change_meter", "bar": 1, "count": 1, "meter": "3/4"})

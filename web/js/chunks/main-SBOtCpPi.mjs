@@ -493,7 +493,7 @@ const Ke = (e, t, n) => {
     f.stopPropagation();
     const _ = ie(r);
     _ === null && (i.textContent = "The stored state is unreadable; it will be replaced when you apply.");
-    const x = oe(String(e.id)), v = (e.inputs ?? []).filter((w) => w.link != null).map((w) => w.name), E = _ ?? { schema: "plenio.sheet_state/1", docs: {} }, y = x?.owned ?? Xe(v, E), q = String(e.widgets?.find((w) => w.name === "review")?.value ?? "continue"), B = q === "as the brief says" ? x?.review ?? "continue" : q, { openSheetDialog: j } = await import("./open-BERnCSZv.mjs");
+    const x = oe(String(e.id)), v = (e.inputs ?? []).filter((w) => w.link != null).map((w) => w.name), E = _ ?? { schema: "plenio.sheet_state/1", docs: {} }, y = x?.owned ?? Xe(v, E), q = String(e.widgets?.find((w) => w.name === "review")?.value ?? "continue"), B = q === "as the brief says" ? x?.review ?? "continue" : q, { openSheetDialog: j } = await import("./open-DqrXVDTo.mjs");
     if (!F) throw new Error("Plenio: API not initialised");
     j({
       title: e.title || "Song Sheet",
@@ -503,6 +503,8 @@ const Ke = (e, t, n) => {
       owned: y.length ? y : [...R],
       review: B,
       fetcher: F,
+      // a template's choice of the score editor's layout (review, text; daw with the DAW template)
+      layout: typeof e.properties?.plenio_editor_layout == "string" ? e.properties.plenio_editor_layout : null,
       onApply: (w) => {
         o.value = Ue(w), e.setDirtyCanvas?.(!0, !0);
       }

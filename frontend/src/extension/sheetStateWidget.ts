@@ -74,6 +74,8 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
       owned: owned.length ? owned : [...DOCUMENT_KINDS],
       review,
       fetcher,
+      // a template's choice of the score editor's layout (review, text; daw with the DAW template)
+      layout: typeof node.properties?.plenio_editor_layout === 'string' ? node.properties.plenio_editor_layout : null,
       onApply: (next) => {
         widget.value = serializeState(next)
         node.setDirtyCanvas?.(true, true)

@@ -675,7 +675,11 @@ def delete_measures(score: Score, bar: int, count: int = 1) -> OpResult:
 
 
 def duplicate_measures(score: Score, bar: int, count: int = 1) -> OpResult:
-    """Insert a copy of measures ``bar ... bar + count - 1`` right after them (notes, chords, keys, sections)."""
+    """Insert a copy of measures ``bar ... bar + count - 1`` right after them (notes, chords, keys).
+
+    A section is copied only when the block holds all of it (duplicating a chorus gives two
+    choruses); a copy of part of a section extends that section.
+    """
     first = _bar_index(score, bar)
     count = _whole(count, "count", 1, min(MAX_INSERT, score.measure_count - first))
     end = first + count
@@ -725,7 +729,12 @@ def duplicate_measures(score: Score, bar: int, count: int = 1) -> OpResult:
     if end_time not in keys and score.key_at(end_time - 1) != opening:
         keys[end_time] = KeyChange(end_time, opening, "field")  # the copy starts in the block's opening key
     sections = [Section(s.measure + count, s.label) if s.measure >= end else s for s in score.sections]
-    sections += [Section(s.measure + count, s.label) for s in score.sections if first <= s.measure < end]
+    starts = [s.measure for s in score.sections] + [score.measure_count]
+    sections += [
+        Section(s.measure + count, s.label)
+        for i, s in enumerate(score.sections)
+        if first <= s.measure and starts[i + 1] <= end  # the whole section lies in the block
+    ]
     origins = _origins(score)
     new = replace(
         score,

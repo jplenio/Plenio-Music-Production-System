@@ -13,14 +13,37 @@ Typical uses:
 | Part | What it does |
 |---|---|
 | **Palette** (top) | undo/redo; pitch −8va, −1, +1, +8va; shorter / longer; rest / note; chord symbol set / remove; *Whole score*: transpose, tempo, remove chords, let the instrument play the melody, silence the Vocal voice |
-| **View** | *notation and ABC text*, *notation* or *ABC text*; *piano roll* on/off; notation zoom |
+| **View** | the layout *Review* or *Text* (see below); in *Review*: *piano roll* and *ABC text (advanced)* on/off; notation zoom |
 | **Piano roll** | both voices over time (Vocal blue, Ins orange) with a chord lane and the bars and sections above; draw, move, resize and delete notes and chord symbols with the mouse (see below) |
-| **Navigator** | the sections (go to, rename, start one bar earlier / later, join to the one before, new section at the selected bar) and a bar strip (sections in colour, bars with errors marked) |
+| **Inspector** (right, *Review*) | the selected note(s), chord symbol and bar as fields: voice, pitch, start, length, chord; insert, duplicate or delete bars, meter, key (see below) |
+| **Navigator** | the sections (go to, rename, start one bar earlier / later, join to the one before, new section at the selected bar) and a bar strip (sections in colour, bars with errors marked); in *Review* with the song's lyrics: *Lyrics fit* (the lyrics next to the score's sections) |
 | **Notation** | click a note or rest to select it, Shift+click to add to the selection |
 | **ABC text** | the canonical text with line numbers; errors are underlined at their bar; the cursor selects the note under it |
-| **Transport** | play from the selected bar, loop the section, voices (Vocal, Ins, chords), speed; with a source connected: play the source from the same bar and **A/B** |
+| **Transport** | play from the selected bar, loop the section, metronome, voices (Vocal, Ins, chords), speed; with a source connected: play the source from the same bar and **A/B** |
 | **Status line** | what is selected (voice, bar, pitch, length, chord) and what the last edit did |
 | **Diagnostics** | the backend's findings, each with a link to its bar |
+
+## Layouts
+
+| Layout | Shows | For |
+|---|---|---|
+| **Review** | piano roll, notation and inspector, the navigator on the left; the ABC text only with *ABC text (advanced)* | correcting a score graphically - no ABC knowledge needed |
+| **Text** | the ABC text (large, with its diagnostics) and the notation | editing the text directly |
+
+A Song Sheet node can choose the layout its editor opens in with the node property `plenio_editor_layout` (`review` or `text`; the templates set it where it matters). Without it the editor opens in the layout you used last in this browser.
+
+## The inspector
+
+The inspector shows what is selected - in the piano roll, the notation, the chord lane or the bar strip - and each field changes it with one checked edit (Enter or leaving the field commits it):
+
+| Selection | Fields |
+|---|---|
+| one note | **voice** (Vocal / Ins: moves the note to the other voice), **pitch** (e.g. `C#5`, `Bb3` or a MIDI number; −8va −1 +1 +8va), **start** (bar and units from the start of the bar; the header says the beat), **length** (units, or a note value; with *longer: over the next note* it may play over the following notes), **chord** where the note starts (empty removes it), *→ rest*, *close gap* |
+| several notes | voice, pitch steps, *→ rest*, *close gap* |
+| a chord symbol | name (empty removes it), start, *remove* |
+| the bar of the selection | *+ before*, *+ after* (an empty bar), *duplicate* (a copy after it), *delete* (in both voices), **meter** (only for an empty bar - music is never re-barred), **key** from this bar on (pitches stay; notes are re-spelled), *remove change* |
+
+Bar rules: an inserted bar joins the line of the bar before it; a line longer than four bars is split. Deleting bars keeps the key that was in effect after them, and a section that started inside moves to the cut. Duplicating a whole section gives two sections of that name; duplicating part of a section makes the section longer.
 
 ## The piano roll
 
@@ -82,7 +105,7 @@ Names are stored in lower case and use letters, digits, spaces and hyphens (up t
 
 ## Playback and A/B
 
-**Play** plays simple tones of the notes from the selected bar, with a cursor in the notation - a guide to the notes, not a preview of what YuE2 will render. It works offline: no soundfont is downloaded. Choose the voices, the speed (the score's tempo is not changed) and *loop section*.
+**Play** plays simple tones of the notes from the selected bar, with a cursor in the notation and the piano roll - a guide to the notes, not a preview of what YuE2 will render. It works offline: no soundfont is downloaded. Choose the voices, the speed (the score's tempo is not changed), *loop section* and the *metronome* (a click on every beat, higher on the first beat of a bar).
 
 With **reference_audio** connected to the Song Sheet (the Cover template connects the source), **Source** plays the recording from the same bar, and **A/B** switches between the notes and the recording at the current bar. The bar times come from the transcription's beat grid, so the recording and the notes line up even where the source's tempo drifts. The reference is only for listening; it is not part of the sheet's documents.
 
@@ -95,10 +118,10 @@ With **reference_audio** connected to the Song Sheet (the Cover template connect
 
 ## Preferences
 
-Layout, zoom, piano roll (on/off and its zoom), voices and speed are remembered in this browser only (not in the workflow). A blocked or cleared browser storage simply gives the defaults.
+Layout, *ABC text (advanced)*, zoom, piano roll (on/off and its zoom), metronome, voices and speed are remembered in this browser only (not in the workflow). A blocked or cleared browser storage simply gives the defaults.
 
 ## Limits
 
 - Very long scores (several minutes of YuE2 plan) render as one page; scrolling is fine, but paging is not built yet.
-- The editor edits notes, rests, lengths, chord symbols and sections. Meter and key changes, and adding or removing bars, are done in the ABC text for now (the operations exist; their buttons come with the inspector).
+- The editor edits notes, rests, lengths, chord symbols, sections, bars, meters (of empty bars) and keys. Tempo and transposition are in the palette's *Whole score*.
 - A score that YuE2 accepts but whose bars are not a whole number of the score's shortest length (`L:`) cannot be shown in the piano roll; it is edited as text (the roll says so).

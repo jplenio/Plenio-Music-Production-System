@@ -32,6 +32,8 @@ const props = defineProps<{
   owned: DocumentKind[]
   review: string
   fetcher: Fetcher
+  /** The node's ``plenio_editor_layout`` property (the score editor's layout). */
+  layout?: string | null
 }>()
 const emit = defineEmits<{ apply: [state: SheetState]; close: [] }>()
 
@@ -94,6 +96,10 @@ const isConflict = (kind: DocumentKind) => docInfo(kind)?.status === 'conflict'
 const docsOf = (which: Tab) => working.filter((doc) => TAB_OF[doc.kind] === which)
 const scoreDoc = computed(() => working.find((doc) => doc.kind === 'score') ?? null)
 const scoreText = computed(() => scoreDoc.value?.text ?? contextScore.value ?? null)
+/** The lyrics next to the score: this sheet's lyrics, else the text sheet's (context). */
+const lyricsText = computed(
+  () => working.find((doc) => doc.kind === 'lyrics')?.text ?? props.payload?.context?.lyrics ?? null
+)
 const timeline = computed(() => sectionTimes(props.payload?.timeline))
 const asr = computed(() => {
   const note = props.asrNote ?? fetchedNote.value
@@ -286,6 +292,8 @@ onBeforeUnmount(() => {
             :fetcher="fetcher"
             :payload="payload"
             :readonly="false"
+            :layout-default="layout ?? null"
+            :lyrics="lyricsText"
             @edited="onInput(doc)"
             @gate="(text: string, reason: string | null) => (scoreGate = { text, reason })"
           />

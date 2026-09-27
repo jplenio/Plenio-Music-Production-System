@@ -246,16 +246,26 @@ describe('editor preferences', () => {
     const stored = JSON.stringify({ layout: 'text', zoom: 1.4, voices: { Vocal: false }, speed: 0.5 })
     expect(loadPrefs({ getItem: () => stored })).toEqual({
       layout: 'text',
+      advanced: false,
       zoom: 1.4,
       voices: { Vocal: false, Ins: true, chords: true },
       speed: 0.5,
       roll: true,
-      rollZoom: 48
+      rollZoom: 48,
+      metronome: false
     })
-    const roll = JSON.stringify({ roll: false, rollZoom: 96 })
-    expect(loadPrefs({ getItem: () => roll })).toMatchObject({ roll: false, rollZoom: 96 })
-    const wrong = JSON.stringify({ layout: 'huge', zoom: 9, voices: 'all', speed: '1', rollZoom: 5000 })
+    const roll = JSON.stringify({ roll: false, rollZoom: 96, metronome: true, advanced: true })
+    expect(loadPrefs({ getItem: () => roll })).toMatchObject({ roll: false, rollZoom: 96, metronome: true, advanced: true })
+    const wrong = JSON.stringify({ layout: 'huge', zoom: 9, voices: 'all', speed: '1', rollZoom: 5000, metronome: 'yes' })
     expect(loadPrefs({ getItem: () => wrong })).toEqual(defaultPrefs())
+  })
+
+  it('reads the layouts of 0.2.x', () => {
+    const load = (layout: string) => loadPrefs({ getItem: () => JSON.stringify({ layout }) })
+    expect(load('both')).toMatchObject({ layout: 'review', advanced: true }) // notation and ABC
+    expect(load('notation')).toMatchObject({ layout: 'review', advanced: false })
+    expect(load('text')).toMatchObject({ layout: 'text' })
+    expect(defaultPrefs()).toMatchObject({ layout: 'review', advanced: false, roll: true })
   })
 
   it('saves, and ignores a full or blocked storage', () => {

@@ -21,6 +21,8 @@ export interface PlayOptions {
   voices: VoiceSwitches
   /** Speed factor: 1 = the score's tempo, 0.5 = half speed. */
   speed: number
+  /** Click on every beat (the first beat of a bar higher). */
+  metronome?: boolean
 }
 
 export interface ToneEvent {
@@ -28,8 +30,11 @@ export interface ToneEvent {
   at: number
   duration: number
   midi: number
-  part: Voice | 'chord'
+  part: Voice | 'chord' | 'click'
 }
+
+/** Length of a metronome click in real seconds (independent of the speed). */
+export const CLICK_SECONDS = 0.04
 
 /**
  * Seconds within which two score times are the same. The backend rounds times (bars and
@@ -66,6 +71,21 @@ export function schedule(view: ScoreView, options: PlayOptions): ToneEvent[] {
       if (chordEnd <= start + TIME_TOLERANCE) continue
       for (const midi of chord.pitches) {
         events.push({ at: (start - options.from) / speed, duration: (chordEnd - start) / speed, midi, part: 'chord' })
+      }
+    }
+  }
+  if (options.metronome) {
+    for (const bar of view.bars) {
+      const beats = Number(bar.meter.split('/')[0]) || 1
+      for (let beat = 0; beat < beats; beat++) {
+        const time = bar.start_s + (beat * bar.duration_s) / beats
+        if (time < options.from - TIME_TOLERANCE || time >= end - TIME_TOLERANCE) continue
+        events.push({
+          at: Math.max(0, time - options.from) / speed,
+          duration: CLICK_SECONDS,
+          midi: beat === 0 ? 96 : 89,
+          part: 'click'
+        })
       }
     }
   }

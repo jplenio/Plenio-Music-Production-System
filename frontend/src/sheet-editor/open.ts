@@ -15,6 +15,8 @@ export interface OpenOptions {
   owned: DocumentKind[]
   review: string
   fetcher: Fetcher
+  /** The Song Sheet node's ``plenio_editor_layout`` property. */
+  layout?: string | null
   onApply: (state: SheetState) => void
 }
 
@@ -42,6 +44,7 @@ export function openSheetDialog(options: OpenOptions): () => void {
     owned: options.owned,
     review: options.review,
     fetcher: options.fetcher,
+    layout: options.layout ?? null,
     onApply: (state: SheetState) => {
       options.onApply(state)
       close()

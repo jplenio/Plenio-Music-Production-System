@@ -6,8 +6,8 @@ import { type ToneEvent, frequency } from '../../shared/playback'
 
 const LOOKAHEAD_S = 0.25
 const TICK_MS = 30
-const LEVEL: Record<ToneEvent['part'], number> = { Vocal: 0.22, Ins: 0.16, chord: 0.045 }
-const WAVE: Record<ToneEvent['part'], OscillatorType> = { Vocal: 'triangle', Ins: 'sine', chord: 'sine' }
+const LEVEL: Record<ToneEvent['part'], number> = { Vocal: 0.22, Ins: 0.16, chord: 0.045, click: 0.1 }
+const WAVE: Record<ToneEvent['part'], OscillatorType> = { Vocal: 'triangle', Ins: 'sine', chord: 'sine', click: 'square' }
 
 export class TonePlayer {
   private context: AudioContext | null = null
@@ -91,7 +91,7 @@ export class TonePlayer {
     const gain = context.createGain()
     const level = LEVEL[event.part]
     gain.gain.setValueAtTime(0, start)
-    gain.gain.linearRampToValueAtTime(level, start + 0.012)
+    gain.gain.linearRampToValueAtTime(level, start + (event.part === 'click' ? 0.002 : 0.012))
     gain.gain.setValueAtTime(level * 0.8, Math.max(start + 0.013, stop - 0.04))
     gain.gain.linearRampToValueAtTime(0, stop)
     oscillator.connect(gain).connect(this.master)

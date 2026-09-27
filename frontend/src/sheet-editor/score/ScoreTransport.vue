@@ -25,6 +25,7 @@ const props = defineProps<{
 }>()
 const voices = defineModel<VoiceSwitches>('voices', { required: true })
 const speed = defineModel<number>('speed', { required: true })
+const metronome = defineModel<boolean>('metronome', { default: false })
 const emit = defineEmits<{ cursor: [ids: string[]] }>()
 
 const player = new TonePlayer()
@@ -59,7 +60,7 @@ function playNotes(from?: number): void {
   if (!view) return
   stop()
   const [start, end] = loopRange()
-  options = { from: from ?? start, to: end, voices: { ...voices.value }, speed: speed.value }
+  options = { from: from ?? start, to: end, voices: { ...voices.value }, speed: speed.value, metronome: metronome.value }
   const current = options
   try {
     player.play(schedule(view, current), {
@@ -144,6 +145,7 @@ onBeforeUnmount(() => player.close())
       A/B
     </button>
     <label title="Repeat the section of the selected bar"><input v-model="loop" type="checkbox" /> loop section</label>
+    <label title="A click on every beat (takes effect at the next start)"><input v-model="metronome" type="checkbox" /> metronome</label>
     <span class="switches" role="group" aria-label="Voices to play">
       <label><input v-model="voices.Vocal" type="checkbox" /> Vocal</label>
       <label><input v-model="voices.Ins" type="checkbox" /> Ins</label>
