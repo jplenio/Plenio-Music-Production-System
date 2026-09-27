@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Design Phase 11A (2026-09-27); **Phase 11B implemented** (OPUS-CRITICAL O1-O7, §17); Phase 11C (milestones M1-M7 in §16.2): **M1-M5 done**, M6-M7 not started. |
+| Status | Design Phase 11A (2026-09-27); **Phase 11B implemented** (OPUS-CRITICAL O1-O7, §17); Phase 11C (milestones M1-M7 in §16.2): **M1-M6 done**, M7 not started; L1/L2 measured with the released weights, their listening verdicts open. |
 | Date | 2026-09-27 |
 | Baseline | Plenio 0.2.2 (`main` at `eaaa174`), ComfyUI 0.37.0, frontend 1.52.7 (cloud) / 1.53.6 (owner) |
 | Scope | audio refinement / super-resolution, EQ UX, optional stems before mastering, authoritative manual lyrics, Song Brief template precedence, a shared canonical score engine with a YuE2 · DAW workflow and graphical Review editing |
@@ -631,6 +631,17 @@ identity with buses at 0; Vitest `stemMixer.test.ts` (value (de)serialisation); 
 fake separator (exist since O7) plus effect buses; workflow tests (bypassed everywhere); browser
 check; `docs/user/concepts/stems.md`. L2 prepared.
 
+**Status (2026-09-27, `641aeea`): done.** BS-RoFormer is vendored (commit `84b1eac0`, per-file
+hashes in `plenio/third_party/msst/NOTICE.md`) and the adapter runs at 44.1 kHz in chunks with
+normalised overlap-add; the catalogue entry is optional in all five templates; `effects.py` carries
+the buses (seeded room/plate/hall reverb, ms-or-note delay, feedback <= 0.8); the widget replaces the
+JSON text widget while the value stays `plenio.stem_mix/1`; the blueprint and the group exist in
+all five templates; `docs/user/concepts/stems.md` and the help pages are written. The browser check
+(the widget in frontend 1.53.6) is part of L4 and did not run here. **L2 measured** on a real
+unmastered MiniMax take (`2bb1b61`): 113.5 s in 32.9 s (RTF 3.45), 1 699 MB peak VRAM, residual
+0.73 % of the energy, neutral mix and muted range exact to -162.6 dBFS; the listening verdict and
+`is_experimental` stay open.
+
 #### M7 - Documentation and release 0.3.0 (D13) - 3 h
 
 *Usable result:* a releasable 0.3.0: README, CHANGELOG, user guides linked, App-mode docs,
@@ -638,6 +649,8 @@ check; `docs/user/concepts/stems.md`. L2 prepared.
 `pyproject.toml`/`frontend/package.json`, full test runs recorded in a test report, the owner's
 local checklist (§15, L1-L4) ready to run. The release itself (tag, Registry publish) only after
 the owner's L1-L4 verdicts.
+
+**Status (2026-09-27): next; nothing of it is done.**
 
 #### Optional follow-up (not scheduled)
 
@@ -670,8 +683,11 @@ L1 → L4 of §15; then the Refine defaults are fixed from L1, and the release i
 | M3 / D6-D7 Brief template + manual lyrics | **done** (2026-09-27, `d3fe3e1`): `POST /plenio/brief/fields` answers the precedence rule for a brief's widget values (sources, fills, choice hints, notes); the panel under the template selector (`frontend/src/extension/briefTemplate.ts`) shows *Template fills:* / *suggests:* and offers *Copy template text*, *Use template choices*, *Reset all to template* (confirmation) and a refresh - no ghost text (the 1.53.6 bundle passes no placeholder to single-line widgets; the fallback line carries it); the legacy `custom` is cleared from the loaded text widgets and from saved named values; *Use my own lyrics* + section-tag helpers in the Lyrics tab; `lyrics: yours (manual)` in the node summary and the sheet widget. Tests: host route test, Vitest `briefTemplate.test.ts` (9), `lyricsTags.test.ts` (2). Guide `docs/user/concepts/brief-templates.md`. |
 | M4 / D8 EQ UX | **done** (2026-09-27, `c026f9b`): the EQ panel rebuilt per plan §5 - 560×260 curve that grows with the node, gain-range toggle ±6/±12/±18, the last run's spectrum behind the curve (grey before, blue after), handles (Shift = fine, wheel = Q, double-click = gain 0 / add a bell, Delete/right-click = remove, keyboard), band strip with chips + inline editor (type, Hz, dB, Q, enable, remove), *Edit these bands* for match proposals, toolbar (presets, undo/redo, reset, bypass compare, *bands as text* hiding the raw JSON widget); `eqCurve.ts` gains the pure axis/fine-drag/editBand/bandChip/spectrumPath/EqHistory helpers; the node's UI payload carries the 1/6-octave profiles before/after (flat: none). Tests: Vitest `eqCurve.test.ts` (11), host production path (the spectrum assertions + a flat case). `mastering.md` updated. |
 | M5 / D9-D10 Refine + UniverSR | **done** (2026-09-27, `a115d95`): UniverSR vendored (MIT, commit `d8636623`, per-file hashes and the five relative-import changes in `plenio/third_party/universr/NOTICE.md`), adapter `plenio/comfy/universr.py` (weights_only config handling, the 24 kHz condition, mono per channel, seed, device/memory through `host`), `_compat.py` stand-ins for timm/torchdiffdet when the host lacks them (reported), catalogue entry (`audio_sr`, CC BY 4.0 weights + MIT code, MiniMax required, the other four templates optional), blueprint *Plenio · Refine (48 kHz)* and the REFINE group in all five templates (active in MiniMax, bypassed elsewhere), reports into Export, `tools/studies/sr_study.py` (arms, simulation/target sets, LSD/fizz/loudness/pre-echo/RTF/VRAM, JSON report), guides `docs/user/concepts/refine.md` + `models.md`. **Two host fixes** were needed: Plenio's model folders are registered with ComfyUI's model extensions (a new folder lists nothing otherwise) and the catalogue accepts `.bin`. `is_experimental` stays until L1 accepts the milestone. Tests: unit `test_universr_adapter.py` (10), host `test_refine_node.py` (6, incl. the tiny real checkpoint), workflow defaults, catalogue/readiness. |
-| M6 … M7 | not started |
-| L1 … L4 | not started |
+| M6 / D11-D12 Stems + BS-RoFormer | **done** (2026-09-27, `641aeea` + `2bb1b61`): MSST's MIT BS-RoFormer inference vendored (`plenio/third_party/msst`, commit `84b1eac0`, per-file hashes and the one relative-import change in `NOTICE.md`, the released config as `audio_config.json`, `_compat.py` stand-ins for beartype/rotary_embedding_torch), adapter `plenio/comfy/msst.py` (file-name matching, checkpoint config or the vendored JSON, Lightning prefix matching, 44.1 kHz stereo chunked overlap-add with crossfades, stems back at the input's rate and length, float32), catalogue entry `model_bs_roformer_ep_17_sdr_9.6568.ckpt` (`audio_separation`, 527 385 512 bytes, MIT trainer + the MUSDB18-HQ dataset note, optional in all five templates; `models.py` now takes `.ckpt` and GitHub release URLs), `plenio/core/audio/effects.py` (seeded room/plate/hall convolution reverb, ms-or-note feedback delay, feedback <= 0.8, low-pass in the loop; a send without its bus is refused), the `plenio_stems` UI payload (strips, seconds, 240-point peaks), blueprint *Plenio · Stems* and the STEMS group (bypassed, collapsed) in every template with both reports into Export, the mixer widget (`src/shared/stemMix.ts`, `src/extension/stemMixer.ts`: strips, fader, M/S, compression, sends, the waveform of the last run with draggable muted ranges, the bus row, the raw value under *Advanced*) and styles, `docs/user/concepts/stems.md` + `models.md` + the About notes. Tests: unit `test_msst_adapter.py`, `test_stem_effects.py`, `test_study_tools.py`, host `test_stems_node.py` (+3), workflow/catalogue/Vitest `stemMixer.test.ts` (6). **L2 measured** with the released weights (`tools/studies/stem_study.py`, new): 113.5 s in 32.9 s (RTF 3.45), 1 699 MB peak VRAM, residual 0.73 %, neutral mix and muted range exact to -162.6 dBFS; the listening verdict and `is_experimental` stay open. |
+| M7 / D13 documentation and release 0.3.0 | not started |
+| L1 SR study | **measured** (2026-09-27, `2bb1b61`): real UniverSR weights, LSD 16-24 kHz 11.0 dB vs 113.4 dB for *resample only*, RTF 0.41, 2 776 MB peak VRAM, 0.00 LU, true peak -0.836 dBTP; blind A/B pack written (`--pack`); **finding: both real takes measure as full band under the 60 dB rule, so the model arm added nothing - the MiniMax "~32 kHz-class" assumption is not confirmed by the measured take.** The listening verdict on the pack is open |
+| L2 separation | **measured** (2026-09-27, `2bb1b61`): see M6 above; the listen on the stems, the neutral mix and the example mix (`D:/Daten2/ComfyUI/output/plenio-l2/<take>/`) is open |
+| L3 full runs / L4 frontend 1.53.6 | not started |
 
 All Phase 11B commits are **local only** (not pushed; owner instruction for this phase).
 
