@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Design, Phase 11A** — analysis and design only; no production code. Implementation: Phase 11B (tasks marked **OPUS-CRITICAL**), Phase 11C (tasks marked **DEEPSEEK-SUITABLE**). |
+| Status | Design Phase 11A (2026-09-27); **Phase 11B implemented** (OPUS-CRITICAL O1-O7, §17); Phase 11C (DEEPSEEK-SUITABLE, milestones M1-M7 in §16.2) not started. |
 | Date | 2026-09-27 |
 | Baseline | Plenio 0.2.2 (`main` at `eaaa174`), ComfyUI 0.37.0, frontend 1.52.7 (cloud) / 1.53.6 (owner) |
 | Scope | audio refinement / super-resolution, EQ UX, optional stems before mastering, authoritative manual lyrics, Song Brief template precedence, a shared canonical score engine with a YuE2 · DAW workflow and graphical Review editing |
@@ -258,6 +258,7 @@ The native node tokenizes the ABC text **as written** (BPE ids of the exact stri
 | Semantics | `C` = MIDI 60; accidentals apply by **letter across octaves** until the bar line or an inline key change; an unmarked tied continuation keeps the tied pitch; every measure sums exactly to its meter; both voices share the measure grid and the key-change timeline; ties must keep the pitch and must not enter rests; no tie at the end |
 | Accepted, not canonical | a second chord symbol at the same onset, a key change repeated at one onset, a key change placed differently in the two voices, an explicit `1`, leading zeros in durations, spaces: parsed and **preserved verbatim** (S2); normalised only when their measure is rewritten by an edit, and the change log names it |
 | Not supported (never produced, rejected on input) | tuplets, grace notes, notes sounding together within a voice, slurs, decorations, repeats and endings, `w:` lyrics, broken rhythm (`>`/`<`), inline `M:`/`Q:`, additional voices or header fields, blank lines |
+| Measure length (added in Phase 11B) | every measure must be a **whole number of `L` units** (`n × L-denominator / d` integral). Measures that are not (e.g. `M:3/32` with `L:1/16`) lie **outside the subset**: the upstream parser accepts them only as full-measure rests (`Z`), because no note duration can fill them. `from_abc` rejects such a text with a located diagnostic; the score stays valid for YuE2 (Song Sheet validation is the upstream parser), but the editor offers text editing only (`model: null`, `model_error` in the view). |
 
 Round-trip fidelity is promised **for this language only**. Any other ABC is rejected with the parser's precise message.
 
@@ -287,7 +288,7 @@ Score (immutable)
 
 | # | Guarantee | Test |
 |---|---|---|
-| S1 | `from_abc(T)` accepts exactly the texts the upstream parser accepts; errors carry line, measure and range | fixtures + generated invalid texts |
+| S1 | `from_abc(T)` accepts exactly the texts the upstream parser accepts (except measures that are not a whole number of units, §9.2); errors carry line, measure and range | fixtures + generated invalid texts |
 | S2 | **Identity:** `to_abc(from_abc(T)) == T` byte for byte for every accepted `T` in the Song Sheet's normal form (`normalize_document`: LF line ends, no trailing spaces, no outer blank lines; spaces inside lines included). Other texts are normalised first — the Song Sheet already does this before hashing and output. | fixtures, every YuE2/SheetSage2 score in the test data, hypothesis-generated texts |
 | S3 | **Round trip:** `from_abc(to_abc(S)) ≡ S` (musical equality) for every valid model `S` | hypothesis-generated models |
 | S4 | **Determinism:** equal models give equal text | property test |
@@ -355,7 +356,7 @@ op ───────► │ POST transform {abc, op} ──► {abc, view} (
 
 ### 9.9 View contract v2 (additions to `/plenio/score/analyze` and `/transform`)
 
-`unit`, `tempo`, `measures[{n, onset, length, meter, key}]` (units), `tracks{vocal:[{id, onset, duration, pitch, name, segments}], ins:[…], chords:[{id, onset, name, pitches}]}`, `sections[{label, first_bar, bars}]`, `grid{units_per_quarter}`. Existing fields stay for the staff view.
+`unit`, `tempo`, `measures[{n, onset, length, meter, key}]` (units), `tracks{vocal:[{id, onset, duration, pitch, name, segments}], ins:[…], chords:[{id, onset, name, pitches}]}`, `sections[{label, first_bar, bars}]`, `grid{units_per_quarter}`. Existing fields stay for the staff view. *As implemented (Phase 11B):* these fields live under the key `model` (the view already has a `sections` field), plus `total`, `groups`, `keys` and `grid.snap`; see §17.1.
 
 ---
 
@@ -521,25 +522,130 @@ Effort = **agent hours** (wall-clock for an AI coding agent including its tests)
 | O6 | **Refine architecture** | `audio/refine.py` (bandwidth measure, PRE, chunked OLA around an injected engine, complementary crossover, POST, contracts), engine protocol, `PlenioAudioModelLoader` skeleton + `PlenioRefine` (engine widget, lazy `model` input) with *resample only* and a fake engine for tests; catalogue kinds/folders | 0.5 |
 | O7 | **Stem interfaces** | `PLENIO_STEMS`, residual invariant, `plenio.stem_mix/1` schema, mixer core (gain, mute/solo incl. *rest*, muted ranges, compressor reuse), node skeletons with a fake separator; neutral-identity tests | 0.5 |
 
-### 16.2 DEEPSEEK-SUITABLE (Phase 11C, in this order)
+### 16.2 DEEPSEEK-SUITABLE (Phase 11C): milestones
 
-| # | Task | Scope | Effort |
-|---|---|---|---|
-| D1 | Piano roll + chord lane | render from view v2, selection, draw/move/resize/delete with ghost preview → ops, snapping, keyboard map | 5 |
-| D2 | Editor layouts + inspector | DAW / Review / Text layouts, track headers (Guide labelled "not sent to YuE2"), inspector fields, transport loop + metronome, node-property layout default | 3 |
-| D3 | MIDI UI | export download, import dialog with track mapping and report; optional chord recognition for foreign MIDI | 2 |
-| D4 | DAW template | Score Tools *new score from brief* (`score/skeleton.py`), template 5 in `build_graphs.py`, App mode, thumbnails, snapshot | 2.5 |
-| D5 | Guide track | editor-only 4th track in node properties, playback, MIDI | 1.5 |
-| D6 | Song Brief UX | placeholder spike (1.52.7/1.53.6), ghost text or fallback line, *copy template text*, *use template choices*, *reset all*, frontend `custom` migration | 2.5 |
-| D7 | Manual-lyrics UX | *Use my own lyrics*, tag helpers, canvas/App badges | 1.5 |
-| D8 | EQ UX | §5 incl. spectrum payload from the node and *Edit these bands* | 3.5 |
-| D9 | Refine engines + study | UniverSR adapter (vendored, hash-pinned, chunking, seed, VRAM via ComfyUI), catalogue entry, `tools/studies/sr_study.py` (simulation set, metrics, listening pack) | 5 |
-| D10 | Refine wiring | blueprint, templates 1–5 defaults (§4.6), System Check rows, docs | 2 |
-| D11 | Separation engine | vendored BS-RoFormer inference, loader integration, chunked OLA at 44.1 kHz, catalogue entry | 3.5 |
-| D12 | Stem mixer UI + effects | reverb/delay buses (`audio/effects.py`), mixer widget (strips, mini waveforms, muted-range drawing), blueprint, template wiring (bypassed, collapsed) | 4.5 |
-| D13 | Tests, docs, release | test expansion of §13, browser checks, user guides (DAW, stems, refine, EQ, brief precedence, manual lyrics), README, App-mode docs, CHANGELOG, `CURRENT_STATUS.md` | 4 |
+The tasks D1-D13 are grouped into **seven milestones**. Each milestone ends in a state that is
+fully usable on its own (merged into `main`, templates working, nothing half-wired), and each
+closes its own tests and documentation - there is no "tests and docs later" bucket. Do them in
+this order; within a milestone, in the listed order. The engine contracts they build on are done
+(§17); **no milestone changes `plenio.core.score.canonical`/`ops` semantics** - a needed change
+there is a design question for the owner.
 
-### 16.3 Owner (local, after D9/D11/D13)
+Rules for every milestone: run `ruff check`, `ruff format --check`, `mypy`, the unit, workflow and
+contract suites, the host suite (`PLENIO_COMFYUI_ROOT`), `npm run check` and, when a template or
+widget changed, `tools/browser_check.mjs`; regenerate `tools/data/node_types.json` after node
+schema changes and `subgraphs/`/`example_workflows/` with `tools/build_graphs.py` (+ thumbnails);
+update `CURRENT_STATUS.md` and §17; commit coherent checkpoints.
+
+#### M1 - Graphical score editor in Review mode (D1, D2, D3) - 10 h
+
+*Usable result:* in every template's Song Sheet · Score a user corrects notes, rests, chords and
+sections graphically (piano roll + chord lane + inspector next to the staff) without ABC
+knowledge; MIDI export/import works from the editor. Raw ABC is the *Advanced* view.
+
+| # | Scope | Files |
+|---|---|---|
+| D1 | Piano roll + chord lane: render `view.model` (v2); selection shared with the staff through `segments`/`modelNoteOfSegment`; draw / move / resize / delete with a client-side ghost that commits **one** canonical operation on release (`insert_note`, `move_notes`, `resize_note` with `mode`, `delete`, Shift+Delete `delete_close_gap`, `put_chord`/`move_chord`/`delete_chord`); snap from `view.model.grid`; keyboard map of §10.3; a refused operation removes the ghost and shows the backend's message | `frontend/src/sheet-editor/score/PianoRoll.vue` (new), `ChordLane.vue` (new), `ScoreTab.vue` |
+| D2 | Layouts + inspector: *Review* (staff + roll + navigator + lyrics fit + inspector, ABC behind *Advanced*) and *Text*; inspector fields (pitch, onset, length, voice, chord) mapped to canonical ops; bar operations (`insert_measures`, `delete_measures`, `duplicate_measures`, `change_meter`, `put_key`/`delete_key`, section ops `rename_section_at`/`start_section`/`remove_section`/`move_section_start`); transport loop + metronome; layout default from the node property `plenio_editor_layout` | `ScoreTab.vue`, `Inspector.vue` (new), `ScoreTransport.vue`, `prefs.ts` |
+| D3 | MIDI UI: export download (`exportMidi`, file name from the title), import dialog with the file's tracks, role mapping and the report (`importMidi`); optional template-matching chord recognition for foreign MIDI as a pure core function (best effort, labelled in the report) | `frontend/src/sheet-editor/score/MidiDialog.vue` (new), `plenio/core/score/chords.py` (new) |
+
+*Done when:* Vitest `pianoRoll.test.ts` (geometry, snapping, ghost -> op mapping, refused op),
+`inspector.test.ts`; the commit gate stays in force (an invalid ABC blocks Apply/Approve, revert
+works); browser check: open a Review sheet, draw a note -> ABC changes, type ABC -> roll changes,
+invalid ABC -> stale + Apply disabled, Delete -> rest; unit tests for chord recognition; user
+guide `docs/user/concepts/score-editor.md` (graphical editing, the delete/close-gap rule, the
+advanced ABC view and the gate).
+
+#### M2 - YuE2 · DAW template (D4, D5) - 4 h
+
+*Usable result:* template **5 · YuE2 · DAW** writes lyrics (or takes manual ones), creates an
+all-rest score from the brief, stops in the DAW layout, and renders exactly the edited ABC.
+
+| # | Scope | Files |
+|---|---|---|
+| D4 | Score Tools *new score from brief*: `plenio/core/score/skeleton.py` builds `canonical.new_score` from the brief (length and tempo -> measures; meter/key parsed from the brief's text fields with the documented defaults, reported); Score Tools' `score` input optional for this operation only; template 5 in `tools/build_graphs.py` (§10.2 groups), DAW layout property, App mode, thumbnail | `plenio/core/score/skeleton.py`, `plenio/comfy/nodes/score_tools.py`, `tools/build_graphs.py` |
+| D5 | Guide track: editor-only 4th track in the Song Sheet node's `properties` (`[[onset, duration, pitch]]`, the format of `midi.guide_from_json`), playback, MIDI export/import, labelled "not sent to YuE2" | frontend score components, `sheetStateWidget.ts` |
+
+*Done when:* unit tests of the skeleton (lengths, parsed/defaulted meter and key, report); host
+`test_daw_path.py` (skeleton -> manual edit -> fake render receives exactly the ABC; I12 blocks the
+unfilled skeleton - the error exists since O5); workflow tests (template 5 anatomy, App config);
+browser check of template 5; user guide `docs/user/paths/yue2-daw.md` (the three conditioning
+tracks, the Guide track, honest limits: YuE2 reads two voices + chord symbols).
+
+#### M3 - Song Brief and manual-lyrics UX (D6, D7) - 4 h
+
+*Usable result:* template values appear as ghost text and never overwrite typed values; users
+can say "use my own lyrics" everywhere, and see that the lyrics are theirs.
+
+| # | Scope | Files |
+|---|---|---|
+| D6 | Placeholder spike on frontend 1.52.7/1.53.6 (canvas, Vue nodes, App mode); ghost text from the template (`brief.field_sources` semantics: typed > template > empty) or the fallback line "Template fills: ..."; actions *Copy template text into fields*, *Use template choices* (`brief.template_choice_hints`), *Reset all to template* (confirmation); frontend migration that clears the legacy `custom` from saved workflows on load (the backend already treats it as empty with a note) | `frontend/src/extension/briefTemplate.ts` (new), `migrate.ts`, route for template fields if needed |
+| D7 | *Use my own lyrics* in the Lyrics tab before the first run and later (sets the document to manual; empty or pre-filled editor; section-tag helpers), `lyrics: yours (manual)` on the canvas summary and the App-mode sheet button; batch-mode note in the docs | `SheetDialog.vue`, `summary.ts`, App-mode button code |
+
+*Done when:* Vitest `briefTemplate.test.ts` (precedence, template switch keeps typed values,
+`custom` migration); browser check of ghost text / fallback in canvas and App mode; host tests
+stay green (manual lyrics survive drafts, brief changes, batch - pinned since O5); docs
+`docs/user/concepts/brief-templates.md` and the manual-lyrics part of the path guides.
+
+#### M4 - EQ UX (D8) - 3.5 h
+
+*Usable result:* the EQ node edits like a visual EQ (§5); the stored value stays `plenio.eq/1`.
+
+*Scope:* bigger resizable curve, band strip with inline editor (types, enable), handles with
+Shift = fine, keyboard support, gain-range toggle, before/after spectrum (the node sends 1/6-octave
+profiles in its UI payload), *Edit these bands* for match proposals, widget-local undo/redo,
+bypass-compare, raw JSON under *Advanced*. Files: `frontend/src/extension/eqWidget.ts`,
+`frontend/src/shared/eqCurve.ts`, `plenio/comfy/nodes/eq.py` (spectrum payload).
+*Done when:* Vitest `eqCurve.test.ts` extended (interactions, value round trip), host test of the
+spectrum payload, browser check (save/reload of a manual EQ identical), `docs/user/concepts/mastering.md` updated.
+
+#### M5 - Refine in the templates (D9, D10) - 7 h (+ owner study L1)
+
+*Usable result:* **Plenio · Refine (48 kHz)** in templates 1-5 (MiniMax: on, others: bypassed),
+with a real super-resolution engine behind Load Audio Model and the study tooling to decide its
+defaults.
+
+| # | Scope | Files |
+|---|---|---|
+| D9 | UniverSR adapter: vendored, hash-pinned MIT code under `plenio/third_party/universr/`, registered with `plenio.comfy.audio_models.register` (kind super-resolution, `input_rate` per condition, `condition_hz`, chunking values), weights through ComfyUI model management (R9), seed handling; catalogue entry (`resources/models.toml`, folder `audio_sr`, licence CC-BY-4.0 with attribution); `tools/studies/sr_study.py` (simulation set, metrics of §4.5, listening pack) | `plenio/comfy/audio_models.py` (+ adapter module), `resources/models.toml`, `tools/studies/` |
+| D10 | Blueprint *Plenio · Refine (48 kHz)* (loader collapsed -> Refine), groups *REFINE (optional)* per §11 (MiniMax active with engine *model*, others bypassed), reports into Export, System Check rows; remove `is_experimental` from Load Audio Model and Refine when this milestone is accepted | `tools/build_graphs.py`, `plenio/core/system.py` |
+
+*Done when:* unit tests of the adapter's pure parts; host tests with the real adapter code on a
+tiny fake checkpoint where possible; workflow tests (defaults per template); browser check;
+`docs/user/concepts/refine.md`; the local checklist L1 prepared (commands in the doc). The
+provisional defaults stay marked until the owner's L1 decision.
+
+#### M6 - Stems in the templates (D11, D12) - 8 h (+ owner check L2)
+
+*Usable result:* an optional, bypassed and collapsed **Plenio · Stems** block before mastering in
+every template; with a separation model it splits, and the mixer edits gain, mute/solo,
+compression, muted ranges, reverb and delay.
+
+| # | Scope | Files |
+|---|---|---|
+| D11 | BS-RoFormer 4-stem adapter (vendored MSST MIT code, `plenio/third_party/msst/`, hash-pinned), 44.1 kHz chunked OLA, results back at the input rate (the core requires the input's shape), registered as kind separation; catalogue entry (folder `audio_separation`, MIT, MUSDB18-HQ note) | adapter module, `resources/models.toml` |
+| D12 | `plenio/core/audio/effects.py`: seeded convolution reverb (room/plate/hall) and feedback delay as `stems.Effect` functions (bus settings from the mixer value's `reverb`/`delay` objects); pass them from the Stem Mixer node; mixer widget (strips, faders, M/S, compression, sends, mini waveforms with draggable muted ranges) replacing the JSON text widget (same `plenio.stem_mix/1` value); blueprint *Plenio · Stems* and template wiring (bypassed, collapsed); remove `is_experimental` from Separate Stems and Stem Mixer when accepted | `plenio/core/audio/effects.py`, `plenio/comfy/nodes/stems.py`, `frontend/src/extension/stemMixer.ts` (new), `tools/build_graphs.py` |
+
+*Done when:* unit tests of the effects (determinism, tail policy, levels) and of the neutral
+identity with buses at 0; Vitest `stemMixer.test.ts` (value (de)serialisation); host tests with the
+fake separator (exist since O7) plus effect buses; workflow tests (bypassed everywhere); browser
+check; `docs/user/concepts/stems.md`. L2 prepared.
+
+#### M7 - Documentation and release 0.3.0 (D13) - 3 h
+
+*Usable result:* a releasable 0.3.0: README, CHANGELOG, user guides linked, App-mode docs,
+`docs/dev/extending.md` (audio model adapters, canonical score operations), version bump in
+`pyproject.toml`/`frontend/package.json`, full test runs recorded in a test report, the owner's
+local checklist (§15, L1-L4) ready to run. The release itself (tag, Registry publish) only after
+the owner's L1-L4 verdicts.
+
+#### Optional follow-up (not scheduled)
+
+- **F1** Route the Phase 5 operations (`plenio/core/score/edit.py`, element ids) through the
+  canonical engine, or retire them once the graphical editor (M1) covers their use. Their 162
+  tests pin exact texts and ids; decide per operation. Owner decision; not needed for 0.3.0.
+
+### 16.3 Owner (local, after M5/M6/M7)
 
 L1 → L4 of §15; then the Refine defaults are fixed from L1, and the release is prepared.
 
@@ -549,10 +655,45 @@ L1 → L4 of §15; then the Refine defaults are fixed from L1, and the release i
 
 | Task | Status |
 |---|---|
-| Phase 11A — this plan | done (2026-09-27) |
-| O1 … O7 | not started (awaiting authorization) |
-| D1 … D13 | not started |
+| Phase 11A — this plan | done (2026-09-27, `c5b8af3`) |
+| O1 canonical model, parser, serializer | **done** (2026-09-27, `9588977`) |
+| O2 edit operation algebra | **done** (`a035c2f`) — the Phase 5 operations stay unchanged (owner decision); re-routing them is F1 |
+| O3 route + view contract v2 + commit gate | **done** (`0139957`) |
+| O4 MIDI boundary | **done** (`a041315`); chord recognition from notes → D3 |
+| O5 brief precedence + manual-lyrics contract + I12 | **done** (`c2f4668`); ghost text and the frontend `custom` migration → D6 |
+| O6 Refine architecture | **done** (`299964d`); real engine → D9, wiring → D10 |
+| O7 stem interfaces | **done** (`6578313`, help pages `7b0eb39`); separation engine → D11, effects/widget/blueprint → D12 |
+| M1 … M7 (D1 … D13) | not started |
 | L1 … L4 | not started |
+
+All Phase 11B commits are **local only** (not pushed; owner instruction for this phase).
+
+### 17.1 As implemented (Phase 11B)
+
+| Area | What exists | Where |
+|---|---|---|
+| Canonical model | `Score(tempo, unit, meters, keys, sections, layout, vocal, ins, chords)`; `Note(onset, duration, pitch, spelling)` with `spelling` = the written natural pitch (presentation); `KeyChange(onset, key, placement)` with placement `header`/`field`/`inline` (a `field` change where no group starts is written inline); `Section(measure, label)` with 0-based measures - a first group without a `%` comment has no Section (the implicit *untitled*, marked `implicit` in the view); `source` (the original text per measure, field and comment line) and `origins` (source measure of every measure, so moved/duplicated measures keep their text) are presentation. `==` is musical equality. | `plenio/core/score/canonical.py` |
+| Serializer | locality-preserving print (unchanged measures/fields/comments verbatim; a measure's reuse depends on its content, meter, key context, inline keys and the entering tie's spelling; measures with inline key text in the source are rewritten in both voices or neither) → S6 check → canonical re-print for exotic accepted texts (e.g. a key change placed differently in the two voices plus a partial edit) → internal error if even that fails. Rewritten lines merge plain `Z` measures into `Z2`…`Z4` runs. The canonical writer reproduces every real YuE2/SheetSage2 fixture byte for byte. | `canonical.to_abc`, `canonical_text` |
+| Operations | `delete`, `delete_close_gap`, `insert_note`, `move_notes`, `resize_note` (`rests`/`overwrite`), `set_note_pitch`, `split_note`, `join_notes`, `fill_rest`, `put_chord`, `move_chord` (replaces with a warning), `delete_chord`, `insert_measures` (default: join the group *before* the insertion point, so bars inserted before a chorus extend the verse; another meter forms its own group; groups > 4 split into fours), `delete_measures` (the key in effect after the cut stays in effect; a section starting inside moves to the cut), `duplicate_measures`, `change_meter` (empty measures only), `put_key`/`delete_key` (pitches kept, re-spelled), `change_tempo`, `transpose_by`, `rename_section_at`, `start_section`, `remove_section`, `move_section_start`. Ids `vocal:<onset>`, `ins:<onset>`, `chord:<onset>`; bars 1-based. Names are disjoint from the Phase 5 operations. `transform(text, op)` is the commit path. | `plenio/core/score/ops.py` |
+| View v2 / route | `/plenio/score/analyze` and `/transform` return the existing view plus `model` (v2: `unit`, `tempo`, `total`, `grid{units_per_quarter, snap}`, `measures`, `groups`, `keys`, `sections`, `tracks{vocal, ins, chords}` with `segments` → element ids); `model: null` + `model_error` outside the subset. The v2 data lives under `model` (not top level) because `sections` already exists in the view. | `plenio/core/score/operations.py`, `plenio/comfy/routes.py` |
+| Commit gate | `useScoreSession.commitBlock` (checking, check failed, invalid text), notation operations refused on an invalid text, `revertToLastValid` (one undo step), canonical ids kept in the selection; the Score tab reports the gate, the dialog disables Apply and Approve with the reason, banner with *Revert to last valid*. | `frontend/src/sheet-editor/score/useScoreSession.ts`, `ScoreTab.vue`, `SheetDialog.vue` |
+| MIDI | own SMF reader/writer; a `plenio:score` text event carries unit and layout (lossless round trip); tracks Vocal/Instrument/Chords/Guide on channels 1-4; routes `POST /plenio/score/midi/export` (base64 JSON, file name from the title) and `/import` (ABC, Guide notes, report, view); typed client calls `exportMidi`/`importMidi`. | `plenio/core/score/midi.py` |
+| Brief / lyrics | `resolve_text_fields` (typed > template > empty, one rule for Song and Cover Brief), `field_sources`, `template_choice_hints`; `custom` → empty with a note in the brief's `notes` (summary), not in the fingerprint or the prompt; sheet info finding for manual lyrics with drafted title/style; I12 as a YuE2 rule error. | `plenio/core/brief.py`, `sheet/evaluate.py`, `engines/yue2.py` |
+| Refine | pure pipeline with an `Engine` protocol; *resample only* = `core.audio.resample`; nodes **Load Audio Model** (`PlenioAudioModelLoader`) and **Refine (48 kHz)** (`PlenioRefine`, default engine *resample only* until D9/L1), both `is_experimental`; folders `models/audio_sr`, `models/audio_separation`; adapter registry `plenio.comfy.audio_models`. The < 0.1 LU criterion of §4.5 is reported per run (`loudness_change_lu`), not enforced. | `plenio/core/audio/refine.py`, `plenio/comfy/nodes/refine.py`, `audio_model.py` |
+| Stems | `Stems` (≤ 4 float32 stems + residual), strict `plenio.stem_mix/1`, `mix` with injected effect buses (a send without its bus is refused); nodes **Separate Stems** and **Stem Mixer** (JSON value until D12), `is_experimental`; `PLENIO_STEMS` = one `Stems` per batch item. | `plenio/core/audio/stems.py`, `plenio/comfy/nodes/stems.py` |
+
+### 17.2 Verification (owner's machine, 2026-09-27; Python 3.12.9, ComfyUI 0.37.0 on the CPU)
+
+| Check | Result |
+|---|---|
+| unit + workflow + contract suites | 848 passed, 4 skipped |
+| host suite (real ComfyUI server, fakes) | 101 passed, 8 skipped (smoke/legacy) |
+| frontend `npm run check` | vue-tsc clean, 67 Vitest passed, build ok |
+| ruff check / format | clean |
+| mypy (`--python-version 3.12`) | only `type-arg` errors for bare `np.ndarray` from the local numpy 2.2 stubs - the same class as the 23 pre-existing ones in `core/audio`; no other error |
+| workflow validation | all blueprints and templates ok |
+| extra fuzzing (not in the suite) | 5 000 random models + 3 000 accepted texts (S2/S3/S6); 2 000 random edit sequences × 25 steps (validity, round trip, locality) - no failure |
+| not run | browser checks (`tools/browser_check.mjs`) - the dialog's gate banner and disabled Apply are covered by Vitest only; real SR/separation engines, GPU runs, listening (L1-L4) |
 
 ---
 

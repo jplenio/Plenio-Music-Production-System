@@ -2,18 +2,99 @@
 
 | | |
 |---|---|
-| Date | 2026-09-25 |
-| Written for | the return from the Claude Code cloud session to the owner's Windows machine (the real-model pass that the Phase 10 acceptance depends on) |
-| Overall phase | **Phase 10 done (accepted with conditions); 0.2.0 and 0.2.1 released; 0.2.2 prepared** (section 0) |
-| Sub-phase | - (hard stop after Phase 10) |
-| Phases done | 1A, 1B (design), 2 (Foundation), 3 (YuE2 Core), 4A (Cover/Instrumental design gate), 4B (YuE2 Cover), 5 (Score / ABC editor), 9 (audit), 10 (acceptance review); 6 (MiniMax), 7 (Audio production chain) and 8 (Main workflows and UX) implemented, their real-model checks open |
-| Prompt set | `D:\Daten2\Deepseek\ComfyUI-MiniMax\Plenio_Music_Production_System_Refactor_Prompts\` on the owner's machine (not in this repository): `01_PHASE_1A` ... `12_PHASE_10`, one phase per prompt, hard stop after each phase, the next phase only on the owner's explicit authorization |
+| Date | 2026-09-27 |
+| Written for | **Phase 11C** (DeepSeek 4.1 Flash): the DEEPSEEK-SUITABLE milestones M1-M7 of the next-release plan |
+| Overall phase | **Phase 11A (next-release design) and Phase 11B (critical implementation, O1-O7) done**; 0.2.2 is the released baseline; the Phase 10 owner-machine checks (§8.3) are still open |
+| Sub-phase | - (hard stop after Phase 11B) |
+| Commits | Phase 11A `c5b8af3`; Phase 11B `9588977` (O1) · `a035c2f` (O2) · `0139957` (O3) · `a041315` (O4) · `c2f4668` (O5) · `299964d` (O6) · `6578313` (O7) · `7b0eb39` (help pages) · this checkpoint. **All local, not pushed** (owner instruction for Phase 11B). |
+| Prompt set | `D:\Daten2\Deepseek\ComfyUI-MiniMax\Plenio_Music_Production_System_Refactor_Prompts_Next_Release\` on the owner's machine: `13_PHASE_11A`, `14_PHASE_11B`, `15_PHASE_11C` |
 
-Read with: the [Phase 10 acceptance report](../audit/2026-09-25-phase-10-acceptance.md) (verdict, conditions, limitations), [README.md](README.md) (design index), [implementation-roadmap.md](implementation-roadmap.md), [docs/dev/extending.md](../dev/extending.md), [score-editor-design.md](score-editor-design.md) (§15 = Phase 5 implementation record), [target-architecture.md](target-architecture.md) §0/§2/§18, the test reports [phase 6](../test-reports/2026-09-25-phase-6.md), [phase 7](../test-reports/2026-09-25-phase-7.md) and [phase 8](../test-reports/2026-09-25-phase-8.md), the [usability review](usability-review.md) and the [Phase 9 audit](../audit/2026-09-25-phase-9-audit.md).
+Read with: [next-release-plan.md](next-release-plan.md) - **§16.2 (the milestones, in order), §17 (as implemented, verification)**, §9 (canonical score engine), §10 (DAW), §4 (refine), §6 (stems), §7/§8 (lyrics, brief); then [score-editor-design.md](score-editor-design.md) §15 (the Phase 5 editor the milestones extend), [target-architecture.md](target-architecture.md) §2 (rules R1-R12), [docs/dev/testing.md](../dev/testing.md).
 
 ---
 
-## 0. Releases after the acceptance review
+## 1. Completed in Phase 11B (the OPUS-CRITICAL foundations)
+
+| # | Result | Main files | Tests |
+|---|---|---|---|
+| O1 | **Canonical score model** (`Score`, `Note`, `KeyChange`, `ChordSymbol`, `Section`), `from_abc` (upstream parser first; measures that are not a whole number of `L` units are outside the subset), `to_abc` (verbatim reuse of unchanged measures/fields/comments = S2 identity and S5 locality; native style for rewritten measures = S7; every output re-parsed = S6; canonical re-print as fallback), `validate`/`problems`, `new_score` | `plenio/core/score/canonical.py`, `tests/support/score_strategies.py` (hypothesis models and accepted texts) | `tests/unit/test_score_canonical.py` |
+| O2 | **Edit operations** on the model (24 operations; delete → rest keeps every measure's length, close-gap only on request, overwrite insert, move = delete + insert, resize into rests or overwrite, chords never move notes, measure insert/delete/duplicate, meter only on empty bars, key changes keep pitches) and the commit path `transform(text, op)`. The Phase 5 operations in `edit.py` are **unchanged** (owner decision); names are disjoint. | `plenio/core/score/ops.py` | `tests/unit/test_score_ops.py` (examples + hypothesis state machine: validity, round trip, locality) |
+| O3 | **View contract v2** under `view.model` (units, measures, groups, keys, sections, tracks with `segments` → element ids), `model_error` outside the subset; `/plenio/score/transform` runs canonical operations; **commit gate** in the editor (invalid/unchecked text blocks Apply and Approve with the reason, notation operations refused, *Revert to last valid*) | `plenio/core/score/operations.py`, `frontend/src/shared/scoreView.ts`, `frontend/src/sheet-editor/score/useScoreSession.ts`, `ScoreTab.vue`, `SheetDialog.vue` | `tests/unit/test_score_view.py`, `frontend/tests/scoreEditor.test.ts`, host `test_canonical_score_routes` |
+| O4 | **MIDI boundary**: own SMF reader/writer, lossless round trip for Plenio files (`plenio:score` text event), foreign import with quantisation, monophonic reduction, first tempo, time/key signatures, markers, `plenio:chord` events - every lossy step reported; routes `/plenio/score/midi/export` and `/import` | `plenio/core/score/midi.py`, `plenio/comfy/routes.py`, `frontend/src/api/client.ts` | `tests/unit/test_score_midi.py`, host `test_canonical_score_routes` |
+| O5 | **One authoritative value**: brief precedence typed > template > empty (`resolve_text_fields`, `field_sources`, `template_choice_hints`), legacy `custom` = empty with a note (never in the prompt or fingerprint); manual lyrics resolve to themselves for any draft, review and brief mode; info finding "Title and style were drafted from the brief, not from your lyrics."; **I12**: a score of rests is a YuE2 rule error | `plenio/core/brief.py`, `plenio/core/sheet/evaluate.py`, `plenio/core/engines/yue2.py`, brief nodes | `tests/unit/test_precedence.py`, host `test_manual_lyrics_survive_every_new_draft` |
+| O6 | **Refine (48 kHz)** core (bandwidth, PRE, chunked OLA around an `Engine`, complementary crossover, POST, report; *resample only* = the resampler) and the experimental nodes **Load Audio Model** and **Refine**; model folders `models/audio_sr`, `models/audio_separation`; adapter registry | `plenio/core/audio/refine.py`, `plenio/comfy/audio_models.py`, `plenio/comfy/nodes/{audio_model,refine}.py` | `tests/unit/test_refine.py`, host `tests/host/test_refine_node.py` |
+| O7 | **Stems**: `Stems` + residual (neutral mix = input), strict `plenio.stem_mix/1`, mixer (gain, mute/solo incl. *rest*, compression, muted ranges, injected reverb/delay buses) and the experimental nodes **Separate Stems** and **Stem Mixer** | `plenio/core/audio/stems.py`, `plenio/comfy/nodes/stems.py` | `tests/unit/test_stems.py`, host `tests/host/test_stems_node.py` |
+
+Also: types `PLENIO_AUDIO_MODEL`, `PLENIO_STEMS`; node count 14 → 18 (the four new nodes `is_experimental`); help pages `web/docs/Plenio{AudioModelLoader,Refine,SeparateStems,StemMixer}.md`; `tools/data/node_types.json` regenerated; test node pack: `PlenioTestFakeAudioModel`, `PlenioTestAudioProbe`; plan §9.2 states the whole-unit measure rule; plan §16.2 groups the DeepSeek tasks into milestones; §17 records what was built and how it deviates from the design text.
+
+## 2. Remaining DEEPSEEK-SUITABLE tasks, in exact order
+
+Detail, files and "done when" criteria: [next-release-plan.md §16.2](next-release-plan.md). Each milestone ends in a usable state and closes its own tests and docs.
+
+| Order | Milestone | Tasks | Effort |
+|---|---|---|---|
+| 1 | **M1** graphical score editor in Review mode | D1 piano roll + chord lane → D2 layouts + inspector (+ bar/key/section operations in the UI) → D3 MIDI UI (+ chord recognition for foreign MIDI) | 10 h |
+| 2 | **M2** YuE2 · DAW template | D4 *new score from brief* + template 5 → D5 Guide track | 4 h |
+| 3 | **M3** Song Brief and manual-lyrics UX | D6 ghost text / template actions / frontend `custom` migration → D7 *Use my own lyrics* | 4 h |
+| 4 | **M4** EQ UX | D8 | 3.5 h |
+| 5 | **M5** Refine in the templates | D9 UniverSR adapter + study tooling → D10 blueprint, template defaults, System Check | 7 h |
+| 6 | **M6** Stems in the templates | D11 BS-RoFormer adapter → D12 effects, mixer widget, blueprint, wiring | 8 h |
+| 7 | **M7** documentation and release 0.3.0 | D13 | 3 h |
+| - | optional **F1** | route or retire the Phase 5 operations (owner decision) | - |
+
+Rules that bind every milestone: use the canonical engine (`canonical`/`ops`) for all graphical edits - **no second score model** in TypeScript, the piano roll only does geometry and commits one operation per gesture; the ABC text stays the only stored score; never accept malformed ABC (the gate exists - keep it in force); keep the new stages bypassed/collapsed until used; remove `is_experimental` from a node only when its milestone is accepted.
+
+## 3. Files and components (Phase 11B)
+
+- **New core:** `plenio/core/score/canonical.py`, `ops.py`, `midi.py`; `plenio/core/audio/refine.py`, `stems.py`.
+- **Changed core:** `plenio/core/score/operations.py` (dispatch, `model_view`, `editor_view`), `plenio/core/brief.py`, `plenio/core/sheet/evaluate.py`, `plenio/core/engines/yue2.py`, `plenio/core/models.py` (audio model folders).
+- **ComfyUI layer:** `plenio/comfy/audio_models.py` (new), `nodes/audio_model.py`, `nodes/refine.py`, `nodes/stems.py` (new), `nodes/__init__.py`, `types.py`, `host.py` (folders, `model_files`), `routes.py` (MIDI), `nodes/brief.py`, `nodes/cover_brief.py` (notes in the summary).
+- **Frontend:** `src/shared/scoreView.ts`, `src/sheet-editor/score/useScoreSession.ts`, `ScoreTab.vue`, `SheetDialog.vue`, `dialog.css`, `src/api/client.ts`; built output `web/js/`.
+- **Tests:** unit `test_score_canonical.py`, `test_score_ops.py`, `test_score_view.py`, `test_score_midi.py`, `test_precedence.py`, `test_refine.py`, `test_stems.py`; `tests/support/score_strategies.py` (on the pytest path); host `test_refine_node.py`, `test_stems_node.py`, additions to `test_song_path.py`, `conftest.py` (an unreadable model file per audio folder), `plenio_test_nodes/fakes.py`, `test_audit_regressions.py`; frontend `tests/scoreEditor.test.ts`, `tests/fixtures/tricky-score.json` (regenerated from `editor_view`).
+- **Generated:** `tools/data/node_types.json`. Templates and blueprints are unchanged (the new nodes are not wired yet).
+
+## 4. Tests run at this checkpoint (owner's machine, Windows 11, Python 3.12.9 of ComfyUI 0.37.0, CPU)
+
+| Suite | Command (bash, repository root; `PY=/d/Daten2/ComfyUI/.venv/Scripts/python.exe`) | Result |
+|---|---|---|
+| unit + workflow + contract | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/unit tests/workflows tests/contract` | 848 passed, 4 skipped |
+| host (real server, fakes) | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/host` | 101 passed, 8 skipped (smoke and legacy) |
+| frontend | `cd frontend && npm run check` | vue-tsc clean, 67 Vitest passed, build ok |
+| lint | `PYTHONPATH=.devdeps $PY -m ruff check . && ... ruff format --check .` | clean |
+| types | `PYTHONPATH=.devdeps $PY -m mypy --python-version 3.12` | only `type-arg` errors for bare `np.ndarray` (local numpy 2.2 stubs), the same class as the 23 pre-existing ones; nothing else |
+| workflows | `$PY tools/workflow_validation.py` | all ok |
+| extra fuzzing (scratch, not in the suite) | hypothesis with raised limits | 5 000 models + 3 000 accepted texts (identity, round trip, validity); 2 000 edit sequences × 25 steps - no failure |
+
+## 5. Limitations and local validation still required
+
+- **Not run in this phase:** the browser checks (`tools/browser_check.mjs`) - the dialog's gate banner and the disabled Apply/Approve are covered by Vitest, not by a real browser; frontend 1.53.6.
+- **No real audio models:** Refine and Stems ran only with fakes (pointwise SR engine, fixed-fraction separator). The refine defaults are **provisional** until L1; the < 0.1 LU criterion is reported, not enforced.
+- **mypy in CI:** the new audio modules use bare `np.ndarray` like the existing ones; CI (older numpy stubs) is expected to accept them, but CI did not run (nothing pushed).
+- **Owner checklist (plan §15):** L1 SR study (needs M5), L2 separation (needs M6), L3 full runs incl. the DAW template (needs M2), L4 frontend 1.53.6 (ghost text, piano roll, mixer and EQ widgets, the score gate) - plus the still open Phase 10 conditions (§8.3).
+
+## 6. Exact next task
+
+**M1 / D1 - piano roll and chord lane** (plan §16.2): add `frontend/src/sheet-editor/score/PianoRoll.vue` and `ChordLane.vue` that render `session.lastValid.model` (v2) next to the staff in `ScoreTab.vue`; selection shared with the staff through `segments` (`modelNoteOfSegment`, `knownIds`); gestures draw a ghost locally and commit exactly one canonical operation on release through `session.operate` (`insert_note`, `move_notes`, `resize_note` with `mode: "rests"` in Review, `delete`, Shift+Delete `delete_close_gap`, `put_chord`/`move_chord`/`delete_chord`); snap from `model.grid`; with Vitest `pianoRoll.test.ts` first (geometry and op mapping), then the component.
+
+---
+
+## 7. Decisions of Phase 11A/11B (in addition to §8.4)
+
+- One canonical score engine in `plenio.core.score` (`canonical`, `ops`); the ABC text is the persisted document; views derive from exactly one text; the TypeScript side has no score model.
+- Supported language = the native two-voice dialect; round trip promised only there; measures must be whole units (§9.2).
+- Deletion leaves a rest; close-gap only on request; overwrite semantics inside a voice; the Phase 5 operations stay as they are until F1.
+- DAW tracks: Vocal, Instrument, Chords are sent to YuE2; Guide never is.
+- MIDI files carry Plenio's unit and layout in a text event (lossless); foreign imports are deterministic and reported.
+- Template precedence is stateless (typed > template > empty); `custom` is empty.
+- Refine: one node, injected engines, *resample only* as a visible engine; defaults from measurements (L1). Stems: residual invariant, effects injected, sends without a bus refused.
+- New nodes start as `is_experimental` until their milestone wires and accepts them.
+- Phase 11B commits stay local (owner instruction); earlier phases pushed checkpoints to `origin/main`.
+
+## 8. Earlier checkpoint: Phase 10 and 0.2.x (2026-09-25, still valid context)
+
+Written for the return from the cloud session to the owner's machine; the open owner checks of §8.3 still apply. Read with the [Phase 10 acceptance report](../audit/2026-09-25-phase-10-acceptance.md), [implementation-roadmap.md](implementation-roadmap.md) and [docs/dev/extending.md](../dev/extending.md).
+
+### 8.0 Releases after the acceptance review
 
 - **0.2.1** (2026-09-25): renamed branding images (Registry icon and banner).
 - **0.2.2** (2026-09-26, owner's requests after the first real use; details in `CHANGELOG.md`):
@@ -23,7 +104,7 @@ Read with: the [Phase 10 acceptance report](../audit/2026-09-25-phase-10-accepta
   - **Cover art** embedded by Plenio's own FLAC/ID3 writer (`plenio.core.release.embed_cover`) for every tag option; mutagen is no longer used.
   - Node **summaries** re-sent for cached nodes (`has_intermediate_output`) and kept in the node's properties across reloads.
 
-## 1. What has been completed
+### 8.1 What has been completed
 
 **Before Phase 6** (reports in `docs/test-reports/`): Phase 2 foundation; Phase 3 *1 · YuE2 · Song*; Phase 4A cover/instrumental design; Phase 4B *2 · YuE2 · Cover*; Phase 5 score editor (done, owner-verified: 557/559 passed, browser checks, YuE2 Song and Cover with A/B).
 
@@ -54,14 +135,14 @@ Read with: the [Phase 10 acceptance report](../audit/2026-09-25-phase-10-accepta
 
 **Phase 10 - final architecture acceptance review** ([report](../audit/2026-09-25-phase-10-acceptance.md)): **accepted with conditions**. Measured: no import cycles, layer rules hold, `plenio.core` 93.7 % line coverage, the adapter layer 73-100 % with the host tests (subprocess coverage), CI history through the GitHub API, CI environment reproduced (fresh clone, CPU without AVX-512, CRLF checkout, non-root, Python 3.10), generated files reproducible, 183 doc links intact, three full runs without a flaky test. Findings: the CI had been red on all 16 commits (ACC-01, fixed: first green run `3a9fda1`), the owner's reported pass ran a Phase 5 checkout with every host test skipped (ACC-02, open), the release record schema was not pinned (ACC-03, fixed), a stale node snapshot, Score Tools without host coverage, an implicit engine interface and licence facts in three places (ACC-04...07, tests added); `docs/dev/extending.md` lists the extension points with their guards.
 
-## 2. Partially implemented
+### 8.2 Partially implemented
 
 - MiniMax: instrumental caption wording (I-5) adopted from the legacy toolkit, not yet listened to.
 - Restoration decision C1 needs measurements on unprocessed takes.
 - App mode shows only the sung options of *vocals* (frontend limit, documented).
 - File sizes of the writer and the adapter are not in the catalogue (no source here); licences of the FLUX.2 text encoder and VAE to be confirmed on the model cards before a public release.
 
-## 3. What remains (the acceptance conditions, on the owner's machine)
+### 8.3 What remains (the acceptance conditions, on the owner's machine)
 
 Done by the owner (reported 2026-09-25): the Phase 9 fixes - a *new lyrics* cover transcribes the source in its own language (the transcription itself not always exact), MP3 export of a 96 kHz file, editor speed on a long YuE2 plan - and the templates in frontend 1.53.6 ("passt"). The reported full-suite run does **not** count: it ran a checkout at Phase 5 (560 tests) without `PLENIO_COMFYUI_ROOT`, so every host and smoke test was skipped.
 
@@ -71,7 +152,7 @@ Done by the owner (reported 2026-09-25): the Phase 9 fixes - a *new lyrics* cove
 4. One first-use run of each template following only its About note; the System Check against the real models folder.
 5. Record the results in the Phase 6-8 reports and set the roadmap statuses of Phases 6-8 to *Done*.
 
-## 4. Important architectural decisions since Phase 1
+### 8.4 Important architectural decisions since Phase 1
 
 - D-01...D-09 (ADR-0001...0009): per-path templates, Apache-2.0, native text generation, ASR by measurement, optional separation, instrumental adapter, clean break, English everywhere, package identity.
 - Two Song Sheets per path (text and score); what leaves a sheet reaches the model unchanged; precedence manual > edited (while its draft is unchanged) > draft; conflicts instead of silent replacement; approval bound to a backend fingerprint.
@@ -88,14 +169,14 @@ Done by the owner (reported 2026-09-25): the Phase 9 fixes - a *new lyrics* cove
 - Phase 9: user files (templates, config) never stop Plenio from loading - they are skipped or reported; one base name per export; the Cover Brief decides the ASR language only for original lyrics; MP3 is converted when LAME cannot hold the rate.
 - Phase 10: text files are checked out with LF everywhere (`.gitattributes`); the release record has a pinned schema (`resources/schemas/record-1.schema.json`); the engine module interface is written down (`MODULE_INTERFACE`) and tested; extension points and their guards are in `docs/dev/extending.md`.
 
-## 5. Files and modules changed last (Phase 10)
+### 8.5 Files and modules changed last (Phase 10)
 
 - CI and tests: `.gitattributes`, `tests/conftest.py` (GitHub annotations), `tests/unit/test_audio.py` (tone-match tolerance), `tests/host/test_score_tools_node.py`, `tests/host/test_foundation.py` (snapshot), `tests/contract/test_data_schemas.py` and `tests/host/test_production_path.py` (record schema), `tests/unit/test_minimax.py` (engine interface), `tests/unit/test_models_catalogue.py` (licences).
 - Code: `plenio/core/engines/__init__.py` (`MODULE_INTERFACE`, `WRITING_RULE_KEYS`), `tools/snapshot_node_types.py` (`take_snapshot`), `tools/data/node_types.json` (refreshed).
 - Docs: `docs/audit/2026-09-25-phase-10-acceptance.md`, `docs/dev/extending.md`, annotations in `target-architecture.md` §13/§15/§16.
 - Built output committed: `web/js/plenio.js`, `web/js/chunks/*.mjs`; generated: `subgraphs/*.json`, `example_workflows/*.json`, `example_workflows/*.jpg`.
 
-## 6. Known issues
+### 8.6 Known issues
 
 - Upstream ComfyUI 0.37.0: a native loop whose body is blocked never finishes (worked around by gating); the loop body re-runs on every queue; frontend 1.53.6 does not restore `cache_iterations` and misrestores DynamicCombo-first nodes (Plenio nodes repaired, native Start Loop not).
 - YuE2 may render a take to the render ceiling and stop mid-phrase (Check Vocals ranks such takes last among clean ones).
@@ -115,7 +196,7 @@ Done by the owner (reported 2026-09-25): the Phase 9 fixes - a *new lyrics* cove
 - App mode (frontend 1.52.7) drops the children of the DynamicCombo option that is not selected; the song apps list the sung options only.
 - The bundled editor chunk contains 15 control characters from abcjs string literals (minifier output, unchanged since Phase 5); the control-character scan should skip `web/js/chunks/`.
 
-## 7. Tests executed at this checkpoint
+### 8.7 Tests executed at this checkpoint
 
 | Suite | Where | Result |
 |---|---|---|
@@ -133,7 +214,7 @@ Done by the owner (reported 2026-09-25): the Phase 9 fixes - a *new lyrics* cove
 | Phase 5 suite | owner's machine | 557 passed, 3 skipped; with smoke 559 passed, 1 skipped |
 | Full suite reported on 2026-09-25 | owner's machine | not valid (Phase 5 checkout, host tests skipped) |
 
-## 8. Tests that need the local GPU / ComfyUI environment
+### 8.8 Tests that need the local GPU / ComfyUI environment
 
 - **Host tests** (`tests/host/`, marker `host`): need a ComfyUI checkout with its Python environment (`PLENIO_COMFYUI_ROOT`); they start a real server on the CPU with fakes. Without it they are skipped.
 - **Contract tests** marked `comfy` (ComfyUI importable; e.g. the YuE2 tokenizer test also needs `PLENIO_MODELS_DIR`).
@@ -141,13 +222,14 @@ Done by the owner (reported 2026-09-25): the Phase 9 fixes - a *new lyrics* cove
 - **Browser checks** (`tools/browser_check.mjs`, see `docs/dev/testing.md`) and **real template runs** (`tools/dev_server.py --gpu --models <dir> --port 8190 --base <dir>`): YuE2 3B, Gemma 4 writer, instrumental LoRA, SheetSage2; owner's RTX 5060 Ti 16 GB, models in `F:\ComfyUI\models`, ComfyUI 0.37.0 in `D:\Daten2\ComfyUI` (frontend 1.53.6, Python 3.12.9).
 - Everything else (unit, workflow, Vitest) runs without ComfyUI (pure Python with numpy; Node for the frontend).
 
-## 9. Exact recommended next action
+### 8.9 Recommended next action at that checkpoint (superseded by §6 for the next-release work)
 
-Run the owner-machine checks of §3 (first the full suite with the real models on the current commit) and record them in the Phase 6-8 reports. The refactor prompt set ends with Phase 10; further work (a public release, the optional Qwen3-ASR engine, fade-out, Repair node C1) needs the owner's decision and authorization.
+Run the owner-machine checks of §8.3 (first the full suite with the real models on the current commit) and record them in the Phase 6-8 reports. The refactor prompt set ended with Phase 10; the next-release prompt set (Phases 11A-11C) followed; the optional Qwen3-ASR engine, fade-out and the Repair node C1 still need the owner's decision.
 
-## 10. Context a new session would otherwise have to rediscover
+### 8.10 Context a new session would otherwise have to rediscover
 
-- **Owner rules**: the legacy repository (`ComfyUI-MiniMax`, owner's machine) is read-only; reply to the owner in **German**, write code and docs in **English**; never install into the owner's ComfyUI environment (dev tools live in the untracked `.devdeps/`); downloads beyond what the owner approved need consent; one phase per authorization with a hard stop; commits: the owner asked for checkpoint commits pushed to `origin/main` (earlier rule "commit only at the end" was lifted for checkpoints).
+- **Owner rules**: the legacy repository (`ComfyUI-MiniMax`, owner's machine) is read-only; reply to the owner in **German**, write code and docs in **English**; never install into the owner's ComfyUI environment (dev tools live in the untracked `.devdeps/`); downloads beyond what the owner approved need consent; one phase per authorization with a hard stop; commits: the owner asked for checkpoint commits pushed to `origin/main` (earlier rule "commit only at the end" was lifted for checkpoints); **Phase 11B: local commits only, nothing pushed**.
+- **Dev setup (owner's machine, Phase 11B)**: ComfyUI's Python `D:\Daten2\ComfyUI\.venv\Scripts\python.exe` (3.12.9) with the dev tools in the untracked `.devdeps/` (`PYTHONPATH=.devdeps`; pytest 8.4.2, hypothesis 6.168.1, ruff 0.13.3, mypy 1.18.2); `PLENIO_COMFYUI_ROOT=D:\Daten2\ComfyUI` for contract and host tests; hypothesis strategies of the score engine in `tests/support/` (on the pytest path).
 - **Dev setup (cloud)**: Python 3.12 with `numpy`, `scipy`, `av`, `pyloudnorm 0.2.0`, `mutagen`, `pytest 8.4.2`, `hypothesis 6.168.1`, `ruff 0.13.3`, `mypy 1.18.2`, `coverage`; a ComfyUI 0.37.0 checkout with its own venv for host tests (`PLENIO_COMFYUI_ROOT`); run `pytest` from the repository root (config in `pyproject.toml`; markers `comfy`/`host`/`smoke` skip without their environment). Frontend: `cd frontend && npm ci && npm run check` (writes `web/js/`, which is committed). CI results: `https://api.github.com/repos/jplenio/Plenio-Music-Production-System/actions/runs` (jobs and annotations are readable; logs are not). A test run in a folder whose name is a valid Python identifier makes pytest import the repository's `__init__.py` (clone into a folder with a hyphen, as ComfyUI and CI do).
 - **Generated files**: never hand-edit `subgraphs/*.json`, `example_workflows/*.json` or the thumbnails; change `tools/build_graphs.py` (model files: `resources/models.toml`), run it and `tools/build_thumbnails.py`, validate with `tools/workflow_validation.py`. After node schema changes re-run `tools/snapshot_node_types.py` (needs ComfyUI) - the snapshot `tools/data/node_types.json` is committed.
 - **Dialect facts**: native two-voice ABC (`Vocal`, `Ins`), fixed 8-line header, groups of 1-4 bars per voice, `% label` comments start sections, accidentals apply by letter across octaves within a bar, unmarked tied continuations keep their pitch, supported lengths {1,2,3,4,6,8,12,16,24,32,48} units, chords only in `Vocal`; the vendored upstream parser `plenio/third_party/yue2_abc_tools.py` is the authority.
