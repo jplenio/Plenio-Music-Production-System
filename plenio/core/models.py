@@ -18,7 +18,19 @@ from .errors import PlenioUserError
 from .files import read_toml
 
 SCHEMA = "plenio.models/1"
-FOLDERS = frozenset({"checkpoints", "loras", "audio_encoders", "text_encoders", "diffusion_models", "vae"})
+AUDIO_MODEL_FOLDERS = {"super-resolution": "audio_sr", "separation": "audio_separation"}
+"""Plenio's own model folders (registered with ComfyUI) for Load Audio Model, by model kind."""
+FOLDERS = frozenset(
+    {
+        "checkpoints",
+        "loras",
+        "audio_encoders",
+        "text_encoders",
+        "diffusion_models",
+        "vae",
+        *AUDIO_MODEL_FOLDERS.values(),
+    }
+)
 _ID = re.compile(r"[a-z0-9][a-z0-9.-]*")
 _URL = re.compile(r"https://huggingface\.co/[\w.-]+/[\w.-]+/resolve/[\w.-]+/[\w./-]+")
 

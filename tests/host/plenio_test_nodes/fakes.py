@@ -160,7 +160,92 @@ class FakeSheetSage:
         return [events_to_abc(self.model.transcribe(audio), duration, melody_only=melody_only)]
 
 
+class FakeSREngine:
+    """Super-resolution fake (plan §4.3 engine protocol): pointwise 2x at 24 kHz plus seeded quiet noise."""
+
+    name = "fake-sr"
+    input_rate = 24000
+    condition_hz = 11000.0
+    chunk_seconds = 1.0
+    overlap_seconds = 0.1
+
+    def upsample(self, chunk: Any, seed: int) -> Any:
+        import numpy as np
+
+        noise = np.random.default_rng(seed).standard_normal((chunk.shape[0], chunk.shape[1] * 2)) * 1e-3
+        return np.repeat(chunk, 2, axis=1) + noise
+
+
+class FakeSeparator:
+    """Separation fake: fixed fractions of the input; the residual (input - stems) is 0.2 x input."""
+
+    name = "fake-stems"
+    stems = ("vocals", "drums", "bass", "other")
+
+    def separate(self, samples: Any, rate: int) -> dict[str, Any]:
+        return {
+            "vocals": 0.4 * samples,
+            "drums": 0.2 * samples,
+            "bass": 0.1 * samples,
+            "other": 0.1 * samples,
+        }
+
+
+class FakeAudioModel:
+    def __init__(self, kind: str):
+        self.kind = kind
+        self.file = f"fake-{kind}.safetensors"
+        self.adapter = "fake"
+        self.engine = FakeSREngine() if kind == "super-resolution" else FakeSeparator()
+
+
+AUDIO_MODEL = io.Custom("PLENIO_AUDIO_MODEL")
+
+
 def make_nodes(record: Any) -> list[type[io.ComfyNode]]:
+    class PlenioTestFakeAudioModel(io.ComfyNode):
+        """Stands in for Load Audio Model (the real engines arrive later; plan D9/D11)."""
+
+        @classmethod
+        def define_schema(cls) -> io.Schema:
+            return io.Schema(
+                node_id="PlenioTestFakeAudioModel",
+                category="Plenio/Tests",
+                inputs=[io.Combo.Input("kind", options=["super-resolution", "separation"])],
+                outputs=[AUDIO_MODEL.Output()],
+            )
+
+        @classmethod
+        def execute(cls, kind: str) -> io.NodeOutput:
+            record("audio_model", kind=kind)
+            return io.NodeOutput(FakeAudioModel(kind))
+
+    class PlenioTestAudioProbe(io.ComfyNode):
+        """Records rate, shape and level of an AUDIO (host tests assert the audio contracts)."""
+
+        @classmethod
+        def define_schema(cls) -> io.Schema:
+            return io.Schema(
+                node_id="PlenioTestAudioProbe",
+                category="Plenio/Tests",
+                inputs=[io.Audio.Input("audio"), io.String.Input("name", default="")],
+                outputs=[],
+                is_output_node=True,
+            )
+
+        @classmethod
+        def execute(cls, audio: dict[str, Any], name: str) -> io.NodeOutput:
+            waveform = audio["waveform"]
+            record(
+                "probe",
+                name=name,
+                rate=int(audio["sample_rate"]),
+                shape=list(waveform.shape),
+                peak=float(waveform.abs().max()),
+                rms=float(waveform.pow(2).mean().sqrt()),
+            )
+            return io.NodeOutput()
+
     class PlenioTestFakeAudio(io.ComfyNode):
         @classmethod
         def define_schema(cls) -> io.Schema:
@@ -306,6 +391,8 @@ def make_nodes(record: Any) -> list[type[io.ComfyNode]]:
             return io.NodeOutput({"waveform": wave, "sample_rate": 44100})
 
     return [
+        PlenioTestFakeAudioModel,
+        PlenioTestAudioProbe,
         PlenioTestFakeEngine,
         PlenioTestFakeMiniMaxRender,
         PlenioTestFakeLLM,

@@ -23,6 +23,10 @@ def server(tmp_path_factory: pytest.TempPathFactory, comfy_path: Path) -> Iterat
         HERE / "plenio_test_nodes", custom / "plenio_test_nodes", ignore=shutil.ignore_patterns("__pycache__")
     )
     shutil.copy2(COVER_EVENTS, custom / "plenio_test_nodes" / COVER_EVENTS.name)
+    # a model file no engine adapter reads (Load Audio Model must refuse it clearly)
+    for folder, name in (("audio_sr", "unknown-sr.safetensors"), ("audio_separation", "unknown-stems.ckpt")):
+        (base / "models" / folder).mkdir(parents=True, exist_ok=True)
+        (base / "models" / folder / name).write_bytes(b"")
     instance = ComfyServer(
         comfy_path,
         base,

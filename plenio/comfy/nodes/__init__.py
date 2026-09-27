@@ -1,5 +1,6 @@
 """All Plenio nodes. One module per node (target-architecture section 8)."""
 
+from .audio_model import PlenioAudioModelLoader
 from .brief import PlenioSongBrief
 from .compose import PlenioComposePrompt
 from .cover_brief import PlenioCoverBrief
@@ -8,6 +9,7 @@ from .eq import PlenioEQ
 from .export import PlenioExportRelease
 from .loudness import PlenioLoudness
 from .parse import PlenioParseDraft
+from .refine import PlenioRefine
 from .score_tools import PlenioScoreTools
 from .sheet import PlenioSongSheet
 from .system_check import PlenioSystemCheck
@@ -30,6 +32,9 @@ NODES = (
     PlenioLoudness,
     PlenioExportRelease,
     PlenioSystemCheck,
+    # experimental (next release): audio refinement
+    PlenioAudioModelLoader,
+    PlenioRefine,
 )
 
 __all__ = ["NODES"]

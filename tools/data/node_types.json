@@ -1156,6 +1156,67 @@
    "category": "model/conditioning/minimax music",
    "display_name": "MiniMax Music3 Text Encode"
   },
+  "PlenioAudioModelLoader": {
+   "input": {
+    "required": {
+     "kind": [
+      "COMFY_DYNAMICCOMBO_V3",
+      {
+       "tooltip": "super-resolution: for Refine (48 kHz); separation: for Separate Stems.",
+       "options": [
+        {
+         "key": "super-resolution",
+         "inputs": {
+          "required": {
+           "model": [
+            "COMBO",
+            {
+             "tooltip": "A model file in models/audio_sr.",
+             "multiselect": false,
+             "options": []
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "separation",
+         "inputs": {
+          "required": {
+           "model": [
+            "COMBO",
+            {
+             "tooltip": "A model file in models/audio_separation.",
+             "multiselect": false,
+             "options": []
+            }
+           ]
+          }
+         }
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "kind"
+    ]
+   },
+   "output": [
+    "PLENIO_AUDIO_MODEL"
+   ],
+   "output_name": [
+    "model"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Audio",
+   "display_name": "Load Audio Model"
+  },
   "PlenioComposePrompt": {
    "input": {
     "required": {
@@ -2452,6 +2513,121 @@
    "output_node": false,
    "category": "Plenio/Writing",
    "display_name": "Parse Song Draft"
+  },
+  "PlenioRefine": {
+   "input": {
+    "required": {
+     "audio": [
+      "AUDIO",
+      {
+       "tooltip": "The rendered song (any sample rate)."
+      }
+     ],
+     "engine": [
+      "COMBO",
+      {
+       "tooltip": "model: the connected Load Audio Model (super-resolution); resample only: no model.",
+       "default": "resample only",
+       "multiselect": false,
+       "options": [
+        "resample only",
+        "model"
+       ]
+      }
+     ],
+     "crossover_hz": [
+      "FLOAT",
+      {
+       "tooltip": "Where the model takes over; 0: 500 Hz below the measured bandwidth.",
+       "advanced": true,
+       "default": 0.0,
+       "min": 0.0,
+       "max": 23000.0,
+       "step": 100.0
+      }
+     ],
+     "sr_gain": [
+      "FLOAT",
+      {
+       "tooltip": "Level of the added band.",
+       "advanced": true,
+       "default": 1.0,
+       "min": 0.0,
+       "max": 2.0,
+       "step": 0.05
+      }
+     ],
+     "pre_hz": [
+      "FLOAT",
+      {
+       "tooltip": "Low-pass of the model's input; 0: the model's training condition; -1: none.",
+       "advanced": true,
+       "default": 0.0,
+       "min": -1.0,
+       "max": 23000.0,
+       "step": 100.0
+      }
+     ],
+     "post_hz": [
+      "FLOAT",
+      {
+       "tooltip": "Linear-phase roll-off of the result; 0: off.",
+       "advanced": true,
+       "default": 0.0,
+       "min": 0.0,
+       "max": 23900.0,
+       "step": 100.0
+      }
+     ],
+     "seed": [
+      "INT",
+      {
+       "tooltip": "Seed of the model (deterministic).",
+       "default": 0,
+       "min": 0,
+       "max": 4294967295
+      }
+     ]
+    },
+    "optional": {
+     "model": [
+      "PLENIO_AUDIO_MODEL",
+      {
+       "tooltip": "Load Audio Model (super-resolution); only for 'model'.",
+       "lazy": true
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "audio",
+     "engine",
+     "crossover_hz",
+     "sr_gain",
+     "pre_hz",
+     "post_hz",
+     "seed"
+    ],
+    "optional": [
+     "model"
+    ]
+   },
+   "output": [
+    "AUDIO",
+    "PLENIO_REPORT"
+   ],
+   "output_name": [
+    "audio",
+    "report"
+   ],
+   "output_is_list": [
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Audio",
+   "display_name": "Refine (48 kHz)"
   },
   "PlenioScoreTools": {
    "input": {

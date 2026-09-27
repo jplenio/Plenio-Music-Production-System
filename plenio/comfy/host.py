@@ -85,11 +85,24 @@ def models_directory() -> Path:
 
 
 def register_model_folders() -> None:
-    """Register ``models/plenio`` so that assets live next to the other models."""
+    """Register ``models/plenio`` (assets) and the audio model folders next to the other models."""
     import folder_paths
 
-    if ASSET_FOLDER not in folder_paths.folder_names_and_paths:
-        folder_paths.add_model_folder_path(ASSET_FOLDER, str(models_directory() / ASSET_FOLDER))
+    from ..core.models import AUDIO_MODEL_FOLDERS
+
+    for folder in (ASSET_FOLDER, *AUDIO_MODEL_FOLDERS.values()):
+        if folder not in folder_paths.folder_names_and_paths:
+            folder_paths.add_model_folder_path(folder, str(models_directory() / folder))
+
+
+def model_files(folder: str) -> list[str]:
+    """The files ComfyUI lists in a model folder (empty when the folder is unknown)."""
+    import folder_paths
+
+    try:
+        return list(folder_paths.get_filename_list(folder))
+    except KeyError:
+        return []
 
 
 def asset_root(config: PlenioConfig) -> Path:
