@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Design Phase 11A (2026-09-27); **Phase 11B implemented** (OPUS-CRITICAL O1-O7, §17); Phase 11C (milestones M1-M7 in §16.2): **M1 done** (D1, D2, D3), the rest not started. |
+| Status | Design Phase 11A (2026-09-27); **Phase 11B implemented** (OPUS-CRITICAL O1-O7, §17); Phase 11C (milestones M1-M7 in §16.2): **M1 and M2 done**, the rest not started. |
 | Date | 2026-09-27 |
 | Baseline | Plenio 0.2.2 (`main` at `eaaa174`), ComfyUI 0.37.0, frontend 1.52.7 (cloud) / 1.53.6 (owner) |
 | Scope | audio refinement / super-resolution, EQ UX, optional stems before mastering, authoritative manual lyrics, Song Brief template precedence, a shared canonical score engine with a YuE2 · DAW workflow and graphical Review editing |
@@ -666,7 +666,8 @@ L1 → L4 of §15; then the Refine defaults are fixed from L1, and the release i
 | M1 / D1 piano roll + chord lane | **done** (2026-09-27, `f1f968a`): `frontend/src/sheet-editor/score/pianoRoll.ts` (pure geometry, hit test, gesture/key → one canonical operation, selection mapping) and `PianoRoll.vue` in the Score tab; checked by Vitest and in a real ComfyUI 0.37.0 frontend |
 | M1 / D2 layouts + inspector | **done** (`d7621a2`): Review/Text layouts (node property `plenio_editor_layout`, else the viewer's last), `Inspector.vue` + pure `inspector.ts` (note, chord and bar fields → one canonical operation each: voice, pitch, start, length, chord, rest/close gap, insert/duplicate/delete bars, meter, key), metronome; `duplicate_measures` now copies a section only when the block holds all of it |
 | M1 / D3 MIDI UI | **done** (2026-09-27, `e5354bd`): the Score tab exports the score (download, file name from the title, gate-aware) and imports a file through a dialog that shows the file's tracks with a role each (Vocal / Instrument / Chords / Guide / do not import), the grid, *read chords from the notes* and the import report **before** anything is replaced; *Insert* replaces the text as one undo step (`useScoreSession.replaceText` carries the imported view). Backend: the import route returns the tracks (`TrackInfo`), takes an explicit mapping and reads chord symbols from a Chords track's notes with the new pure `plenio/core/score/chords.py` (template matching, key-aware spelling, slash bass, merging; what fits nothing is counted, not guessed; written `plenio:chord` events win). Tests: `test_score_chords.py` (9), additions to `test_score_midi.py`, host `test_song_path.py` (route lists tracks/maps/reads chords), Vitest `midiDialog.test.ts` (11) and a `replaceText` session test. **M1 is complete.** |
-| M2 … M7 | not started |
+| M2 / D4-D5 YuE2 · DAW | **done** (2026-09-27, `db3bc00`): `plenio/core/score/skeleton.py` (an all-rest score from the brief: measures from length and tempo, meter and key parsed from the brief's text fields, defaults 4/4, C major, 100 BPM reported); Score Tools *new score from brief* with the `score` input optional for it; template **5 · YuE2 · DAW** (groups 1 SONG … 6 FINISH, the DAW sheet property, App mode, thumbnail, catalogue entries); a pending review stop now wins over document errors (the DAW skeleton's first run stops at the sheet instead of failing); the frontend *daw* layout with `TrackPanel.vue`/`tracks.ts` (four tracks, "not sent to YuE2", playback switch) and the Guide notes in the node property `plenio_guide` (playback, MIDI, cleared from the panel); tests: `test_score_skeleton.py` (30), host `test_daw_path.py` (4), workflow/catalogue tests, Vitest `dawTracks.test.ts` (8); guide `docs/user/paths/yue2-daw.md`. |
+| M3 … M7 | not started |
 | L1 … L4 | not started |
 
 All Phase 11B commits are **local only** (not pushed; owner instruction for this phase).
