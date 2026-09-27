@@ -108,7 +108,7 @@ def test_template_inventory_and_optional_packages() -> None:
     assert status["sheetsage2_bf16.safetensors"] == "missing"
     assert "yue2_3b_bf16.safetensors" not in status  # alternatives appear in the rule table only
     markdown = to_markdown(report)
-    assert "| 1 · YuE2 · Song | all installed; optional blocks: 5 not installed |" in markdown
+    assert "| 1 · YuE2 · Song | all installed; optional blocks: 6 not installed |" in markdown
     assert (
         "1 with an unexpected size (an interrupted download?): `minimax_music3_dav.safetensors`" in markdown
     )

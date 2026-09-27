@@ -295,6 +295,56 @@ def test_refine_runs_in_minimax_and_stays_bypassed_elsewhere() -> None:
         assert wrapper["id"] in sources, name
 
 
+def test_stems_is_bypassed_everywhere_and_mixes_neutrally() -> None:
+    """M6/D12: the STEMS block is bypassed and collapsed in every template (plan §11, §6.4)."""
+    for name in (
+        "1 · YuE2 · Song",
+        "2 · YuE2 · Cover",
+        "3 · MiniMax · Song",
+        "4 · Enhance & Master",
+        "5 · YuE2 · DAW",
+    ):
+        template = TEMPLATES[name]
+        wrapper = next(n for n in template["nodes"] if "Stems" in str(n.get("title", "")))
+        assert wrapper.get("mode") == 4, name
+        assert wrapper["flags"]["collapsed"] is True, name
+        assert "(optional)" in str(wrapper["title"]), name
+        assert any("STEMS (optional)" == g["title"] for g in template["groups"]), name
+        definition = next(d for d in template["definitions"]["subgraphs"] if d["id"] == wrapper["type"])
+        assert definition["name"] == "Plenio · Stems"
+        loader = next(n for n in definition["nodes"] if n["type"] == "PlenioAudioModelLoader")
+        assert loader["widgets_values"][0] == "separation"
+        assert loader["widgets_values"][1] == "model_bs_roformer_ep_17_sdr_9.6568.ckpt"
+        assert loader["properties"]["models"][0]["directory"] == "audio_separation"
+        mixer = next(n for n in definition["nodes"] if n["type"] == "PlenioStemMixer")
+        assert mixer["widgets_values"] == [""]  # neutral by default: the input comes back unchanged
+        # both reports (separation and mix) reach the release record
+        export = next(n for n in template["nodes"] if n["type"] == "PlenioExportRelease")
+        linked = {
+            link[1]
+            for link in template["links"]
+            if link[0] in {slot["link"] for slot in export["inputs"] if slot["name"].startswith("reports.")}
+        }
+        assert wrapper["id"] in linked, name
+
+
+def test_the_stems_block_sits_after_the_render_and_before_master() -> None:
+    """Stems (optional) -> Refine -> Master: the audio path of every template."""
+    for name in ("1 · YuE2 · Song", "3 · MiniMax · Song"):
+        template = TEMPLATES[name]
+        titles = {n["id"]: n.get("title") or n["type"] for n in template["nodes"]}
+        stems = next(n for n in template["nodes"] if "Stems" in str(n.get("title", "")))
+        refine = next(n for n in template["nodes"] if "Refine" in str(n.get("title", "")))
+        master = next(n for n in template["nodes"] if titles[n["id"]] == "Plenio · Master")
+        assert any(link[1] == stems["id"] and link[3] == refine["id"] for link in template["links"]), (
+            name
+        )  # Stems -> Refine
+        refine_from = {
+            tuple(link[1:3]) for link in template["links"] if link[3] == master["id"] and link[5] == "AUDIO"
+        }
+        assert (refine["id"], 0) in refine_from, name  # Refine -> Master
+
+
 def test_thumbnails_are_400px_jpegs() -> None:
     image = pytest.importorskip("PIL.Image")
     for name in TEMPLATES:

@@ -61,8 +61,8 @@ def test_shipped_catalogue() -> None:
     ("changes", "message"),
     [
         ({"folder": "somewhere"}, "unknown model folder"),
-        ({"file": "sub/demo.safetensors"}, "unique .safetensors or .bin file name"),
-        ({"url": "https://example.com/demo.safetensors"}, "Hugging Face file URL"),
+        ({"file": "sub/demo.safetensors"}, "unique .safetensors or .bin or .ckpt file name"),
+        ({"url": "https://example.com/demo.safetensors"}, "Hugging Face or GitHub release file URL"),
         (
             {"url": "https://huggingface.co/org/repo/resolve/main/other.safetensors"},
             "ending in the file name",
@@ -136,8 +136,12 @@ def test_inventory_and_readiness(tmp_path: Path) -> None:
         "ar_lora_inst_v3abc_comfyui.safetensors",
         "pytorch_model.bin",  # Refine, bypassed in this template
     }
-    # Enhance & Master ships Refine (bypassed) for band-limited uploads: nothing else is optional there
-    assert {m.file for m in enhance.optional_missing} == {"pytorch_model.bin"}
+    # Enhance & Master ships Refine (bypassed) for band-limited uploads and Stems (bypassed):
+    # nothing else is optional there
+    assert {m.file for m in enhance.optional_missing} == {
+        "pytorch_model.bin",
+        "model_bs_roformer_ep_17_sdr_9.6568.ckpt",
+    }
     assert readiness(CATALOGUE, Inventory({}), ["4 · Enhance & Master"])[0].ready
 
 

@@ -8,13 +8,31 @@ from __future__ import annotations
 
 from typing import Any
 
+import numpy as np
 from comfy_api.latest import io
 
 from ...core.audio import stems as stem_core
+from ...core.audio.effects import effects_for
 from ...core.audio.stems import MIX_SCHEMA, REST, make_stems, parse_mix
 from ...core.reports import Report, Status
 from .. import audio_models, host
 from ..types import AudioModelType, ReportType, StemsType
+
+PEAK_POINTS = 240
+"""How many peak values per strip the widget draws (about 1.4 kB per strip in the UI payload)."""
+
+
+def peak_profile(stem: Any, points: int = PEAK_POINTS) -> list[float]:
+    """Absolute peaks of ``[channels, frames]`` in ``points`` buckets, for the mixer's waveform."""
+    data = np.asarray(stem, dtype=np.float64)
+    frames = data.shape[1]
+    if frames == 0 or points <= 0:
+        return [0.0] * max(points, 0)
+    edges = np.linspace(0, frames, points + 1).astype(int)
+    return [
+        round(float(np.abs(data[:, edges[i] : max(edges[i] + 1, edges[i + 1])]).max()), 4)
+        for i in range(points)
+    ]
 
 
 class PlenioSeparateStems(io.ComfyNode):
@@ -99,9 +117,10 @@ class PlenioStemMixer(io.ComfyNode):
     @classmethod
     def execute(cls, stems: Any, mix: str) -> io.NodeOutput:
         settings = parse_mix(mix)
+        bus_effects = effects_for(settings.buses)
         results, reports = [], []
         for item in stems:
-            out, report = stem_core.mix(item, settings, cancel=host.raise_if_interrupted)
+            out, report = stem_core.mix(item, settings, effects=bus_effects, cancel=host.raise_if_interrupted)
             results.append(out)
             reports.append(report)
         notes = sorted({note for report in reports for note in report["notes"]})
@@ -114,8 +133,18 @@ class PlenioStemMixer(io.ComfyNode):
         status = Status.WARNING if notes else Status.OK
         record = Report("stem_mix", status, summary, tuple(notes), {"items": reports})
         markdown = "\n".join([f"**{summary}**", *[f"- note: {n}" for n in notes]])
+        first = stems[0]
+        strips = first.strips()
+        payload = {
+            "stems": [name for name, _stem in strips],
+            "seconds": round(first.frames / first.rate, 2),
+            "peaks": {name: peak_profile(stem) for name, stem in strips},
+        }
         return io.NodeOutput(
             host.make_audio(results, stems[0].rate),
             record,
-            ui={"plenio_summary": [{"status": status.value, "markdown": markdown}]},
+            ui={
+                "plenio_summary": [{"status": status.value, "markdown": markdown}],
+                "plenio_stems": [payload],
+            },
         )

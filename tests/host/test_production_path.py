@@ -332,6 +332,8 @@ def test_enhance_template_contains_the_chain(server: ComfyServer, log: Log) -> N
         )
     )
     types = sorted(n["type"] for n in template["nodes"])
+    wrappers = {sub["name"]: sub["id"] for sub in template["definitions"]["subgraphs"]}
+    assert set(wrappers) == {"Plenio · Refine (48 kHz)", "Plenio · Stems"}
     assert types == [
         "LoadAudio",
         "MarkdownNote",
@@ -339,11 +341,19 @@ def test_enhance_template_contains_the_chain(server: ComfyServer, log: Log) -> N
         "PlenioExportRelease",
         "PlenioLoudness",
         "PreviewAudio",
-        template["definitions"]["subgraphs"][0]["id"],  # the Refine (optional) wrapper (M5/D10)
+        *sorted(wrappers.values()),  # the Refine (M5/D10) and Stems (M6/D11-D12) wrappers
     ]
-    refine = template["definitions"]["subgraphs"][0]
-    assert refine["name"] == "Plenio · Refine (48 kHz)"
+    refine = next(
+        sub for sub in template["definitions"]["subgraphs"] if sub["name"].endswith("Refine (48 kHz)")
+    )
     assert [n["type"] for n in refine["nodes"]] == ["PlenioAudioModelLoader", "PlenioRefine"]
+    stems = next(sub for sub in template["definitions"]["subgraphs"] if sub["name"].endswith("Stems"))
+    assert [n["type"] for n in stems["nodes"]] == [
+        "PlenioAudioModelLoader",
+        "PlenioSeparateStems",
+        "PlenioStemMixer",
+    ]
+    assert [out["name"] for out in stems["outputs"]] == ["audio", "report", "separation_report"]
 
 
 def test_hi_res_mp3_and_repeated_exports_keep_every_record(server: ComfyServer, log: Log) -> None:

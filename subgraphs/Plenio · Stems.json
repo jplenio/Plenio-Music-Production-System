@@ -1,0 +1,370 @@
+{
+ "revision": 0,
+ "last_node_id": 1,
+ "last_link_id": 0,
+ "nodes": [
+  {
+   "id": 1,
+   "type": "b15b93f5-aa6c-53d1-a081-d23166dcc913",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    340,
+    200
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "links": null
+    },
+    {
+     "localized_name": "report",
+     "name": "report",
+     "type": "PLENIO_REPORT",
+     "links": null
+    },
+    {
+     "localized_name": "separation_report",
+     "name": "separation_report",
+     "type": "PLENIO_REPORT",
+     "links": null
+    }
+   ],
+   "title": "Plenio · Stems",
+   "properties": {},
+   "widgets_values": []
+  }
+ ],
+ "links": [],
+ "version": 0.4,
+ "definitions": {
+  "subgraphs": [
+   {
+    "id": "b15b93f5-aa6c-53d1-a081-d23166dcc913",
+    "version": 1,
+    "state": {
+     "lastGroupId": 0,
+     "lastNodeId": 803,
+     "lastLinkId": 6,
+     "lastRerouteId": 0
+    },
+    "revision": 0,
+    "config": {},
+    "name": "Plenio · Stems",
+    "inputNode": {
+     "id": -10,
+     "bounding": [
+      -260,
+      0,
+      160,
+      60
+     ]
+    },
+    "outputNode": {
+     "id": -20,
+     "bounding": [
+      1300,
+      0,
+      160,
+      100
+     ]
+    },
+    "inputs": [
+     {
+      "id": "4eb631f3-0af4-5eae-9c97-06fc35a4593d",
+      "name": "audio",
+      "type": "AUDIO",
+      "linkIds": [
+       3
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     }
+    ],
+    "outputs": [
+     {
+      "id": "d2ef4eca-e7cc-5086-9349-862bd7fa7b77",
+      "name": "audio",
+      "type": "AUDIO",
+      "linkIds": [
+       4
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     },
+     {
+      "id": "61b46f3c-ebc7-5c17-8ddf-0c3d86596727",
+      "name": "report",
+      "type": "PLENIO_REPORT",
+      "linkIds": [
+       5
+      ],
+      "pos": [
+       0,
+       20
+      ]
+     },
+     {
+      "id": "8bd85dea-9e52-5813-ba16-61f0e6c06450",
+      "name": "separation_report",
+      "type": "PLENIO_REPORT",
+      "linkIds": [
+       6
+      ],
+      "pos": [
+       0,
+       40
+      ]
+     }
+    ],
+    "widgets": [],
+    "nodes": [
+     {
+      "id": 801,
+      "type": "PlenioAudioModelLoader",
+      "pos": [
+       0,
+       0
+      ],
+      "size": [
+       340,
+       130
+      ],
+      "flags": {
+       "collapsed": true
+      },
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "kind",
+        "name": "kind",
+        "type": "COMFY_DYNAMICCOMBO_V3",
+        "widget": {
+         "name": "kind"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "kind.model",
+        "name": "kind.model",
+        "type": "COMBO",
+        "widget": {
+         "name": "kind.model"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "model",
+        "name": "model",
+        "type": "PLENIO_AUDIO_MODEL",
+        "links": [
+         1
+        ]
+       }
+      ],
+      "title": "Separation model",
+      "properties": {
+       "Node name for S&R": "PlenioAudioModelLoader",
+       "models": [
+        {
+         "name": "model_bs_roformer_ep_17_sdr_9.6568.ckpt",
+         "url": "https://github.com/ZFTurbo/Music-Source-Separation-Training/releases/download/v1.0.12/model_bs_roformer_ep_17_sdr_9.6568.ckpt",
+         "directory": "audio_separation"
+        }
+       ]
+      },
+      "widgets_values": [
+       "separation",
+       "model_bs_roformer_ep_17_sdr_9.6568.ckpt"
+      ]
+     },
+     {
+      "id": 802,
+      "type": "PlenioSeparateStems",
+      "pos": [
+       400,
+       0
+      ],
+      "size": [
+       340,
+       170
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "audio",
+        "name": "audio",
+        "type": "AUDIO",
+        "link": 3
+       },
+       {
+        "localized_name": "model",
+        "name": "model",
+        "type": "PLENIO_AUDIO_MODEL",
+        "link": 1
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "stems",
+        "name": "stems",
+        "type": "PLENIO_STEMS",
+        "links": [
+         2
+        ]
+       },
+       {
+        "localized_name": "report",
+        "name": "report",
+        "type": "PLENIO_REPORT",
+        "links": [
+         6
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "PlenioSeparateStems"
+      },
+      "widgets_values": []
+     },
+     {
+      "id": 803,
+      "type": "PlenioStemMixer",
+      "pos": [
+       800,
+       0
+      ],
+      "size": [
+       400,
+       260
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "stems",
+        "name": "stems",
+        "type": "PLENIO_STEMS",
+        "link": 2
+       },
+       {
+        "localized_name": "mix",
+        "name": "mix",
+        "label": "mixer",
+        "type": "STRING",
+        "widget": {
+         "name": "mix"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "audio",
+        "name": "audio",
+        "type": "AUDIO",
+        "links": [
+         4
+        ]
+       },
+       {
+        "localized_name": "report",
+        "name": "report",
+        "type": "PLENIO_REPORT",
+        "links": [
+         5
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "PlenioStemMixer"
+      },
+      "widgets_values": [
+       ""
+      ]
+     }
+    ],
+    "groups": [],
+    "links": [
+     {
+      "id": 1,
+      "origin_id": 801,
+      "origin_slot": 0,
+      "target_id": 802,
+      "target_slot": 1,
+      "type": "PLENIO_AUDIO_MODEL"
+     },
+     {
+      "id": 2,
+      "origin_id": 802,
+      "origin_slot": 0,
+      "target_id": 803,
+      "target_slot": 0,
+      "type": "PLENIO_STEMS"
+     },
+     {
+      "id": 3,
+      "origin_id": -10,
+      "origin_slot": 0,
+      "target_id": 802,
+      "target_slot": 0,
+      "type": "AUDIO"
+     },
+     {
+      "id": 4,
+      "origin_id": 803,
+      "origin_slot": 0,
+      "target_id": -20,
+      "target_slot": 0,
+      "type": "AUDIO"
+     },
+     {
+      "id": 5,
+      "origin_id": 803,
+      "origin_slot": 1,
+      "target_id": -20,
+      "target_slot": 1,
+      "type": "PLENIO_REPORT"
+     },
+     {
+      "id": 6,
+      "origin_id": 802,
+      "origin_slot": 1,
+      "target_id": -20,
+      "target_slot": 2,
+      "type": "PLENIO_REPORT"
+     }
+    ],
+    "extra": {},
+    "category": "Plenio/Audio",
+    "description": "Splits the song into up to four stems (vocals, drums, bass, other) and mixes them back: gain, mute/solo, compression, muted time ranges and one reverb and delay bus per mix. The residual (what the separator missed) is one more strip, so a neutral mix returns the render unchanged. Bypassed by default in every template - select the block and press Ctrl+B to use it."
+   }
+  ]
+ },
+ "extra": {}
+}

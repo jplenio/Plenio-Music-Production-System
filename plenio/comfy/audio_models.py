@@ -56,7 +56,7 @@ def _ensure_registered() -> None:
     if _REGISTERED:
         return
     _REGISTERED = True
-    from . import universr  # noqa: F401  (registers the super-resolution adapter, D9)
+    from . import msst, universr  # noqa: F401  (register the adapters of D9 and D11)
 
 
 def register(adapter: Adapter) -> None:

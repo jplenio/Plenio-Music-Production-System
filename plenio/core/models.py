@@ -20,9 +20,9 @@ from .files import read_toml
 SCHEMA = "plenio.models/1"
 AUDIO_MODEL_FOLDERS = {"super-resolution": "audio_sr", "separation": "audio_separation"}
 """Plenio's own model folders (registered with ComfyUI) for Load Audio Model, by model kind."""
-FILE_SUFFIXES = (".safetensors", ".bin")
-"""Allowed catalogued file names. ``.bin`` covers released PyTorch state dicts (UniverSR); the
-adapters load them with ``weights_only=True`` only."""
+FILE_SUFFIXES = (".safetensors", ".bin", ".ckpt")
+"""Allowed catalogued file names. ``.bin``/``.ckpt`` cover released PyTorch state dicts (UniverSR,
+BS-RoFormer); the adapters read them with the trust they document (``weights_only`` where possible)."""
 FOLDERS = frozenset(
     {
         "checkpoints",
@@ -35,7 +35,12 @@ FOLDERS = frozenset(
     }
 )
 _ID = re.compile(r"[a-z0-9][a-z0-9.-]*")
-_URL = re.compile(r"https://huggingface\.co/[\w.-]+/[\w.-]+/resolve/[\w.-]+/[\w./-]+")
+_URL = re.compile(
+    r"https://huggingface\.co/[\w.-]+/[\w.-]+/resolve/[\w.-]+/[\w./-]+"
+    r"|https://github\.com/[\w.-]+/[\w.-]+/releases/download/[\w.-]+/[\w./-]+"
+)
+"""A direct file URL: a Hugging Face ``resolve`` path or a GitHub release asset (both download the
+file itself; the MSST checkpoints are published as GitHub release assets)."""
 
 
 @dataclass(frozen=True)
@@ -93,7 +98,7 @@ def parse_catalogue(data: Mapping[str, Any], source: str) -> dict[str, ModelFile
             raise PlenioUserError(f"{where}: unknown model folder {model.folder!r}.")
         if not _URL.fullmatch(model.url) or not model.url.endswith("/" + model.file):
             raise PlenioUserError(
-                f"{where}: the URL must be a Hugging Face file URL ending in the file name."
+                f"{where}: the URL must be a Hugging Face or GitHub release file URL ending in the file name."
             )
         if model.bytes < 0:
             raise PlenioUserError(f"{where}: bytes must not be negative.")

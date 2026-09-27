@@ -45,6 +45,16 @@ The list below is the model catalogue Plenio's templates are built from (`resour
 
 The block stays bypassed there until you turn it on; the one file serves every template. Plenio's *resample only* engine needs no model at all.
 
+### Stems (BS-RoFormer), the optional block of templates 1-5
+
+| File | Folder | Size | Licence |
+|---|---|---|---|
+| `model_bs_roformer_ep_17_sdr_9.6568.ckpt` | `audio_separation` | 527 MB | MIT (training code; vendored inference code in `plenio/third_party/msst`); the checkpoint was trained on MUSDB18-HQ, whose dataset terms are research-oriented |
+
+*Separate Stems* and *Stem Mixer* stay bypassed in every template until you turn them on. Place the file in `ComfyUI/models/audio_separation` (create the folder if needed); the checkpoint is a plain `.ckpt` with its config inside, so no second file is required. Without it the template runs exactly as before.
+
+The block is **experimental** until its listening check (L2) is accepted: the separation itself is measured (MUSDB18-HQ SDR 9.66 reported by the authors), but how the stems are used here is not.
+
 ### Cover Art (optional block of templates 1-3)
 
 | File | Folder | Size | Licence |
@@ -57,7 +67,7 @@ The block stays bypassed until you turn it on, so a template runs without these 
 
 ### 0 · System Check and 4 · Enhance & Master
 
-No model files.
+No model file is required. 4 · Enhance & Master carries the optional Refine and Stems blocks (both bypassed) for material you upload.
 
 ## Download sources
 
@@ -68,6 +78,7 @@ No model files.
 | writer | [Comfy-Org/gemma-4](https://huggingface.co/Comfy-Org/gemma-4) |
 | MiniMax Music 3 | [Comfy-Org/MiniMax-Music-3](https://huggingface.co/Comfy-Org/MiniMax-Music-3) |
 | UniverSR audio (Refine) | [woongzip1/universr-audio](https://huggingface.co/woongzip1/universr-audio) - released as `pytorch_model.bin` (CC BY 4.0; the inference code is MIT and vendored) |
+| BS-RoFormer 4-stem (Stems) | [ZFTurbo/Music-Source-Separation-Training](https://github.com/ZFTurbo/Music-Source-Separation-Training) release v1.0.12 - `model_bs_roformer_ep_17_sdr_9.6568.ckpt` (MIT training code; the inference code is MIT and vendored) |
 | FLUX.2 Klein 4B, its text encoder | [Comfy-Org/flux2-klein](https://huggingface.co/Comfy-Org/flux2-klein) |
 | FLUX.2 VAE | [Comfy-Org/flux2-dev](https://huggingface.co/Comfy-Org/flux2-dev) |
 | faster-whisper large-v3 | [Systran/faster-whisper-large-v3](https://huggingface.co/Systran/faster-whisper-large-v3) (pinned revision) |

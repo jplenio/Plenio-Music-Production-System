@@ -61,6 +61,31 @@ const CSS = `
 .plenio-brief-template button { padding: 1px 6px; border-radius: 5px; border: 1px solid var(--border-color, #555);
   background: var(--comfy-input-bg, #333); color: var(--input-text, #ddd); cursor: pointer; font: inherit; }
 .plenio-brief-template button:disabled { opacity: 0.45; cursor: default; }
+.plenio-mix { display: flex; flex-direction: column; gap: 4px; font: 11px/1.4 var(--font-family, sans-serif);
+  color: var(--descrip-text, #999); }
+.plenio-mix-strips { display: flex; flex-direction: column; gap: 3px; }
+.plenio-mix-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 2px 4px;
+  border-radius: 5px; background: rgba(127, 127, 127, 0.08); }
+.plenio-mix-strip .name { flex: 0 0 62px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--input-text, #ddd); }
+.plenio-mix-strip .gain { flex: 0 0 54px; text-align: right; font-variant-numeric: tabular-nums; }
+.plenio-mix-strip .label, .plenio-mix-buses .label, .plenio-mix-advanced .label { opacity: 0.8; }
+.plenio-mix-strip input[type="range"] { width: 84px; height: 14px; accent-color: #4aa3ff; }
+.plenio-mix .toggle { padding: 1px 6px; min-width: 22px; text-align: center; border-radius: 5px;
+  border: 1px solid var(--border-color, #555); background: var(--comfy-input-bg, #333);
+  color: var(--input-text, #ddd); cursor: pointer; font: inherit; }
+.plenio-mix .toggle.active { background: #2d5d9f; color: #fff; }
+.plenio-mix-strip.silent { opacity: 0.5; }
+.plenio-mix-wave { flex: 1 0 160px; max-width: 320px; height: 26px; background: var(--comfy-input-bg, #222);
+  border-radius: 4px; cursor: crosshair; touch-action: none; }
+.plenio-mix-buses { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.plenio-mix-buses select, .plenio-mix-buses input[type="number"] { background: var(--comfy-input-bg, #333);
+  color: var(--input-text, #ddd); border: 1px solid var(--border-color, #555); border-radius: 4px;
+  font: inherit; }
+.plenio-mix-buses input[type="number"] { width: 64px; }
+.plenio-mix-buses input[type="range"] { width: 84px; accent-color: #4aa3ff; }
+.plenio-mix-advanced { display: flex; align-items: center; gap: 6px; }
+.plenio-mix-info { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 `
 
 export function installStyles(): void {

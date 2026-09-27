@@ -77,3 +77,46 @@ def test_errors_are_actionable(server: ComfyServer) -> None:
     assert send["node_type"] == "PlenioStemMixer" and "no reverb bus yet" in send["exception_message"]
     typo = server.run_expect_error(stems_prompt({"strips": {"drums": {"pan": 0.3}}}))
     assert "unknown fields" in typo["exception_message"]
+
+
+def test_the_payload_carries_the_strips_for_the_mixer_widget(server: ComfyServer) -> None:
+    """The mixer widget draws its waveform from ``plenio_stems`` (Phase 11C M6/D12)."""
+    entry = server.run(stems_prompt())
+    payload = entry["outputs"]["4"]["plenio_stems"][0]
+    assert payload["stems"] == ["vocals", "drums", "bass", "other", "rest"]
+    assert payload["seconds"] == pytest.approx(2.0, abs=0.05)
+    assert set(payload["peaks"]) == set(payload["stems"])
+    for name, values in payload["peaks"].items():
+        assert len(values) == 240, name
+        assert max(values) > 0, name
+        assert max(values) <= 1.0, name
+
+
+def test_the_effect_buses_run_and_change_the_mix(server: ComfyServer, log: Log) -> None:
+    server.run(stems_prompt())
+    neutral = probes(log)["mix"]
+    log.clear()
+    entry = server.run(
+        stems_prompt(
+            {
+                "strips": {"drums": {"reverb": 0.4, "delay": 0.25}},
+                "reverb": {"preset": "hall"},
+                "delay": {"time_ms": 250, "feedback": 0.35, "lowpass_hz": 4000},
+            }
+        )
+    )
+    found = probes(log)["mix"]
+    assert found["rate"] == neutral["rate"] and found["shape"] == neutral["shape"]
+    assert found["rms"] != pytest.approx(neutral["rms"], rel=1e-4)  # the sends are audible
+    assert "Stem Mixer" in entry["outputs"]["4"]["plenio_summary"][0]["markdown"]
+
+
+def test_a_muted_range_silences_only_its_stretch(server: ComfyServer, log: Log) -> None:
+    server.run(stems_prompt())
+    neutral = probes(log)["mix"]
+    log.clear()
+    server.run(stems_prompt({"strips": {"drums": {"muted": [[0.0, 1.0]]}}}))
+    found = probes(log)["mix"]
+    assert found["rms"] < neutral["rms"]  # half of the drums is gone
+    assert found["rms"] > 0.5 * neutral["rms"]  # and nothing else
+    assert found["shape"] == neutral["shape"] and found["rate"] == neutral["rate"]

@@ -18,6 +18,7 @@ import { addEqCurve } from './eqWidget'
 import { MODE_BEFORE_0_2_2, migrateWidgetValues } from './migrate'
 import { setAsrNote, setPayload } from './payloads'
 import { SHEET_STATE_TYPE, setFetcher, sheetStateWidget } from './sheetStateWidget'
+import { addStemMixer } from './stemMixer'
 import { installStyles } from './style'
 import { addSummaryDisplay } from './summary'
 
@@ -69,6 +70,18 @@ setFetcher(comfyApi)
     if (BRIEF_NODES.has(nodeData.name)) {
       // the template panel: what the template fills, and the explicit actions (M3/D6)
       installBriefTemplatePanel(nodeType, comfyApi)
+    }
+    if (nodeData.name === 'PlenioStemMixer') {
+      // the mixer widget: strips, faders, sends and the muted ranges (M6/D12)
+      const mixers = new WeakMap<ComfyNode, ReturnType<typeof addStemMixer>>()
+      const created = (nodeType.prototype as ComfyNode & { onNodeCreated?: () => void }).onNodeCreated
+      ;(nodeType.prototype as ComfyNode & { onNodeCreated?: () => void }).onNodeCreated = function (this: ComfyNode) {
+        created?.call(this)
+        mixers.set(this, addStemMixer(this))
+      }
+      nodeType.prototype.onExecuted = chain(nodeType.prototype.onExecuted, function (this: ComfyNode, output) {
+        mixers.get(this)?.showExecuted(output)
+      })
     }
     if (nodeData.name === 'PlenioSongSheet') {
       nodeType.prototype.onExecuted = chain(nodeType.prototype.onExecuted, function (this: ComfyNode, output) {
