@@ -273,7 +273,7 @@ def test_refine_runs_in_minimax_and_stays_bypassed_elsewhere() -> None:
     """
     from plenio.core.audio.refine import CUSTOM_PRESET, PREPARED_STAGES, prepared_stages
 
-    PRESET_OPTIONS = {CUSTOM_PRESET, *(option for option, _pre, _post in PREPARED_STAGES)}
+    presets = {CUSTOM_PRESET, *(option for option, _pre, _post in PREPARED_STAGES)}
     for name, active in (
         ("1 · YuE2 · Song", False),
         ("2 · YuE2 · Cover", False),
@@ -297,7 +297,7 @@ def test_refine_runs_in_minimax_and_stays_bypassed_elsewhere() -> None:
         engine, crossover, _gain, preset, pre, post, _seed = stage["widgets_values"]
         assert engine == ("model" if active else "resample only"), name
         assert all(isinstance(value, (int, float)) for value in (crossover, pre, post)), name  # free numbers
-        assert preset in PRESET_OPTIONS, name
+        assert preset in presets, name
         if active:  # the MiniMax template: template 3 and its matching numbers (custom keeps the sound)
             assert preset.startswith("3 - MiniMax") and prepared_stages(preset) == (pre, post, crossover)
         else:

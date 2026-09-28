@@ -6,6 +6,7 @@ the stems) is always part of the mix as the strip ``rest``, so a neutral mix ret
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -130,15 +131,23 @@ class PlenioStemMixer(io.ComfyNode):
     def execute(cls, stems: Any, mix: str) -> io.NodeOutput:
         settings = parse_mix(mix)
         bus_effects = effects_for(settings.buses)
-        results, reports = [], []
+        results, reports, written = [], [], []
         for item in stems:
-            out, report = stem_core.mix(item, settings, effects=bus_effects, cancel=host.raise_if_interrupted)
+            # the mixdown hands back the processed signals of the audible strips marked *save*, so a
+            # saved file does not run the strip's compressor a second time
+            processed: dict[str, Any] = {}
+            out, report = stem_core.mix(
+                item, settings, effects=bus_effects, cancel=host.raise_if_interrupted, signals=processed
+            )
             results.append(out)
             reports.append(report)
+            written.extend(cls._write_stems(item, settings, processed, report))
         notes = sorted({note for report in reports for note in report["notes"]})
-        written: list[str] = []
-        for index, item in enumerate(stems):
-            written.extend(cls._write_stems(item, settings, first=index == 0, notes=notes, reports=reports))
+        saved = [
+            f"saved {strip['name']} as its own file: {Path(strip['file']).name}"
+            for strip in reports[0]["strips"]
+            if "file" in strip
+        ]
         audible = [s["name"] for s in reports[0]["strips"] if s["audible"]]
         summary = (
             "Stem Mixer: neutral (the input unchanged)"
@@ -153,14 +162,14 @@ class PlenioStemMixer(io.ComfyNode):
             tuple(notes),
             {"items": reports, "files": written},
         )
-        markdown = "\n".join([f"**{summary}**", *[f"- note: {n}" for n in notes]])
+        markdown = "\n".join([f"**{summary}**", *[f"- note: {n}" for n in notes], *[f"- {s}" for s in saved]])
         first = stems[0]
         strips = first.strips()
         payload = {
             "stems": [name for name, _stem in strips],
             "seconds": round(first.frames / first.rate, 2),
             "peaks": {name: peak_profile(stem) for name, stem in strips},
-            "saved": [name for name in _saved_names(first, settings)],
+            "saved": _saved_names(first, settings),
         }
         return io.NodeOutput(
             host.make_audio(results, stems[0].rate),
@@ -173,38 +182,31 @@ class PlenioStemMixer(io.ComfyNode):
 
     @classmethod
     def _write_stems(
-        cls,
-        item: Any,
-        settings: Any,
-        *,
-        first: bool,
-        notes: list[str],
-        reports: list[dict[str, Any]],
+        cls, item: Any, settings: Any, processed: dict[str, Any], report: dict[str, Any]
     ) -> list[str]:
         """Write every strip marked *save* as a 24-bit FLAC into ``output/plenio/stems``.
 
         The file holds the strip's own signal (its gain, compression and muted ranges applied; the
         mute/solo decision and the shared effect buses are the mixdown's, not one stem's). One file
-        per name: a second run that writes the same stem gets ``name (2).flac`` and so on.
+        per name: a second run that writes the same stem gets ``name (2).flac`` and so on. The
+        item's own ``report`` names its files (``strips[].file``).
         """
         wanted = _saved_names(item, settings)
         if not wanted:
             return []
         folder = host.output_directory() / EXPORT_FOLDER
+        stems = dict(item.strips())
+        entries = {strip["name"]: strip for strip in report["strips"]}
         written: list[str] = []
         for name in wanted:
-            stem = dict(item.strips())[name]
-            signal = stem_core.strip_signal(stem, item.rate, settings.strip(name))
+            signal = processed.get(name)
+            if signal is None:  # a muted or unsoloed strip is not in the mixdown: process it here
+                signal = stem_core.strip_signal(stems[name], item.rate, settings.strip(name))
             base = plan_release(folder, safe_filename(name), [".flac"])
             target = base.with_name(base.name + ".flac")
             write_audio(target, signal, item.rate, "flac", {"title": f"{name} (Plenio stems)"})
             written.append(str(target))
-            if first:
-                notes.append(f"saved {name} as its own file: {target.name}")
-                for report in reports:
-                    for strip in report["strips"]:
-                        if strip["name"] == name:
-                            strip["file"] = str(target)
+            entries[name]["file"] = str(target)
         return written
 
 

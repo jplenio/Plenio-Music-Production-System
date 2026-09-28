@@ -108,6 +108,76 @@ def test_delay_limits_are_enforced() -> None:
         effects.delay(time_ms=1.0)
 
 
+def test_the_delay_is_the_feedback_recursion() -> None:
+    """Against the textbook loop: wet[n] = w[n-L], w[n] = x[n] + g * lowpass(wet)[n]."""
+    rng = np.random.default_rng(11)
+    data = rng.standard_normal((2, 3000)) * 0.1
+    length, gain, hz = 240, 0.5, 3000.0  # 5 ms at 48 kHz
+    a = float(np.exp(-2.0 * np.pi * hz / RATE))
+    expected = np.zeros_like(data)
+    for channel in range(2):
+        line, state = np.zeros(data.shape[1]), 0.0
+        for n in range(data.shape[1]):
+            wet = line[n - length] if n >= length else 0.0
+            state = (1 - a) * wet + a * state
+            line[n] = data[channel, n] + gain * state
+            expected[channel, n] = wet
+    wet = effects.delay(time_ms=5.0, feedback=gain, lowpass_hz=hz)(data, RATE)
+    assert np.max(np.abs(wet - expected)) < 1e-5 * np.max(np.abs(data)) * 2
+
+
+def test_feedback_zero_is_a_single_echo_at_the_send_level() -> None:
+    wet = effects.delay(time_ms=100.0, feedback=0.0)(impulse(1.0), RATE)
+    hits = np.flatnonzero(np.abs(wet[0]) > 1e-9)
+    assert hits.tolist() == [100 + RATE // 10] and wet[0, hits[0]] == pytest.approx(1.0)
+
+
+def test_a_long_delay_costs_the_echoes_not_the_delay_samples() -> None:
+    """The old comb filter cost O(frames x delay samples): about 11 min for a 3-min song at 1.5 s."""
+    import time
+
+    data = noise(30.0)
+    started = time.perf_counter()
+    wet = effects.delay(time_ms=1500.0, feedback=0.8)(data, RATE)
+    assert time.perf_counter() - started < 5.0
+    assert wet.shape == data.shape and np.isfinite(wet).all()
+
+
+def test_the_buses_follow_the_stems_channel_count() -> None:
+    """A mono separation (a phone recording) gets a mono wet signal, not the stereo IR's two channels."""
+    from plenio.core.audio.stems import make_stems, parse_mix
+
+    for channels in (1, 2):
+        data = np.random.default_rng(channels).standard_normal((channels, RATE // 2)) * 0.1
+        assert effects.reverb("room")(data, RATE).shape == data.shape
+        assert effects.delay(time_ms=50.0)(data, RATE).shape == data.shape
+    mono = noise(0.5)[:1]
+    stems = make_stems(mono, RATE, {"vocals": mono * 0.5, "other": mono * 0.25})
+    settings = parse_mix(
+        '{"schema": "plenio.stem_mix/1", "strips": {"vocals": {"reverb": 0.5, "delay": 0.3}},'
+        ' "reverb": {"preset": "hall"}, "delay": {"time_ms": 120}}'
+    )
+    out, report = mix(stems, settings, effects=effects.effects_for(settings.buses))
+    assert out.shape == mono.shape and report["buses"] == ["reverb", "delay"]
+
+
+def test_a_bus_setting_that_is_left_out_takes_the_widgets_default() -> None:
+    """The widget shows feedback 0.35 for a delay bus without the key; the backend used 0 (silent)."""
+    probe = impulse(1.0)
+    only_time = effects.delay_bus({"time_ms": 100})(probe, RATE)
+    assert np.array_equal(only_time, effects.delay(time_ms=100.0, feedback=0.35)(probe, RATE))
+    single = effects.delay_bus({"time_ms": 100, "feedback": 0})(probe, RATE)  # a given 0 stays 0
+    assert np.count_nonzero(np.abs(single[0]) > 1e-9) == 1
+    with pytest.raises(PlenioUserError, match="at most 0.8"):
+        effects.delay_bus({"feedback": -0.2})
+    with pytest.raises(PlenioUserError, match="BPM"):
+        effects.delay_bus({"note": "1/8", "bpm": 0})
+    with pytest.raises(PlenioUserError, match="Unknown delay bus setting"):
+        effects.delay_bus({"time": 300})
+    with pytest.raises(PlenioUserError, match="Unknown reverb bus setting"):
+        effects.reverb_bus({"preset": "room", "size": 2})
+
+
 def test_the_buses_are_built_from_the_mixer_settings() -> None:
     built = effects.effects_for({"reverb": {"preset": "hall"}, "delay": {"time_ms": "375", "feedback": 0.4}})
     assert set(built) == {"reverb", "delay"}

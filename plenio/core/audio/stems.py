@@ -279,8 +279,13 @@ def mix(
     *,
     effects: Mapping[str, Effect] | None = None,
     cancel: Cancel = no_cancel,
+    signals: dict[str, np.ndarray] | None = None,
 ) -> tuple[np.ndarray, dict[str, Any]]:
-    """The mixdown (float64 ``[channels, frames]``, the input's length) and the mixer report."""
+    """The mixdown (float64 ``[channels, frames]``, the input's length) and the mixer report.
+
+    ``signals``, when given, receives the processed signal (:func:`strip_signal`) of every audible
+    strip marked *save*, so the Stem Mixer node writes those files without processing them again.
+    """
     options = settings or Mix()
     rate = stems.rate
     known = {*stems.names, REST}
@@ -305,6 +310,8 @@ def mix(
         if not audible:
             continue
         signal_ = strip_signal(stem, rate, strip, item=item, cancel=cancel)
+        if signals is not None and strip.save:
+            signals[name] = signal_
         dry += signal_
         for bus in BUSES:
             amount = getattr(strip, bus)

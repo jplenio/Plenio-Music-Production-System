@@ -9,7 +9,11 @@ from a seeded generator, so the same settings give the same result (R12).
   *hall* (2.4 s) differ in decay time, damping and early-reflection density. The impulse is scaled to
   unit energy, so the wet signal keeps the level of the dry one - no hidden normalisation of the mix.
 - **Delay**: a stereo feedback delay with a low-pass in the loop. The time is given in milliseconds
-  or as a note value at a BPM. The feedback is bounded (0.8 at most) so the tail always decays.
+  or as a note value at a BPM. The first echo carries the send level; the feedback (0 ... 0.8, so
+  the tail always decays) sets how much of each echo returns as the next one.
+
+Both follow the stems' channel count: a mono separation gets a mono wet signal (the reverb uses the
+first channel of its impulse response).
 
 The buses' settings come from the mixer value (``plenio.stem_mix/1``, the ``buses`` object); the
 Stem Mixer node turns them into these functions with :func:`effects_for` and refuses a send whose bus
@@ -45,6 +49,14 @@ NOTE_VALUES: dict[str, float] = {
 MAX_FEEDBACK = 0.8
 MIN_DELAY_MS = 5.0
 MAX_DELAY_MS = 2000.0
+DEFAULT_DELAY_MS = 375.0
+DEFAULT_FEEDBACK = 0.35
+DEFAULT_LOWPASS_HZ = 4000.0
+DEFAULT_BPM = 120.0
+TAIL_FLOOR = 1e-5
+"""The delay stops adding echoes once their level bound (``feedback ** n``) is below -100 dB."""
+REVERB_KEYS = frozenset({"preset", "rt60", "damping", "pre_delay_ms", "seed"})
+DELAY_KEYS = frozenset({"time_ms", "note", "bpm", "feedback", "lowpass_hz", "seed"})
 
 
 def _value(settings: Mapping[str, Any], name: str, default: float, low: float, high: float) -> float:
@@ -135,6 +147,8 @@ def reverb(preset: str = "room", *, seed: int = 0, **overrides: Any) -> Effect:
         signal = require("scipy.signal")
         data = as_channels(samples)
         impulse = impulse_response(rate, seed=seed_value, rt60=rt60, damping=damping, pre_delay_ms=pre_delay)
+        # one impulse channel per stem channel: mono stems stay mono (the first channel of the IR)
+        impulse = impulse[np.arange(data.shape[0]) % impulse.shape[0]]
         out = signal.oaconvolve(data, impulse, mode="full", axes=-1)[:, : data.shape[1]]
         return np.asarray(out, dtype=np.float64)
 
@@ -148,54 +162,62 @@ def delay(
     *,
     time_ms: float | None = None,
     note: str | None = None,
-    bpm: float = 120.0,
-    feedback: float = 0.35,
-    lowpass_hz: float = 4000.0,
+    bpm: float = DEFAULT_BPM,
+    feedback: float = DEFAULT_FEEDBACK,
+    lowpass_hz: float = DEFAULT_LOWPASS_HZ,
     seed: int = 0,
 ) -> Effect:
     """The delay bus: a feedback delay with a low-pass in the loop (wet only).
 
-    ``time_ms`` wins over ``note`` (a note value at ``bpm``: ``1/4``, ``1/8.``, ``1/8t`` ...).
-    The loop filter is a one-pole low-pass, so every repeat is darker; the tail is truncated where
-    the feedback has decayed below -80 dB from the first repeat.
+    ``time_ms`` wins over ``note`` (a note value at ``bpm``: ``1/4``, ``1/8.``, ``1/8t`` ...). The
+    first echo is the send itself, one delay time later; every further echo is the one before it
+    times ``feedback``, through the loop's one-pole low-pass (so every repeat is darker). With
+    ``feedback`` 0 the bus is a single echo.
+
+    The echoes are summed one by one - ``O(frames x echoes)``, not ``O(frames x delay samples)`` as a
+    comb filter with the delay in its denominator costs - and stop once their level bound
+    ``feedback ** n`` falls below :data:`TAIL_FLOOR` or the song ends.
     """
-    if feedback > MAX_FEEDBACK:
+    if not 0.0 <= feedback <= MAX_FEEDBACK:
         raise PlenioUserError(
-            f"The delay feedback must be at most {MAX_FEEDBACK} (got {feedback}); a higher value never decays."
+            f"The delay feedback must be 0 or more and at most {MAX_FEEDBACK} (got {feedback}); a higher "
+            "value never decays."
         )
+    if not 20.0 <= lowpass_hz <= 24000.0:
+        raise PlenioUserError(f"The delay low-pass must be between 20 and 24000 Hz, got {lowpass_hz:g}.")
+    if not 20.0 <= bpm <= 400.0:
+        raise PlenioUserError(f"The delay BPM must be between 20 and 400, got {bpm:g}.")
     if time_ms is None and note is not None:
         if note not in NOTE_VALUES:
             raise PlenioUserError(f"Unknown delay note {note!r}; use one of {list(NOTE_VALUES)}.")
-        beats = NOTE_VALUES[note]
-        time_ms = beats * 60000.0 / max(bpm, 1.0)
-    milliseconds = float(time_ms if time_ms is not None else 375.0)
+        time_ms = NOTE_VALUES[note] * 60000.0 / bpm
+    milliseconds = float(time_ms if time_ms is not None else DEFAULT_DELAY_MS)
     if not MIN_DELAY_MS <= milliseconds <= MAX_DELAY_MS:
         raise PlenioUserError(
             f"The delay time must be between {MIN_DELAY_MS:.0f} and {MAX_DELAY_MS:.0f} ms, got {milliseconds:.0f}."
         )
-    gain = float(np.clip(feedback, 0.0, MAX_FEEDBACK))
+    gain = float(feedback)
     cutoff = float(lowpass_hz)
 
     def apply(samples: np.ndarray, rate: int) -> np.ndarray:
         signal = require("scipy.signal")
-        data = as_channels(samples)
+        data = np.asarray(as_channels(samples), dtype=np.float64)
         rate = check_rate(rate)
+        frames = data.shape[1]
         length = max(1, int(round(milliseconds * rate / 1000.0)))
-        # one-pole low-pass in the loop: y[n] = (1-a) x[n] + a y[n-1]
-        a = float(np.exp(-2.0 * np.pi * max(cutoff, 1.0) / rate))
-        a = min(a, 0.9995)
-        # the feedback path's impulse response: a one-pole low-pass, truncated at -80 dB
-        tail = int(np.ceil(math.log(1e-4) / math.log(max(a, 1e-6)))) if a > 0 else 0
-        tail = max(0, min(tail, 4 * length))
-        loop = (1 - a) * a ** np.arange(tail + 1)
-        # a comb filter with that loop: denominators [1, 0 ... 0, -gain * loop]
-        denominator = np.zeros(length + tail + 1)
-        denominator[0] = 1.0
-        denominator[length:] = -gain * loop
-        out = np.empty_like(data, dtype=np.float64)
-        for channel in range(data.shape[0]):
-            wet = signal.lfilter([1.0], denominator, data[channel])
-            out[channel] = wet - data[channel]  # the wet part only: the mixer adds the send level
+        # the loop's one-pole low-pass: y[n] = (1-a) x[n] + a y[n-1]
+        a = min(float(np.exp(-2.0 * np.pi * cutoff / rate)), 0.9995)
+        out = np.zeros_like(data)
+        echo = data  # the current echo, from its own start on
+        start, level = length, 1.0
+        while start < frames and level >= TAIL_FLOOR:
+            out[:, start:] += echo[:, : frames - start]
+            if not gain:
+                break
+            # the next echo: this one back through the loop (low-pass, feedback), one delay time later
+            echo = gain * signal.lfilter([1.0 - a], [1.0, -a], echo[:, : frames - start], axis=-1)
+            start += length
+            level *= gain
         return out
 
     return apply
@@ -204,22 +226,40 @@ def delay(
 # --- the buses ----------------------------------------------------------------------------------
 
 
+def _known(values: Mapping[str, Any], bus: str, keys: frozenset[str]) -> None:
+    unknown = sorted(set(values) - keys)
+    if unknown:
+        raise PlenioUserError(
+            f"Unknown {bus} bus setting(s) {unknown}; use {sorted(keys)}.",
+            hint="The Stem Mixer widget writes only these; check a hand-edited mix value.",
+        )
+
+
+def _number_or(values: Mapping[str, Any], name: str, default: float) -> float:
+    """A bus setting or its default: a missing value takes the default, a given 0 stays 0."""
+    value = _optional_number(values, name)
+    return default if value is None else value
+
+
 def reverb_bus(settings: Mapping[str, Any] | None = None) -> Effect:
     values = dict(settings or {})
+    _known(values, "reverb", REVERB_KEYS)
     preset = _choice(values, "preset", tuple(REVERB_PRESETS), "room")
     values.pop("preset", None)
     return reverb(preset, **values)
 
 
 def delay_bus(settings: Mapping[str, Any] | None = None) -> Effect:
+    """The delay bus from the mixer value; a missing setting takes the default the widget shows."""
     values = dict(settings or {})
+    _known(values, "delay", DELAY_KEYS)
     return delay(
         time_ms=_optional_number(values, "time_ms"),
         note=str(values["note"]) if values.get("note") else None,
-        bpm=float(_optional_number(values, "bpm") or 120.0),
-        feedback=float(_optional_number(values, "feedback") or 0.0),
-        lowpass_hz=float(_optional_number(values, "lowpass_hz") or 4000.0),
-        seed=int(_optional_number(values, "seed") or 0),
+        bpm=_number_or(values, "bpm", DEFAULT_BPM),
+        feedback=_number_or(values, "feedback", DEFAULT_FEEDBACK),
+        lowpass_hz=_number_or(values, "lowpass_hz", DEFAULT_LOWPASS_HZ),
+        seed=int(_number_or(values, "seed", 0)),
     )
 
 
@@ -235,6 +275,9 @@ def effects_for(buses: Mapping[str, Mapping[str, Any]] | None) -> dict[str, Effe
 
 
 __all__ = [
+    "DEFAULT_DELAY_MS",
+    "DEFAULT_FEEDBACK",
+    "DEFAULT_LOWPASS_HZ",
     "MAX_FEEDBACK",
     "NOTE_VALUES",
     "REVERB_PRESETS",

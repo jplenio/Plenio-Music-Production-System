@@ -77,7 +77,7 @@ keeps its length - cutting time out of the song would misalign the stems, so it 
 | Bus | Model |
 |---|---|
 | **Reverb** | convolution with a synthesised, seeded, decorrelated stereo impulse response; presets *room* (1.2 s), *plate* (1.6 s), *hall* (2.4 s) |
-| **Delay** | stereo feedback delay; time in **ms** or a note value at 120 BPM; feedback ≤ 0.8; low-pass in the loop |
+| **Delay** | stereo feedback delay; time in **ms** or a note value at 120 BPM; the first echo has the send level, feedback 0 ... 0.8 sets how much of each echo returns (0: a single echo); low-pass in the loop |
 
 Both are deterministic: the same settings give the same result. A **send without its bus is refused** - the mixer
 stops with a message instead of silently ignoring your send. Raising a send in the widget writes the documented
