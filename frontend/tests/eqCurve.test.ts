@@ -16,6 +16,7 @@ import {
   hzOf,
   maxBandHz,
   moveBand,
+  parseField,
   parseSettings,
   plotDb,
   removeBand,
@@ -115,6 +116,21 @@ describe('the panel helpers (M4/D8)', () => {
     expect(resetBandGain(s, 'band-1').bands[0].gain_db).toBe(0)
   })
 
+  it('reads typed band fields and never writes NaN', () => {
+    expect(parseField('1200')).toBe(1200)
+    expect(parseField(' 1,5 ')).toBe(1.5)
+    expect(parseField('+3 dB')).toBe(3)
+    expect(parseField('1.2k', { kilo: true })).toBe(1200)
+    expect(parseField('2 kHz', { kilo: true })).toBe(2000)
+    for (const text of ['', 'abc', '1.2k', '12..5', '1e']) expect(parseField(text)).toBeNull()
+    const s = addBand(flat(), 1000, 3)!
+    const edited = editBand(s, 'band-1', { frequency_hz: Number('abc'), gain_db: Number.NaN, q: Number.POSITIVE_INFINITY })
+    expect(edited.bands[0]).toMatchObject({ frequency_hz: s.bands[0].frequency_hz, gain_db: s.bands[0].gain_db, q: s.bands[0].q })
+    expect(serialize(edited)).not.toContain('null')
+    // the shelf slope stays in the backend's range (0.25 ... 1)
+    expect(editBand(s, 'band-1', { slope: 4 }).bands[0].slope).toBe(1)
+  })
+
   it('labels the band chips of the strip', () => {
     const band = {
       id: 'band-2',
@@ -126,7 +142,8 @@ describe('the panel helpers (M4/D8)', () => {
       slope: 1
     }
     expect(bandChip(band, 1)).toBe('● 2 Bell 1.20 kHz +2.0 dB Q 1')
-    expect(bandChip({ ...band, type: 'highpass', enabled: false }, 0)).toBe('● 1 Low cut 1.20 kHz (off)')
+    expect(bandChip({ ...band, type: 'highpass', enabled: false }, 0)).toBe('● 1 Low cut 1.20 kHz Q 1 (off)')
+    expect(bandChip({ ...band, type: 'low_shelf' }, 0)).toBe('● 1 Low shelf 1.20 kHz +2.0 dB') // a slope, no Q
   })
 
   it('draws the spectrum area behind the curve and refuses mismatched data', () => {

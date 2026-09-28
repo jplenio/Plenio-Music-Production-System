@@ -64,9 +64,12 @@ const rows = computed(() =>
     <h4>Lyrics and the score's sections</h4>
     <p v-if="failed" class="error">{{ failed }}</p>
     <table v-else-if="rows.length">
-      <tr>
-        <th>Lyrics</th><th>Score section</th><th>Lines</th><th>Syllables</th><th>Vocal notes</th><th>Fit</th>
-      </tr>
+      <thead>
+        <tr>
+          <th>Lyrics</th><th>Score section</th><th>Lines</th><th>Syllables</th><th>Vocal notes</th><th>Fit</th>
+        </tr>
+      </thead>
+      <tbody>
       <tr v-for="(row, index) in rows" :key="index" :class="{ mismatch: row.mismatch }">
         <td>[{{ row.tag }}]</td>
         <td>{{ row.score_section ?? '—' }}<span v-if="row.mismatch" class="bad"> ≠</span></td>
@@ -77,6 +80,7 @@ const rows = computed(() =>
           {{ row.ratio === null ? '' : `${row.ratio.toFixed(2)} · ${row.fit}` }}
         </td>
       </tr>
+      </tbody>
     </table>
     <p class="hint">About one syllable per vocal note sings clearly; melismas (one syllable on several notes) are fine.</p>
   </section>

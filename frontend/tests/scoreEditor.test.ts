@@ -68,6 +68,20 @@ describe('history', () => {
     expect(history.undo()?.text).toBe('hey')
   })
 
+  it('hands the side state of a step back with its text (the Guide notes of a MIDI import)', () => {
+    const history = new History('old')
+    history.record('typed', 'typing')
+    history.annotate({ guide: 'G0' }) // the state that belonged to this text before the import
+    history.record('imported', 'import MIDI', { extra: { guide: 'G1' } })
+    history.record('typed again', 'typing')
+    expect(history.undo()).toEqual({ text: 'imported', label: 'import MIDI', extra: { guide: 'G1' } })
+    expect(history.undo()).toEqual({ text: 'typed', label: 'typing', extra: { guide: 'G0' } })
+    expect(history.undo()?.extra).toBeUndefined() // a step without its own side state leaves it alone
+    expect(history.redo()?.extra).toEqual({ guide: 'G0' })
+    history.annotate({ guide: 'other' }) // a step keeps the state it already has
+    expect(history.current.extra).toEqual({ guide: 'G0' })
+  })
+
   it('keeps at most its limit of snapshots', () => {
     const history = new History('0', 3)
     for (const text of ['1', '2', '3', '4']) history.record(text, text)
@@ -441,6 +455,28 @@ describe('score session', () => {
     session.redo()
     expect(doc.text).toBe('EDITED')
     expect(session.canUndo).toBe(true)
+  })
+
+  it('moves a side state with its text through undo and redo (the Guide notes of an import)', async () => {
+    const restored: unknown[] = []
+    const session = useScoreSession(doc, {
+      fetcher: backend.fetcher,
+      debounceMs: 300,
+      onRestore: (extra) => restored.push(extra)
+    })
+    await settle()
+    await backend.calls[0].answer(VIEW)
+    session.replaceText('IMPORTED', 'import MIDI (a.mid)', viewFor('imported'), {
+      before: { guide: [[0, 4, 60]] },
+      after: { guide: [] }
+    })
+    expect(restored).toEqual([]) // the caller applies the new state itself
+    session.undo()
+    expect(doc.text).toBe(ABC)
+    expect(restored).toEqual([{ guide: [[0, 4, 60]] }])
+    session.redo()
+    expect(doc.text).toBe('IMPORTED')
+    expect(restored).toEqual([{ guide: [[0, 4, 60]] }, { guide: [] }])
   })
 
   it('refuses an operation whose text changed while it was computed', async () => {

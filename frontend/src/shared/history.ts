@@ -7,6 +7,11 @@
 export interface Snapshot {
   text: string
   label: string
+  /**
+   * State that changed with this step besides the text (the score's Guide notes on a MIDI import).
+   * An undo or redo hands it back with the text; a step without it leaves that state alone.
+   */
+  extra?: unknown
 }
 
 export class History {
@@ -39,14 +44,14 @@ export class History {
     return this.canRedo ? this.entries[this.cursor + 1].label : null
   }
 
-  record(text: string, label: string, options: { group?: string } = {}): void {
+  record(text: string, label: string, options: { group?: string; extra?: unknown } = {}): void {
     if (text === this.current.text) return
     const group = options.group ?? null
     this.entries = this.entries.slice(0, this.cursor + 1)
     if (group !== null && group === this.openGroup && this.cursor > 0) {
-      this.entries[this.cursor] = { text, label }
+      this.entries[this.cursor] = { text, label, extra: this.entries[this.cursor].extra }
     } else {
-      this.entries.push({ text, label })
+      this.entries.push(options.extra === undefined ? { text, label } : { text, label, extra: options.extra })
       this.cursor = this.entries.length - 1
       if (this.entries.length > this.limit) {
         this.entries.shift()
@@ -54,6 +59,14 @@ export class History {
       }
     }
     this.openGroup = group
+  }
+
+  /**
+   * Attach ``extra`` to the current step unless it has its own: the state that belonged to this
+   * text before a step changes it, so an undo back to here restores it.
+   */
+  annotate(extra: unknown): void {
+    if (this.current.extra === undefined) this.entries[this.cursor] = { ...this.current, extra }
   }
 
   /** Close the typing group, so the next edit is a separate step. */

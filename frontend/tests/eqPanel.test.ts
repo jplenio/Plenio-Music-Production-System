@@ -117,6 +117,29 @@ describe('the EQ panel', () => {
     expect(Number(handle.getAttribute('cy'))).toBeCloseTo(at, 3)
   })
 
+  it('commits typed numbers from the band fields and puts back anything else', async () => {
+    const node = await mount()
+    const chip = node.root.querySelector('button[aria-label="Edit band 1"]') as HTMLButtonElement
+    chip.click()
+    const field = (name: string) => node.root.querySelector(`input[aria-label="Band ${name}"]`) as HTMLInputElement
+    await vi.waitFor(() => expect(field('Hz')).toBeTruthy())
+    const hz = field('Hz')
+    hz.value = 'abc'
+    hz.dispatchEvent(new Event('blur'))
+    expect(hz.value).toBe('1000') // not a number: the band's value comes back, nothing is written
+    expect(parseSettings(node.value('mode.bands'))!.bands[0].frequency_hz).toBe(1000)
+    hz.value = '1.5k'
+    hz.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }))
+    await vi.waitFor(() => expect(parseSettings(node.value('mode.bands'))!.bands[0].frequency_hz).toBe(1500))
+    expect(node.value('mode.bands')).not.toContain('null')
+    // a notch has a Q (its width) and no gain
+    const type = node.root.querySelector('select[aria-label="Band type"]') as HTMLSelectElement
+    type.value = 'notch'
+    type.dispatchEvent(new Event('change'))
+    await vi.waitFor(() => expect(field('Q').disabled).toBe(false))
+    expect(field('dB').disabled).toBe(true)
+  })
+
   it('keeps a chosen preset visible until the bands are edited by hand', async () => {
     const node = await mount()
     const select = node.root.querySelector('select[aria-label="EQ preset"]') as HTMLSelectElement

@@ -14,6 +14,7 @@ import {
   ROLL_MIN,
   SIDE_MAX,
   SIDE_MIN,
+  beginDrag,
   clampDialog,
   defaultGeometry,
   loadGeometry,
@@ -92,5 +93,49 @@ describe('the pane sizes', () => {
     expect(sideWidthAfter(230, 40)).toBe(270)
     expect(sideWidthAfter(230, -1000)).toBe(SIDE_MIN)
     expect(sideWidthAfter(230, 1000)).toBe(SIDE_MAX)
+  })
+})
+
+describe('a splitter drag', () => {
+  function pointer(type: string, x: number, y: number, buttons = 1): PointerEvent {
+    return new PointerEvent(type, { clientX: x, clientY: y, buttons, bubbles: true })
+  }
+
+  function start(): { moves: { dx: number; dy: number }[]; ends: number[] } {
+    const log = { moves: [] as { dx: number; dy: number }[], ends: [] as number[] }
+    const grip = document.createElement('div')
+    document.body.append(grip)
+    const down = pointer('pointerdown', 100, 100)
+    Object.defineProperty(down, 'currentTarget', { value: grip })
+    beginDrag(down, (delta) => log.moves.push(delta), () => log.ends.push(log.moves.length))
+    return log
+  }
+
+  it('follows the pointer and ends once on release', () => {
+    const log = start()
+    window.dispatchEvent(pointer('pointermove', 110, 130))
+    window.dispatchEvent(pointer('pointerup', 110, 130, 0))
+    window.dispatchEvent(pointer('pointermove', 200, 200))
+    expect(log.moves).toEqual([{ dx: 10, dy: 30 }])
+    expect(log.ends).toEqual([1])
+  })
+
+  it('ends when the release was lost, on a cancel and when the window loses focus', () => {
+    const lost = start()
+    window.dispatchEvent(pointer('pointermove', 120, 100))
+    window.dispatchEvent(pointer('pointermove', 300, 300, 0)) // no button pressed any more
+    window.dispatchEvent(pointer('pointermove', 400, 400))
+    expect(lost.moves).toEqual([{ dx: 20, dy: 0 }])
+    expect(lost.ends).toEqual([1])
+    const cancelled = start()
+    window.dispatchEvent(pointer('pointercancel', 100, 100, 0))
+    window.dispatchEvent(pointer('pointermove', 150, 150))
+    expect(cancelled.moves).toEqual([])
+    expect(cancelled.ends).toEqual([0])
+    const blurred = start()
+    window.dispatchEvent(new Event('blur'))
+    window.dispatchEvent(pointer('pointermove', 150, 150))
+    expect(blurred.moves).toEqual([])
+    expect(blurred.ends).toEqual([0])
   })
 })

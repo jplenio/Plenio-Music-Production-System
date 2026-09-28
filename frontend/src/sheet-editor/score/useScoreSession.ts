@@ -14,7 +14,7 @@
 import { computed, reactive, ref, shallowRef, watch } from 'vue'
 
 import { type Fetcher, PlenioApiError, type ScoreOperation, analyzeScore, transformScore } from '../../api/client'
-import { History } from '../../shared/history'
+import { History, type Snapshot } from '../../shared/history'
 import { type ScoreView, elementById, elementSelection, knownIds } from '../../shared/scoreView'
 import type { WorkingDoc } from '../../shared/sheetSession'
 
@@ -22,6 +22,11 @@ export interface ScoreSessionOptions {
   fetcher: Fetcher
   /** Called whenever the text changes by an edit in the editor (not by the dialog). */
   onEdit?: () => void
+  /**
+   * Called on an undo or redo that reaches a step with a side state (``replaceText``'s ``state``):
+   * the caller restores what belongs to that text (the Guide notes of a MIDI import).
+   */
+  onRestore?: (extra: unknown) => void
   debounceMs?: number
 }
 
@@ -125,12 +130,12 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
     timer = setTimeout(() => void analyze(), delay)
   }
 
-  function write(text: string, label: string, group?: string): void {
+  function write(text: string, label: string, group?: string, extra?: unknown): void {
     if (text === doc.text) return
     ownWrite = true
     doc.text = text
     ownWrite = false
-    history.record(text, label, { group })
+    history.record(text, label, { group, extra })
     historyVersion.value++
     options.onEdit?.()
   }
@@ -144,11 +149,21 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
   /**
    * Replace the whole text as one undo step (an import, a dialog decision). When ``view`` is the
    * backend's analysis of exactly this text it is taken as it is; otherwise it is checked again.
+   *
+   * ``state`` is a side state that changes with the text (a MIDI import's Guide notes): ``before``
+   * is attached to the current step, ``after`` to the new one, and ``onRestore`` gets the one an
+   * undo or redo reaches - so text and side state always move together.
    */
-  function replaceText(text: string, label: string, view: ScoreView | null = null): boolean {
+  function replaceText(
+    text: string,
+    label: string,
+    view: ScoreView | null = null,
+    state?: { before: unknown; after: unknown }
+  ): boolean {
     if (text === doc.text) return false
     history.seal()
-    write(text, label)
+    if (state) history.annotate(state.before)
+    write(text, label, undefined, state?.after)
     history.seal()
     clearTimeout(timer)
     requested = text
@@ -197,11 +212,12 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
     }
   }
 
-  function restore(snapshot: { text: string; label: string } | null): void {
+  function restore(snapshot: Snapshot | null): void {
     if (!snapshot) return
     ownWrite = true
     doc.text = snapshot.text
     ownWrite = false
+    if (snapshot.extra !== undefined) options.onRestore?.(snapshot.extra)
     historyVersion.value++
     options.onEdit?.()
     notes.value = []

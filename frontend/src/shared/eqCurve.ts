@@ -12,6 +12,11 @@ export const MAX_GAIN_DB = 12
 export const PLOT_DB = 15
 export type BandType = 'peak' | 'low_shelf' | 'high_shelf' | 'highpass' | 'lowpass' | 'notch'
 export const GAIN_TYPES: BandType[] = ['peak', 'low_shelf', 'high_shelf']
+/** The types whose Q the backend uses (bell width, notch width, the cuts' resonance); shelves use ``slope``. */
+export const Q_TYPES: BandType[] = ['peak', 'notch', 'highpass', 'lowpass']
+/** The backend's ranges (``core.audio.eq``): Q 0.2 ... 10, shelf slope 0.25 ... 1. */
+export const Q_RANGE: [number, number] = [0.2, 10]
+export const SLOPE_RANGE: [number, number] = [0.25, 1]
 
 export interface Band {
   id: string
@@ -192,7 +197,7 @@ export function bandChip(band: Band, index: number): string {
   const name = BAND_NAMES[band.type] ?? band.type
   const hz = band.frequency_hz >= 1000 ? `${(band.frequency_hz / 1000).toFixed(2)} kHz` : `${Math.round(band.frequency_hz)} Hz`
   const gain = GAIN_TYPES.includes(band.type) ? ` ${band.gain_db > 0 ? '+' : ''}${band.gain_db.toFixed(1)} dB` : ''
-  const shape = band.type === 'peak' || band.type === 'notch' ? ` Q ${band.q}` : ''
+  const shape = Q_TYPES.includes(band.type) ? ` Q ${band.q}` : ''
   return `● ${index + 1} ${name} ${hz}${gain}${shape}${band.enabled ? '' : ' (off)'}`
 }
 
@@ -204,6 +209,29 @@ export const BAND_NAMES: Record<BandType, string> = {
   highpass: 'Low cut',
   lowpass: 'High cut',
   notch: 'Notch'
+}
+
+/**
+ * A number typed into a band field: ``1200``, ``1.2k``, ``1,5`` (a decimal comma), ``+3 dB``,
+ * ``2 kHz``. ``null`` when the text is not a number - the field then keeps the band's value
+ * instead of writing ``NaN`` (which serialises as ``null`` and breaks the node's value).
+ */
+export function parseField(text: string, { kilo = false }: { kilo?: boolean } = {}): number | null {
+  let value = text.trim().replace(',', '.').replace(/\s*(hz|db)$/i, '')
+  let factor = 1
+  if (kilo && /k$/i.test(value)) {
+    factor = 1000
+    value = value.slice(0, -1).trim()
+  }
+  if (!/^[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?$/i.test(value)) return null
+  const number = Number(value) * factor
+  return Number.isFinite(number) ? number : null
+}
+
+/** ``value`` as a finite number, else ``fallback`` (a band never takes ``NaN``). */
+function finiteOr(value: unknown, fallback: number): number {
+  const number = Number(value)
+  return Number.isFinite(number) ? number : fallback
 }
 
 /** One field of a band, edited in the strip's inline editor (clamped like a drag). */
@@ -220,10 +248,10 @@ export function editBand(
       const next = { ...band, ...patch }
       return {
         ...next,
-        frequency_hz: round(clamp(Number(next.frequency_hz ?? band.frequency_hz), MIN_HZ, maxBandHz(sampleRate)), 1),
-        gain_db: round(clamp(Number(next.gain_db ?? band.gain_db), -MAX_GAIN_DB, MAX_GAIN_DB), 1),
-        q: round(clamp(Number(next.q ?? band.q), 0.2, 10), 3),
-        slope: round(clamp(Number(next.slope ?? band.slope), 0.1, 4), 2),
+        frequency_hz: round(clamp(finiteOr(next.frequency_hz, band.frequency_hz), MIN_HZ, maxBandHz(sampleRate)), 1),
+        gain_db: round(clamp(finiteOr(next.gain_db, band.gain_db), -MAX_GAIN_DB, MAX_GAIN_DB), 1),
+        q: round(clamp(finiteOr(next.q, band.q), Q_RANGE[0], Q_RANGE[1]), 3),
+        slope: round(clamp(finiteOr(next.slope, band.slope), SLOPE_RANGE[0], SLOPE_RANGE[1]), 2),
         enabled: next.enabled !== false
       }
     })

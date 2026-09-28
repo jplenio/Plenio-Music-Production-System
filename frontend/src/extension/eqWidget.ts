@@ -18,6 +18,7 @@ import {
   GAIN_RANGES,
   GAIN_TYPES,
   type GainRange,
+  Q_TYPES,
   MAX_BANDS,
   type Plot,
   addBand,
@@ -30,6 +31,7 @@ import {
   flat,
   hzOf,
   moveBand,
+  parseField,
   parseSettings,
   removeBand,
   resetBandGain,
@@ -385,15 +387,17 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
     enabled.setAttribute('aria-label', 'Band enabled')
     enabled.title = 'Band enabled: off keeps the band in the list but out of the response'
     enabled.addEventListener('change', () => writeBands(editBand(shown.settings, band.id, { enabled: enabled.checked })))
-    const fields: [string, string, number, ((value: string) => void)][] = [
+    // a field commits only a number ("1.2k", "1,5" and a unit are fine); anything else puts the
+    // band's value back into the field instead of writing NaN into the node's value
+    const fields: [string, string, number, (value: string) => boolean][] = [
       [
         'Hz',
         `${band.frequency_hz}`,
         70,
-        (value) => writeBands(editBand(shown.settings, band.id, { frequency_hz: Number(value) }))
+        (value) => commitField(band.id, 'frequency_hz', parseField(value, { kilo: true }))
       ],
-      ['dB', `${band.gain_db}`, 60, (value) => writeBands(editBand(shown.settings, band.id, { gain_db: Number(value) }))],
-      ['Q', `${band.q}`, 60, (value) => writeBands(editBand(shown.settings, band.id, { q: Number(value) }))]
+      ['dB', `${band.gain_db}`, 60, (value) => commitField(band.id, 'gain_db', parseField(value))],
+      ['Q', `${band.q}`, 60, (value) => commitField(band.id, 'q', parseField(value))]
     ]
     editorFields.append(label, type, enabled)
     for (const [name, value, width, commit] of fields) {
@@ -407,11 +411,17 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
           : name === 'dB'
             ? 'Gain in dB (bell and shelves; the cuts and the notch have none)'
             : 'Q: how narrow the band is - higher Q, smaller range'
+      const apply = () => {
+        if (!commit(field.value)) field.value = value
+      }
       field.addEventListener('keydown', (event) => {
-        if ((event as KeyboardEvent).key === 'Enter') commit(field.value)
+        if ((event as KeyboardEvent).key === 'Enter') apply()
       })
-      field.addEventListener('blur', () => commit(field.value))
-      if (name !== 'Hz' && !GAIN_TYPES.includes(band.type)) field.disabled = true
+      field.addEventListener('blur', apply)
+      // the gain belongs to bell and shelves; the Q to bell, notch and the cuts (shelves use a slope)
+      if ((name === 'dB' && !GAIN_TYPES.includes(band.type)) || (name === 'Q' && !Q_TYPES.includes(band.type))) {
+        field.disabled = true
+      }
       editorFields.append(field)
     }
     const remove = button('', 'remove', 'Remove this band')
@@ -523,6 +533,15 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
       target.computeSize = () => [0, -4]
     }
     node.setDirtyCanvas?.(true, true)
+  }
+
+  /** Write one typed band field; ``false`` (nothing written) when the text was not a number. */
+  function commitField(id: string, key: 'frequency_hz' | 'gain_db' | 'q', value: number | null): boolean {
+    if (value === null) return false
+    const band = shown.settings.bands.find((b) => b.id === id)
+    if (band && band[key] === value) return true // Enter, then blur: nothing new
+    writeBands(editBand(shown.settings, id, { [key]: value }))
+    return true
   }
 
   function startDrag(event: PointerEvent, id: string): void {

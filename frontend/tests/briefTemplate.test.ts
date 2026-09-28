@@ -2,13 +2,14 @@
  * The brief template panel (M3/D6): the values it reads, what each action writes, the lines it
  * shows, the legacy placeholder, and the migration of saved workflows.
  */
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import type { BriefFields } from '../src/api/client'
+import type { BriefFields, Fetcher } from '../src/api/client'
 import type { ComfyNode, ComfyWidget } from '../src/shared/comfy'
 import {
   CHOICE_FIELDS,
   TEXT_FIELDS,
+  addBriefTemplatePanel,
   briefValues,
   choicePlan,
   clearLegacyPlaceholders,
@@ -156,5 +157,47 @@ describe('the legacy placeholder', () => {
     ])
     expect(legacyPlaceholderFields('PlenioSongBrief', ['new song every run', 'none', 'custom'])).toEqual([])
     expect(legacyPlaceholderFields('SomeOtherNode', info.widgets_values_named)).toEqual([])
+  })
+})
+
+describe('the panel', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('asks again when any field the rule reads changes, a rebuilt vocals child included', async () => {
+    vi.useFakeTimers()
+    const asked: Record<string, string>[] = []
+    const fetcher: Fetcher = {
+      fetchApi: (_route, options) => {
+        asked.push((JSON.parse(String(options?.body)) as { fields: Record<string, string> }).fields)
+        return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(ANSWER) } as Response)
+      }
+    }
+    const target = node()
+    target.addDOMWidget = () => widget('plenio_brief_template', '')
+    addBriefTemplatePanel(target, fetcher)
+    await vi.advanceTimersByTimeAsync(500)
+    expect(asked).toHaveLength(1)
+    // fields the first version did not listen to: length and a child of the vocals group
+    for (const field of ['length', 'vocals.theme'] as const) {
+      const changed = (target.widgets ?? []).find((w) => w.name === field)!
+      changed.value = 'short (about 1:30)'
+      changed.callback?.(changed.value)
+      await vi.advanceTimersByTimeAsync(500)
+    }
+    expect(asked).toHaveLength(3)
+    // the vocals group rebuilds its children: a new child widget is wired after the next answer
+    target.widgets = (target.widgets ?? []).filter((w) => w.name !== 'vocals.theme')
+    target.widgets.push(widget('vocals.theme', ''))
+    const vocals = (target.widgets ?? []).find((w) => w.name === 'vocals')!
+    vocals.callback?.('sung')
+    await vi.advanceTimersByTimeAsync(500)
+    const theme = target.widgets.find((w) => w.name === 'vocals.theme')!
+    theme.value = 'the sea'
+    theme.callback?.('the sea')
+    await vi.advanceTimersByTimeAsync(500)
+    expect(asked).toHaveLength(5)
+    expect(asked[4].theme).toBe('the sea')
   })
 })

@@ -127,7 +127,8 @@ function shorten(text: string, limit = 44): string {
   return flat.length > limit ? `${flat.slice(0, limit - 1)}…` : flat
 }
 
-/** Write values into widgets (the user's action; the widget callback keeps the node in sync). */export function writeValues(node: ComfyNode, changes: { field: string; value: unknown }[]): void {
+/** Write values into widgets (the user's action; the widget callback keeps the node in sync). */
+export function writeValues(node: ComfyNode, changes: { field: string; value: unknown }[]): void {
   for (const change of changes) {
     const widget = widgetOf(node, change.field)
     if (!widget) continue
@@ -244,7 +245,25 @@ export function addBriefTemplatePanel(node: ComfyNode, fetcher: Fetcher): Templa
     node.setDirtyCanvas?.(true, true)
   }
 
+  // every field the rule reads refreshes the panel. The vocals group's children (language, voice,
+  // theme, melody, lead instrument) are rebuilt when *vocals* changes, so wiring is idempotent and
+  // runs again after each change and each answer: a new child widget is wired, a known one is not.
+  const wired = new WeakSet<ComfyWidget>()
+  const wire = (): void => {
+    for (const name of ['template', ...Object.keys(WIDGET_OF)]) {
+      const widget =
+        name === 'template' ? node.widgets?.find((candidate) => candidate.name === 'template') : widgetOf(node, name)
+      if (!widget || wired.has(widget)) continue
+      wired.add(widget)
+      widget.callback = chain(widget.callback, () => {
+        wire()
+        refresh()
+      })
+    }
+  }
+
   const ask = async (): Promise<void> => {
+    wire()
     const template = String(node.widgets?.find((widget) => widget.name === 'template')?.value ?? 'none')
     try {
       current = await briefFields(fetcher, { fields: briefValues(node), template })
@@ -262,14 +281,7 @@ export function addBriefTemplatePanel(node: ComfyNode, fetcher: Fetcher): Templa
     timer = setTimeout(() => void ask(), REFRESH_MS)
   }
 
-  const templateWidget = node.widgets?.find((widget) => widget.name === 'template')
-  if (templateWidget) templateWidget.callback = chain(templateWidget.callback, () => refresh())
-  for (const field of ['description', 'genre', 'mood', 'tempo', 'key', 'meter'] as const) {
-    const widget = widgetOf(node, field)
-    if (widget) widget.callback = chain(widget.callback, () => refresh())
-  }
-  const vocals = widgetOf(node, 'vocals')
-  if (vocals) vocals.callback = chain(vocals.callback, () => refresh())
+  wire()
 
   const widget = node.addDOMWidget(PANEL, PANEL, element, {
     serialize: false,

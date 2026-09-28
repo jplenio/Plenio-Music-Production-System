@@ -58,7 +58,7 @@ import {
   shareValue,
   sideWidthAfter
 } from '../paneSizes'
-import { guideNotes } from './tracks'
+import { guideNotes, sameGuide } from './tracks'
 import { describeError, useScoreSession } from './useScoreSession'
 
 const props = defineProps<{
@@ -83,7 +83,25 @@ const emit = defineEmits<{
   guideChange: [guide: GuideNote[]]
 }>()
 
-const session = useScoreSession(props.doc, { fetcher: props.fetcher, onEdit: () => emit('edited') })
+/** The Guide notes that belong to one undo step of a MIDI import (``replaceText``'s side state). */
+interface GuideState {
+  guide: GuideNote[]
+}
+
+function isGuideState(value: unknown): value is GuideState {
+  return typeof value === 'object' && value !== null && Array.isArray((value as GuideState).guide)
+}
+
+const session = useScoreSession(props.doc, {
+  fetcher: props.fetcher,
+  onEdit: () => emit('edited'),
+  // an undo or redo across a MIDI import brings the Guide notes of that step back with its text
+  onRestore: (extra) => {
+    if (isGuideState(extra) && props.guide !== undefined && !sameGuide(extra.guide, props.guide)) {
+      emit('guideChange', [...extra.guide])
+    }
+  }
+})
 watch(
   () => [props.doc.text, session.commitBlock] as const,
   ([text, reason]) => {
@@ -290,12 +308,19 @@ async function onMidiFile(event: Event): Promise<void> {
   }
 }
 
-/** Replace the score with the imported one (one undo step) and take its Guide notes over. */
+/**
+ * Replace the score with the imported one and its Guide notes with the file's - one undo step for
+ * both. The sheet's old Guide notes were timed to the replaced score, so they go with it (an undo
+ * brings both back); unticking *keep the Guide notes* leaves the new score without any.
+ */
 function insertMidi(result: MidiImportResult, keepGuide: boolean): void {
   if (props.readonly) return
   const name = midiRequest.value?.filename ?? 'file'
-  session.replaceText(result.abc, `import MIDI (${name})`, result.analysis)
-  if (keepGuide && props.guide !== undefined && result.guide.length) emit('guideChange', result.guide)
+  const before = props.guide
+  const after = before === undefined ? undefined : keepGuide ? [...result.guide] : []
+  const state = before === undefined || after === undefined ? undefined : { before: { guide: [...before] }, after: { guide: after } }
+  session.replaceText(result.abc, `import MIDI (${name})`, result.analysis, state)
+  if (after !== undefined && before !== undefined && !sameGuide(after, before)) emit('guideChange', after)
   midiRequest.value = null
   midiError.value = null
 }
@@ -513,7 +538,7 @@ function onKey(event: KeyboardEvent): void {
       :data-text="review ? (prefs.advanced ? 'shown' : 'hidden') : 'main'"
       :style="mainStyle"
     >
-      <div class="side ">
+      <div class="side">
         <TrackPanel
           v-if="daw"
           v-model:voices="voices"
@@ -634,6 +659,7 @@ function onKey(event: KeyboardEvent): void {
       :filename="midiRequest.filename"
       :view="shown"
       :keeps-guide="keepsGuide"
+      :current-guide="guide.length"
       @close="midiRequest = null"
       @insert="insertMidi"
     />

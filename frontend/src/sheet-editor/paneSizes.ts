@@ -67,7 +67,12 @@ export function sideWidthAfter(start: number, dx: number): number {
 
 /**
  * Wire a splitter or resize grip: ``update`` receives the pointer's delta from the start, ``done``
- * runs once on release (where the caller saves). Removes its listeners; the component stays thin.
+ * runs once when the drag ends (where the caller saves). Removes its listeners; the component stays
+ * thin.
+ *
+ * The drag ends on ``pointerup``, on ``pointercancel``, when the window loses focus, and on the
+ * first move without a pressed button - a release outside the browser window or one the frontend
+ * swallowed must not leave the pane following the mouse (the EQ drag had the same bug).
  */
 export function beginDrag(
   event: PointerEvent,
@@ -77,16 +82,37 @@ export function beginDrag(
   const startX = event.clientX
   const startY = event.clientY
   const target = event.currentTarget as HTMLElement | null
-  target?.setPointerCapture?.(event.pointerId)
-  const move = (moveEvent: PointerEvent) => update({ dx: moveEvent.clientX - startX, dy: moveEvent.clientY - startY })
-  const up = () => {
-    target?.releasePointerCapture?.(event.pointerId)
+  let finished = false
+  try {
+    target?.setPointerCapture?.(event.pointerId)
+  } catch {
+    // a detached grip: the window listeners below carry the drag
+  }
+  const end = () => {
+    if (finished) return
+    finished = true
+    try {
+      target?.releasePointerCapture?.(event.pointerId)
+    } catch {
+      // already released or detached
+    }
     window.removeEventListener('pointermove', move)
-    window.removeEventListener('pointerup', up)
+    window.removeEventListener('pointerup', end)
+    window.removeEventListener('pointercancel', end)
+    window.removeEventListener('blur', end)
     done?.()
   }
+  const move = (moveEvent: PointerEvent) => {
+    if (moveEvent.buttons === 0) {
+      end()
+      return
+    }
+    update({ dx: moveEvent.clientX - startX, dy: moveEvent.clientY - startY })
+  }
   window.addEventListener('pointermove', move)
-  window.addEventListener('pointerup', up)
+  window.addEventListener('pointerup', end)
+  window.addEventListener('pointercancel', end)
+  window.addEventListener('blur', end)
 }
 
 export function defaultGeometry(): DialogGeometry {

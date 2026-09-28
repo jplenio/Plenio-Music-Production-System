@@ -100,15 +100,30 @@ export function trackLabel(choice: TrackChoice): string {
   return choice.notes === 1 ? `${name} · 1 note` : `${name} · ${choice.notes} notes`
 }
 
-/** The lines under the track list: the report plus what happens to Guide notes. */
-export function summaryLines(report: string[], guideCount: number, keepsGuide: boolean): string[] {
+/**
+ * The lines under the track list: the report plus what happens to Guide notes - the file's
+ * (``guideCount``; ``keep``: the dialog's *keep the Guide notes*) and the sheet's own
+ * (``current``), which belong to the score the import replaces.
+ */
+export function summaryLines(
+  report: string[],
+  guideCount: number,
+  keepsGuide: boolean,
+  { current = 0, keep = true }: { current?: number; keep?: boolean } = {}
+): string[] {
   const lines = [...report]
   if (guideCount) {
     lines.push(
-      keepsGuide
-        ? `${guideCount} Guide note(s) in the file will be kept (never sent to YuE2).`
-        : `${guideCount} Guide note(s) in the file are not kept here (this sheet has no Guide track).`
+      !keepsGuide
+        ? `${guideCount} Guide note(s) in the file are not kept here (this sheet has no Guide track).`
+        : keep
+          ? `${guideCount} Guide note(s) in the file will be kept (never sent to YuE2).`
+          : `${guideCount} Guide note(s) in the file are left out (keep the Guide notes is off).`
     )
+  }
+  if (keepsGuide && current) {
+    const fate = guideCount && keep ? "replaced by the file's" : 'removed'
+    lines.push(`The sheet's ${current} Guide note(s) belong to the replaced score and are ${fate} (Undo brings them back).`)
   }
   return lines
 }

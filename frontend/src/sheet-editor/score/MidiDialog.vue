@@ -31,6 +31,8 @@ const props = defineProps<{
   view: ScoreView | null
   /** Whether this sheet keeps a Guide track (node properties); false: Guide notes are dropped. */
   keepsGuide: boolean
+  /** How many Guide notes the sheet has now (they belong to the score the import replaces). */
+  currentGuide?: number
 }>()
 const emit = defineEmits<{
   close: []
@@ -48,10 +50,19 @@ const keepGuide = ref(props.keepsGuide)
 const rows = computed(() => choices.value.filter((choice) => choice.notes > 0))
 const empty = computed(() => choices.value.filter((choice) => choice.notes === 0))
 const lines = computed(() =>
-  result.value ? summaryLines(result.value.report, result.value.guide.length, props.keepsGuide) : []
+  result.value
+    ? summaryLines(result.value.report, result.value.guide.length, props.keepsGuide, {
+        current: props.currentGuide ?? 0,
+        keep: keepGuide.value
+      })
+    : []
 )
 
+/** The number of the newest request: an older answer that arrives late is dropped. */
+let latest = 0
+
 async function run(sendMapping: boolean): Promise<void> {
+  const request = ++latest
   busy.value = true
   error.value = null
   try {
@@ -61,12 +72,15 @@ async function run(sendMapping: boolean): Promise<void> {
       chords: recognize.value,
       mapping: sendMapping ? mappingOf(choices.value) : undefined
     })
+    // quick role, grid or chord changes overlap: only the answer to the last choice may be shown
+    // (and inserted), never an older mapping that happened to arrive later
+    if (request !== latest) return
     result.value = imported
     if (!sendMapping) choices.value = choicesOf(imported.tracks)
   } catch (e) {
-    error.value = describeError(e)
+    if (request === latest) error.value = describeError(e)
   } finally {
-    busy.value = false
+    if (request === latest) busy.value = false
   }
 }
 

@@ -149,6 +149,18 @@ describe('midiImport (pure)', () => {
     expect(summaryLines([], 1, false)).toEqual([
       '1 Guide note(s) in the file are not kept here (this sheet has no Guide track).'
     ])
+    // the sheet's own Guide notes belong to the score the import replaces
+    expect(summaryLines([], 2, true, { current: 3 })).toEqual([
+      '2 Guide note(s) in the file will be kept (never sent to YuE2).',
+      "The sheet's 3 Guide note(s) belong to the replaced score and are replaced by the file's (Undo brings them back)."
+    ])
+    expect(summaryLines([], 2, true, { current: 3, keep: false })).toEqual([
+      '2 Guide note(s) in the file are left out (keep the Guide notes is off).',
+      "The sheet's 3 Guide note(s) belong to the replaced score and are removed (Undo brings them back)."
+    ])
+    expect(summaryLines([], 0, true, { current: 1 })).toEqual([
+      "The sheet's 1 Guide note(s) belong to the replaced score and are removed (Undo brings them back)."
+    ])
   })
 
   it('saves bytes as a download (happy-dom keeps the anchor reachable)', () => {
@@ -215,6 +227,50 @@ describe('MidiDialog', () => {
     expect(result.abc.startsWith('X:1')).toBe(true)
     expect(result.guide).toEqual([[0, 8, 60]])
     expect(keepGuide).toBe(true)
+  })
+
+  it('shows only the answer to the last choice when answers overlap', async () => {
+    // the first read answers at once; the next two wait until the test releases them, newest first
+    const waiting: ((value: Response) => void)[] = []
+    const host = document.createElement('div')
+    document.body.appendChild(host)
+    let calls = 0
+    const fetcher: Fetcher = {
+      fetchApi: () => {
+        calls += 1
+        const answer = { ...imported(undefined), report: [`answer ${calls}`] }
+        const response = { ok: true, status: 200, json: () => Promise.resolve(answer) } as Response
+        if (calls === 1) return Promise.resolve(response)
+        return new Promise<Response>((resolve) => waiting.push(() => resolve(response)))
+      }
+    }
+    app = createApp({
+      render: () =>
+        h(MidiDialog, {
+          fetcher,
+          data: 'TUZ0aGQ=',
+          filename: 'sketch.mid',
+          view: null,
+          keepsGuide: true,
+          onInsert: () => {},
+          onClose: () => {}
+        })
+    })
+    app.mount(host)
+    await settle()
+    const grid = host.querySelector('[aria-label="Import grid"]') as HTMLSelectElement
+    grid.value = '32'
+    grid.dispatchEvent(new Event('change'))
+    grid.value = '64'
+    grid.dispatchEvent(new Event('change'))
+    await settle()
+    expect(waiting).toHaveLength(2)
+    waiting[1](undefined as unknown as Response) // the newest answer first ...
+    await settle()
+    waiting[0](undefined as unknown as Response) // ... then the stale one
+    await settle()
+    expect(host.textContent).toContain('answer 3')
+    expect(host.textContent).not.toContain('answer 2')
   })
 
   it('shows a refused file and keeps Insert off', async () => {

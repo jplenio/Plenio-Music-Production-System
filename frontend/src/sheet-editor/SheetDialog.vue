@@ -138,16 +138,12 @@ function useDraft(doc: WorkingDoc) {
   doc.intent = 'auto'
   doc.text = draftOf(doc.kind) ?? ''
 }
-function makeManual(doc: WorkingDoc) {
-  doc.intent = 'manual'
-}
-
 /**
- * *Use my own lyrics* (plan §7): the document becomes manual, so the writer is not consulted any
- * more and these words reach YuE2 verbatim. The text he has (a draft or his own words) stays as it
- * is - nothing is replaced, and the editor's checks keep running.
+ * *Make manual* - for the lyrics *Use my own lyrics* (plan §7): the writer is not consulted any more
+ * and the text reaches YuE2 verbatim. The text in the editor (a draft or the user's own words) stays
+ * as it is - nothing is replaced, and the editor's checks keep running.
  */
-function useOwnLyrics(doc: WorkingDoc): void {
+function makeManual(doc: WorkingDoc) {
   doc.intent = 'manual'
 }
 
@@ -394,7 +390,7 @@ onBeforeUnmount(() => {
               v-if="doc.kind === 'lyrics'"
               :disabled="doc.intent === 'manual'"
               title="Keep exactly these words: the writer is not consulted any more (your lyrics reach YuE2 unchanged)"
-              @click="useOwnLyrics(doc)"
+              @click="makeManual(doc)"
             >
               Use my own lyrics
             </button>

@@ -592,8 +592,11 @@ def import_midi(
         report.append("no key signature at the start: C major assumed")
     if not chords and pitched["chords"]:
         if chords_from_notes:
+            # the note lists hold (onset, end, pitch); the recognition takes (onset, duration, pitch)
             reading = chord_templates.recognize_chords(
-                pitched["chords"], keys=sorted(keys.items()), default_key=keys[0]
+                [(onset, end - onset, pitch) for onset, end, pitch in pitched["chords"]],
+                keys=sorted(keys.items()),
+                default_key=keys[0],
             )
             chords = {chord.onset: chord.name for chord in reading.chords}
             note = f"chord symbols were read from the notes of the Chords track (best effort, {len(chords)} symbol(s))"
