@@ -22,7 +22,7 @@ AUDIO_MODEL_FOLDERS = {"super-resolution": "audio_sr", "separation": "audio_sepa
 """Plenio's own model folders (registered with ComfyUI) for Load Audio Model, by model kind."""
 FILE_SUFFIXES = (".safetensors", ".bin", ".ckpt")
 """Allowed catalogued file names. ``.bin``/``.ckpt`` cover released PyTorch state dicts (UniverSR,
-BS-RoFormer); the adapters read them with the trust they document (``weights_only`` where possible)."""
+BS-RoFormer); the adapters read them with ``weights_only=True`` only (``comfy.audio_models.read_weights``)."""
 FOLDERS = frozenset(
     {
         "checkpoints",

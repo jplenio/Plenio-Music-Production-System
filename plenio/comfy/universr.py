@@ -27,7 +27,7 @@ import numpy as np
 from ..core.audio.refine import OUTPUT_RATE
 from ..core.dependencies import require
 from ..core.errors import PlenioDependencyError, PlenioModelError
-from . import host
+from . import audio_models, host
 
 NAME = "UniverSR"
 """The engine name that appears in Refine's report."""
@@ -65,14 +65,12 @@ def _require_torch() -> Any:
 
 
 def _config_for(path: Path, torch: Any) -> tuple[dict[str, Any], dict[str, Any]]:
-    """``(state_dict, config)`` from a checkpoint: its own ``config`` or the released one."""
-    try:
-        payload = torch.load(str(path), map_location="cpu", weights_only=True)
-    except Exception as error:  # noqa: BLE001 - torch raises many types for a broken file
-        raise PlenioModelError(
-            f"{path.name} could not be read as a {NAME} checkpoint: {error}",
-            hint="Download the weights again (the missing-model dialog), or choose another file.",
-        ) from error
+    """``(state_dict, config)`` from a checkpoint: its own ``config`` or the released one.
+
+    ``.bin``/``.pt`` files are read with ``weights_only=True``, ``.safetensors`` with safetensors
+    (``audio_models.read_weights``).
+    """
+    payload = audio_models.read_weights(path, torch, NAME)
     if isinstance(payload, dict) and isinstance(payload.get("config"), dict) and "state_dict" in payload:
         return payload["state_dict"], dict(payload["config"])
     yaml = require("yaml")

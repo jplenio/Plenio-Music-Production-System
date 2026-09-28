@@ -20,7 +20,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from ..core.errors import PlenioModelError, PlenioUserError
+from ..core.dependencies import require as require_module
+from ..core.errors import PlenioDependencyError, PlenioModelError, PlenioUserError
 from ..core.models import AUDIO_MODEL_FOLDERS
 
 KINDS = tuple(AUDIO_MODEL_FOLDERS)
@@ -46,17 +47,56 @@ class Adapter:
     load: Callable[[Path], Any]
 
 
+WEIGHTS_ERROR = "WeightsUnpickler error:"
+
+
+def read_weights(path: Path, torch: Any, name: str) -> Any:
+    """The payload of a weights file, never unpickling arbitrary objects (every adapter reads through it).
+
+    ``.safetensors`` is read with safetensors; anything else with ``torch.load(weights_only=True)``.
+    A file that needs full unpickling is refused: it could run code when loaded.
+    """
+    try:
+        if path.suffix.lower() == ".safetensors":
+            return require_module("safetensors.torch").load_file(str(path), device="cpu")
+        return torch.load(str(path), map_location="cpu", weights_only=True)
+    except PlenioDependencyError:
+        raise
+    except Exception as error:  # noqa: BLE001 - torch raises many types for a broken file
+        text = str(error)
+        # torch's own message is long and suggests weights_only=False; only its reason is passed on
+        marker = text.find(WEIGHTS_ERROR)
+        detail = text[marker + len(WEIGHTS_ERROR) :] if marker >= 0 else text
+        detail = next((line.strip() for line in detail.splitlines() if line.strip()), type(error).__name__)
+        pickled = "Unsupported global" in text
+        raise PlenioModelError(
+            f"{path.name} could not be read as a {name} checkpoint: {detail[:200]}",
+            hint=(
+                "The file pickles Python objects besides the weights; Plenio does not load those, "
+                "because unpickling them can run code. Use the released weights, or save the model's "
+                "state_dict (or a .safetensors file)."
+                if pickled
+                else "Download the checkpoint again (the missing-model dialog), or choose another file."
+            ),
+        ) from error
+
+
 _ADAPTERS: dict[str, Adapter] = {}
 _REGISTERED = False
 
 
 def _ensure_registered() -> None:
-    """Import the adapter modules once (they import torch only when a model is loaded)."""
+    """Import the adapter modules once (they import torch only when a model is loaded).
+
+    The flag is set only after both imports succeeded: a failed import raises again on the next
+    call instead of leaving an empty registry that refuses every file as "no engine reads it".
+    """
     global _REGISTERED
     if _REGISTERED:
         return
-    _REGISTERED = True
     from . import msst, universr  # noqa: F401  (register the adapters of D9 and D11)
+
+    _REGISTERED = True
 
 
 def register(adapter: Adapter) -> None:

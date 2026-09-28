@@ -128,6 +128,38 @@ def test_a_broken_checkpoint_is_refused_with_a_hint(tmp_path: Path) -> None:
     assert "missing-model dialog" in (error.value.hint or "")
 
 
+class _Payload:
+    """A pickled object whose unpickling would create a marker file (the code-execution probe)."""
+
+    def __init__(self, marker: Path) -> None:
+        self.marker = marker
+
+    def __reduce__(self) -> tuple[Any, ...]:
+        return (Path.touch, (self.marker,))
+
+
+def test_a_checkpoint_that_pickles_objects_is_refused_and_never_unpickled(tmp_path: Path) -> None:
+    """weights_only=True: an object besides the weights could run code while it is unpickled."""
+    marker = tmp_path / "ran.txt"
+    path = tmp_path / "bs_roformer_evil.ckpt"
+    torch.save({"state_dict": {"a": torch.zeros(1)}, "extra": _Payload(marker)}, path)
+    with pytest.raises(PlenioModelError) as error:
+        msst._read_checkpoint(path, torch)
+    assert not marker.exists()
+    assert "Unsupported global" in error.value.message and "weights_only=False" not in error.value.message
+    assert "unpickling them can run code" in (error.value.hint or "")
+
+
+def test_a_safetensors_file_is_read_without_pickle(tmp_path: Path) -> None:
+    save_file = pytest.importorskip("safetensors.torch").save_file
+    released = json.loads((msst.VENDOR / msst.CONFIG_NAME).read_text(encoding="utf-8"))
+    path = tmp_path / "bs_roformer.safetensors"
+    save_file({"a": torch.ones(2)}, str(path))
+    assert msst.matches(path.name)
+    config, state = msst._read_checkpoint(path, torch)
+    assert config == released and torch.equal(state["a"], torch.ones(2))
+
+
 def test_the_released_config_is_used_when_the_checkpoint_has_none(tmp_path: Path) -> None:
     released = json.loads((msst.VENDOR / msst.CONFIG_NAME).read_text(encoding="utf-8"))
     assert released["model"]["num_stems"] == 4 and released["model"]["dim"] == 384

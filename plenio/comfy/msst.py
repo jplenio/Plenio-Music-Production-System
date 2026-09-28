@@ -30,7 +30,7 @@ from ..core.audio.resample import resample
 from ..core.audio.stems import REST
 from ..core.dependencies import require
 from ..core.errors import PlenioDependencyError, PlenioModelError
-from . import host
+from . import audio_models, host
 
 NAME = "BS-RoFormer 4-stem"
 STEMS: tuple[str, ...] = ("vocals", "drums", "bass", "other")
@@ -248,14 +248,14 @@ def _match_state_dict(model: Any, state: dict[str, Any]) -> dict[str, Any]:
 
 
 def _read_checkpoint(path: Path, torch: Any) -> tuple[dict[str, Any], dict[str, Any]]:
-    """``(config, state_dict)``: the checkpoint's own config or the released one."""
-    try:
-        payload = torch.load(str(path), map_location="cpu", weights_only=False)
-    except Exception as error:  # noqa: BLE001 - torch raises many types for a broken file
-        raise PlenioModelError(
-            f"{path.name} could not be read as a {NAME} checkpoint: {error}",
-            hint="Download the checkpoint again (the missing-model dialog), or choose another file.",
-        ) from error
+    """``(config, state_dict)``: the checkpoint's own config or the released one.
+
+    A pickled checkpoint is read with ``weights_only=True`` - tensors and plain containers only,
+    because unpickling anything else can run code from the file. The released MSST checkpoint is a
+    plain state dict; a checkpoint that pickles other objects is refused with that reason. A
+    ``.safetensors`` file holds no pickle at all and uses the released config.
+    """
+    payload = audio_models.read_weights(path, torch, NAME)
     if not isinstance(payload, dict):
         raise PlenioModelError(f"{path.name} is not a checkpoint of {NAME}.")
     state = payload.get("state_dict") or payload

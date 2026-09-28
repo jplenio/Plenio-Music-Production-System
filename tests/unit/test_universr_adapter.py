@@ -111,6 +111,16 @@ def test_a_checkpoint_can_carry_its_own_config(tmp_path: Path) -> None:
     assert list(state) == ["a"] and resolved == config
 
 
+def test_a_safetensors_file_is_read_without_pickle(tmp_path: Path) -> None:
+    """The names the adapter claims (``universr_audio.safetensors``) are really readable."""
+    save_file = pytest.importorskip("safetensors.torch").save_file
+    path = tmp_path / "universr_audio.safetensors"
+    save_file({"a": torch.zeros(3)}, str(path))
+    assert universr.matches(path.name)
+    state, resolved = universr._config_for(path, torch)
+    assert list(state) == ["a"] and resolved == _released_config()
+
+
 def _released_config() -> dict[str, Any]:
     yaml = pytest.importorskip("yaml")
     return dict(yaml.safe_load((universr.VENDOR / universr.CONFIG_NAME).read_text(encoding="utf-8")))
