@@ -2557,37 +2557,42 @@
        "step": 0.05
       }
      ],
-     "pre_hz": [
+     "preset": [
       "COMBO",
       {
-       "tooltip": "Low-pass before the model (shapes only what the model sees): auto = the model's training condition, off = no low-pass, else 6/8/10/12/14 kHz.",
-       "advanced": true,
-       "default": "auto",
+       "tooltip": "A prepared stage template: one choice sets PRE, POST and the crossover (500 Hz below PRE). *custom* uses the three fields below, which stay editable - the MiniMax template ships template 3 and the matching numbers.",
+       "default": "custom - the three fields below",
        "multiselect": false,
        "options": [
-        "auto",
-        "off",
-        "6000",
-        "8000",
-        "10000",
-        "12000",
-        "14000"
+        "custom - the three fields below",
+        "1 - pre 6 kHz / post 16 kHz",
+        "2 - pre 8 kHz / post 19 kHz",
+        "3 - MiniMax: pre 10 kHz / post 19 kHz",
+        "4 - pre 12 kHz / post 19 kHz",
+        "5 - pre 14 kHz / post 21 kHz"
        ]
       }
      ],
-     "post_hz": [
-      "COMBO",
+     "pre_hz": [
+      "FLOAT",
       {
-       "tooltip": "Linear-phase roll-off of the result: off, or 16/19/21 kHz (tames added air that sounds harsh).",
+       "tooltip": "Low-pass before the model (it shapes only what the model sees): 0 = the model's training condition, -1 = no PRE, else Hz (6000, 8000, 10000, 12000, 14000).",
        "advanced": true,
-       "default": "off",
-       "multiselect": false,
-       "options": [
-        "off",
-        "16000",
-        "19000",
-        "21000"
-       ]
+       "default": 0.0,
+       "min": -1.0,
+       "max": 23000.0,
+       "step": 100.0
+      }
+     ],
+     "post_hz": [
+      "FLOAT",
+      {
+       "tooltip": "Linear-phase roll-off of the result: 0 = off, else Hz (16000, 19000, 21000 tame added air that sounds harsh).",
+       "advanced": true,
+       "default": 0.0,
+       "min": 0.0,
+       "max": 23900.0,
+       "step": 100.0
       }
      ],
      "seed": [
@@ -2616,6 +2621,7 @@
      "engine",
      "crossover_hz",
      "sr_gain",
+     "preset",
      "pre_hz",
      "post_hz",
      "seed"
@@ -4638,6 +4644,14 @@
         "5"
        ]
       }
+     ],
+     "system_prompt": [
+      "STRING",
+      {
+       "tooltip": "Replaces the system prompt in the model's chat template. Ignored when the default template is not used.",
+       "forceInput": true,
+       "multiline": false
+      }
      ]
     }
    },
@@ -4654,16 +4668,20 @@
      "audio",
      "thinking",
      "use_default_template",
-     "mtp"
+     "mtp",
+     "system_prompt"
     ]
    },
    "output": [
+    "STRING",
     "STRING"
    ],
    "output_name": [
-    "generated_text"
+    "generated_text",
+    "thinking"
    ],
    "output_is_list": [
+    false,
     false
    ],
    "output_node": false,

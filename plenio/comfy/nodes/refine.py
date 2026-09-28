@@ -6,29 +6,22 @@ from typing import Any
 
 from comfy_api.latest import io
 
-from ...core.audio.refine import OUTPUT_RATE, RefineSettings, refine
+from ...core.audio.refine import (
+    CUSTOM_PRESET,
+    OUTPUT_RATE,
+    PREPARED_STAGES,
+    RefineSettings,
+    prepared_stages,
+    refine,
+)
 from ...core.errors import PlenioUserError
 from ...core.reports import Report, Status
 from .. import audio_models, host
 from ..types import AudioModelType, ReportType
 
 ENGINES = ("resample only", "model")
-PRE_STAGES: tuple[str, ...] = ("auto", "off", "6000", "8000", "10000", "12000", "14000")
-POST_STAGES: tuple[str, ...] = ("off", "16000", "19000", "21000")
-"""The prepared stages of the model engine (owner's list, 2026-09-28); every value is selectable."""
-
-
-def pre_value(stage: str) -> float:
-    """``auto`` -> the model's own training condition, ``off`` -> no PRE, else the frequency in Hz."""
-    if stage == "auto":
-        return 0.0
-    if stage == "off":
-        return -1.0
-    return float(stage)
-
-
-def post_value(stage: str) -> float:
-    return 0.0 if stage == "off" else float(stage)
+PRESET_OPTIONS: tuple[str, ...] = (CUSTOM_PRESET, *[name for name, _pre, _post in PREPARED_STAGES])
+"""The prepared stage templates plus *custom* (the three fields below them)."""
 
 
 class PlenioRefine(io.ComfyNode):
@@ -45,7 +38,8 @@ class PlenioRefine(io.ComfyNode):
                 "and keeps everything below the crossover from the original (complementary crossover); "
                 "'resample only' converts the rate without new content. The model always runs when it is "
                 "connected, also for an input that already reaches 20 kHz - nothing below the crossover "
-                "changes. Same duration, no normalisation. Experimental."
+                "changes. A prepared preset sets PRE, POST and the crossover in one go; *custom* uses the "
+                "three fields. Same duration, no normalisation. Experimental."
             ),
             inputs=[
                 io.Audio.Input("audio", tooltip="The rendered song (any sample rate)."),
@@ -80,23 +74,37 @@ class PlenioRefine(io.ComfyNode):
                     tooltip="Level of the added band.",
                 ),
                 io.Combo.Input(
-                    "pre_hz",
-                    options=list(PRE_STAGES),
-                    default="auto",
-                    advanced=True,
+                    "preset",
+                    options=list(PRESET_OPTIONS),
+                    default=CUSTOM_PRESET,
                     tooltip=(
-                        "Low-pass before the model (shapes only what the model sees): auto = the model's "
-                        "training condition, off = no low-pass, else 6/8/10/12/14 kHz."
+                        "A prepared stage template: one choice sets PRE, POST and the crossover (500 Hz "
+                        "below PRE). *custom* uses the three fields below, which stay editable - the "
+                        "MiniMax template ships template 3 and the matching numbers."
                     ),
                 ),
-                io.Combo.Input(
-                    "post_hz",
-                    options=list(POST_STAGES),
-                    default="off",
+                io.Float.Input(
+                    "pre_hz",
+                    default=0.0,
+                    min=-1.0,
+                    max=23000.0,
+                    step=100.0,
                     advanced=True,
                     tooltip=(
-                        "Linear-phase roll-off of the result: off, or 16/19/21 kHz (tames added air that "
-                        "sounds harsh)."
+                        "Low-pass before the model (it shapes only what the model sees): 0 = the model's "
+                        "training condition, -1 = no PRE, else Hz (6000, 8000, 10000, 12000, 14000)."
+                    ),
+                ),
+                io.Float.Input(
+                    "post_hz",
+                    default=0.0,
+                    min=0.0,
+                    max=23900.0,
+                    step=100.0,
+                    advanced=True,
+                    tooltip=(
+                        "Linear-phase roll-off of the result: 0 = off, else Hz (16000, 19000, 21000 tame "
+                        "added air that sounds harsh)."
                     ),
                 ),
                 io.Int.Input(
@@ -123,17 +131,22 @@ class PlenioRefine(io.ComfyNode):
         engine: str,
         crossover_hz: float,
         sr_gain: float,
-        pre_hz: str,
-        post_hz: str,
+        pre_hz: float,
+        post_hz: float,
         seed: int,
         model: Any = None,
+        preset: str = CUSTOM_PRESET,
     ) -> io.NodeOutput:
         if engine not in ENGINES:
             raise PlenioUserError(f"Unknown engine {engine!r}; use one of {list(ENGINES)}.")
-        if pre_hz not in PRE_STAGES:
-            raise PlenioUserError(f"Unknown pre stage {pre_hz!r}; use one of {list(PRE_STAGES)}.")
-        if post_hz not in POST_STAGES:
-            raise PlenioUserError(f"Unknown post stage {post_hz!r}; use one of {list(POST_STAGES)}.")
+        chosen = prepared_stages(preset)
+        if preset not in PRESET_OPTIONS:
+            raise PlenioUserError(f"Unknown preset {preset!r}; use one of {list(PRESET_OPTIONS)}.")
+        # a prepared template sets all three stages in one go (owner's rule: crossover 500 Hz below PRE);
+        # *custom* uses the three fields as they are
+        use_pre, use_post, use_crossover = float(pre_hz), float(post_hz), float(crossover_hz)
+        if chosen is not None:
+            use_pre, use_post, use_crossover = chosen
         sr_engine = None
         if engine == "model":
             if model is None:
@@ -142,7 +155,7 @@ class PlenioRefine(io.ComfyNode):
                     hint="Connect Load Audio Model (super-resolution), or choose the engine 'resample only'.",
                 )
             sr_engine = audio_models.require(model, "super-resolution", "Refine")
-        settings = RefineSettings(pre_value(pre_hz), crossover_hz, sr_gain, post_value(post_hz), seed)
+        settings = RefineSettings(use_pre, use_crossover, sr_gain, use_post, seed)
         items, rate = host.audio_items(audio)
         results, reports = [], []
         for item in items:
@@ -152,14 +165,26 @@ class PlenioRefine(io.ComfyNode):
         notes = [note for report in reports for note in report["notes"]]
         first = reports[0]
         edge_in, edge_out = first["bandwidth_in_hz"], first["bandwidth_out_hz"]
+        applied = (
+            f"; preset {preset} (PRE {use_pre:g} Hz, crossover {use_crossover:g} Hz, POST {use_post:g} Hz)"
+            if chosen is not None
+            else ""
+        )
         summary = (
             f"Refine: {first['engine']}, {rate} -> {OUTPUT_RATE} Hz; bandwidth "
             f"{'-' if edge_in is None else f'{edge_in / 1000:.1f} kHz'} -> "
             f"{'-' if edge_out is None else f'{edge_out / 1000:.1f} kHz'}"
+            + applied
             + (" (provisional defaults)" if first["provisional_defaults"] and sr_engine is not None else "")
         )
         status = Status.WARNING if notes else Status.OK
-        record = Report("refine", status, summary, tuple(notes), {"items": reports})
+        record = Report(
+            "refine",
+            status,
+            summary,
+            tuple(notes),
+            {"items": reports, "preset": preset if chosen is not None else None},
+        )
         markdown = "\n".join([f"**{summary}**", *[f"- note: {n}" for n in notes]])
         return io.NodeOutput(
             host.make_audio(results, OUTPUT_RATE),

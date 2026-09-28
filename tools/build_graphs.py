@@ -250,13 +250,13 @@ def master() -> Blueprint:
     eq = g.add(
         "PlenioEQ",
         (0, 0),
-        size=(340, 200),
+        size=(620, 320),
         widgets={"mode": "match preset", "mode.preset": WARM_GENTLE},
     )
     loudness = g.add(
         "PlenioLoudness",
-        (400, 0),
-        size=(340, 200),
+        (680, 0),
+        size=(360, 220),
         widgets={"target": MASTER_TARGET, "compression": MASTER_STYLE, "sample_rate": "keep"},
     )
     g.link(eq, "audio", loudness, "audio")
@@ -318,8 +318,9 @@ def refine() -> Blueprint:
         [
             BlueprintInput("audio", "AUDIO", [(stage, "audio")]),
             # promoted widgets: every template sets its own stages on the wrapper node
-            BlueprintInput("pre_hz", "COMBO", [(stage, "pre_hz")], label="pre (model input)"),
-            BlueprintInput("post_hz", "COMBO", [(stage, "post_hz")], label="post (roll-off)"),
+            BlueprintInput("preset", "COMBO", [(stage, "preset")], label="stage template"),
+            BlueprintInput("pre_hz", "FLOAT", [(stage, "pre_hz")], label="pre (model input)"),
+            BlueprintInput("post_hz", "FLOAT", [(stage, "post_hz")], label="post (roll-off)"),
             BlueprintInput("crossover_hz", "FLOAT", [(stage, "crossover_hz")], label="crossover"),
         ],
         [
@@ -353,7 +354,6 @@ def stems_stage(
 
 def refine_stage(
     g: Graph,
-    blueprints: dict[str, Blueprint],
     x: float,
     *,
     audio: tuple[Node, str],
@@ -361,33 +361,45 @@ def refine_stage(
     y: float = 430,
     widgets: dict[str, object] | None = None,
 ) -> tuple[tuple[Node, str], Node]:
-    """The REFINE block of a template (plan §11): bypassed and collapsed unless it is on by default.
+    """The REFINE block: the model loader and Refine as **plain nodes** in one group (plan §11).
 
-    Where the block is active it ships **expanded**: a collapsed node shows its promoted stages as a
-    preview only, so the three fields could not be edited there (the owner's report, 2026-09-28).
+    Not a subgraph: the ComfyUI frontend renders the promoted widgets of a subgraph node as a
+    read-only preview and draws no editable widget rows for them, so the four stage widgets (the
+    preset and the three numbers) could not be touched there - the owner's reports of 2026-09-28
+    and 2026-09-29. Plain nodes behave like every other node in the templates.
 
-    ``widgets`` sets the promoted stages of this template (the MiniMax preset: pre 10 kHz, post
-    19 kHz, crossover 14.5 kHz - the owner's choice, 2026-09-28); elsewhere the node keeps its own
-    defaults (pre *auto*, post *off*, crossover 0 = the measured bandwidth minus 500 Hz).
+    ``widgets`` are Refine's own widget values (the MiniMax template: preset 3 and the matching
+    numbers, the owner's choice); elsewhere the node keeps its defaults (preset *custom*, pre 0 =
+    the engine's condition, post 0 = off, crossover 0 = the measured bandwidth minus 500 Hz).
 
-    Returns the audio source and the node, so the caller can pass both to ``finish`` (its report).
+    Returns the audio source and the stage node, so the caller can pass both to ``finish`` (its
+    report).
     """
-    node = g.add_subgraph(
-        blueprints["refine"],
+    loader = g.add(
+        "PlenioAudioModelLoader",
         (x, y),
-        size=(340, 250) if active else (340, 170),
-        title="Plenio · Refine (48 kHz)" if active else "Refine (optional)",
+        size=(320, 150),
+        title="Super-resolution model" if active else "Super-resolution model (optional)",
+        widgets={"kind": "super-resolution", "kind.model": REFINE_MODEL},
+        properties=model(REFINE_MODEL),
+        mode=0 if active else 4,
+    )
+    stage = g.add(
+        "PlenioRefine",
+        (x, y + 165),
+        size=(360, 340),
+        title="Refine (48 kHz)" if active else "Refine (optional)",
         widgets=widgets,
         mode=0 if active else 4,
-        collapsed=not active,
     )
-    g.link(audio[0], audio[1], node, "audio")
+    g.link(loader, "model", stage, "model")
+    g.link(audio[0], audio[1], stage, "audio")
     g.group(
         "REFINE (48 kHz)" if active else "REFINE (optional)",
-        [node],
+        [loader, stage],
         color=GROUP if active else OPTIONAL_GROUP,
     )
-    return (node, "audio"), node
+    return (stage, "audio"), stage
 
 
 def stems() -> Blueprint:
@@ -945,7 +957,7 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     seed = take_seed(g, (2320, 0))
     render = g.add_subgraph(bp["yue2_render"], (2320, 150), size=(320, 310))
     audio, stems_node = stems_stage(g, bp, 2320, audio=(render, "AUDIO"), y=665)
-    audio, refine_node = refine_stage(g, bp, 2320, audio=audio, y=815)
+    audio, refine_node = refine_stage(g, 2320, audio=audio, y=815)
     g.link(brief, "brief", write, "brief")
     g.link(model_node, "engine", write, "engine")
     for kind in ("title", "style", "lyrics", "artwork_prompt"):
@@ -1154,7 +1166,7 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g.link(check_vocals, "audio", check_lyrics, "audio")
     g.link(text_sheet, "lyrics", check_lyrics, "expected_lyrics")
     audio, stems_node = stems_stage(g, bp, 3420, audio=(check_vocals, "audio"), y=715)
-    audio, refine_node = refine_stage(g, bp, 3420, audio=audio, y=905)
+    audio, refine_node = refine_stage(g, 3420, audio=audio, y=905)
     _master, preview, export = finish(
         g,
         bp,
@@ -1253,12 +1265,17 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     audio, stems_node = stems_stage(g, bp, 1800, audio=(render, "AUDIO"), y=430)
     audio, refine_node = refine_stage(
         g,
-        bp,
         1800,
         audio=audio,
         active=True,
         y=620,
-        widgets={"pre_hz": "10000", "post_hz": "19000", "crossover_hz": 14500.0},
+        widgets={
+            "engine": "model",
+            "preset": "3 - MiniMax: pre 10 kHz / post 19 kHz",
+            "pre_hz": 10000.0,
+            "post_hz": 19000.0,
+            "crossover_hz": 9500.0,
+        },
     )
     _master, preview, export = finish(
         g,
@@ -1374,7 +1391,7 @@ def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g.link(score_sheet, "score_seconds", render, "max_duration")
     g.link(seed, "seed", render, "seed")
     audio, stems_node = stems_stage(g, bp, 2320, audio=(render, "AUDIO"), y=670)
-    audio, refine_node = refine_stage(g, bp, 2320, audio=audio, y=820)
+    audio, refine_node = refine_stage(g, 2320, audio=audio, y=820)
     _master, preview, export = finish(
         g,
         bp,
@@ -1427,25 +1444,26 @@ def enhance_master(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     source = g.add("LoadAudio", (0, 0), size=(340, 140), title="Source")
     # for band-limited uploads (old MP3s): Refine is available, bypassed (plan §11)
     audio, stems_node = stems_stage(g, bp, 420, audio=(source, "AUDIO"), y=200)
-    audio, refine_node = refine_stage(g, bp, 420, audio=audio, y=380)
+    audio, refine_node = refine_stage(g, 420, audio=audio, y=380)
     eq = g.add(
         "PlenioEQ",
         (880, 0),
-        size=(605, 540),
+        # the owner's request (2026-09-28): a much wider EQ, so the curve has room for editing
+        size=(980, 560),
         widgets={"mode": "match preset", "mode.preset": WARM_GENTLE},
         labels={"mode": "EQ"},
     )
     loudness = g.add(
         "PlenioLoudness",
-        (1530, 0),
+        (1905, 0),
         size=(425, 245),
         widgets={"target": MASTER_TARGET, "compression": MASTER_STYLE, "sample_rate": "keep"},
         labels={"target": "loudness target"},
     )
-    preview = g.add("PreviewAudio", (2115, 0), size=(360, 120), title="Preview (mastered)")
+    preview = g.add("PreviewAudio", (2490, 0), size=(360, 120), title="Preview (mastered)")
     export = g.add(
         "PlenioExportRelease",
-        (2115, 180),
+        (2490, 180),
         size=(380, 400),
         autogrow={"reports": 5},
         widgets={

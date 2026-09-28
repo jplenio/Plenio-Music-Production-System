@@ -20,7 +20,13 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 ### Changed
 
-- The templates gained the new optional blocks: **REFINE (48 kHz)** in all five (active in MiniMax, bypassed elsewhere) and **STEMS (optional)** in all five (bypassed); both are collapsed, and *4 · Enhance & Master* now reads *Load Audio → Stems (optional) → Refine (optional) → EQ → Loudness & Dynamics → Export*.
+- ### Changed
+
+- **Refine's stages are a preset plus three free fields** (the owner's request, 2026-09-28): the two *stage* combos are gone. `pre_hz` and `post_hz` are numbers again (0 = the engine's training condition for PRE, 0 = off for POST), and a new **`preset`** list box sets all three in one go - five prepared templates (`1 - pre 6 kHz / post 16 kHz` … `5 - pre 14 kHz / post 21 kHz`), each with the crossover 500 Hz below its PRE (the owner's rule), plus *custom* for the three fields. *3 · MiniMax · Song* ships template **3 (pre 10 kHz / post 19 kHz, crossover 9.5 kHz)** with the matching numbers in the fields, so switching to *custom* keeps the same sound. The report names the preset that applied.
+- **The REFINE block is a pair of plain nodes** (loader + stage) in a group, not a subgraph: the ComfyUI frontend renders the promoted widgets of a subgraph node as a read-only preview and draws no editable rows for them - which is why the three fields were dead in *3 · MiniMax · Song* (the owner's reports of 2026-09-28/29, measured in a real frontend). Plain nodes behave like every other node; the block is still bypassed (mode 4) in the other four templates.
+- **The EQ is much wider in the templates** (980 x 560 in *4 · Enhance & Master*, 620 x 320 in the *Plenio · Master* blueprint) and the nodes to its right moved with it (Loudness 1905, Preview/Export 2490), so nothing overlaps.
+
+The templates gained the new optional blocks: **REFINE (48 kHz)** in all five (active in MiniMax, bypassed elsewhere) and **STEMS (optional)** in all five (bypassed); both are collapsed, and *4 · Enhance & Master* now reads *Load Audio → Stems (optional) → Refine (optional) → EQ → Loudness & Dynamics → Export*.
 - Plenio now has 18 nodes (was 14): *Load Audio Model*, *Refine (48 kHz)*, *Separate Stems* and *Stem Mixer* (all four marked experimental).
 - The Song Sheet review stop now wins over a document error: a run that would stop for approval stops instead of failing (the DAW template's first run needs exactly that).
 - The ABC text stays the only stored score; the piano roll, the chord lane and the inspector commit canonical operations, and no graphical edit can write text the upstream parser refuses.

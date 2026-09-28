@@ -48,6 +48,27 @@ CROSSOVER_BELOW_EDGE_HZ = 500.0
 PROVISIONAL = True
 """The defaults come from the legacy chain and the plan's re-evaluation, not from measurements yet (L1)."""
 
+CUSTOM_PRESET = "custom - the three fields below"
+PREPARED_STAGES: tuple[tuple[str, float, float], ...] = (
+    ("1 - pre 6 kHz / post 16 kHz", 6000.0, 16000.0),
+    ("2 - pre 8 kHz / post 19 kHz", 8000.0, 19000.0),
+    ("3 - MiniMax: pre 10 kHz / post 19 kHz", 10000.0, 19000.0),
+    ("4 - pre 12 kHz / post 19 kHz", 12000.0, 19000.0),
+    ("5 - pre 14 kHz / post 21 kHz", 14000.0, 21000.0),
+)
+"""The prepared stage templates (owner's list, 2026-09-28): one choice sets PRE, POST and the crossover."""
+
+CROSSOVER_BELOW_PRE_HZ = 500.0
+"""The prepared templates put the crossover this far below their PRE (owner's rule)."""
+
+
+def prepared_stages(name: str) -> tuple[float, float, float] | None:
+    """``(pre_hz, post_hz, crossover_hz)`` of a prepared template; ``None`` for *custom*."""
+    for option, pre, post in PREPARED_STAGES:
+        if option == name:
+            return pre, post, max(pre - CROSSOVER_BELOW_PRE_HZ, 1000.0)
+    return None
+
 
 class Engine(Protocol):
     """A super-resolution model behind the ComfyUI adapter layer (weights, device, memory)."""
@@ -279,7 +300,10 @@ def refine(
 
 
 __all__ = [
+    "CUSTOM_PRESET",
+    "CROSSOVER_BELOW_PRE_HZ",
     "OUTPUT_RATE",
+    "PREPARED_STAGES",
     "REFINE_SCHEMA",
     "Engine",
     "RefineSettings",
@@ -287,6 +311,7 @@ __all__ = [
     "filter_zero_delay",
     "lowpass_kernel",
     "measure_bandwidth",
+    "prepared_stages",
     "refine",
     "run_chunked",
 ]

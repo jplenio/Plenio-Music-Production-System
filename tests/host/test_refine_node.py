@@ -33,8 +33,8 @@ def refine_prompt(
                 "engine": engine,
                 "crossover_hz": 0.0,
                 "sr_gain": 1.0,
-                "pre_hz": "auto",
-                "post_hz": "off",
+                "pre_hz": 0.0,
+                "post_hz": 0.0,
                 "seed": 4,
                 **settings,
             },
@@ -81,20 +81,30 @@ def test_the_model_runs_for_a_full_band_input_too(server: ComfyServer, log: Log)
     assert probe["rate"] == 48000 and probe["shape"] == [1, 2, int(SECONDS * 48000)]
 
 
-def test_the_stages_are_checked(server: ComfyServer) -> None:
-    """A stage outside the prepared list is refused before anything runs (ComfyUI's combo check)."""
-    with pytest.raises(ExecutionFailedError) as refused:
-        server.run(refine_prompt(engine="model", pre_hz="9000"))
-    assert "pre_hz: '9000' not in" in str(refused.value)
-    with pytest.raises(ExecutionFailedError) as refused:
-        server.run(refine_prompt(engine="model", post_hz="18000"))
-    assert "post_hz: '18000' not in" in str(refused.value)
+def test_the_prepared_templates_set_all_three_stages(server: ComfyServer) -> None:
+    """Owner's request (2026-09-28): one preset sets PRE, POST and the crossover (500 Hz below PRE)."""
     info = server.get("/object_info/PlenioRefine")["PlenioRefine"]
-    # ComfyUI reports a combo as ["COMBO", {"options": [...]}]
-    pre = info["input"]["required"]["pre_hz"][1]["options"]
-    post = info["input"]["required"]["post_hz"][1]["options"]
-    assert pre == ["auto", "off", "6000", "8000", "10000", "12000", "14000"]
-    assert post == ["off", "16000", "19000", "21000"]
+    inputs = info["input"]
+    # optional inputs (a default is enough for prompt validation) live under "optional"
+    spec = inputs["required"].get("preset") or inputs["optional"]["preset"]
+    presets = spec[1]["options"]
+    assert presets[0].startswith("custom") and len(presets) == 6
+    minimax = [name for name in presets if "MiniMax" in name]
+    assert minimax, presets
+    entry = server.run(refine_prompt(engine="model", preset=minimax[0]))
+    summary = entry["outputs"]["2"]["plenio_summary"][0]["markdown"]
+    # the preset resolved its own numbers: PRE 10 kHz, crossover 9.5 kHz, POST 19 kHz
+    assert f"preset {minimax[0]}" in summary
+    assert "PRE 10000 Hz" in summary and "crossover 9500 Hz" in summary and "POST 19000 Hz" in summary
+    assert "fake-sr" in summary  # the model ran
+    # the three fields are free numbers now (the "off"/"auto" stage combos are gone)
+    assert info["input"]["required"]["pre_hz"][0] == "FLOAT"
+    assert info["input"]["required"]["post_hz"][0] == "FLOAT"
+    assert info["input"]["required"]["crossover_hz"][0] == "FLOAT"
+    # an unknown preset is refused before anything runs
+    with pytest.raises(ExecutionFailedError) as refused:
+        server.run(refine_prompt(engine="model", preset="no such template"))
+    assert "preset" in str(refused.value) and "no such template" in str(refused.value)
 
 
 def test_model_engine_errors_are_actionable(server: ComfyServer) -> None:

@@ -191,3 +191,13 @@ def test_post_rolloff_and_settings_are_checked() -> None:
     assert r.measure_bandwidth(out, 48000) < 19800
     with pytest.raises(PlenioUserError):
         r.refine(x, 44100, NoiseEngine(), r.RefineSettings(sr_gain=5.0))
+
+
+def test_the_prepared_templates_set_pre_post_and_the_crossover() -> None:
+    """The owner's rule (2026-09-28): one choice sets PRE, POST and the crossover 500 Hz below PRE."""
+    names = [name for name, _pre, _post in r.PREPARED_STAGES]
+    assert len(names) == 5 and names[2].startswith("3 - MiniMax")
+    for name, pre, post in r.PREPARED_STAGES:
+        assert r.prepared_stages(name) == (pre, post, pre - r.CROSSOVER_BELOW_PRE_HZ), name
+    assert r.prepared_stages(r.CUSTOM_PRESET) is None
+    assert r.prepared_stages("no such template") is None

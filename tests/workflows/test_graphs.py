@@ -265,10 +265,11 @@ def test_the_daw_template_composes_its_own_score() -> None:
 
 
 def test_refine_runs_in_minimax_and_stays_bypassed_elsewhere() -> None:
-    """M5/D10: Refine (48 kHz) with UniverSR is on in MiniMax and bypassed (collapsed) elsewhere (plan §4.6).
+    """M5/D10: Refine (48 kHz) with UniverSR is on in MiniMax and bypassed elsewhere (plan §4.6).
 
-    The active block ships **expanded**: a collapsed node shows its promoted stages as a preview only,
-    so the three fields could not be edited there (the owner's report, 2026-09-28).
+    The block is a pair of **plain nodes** (loader + stage), not a subgraph: the frontend renders the
+    promoted widgets of a subgraph node as a read-only preview, so the stage widgets (the preset and
+    the three numbers) could not be edited there (the owner's reports of 2026-09-28/29).
     """
     for name, active in (
         ("1 · YuE2 · Song", False),
@@ -278,25 +279,25 @@ def test_refine_runs_in_minimax_and_stays_bypassed_elsewhere() -> None:
         ("5 · YuE2 · DAW", False),
     ):
         template = TEMPLATES[name]
-        wrapper = next(n for n in template["nodes"] if "Refine" in str(n.get("title", "")))
-        assert (wrapper.get("mode") != 4) is active, name
-        assert wrapper["flags"].get("collapsed", False) is not active, name
+        stage = next(n for n in template["nodes"] if n.get("type") == "PlenioRefine")
+        loader = next(n for n in template["nodes"] if n.get("type") == "PlenioAudioModelLoader")
+        assert (stage.get("mode") != 4) is active, name
+        assert (loader.get("mode") != 4) is active, name
+        assert not stage.get("flags", {}).get("collapsed", False), name  # the widgets stay visible
         if not active:
-            assert "(optional)" in str(wrapper["title"]), name
+            assert "(optional)" in str(stage["title"]) and "(optional)" in str(loader["title"]), name
         group = next(g for g in template["groups"] if "REFINE" in g["title"])
         assert ("48 kHz" in group["title"]) is active, name
-        definition = next(d for d in template["definitions"]["subgraphs"] if d["id"] == wrapper["type"])
-        assert definition["name"] == "Plenio · Refine (48 kHz)"
-        loader = next(n for n in definition["nodes"] if n["type"] == "PlenioAudioModelLoader")
         assert loader["widgets_values"][1] == "pytorch_model.bin"
         assert loader["properties"]["models"][0]["directory"] == "audio_sr"
-        stage = next(n for n in definition["nodes"] if n["type"] == "PlenioRefine")
-        assert stage["widgets_values"][0] == "model"  # the engine widget: the connected model
+        assert stage["widgets_values"][0] == ("model" if active else "resample only"), name
+        assert isinstance(stage["widgets_values"][1], (int, float)), name  # crossover_hz, a free number
+        assert isinstance(stage["widgets_values"][3], (int, float)), name  # pre_hz too
         # the stage's report reaches the release record
         export = next(n for n in template["nodes"] if n["type"] == "PlenioExportRelease")
         reports = [slot for slot in export["inputs"] if slot["name"].startswith("reports.")]
         sources = {link[1] for link in template["links"] if link[0] in {s["link"] for s in reports}}
-        assert wrapper["id"] in sources, name
+        assert stage["id"] in sources, name
 
 
 def test_stems_is_bypassed_everywhere_and_mixes_neutrally() -> None:

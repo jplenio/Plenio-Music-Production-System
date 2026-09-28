@@ -1,8 +1,8 @@
 {
  "id": "dac7a916-31bb-521d-b75c-0944f452bb94",
  "revision": 0,
- "last_node_id": 28,
- "last_link_id": 73,
+ "last_node_id": 29,
+ "last_link_id": 74,
  "nodes": [
   {
    "id": 1,
@@ -555,7 +555,7 @@
      "name": "report",
      "type": "PLENIO_REPORT",
      "links": [
-      66
+      67
      ]
     },
     {
@@ -815,7 +815,7 @@
      "name": "report",
      "type": "PLENIO_REPORT",
      "links": [
-      64
+      65
      ]
     },
     {
@@ -1362,7 +1362,7 @@
      "name": "title",
      "type": "STRING",
      "links": [
-      60
+      61
      ]
     },
     {
@@ -1393,7 +1393,7 @@
      "name": "artwork_prompt",
      "type": "STRING",
      "links": [
-      61
+      62
      ]
     },
     {
@@ -1413,7 +1413,7 @@
      "name": "report",
      "type": "PLENIO_REPORT",
      "links": [
-      65
+      66
      ]
     },
     {
@@ -1661,7 +1661,7 @@
      "name": "report",
      "type": "PLENIO_REPORT",
      "links": [
-      67
+      68
      ]
     },
     {
@@ -1818,7 +1818,7 @@
      "name": "report",
      "type": "PLENIO_REPORT",
      "links": [
-      68
+      69
      ]
     }
    ],
@@ -1862,7 +1862,7 @@
      "name": "audio",
      "type": "AUDIO",
      "links": [
-      55
+      56
      ]
     },
     {
@@ -1870,7 +1870,7 @@
      "name": "report",
      "type": "PLENIO_REPORT",
      "links": [
-      69
+      70
      ]
     },
     {
@@ -1878,7 +1878,7 @@
      "name": "separation_report",
      "type": "PLENIO_REPORT",
      "links": [
-      70
+      71
      ]
     }
    ],
@@ -1888,32 +1888,132 @@
   },
   {
    "id": 23,
-   "type": "d0897a69-045d-5c2a-95eb-7a0481b8318b",
+   "type": "PlenioAudioModelLoader",
    "pos": [
     3420,
     905
    ],
    "size": [
-    340,
-    170
+    320,
+    150
    ],
-   "flags": {
-    "collapsed": true
-   },
+   "flags": {},
    "order": 22,
+   "mode": 4,
+   "inputs": [
+    {
+     "localized_name": "kind",
+     "name": "kind",
+     "type": "COMFY_DYNAMICCOMBO_V3",
+     "widget": {
+      "name": "kind"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "kind.model",
+     "name": "kind.model",
+     "type": "COMBO",
+     "widget": {
+      "name": "kind.model"
+     },
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "localized_name": "model",
+     "name": "model",
+     "type": "PLENIO_AUDIO_MODEL",
+     "links": [
+      55
+     ]
+    }
+   ],
+   "title": "Super-resolution model (optional)",
+   "properties": {
+    "Node name for S&R": "PlenioAudioModelLoader",
+    "models": [
+     {
+      "name": "pytorch_model.bin",
+      "url": "https://huggingface.co/woongzip1/universr-audio/resolve/main/pytorch_model.bin",
+      "directory": "audio_sr"
+     }
+    ]
+   },
+   "widgets_values": [
+    "super-resolution",
+    "pytorch_model.bin"
+   ]
+  },
+  {
+   "id": 24,
+   "type": "PlenioRefine",
+   "pos": [
+    3420,
+    1070
+   ],
+   "size": [
+    360,
+    340
+   ],
+   "flags": {},
+   "order": 23,
    "mode": 4,
    "inputs": [
     {
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
+     "link": 56
+    },
+    {
+     "localized_name": "model",
+     "name": "model",
+     "shape": 7,
+     "type": "PLENIO_AUDIO_MODEL",
      "link": 55
+    },
+    {
+     "localized_name": "engine",
+     "name": "engine",
+     "type": "COMBO",
+     "widget": {
+      "name": "engine"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "crossover_hz",
+     "name": "crossover_hz",
+     "type": "FLOAT",
+     "widget": {
+      "name": "crossover_hz"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "sr_gain",
+     "name": "sr_gain",
+     "type": "FLOAT",
+     "widget": {
+      "name": "sr_gain"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "preset",
+     "name": "preset",
+     "type": "COMBO",
+     "widget": {
+      "name": "preset"
+     },
+     "link": null
     },
     {
      "localized_name": "pre_hz",
      "name": "pre_hz",
-     "label": "pre (model input)",
-     "type": "COMBO",
+     "type": "FLOAT",
      "widget": {
       "name": "pre_hz"
      },
@@ -1922,20 +2022,18 @@
     {
      "localized_name": "post_hz",
      "name": "post_hz",
-     "label": "post (roll-off)",
-     "type": "COMBO",
+     "type": "FLOAT",
      "widget": {
       "name": "post_hz"
      },
      "link": null
     },
     {
-     "localized_name": "crossover_hz",
-     "name": "crossover_hz",
-     "label": "crossover",
-     "type": "FLOAT",
+     "localized_name": "seed",
+     "name": "seed",
+     "type": "INT",
      "widget": {
-      "name": "crossover_hz"
+      "name": "seed"
      },
      "link": null
     }
@@ -1946,8 +2044,8 @@
      "name": "audio",
      "type": "AUDIO",
      "links": [
-      56,
-      59
+      57,
+      60
      ]
     },
     {
@@ -1955,20 +2053,26 @@
      "name": "report",
      "type": "PLENIO_REPORT",
      "links": [
-      71
+      72
      ]
     }
    ],
    "title": "Refine (optional)",
-   "properties": {},
+   "properties": {
+    "Node name for S&R": "PlenioRefine"
+   },
    "widgets_values": [
-    "auto",
-    "off",
-    0.0
+    "resample only",
+    0.0,
+    1.0,
+    "custom - the three fields below",
+    0.0,
+    0.0,
+    0
    ]
   },
   {
-   "id": 24,
+   "id": 25,
    "type": "259b88ba-7c57-57fb-b73e-58f691fe4b56",
    "pos": [
     3880,
@@ -1979,14 +2083,14 @@
     170
    ],
    "flags": {},
-   "order": 23,
+   "order": 24,
    "mode": 0,
    "inputs": [
     {
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
-     "link": 56
+     "link": 57
     },
     {
      "localized_name": "reference",
@@ -2011,8 +2115,8 @@
      "name": "audio",
      "type": "AUDIO",
      "links": [
-      57,
-      58
+      58,
+      59
      ]
     },
     {
@@ -2020,7 +2124,7 @@
      "name": "eq_report",
      "type": "PLENIO_REPORT",
      "links": [
-      72
+      73
      ]
     },
     {
@@ -2028,7 +2132,7 @@
      "name": "loudness_report",
      "type": "PLENIO_REPORT",
      "links": [
-      73
+      74
      ]
     }
    ],
@@ -2039,7 +2143,7 @@
    ]
   },
   {
-   "id": 25,
+   "id": 26,
    "type": "PreviewAudio",
    "pos": [
     3880,
@@ -2050,14 +2154,14 @@
     120
    ],
    "flags": {},
-   "order": 24,
+   "order": 25,
    "mode": 0,
    "inputs": [
     {
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
-     "link": 57
+     "link": 58
     }
    ],
    "outputs": [
@@ -2075,7 +2179,7 @@
    "widgets_values": []
   },
   {
-   "id": 26,
+   "id": 27,
    "type": "PlenioExportRelease",
    "pos": [
     4280,
@@ -2086,35 +2190,35 @@
     520
    ],
    "flags": {},
-   "order": 25,
+   "order": 26,
    "mode": 0,
    "inputs": [
     {
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
-     "link": 58
+     "link": 59
     },
     {
      "localized_name": "title",
      "name": "title",
      "shape": 7,
      "type": "STRING",
-     "link": 60
+     "link": 61
     },
     {
      "localized_name": "original",
      "name": "original",
      "shape": 7,
      "type": "AUDIO",
-     "link": 59
+     "link": 60
     },
     {
      "localized_name": "cover",
      "name": "cover",
      "shape": 7,
      "type": "IMAGE",
-     "link": 62
+     "link": 63
     },
     {
      "localized_name": "reports.report_0",
@@ -2122,7 +2226,7 @@
      "label": "report_0",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 64
+     "link": 65
     },
     {
      "localized_name": "reports.report_1",
@@ -2130,7 +2234,7 @@
      "label": "report_1",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 65
+     "link": 66
     },
     {
      "localized_name": "reports.report_2",
@@ -2138,7 +2242,7 @@
      "label": "report_2",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 66
+     "link": 67
     },
     {
      "localized_name": "reports.report_3",
@@ -2146,7 +2250,7 @@
      "label": "report_3",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 67
+     "link": 68
     },
     {
      "localized_name": "reports.report_4",
@@ -2154,7 +2258,7 @@
      "label": "report_4",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 68
+     "link": 69
     },
     {
      "localized_name": "reports.report_5",
@@ -2162,7 +2266,7 @@
      "label": "report_5",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 69
+     "link": 70
     },
     {
      "localized_name": "reports.report_6",
@@ -2170,7 +2274,7 @@
      "label": "report_6",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 70
+     "link": 71
     },
     {
      "localized_name": "reports.report_7",
@@ -2178,7 +2282,7 @@
      "label": "report_7",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 71
+     "link": 72
     },
     {
      "localized_name": "reports.report_8",
@@ -2186,7 +2290,7 @@
      "label": "report_8",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 72
+     "link": 73
     },
     {
      "localized_name": "reports.report_9",
@@ -2194,7 +2298,7 @@
      "label": "report_9",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 73
+     "link": 74
     },
     {
      "localized_name": "reports.report_10",
@@ -2296,7 +2400,7 @@
    ]
   },
   {
-   "id": 27,
+   "id": 28,
    "type": "9dbb5617-ccf9-5537-b674-405adb29958c",
    "pos": [
     3880,
@@ -2307,7 +2411,7 @@
     170
    ],
    "flags": {},
-   "order": 26,
+   "order": 27,
    "mode": 4,
    "inputs": [
     {
@@ -2318,7 +2422,7 @@
      "widget": {
       "name": "text"
      },
-     "link": 61
+     "link": 62
     },
     {
      "localized_name": "noise_seed",
@@ -2347,8 +2451,8 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      62,
-      63
+      63,
+      64
      ]
     }
    ],
@@ -2361,7 +2465,7 @@
    ]
   },
   {
-   "id": 28,
+   "id": 29,
    "type": "PreviewImage",
    "pos": [
     4280,
@@ -2372,14 +2476,14 @@
     300
    ],
    "flags": {},
-   "order": 27,
+   "order": 28,
    "mode": 4,
    "inputs": [
     {
      "localized_name": "images",
      "name": "images",
      "type": "IMAGE",
-     "link": 63
+     "link": 64
     }
    ],
    "outputs": [
@@ -2832,15 +2936,15 @@
   ],
   [
    55,
-   22,
-   0,
    23,
    0,
-   "AUDIO"
+   24,
+   1,
+   "PLENIO_AUDIO_MODEL"
   ],
   [
    56,
-   23,
+   22,
    0,
    24,
    0,
@@ -2856,7 +2960,7 @@
   ],
   [
    58,
-   24,
+   25,
    0,
    26,
    0,
@@ -2864,121 +2968,129 @@
   ],
   [
    59,
-   23,
+   25,
    0,
-   26,
-   2,
+   27,
+   0,
    "AUDIO"
   ],
   [
    60,
-   16,
+   24,
    0,
-   26,
-   1,
-   "STRING"
+   27,
+   2,
+   "AUDIO"
   ],
   [
    61,
    16,
-   4,
-   27,
    0,
+   27,
+   1,
    "STRING"
   ],
   [
    62,
-   27,
+   16,
+   4,
+   28,
    0,
-   26,
-   3,
-   "IMAGE"
+   "STRING"
   ],
   [
    63,
-   27,
-   0,
    28,
    0,
+   27,
+   3,
    "IMAGE"
   ],
   [
    64,
+   28,
+   0,
+   29,
+   0,
+   "IMAGE"
+  ],
+  [
+   65,
    10,
    7,
-   26,
+   27,
    4,
    "PLENIO_REPORT"
   ],
   [
-   65,
+   66,
    16,
    7,
-   26,
+   27,
    5,
    "PLENIO_REPORT"
   ],
   [
-   66,
+   67,
    8,
    2,
-   26,
+   27,
    6,
    "PLENIO_REPORT"
   ],
   [
-   67,
+   68,
    19,
    2,
-   26,
+   27,
    7,
    "PLENIO_REPORT"
   ],
   [
-   68,
+   69,
    21,
    3,
-   26,
+   27,
    8,
-   "PLENIO_REPORT"
-  ],
-  [
-   69,
-   22,
-   1,
-   26,
-   9,
    "PLENIO_REPORT"
   ],
   [
    70,
    22,
-   2,
-   26,
-   10,
+   1,
+   27,
+   9,
    "PLENIO_REPORT"
   ],
   [
    71,
-   23,
-   1,
-   26,
-   11,
+   22,
+   2,
+   27,
+   10,
    "PLENIO_REPORT"
   ],
   [
    72,
    24,
    1,
-   26,
-   12,
+   27,
+   11,
    "PLENIO_REPORT"
   ],
   [
    73,
-   24,
+   25,
+   1,
+   27,
+   12,
+   "PLENIO_REPORT"
+  ],
+  [
+   74,
+   25,
    2,
-   26,
+   27,
    13,
    "PLENIO_REPORT"
   ]
@@ -3003,8 +3115,8 @@
    "bounding": [
     3390,
     835,
-    320,
-    130
+    420,
+    605
    ],
    "color": "#555",
    "font_size": 24,
@@ -3895,6 +4007,13 @@
         "link": null
        },
        {
+        "localized_name": "system_prompt",
+        "name": "system_prompt",
+        "shape": 7,
+        "type": "STRING",
+        "link": null
+       },
+       {
         "localized_name": "prompt",
         "name": "prompt",
         "type": "STRING",
@@ -4020,6 +4139,12 @@
         "links": [
          3
         ]
+       },
+       {
+        "localized_name": "thinking",
+        "name": "thinking",
+        "type": "STRING",
+        "links": null
        }
       ],
       "properties": {
@@ -4124,7 +4249,7 @@
       "origin_id": 501,
       "origin_slot": 0,
       "target_id": 503,
-      "target_slot": 4,
+      "target_slot": 5,
       "type": "STRING"
      },
      {
@@ -4204,7 +4329,7 @@
       "origin_id": -10,
       "origin_slot": 6,
       "target_id": 503,
-      "target_slot": 12,
+      "target_slot": 13,
       "type": "INT"
      },
      {
@@ -4212,7 +4337,7 @@
       "origin_id": -10,
       "origin_slot": 7,
       "target_id": 503,
-      "target_slot": 14,
+      "target_slot": 15,
       "type": "BOOLEAN"
      },
      {
@@ -5546,7 +5671,7 @@
     "outputNode": {
      "id": -20,
      "bounding": [
-      840,
+      1140,
       0,
       160,
       100
@@ -5639,8 +5764,8 @@
        0
       ],
       "size": [
-       340,
-       200
+       620,
+       320
       ],
       "flags": {},
       "order": 0,
@@ -5708,12 +5833,12 @@
       "id": 402,
       "type": "PlenioLoudness",
       "pos": [
-       400,
+       680,
        0
       ],
       "size": [
-       340,
-       200
+       360,
+       220
       ],
       "flags": {},
       "order": 1,
@@ -6742,7 +6867,7 @@
     "state": {
      "lastGroupId": 0,
      "lastNodeId": 702,
-     "lastLinkId": 7,
+     "lastLinkId": 8,
      "lastRerouteId": 0
     },
     "revision": 0,
@@ -6754,7 +6879,7 @@
       -260,
       0,
       160,
-      120
+      140
      ]
     },
     "outputNode": {
@@ -6780,8 +6905,8 @@
       ]
      },
      {
-      "id": "9eecb3ba-0562-58fd-a75d-ce58a7b247a0",
-      "name": "pre_hz",
+      "id": "3efe46b0-003c-5649-b78d-248e2d0960de",
+      "name": "preset",
       "type": "COMBO",
       "linkIds": [
        3
@@ -6790,18 +6915,31 @@
        0,
        20
       ],
-      "label": "pre (model input)"
+      "label": "stage template"
      },
      {
-      "id": "1048ddc6-fec6-52f8-87f7-96e06f5c2c2e",
-      "name": "post_hz",
-      "type": "COMBO",
+      "id": "9eecb3ba-0562-58fd-a75d-ce58a7b247a0",
+      "name": "pre_hz",
+      "type": "FLOAT",
       "linkIds": [
        4
       ],
       "pos": [
        0,
        40
+      ],
+      "label": "pre (model input)"
+     },
+     {
+      "id": "1048ddc6-fec6-52f8-87f7-96e06f5c2c2e",
+      "name": "post_hz",
+      "type": "FLOAT",
+      "linkIds": [
+       5
+      ],
+      "pos": [
+       0,
+       60
       ],
       "label": "post (roll-off)"
      },
@@ -6810,11 +6948,11 @@
       "name": "crossover_hz",
       "type": "FLOAT",
       "linkIds": [
-       5
+       6
       ],
       "pos": [
        0,
-       60
+       80
       ],
       "label": "crossover"
      }
@@ -6825,7 +6963,7 @@
       "name": "audio",
       "type": "AUDIO",
       "linkIds": [
-       6
+       7
       ],
       "pos": [
        0,
@@ -6837,7 +6975,7 @@
       "name": "report",
       "type": "PLENIO_REPORT",
       "linkIds": [
-       7
+       8
       ],
       "pos": [
        0,
@@ -6954,7 +7092,7 @@
         "widget": {
          "name": "crossover_hz"
         },
-        "link": 5
+        "link": 6
        },
        {
         "localized_name": "sr_gain",
@@ -6966,22 +7104,31 @@
         "link": null
        },
        {
-        "localized_name": "pre_hz",
-        "name": "pre_hz",
+        "localized_name": "preset",
+        "name": "preset",
         "type": "COMBO",
         "widget": {
-         "name": "pre_hz"
+         "name": "preset"
         },
         "link": 3
        },
        {
+        "localized_name": "pre_hz",
+        "name": "pre_hz",
+        "type": "FLOAT",
+        "widget": {
+         "name": "pre_hz"
+        },
+        "link": 4
+       },
+       {
         "localized_name": "post_hz",
         "name": "post_hz",
-        "type": "COMBO",
+        "type": "FLOAT",
         "widget": {
          "name": "post_hz"
         },
-        "link": 4
+        "link": 5
        },
        {
         "localized_name": "seed",
@@ -6999,7 +7146,7 @@
         "name": "audio",
         "type": "AUDIO",
         "links": [
-         6
+         7
         ]
        },
        {
@@ -7007,7 +7154,7 @@
         "name": "report",
         "type": "PLENIO_REPORT",
         "links": [
-         7
+         8
         ]
        }
       ],
@@ -7018,8 +7165,9 @@
        "model",
        0.0,
        1.0,
-       "auto",
-       "off",
+       "custom - the three fields below",
+       0.0,
+       0.0,
        0
       ]
      }
@@ -7056,18 +7204,26 @@
       "origin_slot": 2,
       "target_id": 702,
       "target_slot": 6,
-      "type": "COMBO"
+      "type": "FLOAT"
      },
      {
       "id": 5,
       "origin_id": -10,
       "origin_slot": 3,
       "target_id": 702,
-      "target_slot": 3,
+      "target_slot": 7,
       "type": "FLOAT"
      },
      {
       "id": 6,
+      "origin_id": -10,
+      "origin_slot": 4,
+      "target_id": 702,
+      "target_slot": 3,
+      "type": "FLOAT"
+     },
+     {
+      "id": 7,
       "origin_id": 702,
       "origin_slot": 0,
       "target_id": -20,
@@ -7075,7 +7231,7 @@
       "type": "AUDIO"
      },
      {
-      "id": 7,
+      "id": 8,
       "origin_id": 702,
       "origin_slot": 1,
       "target_id": -20,
@@ -7469,8 +7625,8 @@
    ],
    "outputs": [
     20,
-    25,
-    26
+    26,
+    27
    ]
   }
  },
