@@ -271,6 +271,9 @@ def test_refine_runs_in_minimax_and_stays_bypassed_elsewhere() -> None:
     promoted widgets of a subgraph node as a read-only preview, so the stage widgets (the preset and
     the three numbers) could not be edited there (the owner's reports of 2026-09-28/29).
     """
+    from plenio.core.audio.refine import CUSTOM_PRESET, PREPARED_STAGES, prepared_stages
+
+    PRESET_OPTIONS = {CUSTOM_PRESET, *(option for option, _pre, _post in PREPARED_STAGES)}
     for name, active in (
         ("1 · YuE2 · Song", False),
         ("2 · YuE2 · Cover", False),
@@ -290,9 +293,17 @@ def test_refine_runs_in_minimax_and_stays_bypassed_elsewhere() -> None:
         assert ("48 kHz" in group["title"]) is active, name
         assert loader["widgets_values"][1] == "pytorch_model.bin"
         assert loader["properties"]["models"][0]["directory"] == "audio_sr"
-        assert stage["widgets_values"][0] == ("model" if active else "resample only"), name
-        assert isinstance(stage["widgets_values"][1], (int, float)), name  # crossover_hz, a free number
-        assert isinstance(stage["widgets_values"][3], (int, float)), name  # pre_hz too
+        # the widget order: engine, crossover_hz, sr_gain, preset, pre_hz, post_hz, seed
+        engine, crossover, _gain, preset, pre, post, _seed = stage["widgets_values"]
+        assert engine == ("model" if active else "resample only"), name
+        assert all(isinstance(value, (int, float)) for value in (crossover, pre, post)), name  # free numbers
+        assert preset in PRESET_OPTIONS, name
+        if active:  # the MiniMax template: template 3 and its matching numbers (custom keeps the sound)
+            assert preset.startswith("3 - MiniMax") and prepared_stages(preset) == (pre, post, crossover)
+        else:
+            assert preset == CUSTOM_PRESET and (crossover, pre, post) == (0.0, 0.0, 0.0), name
+        # no template embeds the Refine blueprint: the block is plain nodes
+        assert all("Refine" not in sub["name"] for sub in template["definitions"]["subgraphs"]), name
         # the stage's report reaches the release record
         export = next(n for n in template["nodes"] if n["type"] == "PlenioExportRelease")
         reports = [slot for slot in export["inputs"] if slot["name"].startswith("reports.")]

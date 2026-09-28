@@ -1546,7 +1546,9 @@ def templates(bp: dict[str, Blueprint]) -> list[tuple[str, Graph, list[Blueprint
     daw, daw_app = yue2_daw(bp)
     enhance, enhance_app = enhance_master(bp)
     check, check_app = system_check()
-    finish_bps = [bp["master"], bp["cover"], bp["refine"], bp["stems"]]
+    # the REFINE block is plain nodes in every template (``refine_stage``): its blueprint ships in
+    # subgraphs/ for the node library only, so no template embeds its definition
+    finish_bps = [bp["master"], bp["cover"], bp["stems"]]
     return [
         ("0 · System Check", check, [], check_app),
         (
@@ -1570,7 +1572,7 @@ def templates(bp: dict[str, Blueprint]) -> list[tuple[str, Graph, list[Blueprint
         (
             "4 · Enhance & Master",
             enhance,
-            [bp["refine"], bp["stems"]],
+            [bp["stems"]],
             enhance_app,
         ),
         (

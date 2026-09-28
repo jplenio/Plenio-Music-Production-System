@@ -98,13 +98,29 @@ def test_the_prepared_templates_set_all_three_stages(server: ComfyServer) -> Non
     assert "PRE 10000 Hz" in summary and "crossover 9500 Hz" in summary and "POST 19000 Hz" in summary
     assert "fake-sr" in summary  # the model ran
     # the three fields are free numbers now (the "off"/"auto" stage combos are gone)
-    assert info["input"]["required"]["pre_hz"][0] == "FLOAT"
-    assert info["input"]["required"]["post_hz"][0] == "FLOAT"
-    assert info["input"]["required"]["crossover_hz"][0] == "FLOAT"
+    specs = {**inputs["required"], **inputs.get("optional", {})}
+    assert [specs[name][0] for name in ("pre_hz", "post_hz", "crossover_hz")] == ["FLOAT"] * 3
+    # the widget order the frontend builds (required first, then optional) keeps the preset in front
+    # of its three fields, as the templates store it
+    order = info["input_order"]["required"] + info["input_order"]["optional"]
+    widgets = [name for name in order if name not in ("audio", "model")]
+    assert widgets == ["engine", "crossover_hz", "sr_gain", "preset", "pre_hz", "post_hz", "seed"]
     # an unknown preset is refused before anything runs
     with pytest.raises(ExecutionFailedError) as refused:
         server.run(refine_prompt(engine="model", preset="no such template"))
     assert "preset" in str(refused.value) and "no such template" in str(refused.value)
+
+
+def test_a_prompt_from_before_the_preset_still_runs(server: ComfyServer, log: Log) -> None:
+    """An API prompt written before the preset existed has no preset (and may lack pre, post and the
+    seed): ComfyUI accepts it and the node uses the defaults (*custom*, pre 0, post 0, seed 0)."""
+    prompt = refine_prompt(engine="model")
+    for name in ("preset", "pre_hz", "post_hz", "seed"):
+        prompt["2"]["inputs"].pop(name, None)
+    entry = server.run(prompt)
+    summary = entry["outputs"]["2"]["plenio_summary"][0]["markdown"]
+    assert "fake-sr" in summary and "preset" not in summary
+    assert events(log, "probe")[-1]["rate"] == 48000
 
 
 def test_model_engine_errors_are_actionable(server: ComfyServer) -> None:

@@ -9,8 +9,8 @@ ComfyUI's ``/object_info``):
   definition produces (incl. seed control values and DynamicCombo options);
 * blueprints: one wrapper node, name equal to the file name, a ``Plenio``
   category and a description, no legacy ``proxyWidgets`` entries;
-* templates: embedded subgraph definitions equal the blueprint files; one "About this template"
-  note; every other top-level node inside a group; bypassed (optional) nodes titled "(optional)";
+* templates: embedded subgraph definitions equal the blueprint files and every one is used (by a
+  node of the template or of another used definition); one "About this template" note; every other top-level node inside a group; bypassed (optional) nodes titled "(optional)";
   an App Mode configuration (``extra.linearData``) names existing widgets and output nodes; a
   thumbnail ``<name>.jpg`` next to the template;
 * no absolute local paths, private addresses or secrets in any string.
@@ -331,6 +331,14 @@ def _check_template(
                 problems.append(f"{where}: App output {output!r} is not an output node")
             elif node.get("mode") == 4:
                 problems.append(f"{where}: App output {output!r} is bypassed")
+    used = {node["type"] for node in nodes}
+    for definition in definitions:
+        used |= {node["type"] for node in definition.get("nodes", [])}
+    for definition in definitions:
+        if definition["id"] not in used:
+            problems.append(
+                f"{where}: subgraph definition {definition.get('name')!r} is embedded but no node uses it"
+            )
     if not path.with_suffix(".jpg").is_file():
         problems.append(f"{where}: thumbnail {path.stem}.jpg missing (tools/build_thumbnails.py)")
 

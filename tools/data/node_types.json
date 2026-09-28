@@ -2556,6 +2556,15 @@
        "max": 2.0,
        "step": 0.05
       }
+     ]
+    },
+    "optional": {
+     "model": [
+      "PLENIO_AUDIO_MODEL",
+      {
+       "tooltip": "Load Audio Model (super-resolution); only for 'model'.",
+       "lazy": true
+      }
      ],
      "preset": [
       "COMBO",
@@ -2604,15 +2613,6 @@
        "max": 4294967295
       }
      ]
-    },
-    "optional": {
-     "model": [
-      "PLENIO_AUDIO_MODEL",
-      {
-       "tooltip": "Load Audio Model (super-resolution); only for 'model'.",
-       "lazy": true
-      }
-     ]
     }
    },
    "input_order": {
@@ -2620,14 +2620,14 @@
      "audio",
      "engine",
      "crossover_hz",
-     "sr_gain",
+     "sr_gain"
+    ],
+    "optional": [
+     "model",
      "preset",
      "pre_hz",
      "post_hz",
      "seed"
-    ],
-    "optional": [
-     "model"
     ]
    },
    "output": [

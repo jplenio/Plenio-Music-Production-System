@@ -333,20 +333,21 @@ def test_enhance_template_contains_the_chain(server: ComfyServer, log: Log) -> N
     )
     types = sorted(n["type"] for n in template["nodes"])
     wrappers = {sub["name"]: sub["id"] for sub in template["definitions"]["subgraphs"]}
-    assert set(wrappers) == {"Plenio · Refine (48 kHz)", "Plenio · Stems"}
-    assert types == [
-        "LoadAudio",
-        "MarkdownNote",
-        "PlenioEQ",
-        "PlenioExportRelease",
-        "PlenioLoudness",
-        "PreviewAudio",
-        *sorted(wrappers.values()),  # the Refine (M5/D10) and Stems (M6/D11-D12) wrappers
-    ]
-    refine = next(
-        sub for sub in template["definitions"]["subgraphs"] if sub["name"].endswith("Refine (48 kHz)")
+    # Refine (M5/D10) is a pair of plain nodes (its fields stay editable); Stems (M6/D11-D12) a wrapper
+    assert set(wrappers) == {"Plenio · Stems"}
+    assert types == sorted(
+        [
+            "LoadAudio",
+            "MarkdownNote",
+            "PlenioAudioModelLoader",
+            "PlenioEQ",
+            "PlenioExportRelease",
+            "PlenioLoudness",
+            "PlenioRefine",
+            "PreviewAudio",
+            wrappers["Plenio · Stems"],
+        ]
     )
-    assert [n["type"] for n in refine["nodes"]] == ["PlenioAudioModelLoader", "PlenioRefine"]
     stems = next(sub for sub in template["definitions"]["subgraphs"] if sub["name"].endswith("Stems"))
     assert [n["type"] for n in stems["nodes"]] == [
         "PlenioAudioModelLoader",

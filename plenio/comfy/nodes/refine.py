@@ -73,10 +73,14 @@ class PlenioRefine(io.ComfyNode):
                     advanced=True,
                     tooltip="Level of the added band.",
                 ),
+                # preset, pre_hz, post_hz and seed are optional: an API prompt written before the preset
+                # existed (it has no 'preset') stays valid, and the widget order the frontend builds
+                # (required first, then optional) stays engine, crossover, gain, preset, pre, post, seed
                 io.Combo.Input(
                     "preset",
                     options=list(PRESET_OPTIONS),
                     default=CUSTOM_PRESET,
+                    optional=True,
                     tooltip=(
                         "A prepared stage template: one choice sets PRE, POST and the crossover (500 Hz "
                         "below PRE). *custom* uses the three fields below, which stay editable - the "
@@ -90,6 +94,7 @@ class PlenioRefine(io.ComfyNode):
                     max=23000.0,
                     step=100.0,
                     advanced=True,
+                    optional=True,
                     tooltip=(
                         "Low-pass before the model (it shapes only what the model sees): 0 = the model's "
                         "training condition, -1 = no PRE, else Hz (6000, 8000, 10000, 12000, 14000)."
@@ -102,13 +107,19 @@ class PlenioRefine(io.ComfyNode):
                     max=23900.0,
                     step=100.0,
                     advanced=True,
+                    optional=True,
                     tooltip=(
                         "Linear-phase roll-off of the result: 0 = off, else Hz (16000, 19000, 21000 tame "
                         "added air that sounds harsh)."
                     ),
                 ),
                 io.Int.Input(
-                    "seed", default=0, min=0, max=2**32 - 1, tooltip="Seed of the model (deterministic)."
+                    "seed",
+                    default=0,
+                    min=0,
+                    max=2**32 - 1,
+                    optional=True,
+                    tooltip="Seed of the model (deterministic).",
                 ),
             ],
             outputs=[
@@ -131,17 +142,17 @@ class PlenioRefine(io.ComfyNode):
         engine: str,
         crossover_hz: float,
         sr_gain: float,
-        pre_hz: float,
-        post_hz: float,
-        seed: int,
         model: Any = None,
         preset: str = CUSTOM_PRESET,
+        pre_hz: float = 0.0,
+        post_hz: float = 0.0,
+        seed: int = 0,
     ) -> io.NodeOutput:
         if engine not in ENGINES:
             raise PlenioUserError(f"Unknown engine {engine!r}; use one of {list(ENGINES)}.")
-        chosen = prepared_stages(preset)
         if preset not in PRESET_OPTIONS:
             raise PlenioUserError(f"Unknown preset {preset!r}; use one of {list(PRESET_OPTIONS)}.")
+        chosen = prepared_stages(preset)
         # a prepared template sets all three stages in one go (owner's rule: crossover 500 Hz below PRE);
         # *custom* uses the three fields as they are
         use_pre, use_post, use_crossover = float(pre_hz), float(post_hz), float(crossover_hz)
