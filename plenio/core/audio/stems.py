@@ -35,7 +35,7 @@ MAX_STEMS = 4
 EDGE_SECONDS = 0.010
 TAIL_FADE_SECONDS = 0.050
 BUSES = ("reverb", "delay")
-_STRIP_FIELDS = {"gain_db", "mute", "solo", "compression", "muted", *BUSES}
+_STRIP_FIELDS = {"gain_db", "mute", "solo", "compression", "muted", *BUSES, "save"}
 
 
 class Separator(Protocol):
@@ -104,6 +104,8 @@ class Strip:
     muted: tuple[tuple[float, float], ...] = ()
     reverb: float = 0.0
     delay: float = 0.0
+    save: bool = False
+    """Write this strip as its own file (owner's request, 2026-09-28); the Stem Mixer node does it."""
 
     @property
     def neutral(self) -> bool:
@@ -181,6 +183,7 @@ def parse_mix(text: str | None) -> Mix:
             tuple(muted),
             number(raw.get("reverb", 0.0), f"{where} reverb", 0, 1),
             number(raw.get("delay", 0.0), f"{where} delay", 0, 1),
+            _flag(raw.get("save", False), f"{where} save"),
         )
     buses = {bus: data[bus] for bus in BUSES if bus in data}
     for bus, value in buses.items():
@@ -241,6 +244,35 @@ def _tail_fade(signal_: np.ndarray, rate: int) -> np.ndarray:
     return signal_
 
 
+def strip_signal(
+    stem: Any,
+    rate: int,
+    strip: Strip,
+    *,
+    item: dict[str, Any] | None = None,
+    cancel: Cancel = no_cancel,
+) -> np.ndarray:
+    """One strip as the mixer uses it: float64, with its compression, muted ranges and gain.
+
+    The mute/solo *decision* is the mixer's (it depends on the other strips); the effect sends are
+    added by the mixer too. ``item`` (the strip's report entry) is filled with the gain reduction and
+    the muted time - the same numbers the mixdown reports.
+    """
+    signal_ = np.asarray(stem, dtype=np.float64)
+    if strip.compression > 0:
+        signal_, info = compress(signal_, rate, compressor_for(strip.compression), cancel=cancel)
+        if item is not None:
+            item["gain_reduction_db"] = info["max_reduction_db"]
+    if strip.muted:
+        envelope = mute_envelope(signal_.shape[1], rate, strip.muted)
+        signal_ = signal_ * envelope
+        if item is not None:
+            item["muted_seconds"] = round(float((1 - envelope).sum()) / rate, 3)
+    if strip.gain_db:
+        signal_ = signal_ * gain(strip.gain_db)
+    return signal_
+
+
 def mix(
     stems: Stems,
     settings: Mix | None = None,
@@ -267,19 +299,12 @@ def mix(
         strip = options.strip(name)
         audible = strip.solo if soloing else not strip.mute
         item: dict[str, Any] = {"name": name, "audible": audible, "gain_db": strip.gain_db}
+        if strip.save:
+            item["save"] = True
         strips_report.append(item)
         if not audible:
             continue
-        signal_ = stem.astype(np.float64)
-        if strip.compression > 0:
-            signal_, info = compress(signal_, rate, compressor_for(strip.compression), cancel=cancel)
-            item["gain_reduction_db"] = info["max_reduction_db"]
-        if strip.muted:
-            envelope = mute_envelope(signal_.shape[1], rate, strip.muted)
-            signal_ = signal_ * envelope
-            item["muted_seconds"] = round(float((1 - envelope).sum()) / rate, 3)
-        if strip.gain_db:
-            signal_ = signal_ * gain(strip.gain_db)
+        signal_ = strip_signal(stem, rate, strip, item=item, cancel=cancel)
         dry += signal_
         for bus in BUSES:
             amount = getattr(strip, bus)
@@ -326,4 +351,5 @@ __all__ = [
     "mix",
     "mute_envelope",
     "parse_mix",
+    "strip_signal",
 ]

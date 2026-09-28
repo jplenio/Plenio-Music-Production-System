@@ -12,6 +12,7 @@ import {
   REST,
   type MixValue,
   addRange,
+  defaultNames,
   emptyStrip,
   formatGain,
   isAudible,
@@ -48,7 +49,8 @@ describe('the mixer value', () => {
       compression: 0,
       muted: [],
       reverb: 0.4,
-      delay: 0
+      delay: 0,
+      save: false
     })
     expect(stripOf(mix, 'drums')).toEqual(emptyStrip())
     expect(parseMix(serializeMix(mix))).toEqual(mix)
@@ -71,6 +73,15 @@ describe('the mixer value', () => {
     expect(JSON.parse(serializeMix(mix))).toEqual({ schema: MIX_SCHEMA, strips: {}, reverb: { preset: 'plate' } })
     expect(isNeutral(emptyStrip())).toBe(true)
     expect(isNeutral({ ...emptyStrip(), mute: true })).toBe(false)
+  })
+
+  it('keeps the save flag of a strip that should be written as its own file', () => {
+    const mix = withStrip({ schema: MIX_SCHEMA, strips: {} }, 'drums', { ...emptyStrip(), save: true })
+    expect(JSON.parse(serializeMix(mix)).strips.drums).toEqual({ save: true })
+    const again = parseMix(serializeMix(mix))!
+    expect(stripOf(again, 'drums').save).toBe(true)
+    expect(stripOf(again, 'vocals').save).toBe(false)
+    expect(isNeutral({ ...emptyStrip(), save: true })).toBe(false)
   })
 
   it('resolves mute and solo like the backend', () => {
@@ -124,6 +135,22 @@ describe('the waveform data of the last run', () => {
     expect(peaksOf({})).toEqual({})
     expect(peaksFor(peaks, 'vocals', 4)).toEqual([0.5, 0.5, 0.25, 0.25])
     expect(peaksFor(peaks, 'drums', 3)).toEqual([0, 0, 0])
-    expect(stripNames({ schema: MIX_SCHEMA, strips: { drums: {} } }, null)).toEqual([REST, 'drums'])
+    expect(stripNames({ schema: MIX_SCHEMA, strips: { drums: {} } }, null)).toEqual([
+      'vocals',
+      'drums',
+      'bass',
+      'other',
+      REST
+    ])
+    expect(defaultNames()).toEqual(['vocals', 'drums', 'bass', 'other', REST])
+    // after a run the strips follow what the separator produced
+    expect(stripNames(null, { stems: ['vocals', 'drums', 'bass', 'other', REST] })).toEqual([
+      'vocals',
+      'drums',
+      'bass',
+      'other',
+      REST
+    ])
+    expect(stripNames(null, { stems: ['vocals', 'instrumental'] })).toEqual(['vocals', 'instrumental', REST])
   })
 })

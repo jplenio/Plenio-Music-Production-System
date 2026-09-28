@@ -22,8 +22,8 @@ class PlenioAudioModelLoader(io.ComfyNode):
             is_experimental=True,
             description=(
                 "Loads a super-resolution model (for Refine) from models/audio_sr or a separation model "
-                "(for Separate Stems) from models/audio_separation. Experimental: the engines arrive in a "
-                "later release; Refine's 'resample only' needs no model."
+                "(for Separate Stems) from models/audio_separation. A file of another architecture is "
+                "refused with a message; Refine's 'resample only' engine needs no model at all."
             ),
             inputs=[
                 io.DynamicCombo.Input(

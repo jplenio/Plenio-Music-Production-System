@@ -13,8 +13,11 @@ One pipeline for every engine; everything but the engine is pure DSP and testabl
 6. contract: 48 kHz, the duration of the input (``output_frames``), no hidden normalisation;
    a report with the parameters, the bandwidth before and after, loudness change and timing.
 
-*resample only* is the same stage without the engine: exactly ``core.audio.resample``. An input
-that is already full band (edge above 20 kHz) is only resampled, and the report says so.
+*resample only* is the same stage without the engine: exactly ``core.audio.resample``. With an
+engine connected the model **always runs** - also for an input that already reaches the top
+(owner's decision, 2026-09-28): PRE shapes what the model sees, the crossover decides what it may
+replace (nothing below it changes) and POST rolls the result off. A silent or far too short input is
+only resampled, and the report says so.
 
 The parameter values are **provisional** (plan §4.4) until the measurement study (L1) decides
 them; the report marks them as such.
@@ -225,11 +228,10 @@ def refine(
         out = original
         engine_name = engine.name
         notes.append("the input is silent or too short to measure; it was only resampled")
-    elif edge_in >= FULL_BAND_HZ:
-        out = original
-        engine_name = engine.name
-        notes.append(f"input already full band ({edge_in:.0f} Hz) - resample only")
     else:
+        # The model always runs when it is connected - also for an input that already reaches the top
+        # (the owner's decision, 2026-09-28): the crossover decides what it may replace, PRE what it
+        # sees, POST rolls the result off. Nothing below the crossover changes.
         engine_name = engine.name
         pre = engine.condition_hz if options.pre_hz == 0 else max(options.pre_hz, 0.0)
         source = data
@@ -240,6 +242,11 @@ def refine(
         frames = original.shape[1]
         sr = np.pad(sr[:, :frames], ((0, 0), (0, max(0, frames - sr.shape[1]))))
         cutoff = options.crossover_hz or max(edge_in - CROSSOVER_BELOW_EDGE_HZ, 1000.0)
+        if edge_in >= FULL_BAND_HZ:
+            notes.append(
+                f"the input already reaches {edge_in / 1000:.1f} kHz: the model only replaces content "
+                f"above the crossover ({cutoff / 1000:.1f} kHz), everything below stays the original"
+            )
         out = crossover(original, sr, OUTPUT_RATE, cutoff, options.sr_gain)
         if options.post_hz:
             out = filter_zero_delay(out, lowpass_kernel(OUTPUT_RATE, options.post_hz))

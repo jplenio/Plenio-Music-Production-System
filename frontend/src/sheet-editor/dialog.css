@@ -13,6 +13,9 @@
   position: relative;
   width: min(1280px, 96vw);
   height: min(900px, 94vh);
+  /* a hard guarantee: whatever the stored or dragged size says, the dialog never leaves the window */
+  max-width: calc(100vw - 16px);
+  max-height: calc(100vh - 16px);
   --plenio-dialog-h: min(900px, 94vh);
   display: flex;
   flex-direction: column;

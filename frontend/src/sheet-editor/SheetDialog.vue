@@ -254,19 +254,33 @@ function close() {
 
 // --- the window (resizable, fills the browser window on request; owner's request, 2026-09-28) -----
 const geometry = reactive<DialogGeometry>(loadGeometry())
+// the viewport is reactive so a browser resize re-renders the dialog (and re-clamps the stored size)
+const viewport = reactive({ width: window.innerWidth, height: window.innerHeight })
 
 const dialogStyle = computed(() => {
   // --plenio-dialog-h feeds the panes' calc() heights in dialog.css, so they follow the window
-  const height = geometry.maximized ? window.innerHeight - 2 * DIALOG_MARGIN : geometry.height
+  const height = geometry.maximized ? viewport.height - 2 * DIALOG_MARGIN : geometry.height
   if (geometry.maximized) {
     return {
-      width: `${window.innerWidth - 2 * DIALOG_MARGIN}px`,
+      width: `${viewport.width - 2 * DIALOG_MARGIN}px`,
       height: `${height}px`,
       '--plenio-dialog-h': `${height}px`
     }
   }
   return { width: `${geometry.width}px`, height: `${geometry.height}px`, '--plenio-dialog-h': `${height}px` }
 })
+
+/** A smaller browser window shrinks the dialog with it (it is never larger than the window). */
+function onWindowResize(): void {
+  viewport.width = window.innerWidth
+  viewport.height = window.innerHeight
+  const size = clampDialog({ width: geometry.width, height: geometry.height }, viewport)
+  if (size.width !== geometry.width || size.height !== geometry.height) {
+    geometry.width = size.width
+    geometry.height = size.height
+    saveGeometry(geometry)
+  }
+}
 
 function toggleMaximize(): void {
   geometry.maximized = !geometry.maximized
@@ -300,6 +314,7 @@ function onKey(event: KeyboardEvent) {
 }
 onMounted(() => {
   window.addEventListener('keydown', onKey)
+  window.addEventListener('resize', onWindowResize)
   if (props.payload) void validate()
   const draft = docInfo('lyrics')?.upstream_sha256
   if (!props.asrNote && draft) {
@@ -311,6 +326,7 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKey)
+  window.removeEventListener('resize', onWindowResize)
   clearTimeout(timer)
 })
 </script>

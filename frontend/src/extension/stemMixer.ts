@@ -22,6 +22,7 @@ import {
   peaksFor,
   peaksOf,
   serializeMix,
+  stripNames,
   stripOf,
   withRange,
   withStrip,
@@ -65,27 +66,35 @@ export function addStemMixer(node: ComfyNode): { showExecuted(output: Record<str
   const info = element('div', 'plenio-mix-info')
   const owner = element('div', 'plenio-mix-advanced')
   root.append(strips, buses, owner, info)
-  let shown: Shown = { mix: { schema: MIX_SCHEMA, strips: {} }, names: [REST], peaks: {}, seconds: 0 }
+  let shown: Shown = {
+    mix: { schema: MIX_SCHEMA, strips: {} },
+    // the documented stems are there before the first run (owner's request, 2026-09-28); a separation
+    // replaces them with what the model actually produced
+    names: stripNames(null, null),
+    peaks: {},
+    seconds: 0
+  }
   let advanced = false
 
   const mixWidget = (): ComfyWidget | undefined => node.widgets?.find((widget) => widget.name === MIX_WIDGET)
 
-  function write(mix: MixValue): void {
+  /** Write the value; ``draw`` false keeps the strips on screen (a drag must not replace the fader). */
+  function write(mix: MixValue, { draw: redraw = true } = {}): void {
     const target = mixWidget()
     if (!target) return
     const text = serializeMix(mix)
     target.value = text
     target.callback?.(text)
     shown = { ...shown, mix }
-    draw()
+    if (redraw) draw()
   }
 
-  function update(name: string, patch: Partial<Strip>): void {
-    write(withStrip(shown.mix, name, { ...stripOf(shown.mix, name), ...patch }))
+  function update(name: string, patch: Partial<Strip>, options: { draw?: boolean } = {}): void {
+    write(withStrip(shown.mix, name, { ...stripOf(shown.mix, name), ...patch }), options)
   }
 
   /** A send that is raised needs its bus: the widget writes the documented defaults with it. */
-  function setSend(name: string, bus: Bus, amount: number): void {
+  function setSend(name: string, bus: Bus, amount: number, options: { draw?: boolean } = {}): void {
     const strip = stripOf(shown.mix, name)
     let mix = withStrip(shown.mix, name, { ...strip, [bus]: amount })
     if (amount > 0 && !(mix[bus] && Object.keys(mix[bus]).length)) {
@@ -94,7 +103,7 @@ export function addStemMixer(node: ComfyNode): { showExecuted(output: Record<str
           ? { ...mix, reverb: { preset: 'room' } }
           : { ...mix, delay: { time_ms: 375, feedback: 0.35, lowpass_hz: 4000 } }
     }
-    write(mix)
+    write(mix, options)
   }
 
   function setBusSetting(bus: Bus, key: string, value: unknown): void {
@@ -114,9 +123,12 @@ export function addStemMixer(node: ComfyNode): { showExecuted(output: Record<str
       const fader = slider(MIN_GAIN_DB, MAX_GAIN_DB, 0.5, strip.gain_db, `${name} gain`)
       const gainText = element('span', 'gain', `${formatGain(strip.gain_db)} dB`)
       fader.addEventListener('input', () => {
+        // live: the label follows the pointer and the value is written, but the strips are not rebuilt
+        // (a rebuild would replace the fader under the pointer and the drag would stop)
         gainText.textContent = `${formatGain(Number(fader.value))} dB`
-        update(name, { gain_db: Number(fader.value) })
+        update(name, { gain_db: Number(fader.value) }, { draw: false })
       })
+      fader.addEventListener('change', () => update(name, { gain_db: Number(fader.value) }))
       const mute = element('button', strip.mute ? 'toggle active' : 'toggle', 'M')
       mute.setAttribute('aria-label', `${name} mute`)
       mute.addEventListener('click', (event) => {
@@ -130,13 +142,25 @@ export function addStemMixer(node: ComfyNode): { showExecuted(output: Record<str
         update(name, { solo: !strip.solo })
       })
       const comp = slider(0, 1, 0.05, strip.compression, `${name} compression`)
-      comp.title = 'Compression amount'
-      comp.addEventListener('input', () => update(name, { compression: Number(comp.value) }))
+      comp.title = 'Compression amount: one knob for the master compressor (threshold and ratio)'
+      comp.addEventListener('input', () => update(name, { compression: Number(comp.value) }, { draw: false }))
+      comp.addEventListener('change', () => update(name, { compression: Number(comp.value) }))
       const sends = BUSES.map((bus) => {
         const send = slider(0, 1, 0.05, strip[bus], `${name} ${bus} send`)
-        send.title = `${bus} send`
-        send.addEventListener('input', () => setSend(name, bus, Number(send.value)))
+        send.title = `${bus} send: how much of this stem goes to the shared ${bus} bus`
+        send.addEventListener('input', () => setSend(name, bus, Number(send.value), { draw: false }))
+        send.addEventListener('change', () => setSend(name, bus, Number(send.value)))
         return send
+      })
+      const save = element('button', strip.save ? 'toggle active' : 'toggle', 'save')
+      save.setAttribute('aria-label', `${name} save as its own file`)
+      save.setAttribute('aria-pressed', String(strip.save))
+      save.title =
+        'Write this stem as its own 24-bit FLAC file (output/plenio/stems) on the next run; ' +
+        'its gain, compression and muted ranges are applied, mute/solo and the buses are not'
+      save.addEventListener('click', (event) => {
+        event.stopPropagation()
+        update(name, { save: !strip.save })
       })
       const audible = isAudible(shown.mix, name, audibleNames)
       row.classList.toggle('silent', !audible)
@@ -158,6 +182,7 @@ export function addStemMixer(node: ComfyNode): { showExecuted(output: Record<str
         sends[0],
         element('span', 'label', 'delay'),
         sends[1],
+        save,
         waveform
       )
       strips.append(row)
@@ -165,7 +190,7 @@ export function addStemMixer(node: ComfyNode): { showExecuted(output: Record<str
     drawBuses()
     info.textContent = shown.seconds
       ? `last run: ${shown.seconds.toFixed(1)} s - drag on a strip to mute a time range, click a range to remove it`
-      : 'no run yet: the strips appear after Separate Stems ran (the residual keeps a neutral mix exact)'
+      : 'no run yet: the strips show the documented stems (vocals, drums, bass, other and the residual rest); Separate Stems fills them'
     node.setDirtyCanvas?.(true, true)
   }
 
@@ -230,6 +255,7 @@ export function addStemMixer(node: ComfyNode): { showExecuted(output: Record<str
     >
     const preset = element('select') as HTMLSelectElement
     preset.setAttribute('aria-label', 'Reverb preset')
+    preset.title = 'The room the reverb bus adds; the amount per stem is its verb send'
     for (const name of PRESETS) preset.append(new Option(name, name))
     preset.value = String(reverb.preset ?? 'room')
     preset.addEventListener('change', () => setBusSetting('reverb', 'preset', preset.value))
@@ -237,8 +263,10 @@ export function addStemMixer(node: ComfyNode): { showExecuted(output: Record<str
     time.type = 'number'
     time.value = String(delay.time_ms ?? 375)
     time.setAttribute('aria-label', 'Delay time in ms')
+    time.title = 'Delay time in ms: where the first echo of the delay bus sits'
     time.addEventListener('change', () => setBusSetting('delay', 'time_ms', Number(time.value)))
     const feedback = slider(0, 0.8, 0.05, Number(delay.feedback ?? 0.35), 'Delay feedback')
+    feedback.title = 'Delay feedback: how much of each echo returns into the delay line'
     feedback.addEventListener('input', () => setBusSetting('delay', 'feedback', Number(feedback.value)))
     buses.append(
       element('span', 'label', 'reverb bus'),
@@ -299,7 +327,7 @@ export function addStemMixer(node: ComfyNode): { showExecuted(output: Record<str
           | undefined
       )?.at(-1)
       const peaks = peaksOf(output)
-      const names = payload?.stems?.length ? [...payload.stems.filter((name) => name !== REST), REST] : shown.names
+      const names = stripNames(shown.mix, payload ?? null)
       shown = { ...shown, names, peaks, seconds: Number(payload?.seconds ?? shown.seconds) || 0 }
       reload()
     }

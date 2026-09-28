@@ -309,12 +309,19 @@ def refine() -> Blueprint:
     return Blueprint(
         "Plenio · Refine (48 kHz)",
         "Plenio/Audio",
-        "Brings the song to 48 kHz and extends the missing top octave with UniverSR (vocoder-free flow "
-        "matching), keeping everything below the measured bandwidth from the render (complementary crossover). "
+        "Brings the song to 48 kHz and extends the top octaves with UniverSR (vocoder-free flow "
+        "matching), keeping everything below the crossover from the render (complementary crossover). "
         "Same duration, no normalisation; the report shows engine, bandwidth before and after, crossover, "
-        "loudness change and timing. The defaults are provisional until the measurement study (L1).",
+        "loudness change and timing. The model always runs when it is connected, also for input that "
+        "already reaches 20 kHz.",
         g,
-        [BlueprintInput("audio", "AUDIO", [(stage, "audio")])],
+        [
+            BlueprintInput("audio", "AUDIO", [(stage, "audio")]),
+            # promoted widgets: every template sets its own stages on the wrapper node
+            BlueprintInput("pre_hz", "COMBO", [(stage, "pre_hz")], label="pre (model input)"),
+            BlueprintInput("post_hz", "COMBO", [(stage, "post_hz")], label="post (roll-off)"),
+            BlueprintInput("crossover_hz", "FLOAT", [(stage, "crossover_hz")], label="crossover"),
+        ],
         [
             BlueprintOutput("audio", "AUDIO", (stage, "audio")),
             BlueprintOutput("report", "PLENIO_REPORT", (stage, "report")),
@@ -352,8 +359,13 @@ def refine_stage(
     audio: tuple[Node, str],
     active: bool = False,
     y: float = 430,
+    widgets: dict[str, object] | None = None,
 ) -> tuple[tuple[Node, str], Node]:
     """The REFINE block of a template (plan §11): bypassed and collapsed unless it is on by default.
+
+    ``widgets`` sets the promoted stages of this template (the MiniMax preset: pre 10 kHz, post
+    19 kHz, crossover 14.5 kHz - the owner's choice, 2026-09-28); elsewhere the node keeps its own
+    defaults (pre *auto*, post *off*, crossover 0 = the measured bandwidth minus 500 Hz).
 
     Returns the audio source and the node, so the caller can pass both to ``finish`` (its report).
     """
@@ -362,6 +374,7 @@ def refine_stage(
         (x, y),
         size=(340, 170),
         title="Plenio · Refine (48 kHz)" if active else "Refine (optional)",
+        widgets=widgets,
         mode=0 if active else 4,
         collapsed=True,
     )
@@ -1232,9 +1245,18 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g.link(sheet, "lyrics", render, "lyrics")
     g.link(sheet, "score_seconds", render, "max_duration")
     g.link(seed, "seed", render, "seed")
-    # MiniMax renders a band-limited signal: Refine runs with UniverSR by default (plan §4.6)
+    # MiniMax renders a band-limited signal: Refine runs with UniverSR by default (plan §4.6) and
+    # carries the owner's preset (pre 10 kHz, post 19 kHz, crossover 14.5 kHz; 2026-09-28)
     audio, stems_node = stems_stage(g, bp, 1800, audio=(render, "AUDIO"), y=430)
-    audio, refine_node = refine_stage(g, bp, 1800, audio=audio, active=True, y=620)
+    audio, refine_node = refine_stage(
+        g,
+        bp,
+        1800,
+        audio=audio,
+        active=True,
+        y=620,
+        widgets={"pre_hz": "10000", "post_hz": "19000", "crossover_hz": 14500.0},
+    )
     _master, preview, export = finish(
         g,
         bp,

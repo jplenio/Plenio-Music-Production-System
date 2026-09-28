@@ -10,7 +10,7 @@ from typing import Any
 import numpy as np
 import pytest
 
-from harness import ComfyServer, Log
+from harness import ComfyServer, ExecutionFailedError, Log
 
 pytestmark = pytest.mark.host
 
@@ -33,8 +33,8 @@ def refine_prompt(
                 "engine": engine,
                 "crossover_hz": 0.0,
                 "sr_gain": 1.0,
-                "pre_hz": 0.0,
-                "post_hz": 0.0,
+                "pre_hz": "auto",
+                "post_hz": "off",
                 "seed": 4,
                 **settings,
             },
@@ -63,6 +63,38 @@ def test_the_model_engine_runs_the_connected_model(server: ComfyServer, log: Log
     assert probe["rate"] == 48000 and probe["shape"] == [1, 2, int(SECONDS * 48000)]
     summary = entry["outputs"]["2"]["plenio_summary"][0]["markdown"]
     assert "fake-sr" in summary and "provisional" in summary
+
+
+def test_the_model_runs_for_a_full_band_input_too(server: ComfyServer, log: Log) -> None:
+    """Owner's decision (2026-09-28): the model always runs; above the crossover it replaces content.
+
+    A 48 kHz input that already reaches 20 kHz: the engine is never skipped, and the report names the
+    engine and says that only the content above the crossover changes.
+    """
+    prompt = refine_prompt(engine="model", crossover_hz=14500.0)
+    prompt["1"]["inputs"].update({"rate": 48000, "broadband": True})  # already full band
+    entry = server.run(prompt)
+    summary = entry["outputs"]["2"]["plenio_summary"][0]["markdown"]
+    assert "fake-sr" in summary  # the engine path, not 'resample only'
+    assert "already reaches" in summary and "14.5 kHz" in summary
+    probe = events(log, "probe")[-1]
+    assert probe["rate"] == 48000 and probe["shape"] == [1, 2, int(SECONDS * 48000)]
+
+
+def test_the_stages_are_checked(server: ComfyServer) -> None:
+    """A stage outside the prepared list is refused before anything runs (ComfyUI's combo check)."""
+    with pytest.raises(ExecutionFailedError) as refused:
+        server.run(refine_prompt(engine="model", pre_hz="9000"))
+    assert "pre_hz: '9000' not in" in str(refused.value)
+    with pytest.raises(ExecutionFailedError) as refused:
+        server.run(refine_prompt(engine="model", post_hz="18000"))
+    assert "post_hz: '18000' not in" in str(refused.value)
+    info = server.get("/object_info/PlenioRefine")["PlenioRefine"]
+    # ComfyUI reports a combo as ["COMBO", {"options": [...]}]
+    pre = info["input"]["required"]["pre_hz"][1]["options"]
+    post = info["input"]["required"]["post_hz"][1]["options"]
+    assert pre == ["auto", "off", "6000", "8000", "10000", "12000", "14000"]
+    assert post == ["off", "16000", "19000", "21000"]
 
 
 def test_model_engine_errors_are_actionable(server: ComfyServer) -> None:

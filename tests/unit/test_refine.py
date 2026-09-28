@@ -159,10 +159,27 @@ def test_model_refinement_keeps_the_band_below_the_crossover_and_the_duration() 
     assert np.array_equal(out, again)
 
 
-def test_full_band_and_silent_inputs_are_only_resampled() -> None:
+def test_a_full_band_input_keeps_everything_below_the_crossover() -> None:
+    """The model always runs when it is connected (owner's decision, 2026-09-28): for an input that is
+    already full band, only what lies above the crossover comes from the model."""
     full = RNG.standard_normal((2, 48000 * 2)) * 0.1
-    out, report = r.refine(full, 48000, NoiseEngine())
-    assert np.array_equal(out, full) and "full band" in report["notes"][0]
+    crossover = 21500.0
+    out, report = r.refine(full, 48000, NoiseEngine(), r.RefineSettings(crossover_hz=crossover))
+    assert report["engine"] == "noise"  # the engine ran, nothing was skipped
+    assert "already reaches" in report["notes"][0] and "21.5 kHz" in report["notes"][0]
+    assert report["crossover_hz"] == crossover
+    assert out.shape == full.shape
+    # below the crossover the output is the original: what is left there is the crossover filter's own
+    # arithmetic (~1.5e-6, about -116 dBFS), not the model
+    kernel = r.lowpass_kernel(48000, crossover - 1500.0)
+    below = r.filter_zero_delay(out - full, kernel)
+    assert np.max(np.abs(below[:, 5000:-5000])) < 1e-5
+    # above it, the model's content is in: the bands differ
+    high = full - r.filter_zero_delay(full, kernel)
+    assert np.max(np.abs((out - full)[:, 5000:-5000])) > np.max(np.abs(high)) * 0.01
+
+
+def test_a_silent_input_is_only_resampled() -> None:
     silent, report = r.refine(np.zeros((1, 44100)), 44100, NoiseEngine())
     assert not silent.any() and "silent" in report["notes"][0]
 

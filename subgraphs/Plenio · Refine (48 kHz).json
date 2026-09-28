@@ -23,6 +23,36 @@
      "name": "audio",
      "type": "AUDIO",
      "link": null
+    },
+    {
+     "localized_name": "pre_hz",
+     "name": "pre_hz",
+     "label": "pre (model input)",
+     "type": "COMBO",
+     "widget": {
+      "name": "pre_hz"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "post_hz",
+     "name": "post_hz",
+     "label": "post (roll-off)",
+     "type": "COMBO",
+     "widget": {
+      "name": "post_hz"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "crossover_hz",
+     "name": "crossover_hz",
+     "label": "crossover",
+     "type": "FLOAT",
+     "widget": {
+      "name": "crossover_hz"
+     },
+     "link": null
     }
    ],
    "outputs": [
@@ -41,7 +71,11 @@
    ],
    "title": "Plenio · Refine (48 kHz)",
    "properties": {},
-   "widgets_values": []
+   "widgets_values": [
+    "auto",
+    "off",
+    0.0
+   ]
   }
  ],
  "links": [],
@@ -54,7 +88,7 @@
     "state": {
      "lastGroupId": 0,
      "lastNodeId": 702,
-     "lastLinkId": 4,
+     "lastLinkId": 7,
      "lastRerouteId": 0
     },
     "revision": 0,
@@ -66,7 +100,7 @@
       -260,
       0,
       160,
-      60
+      120
      ]
     },
     "outputNode": {
@@ -90,6 +124,45 @@
        0,
        0
       ]
+     },
+     {
+      "id": "9eecb3ba-0562-58fd-a75d-ce58a7b247a0",
+      "name": "pre_hz",
+      "type": "COMBO",
+      "linkIds": [
+       3
+      ],
+      "pos": [
+       0,
+       20
+      ],
+      "label": "pre (model input)"
+     },
+     {
+      "id": "1048ddc6-fec6-52f8-87f7-96e06f5c2c2e",
+      "name": "post_hz",
+      "type": "COMBO",
+      "linkIds": [
+       4
+      ],
+      "pos": [
+       0,
+       40
+      ],
+      "label": "post (roll-off)"
+     },
+     {
+      "id": "5ab86204-822c-5328-9f14-bc4b946972ce",
+      "name": "crossover_hz",
+      "type": "FLOAT",
+      "linkIds": [
+       5
+      ],
+      "pos": [
+       0,
+       60
+      ],
+      "label": "crossover"
      }
     ],
     "outputs": [
@@ -98,7 +171,7 @@
       "name": "audio",
       "type": "AUDIO",
       "linkIds": [
-       3
+       6
       ],
       "pos": [
        0,
@@ -110,7 +183,7 @@
       "name": "report",
       "type": "PLENIO_REPORT",
       "linkIds": [
-       4
+       7
       ],
       "pos": [
        0,
@@ -227,7 +300,7 @@
         "widget": {
          "name": "crossover_hz"
         },
-        "link": null
+        "link": 5
        },
        {
         "localized_name": "sr_gain",
@@ -241,20 +314,20 @@
        {
         "localized_name": "pre_hz",
         "name": "pre_hz",
-        "type": "FLOAT",
+        "type": "COMBO",
         "widget": {
          "name": "pre_hz"
         },
-        "link": null
+        "link": 3
        },
        {
         "localized_name": "post_hz",
         "name": "post_hz",
-        "type": "FLOAT",
+        "type": "COMBO",
         "widget": {
          "name": "post_hz"
         },
-        "link": null
+        "link": 4
        },
        {
         "localized_name": "seed",
@@ -272,7 +345,7 @@
         "name": "audio",
         "type": "AUDIO",
         "links": [
-         3
+         6
         ]
        },
        {
@@ -280,7 +353,7 @@
         "name": "report",
         "type": "PLENIO_REPORT",
         "links": [
-         4
+         7
         ]
        }
       ],
@@ -291,8 +364,8 @@
        "model",
        0.0,
        1.0,
-       0.0,
-       0.0,
+       "auto",
+       "off",
        0
       ]
      }
@@ -317,6 +390,30 @@
      },
      {
       "id": 3,
+      "origin_id": -10,
+      "origin_slot": 1,
+      "target_id": 702,
+      "target_slot": 5,
+      "type": "COMBO"
+     },
+     {
+      "id": 4,
+      "origin_id": -10,
+      "origin_slot": 2,
+      "target_id": 702,
+      "target_slot": 6,
+      "type": "COMBO"
+     },
+     {
+      "id": 5,
+      "origin_id": -10,
+      "origin_slot": 3,
+      "target_id": 702,
+      "target_slot": 3,
+      "type": "FLOAT"
+     },
+     {
+      "id": 6,
       "origin_id": 702,
       "origin_slot": 0,
       "target_id": -20,
@@ -324,7 +421,7 @@
       "type": "AUDIO"
      },
      {
-      "id": 4,
+      "id": 7,
       "origin_id": 702,
       "origin_slot": 1,
       "target_id": -20,
@@ -334,7 +431,7 @@
     ],
     "extra": {},
     "category": "Plenio/Audio",
-    "description": "Brings the song to 48 kHz and extends the missing top octave with UniverSR (vocoder-free flow matching), keeping everything below the measured bandwidth from the render (complementary crossover). Same duration, no normalisation; the report shows engine, bandwidth before and after, crossover, loudness change and timing. The defaults are provisional until the measurement study (L1)."
+    "description": "Brings the song to 48 kHz and extends the top octaves with UniverSR (vocoder-free flow matching), keeping everything below the crossover from the render (complementary crossover). Same duration, no normalisation; the report shows engine, bandwidth before and after, crossover, loudness change and timing. The model always runs when it is connected, also for input that already reaches 20 kHz."
    }
   ]
  },

@@ -7,11 +7,14 @@ from __future__ import annotations
 
 import json
 import uuid
+from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pytest
 
 from harness import ComfyServer, Log
+from plenio.core.release import read_tags
 
 pytestmark = pytest.mark.host
 
@@ -46,6 +49,23 @@ def stems_prompt(mix: dict[str, Any] | None = None, kind: str = "separation") ->
 
 def probes(log: Log) -> dict[str, dict[str, Any]]:
     return {e["name"].split()[0]: e for e in events(log, "probe")}
+
+
+def decode(path: Path) -> tuple[np.ndarray, int]:
+    """A written stem file as float ``[channels, frames]`` and its rate (24-bit FLAC: 2**31 full scale)."""
+    import av
+
+    with av.open(str(path)) as container:
+        stream = container.streams.audio[0]
+        rate = int(stream.codec_context.sample_rate)
+        channels = int(stream.channels)
+        frames = [frame.to_ndarray() for frame in container.decode(stream)]
+    packed = np.concatenate(frames, axis=-1).astype(np.float64) / (1 << 31)
+    return packed.reshape(-1, channels).T, rate
+
+
+def rms(data: np.ndarray) -> float:
+    return float(np.sqrt(np.mean(data**2)))
 
 
 def test_a_neutral_mix_returns_the_input(server: ComfyServer, log: Log) -> None:
@@ -120,3 +140,35 @@ def test_a_muted_range_silences_only_its_stretch(server: ComfyServer, log: Log) 
     assert found["rms"] < neutral["rms"]  # half of the drums is gone
     assert found["rms"] > 0.5 * neutral["rms"]  # and nothing else
     assert found["shape"] == neutral["shape"] and found["rate"] == neutral["rate"]
+
+
+def test_a_strip_marked_save_is_written_as_its_own_file(server: ComfyServer) -> None:
+    """Owner's request (2026-09-28): a switch per stem writes it as a file; default: off."""
+    folder = server.output_dir / "plenio" / "stems"
+    entry = server.run(
+        stems_prompt({"strips": {"drums": {"save": True}, "rest": {"save": True, "gain_db": -6.0}}})
+    )
+    payload = entry["outputs"]["4"]["plenio_stems"][0]
+    summary = entry["outputs"]["4"]["plenio_summary"][0]["markdown"]
+    assert payload["saved"] == ["drums", "rest"]
+    assert "saved drums as its own file: drums.flac" in summary
+    assert "saved rest as its own file: rest.flac" in summary
+    assert not (folder / "vocals.flac").exists()  # only the marked strips are written
+    assert not (folder / "other.flac").exists()
+    drums_audio, rate = decode(folder / "drums.flac")
+    rest_audio, rest_rate = decode(folder / "rest.flac")
+    assert rate == rest_rate == 24000
+    assert drums_audio.shape == rest_audio.shape == (2, 48000)  # 2 s at the input's rate
+    # the file holds that strip's own signal: the residual at its -6 dB, the fake's drums untouched
+    assert rms(rest_audio) == pytest.approx(10 ** (-6 / 20) * rms(drums_audio), rel=1e-3)
+    tags, _cover = read_tags(folder / "drums.flac")
+    assert tags["title"] == "drums (Plenio stems)"
+
+
+def test_saved_stems_never_overwrite_an_earlier_file(server: ComfyServer) -> None:
+    folder = server.output_dir / "plenio" / "stems"
+    entry = server.run(stems_prompt({"strips": {"drums": {"save": True}}}))
+    summary = entry["outputs"]["4"]["plenio_summary"][0]["markdown"]
+    assert "saved drums as its own file: drums (2).flac" in summary
+    assert (folder / "drums.flac").is_file() and (folder / "drums (2).flac").is_file()
+    assert not (folder / "rest (2).flac").exists()  # the plain strip is not written again

@@ -2558,25 +2558,36 @@
       }
      ],
      "pre_hz": [
-      "FLOAT",
+      "COMBO",
       {
-       "tooltip": "Low-pass of the model's input; 0: the model's training condition; -1: none.",
+       "tooltip": "Low-pass before the model (shapes only what the model sees): auto = the model's training condition, off = no low-pass, else 6/8/10/12/14 kHz.",
        "advanced": true,
-       "default": 0.0,
-       "min": -1.0,
-       "max": 23000.0,
-       "step": 100.0
+       "default": "auto",
+       "multiselect": false,
+       "options": [
+        "auto",
+        "off",
+        "6000",
+        "8000",
+        "10000",
+        "12000",
+        "14000"
+       ]
       }
      ],
      "post_hz": [
-      "FLOAT",
+      "COMBO",
       {
-       "tooltip": "Linear-phase roll-off of the result; 0: off.",
+       "tooltip": "Linear-phase roll-off of the result: off, or 16/19/21 kHz (tames added air that sounds harsh).",
        "advanced": true,
-       "default": 0.0,
-       "min": 0.0,
-       "max": 23900.0,
-       "step": 100.0
+       "default": "off",
+       "multiselect": false,
+       "options": [
+        "off",
+        "16000",
+        "19000",
+        "21000"
+       ]
       }
      ],
      "seed": [
@@ -3469,7 +3480,7 @@
      "mix": [
       "STRING",
       {
-       "tooltip": "The mixer settings (plenio.stem_mix/1 JSON); empty: neutral.",
+       "tooltip": "The mixer settings (plenio.stem_mix/1 JSON); empty: neutral.  The widget under the node writes the same value (a 'save' flag per strip included).",
        "default": "",
        "multiline": true
       }

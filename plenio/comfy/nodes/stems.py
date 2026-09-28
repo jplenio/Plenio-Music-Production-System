@@ -14,12 +14,16 @@ from comfy_api.latest import io
 from ...core.audio import stems as stem_core
 from ...core.audio.effects import effects_for
 from ...core.audio.stems import MIX_SCHEMA, REST, make_stems, parse_mix
+from ...core.release import plan_release, safe_filename, write_audio
 from ...core.reports import Report, Status
 from .. import audio_models, host
 from ..types import AudioModelType, ReportType, StemsType
 
 PEAK_POINTS = 240
 """How many peak values per strip the widget draws (about 1.4 kB per strip in the UI payload)."""
+
+EXPORT_FOLDER = "plenio/stems"
+"""Where the strips marked *save* are written (under the ComfyUI output folder)."""
 
 
 def peak_profile(stem: Any, points: int = PEAK_POINTS) -> list[float]:
@@ -95,7 +99,8 @@ class PlenioStemMixer(io.ComfyNode):
             description=(
                 "Mixes the stems back into one song: gain, mute/solo, compression and muted time ranges per stem "
                 "(and the residual 'rest'). Empty settings mix neutrally and return the input. No normalisation; "
-                "Master sets the loudness. Experimental."
+                "Master sets the loudness. The widget shows one strip per stem before the first run too, and a "
+                "strip marked *save* is written as its own file to output/plenio/stems. Experimental."
             ),
             inputs=[
                 StemsType.Input("stems", tooltip="From Separate Stems."),
@@ -103,13 +108,20 @@ class PlenioStemMixer(io.ComfyNode):
                     "mix",
                     default="",
                     multiline=True,
-                    tooltip=f"The mixer settings ({MIX_SCHEMA} JSON); empty: neutral.",
+                    tooltip=(
+                        f"The mixer settings ({MIX_SCHEMA} JSON); empty: neutral.  The widget under the node "
+                        "writes the same value (a 'save' flag per strip included)."
+                    ),
                 ),
             ],
             outputs=[
                 io.Audio.Output(display_name="audio", tooltip="The mixdown at the input's rate and length."),
                 ReportType.Output(
-                    display_name="report", tooltip="Per strip: audible, gain, gain reduction, muted time."
+                    display_name="report",
+                    tooltip=(
+                        "Per strip: audible, gain, gain reduction, muted time; and the files written for "
+                        "strips marked 'save'."
+                    ),
                 ),
             ],
         )
@@ -124,6 +136,9 @@ class PlenioStemMixer(io.ComfyNode):
             results.append(out)
             reports.append(report)
         notes = sorted({note for report in reports for note in report["notes"]})
+        written: list[str] = []
+        for index, item in enumerate(stems):
+            written.extend(cls._write_stems(item, settings, first=index == 0, notes=notes, reports=reports))
         audible = [s["name"] for s in reports[0]["strips"] if s["audible"]]
         summary = (
             "Stem Mixer: neutral (the input unchanged)"
@@ -131,7 +146,13 @@ class PlenioStemMixer(io.ComfyNode):
             else f"Stem Mixer: {', '.join(audible) or 'nothing'} audible"
         )
         status = Status.WARNING if notes else Status.OK
-        record = Report("stem_mix", status, summary, tuple(notes), {"items": reports})
+        record = Report(
+            "stem_mix",
+            status,
+            summary,
+            tuple(notes),
+            {"items": reports, "files": written},
+        )
         markdown = "\n".join([f"**{summary}**", *[f"- note: {n}" for n in notes]])
         first = stems[0]
         strips = first.strips()
@@ -139,6 +160,7 @@ class PlenioStemMixer(io.ComfyNode):
             "stems": [name for name, _stem in strips],
             "seconds": round(first.frames / first.rate, 2),
             "peaks": {name: peak_profile(stem) for name, stem in strips},
+            "saved": [name for name in _saved_names(first, settings)],
         }
         return io.NodeOutput(
             host.make_audio(results, stems[0].rate),
@@ -148,3 +170,44 @@ class PlenioStemMixer(io.ComfyNode):
                 "plenio_stems": [payload],
             },
         )
+
+    @classmethod
+    def _write_stems(
+        cls,
+        item: Any,
+        settings: Any,
+        *,
+        first: bool,
+        notes: list[str],
+        reports: list[dict[str, Any]],
+    ) -> list[str]:
+        """Write every strip marked *save* as a 24-bit FLAC into ``output/plenio/stems``.
+
+        The file holds the strip's own signal (its gain, compression and muted ranges applied; the
+        mute/solo decision and the shared effect buses are the mixdown's, not one stem's). One file
+        per name: a second run that writes the same stem gets ``name (2).flac`` and so on.
+        """
+        wanted = _saved_names(item, settings)
+        if not wanted:
+            return []
+        folder = host.output_directory() / EXPORT_FOLDER
+        written: list[str] = []
+        for name in wanted:
+            stem = dict(item.strips())[name]
+            signal = stem_core.strip_signal(stem, item.rate, settings.strip(name))
+            base = plan_release(folder, safe_filename(name), [".flac"])
+            target = base.with_name(base.name + ".flac")
+            write_audio(target, signal, item.rate, "flac", {"title": f"{name} (Plenio stems)"})
+            written.append(str(target))
+            if first:
+                notes.append(f"saved {name} as its own file: {target.name}")
+                for report in reports:
+                    for strip in report["strips"]:
+                        if strip["name"] == name:
+                            strip["file"] = str(target)
+        return written
+
+
+def _saved_names(stems: Any, settings: Any) -> list[str]:
+    """The strips marked *save* (the documented order: the separator's stems, then ``rest``)."""
+    return [name for name, _stem in stems.strips() if settings.strip(name).save]

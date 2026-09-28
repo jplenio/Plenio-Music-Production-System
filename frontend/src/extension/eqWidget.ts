@@ -110,6 +110,7 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
     preserveAspectRatio: 'none'
   })
   plot.setAttribute('aria-label', 'EQ response curve')
+  plot.setAttribute('tabindex', '0')
   const strip = element('div', 'plenio-eq-strip')
   const editor = element('div', 'plenio-eq-editor')
   const editorFields = element('div', 'plenio-eq-fields')
@@ -131,7 +132,12 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
   let range: GainRange = 12
   let request = 0
   let timer: ReturnType<typeof setTimeout> | undefined
+  let liveTimer: ReturnType<typeof setTimeout> | undefined
   let dragStart: { hz: number; db: number } | null = null
+  let restoreFocus = false
+  /** The drawn handles and the curve, so a drag can move them without rebuilding the plot. */
+  const handles = new Map<string, SVGCircleElement>()
+  let curve: SVGPathElement | null = null
   const history = new EqHistory(flat())
 
   const bandsWidget = () => widget(node, BANDS_WIDGET)
@@ -199,6 +205,8 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
 
   function draw(): void {
     plot.replaceChildren()
+    handles.clear()
+    curve = null
     const box = limit()
     for (const db of [-box.db!, -box.db! / 2, 0, box.db! / 2, box.db!]) {
       plot.append(
@@ -218,7 +226,8 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
     if (compare) {
       plot.append(svg('line', { x1: 0, x2: box.width, y1: yOf(box, 0), y2: yOf(box, 0), class: 'curve flat' }))
     } else if (shown.frequencies.length) {
-      plot.append(svg('path', { d: curvePath(box, shown.frequencies, shown.response), class: 'curve' }))
+      curve = svg('path', { d: curvePath(box, shown.frequencies, shown.response), class: 'curve' }) as SVGPathElement
+      plot.append(curve)
     }
     if (!shown.readonly && !compare) {
       shown.settings.bands.forEach((band, index) => {
@@ -254,6 +263,7 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
           writeBands(removeBand(shown.settings, band.id))
         })
         plot.append(handle)
+        handles.set(band.id, handle as SVGCircleElement)
       })
     }
     drawStrip()
@@ -273,6 +283,12 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
     undoButton.disabled = !history.canUndo
     redoButton.disabled = !history.canRedo
     resetButton.disabled = shown.readonly || !shown.settings.bands.length
+    if (restoreFocus) {
+      // a draw replaces the handles: put the focus back on the selected one so Delete and the arrows
+      // keep working (the owner's report, 2026-09-28)
+      restoreFocus = false
+      if (selected) handles.get(selected)?.focus({ preventScroll: true })
+    }
     rangeSelect.value = String(range)
     compareButton.classList.toggle('active', compare)
     textButton.classList.toggle('active', isTextShown())
@@ -389,7 +405,46 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
 
   function select(id: string | null): void {
     selected = id
+    restoreFocus = true
     draw()
+  }
+
+  /**
+   * Move the drawn handles and the curve to what ``shown`` says - without rebuilding the plot.
+   * A rebuild during a drag would replace the handle under the pointer (the drag then stops after
+   * the first move), so a drag paints live and only the release draws the whole panel again.
+   */
+  function paintLive(): void {
+    const box = limit()
+    shown.settings.bands.forEach((band) => {
+      const handle = handles.get(band.id)
+      if (!handle) return
+      const gain = GAIN_TYPES.includes(band.type) ? band.gain_db : 0
+      handle.setAttribute('cx', String(xOf(box, band.frequency_hz)))
+      handle.setAttribute('cy', String(yOf(box, gain)))
+      handle.classList.toggle('selected', band.id === selected)
+      handle.setAttribute('r', band.id === selected ? '9' : '7')
+    })
+    if (curve && shown.frequencies.length) curve.setAttribute('d', curvePath(box, shown.frequencies, shown.response))
+    const band = shown.settings.bands.find((b) => b.id === selected)
+    if (band) info.textContent = describeBand(band)
+  }
+
+  /** During a drag: ask for the curve of the new bands, but paint it without a rebuild. */
+  function refreshLive(): void {
+    clearTimeout(liveTimer)
+    liveTimer = setTimeout(async () => {
+      const settings = shown.settings
+      const id = ++request
+      try {
+        const result = await eqResponse(fetcher, settings, shown.sampleRate)
+        if (id !== request) return
+        shown = { ...shown, frequencies: result.frequency_hz, response: result.response_db }
+        paintLive()
+      } catch {
+        // a failed curve while dragging is not worth interrupting the drag; the release reports it
+      }
+    }, 60)
   }
 
   /** Show or hide the raw ``mode.bands`` widget (the value itself is never touched). */
@@ -417,6 +472,8 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
     const band = shown.settings.bands.find((b) => b.id === id)
     if (!band) return
     dragStart = { hz: band.frequency_hz, db: band.gain_db }
+    const origin = event.currentTarget as Element | null
+    origin?.setPointerCapture?.(event.pointerId)
     const box = plot.getBoundingClientRect()
     const move = (e: PointerEvent) => {
       const scaleX = PLOT_SIZE.width / (box.width || PLOT_SIZE.width)
@@ -428,9 +485,11 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
       const hz = hzOf(limit(), fineValue(grabX, x, e.shiftKey))
       const db = dbOf(limit(), fineValue(grabY, y, e.shiftKey))
       shown = { ...shown, settings: moveBand(shown.settings, id, hz, db, shown.sampleRate) }
-      draw()
+      paintLive()
+      refreshLive()
     }
     const up = () => {
+      origin?.releasePointerCapture?.(event.pointerId)
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
       dragStart = null
@@ -459,6 +518,12 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
       writeBands(next)
     }
   }
+
+  // the keyboard acts on the selected band wherever the focus sits inside the plot: click a handle and
+  // press Delete (every draw replaces the handle, so its own listener is not enough on its own)
+  plot.addEventListener('keydown', (event) => {
+    if (selected && event.target === plot) onKey(event, selected)
+  })
 
   plot.addEventListener('dblclick', (event) => {
     if (shown.readonly || compare) return

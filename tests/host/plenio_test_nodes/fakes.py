@@ -120,10 +120,22 @@ EVENTS_FILE = Path(__file__).resolve().parent / "minimax-excerpt.events.json"
 FAKE_RATE = 24000
 
 
-def fake_waveform(seconds: float, variant: int) -> torch.Tensor:
-    """Deterministic stereo test signal; the host tests recompute it to predict the ASR cache key."""
-    t = torch.arange(int(round(seconds * FAKE_RATE)), dtype=torch.float32) / FAKE_RATE
-    wave = 0.1 * torch.sin(2 * torch.pi * 220.0 * t + float(variant))
+def fake_waveform(
+    seconds: float, variant: int, *, rate: int = FAKE_RATE, broadband: bool = False
+) -> torch.Tensor:
+    """Deterministic stereo test signal; the host tests recompute it to predict the ASR cache key.
+
+    ``broadband``: a harmonic series up to 0.95 x Nyquist instead of the 220 Hz sine, for tests that
+    need an input which already reaches the top of its own rate (Refine's full-band note).
+    """
+    t = torch.arange(int(round(seconds * rate)), dtype=torch.float32) / rate
+    if broadband:
+        wave = torch.zeros_like(t)
+        for harmonic in range(1, int(0.95 * (rate / 2) / 110.0) + 1):
+            wave = wave + torch.sin(2 * torch.pi * 110.0 * harmonic * t) / harmonic
+        wave = 0.1 * wave
+    else:
+        wave = 0.1 * torch.sin(2 * torch.pi * 220.0 * t + float(variant))
     return wave.reshape(1, 1, -1).repeat(1, 2, 1)
 
 
@@ -255,14 +267,19 @@ def make_nodes(record: Any) -> list[type[io.ComfyNode]]:
                 inputs=[
                     io.Float.Input("seconds", default=83.02),
                     io.Int.Input("variant", default=0, min=0, max=1000),
+                    io.Int.Input("rate", optional=True, default=FAKE_RATE, min=8000, max=192000),
+                    io.Boolean.Input("broadband", optional=True, default=False),
                 ],
                 outputs=[io.Audio.Output()],
             )
 
         @classmethod
-        def execute(cls, seconds: float, variant: int) -> io.NodeOutput:
+        def execute(
+            cls, seconds: float, variant: int, rate: int = FAKE_RATE, broadband: bool = False
+        ) -> io.NodeOutput:
             record("audio", seconds=seconds, variant=variant)
-            return io.NodeOutput({"waveform": fake_waveform(seconds, variant), "sample_rate": FAKE_RATE})
+            signal = fake_waveform(seconds, variant, rate=rate, broadband=broadband)
+            return io.NodeOutput({"waveform": signal, "sample_rate": rate})
 
     class PlenioTestFakeSheetSage(io.ComfyNode):
         @classmethod

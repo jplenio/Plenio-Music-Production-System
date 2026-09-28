@@ -7,8 +7,6 @@
  * displays the value - a second mixer model does not exist.
  */
 
-import type { ScoreView } from './scoreView'
-
 export const MIX_SCHEMA = 'plenio.stem_mix/1'
 export const REST = 'rest'
 export const BUSES = ['reverb', 'delay'] as const
@@ -25,6 +23,8 @@ export interface Strip {
   muted: [number, number][]
   reverb: number
   delay: number
+  /** Write this strip as its own file (the Stem Mixer node does it; owner's request, 2026-09-28). */
+  save: boolean
 }
 
 export interface MixValue {
@@ -35,7 +35,7 @@ export interface MixValue {
 }
 
 export function emptyStrip(): Strip {
-  return { gain_db: 0, mute: false, solo: false, compression: 0, muted: [], reverb: 0, delay: 0 }
+  return { gain_db: 0, mute: false, solo: false, compression: 0, muted: [], reverb: 0, delay: 0, save: false }
 }
 
 /** A strip as the widget shows it: the stored values or their defaults. */
@@ -48,7 +48,8 @@ export function stripOf(mix: MixValue | null, name: string): Strip {
     compression: typeof raw.compression === 'number' ? raw.compression : 0,
     muted: Array.isArray(raw.muted) ? raw.muted.map((range) => [range[0], range[1]] as [number, number]) : [],
     reverb: typeof raw.reverb === 'number' ? raw.reverb : 0,
-    delay: typeof raw.delay === 'number' ? raw.delay : 0
+    delay: typeof raw.delay === 'number' ? raw.delay : 0,
+    save: raw.save === true
   }
 }
 
@@ -62,8 +63,17 @@ export function isNeutral(strip: Strip): boolean {
     strip.compression === defaults.compression &&
     strip.muted.length === 0 &&
     strip.reverb === defaults.reverb &&
-    strip.delay === defaults.delay
+    strip.delay === defaults.delay &&
+    strip.save === defaults.save
   )
+}
+
+/** The documented stems the widget shows before the first separation ran (owner's request). */
+export const DEFAULT_STEMS = ['vocals', 'drums', 'bass', 'other'] as const
+
+/** The strip order of the widget: the four documented stems, then the residual ``rest``. */
+export function defaultNames(): string[] {
+  return [...DEFAULT_STEMS, REST]
 }
 
 export function parseMix(text: unknown): MixValue | null {
@@ -92,6 +102,7 @@ export function serializeMix(mix: MixValue): string {
     if (full.muted.length) value.muted = full.muted
     if (full.reverb) value.reverb = full.reverb
     if (full.delay) value.delay = full.delay
+    if (full.save) value.save = true
     strips[name] = value
   }
   const result: MixValue = { schema: MIX_SCHEMA, strips }
@@ -207,11 +218,10 @@ export function fractionOf(seconds: number, duration: number | null): number {
   return Math.min(1, Math.max(0, seconds / duration))
 }
 
-/** The strip names of a mix: the stems of the last run plus ``rest`` (plan §6.2). */
-export function stripNames(mix: MixValue | null, view: ScoreView | null): string[] {
-  const stored = Object.keys(mix?.strips ?? {})
-  const base = [REST, ...stored.filter((name) => name !== REST)]
-  const stems = (view as unknown as { stems?: string[] } | null)?.stems
-  if (Array.isArray(stems) && stems.length) return [...stems, REST]
-  return base.length ? base : [REST]
+/** The strip names of a mix: the stems of the last run (or the documented stems), then ``rest``. */
+export function stripNames(mix: MixValue | null, view: { stems?: string[] } | null): string[] {
+  const stems = Array.isArray(view?.stems) && view.stems.length ? view.stems : defaultNames()
+  const base = stems.filter((name) => name !== REST)
+  const extras = Object.keys(mix?.strips ?? {}).filter((name) => name !== REST && !base.includes(name))
+  return [...base, ...extras, REST]
 }
