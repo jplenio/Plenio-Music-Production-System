@@ -43,19 +43,56 @@ def test_round_trip_of_real_scores(text: str) -> None:
 def test_round_trip_of_every_valid_score_with_guide_notes(
     score: c.Score, raw_guide: list[tuple[int, int, int]]
 ) -> None:
+    """A Plenio file round-trips exactly *in the canonical form*: notes that a MIDI file cannot hold
+    (the same onset and pitch, or the same pitch overlapping itself) are merged or shortened, and the
+    next trip changes nothing (the contract `canonical_guide` documents)."""
     guide = tuple(
         sorted(
             (GuideNote(o, min(d, score.total - o), p) for o, d, p in raw_guide if o < score.total),
-            # (onset, pitch, duration): the same canonical order the exporter and the importer use -
-            # two notes at the same onset *and* pitch have no order of their own in a MIDI file
             key=lambda g: (g.onset, g.pitch, g.duration),
         )
     )
+    expected, _cost = midi.canonical_guide(guide)
     data = midi.export_midi(score, guide=guide)
     back = midi.import_midi(data)
     assert back.score == score
-    assert back.guide == guide
+    assert back.guide == expected
     assert back.report == ()
+    # and the canonical form is stable: a second round trip is byte-identical
+    assert midi.export_midi(back.score, guide=back.guide) == data
+
+
+def test_overlapping_notes_of_one_pitch_are_reported() -> None:
+    """Two note-ons of one pitch cannot be told apart in a MIDI file; the reader says what it did."""
+
+    def track(*events: tuple[int, int, bytes]) -> bytes:
+        end = max(tick for tick, _o, _m in events)
+        return _track(list(events), end)
+
+    # note on 60 at tick 0 and 48, note off 60 at 72 and 96 (ppq 96): which off belongs to which on is
+    # ambiguous, and the pairs the reader makes overlap
+    data = _chunk(b"MThd", (0).to_bytes(2, "big") + (1).to_bytes(2, "big") + (96).to_bytes(2, "big"))
+    body = [
+        (0, 0, _meta(0x03, b"Guide")),
+        (0, 1, bytes([0x90, 60, 90])),
+        (48, 2, bytes([0x90, 60, 90])),
+        (72, 3, bytes([0x80, 60, 0])),
+        (96, 4, bytes([0x80, 60, 0])),
+    ]
+    source = data + track(*body)
+    result = midi.import_midi(source)
+    # the guide cannot hold the overlap: the reader says so and returns the canonical form
+    assert any("cannot overlap" in line for line in result.report)
+    by_pitch: dict[int, list[GuideNote]] = {}
+    for note in result.guide:
+        by_pitch.setdefault(note.pitch, []).append(note)
+    for notes in by_pitch.values():
+        for first, second in zip(notes, notes[1:], strict=False):
+            assert first.onset + first.duration <= second.onset
+    # and that form is stable: a second round trip is identical and without a word
+    # the exported form of the same notes holds no overlap, so it reads back without a word
+    again = midi.import_midi(midi.export_midi(result.score, guide=result.guide))
+    assert again.guide == result.guide and again.report == ()
 
 
 def test_file_layout() -> None:

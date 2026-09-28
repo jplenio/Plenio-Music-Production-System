@@ -236,13 +236,56 @@ def _key_signature(key: str) -> bytes:
 
 
 def _guide_key(note: GuideNote) -> tuple[int, int, int]:
-    """The canonical guide order: two notes at the same onset *and* pitch have no order in the file.
-
-    The MIDI round trip pairs note-offs with note-ons by pitch, so simultaneous same-pitch notes come
-    back as the same multiset in an arbitrary order (found by the hypothesis test, 2026-09-28). Both
-    sides sort by ``(onset, pitch, duration)`` so the round trip is canonical and deterministic.
-    """
+    """The canonical guide order: two notes at the same onset *and* pitch have no order in the file."""
     return (note.onset, note.pitch, note.duration)
+
+
+def canonical_guide(notes: Sequence[GuideNote]) -> tuple[tuple[GuideNote, ...], tuple[str, ...]]:
+    """The guide notes as a MIDI file can hold them, plus what that cost.
+
+    A MIDI file identifies a note by pitch, channel and start: two notes of the same pitch that
+    **overlap in time** cannot be told apart when they are read back (the note-offs pair by pitch),
+    and two notes at the same onset *and* pitch are the same key pressed twice at once. So
+
+    - notes at the same ``(onset, pitch)`` collapse to the longest one,
+    - a note is shortened when the next note of its pitch starts inside it (a key cannot be pressed
+      twice while it is held),
+
+    and every change is reported. Export, import and the node property all use this form, so a
+    Plenio file round-trips exactly (found by the hypothesis test, 2026-09-28).
+    """
+    longest: dict[tuple[int, int], GuideNote] = {}
+    for note in notes:
+        key = (note.onset, note.pitch)
+        current = longest.get(key)
+        if current is None or note.duration > current.duration:
+            longest[key] = note
+    dropped = len(notes) - len(longest)
+
+    kept: list[GuideNote] = []
+    notes_by_pitch: dict[int, list[GuideNote]] = {}
+    for note in sorted(longest.values(), key=_guide_key):
+        notes_by_pitch.setdefault(note.pitch, []).append(note)
+    clipped = 0
+    for items in notes_by_pitch.values():
+        for index, note in enumerate(items):
+            limit = items[index + 1].onset if index + 1 < len(items) else None
+            if limit is not None and note.onset + note.duration > limit:
+                kept.append(GuideNote(note.onset, max(1, limit - note.onset), note.pitch))
+                clipped += 1
+            else:
+                kept.append(note)
+    listed = sorted(kept, key=_guide_key)
+    report = []
+    if dropped:
+        report.append(
+            f"guide: {dropped} note(s) at the same start and pitch were merged (the same key pressed twice at once)"
+        )
+    if clipped:
+        report.append(
+            f"guide: {clipped} note(s) were shortened (two notes of one pitch cannot overlap in a MIDI file)"
+        )
+    return tuple(listed), tuple(report)
 
 
 def export_midi(score: Score, *, guide: Sequence[GuideNote] = (), title: str = "") -> bytes:
@@ -292,9 +335,8 @@ def export_midi(score: Score, *, guide: Sequence[GuideNote] = (), title: str = "
         voicings += [(chord.onset, until - chord.onset, pitch) for pitch in _chord_pitches(chord.name)]
     tracks.append(notes_track("chords", voicings, texts))
     if guide:
-        tracks.append(
-            notes_track("guide", ((g.onset, g.duration, g.pitch) for g in sorted(guide, key=_guide_key)))
-        )
+        written, _cost = canonical_guide(guide)
+        tracks.append(notes_track("guide", ((g.onset, g.duration, g.pitch) for g in written)))
     header = _chunk(b"MThd", (1).to_bytes(2, "big") + len(tracks).to_bytes(2, "big") + ppq.to_bytes(2, "big"))
     return header + b"".join(tracks)
 
@@ -607,7 +649,8 @@ def import_midi(
             "The MIDI file cannot be read as a score.",
             diagnostics=[{"severity": "error", "message": problem, "where": "midi"} for problem in found],
         )
-    guide = tuple(sorted((GuideNote(o, e - o, p) for o, e, p in pitched["guide"]), key=_guide_key))
+    guide, guide_cost = canonical_guide([GuideNote(o, e - o, p) for o, e, p in pitched["guide"]])
+    report.extend(guide_cost)
     return MidiImport(score, guide, tuple(report), infos)
 
 
@@ -640,7 +683,7 @@ def guide_from_json(value: object) -> tuple[GuideNote, ...]:
                 f"Guide note {item!r} is not [onset >= 0, duration >= 1, pitch 0-127]."
             )
         notes.append(GuideNote(item[0], item[1], item[2]))
-    return tuple(sorted(notes, key=_guide_key))
+    return canonical_guide(notes)[0]
 
 
 def mapping_from_json(value: object) -> dict[int, str | None] | None:
@@ -664,6 +707,7 @@ __all__ = [
     "GuideNote",
     "MidiImport",
     "TrackInfo",
+    "canonical_guide",
     "export_midi",
     "filename_for",
     "guide_from_json",
