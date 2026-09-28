@@ -265,7 +265,11 @@ def test_the_daw_template_composes_its_own_score() -> None:
 
 
 def test_refine_runs_in_minimax_and_stays_bypassed_elsewhere() -> None:
-    """M5/D10: Refine (48 kHz) with UniverSR is on in MiniMax and bypassed (collapsed) elsewhere (plan §4.6)."""
+    """M5/D10: Refine (48 kHz) with UniverSR is on in MiniMax and bypassed (collapsed) elsewhere (plan §4.6).
+
+    The active block ships **expanded**: a collapsed node shows its promoted stages as a preview only,
+    so the three fields could not be edited there (the owner's report, 2026-09-28).
+    """
     for name, active in (
         ("1 · YuE2 · Song", False),
         ("2 · YuE2 · Cover", False),
@@ -276,7 +280,7 @@ def test_refine_runs_in_minimax_and_stays_bypassed_elsewhere() -> None:
         template = TEMPLATES[name]
         wrapper = next(n for n in template["nodes"] if "Refine" in str(n.get("title", "")))
         assert (wrapper.get("mode") != 4) is active, name
-        assert wrapper["flags"]["collapsed"] is True, name
+        assert wrapper["flags"].get("collapsed", False) is not active, name
         if not active:
             assert "(optional)" in str(wrapper["title"]), name
         group = next(g for g in template["groups"] if "REFINE" in g["title"])

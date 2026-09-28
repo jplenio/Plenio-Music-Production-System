@@ -363,6 +363,9 @@ def refine_stage(
 ) -> tuple[tuple[Node, str], Node]:
     """The REFINE block of a template (plan §11): bypassed and collapsed unless it is on by default.
 
+    Where the block is active it ships **expanded**: a collapsed node shows its promoted stages as a
+    preview only, so the three fields could not be edited there (the owner's report, 2026-09-28).
+
     ``widgets`` sets the promoted stages of this template (the MiniMax preset: pre 10 kHz, post
     19 kHz, crossover 14.5 kHz - the owner's choice, 2026-09-28); elsewhere the node keeps its own
     defaults (pre *auto*, post *off*, crossover 0 = the measured bandwidth minus 500 Hz).
@@ -372,11 +375,11 @@ def refine_stage(
     node = g.add_subgraph(
         blueprints["refine"],
         (x, y),
-        size=(340, 170),
+        size=(340, 250) if active else (340, 170),
         title="Plenio · Refine (48 kHz)" if active else "Refine (optional)",
         widgets=widgets,
         mode=0 if active else 4,
-        collapsed=True,
+        collapsed=not active,
     )
     g.link(audio[0], audio[1], node, "audio")
     g.group(

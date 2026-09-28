@@ -880,11 +880,9 @@
    ],
    "size": [
     340,
-    170
+    250
    ],
-   "flags": {
-    "collapsed": true
-   },
+   "flags": {},
    "order": 9,
    "mode": 0,
    "inputs": [
@@ -1628,8 +1626,8 @@
    "bounding": [
     1770,
     550,
-    320,
-    130
+    400,
+    350
    ],
    "color": "#3f789e",
    "font_size": 24,
