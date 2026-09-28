@@ -44,6 +44,8 @@ import {
 const SVG = 'http://www.w3.org/2000/svg'
 const WIDGET = 'plenio_eq_panel'
 const BANDS_WIDGET = 'mode.bands'
+/** Capture phase: the frontend swallows a bubbling pointerup, so a drag has to end on its own. */
+const CAPTURE: AddEventListenerOptions = { capture: true }
 const PLOT_SIZE = { width: 560, height: 260 }
 /** Colour per band (the strip, the handles and the envelope of a clicked chip agree). */
 const BAND_COLORS = ['#4aa3ff', '#f0a35e', '#6fbf73', '#d873c8', '#e0c65a', '#5ac8c8', '#b28df0', '#e08a8a']
@@ -533,6 +535,8 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
     const band = shown.settings.bands.find((b) => b.id === id)
     if (!band) return
     dragStart = { hz: band.frequency_hz, db: band.gain_db }
+    let moved = false
+    let done = false
     const origin = event.currentTarget as Element | null
     try {
       origin?.setPointerCapture?.(event.pointerId)
@@ -540,32 +544,55 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
       // the handle may be detached while a drag is running; the window listeners below carry the drag
     }
     const box = plot.getBoundingClientRect()
-    const move = (e: PointerEvent) => {
-      const scaleX = PLOT_SIZE.width / (box.width || PLOT_SIZE.width)
-      const scaleY = PLOT_SIZE.height / (box.height || PLOT_SIZE.height)
-      const x = (e.clientX - box.left) * scaleX
-      const y = (e.clientY - box.top) * scaleY
-      const grabX = xOf(limit(), dragStart!.hz)
-      const grabY = yOf(limit(), dragStart!.db)
-      const hz = hzOf(limit(), fineValue(grabX, x, e.shiftKey))
-      const db = dbOf(limit(), fineValue(grabY, y, e.shiftKey))
-      shown = { ...shown, settings: moveBand(shown.settings, id, hz, db, shown.sampleRate) }
-      paintLive()
-      refreshLive()
-    }
-    const up = () => {
+    // the test environment reports an empty rect: fall back to the viewBox
+    const left = box.width ? box.left : 0
+    const top = box.height ? box.top : 0
+    const width = box.width || PLOT_SIZE.width
+    const height = box.height || PLOT_SIZE.height
+    /** Only what happens on the curve counts: outside it the band stays where it was. */
+    const inside = (x: number, y: number) =>
+      x >= left - 1 && x <= left + width + 1 && y >= top - 1 && y <= top + height + 1
+    function finish(): void {
+      if (done) return
+      done = true
       try {
         origin?.releasePointerCapture?.(event.pointerId)
       } catch {
         // already detached
       }
-      window.removeEventListener('pointermove', move)
-      window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointermove', move, CAPTURE)
+      window.removeEventListener('pointerup', finish, CAPTURE)
+      window.removeEventListener('pointercancel', finish, CAPTURE)
+      window.removeEventListener('blur', finish, CAPTURE)
       dragStart = null
-      writeBands(shown.settings)
+      if (moved) writeBands(shown.settings)
     }
-    window.addEventListener('pointermove', move)
-    window.addEventListener('pointerup', up)
+    const move = (e: PointerEvent) => {
+      if (done || !dragStart) return
+      // the button is no longer down (the pointerup was swallowed by the frontend or happened
+      // outside the window): the drag ends here instead of following every later move
+      if (e.buttons === 0) {
+        finish()
+        return
+      }
+      if (!inside(e.clientX, e.clientY)) return
+      const scaleX = PLOT_SIZE.width / width
+      const scaleY = PLOT_SIZE.height / height
+      const x = (e.clientX - left) * scaleX
+      const y = (e.clientY - top) * scaleY
+      const grabX = xOf(limit(), dragStart.hz)
+      const grabY = yOf(limit(), dragStart.db)
+      const hz = hzOf(limit(), fineValue(grabX, x, e.shiftKey))
+      const db = dbOf(limit(), fineValue(grabY, y, e.shiftKey))
+      shown = { ...shown, settings: moveBand(shown.settings, id, hz, db, shown.sampleRate) }
+      moved = true
+      paintLive()
+      refreshLive()
+    }
+    window.addEventListener('pointermove', move, CAPTURE)
+    window.addEventListener('pointerup', finish, CAPTURE)
+    window.addEventListener('pointercancel', finish, CAPTURE)
+    window.addEventListener('blur', finish, CAPTURE)
   }
 
   function onKey(event: KeyboardEvent, id: string): void {

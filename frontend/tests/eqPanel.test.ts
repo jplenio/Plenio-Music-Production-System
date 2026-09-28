@@ -44,8 +44,8 @@ function fetcher(): Fetcher {
   }
 }
 
-function pointer(type: string, x: number, y: number): PointerEvent {
-  return new PointerEvent(type, { clientX: x, clientY: y, bubbles: true })
+function pointer(type: string, x: number, y: number, buttons = 1): PointerEvent {
+  return new PointerEvent(type, { clientX: x, clientY: y, buttons, bubbles: true })
 }
 
 function plotOf(node: Host): SVGSVGElement {
@@ -96,6 +96,25 @@ describe('the EQ panel', () => {
     handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete', bubbles: true }))
     expect(parseSettings(node.value('mode.bands'))!.bands).toEqual([])
     expect(node.root.querySelector('circle.handle')).toBeNull()
+  })
+
+  it('ends a drag whose pointerup never arrives, and ignores the area outside the curve', async () => {
+    const node = await mount()
+    const plot = plotOf(node)
+    const start = { x: xOf(BOX, 1000), y: yOf(BOX, 3) }
+    ;(plot.querySelector('circle.handle') as SVGCircleElement).dispatchEvent(pointer('pointerdown', start.x, start.y))
+    const handle = plot.querySelector('circle.handle') as SVGCircleElement
+    // a move far outside the curve (the owner's report: the band followed the pointer there too)
+    window.dispatchEvent(pointer('pointermove', start.x + 600, start.y - 400))
+    expect(Number(handle.getAttribute('cy'))).toBeCloseTo(start.y, 3)
+    // a normal move inside it works
+    window.dispatchEvent(pointer('pointermove', start.x + 40, start.y - 30))
+    expect(Number(handle.getAttribute('cy'))).toBeLessThan(start.y)
+    // the button is no longer down: the drag ends here, even though no pointerup ever arrived
+    window.dispatchEvent(pointer('pointermove', start.x + 60, start.y - 40, 0))
+    const at = Number(handle.getAttribute('cy'))
+    window.dispatchEvent(pointer('pointermove', start.x + 120, start.y - 90))
+    expect(Number(handle.getAttribute('cy'))).toBeCloseTo(at, 3)
   })
 
   it('keeps a chosen preset visible until the bands are edited by hand', async () => {
