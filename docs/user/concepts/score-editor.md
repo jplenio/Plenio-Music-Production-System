@@ -32,6 +32,20 @@ Typical uses:
 
 A Song Sheet node can choose the layout its editor opens in with the node property `plenio_editor_layout` (`review` or `text`; the templates set it where it matters). Without it the editor opens in the layout you used last in this browser.
 
+## The window and the panes
+
+The editor window is yours to size (since 0.3.0):
+
+| Control | What it does |
+|---|---|
+| **⛶ / ❐** in the header (or a double-click on the header) | fills the browser window / returns to the size before |
+| the **corner grip** (bottom right) | drag it to resize the window; it never gets smaller than 640 × 420 and never larger than the browser window |
+| the **grip under the piano roll** | drag it (or use ↑/↓ on it) to give the roll more or less height - a big roll for drawing, a small one to keep the notation in view |
+| the **grip under the notation** (with *ABC text (advanced)*) | drag it (or ↑/↓) to share the column between the notation and the ABC text |
+| the **grip right of the navigator** | drag it (or ←/→) to widen the navigator, the track panel and *Lyrics fit* |
+
+The window size and the pane sizes are remembered in this browser (they are viewer preferences, never part of the workflow). The lyrics and ABC text fields keep their own resize grip too.
+
 ## The inspector
 
 The inspector shows what is selected - in the piano roll, the notation, the chord lane or the bar strip - and each field changes it with one checked edit (Enter or leaving the field commits it):

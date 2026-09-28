@@ -4,6 +4,7 @@
  * storage simply gives the defaults.
  */
 import type { VoiceSwitches } from '../../shared/playback'
+import { NOTATION_MAX, NOTATION_MIN, ROLL_MAX, ROLL_MIN, SIDE_MAX, SIDE_MIN } from '../paneSizes'
 
 export interface EditorPrefs {
   /**
@@ -20,6 +21,12 @@ export interface EditorPrefs {
   roll: boolean
   /** Piano-roll zoom: pixels per quarter note. */
   rollZoom: number
+  /** Height of the piano roll in pixels (the splitter under it; 120-720). */
+  rollHeight: number
+  /** Share of the review/DAW column the notation takes above the ABC text (0.25-0.85). */
+  notationShare: number
+  /** Width of the side column (navigator, track panel, lyrics fit; 160-460 px). */
+  sideWidth: number
   metronome: boolean
 }
 
@@ -34,6 +41,9 @@ export function defaultPrefs(): EditorPrefs {
     speed: 1,
     roll: true,
     rollZoom: 48,
+    rollHeight: 280,
+    notationShare: 0.6,
+    sideWidth: 230,
     metronome: false
   }
 }
@@ -66,6 +76,20 @@ export function loadPrefs(storage: Pick<Storage, 'getItem'> | null = safeStorage
       roll: data.roll !== false,
       rollZoom:
         typeof data.rollZoom === 'number' && data.rollZoom >= 12 && data.rollZoom <= 240 ? data.rollZoom : defaults.rollZoom,
+      rollHeight:
+        typeof data.rollHeight === 'number' && data.rollHeight >= ROLL_MIN && data.rollHeight <= ROLL_MAX
+          ? Math.round(data.rollHeight)
+          : defaults.rollHeight,
+      notationShare:
+        typeof data.notationShare === 'number' &&
+        data.notationShare >= NOTATION_MIN &&
+        data.notationShare <= NOTATION_MAX
+          ? data.notationShare
+          : defaults.notationShare,
+      sideWidth:
+        typeof data.sideWidth === 'number' && data.sideWidth >= SIDE_MIN && data.sideWidth <= SIDE_MAX
+          ? Math.round(data.sideWidth)
+          : defaults.sideWidth,
       metronome: data.metronome === true
     }
   } catch {

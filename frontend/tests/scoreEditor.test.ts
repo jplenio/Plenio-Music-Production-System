@@ -252,12 +252,28 @@ describe('editor preferences', () => {
       speed: 0.5,
       roll: true,
       rollZoom: 48,
+      rollHeight: 280,
+      notationShare: 0.6,
+      sideWidth: 230,
       metronome: false
     })
     const roll = JSON.stringify({ roll: false, rollZoom: 96, metronome: true, advanced: true })
     expect(loadPrefs({ getItem: () => roll })).toMatchObject({ roll: false, rollZoom: 96, metronome: true, advanced: true })
     const wrong = JSON.stringify({ layout: 'huge', zoom: 9, voices: 'all', speed: '1', rollZoom: 5000, metronome: 'yes' })
     expect(loadPrefs({ getItem: () => wrong })).toEqual(defaultPrefs())
+    // the pane sizes keep valid values and replace what is out of range (owner's request, 2026-09-28)
+    const panes = JSON.stringify({ rollHeight: 400, notationShare: 0.4, sideWidth: 300 })
+    expect(loadPrefs({ getItem: () => panes })).toMatchObject({
+      rollHeight: 400,
+      notationShare: 0.4,
+      sideWidth: 300
+    })
+    const panesWrong = JSON.stringify({ rollHeight: 5000, notationShare: 0.1, sideWidth: 20 })
+    expect(loadPrefs({ getItem: () => panesWrong })).toMatchObject({
+      rollHeight: 280,
+      notationShare: 0.6,
+      sideWidth: 230
+    })
   })
 
   it('reads the layouts of 0.2.x', () => {

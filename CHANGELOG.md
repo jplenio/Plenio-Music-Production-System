@@ -12,6 +12,7 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 - **Stems** - an optional block before mastering: **Separate Stems** (BS-RoFormer 4-stem, vendored MIT inference code) splits the song into vocals, drums, bass and other and keeps the **residual** *rest*, so that the **Stem Mixer** with neutral settings returns the song unchanged. The mixer has a strip per stem (fader, mute/solo, compression, reverb and delay sends), draws the last separation as a waveform on which you **drag muted time ranges**, and writes one JSON value (`plenio.stem_mix/1`) that you can also edit under *Advanced*. A send without its bus is refused, never silently ignored. Experimental until the owner's listening check (L2).
 - **Brief template panel**: under the template selector in Song Brief and Cover Brief - the *Template fills:* line, what the template suggests, *Copy template text*, *Use template choices* and *Reset all to template*; and **Use my own lyrics** in the Lyrics tab (manual lyrics are never replaced, and the sheet says `lyrics: yours (manual)`).
 - **EQ panel on the node**: the curve is now the editor - handles (drag for frequency and gain, Shift for fine, wheel for Q, double-click for 0 dB or a new bell, Delete to remove), a band strip with an inline editor, *Edit these bands* for match proposals, the last run's spectrum behind the curve, undo/redo, a gain-range switch (±6/±12/±18 dB) and *bands as text*.
+- **The Song Sheet window is resizable** (and fills the browser window with one click, or a double-click on its header), and the score editor's panes are draggable: the piano roll's height, the split between the notation and the ABC text, and the width of the navigator column. Window and pane sizes are remembered in the browser (viewer preferences, never in the workflow).
 - Two measurement tools for the owner's local checks: `tools/studies/sr_study.py` (Refine arms, blind A/B pack) and `tools/studies/stem_study.py` (separation speed, VRAM, the mixer contracts and the listening material).
 - Two new model files are catalogued for the new stages: `audio_sr/pytorch_model.bin` (UniverSR, CC BY 4.0 weights) and `audio_separation/model_bs_roformer_ep_17_sdr_9.6568.ckpt` (BS-RoFormer, MIT trainer); ComfyUI's missing-model dialog offers them when a template uses the block.
 
@@ -25,6 +26,8 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 ### Fixed
 
 - `duplicate_measures` copies a section only when the block holds all of it; duplicating part of it extends the section instead of creating a second one with the same name (found by a browser check).
+- The stem names of *Separate Stems* follow the checkpoint's own instrument order (the released BS-RoFormer lists `drums, bass, other, vocals`); a hardcoded order had labelled every stem as its neighbour. The mixdown was never affected (the residual keeps a neutral mix exact), which is why only a listening check could find it.
+- A MIDI round trip of guide notes that share onset *and* pitch came back in an arbitrary order; export, import and the node property now use one canonical order `(onset, pitch, duration)`.
 
 ### Notes on this release
 

@@ -45,6 +45,19 @@ import TrackPanel from './TrackPanel.vue'
 import { type Layout, focusOf, initialLayout } from './inspector'
 import { downloadBytes, fromBase64, toBase64 } from './midiImport'
 import { loadPrefs, savePrefs } from './prefs'
+import {
+  NOTATION_MAX,
+  NOTATION_MIN,
+  ROLL_MAX,
+  ROLL_MIN,
+  SIDE_MAX,
+  SIDE_MIN,
+  beginDrag,
+  rollHeightAfter,
+  shareAfter,
+  shareValue,
+  sideWidthAfter
+} from '../paneSizes'
 import { guideNotes } from './tracks'
 import { describeError, useScoreSession } from './useScoreSession'
 
@@ -175,6 +188,55 @@ const rollZoom = computed<number>({
   get: () => prefs.value.rollZoom,
   set: (value) => (prefs.value = { ...prefs.value, rollZoom: value })
 })
+
+// --- pane sizes (owner's request, 2026-09-28): drag the roll, the notation split and the side column
+const mainStyle = computed(() => ({
+  '--plenio-side-w': `${prefs.value.sideWidth}px`,
+  '--plenio-notation-fr': `${prefs.value.notationShare}fr`,
+  '--plenio-text-fr': `${Math.round((1 - prefs.value.notationShare) * 1000) / 1000}fr`
+}))
+
+function startRollDrag(event: PointerEvent): void {
+  event.preventDefault()
+  const start = prefs.value.rollHeight
+  beginDrag(event, ({ dy }) => (prefs.value = { ...prefs.value, rollHeight: rollHeightAfter(start, dy) }))
+}
+
+function nudgeRoll(event: KeyboardEvent): void {
+  const step = event.key === 'ArrowUp' ? -16 : event.key === 'ArrowDown' ? 16 : 0
+  if (!step) return
+  event.preventDefault()
+  prefs.value = { ...prefs.value, rollHeight: rollHeightAfter(prefs.value.rollHeight, step) }
+}
+
+function startNotationDrag(event: PointerEvent): void {
+  event.preventDefault()
+  const start = prefs.value.notationShare
+  const container = (event.currentTarget as HTMLElement).parentElement
+  const height = container?.clientHeight ?? 0
+  beginDrag(event, ({ dy }) => (prefs.value = { ...prefs.value, notationShare: shareAfter(start, dy, height) }))
+}
+
+function nudgeNotation(event: KeyboardEvent): void {
+  // ArrowDown moves the divider down (the notation grows), like dragging it
+  const step = event.key === 'ArrowDown' ? 0.03 : event.key === 'ArrowUp' ? -0.03 : 0
+  if (!step) return
+  event.preventDefault()
+  prefs.value = { ...prefs.value, notationShare: shareValue(prefs.value.notationShare + step) }
+}
+
+function startSideDrag(event: PointerEvent): void {
+  event.preventDefault()
+  const start = prefs.value.sideWidth
+  beginDrag(event, ({ dx }) => (prefs.value = { ...prefs.value, sideWidth: sideWidthAfter(start, dx) }))
+}
+
+function nudgeSide(event: KeyboardEvent): void {
+  const step = event.key === 'ArrowLeft' ? -16 : event.key === 'ArrowRight' ? 16 : 0
+  if (!step) return
+  event.preventDefault()
+  prefs.value = { ...prefs.value, sideWidth: sideWidthAfter(prefs.value.sideWidth, step) }
+}
 
 // --- MIDI (next-release plan §10.4 / D3): export the score, import a file as a new score ---
 const midiFile = ref<HTMLInputElement | null>(null)
@@ -420,6 +482,7 @@ function onKey(event: KeyboardEvent): void {
     <PianoRoll
       v-if="showRoll"
       v-model:zoom="rollZoom"
+      :height="prefs.rollHeight"
       :view="shown"
       :selection="session.selection"
       :playing="cursor"
@@ -431,12 +494,26 @@ function onKey(event: KeyboardEvent): void {
       @select="selectFromRoll"
     />
     <div
+      v-if="showRoll && shown?.model"
+      class="splitter horizontal"
+      role="separator"
+      tabindex="0"
+      aria-label="Resize the piano roll"
+      :aria-valuenow="prefs.rollHeight"
+      :aria-valuemin="ROLL_MIN"
+      :aria-valuemax="ROLL_MAX"
+      title="Drag to resize the piano roll (arrow keys work too)"
+      @pointerdown="startRollDrag"
+      @keydown="nudgeRoll"
+    />
+    <div
       class="score-main"
       :class="{ 'with-roll': showRoll && !!shown?.model, 'with-inspector': review }"
       :data-layout="layout"
       :data-text="review ? (prefs.advanced ? 'shown' : 'hidden') : 'main'"
+      :style="mainStyle"
     >
-      <div class="side">
+      <div class="side ">
         <TrackPanel
           v-if="daw"
           v-model:voices="voices"
@@ -466,7 +543,19 @@ function onKey(event: KeyboardEvent): void {
           />
         </details>
       </div>
-      <div class="score-views">
+      <div
+        class="splitter vertical"
+        role="separator"
+        tabindex="0"
+        aria-label="Resize the side column"
+        :aria-valuenow="prefs.sideWidth"
+        :aria-valuemin="SIDE_MIN"
+        :aria-valuemax="SIDE_MAX"
+        title="Drag to resize the navigator column (arrow keys work too)"
+        @pointerdown="startSideDrag"
+        @keydown="nudgeSide"
+      />
+      <div class="score-views" :class="{ split: review && prefs.advanced }">
         <AbcEditor
           v-if="!review"
           :text="doc.text"
@@ -484,6 +573,19 @@ function onKey(event: KeyboardEvent): void {
           :zoom="prefs.zoom"
           tabindex="0"
           @select="(id: string, additive: boolean) => select(id, additive)"
+        />
+        <div
+          v-if="review && prefs.advanced"
+          class="splitter horizontal"
+          role="separator"
+          tabindex="0"
+          aria-label="Resize the ABC text"
+          :aria-valuenow="prefs.notationShare"
+          :aria-valuemin="NOTATION_MIN"
+          :aria-valuemax="NOTATION_MAX"
+          title="Drag to give the notation or the ABC text more room (arrow keys work too)"
+          @pointerdown="startNotationDrag"
+          @keydown="nudgeNotation"
         />
         <AbcEditor
           v-if="review && prefs.advanced"

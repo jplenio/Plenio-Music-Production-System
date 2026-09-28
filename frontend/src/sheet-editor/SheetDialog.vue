@@ -22,6 +22,14 @@ import {
 import { type DocumentKind, type SheetState, serializeState } from '../shared/sheetState'
 import { SECTION_TAGS, withTag } from '../shared/lyricsTags'
 import { LINE_BREAK, changedWords, wordDiff } from '../shared/wordDiff'
+import {
+  DIALOG_MARGIN,
+  type DialogGeometry,
+  beginDrag,
+  clampDialog,
+  loadGeometry,
+  saveGeometry
+} from './paneSizes'
 import LyricsFit from './LyricsFit.vue'
 import ScoreTab from './score/ScoreTab.vue'
 import { sameGuide } from './score/tracks'
@@ -243,6 +251,46 @@ function close() {
   if (dirty.value) confirmClose.value = true
   else emit('close')
 }
+
+// --- the window (resizable, fills the browser window on request; owner's request, 2026-09-28) -----
+const geometry = reactive<DialogGeometry>(loadGeometry())
+
+const dialogStyle = computed(() => {
+  // --plenio-dialog-h feeds the panes' calc() heights in dialog.css, so they follow the window
+  const height = geometry.maximized ? window.innerHeight - 2 * DIALOG_MARGIN : geometry.height
+  if (geometry.maximized) {
+    return {
+      width: `${window.innerWidth - 2 * DIALOG_MARGIN}px`,
+      height: `${height}px`,
+      '--plenio-dialog-h': `${height}px`
+    }
+  }
+  return { width: `${geometry.width}px`, height: `${geometry.height}px`, '--plenio-dialog-h': `${height}px` }
+})
+
+function toggleMaximize(): void {
+  geometry.maximized = !geometry.maximized
+  saveGeometry(geometry)
+}
+
+/** Drag the corner: the window follows the pointer, clamped to the minimum and to the viewport. */
+function startResize(event: PointerEvent): void {
+  event.preventDefault()
+  event.stopPropagation()
+  const start = { width: geometry.width, height: geometry.height }
+  beginDrag(
+    event,
+    ({ dx, dy }) => {
+      const size = clampDialog(
+        { width: start.width + dx, height: start.height + dy },
+        { width: window.innerWidth, height: window.innerHeight }
+      )
+      geometry.width = size.width
+      geometry.height = size.height
+    },
+    () => saveGeometry(geometry)
+  )
+}
 function onKey(event: KeyboardEvent) {
   if (event.key === 'Escape' && !event.defaultPrevented) {
     event.preventDefault()
@@ -269,8 +317,15 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="plenio-overlay" @mousedown.self="close">
-    <div class="plenio-dialog" role="dialog" aria-modal="true" :aria-label="title">
-      <header>
+    <div
+      class="plenio-dialog"
+      role="dialog"
+      aria-modal="true"
+      :aria-label="title"
+      :class="{ maximized: geometry.maximized }"
+      :style="dialogStyle"
+    >
+      <header @dblclick.self="toggleMaximize">
         <h2>{{ title }}</h2>
         <span class="status" :class="{ bad: hasErrors || unresolvedConflicts.length }" :title="result?.status ?? ''">
           {{ statusIcon }}
@@ -287,6 +342,15 @@ onBeforeUnmount(() => {
             {{ tabLabel(item) }}
           </button>
         </div>
+        <button
+          class="icon"
+          :title="geometry.maximized ? 'Restore the window size (double-click the header)' : 'Fill the browser window (double-click the header)'"
+          :aria-label="geometry.maximized ? 'Restore' : 'Maximize'"
+          :aria-pressed="geometry.maximized"
+          @click="toggleMaximize"
+        >
+          {{ geometry.maximized ? '❐' : '⛶' }}
+        </button>
         <button class="icon" title="Close (Esc)" aria-label="Close" @click="close">×</button>
       </header>
       <p v-if="!payload" class="hint">
@@ -448,6 +512,15 @@ onBeforeUnmount(() => {
           Approve
         </button>
       </footer>
+      <div
+        v-if="!geometry.maximized"
+        class="resize-handle"
+        role="separator"
+        aria-label="Resize the window"
+        :aria-valuenow="geometry.width"
+        :title="`Resize (${geometry.width} × ${geometry.height})`"
+        @pointerdown="startResize"
+      />
     </div>
   </div>
 </template>
