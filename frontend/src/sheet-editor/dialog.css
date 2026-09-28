@@ -62,20 +62,20 @@
   background: rgb(76 154 255 / 35%);
   outline: none;
 }
-/* splitters inside a grid overlap its gap, so no column or row is added for them */
+/* the notation/ABC split overlays the gap between the two rows of the column */
+.plenio-overlay .score-views > .splitter.horizontal {
+  grid-row: 1;
+  align-self: end;
+  height: 10px;
+  margin-bottom: -9px;
+  z-index: 2;
+}
 .plenio-overlay .score-main > .splitter.vertical {
   grid-column: 1;
   justify-self: end;
   align-self: stretch;
   width: 10px;
   margin-right: -10px;
-  z-index: 2;
-}
-.plenio-overlay .score-views > .splitter.horizontal {
-  grid-row: 1;
-  align-self: end;
-  height: 10px;
-  margin-bottom: -9px;
   z-index: 2;
 }
 .plenio-overlay header,
@@ -364,6 +364,21 @@
   grid-template-columns: var(--plenio-side-w, 230px) minmax(0, 1fr);
   gap: 10px;
   height: max(380px, calc(var(--plenio-dialog-h, min(900px, 94vh)) - 330px));
+}
+/* every child sits in row 1 - without this the splitter (a definite column, an automatic row) would
+   be pushed to a second row and drag the notation and the inspector down with it */
+.plenio-overlay .score-main > .side {
+  grid-area: 1 / 1;
+}
+.plenio-overlay .score-main > .splitter.vertical {
+  grid-area: 1 / 1;
+  justify-self: end;
+}
+.plenio-overlay .score-main > .score-views {
+  grid-area: 1 / 2;
+}
+.plenio-overlay .score-main > .inspector {
+  grid-area: 1 / 3;
 }
 .plenio-overlay .score-main.with-roll {
   /* the piano roll sits above (its height is draggable): keep roll, notation and text in the dialog */
@@ -810,18 +825,46 @@
 }
 .plenio-overlay .track-panel li {
   display: grid;
-  grid-template-columns: 10px minmax(0, 1fr) auto;
+  grid-template-columns: 8px minmax(0, 1fr) auto auto;
+  /* one track, two lines: the dot, name, note count and the playback switch on the first, where the
+     track goes ("sung as V: Vocal", "never sent to YuE2") on the second */
+  grid-template-areas:
+    'dot name count play'
+    'dot destination destination clear';
   align-items: center;
-  gap: 4px;
+  column-gap: 6px;
+  row-gap: 1px;
   font-size: 12px;
 }
 .plenio-overlay .track-panel .dot {
+  grid-area: dot;
   width: 8px;
   height: 8px;
   border-radius: 50%;
 }
 .plenio-overlay .track-panel .track-name {
+  grid-area: name;
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.plenio-overlay .track-panel .count {
+  grid-area: count;
+}
+.plenio-overlay .track-panel .play {
+  grid-area: play;
+  display: flex;
+  align-items: center;
+}
+.plenio-overlay .track-panel .play input {
+  margin: 0;
+}
+.plenio-overlay .track-panel button.link {
+  grid-area: clear;
+}
+.plenio-overlay .track-panel .destination {
+  grid-area: destination;
 }
 .plenio-overlay .track-panel .destination,
 .plenio-overlay .track-panel .count {
