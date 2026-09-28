@@ -43,7 +43,7 @@ Open them from ComfyUI's template browser (listed under this package's name):
 | **4 · Enhance & Master** | EQ, loudness and export for a file you already have; runs on the CPU ([guide](docs/user/paths/enhance-master.md)) |
 | **5 · YuE2 · DAW** | compose the score yourself: piano roll, chord symbols and the Guide track ([guide](docs/user/paths/yue2-daw.md)) |
 
-Every template reads left to right in numbered groups: **SONG → WRITE → SHEET → RENDER → FINISH** (the DAW template adds **DAW** and **FINISH** groups of its own). An *About this template* note explains the path in a few steps, and optional blocks (Cover Art, the instrumental adapter, Refine, Stems) are marked *(optional)* and switched off until you want them. All five templates also run as a simple form in ComfyUI's **App mode**; the Song Sheet buttons work there too, so you can review and edit without the graph.
+Every template reads left to right in numbered groups: **SONG → WRITE → SHEET → RENDER → FINISH** (the DAW template adds **DAW** and **FINISH** groups of its own). An *About this template* note explains the path in a few steps, and optional blocks (Cover Art, the instrumental adapter, Refine, Stems) are marked *(optional)* and switched off until you want them. All six templates also run as a simple form in ComfyUI's **App mode**; the Song Sheet buttons work there too, so you can review and edit without the graph.
 
 ### Two ways to work
 
@@ -94,6 +94,12 @@ The cover template has the same choice (*one cover, stop to review* is its defau
 
 Open a Song Sheet and choose the score tab. The **piano roll** draws, moves and resizes notes (Review mode: into rests, **Alt** to overwrite), the **chord lane** takes chord symbols, the **inspector** handles the bar the selection starts in (insert, duplicate, delete, meter, key changes), and the notation and the ABC text stay in sync with the selection. **Export MIDI** writes the score (and the Guide notes) as a type-1 file; **Import MIDI…** shows the file's tracks with a role each, its grid and what the import would change *before* it replaces anything - and can read chord symbols from a Chords track. Undo and redo work, and every result is validated before it is kept. See the [score editor guide](docs/user/concepts/score-editor.md).
 
+<p align="center">
+  <img src="assets/branding/Screenshot%20Score-Editor.png" alt="The Song Sheet's score tab in the DAW layout: piano roll with the chord lane, the track panel, the notation and the transport" width="100%" />
+</p>
+
+*The score tab of a Song Sheet in the DAW layout: the piano roll with the chord lane on top, the tracks (Vocal, Instrument, Chords and the Guide track that never reaches YuE2), the notation in sync with the roll, MIDI export and import, and playback with loop and metronome.*
+
 ### Compose a song yourself (YuE2 · DAW)
 
 Open **5 · YuE2 · DAW**, describe the song in the brief and run once: *Score Tools* builds an empty score in the right length, meter and key, and the run stops at the sheet. Draw the notes, set the chords, split the score into sections - and run again: YuE2 renders exactly the score you approved. The fourth track, **Guide**, is played with the sheet for timing but never sent to the model ([guide](docs/user/paths/yue2-daw.md)).
@@ -120,14 +126,26 @@ The same brief and writer, one Song Sheet with the structured caption (Global Me
 
 Both blocks sit between the render and the master and are bypassed until you switch them on (**Ctrl+B** selects a block).
 
-- **Stems**: *Separate Stems* splits the song into up to four stems (vocals, drums, bass, other) and keeps the **residual** as the strip *rest*, so a neutral **Stem Mixer** returns the song unchanged - separation errors can only affect what you change yourself. The mixer has a fader, mute/solo, compression and reverb/delay sends per strip, and you drag **muted time ranges** directly on the strip's waveform. The mixdown is not normalised; *Plenio · Master* sets the loudness. Needs the BS-RoFormer checkpoint (527 MB, `models/audio_separation`). [Details](docs/user/concepts/stems.md)
-- **Refine (48 kHz)**: brings a render to 48 kHz and, for band-limited material, extends the missing top octave with a super-resolution model (UniverSR, 229 MB, `models/audio_sr`); an input that is already full band is only resampled and the report says so. On by default in *3 · MiniMax · Song*, bypassed elsewhere - switch it on for old MP3s or phone recordings in *4 · Enhance & Master*. Both stages are **experimental**: the measurements are in, the owner's listening verdicts are open (see the [status](docs/design/CURRENT_STATUS.md) §5). [Details](docs/user/concepts/refine.md)
+- **Stems**: *Separate Stems* splits the song into up to four stems (vocals, drums, bass, other) and keeps the **residual** as the strip *rest*, so a neutral **Stem Mixer** returns the song unchanged - separation errors can only affect what you change yourself. The mixer has a fader, mute/solo, compression and reverb/delay sends per strip, you drag **muted time ranges** directly on the strip's waveform, and **save** writes a strip as its own 24-bit FLAC. The mixdown is not normalised; *Plenio · Master* sets the loudness. Needs the BS-RoFormer checkpoint (527 MB, `models/audio_separation`). [Details](docs/user/concepts/stems.md)
+- **Refine (48 kHz)**: brings a render to 48 kHz and extends the top octaves with a super-resolution model (UniverSR, 229 MB, `models/audio_sr`), keeping everything below the crossover from the original. A **preset** sets what the model sees, where it takes over and how its result is rolled off in one go; the model runs whenever it is connected, and for material that already reaches the top of the band the report says that only the content above the crossover changed. On by default in *3 · MiniMax · Song*, bypassed elsewhere - switch it on for old MP3s or phone recordings in *4 · Enhance & Master*. Both stages are **experimental**: the measurements are in, the owner's listening verdicts are open (see the [status](docs/design/CURRENT_STATUS.md) §5). [Details](docs/user/concepts/refine.md)
+
+<p align="center">
+  <img src="assets/branding/Screenshot%20Stems.png" alt="The Stem Mixer node: a strip per stem and the residual rest with fader, mute/solo, compression, reverb and delay sends and save, and the two effect buses" width="80%" />
+</p>
+
+*The Stem Mixer before its first run: the four documented stems and the residual "rest", each with fader, mute/solo, compression, the two sends and a save switch; the waveform under each strip fills with the separation, and the reverb and delay buses sit below.*
 
 ## Mastering and export
 
-- **EQ**: up to 8 parametric bands with a live response curve, or *tone match*: a gentle tilt (*warm*, *bright*) or the long-term spectrum of a reference recording, within a maximum gain you set.
+- **EQ**: up to 8 parametric bands edited directly on the response curve - drag a handle for frequency and gain, use the wheel for Q, type exact values into the band strip - with presets, undo/redo and the last run's spectrum behind the curve; or *tone match*: a gentle tilt (*warm*, *bright*) or the long-term spectrum of a reference recording, within a maximum gain you set.
 - **Loudness & Dynamics**: BS.1770-4 loudness, EBU loudness range, 4x oversampled true peak; a soft-knee compressor and a lookahead true-peak limiter. The default target is -14 LUFS / -1 dBTP, and the result is measured and reported. If the target cannot be reached within the gain and limiter budgets, you get the best result within them and a note.
 - **Export Release**: FLAC 24-bit, MP3 V0 (above 48 kHz converted for the MP3 only), WAV 32-bit float; title, artist, album, date, track, genre, comment, album artist and composer, typed or copied from the loaded file. Cover art - from the optional Cover Art block, or copied from the loaded file - is embedded in the FLAC and MP3 files (whichever tag option you choose) and saved next to them as `.jpg`; WAV keeps the `.jpg` only. Every export also writes a `.plenio.json` release record.
+
+<p align="center">
+  <img src="assets/branding/Screenshot%20graphical-EQ.png" alt="The EQ node's panel: a response curve with two bell bands as handles, the band strip and the inline editor" width="80%" />
+</p>
+
+*The EQ node's panel: each band is a handle on the curve, the strip below lists the bands and opens an inline editor for type, frequency, gain and Q; presets, the gain range, undo/redo and compare sit above the curve.*
 
 Details and limits: [Mastering and audio formats](docs/user/concepts/mastering.md).
 
@@ -186,7 +204,7 @@ Plenio is the successor of the [Music Production Toolkit](https://github.com/jpl
 - The ASR can mishear words. A cover shows unsure words highlighted so you can correct them before rendering.
 - SheetSage2 reads one 300-second window at a time; on 16 GB cards, trim longer sources.
 - Mastering is whole-song loudness with a gentle tone match. There is no restoration, no fades and no multiband processing.
-- **Stems** and **Refine** are experimental: their guarantees (a neutral mix returns the input, solo/mute rules, bandwidth before/after, no normalisation) are tested, but how the models *sound* is decided by the owner's listening checks (L1/L2), not yet done. On the two real takes measured so far, Refine's bandwidth rule reported *input already full band*, so the model added nothing - see the [status](docs/design/CURRENT_STATUS.md) §5.
+- **Stems** and **Refine** are experimental: their guarantees (a neutral mix returns the input, solo/mute rules, bandwidth before/after, no normalisation) are tested, but how the models *sound* is decided by the owner's listening checks (L1/L2), not yet done. On the two real takes measured so far, Refine's bandwidth rule counts both as full band: the model runs, but only the content above the crossover changes - see the [status](docs/design/CURRENT_STATUS.md) §5.
 
 ## Licences
 

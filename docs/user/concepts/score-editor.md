@@ -118,7 +118,7 @@ A score goes in and out as a standard MIDI file, so a sketch from any DAW can be
 | Button | What it does |
 |---|---|
 | **Export MIDI** | Downloads the score as a type-1 MIDI file named after the song's title. Tracks: *Vocal*, *Instrument*, *Chords* (block voicings plus `plenio:chord` text events) and the *Guide* track; tempo, time and key signatures and the section markers sit in the conductor track. Off while the text is invalid - the same gate as Apply. |
-| **Import MIDI…** | Reads a `.mid`/`.midi` file and shows what the import found **before** anything is replaced: the file's tracks with a role each, the grid, whether to read chords from the notes, and the import report. *Insert* replaces the score (one undo step; the diagnostics of the imported text come with it). |
+| **Import MIDI…** | Reads a `.mid`/`.midi` file and shows what the import found **before** anything is replaced: the file's tracks with a role each, the grid, whether to read chords from the notes, and the import report. *Insert* replaces the score **and its Guide notes** - one undo step for both (the diagnostics of the imported text come with it); the sheet's old Guide notes belong to the replaced score and go with it, which the dialog says before you insert. |
 
 Roles: *Vocal* and *Instrument* become the two YuE2 voices (one voice each - where notes overlap, the highest sounds, and the report says how many were shortened, split or dropped); *Chords* becomes chord symbols; *Guide* is kept for playback and MIDI only and is **never sent to YuE2**; *do not import* leaves a track out. A Plenio file carries the unit and the bar layout in a text event, so it comes back exactly as it was.
 

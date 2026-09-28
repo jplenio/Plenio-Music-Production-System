@@ -6,7 +6,7 @@ Needs comfy-cli (`python -m pip install comfy-cli`) and git. Writes into ``dist/
 
 - ``Plenio-Music-Production-System-v<version>.zip`` - the Registry package (`comfy node pack`, so the same
   files as in the ComfyUI Manager) under one top folder, ready to unpack into ``ComfyUI/custom_nodes``;
-- ``Plenio <template> v<version>.json`` - the five templates;
+- ``Plenio <template> v<version>.json`` - the six templates;
 - ``SHA256SUMS.txt``.
 """
 
