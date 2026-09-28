@@ -78,6 +78,7 @@ function button(className: string, text: string, label: string): HTMLButtonEleme
   node.className = className
   node.textContent = text
   node.setAttribute('aria-label', label)
+  node.title = label
   return node
 }
 
@@ -85,13 +86,33 @@ function widget(node: ComfyNode, name: string): ComfyWidget | undefined {
   return node.widgets?.find((w) => w.name === name)
 }
 
+/** Do two band lists describe the same response? (the backend normalises ids, order and slope) */
+function sameBands(one: EqSettings, other: EqSettings): boolean {
+  return (
+    one.bands.length === other.bands.length &&
+    one.bands.every((band, index) => {
+      const twin = other.bands[index]
+      return (
+        twin !== undefined &&
+        band.type === twin.type &&
+        band.enabled === twin.enabled &&
+        Math.abs(band.frequency_hz - twin.frequency_hz) < 0.5 &&
+        Math.abs(band.gain_db - twin.gain_db) < 0.05 &&
+        Math.abs(band.q - twin.q) < 0.01
+      )
+    })
+  )
+}
+
 export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(output: Record<string, unknown>): void } {
   const root = element('div', 'plenio-eq')
   const toolbar = element('div', 'plenio-eq-tools')
   const presetSelect = element('select') as HTMLSelectElement
   presetSelect.setAttribute('aria-label', 'EQ preset')
+  presetSelect.title = 'EQ preset: sets every band at once (the list comes from resources/presets/eq.json)'
   const rangeSelect = element('select') as HTMLSelectElement
   rangeSelect.setAttribute('aria-label', 'Gain range')
+  rangeSelect.title = 'Gain range: the dB axis of the curve and how far a drag may go'
   for (const range of GAIN_RANGES) rangeSelect.append(new Option(`±${range} dB`, String(range)))
   const undoButton = button('', '↶', 'Undo the last band change')
   const redoButton = button('', '↷', 'Redo the last band change')
@@ -100,6 +121,7 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
   const textButton = button('', 'bands as text', 'Show or hide the plenio.eq/1 JSON widget')
   const info = element('span', 'plenio-eq-info')
   info.setAttribute('aria-live', 'polite')
+  info.title = 'What the panel is showing right now (the selected band, a note, or a hint)'
   toolbar.append(presetSelect, rangeSelect, undoButton, redoButton, resetButton, compareButton, textButton, info)
 
   const modeRow = element('div', 'plenio-eq-mode')
@@ -111,6 +133,7 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
   })
   plot.setAttribute('aria-label', 'EQ response curve')
   plot.setAttribute('tabindex', '0')
+  plot.setAttribute('title', 'Drag a handle to move a band (Shift = fine), wheel = Q, double-click = new band, Delete = remove')
   const strip = element('div', 'plenio-eq-strip')
   const editor = element('div', 'plenio-eq-editor')
   const editorFields = element('div', 'plenio-eq-fields')
@@ -130,6 +153,8 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
   let selected: string | null = null
   let compare = false
   let range: GainRange = 12
+  let presetName: string | null = null
+  let presetItems: EqPreset[] = []
   let request = 0
   let timer: ReturnType<typeof setTimeout> | undefined
   let liveTimer: ReturnType<typeof setTimeout> | undefined
@@ -201,6 +226,22 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
       }
       draw()
     }, delay)
+  }
+
+  /** The bands of a preset, capped to what the panel can draw. */
+  const presetSettings = (item: EqPreset): EqSettings => ({
+    ...item.settings,
+    bands: item.settings.bands.slice(0, MAX_BANDS)
+  })
+
+  /**
+   * The preset that is on the curve right now, or '' - the owner expects a chosen preset to stay
+   * visible until the bands are edited by hand (2026-09-28).
+   */
+  function activePreset(): string {
+    if (!presetName) return ''
+    const item = presetItems.find((candidate) => candidate.name === presetName)
+    return item && sameBands(presetSettings(item), shown.settings) ? presetName : ''
   }
 
   function draw(): void {
@@ -290,6 +331,7 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
       if (selected) handles.get(selected)?.focus({ preventScroll: true })
     }
     rangeSelect.value = String(range)
+    presetSelect.value = activePreset()
     compareButton.classList.toggle('active', compare)
     textButton.classList.toggle('active', isTextShown())
     node.setDirtyCanvas?.(true, true)
@@ -308,6 +350,7 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
       chip.classList.toggle('selected', band.id === selected)
       chip.classList.toggle('disabled', !band.enabled)
       chip.setAttribute('aria-label', `Edit band ${index + 1}`)
+      chip.title = `Band ${index + 1}: ${describeBand(band)} - click to open its fields`
       chip.addEventListener('click', (event) => {
         event.stopPropagation()
         selected = selected === band.id ? null : band.id
@@ -327,8 +370,10 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
     }
     editor.style.display = ''
     const label = element('span', 'name', `Band ${shown.settings.bands.indexOf(band) + 1}`)
+    label.title = 'The selected band'
     const type = element('select') as HTMLSelectElement
     type.setAttribute('aria-label', 'Band type')
+    type.title = 'Band type: bell and shelves change the gain, the cuts and the notch do not'
     for (const [value, name] of Object.entries(BAND_NAMES)) type.append(new Option(name, value))
     type.value = band.type
     type.addEventListener('change', () => writeBands(editBand(shown.settings, band.id, { type: type.value as BandType })))
@@ -336,6 +381,7 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
     enabled.type = 'checkbox'
     enabled.checked = band.enabled
     enabled.setAttribute('aria-label', 'Band enabled')
+    enabled.title = 'Band enabled: off keeps the band in the list but out of the response'
     enabled.addEventListener('change', () => writeBands(editBand(shown.settings, band.id, { enabled: enabled.checked })))
     const fields: [string, string, number, ((value: string) => void)][] = [
       [
@@ -353,6 +399,12 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
       field.value = value
       field.style.width = `${width}px`
       field.setAttribute('aria-label', `Band ${name}`)
+      field.title =
+        name === 'Hz'
+          ? 'Frequency of the band in Hz (the centre of a bell, the corner of a shelf)'
+          : name === 'dB'
+            ? 'Gain in dB (bell and shelves; the cuts and the notch have none)'
+            : 'Q: how narrow the band is - higher Q, smaller range'
       field.addEventListener('keydown', (event) => {
         if ((event as KeyboardEvent).key === 'Enter') commit(field.value)
       })
@@ -407,6 +459,12 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
     selected = id
     restoreFocus = true
     draw()
+  }
+
+  /** Mark a band as selected without rebuilding the plot (a drag must keep the handle it grabbed). */
+  function selectLive(id: string | null): void {
+    selected = id
+    paintLive()
   }
 
   /**
@@ -468,12 +526,19 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
   function startDrag(event: PointerEvent, id: string): void {
     event.preventDefault()
     event.stopPropagation()
-    select(id)
+    // select without a redraw: a rebuild here would replace the handle under the pointer (and would
+    // make setPointerCapture throw on the detached element), which stopped the drag after the first
+    // move - the owner's report of 2026-09-28
+    if (selected !== id) selectLive(id)
     const band = shown.settings.bands.find((b) => b.id === id)
     if (!band) return
     dragStart = { hz: band.frequency_hz, db: band.gain_db }
     const origin = event.currentTarget as Element | null
-    origin?.setPointerCapture?.(event.pointerId)
+    try {
+      origin?.setPointerCapture?.(event.pointerId)
+    } catch {
+      // the handle may be detached while a drag is running; the window listeners below carry the drag
+    }
     const box = plot.getBoundingClientRect()
     const move = (e: PointerEvent) => {
       const scaleX = PLOT_SIZE.width / (box.width || PLOT_SIZE.width)
@@ -489,7 +554,11 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
       refreshLive()
     }
     const up = () => {
-      origin?.releasePointerCapture?.(event.pointerId)
+      try {
+        origin?.releasePointerCapture?.(event.pointerId)
+      } catch {
+        // already detached
+      }
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
       dragStart = null
@@ -545,12 +614,15 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
   presetSelect.append(new Option('preset…', ''))
   presets ??= eqPresets(fetcher).then((data) => data.manual).catch(() => [])
   void presets.then((items) => {
+    presetItems = items
     for (const item of items) presetSelect.append(new Option(item.name, item.name))
+    presetSelect.value = activePreset()
   })
   presetSelect.addEventListener('change', async () => {
     const item = (await presets)?.find((p) => p.name === presetSelect.value)
-    presetSelect.value = ''
-    if (item) writeBands({ ...item.settings, bands: item.settings.bands.slice(0, MAX_BANDS) })
+    if (!item) return
+    presetName = item.name
+    writeBands(presetSettings(item))
   })
   rangeSelect.addEventListener('change', () => {
     const value = Number(rangeSelect.value)
@@ -597,6 +669,26 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
   watch()
   setTextShown(false)
   void refresh(0)
+
+  // A DynamicCombo rebuilds the widgets of its node when the mode changes, and the frontend may
+  // replace them entirely: the watchers of a replaced widget never fire again, which is why the
+  // panel did not follow a mode change (the owner's report, 2026-09-28). Re-attach and re-read
+  // whenever the mode or the bands differ from what the panel saw last.
+  let watchedMode: string | null = null
+  let watchedBands: string | null = null
+  const follow = setInterval(() => {
+    if (!root.isConnected) {
+      clearInterval(follow)
+      return
+    }
+    const mode = String(widget(node, 'mode')?.value ?? 'flat')
+    const bands = String(bandsWidget()?.value ?? '')
+    if (mode === watchedMode && bands === watchedBands) return
+    watchedMode = mode
+    watchedBands = bands
+    watch()
+    void refresh(0)
+  }, 700)
 
   return {
     showExecuted(output) {

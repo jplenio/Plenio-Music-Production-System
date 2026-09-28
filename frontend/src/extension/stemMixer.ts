@@ -268,6 +268,9 @@ export function addStemMixer(node: ComfyNode): { showExecuted(output: Record<str
     const feedback = slider(0, 0.8, 0.05, Number(delay.feedback ?? 0.35), 'Delay feedback')
     feedback.title = 'Delay feedback: how much of each echo returns into the delay line'
     feedback.addEventListener('input', () => setBusSetting('delay', 'feedback', Number(feedback.value)))
+    // the bus row is part of the panel and always visible (owner's report, 2026-09-28: it only
+    // appeared after an interaction); it shows the documented defaults until a send raises a bus,
+    // and only a raised send writes those defaults into the value
     buses.append(
       element('span', 'label', 'reverb bus'),
       preset,
@@ -276,15 +279,15 @@ export function addStemMixer(node: ComfyNode): { showExecuted(output: Record<str
       element('span', 'label', 'ms, feedback'),
       feedback
     )
-    buses.style.display = BUSES.some((bus) => shown.mix[bus]) ? '' : 'none'
+    buses.style.display = 'flex'
   }
 
   const widget = node.addDOMWidget(WIDGET, WIDGET, root, {
     serialize: false,
     getValue: () => '',
     setValue: () => {},
-    getMinHeight: () => 200,
-    getMaxHeight: () => 520
+    getMinHeight: () => 260,
+    getMaxHeight: () => 620
   })
   widget.serialize = false
 

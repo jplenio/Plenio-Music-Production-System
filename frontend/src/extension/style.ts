@@ -62,7 +62,7 @@ const CSS = `
   background: var(--comfy-input-bg, #333); color: var(--input-text, #ddd); cursor: pointer; font: inherit; }
 .plenio-brief-template button:disabled { opacity: 0.45; cursor: default; }
 .plenio-mix { display: flex; flex-direction: column; gap: 4px; font: 11px/1.4 var(--font-family, sans-serif);
-  color: var(--descrip-text, #999); }
+  color: var(--descrip-text, #999); overflow-y: auto; }
 .plenio-mix-strips { display: flex; flex-direction: column; gap: 3px; }
 .plenio-mix-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 2px 4px;
   border-radius: 5px; background: rgba(127, 127, 127, 0.08); }

@@ -21,7 +21,18 @@ function fetcher(): Fetcher {
       const body = JSON.parse(String(options?.body ?? '{}')) as { settings?: EqSettings }
       const payload =
         route === '/plenio/presets/eq'
-          ? { manual: [] }
+          ? {
+              manual: [
+                {
+                  name: 'Air - gentle lift',
+                  settings: {
+                    schema: 'plenio.eq/1',
+                    preamp_db: 0,
+                    bands: [{ id: 'p1', enabled: true, type: 'high_shelf', frequency_hz: 8000, gain_db: 2, q: 1, slope: 1 }]
+                  }
+                }
+              ]
+            }
           : {
               settings: body.settings,
               frequency_hz: FREQUENCIES,
@@ -85,5 +96,20 @@ describe('the EQ panel', () => {
     handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete', bubbles: true }))
     expect(parseSettings(node.value('mode.bands'))!.bands).toEqual([])
     expect(node.root.querySelector('circle.handle')).toBeNull()
+  })
+
+  it('keeps a chosen preset visible until the bands are edited by hand', async () => {
+    const node = await mount()
+    const select = node.root.querySelector('select[aria-label="EQ preset"]') as HTMLSelectElement
+    await vi.waitFor(() => expect(select.options.length).toBeGreaterThan(1))
+    select.value = 'Air - gentle lift'
+    select.dispatchEvent(new Event('change', { bubbles: true }))
+    await vi.waitFor(() => expect(parseSettings(node.value('mode.bands'))!.bands).toHaveLength(1))
+    expect(select.value).toBe('Air - gentle lift') // the chosen preset stays in the field
+    expect(plotOf(node).querySelector('circle.handle')).toBeTruthy()
+    // an edit of the bands is no longer that preset
+    const handle = plotOf(node).querySelector('circle.handle') as SVGCircleElement
+    handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }))
+    await vi.waitFor(() => expect(select.value).toBe(''))
   })
 })

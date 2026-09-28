@@ -42,6 +42,15 @@ describe('the Stem Mixer strips', () => {
     expect(strips(mount())).toEqual(['vocals', 'drums', 'bass', 'other', 'rest'])
   })
 
+  it('shows the bus settings from the start (not only after an interaction)', () => {
+    const node = mount()
+    const buses = node.root.querySelector('.plenio-mix-buses') as HTMLElement
+    expect(buses.style.display).toBe('flex')
+    expect(buses.textContent).toContain('reverb bus')
+    expect(buses.textContent).toContain('delay bus')
+    expect(node.root.querySelector('.plenio-mix-advanced')?.textContent).toContain('Advanced')
+  })
+
   it('writes a dragged fader and keeps the fader under the pointer', () => {
     const node = mount()
     const gain = fader(node, 'vocals')
