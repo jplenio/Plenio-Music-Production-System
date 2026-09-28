@@ -12,19 +12,26 @@ MiniMax Render ─► Refine (on by default) ─► Plenio · Master ─► Expo
 | Template | Refine | Why |
 |---|---|---|
 | 1 · YuE2 · Song, 2 · YuE2 · Cover, 5 · YuE2 · DAW | bypassed | YuE2 decodes at 48 kHz already; press **Ctrl+B** to switch it on |
-| 3 · MiniMax · Song | **on** (engine *model*) | MiniMax renders a band-limited signal; this is the owner's default |
+| 3 · MiniMax · Song | **on** (engine *model*, pre 10 kHz, crossover 14.5 kHz, post 19 kHz) | the owner's default for MiniMax renders |
 | 4 · Enhance & Master | bypassed | switch it on for band-limited uploads (old MP3s, phone recordings) |
+
+The model **always runs when it is connected** - also for an input that already reaches the top of the band
+(the owner's decision, 2026-09-28). PRE shapes only what the model sees, the crossover decides what the model may
+replace, and POST rolls its result off; nothing below the crossover changes. The report says so when the input was
+already full band.
 
 ## What it does, step by step
 
 1. **Measure** the input's bandwidth (the highest frequency within 60 dB of the 1–4 kHz level).
-2. **Condition** the model's input (PRE): a steep low-pass at the model's training condition (12 kHz for the 24 kHz condition), then resampling to the model's rate. This shapes *only* what the model sees.
+2. **Condition** the model's input (**pre_hz**): a steep low-pass - *auto* takes the model's own training
+   condition, *off* leaves the input unchanged, otherwise 6, 8, 10, 12 or 14 kHz - then resampling to the model's
+   rate. This shapes *only* what the model sees, never the band you keep.
 3. **Run the model** chunk by chunk (5 s with 0.5 s overlap, crossfades, one derived seed per chunk).
 4. **Join** the original (converted to 48 kHz) and the model's output with a **complementary crossover**: `LP(original) + HP(model)`, where the two filters sum to a pure delay. Below the crossover the result is the original, sample by sample; above it the model's content takes over.
-5. Optional **POST roll-off** (linear phase) if the added air is too bright.
+5. Optional **POST roll-off** (linear phase): *off*, or a low-pass at 16, 19 or 21 kHz if the added air is too bright.
 6. **Contract:** 48 kHz, exactly the input's duration, **no normalisation**. The report names the engine, the bandwidth before and after, the crossover, the loudness change, the peaks and the time.
 
-An input that is already full band (edge above 20 kHz) is only resampled - the report says so. A silent or very short input is only resampled, too.
+A silent or very short input is only resampled, and the report says so.
 
 ## The engines
 
@@ -50,11 +57,16 @@ ComfyUI's missing-model dialog offers the download when you open *3 · MiniMax �
 | Setting | Default | Meaning |
 |---|---|---|
 | `engine` | *model* in MiniMax, *resample only* elsewhere | which engine runs |
-| `crossover_hz` | 0 = measured edge − 500 Hz | where the model takes over from the original |
+| `crossover_hz` | 0 = measured edge − 500 Hz (14.5 kHz in the MiniMax template) | where the model takes over from the original |
 | `sr_gain` | 1.0 | level of the added band (lower it if the air is too strong) |
-| `pre_hz` | 0 = the model's condition | low-pass of the model's input; −1 disables it |
-| `post_hz` | 0 = off | linear-phase roll-off of the result |
+| `pre_hz` | `auto` | low-pass of the model's input: *auto* = the model's training condition, *off* = none, else 6/8/10/12/14 kHz |
+| `post_hz` | `off` | linear-phase roll-off of the result: *off*, or 16/19/21 kHz |
 | `seed` | 0 | the model's seed (same seed, same result) |
+
+The three stage lists are the prepared steps of the model engine (owner's list, 2026-09-28); every value is
+selectable and changeable on the node. The **MiniMax template** ships `pre_hz` **10000**, `post_hz` **19000** and
+`crossover_hz` **14500** as part of the workflow - all three are instance widgets there, so you can see and change
+them without switching to the advanced view.
 
 **Provisional defaults:** these values come from the design's re-evaluation of the legacy chain, not from measurements on your machine yet. The Refine block is marked *experimental* until the measurement study (**L1**) has decided them; the report marks the defaults as provisional.
 

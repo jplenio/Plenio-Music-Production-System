@@ -56,6 +56,18 @@ The node has one widget: a **strip per stem** plus `rest`. Under *Advanced* you 
 | reverb send | 0 … 1 | to the one shared reverb bus |
 | delay send | 0 … 1 | to the one shared delay bus |
 | muted ranges | `[start_s, end_s]` | drawn on the strip's waveform: **drag** to mute a stretch, **click** a range to remove it |
+| save | on/off | writes this stem as its own 24-bit FLAC on the next run (default: off) |
+
+Every strip is there **before the first run** - vocals, drums, bass, other and the residual `rest` - so you can
+set the balance for the run you are about to start. Dragging a fader writes the value live (the strip stays under
+your pointer) and the release updates the whole node; every control carries a tooltip.
+
+### A stem as its own file
+
+A strip switched to **save** is written on the next run: 24-bit FLAC in `output/plenio/stems`, named after the stem
+(`drums.flac`). A later run that writes the same stem gets `drums (2).flac`, so nothing is overwritten. The file
+holds **that strip's own signal**: its gain, its compression and its muted ranges are applied; mute/solo and the
+shared buses belong to the mixdown, not to one stem. The summary and the report name every file that was written.
 
 Muted ranges cut a stem's content in that window with a 10 ms fade and are merged and clipped to the song. The song
 keeps its length - cutting time out of the song would misalign the stems, so it is not offered.
@@ -72,7 +84,7 @@ stops with a message instead of silently ignoring your send. Raising a send in t
 default bus settings along with it, so the first raise just works.
 
 The mixer's **waveform of the last run** comes from the separation that produced the stems; before the first run the
-strips are empty and say so.
+strips show the documented stems and an empty waveform, and the node says so.
 
 ## Mixdown contract
 
@@ -111,6 +123,8 @@ refused with a message rather than guessed at.
 - Separation quality is the model's, not Plenio's: dense mixes with wide stereo vocals are the hard case, and
   "other" holds whatever did not fit the three named stems.
 - The residual keeps a neutral mix exact - it does **not** repair a separation error once you change gains.
-- The block mixes; it does not write individual stem files. *Export* takes the mixdown (and the reports).
+- Separate files are written only for the strips you switch to **save**; *Export* always takes the mixdown (and the
+  reports). The saved file carries the strip's gain, compression and muted ranges, not the mute/solo decision and
+  not the shared bus tails.
 - Effect buses are shared: every strip's send reaches the *same* reverb and the *same* delay, which is what keeps
   the mix reproducible.
