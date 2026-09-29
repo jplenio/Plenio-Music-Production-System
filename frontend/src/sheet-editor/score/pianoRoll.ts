@@ -30,6 +30,11 @@ export const TOP = HEADER + LANE
 export const KEYS_WIDTH = 36
 export const EDGE_PX = 6
 export const MOVE_THRESHOLD_PX = 3
+/** One key row: the roll scrolls vertically through the whole range instead of squeezing it. */
+export const ROW_HEIGHT = 12
+/** The range the roll always offers - the piano's A0 to C8 - widened for notes outside it. */
+export const PIANO_LOW = 21
+export const PIANO_HIGH = 108
 
 export interface Geometry {
   pxPerUnit: number
@@ -37,6 +42,8 @@ export interface Geometry {
   /** Highest and lowest pitch shown (top and bottom row). */
   high: number
   low: number
+  /** The notes' own range, padded (``pitchRange``): where the roll opens. */
+  focus: [number, number]
   total: number
   /** Snap step in units. */
   snap: number
@@ -88,14 +95,29 @@ export function pitchRange(notes: readonly { pitch: number }[], pad = 4, span = 
   return [low, high]
 }
 
+/** ``[low, high]`` of the roll: the piano's range, widened to every note (within MIDI). */
+export function rollRange(notes: readonly { pitch: number }[]): [number, number] {
+  const pitches = notes.map((n) => n.pitch)
+  const low = Math.max(0, Math.min(PIANO_LOW, ...pitches.map((p) => p - 2)))
+  const high = Math.min(127, Math.max(PIANO_HIGH, ...pitches.map((p) => p + 2)))
+  return [low, high]
+}
+
+/**
+ * The layout of the roll. Every pitch of the piano (and any note beyond it) has a row of
+ * ``ROW_HEIGHT``; the roll's pane scrolls vertically through them - before, the rows were squeezed
+ * into the pane and only the notes' range (+-4 semitones) existed, so nothing could be drawn above
+ * or below it. ``options.height`` (the pane) no longer changes the layout.
+ */
 export function geometry(
   model: ScoreModelView,
-  options: { pxPerQuarter: number; height: number; snap: SnapChoice }
+  options: { pxPerQuarter: number; height?: number; snap: SnapChoice }
 ): Geometry {
-  const [low, high] = pitchRange(notesOf(model))
+  const notes = notesOf(model)
+  const [low, high] = rollRange(notes)
   const rows = high - low + 1
   const pxPerUnit = options.pxPerQuarter / Math.max(model.grid.units_per_quarter, 1e-9)
-  const rowHeight = Math.max(6, Math.min(14, Math.floor((options.height - TOP) / rows)))
+  const rowHeight = ROW_HEIGHT
   const snap = snapUnits(model, options.snap)
   const beat = Math.max(1, Math.round(model.grid.units_per_quarter))
   return {
@@ -103,6 +125,7 @@ export function geometry(
     rowHeight,
     high,
     low,
+    focus: pitchRange(notes),
     total: model.total,
     snap,
     drawLength: Math.max(snap, Math.round(beat / snap) * snap),
@@ -114,6 +137,24 @@ export function geometry(
 export const xOf = (unit: number, geo: Geometry): number => KEYS_WIDTH + unit * geo.pxPerUnit
 export const unitAt = (x: number, geo: Geometry): number => (x - KEYS_WIDTH) / geo.pxPerUnit
 export const yOf = (pitch: number, geo: Geometry): number => TOP + (geo.high - pitch) * geo.rowHeight
+
+/**
+ * The vertical scroll position that centres the pitches ``[low, high]`` in a pane of
+ * ``viewportHeight`` (the header and the chord lane stay on top of it), within the roll.
+ */
+export function scrollTopFor(geo: Geometry, viewportHeight: number, low: number, high: number): number {
+  const middle = (yOf(high, geo) + yOf(low, geo) + geo.rowHeight) / 2
+  const visible = Math.max(0, viewportHeight - TOP)
+  const top = middle - TOP - visible / 2
+  return Math.round(Math.max(0, Math.min(Math.max(0, geo.height - viewportHeight), top)))
+}
+
+/** The scroll position that brings ``pitch`` into view, or ``null`` when its row is visible already. */
+export function scrollTopToShow(geo: Geometry, scrollTop: number, viewportHeight: number, pitch: number): number | null {
+  const y = yOf(pitch, geo)
+  if (y >= scrollTop + TOP && y + geo.rowHeight <= scrollTop + viewportHeight) return null
+  return scrollTopFor(geo, viewportHeight, pitch, pitch)
+}
 
 export function pitchAt(y: number, geo: Geometry): number {
   const pitch = geo.high - Math.floor((y - TOP) / geo.rowHeight)
@@ -172,17 +213,24 @@ export type Hit =
   | { area: 'lane'; unit: number }
   | { area: 'header'; unit: number }
 
+/**
+ * What lies under ``(x, y)`` (roll coordinates). The header and the chord lane stay at the top of the
+ * pane while it scrolls: with ``scrollTop`` the first ``TOP`` pixels of the *visible* area are them,
+ * and a note scrolled underneath cannot be hit there.
+ */
 export function hitTest(
   x: number,
   y: number,
   notes: readonly RollNote[],
   chords: readonly ModelChord[],
   geo: Geometry,
-  prefer: Track
+  prefer: Track,
+  scrollTop = 0
 ): Hit {
   const unit = Math.max(0, Math.min(geo.total, unitAt(x, geo)))
-  if (y < HEADER) return { area: 'header', unit }
-  if (y < TOP) {
+  const inPane = y - scrollTop
+  if (inPane < HEADER) return { area: 'header', unit }
+  if (inPane < TOP) {
     for (let i = chords.length - 1; i >= 0; i--) {
       const chord = chords[i]
       const left = xOf(chord.onset, geo)

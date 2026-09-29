@@ -532,8 +532,9 @@
 }
 .plenio-overlay .roll-scroll {
   position: relative;
-  overflow-x: auto;
-  overflow-y: hidden;
+  /* both ways: the bars horizontally, the whole piano range vertically (the header stays on top) */
+  overflow: auto;
+  overscroll-behavior: contain;
   border: 1px solid var(--border-color, #444);
   border-radius: 6px;
   background: var(--comfy-input-bg, #1e1e1e);
@@ -624,6 +625,10 @@
 }
 .plenio-overlay .roll-svg .keys-bg {
   fill: var(--comfy-menu-bg, #252525);
+}
+.plenio-overlay .roll-svg .top-bg {
+  /* the pinned header covers the rows that scroll underneath it */
+  fill: var(--comfy-input-bg, #1e1e1e);
 }
 .plenio-overlay .roll.readonly .roll-svg .note,
 .plenio-overlay .roll.stale .roll-svg .note {

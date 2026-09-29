@@ -58,7 +58,9 @@ before its first run; every About note explains Refine and how to reach the Stem
 **run status is visible on the nodes** (F16): ⏸ *review stop* on every sheet that will stop, ✓/⚠/✖ per Plenio node
 after a run, ⏸ *waiting for your approval* with an amber frame and a toast where the run stopped, ✓ *approved*; a new
 run clears the badges; the sheet's button line says it in App mode too. **App mode** is current (F17): the song apps
-show the brief's key and meter (no longer *advanced*), MiniMax's app Refine's preset. New guards: the validator
+show the brief's key and meter (no longer *advanced*), MiniMax's app Refine's preset. The **piano roll scrolls
+vertically** through the whole piano range (A0-C8, wider for notes beyond it), opens centred on the notes and keeps
+the pitch names left and the header with the chord lane on top (checked in real Chromium). New guards: the validator
 refuses overlapping nodes and groups and shared blueprint ids; `tools/browser_check.mjs` gained step 5 (summaries) and step 6 (status) - 78/78;
 Vitest `summary.test.ts` and `runStatus.test.ts`; workflow tests for the ids, the summary room, the Refine seed and
 advanced widgets in apps.
@@ -120,7 +122,7 @@ At HEAD `0db6ae7` 9 tests were red (1 workflow, 8 host) and ten defects were fou
 |---|---|---|
 | unit + workflow + contract | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/unit tests/workflows tests/contract` | 959 passed, 4 skipped (after the UX review and the run status, 2026-09-29) |
 | host (real server, fakes and tiny checkpoints) | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/host` | 118 passed, 8 skipped in 124 s (2026-09-29) |
-| frontend | `cd frontend && npm run check` | vue-tsc clean, 187 Vitest passed in 20 files, build ok (no warning), `web/js` rebuilt (2026-09-29) |
+| frontend | `cd frontend && npm run check` | vue-tsc clean, 190 Vitest passed in 20 files, build ok (no warning), `web/js` rebuilt (2026-09-29, with the vertical piano-roll scroll) |
 | study tool (smoke, real adapter) | `$PY tools/studies/sr_study.py --out <json> --models <dir with models/audio_sr> ...` | runs end to end with *resample only* and with a tiny UniverSR checkpoint (RTF 122x CPU for resample only; a tiny model is not a quality statement) |
 | **L1 with the released weights** | `$PY tools/studies/sr_study.py --models F:/ComfyUI/models --pack <dir> --targets .devdeps/l1-targets <references>` | simulation set (two references): LSD 16-24 kHz **11.0 dB** (the 48 kHz YuE2 take) and **34.6 dB** (the owner's 32 kHz-class MiniMax file) vs 113.4/97.1 dB for resample only, RTF 0.41, 2 776 MB peak VRAM, 0.00 LU loudness change; target set: both takes measure as full band - until `04469c6` that meant *resample only*, the owner's decision now lets the engine run above the crossover - see §5 |
 | **L2 with the released weights** | `$PY tools/studies/stem_study.py --models F:/ComfyUI/models --write-audio <dir> <unmastered take>` | the owner's take (153.6 s): **40.8 s** (RTF 3.76), **1 699 MB** peak VRAM; residual **0.06 %** of the song's energy; neutral mix and muted range exact to **−168.6 dBFS** (float64 rounding); the stem labels verified by centroid and kurtosis |

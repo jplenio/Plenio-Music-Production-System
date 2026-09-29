@@ -13,6 +13,9 @@ import {
   HEADER,
   KEYS_WIDTH,
   LANE,
+  PIANO_HIGH,
+  PIANO_LOW,
+  ROW_HEIGHT,
   TOP,
   type RollNote,
   dragOp,
@@ -25,6 +28,9 @@ import {
   noteRect,
   notesOf,
   pitchRange,
+  rollRange,
+  scrollTopFor,
+  scrollTopToShow,
   selectedNoteIds,
   selectionFor,
   snapUnits,
@@ -53,13 +59,18 @@ const centre = (n: RollNote): [number, number] => {
 describe('geometry and snapping', () => {
   it('lays the score out in units and pitch rows', () => {
     expect(GEO.pxPerUnit).toBe(6) // 48 px per quarter, 8 units per quarter (L:1/32)
-    expect([GEO.low, GEO.high]).toEqual([58, 85]) // pitches 62-81, padded by 4
-    expect(GEO.rowHeight).toBe(8)
+    // the whole piano range, one fixed row each; the pane scrolls vertically through it
+    expect([GEO.low, GEO.high]).toEqual([PIANO_LOW, PIANO_HIGH])
+    expect(GEO.rowHeight).toBe(ROW_HEIGHT)
+    expect(GEO.height).toBe(TOP + (PIANO_HIGH - PIANO_LOW + 1) * ROW_HEIGHT)
+    expect(GEO.focus).toEqual([58, 85]) // the notes (62-81) padded by 4: where the roll opens
+    // the pane's height no longer squeezes the rows
+    expect(geometry(MODEL, { pxPerQuarter: 48, height: 120, snap: 'auto' }).rowHeight).toBe(ROW_HEIGHT)
     expect(GEO.snap).toBe(1)
     expect(GEO.drawLength).toBe(8) // a quarter note
     expect(GEO.width).toBe(KEYS_WIDTH + 224 * 6 + 40)
     const rect = noteRect(note('vocal:32'), GEO)
-    expect(rect).toEqual({ x: xOf(32, GEO), y: yOf(66, GEO) + 0.5, width: 47, height: 7 })
+    expect(rect).toEqual({ x: xOf(32, GEO), y: yOf(66, GEO) + 0.5, width: 47, height: ROW_HEIGHT - 1 })
     expect(unitAt(xOf(40, GEO), GEO)).toBe(40)
   })
 
@@ -69,6 +80,27 @@ describe('geometry and snapping', () => {
     expect(low).toBe(0)
     expect(high - low + 1).toBeGreaterThanOrEqual(24)
     expect(pitchRange([{ pitch: 126 }])[1]).toBe(127)
+  })
+
+  it('offers the piano range, widened to notes outside it', () => {
+    expect(rollRange([])).toEqual([PIANO_LOW, PIANO_HIGH])
+    expect(rollRange([{ pitch: 60 }, { pitch: 72 }])).toEqual([PIANO_LOW, PIANO_HIGH])
+    expect(rollRange([{ pitch: 10 }, { pitch: 120 }])).toEqual([8, 122])
+    expect(rollRange([{ pitch: 0 }, { pitch: 127 }])).toEqual([0, 127])
+  })
+
+  it('opens on the notes and scrolls a note into view', () => {
+    const pane = 280
+    const top = scrollTopFor(GEO, pane, GEO.focus[0], GEO.focus[1])
+    // the notes' middle sits in the middle of the rows below the pinned header
+    const middle = (yOf(GEO.focus[1], GEO) + yOf(GEO.focus[0], GEO) + ROW_HEIGHT) / 2
+    expect(Math.abs(middle - top - (TOP + (pane - TOP) / 2))).toBeLessThanOrEqual(1)
+    expect(scrollTopFor(GEO, pane, PIANO_HIGH, PIANO_HIGH)).toBe(0) // clamped at the top
+    expect(scrollTopFor(GEO, pane, PIANO_LOW, PIANO_LOW)).toBe(GEO.height - pane) // and at the bottom
+    expect(scrollTopToShow(GEO, top, pane, 70)).toBeNull() // visible: nothing to do
+    const low = scrollTopToShow(GEO, top, pane, 30) as number
+    expect(yOf(30, GEO)).toBeGreaterThanOrEqual(low + TOP)
+    expect(yOf(30, GEO) + ROW_HEIGHT).toBeLessThanOrEqual(low + pane)
   })
 
   it('snaps to the score grid or to a note value', () => {
@@ -96,6 +128,11 @@ describe('hit testing', () => {
     expect(hitTest(xOf(33, GEO), HEADER + 8, NOTES, CHORDS, GEO, 'vocal')).toMatchObject({ area: 'chord', chord: { id: 'chord:32' } })
     expect(hitTest(xOf(50, GEO), HEADER + 8, NOTES, CHORDS, GEO, 'vocal')).toMatchObject({ area: 'lane', unit: 50 })
     expect(hitTest(xOf(50, GEO), 4, NOTES, CHORDS, GEO, 'vocal').area).toBe('header')
+    // scrolled down: the header and the lane stay at the top of the pane, over the rows below them
+    const scrolled = 400
+    expect(hitTest(xOf(50, GEO), scrolled + 4, NOTES, CHORDS, GEO, 'vocal', scrolled).area).toBe('header')
+    expect(hitTest(xOf(50, GEO), scrolled + HEADER + 8, NOTES, CHORDS, GEO, 'vocal', scrolled)).toMatchObject({ area: 'lane' })
+    expect(hitTest(xOf(50, GEO), scrolled + TOP + 3, NOTES, CHORDS, GEO, 'vocal', scrolled)).toMatchObject({ area: 'grid' })
   })
 })
 
@@ -364,6 +401,24 @@ describe('PianoRoll', () => {
     app.mount(host)
     expect(host.querySelector('svg')).toBeNull()
     expect(host.querySelector('.roll-note')?.textContent).toContain('not a whole number')
+  })
+})
+
+describe('PianoRoll scrolling', () => {
+  it('scrolls in its pane and keeps the header and the chord lane on top', async () => {
+    const { root, svg } = mount()
+    const scroller = root.querySelector('.roll-scroll') as HTMLElement
+    expect(parseFloat(scroller.style.height)).toBe(280) // the pane, not the full range (1098 px)
+    scroller.scrollTop = 500
+    scroller.dispatchEvent(new Event('scroll'))
+    await settle()
+    expect(svg.querySelector('g.roll-top')?.getAttribute('transform')).toBe('translate(0 500)')
+    // a double-click in the pinned lane (below the header of the *scrolled* pane) opens the chord field there
+    svg.dispatchEvent(new MouseEvent('dblclick', { clientX: xOf(50, GEO), clientY: 500 + HEADER + 8, bubbles: true }))
+    await settle()
+    const field = root.querySelector('input.chord-edit') as HTMLInputElement
+    expect(field).toBeTruthy()
+    expect(field.style.top).toBe(`${HEADER + 1 + 500}px`)
   })
 })
 

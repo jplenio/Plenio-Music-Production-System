@@ -8,6 +8,10 @@
  * through ``operate``; the backend checks it and returns the new view. A refused operation
  * removes the ghost (the Score tab shows the backend's message). Only the visible part of a long
  * score is drawn.
+ *
+ * The pane scrolls both ways: horizontally through the bars, vertically through the whole piano range
+ * (the notes' range is centred when the roll opens). The pitch column stays on the left and the header
+ * with the chord lane stays on top while it scrolls; a drag near the top or bottom edge scrolls along.
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
@@ -38,6 +42,8 @@ import {
   notesOf,
   pitchAt,
   pitchLabel,
+  scrollTopFor,
+  scrollTopToShow,
   selectedChordIds,
   selectedNoteIds,
   selectionFor,
@@ -80,7 +86,11 @@ const snapChoice = ref<SnapChoice>('auto')
 const drag = ref<Drag | null>(null)
 const committing = ref(false)
 const scrollLeft = ref(0)
+const scrollTop = ref(0)
 const viewportWidth = ref(0)
+const viewportHeight = ref(0)
+/** The roll opened on the notes once (again after the model was missing, e.g. a new score). */
+let centred = false
 const chordEdit = ref<{ onset: number; name: string; original: string | null } | null>(null)
 let press: { x: number; y: number; start: Drag | null; started: boolean; clear: boolean } | null = null
 let observer: ResizeObserver | null = null
@@ -88,9 +98,7 @@ let observer: ResizeObserver | null = null
 const model = computed(() => props.view?.model ?? null)
 const notes = computed<RollNote[]>(() => (model.value ? notesOf(model.value) : []))
 const chords = computed<ModelChord[]>(() => model.value?.tracks.chords ?? [])
-const geo = computed(() =>
-  model.value ? geometry(model.value, { pxPerQuarter: zoom.value, height: props.height, snap: snapChoice.value }) : null
-)
+const geo = computed(() => (model.value ? geometry(model.value, { pxPerQuarter: zoom.value, snap: snapChoice.value }) : null))
 const editable = computed(() => !props.readonly && !props.stale && !props.busy && !committing.value)
 const selectedNotes = computed(() => selectedNoteIds(props.view, props.selection))
 const selectedChords = computed(() => selectedChordIds(props.selection))
@@ -157,7 +165,7 @@ function onPointerDown(event: PointerEvent): void {
   if (!g || event.button !== 0) return
   root.value?.focus({ preventScroll: true })
   const [x, y] = local(event)
-  const hit = hitTest(x, y, notes.value, chords.value, g, track.value)
+  const hit = hitTest(x, y, notes.value, chords.value, g, track.value, scrollTop.value)
   const additive = event.shiftKey || event.ctrlKey || event.metaKey
   let start: Drag | null = null
   let clear = false
@@ -204,9 +212,24 @@ function onPointerDown(event: PointerEvent): void {
   }
 }
 
+/** While a gesture runs, the pane scrolls along when the pointer reaches its top or bottom edge. */
+function followEdge(event: PointerEvent): void {
+  const el = scroller.value
+  const g = geo.value
+  if (!el || !g) return
+  const box = el.getBoundingClientRect()
+  if (!box.height) return
+  const step = g.rowHeight
+  if (event.clientY < box.top + TOP + 12) el.scrollTop = Math.max(0, el.scrollTop - step)
+  else if (event.clientY > box.bottom - 16) el.scrollTop = el.scrollTop + step
+  else return
+  onScroll()
+}
+
 function onPointerMove(event: PointerEvent): void {
   const g = geo.value
   if (!press || !press.start || !g) return
+  if (press.started) followEdge(event)
   const [x, y] = local(event)
   if (!press.started && Math.hypot(x - press.x, y - press.y) < MOVE_THRESHOLD_PX) return
   press.started = true
@@ -249,7 +272,7 @@ function onDoubleClick(event: MouseEvent): void {
   const g = geo.value
   if (!g || !editable.value) return
   const [x, y] = local(event)
-  const hit = hitTest(x, y, notes.value, chords.value, g, track.value)
+  const hit = hitTest(x, y, notes.value, chords.value, g, track.value, scrollTop.value)
   if (hit.area === 'grid') {
     const onset = Math.min(snapFloor(hit.unit, g.snap), g.total - 1)
     const duration = Math.min(g.drawLength, g.total - onset)
@@ -315,10 +338,22 @@ function onKey(event: KeyboardEvent): void {
 
 function onScroll(): void {
   scrollLeft.value = scroller.value?.scrollLeft ?? 0
+  scrollTop.value = scroller.value?.scrollTop ?? 0
   viewportWidth.value = scroller.value?.clientWidth ?? 0
+  viewportHeight.value = scroller.value?.clientHeight ?? 0
 }
 
-/** Scroll so that the (first) selected or playing note is visible. */
+/** Open on the notes: centre their range vertically (once per score shown). */
+function centre(): void {
+  const g = geo.value
+  const el = scroller.value
+  if (centred || !g || !el || !el.clientHeight) return
+  centred = true
+  el.scrollTop = scrollTopFor(g, el.clientHeight, g.focus[0], g.focus[1])
+  onScroll()
+}
+
+/** Scroll so that the (first) selected or playing note is visible - along the bars and in pitch. */
 function reveal(ids: Set<string>): void {
   const g = geo.value
   const el = scroller.value
@@ -327,8 +362,10 @@ function reveal(ids: Set<string>): void {
   const x = xOf(note.onset, g)
   if (x < el.scrollLeft + KEYS_WIDTH || x > el.scrollLeft + el.clientWidth - 40) {
     el.scrollLeft = Math.max(0, x - el.clientWidth / 3)
-    onScroll()
   }
+  const top = el.clientHeight ? scrollTopToShow(g, el.scrollTop, el.clientHeight, note.pitch) : null
+  if (top !== null) el.scrollTop = top
+  onScroll()
 }
 
 function zoomBy(factor: number): void {
@@ -337,11 +374,23 @@ function zoomBy(factor: number): void {
 
 watch(selectedNotes, (ids) => reveal(ids))
 watch(playingNotes, (ids) => reveal(ids))
+// the scroller exists only while there is a model: centre when it appears (a new or repaired score)
+watch(
+  () => !!model.value,
+  (present) => {
+    if (!present) centred = false
+    else void nextTick(centre)
+  }
+)
 
 onMounted(() => {
   onScroll()
+  centre()
   if (scroller.value && typeof ResizeObserver !== 'undefined') {
-    observer = new ResizeObserver(onScroll)
+    observer = new ResizeObserver(() => {
+      onScroll()
+      centre()
+    })
     observer.observe(scroller.value)
   }
 })
@@ -388,7 +437,13 @@ onBeforeUnmount(() => observer?.disconnect())
       </span>
     </div>
     <p v-if="!model && view?.model_error" class="roll-note">{{ view.model_error.message }}</p>
-    <div v-else-if="model && geo" ref="scroller" class="roll-scroll" :style="{ height: `${geo.height + 16}px` }" @scroll="onScroll">
+    <div
+      v-else-if="model && geo"
+      ref="scroller"
+      class="roll-scroll"
+      :style="{ height: `${Math.min(height, geo.height + 16)}px` }"
+      @scroll="onScroll"
+    >
       <svg
         ref="svg"
         class="roll-svg"
@@ -410,36 +465,15 @@ onBeforeUnmount(() => observer?.disconnect())
           :width="geo.width"
           :height="geo.rowHeight"
         />
-        <rect class="lane" :x="0" :y="HEADER" :width="geo.width" :height="LANE" />
         <line
           v-for="line in visibleLines"
           :key="'l' + line.unit"
           :class="line.kind"
           :x1="xOf(line.unit, geo)"
           :x2="xOf(line.unit, geo)"
-          :y1="line.kind === 'bar' ? 0 : TOP"
+          :y1="TOP"
           :y2="geo.height"
         />
-        <text v-for="line in visibleLines.filter((l) => l.bar)" :key="'n' + line.unit" class="bar-number" :x="xOf(line.unit, geo) + 3" :y="12">
-          {{ line.bar }}
-        </text>
-        <text v-for="section in sectionStarts" :key="'s' + section.unit" class="section-label" :x="xOf(section.unit, geo) + 22" :y="12">
-          {{ section.label }}
-        </text>
-        <g
-          v-for="{ chord, next } in visibleChords"
-          :key="chord.id"
-          class="chord"
-          :class="{ selected: selectedChords.has(chord.id), dragged: drag?.kind === 'chord' && drag.chord.id === chord.id }"
-        >
-          <rect :x="xOf(chord.onset, geo)" :y="HEADER + 3" :width="chordWidth(chord, next, geo)" :height="LANE - 6" rx="3" />
-          <text :x="xOf(chord.onset, geo) + 4" :y="HEADER + LANE / 2 + 4">{{ chord.name }}</text>
-          <title>chord {{ chord.name }} - drag to move, double-click to rename, Delete to remove</title>
-        </g>
-        <g v-if="drag?.kind === 'chord'" class="chord ghost">
-          <rect :x="xOf(drag.to, geo)" :y="HEADER + 3" :width="chordWidth(drag.chord, undefined, geo)" :height="LANE - 6" rx="3" />
-          <text :x="xOf(drag.to, geo) + 4" :y="HEADER + LANE / 2 + 4">{{ drag.chord.name }}</text>
-        </g>
         <rect v-for="note in visibleNotes" :key="note.id" :class="noteClasses(note)" v-bind="noteRect(note, geo)" rx="2">
           <title>{{ describeNote(note) }}</title>
         </rect>
@@ -456,6 +490,40 @@ onBeforeUnmount(() => observer?.disconnect())
             {{ pitchLabel(pitch) }}
           </text>
         </g>
+        <!-- the header (bar numbers, sections) and the chord lane stay on top while the pane scrolls -->
+        <g class="roll-top" :transform="`translate(0 ${scrollTop})`">
+          <rect class="top-bg" :x="0" :y="0" :width="geo.width" :height="TOP" />
+          <rect class="lane" :x="0" :y="HEADER" :width="geo.width" :height="LANE" />
+          <line
+            v-for="line in visibleLines.filter((l) => l.kind === 'bar')"
+            :key="'t' + line.unit"
+            class="bar"
+            :x1="xOf(line.unit, geo)"
+            :x2="xOf(line.unit, geo)"
+            :y1="0"
+            :y2="TOP"
+          />
+          <text v-for="line in visibleLines.filter((l) => l.bar)" :key="'n' + line.unit" class="bar-number" :x="xOf(line.unit, geo) + 3" :y="12">
+            {{ line.bar }}
+          </text>
+          <text v-for="section in sectionStarts" :key="'s' + section.unit" class="section-label" :x="xOf(section.unit, geo) + 22" :y="12">
+            {{ section.label }}
+          </text>
+          <g
+            v-for="{ chord, next } in visibleChords"
+            :key="chord.id"
+            class="chord"
+            :class="{ selected: selectedChords.has(chord.id), dragged: drag?.kind === 'chord' && drag.chord.id === chord.id }"
+          >
+            <rect :x="xOf(chord.onset, geo)" :y="HEADER + 3" :width="chordWidth(chord, next, geo)" :height="LANE - 6" rx="3" />
+            <text :x="xOf(chord.onset, geo) + 4" :y="HEADER + LANE / 2 + 4">{{ chord.name }}</text>
+            <title>chord {{ chord.name }} - drag to move, double-click to rename, Delete to remove</title>
+          </g>
+          <g v-if="drag?.kind === 'chord'" class="chord ghost">
+            <rect :x="xOf(drag.to, geo)" :y="HEADER + 3" :width="chordWidth(drag.chord, undefined, geo)" :height="LANE - 6" rx="3" />
+            <text :x="xOf(drag.to, geo) + 4" :y="HEADER + LANE / 2 + 4">{{ drag.chord.name }}</text>
+          </g>
+        </g>
       </svg>
       <input
         v-if="chordEdit"
@@ -464,7 +532,7 @@ onBeforeUnmount(() => observer?.disconnect())
         class="chord-edit"
         aria-label="Chord symbol (empty removes it)"
         placeholder="Am7"
-        :style="{ left: `${xOf(chordEdit.onset, geo)}px`, top: `${HEADER + 1}px` }"
+        :style="{ left: `${xOf(chordEdit.onset, geo)}px`, top: `${HEADER + 1 + scrollTop}px` }"
         @keydown.enter.prevent="commitChord"
         @keydown.esc.prevent.stop="cancelChord"
         @blur="cancelChord"
