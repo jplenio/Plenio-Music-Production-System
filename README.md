@@ -59,16 +59,16 @@ The first field of the **Song Brief** (and of the **Cover Brief**) is the **mode
 The cover template has the same choice (*one cover, stop to review* is its default; *new cover every run* writes a new version - title, style and, with new lyrics, the lyrics - on the same transcription every time). The Song Sheets follow the brief (*review: as the brief says*); you can still set a single sheet to *continue* or *stop for review*.
 
 <p align="center">
-  <img src="assets/branding/Screenshot%20YuE2-graph.png" alt="The 1 · YuE2 · Song template in ComfyUI: brief, writer, Song Sheets, render and finish in numbered groups" width="100%" />
+  <img src="assets/branding/0.3.0/Screenshot%20YuE2-graph.png" alt="The 1 · YuE2 · Song template in ComfyUI: brief, writer, Song Sheets, render and finish in numbered groups" width="100%" />
 </p>
 
-*1 · YuE2 · Song: the brief on the left, the writer and the Song Sheets in the middle, render, mastering and export on the right; the model block sits collapsed below.*
+*1 · YuE2 · Song: the brief on the left, the writer and the Song Sheets in the middle, render, mastering and export on the right; the model block and the optional Stems, Refine and Cover Art blocks sit below.*
 
 **App mode** - the same templates as a simple form, without the graph:
 
 | 1 · YuE2 · Song | 3 · MiniMax · Song | 4 · Enhance & Master |
 |---|---|---|
-| <img src="assets/branding/Screenshot%20YuE2-appmode.png" alt="1 · YuE2 · Song in App mode: brief fields, take seed and the finished song" width="100%" /> | <img src="assets/branding/Screenshot%20Minimax-appmode.png" alt="3 · MiniMax · Song in App mode" width="100%" /> | <img src="assets/branding/Screenshot%20SoundEnhance-appmode.png" alt="4 · Enhance & Master in App mode" width="100%" /> |
+| <img src="assets/branding/0.3.0/Screenshot%20YuE2-appmode.png" alt="1 · YuE2 · Song in App mode: brief fields, take seed and the finished song" width="100%" /> | <img src="assets/branding/0.3.0/Screenshot%20Minimax-appmode.png" alt="3 · MiniMax · Song in App mode" width="100%" /> | <img src="assets/branding/0.3.0/Screenshot%20SoundEnhance-appmode.png" alt="4 · Enhance & Master in App mode" width="100%" /> |
 
 *Since 0.2.2 the apps also show the mode and the Song Sheet buttons, and 2 · YuE2 · Cover has an app too.*
 
@@ -87,7 +87,7 @@ The cover template has the same choice (*one cover, stop to review* is its defau
 3. Queue: with *one cover, stop to review* the run stops at **Song Sheet · Score** and later at **Song Sheet · Text**, so you can inspect and edit the transcribed score and the lyrics before YuE2 renders. With *new cover every run* it renders straight through, a new version every run.
 
 <p align="center">
-  <img src="assets/branding/Screenshot%20YuE2-cover-graph.png" alt="The 2 · YuE2 · Cover template: source, Cover Brief, score, lyrics, render and finish" width="100%" />
+  <img src="assets/branding/0.3.0/Screenshot%20YuE2-cover-graph.png" alt="The 2 · YuE2 · Cover template: source, Cover Brief, score, lyrics, render and finish" width="100%" />
 </p>
 
 *2 · YuE2 · Cover: source and Cover Brief, then Song Sheet · Score and Song Sheet · Text with their review stops, render, mastering and export.*
@@ -97,10 +97,10 @@ The cover template has the same choice (*one cover, stop to review* is its defau
 Open a Song Sheet and choose the score tab. The **piano roll** draws, moves and resizes notes (Review mode: into rests, **Alt** to overwrite) and in its *Select* mode frames several notes at once, the **chord lane** takes chord symbols, the **inspector** handles the bar the selection starts in (insert, duplicate, delete, meter, key changes), and the notation and the ABC text stay in sync with the selection. **Export MIDI** writes the score (and the Guide notes) as a type-1 file; **Import MIDI…** shows the file's tracks with a role each, its grid and what the import would change *before* it replaces anything - and can read chord symbols from a Chords track. Undo and redo work, and every result is validated before it is kept. See the [score editor guide](docs/user/concepts/score-editor.md).
 
 <p align="center">
-  <img src="assets/branding/Screenshot%20Score-Editor.png" alt="The Song Sheet's score tab in the DAW layout: piano roll with the chord lane, the track panel, the notation and the transport" width="100%" />
+  <img src="assets/branding/0.3.0/Screenshot%20Score-Editor.png" alt="The Song Sheet's score tab in the DAW layout: six notes framed in the piano roll's select mode and marked in the notation, the track panel, the sections, the bar inspector and the transport" width="100%" />
 </p>
 
-*The score tab of a Song Sheet in the DAW layout: the piano roll with the chord lane on top, the tracks (Vocal, Instrument, Chords and the Guide track that never reaches YuE2), the notation in sync with the roll, MIDI export and import, and playback with loop and metronome.*
+*The score tab of a Song Sheet in the DAW layout: the piano roll with the chord lane on top (here in *Select* mode, six framed notes marked in the roll and in the notation), the tracks (Vocal, Instrument, Chords and the Guide track that never reaches YuE2), the notation in sync with the roll, MIDI export and import, and playback with loop and metronome.*
 
 ### Compose a song yourself (YuE2 · DAW)
 
@@ -111,7 +111,7 @@ Open **5 · YuE2 · DAW**, describe the song in the brief and run once: *Score T
 The same brief and writer, one Song Sheet with the structured caption (Global Metadata, Vocal Details, Arrangement) and the lyrics; the sheet checks the exact 5,000-token prompt budget with the model's own tokenizer before rendering.
 
 <p align="center">
-  <img src="assets/branding/Screenshot%20Minimax-graph.png" alt="The 3 · MiniMax · Song template: brief, writer, Song Sheet, MiniMax render and finish" width="100%" />
+  <img src="assets/branding/0.3.0/Screenshot%20Minimax-graph.png" alt="The 3 · MiniMax · Song template: brief, writer, Song Sheet, MiniMax render and finish" width="100%" />
 </p>
 
 *3 · MiniMax · Song: one Song Sheet between the writer and the MiniMax Music 3 render.*
@@ -119,7 +119,7 @@ The same brief and writer, one Song Sheet with the structured caption (Global Me
 ### Finish a recording
 
 <p align="center">
-  <img src="assets/branding/Screenshot%20SoundEnhance-graph.png" alt="The 4 · Enhance & Master template: load a file, EQ, loudness and export" width="100%" />
+  <img src="assets/branding/0.3.0/Screenshot%20SoundEnhance-graph.png" alt="The 4 · Enhance & Master template: load a file, EQ, loudness and export" width="100%" />
 </p>
 
 *4 · Enhance & Master: load a file, shape it with the EQ (manual bands with the curve, or tone match), set the loudness target and export with the file's own tags and cover.*
@@ -132,7 +132,7 @@ Both blocks sit between the render and the master and are bypassed until you swi
 - **Refine (48 kHz)**: brings a render to 48 kHz and extends the top octaves with a super-resolution model (UniverSR, 229 MB, `models/audio_sr`), keeping everything below the crossover from the original. A **preset** sets what the model sees, where it takes over and how its result is rolled off in one go; the model runs whenever it is connected, and for material that already reaches the top of the band the report says that only the content above the crossover changed. On by default in *3 · MiniMax · Song*, bypassed elsewhere - switch it on for old MP3s or phone recordings in *4 · Enhance & Master*. Both stages are **experimental**: the measurements are in, the owner's listening verdicts are open (see the [status](docs/design/CURRENT_STATUS.md) §5). [Details](docs/user/concepts/refine.md)
 
 <p align="center">
-  <img src="assets/branding/Screenshot%20Stems.png" alt="The Stem Mixer node: a strip per stem and the residual rest with fader, mute/solo, compression, reverb and delay sends and save, and the two effect buses" width="80%" />
+  <img src="assets/branding/0.3.0/Screenshot%20Stems.png" alt="The Stem Mixer node: a strip per stem and the residual rest with fader, mute/solo, compression, reverb and delay sends and save, and the two effect buses" width="80%" />
 </p>
 
 *The Stem Mixer before its first run: the four documented stems and the residual "rest", each with fader, mute/solo, compression, the two sends and a save switch; the waveform under each strip fills with the separation, and the reverb and delay buses sit below.*
@@ -144,7 +144,7 @@ Both blocks sit between the render and the master and are bypassed until you swi
 - **Export Release**: FLAC 24-bit, MP3 V0 (above 48 kHz converted for the MP3 only), WAV 32-bit float; title, artist, album, date, track, genre, comment, album artist and composer, typed or copied from the loaded file. Cover art - from the optional Cover Art block, or copied from the loaded file - is embedded in the FLAC and MP3 files (whichever tag option you choose) and saved next to them as `.jpg`; WAV keeps the `.jpg` only. Every export also writes a `.plenio.json` release record.
 
 <p align="center">
-  <img src="assets/branding/Screenshot%20graphical-EQ.png" alt="The EQ node's panel: a response curve with two bell bands as handles, the band strip and the inline editor" width="80%" />
+  <img src="assets/branding/0.3.0/Screenshot%20graphical-EQ.png" alt="The EQ node's panel: a response curve with two bell bands as handles, the band strip and the inline editor" width="80%" />
 </p>
 
 *The EQ node's panel: each band is a handle on the curve, the strip below lists the bands and opens an inline editor for type, frequency, gain and Q; presets, the gain range, undo/redo and compare sit above the curve.*
@@ -154,6 +154,12 @@ Details and limits: [Mastering and audio formats](docs/user/concepts/mastering.m
 ## Built for different computers
 
 The **0 · System Check** template reads your GPU and marks your row. Nothing is switched automatically; you choose the model files in the loaders.
+
+<p align="center">
+  <img src="assets/branding/0.3.0/Screenshot%200-System%20Check.png" alt="The 0 · System Check template: versions, GPU and RAM, the model files of every template, the hardware table with this machine's row marked, and recommendations" width="70%" />
+</p>
+
+*0 · System Check: versions, GPU and memory, which model files each template has or still needs, and the hardware table with this machine's row marked.*
 
 | GPU memory | YuE2 | MiniMax Music 3 | Cover Art (FLUX.2 Klein 4B) |
 |---|---|---|---|
