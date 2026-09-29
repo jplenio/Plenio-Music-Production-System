@@ -9,8 +9,13 @@ ComfyUI's ``/object_info``):
   definition produces (incl. seed control values and DynamicCombo options);
 * blueprints: one wrapper node, name equal to the file name, a ``Plenio``
   category and a description, no legacy ``proxyWidgets`` entries;
-* templates: embedded subgraph definitions equal the blueprint files and every one is used (by a
-  node of the template or of another used definition); one "About this template" note; every other top-level node inside a group; bypassed (optional) nodes titled "(optional)";
+* templates: embedded subgraph definitions equal the blueprint files, every one is used (by a
+  node of the template or of another used definition) and no two share a node id; one "About this
+  template" note; no two groups and no two nodes overlap (a node's box includes its title bar, a
+  collapsed node is its title bar);
+* blueprints: no two blueprint files share a node id (every blueprint body owns its own id range,
+  so any of them can be added to any template; the frontend renumbers clashing ids on load, which
+  breaks references to inner nodes); every other top-level node inside a group; bypassed (optional) nodes titled "(optional)";
   an App Mode configuration (``extra.linearData``) names existing widgets and output nodes; a
   thumbnail ``<name>.jpg`` next to the template;
 * no absolute local paths, private addresses or secrets in any string.
@@ -284,6 +289,48 @@ def validate_file(
 ABOUT_TITLE = "About this template"
 
 
+TITLE_HEIGHT = 30
+COLLAPSED_WIDTH = 260
+
+
+def _box(node: Mapping[str, Any]) -> tuple[float, float, float, float]:
+    """``(left, top, right, bottom)`` of a node as the canvas draws it (title bar included)."""
+    x, y = node["pos"]
+    width, height = node["size"]
+    if (node.get("flags") or {}).get("collapsed"):
+        width, height = min(width, COLLAPSED_WIDTH), 0
+    return x, y - TITLE_HEIGHT, x + width, y + height
+
+
+def _overlap(a: tuple[float, float, float, float], b: tuple[float, float, float, float]) -> bool:
+    return min(a[2], b[2]) > max(a[0], b[0]) and min(a[3], b[3]) > max(a[1], b[1])
+
+
+def _check_layout(where: str, data: Mapping[str, Any], problems: list[str]) -> None:
+    """Nothing on the canvas covers anything else: groups do not overlap, nodes do not overlap."""
+    groups = [
+        (
+            str(g.get("title")),
+            (
+                g["bounding"][0],
+                g["bounding"][1],
+                g["bounding"][0] + g["bounding"][2],
+                g["bounding"][1] + g["bounding"][3],
+            ),
+        )
+        for g in data.get("groups", [])
+    ]
+    for index, (title, box) in enumerate(groups):
+        for other, other_box in groups[index + 1 :]:
+            if _overlap(box, other_box):
+                problems.append(f"{where}: the groups {title!r} and {other!r} overlap")
+    nodes = [(str(n.get("title") or n["type"]), _box(n)) for n in data.get("nodes", [])]
+    for index, (title, box) in enumerate(nodes):
+        for other, other_box in nodes[index + 1 :]:
+            if _overlap(box, other_box):
+                problems.append(f"{where}: the nodes {title!r} and {other!r} overlap")
+
+
 def _inside(node: Mapping[str, Any], group: Mapping[str, Any]) -> bool:
     x, y = node["pos"]
     left, top, width, height = group["bounding"]
@@ -339,6 +386,8 @@ def _check_template(
             problems.append(
                 f"{where}: subgraph definition {definition.get('name')!r} is embedded but no node uses it"
             )
+    problems.extend(f"{where}: {clash}" for clash in id_clashes(definitions))
+    _check_layout(where, data, problems)
     if not path.with_suffix(".jpg").is_file():
         problems.append(f"{where}: thumbnail {path.stem}.jpg missing (tools/build_thumbnails.py)")
 
@@ -352,12 +401,32 @@ def load_blueprints(folder: Path) -> dict[str, dict[str, Any]]:
     return result
 
 
+def id_clashes(definitions: Iterable[Mapping[str, Any]]) -> list[str]:
+    """Node ids that two subgraph definitions share (each blueprint body owns its own id range)."""
+    owners: dict[Any, str] = {}
+    clashes = []
+    for definition in definitions:
+        name = str(definition.get("name"))
+        for node in definition.get("nodes", []):
+            other = owners.setdefault(node["id"], name)
+            if other != name:
+                clashes.append(
+                    f"node id {node['id']} is used by the subgraphs {other!r} and {name!r} "
+                    "(the frontend renumbers one of them on load)"
+                )
+    return clashes
+
+
 def validate_all(
     paths: Iterable[Path], blueprint_folder: Path = PROJECT / "subgraphs"
 ) -> dict[str, list[str]]:
     snapshot = load_snapshot()
     blueprints = load_blueprints(blueprint_folder)
-    return {str(path): validate_file(path, snapshot, blueprints) for path in paths}
+    results = {str(path): validate_file(path, snapshot, blueprints) for path in paths}
+    clashes = id_clashes(blueprints.values())
+    if clashes:
+        results[str(blueprint_folder)] = [f"blueprints: {clash}" for clash in clashes]
+    return results
 
 
 def main() -> int:

@@ -2607,10 +2607,11 @@
      "seed": [
       "INT",
       {
-       "tooltip": "Seed of the model (deterministic).",
+       "tooltip": "Seed of the model: the same seed gives the same result.",
        "default": 0,
        "min": 0,
-       "max": 4294967295
+       "max": 4294967295,
+       "control_after_generate": "fixed"
       }
      ]
     }

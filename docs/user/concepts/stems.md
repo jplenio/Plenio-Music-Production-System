@@ -14,6 +14,11 @@ together with your own balance. It is one optional block of two nodes:
 
 The block sits **before** mastering on purpose: the master then hears your mix, not the raw render.
 
+In the templates the block is one collapsed node, *Stems (optional)* (a subgraph of the loader, *Separate Stems*
+and the *Stem Mixer*). To use it: select it, press **Ctrl+B**, then **open it** with the icon at the top right of
+the node - the mixer with its strips and waveforms is inside. The breadcrumb at the top of the canvas takes you back
+to the workflow.
+
 ## The residual: why a neutral mix is exact
 
 A separation model yields *at most* four stems; whatever it cannot place - room tone, reverb tails, separation

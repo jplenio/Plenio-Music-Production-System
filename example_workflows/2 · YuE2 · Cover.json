@@ -25,7 +25,7 @@
     "Node name for S&R": "MarkdownNote"
    },
    "widgets_values": [
-    "# 2 · YuE2 · Cover\n\n**Source -> Transcribe Score -> Song Sheet · Score -> lyrics (ASR, writer or section tags) -> Song Sheet · Text -> YuE2 Takes -> Check Vocals -> Master -> Export**\n\n1. Load the **source** recording (upload in *Load Audio*; up to 5:00 - trim longer songs with the optional *Excerpt* node).\n2. In **Cover Brief** choose the **mode** - *one cover, stop to review* (default, steps 4-6) or *new cover every run*: every run writes and renders a **different version** (title, style and - with new lyrics - the lyrics) without stops; the batch count next to **Run** makes a series. Then the target style and what happens to the vocals: *instrumental* (default; an instrument plays the melody, or accompaniment only), *original lyrics* (transcribed from the source) or *new lyrics* (written on the source's melody). *harmony* keeps or replaces the original chords.\n3. Press **Run**: SheetSage2 transcribes the source (once; later runs reuse it).\n4. The run **stops at Song Sheet · Score**. Open it, check the score (fix section names and boundaries), then *Approve*.\n5. Run again: the lyrics are drafted (ASR of the original, the writer's new lyrics, or the section tags) and the run **stops at Song Sheet · Text**. Correct or replace the lyrics - your text always wins - and *Approve*.\n6. Run again to render. Each further run is a new take (the take seed changes).\n\n**New lyrics** are understood only when they fit the melody - about one syllable per note - and the voice fits its range; Song Sheet · Text warns about both.\n\n**Takes:** *YuE2 Takes* renders *takes* versions (seeds take seed, +1, ...); **Check Vocals** keeps the first instrumental take without vocal notes, the preview plays all takes. N takes cost N renders. **Instrumental adapter:** for instrumental covers YuE2 renders with the instrumental LoRA of the *Instrumental adapter* node (the optional adapter inside the model block stays bypassed here). **Check sung lyrics** (optional, bypassed) measures what a sung take actually sang.\n\n**Finish:** *Plenio · Master* brings the take to -14 LUFS / -1 dBTP with a gentle tone match (open the block to change the EQ or the loudness target). Export writes the mastered FLAC 24-bit, the unmastered take as `(original).flac` and a release record to `output/plenio`.\n\n**Cover art (optional, bypassed):** *Cover Art* paints a cover from the sheet's artwork prompt with FLUX.2 Klein 4B (about 16 GB of extra model files, Apache-2.0). Select it and the cover preview and press **Ctrl+B**; Export then embeds the cover in the FLAC and MP3 files and saves it as `.jpg`.\n\n**Stems (optional, bypassed):** *Separate Stems* splits the take into vocals, drums, bass and other; the *Stem Mixer* balances them (gain, mute/solo, compression, reverb/delay sends, muted time ranges) and mixes the residual *rest* along, so a neutral mix returns the render unchanged. Select the block and press **Ctrl+B**; it needs the BS-RoFormer checkpoint (527 MB). The user guide *Stems* covers it.\n\n**App mode:** switch *Graph / App* at the top left for a simple form: the source file, the mode, the cover style, the take seed, the two Song Sheet buttons (the review stops work in the app) and the results. The options of *original lyrics* and *new lyrics* are set in the graph.\n\n**Models** (downloaded on first use): YuE2 3B int8, SheetSage2, the instrumental adapter, the Gemma 4 E4B writer; the lyrics ASR (faster-whisper large-v3, 3.1 GB) is fetched by Plenio when first needed. YuE2, SheetSage2 and the adapter are **CC BY-NC 4.0 (non-commercial)**.\n"
+    "# 2 · YuE2 · Cover\n\n**Source -> Transcribe Score -> Song Sheet · Score -> lyrics (ASR, writer or section tags) -> Song Sheet · Text -> YuE2 Takes -> Check Vocals -> Master -> Export**\n\n1. Load the **source** recording (upload in *Load Audio*; up to 5:00 - trim longer songs with the optional *Excerpt* node).\n2. In **Cover Brief** choose the **mode** - *one cover, stop to review* (default, steps 4-6) or *new cover every run*: every run writes and renders a **different version** (title, style and - with new lyrics - the lyrics) without stops; the batch count next to **Run** makes a series. Then the target style and what happens to the vocals: *instrumental* (default; an instrument plays the melody, or accompaniment only), *original lyrics* (transcribed from the source) or *new lyrics* (written on the source's melody). *harmony* keeps or replaces the original chords.\n3. Press **Run**: SheetSage2 transcribes the source (once; later runs reuse it).\n4. The run **stops at Song Sheet · Score**. Open it, check the score (fix section names and boundaries), then *Approve*.\n5. Run again: the lyrics are drafted (ASR of the original, the writer's new lyrics, or the section tags) and the run **stops at Song Sheet · Text**. Correct or replace the lyrics - your text always wins - and *Approve*.\n6. Run again to render. Each further run is a new take (the take seed changes).\n\n**New lyrics** are understood only when they fit the melody - about one syllable per note - and the voice fits its range; Song Sheet · Text warns about both.\n\n**Takes:** *YuE2 Takes* renders *takes* versions (seeds take seed, +1, ...); **Check Vocals** keeps the first instrumental take without vocal notes, the preview plays all takes. N takes cost N renders. **Instrumental adapter:** for instrumental covers YuE2 renders with the instrumental LoRA of the *Instrumental adapter* node (the optional adapter inside the model block stays bypassed here). **Check sung lyrics** (optional, bypassed) measures what a sung take actually sang.\n\n**Finish:** *Plenio · Master* brings the take to -14 LUFS / -1 dBTP with a gentle tone match (open the block to change the EQ or the loudness target). Export writes the mastered FLAC 24-bit, the unmastered take as `(original).flac` and a release record to `output/plenio`.\n\n**Cover art (optional, bypassed):** *Cover Art* paints a cover from the sheet's artwork prompt with FLUX.2 Klein 4B (about 16 GB of extra model files, Apache-2.0). Select it and the cover preview and press **Ctrl+B**; Export then embeds the cover in the FLAC and MP3 files and saves it as `.jpg`.\n\n**Stems (optional, bypassed):** *Separate Stems* splits the take into vocals, drums, bass and other; the *Stem Mixer* balances them (gain, mute/solo, compression, reverb/delay sends, muted time ranges) and mixes the residual *rest* along, so a neutral mix returns the render unchanged. Select the block and press **Ctrl+B**; the mixer is inside it - open the block with the icon at the top right of the node. It needs the BS-RoFormer checkpoint (527 MB). The user guide *Stems* covers it.\n\n**Refine (optional, bypassed):** brings the take to 48 kHz and extends the top octaves with the UniverSR model (229 MB); nothing below the crossover changes. YuE2 renders at 48 kHz already, so this is for experiments. Select the REFINE group, press **Ctrl+B** and expand its two nodes to pick a *preset*. The user guide *Refine (48 kHz)* covers it.\n\n**App mode:** switch *Graph / App* at the top left for a simple form: the source file, the mode, the cover style, the take seed, the two Song Sheet buttons (the review stops work in the app) and the results. The options of *original lyrics* and *new lyrics* are set in the graph.\n\n**Models** (downloaded on first use): YuE2 3B int8, SheetSage2, the instrumental adapter, the Gemma 4 E4B writer; the lyrics ASR (faster-whisper large-v3, 3.1 GB) is fetched by Plenio when first needed. YuE2, SheetSage2 and the adapter are **CC BY-NC 4.0 (non-commercial)**.\n"
    ]
   },
   {
@@ -68,7 +68,7 @@
     "Node name for S&R": "LoadAudio"
    },
    "widgets_values": [
-    "cover_source.flac"
+    ""
    ]
   },
   {
@@ -141,7 +141,7 @@
    ],
    "size": [
     380,
-    520
+    620
    ],
    "flags": {},
    "order": 3,
@@ -297,7 +297,7 @@
    "type": "be8d0fd4-8ce7-561b-8778-c59f81c6c6b4",
    "pos": [
     0,
-    1175
+    1275
    ],
    "size": [
     380,
@@ -369,7 +369,7 @@
    "type": "LoraLoader",
    "pos": [
     0,
-    1255
+    1355
    ],
    "size": [
     380,
@@ -457,7 +457,7 @@
    "type": "ComfySwitchNode",
    "pos": [
     420,
-    1255
+    1355
    ],
    "size": [
     260,
@@ -580,7 +580,7 @@
    ],
    "size": [
     340,
-    140
+    220
    ],
    "flags": {},
    "order": 8,
@@ -648,7 +648,7 @@
    ],
    "size": [
     420,
-    420
+    460
    ],
    "flags": {},
    "order": 9,
@@ -845,7 +845,7 @@
    ],
    "size": [
     340,
-    240
+    300
    ],
    "flags": {},
    "order": 10,
@@ -960,7 +960,7 @@
    "type": "ec9ff305-6d52-5283-8543-6c063df4002b",
    "pos": [
     1380,
-    300
+    360
    ],
    "size": [
     360,
@@ -1083,7 +1083,7 @@
    "type": "SeedNode",
    "pos": [
     1380,
-    620
+    680
    ],
    "size": [
     300,
@@ -1246,7 +1246,7 @@
    ],
    "size": [
     420,
-    420
+    460
    ],
    "flags": {},
    "order": 15,
@@ -1605,7 +1605,7 @@
    ],
    "size": [
     340,
-    160
+    220
    ],
    "flags": {},
    "order": 18,
@@ -1686,7 +1686,7 @@
    "type": "PreviewAudio",
    "pos": [
     3000,
-    220
+    280
    ],
    "size": [
     340,
@@ -1726,7 +1726,7 @@
    ],
    "size": [
     340,
-    200
+    300
    ],
    "flags": {},
    "order": 20,
@@ -1895,9 +1895,11 @@
    ],
    "size": [
     320,
-    150
+    110
    ],
-   "flags": {},
+   "flags": {
+    "collapsed": true
+   },
    "order": 22,
    "mode": 4,
    "inputs": [
@@ -1951,13 +1953,15 @@
    "type": "PlenioRefine",
    "pos": [
     3420,
-    1070
+    955
    ],
    "size": [
     360,
-    340
+    380
    ],
-   "flags": {},
+   "flags": {
+    "collapsed": true
+   },
    "order": 23,
    "mode": 4,
    "inputs": [
@@ -2068,7 +2072,8 @@
     "custom - the three fields below",
     0.0,
     0.0,
-    0
+    0,
+    "fixed"
    ]
   },
   {
@@ -2187,7 +2192,7 @@
    ],
    "size": [
     380,
-    520
+    660
    ],
    "flags": {},
    "order": 26,
@@ -2404,7 +2409,7 @@
    "type": "9dbb5617-ccf9-5537-b674-405adb29958c",
    "pos": [
     3880,
-    715
+    780
    ],
    "size": [
     340,
@@ -2469,7 +2474,7 @@
    "type": "PreviewImage",
    "pos": [
     4280,
-    715
+    780
    ],
    "size": [
     300,
@@ -3115,8 +3120,8 @@
    "bounding": [
     3390,
     835,
-    420,
-    605
+    320,
+    180
    ],
    "color": "#555",
    "font_size": 24,
@@ -3129,7 +3134,7 @@
     3850,
     -70,
     840,
-    620
+    760
    ],
    "color": "#3f789e",
    "font_size": 24,
@@ -3140,7 +3145,7 @@
    "title": "COVER ART (optional)",
    "bounding": [
     3850,
-    645,
+    710,
     760,
     400
    ],
@@ -3168,7 +3173,7 @@
     -30,
     410,
     440,
-    620
+    720
    ],
    "color": "#3f789e",
    "font_size": 24,
@@ -3181,7 +3186,7 @@
     430,
     -70,
     900,
-    520
+    560
    ],
    "color": "#3f789e",
    "font_size": 24,
@@ -3194,7 +3199,7 @@
     1350,
     -70,
     740,
-    810
+    870
    ],
    "color": "#3f789e",
    "font_size": 24,
@@ -3207,7 +3212,7 @@
     2105,
     -60,
     480,
-    520
+    560
    ],
    "color": "#3f789e",
    "font_size": 24,
@@ -3233,7 +3238,7 @@
     2985,
     775,
     400,
-    300
+    400
    ],
    "color": "#555",
    "font_size": 24,
@@ -3244,7 +3249,7 @@
    "title": "MUSIC MODEL",
    "bounding": [
     -30,
-    1105,
+    1205,
     740,
     310
    ],
@@ -6866,7 +6871,7 @@
     "version": 1,
     "state": {
      "lastGroupId": 0,
-     "lastNodeId": 803,
+     "lastNodeId": 1103,
      "lastLinkId": 6,
      "lastRerouteId": 0
     },
@@ -6946,7 +6951,7 @@
     "widgets": [],
     "nodes": [
      {
-      "id": 801,
+      "id": 1101,
       "type": "PlenioAudioModelLoader",
       "pos": [
        0,
@@ -7008,7 +7013,7 @@
       ]
      },
      {
-      "id": 802,
+      "id": 1102,
       "type": "PlenioSeparateStems",
       "pos": [
        400,
@@ -7059,7 +7064,7 @@
       "widgets_values": []
      },
      {
-      "id": 803,
+      "id": 1103,
       "type": "PlenioStemMixer",
       "pos": [
        800,
@@ -7120,17 +7125,17 @@
     "links": [
      {
       "id": 1,
-      "origin_id": 801,
+      "origin_id": 1101,
       "origin_slot": 0,
-      "target_id": 802,
+      "target_id": 1102,
       "target_slot": 1,
       "type": "PLENIO_AUDIO_MODEL"
      },
      {
       "id": 2,
-      "origin_id": 802,
+      "origin_id": 1102,
       "origin_slot": 0,
-      "target_id": 803,
+      "target_id": 1103,
       "target_slot": 0,
       "type": "PLENIO_STEMS"
      },
@@ -7138,13 +7143,13 @@
       "id": 3,
       "origin_id": -10,
       "origin_slot": 0,
-      "target_id": 802,
+      "target_id": 1102,
       "target_slot": 0,
       "type": "AUDIO"
      },
      {
       "id": 4,
-      "origin_id": 803,
+      "origin_id": 1103,
       "origin_slot": 0,
       "target_id": -20,
       "target_slot": 0,
@@ -7152,7 +7157,7 @@
      },
      {
       "id": 5,
-      "origin_id": 803,
+      "origin_id": 1103,
       "origin_slot": 1,
       "target_id": -20,
       "target_slot": 1,
@@ -7160,7 +7165,7 @@
      },
      {
       "id": 6,
-      "origin_id": 802,
+      "origin_id": 1102,
       "origin_slot": 1,
       "target_id": -20,
       "target_slot": 2,

@@ -119,7 +119,11 @@ class PlenioRefine(io.ComfyNode):
                     min=0,
                     max=2**32 - 1,
                     optional=True,
-                    tooltip="Seed of the model (deterministic).",
+                    # the frontend adds a *control after generate* to every input named seed and defaults it
+                    # to randomize - that would re-run the model on every queue and change the result;
+                    # fixed keeps the promise of the tooltip (and ComfyUI's cache)
+                    control_after_generate=io.ControlAfterGenerate.fixed,
+                    tooltip="Seed of the model: the same seed gives the same result.",
                 ),
             ],
             outputs=[

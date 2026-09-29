@@ -48,6 +48,16 @@ Rules that bind every milestone: use the canonical engine (`canonical`/`ops`) fo
 
 ### 2.1 Done in Phase 11C
 
+**UX review of the templates (2026-09-29, before the release)** - in the real frontend 1.53.6 (dev server, headless
+Chromium), before and after a simulated run; the findings F6-F15 and what changed are in
+[usability-review.md §5](usability-review.md). In short: Refine's seed is *fixed* (the frontend defaulted it to
+*randomize*); the Stems and Refine blueprints own their node-id ranges again (templates 1 and 5 were renumbered on
+load); no node or group overlaps; run summaries keep about four lines and the templates reserve the room; the
+bypassed REFINE block is collapsed; the Cover template opens without an error toast; the EQ explains a match mode
+before its first run; every About note explains Refine and how to reach the Stem Mixer. New guards: the validator
+refuses overlapping nodes and groups and shared blueprint ids; `tools/browser_check.mjs` gained step 5 (summaries);
+Vitest `summary.test.ts`; workflow tests for the ids, the summary room and the Refine seed.
+
 **Quality review of the DeepSeek range `4f65626..0db6ae7` (2026-09-29, before the release)**
 
 At HEAD `0db6ae7` 9 tests were red (1 workflow, 8 host) and ten defects were found; all ten and the smaller points are fixed, each with tests:

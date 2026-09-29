@@ -26,14 +26,14 @@ Frontend: `cd frontend && npm ci`.
 | S-1, S-2, S-6 (YuE2 Song sung / instrumental, writer) and Cover Art | `PLENIO_SMOKE=1 PLENIO_MODELS_DIR=<models> ... pytest tests/host/test_song_models.py tests/host/test_cover_art_models.py` (GPU; `-s` prints timings) |
 | S-7 mastering smoke (CPU, no model) | `PLENIO_SMOKE=1 PLENIO_COMFYUI_ROOT=<ComfyUI> <python> -m pytest tests/host/test_master_smoke.py`; the take is `assets/sound-samples/Example Album - A Feeling With No Address.mp3` or `PLENIO_LEGACY_SAMPLE=<audio file>` |
 | lint / format / types | `PYTHONPATH=.devdeps <python> -m ruff check . && ... -m ruff format --check . && ... -m mypy` |
-| templates and blueprints | `<python> tools/workflow_validation.py` |
+| templates and blueprints | `<python> tools/workflow_validation.py` (also: no two groups or nodes overlap, no embedded definition is unused, no two blueprints share a node id) |
 | frontend | `cd frontend && npm run check` (types, Vitest, build) |
 
 Host tests use an isolated base directory (`--base-directory`, `--disable-all-custom-nodes` with a whitelist): the user's custom nodes, user data and outputs are never touched.
 
 ## Browser checks of the templates
 
-`tools/browser_check.mjs` loads every template in the real ComfyUI frontend and checks: load (widget values as shipped, no Plenio console errors, no node-id renumbering), save/reload (widget values and API prompt identical), optional blocks on/off and Master bypassed (the frontend's API prompt has the expected shape and the server validates it), App Mode (configured controls shown, configuration kept). It needs a running server whose models folder holds files with the catalogue's names - empty files are enough, the server only validates the names:
+`tools/browser_check.mjs` loads every template in the real ComfyUI frontend and checks: load (widget values as shipped, no Plenio console errors, no node-id renumbering), save/reload (widget values and API prompt identical), optional blocks on/off and Master bypassed (the frontend's API prompt has the expected shape and the server validates it), summaries (after a run every node's summary shows at least four lines, no text field is squeezed below 60 px, no node overlaps another once nodes grew), App Mode (configured controls shown, configuration kept). Run it after every change to a template, a blueprint or a node's widgets - the validator cannot see what the frontend adds (a seed's *control after generate*, the height of DOM widgets). It needs a running server whose models folder holds files with the catalogue's names - empty files are enough, the server only validates the names:
 
 ```bash
 <python> tools/dev_server.py --port 8190 --base <dir> --models <dir with empty model files>

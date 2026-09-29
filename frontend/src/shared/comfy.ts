@@ -31,6 +31,11 @@ export interface ComfyNode {
   comfyClass?: string
   widgets?: ComfyWidget[]
   properties: Record<string, unknown>
+  /** ``[width, height]`` of the node body. */
+  size?: [number, number]
+  setSize?(size: [number, number]): void
+  /** The minimum size of the node for its widgets (LiteGraph; the argument is an optional output array). */
+  computeSize?(out?: [number, number]): [number, number]
   addDOMWidget(name: string, type: string, element: HTMLElement, options?: DOMWidgetOptions): ComfyWidget
   setDirtyCanvas?(foreground: boolean, background?: boolean): void
   onExecuted?: (output: Record<string, unknown>) => void

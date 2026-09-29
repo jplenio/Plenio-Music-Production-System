@@ -12,6 +12,7 @@ import pytest
 from workflow_validation import (
     PROJECT,
     expected_widget_values,
+    id_clashes,
     load_blueprints,
     load_snapshot,
     validate_file,
@@ -27,6 +28,44 @@ FIXTURE = PROJECT / "tests" / "fixtures" / "graphs" / "Plenio Test Blueprint.jso
 @pytest.mark.parametrize("path", GRAPHS, ids=lambda p: p.name)
 def test_shipped_graph_is_valid(path: Path) -> None:
     assert validate_file(path, SNAPSHOT, load_blueprints(PROJECT / "subgraphs")) == []
+
+
+def test_every_blueprint_owns_its_node_ids() -> None:
+    """Phase 8 F2, regressed by the Stems blueprint (801+, the ids of YuE2 Render) and fixed again:
+    shared ids made the frontend renumber nodes when a template loaded."""
+    assert id_clashes(load_blueprints(PROJECT / "subgraphs").values()) == []
+    clash = [{"name": "A", "nodes": [{"id": 1}, {"id": 2}]}, {"name": "B", "nodes": [{"id": 2}]}]
+    assert id_clashes(clash) == [
+        "node id 2 is used by the subgraphs 'A' and 'B' (the frontend renumbers one of them on load)"
+    ]
+
+
+SUMMARY_TYPES = {
+    "PlenioSongBrief", "PlenioCoverBrief", "PlenioEQ", "PlenioExportRelease", "PlenioLoudness", "PlenioRefine",
+    "PlenioScoreTools", "PlenioSongSheet", "PlenioStemMixer", "PlenioSystemCheck", "PlenioTranscribeLyrics",
+    "PlenioVocalCheck",
+}  # fmt: skip
+"""Node classes in the templates that show a run summary under their widgets."""
+
+
+def test_nodes_with_a_run_summary_keep_room_for_it() -> None:
+    """A lower bound for every expanded summary node: slot rows (20 px), widget rows (24 px), the title and
+    ``SUMMARY_ROOM``. Before the review of 2026-09-29 Score Tools was 140 px tall and its summary was one
+    clipped line after a run; the browser check measures the real heights (step 5)."""
+    from build_graphs import SUMMARY_ROOM
+
+    for path in sorted((PROJECT / "example_workflows").glob("*.json")):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        for node in data["nodes"]:
+            if node["type"] not in SUMMARY_TYPES or node.get("flags", {}).get("collapsed"):
+                continue
+            widgets = sum(1 for slot in node.get("inputs", []) if slot.get("widget"))
+            sockets = sum(1 for slot in node.get("inputs", []) if not slot.get("widget"))
+            rows = max(sockets, len(node.get("outputs", [])))
+            needed = rows * 20 + widgets * 24 + SUMMARY_ROOM
+            assert node["size"][1] >= needed, (
+                f"{path.stem}: {node.get('title') or node['type']} {node['size'][1]} < {needed}"
+            )
 
 
 def test_templates_ship() -> None:
@@ -286,15 +325,20 @@ def test_refine_runs_in_minimax_and_stays_bypassed_elsewhere() -> None:
         loader = next(n for n in template["nodes"] if n.get("type") == "PlenioAudioModelLoader")
         assert (stage.get("mode") != 4) is active, name
         assert (loader.get("mode") != 4) is active, name
-        assert not stage.get("flags", {}).get("collapsed", False), name  # the widgets stay visible
+        # on (MiniMax): expanded, its fields in view; bypassed: collapsed like the other optional blocks
+        for node in (stage, loader):
+            assert bool(node.get("flags", {}).get("collapsed", False)) is not active, name
         if not active:
             assert "(optional)" in str(stage["title"]) and "(optional)" in str(loader["title"]), name
         group = next(g for g in template["groups"] if "REFINE" in g["title"])
         assert ("48 kHz" in group["title"]) is active, name
         assert loader["widgets_values"][1] == "pytorch_model.bin"
         assert loader["properties"]["models"][0]["directory"] == "audio_sr"
-        # the widget order: engine, crossover_hz, sr_gain, preset, pre_hz, post_hz, seed
-        engine, crossover, _gain, preset, pre, post, _seed = stage["widgets_values"]
+        # the widget order: engine, crossover_hz, sr_gain, preset, pre_hz, post_hz, seed + its control
+        engine, crossover, _gain, preset, pre, post, _seed, control = stage["widgets_values"]
+        # fixed: the frontend's default for an input named seed is randomize, which re-ran the model on
+        # every queue with a new seed (no cache, a different result)
+        assert control == "fixed", name
         assert engine == ("model" if active else "resample only"), name
         assert all(isinstance(value, (int, float)) for value in (crossover, pre, post)), name  # free numbers
         assert preset in presets, name

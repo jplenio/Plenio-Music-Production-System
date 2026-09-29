@@ -1,8 +1,8 @@
-# Usability review of the templates (Phase 8)
+# Usability review of the templates (Phase 8, reviewed again before 0.3.0 - §5)
 
 | | |
 |---|---|
-| Date | 2026-09-25 |
+| Date | 2026-09-25; §5: 2026-09-29 |
 | Scope | the five shipped templates (`example_workflows/`), their blueprints and App configurations |
 | Method | checklist below against the generated templates (visible controls per node, from the template JSON), the automated checks (`tools/workflow_validation.py`, `tests/workflows`, `tools/browser_check.mjs`) and screenshots of every template and App view in the ComfyUI frontend 1.52.7 |
 | Not covered | a session with a new user; keyboard-only use and the light theme; the owner's frontend 1.53.6 (open, see §4) |
@@ -78,3 +78,33 @@ Accepted:
 | A3 | App mode shows only the sung options of *vocals* | a frontend limit (unselected DynamicCombo options are dropped); instrumental options are set in the graph, documented |
 
 Open (owner's machine): the same browser check in frontend 1.53.6 (`tools/browser_check.mjs --channel msedge`); a first-time use of each template following only the About note; keyboard-only use and the light theme.
+
+## 5. Review before 0.3.0 (2026-09-29)
+
+Scope: the six templates of 0.3.0 (with REFINE, STEMS and *5 · YuE2 · DAW*), in the **real frontend 1.53.6** of
+ComfyUI 0.37.0 (the isolated `tools/dev_server.py`, headless Chromium through Playwright): screenshots of every
+template at 2400 x 1350, before and after a simulated run (a five-line summary on every node that sends one),
+measured node boxes, group boxes and summary heights, and the full `tools/browser_check.mjs`.
+
+| # | Finding | Fix |
+|---|---|---|
+| F6 | Refine's *seed* had a *control after generate* the frontend adds to every input named `seed`, defaulting to **randomize**: every queue re-ran UniverSR with a new seed (no cache, a different result), against the tooltip's *same seed, same result*; the templates shipped seven widget values, the frontend saved eight | the input declares `control_after_generate=fixed`; the templates ship the value; the browser check's *widget values as shipped* passes again |
+| F7 | The *Stems* blueprint used the node ids of *YuE2 Render* (801-803), the *Refine* blueprint those of *YuE2 Plan* (701): the frontend renumbered the Stems nodes when templates 1 and 5 loaded (F2 had fixed exactly this in Phase 8) | ranges 1101+ (Stems) and 1201+ (Refine); `tools/workflow_validation.py` now refuses shared ids between embedded definitions and between blueprint files - offline, in CI, not only in the browser check |
+| F8 | The super-resolution loader overlapped the Refine node (15 px) in every template; the REFINE group overlapped COVER ART in templates 1 and 5 | layout fixed; the validator refuses overlapping nodes (title bar included, collapsed = title bar) and overlapping groups |
+| F9 | After a run the summaries were squeezed into what was left of a node: one clipped line on Score Tools and the EQ, two on the briefs - whose *description* field shrank to make room | the summary keeps about four lines (`SUMMARY_MIN_HEIGHT`) and asks for its text's height (estimated while the node is off screen, where the DOM reports 0); a node that is too small grows, never shrinks; the templates reserve the room (`SUMMARY_ROOM`), so none of them grows; browser check step 5 measures it |
+| F10 | The bypassed Refine block was expanded and large (a purple 360 x 380 node), unlike the collapsed Stems block | collapsed while bypassed, expanded where it is on (MiniMax); the About notes say how to expand it |
+| F11 | *2 · YuE2 · Cover* opened with a red **Media input missing** toast: its source shipped a file name no fresh install has | the source starts empty, like *4 · Enhance & Master* |
+| F12 | The EQ in a match mode showed an empty grid and *applied proposal (0 band(s))* before the first run - and after a switch from *manual*, the manual bands as if they were the proposal | the panel says the bands are fitted to the audio when the workflow runs; a proposal is shown only for the mode it came from |
+| F13 | The About notes did not explain Refine in templates 1, 2 and 5 (MiniMax named it only in the path), the DAW note lacked Cover Art, and no note said that the Stem Mixer is **inside** the Stems block | a Refine paragraph in every note (MiniMax: the preset and how to bypass it), Cover Art in the DAW note, *open the block with the icon at the top right* in the Stems paragraph and guide |
+| F14 | The brief panel's three buttons wrapped their labels onto two lines each | one line per button; the row wraps instead |
+| F15 | The browser check counted Load Audio's extra widgets wrongly for an empty file and compared API prompts as strings - the frontend's autogrow lists Export's report inputs in another order after a reload (the links and the backend's numeric order are unchanged). It had not run since M6, which let F6 and F7 through | only the file name counts; prompts compare with sorted keys; `docs/dev/testing.md` says to run it after every template, blueprint or widget change |
+
+Accepted:
+
+| # | Item | Why |
+|---|---|---|
+| A4 | Export Release shows a report input that is linked from a subgraph (*Transcribe Score* in the Cover template) at the end of its report list after loading | the frontend's autogrow places it; the link, the API prompt's content and the order in the release record (the backend reads the inputs by number) are unaffected |
+| A5 | The Stem Mixer is reached by opening the Stems block (a subgraph) | as a subgraph the block stays one collapsed node in five templates; the About notes and the guide say how to open it. Making it plain nodes like REFINE is an option if the owner prefers the mixer on the canvas |
+
+Result: `tools/browser_check.mjs` **74/74** (frontend 1.53.6), `tools/workflow_validation.py` clean with the new
+layout and id checks.

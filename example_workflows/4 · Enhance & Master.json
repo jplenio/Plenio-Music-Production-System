@@ -135,9 +135,11 @@
    ],
    "size": [
     320,
-    150
+    110
    ],
-   "flags": {},
+   "flags": {
+    "collapsed": true
+   },
    "order": 3,
    "mode": 4,
    "inputs": [
@@ -191,13 +193,15 @@
    "type": "PlenioRefine",
    "pos": [
     420,
-    545
+    430
    ],
    "size": [
     360,
-    340
+    380
    ],
-   "flags": {},
+   "flags": {
+    "collapsed": true
+   },
    "order": 4,
    "mode": 4,
    "inputs": [
@@ -307,7 +311,8 @@
     "custom - the three fields below",
     0.0,
     0.0,
-    0
+    0,
+    "fixed"
    ]
   },
   {
@@ -319,7 +324,7 @@
    ],
    "size": [
     980,
-    560
+    660
    ],
    "flags": {},
    "order": 5,
@@ -393,7 +398,7 @@
    ],
    "size": [
     425,
-    245
+    280
    ],
    "flags": {},
    "order": 6,
@@ -507,7 +512,7 @@
    ],
    "size": [
     380,
-    400
+    500
    ],
    "flags": {},
    "order": 8,
@@ -806,8 +811,8 @@
    "bounding": [
     390,
     310,
-    420,
-    605
+    320,
+    180
    ],
    "color": "#555",
    "font_size": 24,
@@ -833,7 +838,7 @@
     850,
     -70,
     1510,
-    660
+    760
    ],
    "color": "#3f789e",
    "font_size": 24,
@@ -846,7 +851,7 @@
     2460,
     -70,
     440,
-    680
+    780
    ],
    "color": "#3f789e",
    "font_size": 24,
@@ -860,7 +865,7 @@
     "version": 1,
     "state": {
      "lastGroupId": 0,
-     "lastNodeId": 803,
+     "lastNodeId": 1103,
      "lastLinkId": 6,
      "lastRerouteId": 0
     },
@@ -940,7 +945,7 @@
     "widgets": [],
     "nodes": [
      {
-      "id": 801,
+      "id": 1101,
       "type": "PlenioAudioModelLoader",
       "pos": [
        0,
@@ -1002,7 +1007,7 @@
       ]
      },
      {
-      "id": 802,
+      "id": 1102,
       "type": "PlenioSeparateStems",
       "pos": [
        400,
@@ -1053,7 +1058,7 @@
       "widgets_values": []
      },
      {
-      "id": 803,
+      "id": 1103,
       "type": "PlenioStemMixer",
       "pos": [
        800,
@@ -1114,17 +1119,17 @@
     "links": [
      {
       "id": 1,
-      "origin_id": 801,
+      "origin_id": 1101,
       "origin_slot": 0,
-      "target_id": 802,
+      "target_id": 1102,
       "target_slot": 1,
       "type": "PLENIO_AUDIO_MODEL"
      },
      {
       "id": 2,
-      "origin_id": 802,
+      "origin_id": 1102,
       "origin_slot": 0,
-      "target_id": 803,
+      "target_id": 1103,
       "target_slot": 0,
       "type": "PLENIO_STEMS"
      },
@@ -1132,13 +1137,13 @@
       "id": 3,
       "origin_id": -10,
       "origin_slot": 0,
-      "target_id": 802,
+      "target_id": 1102,
       "target_slot": 0,
       "type": "AUDIO"
      },
      {
       "id": 4,
-      "origin_id": 803,
+      "origin_id": 1103,
       "origin_slot": 0,
       "target_id": -20,
       "target_slot": 0,
@@ -1146,7 +1151,7 @@
      },
      {
       "id": 5,
-      "origin_id": 803,
+      "origin_id": 1103,
       "origin_slot": 1,
       "target_id": -20,
       "target_slot": 1,
@@ -1154,7 +1159,7 @@
      },
      {
       "id": 6,
-      "origin_id": 802,
+      "origin_id": 1102,
       "origin_slot": 1,
       "target_id": -20,
       "target_slot": 2,

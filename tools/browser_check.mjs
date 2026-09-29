@@ -6,6 +6,8 @@
 //   3. options - each optional block on/off (and Master bypassed): the frontend's API prompt has the
 //                expected shape and the server validates it (dummy model files, see below)
 //   4. app     - App Mode shows the configured controls and outputs
+//   5. summaries - after a run: every node's summary shows at least four lines, no text field
+//                shrinks below 60 px to make room, and no two nodes overlap once the nodes grew
 //
 // Needs a running ComfyUI with Plenio (tools/dev_server.py) whose models folder holds files with the
 // catalogue's default names (empty files are enough: the server only validates the names; a queued
@@ -52,6 +54,15 @@ const OPTIONAL = {
   '3 · MiniMax · Song': ['Cover Art (optional)', 'Cover preview (optional)'],
 }
 const INPUT_AUDIO = { '2 · YuE2 · Cover': 'cover_source.flac', '4 · Enhance & Master': 'browser-check.flac' }
+// The node classes that send a run summary (``plenio_summary`` in their UI output, plenio/comfy/nodes)
+const SUMMARY_TYPES = [
+  'PlenioSongBrief', 'PlenioComposePrompt', 'PlenioCoverBrief', 'PlenioEngine', 'PlenioEQ', 'PlenioExportRelease',
+  'PlenioLoudness', 'PlenioParseDraft', 'PlenioRefine', 'PlenioScoreTools', 'PlenioSongSheet', 'PlenioSeparateStems',
+  'PlenioStemMixer', 'PlenioSystemCheck', 'PlenioTranscribeLyrics', 'PlenioTranscribeScore', 'PlenioVocalCheck',
+]
+/** JSON with sorted keys: the frontend's autogrow may list the same inputs in another order after a reload. */
+const canonical = (value) =>
+  JSON.stringify(value, (_key, v) => (v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b))) : v))
 
 const results = []
 const record = (template, check, ok, detail = '') => {
@@ -153,12 +164,13 @@ for (const name of names) {
   // 1. load
   await load(template, name)
   const first = await snapshot()
-  // Load Audio's frontend adds its player and upload widgets after the file name (as native templates ship)
-  const FRONTEND_EXTRAS = { LoadAudio: 2 }
+  // Load Audio's frontend adds its player and upload widgets after the file name (as native templates
+  // ship; one or two, depending on whether a file is set): only the file name is a shipped value
+  const SHIPPED_ONLY = { LoadAudio: 1 }
   const differing = first.serialized.nodes.filter((n) => {
     const shipped = template.nodes.find((t) => t.id === n.id)?.widgets_values ?? []
-    const saved = (n.widgets_values ?? []).slice(0, (n.widgets_values ?? []).length - (FRONTEND_EXTRAS[n.type] ?? 0))
-    return JSON.stringify(saved) !== JSON.stringify(shipped)
+    const saved = SHIPPED_ONLY[n.type] ? (n.widgets_values ?? []).slice(0, SHIPPED_ONLY[n.type]) : n.widgets_values ?? []
+    return JSON.stringify(saved) !== JSON.stringify(SHIPPED_ONLY[n.type] ? shipped.slice(0, SHIPPED_ONLY[n.type]) : shipped)
   })
   record(name, 'load: widget values as shipped', differing.length === 0, differing.map((n) => `${n.id} ${n.type}: ${JSON.stringify(n.widgets_values)}`).join(' | '))
   record(name, 'load: no Plenio console errors', plenioErrors().length === 0, plenioErrors().slice(0, 2).join(' | '))
@@ -169,7 +181,7 @@ for (const name of names) {
   await load(first.serialized, `${name} (reloaded)`)
   const second = await snapshot()
   const sameValues = JSON.stringify(first.values) === JSON.stringify(second.values)
-  const samePrompt = JSON.stringify(first.output) === JSON.stringify(second.output)
+  const samePrompt = canonical(first.output) === canonical(second.output)
   record(name, 'reload: widget values identical', sameValues)
   record(name, 'reload: API prompt identical', samePrompt)
 
@@ -204,6 +216,49 @@ for (const name of names) {
     record(name, 'options: Master bypassed validates', bypassProblem === '', bypassProblem)
     await setMode(['Plenio · Master'], 0)
   }
+
+  // 5. summaries (what a run leaves on the nodes)
+  await load(template, name)
+  const summaries = await page.evaluate(async (types) => {
+    const graph = window.app.graph
+    const markdown = '**Summary of this node**\n- note: one\n- note: two\n- note: three\n- note: four'
+    const shown = graph.nodes.filter((n) => types.includes(n.type) && typeof n.onExecuted === 'function')
+    for (const node of shown) node.onExecuted({ plenio_summary: [{ status: 'ok', markdown }] })
+    const problems = []
+    const canvas = window.app.canvas
+    for (const node of shown) {
+      if (node.flags?.collapsed) continue
+      const summary = node.widgets?.find((w) => w.name === 'plenio_summary')?.element
+      if (!summary) continue
+      // DOM widgets are laid out on screen only: bring the node into view at 100 %
+      canvas.ds.scale = 1
+      canvas.ds.offset[0] = -node.pos[0] + 100
+      canvas.ds.offset[1] = -node.pos[1] + 100
+      canvas.setDirty(true, true)
+      await new Promise((r) => setTimeout(r, 600))
+      const label = node.title || node.type
+      if (summary.clientHeight < 76) problems.push(`${label}: summary ${summary.clientHeight} px`)
+      for (const field of node.widgets ?? []) {
+        const area = field.element?.querySelector?.('textarea') ?? (field.element?.tagName === 'TEXTAREA' ? field.element : null)
+        if (area && area.clientHeight < 60) problems.push(`${label}: ${field.name} squeezed to ${area.clientHeight} px`)
+      }
+    }
+    const box = (n) => {
+      const collapsed = !!n.flags?.collapsed
+      return [n.pos[0], n.pos[1] - 30, n.pos[0] + (collapsed ? Math.min(n.size[0], 260) : n.size[0]), n.pos[1] + (collapsed ? 0 : n.size[1])]
+    }
+    const nodes = graph.nodes
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = box(nodes[i]), b = box(nodes[j])
+        if (Math.min(a[2], b[2]) > Math.max(a[0], b[0]) && Math.min(a[3], b[3]) > Math.max(a[1], b[1])) {
+          problems.push(`${nodes[i].title} overlaps ${nodes[j].title} after the run`)
+        }
+      }
+    }
+    return problems
+  }, SUMMARY_TYPES)
+  record(name, 'summaries: readable after a run, no squeezed field, no overlap', summaries.length === 0, summaries.slice(0, 4).join(' | '))
 
   // 4. app
   const app = template.extra?.linearData

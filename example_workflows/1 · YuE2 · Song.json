@@ -25,7 +25,7 @@
     "Node name for S&R": "MarkdownNote"
    },
    "widgets_values": [
-    "# 1 · YuE2 · Song\n\n**Brief -> Write Song -> Song Sheet · Text -> YuE2 Plan -> Song Sheet · Score -> YuE2 Render -> Master -> Export**\n\n1. Choose the **mode** in **Song Brief**:\n   - *new song every run* - every run writes and renders a **different song** from the brief, without stops (set the **Draft seed** to *randomize* for even more variety). For a series, set the batch count next to **Run** (App mode: *Number of runs*) - one click, many songs.\n   - *one song, stop to review* - the run **stops at the Song Sheets (Text, then Score)**: open it, check or edit the documents, *Approve*, run again. Once approved, every further run is a **new take** of the same song (the documents stay cached).\n2. Describe the song (or pick a template). *vocals* switches between a sung song and an instrumental; *length* runs from 1:00 to 6:00.\n3. Press **Run**. The writer model drafts title, style and lyrics; YuE2 plans a score and renders the song.\n\n**Inspect and edit:** open a **Song Sheet** to see exactly what YuE2 receives. Edit a document there; your edit wins until its draft changes, then the run stops and asks you. The sheets' *review* follows the brief's mode (*as the brief says*); set it to *continue* or *stop for review* to decide per sheet.\n\n**Finish:** *Plenio · Master* brings the take to -14 LUFS / -1 dBTP with a gentle tone match (open the block to change the EQ or the loudness target). Export writes the mastered FLAC 24-bit, the unmastered take as `(original).flac` and a release record to `output/plenio`.\n\n**Cover art (optional, bypassed):** *Cover Art* paints a cover from the sheet's artwork prompt with FLUX.2 Klein 4B (about 16 GB of extra model files, Apache-2.0). Select it and the cover preview and press **Ctrl+B**; Export then embeds the cover in the FLAC and MP3 files and saves it as `.jpg`.\n\n**Stems (optional, bypassed):** *Separate Stems* splits the take into vocals, drums, bass and other; the *Stem Mixer* balances them (gain, mute/solo, compression, reverb/delay sends, muted time ranges) and mixes the residual *rest* along, so a neutral mix returns the render unchanged. Select the block and press **Ctrl+B**; it needs the BS-RoFormer checkpoint (527 MB). The user guide *Stems* covers it.\n\n**App mode:** switch *Graph / App* at the top left for a simple form: the mode, the brief, the take seed, the Song Sheet buttons (review and edit, also in the app) and the results. *Number of runs* next to Run renders a series.\n\n**Models** (ComfyUI offers the downloads when you open the template): YuE2 3B int8 (4.0 GB), the Gemma 4 E4B writer. YuE2 weights are **CC BY-NC 4.0 (non-commercial)**. The model block below is collapsed; expand it to choose other files.\n"
+    "# 1 · YuE2 · Song\n\n**Brief -> Write Song -> Song Sheet · Text -> YuE2 Plan -> Song Sheet · Score -> YuE2 Render -> Master -> Export**\n\n1. Choose the **mode** in **Song Brief**:\n   - *new song every run* - every run writes and renders a **different song** from the brief, without stops (set the **Draft seed** to *randomize* for even more variety). For a series, set the batch count next to **Run** (App mode: *Number of runs*) - one click, many songs.\n   - *one song, stop to review* - the run **stops at the Song Sheets (Text, then Score)**: open it, check or edit the documents, *Approve*, run again. Once approved, every further run is a **new take** of the same song (the documents stay cached).\n2. Describe the song (or pick a template). *vocals* switches between a sung song and an instrumental; *length* runs from 1:00 to 6:00.\n3. Press **Run**. The writer model drafts title, style and lyrics; YuE2 plans a score and renders the song.\n\n**Inspect and edit:** open a **Song Sheet** to see exactly what YuE2 receives. Edit a document there; your edit wins until its draft changes, then the run stops and asks you. The sheets' *review* follows the brief's mode (*as the brief says*); set it to *continue* or *stop for review* to decide per sheet.\n\n**Finish:** *Plenio · Master* brings the take to -14 LUFS / -1 dBTP with a gentle tone match (open the block to change the EQ or the loudness target). Export writes the mastered FLAC 24-bit, the unmastered take as `(original).flac` and a release record to `output/plenio`.\n\n**Cover art (optional, bypassed):** *Cover Art* paints a cover from the sheet's artwork prompt with FLUX.2 Klein 4B (about 16 GB of extra model files, Apache-2.0). Select it and the cover preview and press **Ctrl+B**; Export then embeds the cover in the FLAC and MP3 files and saves it as `.jpg`.\n\n**Stems (optional, bypassed):** *Separate Stems* splits the take into vocals, drums, bass and other; the *Stem Mixer* balances them (gain, mute/solo, compression, reverb/delay sends, muted time ranges) and mixes the residual *rest* along, so a neutral mix returns the render unchanged. Select the block and press **Ctrl+B**; the mixer is inside it - open the block with the icon at the top right of the node. It needs the BS-RoFormer checkpoint (527 MB). The user guide *Stems* covers it.\n\n**Refine (optional, bypassed):** brings the take to 48 kHz and extends the top octaves with the UniverSR model (229 MB); nothing below the crossover changes. YuE2 renders at 48 kHz already, so this is for experiments. Select the REFINE group, press **Ctrl+B** and expand its two nodes to pick a *preset*. The user guide *Refine (48 kHz)* covers it.\n\n**App mode:** switch *Graph / App* at the top left for a simple form: the mode, the brief, the take seed, the Song Sheet buttons (review and edit, also in the app) and the results. *Number of runs* next to Run renders a series.\n\n**Models** (ComfyUI offers the downloads when you open the template): YuE2 3B int8 (4.0 GB), the Gemma 4 E4B writer. YuE2 weights are **CC BY-NC 4.0 (non-commercial)**. The model block below is collapsed; expand it to choose other files.\n"
    ]
   },
   {
@@ -37,7 +37,7 @@
    ],
    "size": [
     380,
-    620
+    720
    ],
    "flags": {},
    "order": 1,
@@ -216,7 +216,7 @@
    "type": "be8d0fd4-8ce7-561b-8778-c59f81c6c6b4",
    "pos": [
     0,
-    760
+    860
    ],
    "size": [
     380,
@@ -459,7 +459,7 @@
    ],
    "size": [
     420,
-    420
+    460
    ],
    "flags": {},
    "order": 5,
@@ -747,7 +747,7 @@
    ],
    "size": [
     340,
-    140
+    220
    ],
    "flags": {},
    "order": 7,
@@ -815,7 +815,7 @@
    ],
    "size": [
     420,
-    420
+    460
    ],
    "flags": {},
    "order": 8,
@@ -1225,9 +1225,11 @@
    ],
    "size": [
     320,
-    150
+    110
    ],
-   "flags": {},
+   "flags": {
+    "collapsed": true
+   },
    "order": 12,
    "mode": 4,
    "inputs": [
@@ -1281,13 +1283,15 @@
    "type": "PlenioRefine",
    "pos": [
     2320,
-    980
+    865
    ],
    "size": [
     360,
-    340
+    380
    ],
-   "flags": {},
+   "flags": {
+    "collapsed": true
+   },
    "order": 13,
    "mode": 4,
    "inputs": [
@@ -1398,7 +1402,8 @@
     "custom - the three fields below",
     0.0,
     0.0,
-    0
+    0,
+    "fixed"
    ]
   },
   {
@@ -1517,7 +1522,7 @@
    ],
    "size": [
     380,
-    440
+    570
    ],
    "flags": {},
    "order": 16,
@@ -1710,7 +1715,7 @@
    "type": "9dbb5617-ccf9-5537-b674-405adb29958c",
    "pos": [
     2720,
-    650
+    700
    ],
    "size": [
     340,
@@ -1775,7 +1780,7 @@
    "type": "PreviewImage",
    "pos": [
     3120,
-    650
+    700
    ],
    "size": [
     300,
@@ -2197,8 +2202,8 @@
    "bounding": [
     2290,
     745,
-    420,
-    605
+    320,
+    180
    ],
    "color": "#555",
    "font_size": 24,
@@ -2211,7 +2216,7 @@
     2690,
     -70,
     840,
-    540
+    670
    ],
    "color": "#3f789e",
    "font_size": 24,
@@ -2222,7 +2227,7 @@
    "title": "COVER ART (optional)",
    "bounding": [
     2690,
-    580,
+    630,
     760,
     400
    ],
@@ -2237,7 +2242,7 @@
     -30,
     -70,
     440,
-    720
+    820
    ],
    "color": "#3f789e",
    "font_size": 24,
@@ -2263,7 +2268,7 @@
     870,
     -70,
     480,
-    520
+    560
    ],
    "color": "#3f789e",
    "font_size": 24,
@@ -2276,7 +2281,7 @@
     1370,
     -70,
     900,
-    540
+    620
    ],
    "color": "#3f789e",
    "font_size": 24,
@@ -2300,7 +2305,7 @@
    "title": "MUSIC MODEL",
    "bounding": [
     -30,
-    690,
+    790,
     320,
     130
    ],
@@ -5834,7 +5839,7 @@
     "version": 1,
     "state": {
      "lastGroupId": 0,
-     "lastNodeId": 803,
+     "lastNodeId": 1103,
      "lastLinkId": 6,
      "lastRerouteId": 0
     },
@@ -5914,7 +5919,7 @@
     "widgets": [],
     "nodes": [
      {
-      "id": 801,
+      "id": 1101,
       "type": "PlenioAudioModelLoader",
       "pos": [
        0,
@@ -5976,7 +5981,7 @@
       ]
      },
      {
-      "id": 802,
+      "id": 1102,
       "type": "PlenioSeparateStems",
       "pos": [
        400,
@@ -6027,7 +6032,7 @@
       "widgets_values": []
      },
      {
-      "id": 803,
+      "id": 1103,
       "type": "PlenioStemMixer",
       "pos": [
        800,
@@ -6088,17 +6093,17 @@
     "links": [
      {
       "id": 1,
-      "origin_id": 801,
+      "origin_id": 1101,
       "origin_slot": 0,
-      "target_id": 802,
+      "target_id": 1102,
       "target_slot": 1,
       "type": "PLENIO_AUDIO_MODEL"
      },
      {
       "id": 2,
-      "origin_id": 802,
+      "origin_id": 1102,
       "origin_slot": 0,
-      "target_id": 803,
+      "target_id": 1103,
       "target_slot": 0,
       "type": "PLENIO_STEMS"
      },
@@ -6106,13 +6111,13 @@
       "id": 3,
       "origin_id": -10,
       "origin_slot": 0,
-      "target_id": 802,
+      "target_id": 1102,
       "target_slot": 0,
       "type": "AUDIO"
      },
      {
       "id": 4,
-      "origin_id": 803,
+      "origin_id": 1103,
       "origin_slot": 0,
       "target_id": -20,
       "target_slot": 0,
@@ -6120,7 +6125,7 @@
      },
      {
       "id": 5,
-      "origin_id": 803,
+      "origin_id": 1103,
       "origin_slot": 1,
       "target_id": -20,
       "target_slot": 1,
@@ -6128,7 +6133,7 @@
      },
      {
       "id": 6,
-      "origin_id": 802,
+      "origin_id": 1102,
       "origin_slot": 1,
       "target_id": -20,
       "target_slot": 2,

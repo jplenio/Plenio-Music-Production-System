@@ -21,7 +21,12 @@ replace, and POST rolls its result off; nothing below the crossover changes. The
 already full band.
 
 In every template the block is two plain nodes in a **REFINE** group - the super-resolution model loader and
-*Refine (48 kHz)* itself - so all fields stay editable on the node.
+*Refine (48 kHz)* itself - so all fields stay editable on the node. Where the block is bypassed, both nodes are
+collapsed like the other optional blocks: select the group, press **Ctrl+B**, then click the dot at the left of each
+title to expand them and see the settings.
+
+The **seed** starts as *fixed* (its *control after generate*): the same seed gives the same result, and ComfyUI
+reuses the refined audio when nothing before it changed. Set it to *randomize* only to compare the model's variations.
 
 ## What it does, step by step
 

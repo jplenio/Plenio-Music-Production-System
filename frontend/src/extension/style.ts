@@ -57,8 +57,8 @@ const CSS = `
 .plenio-brief-template .line[data-state="ok"] { color: #8fb6d9; }
 .plenio-brief-template .line[data-state="error"] { color: #d0453b; }
 .plenio-brief-template .hint { color: #c79a3a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.plenio-brief-template .actions { display: flex; gap: 4px; }
-.plenio-brief-template button { padding: 1px 6px; border-radius: 5px; border: 1px solid var(--border-color, #555);
+.plenio-brief-template .actions { display: flex; flex-wrap: wrap; gap: 4px; }
+.plenio-brief-template button { white-space: nowrap; padding: 1px 6px; border-radius: 5px; border: 1px solid var(--border-color, #555);
   background: var(--comfy-input-bg, #333); color: var(--input-text, #ddd); cursor: pointer; font: inherit; }
 .plenio-brief-template button:disabled { opacity: 0.45; cursor: default; }
 .plenio-mix { display: flex; flex-direction: column; gap: 4px; font: 11px/1.4 var(--font-family, sans-serif);

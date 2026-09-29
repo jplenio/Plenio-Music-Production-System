@@ -98,7 +98,7 @@
     "version": 1,
     "state": {
      "lastGroupId": 0,
-     "lastNodeId": 702,
+     "lastNodeId": 1202,
      "lastLinkId": 8,
      "lastRerouteId": 0
     },
@@ -218,7 +218,7 @@
     "widgets": [],
     "nodes": [
      {
-      "id": 701,
+      "id": 1201,
       "type": "PlenioAudioModelLoader",
       "pos": [
        0,
@@ -280,7 +280,7 @@
       ]
      },
      {
-      "id": 702,
+      "id": 1202,
       "type": "PlenioRefine",
       "pos": [
        400,
@@ -400,7 +400,8 @@
        "custom - the three fields below",
        0.0,
        0.0,
-       0
+       0,
+       "fixed"
       ]
      }
     ],
@@ -408,9 +409,9 @@
     "links": [
      {
       "id": 1,
-      "origin_id": 701,
+      "origin_id": 1201,
       "origin_slot": 0,
-      "target_id": 702,
+      "target_id": 1202,
       "target_slot": 1,
       "type": "PLENIO_AUDIO_MODEL"
      },
@@ -418,7 +419,7 @@
       "id": 2,
       "origin_id": -10,
       "origin_slot": 0,
-      "target_id": 702,
+      "target_id": 1202,
       "target_slot": 0,
       "type": "AUDIO"
      },
@@ -426,7 +427,7 @@
       "id": 3,
       "origin_id": -10,
       "origin_slot": 1,
-      "target_id": 702,
+      "target_id": 1202,
       "target_slot": 5,
       "type": "COMBO"
      },
@@ -434,7 +435,7 @@
       "id": 4,
       "origin_id": -10,
       "origin_slot": 2,
-      "target_id": 702,
+      "target_id": 1202,
       "target_slot": 6,
       "type": "FLOAT"
      },
@@ -442,7 +443,7 @@
       "id": 5,
       "origin_id": -10,
       "origin_slot": 3,
-      "target_id": 702,
+      "target_id": 1202,
       "target_slot": 7,
       "type": "FLOAT"
      },
@@ -450,13 +451,13 @@
       "id": 6,
       "origin_id": -10,
       "origin_slot": 4,
-      "target_id": 702,
+      "target_id": 1202,
       "target_slot": 3,
       "type": "FLOAT"
      },
      {
       "id": 7,
-      "origin_id": 702,
+      "origin_id": 1202,
       "origin_slot": 0,
       "target_id": -20,
       "target_slot": 0,
@@ -464,7 +465,7 @@
      },
      {
       "id": 8,
-      "origin_id": 702,
+      "origin_id": 1202,
       "origin_slot": 1,
       "target_id": -20,
       "target_slot": 1,

@@ -287,8 +287,12 @@ def master() -> Blueprint:
 
 
 def refine() -> Blueprint:
-    """Refine (48 kHz): the loader (collapsed) and the stage, wrapped for the templates (D10)."""
-    g = Graph(first_id=701)
+    """Refine (48 kHz): the loader (collapsed) and the stage, wrapped for the node library (D10).
+
+    Node ids 1201+: every blueprint body owns its own range (YuE2 Plan uses 701+), so a blueprint added
+    to a template never collides with another one.
+    """
+    g = Graph(first_id=1201)
     loader = g.add(
         "PlenioAudioModelLoader",
         (0, 0),
@@ -352,6 +356,10 @@ def stems_stage(
     return (node, "audio"), node
 
 
+REFINE_HEIGHT = 380
+"""The stage's eight widgets, its two sockets and a report summary of about four lines."""
+
+
 def refine_stage(
     g: Graph,
     x: float,
@@ -372,25 +380,30 @@ def refine_stage(
     numbers, the owner's choice); elsewhere the node keeps its defaults (preset *custom*, pre 0 =
     the engine's condition, post 0 = off, crossover 0 = the measured bandwidth minus 500 Hz).
 
+    Active (MiniMax), both nodes are expanded with room for the stage's report summary; bypassed,
+    both are collapsed like the Stems block (Ctrl+B on the group, then expand them to see the fields).
+
     Returns the audio source and the stage node, so the caller can pass both to ``finish`` (its
     report).
     """
     loader = g.add(
         "PlenioAudioModelLoader",
         (x, y),
-        size=(320, 150),
+        size=(320, 110),
         title="Super-resolution model" if active else "Super-resolution model (optional)",
         widgets={"kind": "super-resolution", "kind.model": REFINE_MODEL},
         properties=model(REFINE_MODEL),
         mode=0 if active else 4,
+        collapsed=not active,
     )
     stage = g.add(
         "PlenioRefine",
-        (x, y + 165),
-        size=(360, 340),
+        (x, y + (160 if active else 50)),
+        size=(360, REFINE_HEIGHT),
         title="Refine (48 kHz)" if active else "Refine (optional)",
         widgets=widgets,
         mode=0 if active else 4,
+        collapsed=not active,
     )
     g.link(loader, "model", stage, "model")
     g.link(audio[0], audio[1], stage, "audio")
@@ -404,7 +417,7 @@ def refine_stage(
 
 def stems() -> Blueprint:
     """Separate Stems + Stem Mixer as one optional block (plan §11)."""
-    g = Graph(first_id=801)
+    g = Graph(first_id=1101)  # its own id range (YuE2 Render uses 801+)
     loader = g.add(
         "PlenioAudioModelLoader",
         (0, 0),
@@ -784,6 +797,11 @@ GROUP = "#3f789e"
 MODEL_GROUP = "#444"
 OPTIONAL_GROUP = "#555"
 ABOUT_SIZE = (480, 760)
+SUMMARY_ROOM = 100
+"""Height every node with a run summary keeps free for it (about five lines). Without the room the
+frontend squeezed the summary into what was left after a run - one clipped line on Score Tools and
+the EQ - and shrank the brief's description field; ``frontend/src/extension/summary.ts`` gives the
+summary its minimum, and ``tests/workflows/test_graphs.py`` checks the room."""
 
 
 def about_note(g: Graph, text: str, height: float = ABOUT_SIZE[1]) -> Node:
@@ -801,7 +819,7 @@ def song_sheet(g: Graph, pos: tuple[float, float], title: str) -> Node:
     return g.add(
         "PlenioSongSheet",
         pos,
-        size=(420, 420),
+        size=(420, 360 + SUMMARY_ROOM),
         title=title,
         widgets=FOLLOW_BRIEF,
         labels={"sheet_state": title},
@@ -846,7 +864,7 @@ def finish(
     group: str,
     export_widgets: dict[str, object] | None = None,
     cover_y: float = 560,
-    export_size: tuple[float, float] = (380, 440),
+    export_size: tuple[float, float] = (380, 470 + SUMMARY_ROOM),
 ) -> tuple[Node, Node, Node]:
     """Master -> Preview + Export (the unmastered take as the original), and the optional Cover Art.
 
@@ -898,7 +916,21 @@ STEMS_TEXT = (
     "**Stems (optional, bypassed):** *Separate Stems* splits the take into vocals, drums, bass and other; "
     "the *Stem Mixer* balances them (gain, mute/solo, compression, reverb/delay sends, muted time ranges) "
     "and mixes the residual *rest* along, so a neutral mix returns the render unchanged. Select the block "
-    "and press **Ctrl+B**; it needs the BS-RoFormer checkpoint (527 MB). The user guide *Stems* covers it."
+    "and press **Ctrl+B**; the mixer is inside it - open the block with the icon at the top right of the "
+    "node. It needs the BS-RoFormer checkpoint (527 MB). The user guide *Stems* covers it."
+)
+REFINE_TEXT = (
+    "**Refine (optional, bypassed):** brings the take to 48 kHz and extends the top octaves with the "
+    "UniverSR model (229 MB); nothing below the crossover changes. YuE2 renders at 48 kHz already, so this "
+    "is for experiments. Select the REFINE group, press **Ctrl+B** and expand its two nodes to pick a "
+    "*preset*. The user guide *Refine (48 kHz)* covers it."
+)
+REFINE_MINIMAX_TEXT = (
+    "**Refine (48 kHz, on):** extends the top octaves of the render with the UniverSR model (229 MB) and "
+    "keeps everything below the crossover. The *preset* is *3 - MiniMax* (pre 10 kHz, crossover 9.5 kHz, "
+    "post 19 kHz); pick another preset, or *custom* for the three number fields. For the plain render select "
+    "the REFINE group and press **Ctrl+B**. Experimental: the settings are provisional until the listening "
+    "study."
 )
 APP_TEXT = (
     "**App mode:** switch *Graph / App* at the top left for a simple form: the mode, the brief, the take seed, "
@@ -925,6 +957,8 @@ ABOUT_YUE2 = f"""# 1 · YuE2 · Song
 
 {STEMS_TEXT}
 
+{REFINE_TEXT}
+
 {APP_TEXT}
 
 **Models** (ComfyUI offers the downloads when you open the template): YuE2 3B int8 (4.0 GB), the Gemma 4 E4B writer. YuE2 weights are **CC BY-NC 4.0 (non-commercial)**. The model block below is collapsed; expand it to choose other files.
@@ -937,7 +971,7 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     brief = g.add(
         "PlenioSongBrief",
         (0, 0),
-        size=(380, 620),
+        size=(380, 620 + SUMMARY_ROOM),
         widgets={
             "mode": "new song every run",
             "template": "pop/singer-songwriter-acoustic-vocal",
@@ -945,13 +979,16 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             "vocals": "sung",
         },
     )
-    model_node = g.add_subgraph(bp["yue2_model"], (0, 760), size=(380, 140), collapsed=True)
+    model_node = g.add_subgraph(bp["yue2_model"], (0, 860), size=(380, 140), collapsed=True)
     write = g.add_subgraph(bp["write"], (460, 0), size=(360, 220))
     draft = draft_seed(g, write, (460, 280))
     text_sheet = song_sheet(g, (900, 0), "Song Sheet · Text")
     plan = g.add_subgraph(bp["yue2_plan"], (1400, 0), size=(340, 220))
     tools = g.add(
-        "PlenioScoreTools", (1400, 300), size=(340, 140), widgets={"operation": "prepare from brief"}
+        "PlenioScoreTools",
+        (1400, 300),
+        size=(340, 120 + SUMMARY_ROOM),
+        widgets={"operation": "prepare from brief"},
     )
     score_sheet = song_sheet(g, (1820, 0), "Song Sheet · Score")
     seed = take_seed(g, (2320, 0))
@@ -999,7 +1036,7 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             (refine_node, "report"),
         ],
         group="6 · FINISH",
-        cover_y=650,
+        cover_y=700,
     )
     g.group("1 · SONG", [brief])
     g.group("2 · WRITE", [write, draft])
@@ -1041,6 +1078,8 @@ ABOUT_COVER = f"""# 2 · YuE2 · Cover
 
 {STEMS_TEXT}
 
+{REFINE_TEXT}
+
 **App mode:** switch *Graph / App* at the top left for a simple form: the source file, the mode, the cover style, the take seed, the two Song Sheet buttons (the review stops work in the app) and the results. The options of *original lyrics* and *new lyrics* are set in the graph.
 
 **Models** (downloaded on first use): YuE2 3B int8, SheetSage2, the instrumental adapter, the Gemma 4 E4B writer; the lyrics ASR (faster-whisper large-v3, 3.1 GB) is fetched by Plenio when first needed. YuE2, SheetSage2 and the adapter are **CC BY-NC 4.0 (non-commercial)**.
@@ -1050,9 +1089,7 @@ ABOUT_COVER = f"""# 2 · YuE2 · Cover
 def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g = Graph()
     about_note(g, ABOUT_COVER, height=960)
-    source = g.add(
-        "LoadAudio", (0, 0), size=(360, 140), title="Source recording", widgets={"audio": "cover_source.flac"}
-    )
+    source = g.add("LoadAudio", (0, 0), size=(360, 140), title="Source recording")
     excerpt = g.add(
         "TrimAudioDuration",
         (0, 230),
@@ -1064,7 +1101,7 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     brief = g.add(
         "PlenioCoverBrief",
         (0, 480),
-        size=(380, 520),
+        size=(380, 520 + SUMMARY_ROOM),
         widgets={
             "mode": "one cover, stop to review",
             "genre": "acoustic folk",
@@ -1072,44 +1109,49 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             "vocals": "instrumental",
         },
     )
-    model_node = g.add_subgraph(bp["yue2_model"], (0, 1175), size=(380, 140), collapsed=True)
+    model_node = g.add_subgraph(bp["yue2_model"], (0, 1275), size=(380, 140), collapsed=True)
     adapter = g.add(
         "LoraLoader",
-        (0, 1255),
+        (0, 1355),
         size=(380, 130),
         title="Instrumental adapter",
         widgets={"lora_name": LORA, "strength_model": 0.0, "strength_clip": 1.0},
         properties=model(LORA),
     )
     adapter_switch = g.add(
-        "ComfySwitchNode", (420, 1255), size=(260, 90), title="Adapter for instrumental covers"
+        "ComfySwitchNode", (420, 1355), size=(260, 90), title="Adapter for instrumental covers"
     )
     transcribe = g.add_subgraph(bp["transcribe"], (460, 0), size=(340, 160))
     tools = g.add(
-        "PlenioScoreTools", (460, 220), size=(340, 140), widgets={"operation": "prepare from brief"}
+        "PlenioScoreTools",
+        (460, 220),
+        size=(340, 120 + SUMMARY_ROOM),
+        widgets={"operation": "prepare from brief"},
     )
     score_sheet = song_sheet(g, (880, 0), "Song Sheet · Score")
     # Original lyrics: the Cover Brief owns the source's language; new lyrics: this widget does (AUD-02).
     asr = g.add(
         "PlenioTranscribeLyrics",
         (1380, 0),
-        size=(340, 240),
+        size=(340, 200 + SUMMARY_ROOM),
         title="Transcribe Lyrics",
         labels={"language": "source language (original lyrics: Cover Brief)"},
     )
-    write = g.add_subgraph(bp["write"], (1380, 300), size=(360, 260))
-    draft = draft_seed(g, write, (1380, 620))
+    write = g.add_subgraph(bp["write"], (1380, 360), size=(360, 260))
+    draft = draft_seed(g, write, (1380, 680))
     source_switch = g.add("ComfySwitchNode", (1800, 0), size=(260, 90), title="Original or new lyrics")
     tags_switch = g.add("ComfySwitchNode", (1800, 165), size=(260, 90), title="Instrumental: section tags")
     text_sheet = song_sheet(g, (2135, 10), "Song Sheet · Text")
     seed = take_seed(g, (2620, 0))
     render = g.add_subgraph(bp["yue2_takes"], (2620, 170), size=(320, 330), title="YuE2 Takes")
-    check_vocals = g.add("PlenioVocalCheck", (3000, 0), size=(340, 160), title="Check Vocals · best take")
-    takes_preview = g.add("PreviewAudio", (3000, 220), size=(340, 120), title="Preview (all takes)")
+    check_vocals = g.add(
+        "PlenioVocalCheck", (3000, 0), size=(340, 120 + SUMMARY_ROOM), title="Check Vocals · best take"
+    )
+    takes_preview = g.add("PreviewAudio", (3000, 280), size=(340, 120), title="Preview (all takes)")
     check_lyrics = g.add(
         "PlenioTranscribeLyrics",
         (3015, 845),
-        size=(340, 200),
+        size=(340, 200 + SUMMARY_ROOM),
         mode=4,
         title="Check sung lyrics (optional)",
     )
@@ -1185,8 +1227,8 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             (refine_node, "report"),
         ],
         group="7 · FINISH",
-        cover_y=715,
-        export_size=(380, 520),
+        cover_y=780,
+        export_size=(380, 560 + SUMMARY_ROOM),
     )
     g.group("1 · SOURCE", [source, excerpt])
     g.group("2 · COVER", [brief])
@@ -1218,6 +1260,8 @@ ABOUT_MINIMAX = f"""# 3 · MiniMax · Song
 
 {FINISH_TEXT}
 
+{REFINE_MINIMAX_TEXT}
+
 {COVER_TEXT}
 
 {STEMS_TEXT}
@@ -1234,7 +1278,7 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     brief = g.add(
         "PlenioSongBrief",
         (0, 0),
-        size=(380, 620),
+        size=(380, 620 + SUMMARY_ROOM),
         widgets={
             "mode": "new song every run",
             "template": "pop/singer-songwriter-acoustic-vocal",
@@ -1242,7 +1286,7 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             "vocals": "sung",
         },
     )
-    model_node = g.add_subgraph(bp["minimax_model"], (0, 830), size=(380, 160), collapsed=True)
+    model_node = g.add_subgraph(bp["minimax_model"], (0, 860), size=(380, 160), collapsed=True)
     write = g.add_subgraph(bp["write"], (460, 0), size=(360, 220))
     draft = draft_seed(g, write, (460, 280))
     sheet = song_sheet(g, (900, 0), "Song Sheet")
@@ -1291,7 +1335,7 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             (refine_node, "report"),
         ],
         group="5 · FINISH",
-        cover_y=650,
+        cover_y=700,
     )
     g.group("1 · SONG", [brief])
     g.group("2 · WRITE", [write, draft])
@@ -1323,7 +1367,11 @@ How to work:
 
 {FINISH_TEXT}
 
+{COVER_TEXT}
+
 {STEMS_TEXT}
+
+{REFINE_TEXT}
 
 **App mode:** the mode, the brief, the take seed, both Song Sheet buttons and the results - the app is usable for a first run, but the score is drawn in the graph's sheet editor.
 
@@ -1337,7 +1385,7 @@ def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     brief = g.add(
         "PlenioSongBrief",
         (0, 0),
-        size=(380, 620),
+        size=(380, 620 + SUMMARY_ROOM),
         widgets={
             "mode": "one song, stop to review",
             "template": "pop/singer-songwriter-acoustic-vocal",
@@ -1345,14 +1393,14 @@ def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             "vocals": "sung",
         },
     )
-    model_node = g.add_subgraph(bp["yue2_model"], (0, 830), size=(380, 140), collapsed=True)
+    model_node = g.add_subgraph(bp["yue2_model"], (0, 860), size=(380, 140), collapsed=True)
     write = g.add_subgraph(bp["write"], (460, 0), size=(360, 220))
     draft = draft_seed(g, write, (460, 280))
     text_sheet = song_sheet(g, (900, 0), "Song Sheet · Text")
     tools = g.add(
         "PlenioScoreTools",
         (1400, 0),
-        size=(340, 150),
+        size=(340, 130 + SUMMARY_ROOM),
         title="Score Tools · new score from brief",
         widgets={"operation": "new score from brief"},
     )
@@ -1360,7 +1408,7 @@ def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     score_sheet = g.add(
         "PlenioSongSheet",
         (1820, 0),
-        size=(420, 420),
+        size=(420, 360 + SUMMARY_ROOM),
         title="Song Sheet · DAW",
         widgets=FOLLOW_BRIEF,
         labels={"sheet_state": "Song Sheet · DAW"},
@@ -1407,8 +1455,8 @@ def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             (refine_node, "report"),
         ],
         group="6 · FINISH",
-        cover_y=655,
-        export_size=(385, 530),
+        cover_y=755,
+        export_size=(385, 530 + SUMMARY_ROOM),
     )
     g.group("1 · SONG", [brief])
     g.group("2 · WRITE", [write, draft])
@@ -1449,14 +1497,14 @@ def enhance_master(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         "PlenioEQ",
         (880, 0),
         # the owner's request (2026-09-28): a much wider EQ, so the curve has room for editing
-        size=(980, 560),
+        size=(980, 560 + SUMMARY_ROOM),
         widgets={"mode": "match preset", "mode.preset": WARM_GENTLE},
         labels={"mode": "EQ"},
     )
     loudness = g.add(
         "PlenioLoudness",
         (1905, 0),
-        size=(425, 245),
+        size=(425, 180 + SUMMARY_ROOM),
         widgets={"target": MASTER_TARGET, "compression": MASTER_STYLE, "sample_rate": "keep"},
         labels={"target": "loudness target"},
     )
@@ -1464,7 +1512,7 @@ def enhance_master(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     export = g.add(
         "PlenioExportRelease",
         (2490, 180),
-        size=(380, 400),
+        size=(380, 400 + SUMMARY_ROOM),
         autogrow={"reports": 5},
         widgets={
             "folder": "plenio/enhanced",

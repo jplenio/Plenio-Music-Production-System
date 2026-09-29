@@ -25,7 +25,7 @@
     "Node name for S&R": "MarkdownNote"
    },
    "widgets_values": [
-    "# 5 · YuE2 · DAW\n\n**Brief -> Write Song -> Song Sheet · Text -> Score Tools (new score from brief) -> Song Sheet · DAW -> YuE2 Render -> Master -> Export**\n\nWrite the song yourself: the lyrics come from the writer (or from you - open the lyrics tab and *use my own lyrics*), and the **score** is yours. YuE2 reads exactly two voices and the chord symbols:\n\n- **Vocal** -> `V: Vocal` - the sung melody, one voice.\n- **Instrument** -> `V: Ins` - the instrumental melody, one voice.\n- **Chords** -> the chord symbols over the Vocal voice.\n- **Guide** -> **not sent to YuE2**: your own notes for playback and for MIDI export (a sketch piano, a bass line).\n\nHow to work:\n\n1. In **Song Brief** describe the song (genre, mood, length, tempo, key, meter). *one song, stop to review* is the default: nothing is rendered before you have approved the score.\n2. Press **Run**. The writer drafts title, style and lyrics; *Score Tools* builds an **empty score** from the brief - one `verse` of the right length in the brief's meter and key, all rests.\n3. The run **stops at Song Sheet · DAW**. Open it and compose: draw notes in the piano roll (or import a MIDI file), set chord symbols in the chord lane, split the score into sections in the navigator, and correct the lyrics in *Song Sheet · Text*. **Approve** both sheets.\n4. Run again: YuE2 renders **exactly the score you approved** (`Vocal`, `Ins` and the chord symbols - never the Guide track), and Master and Export finish the song.\n\n**Empty score:** a score of rests cannot be rendered - YuE2 needs at least one note (the Song Sheet says so). Draw the first note or import a MIDI file.\n\n**Finish:** *Plenio · Master* brings the take to -14 LUFS / -1 dBTP with a gentle tone match (open the block to change the EQ or the loudness target). Export writes the mastered FLAC 24-bit, the unmastered take as `(original).flac` and a release record to `output/plenio`.\n\n**Stems (optional, bypassed):** *Separate Stems* splits the take into vocals, drums, bass and other; the *Stem Mixer* balances them (gain, mute/solo, compression, reverb/delay sends, muted time ranges) and mixes the residual *rest* along, so a neutral mix returns the render unchanged. Select the block and press **Ctrl+B**; it needs the BS-RoFormer checkpoint (527 MB). The user guide *Stems* covers it.\n\n**App mode:** the mode, the brief, the take seed, both Song Sheet buttons and the results - the app is usable for a first run, but the score is drawn in the graph's sheet editor.\n\n**Models:** YuE2 3B int8 (4.0 GB, **CC BY-NC 4.0, non-commercial**) and the Gemma 4 E4B writer. The model block below is collapsed; expand it to choose other files.\n"
+    "# 5 · YuE2 · DAW\n\n**Brief -> Write Song -> Song Sheet · Text -> Score Tools (new score from brief) -> Song Sheet · DAW -> YuE2 Render -> Master -> Export**\n\nWrite the song yourself: the lyrics come from the writer (or from you - open the lyrics tab and *use my own lyrics*), and the **score** is yours. YuE2 reads exactly two voices and the chord symbols:\n\n- **Vocal** -> `V: Vocal` - the sung melody, one voice.\n- **Instrument** -> `V: Ins` - the instrumental melody, one voice.\n- **Chords** -> the chord symbols over the Vocal voice.\n- **Guide** -> **not sent to YuE2**: your own notes for playback and for MIDI export (a sketch piano, a bass line).\n\nHow to work:\n\n1. In **Song Brief** describe the song (genre, mood, length, tempo, key, meter). *one song, stop to review* is the default: nothing is rendered before you have approved the score.\n2. Press **Run**. The writer drafts title, style and lyrics; *Score Tools* builds an **empty score** from the brief - one `verse` of the right length in the brief's meter and key, all rests.\n3. The run **stops at Song Sheet · DAW**. Open it and compose: draw notes in the piano roll (or import a MIDI file), set chord symbols in the chord lane, split the score into sections in the navigator, and correct the lyrics in *Song Sheet · Text*. **Approve** both sheets.\n4. Run again: YuE2 renders **exactly the score you approved** (`Vocal`, `Ins` and the chord symbols - never the Guide track), and Master and Export finish the song.\n\n**Empty score:** a score of rests cannot be rendered - YuE2 needs at least one note (the Song Sheet says so). Draw the first note or import a MIDI file.\n\n**Finish:** *Plenio · Master* brings the take to -14 LUFS / -1 dBTP with a gentle tone match (open the block to change the EQ or the loudness target). Export writes the mastered FLAC 24-bit, the unmastered take as `(original).flac` and a release record to `output/plenio`.\n\n**Cover art (optional, bypassed):** *Cover Art* paints a cover from the sheet's artwork prompt with FLUX.2 Klein 4B (about 16 GB of extra model files, Apache-2.0). Select it and the cover preview and press **Ctrl+B**; Export then embeds the cover in the FLAC and MP3 files and saves it as `.jpg`.\n\n**Stems (optional, bypassed):** *Separate Stems* splits the take into vocals, drums, bass and other; the *Stem Mixer* balances them (gain, mute/solo, compression, reverb/delay sends, muted time ranges) and mixes the residual *rest* along, so a neutral mix returns the render unchanged. Select the block and press **Ctrl+B**; the mixer is inside it - open the block with the icon at the top right of the node. It needs the BS-RoFormer checkpoint (527 MB). The user guide *Stems* covers it.\n\n**Refine (optional, bypassed):** brings the take to 48 kHz and extends the top octaves with the UniverSR model (229 MB); nothing below the crossover changes. YuE2 renders at 48 kHz already, so this is for experiments. Select the REFINE group, press **Ctrl+B** and expand its two nodes to pick a *preset*. The user guide *Refine (48 kHz)* covers it.\n\n**App mode:** the mode, the brief, the take seed, both Song Sheet buttons and the results - the app is usable for a first run, but the score is drawn in the graph's sheet editor.\n\n**Models:** YuE2 3B int8 (4.0 GB, **CC BY-NC 4.0, non-commercial**) and the Gemma 4 E4B writer. The model block below is collapsed; expand it to choose other files.\n"
    ]
   },
   {
@@ -37,7 +37,7 @@
    ],
    "size": [
     380,
-    620
+    720
    ],
    "flags": {},
    "order": 1,
@@ -216,7 +216,7 @@
    "type": "be8d0fd4-8ce7-561b-8778-c59f81c6c6b4",
    "pos": [
     0,
-    830
+    860
    ],
    "size": [
     380,
@@ -458,7 +458,7 @@
    ],
    "size": [
     420,
-    420
+    460
    ],
    "flags": {},
    "order": 5,
@@ -654,7 +654,7 @@
    ],
    "size": [
     340,
-    150
+    230
    ],
    "flags": {},
    "order": 6,
@@ -723,7 +723,7 @@
    ],
    "size": [
     420,
-    420
+    460
    ],
    "flags": {},
    "order": 7,
@@ -1134,9 +1134,11 @@
    ],
    "size": [
     320,
-    150
+    110
    ],
-   "flags": {},
+   "flags": {
+    "collapsed": true
+   },
    "order": 11,
    "mode": 4,
    "inputs": [
@@ -1190,13 +1192,15 @@
    "type": "PlenioRefine",
    "pos": [
     2320,
-    985
+    870
    ],
    "size": [
     360,
-    340
+    380
    ],
-   "flags": {},
+   "flags": {
+    "collapsed": true
+   },
    "order": 12,
    "mode": 4,
    "inputs": [
@@ -1307,7 +1311,8 @@
     "custom - the three fields below",
     0.0,
     0.0,
-    0
+    0,
+    "fixed"
    ]
   },
   {
@@ -1426,7 +1431,7 @@
    ],
    "size": [
     385,
-    530
+    630
    ],
    "flags": {},
    "order": 15,
@@ -1619,7 +1624,7 @@
    "type": "9dbb5617-ccf9-5537-b674-405adb29958c",
    "pos": [
     2720,
-    655
+    755
    ],
    "size": [
     340,
@@ -1684,7 +1689,7 @@
    "type": "PreviewImage",
    "pos": [
     3120,
-    655
+    755
    ],
    "size": [
     300,
@@ -2074,8 +2079,8 @@
    "bounding": [
     2290,
     750,
-    420,
-    605
+    320,
+    180
    ],
    "color": "#555",
    "font_size": 24,
@@ -2088,7 +2093,7 @@
     2690,
     -70,
     845,
-    630
+    730
    ],
    "color": "#3f789e",
    "font_size": 24,
@@ -2099,7 +2104,7 @@
    "title": "COVER ART (optional)",
    "bounding": [
     2690,
-    585,
+    685,
     760,
     400
    ],
@@ -2114,7 +2119,7 @@
     -30,
     -70,
     440,
-    720
+    820
    ],
    "color": "#3f789e",
    "font_size": 24,
@@ -2140,7 +2145,7 @@
     870,
     -70,
     480,
-    520
+    560
    ],
    "color": "#3f789e",
    "font_size": 24,
@@ -2153,7 +2158,7 @@
     1370,
     -70,
     900,
-    520
+    560
    ],
    "color": "#3f789e",
    "font_size": 24,
@@ -2177,7 +2182,7 @@
    "title": "MUSIC MODEL",
    "bounding": [
     -30,
-    760,
+    790,
     320,
     130
    ],
@@ -5270,7 +5275,7 @@
     "version": 1,
     "state": {
      "lastGroupId": 0,
-     "lastNodeId": 803,
+     "lastNodeId": 1103,
      "lastLinkId": 6,
      "lastRerouteId": 0
     },
@@ -5350,7 +5355,7 @@
     "widgets": [],
     "nodes": [
      {
-      "id": 801,
+      "id": 1101,
       "type": "PlenioAudioModelLoader",
       "pos": [
        0,
@@ -5412,7 +5417,7 @@
       ]
      },
      {
-      "id": 802,
+      "id": 1102,
       "type": "PlenioSeparateStems",
       "pos": [
        400,
@@ -5463,7 +5468,7 @@
       "widgets_values": []
      },
      {
-      "id": 803,
+      "id": 1103,
       "type": "PlenioStemMixer",
       "pos": [
        800,
@@ -5524,17 +5529,17 @@
     "links": [
      {
       "id": 1,
-      "origin_id": 801,
+      "origin_id": 1101,
       "origin_slot": 0,
-      "target_id": 802,
+      "target_id": 1102,
       "target_slot": 1,
       "type": "PLENIO_AUDIO_MODEL"
      },
      {
       "id": 2,
-      "origin_id": 802,
+      "origin_id": 1102,
       "origin_slot": 0,
-      "target_id": 803,
+      "target_id": 1103,
       "target_slot": 0,
       "type": "PLENIO_STEMS"
      },
@@ -5542,13 +5547,13 @@
       "id": 3,
       "origin_id": -10,
       "origin_slot": 0,
-      "target_id": 802,
+      "target_id": 1102,
       "target_slot": 0,
       "type": "AUDIO"
      },
      {
       "id": 4,
-      "origin_id": 803,
+      "origin_id": 1103,
       "origin_slot": 0,
       "target_id": -20,
       "target_slot": 0,
@@ -5556,7 +5561,7 @@
      },
      {
       "id": 5,
-      "origin_id": 803,
+      "origin_id": 1103,
       "origin_slot": 1,
       "target_id": -20,
       "target_slot": 1,
@@ -5564,7 +5569,7 @@
      },
      {
       "id": 6,
-      "origin_id": 802,
+      "origin_id": 1102,
       "origin_slot": 1,
       "target_id": -20,
       "target_slot": 2,

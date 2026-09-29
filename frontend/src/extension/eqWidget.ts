@@ -154,6 +154,8 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
   panel.serialize = false
 
   let shown: Shown = { sampleRate: 48000, frequencies: [], response: [], settings: flat(), readonly: true, note: '' }
+  /** The match mode whose proposal the panel shows (from the last run); ``null``: none yet. */
+  let proposalMode: string | null = null
   let selected: string | null = null
   let compare = false
   let range: GainRange = 12
@@ -198,6 +200,16 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
             response: shown.frequencies.map(() => 0),
             readonly: true,
             note: 'flat: no change'
+          }
+        } else if (proposalMode !== current) {
+          // a match mode fits its bands to the audio when the workflow runs: until then there is no
+          // proposal to show (not the manual bands of before, not an empty 'applied' curve)
+          shown = {
+            ...shown,
+            settings: flat(),
+            response: shown.frequencies.map(() => 0),
+            readonly: true,
+            note: `${current}: the bands are fitted to your audio when the workflow runs - run once to see the proposal here`
           }
         } else {
           shown = { ...shown, readonly: true }
@@ -443,7 +455,13 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
     }
     modeRow.style.display = ''
     modeRow.append(
-      element('span', 'plenio-eq-hint', `applied proposal (${shown.settings.bands.length} band(s), ${name})`)
+      element(
+        'span',
+        'plenio-eq-hint',
+        proposalMode === name
+          ? `applied proposal (${shown.settings.bands.length} band(s), ${name})`
+          : `${name}: no proposal yet - it is computed on the next run`
+      )
     )
     const edit = button('', 'Edit these bands', 'Copy the proposal into manual bands and edit it')
     edit.disabled = !shown.settings.bands.length
@@ -750,7 +768,9 @@ export function addEqCurve(node: ComfyNode, fetcher: Fetcher): { showExecuted(ou
         | undefined
       const last = items?.[items.length - 1]
       if (!last) return
-      const manual = String(widget(node, 'mode')?.value ?? 'flat') === 'manual'
+      const mode = String(widget(node, 'mode')?.value ?? 'flat')
+      const manual = mode === 'manual'
+      proposalMode = manual || mode === 'flat' ? null : mode
       shown = {
         sampleRate: last.sample_rate,
         frequencies: last.frequency_hz,
