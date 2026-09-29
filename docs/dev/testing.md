@@ -53,7 +53,9 @@ Put `cover_source.flac` and `browser-check.flac` (any short audio) into `<dir>/i
 
 ## Refreshing the node-type snapshot
 
-After upgrading ComfyUI: `PLENIO_COMFYUI_ROOT=<ComfyUI> <python> tools/snapshot_node_types.py`, then re-run the workflow tests.
+After upgrading ComfyUI: `PLENIO_COMFYUI_ROOT=<ComfyUI> <python> tools/snapshot_node_types.py`, then `tools/build_graphs.py` (it takes the native nodes' slots from the snapshot) and the workflow tests.
+
+Take the snapshot from the **release tag** the CI checks out (`v0.37.0` in `.github/workflows/ci.yml`), not from a `master` checkout: past the tag ComfyUI still calls itself 0.37.0, but its native nodes can differ (`TextGenerate` gained a `system_prompt` input and a `thinking` output, and the CI failed on the 0.3.0 push). The tool refuses a checkout that is not exactly on a tag (`--allow-untagged` overrides it). A local clone of the tag works without touching the installed ComfyUI: `git clone --branch v0.37.0 --depth 1 file:///<ComfyUI> <dir>`, then `PLENIO_COMFYUI_ROOT=<dir>`. The snapshot records the checkout (`comfyui_ref`); the host test compares native nodes only on the same checkout, Plenio's own nodes always.
 
 ## DSP golden data and studies
 

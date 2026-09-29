@@ -2642,13 +2642,6 @@
         "link": null
        },
        {
-        "localized_name": "system_prompt",
-        "name": "system_prompt",
-        "shape": 7,
-        "type": "STRING",
-        "link": null
-       },
-       {
         "localized_name": "prompt",
         "name": "prompt",
         "type": "STRING",
@@ -2774,12 +2767,6 @@
         "links": [
          3
         ]
-       },
-       {
-        "localized_name": "thinking",
-        "name": "thinking",
-        "type": "STRING",
-        "links": null
        }
       ],
       "properties": {
@@ -2884,7 +2871,7 @@
       "origin_id": 501,
       "origin_slot": 0,
       "target_id": 503,
-      "target_slot": 5,
+      "target_slot": 4,
       "type": "STRING"
      },
      {
@@ -2964,7 +2951,7 @@
       "origin_id": -10,
       "origin_slot": 6,
       "target_id": 503,
-      "target_slot": 13,
+      "target_slot": 12,
       "type": "INT"
      },
      {
@@ -2972,7 +2959,7 @@
       "origin_id": -10,
       "origin_slot": 7,
       "target_id": 503,
-      "target_slot": 15,
+      "target_slot": 14,
       "type": "BOOLEAN"
      },
      {

@@ -42,7 +42,12 @@ def test_the_node_type_snapshot_matches_the_server(comfy_path: Path, tmp_path: P
     assert sorted(n for n in live["nodes"] if n.startswith("Plenio")) == sorted(
         n for n in committed["nodes"] if n.startswith("Plenio")
     )
-    same_comfyui = committed["comfyui_version"] == live["comfyui_version"]  # native nodes change with it
+    # native nodes change with ComfyUI - also between commits of one version number (a master checkout
+    # past v0.37.0 had another TextGenerate, and CI checks the tag): compare them on the same checkout only
+    refs = committed.get("comfyui_ref"), live.get("comfyui_ref")
+    same_comfyui = committed["comfyui_version"] == live["comfyui_version"] and (
+        None in refs or refs[0] == refs[1]
+    )
     stale = [
         name
         for name, entry in live["nodes"].items()
