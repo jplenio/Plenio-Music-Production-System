@@ -12,22 +12,30 @@
  * The pane scrolls both ways: horizontally through the bars, vertically through the whole piano range
  * (the notes' range is centred when the roll opens). The pitch column stays on the left and the header
  * with the chord lane stays on top while it scrolls; a drag near the top or bottom edge scrolls along.
+ *
+ * Two modes decide what a drag on the empty grid does: *draw* (a new note - the roll always opens in
+ * it) or *select* (a frame that selects every note it touches; with Shift the frame adds to the
+ * selection). A click on a note selects it and a drag moves it (with the other selected notes) in
+ * both modes. The selection is shared with the staff, so the framed notes are marked there too.
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import type { ScoreOperation } from '../../api/client'
 import type { ModelChord, ScoreView } from '../../shared/scoreView'
 import {
+  type Band,
   type Drag,
   HEADER,
   KEYS_WIDTH,
   LANE,
   MOVE_THRESHOLD_PX,
   type ResizeMode,
+  type RollMode,
   type RollNote,
   type SnapChoice,
   TOP,
   type Track,
+  bandRect,
   chordWidth,
   dragOp,
   dragTo,
@@ -39,6 +47,7 @@ import {
   isBlackKey,
   keyOp,
   noteRect,
+  notesInRect,
   notesOf,
   pitchAt,
   pitchLabel,
@@ -82,8 +91,12 @@ const scroller = ref<HTMLDivElement | null>(null)
 const svg = ref<SVGSVGElement | null>(null)
 const chordInput = ref<HTMLInputElement | null>(null)
 const track = ref<Track>('vocal')
+/** Draw or select: not a preference - the roll always opens in draw mode. */
+const mode = ref<RollMode>('draw')
 const snapChoice = ref<SnapChoice>('auto')
 const drag = ref<Drag | null>(null)
+/** The selection frame while it is pulled, with the note ids it keeps (Shift: the selection before). */
+const band = ref<(Band & { keep: string[] }) | null>(null)
 const committing = ref(false)
 const scrollLeft = ref(0)
 const scrollTop = ref(0)
@@ -92,7 +105,16 @@ const viewportHeight = ref(0)
 /** The roll opened on the notes once (again after the model was missing, e.g. a new score). */
 let centred = false
 const chordEdit = ref<{ onset: number; name: string; original: string | null } | null>(null)
-let press: { x: number; y: number; start: Drag | null; started: boolean; clear: boolean } | null = null
+interface Press {
+  x: number
+  y: number
+  start: Drag | null
+  started: boolean
+  clear: boolean
+  /** Set when the press pulls a selection frame: the selection it keeps. */
+  keep: { notes: string[]; chords: ModelChord[] } | null
+}
+let press: Press | null = null
 let observer: ResizeObserver | null = null
 
 const model = computed(() => props.view?.model ?? null)
@@ -105,6 +127,23 @@ const selectedChords = computed(() => selectedChordIds(props.selection))
 const playingNotes = computed(() => selectedNoteIds(props.view, props.playing))
 const dragged = computed(() => draggedIds(drag.value))
 const ghostNotes = computed(() => ghosts(drag.value))
+/** The frame's rectangle and the notes it would select - shown as selected while it is pulled. */
+const banded = computed(() => {
+  const g = geo.value
+  const current = band.value
+  if (!g || !current) return null
+  const rect = bandRect(current, g, scrollTop.value, scrollLeft.value)
+  const ids = new Set(current.keep)
+  for (const note of notesInRect(notes.value, rect, g)) ids.add(note.id)
+  return { rect, ids }
+})
+const hint = computed(() =>
+  mode.value === 'draw'
+    ? 'drag: draw · drag a note: move (↕ pitch) · drag its end: length (Alt: over the next note) · double-click: note · ' +
+      'double-click the lane: chord · Del: rest · Shift+Del: close the gap'
+    : 'drag: frame the notes to select (Shift: add) · click: note (Shift: add or remove) · drag a selected note: move them all · ' +
+      'Ctrl+A: all notes · ↑↓←→: move · Del: rest · Shift+Del: close the gap'
+)
 const snapLabel = computed(() => (model.value ? `1/${Math.round(unitDenominator(model.value) / (geo.value?.snap ?? 1))}` : ''))
 
 /** The visible units (with a margin) - only this part of a long score is drawn. */
@@ -143,7 +182,7 @@ function noteClasses(note: RollNote): Record<string, boolean> {
   return {
     note: true,
     [note.track]: true,
-    selected: selectedNotes.value.has(note.id),
+    selected: (banded.value?.ids ?? selectedNotes.value).has(note.id),
     playing: playingNotes.value.has(note.id),
     dragged: dragged.value.has(note.id)
   }
@@ -169,6 +208,7 @@ function onPointerDown(event: PointerEvent): void {
   const additive = event.shiftKey || event.ctrlKey || event.metaKey
   let start: Drag | null = null
   let clear = false
+  let keep: Press['keep'] = null
   if (hit.area === 'note') {
     const already = selectedNotes.value.has(hit.note.id)
     let moving: RollNote[]
@@ -198,13 +238,19 @@ function onPointerDown(event: PointerEvent): void {
       select([...props.selection.filter((id) => !id.startsWith('chord:')), ...ids])
     } else if (!selectedChords.value.has(hit.chord.id)) select([hit.chord.id])
     if (editable.value) start = startChord(hit.chord, unitAt(x, g))
+  } else if (hit.area === 'grid' && mode.value === 'select') {
+    // a frame selects - also while the score cannot be edited
+    keep = additive
+      ? { notes: [...selectedNotes.value], chords: chords.value.filter((c) => selectedChords.value.has(c.id)) }
+      : { notes: [], chords: [] }
+    clear = !additive
   } else if (hit.area === 'grid') {
     if (editable.value && !additive) start = startDraw(track.value, hit.unit, hit.pitch, g)
     clear = !additive
   } else {
     clear = !additive
   }
-  press = { x, y, start, started: false, clear }
+  press = { x, y, start, started: false, clear, keep }
   try {
     svg.value?.setPointerCapture?.(event.pointerId)
   } catch {
@@ -228,12 +274,13 @@ function followEdge(event: PointerEvent): void {
 
 function onPointerMove(event: PointerEvent): void {
   const g = geo.value
-  if (!press || !press.start || !g) return
+  if (!press || (!press.start && !press.keep) || !g) return
   if (press.started) followEdge(event)
   const [x, y] = local(event)
   if (!press.started && Math.hypot(x - press.x, y - press.y) < MOVE_THRESHOLD_PX) return
   press.started = true
-  drag.value = dragTo(press.start, unitAt(x, g), pitchAt(y, g), g, { alt: event.altKey })
+  if (press.keep) band.value = { x0: press.x, y0: press.y, x1: x, y1: y, keep: press.keep.notes }
+  else if (press.start) drag.value = dragTo(press.start, unitAt(x, g), pitchAt(y, g), g, { alt: event.altKey })
 }
 
 async function commit(operation: ScoreOperation): Promise<void> {
@@ -255,6 +302,12 @@ function onPointerUp(): void {
     if (current.clear) select([])
     return
   }
+  if (current.keep) {
+    const ids = banded.value?.ids ?? new Set<string>()
+    band.value = null
+    select(selectionFor(notes.value.filter((n) => ids.has(n.id)), current.keep.chords))
+    return
+  }
   const operation = drag.value ? dragOp(drag.value, props.resizeMode) : null
   if (!operation) {
     drag.value = null
@@ -266,6 +319,7 @@ function onPointerUp(): void {
 function onPointerCancel(): void {
   press = null
   drag.value = null
+  band.value = null
 }
 
 function onDoubleClick(event: MouseEvent): void {
@@ -274,6 +328,7 @@ function onDoubleClick(event: MouseEvent): void {
   const [x, y] = local(event)
   const hit = hitTest(x, y, notes.value, chords.value, g, track.value, scrollTop.value)
   if (hit.area === 'grid') {
+    if (mode.value !== 'draw') return // select mode draws nothing
     const onset = Math.min(snapFloor(hit.unit, g.snap), g.total - 1)
     const duration = Math.min(g.drawLength, g.total - onset)
     void commit({ op: 'insert_note', track: track.value, onset, duration, pitch: hit.pitch })
@@ -313,11 +368,18 @@ function onKey(event: KeyboardEvent): void {
   const g = geo.value
   if (!g) return
   if (event.key === 'Escape') {
-    if (press || drag.value) onPointerCancel()
+    if (press || drag.value || band.value) onPointerCancel()
     else if (props.selection.length) select([])
     else return
     event.preventDefault()
     event.stopPropagation()
+    return
+  }
+  if (event.key.toLowerCase() === 'a' && (event.ctrlKey || event.metaKey) && !event.altKey) {
+    // all notes of both voices (the chords stay as they are)
+    event.preventDefault()
+    event.stopPropagation()
+    select(selectionFor(notes.value, chords.value.filter((c) => selectedChords.value.has(c.id))))
     return
   }
   const selected = notes.value.filter((n) => selectedNotes.value.has(n.id))
@@ -401,13 +463,39 @@ onBeforeUnmount(() => observer?.disconnect())
   <div
     ref="root"
     class="roll"
-    :class="{ stale, readonly }"
+    :class="{ stale, readonly, [`mode-${mode}`]: true }"
     tabindex="0"
     role="application"
-    aria-label="Piano roll: drag to draw a note, drag a note to move it, drag its end to change its length"
+    :aria-label="
+      mode === 'draw'
+        ? 'Piano roll, draw mode: drag to draw a note, drag a note to move it, drag its end to change its length'
+        : 'Piano roll, select mode: drag a frame to select the notes in it, drag a selected note to move them all'
+    "
     @keydown="onKey"
   >
     <div class="roll-tools" role="toolbar" aria-label="Piano roll">
+      <span class="group" role="group" aria-label="Mode">
+        <button
+          class="mode draw"
+          :class="{ active: mode === 'draw' }"
+          :aria-pressed="mode === 'draw'"
+          title="Draw notes: a drag on the empty grid draws a note"
+          @click="mode = 'draw'"
+        >
+          <svg class="icon" viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 11.5 3 9 9.5 2.5l2 2L5 11z M8.5 3.5l2 2" /></svg>
+          Draw
+        </button>
+        <button
+          class="mode select"
+          :class="{ active: mode === 'select' }"
+          :aria-pressed="mode === 'select'"
+          title="Select notes: a drag on the empty grid pulls a frame, every note it touches is selected (Shift: add)"
+          @click="mode = 'select'"
+        >
+          <svg class="icon" viewBox="0 0 14 14" aria-hidden="true"><rect x="2" y="3" width="10" height="8" stroke-dasharray="2 1.5" /></svg>
+          Select
+        </button>
+      </span>
       <span class="group" role="group" aria-label="Draw into">
         draw into
         <button :class="{ active: track === 'vocal' }" class="vocal" :aria-pressed="track === 'vocal'" @click="track = 'vocal'">
@@ -431,10 +519,7 @@ onBeforeUnmount(() => observer?.disconnect())
         <button title="Zoom out" aria-label="Zoom out" @click="zoomBy(1 / 1.25)">−</button>
         <button title="Zoom in" aria-label="Zoom in" @click="zoomBy(1.25)">+</button>
       </span>
-      <span class="hint">
-        drag: draw · drag a note: move (↕ pitch) · drag its end: length (Alt: over the next note) · double-click: note ·
-        double-click the lane: chord · Del: rest · Shift+Del: close the gap
-      </span>
+      <span class="hint">{{ hint }}</span>
     </div>
     <p v-if="!model && view?.model_error" class="roll-note">{{ view.model_error.message }}</p>
     <div
@@ -478,6 +563,7 @@ onBeforeUnmount(() => observer?.disconnect())
           <title>{{ describeNote(note) }}</title>
         </rect>
         <rect v-for="(ghost, index) in ghostNotes" :key="'ghost' + index" class="ghost" :class="ghost.track" v-bind="noteRect(ghost, geo)" rx="2" />
+        <rect v-if="banded" class="band" v-bind="banded.rect" />
         <g class="keys" :transform="`translate(${scrollLeft} 0)`">
           <rect class="keys-bg" :x="0" :y="TOP" :width="KEYS_WIDTH - 2" :height="geo.height - TOP" />
           <text

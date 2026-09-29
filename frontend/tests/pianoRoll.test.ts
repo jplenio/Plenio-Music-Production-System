@@ -18,6 +18,7 @@ import {
   ROW_HEIGHT,
   TOP,
   type RollNote,
+  bandRect,
   dragOp,
   dragTo,
   geometry,
@@ -26,6 +27,7 @@ import {
   hitTest,
   keyOp,
   noteRect,
+  notesInRect,
   notesOf,
   pitchRange,
   rollRange,
@@ -133,6 +135,31 @@ describe('hit testing', () => {
     expect(hitTest(xOf(50, GEO), scrolled + 4, NOTES, CHORDS, GEO, 'vocal', scrolled).area).toBe('header')
     expect(hitTest(xOf(50, GEO), scrolled + HEADER + 8, NOTES, CHORDS, GEO, 'vocal', scrolled)).toMatchObject({ area: 'lane' })
     expect(hitTest(xOf(50, GEO), scrolled + TOP + 3, NOTES, CHORDS, GEO, 'vocal', scrolled)).toMatchObject({ area: 'grid' })
+  })
+})
+
+describe('the selection frame (select mode)', () => {
+  it('spans the drag either way and keeps to the rows that can be seen', () => {
+    expect(bandRect({ x0: 300, y0: 900, x1: 100, y1: 800 }, GEO)).toEqual({ x: 100, y: 800, width: 200, height: 100 })
+    // pulled over the pitch column and into the pinned lane of a scrolled pane: only the rows below them
+    expect(bandRect({ x0: 0, y0: 400, x1: 200, y1: 700 }, GEO, 500, 50)).toEqual({
+      x: 50 + KEYS_WIDTH,
+      y: 500 + TOP,
+      width: 200 - 50 - KEYS_WIDTH,
+      height: 700 - 500 - TOP
+    })
+    expect(bandRect({ x0: 100, y0: 800, x1: 1e6, y1: 1e6 }, GEO)).toMatchObject({ width: GEO.width - 100, height: GEO.height - 800 })
+  })
+
+  it('selects every note it touches', () => {
+    // bars 2 and 3 of the vocal line: G#4 (66), F#5 (78), F4 (65) touched, not the note from unit 56 on
+    const frame = bandRect({ x0: xOf(50, GEO), y0: yOf(64, GEO), x1: xOf(34, GEO), y1: yOf(79, GEO) }, GEO)
+    expect(notesInRect(NOTES, frame, GEO).map((n) => n.id)).toEqual(['vocal:32', 'vocal:40', 'vocal:48'])
+    // both voices at once
+    const both = bandRect({ x0: xOf(97, GEO), y0: yOf(72, GEO), x1: xOf(99, GEO), y1: yOf(61, GEO) }, GEO)
+    expect(notesInRect(NOTES, both, GEO).map((n) => n.id)).toEqual(['vocal:96', 'ins:96'])
+    expect(notesInRect(NOTES, bandRect({ x0: xOf(200, GEO), y0: yOf(62, GEO), x1: xOf(210, GEO), y1: yOf(58, GEO) }, GEO), GEO)).toEqual([])
+    expect(notesInRect(NOTES, { x: xOf(34, GEO), y: yOf(66, GEO), width: 0, height: 20 }, GEO)).toEqual([])
   })
 })
 
@@ -399,8 +426,99 @@ describe('PianoRoll', () => {
     document.body.appendChild(host)
     app = createApp({ render: () => h(PianoRoll, { view: outside, selection: [], operate: vi.fn() }) })
     app.mount(host)
-    expect(host.querySelector('svg')).toBeNull()
+    expect(host.querySelector('svg.roll-svg')).toBeNull()
     expect(host.querySelector('.roll-note')?.textContent).toContain('not a whole number')
+  })
+})
+
+describe('PianoRoll modes', () => {
+  const modeButton = (root: HTMLElement, mode: 'draw' | 'select'): HTMLButtonElement =>
+    root.querySelector(`.roll-tools button.mode.${mode}`) as HTMLButtonElement
+
+  async function selectMode(root: HTMLElement): Promise<void> {
+    modeButton(root, 'select').click()
+    await nextTick()
+  }
+
+  it('opens in draw mode, every time', async () => {
+    let mounted = mount()
+    expect(mounted.root.classList.contains('mode-draw')).toBe(true)
+    expect(modeButton(mounted.root, 'draw').getAttribute('aria-pressed')).toBe('true')
+    expect(mounted.root.querySelector('.roll-tools .hint')?.textContent).toContain('drag: draw')
+    await selectMode(mounted.root)
+    expect(mounted.root.classList.contains('mode-select')).toBe(true)
+    expect(modeButton(mounted.root, 'select').getAttribute('aria-pressed')).toBe('true')
+    expect(mounted.root.querySelector('.roll-tools .hint')?.textContent).toContain('frame the notes')
+    app?.unmount()
+    mounted = mount()
+    expect(mounted.root.classList.contains('mode-draw')).toBe(true)
+    await gesture(mounted.svg, [xOf(200, GEO) + 1, yOf(60, GEO) + 3], [xOf(208, GEO) + 1, yOf(60, GEO) + 3])
+    expect(mounted.operate).toHaveBeenLastCalledWith({ op: 'insert_note', track: 'vocal', onset: 200, duration: 8, pitch: 60 })
+  })
+
+  it('selects the notes a frame touches, shows them while it is pulled and adds with Shift', async () => {
+    const { root, svg, operate, selects } = mount()
+    await selectMode(root)
+    pointer(svg, 'pointerdown', xOf(50, GEO), yOf(63, GEO) + 2)
+    pointer(svg, 'pointermove', xOf(40, GEO), yOf(70, GEO))
+    pointer(svg, 'pointermove', xOf(34, GEO), yOf(79, GEO))
+    await nextTick()
+    expect(svg.querySelector('rect.band')).not.toBeNull()
+    expect(svg.querySelectorAll('rect.note.selected')).toHaveLength(3) // before the release
+    expect(selects).toEqual([])
+    pointer(svg, 'pointerup', xOf(34, GEO), yOf(79, GEO))
+    await settle()
+    expect(operate).not.toHaveBeenCalled() // selecting draws nothing
+    expect(selects.at(-1)).toEqual(['V2.0', 'V2.1', 'V2.2']) // the staff and the text select them too
+    expect(svg.querySelector('rect.band')).toBeNull()
+    // Shift: the frame adds to the selection (from the empty grid above the note at unit 56)
+    await gesture(svg, [xOf(60, GEO), yOf(80, GEO) + 3], [xOf(58, GEO), yOf(77, GEO) + 3], { shiftKey: true })
+    expect(selects.at(-1)).toEqual(['V2.0', 'V2.1', 'V2.2', 'V2.3'])
+    // a frame without Shift replaces it
+    await gesture(svg, [xOf(97, GEO), yOf(72, GEO)], [xOf(99, GEO), yOf(61, GEO)])
+    expect(selects.at(-1)).toEqual(['V4.0', 'I4.0'])
+    // a click on the empty grid clears it
+    pointer(svg, 'pointerdown', xOf(210, GEO), yOf(60, GEO) + 3)
+    pointer(svg, 'pointerup', xOf(210, GEO), yOf(60, GEO) + 3)
+    await settle()
+    expect(selects.at(-1)).toEqual([])
+  })
+
+  it('moves all selected notes by dragging one of them and draws no notes', async () => {
+    const { root, svg, operate } = mount(true, ['V2.0', 'V2.1', 'V2.2'])
+    await selectMode(root)
+    const [x, y] = centre(note('vocal:40'))
+    await gesture(svg, [x, y], [x + 16 * GEO.pxPerUnit, y])
+    expect(operate).toHaveBeenLastCalledWith({ op: 'move_notes', ids: ['vocal:32', 'vocal:40', 'vocal:48'], delta: 16, semitones: 0 })
+    operate.mockClear()
+    svg.dispatchEvent(new MouseEvent('dblclick', { clientX: xOf(210, GEO) + 2, clientY: yOf(59, GEO) + 3, bubbles: true }))
+    await settle()
+    expect(operate).not.toHaveBeenCalled()
+  })
+
+  it('cancels a frame with Escape and selects while the score cannot be edited', async () => {
+    const { root, svg, state, selects } = mount()
+    state.stale = true
+    await selectMode(root)
+    pointer(svg, 'pointerdown', xOf(50, GEO), yOf(63, GEO) + 2)
+    pointer(svg, 'pointermove', xOf(34, GEO), yOf(79, GEO))
+    await nextTick()
+    expect(key(root, 'Escape').defaultPrevented).toBe(true)
+    await nextTick()
+    expect(svg.querySelector('rect.band')).toBeNull()
+    pointer(svg, 'pointerup', xOf(34, GEO), yOf(79, GEO))
+    await settle()
+    expect(selects).toEqual([])
+    await gesture(svg, [xOf(50, GEO), yOf(63, GEO) + 2], [xOf(34, GEO), yOf(79, GEO)])
+    expect(selects.at(-1)).toEqual(['V2.0', 'V2.1', 'V2.2'])
+  })
+
+  it('selects all notes with Ctrl+A', async () => {
+    const { root, selects } = mount(true, ['chord:0'])
+    const event = key(root, 'a', { ctrlKey: true })
+    await settle()
+    expect(event.defaultPrevented).toBe(true)
+    expect(selects.at(-1)).toEqual(selectionFor(NOTES, [CHORDS[0]]))
   })
 })
 

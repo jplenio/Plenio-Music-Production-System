@@ -63,14 +63,23 @@ Bar rules: an inserted bar joins the line of the bar before it; a line longer th
 
 The roll shows every sounding note of both voices as a bar: its left edge is where the note starts, its length is how long it sounds (tied notes are one bar), its height is its pitch (the rows are the semitones, C rows are marked and labelled). Above the notes are the **chord lane** and the bar numbers with the section names.
 
+Two modes, switched in the roll's toolbar, decide what a drag on an **empty place** does. The roll always opens in **✎ Draw**; the mode is not remembered.
+
+- **✎ Draw** - a drag on an empty place draws a new note, a double-click adds one.
+- **⬚ Select** - a drag on an empty place pulls a dashed **frame**: every note it touches is selected when you let go (the roll shows them while you pull). Hold **Shift** to add the framed notes to the selection. The frame selects notes of both voices. The notation and the ABC text show the same selection, so you can see there which notes you caught. Select mode never draws a note.
+
+Clicking, moving and resizing notes, and all keys, work the same in both modes. So you can frame a phrase in *Select*, then drag one of its notes to move the whole phrase, or press ↑ to transpose it.
+
 | Gesture | Result |
 |---|---|
 | click a note | select it (Shift/Ctrl+click adds to the selection); the notation and the ABC text select it too |
 | drag a note | move it in time and pitch (all selected notes together); where it lands it replaces what its voice played there, and the place it left becomes a rest |
 | drag the right end of a note | make it longer or shorter; longer only grows into rests - hold **Alt** to play over the following note (it is shortened or removed) |
-| drag on an empty place | draw a new note into the voice chosen under *draw into* (Vocal or Ins) |
-| double-click an empty place | a new note of one beat |
-| click an empty place / Esc | clear the selection |
+| drag on an empty place (**Draw**) | draw a new note into the voice chosen under *draw into* (Vocal or Ins) |
+| double-click an empty place (**Draw**) | a new note of one beat |
+| drag on an empty place (**Select**) | a frame: select every note it touches (Shift: add them to the selection) |
+| Ctrl+A | select all notes of both voices |
+| click an empty place / Esc | clear the selection (Esc during a frame cancels the frame) |
 | drag a chord symbol | move it; a chord already at that place is replaced |
 | double-click the chord lane | type a new chord symbol (Enter adds it, Esc cancels); double-click a chord to rename it, an empty name removes it |
 

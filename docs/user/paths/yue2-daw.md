@@ -24,7 +24,7 @@ There is no fourth conditioning track and no hidden arrangement: what you see in
 1. In **Song Brief** describe the song - genre, mood, length, tempo, key, meter. The default mode is *one song, stop to review*.
 2. Press **Run**. The writer drafts title, style and lyrics; *Score Tools* builds an **empty score** from the brief: the length and tempo give the number of measures, the brief's *meter* and *key* are read where you wrote them, and anything missing falls back to 4/4, C major and 100 BPM (the report lists every fallback). The score is one `verse` section of rests.
 3. The run **stops at Song Sheet · DAW**. Open it and compose:
-   - **piano roll**: draw a note on an empty place, drag to move, drag the right end to resize; `Delete` turns notes into rests, `Shift+Delete` closes the gap;
+   - **piano roll**: draw a note on an empty place, drag to move, drag the right end to resize; switch to **⬚ Select** to frame several notes (Shift adds) and move or delete them together; `Delete` turns notes into rests, `Shift+Delete` closes the gap;
    - **chord lane**: double-click to write a chord symbol, drag one to move it, double-click to rename;
    - **navigator**: split the score into sections (`verse`, `chorus`, ...), because YuE2 sings section by section;
    - **ABC text**: still there, under *Advanced* - the same text, synchronised both ways.

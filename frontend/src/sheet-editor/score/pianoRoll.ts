@@ -1,6 +1,6 @@
 /**
- * Piano roll and chord lane: geometry, hit testing and gestures (next-release plan §9.8, §10.3;
- * milestone M1, task D1).
+ * Piano roll and chord lane: geometry, hit testing, the select mode's frame and gestures
+ * (next-release plan §9.8, §10.3; milestone M1, task D1).
  *
  * The roll draws the canonical model of the current text (``view.model``, integer units of L)
  * and never computes musical content. A gesture is drawn as a ghost locally and commits exactly
@@ -18,6 +18,8 @@ export type Track = 'vocal' | 'ins'
 export const TRACKS: readonly Track[] = ['vocal', 'ins']
 export type ResizeMode = 'rests' | 'overwrite'
 export type SnapChoice = 'auto' | 4 | 8 | 16 | 32
+/** What a drag on the empty grid does: draw a note, or pull a frame that selects the notes it touches. */
+export type RollMode = 'draw' | 'select'
 
 export interface RollNote extends ModelNote {
   track: Track
@@ -249,6 +251,37 @@ export function hitTest(
     return { area: 'note', note, edge }
   }
   return { area: 'grid', unit, pitch: pitchAt(y, geo) }
+}
+
+// --- the selection frame ----------------------------------------------------------------------
+
+/** A selection frame (select mode): where the drag started and where the pointer is, in roll coordinates. */
+export interface Band {
+  x0: number
+  y0: number
+  x1: number
+  y1: number
+}
+
+/**
+ * The frame's rectangle, kept to the rows that can be seen: below the header and the chord lane and
+ * right of the pitch column, which stay in place while the pane scrolls (``scrollTop``, ``scrollLeft``).
+ */
+export function bandRect(band: Band, geo: Geometry, scrollTop = 0, scrollLeft = 0): Rect {
+  const clampX = (x: number): number => Math.max(scrollLeft + KEYS_WIDTH, Math.min(geo.width, x))
+  const clampY = (y: number): number => Math.max(scrollTop + TOP, Math.min(geo.height, y))
+  const left = clampX(Math.min(band.x0, band.x1))
+  const top = clampY(Math.min(band.y0, band.y1))
+  return { x: left, y: top, width: clampX(Math.max(band.x0, band.x1)) - left, height: clampY(Math.max(band.y0, band.y1)) - top }
+}
+
+/** The notes a selection frame touches (a note needs to overlap it, not to lie inside it). */
+export function notesInRect(notes: readonly RollNote[], rect: Rect, geo: Geometry): RollNote[] {
+  if (rect.width <= 0 || rect.height <= 0) return []
+  return notes.filter((note) => {
+    const box = noteRect(note, geo)
+    return box.x < rect.x + rect.width && box.x + box.width > rect.x && box.y < rect.y + rect.height && box.y + box.height > rect.y
+  })
 }
 
 // --- gestures ---------------------------------------------------------------------------------
