@@ -3,8 +3,11 @@ import type { ComfyNode, InputSpec, WidgetConstructor } from '../shared/comfy'
 import { ownedBeforeRun } from '../shared/sheetSession'
 import { DOCUMENT_KINDS, parseState, serializeState, summarize } from '../shared/sheetState'
 import { getAsrNote, getPayload, onPayload } from './payloads'
+import { displayState, onRunState, sheetLine } from './runStatus'
 
 export const SHEET_STATE_TYPE = 'PLENIO_SHEET_STATE'
+/** The widget's layout height: the button row (28 px), the status row (18 px) and the frontend's margins. */
+export const SHEET_WIDGET_HEIGHT = 68
 
 interface InputSlot {
   name: string
@@ -32,12 +35,29 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
   const button = document.createElement('button')
   button.className = 'plenio-sheet-open'
   button.textContent = 'Edit Song Sheet…'
-  element.append(button, summary)
+  // where the run stands at this sheet - a review stop, waiting for approval, approved - in words, so
+  // App mode (which shows this widget but not the canvas badges) says it too
+  const status = document.createElement('div')
+  status.className = 'plenio-sheet-status'
+  element.append(button, summary, status)
+  let hookedReview = false
 
   const render = () => {
     const payload = getPayload(String(node.id))
-    const status = payload ? ` · ${payload.status}` : ''
-    summary.textContent = summarize(parseState(value)) + status
+    summary.textContent = summarize(parseState(value)) + (payload ? ` · ${payload.status}` : '')
+    const state = displayState(node)
+    status.textContent = sheetLine(state)
+    status.dataset.state = state ?? ''
+    // the review setting decides whether the sheet stops: follow it (the widget exists once the node is built)
+    const review = hookedReview ? null : node.widgets?.find((w) => w.name === 'review')
+    if (review) {
+      hookedReview = true
+      const original = review.callback
+      review.callback = (next: unknown) => {
+        original?.(next)
+        render()
+      }
+    }
   }
 
   const widget = node.addDOMWidget(inputName, SHEET_STATE_TYPE, element, {
@@ -46,8 +66,10 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
       value = typeof next === 'string' ? next : ''
       render()
     },
-    getMinHeight: () => 30,
-    getMaxHeight: () => 30
+    // two rows, always: the frontend lays a DOM widget out once, so a height that changes later is cut;
+    // it also keeps a 10 px margin above and below the element (68 - 20 = the rows' 48 px)
+    getMinHeight: () => SHEET_WIDGET_HEIGHT,
+    getMaxHeight: () => SHEET_WIDGET_HEIGHT
   })
 
   button.addEventListener('click', async (event) => {
@@ -87,9 +109,20 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
     })
   })
 
-  onPayload((nodeId) => {
-    if (nodeId === String(node.id)) render()
-  })
+  const unsubscribe = [
+    onPayload((nodeId) => {
+      if (nodeId === String(node.id)) render()
+    }),
+    onRunState((changed) => {
+      if (changed === null || changed === node) render()
+    })
+  ]
+  // a removed node (another workflow loaded, the node deleted) stops listening: its graph is gone
+  const removed = node.onRemoved
+  node.onRemoved = function (this: ComfyNode) {
+    for (const stop of unsubscribe) stop()
+    removed?.call(this)
+  }
   render()
   return { widget }
 }

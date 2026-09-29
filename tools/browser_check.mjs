@@ -8,6 +8,8 @@
 //   4. app     - App Mode shows the configured controls and outputs
 //   5. summaries - after a run: every node's summary shows at least four lines, no text field
 //                shrinks below 60 px to make room, and no two nodes overlap once the nodes grew
+//   6. status  - before a run every Song Sheet says whether it stops for review (the brief's mode:
+//                *stop to review* templates stop at every sheet, *every run* templates run through)
 //
 // Needs a running ComfyUI with Plenio (tools/dev_server.py) whose models folder holds files with the
 // catalogue's default names (empty files are enough: the server only validates the names; a queued
@@ -259,6 +261,23 @@ for (const name of names) {
     return problems
   }, SUMMARY_TYPES)
   record(name, 'summaries: readable after a run, no squeezed field, no overlap', summaries.length === 0, summaries.slice(0, 4).join(' | '))
+
+  // 6. status (the holding points before a run)
+  await load(template, name)
+  const holding = await page.evaluate(() =>
+    window.app.graph.nodes
+      .filter((n) => n.type === 'PlenioSongSheet')
+      .map((n) => {
+        const brief = n.getInputNode?.(n.inputs.findIndex((s) => s.name === 'brief'))
+        const mode = String(brief?.widgets?.find((w) => w.name === 'mode')?.value ?? '')
+        const line = n.widgets?.find((w) => w.name === 'sheet_state')?.element?.querySelector('.plenio-sheet-status')?.textContent ?? ''
+        return { title: n.title, stops: mode.includes('stop to review'), line, badges: (n.badges ?? []).length }
+      })
+  )
+  const wrong = holding.filter((s) => s.badges < 1 || s.line !== (s.stops ? '⏸ stops here for review' : '▶ runs through, no review stop'))
+  if (holding.length) {
+    record(name, 'status: every Song Sheet says whether it stops for review', wrong.length === 0, wrong.map((s) => `${s.title}: ${JSON.stringify(s.line)}`).join(' | '))
+  }
 
   // 4. app
   const app = template.extra?.linearData

@@ -1,8 +1,14 @@
 /** Styles use ComfyUI's CSS variables so that light and dark themes both work. */
 const CSS = `
-.plenio-sheet-state { display: flex; align-items: center; gap: 8px; font: 12px/28px var(--font-family, sans-serif);
+.plenio-sheet-state { display: flex; flex-wrap: wrap; align-items: center; column-gap: 8px; font: 12px/28px var(--font-family, sans-serif);
   color: var(--descrip-text, #999); padding: 0 4px; white-space: nowrap; overflow: hidden; }
-.plenio-sheet-summary { overflow: hidden; text-overflow: ellipsis; }
+.plenio-sheet-summary { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.plenio-sheet-status { flex: 1 0 100%; font-weight: 600; line-height: 18px; overflow: hidden; text-overflow: ellipsis; }
+.plenio-sheet-status[data-state="stop"] { color: #8fa3bf; }
+.plenio-sheet-status[data-state="waiting"] { color: #e3a82b; }
+.plenio-sheet-status[data-state="approved"], .plenio-sheet-status[data-state="ok"] { color: #4fbf7f; }
+.plenio-sheet-status[data-state="warning"] { color: #d8a31a; }
+.plenio-sheet-status[data-state="error"] { color: #e0574a; }
 .plenio-sheet-open { flex: none; padding: 2px 10px; border-radius: 6px; border: 1px solid var(--border-color, #555);
   background: var(--comfy-input-bg, #333); color: var(--input-text, #ddd); cursor: pointer; font: inherit; line-height: 20px; }
 .plenio-sheet-open:hover { background: #2f6fb0; color: #fff; }

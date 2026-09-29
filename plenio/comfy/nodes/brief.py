@@ -125,8 +125,10 @@ class PlenioSongBrief(io.ComfyNode):
                     ],
                     tooltip="Sung song or instrumental. Instrumental hides all vocal settings.",
                 ),
-                io.String.Input("key", default="", advanced=True, tooltip=TEXT["key"]),
-                io.String.Input("meter", default="", advanced=True, tooltip=TEXT["meter"]),
+                # not 'advanced': App mode shows an advanced widget's label without its field, and the DAW
+                # template's empty score follows the key and the meter
+                io.String.Input("key", default="", tooltip=TEXT["key"]),
+                io.String.Input("meter", default="", tooltip=TEXT["meter"]),
             ],
             outputs=[
                 Brief.Output(

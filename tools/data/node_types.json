@@ -3229,7 +3229,6 @@
       "STRING",
       {
        "tooltip": "Optional key, e.g. 'G major'. Music models that use a score take the key from the score.",
-       "advanced": true,
        "default": "",
        "multiline": false
       }
@@ -3238,7 +3237,6 @@
       "STRING",
       {
        "tooltip": "Optional meter, e.g. '3/4'.",
-       "advanced": true,
        "default": "",
        "multiline": false
       }

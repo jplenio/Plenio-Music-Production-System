@@ -83,8 +83,10 @@ Open (owner's machine): the same browser check in frontend 1.53.6 (`tools/browse
 
 Scope: the six templates of 0.3.0 (with REFINE, STEMS and *5 · YuE2 · DAW*), in the **real frontend 1.53.6** of
 ComfyUI 0.37.0 (the isolated `tools/dev_server.py`, headless Chromium through Playwright): screenshots of every
-template at 2400 x 1350, before and after a simulated run (a five-line summary on every node that sends one),
-measured node boxes, group boxes and summary heights, and the full `tools/browser_check.mjs`.
+template at 2400 x 1350, before and after a simulated run (a five-line summary on every node that sends one; a run
+that stops at a Song Sheet), App mode, measured node boxes, group boxes and summary heights, and the full
+`tools/browser_check.mjs`. The owner asked for the holding points and the run's position to be visible (F16) and
+for App mode to be current (F17).
 
 | # | Finding | Fix |
 |---|---|---|
@@ -98,6 +100,9 @@ measured node boxes, group boxes and summary heights, and the full `tools/browse
 | F13 | The About notes did not explain Refine in templates 1, 2 and 5 (MiniMax named it only in the path), the DAW note lacked Cover Art, and no note said that the Stem Mixer is **inside** the Stems block | a Refine paragraph in every note (MiniMax: the preset and how to bypass it), Cover Art in the DAW note, *open the block with the icon at the top right* in the Stems paragraph and guide |
 | F14 | The brief panel's three buttons wrapped their labels onto two lines each | one line per button; the row wraps instead |
 | F15 | The browser check counted Load Audio's extra widgets wrongly for an empty file and compared API prompts as strings - the frontend's autogrow lists Export's report inputs in another order after a reload (the links and the backend's numeric order are unchanged). It had not run since M6, which let F6 and F7 through | only the file name counts; prompts compare with sorted keys; `docs/dev/testing.md` says to run it after every template, blueprint or widget change |
+| F16 | The review stops were visible only in a node's *review* widget and the brief's mode; after a run nothing on the canvas said where it stopped (the sheet's line read *waiting for approval* in grey) or how far it got | run status on the nodes (`frontend/src/extension/runStatus.ts`): **⏸ review stop** on every sheet that will stop, ✓ / ⚠ / ✖ per Plenio node after a run, **⏸ waiting for your approval** / **✓ approved** on the sheets, an amber or red frame where the run stopped or failed (visible zoomed out), a toast; a new run clears the badges; the sheet's line says the same in colour (App mode) |
+| F17 | In App mode the brief's *key* and *meter* were labels without fields (*advanced* widgets), although the DAW's empty score follows them; MiniMax's app had no Refine setting although the stage is on there | *key* and *meter* are regular widgets; the song apps show them; MiniMax's app shows Refine's *preset*; a workflow test refuses an advanced widget in any app |
+| F18 | The Song Sheet widget kept listening after its node was removed (another workflow loaded): a status refresh then followed a link of a node without a graph and the frontend reported an extension error | the widget unsubscribes in `onRemoved`; the lookup of the brief is guarded; Vitest and browser check step 6 cover it |
 
 Accepted:
 
@@ -106,5 +111,5 @@ Accepted:
 | A4 | Export Release shows a report input that is linked from a subgraph (*Transcribe Score* in the Cover template) at the end of its report list after loading | the frontend's autogrow places it; the link, the API prompt's content and the order in the release record (the backend reads the inputs by number) are unaffected |
 | A5 | The Stem Mixer is reached by opening the Stems block (a subgraph) | as a subgraph the block stays one collapsed node in five templates; the About notes and the guide say how to open it. Making it plain nodes like REFINE is an option if the owner prefers the mixer on the canvas |
 
-Result: `tools/browser_check.mjs` **74/74** (frontend 1.53.6), `tools/workflow_validation.py` clean with the new
+Result: `tools/browser_check.mjs` **78/78** (frontend 1.53.6, with step 6: status), `tools/workflow_validation.py` clean with the new
 layout and id checks.

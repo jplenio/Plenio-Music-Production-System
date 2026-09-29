@@ -928,14 +928,21 @@ REFINE_TEXT = (
 REFINE_MINIMAX_TEXT = (
     "**Refine (48 kHz, on):** extends the top octaves of the render with the UniverSR model (229 MB) and "
     "keeps everything below the crossover. The *preset* is *3 - MiniMax* (pre 10 kHz, crossover 9.5 kHz, "
-    "post 19 kHz); pick another preset, or *custom* for the three number fields. For the plain render select "
+    "post 19 kHz); pick another preset (also in App mode), or *custom* for the three number fields. For the plain render select "
     "the REFINE group and press **Ctrl+B**. Experimental: the settings are provisional until the listening "
     "study."
 )
 APP_TEXT = (
     "**App mode:** switch *Graph / App* at the top left for a simple form: the mode, the brief, the take seed, "
-    "the Song Sheet buttons (review and edit, also in the app) and the results. *Number of runs* next to Run "
-    "renders a series."
+    "the Song Sheet buttons (review and edit, also in the app - their status line says where the run stands: "
+    "*stops here for review*, *waiting for your approval*, *approved*) and the results. *Number of runs* next to "
+    "Run renders a series."
+)
+STATUS_TEXT = (
+    "**Where the run stands:** a badge above each Plenio node shows its result - ✓ done, ⚠ warning, ✖ error; "
+    "every Song Sheet that will stop carries ⏸ *review stop* before the run, ⏸ *waiting for your approval* "
+    "(and an amber frame) when the run stopped there, ✓ *approved* once you approved it. A new run clears the "
+    "badges, so they show how far this run got."
 )
 SONG_MODES_TEXT = """1. Choose the **mode** in **Song Brief**:
    - *new song every run* - every run writes and renders a **different song** from the brief, without stops (set the **Draft seed** to *randomize* for even more variety). For a series, set the batch count next to **Run** (App mode: *Number of runs*) - one click, many songs.
@@ -950,6 +957,8 @@ ABOUT_YUE2 = f"""# 1 · YuE2 · Song
 3. Press **Run**. The writer model drafts title, style and lyrics; YuE2 plans a score and renders the song.
 
 **Inspect and edit:** open a **Song Sheet** to see exactly what YuE2 receives. Edit a document there; your edit wins until its draft changes, then the run stops and asks you. The sheets' *review* follows the brief's mode (*as the brief says*); set it to *continue* or *stop for review* to decide per sheet.
+
+{STATUS_TEXT}
 
 {FINISH_TEXT}
 
@@ -1047,13 +1056,32 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     return g, song_app(brief, seed, draft, [text_sheet, score_sheet], preview, export)
 
 
-def song_app(brief: Node, seed: Node, draft: Node, sheets: list[Node], preview: Node, export: Node) -> App:
+def song_app(
+    brief: Node,
+    seed: Node,
+    draft: Node,
+    sheets: list[Node],
+    preview: Node,
+    export: Node,
+    extra: list[tuple[Node, str]] | None = None,
+) -> App:
     # The sung options only: App Mode (frontend 1.52) drops controls of the option that is not selected,
     # so the instrumental options are set in the graph. The sheets' editor buttons work in App mode too:
-    # 'one song, stop to review' is reviewed there.
-    controls = ["mode", "template", "description", "genre", "mood", "tempo", "length", "vocals"]
+    # 'one song, stop to review' is reviewed there, and their status line says where the run stands.
+    controls = [
+        "mode",
+        "template",
+        "description",
+        "genre",
+        "mood",
+        "tempo",
+        "key",
+        "meter",
+        "length",
+        "vocals",
+    ]
     controls += ["vocals.language", "vocals.voice", "vocals.theme"]
-    inputs = [(brief, name) for name in controls] + [(seed, "seed"), (draft, "seed")]
+    inputs = [(brief, name) for name in controls] + [(seed, "seed"), (draft, "seed"), *(extra or [])]
     return App(inputs + [(sheet, "sheet_state") for sheet in sheets], [preview, export])
 
 
@@ -1070,6 +1098,8 @@ ABOUT_COVER = f"""# 2 · YuE2 · Cover
 
 **New lyrics** are understood only when they fit the melody - about one syllable per note - and the voice fits its range; Song Sheet · Text warns about both.
 
+{STATUS_TEXT}
+
 **Takes:** *YuE2 Takes* renders *takes* versions (seeds take seed, +1, ...); **Check Vocals** keeps the first instrumental take without vocal notes, the preview plays all takes. N takes cost N renders. **Instrumental adapter:** for instrumental covers YuE2 renders with the instrumental LoRA of the *Instrumental adapter* node (the optional adapter inside the model block stays bypassed here). **Check sung lyrics** (optional, bypassed) measures what a sung take actually sang.
 
 {FINISH_TEXT}
@@ -1080,7 +1110,7 @@ ABOUT_COVER = f"""# 2 · YuE2 · Cover
 
 {REFINE_TEXT}
 
-**App mode:** switch *Graph / App* at the top left for a simple form: the source file, the mode, the cover style, the take seed, the two Song Sheet buttons (the review stops work in the app) and the results. The options of *original lyrics* and *new lyrics* are set in the graph.
+**App mode:** switch *Graph / App* at the top left for a simple form: the source file, the mode, the cover style, the take seed, the two Song Sheet buttons (the review stops work in the app; their status line says where the run stands) and the results. The options of *original lyrics* and *new lyrics* are set in the graph.
 
 **Models** (downloaded on first use): YuE2 3B int8, SheetSage2, the instrumental adapter, the Gemma 4 E4B writer; the lyrics ASR (faster-whisper large-v3, 3.1 GB) is fetched by Plenio when first needed. YuE2, SheetSage2 and the adapter are **CC BY-NC 4.0 (non-commercial)**.
 """
@@ -1254,6 +1284,8 @@ ABOUT_MINIMAX = f"""# 3 · MiniMax · Song
 {SONG_MODES_TEXT.format(sheets="")}
 3. Press **Run**. The writer model drafts title, a structured **caption** (Global Metadata, Vocal Details, Arrangement), lyrics and an artwork prompt; MiniMax Music 3 renders the song.
 
+{STATUS_TEXT}
+
 **Inspect and edit:** open the **Song Sheet** to see exactly what MiniMax receives; its *review* follows the brief's mode (*as the brief says*). Caption and lyrics together must stay under **5 000 tokens** (the sheet counts them exactly with the loaded text encoder and stops before rendering if they do not fit). The render ceiling follows the brief's length, at most 6:00; the model can end earlier.
 
 **Instrumentals:** the lyrics are a map of section tags ([Intro], [Instrumental], [Solo], ...), about twice as long as a sung song's, and the caption's Vocal Details are *n/a*.
@@ -1342,7 +1374,8 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g.group("3 · SHEET", [sheet])
     g.group("4 · RENDER", [seed, render])
     g.group("MUSIC MODEL", [model_node], color=MODEL_GROUP)
-    return g, song_app(brief, seed, draft, [sheet], preview, export)
+    # Refine is on in this template: its preset is the one audio choice worth making in the app
+    return g, song_app(brief, seed, draft, [sheet], preview, export, extra=[(refine_node, "preset")])
 
 
 ABOUT_DAW = f"""# 5 · YuE2 · DAW
@@ -1365,6 +1398,8 @@ How to work:
 
 **Empty score:** a score of rests cannot be rendered - YuE2 needs at least one note (the Song Sheet says so). Draw the first note or import a MIDI file.
 
+{STATUS_TEXT}
+
 {FINISH_TEXT}
 
 {COVER_TEXT}
@@ -1373,7 +1408,7 @@ How to work:
 
 {REFINE_TEXT}
 
-**App mode:** the mode, the brief, the take seed, both Song Sheet buttons and the results - the app is usable for a first run, but the score is drawn in the graph's sheet editor.
+**App mode:** the mode, the brief (with key and meter - the empty score follows them), the take seed, both Song Sheet buttons with their status line and the results - the app is usable for a first run, but the score is drawn in the graph's sheet editor.
 
 **Models:** YuE2 3B int8 (4.0 GB, **CC BY-NC 4.0, non-commercial**) and the Gemma 4 E4B writer. The model block below is collapsed; expand it to choose other files.
 """
@@ -1480,7 +1515,7 @@ Finishes an existing recording (for example a take you rendered earlier) without
 5. **Loudness & Dynamics** brings the song to -14 LUFS with a true peak of at most -1 dBTP (streaming); pick another target or compression style if you like.
 6. Press **Run**. Export writes FLAC 24-bit and MP3 V0 to `output/plenio/enhanced`, copies the source file's tags and cover, keeps the unmastered source as `(original).flac`, and writes a release record with the measured loudness.
 
-The preview plays the result; compare it with the source in Load Audio. Nothing here needs a GPU.
+The preview plays the result; compare it with the source in Load Audio. Nothing here needs a GPU. After a run, a badge above each Plenio node shows its result (✓ done, ⚠ warning, ✖ error).
 
 **App mode:** switch *Graph / App* at the top left for a simple form (file, EQ, target, compression).
 """

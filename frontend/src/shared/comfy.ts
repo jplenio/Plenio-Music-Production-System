@@ -41,6 +41,19 @@ export interface ComfyNode {
   onExecuted?: (output: Record<string, unknown>) => void
   onConfigure?: (info: Record<string, unknown>) => void
   configure?: (info: Record<string, unknown>) => unknown
+  /** The input slots (a linked slot has a ``link`` id). */
+  inputs?: { name: string; link?: number | null }[]
+  /** The node linked to input ``slot`` (LiteGraph). */
+  getInputNode?(slot: number): ComfyNode | null | undefined
+  flags?: { collapsed?: boolean }
+  /**
+   * The badge row above the title bar (frontend): an entry that is not an ``LGraphBadge`` is called on
+   * every draw and returns an object with ``height``, ``getWidth(ctx)`` and ``draw(ctx, x, y)``.
+   */
+  badges?: unknown[]
+  onDrawForeground?: (ctx: CanvasRenderingContext2D) => void
+  /** Called when the node leaves its graph (deleted, or another workflow loaded). */
+  onRemoved?: () => void
 }
 
 export interface ComfyNodeType {
@@ -70,11 +83,18 @@ export interface ComfyExtension {
   beforeRegisterNodeDef?: (nodeType: ComfyNodeType, nodeData: ComfyNodeDef, app: ComfyApp) => void | Promise<void>
   nodeCreated?: (node: ComfyNode, app: ComfyApp) => void
   setup?: (app: ComfyApp) => void | Promise<void>
+  /** After a workflow was loaded (nodes, links and widget values are in place). */
+  afterConfigureGraph?: () => void | Promise<void>
 }
 
 export interface ComfyApp {
   registerExtension(extension: ComfyExtension): void
   graph?: unknown
+  canvas?: { ds?: { scale?: number } }
+  /** The frontend's services (1.2x+); only the toast is used. */
+  extensionManager?: {
+    toast?: { add(message: { severity: string; summary: string; detail?: string; life?: number }): void }
+  }
 }
 
 /** Chain a new callback onto an existing optional node callback. */

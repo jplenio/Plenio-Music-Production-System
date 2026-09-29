@@ -17,6 +17,14 @@ import { dynamicComboNames, restoreWidgetValues, savedWidgetValues } from './dyn
 import { addEqCurve } from './eqWidget'
 import { MODE_BEFORE_0_2_2, migrateWidgetValues } from './migrate'
 import { setAsrNote, setPayload } from './payloads'
+import {
+  type StatusHost,
+  clearRunStates,
+  installRunStatus,
+  refreshRunStatus,
+  setRunState,
+  sheetState
+} from './runStatus'
 import { SHEET_STATE_TYPE, setFetcher, sheetStateWidget } from './sheetStateWidget'
 import { addStemMixer } from './stemMixer'
 import { installStyles } from './style'
@@ -30,13 +38,37 @@ interface ComfyApi extends Fetcher {
 
 const comfyApi = api as ComfyApi
 setFetcher(comfyApi)
+const comfyApp = app as ComfyApp
+
+interface GraphNodes {
+  nodes?: ComfyNode[]
+  getNodeById?(id: number | string): ComfyNode | null | undefined
+}
+
+const graph = (): GraphNodes | undefined => comfyApp.graph as GraphNodes | undefined
+
+/** A node of the open graph by the id an execution event names (a subgraph's inner nodes read ``outer:inner``). */
+function nodeById(id: unknown): ComfyNode | null {
+  if (id === null || id === undefined) return null
+  const text = String(id)
+  return graph()?.getNodeById?.(text.includes(':') ? text : Number(text)) ?? null
+}
+
+const statusHost: StatusHost = {
+  scale: () => comfyApp.canvas?.ds?.scale ?? 1,
+  toast: (summary, detail) => comfyApp.extensionManager?.toast?.add({ severity: 'info', summary, detail, life: 12000 })
+}
 
 ;(app as ComfyApp).registerExtension({
   name: EXTENSION_NAME,
   getCustomWidgets: () => ({ [SHEET_STATE_TYPE]: sheetStateWidget }),
+  // the sheets' review stops depend on the linked brief's mode: known once the links are in place
+  afterConfigureGraph: () => refreshRunStatus(),
   beforeRegisterNodeDef(nodeType, nodeData) {
     if (!nodeData.name.startsWith('Plenio')) return
     addSummaryDisplay(nodeType)
+    // where the run stands: a status badge per node, a frame where it stopped or failed (runStatus.ts)
+    installRunStatus(nodeType, statusHost)
     const combos = dynamicComboNames(nodeData.input)
     if (combos.size || nodeData.name in MODE_BEFORE_0_2_2) {
       // Frontend 1.53.6 restores the values of a node with a DynamicCombo out of order (see
@@ -96,7 +128,18 @@ setFetcher(comfyApi)
     // Sent by the Song Sheet before it stops with a conflict or validation error.
     comfyApi.addEventListener('plenio.sheet', (event: CustomEvent) => {
       const payload = event.detail as SheetPayload
-      if (payload?.node_id) setPayload(String(payload.node_id), payload)
+      if (!payload?.node_id) return
+      setPayload(String(payload.node_id), payload)
+      const node = nodeById(payload.node_id)
+      if (node) setRunState(node, sheetState(payload))
+    })
+    // A new run: the previous run's results go, so the canvas shows how far this run gets.
+    comfyApi.addEventListener('execution_start', () => {
+      clearRunStates(graph()?.nodes ?? [])
+    })
+    comfyApi.addEventListener('execution_error', (event: CustomEvent) => {
+      const node = nodeById((event.detail as { node_id?: unknown } | undefined)?.node_id)
+      if (node && String(node.type).startsWith('Plenio')) setRunState(node, 'error')
     })
   }
 })

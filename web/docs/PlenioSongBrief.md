@@ -9,6 +9,6 @@ The intent of a new song. It is the only place where the *work mode*, *sung or i
 - **description, genre, mood, tempo** - what the song is and how it sounds. Sent to the writing model.
 - **length** - from *very short (about 1:00)* in half-minute steps to *about 5:00*, and *very long (about 6:00)*; *standard (about 3:00)* is the default. Guides the song form and how much the writer writes (YuE2's plan follows the amount of lyrics) and sets the render ceiling without a score (MiniMax Music 3 renders at most 6:00). A free-form value such as *2-3 minutes* (from older workflows) takes the nearest option, with a note.
 - **vocals** - *sung* (language, voice character, lyrics theme) or *instrumental* (the instrument plays the lead melody, or accompaniment only; optional lead instrument).
-- **key, meter** (advanced) - optional musical constraints.
+- **key, meter** - optional musical constraints (the DAW template's empty score takes both; also in App mode).
 
 Outputs: the brief, a readable summary, a render headroom for the length, and whether the song is instrumental. The node's summary shows the mode and, in *new song every run*, the variation of the current run.

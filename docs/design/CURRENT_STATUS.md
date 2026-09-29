@@ -54,9 +54,14 @@ Chromium), before and after a simulated run; the findings F6-F15 and what change
 *randomize*); the Stems and Refine blueprints own their node-id ranges again (templates 1 and 5 were renumbered on
 load); no node or group overlaps; run summaries keep about four lines and the templates reserve the room; the
 bypassed REFINE block is collapsed; the Cover template opens without an error toast; the EQ explains a match mode
-before its first run; every About note explains Refine and how to reach the Stem Mixer. New guards: the validator
-refuses overlapping nodes and groups and shared blueprint ids; `tools/browser_check.mjs` gained step 5 (summaries);
-Vitest `summary.test.ts`; workflow tests for the ids, the summary room and the Refine seed.
+before its first run; every About note explains Refine and how to reach the Stem Mixer. At the owner's request the
+**run status is visible on the nodes** (F16): ⏸ *review stop* on every sheet that will stop, ✓/⚠/✖ per Plenio node
+after a run, ⏸ *waiting for your approval* with an amber frame and a toast where the run stopped, ✓ *approved*; a new
+run clears the badges; the sheet's button line says it in App mode too. **App mode** is current (F17): the song apps
+show the brief's key and meter (no longer *advanced*), MiniMax's app Refine's preset. New guards: the validator
+refuses overlapping nodes and groups and shared blueprint ids; `tools/browser_check.mjs` gained step 5 (summaries) and step 6 (status) - 78/78;
+Vitest `summary.test.ts` and `runStatus.test.ts`; workflow tests for the ids, the summary room, the Refine seed and
+advanced widgets in apps.
 
 **Quality review of the DeepSeek range `4f65626..0db6ae7` (2026-09-29, before the release)**
 
@@ -113,14 +118,15 @@ At HEAD `0db6ae7` 9 tests were red (1 workflow, 8 host) and ten defects were fou
 
 | Suite | Command (bash, repository root; `PY=/d/Daten2/ComfyUI/.venv/Scripts/python.exe`) | Result |
 |---|---|---|
-| unit + workflow + contract | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/unit tests/workflows tests/contract` | 956 passed, 4 skipped (after the quality review, `14675e6` + release docs) |
-| host (real server, fakes and tiny checkpoints) | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/host` | 118 passed, 8 skipped in 133 s (`14675e6`) |
-| frontend | `cd frontend && npm run check` | vue-tsc clean, 175 Vitest passed in 18 files, build ok (no warning), `web/js` rebuilt (`14675e6`) |
+| unit + workflow + contract | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/unit tests/workflows tests/contract` | 959 passed, 4 skipped (after the UX review and the run status, 2026-09-29) |
+| host (real server, fakes and tiny checkpoints) | `PLENIO_COMFYUI_ROOT=D:/Daten2/ComfyUI PYTHONPATH=.devdeps $PY -m pytest tests/host` | 118 passed, 8 skipped in 124 s (2026-09-29) |
+| frontend | `cd frontend && npm run check` | vue-tsc clean, 187 Vitest passed in 20 files, build ok (no warning), `web/js` rebuilt (2026-09-29) |
 | study tool (smoke, real adapter) | `$PY tools/studies/sr_study.py --out <json> --models <dir with models/audio_sr> ...` | runs end to end with *resample only* and with a tiny UniverSR checkpoint (RTF 122x CPU for resample only; a tiny model is not a quality statement) |
 | **L1 with the released weights** | `$PY tools/studies/sr_study.py --models F:/ComfyUI/models --pack <dir> --targets .devdeps/l1-targets <references>` | simulation set (two references): LSD 16-24 kHz **11.0 dB** (the 48 kHz YuE2 take) and **34.6 dB** (the owner's 32 kHz-class MiniMax file) vs 113.4/97.1 dB for resample only, RTF 0.41, 2 776 MB peak VRAM, 0.00 LU loudness change; target set: both takes measure as full band - until `04469c6` that meant *resample only*, the owner's decision now lets the engine run above the crossover - see §5 |
 | **L2 with the released weights** | `$PY tools/studies/stem_study.py --models F:/ComfyUI/models --write-audio <dir> <unmastered take>` | the owner's take (153.6 s): **40.8 s** (RTF 3.76), **1 699 MB** peak VRAM; residual **0.06 %** of the song's energy; neutral mix and muted range exact to **−168.6 dBFS** (float64 rounding); the stem labels verified by centroid and kurtosis |
 | lint | `PYTHONPATH=.devdeps $PY -m ruff check . && ... ruff format --check .` | clean (173 files) |
 | types | `PYTHONPATH=.devdeps $PY -m mypy --python-version 3.12` | 46 errors, **all** `type-arg` for bare `np.ndarray` (local numpy 2.2 stubs; the same class as before, nothing else) |
+| browser check (real frontend 1.53.6, headless Chromium, `tools/dev_server.py` with empty model files) | `node tools/browser_check.mjs --url http://127.0.0.1:8190 --out <dir>` | **78/78** (load, reload, options, summaries, status, App mode for all six templates) |
 | workflows | `$PY tools/workflow_validation.py` | all ok (incl. the new check: no unused embedded subgraph definition); `build_graphs.py` and `build_thumbnails.py` leave no diff |
 | released BS-RoFormer through the new reader | a scratch script: `msst.load(F:/ComfyUI/models/audio_separation/model_bs_roformer_ep_17_sdr_9.6568.ckpt)` | loads with `weights_only=True` in 5.5 s (CPU) and separates a test signal - the security fix does not lock out the released file |
 | package content | `git ls-files` filtered by `.comfyignore` (comfy-cli is not installed here) | 6 templates, 12 blueprints, `plenio/` incl. `third_party/`, `web/`, `resources/`, `docs/user/`; nothing from `tests/`, `tools/`, `frontend/`, `assets/` or the design docs |

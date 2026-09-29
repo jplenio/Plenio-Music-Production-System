@@ -10,6 +10,8 @@ Press **Edit Song Sheet…** (also available in App mode) to see and edit the do
 
 **review** - *as the brief says* (default) stops when the connected brief's mode is *one song / one cover, stop to review* and continues for *new song / new cover every run* (and without a brief); *stop for review* always holds the documents back until you **Approve** exactly what you see; *continue* never stops. In a series (*new song every run*) an *edited* document conflicts with the next run's new draft - make it *manual* to keep it for the whole series.
 
+**Where the run stands:** before a run a sheet that will stop carries **⏸ review stop** (and *stops here for review* under its button); after a run it shows **⏸ waiting for your approval** with an amber frame (the run stopped here - Edit, Approve, run again), **✓ approved**, or **✖** with a red frame for a conflict or an invalid document. The same line appears in App mode. A new run clears the previous run's badges.
+
 The sheet validates the documents with the rules of the connected engine (style, lyrics, score, exact token budget). With MiniMax Music 3 the style document is the **caption** (Global Metadata, Vocal Details, Arrangement); caption and lyrics must stay under 5 000 tokens, counted exactly with the loaded text encoder, and the render ceiling follows the brief (at most 6:00). For a score it also outputs the render mode (chords -> full, otherwise melody), a render ceiling derived from the score's length and the score's **section tags** (the lyrics of an instrumental cover).
 
 For covers (the score comes from *Song Sheet · Score* as context) the text sheet also checks:

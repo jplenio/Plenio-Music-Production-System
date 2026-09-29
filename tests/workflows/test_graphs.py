@@ -209,6 +209,21 @@ def test_loaders_match_the_model_catalogue(name: str) -> None:
     assert optional == {m.file for m in catalogue.values() if name in m.optional_templates}
 
 
+def test_no_app_control_is_an_advanced_widget() -> None:
+    """App mode shows an *advanced* widget's label without its field (frontend 1.53.6): the brief's key
+    and meter were such labels in the DAW app until the review before 0.3.0."""
+    for name, template in TEMPLATES.items():
+        nodes = {n["id"]: n for n in template["nodes"]}
+        for node_id, widget in (template["extra"].get("linearData") or {}).get("inputs", []):
+            info = SNAPSHOT["nodes"].get(nodes[node_id]["type"])
+            if info is None:  # a subgraph wrapper or a frontend-only node
+                continue
+            specs = {**info["input"].get("required", {}), **(info["input"].get("optional") or {})}
+            spec = specs.get(widget)
+            options = spec[1] if spec and len(spec) > 1 and isinstance(spec[1], dict) else {}
+            assert not options.get("advanced"), f"{name}: {nodes[node_id]['type']}.{widget} is advanced"
+
+
 def test_app_configurations() -> None:
     apps = {name: t["extra"].get("linearData") for name, t in TEMPLATES.items()}
     for name in TEMPLATES:
@@ -222,13 +237,21 @@ def test_app_configurations() -> None:
         brief = [widget for kind, widget in shown if kind.endswith("Brief")]
         assert brief[0] == "mode", name
         assert [kind for kind, widget in shown if widget == "sheet_state"] == ["PlenioSongSheet"] * count
+        # MiniMax has Refine on: its preset is the one audio choice in the app (review before 0.3.0)
+        refine = {"PlenioRefine"} if name == "3 · MiniMax · Song" else set()
         assert {kind for kind, _ in shown} <= {
             "PlenioSongBrief",
             "PlenioCoverBrief",
             "SeedNode",
             "PlenioSongSheet",
             "LoadAudio",
+            *refine,
         }
+        assert [widget for kind, widget in shown if kind == "PlenioRefine"] == (["preset"] if refine else [])
+        if (
+            name != "2 · YuE2 · Cover"
+        ):  # the song briefs: key and meter too (the DAW's empty score follows them)
+            assert {"tempo", "key", "meter", "length"} <= set(brief), name
         assert {nodes[i]["type"] for i in apps[name]["outputs"]} == {"PreviewAudio", "PlenioExportRelease"}
         for node in nodes.values():
             if node["type"] == "PlenioSongSheet":  # the app shows the sheet's title on its button

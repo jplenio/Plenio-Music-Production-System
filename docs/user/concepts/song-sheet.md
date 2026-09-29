@@ -35,6 +35,17 @@ Each shows the other's documents as read-only context and checks against them: i
 
 A stopped run waits after the sheet until you **Approve** in the editor. The approval is bound to exactly the documents you saw (a fingerprint); if anything changes, the sheet waits again. The templates set every sheet to *as the brief says*, so the mode in the brief decides for the whole path: the song templates start with *new song every run* (no stops), the cover template with *one cover, stop to review* (both sheets stop).
 
+### Where the run stands
+
+The canvas shows it on the nodes, the sheet's button line says it in words (also in App mode):
+
+| Before a run | After a run |
+|---|---|
+| **⏸ review stop** (blue badge above the sheet; *stops here for review* under its button) - the sheet will hold the run | **⏸ waiting for your approval** (amber badge and an amber frame around the sheet, a message) - the run stopped here: *Edit Song Sheet…*, check, *Approve*, run again |
+| *runs through, no review stop* - the run passes this sheet | **✓ approved** - you approved exactly these documents; ✓ *passed*, ⚠ *warnings* or ✖ *fix the sheet* (red frame) for a sheet that does not stop |
+
+Every other Plenio node shows its result the same way (✓, ⚠ warning, ✖ error with a red frame). A new run clears the badges first, so they show how far the current run got - a node after the stop has none. The frame stays visible when you zoom out.
+
 **Edits in a series:** in the mode *new song every run* every run brings a new draft, so an *edited* document conflicts on the next run (the error says so). Use *manual* for a text the whole series should keep, or *Use draft* to let the series write it.
 
 ## The editor
