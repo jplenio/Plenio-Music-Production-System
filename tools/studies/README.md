@@ -13,6 +13,7 @@ All scripts run with ComfyUI's Python and `PLENIO_COMFYUI_ROOT` set; GPU scripts
 | `excerpt.py` | E5 | cuts an excerpt exactly like native `TrimAudioDuration` |
 | `cover_budget.py` | Q-C6 | exact YuE2 context budget for transcribed scores (tokenizer only) |
 | `render_matrix.py` | E3/E4/E5 | native YuE2 and Gemma jobs on a running isolated ComfyUI (`tools/dev_server.py --gpu`): instrumental conditions, cover modes, listen detector, Gemma ASR |
+| `instrumental_form.py` | E6 | instrumental form and length on the Song path: planner-only lyrics forms x styles (plan length, sections, variety: pitches, chords, distinct bars), then render-lyrics and style variants with Check Vocals |
 | `evaluate_takes.py` | E3/E5 | detector metrics, cover identity, sung-lyrics WER and ending check per rendered take |
 | `listening_pack.py` | — | numbered copies of the takes plus a verdict sheet for the owner |
 | `export_summary.py` | — | compact results (no audio, no word lists) for `docs/test-reports/data/` |

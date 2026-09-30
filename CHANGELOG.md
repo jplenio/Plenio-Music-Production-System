@@ -4,6 +4,10 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 ## Unreleased
 
+### Changed
+
+- **Instrumental songs keep the requested length** (YuE2 Song path). YuE2 plans an instrumental's length itself; the owner's 274 instrumentals ran from 0.4 to 3.8 times the brief's length - above all EDM and electronic styles, where the plan was an intro and one section repeating for up to 14 minutes, which *fit length* could not cut. *Prepare from brief* now fits every instrumental plan outside 0.8-1.2 times the target: too long, it removes whole sections or - inside a long section - the bars between the start and the plan's own ending, at a phrase, so the song still ends as it was written (no hard cut); too short, it repeats the middle of the song. On the owner's records this brings 92 % of the instrumentals within 0.8-1.2 times the length (22 % before). Score Tools *fit length* does the same on demand.
+
 ### Fixed
 
 - Export Release warned after almost every YuE2 run - *samples above full scale were clipped in FLAC/MP3 … a limiter before the export avoids this* - although the mastered files were fine: the clipped file was the unmastered take `(original).flac`, which keeps the render as it was (a render above full scale is normal). That is now a note on the node (*the unmastered take peaks at …; the mastered files are not affected*); a clip in the released files is still a warning.

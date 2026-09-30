@@ -324,11 +324,14 @@ def check_score(
         )
     if lyrics.strip():
         findings.extend(lyrics_rules.compare_sections(lyrics, [s.tag for s in analysis.sections]))
-    if target_seconds and not 0.6 * target_seconds <= analysis.duration_s <= 1.5 * target_seconds:
+    # instrumental plans are fitted to 0.8-1.2 x the target by 'prepare from brief' (study E6); sung plans
+    # follow their lyrics
+    low, high = (0.75, 1.25) if instrumental else (0.6, 1.5)
+    if target_seconds and not low * target_seconds <= analysis.duration_s <= high * target_seconds:
         advice = (
-            # instrumental plans ignore tags and timed tags (Phase 4A E4b); Score Tools fit length cuts whole sections
-            "YuE2 chooses the length of instrumental plans itself: use Score Tools 'fit length', delete sections in "
-            "the score, or plan again with another seed."
+            # instrumental plans ignore tags and timed tags (Phase 4A E4b)
+            "YuE2 chooses the length of instrumental plans itself, and Score Tools 'fit length' could not bring "
+            "this one close: repeat or delete sections in the score, or plan again with another seed."
             if instrumental
             else "The plan follows the amount of lyrics: shorten or lengthen them, or edit the score."
         )

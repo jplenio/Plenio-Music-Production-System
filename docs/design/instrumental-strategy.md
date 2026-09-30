@@ -17,7 +17,7 @@ Instrumental output is treated as a quality requirement. The strategy is **defen
 | Deterministic score preparation | **Mandatory on both YuE2 paths** (G1): the final score has no sounding `Vocal` notes — *lead* moves them into `Ins`, *accompaniment* silences them. It is necessary but **not sufficient**: YuE2 can still sing the lead line (G4). | [4A E4] without the adapter the planner wrote a vocal melody into **6 of 6** plans for tag-only lyrics (30–219 notes); [4A E3] 2 of 6 text-path takes rendered from lead-prepared scores were flagged as vocal |
 | Instrumental adapter (D-06) | Keys load completely (AS-07 load part **verified**). **Covers (instrumental modes): on** — applied through a lazy native switch only when the brief is instrumental. **Song path: optional, bypassed by default** — there it makes plans very long or unfinished and every take ended abruptly. **Both defaults confirmed by the owner's listening (2026-09-25)**: covers with the adapter had no voice, musically close to those without; Song-path takes with the adapter were "boring, monotonous loops" with unnatural endings. | [4A E5/E3] adapter covers 6/6 at the score length, 0/6 flagged, melody overlap 0.89–0.92 vs 2/7 flagged and 3/7 off-length without; [4A E4/E4b] text path: 0/4 flagged, but 2/6 plans unfinished (token limit), plans 226–387 s, 4/4 abrupt endings vs 0/6 without |
 | Tag vocabulary / form | **Song path: the bare `[instrumental]` tag** (owner's listening: "much better, natural ending" against humming with section tags and loops with the adapter); covers: the final score's section tags. Timed tags do not control the length (63–387 s for an 80-s target). | [4A E4, E4b], owner verdicts 02–11 |
-| Length control of instrumental plans (Song path) | New deterministic Score Tools operation **fit length** (§3.2) instead of relying on the planner. | [4A E4] four tags gave plans of 188–363 s; timed tags 63–387 s |
+| Length control of instrumental plans (Song path) | New deterministic Score Tools operation **fit length** (§3.2) instead of relying on the planner. **E6 (2026-09-30)**: applied outside 0.8–1.2 × the target, cuts inside a section at a phrase and lengthens short plans (§14). | [4A E4] four tags gave plans of 188–363 s; timed tags 63–387 s; [E6] the owner's 274 instrumentals: 0.4–3.8 × the target |
 | Vocal detector for *Check Vocals* | **`score` only** (SheetSage2 re-transcription), **any `Vocal` note fails** (tolerance 0 s, advanced). `listen` (Gemma) dropped, `words` (ASR) rejected. | owner calibration on 25 takes: 6 of 8 voiced takes flagged (the 2 missed had a rare, faint voice), 0 false alarms; `listen` flagged a subset of `score` |
 | Ending check | Every take's report states whether it ends with the music still playing (tail loudness ≥ 0.5 × the take's median); Export warns; the planned fade-out in the Master stage is not built yet (deferred, Phase 9 audit AUD-14). | [4A E4] |
 | Takes | Default N = 1; cost per take is 0.35–0.55 × the song length on the owner's GPU (§7). | [4A E4/E5] |
@@ -66,7 +66,7 @@ The UI and documentation say exactly this: *"Plenio guarantees an instrumental c
 | Native | Planning `full`. Lyrics = the single tag `[instrumental]` (owner verdict; YuE2 plans the form itself). | Write Song, Song Sheet · Text, YuE2 Plan | G1/G2 |
 | Conditioning | Style: concise positive descriptors — genre, instruments, lead instrument, tempo, mood; **no** language, vocal character, singer, choir, humming, and no negated vocal terms. | Compose → Parse → Song Sheet validation | G1 (terms absent) / G2 |
 | Score | Score Tools *prepare from brief*: *lead* moves `Vocal` notes into `Ins`, *accompaniment* silences them — **needed in practice** (6/6 plans without the adapter had a vocal melody). Validated: no sounding `Vocal` notes. | Score Tools, Song Sheet · Score | G1 |
-| Length | Score Tools **fit length** (§3.2) when the plan is longer than 150 % of the brief's target. | Score Tools, Song Sheet · Score | G1 (score length) |
+| Length | Score Tools **fit length** (§3.2, §14) when the plan is outside 80–120 % of the brief's target. | Score Tools, Song Sheet · Score | G1 (score length) |
 | Adapter | Instrumental AR LoRA on the CLIP, bypassed by default (§10). | YuE2 Model block | G3 |
 | Validation | Check Vocals per take (§6); ending check. | Check Vocals | G5 |
 | Retry | Optional Takes block (§7). | Takes, Check Vocals | G4 → G5 |
@@ -221,10 +221,52 @@ These limits are stated in the node help, the user guide and the release record.
 | G1 score preparation | Score Tools *prepare from brief* (also for covers: harmony *new* strips chords first) | unit and host tests; real run: 42 chords removed, melody moved to Ins in 37 bars |
 | G1 lyrics | Song path `[instrumental]`; covers: Song Sheet `section_tags` through a lazy switch | host tests (song and cover path) |
 | G1 style | Parse removes vocal/language descriptors; the sheet refuses them; voice types count as vocal words, instruments named after them do not | unit tests incl. all 239 shipped templates |
-| G1 length (Song path) | *fit length* inside *prepare from brief* when the plan exceeds 1.5 x the target; the sheet's advice names fit length for instrumentals | real run: 140-s plan for 90 s could not be shortened (shortest complete form), reported |
+| G1 length (Song path) | *fit length* inside *prepare from brief* when the plan exceeds 1.5 x the target (E6: outside 0.8-1.2 x, inside sections and in both directions, §14); the sheet's advice names fit length for instrumentals | real run: 140-s plan for 90 s could not be shortened (shortest complete form), reported; E6: 92 % of the owner's 274 instrumental scores within 0.8-1.2 x |
 | G3 adapter | covers: `LoraLoader` behind a lazy `ComfySwitchNode` on `instrumental`; Song path: the bypassed `LoraLoader` in the *YuE2 Model* block (bypassed nodes leave the prompt, so the record lists no adapter licence there) | template validation; real instrumental cover: 0 vocal notes in 2 of 2 takes |
 | G5 Check Vocals | `score` detector, tolerance 0 s, ending check, ranked `takes` output | host tests (clean, flagged, sung skipped); real run |
 | G4 → G5 Takes | blueprint *Plenio · YuE2 Takes* (native loop), gated on the final lyrics | host tests (N seeds, review stops on either sheet do not hang); frontend `graphToPrompt`; real run with 2 takes |
 | records | the licences of SheetSage2 and the adapter are listed when the workflow references them | unit test; real records |
 
 Not built (unchanged): vocal removal of delivered audio; early-exit retries.
+
+## 14. E6 - length and form of instrumental songs (owner report, 2026-09-30)
+
+**Report:** instrumentals, above all electronic ones, came out far longer than asked (3 min asked, 8 min delivered) and
+monotonous.
+
+**Evidence - the owner's release records** (read only; 588 briefs, 274 instrumental YuE2 songs, Plenio 0.2.2-0.3.0):
+
+| | |
+|---|---|
+| audio / target | 22 % within 0.8-1.2 x; 33 % below 0.8 x (median of those 0.53 x); 45 % above 1.2 x, 61 songs above 2 x (up to 3.8 x, 654 s against 180 s - the render ceiling) |
+| by style (mean ratio) | EDM 1.78, African 1.70, electronic 1.53, European 1.47, ambient 1.24 ... classical 0.77 |
+| form of the long plans | almost always `[intro]` + one `[interlude]` of 400-800 s (1-2 sections); *fit length* needed 3 sections and never cut inside one, so these plans went to the render unchanged |
+| variety (study metric, `tools/studies/instrumental_form.py`) | an 8-min psytrance plan: 3 pitches, 1 chord (Fm), 11 % distinct bars in 290 - the planner repeats one pattern; a sung plan for comparison: 18 pitches, 7 chords, 68 % distinct |
+
+**Upstream** (YuE2 skill `instrumental/`, `scripts/instrumental.py`, 2026): the planner gets **planner-only** section
+tags (default `[Intro] [Verse] [Chorus] [Outro]`, "never sung in the final request"), Vocal notes move to Ins, and the
+render gets **empty lyrics or exactly the score's section tags**; the style is prefixed `Instrumental,` and ends with
+`no vocals, no singing, no choir, no spoken words`. Section vocabulary: intro, verse, pre-chorus, chorus, bridge,
+interlude, outro, instrumental. The instrumental LoRA card: three lyrics forms (bare, untimed, timed tags); timing is
+a guideline, the model follows order and proportions better than end times.
+
+**Built (deterministic, G1):** *fit length* works in both directions and inside sections; *prepare from brief* applies
+it to every instrumental plan outside 0.8-1.2 x the target (was: above 1.5 x, whole sections only).
+
+- too long: whole sections as before when that leaves 0.75-1.15 x; otherwise the bars between the start and the
+  plan's ending are removed **inside a section at a phrase** (section starts and every 4 bars) with the score editor's
+  *delete bars* (keys, ties, sections stay consistent). The ending is the last section when it is short (at most 0.3 x
+  the target, e.g. an outro), otherwise the plan's last phrase (at least 4 bars and 8 s). The cut point is the phrase
+  boundary nearest the target. No hard cut: YuE2 renders the plan's own ending.
+- too short: the middle (the sections between the first and the last; with two sections the second one, with its
+  ending) is repeated 1-3 x with *duplicate bars*, nearest the target, at most 1.2 x.
+- on the 274 records (their rendered scores, offline): **251 (92 %) within 0.8-1.2 x** (was 62); the shortened ones
+  average 1.0 x (0.76-1.19 x); 7 stay unchanged (single-section plans); 0 invalid scores; the last bars are the plan's.
+
+**Open - the form (monotony)**, measured with `tools/studies/instrumental_form.py` on the owner's GPU (phase *plans*:
+planner-only forms `bare`, `upstream`, `song` (a 3-minute verse/chorus form), `inst-labels`, `timed` x five styles
+x two seeds; phase *renders*: render lyrics `[instrumental]`, the score's tags, the tags with upstream's style, empty
+lyrics with upstream's style, each with Check Vocals). The first run was stopped because the owner's ComfyUI was using
+the GPU. Decision criteria: variety (pitches, chords, distinct bars), plan length, sections, and **no increase in
+Check Vocals flags** against today's `[instrumental]` - the owner's earlier verdict found humming with section tags in
+the render (§0), so section tags are only adopted for the render if the measurement and the owner's listening agree.

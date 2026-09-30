@@ -6,8 +6,10 @@ Every step is deterministic, validated by the score operations and reported:
 2. covers: *harmony new* removes the chord symbols (the render then runs in melody mode);
 3. instrumental songs and covers: the Vocal voice is silenced - the instrument plays the melody
    (*lead*) or the song is accompaniment only;
-4. instrumental songs: a plan longer than 1.5 x the brief's target is fitted at section
-   boundaries (the planner ignores the intended length for tag-only lyrics, Phase 4A E4).
+4. instrumental songs: a plan longer than 1.2 x the brief's target is shortened - at section
+   boundaries, or inside a section at a phrase, keeping the plan's ending - and a plan shorter
+   than 0.8 x repeats its middle (the planner ignores the intended length for tag-only lyrics,
+   Phase 4A E4; the owner's instrumentals ran from 0.4 x to 3.8 x the target, study E6).
 """
 
 from __future__ import annotations
@@ -15,7 +17,7 @@ from __future__ import annotations
 from .brief import CoverBrief, SongBrief
 from .score import native
 
-FIT_THRESHOLD = 1.5
+FIT_THRESHOLD = 1.2
 
 
 def prepare_for_brief(text: str, brief: SongBrief | CoverBrief | None) -> native.Change:
@@ -39,7 +41,7 @@ def prepare_for_brief(text: str, brief: SongBrief | CoverBrief | None) -> native
     warnings += step.warnings
     if isinstance(brief, SongBrief) and brief.instrumental:
         duration = native.validate(text).duration_s
-        if duration > FIT_THRESHOLD * brief.target_seconds:
+        if not native.EXTEND_BELOW * brief.target_seconds <= duration <= FIT_THRESHOLD * brief.target_seconds:
             step = native.fit_length(text, brief.target_seconds)
             text = step.abc
             changes += step.changes

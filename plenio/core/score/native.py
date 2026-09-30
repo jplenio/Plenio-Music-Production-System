@@ -810,6 +810,16 @@ def repair_truncated(text: str) -> Change | None:
 
 
 FIT_TOLERANCE = 1.15
+FIT_FLOOR = 0.75
+"""A section fit shorter than this share of the target falls back to a cut inside a section."""
+PHRASE_BARS = 4
+ENDING_SHARE = 0.3
+"""The kept ending (the last section, or the plan's last phrase) takes at most this share of the target."""
+ENDING_MIN_SECONDS = 8.0
+EXTEND_BELOW = 0.8
+"""A score shorter than this share of the target is lengthened by repeating its middle."""
+EXTEND_CEILING = 1.2
+EXTEND_MAX_REPEATS = 3
 
 
 def _core_sections(labels: list[str]) -> int:
@@ -823,7 +833,33 @@ def _core_sections(labels: list[str]) -> int:
 
 
 def fit_length(text: str, target_seconds: float) -> Change:
-    """Shorten a score to about ``target_seconds`` at section boundaries.
+    """Bring a score to about ``target_seconds`` without cutting its ending off.
+
+    Too long: first at section boundaries (:func:`_fit_sections`); when that is not possible or
+    leaves too little - instrumental plans often consist of an intro and one long section that
+    repeats for minutes (the owner's records, study E6) - inside a section at a phrase
+    (:func:`_fit_phrases`). Too short (below ``EXTEND_BELOW`` x the target): the middle of the song
+    is repeated (:func:`_extend_middle`). Either way the plan's own beginning and ending stay.
+    """
+    analysis = validate(text)
+    limit = target_seconds * FIT_TOLERANCE
+    if analysis.duration_s < EXTEND_BELOW * target_seconds:
+        return _extend_middle(text, analysis, target_seconds)
+    if analysis.duration_s <= limit:
+        return Change(
+            text, (f"length {analysis.duration_s:.0f} s fits about {target_seconds:.0f} s: unchanged",)
+        )
+    if len(analysis.sections) >= 3:
+        by_sections = _fit_sections(text, analysis, target_seconds)
+        if by_sections.abc != text and (
+            FIT_FLOOR * target_seconds <= validate(by_sections.abc).duration_s <= limit
+        ):
+            return by_sections
+    return _fit_phrases(text, analysis, target_seconds)
+
+
+def _fit_sections(text: str, analysis: Analysis, target_seconds: float) -> Change:
+    """Shorten a score at section boundaries.
 
     Keeps whole sections from the start - at least up to the first chorus (or verse), so that a
     complete song remains - and then more sections while the kept part plus the final section
@@ -831,13 +867,8 @@ def fit_length(text: str, target_seconds: float) -> Change:
     cuts inside a section. When a removed section changes key or meter, the final section is not
     appended (its key would be wrong) and a warning says so.
     """
-    analysis = validate(text)
     sections = list(analysis.sections)
     limit = target_seconds * FIT_TOLERANCE
-    if analysis.duration_s <= limit or len(sections) < 3:
-        return Change(
-            text, (f"length {analysis.duration_s:.0f} s fits about {target_seconds:.0f} s: unchanged",)
-        )
     ending = sections[-1]
     durations = [s.end_s - s.start_s for s in sections]
     keep = min(_core_sections([s.label for s in sections]), len(sections) - 1)
@@ -895,6 +926,129 @@ def fit_length(text: str, target_seconds: float) -> Change:
             f"{analysis.duration_s:.0f} s -> {after.duration_s:.0f} s",
         ),
         tuple(warnings),
+    )
+
+
+def _extend_middle(text: str, analysis: Analysis, target_seconds: float) -> Change:
+    """Lengthen a short score by repeating its middle - the sections between the first and the last
+    (intro ... outro keep their places), as a song repeats its verse and chorus; with two sections
+    the second one repeats (with its ending, which then closes the last copy).
+
+    The number of repeats (at most ``EXTEND_MAX_REPEATS``) brings the length nearest the target
+    without going past ``EXTEND_CEILING`` x the target; the copies are made with the score editor's
+    *duplicate bars*, so whole sections are copied with their labels, keys and chords.
+    """
+    from . import canonical
+    from .ops import MAX_INSERT, duplicate_measures
+
+    sections = analysis.sections
+    unchanged = f"length {analysis.duration_s:.0f} s, shorter than about {target_seconds:.0f} s"
+    if len(sections) < 2:
+        return Change(text, (f"{unchanged}: a single section cannot be repeated; unchanged",))
+    if len(sections) == 2:  # intro and one more section: that section repeats, with its ending
+        first, end = sections[1].start_bar - 1, len(analysis.bars)
+        block_seconds = analysis.duration_s - sections[1].start_s
+    else:
+        first, end = sections[1].start_bar - 1, sections[-1].start_bar - 1
+        block_seconds = sections[-1].start_s - sections[1].start_s
+    block = end - first
+    if block < PHRASE_BARS or block > MAX_INSERT or block_seconds <= 0:
+        return Change(text, (f"{unchanged}: its middle cannot be repeated; unchanged",))
+    options = [
+        k
+        for k in range(EXTEND_MAX_REPEATS + 1)
+        if analysis.duration_s + k * block_seconds <= EXTEND_CEILING * target_seconds
+    ]
+    repeats = min(options, key=lambda k: abs(analysis.duration_s + k * block_seconds - target_seconds))
+    if repeats == 0:
+        return Change(text, (f"{unchanged}: one more repeat of its middle would be too long; unchanged",))
+    score = canonical.from_abc(text)
+    warnings: list[str] = []
+    for _ in range(repeats):
+        result = duplicate_measures(score, first + 1, block)
+        score = result.score
+        warnings += result.warnings
+    extended = canonical.to_abc(score)
+    after = validate(extended)
+    labels = ", ".join(s.label for s in (sections[1:] if len(sections) == 2 else sections[1:-1]))
+    where = "" if len(sections) == 2 else f" before the {sections[-1].label}"
+    return Change(
+        extended,
+        (
+            f"extended to about {target_seconds:.0f} s: the middle ({labels}, bars {first + 1}-{end}) repeated "
+            f"{repeats} x{where}; {analysis.duration_s:.0f} s -> {after.duration_s:.0f} s",
+        ),
+        tuple(warnings),
+    )
+
+
+def _fit_phrases(text: str, analysis: Analysis, target_seconds: float) -> Change:
+    """Shorten a score inside its sections: keep the start up to a phrase, and the plan's ending.
+
+    The ending is the last section when it is short (at most ``ENDING_SHARE`` of the target, e.g. an
+    outro), otherwise the plan's last phrase: at least ``PHRASE_BARS`` bars and ``ENDING_MIN_SECONDS``. The start is kept up
+    to the phrase boundary - a section start, or every ``PHRASE_BARS`` bars into a section - that brings
+    start and ending nearest the target (within ``FIT_TOLERANCE`` x the target). The bars in between are
+    removed with the score editor's *delete bars*, so keys, ties and sections stay consistent.
+    """
+    from . import canonical
+    from .ops import delete_measures
+
+    bars = analysis.bars
+    count = len(bars)
+    limit = target_seconds * FIT_TOLERANCE
+    section_starts = sorted({max(0, s.start_bar - 1) for s in analysis.sections} | {0})
+
+    def section_start(index: int) -> int:
+        return max(start for start in section_starts if start <= index)
+
+    def seconds(first: int, end: int) -> float:
+        return sum(bar.duration_s for bar in bars[first:end])
+
+    boundaries = [
+        index
+        for index in range(1, count)
+        if index in section_starts or (index - section_start(index)) % PHRASE_BARS == 0
+    ]
+    last = analysis.sections[-1] if analysis.sections else None
+    if (
+        last is not None
+        and len(analysis.sections) >= 2
+        and last.start_bar > 1
+        and last.end_s - last.start_s <= ENDING_SHARE * target_seconds
+    ):
+        ending, ending_kind = last.start_bar - 1, f"the {last.label} section"
+    else:
+        long_enough = [
+            b for b in boundaries if seconds(b, count) >= ENDING_MIN_SECONDS and count - b >= PHRASE_BARS
+        ]
+        if not long_enough:
+            return Change(text, ("the score is too short to keep an ending: unchanged",))
+        short_enough = [b for b in long_enough if seconds(b, count) <= ENDING_SHARE * target_seconds]
+        ending = max(short_enough) if short_enough else max(long_enough)
+        ending_kind = "the plan's last phrase"
+    tail = seconds(ending, count)
+    earlier = [b for b in boundaries if b < ending]
+    if not earlier:
+        return Change(text, ("no phrase can be removed",))
+    warnings: list[str] = []
+    fitting = [b for b in earlier if seconds(0, b) + tail <= limit]
+    if not fitting:
+        fitting = [min(earlier)]
+        warnings.append(f"even the first phrase and the ending last longer than {target_seconds:.0f} s")
+    head = min(fitting, key=lambda b: (abs(seconds(0, b) + tail - target_seconds), -b))  # nearest the target
+    result = delete_measures(canonical.from_abc(text), head + 1, ending - head)
+    fitted = canonical.to_abc(result.score)
+    after = validate(fitted)
+    where = next((s.label for s in reversed(analysis.sections) if s.start_bar - 1 <= head), "score")
+    return Change(
+        fitted,
+        (
+            f"fitted to about {target_seconds:.0f} s inside the {where} section: bars {head + 1}-{ending} "
+            f"removed at a phrase boundary, {ending_kind} (bars {ending + 1}-{count}) kept as the ending; "
+            f"{analysis.duration_s:.0f} s -> {after.duration_s:.0f} s",
+        ),
+        (*warnings, *result.warnings),
     )
 
 

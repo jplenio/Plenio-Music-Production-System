@@ -58,7 +58,7 @@ class PlenioScoreTools(io.ComfyNode):
                                     min=20.0,
                                     max=900.0,
                                     step=5.0,
-                                    tooltip="Target length; whole sections are kept, the ending stays.",
+                                    tooltip="Target length. Longer scores lose whole sections, or bars inside a section at a phrase; shorter ones repeat their middle. The beginning and the ending stay.",
                                 ),
                             ],
                         ),

@@ -25,4 +25,9 @@ Limits: quiet humming below the transcription's threshold may pass, an instrumen
 
 ## Length of instrumental songs
 
-YuE2 decides the length of an instrumental plan itself; tags and timed tags do not control it. Score Tools *fit length* removes whole sections when a plan is much longer than requested and reports when the shortest complete form is still too long.
+YuE2 decides the length of an instrumental plan itself; tags and timed tags do not control it. Left alone, the owner's instrumental plans ran from 0.4 to 3.8 times the requested length - above all EDM and electronic styles, where the planner wrote an intro and one section that repeated for up to 14 minutes. *Prepare from brief* therefore fits every instrumental plan that is more than 1.2 times or less than 0.8 times the brief's length (Score Tools *fit length*):
+
+- **too long**: whole sections are removed; when the sections are too long for that, the bars in between are removed inside a section at a phrase (every 4 bars). The plan's beginning and its own ending - the outro, or the last phrase - stay, so the song still ends as it was written, not with a hard cut.
+- **too short**: the middle of the song (the sections between the first and the last) is repeated, like a second verse and chorus.
+
+The score sheet says what was removed or repeated. On the owner's 274 instrumental scores this brings 92 % within 0.8-1.2 times the requested length (22 % before); the rest are single-section plans that cannot be lengthened.

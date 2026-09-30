@@ -2681,7 +2681,7 @@
            "seconds": [
             "FLOAT",
             {
-             "tooltip": "Target length; whole sections are kept, the ending stays.",
+             "tooltip": "Target length. Longer scores lose whole sections, or bars inside a section at a phrase; shorter ones repeat their middle. The beginning and the ending stay.",
              "default": 90.0,
              "min": 20.0,
              "max": 900.0,
