@@ -23,6 +23,10 @@ YuE2 can still produce humming, vowel sounds or a choir-like pad. **Check Vocals
 
 Limits: quiet humming below the transcription's threshold may pass, an instrument that sounds like a voice may be flagged, and the check says nothing about musical quality. Delivered audio is never processed by vocal removal.
 
+## Form of instrumental songs
+
+With only `[instrumental]` as lyrics, YuE2's planner mostly wrote an intro and one long section that repeated the same pattern. Since 0.3.1 the planner reads a **section form** that grows with the brief's length - *Intro, Verse, Chorus, Outro* for about a minute, up to *Intro, Verse, Pre-Chorus, Chorus, Verse, Pre-Chorus, Chorus, Bridge, Chorus, Outro* for 4:30 and more - as YuE2's own instrumental workflow does. The form is **only for the plan** (Song Sheet · Text, output *plan_lyrics*): the render still gets `[instrumental]`, and any melody the planner writes for the voice moves to the instrument as before. If you write or edit the lyrics yourself, the planner reads your text.
+
 ## Length of instrumental songs
 
 YuE2 decides the length of an instrumental plan itself; tags and timed tags do not control it. Left alone, the owner's instrumental plans ran from 0.4 to 3.8 times the requested length - above all EDM and electronic styles, where the planner wrote an intro and one section that repeated for up to 14 minutes. *Prepare from brief* therefore fits every instrumental plan that is more than 1.2 times or less than 0.8 times the brief's length (Score Tools *fit length*):

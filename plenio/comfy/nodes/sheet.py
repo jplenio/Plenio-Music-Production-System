@@ -7,6 +7,7 @@ from typing import Any
 from comfy_api.latest import io
 
 from ...core import score as score_rules
+from ...core import writing
 from ...core.brief import CoverBrief
 from ...core.diagnostics import has_errors, warning
 from ...core.engines import rules_for
@@ -115,6 +116,13 @@ class PlenioSongSheet(io.ComfyNode):
                     display_name="section_tags",
                     tooltip="The final score's section tags (the lyrics of an instrumental cover).",
                 ),
+                io.String.Output(
+                    display_name="plan_lyrics",
+                    tooltip=(
+                        "What the YuE2 planner reads: for an instrumental song, a section form for the brief's "
+                        "length (never sung - the render keeps [instrumental]); otherwise the lyrics."
+                    ),
+                ),
             ],
             hidden=[io.Hidden.unique_id],
             is_output_node=True,
@@ -193,15 +201,18 @@ class PlenioSongSheet(io.ComfyNode):
         final_score = evaluation.text("score") if "score" in evaluation.owned else ""
         tags = score_rules.section_tags(final_score) if final_score.strip() else ""
         derived: list[Any] = [evaluation.planning_mode, evaluation.score_seconds]
+        final_lyrics = evaluation.text("lyrics") if "lyrics" in evaluation.owned else ""
+        plan_lyrics: Any = writing.plan_lyrics(final_lyrics or "", brief)
         if evaluation.waiting_for_approval:
             documents = [host.execution_blocker(None)] * len(DOCUMENT_KINDS)
             derived = [host.execution_blocker(None)] * 2
             tags = host.execution_blocker(None)
+            plan_lyrics = host.execution_blocker(None)
         ui = {
             "plenio_sheet": [payload],
             "plenio_summary": [{"status": report.status.value, "markdown": _markdown(evaluation)}],
         }
-        return io.NodeOutput(*documents, *derived, report, tags, ui=ui)
+        return io.NodeOutput(*documents, *derived, report, tags, plan_lyrics, ui=ui)
 
 
 def _cover_findings(brief: Any, upstream: dict[str, Any], state: Any) -> list[Any]:

@@ -263,7 +263,13 @@ it to every instrumental plan outside 0.8-1.2 x the target (was: above 1.5 x, wh
 - on the 274 records (their rendered scores, offline): **251 (92 %) within 0.8-1.2 x** (was 62); the shortened ones
   average 1.0 x (0.76-1.19 x); 7 stay unchanged (single-section plans); 0 invalid scores; the last bars are the plan's.
 
-**Open - the form (monotony)**, measured with `tools/studies/instrumental_form.py` on the owner's GPU (phase *plans*:
+**Built in 0.3.1 - the form (owner's decision 2026-10-01, before the measurement):** the planner reads a
+planner-only form by target length (`core.writing.PLAN_FORMS`: 4 sections up to 100 s, 6 up to 165 s, 8 with a bridge
+up to 250 s, 10 with pre-choruses above), passed by the text sheet's new output `plan_lyrics` to YuE2 Plan only. The
+render keeps `[instrumental]` (the owner's verdict of §0 stands), and *prepare from brief* still silences the Vocal
+voice (G1), so the singing-side conditioning is unchanged. User-written or edited lyrics reach the planner unchanged.
+
+**Still to measure**, with `tools/studies/instrumental_form.py` on the owner's GPU (phase *plans*:
 planner-only forms `bare`, `upstream`, `song` (a 3-minute verse/chorus form), `inst-labels`, `timed` x five styles
 x two seeds; phase *renders*: render lyrics `[instrumental]`, the score's tags, the tags with upstream's style, empty
 lyrics with upstream's style, each with Check Vocals). The first run was stopped because the owner's ComfyUI was using

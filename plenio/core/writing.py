@@ -50,6 +50,50 @@ INSTRUMENTAL_TAG = "instrumental"
 """Lyrics of an instrumental song: the single tag ``[instrumental]`` (Phase 4A: fewer vocal-like
 sounds than section tags, and the owner preferred these takes)."""
 
+PLAN_FORMS: tuple[tuple[float, tuple[str, ...]], ...] = (
+    (100.0, ("Intro", "Verse", "Chorus", "Outro")),
+    (165.0, ("Intro", "Verse", "Chorus", "Verse", "Chorus", "Outro")),
+    (250.0, ("Intro", "Verse", "Chorus", "Verse", "Chorus", "Bridge", "Chorus", "Outro")),
+    (
+        float("inf"),
+        (
+            "Intro",
+            "Verse",
+            "Pre-Chorus",
+            "Chorus",
+            "Verse",
+            "Pre-Chorus",
+            "Chorus",
+            "Bridge",
+            "Chorus",
+            "Outro",
+        ),
+    ),
+)
+"""Planner-only forms of an instrumental song by its target length (seconds, upper bound).
+
+With the lyrics ``[instrumental]`` the planner mostly wrote an intro and one section repeating for
+minutes (study E6). Upstream's instrumental workflow (YuE2 skill ``instrumental/``) plans with empty
+section tags instead - "planner-only ... never sung in the final request" - and the render keeps
+``[instrumental]``. Tag names are the instrumental adapter's vocabulary."""
+
+
+def instrumental_plan_form(target_seconds: float) -> str:
+    """The planner-only lyrics of an instrumental song: empty section tags, one per line."""
+    form = next(tags for limit, tags in PLAN_FORMS if target_seconds <= limit)
+    return "\n\n".join(f"[{tag}]" for tag in form) + "\n"
+
+
+def plan_lyrics(lyrics: str, brief: Any) -> str:
+    """What the YuE2 planner reads: for an instrumental song whose lyrics are the bare
+    ``[instrumental]`` tag, a section form for the brief's length; otherwise the lyrics unchanged.
+    Only the plan sees it - the render gets the sheet's lyrics (``[instrumental]``), and the plan's
+    Vocal notes are moved to Ins by *prepare from brief*, as before."""
+    bare = lyrics.strip().lower() == f"[{INSTRUMENTAL_TAG}]"
+    if bare and isinstance(brief, SongBrief) and brief.instrumental:
+        return instrumental_plan_form(brief.target_seconds)
+    return lyrics
+
 
 @dataclass(frozen=True)
 class Request:

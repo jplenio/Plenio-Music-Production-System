@@ -1012,7 +1012,7 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g.link(model_node, "engine", text_sheet, "engine")
     g.link(model_node, "CLIP", plan, "clip")
     g.link(text_sheet, "style", plan, "style")
-    g.link(text_sheet, "lyrics", plan, "lyrics")
+    g.link(text_sheet, "plan_lyrics", plan, "lyrics")
     g.link(plan, "score", tools, "score")
     g.link(brief, "brief", tools, "brief")
     g.link(tools, "score", score_sheet, "score")

@@ -2,10 +2,11 @@
 
 All notable changes are listed here. Versions follow semantic versioning; published Registry versions are immutable.
 
-## Unreleased
+## 0.3.1 - 2026-10-01
 
 ### Changed
 
+- **Instrumental songs get a song form** (YuE2 Song path). With the lyrics `[instrumental]` the planner mostly wrote an intro and one section that repeated for minutes - in the owner's electronic songs one pattern over one chord. The planner now reads a **planner-only form** that grows with the brief's length - from *Intro, Verse, Chorus, Outro* for about 1:00 to *Intro, Verse, Pre-Chorus, Chorus, Verse, Pre-Chorus, Chorus, Bridge, Chorus, Outro* for 4:30 and more - as YuE2's own instrumental workflow does (empty section tags, never sung). The render still gets `[instrumental]`, and any melody the planner writes for the voice still moves to the instrument (*prepare from brief*), so nothing new reaches the singing side. The Song Sheet has a new output **plan_lyrics** for this; lyrics you write or edit yourself reach the planner unchanged. Not yet measured on the GPU (study E6, planned).
 - **Instrumental songs keep the requested length** (YuE2 Song path). YuE2 plans an instrumental's length itself; the owner's 274 instrumentals ran from 0.4 to 3.8 times the brief's length - above all EDM and electronic styles, where the plan was an intro and one section repeating for up to 14 minutes, which *fit length* could not cut. *Prepare from brief* now fits every instrumental plan outside 0.8-1.2 times the target: too long, it removes whole sections or - inside a long section - the bars between the start and the plan's own ending, at a phrase, so the song still ends as it was written (no hard cut); too short, it repeats the middle of the song. On the owner's records this brings 92 % of the instrumentals within 0.8-1.2 times the length (22 % before). Score Tools *fit length* does the same on demand.
 
 ### Fixed

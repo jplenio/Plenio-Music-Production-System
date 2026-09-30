@@ -3446,6 +3446,7 @@
     "COMBO",
     "FLOAT",
     "PLENIO_REPORT",
+    "STRING",
     "STRING"
    ],
    "output_name": [
@@ -3457,9 +3458,11 @@
     "planning_mode",
     "score_seconds",
     "report",
-    "section_tags"
+    "section_tags",
+    "plan_lyrics"
    ],
    "output_is_list": [
+    false,
     false,
     false,
     false,

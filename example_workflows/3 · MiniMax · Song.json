@@ -653,6 +653,12 @@
      "name": "section_tags",
      "type": "STRING",
      "links": null
+    },
+    {
+     "localized_name": "plan_lyrics",
+     "name": "plan_lyrics",
+     "type": "STRING",
+     "links": null
     }
    ],
    "title": "Song Sheet",

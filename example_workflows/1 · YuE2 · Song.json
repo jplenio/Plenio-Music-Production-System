@@ -593,7 +593,6 @@
      "name": "lyrics",
      "type": "STRING",
      "links": [
-      15,
       20,
       27
      ]
@@ -637,6 +636,14 @@
      "name": "section_tags",
      "type": "STRING",
      "links": null
+    },
+    {
+     "localized_name": "plan_lyrics",
+     "name": "plan_lyrics",
+     "type": "STRING",
+     "links": [
+      15
+     ]
     }
    ],
    "title": "Song Sheet · Text",
@@ -985,6 +992,12 @@
     {
      "localized_name": "section_tags",
      "name": "section_tags",
+     "type": "STRING",
+     "links": null
+    },
+    {
+     "localized_name": "plan_lyrics",
+     "name": "plan_lyrics",
      "type": "STRING",
      "links": null
     }
@@ -1928,7 +1941,7 @@
   [
    15,
    6,
-   2,
+   9,
    7,
    2,
    "STRING"

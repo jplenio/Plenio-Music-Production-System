@@ -456,3 +456,21 @@ def test_validator_checks_the_template_anatomy(tmp_path: Path) -> None:
         "thumbnail",
     ):
         assert message in text, message
+
+
+def test_the_song_planner_reads_the_plan_lyrics_and_the_render_the_sheets_lyrics() -> None:
+    """0.3.1 (study E6): the YuE2 planner gets a section form for instrumental songs through the text
+    sheet's ``plan_lyrics``; the render keeps the sheet's ``lyrics`` ([instrumental]), never the form."""
+    template = TEMPLATES["1 · YuE2 · Song"]
+    titles = {n["id"]: n.get("title") or n["type"] for n in template["nodes"]}
+    links = {link[0]: link for link in template["links"]}
+    sheet = next(n for n in template["nodes"] if titles[n["id"]] == "Song Sheet · Text")
+    outputs = [slot["name"] for slot in sheet["outputs"]]
+
+    def source(node_title: str, name: str) -> tuple[str, str]:
+        node = next(n for n in template["nodes"] if titles[n["id"]] == node_title)
+        link = links[next(s["link"] for s in node["inputs"] if s["name"] == name)]
+        return titles[link[1]], outputs[link[2]] if titles[link[1]] == "Song Sheet · Text" else str(link[2])
+
+    assert source("Plenio · YuE2 Plan", "lyrics") == ("Song Sheet · Text", "plan_lyrics")
+    assert source("Plenio · YuE2 Render", "lyrics") == ("Song Sheet · Text", "lyrics")
