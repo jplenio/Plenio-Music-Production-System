@@ -1,4 +1,4 @@
-import { a as b3, P as om, b as y3, t as w3, i as x3, e as k3, v as C3, s as af, g as S3, r as T3, u as A3, w as of, c as M3, n as _3, d as lf, f as _s } from "./main-rLeKy2iL.mjs";
+import { a as b3, P as om, b as y3, t as w3, i as x3, e as k3, v as C3, s as af, g as S3, r as T3, u as A3, w as of, c as M3, n as _3, d as lf, f as _s } from "./main-Ch6eHqdr.mjs";
 import { notesLabel as E3, trackRows as B3, sameGuide as zc, guideNotes as L3 } from "./tracks-DEywwRcM.mjs";
 // @__NO_SIDE_EFFECTS__
 function Uh(i) {
@@ -4200,8 +4200,8 @@ function l6(i, e = "1/16") {
   return `${i.voice} bar ${i.bar}: ${n}, ${i.kind === "bar_rest" ? "whole bar" : r}${s}`;
 }
 function la(i) {
-  const e = Math.floor(i / 60), t = Math.floor(i - e * 60);
-  return `${e}:${String(t).padStart(2, "0")}`;
+  const e = Math.max(0, i), t = Math.floor(e / 60), r = Math.floor(e - t * 60);
+  return `${t}:${String(r).padStart(2, "0")}`;
 }
 let Zc = [], gv = [];
 (() => {

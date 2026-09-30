@@ -74,8 +74,9 @@ export interface SectionTime {
 }
 
 function clock(seconds: number): string {
-  const minutes = Math.floor(seconds / 60)
-  const rest = Math.round(seconds - minutes * 60)
+  const time = Math.max(0, seconds) // a padded pickup bar begins before the recording
+  const minutes = Math.floor(time / 60)
+  const rest = Math.round(time - minutes * 60)
   return `${minutes}:${String(rest).padStart(2, '0')}`
 }
 

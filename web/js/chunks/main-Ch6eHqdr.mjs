@@ -1059,8 +1059,8 @@ function qi(e) {
   return (t.length ? t.join(" · ") : "all documents automatic") + n;
 }
 function Bt(e) {
-  const t = Math.floor(e / 60), n = Math.round(e - t * 60);
-  return `${t}:${String(n).padStart(2, "0")}`;
+  const t = Math.max(0, e), n = Math.floor(t / 60), i = Math.round(t - n * 60);
+  return `${n}:${String(i).padStart(2, "0")}`;
 }
 function yr(e) {
   return e?.bars?.length ? (e.sections ?? []).map(([t, n, i]) => {
@@ -1160,7 +1160,7 @@ const Ci = (e, t, n) => {
     b.stopPropagation();
     const O = Rt(i);
     O === null && (s.textContent = "The stored state is unreadable; it will be replaced when you apply.");
-    const q = Ct(String(e.id)), V = (e.inputs ?? []).filter((_) => _.link != null).map((_) => _.name), a = O ?? { schema: "plenio.sheet_state/1", docs: {} }, P = q?.owned ?? Ni(V, a), E = String(e.widgets?.find((_) => _.name === "review")?.value ?? "continue"), p = E === "as the brief says" ? q?.review ?? "continue" : E, { openSheetDialog: d } = await import("./open-4t88BhGe.mjs"), { parseGuide: f, serializeGuide: m } = await import("./tracks-DEywwRcM.mjs");
+    const q = Ct(String(e.id)), V = (e.inputs ?? []).filter((_) => _.link != null).map((_) => _.name), a = O ?? { schema: "plenio.sheet_state/1", docs: {} }, P = q?.owned ?? Ni(V, a), E = String(e.widgets?.find((_) => _.name === "review")?.value ?? "continue"), p = E === "as the brief says" ? q?.review ?? "continue" : E, { openSheetDialog: d } = await import("./open--pGHtHnX.mjs"), { parseGuide: f, serializeGuide: m } = await import("./tracks-DEywwRcM.mjs");
     if (!it) throw new Error("Plenio: API not initialised");
     d({
       title: e.title || "Song Sheet",

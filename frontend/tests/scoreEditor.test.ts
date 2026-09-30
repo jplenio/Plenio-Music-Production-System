@@ -165,6 +165,7 @@ describe('score view helpers', () => {
     expect(clock(0)).toBe('0:00')
     expect(clock(61.9)).toBe('1:01')
     expect(clock(600)).toBe('10:00')
+    expect(clock(-1.2)).toBe('0:00') // a padded pickup bar of a transcription (read "-1:58")
   })
 })
 

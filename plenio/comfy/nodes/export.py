@@ -231,11 +231,20 @@ class PlenioExportRelease(io.ComfyNode):
         record_path = file(RECORD_SUFFIX)
         atomic_write_text(record_path, json.dumps(record, indent=2, ensure_ascii=False))
         relative_names = [str(Path(p).relative_to(base)) for p in written]
-        clipped = sum(int(f.get("clipped_samples", 0)) for f in facts)
+        # the released files: a clip there is a mistake (a limiter before the export avoids it)
+        released = [f for f in facts if f.get("role") not in ("original", "cover")]
+        clipped = sum(int(f.get("clipped_samples", 0)) for f in released)
         if clipped:
             warnings.append(
                 f"{clipped} samples above full scale were clipped in FLAC/MP3 (peak "
-                f"{max(float(f.get('peak', 0)) for f in facts):.3f}); a limiter before the export avoids this"
+                f"{max(float(f.get('peak', 0)) for f in released):.3f}); a limiter before the export avoids this"
+            )
+        # the unmastered take is kept as it was rendered: a render above full scale is normal there
+        # and the mastered files are not affected, so it is a note, not a warning
+        for f in (f for f in facts if f.get("role") == "original" and f.get("clipped_samples")):
+            notes.append(
+                f"the unmastered take peaks at {float(f.get('peak', 0)):.3f}: {int(f['clipped_samples'])} samples "
+                "above full scale were clipped in its FLAC (the mastered files are not affected)"
             )
         if wav and any(metadata.get(k) for k in ("album_artist", "composer")):
             warnings.append("WAV files cannot hold album artist and composer tags")

@@ -141,6 +141,50 @@ def test_tag_copy_accepts_an_annotated_load_audio_value(server: ComfyServer) -> 
     assert tags["artist"] == "Plenio"
 
 
+def test_a_loud_unmastered_take_is_a_note_not_a_warning(server: ComfyServer) -> None:
+    """A YuE2 render peaks above full scale, so its (original).flac clips; the export warned about it
+    on every run ('a limiter before the export avoids this'), though the mastered files were fine."""
+    import uuid
+
+    import numpy as np
+
+    from plenio.core.release import write_audio
+
+    tag = uuid.uuid4().hex[:8]
+    (server.base / "input").mkdir(exist_ok=True)
+    t = np.arange(44100 * 2) / 44100
+    tone = np.vstack([np.sin(2 * np.pi * 220 * t)] * 2)
+    write_audio(server.base / "input" / f"mastered-{tag}.flac", 0.5 * tone, 44100, "flac", {})
+    write_audio(server.base / "input" / f"loud-{tag}.wav", 1.2 * tone, 44100, "wav", {})  # float: > 1 kept
+
+    def export(audio: str, original: str | None) -> dict:
+        folder = f"plenio-audit/{uuid.uuid4().hex[:8]}"
+        prompt = {
+            "1": {"class_type": "LoadAudio", "inputs": {"audio": audio}},
+            "3": {
+                "class_type": "PlenioExportRelease",
+                "inputs": {
+                    "audio": ["1", 0],
+                    "folder": folder,
+                    "naming": "{title}",
+                    "collision": "number",
+                    "tags": "title only",
+                    **({"original": ["2", 0]} if original else {}),
+                },
+            },
+        }
+        if original:
+            prompt["2"] = {"class_type": "LoadAudio", "inputs": {"audio": original}}
+        return server.run(prompt)["outputs"]["3"]["plenio_summary"][0]
+
+    quiet_song = export(f"mastered-{tag}.flac", f"loud-{tag}.wav")
+    assert quiet_song["status"] == "ok", quiet_song["markdown"]
+    assert "the unmastered take peaks at 1.200" in quiet_song["markdown"]
+    assert "limiter" not in quiet_song["markdown"]
+    loud_song = export(f"loud-{tag}.wav", None)  # the released file itself clips: still a warning
+    assert loud_song["status"] == "warning" and "a limiter before the export" in loud_song["markdown"]
+
+
 def test_a_free_form_length_passes_validation_with_a_note(server: ComfyServer) -> None:
     """A length like '2-3 minutes' (the predecessor toolkit's option, reused from other parameters)
     failed the prompt's validation; it now takes the nearest option and the node says so."""

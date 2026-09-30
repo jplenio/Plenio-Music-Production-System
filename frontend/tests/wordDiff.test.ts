@@ -35,5 +35,7 @@ describe('section times', () => {
       { label: 'chorus', bars: 1, start: '0:04', end: '1:03' }
     ])
     expect(sectionTimes(undefined)).toEqual([])
+    // a padded pickup bar begins before the recording: 0:00, not "-1:59"
+    expect(sectionTimes({ duration_s: 10, bars: [[-1.2, 2, '4/4']], sections: [['intro', 1, 1]] })[0].start).toBe('0:00')
   })
 })

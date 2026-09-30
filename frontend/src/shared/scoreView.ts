@@ -273,8 +273,11 @@ export function describe(element: ScoreElement | null, unit = '1/16'): string {
   return `${element.voice} bar ${element.bar}: ${what}, ${element.kind === 'bar_rest' ? 'whole bar' : length}${chord}`
 }
 
+/** ``m:ss``. A time before the start shows as 0:00: a transcription's padded pickup bar begins before
+ * the recording, and ``Math.floor`` made -1.2 s read "-1:58". */
 export function clock(seconds: number): string {
-  const minutes = Math.floor(seconds / 60)
-  const rest = Math.floor(seconds - minutes * 60)
+  const time = Math.max(0, seconds)
+  const minutes = Math.floor(time / 60)
+  const rest = Math.floor(time - minutes * 60)
   return `${minutes}:${String(rest).padStart(2, '0')}`
 }
