@@ -8,6 +8,25 @@
 
 Everything runs on your own machine, inside ComfyUI's own nodes: no cloud service, no API key, no extra Python packages. Before a single note is rendered, the **Song Sheet** shows you the title, style, lyrics and score that the model will receive. You can edit all of them, and your edits are never silently overwritten.
 
+## Watch the tutorials
+
+Two short video walkthroughs (about 6 minutes each, English subtitles), recorded in ComfyUI with the real models: one run straight through, then one with both review stops - checking the lyrics, editing the score, approving and rendering.
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <a href="https://youtu.be/WLiZp3wDKGE"><img src="assets/branding/0.3.0/tutorial-1-yue2-song.jpg" alt="Tutorial 1 · YuE2 · Song - watch on YouTube" width="100%" /></a>
+      <br /><b><a href="https://youtu.be/WLiZp3wDKGE">Tutorial 1 · YuE2 · Song</a></b>
+      <br />Write a song from a brief, review the lyrics, edit the score in the piano roll, render and master it.
+    </td>
+    <td width="50%" align="center">
+      <a href="https://youtu.be/Was_C78aRQE"><img src="assets/branding/0.3.0/tutorial-2-yue2-cover.jpg" alt="Tutorial 2 · YuE2 · Cover - watch on YouTube" width="100%" /></a>
+      <br /><b><a href="https://youtu.be/Was_C78aRQE">Tutorial 2 · YuE2 · Cover</a></b>
+      <br />Turn a recording into a new version: an instrumental cover, then one with the original lyrics and both review stops.
+    </td>
+  </tr>
+</table>
+
 ## Listen first
 
 **🎧 [Open the demo gallery](https://jplenio.github.io/Plenio-Music-Production-System/)** - 30 songs made with Plenio 0.2.2 and YuE2 (one per genre, straight out of the templates), 35 MiniMax Music 3 songs and 8 cover versions, with search, filters and everything the model received for each track.
