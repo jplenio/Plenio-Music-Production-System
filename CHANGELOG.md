@@ -9,6 +9,10 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 - Export Release warned after almost every YuE2 run - *samples above full scale were clipped in FLAC/MP3 … a limiter before the export avoids this* - although the mastered files were fine: the clipped file was the unmastered take `(original).flac`, which keeps the render as it was (a render above full scale is normal). That is now a note on the node (*the unmastered take peaks at …; the mastered files are not affected*); a clip in the released files is still a warning.
 - The score editor's section list showed a cover's intro at *source -1:58*: the transcription's first bar starts a moment before the recording (a padded pickup), and the clock formatted -1.2 s that way. Times before the start now read 0:00 (also in the section times of the text sheet).
 
+### Added
+
+- Tutorial videos for *1 · YuE2 · Song* and *2 · YuE2 · Cover*, recorded from the real frontend with the real models: `tools/tutorials/` (Playwright and ffmpeg; English subtitles burned in and as `.srt`; see its README).
+
 ## 0.3.0 - 2026-09-29
 
 ### Added

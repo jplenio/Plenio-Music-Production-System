@@ -1,0 +1,270 @@
+// The Song Sheet parts of the tutorials: open a sheet, walk through its tabs, approve it, and the
+// score editor demo (select, arrow keys, drag, resize, draw, frame-select, chords, undo, playback).
+
+const DIALOG = '.plenio-overlay .plenio-dialog'
+
+export async function openSheet(s, nodeId, text) {
+  if (text) s.caption(text)
+  const box = await s.nodeButton(nodeId, 'Edit Song Sheet')
+  await s.spotlight(box, { ms: 1200 })
+  await s.click(box, { pause: 400 })
+  await s.page.locator(DIALOG).waitFor({ state: 'visible', timeout: 15000 })
+  await s.wait(1200)
+}
+
+export async function tab(s, name, text, { min = 3200 } = {}) {
+  const t = s.page.locator(DIALOG).getByRole('tab', { name, exact: true })
+  if (text) s.caption(text)
+  await s.click(t)
+  await s.read(text, min)
+}
+
+export async function approve(s, text) {
+  const button = s.page.locator(DIALOG).getByRole('button', { name: 'Approve', exact: true })
+  if (text) s.caption(text)
+  await s.spotlight(button, { ms: 1400 })
+  await s.wait(700)
+  await s.click(button, { pause: 400 })
+  await s.page.locator(DIALOG).waitFor({ state: 'detached', timeout: 15000 }).catch(() => {})
+  await s.rest()
+  await s.wait(500)
+}
+
+export async function maximize(s, text) {
+  const d = s.page.locator(DIALOG)
+  const button = d.locator('button', { hasText: '⛶' }).first()
+  if (!(await button.count())) return
+  if (text) s.caption(text)
+  await s.click(button, { pause: 300 })
+  await s.wait(1400)
+}
+
+// geometry of the roll: its visible box, the notes of a voice that are visible, the chords
+async function roll(s, voice) {
+  return s.page.evaluate(([sel, v]) => {
+    const d = document.querySelector(sel)
+    const scroller = d.querySelector('.roll-scroll').getBoundingClientRect()
+    const lane = d.querySelector('.roll-svg .lane')?.getBoundingClientRect()
+    const top = lane ? lane.bottom + 2 : scroller.top + 44
+    const inside = (r) => r.left >= scroller.left + 40 && r.right <= scroller.right - 10 && r.top >= top && r.bottom <= scroller.bottom - 12
+    const notes = [...d.querySelectorAll('rect.note')].map((n) => {
+      const r = n.getBoundingClientRect()
+      return { x: r.x, y: r.y, width: r.width, height: r.height, title: n.querySelector('title')?.textContent ?? '', voice: n.classList.contains('vocal') ? 'vocal' : 'ins', visible: inside(r) }
+    })
+    const chords = [...d.querySelectorAll('g.chord')].map((g) => {
+      const r = g.querySelector('rect').getBoundingClientRect()
+      return { x: r.x, y: r.y, width: r.width, height: r.height, name: g.textContent.trim() }
+    }).filter((c) => c.x > scroller.left + 40 && c.x + c.width < scroller.right - 10)
+    return { box: { x: scroller.x, y: scroller.y, width: scroller.width, height: scroller.height }, top, notes, visible: notes.filter((n) => n.visible && n.voice === v), chords }
+  }, [DIALOG, voice])
+}
+
+const free = (geo, x, y) => !geo.notes.some((n) => x >= n.x - 6 && x <= n.x + n.width + 6 && y >= n.y - 4 && y <= n.y + n.height + 4)
+
+async function undo(s, times = 1, text) {
+  if (text) s.caption(text)
+  await s.keys('Control+z', { labels: ['Ctrl', 'Z'], times, gap: 650 })
+  await s.wait(700)
+}
+
+// A real fix first, when the sheet has one: the score's section names against the lyrics' (the
+// planner may call a section "interlude" where the lyrics have a chorus). This edit stays.
+async function fixSections(s) {
+  const d = s.page.locator(DIALOG)
+  const mismatch = await s.page.evaluate((sel) => {
+    const dialog = document.querySelector(sel)
+    const text = [...dialog.querySelectorAll('li')].map((x) => x.innerText).find((t) => /lyrics have sections/.test(t))
+    const m = text?.match(/lyrics have sections \[(.*?)\] but the score has \[(.*?)\]/)
+    if (!m) return null
+    const list = (x) => [...x.matchAll(/'([^']*)'/g)].map((y) => y[1])
+    const lyrics = list(m[1]), score = list(m[2])
+    if (lyrics.length !== score.length) return null
+    const index = lyrics.findIndex((name, k) => name !== score[k])
+    return index < 0 ? null : { index, from: score[index], to: lyrics[index] }
+  }, DIALOG)
+  if (!mismatch) return
+  const warning = `The sheet warns: the lyrics expect a ${mismatch.to} where the score says “${mismatch.from}”.`
+  s.caption(warning)
+  await s.spotlight(d.locator('li', { hasText: 'lyrics have sections' }).first(), { ms: 3200, pad: 4 })
+  await s.read(warning, 4600)
+  s.caption(`Fix it in the section list on the left: Rename “${mismatch.from}” to “${mismatch.to}”.`)
+  await s.click(d.getByRole('button', { name: 'Rename', exact: true }).nth(mismatch.index), { pause: 500 })
+  const field = d.locator('input[aria-label="Section name"]').first()
+  await field.waitFor({ state: 'visible', timeout: 5000 })
+  await s.wait(600)
+  await s.click(field, { count: 3, pause: 250 })
+  await s.type(mismatch.to, { delay: 120 })
+  await s.wait(400)
+  await s.keys('Enter', { labels: ['Enter'] })
+  await s.wait(1800)
+  const done = 'Fixed: the warning is gone, and the words will land in the right sections. This edit stays.'
+  s.caption(done)
+  await s.read(done, 4400)
+}
+
+// Scroll the roll to where the voice starts (an instrumental intro can fill the first bars).
+async function scrollToVoice(s, voice) {
+  const page = s.page
+  const need = () => page.evaluate(([sel, v]) => {
+    const d = document.querySelector(sel)
+    const box = d.querySelector('.roll-scroll').getBoundingClientRect()
+    const first = [...d.querySelectorAll(`rect.note.${v}`)].map((n) => n.getBoundingClientRect().x).sort((a, b) => a - b)[0]
+    return first === undefined ? 0 : first - (box.left + 150)
+  }, [DIALOG, voice])
+  let distance = await need()
+  if (distance < 60) return
+  const geo = await roll(s, voice)
+  s.caption('Shift + mouse wheel scrolls through the bars - here to where the singing starts.')
+  await s.hover(geo.box, { fx: 0.55, fy: 0.62 })
+  await page.evaluate(() => window.__tut.keys(['Shift', 'Wheel'], 2600))
+  await page.keyboard.down('Shift')
+  for (let i = 0; i < 40 && distance > 30; i++) {
+    const before = distance
+    await page.mouse.wheel(0, Math.min(140, distance))
+    await s.wait(90)
+    distance = await need()
+    if (Math.abs(before - distance) < 1) await page.mouse.wheel(Math.min(140, distance), 0) // no horizontal wheel for Shift here
+  }
+  await page.keyboard.up('Shift')
+  await s.wait(1200)
+}
+
+// The score editor demo. Every change is undone again: the song keeps the model's melody.
+export async function scoreDemo(s, { voice = 'vocal', play = true, source = false } = {}) {
+  const page = s.page
+  const d = page.locator(DIALOG)
+  let geo = await roll(s, voice)
+
+  await s.say('The score is shown three ways: the piano roll on top, the notation below, the inspector on the right.', 4200)
+  await s.spotlight(geo.box, { ms: 1500, pad: 2 })
+  await s.wait(1600)
+  await s.spotlight(d.locator('.notation-wrap').first(), { ms: 1500, pad: 2 })
+  await s.wait(1600)
+
+  await fixSections(s)
+  await scrollToVoice(s, voice)
+  geo = await roll(s, voice)
+  if (geo.visible.length < 3) throw new Error('not enough visible notes in the roll')
+
+  // select a note
+  const note = geo.visible[Math.min(2, geo.visible.length - 1)]
+  s.caption('Click a note: the roll, the notation and the inspector select it together.')
+  await s.click(note, { pause: 350 })
+  await s.read('Click a note: the roll, the notation and the inspector select it together.', 3800)
+
+  // arrow keys, then back
+  s.caption('The arrow keys move it: ↑ ↓ a semitone, ← → along the grid.')
+  await s.keys('ArrowUp', { times: 2, gap: 700 })
+  await s.wait(600)
+  await s.keys('ArrowDown', { times: 2, gap: 700 })
+  await s.wait(900)
+
+  // the toolbar
+  const tools = d.getByRole('button', { name: '+8va', exact: true }).first()
+  s.caption('The toolbar does the same: −1 / +1, an octave, shorter, longer, rest.')
+  await s.spotlight(async () => {
+    const a = await d.getByRole('button', { name: '−8va', exact: true }).first().boundingBox()
+    const b = await d.getByRole('button', { name: 'rest', exact: true }).first().boundingBox()
+    return { x: a.x, y: a.y, width: b.x + b.width - a.x, height: a.height }
+  }, { ms: 2200 })
+  await s.hover(tools)
+  await s.wait(2600)
+
+  // drag, then undo
+  geo = await roll(s, voice)
+  const target = geo.visible.find((n) => Math.abs(n.x - note.x) < 2 && Math.abs(n.y - note.y) < 2) ?? geo.visible[2]
+  const from = { x: target.x + target.width * 0.4, y: target.y + target.height / 2 }
+  s.caption('Drag a note to move it in time and pitch …')
+  await s.drag(from, { x: from.x + 70, y: from.y - 2 * target.height }, { ms: 1100 })
+  await s.wait(1400)
+  await undo(s, 1, '… and Ctrl+Z undoes any step.')
+
+  // resize by its end, then undo
+  geo = await roll(s, voice)
+  const longer = geo.visible.find((n) => Math.abs(n.x - note.x) < 2 && Math.abs(n.y - note.y) < 2) ?? geo.visible[2]
+  s.caption('Drag its right end to make it longer or shorter.')
+  const end = { x: longer.x + longer.width - 2, y: longer.y + longer.height / 2 }
+  await s.drag(end, { x: end.x + 45, y: end.y }, { ms: 900 })
+  await s.wait(1300)
+  await undo(s, 1)
+
+  // draw a note on an empty place (in the row of the selected note, after it), then undo
+  geo = await roll(s, voice)
+  const anchor = geo.visible[Math.min(2, geo.visible.length - 1)]
+  const row = anchor.y + anchor.height / 2
+  let spot = null
+  for (let x = anchor.x + anchor.width + 20; x < geo.box.x + geo.box.width - 120 && !spot; x += 12) {
+    if (free(geo, x, row) && free(geo, x + 60, row) && free(geo, x + 30, row)) spot = { x, y: row }
+  }
+  if (spot) {
+    s.caption('Draw mode: drag on an empty place to draw a new note (into the voice chosen under “draw into”).')
+    await s.spotlight(d.locator('button', { hasText: 'Draw' }).first(), { ms: 1400 })
+    await s.wait(1200)
+    await s.drag(spot, { x: spot.x + 60, y: spot.y }, { ms: 800 })
+    await s.wait(1800)
+    await undo(s, 1)
+  }
+
+  // select mode: a frame over a phrase, move it, undo
+  geo = await roll(s, voice)
+  const phrase = geo.visible.slice(0, Math.min(6, geo.visible.length))
+  const x0 = Math.min(...phrase.map((n) => n.x)) - 8, y0 = Math.min(...phrase.map((n) => n.y)) - 8
+  const x1 = Math.max(...phrase.map((n) => n.x + n.width)) + 8, y1 = Math.max(...phrase.map((n) => n.y + n.height)) + 8
+  const corners = [[{ x: x0, y: y0 }, { x: x1, y: y1 }], [{ x: x1, y: y1 }, { x: x0, y: y0 }], [{ x: x1, y: y0 }, { x: x0, y: y1 }], [{ x: x0, y: y1 }, { x: x1, y: y0 }]]
+  const [startFrame, endFrame] = corners.find(([a]) => free(geo, a.x, a.y) && a.y > geo.top && a.y < geo.box.y + geo.box.height - 12) ?? corners[0]
+  s.caption('Select mode: pull a frame to select several notes at once …')
+  await s.click(d.locator('button', { hasText: 'Select' }).first(), { pause: 300 })
+  await s.wait(700)
+  await s.drag(startFrame, endFrame, { ms: 1300, hold: 250 })
+  await s.wait(1400)
+  s.caption('… and move them together: here two semitones up.')
+  await s.keys('ArrowUp', { times: 2, gap: 800 })
+  await s.wait(1400)
+  await undo(s, 2, 'Ctrl+Z again: back to the melody as it was.')
+  await s.click(d.locator('button', { hasText: 'Draw' }).first(), { pause: 250 })
+
+  // chords
+  geo = await roll(s, voice)
+  const chord = geo.chords[Math.min(2, geo.chords.length - 1)]
+  if (chord) {
+    s.caption('Double-click a chord symbol to change it; double-click the empty lane to add one.')
+    await s.click(chord, { count: 2, pause: 300 })
+    const input = d.locator('input.chord-edit')
+    await input.waitFor({ state: 'visible', timeout: 4000 })
+    await s.wait(500)
+    await s.type(chord.name.includes('m') ? chord.name.replace(/m.*$/, '') : `${chord.name.replace(/\/.*$/, '')}sus4`, { delay: 120 })
+    await s.wait(500)
+    await s.keys('Enter', { labels: ['Enter'] })
+    await s.wait(1600)
+    await undo(s, 1)
+  }
+
+  // sections
+  const rename = d.locator('button', { hasText: 'Rename' }).first()
+  if (await rename.count()) {
+    s.caption('On the left: the song’s sections - rename them or move their boundaries bar by bar.')
+    await s.spotlight(rename, { ms: 2200 })
+    await s.hover(rename)
+    await s.wait(3000)
+  }
+
+  if (play) {
+    const button = d.locator('button', { hasText: '▶ notes' }).first()
+    if (await button.count()) {
+      s.caption('▶ plays the notes as a guide - simple tones, not the model’s sound.')
+      const where = await s.click(button, { pause: 300 })
+      await s.wait(5500)
+      await s.click({ x: where.x, y: where.y, width: 0, height: 0 }, { pause: 200 }) // the same button: ■ stop
+      await s.wait(600)
+    }
+  }
+  // a cover: the source recording plays from the same bar, A/B switches between the two
+  const original = d.locator('button', { hasText: '▶ source' }).first()
+  if (source && (await original.count())) {
+    s.caption('▶ source plays the original recording from the same bar - A/B switches between the notes and the source.')
+    const where = await s.click(original, { pause: 300 })
+    await s.wait(5500)
+    await s.click({ x: where.x, y: where.y, width: 0, height: 0 }, { pause: 200 })
+    await s.wait(600)
+  }
+}
