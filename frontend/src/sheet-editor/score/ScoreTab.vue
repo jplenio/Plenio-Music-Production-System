@@ -556,6 +556,7 @@ function onKey(event: KeyboardEvent): void {
           :readonly="readonly"
           @goto="goto"
           @operate="operate"
+          @notice="(text: string) => (session.notes = [text])"
         />
         <details v-if="review && lyrics" class="fit-panel">
           <summary>Lyrics fit</summary>

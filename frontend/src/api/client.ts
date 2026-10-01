@@ -71,6 +71,8 @@ export interface TransformResult {
   changes: string[]
   warnings: string[]
   select: string[]
+  /** Where the old time went when bars moved: ``[old_start, old_end, new_start]`` pieces in units of L. */
+  time_map?: [number, number, number][] | null
   analysis: ScoreView
 }
 

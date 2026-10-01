@@ -728,9 +728,50 @@
 .plenio-overlay .navigator li.current {
   border-color: #2f6fb0;
 }
+.plenio-overlay .navigator:focus-visible {
+  outline: 1px solid #4c9aff;
+}
+.plenio-overlay .navigator li.picked {
+  /* selected for arranging (Cubase: a selected arranger event) */
+  background: rgba(76, 154, 255, 0.18);
+  border-color: #4c9aff;
+}
+.plenio-overlay .navigator li[draggable='true'] {
+  cursor: grab;
+}
+.plenio-overlay .navigator li.drop-before {
+  box-shadow: 0 -3px 0 #ffc440;
+}
+.plenio-overlay .navigator li.drop-after {
+  box-shadow: 0 3px 0 #ffc440;
+}
+.plenio-overlay .navigator .section-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 2px 0 4px;
+  background: var(--comfy-menu-bg, #252525);
+}
+.plenio-overlay .navigator .section-actions .hint {
+  flex-basis: 100%;
+  font-size: 11px;
+  color: var(--descrip-text, #999);
+}
+.plenio-overlay .navigator .section-actions button {
+  font-size: 11px;
+  padding: 1px 7px;
+}
+.plenio-overlay .navigator .section-actions button.danger:not(:disabled) {
+  border-color: #a04a44;
+}
 .plenio-overlay .navigator .section-head {
   display: flex;
   flex-direction: column;
+  cursor: pointer;
 }
 .plenio-overlay .navigator .section-tools {
   display: flex;
