@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| Status | **Design and implementation, 2026-10-01** (owner's request) |
-| Scope | Score tab of the Song Sheet editor: section list, piano roll, transport; the backend's canonical operations; what follows a change (Guide track, lyrics, cover source times) |
+| Status | **Implemented, 2026-10-01** (owner's requests; not yet released - CHANGELOG *Unreleased*) |
+| Scope | Score tab of the Song Sheet editor: section list, piano roll, transport; the backend's canonical operations; what follows a change (Guide track, lyrics, cover source times); lyrics where they are sung, MusicXML and project files (§6) |
 | Related | [score-editor-design.md](score-editor-design.md), [yue2-cover-design.md](yue2-cover-design.md), user guide [score-editor.md](../user/concepts/score-editor.md) |
 
 The owner copies a verse and a chorus in a cover by copying ABC text. The editor gets the same in its own terms,
@@ -63,17 +63,37 @@ Backend: `paste {at, mode: overwrite|insert, span, notes: [{track, onset, durati
 |---|---|
 | every sheet | the notation, the roll, the ABC text, the inspector, the section list, undo/redo (one step) |
 | DAW sheet (*5 · YuE2 · DAW*) | the **Guide track**: its notes move, are copied and deleted with the bars (time map; part of the same undo step) - before, inserting or deleting bars left the Guide notes in place |
-| score sheet with the text sheet's lyrics as context (*1 · YuE2 · Song*, *5 · YuE2 · DAW*) | the **lyrics**: when the lyrics' sections matched the score's before the edit, the editor offers to arrange them the same way and writes them into *Song Sheet · Text* (as *edited*; that sheet then asks for approval again - its lyrics changed). Otherwise the existing warning stays |
+| score sheet with the text sheet's lyrics as context (*1 · YuE2 · Song*, *5 · YuE2 · DAW*) | the **lyrics**: when the lyrics' sections matched the score's when the editor opened, every edit lays them onto the new sections (`lyricsFollow.ts`: the time map says where each new section came from; a copied section copies its block, a joined one adds its lines, a split-off part starts empty, a pasted section brings the words copied with it) and Apply writes them into *Song Sheet · Text* (as *edited* against its draft; that sheet then asks for approval again). In *1 · YuE2 · Song* the planner reads those lyrics, so the arranged score is stored as *manual* (the approval covers texts only, so it stays). Lyrics changed in the text sheet after the last run are not overwritten. Otherwise the existing warning stays |
 | cover, *instrumental* | nothing to do: the render's tags come from the final score |
 | cover, *new lyrics* | the writer writes for the final sections on the next run |
-| cover, *original lyrics* | the transcribed words follow their bars: the timeline keeps a fingerprint of every transcribed bar (meter and vocal notes); the final score's bars are matched to them, so a copied chorus gets the chorus words again and a moved verse takes its words along |
-| cover, A/B and the section list's *source* times | the same match: a copied chorus plays the source's chorus |
+| cover, *original lyrics* | the transcribed words follow their bars: the timeline keeps a print of every transcribed bar (`bar_prints`: meter plus the Vocal and the Ins notes relative to the bar); the final score's bars are matched to them (`bar_match`: best content match, among equal bars the passage that goes on matching longest, else the bar after the previous match), so a copied chorus gets the chorus words again, a moved verse takes its words along and a deleted section's words are left out with a warning (alignment method *matched bars*). Timelines made before have no prints and keep the old behaviour |
+| cover, A/B and the section list's *source* times | the same match in the editor (`barMatch.ts`, checked against a backend fixture): a copied chorus plays the source's chorus, the playback line follows the recording's order |
 
-## 5. Order of work
+## 5. Order of work (done)
 
-1. Backend: `arrange_measures`, `arrange_sections`, `paste`; time maps also for insert, delete and duplicate bars.
-2. Section list: selection, Duplicate, Delete, ↑/↓, drag (Alt: copy), Copy.
-3. Cursor in the roll, play from the cursor, follow line.
-4. Clipboard in the roll: copy, cut, paste (overwrite), paste time (insert), duplicate; chords in the frame.
-5. Follow-up: Guide track, lyrics of the text sheet, cover bar matching (lyrics alignment, A/B, source times).
-6. Guide, tests, real-frontend check.
+1. Backend: `arrange_measures`, `arrange_sections`, `paste`; time maps also for insert, delete and duplicate bars (e9907b1).
+2. Section list: selection, Duplicate, Delete, ↑/↓, drag (Alt: copy), Copy, Cut (ee003aa, 2a4b12b).
+3. Cursor in the roll, play from the cursor, follow line (92918b2).
+4. Clipboard in the roll: copy, cut, paste (overwrite), paste time (insert), duplicate; chords in the frame (2a4b12b).
+5. Follow-up: Guide track and lyrics of the text sheet (6996e03); cover bar matching - lyrics alignment, A/B, source
+   times (c847b35).
+6. User guide, tests (Vitest, pytest, host routes), real-frontend check.
+
+## 6. Lyrics where they are sung, MusicXML, project file (owner's follow-up request)
+
+- **Lyrics layout** (`lyric_layout.py`): the editor sends the lyrics with the score (`analyze`/`transform` take
+  `lyrics`); the view says where they fall by the lyrics writer's own rule - a block per labelled section (in order;
+  by tag when the counts differ), the section's Vocal notes as phrases (split at rests of a beat), a line per
+  phrase (lines share a phrase when there are more), a syllable per note (a short line holds its last syllable, a
+  long one crowds its last note). Syllables are split at vowel groups (the *Lyrics fit* estimate; made for English).
+- **Roll**: a lyrics lane under the chord lane (`geo.top` grows by it), every line over its phrase, every syllable
+  over its note; a double-click edits the line there - an undo step of its own (History records side-state-only
+  steps). Edits go where the lyrics live: *Song Sheet · Text* on Apply (templates 1 and 5) or the sheet's own
+  Lyrics tab (the cover's text sheet, whose score is read-only context).
+- **Notation**: `w:` lines in the display text (tied continuations `*`, held syllables `_`); every element keeps its
+  display range.
+- **MusicXML 4.0** (`musicxml.py`, `/plenio/score/musicxml/export`): parts *Vocal* (harmony, rehearsal marks,
+  tempo, lyrics with syllabic) and *Instrument*; pitches spelled for the key, ties across bar lines and for lengths
+  without one note value, bar rests. The Guide track stays in MIDI.
+- **Project file** (`projectFile.ts`, `plenio.score_project/1`, `<title>.plenio.json`): score, Guide notes, lyrics;
+  opening is one undo step and names what a sheet cannot hold.

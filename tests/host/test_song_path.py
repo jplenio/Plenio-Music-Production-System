@@ -490,6 +490,55 @@ def test_canonical_score_routes(server: ComfyServer) -> None:
     assert status == 400 and "not a readable MIDI file" in refused["error"]["message"]
 
 
+def test_arranger_lyrics_and_musicxml_routes(server: ComfyServer) -> None:
+    """Owner's requests 2026-10-01 over HTTP: arranging sections (with the time map), paste at the
+    cursor, the lyrics layout and the notation's syllables, and the MusicXML export."""
+    import json as _json
+
+    plan = _json.loads((ROOT / "tests" / "fixtures" / "cover" / "yue2-take-y3.json").read_text(encoding="utf-8"))["abc"]
+    lyrics = "\n\n".join(f"[{tag}]\nla la la la\nsing it again" for tag in ("Intro", "Verse", "Chorus", "Verse", "Chorus", "Outro"))
+    status, arranged = server.request(
+        "POST",
+        "/plenio/score/transform",
+        {"abc": plan, "operation": {"op": "arrange_sections", "order": [1, 2, 3, 3, 4, 5, 6]}, "lyrics": lyrics},
+    )
+    assert status == 200 and arranged["changes"][0].startswith("sections copied chorus")
+    assert arranged["time_map"] == [[0, 464, 0], [272, 1088, 464]]
+    assert "lyrics" in arranged["analysis"]  # the view of the new score says where the words fall
+    status, view = server.request("POST", "/plenio/score/analyze", {"abc": plan, "lyrics": lyrics})
+    assert status == 200 and [s["block"] for s in view["lyrics"]["sections"]] == [0, 1, 2, 3, 4, 5]
+    assert "\nw: " in view["display_abc"]
+    status, plain = server.request("POST", "/plenio/score/analyze", {"abc": plan, "lyrics": None})
+    assert status == 200 and "lyrics" not in plain and "\nw: " not in plain["display_abc"]
+    status, pasted = server.request(
+        "POST",
+        "/plenio/score/transform",
+        {
+            "abc": plan,
+            "operation": {
+                "op": "paste",
+                "at": 160,
+                "mode": "insert",
+                "span": 16,
+                "tracks": ["vocal"],
+                "with_chords": False,
+                "notes": [{"track": "vocal", "onset": 0, "duration": 16, "pitch": 72}],
+                "chords": [],
+                "sections": [],
+            },
+        },
+    )
+    assert status == 200 and pasted["time_map"] == [[0, 160, 0], [160, 1088, 176]]
+    status, exported = server.request(
+        "POST", "/plenio/score/musicxml/export", {"abc": plan, "title": "My Song", "lyrics": lyrics}
+    )
+    assert status == 200 and exported["filename"] == "My Song.musicxml"
+    assert exported["type"] == "application/vnd.recordare.musicxml+xml"
+    assert exported["data"].startswith("<?xml") and "<score-partwise" in exported["data"] and "<lyric" in exported["data"]
+    status, refused = server.request("POST", "/plenio/score/musicxml/export", {"abc": "X:1\nnot a score"})
+    assert status == 400
+
+
 def test_midi_import_lists_tracks_maps_roles_and_reads_chords(server: ComfyServer) -> None:
     """The import route: the file's tracks (D3), an explicit mapping and chord recognition."""
     import base64
