@@ -35,6 +35,8 @@ class EditResult:
     warnings: tuple[str, ...] = ()
     select: tuple[str, ...] = ()
     """Ids to select after the edit (the edited notes in the new text)."""
+    time_map: tuple[tuple[int, int, int], ...] | None = None
+    """Where the old score's time went (``ops.TimeMap``), for the operations that move bars."""
 
 
 # --- bar writing ----------------------------------------------------------------------

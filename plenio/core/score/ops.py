@@ -43,6 +43,11 @@ RESIZE_MODES = ("rests", "overwrite")
 MAX_INSERT = 64
 
 
+TimeMap = tuple[tuple[int, int, int], ...]
+"""Where the old score's time went: ``(old start, old end, new start)`` per piece, in units. A piece
+may appear twice (a copy); time that is not covered was deleted. ``None`` on a result: unchanged."""
+
+
 @dataclass(frozen=True)
 class OpResult:
     score: Score
@@ -50,6 +55,9 @@ class OpResult:
     warnings: tuple[str, ...] = ()
     select: tuple[str, ...] = ()
     """Ids to select after the edit."""
+    time_map: TimeMap | None = None
+    """Set by the operations that move time (bars inserted, deleted, copied or rearranged): what
+    lives outside the score text - the Guide track - follows with it."""
 
 
 @dataclass(frozen=True)
@@ -142,9 +150,13 @@ def _carve(notes: Iterable[Note], start: int, end: int) -> tuple[list[Note], lis
 
 
 def _commit(
-    score: Score, changes: Iterable[str], warnings: Iterable[str] = (), select: Iterable[str] = ()
+    score: Score,
+    changes: Iterable[str],
+    warnings: Iterable[str] = (),
+    select: Iterable[str] = (),
+    time_map: TimeMap | None = None,
 ) -> OpResult:
-    return OpResult(c.validate(score), tuple(changes), tuple(warnings), tuple(select))
+    return OpResult(c.validate(score), tuple(changes), tuple(warnings), tuple(select), time_map)
 
 
 def _unchanged(score: Score, reason: str, select: Iterable[str] = ()) -> OpResult:
@@ -607,7 +619,13 @@ def insert_measures(
         if n.onset < time < n.end
     ]
     where = f"before bar {at + 1}" if at < score.measure_count else "at the end"
-    return _commit(new, [f"{count} empty bar(s) of {new_meter[0]}/{new_meter[1]} inserted {where}"], warnings)
+    time_map = ((0, time, 0), (time, score.total, time + delta))
+    return _commit(
+        new,
+        [f"{count} empty bar(s) of {new_meter[0]}/{new_meter[1]} inserted {where}"],
+        warnings,
+        time_map=time_map,
+    )
 
 
 def delete_measures(score: Score, bar: int, count: int = 1) -> OpResult:
@@ -671,7 +689,8 @@ def delete_measures(score: Score, bar: int, count: int = 1) -> OpResult:
         if start_time <= n.onset and n.end <= end_time
     ]
     change = f"bar(s) {first + 1}-{end} deleted" if count > 1 else f"bar {first + 1} deleted"
-    return _commit(new, [change, *removed])
+    time_map = ((0, start_time, 0), (end_time, score.total, start_time))
+    return _commit(new, [change, *removed], time_map=time_map)
 
 
 def duplicate_measures(score: Score, bar: int, count: int = 1) -> OpResult:
@@ -748,7 +767,306 @@ def duplicate_measures(score: Score, bar: int, count: int = 1) -> OpResult:
         origins=tuple(origins[:end] + origins[first:end] + origins[end:]),
     )
     label = f"bars {first + 1}-{end}" if count > 1 else f"bar {first + 1}"
-    return _commit(new, [f"{label} duplicated after bar {end}"])
+    time_map = ((0, end_time, 0), (start_time, end_time, end_time), (end_time, score.total, end_time + delta))
+    return _commit(new, [f"{label} duplicated after bar {end}"], time_map=time_map)
+
+
+MAX_MEASURES = 1024
+"""The longest score an arrangement or a paste may make (measures)."""
+
+
+def _section_index(starts: Sequence[Section], measure: int) -> int:
+    return max(i for i, section in enumerate(starts) if section.measure <= measure)
+
+
+def _runs(order: Sequence[int]) -> list[tuple[int, int, int]]:
+    """``(source first, source end, new first)`` of every stretch of consecutive source measures."""
+    runs: list[tuple[int, int, int]] = []
+    for new, source in enumerate(order):
+        if runs and runs[-1][1] == source and runs[-1][2] + (runs[-1][1] - runs[-1][0]) == new:
+            first, _end, start = runs[-1]
+            runs[-1] = (first, source + 1, start)
+        else:
+            runs.append((source, source + 1, new))
+    return runs
+
+
+def arrange_measures(score: Score, order: Sequence[object], *, change: str | None = None) -> OpResult:
+    """The score rebuilt from its own measures in ``order`` (0-based; repeats and omissions allowed).
+
+    Every new measure takes the old measure's meter, notes, chords and key; a note that crosses a seam
+    between measures that were not neighbours is cut there (its tail in the next block starts anew),
+    so no tie leads into another note. A section starts where an old section started and wherever the
+    music comes from another section; the line groups follow the old ones and break at every seam.
+    """
+    count = score.measure_count
+    measures = [_whole(m, "measure", 0, count - 1) for m in order]
+    if not measures:
+        raise PlenioValidationError(
+            "A score keeps at least one bar (I10).", hint="Keep at least one section."
+        )
+    if len(measures) > MAX_MEASURES:
+        raise PlenioValidationError(
+            f"The score would have {len(measures)} bars; at most {MAX_MEASURES} are supported."
+        )
+    if measures == list(range(count)):
+        return _unchanged(score, "the order did not change")
+    starts = score.starts
+    meters = tuple(score.meters[m] for m in measures)
+    lengths = [n * score.unit.denominator // d for n, d in meters]
+    new_starts = [0]
+    for length in lengths:
+        new_starts.append(new_starts[-1] + length)
+    runs = _runs(measures)
+    time_map = tuple((starts[a], starts[b], new_starts[new]) for a, b, new in runs)
+    tracks: dict[str, list[Note]] = {"vocal": [], "ins": []}
+    chords: list[ChordSymbol] = []
+    for old_start, old_end, new_start in time_map:
+        shift = new_start - old_start
+        for kind in ("vocal", "ins"):
+            for note in score.track(kind):
+                if note.end <= old_start or note.onset >= old_end:
+                    continue
+                onset, end = max(note.onset, old_start), min(note.end, old_end)
+                tracks[kind].append(Note(onset + shift, end - onset, note.pitch, note.spelling))
+        chords += [
+            ChordSymbol(ch.onset + shift, ch.name) for ch in score.chords if old_start <= ch.onset < old_end
+        ]
+    # keys: the key in effect at every measure is kept, changes inside a measure move along
+    old_keys = {k.onset: k for k in score.keys}
+    keys: list[KeyChange] = []
+    current: str | None = None
+    for new, source in enumerate(measures):
+        opening = score.key_at(starts[source])
+        if opening != current:
+            written = old_keys.get(starts[source])
+            placement = "header" if new == 0 else (written.placement if written else "field")
+            keys.append(
+                KeyChange(new_starts[new], opening, "field" if placement == "header" and new else placement)
+            )
+            current = opening
+        for k in score.keys:
+            if starts[source] < k.onset < starts[source + 1]:
+                keys.append(KeyChange(k.onset - starts[source] + new_starts[new], k.key, k.placement))
+                current = k.key
+    if keys and keys[0].placement != "header" and score.keys[0].placement == "header":
+        keys[0] = KeyChange(0, keys[0].key, "header")
+    # sections: where an old section started, and where the music comes from another section
+    old_sections = _section_starts(score)
+    explicit_first = bool(score.sections) and score.sections[0].measure == 0
+    sections: list[Section] = []
+    for new, source in enumerate(measures):
+        index = _section_index(old_sections, source)
+        starts_here = (
+            new == 0
+            or old_sections[index].measure == source
+            or index != _section_index(old_sections, measures[new - 1])
+        )
+        if not starts_here:
+            continue
+        if new == 0 and index == 0 and not explicit_first:
+            continue  # the implicit first section stays implicit
+        sections.append(Section(new, old_sections[index].label))
+    # line groups: the old groups within each run, broken at seams, section starts and meter changes
+    old_firsts = set(score.group_firsts)
+    cuts = {new for _a, _b, new in runs} | {s.measure for s in sections}
+    cuts |= {new for new, source in enumerate(measures) if source in old_firsts}
+    cuts |= {i for i in range(1, len(meters)) if meters[i] != meters[i - 1]}
+    bounds = sorted(cuts | {0}) + [len(measures)]
+    layout = _chunk(b - a for a, b in zip(bounds, bounds[1:], strict=False) if b > a)
+    origins = _origins(score)
+    new_score = replace(
+        score,
+        meters=meters,
+        layout=tuple(layout),
+        keys=tuple(keys),
+        sections=tuple(sections),
+        vocal=tuple(sorted(tracks["vocal"], key=lambda n: n.onset)),
+        ins=tuple(sorted(tracks["ins"], key=lambda n: n.onset)),
+        chords=tuple(sorted(chords, key=lambda x: x.onset)),
+        origins=tuple(origins[m] for m in measures),
+    )
+    return _commit(
+        new_score, [change or f"bars rearranged ({count} -> {len(measures)} bars)"], time_map=time_map
+    )
+
+
+def arrange_sections(score: Score, order: Sequence[object]) -> OpResult:
+    """The song as a list of its sections (1-based; repeats and omissions allowed): copy, delete and
+    move whole sections. See :func:`arrange_measures`."""
+    starts = _section_starts(score)
+    picked = [_whole(index, "section", 1, len(starts)) - 1 for index in order]
+    if not picked:
+        raise PlenioValidationError("A score keeps at least one section.", hint="Keep at least one section.")
+    bounds = [s.measure for s in starts] + [score.measure_count]
+    measures = [m for index in picked for m in range(bounds[index], bounds[index + 1])]
+    labels = [starts[i].label for i in picked]
+    before = [s.label for s in starts]
+    removed = [starts[i].label for i in range(len(starts)) if i not in picked]
+    copied = [starts[i].label for i in sorted(set(picked)) if picked.count(i) > 1]
+    what = []
+    if removed:
+        what.append(f"deleted {', '.join(removed)}")
+    if copied:
+        what.append(f"copied {', '.join(copied)}")
+    if not removed and not copied:
+        what.append("moved")
+    change = f"sections {'; '.join(what)}: {' - '.join(labels)} (was {' - '.join(before)})"
+    return arrange_measures(score, measures, change=change)
+
+
+def _clip_notes(value: object, span: int) -> dict[str, list[tuple[int, int, int]]]:
+    if not isinstance(value, list):
+        raise PlenioValidationError("The clip needs a list 'notes'.")
+    notes: dict[str, list[tuple[int, int, int]]] = {"vocal": [], "ins": []}
+    for item in value:
+        if not isinstance(item, Mapping):
+            raise PlenioValidationError("Every clip note needs track, onset, duration and pitch.")
+        track = _track(item.get("track"))
+        onset = _whole(item.get("onset"), "onset", 0, span - 1)
+        duration = _whole(item.get("duration"), "duration", 1, span - onset)
+        notes[track].append((onset, duration, _pitch(item.get("pitch"))))
+    for track, items in notes.items():
+        items.sort()
+        for (a, d, _p), (b, _e, _q) in zip(items, items[1:], strict=False):
+            if a + d > b:
+                raise PlenioValidationError(f"The clip's {VOICE_OF[track]} notes overlap at onset {b}.")
+    return notes
+
+
+def paste(
+    score: Score,
+    at: object,
+    span: object,
+    notes: object,
+    chords: object = (),
+    *,
+    mode: str = "overwrite",
+    tracks: Sequence[object] | None = None,
+    with_chords: bool | None = None,
+    sections: object = (),
+) -> OpResult:
+    """Paste a clip at ``at`` (Cubase: paste at the cursor).
+
+    The clip's onsets are relative to its start; it lasts ``span`` units and covers the voices in
+    ``tracks`` (default: the voices it has notes in) and the chord symbols when ``with_chords`` (default:
+    when it has chord symbols). *overwrite*: in the covered voices the notes from ``at`` for ``span`` are
+    replaced (silence of the clip included), likewise the chord symbols. *insert* (Cubase: paste time):
+    everything from ``at`` on - both voices, chords, keys, sections - first moves later by ``span``
+    rounded up to whole bars of the bar at ``at``, then the clip goes into the gap; ``sections`` of the
+    clip (``{onset, label}`` at its bar starts) become sections there.
+    """
+    if mode not in ("overwrite", "insert"):
+        raise PlenioValidationError(f"Unknown paste mode {mode!r}.", hint="Use 'overwrite' or 'insert'.")
+    at = _whole(at, "at", 0, score.total - 1)
+    span = _whole(span, "span", 1, MAX_MEASURES * score.lengths[0] * 4)
+    clip = _clip_notes(notes, span)
+    clip_chords = []
+    for item in chords if isinstance(chords, list | tuple) else []:
+        if not isinstance(item, Mapping):
+            raise PlenioValidationError("Every clip chord needs onset and name.")
+        clip_chords.append(
+            (_whole(item.get("onset"), "chord onset", 0, span - 1), _chord_name_checked(item.get("name")))
+        )
+    covered = [_track(t) for t in tracks] if tracks else [t for t in ("vocal", "ins") if clip[t]]
+    take_chords = bool(clip_chords) if with_chords is None else bool(with_chords)
+    if not covered and not take_chords:
+        raise PlenioValidationError("The clip is empty.", hint="Copy notes or chord symbols first.")
+    changes: list[str] = []
+    warnings: list[str] = []
+    time_map: TimeMap | None = None
+    work = score
+    if mode == "insert":
+        bar = score.measure_at(at)
+        length = score.lengths[bar]
+        bars = -(-span // length)
+        delta = bars * length
+        if score.measure_count + bars > MAX_MEASURES:
+            raise PlenioValidationError(f"The score would have more than {MAX_MEASURES} bars.")
+        bar_start = score.starts[bar]
+        sections_after = bar if at == bar_start and at > 0 else bar + 1
+        layout = list(score.layout)
+        firsts = _firsts(layout)
+        group = max(i for i, first in enumerate(firsts) if first <= bar)
+        layout = layout[:group] + _chunk([layout[group] + bars]) + layout[group + 1 :]
+        moved_sections = [
+            Section(s.measure + bars, s.label) if s.measure >= sections_after else s for s in score.sections
+        ]
+        origins = _origins(score)
+        work = replace(
+            score,
+            meters=score.meters[: bar + 1] + (score.meters[bar],) * bars + score.meters[bar + 1 :],
+            layout=tuple(layout),
+            keys=tuple(
+                k if k.onset < at or k.onset == 0 else KeyChange(k.onset + delta, k.key, k.placement)
+                for k in score.keys
+            ),
+            sections=tuple(moved_sections),
+            vocal=tuple(_shift_notes(score.vocal, at, delta)),
+            ins=tuple(_shift_notes(score.ins, at, delta)),
+            chords=tuple(
+                ChordSymbol(ch.onset + delta, ch.name) if ch.onset >= at else ch for ch in score.chords
+            ),
+            origins=tuple(origins[: bar + 1] + [None] * bars + origins[bar + 1 :]),
+        )
+        clip_sections = []
+        for item in sections if isinstance(sections, list | tuple) else []:
+            if isinstance(item, Mapping):
+                onset = _whole(item.get("onset"), "section onset", 0, span - 1)
+                clip_sections.append((at + onset, section_label(str(item.get("label", "")))))
+        new_sections = list(work.sections)
+        for onset, label in clip_sections:
+            if onset in work.starts:
+                measure = work.starts.index(onset)
+                new_sections = [s for s in new_sections if s.measure != measure] + [Section(measure, label)]
+        cuts = [s.measure for s in new_sections] + [
+            i for i in range(1, work.measure_count) if work.meters[i] != work.meters[i - 1]
+        ]
+        work = replace(
+            work,
+            sections=tuple(sorted(new_sections, key=lambda s: s.measure)),
+            layout=tuple(_chunk(_split_layout(work.layout, cuts))),
+        )
+        time_map = ((0, at, 0), (at, score.total, at + delta))
+        changes.append(
+            f"{bars} bar(s) inserted at {_bar(score, at)} (everything after moved {bars} bar(s) later)"
+        )
+    end = min(at + span, work.total)
+    if at + span > work.total:
+        warnings.append("the clip was longer than the rest of the score and was cut at the end")
+    tracks_out = {kind: list(work.track(kind)) for kind in ("vocal", "ins")}
+    select: list[str] = []
+    for kind in covered:
+        kept, _hit = _carve(tracks_out[kind], at, end)
+        added = []
+        for onset, duration, pitch in clip[kind]:
+            start = at + onset
+            if start >= end:
+                continue
+            added.append(Note(start, min(duration, end - start), pitch))
+            select.append(note_id(kind, start))
+        tracks_out[kind] = sorted([*kept, *added], key=lambda n: n.onset)
+    new_chords = list(work.chords)
+    if take_chords:
+        new_chords = [ch for ch in new_chords if not at <= ch.onset < end]
+        for onset, name in clip_chords:
+            if at + onset < end:
+                new_chords.append(ChordSymbol(at + onset, name))
+                select.append(chord_id(at + onset))
+    result = replace(
+        work,
+        vocal=tuple(tracks_out["vocal"]),
+        ins=tuple(tracks_out["ins"]),
+        chords=tuple(sorted(new_chords, key=lambda x: x.onset)),
+    )
+    voices = " and ".join(VOICE_OF[k] for k in covered)
+    what = voices + (
+        " with chord symbols" if take_chords and voices else "chord symbols" if take_chords else ""
+    )
+    changes.append(
+        f"pasted at {_bar(score, at) if mode == 'overwrite' else _bar(result, at)}: {what} ({mode})"
+    )
+    return _commit(result, changes, warnings, select, time_map=time_map)
 
 
 def change_meter(score: Score, bar: int, count: int, meter: tuple[int, int]) -> OpResult:
@@ -998,6 +1316,13 @@ def _str(operation: Mapping[str, Any], name: str) -> str:
     return value
 
 
+def _list(operation: Mapping[str, Any], name: str) -> list[object]:
+    value = operation.get(name)
+    if not isinstance(value, list):
+        raise PlenioValidationError(f"The operation needs a list '{name}'.")
+    return value
+
+
 def _opt_track(operation: Mapping[str, Any]) -> str | None:
     return None if operation.get("track") is None else _track(operation.get("track"))
 
@@ -1035,6 +1360,19 @@ OPERATIONS: dict[str, Operation] = {
     ),
     "delete_measures": lambda s, op: delete_measures(s, _int(op, "bar"), _int(op, "count", 1)),
     "duplicate_measures": lambda s, op: duplicate_measures(s, _int(op, "bar"), _int(op, "count", 1)),
+    "arrange_sections": lambda s, op: arrange_sections(s, _list(op, "order")),
+    "arrange_measures": lambda s, op: arrange_measures(s, _list(op, "order")),
+    "paste": lambda s, op: paste(
+        s,
+        op.get("at"),
+        op.get("span"),
+        op.get("notes", []),
+        op.get("chords", []),
+        mode=str(op.get("mode", "overwrite")),
+        tracks=op.get("tracks") if isinstance(op.get("tracks"), list) else None,
+        with_chords=op.get("with_chords") if isinstance(op.get("with_chords"), bool) else None,
+        sections=op.get("sections", []),
+    ),
     "change_meter": lambda s, op: change_meter(
         s, _int(op, "bar"), _int(op, "count", 1), _meter(op.get("meter"))
     ),
@@ -1076,6 +1414,8 @@ __all__ = [
     "OpResult",
     "TextResult",
     "apply",
+    "arrange_measures",
+    "arrange_sections",
     "change_meter",
     "change_tempo",
     "chord_id",
@@ -1093,6 +1433,7 @@ __all__ = [
     "move_notes",
     "move_section_start",
     "note_id",
+    "paste",
     "parse_id",
     "put_chord",
     "put_key",

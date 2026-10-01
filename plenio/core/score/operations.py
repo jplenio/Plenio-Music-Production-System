@@ -96,7 +96,9 @@ def apply(abc: str, operation: Mapping[str, Any]) -> EditResult:
         return OPERATIONS[str(name)](abc, operation)
     if name in ops.OPERATIONS:
         done = ops.transform(abc, operation)
-        return EditResult(done.abc, done.result.changes, done.result.warnings, done.result.select)
+        return EditResult(
+            done.abc, done.result.changes, done.result.warnings, done.result.select, done.result.time_map
+        )
     raise PlenioValidationError(
         f"Unknown score operation {name!r}.", hint=f"Use one of {sorted([*OPERATIONS, *ops.OPERATIONS])}."
     )

@@ -113,6 +113,7 @@ async def score_transform(request: web.Request) -> web.StreamResponse:
             "changes": list(result.changes),
             "warnings": list(result.warnings),
             "select": list(result.select),
+            "time_map": [list(piece) for piece in result.time_map] if result.time_map is not None else None,
             "analysis": score_rules.editor_view(result.abc),
         }
     )
