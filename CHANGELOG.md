@@ -8,6 +8,7 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 - **Arrange a score without ABC** (score editor). The section list works like Cubase's arranger track. Select one or more sections (Ctrl+click, Shift+click), then duplicate them (Ctrl+D), copy them (Ctrl+C), move them (Ctrl+↑/↓, or drag; Alt+drag copies) or delete them (Del). The notes of both voices, the chord symbols, keys and bar lines go with them. Each arrangement is one undo step, and the notation follows it.
 - **A cursor in the piano roll** (Cubase: project cursor). Click or drag in the ruler to set it, on the grid. Playback starts at the cursor, and a line follows the music. The cursor stays where it was on stop. *Loop section* plays to the end of the cursor's section and then repeats that section. Home and End move the cursor to the start and the end of the score. The section list and the bar strip put the cursor at the bar's start.
+- **Copy and paste at the cursor** (Cubase: key editor). Ctrl+C, Ctrl+X and Ctrl+V, plus the roll's Copy, Cut, Paste and Insert buttons. Paste overwrites what the clip's voices play from the cursor on. Insert (Ctrl+Shift+V, Cubase's *Paste Time*) moves everything from the cursor on later by whole bars first. Ctrl+D duplicates the selection right after itself. Sections copied in the list paste with their chord symbols, and when inserted they keep their names. A select frame that reaches into the chord lane also selects the chord symbols there, and Ctrl+A selects all notes and chord symbols.
 
 ## 0.3.1 - 2026-10-01
 

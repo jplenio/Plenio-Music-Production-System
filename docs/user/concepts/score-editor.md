@@ -68,7 +68,7 @@ The bar numbers are the **ruler**, as in Cubase: click in it (or drag along it) 
 Two modes, switched in the roll's toolbar, decide what a drag on an **empty place** does. The roll always opens in **✎ Draw**; the mode is not remembered.
 
 - **✎ Draw** - a drag on an empty place draws a new note, a double-click adds one.
-- **⬚ Select** - a drag on an empty place pulls a dashed **frame**: every note it touches is selected when you let go (the roll shows them while you pull). Hold **Shift** to add the framed notes to the selection. The frame selects notes of both voices. The notation and the ABC text show the same selection, so you can see there which notes you caught. Select mode never draws a note.
+- **⬚ Select** - a drag on an empty place pulls a dashed **frame**: every note it touches is selected when you let go (the roll shows them while you pull). Hold **Shift** to add the framed notes to the selection. The frame selects notes of both voices; when it reaches into the **chord lane** (or starts there) it takes the chord symbols it passes too. The notation and the ABC text show the same selection, so you can see there which notes you caught. Select mode never draws a note.
 
 Clicking, moving and resizing notes, and all keys, work the same in both modes. So you can frame a phrase in *Select*, then drag one of its notes to move the whole phrase, or press ↑ to transpose it.
 
@@ -81,7 +81,7 @@ Clicking, moving and resizing notes, and all keys, work the same in both modes. 
 | drag on an empty place (**Draw**) | draw a new note into the voice chosen under *draw into* (Vocal or Ins) |
 | double-click an empty place (**Draw**) | a new note of one beat |
 | drag on an empty place (**Select**) | a frame: select every note it touches (Shift: add them to the selection) |
-| Ctrl+A | select all notes of both voices |
+| Ctrl+A | select all notes of both voices and all chord symbols |
 | click an empty place / Esc | clear the selection (Esc during a frame cancels the frame) |
 | drag a chord symbol | move it; a chord already at that place is replaced |
 | double-click the chord lane | type a new chord symbol (Enter adds it, Esc cancels); double-click a chord to rename it, an empty name removes it |
@@ -91,6 +91,20 @@ While you drag, a dashed **ghost** shows the result; nothing changes before you 
 Keys with the roll focused: ↑/↓ semitone (Shift: octave), ←/→ move by the grid (Shift: a beat), Alt+←/→ shorter/longer, **Delete** turns the selected notes into rests (and removes selected chord symbols), **Shift+Delete** deletes and lets the note before take the time (*close the gap*). **snap** sets the grid (*auto* is the score's finest length); **−/+** zoom. Only the visible part of a long score is drawn.
 
 The roll covers the whole piano range (A0 to C8, more for a note beyond it) and **scrolls both ways**: the mouse wheel moves through the pitches, Shift+wheel (or the scrollbar) through the bars. It opens centred on the score's notes; the pitch names stay on the left and the bar numbers, sections and the chord lane stay on top while you scroll, and a note you select - or the note that plays - is scrolled into view. Dragging a note to the top or bottom edge scrolls along, so a note can be moved or drawn anywhere in the range.
+
+### Copy and paste at the cursor
+
+The roll's **Copy**, **Cut**, **Paste** and **Insert** buttons and the keys below work like Cubase's key editor. They work wherever the score has the focus (roll, notation, section list), not in a text field. A clip holds notes and chord symbols. It starts at its earliest event, which lands on the cursor when it is pasted.
+
+| Key | Button | What it does |
+|---|---|---|
+| Ctrl+C | Copy | copy the selected notes and chord symbols (also from a read-only score) |
+| Ctrl+X | Cut | copy them; the notes become rests and the chord symbols are removed |
+| Ctrl+V | Paste | **paste at the cursor, overwriting**: in the voices the clip has, what played from the cursor for the clip's length is replaced (its rests too); chord symbols are replaced only when the clip has chord symbols |
+| Ctrl+Shift+V | Insert | **insert at the cursor** (Cubase: *Paste Time*): everything from the cursor on - both voices, chord symbols, keys, sections - moves later by the clip's length rounded up to whole bars, then the clip goes into the gap |
+| Ctrl+D | | duplicate the selection right after itself (overwriting what follows; the clipboard stays as it is) |
+
+A Vocal clip goes into the Vocal voice and an Ins clip into the Ins voice. **Sections** copied in the section list paste as a range of both voices with their chord symbols. Insert them and they keep their names, so a copied chorus becomes a new chorus at the cursor. The clipboard belongs to the editor page, so a clip can be pasted into the other sheet's score. A clip from a score with a finer grid (L:1/32) pastes into a coarser one (L:1/16) only when every note fits that grid; the status line says so otherwise. Each paste is one undo step.
 
 Deleting a note never shortens a bar: the note's time becomes a rest. *Close the gap* only happens with Shift+Delete, and only when a note of the same voice ends exactly where the deleted one started - otherwise the time stays a rest and the status line says why.
 
@@ -153,7 +167,7 @@ The section list works like Cubase's arranger track: whole sections are copied, 
 |---|---|---|
 | select | click a section (it also goes there); **Ctrl+click** adds or removes one, **Shift+click** selects a range | Ctrl+A all, Esc none |
 | duplicate | **Duplicate**: a copy of the selected sections right after the last of them | Ctrl+D |
-| copy | **Copy**: the selected sections into the clipboard, to paste them at the cursor in the roll | Ctrl+C |
+| copy | **Copy**: the selected sections into the clipboard, to paste them at the cursor in the roll | Ctrl+C (Ctrl+X: copy and delete) |
 | move | **↑ / ↓**: one place earlier / later; or **drag** the sections to a new place (the line shows where they land) | Ctrl+↑ / Ctrl+↓ |
 | copy to a place | drag with **Alt** (or Ctrl) held | |
 | delete | **Delete**: the rest closes up (one section always stays) | Del |

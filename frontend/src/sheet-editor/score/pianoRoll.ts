@@ -284,6 +284,26 @@ export function notesInRect(notes: readonly RollNote[], rect: Rect, geo: Geometr
   })
 }
 
+/**
+ * The chord symbols a selection frame takes: when it reaches into the chord lane (it started there or
+ * was pulled up into it), every chord whose box it overlaps along the bars.
+ */
+export function chordsInBand(
+  chords: readonly ModelChord[],
+  band: Band,
+  geo: Geometry,
+  scrollTop = 0,
+  scrollLeft = 0
+): ModelChord[] {
+  if (Math.min(band.y0, band.y1) >= scrollTop + TOP) return []
+  const rect = bandRect(band, geo, scrollTop, scrollLeft)
+  if (rect.width <= 0) return []
+  return chords.filter((chord, index) => {
+    const left = xOf(chord.onset, geo)
+    return left < rect.x + rect.width && left + chordWidth(chord, chords[index + 1], geo) > rect.x
+  })
+}
+
 // --- gestures ---------------------------------------------------------------------------------
 
 export type Drag =

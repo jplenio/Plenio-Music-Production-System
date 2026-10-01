@@ -21,9 +21,14 @@
  * The cursor (Cubase: project cursor, docs/design/score-arrange-design.md §2) is a line through the
  * roll with a marker in the ruler: a click or a drag in the ruler (the bar numbers) puts it on the
  * grid. Playback starts there; while it plays a second line follows the music and the pane pages along.
+ *
+ * The clipboard buttons (Cubase: key editor - Copy, Cut, Paste, Paste Time) ask the Score tab, which
+ * owns the clipboard and the cursor (``clipboard`` event); a frame that reaches into the chord lane
+ * also selects the chord symbols there, and Ctrl+A selects all notes and chord symbols.
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
+import type { ClipAction } from './clipboard'
 import { positionLabel, rulerUnit } from './locator'
 
 import type { ScoreOperation } from '../../api/client'
@@ -43,6 +48,7 @@ import {
   type Track,
   bandRect,
   chordWidth,
+  chordsInBand,
   dragOp,
   dragTo,
   draggedIds,
@@ -89,6 +95,8 @@ const props = withDefaults(
     locator?: number | null
     /** Where playback is, in units of L (``null``: stopped). */
     playhead?: number | null
+    /** What the clipboard holds (``3 notes``), ``null`` when it is empty. */
+    clip?: string | null
   }>(),
   {
     playing: () => [],
@@ -98,10 +106,11 @@ const props = withDefaults(
     resizeMode: 'rests',
     height: 280,
     locator: null,
-    playhead: null
+    playhead: null,
+    clip: null
   }
 )
-const emit = defineEmits<{ select: [ids: string[]]; locate: [unit: number] }>()
+const emit = defineEmits<{ select: [ids: string[]]; locate: [unit: number]; clipboard: [action: ClipAction] }>()
 /** Pixels per quarter note (the roll's horizontal zoom). */
 const zoom = defineModel<number>('zoom', { default: 48 })
 
@@ -115,7 +124,7 @@ const mode = ref<RollMode>('draw')
 const snapChoice = ref<SnapChoice>('auto')
 const drag = ref<Drag | null>(null)
 /** The selection frame while it is pulled, with the note ids it keeps (Shift: the selection before). */
-const band = ref<(Band & { keep: string[] }) | null>(null)
+const band = ref<(Band & { keep: string[]; keepChords: string[] }) | null>(null)
 const committing = ref(false)
 const scrollLeft = ref(0)
 const scrollTop = ref(0)
@@ -148,7 +157,10 @@ const selectedChords = computed(() => selectedChordIds(props.selection))
 const playingNotes = computed(() => selectedNoteIds(props.view, props.playing))
 const dragged = computed(() => draggedIds(drag.value))
 const ghostNotes = computed(() => ghosts(drag.value))
-/** The frame's rectangle and the notes it would select - shown as selected while it is pulled. */
+/**
+ * The frame's rectangle and the notes and chord symbols it would select - shown as selected while it is
+ * pulled; ``lane``: it reaches into the chord lane (drawn there too).
+ */
 const banded = computed(() => {
   const g = geo.value
   const current = band.value
@@ -156,14 +168,18 @@ const banded = computed(() => {
   const rect = bandRect(current, g, scrollTop.value, scrollLeft.value)
   const ids = new Set(current.keep)
   for (const note of notesInRect(notes.value, rect, g)) ids.add(note.id)
-  return { rect, ids }
+  const chordIds = new Set(current.keepChords)
+  for (const chord of chordsInBand(chords.value, current, g, scrollTop.value, scrollLeft.value)) chordIds.add(chord.id)
+  const lane = Math.min(current.y0, current.y1) < scrollTop.value + TOP
+  return { rect, ids, chords: chordIds, lane }
 })
 const hint = computed(() =>
   mode.value === 'draw'
     ? 'drag: draw · drag a note: move (↕ pitch) · drag its end: length (Alt: over the next note) · double-click: note · ' +
       'double-click the lane: chord · Del: rest · Shift+Del: close the gap'
     : 'drag: frame the notes to select (Shift: add) · click: note (Shift: add or remove) · drag a selected note: move them all · ' +
-      'Ctrl+A: all notes · ↑↓←→: move · Del: rest · Shift+Del: close the gap'
+      'into the chord lane: chords too · Ctrl+A: all · ↑↓←→: move · Del: rest · Shift+Del: close the gap · ' +
+      'Ctrl+C / Ctrl+X: copy / cut · Ctrl+V: paste at the cursor · Ctrl+Shift+V: insert · Ctrl+D: duplicate'
 )
 const position = computed(() => (model.value && props.locator !== null ? positionLabel(model.value, props.locator) : ''))
 const snapLabel = computed(() => (model.value ? `1/${Math.round(unitDenominator(model.value) / (geo.value?.snap ?? 1))}` : ''))
@@ -267,8 +283,8 @@ function onPointerDown(event: PointerEvent): void {
       select([...props.selection.filter((id) => !id.startsWith('chord:')), ...ids])
     } else if (!selectedChords.value.has(hit.chord.id)) select([hit.chord.id])
     if (editable.value) start = startChord(hit.chord, unitAt(x, g))
-  } else if (hit.area === 'grid' && mode.value === 'select') {
-    // a frame selects - also while the score cannot be edited
+  } else if ((hit.area === 'grid' || hit.area === 'lane') && mode.value === 'select') {
+    // a frame selects - also while the score cannot be edited; started in the lane it takes chord symbols
     keep = additive
       ? { notes: [...selectedNotes.value], chords: chords.value.filter((c) => selectedChords.value.has(c.id)) }
       : { notes: [], chords: [] }
@@ -316,7 +332,9 @@ function onPointerMove(event: PointerEvent): void {
   if (press.started) followEdge(event)
   if (!press.started && Math.hypot(x - press.x, y - press.y) < MOVE_THRESHOLD_PX) return
   press.started = true
-  if (press.keep) band.value = { x0: press.x, y0: press.y, x1: x, y1: y, keep: press.keep.notes }
+  if (press.keep) {
+    band.value = { x0: press.x, y0: press.y, x1: x, y1: y, keep: press.keep.notes, keepChords: press.keep.chords.map((c) => c.id) }
+  }
   else if (press.start) drag.value = dragTo(press.start, unitAt(x, g), pitchAt(y, g), g, { alt: event.altKey })
 }
 
@@ -341,8 +359,9 @@ function onPointerUp(): void {
   }
   if (current.keep) {
     const ids = banded.value?.ids ?? new Set<string>()
+    const chordIds = banded.value?.chords ?? new Set(current.keep.chords.map((c) => c.id))
     band.value = null
-    select(selectionFor(notes.value.filter((n) => ids.has(n.id)), current.keep.chords))
+    select(selectionFor(notes.value.filter((n) => ids.has(n.id)), chords.value.filter((c) => chordIds.has(c.id))))
     return
   }
   const operation = drag.value ? dragOp(drag.value, props.resizeMode) : null
@@ -413,10 +432,10 @@ function onKey(event: KeyboardEvent): void {
     return
   }
   if (event.key.toLowerCase() === 'a' && (event.ctrlKey || event.metaKey) && !event.altKey) {
-    // all notes of both voices (the chords stay as they are)
+    // all notes of both voices and all chord symbols (Cubase: Select All)
     event.preventDefault()
     event.stopPropagation()
-    select(selectionFor(notes.value, chords.value.filter((c) => selectedChords.value.has(c.id))))
+    select(selectionFor(notes.value, chords.value))
     return
   }
   const selected = notes.value.filter((n) => selectedNotes.value.has(n.id))
@@ -568,6 +587,44 @@ onBeforeUnmount(() => observer?.disconnect())
           <option :value="32">1/32</option>
         </select>
       </label>
+      <span class="group clip-tools" role="group" aria-label="Clipboard">
+        <button
+          :disabled="!selection.length"
+          title="Copy the selected notes and chord symbols (Ctrl+C)"
+          @click="emit('clipboard', 'copy')"
+        >
+          Copy
+        </button>
+        <button
+          :disabled="!selection.length || !editable"
+          title="Cut: copy the selection, its notes become rests (Ctrl+X)"
+          @click="emit('clipboard', 'cut')"
+        >
+          Cut
+        </button>
+        <button
+          :disabled="!clip || !editable || locator === null"
+          :title="
+            clip
+              ? `Paste ${clip} at the cursor, replacing what its voices play there (Ctrl+V)`
+              : 'Paste at the cursor (Ctrl+V) - copy notes, chord symbols or sections first'
+          "
+          @click="emit('clipboard', 'paste')"
+        >
+          Paste
+        </button>
+        <button
+          :disabled="!clip || !editable || locator === null"
+          :title="
+            clip
+              ? `Insert ${clip} at the cursor: everything from the cursor on moves later by whole bars (Ctrl+Shift+V; Cubase: Paste Time)`
+              : 'Insert at the cursor, moving what follows (Ctrl+Shift+V) - copy notes, chord symbols or sections first'
+          "
+          @click="emit('clipboard', 'insert')"
+        >
+          Insert
+        </button>
+      </span>
       <span class="group" role="group" aria-label="Zoom">
         <button title="Zoom out" aria-label="Zoom out" @click="zoomBy(1 / 1.25)">−</button>
         <button title="Zoom in" aria-label="Zoom in" @click="zoomBy(1.25)">+</button>
@@ -616,7 +673,7 @@ onBeforeUnmount(() => observer?.disconnect())
           <title>{{ describeNote(note) }}</title>
         </rect>
         <rect v-for="(ghost, index) in ghostNotes" :key="'ghost' + index" class="ghost" :class="ghost.track" v-bind="noteRect(ghost, geo)" rx="2" />
-        <rect v-if="banded" class="band" v-bind="banded.rect" />
+        <rect v-if="banded && banded.rect.height > 0" class="band" v-bind="banded.rect" />
         <line v-if="locator !== null" class="locator" :x1="xOf(locator, geo)" :x2="xOf(locator, geo)" :y1="TOP" :y2="geo.height" />
         <line v-if="playhead !== null" class="playhead" :x1="xOf(playhead, geo)" :x2="xOf(playhead, geo)" :y1="TOP" :y2="geo.height" />
         <g class="keys" :transform="`translate(${scrollLeft} 0)`">
@@ -657,7 +714,10 @@ onBeforeUnmount(() => observer?.disconnect())
             v-for="{ chord, next } in visibleChords"
             :key="chord.id"
             class="chord"
-            :class="{ selected: selectedChords.has(chord.id), dragged: drag?.kind === 'chord' && drag.chord.id === chord.id }"
+            :class="{
+              selected: (banded?.chords ?? selectedChords).has(chord.id),
+              dragged: drag?.kind === 'chord' && drag.chord.id === chord.id
+            }"
           >
             <rect :x="xOf(chord.onset, geo)" :y="HEADER + 3" :width="chordWidth(chord, next, geo)" :height="LANE - 6" rx="3" />
             <text :x="xOf(chord.onset, geo) + 4" :y="HEADER + LANE / 2 + 4">{{ chord.name }}</text>
@@ -667,6 +727,7 @@ onBeforeUnmount(() => observer?.disconnect())
             <rect :x="xOf(drag.to, geo)" :y="HEADER + 3" :width="chordWidth(drag.chord, undefined, geo)" :height="LANE - 6" rx="3" />
             <text :x="xOf(drag.to, geo) + 4" :y="HEADER + LANE / 2 + 4">{{ drag.chord.name }}</text>
           </g>
+          <rect v-if="banded?.lane && banded.rect.width > 0" class="band" :x="banded.rect.x" :y="HEADER" :width="banded.rect.width" :height="LANE" />
           <line v-if="playhead !== null" class="playhead" :x1="xOf(playhead, geo)" :x2="xOf(playhead, geo)" :y1="0" :y2="TOP" />
           <g v-if="locator !== null" class="locator-mark" :transform="`translate(${xOf(locator, geo)} 0)`">
             <line :x1="0" :x2="0" :y1="0" :y2="TOP" />

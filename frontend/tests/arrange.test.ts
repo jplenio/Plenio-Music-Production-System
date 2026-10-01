@@ -157,6 +157,12 @@ describe('ScoreNavigator: arranging sections', () => {
     expect(notices.at(-1)).toContain('paste it at the cursor')
     key(nav, 'Delete')
     expect(operations.at(-1)).toEqual({ op: 'arrange_sections', order: [3] })
+    // Ctrl+X: copy, then delete (Cubase: cut)
+    clipboard.value = null
+    key(nav, 'x', { ctrlKey: true })
+    const held = () => clipboard.value // read after the key (an assignment would narrow it to null)
+    expect(held()?.label).toContain('sections')
+    expect(operations.at(-1)).toEqual({ op: 'arrange_sections', order: [3] })
   })
 
   it('drags a section to a new place, and copies it with Alt', async () => {

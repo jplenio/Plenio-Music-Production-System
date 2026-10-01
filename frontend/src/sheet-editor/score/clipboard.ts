@@ -34,6 +34,9 @@ export interface Clip {
 
 export type PasteMode = 'overwrite' | 'insert'
 
+/** The clipboard commands of the roll and the keys (Cubase: Copy, Cut, Paste, Paste Time, Duplicate). */
+export type ClipAction = 'copy' | 'cut' | 'paste' | 'insert' | 'duplicate'
+
 /** The clipboard of the page (all sheets share it). */
 export const clipboard = ref<Clip | null>(null)
 

@@ -14,6 +14,12 @@
  * The cursor (``locator``, units of L - Cubase: project cursor) is where playback starts and where a
  * clip is pasted. The roll's ruler sets it, a section or bar in the navigator puts it at the bar's
  * start, Home / End at the start / end of the score; without the roll it follows the selected bar.
+ *
+ * The clipboard (Cubase: key editor; docs/design/score-arrange-design.md §3) works wherever the score
+ * has the focus and no text field does: Ctrl+C / Ctrl+X copy / cut the selected notes and chord
+ * symbols, Ctrl+V pastes at the cursor overwriting, Ctrl+Shift+V inserts at the cursor (Paste Time:
+ * what follows moves later by whole bars), Ctrl+D duplicates the selection right after itself. A
+ * read-only score can be copied from.
  */
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
@@ -27,6 +33,8 @@ import {
 } from '../../api/client'
 import type { VoiceSwitches } from '../../shared/playback'
 import {
+  type ModelChord,
+  type ModelNote,
   describe,
   elementAtSource,
   elementById,
@@ -62,7 +70,9 @@ import {
   shareValue,
   sideWidthAfter
 } from '../paneSizes'
+import { type ClipAction, clipOfSelection, clipboard, pasteOperation } from './clipboard'
 import { barOfUnit, positionLabel, secondsOfUnit, unitOfBar, unitOfSeconds } from './locator'
+import { selectedChordIds, selectedNoteIds } from './pianoRoll'
 import { guideNotes, sameGuide } from './tracks'
 import { describeError, useScoreSession } from './useScoreSession'
 
@@ -222,6 +232,88 @@ function selectFromRoll(ids: string[]): void {
   if (element) revealRange.value = [element.source[0], element.source[1]]
 }
 
+// --- the clipboard (Cubase: key editor) ---
+
+/** The selected notes and chord symbols of the model (the roll, the staff and the inspector share the selection). */
+function selectedEvents(): { notes: ModelNote[]; chords: ModelChord[] } {
+  const m = model.value
+  if (!m) return { notes: [], chords: [] }
+  const noteIds = selectedNoteIds(shown.value, session.selection)
+  const chordIds = selectedChordIds(session.selection)
+  return {
+    notes: [...m.tracks.vocal, ...m.tracks.ins].filter((n) => noteIds.has(n.id)),
+    chords: m.tracks.chords.filter((c) => chordIds.has(c.id))
+  }
+}
+
+function copySelection(): boolean {
+  const m = model.value
+  const events = selectedEvents()
+  const clip = m ? clipOfSelection(m, events.notes, events.chords) : null
+  if (!clip) {
+    session.error = 'Select notes or chord symbols first (in the roll, the notation or the inspector).'
+    return false
+  }
+  clipboard.value = clip
+  session.error = null
+  session.notes = [`copied ${clip.label} - Ctrl+V pastes it at the cursor, Ctrl+Shift+V inserts it there`]
+  return true
+}
+
+async function onClipboard(action: ClipAction): Promise<void> {
+  const m = model.value
+  if (action === 'copy') {
+    copySelection()
+    return
+  }
+  if (props.readonly || !m) return
+  if (action === 'cut') {
+    const events = selectedEvents()
+    if (!copySelection()) return
+    await operate({ op: 'delete', ids: [...events.notes.map((n) => n.id), ...events.chords.map((c) => c.id)] })
+    return
+  }
+  if (action === 'duplicate') {
+    // Cubase: the copy goes right after the selection, the clipboard stays as it is
+    const events = selectedEvents()
+    const clip = clipOfSelection(m, events.notes, events.chords)
+    if (!clip) {
+      session.error = 'Select notes or chord symbols to duplicate first.'
+      return
+    }
+    const start = Math.min(...events.notes.map((n) => n.onset), ...events.chords.map((c) => c.onset))
+    const operation = pasteOperation(clip, m, start + clip.span, 'overwrite')
+    if (typeof operation === 'string') session.error = 'There is no room after the selection to duplicate it.'
+    else await operate(operation)
+    return
+  }
+  const clip = clipboard.value
+  if (!clip) {
+    session.error = 'The clipboard is empty: copy notes, chord symbols or sections first.'
+    return
+  }
+  const operation = pasteOperation(clip, m, locator.value, action === 'insert' ? 'insert' : 'overwrite')
+  if (typeof operation === 'string') session.error = operation
+  else await operate(operation)
+}
+
+/** The clipboard command of a key with Ctrl (Cmd) held, if it is one. */
+function clipKey(event: KeyboardEvent): ClipAction | null {
+  if (event.altKey) return null
+  switch (event.key.toLowerCase()) {
+    case 'c':
+      return 'copy'
+    case 'x':
+      return 'cut'
+    case 'v':
+      return event.shiftKey ? 'insert' : 'paste'
+    case 'd':
+      return 'duplicate'
+    default:
+      return null
+  }
+}
+
 function onPlayTime(seconds: number | null): void {
   playhead.value = seconds === null || !shown.value ? null : unitOfSeconds(shown.value, seconds)
 }
@@ -367,6 +459,13 @@ function onKey(event: KeyboardEvent): void {
     event.preventDefault()
     if (event.key === 'y' || (event.key.toLowerCase() === 'z' && event.shiftKey)) session.redo()
     else session.undo()
+    return
+  }
+  const action = mod && !isTextTarget(event.target) ? clipKey(event) : null
+  if (action) {
+    event.preventDefault()
+    event.stopPropagation()
+    void onClipboard(action)
     return
   }
   if (isTextTarget(event.target) || mod) return
@@ -552,9 +651,11 @@ function onKey(event: KeyboardEvent): void {
       :busy="session.busy"
       :locator="model ? locator : null"
       :playhead="playhead"
+      :clip="clipboard?.label ?? null"
       resize-mode="rests"
       @select="selectFromRoll"
       @locate="(unit: number) => (locator = unit)"
+      @clipboard="onClipboard"
     />
     <div
       v-if="showRoll && shown?.model"

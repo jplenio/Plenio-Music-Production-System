@@ -101,6 +101,10 @@ function onKey(event: KeyboardEvent): void {
   if (event.key === 'Delete' || event.key === 'Backspace') remove()
   else if (mod && key === 'd') duplicate()
   else if (mod && key === 'c') copy()
+  else if (mod && key === 'x' && selected.value.length < sections.value.length) {
+    copy() // Cubase: cut = copy, then delete
+    remove()
+  }
   else if (mod && event.key === 'ArrowUp') shift(-1)
   else if (mod && event.key === 'ArrowDown') shift(1)
   else if (mod && key === 'a') selected.value = sections.value.map((_, i) => i)

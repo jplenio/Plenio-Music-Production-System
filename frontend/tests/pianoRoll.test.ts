@@ -513,12 +513,12 @@ describe('PianoRoll modes', () => {
     expect(selects.at(-1)).toEqual(['V2.0', 'V2.1', 'V2.2'])
   })
 
-  it('selects all notes with Ctrl+A', async () => {
+  it('selects all notes and chord symbols with Ctrl+A (Cubase: Select All)', async () => {
     const { root, selects } = mount(true, ['chord:0'])
     const event = key(root, 'a', { ctrlKey: true })
     await settle()
     expect(event.defaultPrevented).toBe(true)
-    expect(selects.at(-1)).toEqual(selectionFor(NOTES, [CHORDS[0]]))
+    expect(selects.at(-1)).toEqual(selectionFor(NOTES, CHORDS))
   })
 })
 
