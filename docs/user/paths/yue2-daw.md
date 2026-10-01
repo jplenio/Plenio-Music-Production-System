@@ -41,6 +41,8 @@ Patterns of a DAW workflow:
 
 - Import a MIDI file with a *Chords* track: switch on *read chords from the notes* and the chord symbols are written into the score (best effort, reported).
 - Keep the drums or the piano of your sketch on the Guide track: they will not colour what YuE2 sings, but you hear them while you work.
+- **Save project** keeps the score, the Guide notes and the lyrics in one file (`<title>.plenio.json`); **Open project…** brings them back in any DAW sheet, so you can go on where you stopped - in another workflow or on another machine.
+- **Export MusicXML** gives the sheet music, with the lyrics under the notes, to a notation program (MuseScore, Sibelius, Dorico, Cubase).
 
 ## Honest limits
 
@@ -51,6 +53,6 @@ Patterns of a DAW workflow:
 
 ## Related
 
-- [Score editor](../concepts/score-editor.md) - the roll, the inspector, MIDI files, the delete rules.
+- [Score editor](../concepts/score-editor.md) - the roll, the inspector, the lyrics lane, MIDI, MusicXML and project files, the delete rules.
 - [Song Sheet](../concepts/song-sheet.md) - automatic, edited and manual documents, review and approval.
 - [1 · YuE2 · Song](yue2-song.md) - when the model writes the score.

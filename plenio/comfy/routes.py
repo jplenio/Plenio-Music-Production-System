@@ -138,6 +138,17 @@ async def score_midi_export(request: web.Request) -> web.StreamResponse:
     )
 
 
+async def score_musicxml_export(request: web.Request) -> web.StreamResponse:
+    """The score as MusicXML 4.0 (the sheet music for notation programs), with the lyrics under the notes."""
+    from ..core.score import canonical, musicxml
+
+    data = await read_json(request)
+    score = canonical.from_abc(_text(data, "abc"))
+    title = _text(data, "title", required=False)
+    text = musicxml.export_musicxml(score, title=title, lyrics=_lyrics(data))
+    return web.json_response({"filename": musicxml.filename_for(title), "data": text, "type": musicxml.MUSICXML_MIME})
+
+
 async def score_midi_import(request: web.Request) -> web.StreamResponse:
     """A MIDI file (base64) as a score: its ABC, the Guide notes, the tracks and the import report."""
     from ..core.score import canonical, midi
@@ -349,6 +360,7 @@ ROUTES: tuple[tuple[str, str, Handler], ...] = (
     ("POST", "/plenio/score/transform", score_transform),
     ("POST", "/plenio/score/midi/export", score_midi_export),
     ("POST", "/plenio/score/midi/import", score_midi_import),
+    ("POST", "/plenio/score/musicxml/export", score_musicxml_export),
     ("POST", "/plenio/lyrics/analyze", lyrics_analyze),
     ("POST", "/plenio/sheet/resolve", sheet_resolve),
     ("GET", "/plenio/templates", templates_list),

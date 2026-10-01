@@ -87,6 +87,15 @@ export function transformScore(
   return post<TransformResult>(fetcher, '/plenio/score/transform', lyrics ? { abc, operation, lyrics } : { abc, operation })
 }
 
+/** The score as MusicXML 4.0 (sheet music for notation programs); ``data`` is the XML text. */
+export function exportMusicXml(
+  fetcher: Fetcher,
+  request: { abc: string; title?: string; lyrics?: string | null }
+): Promise<{ filename: string; data: string; type: string }> {
+  const { lyrics, ...rest } = request
+  return post(fetcher, '/plenio/score/musicxml/export', lyrics ? { ...rest, lyrics } : rest)
+}
+
 /** A Guide-track note ``[onset, duration, pitch]`` in units of the score's L (never sent to YuE2). */
 export type GuideNote = [number, number, number]
 

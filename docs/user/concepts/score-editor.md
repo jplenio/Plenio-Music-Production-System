@@ -13,7 +13,7 @@ Typical uses:
 | Part | What it does |
 |---|---|
 | **Palette** (top) | undo/redo; pitch −8va, −1, +1, +8va; shorter / longer; rest / note; chord symbol set / remove; *Whole score*: transpose, tempo, remove chords, let the instrument play the melody, silence the Vocal voice |
-| **View** | the layout *Review* or *Text* (see below); in *Review*: *piano roll* and *ABC text (advanced)* on/off; notation zoom; *Export MIDI* and *Import MIDI…* (see below) |
+| **View** | the layout *Review* or *Text* (see below); in *Review*: *piano roll* and *ABC text (advanced)* on/off; notation zoom; the files: *Export MIDI*, *Export MusicXML*, *Save project*, *Import MIDI…*, *Open project…* (see [Files](#files-midi-musicxml-and-the-project)) |
 | **Piano roll** | both voices over time (Vocal blue, Ins orange) with a chord lane and the bars and sections above; with lyrics a **lyrics lane** (the words over the phrases they are sung on - edit them there); the **cursor** (click in the bar numbers); draw, move, resize and delete notes and chord symbols with the mouse (see below) |
 | **Inspector** (right, *Review*) | the selected note(s), chord symbol and bar as fields: voice, pitch, start, length, chord; insert, duplicate or delete bars, meter, key (see below) |
 | **Navigator** | the sections: select one or more and **duplicate, copy, move or delete** them (also by dragging - see [Arranging sections](#arranging-sections)); go to, rename, start one bar earlier / later, join to the one before, new section at the selected bar; a bar strip (sections in colour, bars with errors marked); in *Review* with the song's lyrics: *Lyrics fit* (the lyrics next to the score's sections) |
@@ -155,12 +155,15 @@ Type in the ABC view like in any code editor. The analysis follows after a short
 
 One undo history covers both kinds of edits: a burst of typing is one step, each palette operation is one step (its tooltip names the step), and a document replaced by the dialog (for example *use the new draft* after a conflict) is one step too.
 
-## MIDI files
+## Files: MIDI, MusicXML and the project
 
-A score goes in and out as a standard MIDI file, so a sketch from any DAW can become the score - and the score can go back to a DAW.
+A score goes in and out as a standard MIDI file, so a sketch from any DAW can become the score - and the score can go back to a DAW. The sheet music goes out as MusicXML, and the whole editor's work goes into a project file to go on later.
 
 | Button | What it does |
 |---|---|
+| **Save project** | Downloads everything the score editor holds as one file, `<title>.plenio.json`: the score (notes of both voices, chord symbols, sections, tempo, keys, meters), the **Guide notes** and the **lyrics**. An unfinished or even invalid score is saved as it is. |
+| **Open project…** | Opens such a file in any score sheet. Its score, Guide notes and lyrics replace these in **one undo step**. A part the sheet cannot hold is left out, and the status line says which: Guide notes need the DAW sheet, and lyrics need a sheet whose lyrics the editor can change. Lyrics opened in a score sheet of the Song or DAW template go into *Song Sheet · Text* on Apply, like any lyrics edit. |
+| **Export MusicXML** | Downloads the sheet music as MusicXML 4.0 (`<title>.musicxml`), the format notation programs exchange (MuseScore, Sibelius, Finale, Dorico, Cubase's score editor, Logic). Parts: *Vocal* (with the chord symbols, the section names as rehearsal marks, the tempo and the **lyrics** under the notes) and *Instrument* (bass clef when it plays low). Notes that cross a bar line or have no single note value are tied; pitches are spelled for the key. For a PDF, open the file in a notation program (MuseScore is free) and print it. The Guide track stays in the MIDI export. Off while the text is invalid. |
 | **Export MIDI** | Downloads the score as a type-1 MIDI file named after the song's title. Tracks: *Vocal*, *Instrument*, *Chords* (block voicings plus `plenio:chord` text events) and the *Guide* track; tempo, time and key signatures and the section markers sit in the conductor track. Off while the text is invalid - the same gate as Apply. |
 | **Import MIDI…** | Reads a `.mid`/`.midi` file and shows what the import found **before** anything is replaced: the file's tracks with a role each, the grid, whether to read chords from the notes, and the import report. *Insert* replaces the score **and its Guide notes** - one undo step for both (the diagnostics of the imported text come with it); the sheet's old Guide notes belong to the replaced score and go with it, which the dialog says before you insert. |
 

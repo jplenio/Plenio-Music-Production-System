@@ -27,6 +27,10 @@
  * lays them onto the new sections (a copied chorus copies its words, see ``lyricsFollow``).
  * ``lyricsChange`` reports them: the dialog writes them into their sheet on Apply (*Song Sheet · Text*)
  * or at once into its own Lyrics tab (``own``). Like the Guide notes, they are part of the undo steps.
+ *
+ * Files: *Export MIDI* and *Import MIDI…* (the score and the Guide notes), *Export MusicXML* (the sheet
+ * music with the lyrics, for notation programs) and the project file - *Save project* writes the score,
+ * the Guide notes and the lyrics into one file, *Open project…* brings them back (one undo step).
  */
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 
@@ -36,6 +40,7 @@ import {
   type MidiImportResult,
   type ScoreOperation,
   exportMidi,
+  exportMusicXml,
   viewUrl
 } from '../../api/client'
 import type { VoiceSwitches } from '../../shared/playback'
@@ -92,6 +97,7 @@ import {
 import type { LyricEdit } from './PianoRoll.vue'
 import { barOfUnit, positionLabel, secondsOfUnit, unitOfBar, unitOfSeconds } from './locator'
 import { selectedChordIds, selectedNoteIds } from './pianoRoll'
+import { type ScoreProject, PROJECT_EXTENSION, buildProject, parseProject, projectFilename } from './projectFile'
 import { guideNotes, remapGuide, sameGuide } from './tracks'
 import { describeError, useScoreSession } from './useScoreSession'
 
@@ -343,6 +349,17 @@ function revertLyrics(): void {
   if (!props.readonly) session.recordSide('lyrics reverted', before, lyricsState())
 }
 
+// an opened project's lyrics follow the sections of its score when they match them
+watch(model, (current) => {
+  if (!relayLyrics || !current || loose.value === null) return
+  relayLyrics = false
+  const laid = followOf(loose.value, current)
+  if (laid) {
+    follow.value = laid
+    loose.value = null
+  }
+})
+
 // without the roll there is no ruler: the cursor follows the selected bar, as playback always did
 watch(selectedBar, (bar) => {
   if (!showRoll.value && bar && model.value) locator.value = unitOfBar(model.value, bar)
@@ -584,6 +601,102 @@ async function exportScore(): Promise<void> {
   }
 }
 
+/** The sheet music as MusicXML (both voices, chord symbols, sections and the lyrics under the notes). */
+async function exportSheet(): Promise<void> {
+  const block = midiBlock.value
+  if (block) {
+    midiError.value = block
+    return
+  }
+  midiBusy.value = true
+  midiError.value = null
+  try {
+    const file = await exportMusicXml(props.fetcher, {
+      abc: props.doc.text,
+      title: props.title ?? '',
+      lyrics: lyricsNow.value ?? props.lyrics ?? null
+    })
+    downloadBytes(file.filename, new TextEncoder().encode(file.data), file.type)
+  } catch (e) {
+    midiError.value = describeError(e)
+  } finally {
+    midiBusy.value = false
+  }
+}
+
+// --- the project file: the score, the Guide notes and the lyrics, to go on later ---
+const projectFile = ref<HTMLInputElement | null>(null)
+
+/** Everything this editor holds, as one file - also an unfinished score (its text is kept as it is). */
+function saveProject(): void {
+  const project = buildProject({
+    title: props.title,
+    score: props.doc.text,
+    guide: props.guide ?? [],
+    lyrics: lyricsNow.value ?? props.lyrics ?? null
+  })
+  downloadBytes(projectFilename(props.title), new TextEncoder().encode(`${JSON.stringify(project, null, 1)}\n`), 'application/json')
+  midiError.value = null
+  session.notes = [`saved the project: score${project.guide.length ? `, ${guideCount(project.guide.length)}` : ''}${project.lyrics ? ', lyrics' : ''}`]
+}
+
+function chooseProject(): void {
+  midiError.value = null
+  projectFile.value?.click()
+}
+
+async function onProjectFile(event: Event): Promise<void> {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  if (!file) return
+  const project = parseProject(await file.text())
+  if (typeof project === 'string') midiError.value = project
+  else openProject(project, file.name)
+}
+
+const guideCount = (count: number): string => (count === 1 ? '1 Guide note' : `${count} Guide notes`)
+
+/** Lyrics laid onto the sections of the next view (the opened score's) when they match them. */
+let relayLyrics = false
+
+/**
+ * The project's score replaces this one - with its Guide notes and its lyrics, in one undo step. Parts
+ * this sheet cannot hold are left out, and the status line says which.
+ */
+function openProject(project: ScoreProject, name: string): void {
+  if (props.readonly) {
+    midiError.value = 'This score belongs to the other sheet; open the project in that sheet.'
+    return
+  }
+  const opened = ['score']
+  const left: string[] = []
+  const before: SideState = lyricsState()
+  const after: SideState = {}
+  const guideBefore = props.guide
+  if (guideBefore !== undefined) {
+    before.guide = [...guideBefore]
+    after.guide = [...project.guide]
+    if (project.guide.length) opened.push(guideCount(project.guide.length))
+  } else if (project.guide.length) left.push('the Guide notes (only the DAW sheet keeps a Guide track)')
+  if (project.lyrics && lyricsEditable.value) {
+    follow.value = null
+    loose.value = project.lyrics
+    relayLyrics = true
+    opened.push('lyrics')
+  } else if (project.lyrics) left.push('the lyrics (this sheet cannot change them here)')
+  Object.assign(after, lyricsState())
+  const label = `open project (${name})`
+  // the same score: the step holds the Guide notes and the lyrics alone
+  if (!session.replaceText(project.score, label, null, { before, after })) session.recordSide(label, before, after)
+  if (after.guide && guideBefore !== undefined && !sameGuide(after.guide, guideBefore)) emit('guideChange', after.guide)
+  midiError.value = null
+  session.notes = [
+    `opened ${name}: ${opened.join(', ')}${project.title ? ` ("${project.title}")` : ''}`,
+    ...left.map((part) => `not opened: ${part}`)
+  ]
+}
+
 function chooseMidi(): void {
   midiError.value = null
   midiFile.value?.click()
@@ -771,7 +884,7 @@ function onKey(event: KeyboardEvent): void {
         zoom
         <input v-model.number="prefs.zoom" type="range" min="0.6" max="1.8" step="0.1" aria-label="Notation zoom" />
       </label>
-      <span class="midi-tools" role="group" aria-label="MIDI">
+      <span class="midi-tools" role="group" aria-label="Files">
         <button
           :disabled="midiBusy || !!midiBlock"
           :title="midiBlock ?? 'Download this score as a standard MIDI file (Vocal, Instrument, Chords and the Guide track)'"
@@ -780,11 +893,32 @@ function onKey(event: KeyboardEvent): void {
           Export MIDI
         </button>
         <button
+          :disabled="midiBusy || !!midiBlock"
+          :title="midiBlock ?? 'Download the sheet music as MusicXML for notation programs (MuseScore, Sibelius, Finale, Dorico, Cubase): both voices, chord symbols, sections and the lyrics'"
+          @click="exportSheet"
+        >
+          Export MusicXML
+        </button>
+        <button
+          :disabled="!doc.text.trim()"
+          title="Save the score, the Guide notes and the lyrics in one project file, to go on later (Open project…)"
+          @click="saveProject"
+        >
+          Save project
+        </button>
+        <button
           :disabled="readonly"
           :title="readonly ? 'This score belongs to the other sheet.' : 'Read a MIDI file as the score (the report is shown before anything is replaced)'"
           @click="chooseMidi"
         >
           Import MIDI…
+        </button>
+        <button
+          :disabled="readonly"
+          :title="readonly ? 'This score belongs to the other sheet.' : 'Open a project file: its score, Guide notes and lyrics replace these (one undo step)'"
+          @click="chooseProject"
+        >
+          Open project…
         </button>
         <input
           ref="midiFile"
@@ -793,6 +927,14 @@ function onKey(event: KeyboardEvent): void {
           accept=".mid,.midi,audio/midi,audio/x-midi"
           aria-label="MIDI file"
           @change="onMidiFile"
+        />
+        <input
+          ref="projectFile"
+          class="hidden-file"
+          type="file"
+          :accept="`${PROJECT_EXTENSION},.json,application/json`"
+          aria-label="Project file"
+          @change="onProjectFile"
         />
       </span>
       <span v-if="session.pending" class="facts">checking…</span>
@@ -992,7 +1134,7 @@ function onKey(event: KeyboardEvent): void {
       <span v-for="(note, index) in session.notes" :key="index" class="change">{{ note }}</span>
     </p>
     <p v-if="session.error" class="error" role="alert">{{ session.error }}</p>
-    <p v-if="midiError" class="error" role="alert">MIDI: {{ midiError }}</p>
+    <p v-if="midiError" class="error" role="alert">{{ midiError }}</p>
     <MidiDialog
       v-if="midiRequest"
       :fetcher="fetcher"
