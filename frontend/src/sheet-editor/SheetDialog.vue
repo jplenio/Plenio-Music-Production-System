@@ -182,18 +182,29 @@ const guide = ref<GuideNote[]>([...(props.guide ?? [])])
 function setGuide(next: GuideNote[]): void {
   guide.value = next
 }
-// --- the context lyrics follow the score's sections (they belong to the sheet in lyricsTarget) ---
-const followLyrics = ref(true)
+// --- the lyrics in the score editor: this sheet's own (Lyrics tab) or another sheet's (written on Apply) ---
 const followText = ref<string | null>(null)
-/** Lyrics of another sheet: only those follow (this sheet's own lyrics are edited in its Lyrics tab). */
-const lyricsTarget = computed(() => (working.some((doc) => doc.kind === 'lyrics') ? null : (props.lyricsTarget ?? null)))
-/** The arranged lyrics to write into the other sheet, when they changed. */
+const ownLyrics = computed(() => working.find((doc) => doc.kind === 'lyrics') ?? null)
+const OWN_LYRICS: LyricsTarget = { title: 'the Lyrics tab', blocked: null, replans: false, own: true }
+/** Where lyrics edited in the score editor go. */
+const lyricsTarget = computed(() => (ownLyrics.value ? OWN_LYRICS : (props.lyricsTarget ?? null)))
+/** The other sheet's lyrics as edited or arranged here, when they changed (written on Apply). */
 const followedLyrics = computed(() => {
   const base = props.payload?.context?.lyrics
   const text = followText.value
-  if (!lyricsTarget.value || lyricsTarget.value.blocked || !followLyrics.value || !text || !base) return null
+  if (ownLyrics.value || !lyricsTarget.value || lyricsTarget.value.blocked || !text || !base) return null
   return normalize(text) !== normalize(base) ? text : null
 })
+
+function onLyricsChange(text: string | null): void {
+  const own = ownLyrics.value
+  if (!own) {
+    followText.value = text
+  } else if (text !== null && normalize(text) !== normalize(own.text)) {
+    own.text = text // this sheet's lyrics change at once (the Lyrics tab shows them)
+    onInput(own)
+  }
+}
 /**
  * When the music model plans this score from those lyrics (*1 · YuE2 · Song*), new lyrics plan a new
  * score on the next run: the arranged score is kept as the user's (manual), so it is used and does not
@@ -451,11 +462,10 @@ onBeforeUnmount(() => {
             :title="songTitle"
             :guide="guide"
             :lyrics-target="lyricsTarget"
-            :lyrics-followed="followText"
-            v-model:follow-lyrics="followLyrics"
+            :lyrics-pending="ownLyrics ? null : followText"
             @edited="onInput(doc)"
             @guide-change="setGuide"
-            @lyrics-follow="(text: string | null) => (followText = text)"
+            @lyrics-change="onLyricsChange"
             @gate="(text: string, reason: string | null) => (scoreGate = { text, reason })"
           />
           <textarea
@@ -507,7 +517,16 @@ onBeforeUnmount(() => {
             <h3>Score (ABC)</h3>
             <span class="badge">from the other sheet (read-only)</span>
           </div>
-          <ScoreTab :doc="contextDoc" :fetcher="fetcher" :payload="payload" :readonly="true" />
+          <!-- the other sheet's score, read-only; this sheet's lyrics are shown on it and edited there -->
+          <ScoreTab
+            :doc="contextDoc"
+            :fetcher="fetcher"
+            :payload="payload"
+            :readonly="true"
+            :lyrics="lyricsText"
+            :lyrics-target="ownLyrics ? lyricsTarget : null"
+            @lyrics-change="onLyricsChange"
+          />
         </section>
         <section v-if="tab === 'lyrics' && timeline.length" class="doc sections">
           <div class="doc-head">

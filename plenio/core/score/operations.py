@@ -18,7 +18,7 @@ from fractions import Fraction
 from typing import Any
 
 from ..errors import PlenioValidationError
-from . import canonical, edit, native, ops
+from . import canonical, edit, lyric_layout, native, ops
 from . import model as score_model
 from .edit import EditResult
 
@@ -179,23 +179,31 @@ def model_view(score: canonical.Score, heads: Mapping[tuple[str, int], list[str]
     }
 
 
-def editor_view(abc: str) -> dict[str, Any]:
+def editor_view(abc: str, lyrics: str | None = None) -> dict[str, Any]:
     """The analysis plus, for a valid score, the element view and the canonical model view.
 
     A score the upstream parser accepts but that lies outside the supported subset (plan §9.2)
     is valid for YuE2 but has no ``model``: ``model_error`` says why graphical editing is off.
+    With ``lyrics`` the view also says where they are sung (``lyrics``, see ``lyric_layout``) and
+    the notation shows the syllables under the Vocal notes.
     """
     analysis = native.analyze(abc)
     result = analysis.to_dict()
     if analysis.ok:
-        result.update(score_model.view(abc))
         try:
-            score = canonical.from_abc(abc)
+            score: canonical.Score | None = canonical.from_abc(abc)
         except canonical.ScoreSyntaxError as error:
-            result["model"] = None
+            score = None
             result["model_error"] = {"message": error.message, "diagnostics": error.diagnostics}
-        else:
-            result["model"] = model_view(score, _segments(abc))
+        placed = lyric_layout.layout(score, lyrics) if score is not None and lyrics and lyrics.strip() else None
+        words: dict[int, str] | None = None
+        if placed is not None:
+            words = {onset: lyric_layout.w_token(s) for onset, s in placed.syllables().items()}
+            words.update(dict.fromkeys(placed.holds(), "_"))
+        result.update(score_model.view(abc, words))
+        result["model"] = model_view(score, _segments(abc)) if score is not None else None
+        if placed is not None:
+            result["lyrics"] = placed.to_dict()
     return result
 
 

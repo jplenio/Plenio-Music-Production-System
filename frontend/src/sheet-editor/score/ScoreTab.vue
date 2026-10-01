@@ -21,10 +21,12 @@
  * what follows moves later by whole bars), Ctrl+D duplicates the selection right after itself. A
  * read-only score can be copied from.
  *
- * The lyrics follow the sections (``lyricsTarget``: another sheet owns them - *Song Sheet · Text*):
- * when they matched the score's sections, every edit lays them onto the new sections (a copied chorus
- * copies its words, see ``lyricsFollow``) and ``lyricsFollow`` reports the text; the dialog writes it
- * into that sheet on Apply. Like the Guide notes, the lyrics are part of each undo step.
+ * The lyrics (``lyrics``) go with the score to the backend, which says where they are sung: the roll
+ * shows them over the Vocal phrases and the notation under the notes. With ``lyricsTarget`` they can
+ * be edited in the roll's lyrics lane, and when they matched the score's sections every arrangement
+ * lays them onto the new sections (a copied chorus copies its words, see ``lyricsFollow``).
+ * ``lyricsChange`` reports them: the dialog writes them into their sheet on Apply (*Song Sheet · Text*)
+ * or at once into its own Lyrics tab (``own``). Like the Guide notes, they are part of the undo steps.
  */
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 
@@ -82,9 +84,12 @@ import {
   type LyricsTarget,
   followEdit,
   followOf,
+  followReplace,
   followText,
-  parseLyrics
+  parseLyrics,
+  replaceLine
 } from './lyricsFollow'
+import type { LyricEdit } from './PianoRoll.vue'
 import { barOfUnit, positionLabel, secondsOfUnit, unitOfBar, unitOfSeconds } from './locator'
 import { selectedChordIds, selectedNoteIds } from './pianoRoll'
 import { guideNotes, remapGuide, sameGuide } from './tracks'
@@ -103,21 +108,19 @@ const props = defineProps<{
   title?: string | null
   /** The Guide notes kept in the node's properties; ``undefined``: this sheet keeps none. */
   guide?: GuideNote[]
-  /** Another sheet owns ``lyrics`` and can take them back arranged like the score (``null``: no). */
+  /** Where edited lyrics go (another sheet on Apply, or this sheet's Lyrics tab); ``null``: shown only. */
   lyricsTarget?: LyricsTarget | null
-  /** The lyrics as they followed the sections before this tab was last closed (the dialog keeps them). */
-  lyricsFollowed?: string | null
+  /** The lyrics as they were when this tab was last closed (the dialog keeps them until Apply). */
+  lyricsPending?: string | null
 }>()
-/** Whether the lyrics are written back arranged (the dialog keeps the choice). */
-const followLyrics = defineModel<boolean>('followLyrics', { default: true })
 const emit = defineEmits<{
   edited: []
   /** The commit gate for ``text``: why it cannot be applied/approved (``null``: it can). */
   gate: [text: string, reason: string | null]
   /** The Guide notes an import brought in (stored in the node's properties). */
   guideChange: [guide: GuideNote[]]
-  /** The lyrics laid onto the score's sections (``null``: they do not follow). */
-  lyricsFollow: [text: string | null]
+  /** The lyrics as they are now - arranged with the sections, edited in the roll (``null``: none). */
+  lyricsChange: [text: string | null]
 }>()
 
 /**
@@ -126,15 +129,22 @@ const emit = defineEmits<{
  */
 interface SideState {
   guide?: GuideNote[]
+  /** The lyrics laid onto the sections (while they match them) ... */
   lyrics?: LyricsFollow | null
+  /** ... or as a text of their own (when they do not). */
+  looseLyrics?: string | null
 }
 
 function isSideState(value: unknown): value is SideState {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-/** The lyrics laid onto the score's sections while they follow them. */
+/** The lyrics laid onto the score's sections while they match them ... */
 const follow = shallowRef<LyricsFollow | null>(null)
+/** ... else the lyrics as a text (edited line by line, not arranged). */
+const loose = ref<string | null>(null)
+/** The lyrics as they are now (``null``: nothing to edit; then ``lyrics`` is shown as it is). */
+const lyricsNow = ref<string | null>(null)
 
 /** The lyrics of the sections an *Insert* brings in: the ones copied with them. */
 function insertedLyrics(operation: ScoreOperation): (unit: number) => LyricBlock | null {
@@ -154,6 +164,7 @@ function insertedLyrics(operation: ScoreOperation): (unit: number) => LyricBlock
 const session = useScoreSession(props.doc, {
   fetcher: props.fetcher,
   onEdit: () => emit('edited'),
+  lyrics: () => lyricsNow.value ?? props.lyrics ?? null,
   // an undo or redo brings the Guide notes and the lyrics of that step back with its text
   onRestore: (extra) => {
     if (!isSideState(extra)) return
@@ -161,6 +172,7 @@ const session = useScoreSession(props.doc, {
       emit('guideChange', [...extra.guide])
     }
     if ('lyrics' in extra) follow.value = extra.lyrics ?? null
+    if ('looseLyrics' in extra) loose.value = extra.looseLyrics ?? null
   },
   // bars that moved (arranged sections, Insert at the cursor, inserted, deleted or duplicated bars)
   // take their Guide notes along, and the lyrics follow the sections - in the same undo step as the text
@@ -242,36 +254,94 @@ watch(
     if (total !== undefined && locator.value > total) locator.value = total
   }
 )
-// --- the lyrics follow the sections ---
-/** The base the lyrics were laid onto the sections from (another base starts over). */
-let followBase: string | null = null
+// --- the lyrics: shown where they are sung, edited in the roll, arranged with the sections ---
+/** The text the lyrics state was started from (``lyrics``, or what this tab itself reported). */
+let lyricsBase: string | null = null
+let lyricsReported: string | null = null
+/** The state is laid onto a model (until one is there, the text is used as it is). */
+let lyricsLaid = false
 watch(
   () => [props.lyricsTarget, props.lyrics, model.value] as const,
   ([target, lyrics, current]) => {
-    if (!target || !lyrics || !current) {
-      if (!target || !lyrics) follow.value = null
+    if (!target || !lyrics?.trim()) {
+      follow.value = null
+      loose.value = null
+      lyricsBase = null
+      lyricsLaid = false
       return
     }
-    if (followBase === lyrics && follow.value) {
-      // an edit in the text that changed the number of sections leaves nothing to follow
-      if (follow.value.blocks.length !== current.sections.length) follow.value = null
+    const same = lyrics === lyricsBase || lyrics === lyricsReported
+    lyricsBase = lyrics
+    if (same && (lyricsLaid || !current)) {
+      // an edit in the ABC text that changed the number of sections: the lyrics no longer follow them
+      if (follow.value && current && follow.value.blocks.length !== current.sections.length) {
+        loose.value = lyricsNow.value
+        follow.value = null
+      }
       return
     }
-    followBase = lyrics
-    follow.value = followOf(props.lyricsFollowed, current) ?? followOf(lyrics, current)
+    const start = (!lyricsLaid && props.lyricsPending) || lyrics
+    follow.value = current ? followOf(start, current) : null
+    loose.value = follow.value ? null : start
+    lyricsLaid = !!current
   },
   { immediate: true }
 )
-const followedText = computed(() => {
-  const lyrics = follow.value
-  const current = model.value
-  return lyrics && current && lyrics.blocks.length === current.sections.length ? followText(lyrics, current) : null
-})
-watch(followedText, (text) => emit('lyricsFollow', text), { immediate: true })
-const followChanged = computed(() => !!followedText.value && normalize(followedText.value) !== normalize(props.lyrics ?? ''))
-const followTags = computed(() => (followedText.value ? parseLyrics(followedText.value).blocks.map((b) => b.tag).join(' · ') : ''))
+watch(
+  [follow, loose, model],
+  () => {
+    const laid = follow.value
+    const current = model.value
+    // while an undo waits for its view the blocks and the sections differ: keep the last text
+    if (laid) {
+      if (current && laid.blocks.length === current.sections.length) lyricsNow.value = followText(laid, current)
+    } else lyricsNow.value = loose.value
+  },
+  { immediate: true }
+)
+watch(
+  lyricsNow,
+  (text, previous) => {
+    lyricsReported = text
+    emit('lyricsChange', text)
+    if (previous !== undefined && text !== previous) session.refreshLyrics()
+  },
+  { immediate: true }
+)
+const lyricsEditable = computed(
+  () => !!props.lyricsTarget && !props.lyricsTarget.blocked && (!!props.lyricsTarget.own || !props.readonly)
+)
+const lyricsChanged = computed(
+  () => !!lyricsNow.value && !props.lyricsTarget?.own && normalize(lyricsNow.value) !== normalize(props.lyrics ?? '')
+)
+const lyricsTags = computed(() => (lyricsNow.value ? parseLyrics(lyricsNow.value).blocks.map((b) => b.tag).join(' · ') : ''))
 /** The lyrics the fit panel checks: as they will be written. */
-const fitLyrics = computed(() => (followLyrics.value && followChanged.value ? followedText.value : null) ?? props.lyrics ?? null)
+const fitLyrics = computed(() => lyricsNow.value ?? props.lyrics ?? null)
+
+function lyricsState(): SideState {
+  return { lyrics: follow.value, looseLyrics: loose.value }
+}
+
+/** A line edited in the roll's lyrics lane: one undo step of its own. */
+function onLyricEdit(edit: LyricEdit): void {
+  const current = model.value
+  const before = lyricsState()
+  if (follow.value && current) follow.value = followReplace(follow.value, current, edit.section, edit.line, edit.text)
+  else if (loose.value !== null) loose.value = replaceLine(loose.value, edit.block, edit.line, edit.text)
+  else return
+  if (!props.readonly) session.recordSide(`lyrics: ${edit.text || 'line removed'}`, before, lyricsState())
+}
+
+/** Back to the lyrics as their sheet has them (one undo step). */
+function revertLyrics(): void {
+  const base = props.lyrics
+  const current = model.value
+  if (!base) return
+  const before = lyricsState()
+  follow.value = current ? followOf(base, current) : null
+  loose.value = follow.value ? null : base
+  if (!props.readonly) session.recordSide('lyrics reverted', before, lyricsState())
+}
 
 // without the roll there is no ruler: the cursor follows the selected bar, as playback always did
 watch(selectedBar, (bar) => {
@@ -754,10 +824,13 @@ function onKey(event: KeyboardEvent): void {
       :locator="model ? locator : null"
       :playhead="playhead"
       :clip="clipboard?.label ?? null"
+      :lyrics="shown?.lyrics ?? null"
+      :lyrics-editable="lyricsEditable"
       resize-mode="rests"
       @select="selectFromRoll"
       @locate="(unit: number) => (locator = unit)"
       @clipboard="onClipboard"
+      @lyric-edit="onLyricEdit"
     />
     <div
       v-if="showRoll && shown?.model"
@@ -800,22 +873,27 @@ function onKey(event: KeyboardEvent): void {
           @operate="operate"
           @notice="(text: string) => (session.notes = [text])"
         />
-        <div v-if="lyricsTarget && follow && !readonly" class="lyrics-follow" role="group" aria-label="Lyrics follow the sections">
-          <label :title="`Arrange the lyrics in ${lyricsTarget.title} like the score's sections`">
-            <input v-model="followLyrics" type="checkbox" :disabled="!!lyricsTarget.blocked" />
-            lyrics follow the sections
-          </label>
+        <div v-if="lyricsTarget && lyricsNow !== null" class="lyrics-follow" role="group" aria-label="Lyrics">
+          <strong>Lyrics</strong>
           <p v-if="lyricsTarget.blocked" class="hint">{{ lyricsTarget.blocked }}</p>
-          <p v-else-if="!followLyrics" class="hint">The lyrics in {{ lyricsTarget.title }} stay as they are.</p>
-          <p v-else-if="followChanged" class="hint changed">
-            Apply arranges the lyrics in {{ lyricsTarget.title }} the same way: {{ followTags }}. That sheet then asks
-            for approval again.
-            <template v-if="lyricsTarget.replans">
-              The planner reads those lyrics and plans again on the next run; this score is kept as yours (manual) and
-              used.
-            </template>
-          </p>
-          <p v-else class="hint">Duplicating, moving or deleting sections arranges the lyrics in {{ lyricsTarget.title }} the same way.</p>
+          <template v-else>
+            <p v-if="lyricsChanged" class="hint changed">
+              Apply writes the changed lyrics into {{ lyricsTarget.title }}: {{ lyricsTags }}. That sheet then asks for
+              approval again.
+              <template v-if="lyricsTarget.replans">
+                The planner reads those lyrics and plans again on the next run; this score is kept as yours (manual)
+                and used.
+              </template>
+            </p>
+            <p v-else class="hint">
+              {{ lyricsTarget.own ? 'This sheet\'s lyrics' : `The lyrics of ${lyricsTarget.title}` }}: double-click the
+              lyrics lane over the notes to edit a line where it is sung.
+              <template v-if="follow && !readonly">Duplicating, moving or deleting sections arranges them too.</template>
+            </p>
+            <button v-if="lyricsChanged" title="Back to the lyrics as their sheet has them (one undo step)" @click="revertLyrics">
+              Revert the lyrics
+            </button>
+          </template>
         </div>
         <details v-if="review && fitLyrics" class="fit-panel">
           <summary>Lyrics fit</summary>

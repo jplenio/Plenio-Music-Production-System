@@ -130,7 +130,7 @@ describe('ScoreTab: the lyrics follow the sections', () => {
           title: 'Song',
           guide: [] as GuideNote[],
           lyricsTarget: target,
-          onLyricsFollow: (text: string | null) => followed.push(text)
+          onLyricsChange: (text: string | null) => followed.push(text)
         })
     })
     app.mount(host)
@@ -154,12 +154,12 @@ describe('ScoreTab: the lyrics follow the sections', () => {
   it('arranges the lyrics like the score and says what Apply will do', async () => {
     const { host, sent, followed } = await mountTab({ title: 'Song Sheet · Text', blocked: null, replans: true })
     expect(followed.at(-1)).toBe(LYRICS)
-    expect(host.querySelector('.lyrics-follow')?.textContent).toContain('arranges the lyrics in Song Sheet · Text the same way')
+    expect(host.querySelector('.lyrics-follow')?.textContent).toContain('Duplicating, moving or deleting sections arranges them too')
     await duplicateChorus(host)
     expect(sent.at(-1)).toEqual({ op: 'arrange_sections', order: [1, 2, 3, 3] })
     expect(followed.at(-1)).toBe(`${LYRICS}\n\n[Chorus]\nchorus a\nchorus b`)
     const panel = host.querySelector('.lyrics-follow')?.textContent ?? ''
-    expect(panel).toContain('Intro · Verse · Chorus · Chorus')
+    expect(panel).toContain('Apply writes the changed lyrics into Song Sheet · Text: Intro · Verse · Chorus · Chorus')
     expect(panel).toContain('kept as yours (manual)')
     // undo brings the lyrics back with the text
     host.querySelector('.score-tab')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true, cancelable: true }))
@@ -174,7 +174,7 @@ describe('ScoreTab: the lyrics follow the sections', () => {
     const { host } = await mountTab({ title: 'Song Sheet · Text', blocked: 'The lyrics in Song Sheet · Text changed after the last run.', replans: false })
     const box = host.querySelector('.lyrics-follow') as HTMLElement
     expect(box.textContent).toContain('changed after the last run')
-    expect((box.querySelector('input') as HTMLInputElement).disabled).toBe(true)
+    expect(box.querySelector('button')).toBeNull() // nothing to revert or write
   })
 })
 

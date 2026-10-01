@@ -57,8 +57,9 @@ export async function getAsrNote(fetcher: Fetcher, draftSha256: string): Promise
 }
 
 /** Analysis and element view of a score (valid or not: invalid scores come back with diagnostics). */
-export function analyzeScore(fetcher: Fetcher, abc: string): Promise<ScoreView> {
-  return post<ScoreView>(fetcher, '/plenio/score/analyze', { abc })
+/** The score's view; with ``lyrics`` it also says where they are sung (``view.lyrics``, ``w:`` in the notation). */
+export function analyzeScore(fetcher: Fetcher, abc: string, lyrics?: string | null): Promise<ScoreView> {
+  return post<ScoreView>(fetcher, '/plenio/score/analyze', lyrics ? { abc, lyrics } : { abc })
 }
 
 export interface ScoreOperation {
@@ -77,8 +78,13 @@ export interface TransformResult {
 }
 
 /** Apply one editor operation; the backend checks it and returns the new canonical text. */
-export function transformScore(fetcher: Fetcher, abc: string, operation: ScoreOperation): Promise<TransformResult> {
-  return post<TransformResult>(fetcher, '/plenio/score/transform', { abc, operation })
+export function transformScore(
+  fetcher: Fetcher,
+  abc: string,
+  operation: ScoreOperation,
+  lyrics?: string | null
+): Promise<TransformResult> {
+  return post<TransformResult>(fetcher, '/plenio/score/transform', lyrics ? { abc, operation, lyrics } : { abc, operation })
 }
 
 /** A Guide-track note ``[onset, duration, pitch]`` in units of the score's L (never sent to YuE2). */

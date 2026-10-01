@@ -31,11 +31,11 @@ async function wr(e, t) {
   const n = await e.fetchApi(`/plenio/asr/notes/${t}`);
   return n.ok ? (await n.json())?.note ?? null : null;
 }
-function xr(e, t) {
-  return ae(e, "/plenio/score/analyze", { abc: t });
+function xr(e, t, n) {
+  return ae(e, "/plenio/score/analyze", n ? { abc: t, lyrics: n } : { abc: t });
 }
-function _r(e, t, n) {
-  return ae(e, "/plenio/score/transform", { abc: t, operation: n });
+function _r(e, t, n, i) {
+  return ae(e, "/plenio/score/transform", i ? { abc: t, operation: n, lyrics: i } : { abc: t, operation: n });
 }
 function Er(e, t) {
   return ae(e, "/plenio/score/midi/export", t);
@@ -1201,7 +1201,7 @@ const Hi = (e, t, n) => {
     w.stopPropagation();
     const B = Pe(i);
     B === null && (s.textContent = "The stored state is unreadable; it will be replaced when you apply.");
-    const M = Ce(String(e.id)), Y = (e.inputs ?? []).filter((y) => y.link != null).map((y) => y.name), a = B ?? { schema: "plenio.sheet_state/1", docs: {} }, T = M?.owned ?? zi(Y, a), _ = String(e.widgets?.find((y) => y.name === "review")?.value ?? "continue"), p = _ === "as the brief says" ? M?.review ?? "continue" : _, { openSheetDialog: d } = await import("./open-gzV69gpm.mjs"), { parseGuide: f, serializeGuide: h } = await import("./tracks-DxmZeggM.mjs");
+    const M = Ce(String(e.id)), Y = (e.inputs ?? []).filter((y) => y.link != null).map((y) => y.name), a = B ?? { schema: "plenio.sheet_state/1", docs: {} }, T = M?.owned ?? zi(Y, a), _ = String(e.widgets?.find((y) => y.name === "review")?.value ?? "continue"), p = _ === "as the brief says" ? M?.review ?? "continue" : _, { openSheetDialog: d } = await import("./open-3_uWjQF8.mjs"), { parseGuide: f, serializeGuide: h } = await import("./tracks-DxmZeggM.mjs");
     if (!st) throw new Error("Plenio: API not initialised");
     const E = Ti(e, M, Ce);
     d({

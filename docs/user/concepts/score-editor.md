@@ -14,10 +14,10 @@ Typical uses:
 |---|---|
 | **Palette** (top) | undo/redo; pitch −8va, −1, +1, +8va; shorter / longer; rest / note; chord symbol set / remove; *Whole score*: transpose, tempo, remove chords, let the instrument play the melody, silence the Vocal voice |
 | **View** | the layout *Review* or *Text* (see below); in *Review*: *piano roll* and *ABC text (advanced)* on/off; notation zoom; *Export MIDI* and *Import MIDI…* (see below) |
-| **Piano roll** | both voices over time (Vocal blue, Ins orange) with a chord lane and the bars and sections above; the **cursor** (click in the bar numbers); draw, move, resize and delete notes and chord symbols with the mouse (see below) |
+| **Piano roll** | both voices over time (Vocal blue, Ins orange) with a chord lane and the bars and sections above; with lyrics a **lyrics lane** (the words over the phrases they are sung on - edit them there); the **cursor** (click in the bar numbers); draw, move, resize and delete notes and chord symbols with the mouse (see below) |
 | **Inspector** (right, *Review*) | the selected note(s), chord symbol and bar as fields: voice, pitch, start, length, chord; insert, duplicate or delete bars, meter, key (see below) |
 | **Navigator** | the sections: select one or more and **duplicate, copy, move or delete** them (also by dragging - see [Arranging sections](#arranging-sections)); go to, rename, start one bar earlier / later, join to the one before, new section at the selected bar; a bar strip (sections in colour, bars with errors marked); in *Review* with the song's lyrics: *Lyrics fit* (the lyrics next to the score's sections) |
-| **Notation** | click a note or rest to select it, Shift+click to add to the selection |
+| **Notation** | click a note or rest to select it, Shift+click to add to the selection; the lyrics stand under the Vocal notes (read-only) |
 | **ABC text** | the canonical text with line numbers; errors are underlined at their bar; the cursor selects the note under it |
 | **Transport** | play from the cursor, loop the cursor's section, metronome, voices (Vocal, Ins, chords), speed; with a source connected: play the source from the cursor's bar and **A/B** |
 | **Status line** | what is selected (voice, bar, pitch, length, chord) and what the last edit did |
@@ -91,6 +91,21 @@ While you drag, a dashed **ghost** shows the result; nothing changes before you 
 Keys with the roll focused: ↑/↓ semitone (Shift: octave), ←/→ move by the grid (Shift: a beat), Alt+←/→ shorter/longer, **Delete** turns the selected notes into rests (and removes selected chord symbols), **Shift+Delete** deletes and lets the note before take the time (*close the gap*). **snap** sets the grid (*auto* is the score's finest length); **−/+** zoom. Only the visible part of a long score is drawn.
 
 The roll covers the whole piano range (A0 to C8, more for a note beyond it) and **scrolls both ways**: the mouse wheel moves through the pitches, Shift+wheel (or the scrollbar) through the bars. It opens centred on the score's notes; the pitch names stay on the left and the bar numbers, sections and the chord lane stay on top while you scroll, and a note you select - or the note that plays - is scrolled into view. Dragging a note to the top or bottom edge scrolls along, so a note can be moved or drawn anywhere in the range.
+
+### Lyrics where they are sung
+
+When the song has lyrics, the roll shows a **lyrics lane** under the chord lane. Each line stands over the Vocal phrase it is sung on, and each syllable stands small over its note (`beau-` `ti-` `ful`). The notation shows the same syllables under the Vocal notes; there they are read-only.
+
+**Double-click a line** in the lane to edit it there (Enter keeps it, Esc cancels, an empty line is removed). A double-click over a phrase without words adds a line for it. Each edit is one undo step. Where the edited lyrics go:
+
+| Sheet | The lyrics come from | An edit goes |
+|---|---|---|
+| score sheet of *1 · YuE2 · Song*, *5 · YuE2 · DAW* | *Song Sheet · Text* | into that sheet on **Apply** (the side column says so; *Revert the lyrics* goes back) - that sheet then asks for approval again |
+| text sheet of *2 · YuE2 · Cover* (the score is the other sheet's, read-only) | this sheet | straight into its **Lyrics** tab |
+
+How the words are placed is the lyrics writer's own rule. A block of the lyrics belongs to a section of the score, in order (by tag when the numbers differ). The section's Vocal notes form **phrases**, split at rests of a beat or more, and each line takes a phrase. Each syllable takes a note: a short line holds its last syllable over the rest of the phrase (a melisma), and a long one puts the rest on its last note.
+
+This is a picture of where the words fall. YuE2 itself sings the lyrics section by section and places the syllables itself. Syllables are split at vowel groups, the same estimate the *Lyrics fit* counts with. It is made for English: a German final *e* (*Liebe*) is taken as silent.
 
 ### Copy and paste at the cursor
 

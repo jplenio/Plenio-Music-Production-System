@@ -22,6 +22,10 @@
  * roll with a marker in the ruler: a click or a drag in the ruler (the bar numbers) puts it on the
  * grid. Playback starts there; while it plays a second line follows the music and the pane pages along.
  *
+ * With lyrics, a lyrics lane under the chord lane shows every line over the Vocal phrase it is sung on
+ * and each syllable over its note (backend ``lyric_layout``); a double-click in the lane edits the line
+ * there (``lyricEdit``: the Score tab changes the lyrics, the view follows).
+ *
  * The clipboard buttons (Cubase: key editor - Copy, Cut, Paste, Paste Time) ask the Score tab, which
  * owns the clipboard and the cursor (``clipboard`` event); a frame that reaches into the chord lane
  * also selects the chord symbols there, and Ctrl+A selects all notes and chord symbols.
@@ -32,13 +36,14 @@ import type { ClipAction } from './clipboard'
 import { positionLabel, rulerUnit } from './locator'
 
 import type { ScoreOperation } from '../../api/client'
-import type { ModelChord, ScoreView } from '../../shared/scoreView'
+import type { LyricLayoutView, ModelChord, ScoreView } from '../../shared/scoreView'
 import {
   type Band,
   type Drag,
   HEADER,
   KEYS_WIDTH,
   LANE,
+  LYRICS_LANE,
   MOVE_THRESHOLD_PX,
   type ResizeMode,
   type RollMode,
@@ -97,6 +102,10 @@ const props = withDefaults(
     playhead?: number | null
     /** What the clipboard holds (``3 notes``), ``null`` when it is empty. */
     clip?: string | null
+    /** Where the lyrics are sung (``null``: no lyrics lane). */
+    lyrics?: LyricLayoutView | null
+    /** The lyrics lane edits lines (also on a read-only score: the lyrics may be this sheet's). */
+    lyricsEditable?: boolean
   }>(),
   {
     playing: () => [],
@@ -107,10 +116,24 @@ const props = withDefaults(
     height: 280,
     locator: null,
     playhead: null,
-    clip: null
+    clip: null,
+    lyrics: null,
+    lyricsEditable: false
   }
 )
-const emit = defineEmits<{ select: [ids: string[]]; locate: [unit: number]; clipboard: [action: ClipAction] }>()
+/** A line of the lyrics changed in the lane (``text`` empty: the line goes). */
+export interface LyricEdit {
+  section: number
+  block: number
+  line: number
+  text: string
+}
+const emit = defineEmits<{
+  select: [ids: string[]]
+  locate: [unit: number]
+  clipboard: [action: ClipAction]
+  lyricEdit: [edit: LyricEdit]
+}>()
 /** Pixels per quarter note (the roll's horizontal zoom). */
 const zoom = defineModel<number>('zoom', { default: 48 })
 
@@ -133,6 +156,10 @@ const viewportHeight = ref(0)
 /** The roll opened on the notes once (again after the model was missing, e.g. a new score). */
 let centred = false
 const chordEdit = ref<{ onset: number; name: string; original: string | null } | null>(null)
+const lyricInput = ref<HTMLInputElement | null>(null)
+const lyricEdit = ref<(LyricEdit & { original: string; start: number }) | null>(null)
+/** Esc was pressed: the blur that follows does not commit. */
+let lyricCancelled = false
 interface Press {
   x: number
   y: number
@@ -150,7 +177,9 @@ let observer: ResizeObserver | null = null
 const model = computed(() => props.view?.model ?? null)
 const notes = computed<RollNote[]>(() => (model.value ? notesOf(model.value) : []))
 const chords = computed<ModelChord[]>(() => model.value?.tracks.chords ?? [])
-const geo = computed(() => (model.value ? geometry(model.value, { pxPerQuarter: zoom.value, snap: snapChoice.value }) : null))
+const geo = computed(() =>
+  model.value ? geometry(model.value, { pxPerQuarter: zoom.value, snap: snapChoice.value, lyrics: !!props.lyrics }) : null
+)
 const editable = computed(() => !props.readonly && !props.stale && !props.busy && !committing.value)
 const selectedNotes = computed(() => selectedNoteIds(props.view, props.selection))
 const selectedChords = computed(() => selectedChordIds(props.selection))
@@ -170,7 +199,7 @@ const banded = computed(() => {
   for (const note of notesInRect(notes.value, rect, g)) ids.add(note.id)
   const chordIds = new Set(current.keepChords)
   for (const chord of chordsInBand(chords.value, current, g, scrollTop.value, scrollLeft.value)) chordIds.add(chord.id)
-  const lane = Math.min(current.y0, current.y1) < scrollTop.value + TOP
+  const lane = Math.min(current.y0, current.y1) < scrollTop.value + TOP // the chord lane (not the lyrics lane)
   return { rect, ids, chords: chordIds, lane }
 })
 const hint = computed(() =>
@@ -181,7 +210,110 @@ const hint = computed(() =>
       'into the chord lane: chords too · Ctrl+A: all · ↑↓←→: move · Del: rest · Shift+Del: close the gap · ' +
       'Ctrl+C / Ctrl+X: copy / cut · Ctrl+V: paste at the cursor · Ctrl+Shift+V: insert · Ctrl+D: duplicate'
 )
+const lyricsHint = computed(() => (props.lyrics && props.lyricsEditable ? ' · double-click the lyrics lane: edit the words' : ''))
 const position = computed(() => (model.value && props.locator !== null ? positionLabel(model.value, props.locator) : ''))
+
+// --- the lyrics lane ---
+const LETTER_PX = 6.2
+/** The lines with words, over their phrases, cut to the room before the next line. */
+const lyricLines = computed(() => {
+  const g = geo.value
+  const layout = props.lyrics
+  if (!g || !layout) return []
+  const all = layout.sections
+    .flatMap((s) => s.lines.filter((l) => l.text).map((l) => ({ ...l, section: s.section })))
+    .sort((a, b) => a.start - b.start || a.line - b.line)
+  return all
+    .map((line, index) => {
+      const x = xOf(line.start, g)
+      const next = all.slice(index + 1).find((l) => l.start > line.start)
+      const room = next ? xOf(next.start, g) - x - 2 : 640
+      const wanted = Math.max(xOf(line.end, g) - x, line.text.length * LETTER_PX + 8)
+      const width = Math.max(16, Math.min(room, wanted))
+      const chars = Math.max(1, Math.floor((width - 8) / LETTER_PX))
+      const shown = line.text.length > chars ? `${line.text.slice(0, Math.max(1, chars - 1))}…` : line.text
+      return { ...line, key: `${line.block}:${line.line}`, x, width, shown }
+    })
+    .filter((line) => inWindow(line.start, Math.max(line.end, line.start + 64)))
+})
+/** The syllable of every Vocal note that has one (``-``: the word goes on). */
+const syllables = computed(() => {
+  const map = new Map<number, string>()
+  for (const section of props.lyrics?.sections ?? [])
+    for (const line of section.lines) for (const s of line.syllables) map.set(s.onset, s.end_of_word ? s.text : `${s.text}-`)
+  return map
+})
+const visibleSyllables = computed(() => {
+  const g = geo.value
+  if (!g || !syllables.value.size) return []
+  return visibleNotes.value
+    .filter((n) => n.track === 'vocal' && syllables.value.has(n.onset))
+    .map((n) => {
+      const rect = noteRect(n, g)
+      return { key: n.id, x: rect.x + 1, y: rect.y - 2, text: syllables.value.get(n.onset) as string }
+    })
+})
+
+/** The line to edit at ``unit``: the one sung there, a new one for a phrase without words, or the one before. */
+function lyricTargetAt(unit: number): (LyricEdit & { original: string; start: number }) | null {
+  const m = model.value
+  const layout = props.lyrics
+  if (!m || !layout) return null
+  for (const s of layout.sections) {
+    const section = m.sections[s.section]
+    if (!section) continue
+    const first = m.measures[section.first_bar - 1]?.onset ?? 0
+    const after = m.measures[section.first_bar - 1 + section.bars]?.onset ?? m.total
+    if (unit < first || unit >= after || s.block === null) continue
+    const count = s.lines.length ? Math.max(...s.lines.map((l) => l.line)) + 1 : 0
+    const at = s.lines.find((l) => l.text && unit >= l.start && unit < Math.max(l.end, l.start + 1))
+    const target = (line: { line: number; text: string; start: number }) => ({
+      section: s.section,
+      block: s.block as number,
+      line: line.line,
+      text: line.text,
+      original: line.text,
+      start: line.start
+    })
+    if (at) return target(at)
+    const phrase = s.phrases.find(([a, b]) => unit >= a && unit < b)
+    if (phrase && !s.lines.some((l) => l.syllables.length && l.start < phrase[1] && l.end > phrase[0])) {
+      return target({ line: count, text: '', start: phrase[0] }) // words for a phrase that has none
+    }
+    const before = [...s.lines].reverse().find((l) => l.text && l.start <= unit)
+    return target(before ?? { line: count, text: '', start: first })
+  }
+  return null
+}
+
+function startLyricEdit(unit: number): void {
+  const target = lyricTargetAt(unit)
+  if (!target) return
+  lyricCancelled = false
+  lyricEdit.value = target
+  void nextTick(() => {
+    lyricInput.value?.focus()
+    lyricInput.value?.select()
+  })
+}
+
+function commitLyric(): void {
+  const edit = lyricEdit.value
+  lyricEdit.value = null
+  if (!edit || lyricCancelled) {
+    lyricCancelled = false
+    return
+  }
+  root.value?.focus({ preventScroll: true })
+  if (edit.text.trim() === edit.original.trim()) return
+  emit('lyricEdit', { section: edit.section, block: edit.block, line: edit.line, text: edit.text.trim() })
+}
+
+function cancelLyric(): void {
+  lyricCancelled = true
+  lyricEdit.value = null
+  root.value?.focus({ preventScroll: true })
+}
 const snapLabel = computed(() => (model.value ? `1/${Math.round(unitDenominator(model.value) / (geo.value?.snap ?? 1))}` : ''))
 
 /** The visible units (with a margin) - only this part of a long score is drawn. */
@@ -315,7 +447,7 @@ function followEdge(event: PointerEvent): void {
   const box = el.getBoundingClientRect()
   if (!box.height) return
   const step = g.rowHeight
-  if (event.clientY < box.top + TOP + 12) el.scrollTop = Math.max(0, el.scrollTop - step)
+  if (event.clientY < box.top + g.top + 12) el.scrollTop = Math.max(0, el.scrollTop - step)
   else if (event.clientY > box.bottom - 16) el.scrollTop = el.scrollTop + step
   else return
   onScroll()
@@ -380,9 +512,15 @@ function onPointerCancel(): void {
 
 function onDoubleClick(event: MouseEvent): void {
   const g = geo.value
-  if (!g || !editable.value) return
+  if (!g) return
   const [x, y] = local(event)
   const hit = hitTest(x, y, notes.value, chords.value, g, track.value, scrollTop.value)
+  if (hit.area === 'lyrics') {
+    // the lyrics may be edited where the score may not (they can belong to this sheet)
+    if (props.lyricsEditable) startLyricEdit(hit.unit)
+    return
+  }
+  if (!editable.value) return
   if (hit.area === 'grid') {
     if (mode.value !== 'draw') return // select mode draws nothing
     const onset = Math.min(snapFloor(hit.unit, g.snap), g.total - 1)
@@ -629,7 +767,7 @@ onBeforeUnmount(() => observer?.disconnect())
         <button title="Zoom out" aria-label="Zoom out" @click="zoomBy(1 / 1.25)">−</button>
         <button title="Zoom in" aria-label="Zoom in" @click="zoomBy(1.25)">+</button>
       </span>
-      <span class="hint">{{ hint }}</span>
+      <span class="hint">{{ hint }}{{ lyricsHint }}</span>
     </div>
     <p v-if="!model && view?.model_error" class="roll-note">{{ view.model_error.message }}</p>
     <div
@@ -666,18 +804,19 @@ onBeforeUnmount(() => observer?.disconnect())
           :class="line.kind"
           :x1="xOf(line.unit, geo)"
           :x2="xOf(line.unit, geo)"
-          :y1="TOP"
+          :y1="geo.top"
           :y2="geo.height"
         />
         <rect v-for="note in visibleNotes" :key="note.id" :class="noteClasses(note)" v-bind="noteRect(note, geo)" rx="2">
           <title>{{ describeNote(note) }}</title>
         </rect>
+        <text v-for="item in visibleSyllables" :key="'y' + item.key" class="syllable" :x="item.x" :y="item.y">{{ item.text }}</text>
         <rect v-for="(ghost, index) in ghostNotes" :key="'ghost' + index" class="ghost" :class="ghost.track" v-bind="noteRect(ghost, geo)" rx="2" />
         <rect v-if="banded && banded.rect.height > 0" class="band" v-bind="banded.rect" />
-        <line v-if="locator !== null" class="locator" :x1="xOf(locator, geo)" :x2="xOf(locator, geo)" :y1="TOP" :y2="geo.height" />
-        <line v-if="playhead !== null" class="playhead" :x1="xOf(playhead, geo)" :x2="xOf(playhead, geo)" :y1="TOP" :y2="geo.height" />
+        <line v-if="locator !== null" class="locator" :x1="xOf(locator, geo)" :x2="xOf(locator, geo)" :y1="geo.top" :y2="geo.height" />
+        <line v-if="playhead !== null" class="playhead" :x1="xOf(playhead, geo)" :x2="xOf(playhead, geo)" :y1="geo.top" :y2="geo.height" />
         <g class="keys" :transform="`translate(${scrollLeft} 0)`">
-          <rect class="keys-bg" :x="0" :y="TOP" :width="KEYS_WIDTH - 2" :height="geo.height - TOP" />
+          <rect class="keys-bg" :x="0" :y="geo.top" :width="KEYS_WIDTH - 2" :height="geo.height - geo.top" />
           <text
             v-for="pitch in rows.filter((p) => p % 12 === 0)"
             :key="'k' + pitch"
@@ -690,11 +829,19 @@ onBeforeUnmount(() => observer?.disconnect())
         </g>
         <!-- the header (bar numbers, sections) and the chord lane stay on top while the pane scrolls -->
         <g class="roll-top" :transform="`translate(0 ${scrollTop})`">
-          <rect class="top-bg" :x="0" :y="0" :width="geo.width" :height="TOP" />
+          <rect class="top-bg" :x="0" :y="0" :width="geo.width" :height="geo.top" />
           <rect class="ruler" :x="KEYS_WIDTH" :y="0" :width="geo.width - KEYS_WIDTH" :height="HEADER">
             <title>Click or drag here to set the cursor - playback and paste start there</title>
           </rect>
           <rect class="lane" :x="0" :y="HEADER" :width="geo.width" :height="LANE" />
+          <template v-if="lyrics">
+            <rect class="lyrics-lane" :x="0" :y="TOP" :width="geo.width" :height="LYRICS_LANE" />
+            <g v-for="line in lyricLines" :key="line.key" class="lyric-line" :class="{ unsung: !line.syllables.length }">
+              <rect :x="line.x" :y="TOP + 3" :width="line.width" :height="LYRICS_LANE - 6" rx="3" />
+              <text :x="line.x + 4" :y="TOP + LYRICS_LANE / 2 + 4">{{ line.shown }}</text>
+              <title>{{ line.text }}{{ lyricsEditable ? ' - double-click to edit the line' : '' }}</title>
+            </g>
+          </template>
           <line
             v-for="line in visibleLines.filter((l) => l.kind === 'bar')"
             :key="'t' + line.unit"
@@ -702,7 +849,7 @@ onBeforeUnmount(() => observer?.disconnect())
             :x1="xOf(line.unit, geo)"
             :x2="xOf(line.unit, geo)"
             :y1="0"
-            :y2="TOP"
+            :y2="geo.top"
           />
           <text v-for="line in visibleLines.filter((l) => l.bar)" :key="'n' + line.unit" class="bar-number" :x="xOf(line.unit, geo) + 3" :y="12">
             {{ line.bar }}
@@ -728,9 +875,9 @@ onBeforeUnmount(() => observer?.disconnect())
             <text :x="xOf(drag.to, geo) + 4" :y="HEADER + LANE / 2 + 4">{{ drag.chord.name }}</text>
           </g>
           <rect v-if="banded?.lane && banded.rect.width > 0" class="band" :x="banded.rect.x" :y="HEADER" :width="banded.rect.width" :height="LANE" />
-          <line v-if="playhead !== null" class="playhead" :x1="xOf(playhead, geo)" :x2="xOf(playhead, geo)" :y1="0" :y2="TOP" />
+          <line v-if="playhead !== null" class="playhead" :x1="xOf(playhead, geo)" :x2="xOf(playhead, geo)" :y1="0" :y2="geo.top" />
           <g v-if="locator !== null" class="locator-mark" :transform="`translate(${xOf(locator, geo)} 0)`">
-            <line :x1="0" :x2="0" :y1="0" :y2="TOP" />
+            <line :x1="0" :x2="0" :y1="0" :y2="geo.top" />
             <path d="M-5 0 H5 L0 7 Z" />
             <title>Cursor at {{ position }} - click or drag in the ruler to move it</title>
           </g>
@@ -747,6 +894,18 @@ onBeforeUnmount(() => observer?.disconnect())
         @keydown.enter.prevent="commitChord"
         @keydown.esc.prevent.stop="cancelChord"
         @blur="cancelChord"
+      />
+      <input
+        v-if="lyricEdit"
+        ref="lyricInput"
+        v-model="lyricEdit.text"
+        class="lyric-edit"
+        aria-label="Lyrics line (empty removes it)"
+        placeholder="the words of this phrase"
+        :style="{ left: `${xOf(lyricEdit.start, geo)}px`, top: `${TOP + 1 + scrollTop}px` }"
+        @keydown.enter.prevent="commitLyric"
+        @keydown.esc.prevent.stop="cancelLyric"
+        @blur="commitLyric"
       />
     </div>
   </div>

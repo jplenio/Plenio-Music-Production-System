@@ -7,13 +7,14 @@ the upstream parser exactly (accidentals by letter across octaves, unmarked tied
 continuations keep their pitch), and the upstream parser must accept the text first.
 
 ``display_abc`` is the text abcjs renders: the same score with every accidental that
-standard ABC would read differently written out, and section names as annotations. It is
-never used as the model's score (extra tokens would change what YuE2 reads).
+standard ABC would read differently written out, section names as annotations and, with
+lyrics, a ``w:`` line under every Vocal line (``lyric_layout``). It is never used as the
+model's score (extra tokens would change what YuE2 reads).
 """
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from fractions import Fraction
 from typing import Any
@@ -356,6 +357,30 @@ def _annotation(label: str) -> str:
     return f'"^{text}"'
 
 
+def _lyric_lines(model: ScoreModel, words: Mapping[int, str]) -> list[tuple[int, int, str]]:
+    """A ``w:`` line after every text line of the Vocal voice that has a syllable (abcjs gives every
+    note a syllable, a tied continuation too, so the others are written ``*``)."""
+    quarter = model.unit * 4
+    lines: dict[int, list[str]] = {}
+    for element in model.voice_elements("Vocal"):
+        if not element.is_note:
+            continue  # rests take no syllable
+        token = "*" if element.tie_in else words.get(int(element.onset / quarter), "*")
+        lines.setdefault(model.text.find("\n", element.end), []).append(token)
+    result = []
+    for end, tokens in lines.items():
+        if all(token == "*" for token in tokens):
+            continue
+        line = ""
+        for token in tokens:
+            line += token if not line or line.endswith("-") else f" {token}"
+        if end < 0:
+            result.append((len(model.text), 3, f"\nw: {line}\n"))
+        else:
+            result.append((end + 1, 3, f"w: {line}\n"))
+    return result
+
+
 @dataclass(frozen=True)
 class Display:
     abc: str
@@ -363,8 +388,12 @@ class Display:
     """Element and chord ids -> their range in ``abc``."""
 
 
-def display(model: ScoreModel) -> Display:
-    """``display_abc`` and the display range of every element and chord."""
+def display(model: ScoreModel, words: Mapping[int, str] | None = None) -> Display:
+    """``display_abc`` and the display range of every element and chord.
+
+    ``words``: the ``w:`` token of every Vocal note that has one, by the note's onset in units of L
+    (a held syllable is ``_``); every other note, and a tied note's continuation, is skipped (``*``).
+    """
     insertions: list[tuple[int, int, str]] = []  # (position, order, text)
     first_vocal = {e.bar: e for e in reversed(model.voice_elements("Vocal"))}
     first_chord = {c.bar: c for c in reversed(model.chords)}
@@ -395,6 +424,8 @@ def display(model: ScoreModel) -> Display:
             if alteration != default:
                 insertions.append((element.start, 1, ACCIDENTAL_TEXT[alteration]))
                 state[where] = alteration
+    if words:
+        insertions += _lyric_lines(model, words)
     # Full-bar rests are written out as plain rests, bar by bar: abcjs draws "Z4" as one bar
     # (misaligning the voices) and "Z" with a bar count. (start, end, order, text); start == end
     # for insertions.
@@ -461,10 +492,10 @@ def _chord_pitches(name: str) -> list[int]:
     return pitches
 
 
-def view(text: str) -> dict[str, Any]:
-    """Everything the editor shows and plays, derived from ``text`` (JSON-ready)."""
+def view(text: str, words: Mapping[int, str] | None = None) -> dict[str, Any]:
+    """Everything the editor shows and plays, derived from ``text`` (JSON-ready); ``words``: see ``display``."""
     model = build(text)
-    shown = display(model)
+    shown = display(model, words)
     per_bar_seconds = {b.number: model.seconds(b.onset) for b in model.bars["Vocal"]}
 
     def element_dict(e: Element) -> dict[str, Any]:

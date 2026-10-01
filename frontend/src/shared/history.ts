@@ -48,8 +48,12 @@ export class History {
     return this.canRedo ? this.entries[this.cursor + 1].label : null
   }
 
-  record(text: string, label: string, options: { group?: string; extra?: unknown } = {}): void {
-    if (text === this.current.text) return
+  /**
+   * A new step. ``side``: a step of the side state alone (the lyrics edited over the score) - it is
+   * recorded although the text did not change.
+   */
+  record(text: string, label: string, options: { group?: string; extra?: unknown; side?: boolean } = {}): void {
+    if (text === this.current.text && !options.side) return
     const group = options.group ?? null
     this.entries = this.entries.slice(0, this.cursor + 1)
     if (group !== null && group === this.openGroup && this.cursor > 0) {

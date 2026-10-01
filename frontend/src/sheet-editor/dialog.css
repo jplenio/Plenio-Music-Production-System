@@ -714,6 +714,35 @@
   height: 20px;
   font-size: 11px;
 }
+/* the lyrics lane: every line over its Vocal phrase, every syllable over its note */
+.plenio-overlay .roll-svg .lyrics-lane {
+  fill: rgba(76, 154, 255, 0.06);
+}
+.plenio-overlay .roll-svg .lyric-line rect {
+  fill: rgba(76, 154, 255, 0.16);
+  stroke: rgba(76, 154, 255, 0.45);
+}
+.plenio-overlay .roll-svg .lyric-line.unsung rect {
+  /* a direction, or a line that found no phrase */
+  fill: transparent;
+  stroke-dasharray: 3 2;
+}
+.plenio-overlay .roll-svg .lyric-line text {
+  fill: var(--input-text, #e6e6e6);
+  font-size: 11px;
+  font-style: italic;
+}
+.plenio-overlay .roll-svg text.syllable {
+  fill: #9ecbff;
+  font-size: 9px;
+  pointer-events: none;
+}
+.plenio-overlay .roll-scroll .lyric-edit {
+  position: absolute;
+  width: 280px;
+  height: 20px;
+  font-size: 11px;
+}
 .plenio-overlay .roll-note {
   margin: 0;
   color: var(--descrip-text, #999);
@@ -738,6 +767,10 @@
 .plenio-overlay .notation svg .abcjs-note,
 .plenio-overlay .notation svg .abcjs-rest {
   cursor: pointer;
+}
+/* the lyrics under the Vocal notes: shown, not edited here (the roll's lyrics lane edits them) */
+.plenio-overlay .notation svg .abcjs-lyric {
+  fill: #9ecbff;
 }
 .plenio-overlay .abc-editor {
   min-height: 0;

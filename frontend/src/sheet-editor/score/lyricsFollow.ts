@@ -23,6 +23,8 @@ export interface LyricsTarget {
   blocked: string | null
   /** The music model plans this score from those lyrics (*1 · YuE2 · Song*): the score is kept as yours. */
   replans: boolean
+  /** The lyrics are this sheet's own document (edits go straight into its Lyrics tab). */
+  own?: boolean
 }
 
 export interface LyricBlock {
@@ -157,6 +159,43 @@ export function followEdit(
       const target = j >= 0 && newStarts[j] !== unit ? blocks[j] : null
       if (target) blocks[j] = { tag: target.tag, lines: [...target.lines, ...lines] }
     }
+  })
+  return { preamble: follow.preamble, blocks }
+}
+
+// --- editing a line where it is sung (the piano roll's lyrics lane) ------------------------------
+
+function withLine(lines: readonly string[], line: number, text: string): string[] {
+  const next = [...lines]
+  const value = text.trim()
+  if (line >= next.length) {
+    if (value) next.push(value)
+  } else if (value) next[line] = value
+  else next.splice(line, 1)
+  return next
+}
+
+/**
+ * ``text`` with line ``line`` of block ``block`` replaced (``line`` past the end: a new line; an empty
+ * ``value`` removes the line). The other lines, the tags and the preamble stay as they were.
+ */
+export function replaceLine(text: string, block: number, line: number, value: string): string {
+  const lyrics = parseLyrics(text)
+  const target = lyrics.blocks[block]
+  if (!target) return text
+  const blocks = lyrics.blocks.map((b, i) => (i === block ? { tag: b.tag, lines: withLine(b.lines, line, value) } : b))
+  const parts = lyrics.preamble.length ? [lyrics.preamble.join('\n')] : []
+  for (const b of blocks) parts.push([`[${b.tag}]`, ...b.lines].join('\n'))
+  return parts.join('\n\n')
+}
+
+/** The same edit while the lyrics follow the sections: the block of model section ``section``. */
+export function followReplace(follow: LyricsFollow, model: ScoreModelView, section: number, line: number, value: string): LyricsFollow {
+  const label = model.sections[section]?.label ?? ''
+  const blocks = follow.blocks.map((block, i) => {
+    if (i !== section) return block
+    const own = block ?? { tag: tagFor(label, null), lines: [] }
+    return { tag: own.tag, lines: withLine(own.lines, line, value) }
   })
   return { preamble: follow.preamble, blocks }
 }

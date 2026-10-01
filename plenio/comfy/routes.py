@@ -94,9 +94,15 @@ async def system(request: web.Request) -> web.StreamResponse:
     return web.json_response({"report": report.to_dict(), "markdown": markdown})
 
 
+def _lyrics(data: dict[str, Any]) -> str | None:
+    """The song's lyrics sent with a score (optional): the view then says where they are sung."""
+    value = data.get("lyrics")
+    return value if isinstance(value, str) else None
+
+
 async def score_analyze(request: web.Request) -> web.StreamResponse:
     data = await read_json(request)
-    return web.json_response(score_rules.editor_view(_text(data, "abc")))
+    return web.json_response(score_rules.editor_view(_text(data, "abc"), _lyrics(data)))
 
 
 async def score_transform(request: web.Request) -> web.StreamResponse:
@@ -114,7 +120,7 @@ async def score_transform(request: web.Request) -> web.StreamResponse:
             "warnings": list(result.warnings),
             "select": list(result.select),
             "time_map": [list(piece) for piece in result.time_map] if result.time_map is not None else None,
-            "analysis": score_rules.editor_view(result.abc),
+            "analysis": score_rules.editor_view(result.abc, _lyrics(data)),
         }
     )
 

@@ -40,6 +40,8 @@ export interface ScoreSessionOptions {
    * like ``replaceText``'s ``state`` - so undo and redo move text and side state together.
    */
   onTransform?: (result: TransformResult, operation: ScoreOperation) => { before: unknown; after: unknown } | undefined
+  /** The song's lyrics, sent with every check: the view then says where they are sung. */
+  lyrics?: () => string | null
   debounceMs?: number
 }
 
@@ -81,6 +83,8 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
   const history = new History(doc.text)
   const historyVersion = ref(0)
   let requested = ''
+  /** Every check and edit takes a ticket: only the newest answer is shown (lyrics change without the text). */
+  let ticket = 0
   let timer: ReturnType<typeof setTimeout> | undefined
   let ownWrite = false
 
@@ -116,6 +120,7 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
 
   async function analyze(): Promise<void> {
     const text = doc.text
+    const mine = ++ticket
     requested = text
     if (!text.trim()) {
       view.value = null
@@ -123,8 +128,8 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
       return
     }
     try {
-      const result = await analyzeScore(options.fetcher, text)
-      if (requested !== text || doc.text !== text) return // an older text: drop it
+      const result = await analyzeScore(options.fetcher, text, options.lyrics?.() ?? null)
+      if (mine !== ticket || requested !== text || doc.text !== text) return // an older text or lyrics: drop it
       accept(result, text)
       error.value = null
     } catch (e) {
@@ -201,7 +206,8 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
     busy.value = true
     error.value = null
     try {
-      const result = await transformScore(options.fetcher, text, operation)
+      ++ticket
+      const result = await transformScore(options.fetcher, text, operation, options.lyrics?.() ?? null)
       if (doc.text !== text) {
         error.value = 'The score changed while the edit was computed; it was not applied.'
         return false
@@ -263,6 +269,24 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
     selection.value = ids
   }
 
+  /**
+   * An undo step for a change beside the text (the lyrics edited in the roll): ``before`` is kept with
+   * the current step, ``after`` with the new one; undo and redo hand them to ``onRestore``.
+   */
+  function recordSide(label: string, before: unknown, after: unknown): void {
+    history.seal()
+    history.annotate(before)
+    history.record(doc.text, label, { extra: after, side: true })
+    history.seal()
+    historyVersion.value++
+  }
+
+  /** The lyrics changed (the text did not): check again, without blocking Apply meanwhile. */
+  function refreshLyrics(): void {
+    if (busy.value) setTimeout(refreshLyrics, 60) // an edit is on its way with the old lyrics
+    else if (doc.text.trim() && !pending.value) void analyze() // a pending check reads them anyway
+  }
+
   // Changes made by the dialog (use draft, conflict choice) enter the history as one step.
   // Synchronous, so that ``ownWrite`` tells the session's own writes apart (a queued watcher
   // would run after the flag is reset, break typing groups and re-analyze every edit).
@@ -310,6 +334,8 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
     revertToLastValid,
     select,
     analyze,
+    refreshLyrics,
+    recordSide,
     dispose
   })
 }

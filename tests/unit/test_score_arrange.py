@@ -246,7 +246,8 @@ def follow_fixture() -> dict[str, object]:
 
 
 def write_follow_fixture() -> None:
-    FOLLOW_FIXTURE.write_text(json.dumps(follow_fixture(), indent=1) + "\n", encoding="utf-8")
+    with FOLLOW_FIXTURE.open("w", encoding="utf-8", newline="\n") as file:
+        file.write(json.dumps(follow_fixture(), indent=1) + "\n")
 
 
 def test_the_lyrics_follow_fixture_is_current() -> None:

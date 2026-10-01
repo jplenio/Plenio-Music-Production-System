@@ -28,7 +28,10 @@ export interface RollNote extends ModelNote {
 /** Header (bar numbers, sections), chord lane, pitch-label column, in pixels. */
 export const HEADER = 18
 export const LANE = 24
+/** The top of the rows without the lyrics lane (``geo.top`` is the top of a roll). */
 export const TOP = HEADER + LANE
+/** The lyrics lane under the chord lane, when the song has lyrics. */
+export const LYRICS_LANE = 22
 export const KEYS_WIDTH = 36
 export const EDGE_PX = 6
 export const MOVE_THRESHOLD_PX = 3
@@ -53,6 +56,8 @@ export interface Geometry {
   drawLength: number
   width: number
   height: number
+  /** Where the rows start: under the header, the chord lane and - with lyrics - the lyrics lane. */
+  top: number
 }
 
 export interface Rect {
@@ -113,8 +118,9 @@ export function rollRange(notes: readonly { pitch: number }[]): [number, number]
  */
 export function geometry(
   model: ScoreModelView,
-  options: { pxPerQuarter: number; height?: number; snap: SnapChoice }
+  options: { pxPerQuarter: number; height?: number; snap: SnapChoice; lyrics?: boolean }
 ): Geometry {
+  const top = TOP + (options.lyrics ? LYRICS_LANE : 0)
   const notes = notesOf(model)
   const [low, high] = rollRange(notes)
   const rows = high - low + 1
@@ -132,13 +138,14 @@ export function geometry(
     snap,
     drawLength: Math.max(snap, Math.round(beat / snap) * snap),
     width: KEYS_WIDTH + model.total * pxPerUnit + 40,
-    height: TOP + rows * rowHeight
+    height: top + rows * rowHeight,
+    top
   }
 }
 
 export const xOf = (unit: number, geo: Geometry): number => KEYS_WIDTH + unit * geo.pxPerUnit
 export const unitAt = (x: number, geo: Geometry): number => (x - KEYS_WIDTH) / geo.pxPerUnit
-export const yOf = (pitch: number, geo: Geometry): number => TOP + (geo.high - pitch) * geo.rowHeight
+export const yOf = (pitch: number, geo: Geometry): number => geo.top + (geo.high - pitch) * geo.rowHeight
 
 /**
  * The vertical scroll position that centres the pitches ``[low, high]`` in a pane of
@@ -146,20 +153,20 @@ export const yOf = (pitch: number, geo: Geometry): number => TOP + (geo.high - p
  */
 export function scrollTopFor(geo: Geometry, viewportHeight: number, low: number, high: number): number {
   const middle = (yOf(high, geo) + yOf(low, geo) + geo.rowHeight) / 2
-  const visible = Math.max(0, viewportHeight - TOP)
-  const top = middle - TOP - visible / 2
+  const visible = Math.max(0, viewportHeight - geo.top)
+  const top = middle - geo.top - visible / 2
   return Math.round(Math.max(0, Math.min(Math.max(0, geo.height - viewportHeight), top)))
 }
 
 /** The scroll position that brings ``pitch`` into view, or ``null`` when its row is visible already. */
 export function scrollTopToShow(geo: Geometry, scrollTop: number, viewportHeight: number, pitch: number): number | null {
   const y = yOf(pitch, geo)
-  if (y >= scrollTop + TOP && y + geo.rowHeight <= scrollTop + viewportHeight) return null
+  if (y >= scrollTop + geo.top && y + geo.rowHeight <= scrollTop + viewportHeight) return null
   return scrollTopFor(geo, viewportHeight, pitch, pitch)
 }
 
 export function pitchAt(y: number, geo: Geometry): number {
-  const pitch = geo.high - Math.floor((y - TOP) / geo.rowHeight)
+  const pitch = geo.high - Math.floor((y - geo.top) / geo.rowHeight)
   return Math.max(geo.low, Math.min(geo.high, pitch))
 }
 
@@ -213,6 +220,7 @@ export type Hit =
   | { area: 'grid'; unit: number; pitch: number }
   | { area: 'chord'; chord: ModelChord }
   | { area: 'lane'; unit: number }
+  | { area: 'lyrics'; unit: number }
   | { area: 'header'; unit: number }
 
 /**
@@ -232,6 +240,7 @@ export function hitTest(
   const unit = Math.max(0, Math.min(geo.total, unitAt(x, geo)))
   const inPane = y - scrollTop
   if (inPane < HEADER) return { area: 'header', unit }
+  if (inPane >= TOP && inPane < geo.top) return { area: 'lyrics', unit }
   if (inPane < TOP) {
     for (let i = chords.length - 1; i >= 0; i--) {
       const chord = chords[i]
@@ -269,7 +278,7 @@ export interface Band {
  */
 export function bandRect(band: Band, geo: Geometry, scrollTop = 0, scrollLeft = 0): Rect {
   const clampX = (x: number): number => Math.max(scrollLeft + KEYS_WIDTH, Math.min(geo.width, x))
-  const clampY = (y: number): number => Math.max(scrollTop + TOP, Math.min(geo.height, y))
+  const clampY = (y: number): number => Math.max(scrollTop + geo.top, Math.min(geo.height, y))
   const left = clampX(Math.min(band.x0, band.x1))
   const top = clampY(Math.min(band.y0, band.y1))
   return { x: left, y: top, width: clampX(Math.max(band.x0, band.x1)) - left, height: clampY(Math.max(band.y0, band.y1)) - top }
@@ -295,7 +304,7 @@ export function chordsInBand(
   scrollTop = 0,
   scrollLeft = 0
 ): ModelChord[] {
-  if (Math.min(band.y0, band.y1) >= scrollTop + TOP) return []
+  if (Math.min(band.y0, band.y1) >= scrollTop + geo.top) return []
   const rect = bandRect(band, geo, scrollTop, scrollLeft)
   if (rect.width <= 0) return []
   return chords.filter((chord, index) => {

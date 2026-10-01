@@ -130,6 +130,42 @@ export interface ScoreModelView {
   tracks: { vocal: ModelNote[]; ins: ModelNote[]; chords: ModelChord[] }
 }
 
+/** A syllable on a Vocal note (``onset``: the note's onset in units of L). */
+export interface LyricSyllable {
+  onset: number
+  text: string
+  /** ``false``: the word goes on (a hyphen follows). */
+  end_of_word: boolean
+}
+
+/** A lyrics line on its Vocal phrase (backend ``lyric_layout``; ``block`` and ``line`` index the text). */
+export interface LyricLine {
+  block: number
+  line: number
+  text: string
+  start: number
+  end: number
+  syllables: LyricSyllable[]
+  /** Notes over which the line's last syllable is held. */
+  holds: number[]
+}
+
+export interface LyricSection {
+  /** Index in ``model.sections``. */
+  section: number
+  block: number | null
+  tag: string | null
+  phrases: [number, number][]
+  lines: LyricLine[]
+}
+
+/** Where the lyrics are sung (sent with the score): lines on phrases, syllables on notes. */
+export interface LyricLayoutView {
+  sections: LyricSection[]
+  /** Lyrics blocks that found no section of the score. */
+  unplaced: number[]
+}
+
 export interface ScoreView {
   ok: boolean
   sha256: string
@@ -148,6 +184,8 @@ export interface ScoreView {
   /** The canonical model; ``null`` for a valid score outside the supported subset (see ``model_error``). */
   model?: ScoreModelView | null
   model_error?: { message: string; diagnostics: ScoreDiagnostic[] }
+  /** Present when the view was asked for with lyrics. */
+  lyrics?: LyricLayoutView
 }
 
 /** Every id a view knows: element ids (staff/ABC) and canonical note and chord ids. */
