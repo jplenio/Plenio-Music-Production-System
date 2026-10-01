@@ -13,7 +13,14 @@
  */
 import { computed, reactive, ref, shallowRef, watch } from 'vue'
 
-import { type Fetcher, PlenioApiError, type ScoreOperation, analyzeScore, transformScore } from '../../api/client'
+import {
+  type Fetcher,
+  PlenioApiError,
+  type ScoreOperation,
+  type TransformResult,
+  analyzeScore,
+  transformScore
+} from '../../api/client'
 import { History, type Snapshot } from '../../shared/history'
 import { type ScoreView, elementById, elementSelection, knownIds } from '../../shared/scoreView'
 import type { WorkingDoc } from '../../shared/sheetSession'
@@ -27,6 +34,12 @@ export interface ScoreSessionOptions {
    * the caller restores what belongs to that text (the Guide notes of a MIDI import).
    */
   onRestore?: (extra: unknown) => void
+  /**
+   * Called with an operation's result just before it is written: what else changes with this step
+   * (the Guide notes that follow the bars of a time map) as ``{ before, after }``, kept with the step
+   * like ``replaceText``'s ``state`` - so undo and redo move text and side state together.
+   */
+  onTransform?: (result: TransformResult, operation: ScoreOperation) => { before: unknown; after: unknown } | undefined
   debounceMs?: number
 }
 
@@ -193,8 +206,10 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
         error.value = 'The score changed while the edit was computed; it was not applied.'
         return false
       }
+      const state = options.onTransform?.(result, operation)
       history.seal()
-      write(result.abc, result.changes[0] ?? operation.op)
+      if (state) history.annotate(state.before)
+      write(result.abc, result.changes[0] ?? operation.op, undefined, state?.after)
       history.seal()
       clearTimeout(timer)
       pending.value = false

@@ -130,6 +130,45 @@ export function serializeGuide(guide: GuideNote[]): number[][] {
   return guide.map(([onset, duration, pitch]) => [onset, duration, pitch])
 }
 
+/**
+ * The Guide notes after bars moved: the backend's time map of the edit (``[old_start, old_end,
+ * new_start]`` pieces in units of L - arranging sections, *Insert* at the cursor, inserting, deleting
+ * or duplicating bars). Every part of a note goes where its piece went, so a copied bar copies its
+ * Guide notes and a deleted bar loses them. A note across two pieces that stay neighbours stays one
+ * note; across a seam it is cut, as the score's notes are.
+ */
+interface GuidePart {
+  /** Where the part goes (new units) ... */
+  start: number
+  end: number
+  /** ... and where it was (old units). */
+  from: number
+  to: number
+}
+
+export function remapGuide(guide: readonly GuideNote[], timeMap: readonly (readonly number[])[]): GuideNote[] {
+  const result: GuideNote[] = []
+  for (const [onset, duration, pitch] of guide) {
+    const end = onset + duration
+    const parts = timeMap
+      .map(([oldStart, oldEnd, newStart]) => {
+        const from = Math.max(onset, oldStart)
+        const to = Math.min(end, oldEnd)
+        return to > from ? { start: newStart + from - oldStart, end: newStart + to - oldStart, from, to } : null
+      })
+      .filter((part): part is GuidePart => part !== null)
+      .sort((a, b) => a.start - b.start)
+    const merged: GuidePart[] = []
+    for (const part of parts) {
+      const last = merged[merged.length - 1]
+      if (last && last.end === part.start && last.to === part.from) merged[merged.length - 1] = { ...last, end: part.end, to: part.to }
+      else merged.push(part)
+    }
+    for (const part of merged) result.push([part.start, part.end - part.start, pitch])
+  }
+  return result.sort((a, b) => a[0] - b[0] || a[2] - b[2])
+}
+
 export function sameGuide(a: GuideNote[], b: GuideNote[]): boolean {
   return a.length === b.length && a.every((note, index) => note.every((part, i) => part === b[index][i]))
 }

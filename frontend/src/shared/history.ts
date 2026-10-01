@@ -14,6 +14,10 @@ export interface Snapshot {
   extra?: unknown
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
 export class History {
   private entries: Snapshot[]
   private cursor = 0
@@ -63,10 +67,14 @@ export class History {
 
   /**
    * Attach ``extra`` to the current step unless it has its own: the state that belonged to this
-   * text before a step changes it, so an undo back to here restores it.
+   * text before a step changes it, so an undo back to here restores it. Objects are merged key by
+   * key - the step keeps what it has and gains what it lacks (an import's Guide notes, then the
+   * lyrics of an arrangement).
    */
   annotate(extra: unknown): void {
-    if (this.current.extra === undefined) this.entries[this.cursor] = { ...this.current, extra }
+    const own = this.current.extra
+    if (own === undefined) this.entries[this.cursor] = { ...this.current, extra }
+    else if (isRecord(own) && isRecord(extra)) this.entries[this.cursor] = { ...this.current, extra: { ...extra, ...own } }
   }
 
   /** Close the typing group, so the next edit is a separate step. */

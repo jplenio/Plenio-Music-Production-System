@@ -2,6 +2,7 @@ import type { Fetcher } from '../api/client'
 import type { ComfyNode, InputSpec, WidgetConstructor } from '../shared/comfy'
 import { ownedBeforeRun } from '../shared/sheetSession'
 import { DOCUMENT_KINDS, parseState, serializeState, summarize } from '../shared/sheetState'
+import { lyricsTargetOf, writeLyrics } from './lyricsOwner'
 import { getAsrNote, getPayload, onPayload } from './payloads'
 import { displayState, onRunState, sheetLine } from './runStatus'
 
@@ -89,6 +90,8 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
     const { openSheetDialog } = await import('../sheet-editor/open')
     const { parseGuide, serializeGuide } = await import('../sheet-editor/score/tracks')
     if (!fetcher) throw new Error('Plenio: API not initialised')
+    // the lyrics of Song Sheet · Text follow this score's sections (templates 1 and 5)
+    const lyrics = lyricsTargetOf(node, payload, getPayload)
     openSheetDialog({
       title: node.title || 'Song Sheet',
       state: current,
@@ -101,9 +104,13 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
       layout: typeof node.properties?.plenio_editor_layout === 'string' ? node.properties.plenio_editor_layout : null,
       // the Guide track (playback and MIDI only), kept in the node's properties with the workflow
       guide: parseGuide(node.properties?.plenio_guide),
-      onApply: (next, guide) => {
+      lyricsTarget: lyrics?.target ?? null,
+      onApply: (next, guide, arranged) => {
         widget.value = serializeState(next)
         node.properties = { ...(node.properties ?? {}), plenio_guide: serializeGuide(guide) }
+        if (arranged !== null && lyrics && !lyrics.target.blocked) {
+          writeLyrics(lyrics.owner, arranged, getPayload(String(lyrics.owner.id)))
+        }
         node.setDirtyCanvas?.(true, true)
       }
     })

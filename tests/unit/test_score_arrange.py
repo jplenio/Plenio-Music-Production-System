@@ -192,3 +192,65 @@ def test_bar_operations_say_where_the_time_went() -> None:
     done = operations.apply(PLAN, {"op": "arrange_sections", "order": [1, 2, 3, 6]})
     assert done.time_map is not None and c.from_abc(done.abc).measure_count < score.measure_count
     assert operations.apply(PLAN, {"op": "put_chord", "onset": 0, "name": "C"}).time_map is None
+
+
+# --- the editor's lyrics follow the sections (frontend/tests/fixtures/arrange-edits.json) --------------
+
+FOLLOW_FIXTURE = Path(__file__).resolve().parents[2] / "frontend" / "tests" / "fixtures" / "arrange-edits.json"
+FOLLOW_LYRICS = (
+    "[Intro]\n\n[Verse 1]\nverse one a\nverse one b\n\n[Chorus]\nchorus a\nchorus b\n\n"
+    "[Verse 2]\nverse two a\n\n[Chorus]\nchorus a\nchorus b\n\n[Outro]\noutro a"
+)
+
+
+def _follow_edits(score: c.Score) -> dict[str, dict[str, object]]:
+    """Real edits of the plan (sections at bars 1, 10, 18, 30, 39, 55): what the lyrics must follow."""
+    chorus_start, chorus_end = score.starts[17], score.starts[29]
+    clip = [
+        {"track": kind, "onset": max(n.onset, chorus_start) - chorus_start,
+         "duration": min(n.end, chorus_end) - max(n.onset, chorus_start), "pitch": n.pitch}
+        for kind in ("vocal", "ins")
+        for n in score.track(kind)
+        if n.onset < chorus_end and n.end > chorus_start
+    ]
+    return {
+        "duplicate the first chorus": {"op": "arrange_sections", "order": [1, 2, 3, 3, 4, 5, 6]},
+        "move the first chorus up": {"op": "arrange_sections", "order": [1, 3, 2, 4, 5, 6]},
+        "delete the second verse and chorus": {"op": "arrange_sections", "order": [1, 2, 3, 6]},
+        "join the first chorus to its verse": {"op": "merge_section", "section": 3},
+        "split the first verse": {"op": "split_section", "bar": 14, "label": "bridge"},
+        "delete bars across the chorus start": {"op": "delete_measures", "bar": 16, "count": 4},
+        "insert bars in the first verse": {"op": "insert_measures", "bar": 12, "count": 2},
+        "rename the outro": {"op": "rename_section", "section": 6, "label": "ending"},
+        "insert a copied chorus before the second verse": {
+            "op": "paste", "at": score.starts[29], "mode": "insert", "span": chorus_end - chorus_start,
+            "tracks": ["vocal", "ins"], "with_chords": True, "notes": clip, "chords": [],
+            "sections": [{"onset": 0, "label": "chorus"}],
+        },
+    }
+
+
+def follow_fixture() -> dict[str, object]:
+    """The models (sections and bars only) and time maps of real edits, for the frontend's tests."""
+
+    def trim(abc: str) -> dict[str, object]:
+        model = operations.editor_view(abc)["model"]
+        return {key: model[key] for key in ("total", "measures", "sections")}
+
+    edits = []
+    for name, operation in _follow_edits(c.from_abc(PLAN)).items():
+        done = operations.apply(PLAN, operation)
+        shown = {k: v for k, v in operation.items() if k not in ("notes", "chords")}
+        edits.append({"name": name, "operation": shown, "after": trim(done.abc), "time_map": done.time_map})
+    return json.loads(json.dumps({"lyrics": FOLLOW_LYRICS, "before": trim(PLAN), "edits": edits}))
+
+
+def write_follow_fixture() -> None:
+    FOLLOW_FIXTURE.write_text(json.dumps(follow_fixture(), indent=1) + "\n", encoding="utf-8")
+
+
+def test_the_lyrics_follow_fixture_is_current() -> None:
+    assert json.loads(FOLLOW_FIXTURE.read_text(encoding="utf-8")) == follow_fixture(), (
+        "regenerate frontend/tests/fixtures/arrange-edits.json: "
+        "python -c \"import sys; sys.path[:0] = ['tests/unit', 'tests/support']; import test_score_arrange as t; t.write_follow_fixture()\""
+    )

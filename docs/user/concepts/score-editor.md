@@ -174,6 +174,30 @@ The section list works like Cubase's arranger track: whole sections are copied, 
 
 Every arrangement is **one undo step**, and the notation, the roll, the ABC text and the bar strip follow it at once. A note that was tied across into a section that no longer follows is cut at the section's end - it does not tie into a different note. A copied section keeps its name, so a song can have two `chorus` sections in a row.
 
+### What follows an arrangement
+
+| Where | What follows |
+|---|---|
+| every sheet | notation, roll, ABC text, inspector, section list - and undo/redo (one step) |
+| **DAW** sheet (*5 · YuE2 · DAW*) | the **Guide track**: its notes move, are copied and deleted with their bars. This holds for arranged sections, *Insert* at the cursor, and inserted, deleted or duplicated bars. Undo brings the Guide back with the score. |
+| score sheet whose lyrics come from **Song Sheet · Text** (*1 · YuE2 · Song*, *5 · YuE2 · DAW*) | the **lyrics**, when their sections matched the score's when you opened the editor (see below) |
+| **cover** (*2 · YuE2 · Cover*) | the lyrics are written for the final score on the next run (the text sheet comes after the score sheet) |
+
+**The lyrics follow the sections.** YuE2 sings the lyrics section by section, so a duplicated chorus needs its words twice. When the lyrics of *Song Sheet · Text* have the same sections as the score, the side column shows **lyrics follow the sections**. Every edit then lays the lyrics onto the new sections:
+
+- a copied section copies its words, and a moved section takes them along;
+- a deleted section loses its words;
+- a section joined to the one before adds its lines there;
+- a part split off a section starts without words;
+- a section pasted with *Insert* brings the words it was copied with;
+- a renamed section gets a matching tag.
+
+The panel lists the new order, and *Lyrics fit* checks the arranged lyrics. **Apply** writes them into *Song Sheet · Text* as an edit of its draft, so that sheet asks for approval again.
+
+In *1 · YuE2 · Song* the planner reads those lyrics. On the next run it plans again, and the arranged score is kept as yours (*manual*). It is used as it is and does not turn into a conflict with the new plan.
+
+Untick the box to leave the lyrics as they are. Lyrics that were changed in *Song Sheet · Text* after the last run are not overwritten. The panel then says to run again first.
+
 ## Playback and A/B
 
 **Play** plays simple tones of the notes from the **cursor**, marking the sounding notes in the notation and the piano roll and drawing a playback line in the roll - a guide to the notes, not a preview of what YuE2 will render. It works offline: no soundfont is downloaded. Choose the voices, the speed (the score's tempo is not changed), *loop section* and the *metronome* (a click on every beat, higher on the first beat of a bar). *Loop section* plays from the cursor to the end of its section and then repeats the whole section, like Cubase's cycle.

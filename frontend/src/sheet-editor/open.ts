@@ -4,6 +4,7 @@ import { createApp } from 'vue'
 import type { Fetcher, GuideNote } from '../api/client'
 import type { AsrNote, SheetPayload } from '../shared/sheetSession'
 import type { DocumentKind, SheetState } from '../shared/sheetState'
+import type { LyricsTarget } from './score/lyricsFollow'
 import dialogCss from './dialog.css?inline'
 import SheetDialog from './SheetDialog.vue'
 
@@ -19,7 +20,10 @@ export interface OpenOptions {
   layout?: string | null
   /** The Guide notes of the node's ``plenio_guide`` property (playback and MIDI only). */
   guide?: GuideNote[]
-  onApply: (state: SheetState, guide: GuideNote[]) => void
+  /** The sheet that owns the context lyrics, when they can follow the score's sections. */
+  lyricsTarget?: LyricsTarget | null
+  /** ``lyrics``: the context lyrics arranged like the score, for the sheet that owns them. */
+  onApply: (state: SheetState, guide: GuideNote[], lyrics: string | null) => void
 }
 
 function installCss(): void {
@@ -48,8 +52,9 @@ export function openSheetDialog(options: OpenOptions): () => void {
     fetcher: options.fetcher,
     layout: options.layout ?? null,
     guide: options.guide ?? [],
-    onApply: (state: SheetState, guide: GuideNote[]) => {
-      options.onApply(state, guide)
+    lyricsTarget: options.lyricsTarget ?? null,
+    onApply: (state: SheetState, guide: GuideNote[], lyrics: string | null) => {
+      options.onApply(state, guide, lyrics)
       close()
     },
     onClose: close

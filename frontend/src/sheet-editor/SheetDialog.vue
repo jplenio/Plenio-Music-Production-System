@@ -32,6 +32,7 @@ import {
 } from './paneSizes'
 import LyricsFit from './LyricsFit.vue'
 import ScoreTab from './score/ScoreTab.vue'
+import type { LyricsTarget } from './score/lyricsFollow'
 import { sameGuide } from './score/tracks'
 
 const props = defineProps<{
@@ -46,8 +47,11 @@ const props = defineProps<{
   layout?: string | null
   /** The Guide notes of the node's ``plenio_guide`` property (playback and MIDI only). */
   guide?: GuideNote[]
+  /** The sheet that owns the context lyrics, when they can follow the score's sections. */
+  lyricsTarget?: LyricsTarget | null
 }>()
-const emit = defineEmits<{ apply: [state: SheetState, guide: GuideNote[]]; close: [] }>()
+/** ``lyrics``: the context lyrics arranged like the score, for the sheet that owns them (``null``: unchanged). */
+const emit = defineEmits<{ apply: [state: SheetState, guide: GuideNote[], lyrics: string | null]; close: [] }>()
 
 type Tab = 'lyrics' | 'score' | 'style' | 'details'
 const TAB_OF: Record<DocumentKind, Tab> = {
@@ -178,8 +182,33 @@ const guide = ref<GuideNote[]>([...(props.guide ?? [])])
 function setGuide(next: GuideNote[]): void {
   guide.value = next
 }
+// --- the context lyrics follow the score's sections (they belong to the sheet in lyricsTarget) ---
+const followLyrics = ref(true)
+const followText = ref<string | null>(null)
+/** Lyrics of another sheet: only those follow (this sheet's own lyrics are edited in its Lyrics tab). */
+const lyricsTarget = computed(() => (working.some((doc) => doc.kind === 'lyrics') ? null : (props.lyricsTarget ?? null)))
+/** The arranged lyrics to write into the other sheet, when they changed. */
+const followedLyrics = computed(() => {
+  const base = props.payload?.context?.lyrics
+  const text = followText.value
+  if (!lyricsTarget.value || lyricsTarget.value.blocked || !followLyrics.value || !text || !base) return null
+  return normalize(text) !== normalize(base) ? text : null
+})
+/**
+ * When the music model plans this score from those lyrics (*1 · YuE2 · Song*), new lyrics plan a new
+ * score on the next run: the arranged score is kept as the user's (manual), so it is used and does not
+ * turn into a conflict with the new plan. The approval is unaffected (it covers the texts).
+ */
+function keepScoreWhenReplanned(): void {
+  if (!followedLyrics.value || !lyricsTarget.value?.replans) return
+  const doc = working.find((d) => d.kind === 'score')
+  if (doc && doc.intent === 'keep') doc.intent = 'manual'
+}
 const dirty = computed(
-  () => serializeState(pending.value) !== serializeState(props.state) || !sameGuide(guide.value, props.guide ?? [])
+  () =>
+    serializeState(pending.value) !== serializeState(props.state) ||
+    !sameGuide(guide.value, props.guide ?? []) ||
+    followedLyrics.value !== null
 )
 const findings = computed<Finding[]>(() => (result.value?.findings ?? []).filter((f) => f.severity !== 'info'))
 const infos = computed<Finding[]>(() => (result.value?.findings ?? []).filter((f) => f.severity === 'info'))
@@ -235,12 +264,19 @@ watch(
 
 function apply() {
   if (applyBlock.value) return
-  emit('apply', withApproval(pending.value, props.state.review?.approved_fingerprint ?? null), guide.value)
+  keepScoreWhenReplanned()
+  emit(
+    'apply',
+    withApproval(pending.value, props.state.review?.approved_fingerprint ?? null),
+    guide.value,
+    followedLyrics.value
+  )
 }
 async function approve() {
+  keepScoreWhenReplanned()
   await validate()
   if (canApprove.value) {
-    emit('apply', withApproval(pending.value, result.value?.fingerprint ?? null), guide.value)
+    emit('apply', withApproval(pending.value, result.value?.fingerprint ?? null), guide.value, followedLyrics.value)
   }
 }
 function close() {
@@ -414,8 +450,12 @@ onBeforeUnmount(() => {
             :lyrics="lyricsText"
             :title="songTitle"
             :guide="guide"
+            :lyrics-target="lyricsTarget"
+            :lyrics-followed="followText"
+            v-model:follow-lyrics="followLyrics"
             @edited="onInput(doc)"
             @guide-change="setGuide"
+            @lyrics-follow="(text: string | null) => (followText = text)"
             @gate="(text: string, reason: string | null) => (scoreGate = { text, reason })"
           />
           <textarea

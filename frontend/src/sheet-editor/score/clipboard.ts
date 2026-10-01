@@ -10,6 +10,7 @@ import { ref } from 'vue'
 
 import type { ScoreOperation } from '../../api/client'
 import type { ModelChord, ModelNote, ScoreModelView } from '../../shared/scoreView'
+import type { LyricBlock } from './lyricsFollow'
 import type { Track } from './pianoRoll'
 
 export interface ClipNote {
@@ -27,7 +28,8 @@ export interface Clip {
   withChords: boolean
   notes: ClipNote[]
   chords: { onset: number; name: string }[]
-  sections: { onset: number; label: string }[]
+  /** The sections of a range, with the lyrics they had (the lyrics follow a pasted section). */
+  sections: { onset: number; label: string; lyrics?: LyricBlock | null }[]
   /** What was copied, for the status line (``3 notes``, ``sections chorus, verse``). */
   label: string
 }
@@ -44,15 +46,23 @@ function trackOf(note: ModelNote): Track {
   return note.id.startsWith('ins:') ? 'ins' : 'vocal'
 }
 
-/** A clip of whole sections (0-based indices, in order): both voices, chord symbols and labels. */
-export function clipOfSections(model: ScoreModelView, indices: readonly number[]): Clip | null {
-  const picked = [...new Set(indices)].sort((a, b) => a - b).map((i) => model.sections[i]).filter(Boolean)
+/**
+ * A clip of whole sections (0-based indices, in order): both voices, chord symbols and labels, and the
+ * sections' lyric blocks when the lyrics follow the sections (``lyrics``, one per model section).
+ */
+export function clipOfSections(
+  model: ScoreModelView,
+  indices: readonly number[],
+  lyrics: readonly (LyricBlock | null)[] | null = null
+): Clip | null {
+  const order = [...new Set(indices)].sort((a, b) => a - b).filter((i) => model.sections[i])
+  const picked = order.map((i) => model.sections[i])
   if (!picked.length) return null
   const notes: ClipNote[] = []
   const chords: Clip['chords'] = []
   const sections: Clip['sections'] = []
   let offset = 0
-  for (const section of picked) {
+  for (const [position, section] of picked.entries()) {
     const first = model.measures[section.first_bar - 1]
     const last = model.measures[section.first_bar - 1 + section.bars - 1]
     const start = first.onset
@@ -63,7 +73,8 @@ export function clipOfSections(model: ScoreModelView, indices: readonly number[]
       notes.push({ track: trackOf(note), onset: onset - start + offset, duration: Math.min(note.onset + note.duration, end) - onset, pitch: note.pitch })
     }
     for (const chord of model.tracks.chords) if (chord.onset >= start && chord.onset < end) chords.push({ onset: chord.onset - start + offset, name: chord.name })
-    sections.push({ onset: offset, label: section.label })
+    const block = lyrics?.[order[position]]
+    sections.push(block ? { onset: offset, label: section.label, lyrics: block } : { onset: offset, label: section.label })
     offset += end - start
   }
   return {
@@ -137,6 +148,6 @@ export function pasteOperation(clip: Clip, model: ScoreModelView, at: number, mo
     with_chords: converted.withChords,
     notes: converted.notes,
     chords: converted.chords,
-    sections: mode === 'insert' ? converted.sections : []
+    sections: mode === 'insert' ? converted.sections.map(({ onset, label }) => ({ onset, label })) : []
   }
 }

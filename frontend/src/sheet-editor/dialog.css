@@ -415,6 +415,25 @@
   cursor: pointer;
   color: var(--descrip-text, #aaa);
 }
+/* the lyrics of Song Sheet · Text follow the sections */
+.plenio-overlay .lyrics-follow {
+  border: 1px solid var(--border-color, #444);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+.plenio-overlay .lyrics-follow label {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.plenio-overlay .lyrics-follow .hint {
+  margin: 4px 0 0;
+  color: var(--descrip-text, #999);
+}
+.plenio-overlay .lyrics-follow .hint.changed {
+  color: #e8c46a;
+}
 .plenio-overlay .view-tools .layouts {
   display: inline-flex;
   gap: 2px;

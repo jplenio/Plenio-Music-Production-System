@@ -11,6 +11,7 @@ import type { ScoreOperation } from '../../api/client'
 import { type ScoreView, clock, sectionOfBar } from '../../shared/scoreView'
 import { type Arrangement, deleteSections, dropSections, duplicateSections, moveSections, selectSection } from './arrange'
 import { clipOfSections, clipboard } from './clipboard'
+import type { LyricBlock } from './lyricsFollow'
 
 const props = defineProps<{
   view: ScoreView | null
@@ -19,6 +20,8 @@ const props = defineProps<{
   /** Source-recording start of each bar (transcription timeline), when there is one. */
   sourceStarts: (number | null)[] | null
   readonly: boolean
+  /** The lyric block of every section while the lyrics follow the sections (copied with them). */
+  sectionLyrics?: (LyricBlock | null)[] | null
 }>()
 const emit = defineEmits<{ goto: [bar: number]; operate: [operation: ScoreOperation]; notice: [text: string] }>()
 
@@ -87,7 +90,7 @@ const shift = (delta: -1 | 1) => apply(moveSections(sections.value.length, selec
 function copy(): void {
   const model = props.view?.model
   if (!model || !selected.value.length) return
-  const clip = clipOfSections(model, selected.value)
+  const clip = clipOfSections(model, selected.value, props.sectionLyrics ?? null)
   if (!clip) return
   clipboard.value = clip
   emit('notice', `copied ${clip.label} - paste it at the cursor in the piano roll (Ctrl+V; Ctrl+Shift+V moves what follows)`)
