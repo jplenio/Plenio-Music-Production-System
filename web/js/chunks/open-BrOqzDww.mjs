@@ -1,4 +1,4 @@
-import { a as iy, P as qm, b as ny, t as ry, i as sy, e as ay, c as oy, n as ai, v as ly, s as Df, g as cy, r as hy, u as uy, w as Of, d as fy, f as dy, h as Nf } from "./main-Di4Uhagm.mjs";
+import { a as iy, P as qm, b as ny, t as ry, i as sy, e as ay, c as oy, n as ai, v as ly, s as Df, g as cy, r as hy, u as uy, w as Of, d as fy, f as dy, h as Nf } from "./main-ypbm04T3.mjs";
 import { notesLabel as py, trackRows as gy, parseGuide as my, sameGuide as Xr, remapGuide as vy, guideNotes as by } from "./tracks-DxmZeggM.mjs";
 // @__NO_SIDE_EFFECTS__
 function bu(i) {
@@ -37167,7 +37167,8 @@ const l_ = {
         Of(ie.value, t.state.review?.approved_fingerprint ?? null),
         oe.value,
         j.value,
-        Oe(!1)
+        Oe(!1),
+        !1
       ));
     }
     async function Ke() {
@@ -37176,7 +37177,8 @@ const l_ = {
         Of(ie.value, g.value?.fingerprint ?? null),
         oe.value,
         j.value,
-        Oe(!0)
+        Oe(!0),
+        !0
       );
     }
     function He() {
@@ -37534,8 +37536,8 @@ function XE(i) {
     guide: i.guide ?? [],
     lyricsTarget: i.lyricsTarget ?? null,
     scoreTarget: i.scoreTarget ?? null,
-    onApply: (r, s, a, o) => {
-      i.onApply(r, s, a, o), t();
+    onApply: (r, s, a, o, l) => {
+      i.onApply(r, s, a, o, l), t();
     },
     onClose: t
   });

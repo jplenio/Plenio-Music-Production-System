@@ -59,7 +59,8 @@ const props = defineProps<{
  * unchanged); ``score``: the context score as edited here, for the sheet that owns it (``null``: unchanged).
  */
 const emit = defineEmits<{
-  apply: [state: SheetState, guide: GuideNote[], lyrics: string | null, score: ScoreChange | null]
+  /** ``approved``: Approve was pressed - the sheet is released for the next run now. */
+  apply: [state: SheetState, guide: GuideNote[], lyrics: string | null, score: ScoreChange | null, approved: boolean]
   close: []
 }>()
 
@@ -322,7 +323,8 @@ function apply() {
     withApproval(pending.value, props.state.review?.approved_fingerprint ?? null),
     guide.value,
     followedLyrics.value,
-    scoreChange(false)
+    scoreChange(false),
+    false
   )
 }
 async function approve() {
@@ -335,7 +337,8 @@ async function approve() {
       withApproval(pending.value, result.value?.fingerprint ?? null),
       guide.value,
       followedLyrics.value,
-      scoreChange(true)
+      scoreChange(true),
+      true
     )
   }
 }

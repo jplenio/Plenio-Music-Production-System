@@ -4,7 +4,7 @@ import { ownedBeforeRun } from '../shared/sheetSession'
 import { DOCUMENT_KINDS, parseState, serializeState, summarize } from '../shared/sheetState'
 import { lyricsTargetOf, scoreTargetOf, writeLyrics, writeScore } from './lyricsOwner'
 import { getAsrNote, getPayload, onPayload } from './payloads'
-import { displayState, onRunState, sheetLine } from './runStatus'
+import { displayState, onRunState, runState, setRunState, sheetLine } from './runStatus'
 
 export const SHEET_STATE_TYPE = 'PLENIO_SHEET_STATE'
 /** The widget's layout height: the button row (28 px), the status row (18 px) and the frontend's margins. */
@@ -128,19 +128,35 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
       guide: parseGuide(node.properties?.plenio_guide),
       lyricsTarget: lyrics?.target ?? null,
       scoreTarget: score?.target ?? null,
-      onApply: (next, guide, arranged, changedScore) => {
+      onApply: (next, guide, arranged, changedScore, approved) => {
+        const before = String(widget.value ?? '')
         widget.value = serializeState(next)
         node.properties = { ...(node.properties ?? {}), plenio_guide: serializeGuide(guide) }
+        // the node says it at once: Approve released the sheet (no need to wait for the next run), and
+        // changed documents of a sheet that was approved need a new approval
+        if (approved) setRunState(node, 'approved')
+        else if (String(widget.value) !== before) unapprove(node)
         if (arranged !== null && lyrics && !lyrics.target.blocked) {
           writeLyrics(lyrics.owner, arranged, getPayload(String(lyrics.owner.id)))
+          unapprove(lyrics.owner)
         }
         if (changedScore && score && !score.target.blocked) {
           const owner = score.owner
-          void writeScore(owner, changedScore.text, getPayload(String(owner.id)), changedScore.approved ? { fetcher: api } : null)
+          void writeScore(owner, changedScore.text, getPayload(String(owner.id)), changedScore.approved ? { fetcher: api } : null).then(
+            (written) => {
+              if (written?.review?.approved_fingerprint) setRunState(owner, 'approved')
+              else unapprove(owner)
+            }
+          )
         }
         node.setDirtyCanvas?.(true, true)
       }
     })
+  }
+
+  /** A sheet whose documents changed is no longer approved: it shows its review stop again. */
+  function unapprove(sheet: ComfyNode): void {
+    if (runState(sheet) === 'approved') setRunState(sheet, null)
   }
 
   const unsubscribe = [

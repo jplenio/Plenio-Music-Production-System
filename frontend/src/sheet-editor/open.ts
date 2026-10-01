@@ -28,7 +28,14 @@ export interface OpenOptions {
    * ``lyrics``: the context lyrics arranged like the score, for the sheet that owns them; ``score``: the
    * context score as edited here, for the sheet that owns it.
    */
-  onApply: (state: SheetState, guide: GuideNote[], lyrics: string | null, score: ScoreChange | null) => void
+  onApply: (
+    state: SheetState,
+    guide: GuideNote[],
+    lyrics: string | null,
+    score: ScoreChange | null,
+    /** Approve was pressed: the sheet is released for the next run now. */
+    approved: boolean
+  ) => void
 }
 
 function installCss(): void {
@@ -59,8 +66,8 @@ export function openSheetDialog(options: OpenOptions): () => void {
     guide: options.guide ?? [],
     lyricsTarget: options.lyricsTarget ?? null,
     scoreTarget: options.scoreTarget ?? null,
-    onApply: (state: SheetState, guide: GuideNote[], lyrics: string | null, score: ScoreChange | null) => {
-      options.onApply(state, guide, lyrics, score)
+    onApply: (state: SheetState, guide: GuideNote[], lyrics: string | null, score: ScoreChange | null, approved: boolean) => {
+      options.onApply(state, guide, lyrics, score, approved)
       close()
     },
     onClose: close

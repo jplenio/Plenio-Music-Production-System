@@ -23,6 +23,7 @@ The score editor becomes an arranging tool in the manner of Cubase. You can copy
 
 - Playback starts at the **cursor** (before: at the selected bar). Without the piano roll the cursor follows the selected bar, so the *Text* layout plays as before. *Loop section* now plays to the end of the cursor's section and then repeats the whole section.
 - Ctrl+A in the piano roll selects the chord symbols too (Cubase: *Select All*); before, it selected the notes only.
+- **Approve shows on the node at once.** Approving a Song Sheet in its editor turns the node's badge and status line to *✓ approved* right away; before, the node said *waiting for your approval* until the next run started. An Apply that changes the documents of an approved sheet takes the approval back: the node shows its review stop again. This also applies to the other sheet when the editor writes its lyrics or its score back.
 - Timelines from Transcribe Score hold the content of every bar (`bar_prints`), which lets an arranged cover find its source bars. Older timelines are read as before.
 
 ### Fixed
