@@ -2,7 +2,7 @@
 import { createApp } from 'vue'
 
 import type { Fetcher, GuideNote } from '../api/client'
-import type { AsrNote, SheetPayload } from '../shared/sheetSession'
+import type { AsrNote, ScoreChange, ScoreTarget, SheetPayload } from '../shared/sheetSession'
 import type { DocumentKind, SheetState } from '../shared/sheetState'
 import type { LyricsTarget } from './score/lyricsFollow'
 import dialogCss from './dialog.css?inline'
@@ -22,8 +22,13 @@ export interface OpenOptions {
   guide?: GuideNote[]
   /** The sheet that owns the context lyrics, when they can follow the score's sections. */
   lyricsTarget?: LyricsTarget | null
-  /** ``lyrics``: the context lyrics arranged like the score, for the sheet that owns them. */
-  onApply: (state: SheetState, guide: GuideNote[], lyrics: string | null) => void
+  /** The sheet that owns the context score (a cover's score sheet), when this sheet may edit it. */
+  scoreTarget?: ScoreTarget | null
+  /**
+   * ``lyrics``: the context lyrics arranged like the score, for the sheet that owns them; ``score``: the
+   * context score as edited here, for the sheet that owns it.
+   */
+  onApply: (state: SheetState, guide: GuideNote[], lyrics: string | null, score: ScoreChange | null) => void
 }
 
 function installCss(): void {
@@ -53,8 +58,9 @@ export function openSheetDialog(options: OpenOptions): () => void {
     layout: options.layout ?? null,
     guide: options.guide ?? [],
     lyricsTarget: options.lyricsTarget ?? null,
-    onApply: (state: SheetState, guide: GuideNote[], lyrics: string | null) => {
-      options.onApply(state, guide, lyrics)
+    scoreTarget: options.scoreTarget ?? null,
+    onApply: (state: SheetState, guide: GuideNote[], lyrics: string | null, score: ScoreChange | null) => {
+      options.onApply(state, guide, lyrics, score)
       close()
     },
     onClose: close

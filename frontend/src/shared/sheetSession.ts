@@ -92,6 +92,21 @@ export function sectionTimes(timeline: TimelinePayload | null | undefined): Sect
   })
 }
 
+/**
+ * The sheet that owns the score a text sheet shows as context (*Song Sheet · Score* of a cover): the
+ * text sheet's editor may change that score and Apply writes it there (``blocked``: why it may not).
+ */
+export interface ScoreTarget {
+  title: string
+  blocked: string | null
+}
+
+/** A score changed in a text sheet's editor, for the sheet that owns it (``approved``: Approve was pressed). */
+export interface ScoreChange {
+  text: string
+  approved: boolean
+}
+
 export type Intent = 'keep' | 'auto' | 'manual' | 'rebase'
 
 export interface WorkingDoc {

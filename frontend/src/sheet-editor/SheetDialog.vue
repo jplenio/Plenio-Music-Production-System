@@ -10,6 +10,8 @@ import { type Fetcher, type GuideNote, PlenioApiError, getAsrNote, resolveSheet 
 import {
   type AsrNote,
   type Finding,
+  type ScoreChange,
+  type ScoreTarget,
   type SheetPayload,
   type WorkingDoc,
   nextState,
@@ -49,9 +51,17 @@ const props = defineProps<{
   guide?: GuideNote[]
   /** The sheet that owns the context lyrics, when they can follow the score's sections. */
   lyricsTarget?: LyricsTarget | null
+  /** The sheet that owns the context score (a cover's score sheet), when this sheet may edit it. */
+  scoreTarget?: ScoreTarget | null
 }>()
-/** ``lyrics``: the context lyrics arranged like the score, for the sheet that owns them (``null``: unchanged). */
-const emit = defineEmits<{ apply: [state: SheetState, guide: GuideNote[], lyrics: string | null]; close: [] }>()
+/**
+ * ``lyrics``: the context lyrics arranged like the score, for the sheet that owns them (``null``:
+ * unchanged); ``score``: the context score as edited here, for the sheet that owns it (``null``: unchanged).
+ */
+const emit = defineEmits<{
+  apply: [state: SheetState, guide: GuideNote[], lyrics: string | null, score: ScoreChange | null]
+  close: []
+}>()
 
 type Tab = 'lyrics' | 'score' | 'style' | 'details'
 const TAB_OF: Record<DocumentKind, Tab> = {
@@ -96,6 +106,29 @@ let timer: ReturnType<typeof setTimeout> | undefined
 
 const contextScore = computed(() => props.payload?.context?.score ?? null)
 const contextDoc = reactive<WorkingDoc>({ kind: 'score', text: contextScore.value ?? '', intent: 'keep' })
+// --- the other sheet's score, edited here (a cover's text sheet; owner's request 2026-10-02) ---
+/** The context score may be edited: Apply writes it into the sheet that owns it. */
+const scoreEditable = computed(
+  () => !working.some((d) => d.kind === 'score') && !!contextScore.value && !!props.scoreTarget && !props.scoreTarget.blocked
+)
+const contextGate = ref<{ text: string; reason: string | null } | null>(null)
+const contextBlock = computed(() => {
+  const gate = contextGate.value
+  return scoreEditable.value && gate?.reason && gate.text === contextDoc.text ? gate.reason : null
+})
+/** The context score as edited here, when it changed. */
+const changedScore = computed(() =>
+  scoreEditable.value && contextScore.value && normalize(contextDoc.text) !== normalize(contextScore.value) ? contextDoc.text : null
+)
+/**
+ * A changed score and the lyrics shown with it are one pair: the lyrics are kept as they are now
+ * (manual), so the next run does not replace them with a draft made for the old score.
+ */
+function keepLyricsWithScore(): void {
+  if (!changedScore.value) return
+  const lyrics = working.find((d) => d.kind === 'lyrics')
+  if (lyrics && lyrics.intent !== 'auto') lyrics.intent = 'manual'
+}
 const tabs = computed<Tab[]>(() => {
   const present = new Set<Tab>(working.map((doc) => TAB_OF[doc.kind]))
   for (const kind of Object.keys(props.payload?.context ?? {})) {
@@ -171,6 +204,7 @@ function revert(): void {
   const fresh = startSession(props.state, props.payload, props.owned)
   fresh.forEach((doc, index) => Object.assign(working[index], doc))
   guide.value = [...(props.guide ?? [])]
+  contextDoc.text = contextScore.value ?? ''
   revision.value++
 }
 
@@ -219,7 +253,8 @@ const dirty = computed(
   () =>
     serializeState(pending.value) !== serializeState(props.state) ||
     !sameGuide(guide.value, props.guide ?? []) ||
-    followedLyrics.value !== null
+    followedLyrics.value !== null ||
+    changedScore.value !== null
 )
 const findings = computed<Finding[]>(() => (result.value?.findings ?? []).filter((f) => f.severity !== 'info'))
 const infos = computed<Finding[]>(() => (result.value?.findings ?? []).filter((f) => f.severity === 'info'))
@@ -230,10 +265,11 @@ const canApprove = computed(
     !hasErrors.value &&
     !unresolvedConflicts.value.length &&
     !scoreBlock.value &&
+    !contextBlock.value &&
     !!result.value?.fingerprint
 )
 const applyBlock = computed(() =>
-  unresolvedConflicts.value.length ? 'Resolve the conflicts first.' : scoreBlock.value
+  unresolvedConflicts.value.length ? 'Resolve the conflicts first.' : (scoreBlock.value ?? contextBlock.value)
 )
 const statusIcon = computed(() => {
   if (unresolvedConflicts.value.length) return '⇄ conflict'
@@ -255,7 +291,8 @@ async function validate() {
       review: props.review,
       engine: props.payload.engine,
       instrumental: props.payload.instrumental,
-      context: props.payload.context,
+      // the lyrics are checked against the score as edited here
+      context: changedScore.value ? { ...props.payload.context, score: changedScore.value } : props.payload.context,
       target_seconds: props.payload.target_seconds ?? null
     })
   } catch (e) {
@@ -266,28 +303,40 @@ async function validate() {
 }
 
 watch(
-  () => working.map((doc) => doc.text + doc.intent).join('\u0000'),
+  () => [...working.map((doc) => doc.text + doc.intent), changedScore.value ?? ''].join('\u0000'),
   () => {
     clearTimeout(timer)
     timer = setTimeout(validate, 300)
   }
 )
 
+function scoreChange(approved: boolean): ScoreChange | null {
+  return changedScore.value ? { text: changedScore.value, approved } : null
+}
 function apply() {
   if (applyBlock.value) return
   keepScoreWhenReplanned()
+  keepLyricsWithScore()
   emit(
     'apply',
     withApproval(pending.value, props.state.review?.approved_fingerprint ?? null),
     guide.value,
-    followedLyrics.value
+    followedLyrics.value,
+    scoreChange(false)
   )
 }
 async function approve() {
   keepScoreWhenReplanned()
+  keepLyricsWithScore()
   await validate()
   if (canApprove.value) {
-    emit('apply', withApproval(pending.value, result.value?.fingerprint ?? null), guide.value, followedLyrics.value)
+    emit(
+      'apply',
+      withApproval(pending.value, result.value?.fingerprint ?? null),
+      guide.value,
+      followedLyrics.value,
+      scoreChange(true)
+    )
   }
 }
 function close() {
@@ -515,17 +564,29 @@ onBeforeUnmount(() => {
         <section v-if="tab === 'score' && !scoreDoc && contextScore" class="doc context wide">
           <div class="doc-head">
             <h3>Score (ABC)</h3>
-            <span class="badge">from the other sheet (read-only)</span>
+            <span v-if="scoreEditable" class="badge" :title="`The score belongs to ${scoreTarget?.title}`">
+              from {{ scoreTarget?.title }}{{ changedScore ? ' · changed' : '' }}
+            </span>
+            <span v-else class="badge">from the other sheet (read-only)</span>
           </div>
-          <!-- the other sheet's score, read-only; this sheet's lyrics are shown on it and edited there -->
+          <p v-if="scoreEditable" class="hint score-owner">
+            Changes to the score go into <strong>{{ scoreTarget?.title }}</strong> on Apply, and the lyrics are kept as
+            you see them here (manual), so the two stay a pair. <strong>Approve</strong> approves the changed score in
+            that sheet too; with Apply it asks for approval again on the next run.
+          </p>
+          <p v-else-if="scoreTarget?.blocked" class="hint">{{ scoreTarget.blocked }}</p>
+          <!-- the other sheet's score: edited here when that sheet can take it back, else read-only; this
+               sheet's lyrics are shown on it and edited there -->
           <ScoreTab
             :doc="contextDoc"
             :fetcher="fetcher"
             :payload="payload"
-            :readonly="true"
+            :readonly="!scoreEditable"
+            :layout-default="layout ?? null"
             :lyrics="lyricsText"
             :lyrics-target="ownLyrics ? lyricsTarget : null"
             @lyrics-change="onLyricsChange"
+            @gate="(text: string, reason: string | null) => (contextGate = { text, reason })"
           />
         </section>
         <section v-if="tab === 'lyrics' && timeline.length" class="doc sections">
@@ -534,10 +595,14 @@ onBeforeUnmount(() => {
             <span class="badge">from Transcribe Score</span>
           </div>
           <table>
-            <tr><th>Section</th><th>Bars</th><th>From</th><th>To</th></tr>
-            <tr v-for="(section, index) in timeline" :key="index">
-              <td>{{ section.label }}</td><td>{{ section.bars }}</td><td>{{ section.start }}</td><td>{{ section.end }}</td>
-            </tr>
+            <thead>
+              <tr><th>Section</th><th>Bars</th><th>From</th><th>To</th></tr>
+            </thead>
+            <tbody>
+              <tr v-for="(section, index) in timeline" :key="index">
+                <td>{{ section.label }}</td><td>{{ section.bars }}</td><td>{{ section.start }}</td><td>{{ section.end }}</td>
+              </tr>
+            </tbody>
           </table>
         </section>
         <template v-for="(text, kind) in payload?.context ?? {}" :key="'context-' + kind">
@@ -556,6 +621,7 @@ onBeforeUnmount(() => {
           Resolve the conflict in: {{ unresolvedConflicts.join(', ') }}.
         </p>
         <p v-if="scoreBlock" class="error">Score: {{ scoreBlock }}</p>
+        <p v-else-if="contextBlock" class="error">Score: {{ contextBlock }}</p>
         <ul>
           <li v-for="(f, i) in findings" :key="i" :data-severity="f.severity">
             <strong>{{ f.severity }}</strong> <span class="where">{{ f.where }}</span> {{ f.message }}

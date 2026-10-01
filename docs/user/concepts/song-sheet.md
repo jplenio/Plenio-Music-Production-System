@@ -23,7 +23,14 @@ The score is made from the text (Song path: YuE2 plans from the lyrics) or the t
 - **Song Sheet · Text** owns title, style, lyrics and artwork prompt;
 - **Song Sheet · Score** owns the score.
 
-Each shows the other's documents as read-only context and checks against them: in covers the lyrics must have the score's sections, about one syllable per melody note, and a voice that fits the melody's range.
+Each shows the other's documents as context and checks against them: in covers the lyrics must have the score's sections, about one syllable per melody note, and a voice that fits the melody's range.
+
+The context is read-only, with two exceptions where the editor writes back into the sheet that owns the document:
+
+- **A cover's text sheet edits the score it shows.** Apply writes the score into *Song Sheet · Score* (as an edit of the transcription) and keeps this sheet's lyrics as shown (*manual*), so score and lyrics stay a pair. With **Approve** the changed score is approved in *Song Sheet · Score* too; with Apply that sheet asks for approval on the next run.
+- **A score sheet arranges the lyrics of *Song Sheet · Text*** (templates *1 · YuE2 · Song* and *5 · YuE2 · DAW*; see [Score editor](score-editor.md#what-follows-an-arrangement)).
+
+Neither happens when the other sheet's document changed after the last run: then the editor says so, and the context stays read-only until the next run.
 
 ## Review
 

@@ -2,7 +2,7 @@ import type { Fetcher } from '../api/client'
 import type { ComfyNode, InputSpec, WidgetConstructor } from '../shared/comfy'
 import { ownedBeforeRun } from '../shared/sheetSession'
 import { DOCUMENT_KINDS, parseState, serializeState, summarize } from '../shared/sheetState'
-import { lyricsTargetOf, writeLyrics } from './lyricsOwner'
+import { lyricsTargetOf, scoreTargetOf, writeLyrics, writeScore } from './lyricsOwner'
 import { getAsrNote, getPayload, onPayload } from './payloads'
 import { displayState, onRunState, sheetLine } from './runStatus'
 
@@ -106,6 +106,14 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
     } catch (error) {
       console.warn('Plenio: the lyrics sheet of this score was not found', error)
     }
+    // a cover's text sheet edits the score it shows; Apply writes it into Song Sheet · Score
+    let score: ReturnType<typeof scoreTargetOf> = null
+    try {
+      score = scoreTargetOf(node, payload, getPayload)
+    } catch (error) {
+      console.warn('Plenio: the score sheet of these lyrics was not found', error)
+    }
+    const api = fetcher
     openSheetDialog({
       title: node.title || 'Song Sheet',
       state: current,
@@ -119,11 +127,16 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
       // the Guide track (playback and MIDI only), kept in the node's properties with the workflow
       guide: parseGuide(node.properties?.plenio_guide),
       lyricsTarget: lyrics?.target ?? null,
-      onApply: (next, guide, arranged) => {
+      scoreTarget: score?.target ?? null,
+      onApply: (next, guide, arranged, changedScore) => {
         widget.value = serializeState(next)
         node.properties = { ...(node.properties ?? {}), plenio_guide: serializeGuide(guide) }
         if (arranged !== null && lyrics && !lyrics.target.blocked) {
           writeLyrics(lyrics.owner, arranged, getPayload(String(lyrics.owner.id)))
+        }
+        if (changedScore && score && !score.target.blocked) {
+          const owner = score.owner
+          void writeScore(owner, changedScore.text, getPayload(String(owner.id)), changedScore.approved ? { fetcher: api } : null)
         }
         node.setDirtyCanvas?.(true, true)
       }
