@@ -55,6 +55,8 @@ export interface TimelinePayload {
   duration_s: number
   bars: [number, number, string][]
   sections: [string, number, number][]
+  /** The Vocal and Ins content of every transcribed bar (an arranged score finds its source bars by it). */
+  bar_prints?: [string, string][]
 }
 
 /** What Transcribe Lyrics reports about the draft it produced (``plenio_asr``). */

@@ -29,6 +29,7 @@ from ...core.brief import CoverBrief
 from ...core.errors import PlenioCancelledError, PlenioUserError
 from ...core.hashing import sha256_text
 from ...core.reports import Report, Status
+from ...core.score import bar_match, canonical
 from ...core.sheet.resolve import normalize_document
 from ...core.workers import WorkerEnv, WorkerLimits, run_worker
 from .. import host
@@ -333,10 +334,15 @@ class PlenioTranscribeLyrics(io.ComfyNode):
             )
         sections: list[Any] = []
         meters: list[str] = []
+        prints: tuple[tuple[str, str], ...] = ()
         if score is not None and score.strip():
             analysis = score_rules.validate(score)
             sections, meters = list(analysis.sections), [bar.meter for bar in analysis.bars]
-        alignment = align(words, sections, timeline=own_timeline, score_meters=meters)
+            try:  # an arranged score's bars find their source bars by content (copied sections get their words)
+                prints = bar_match.bar_prints(canonical.from_abc(score))
+            except canonical.ScoreSyntaxError:
+                prints = ()
+        alignment = align(words, sections, timeline=own_timeline, score_meters=meters, score_prints=prints)
         warnings.extend(alignment.warnings)
         data["alignment"] = alignment.to_dict()
         summary = (

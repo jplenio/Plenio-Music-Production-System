@@ -43,6 +43,9 @@ class Timeline:
     sections: tuple[tuple[str, int, int], ...] = ()
     vocal_notes: tuple[tuple[float, float], ...] = ()
     """Sounding vocal notes as (onset, end) in source seconds."""
+    bar_prints: tuple[tuple[str, str], ...] = ()
+    """The Vocal and Ins content of every transcribed bar (``bar_match``): an arranged score's bars find
+    their source bars by it. Empty in timelines made before 0.3.2."""
     engine: str = "sheetsage2"
     extra: Mapping[str, Any] = field(default_factory=dict)
 
@@ -91,6 +94,7 @@ class Timeline:
             "bars": [bar.to_list() for bar in self.bars],
             "sections": [list(section) for section in self.sections],
             "vocal_notes": [[round(a, 3), round(b, 3)] for a, b in self.vocal_notes],
+            **({"bar_prints": [list(p) for p in self.bar_prints]} if self.bar_prints else {}),
             **({"extra": dict(self.extra)} if self.extra else {}),
         }
 
@@ -144,6 +148,7 @@ def timeline_from_dict(data: Mapping[str, Any]) -> Timeline:
             median_bpm=data.get("median_bpm"),
             sections=tuple((str(s[0]), int(s[1]), int(s[2])) for s in data.get("sections", [])),
             vocal_notes=tuple((float(a), float(b)) for a, b in data.get("vocal_notes", [])),
+            bar_prints=tuple((str(v), str(i)) for v, i in data.get("bar_prints", [])),
             engine=str(data.get("engine", "sheetsage2")),
             extra=dict(data.get("extra", {})),
         )

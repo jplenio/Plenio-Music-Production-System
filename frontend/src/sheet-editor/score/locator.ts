@@ -55,24 +55,39 @@ export function unitOfSeconds(view: ScoreView, seconds: number): number | null {
   return Math.max(0, Math.min(model.total, measure.onset + Math.max(0, Math.min(1, part)) * measure.length))
 }
 
+type SourceBar = [number, number, string] | null
+
+/**
+ * The score bar (0-based) that plays second ``second`` of the source: among the bars made from that
+ * source bar (a copied chorus is the source's chorus twice), the first from ``from`` on - the order of
+ * the recording - else the first; ``null`` when no bar of the score is there.
+ */
+export function scoreBarOfSource(second: number, bars: readonly SourceBar[], from = 0): number | null {
+  const hits: number[] = []
+  bars.forEach((bar, index) => {
+    if (bar && bar[0] <= second + TIME_TOLERANCE && second < bar[1]) hits.push(index)
+  })
+  if (!hits.length) return null
+  return hits.find((index) => index >= from) ?? hits[0]
+}
+
 /**
  * Score seconds for a second of the source recording: the transcription's bar times
- * (``[start, end, meter]``) mapped onto the score's bars; without them the times are the same.
+ * (``[start, end, meter]`` per score bar) mapped onto the score's bars; without them the times are the
+ * same. ``null``: no bar of the score plays that part of the source (a deleted section).
  */
 export function scoreSecondOfSource(
   view: ScoreView,
   second: number,
-  timelineBars: [number, number, string][] | undefined
-): number {
+  timelineBars: readonly SourceBar[] | undefined,
+  from = 0
+): number | null {
   if (!timelineBars?.length) return second
-  let index = 0
-  for (let i = 0; i < timelineBars.length; i++) {
-    if (timelineBars[i][0] > second + TIME_TOLERANCE) break
-    index = i
-  }
-  const [start, end] = timelineBars[index]
-  const bar = view.bars[index]
-  if (!bar) return view.duration_s
+  const index = scoreBarOfSource(second, timelineBars, from)
+  const source = index === null ? null : timelineBars[index]
+  const bar = index === null ? undefined : view.bars[index]
+  if (!source || !bar) return null
+  const [start, end] = source
   const part = end > start ? Math.max(0, Math.min(1, (second - start) / (end - start))) : 0
   return bar.start_s + part * bar.duration_s
 }

@@ -95,6 +95,7 @@ import {
   replaceLine
 } from './lyricsFollow'
 import type { LyricEdit } from './PianoRoll.vue'
+import { sourceBars } from './barMatch'
 import { barOfUnit, positionLabel, secondsOfUnit, unitOfBar, unitOfSeconds } from './locator'
 import { selectedChordIds, selectedNoteIds } from './pianoRoll'
 import { type ScoreProject, PROJECT_EXTENSION, buildProject, parseProject, projectFilename } from './projectFile'
@@ -369,8 +370,9 @@ const metronome = computed<boolean>({
   set: (value) => (prefs.value = { ...prefs.value, metronome: value })
 })
 const reference = computed(() => (props.payload?.reference_audio ? viewUrl(props.fetcher, props.payload.reference_audio) : null))
-const timelineBars = computed(() => props.payload?.timeline?.bars)
-const sourceStarts = computed(() => timelineBars.value?.map((bar) => bar[0]) ?? null)
+/** The source's bar for every score bar: by content when the timeline knows it (an arranged cover). */
+const timelineBars = computed(() => sourceBars(shown.value?.model, props.payload?.timeline))
+const sourceStarts = computed(() => timelineBars.value?.map((bar) => bar?.[0] ?? null) ?? null)
 const unit = computed(() => shown.value?.header?.unit ?? '1/16')
 const voices = computed<VoiceSwitches>({
   get: () => prefs.value.voices,

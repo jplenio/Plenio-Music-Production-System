@@ -19,7 +19,7 @@ import {
   sourceSecond
 } from '../../shared/playback'
 import { type ScoreView, clock, sectionOfBar } from '../../shared/scoreView'
-import { scoreSecondOfSource } from './locator'
+import { scoreBarOfSource, scoreSecondOfSource } from './locator'
 import { TonePlayer } from './player'
 
 const props = defineProps<{
@@ -31,7 +31,8 @@ const props = defineProps<{
   /** How the cursor reads (``5.2.1``) for the buttons' titles. */
   position?: string
   reference: string | null
-  timelineBars: [number, number, string][] | undefined
+  /** The source's bar for every score bar (``null``: the source has none - an inserted bar). */
+  timelineBars: ([number, number, string] | null)[] | undefined
   /** The Guide notes to play (score seconds); only with ``voices.guide``. */
   guide?: GuidePlayback[]
 }>()
@@ -102,11 +103,15 @@ function playNotes(from = startSecond.value): void {
   }
 }
 
+/** The score bar the source plays (0-based): an arranged score's bars follow the recording's order. */
+let sourceBar = 0
+
 function playSource(bar = startBar.value): void {
   const element = audio.value
   const view = props.view
   if (!element || !props.reference || !view) return
   stop()
+  sourceBar = bar - 1
   element.currentTime = sourceSecond(bar, props.timelineBars, view)
   void element.play().catch((e: unknown) => {
     problem.value = `The source could not be played: ${e instanceof Error ? e.message : String(e)}`
@@ -132,12 +137,9 @@ function swap(): void {
   if (mode.value === 'notes') playSource(barAt(time.value))
   else if (mode.value === 'source' && audio.value) {
     const second = audio.value.currentTime
-    const starts = props.timelineBars ?? []
-    let bar = 1
-    starts.forEach((item, index) => {
-      if (item[0] <= second + 1e-6) bar = index + 1
-    })
-    const from = props.view?.bars[bar - 1]?.start_s ?? 0
+    const bars = props.timelineBars ?? []
+    const index = scoreBarOfSource(second, bars, sourceBar) ?? sourceBar
+    const from = props.view?.bars[index]?.start_s ?? 0
     playNotes(from)
   } else playNotes()
 }
@@ -146,7 +148,11 @@ function onSourceTime(): void {
   const element = audio.value
   if (!element || mode.value !== 'source') return
   time.value = element.currentTime
-  if (props.view) emit('time', scoreSecondOfSource(props.view, element.currentTime, props.timelineBars))
+  if (!props.view) return
+  const at = scoreBarOfSource(element.currentTime, props.timelineBars ?? [], sourceBar)
+  if (at !== null) sourceBar = at
+  const second = scoreSecondOfSource(props.view, element.currentTime, props.timelineBars, sourceBar)
+  if (second !== null) emit('time', second)
 }
 
 defineExpose({ toggle, stop })

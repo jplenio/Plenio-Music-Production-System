@@ -138,10 +138,15 @@ export function frequency(midi: number): number {
 }
 
 /**
- * The source recording's second for a score bar: the transcription timeline's bar start,
- * else the score's own time (a score that was not transcribed from this recording).
+ * The source recording's second for a score bar: the transcription timeline's bar start (the bars as
+ * the score's bars see them - an arranged cover's copied chorus is the source's chorus), else the
+ * score's own time (a score that was not transcribed from this recording, or a bar the source lacks).
  */
-export function sourceSecond(bar: number, timelineBars: [number, number, string][] | undefined, view: ScoreView): number {
+export function sourceSecond(
+  bar: number,
+  timelineBars: readonly ([number, number, string] | null)[] | undefined,
+  view: ScoreView
+): number {
   const fromTimeline = timelineBars?.[bar - 1]?.[0]
   if (typeof fromTimeline === 'number') return fromTimeline
   return view.bars[bar - 1]?.start_s ?? 0

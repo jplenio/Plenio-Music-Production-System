@@ -11,6 +11,7 @@ from ...core import score as score_rules
 from ...core.errors import PlenioModelError, PlenioUserError
 from ...core.hashing import sha256_text
 from ...core.reports import Report, Status
+from ...core.score import bar_match, canonical
 from ...core.score.timeline import Timeline, TimelineBar
 from ...core.timefmt import clock as _clock
 from .. import host
@@ -19,6 +20,14 @@ from ..types import ReportType, TimelineType
 LONG_SOURCE_VRAM_BYTES = 24 * 2**30
 """Sources longer than one native SheetSage2 window (300 s) need a second window; on the owner's
 16 GB card that ran out of memory (Phase 4A E3). Larger cards are allowed to try."""
+
+
+def _bar_prints(abc: str) -> tuple[tuple[str, str], ...]:
+    """The content of every transcribed bar, so an arranged score finds its source bars (none outside the subset)."""
+    try:
+        return bar_match.bar_prints(canonical.from_abc(abc))
+    except canonical.ScoreSyntaxError:
+        return ()
 
 
 class PlenioTranscribeScore(io.ComfyNode):
@@ -119,6 +128,7 @@ class PlenioTranscribeScore(io.ComfyNode):
                 median_bpm=float(median(local)) if local else None,
                 sections=tuple((s.label, s.start_bar, s.bars) for s in analysis.sections),
                 vocal_notes=tuple((float(a), float(b)) for a, b in result["vocal_notes"]),
+                bar_prints=_bar_prints(abc),
             )
         elif result.get("engine_path") == "events":
             warnings.append(

@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from . import lyrics as lyrics_rules
+from .score import bar_match
 from .score.native import Section
 from .score.timeline import Timeline
 
@@ -183,12 +184,17 @@ def join_tokens(tokens: Sequence[str]) -> str:
     return out
 
 
-def _lines(words: Sequence[AsrWord]) -> list[str]:
+def _lines(words: Sequence[AsrWord], order: Sequence[int] | None = None) -> list[str]:
+    """The words as lines: a pause, a new ASR segment or (``order``: their places in the recording) a
+    jump in the recording starts a new line."""
     lines: list[list[str]] = []
     previous: AsrWord | None = None
-    for word in words:
+    for index, word in enumerate(words):
         new_line = (
-            previous is None or word.start - previous.end > LINE_GAP_S or word.segment != previous.segment
+            previous is None
+            or word.start - previous.end > LINE_GAP_S
+            or word.segment != previous.segment
+            or (order is not None and order[index] != order[index - 1] + 1)
         )
         if new_line:
             lines.append([])
@@ -197,17 +203,46 @@ def _lines(words: Sequence[AsrWord]) -> list[str]:
     return [join_tokens(line) for line in lines if line]
 
 
+def place_by_bars(
+    words: Sequence[AsrWord], timeline: Timeline, sections: Sequence[Section], mapping: Sequence[int | None]
+) -> tuple[list[list[int]], list[int]]:
+    """Words (indices) per final section when the final bars are source bars (``bar_match``): every word
+    goes wherever its bar went - into each copy of a copied section, nowhere for a deleted one (the
+    second list). The pickup rule of the transcription's own sections still holds: a phrase that starts
+    just before a section belongs to that section's first bar."""
+    bars = [timeline.bar_at(w.mid) for w in words]
+    if timeline.sections:
+        own = [Section(label, start, count, 0.0, 0.0, 0) for label, start, count in timeline.sections]
+        lookup = _section_of_bar(own)
+        for index, section in enumerate(place_on_grid(words, timeline.bar_starts, own)):
+            if bars[index] < len(lookup) and lookup[bars[index]] < section:
+                bars[index] = own[section].start_bar - 1
+    targets: dict[int, list[int]] = {}
+    for final, source in enumerate(mapping):
+        if source is not None:
+            targets.setdefault(source, []).append(final)
+    section_of = _section_of_bar(sections)
+    per_section: list[list[int]] = [[] for _ in sections]
+    if not section_of:
+        return per_section, list(range(len(words)))
+    for final, index in sorted((final, index) for index, bar in enumerate(bars) for final in targets.get(bar, [])):
+        per_section[section_of[min(final, len(section_of) - 1)]].append(index)
+    return per_section, [index for index, bar in enumerate(bars) if bar not in targets]
+
+
 def align(
     words: Sequence[AsrWord],
     sections: Sequence[Section],
     *,
     timeline: Timeline | None,
     score_meters: Sequence[str] = (),
+    score_prints: Sequence[bar_match.BarPrint] = (),
 ) -> Alignment:
     """The automatic lyrics draft: the final score's section tags with the sung words in them.
 
-    ``sections`` and ``score_meters`` describe the **final** score (after the user's edits), the
-    timeline the transcription it was made from.
+    ``sections``, ``score_meters`` and ``score_prints`` describe the **final** score (after the user's
+    edits), the timeline the transcription it was made from. When the timeline knows its bars' content
+    and the final score is arranged (sections copied, moved, deleted), the words follow their bars.
     """
     warnings: list[str] = []
     kept, dropped = drop_inventions(words, timeline)
@@ -219,6 +254,20 @@ def align(
     low = tuple(w for w in kept if w.p < LOW_CONFIDENCE)
     method: str
     placed: list[int]
+    mapping: list[int | None] | None = None
+    if timeline is not None and sections and timeline.bar_prints and score_prints:
+        mapping = bar_match.match_bars(score_prints, timeline.bar_prints)
+        if bar_match.is_identity(mapping, len(timeline.bars)):
+            mapping = None  # the transcription's own bars: the beat grid
+    if mapping is not None and timeline is not None:
+        method = "matched bars"
+        groups, lost = place_by_bars(kept, timeline, sections, mapping)
+        if lost:
+            warnings.append(
+                f"{len(lost)} word(s) of bars that are no longer in the score were left out: "
+                + repr(join_tokens([kept[i].word for i in lost][:24]))
+            )
+        return _draft(kept, groups, sections, method, dropped, low, warnings, jumps=True)
     if (
         timeline is not None
         and sections
@@ -250,11 +299,27 @@ def align(
         return Alignment(
             text, method, ({"tag": "[Verse]", "words": len(kept)},), tuple(dropped), low, tuple(warnings)
         )
+    groups = [[i for i, s in enumerate(placed) if s == index] for index in range(len(sections))]
+    return _draft(kept, groups, sections, method, dropped, low, warnings)
+
+
+def _draft(
+    kept: Sequence[AsrWord],
+    groups: Sequence[Sequence[int]],
+    sections: Sequence[Section],
+    method: str,
+    dropped: Sequence[AsrWord],
+    low: tuple[AsrWord, ...],
+    warnings: list[str],
+    *,
+    jumps: bool = False,
+) -> Alignment:
+    """The draft from the words (indices into ``kept``) of every section."""
     blocks: list[str] = []
     summary: list[dict[str, Any]] = []
     for index, section in enumerate(sections):
-        section_words = [w for w, s in zip(kept, placed, strict=True) if s == index]
-        lines = _lines(section_words)
+        section_words = [kept[i] for i in groups[index]]
+        lines = _lines(section_words, list(groups[index]) if jumps else None)
         blocks.append("\n".join([section.tag, *lines]))
         summary.append(
             {
