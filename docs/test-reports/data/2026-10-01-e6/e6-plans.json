@@ -1,0 +1,3294 @@
+[
+ {
+  "style": "psytrance",
+  "form": "bare",
+  "seed": 1,
+  "truncated": true,
+  "plan_seconds": 83.3,
+  "planned": {
+   "valid": true,
+   "seconds": 405.9,
+   "sections": [
+    [
+     "intro",
+     406
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 296,
+   "distinct_bars": 9,
+   "distinct_ratio": 0.03,
+   "pitches": 8,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 181.0,
+   "sections": [
+    [
+     "intro",
+     181
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 132,
+   "distinct_bars": 9,
+   "distinct_ratio": 0.068,
+   "pitches": 8,
+   "chords": 1
+  }
+ },
+ {
+  "style": "psytrance",
+  "form": "bare",
+  "seed": 2,
+  "truncated": true,
+  "plan_seconds": 62.8,
+  "planned": {
+   "valid": true,
+   "seconds": 508.2,
+   "sections": [
+    [
+     "intro",
+     45
+    ],
+    [
+     "interlude",
+     237
+    ],
+    [
+     "verse",
+     34
+    ],
+    [
+     "interlude",
+     192
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 360,
+   "distinct_bars": 23,
+   "distinct_ratio": 0.064,
+   "pitches": 6,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 180.7,
+   "sections": [
+    [
+     "intro",
+     45
+    ],
+    [
+     "interlude",
+     124
+    ],
+    [
+     "interlude",
+     11
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 128,
+   "distinct_bars": 23,
+   "distinct_ratio": 0.18,
+   "pitches": 6,
+   "chords": 1
+  }
+ },
+ {
+  "style": "psytrance",
+  "form": "plenio",
+  "seed": 1,
+  "truncated": true,
+  "plan_seconds": 62.9,
+  "planned": {
+   "valid": true,
+   "seconds": 493.7,
+   "sections": [
+    [
+     "intro",
+     44
+    ],
+    [
+     "interlude",
+     450
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 360,
+   "distinct_bars": 12,
+   "distinct_ratio": 0.033,
+   "pitches": 5,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 181.0,
+   "sections": [
+    [
+     "intro",
+     44
+    ],
+    [
+     "interlude",
+     137
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 132,
+   "distinct_bars": 12,
+   "distinct_ratio": 0.091,
+   "pitches": 5,
+   "chords": 1
+  }
+ },
+ {
+  "style": "psytrance",
+  "form": "plenio",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 43.2,
+  "planned": {
+   "valid": true,
+   "seconds": 421.7,
+   "sections": [
+    [
+     "intro",
+     55
+    ],
+    [
+     "verse",
+     14
+    ],
+    [
+     "interlude",
+     353
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 246,
+   "distinct_bars": 37,
+   "distinct_ratio": 0.15,
+   "pitches": 9,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 181.7,
+   "sections": [
+    [
+     "intro",
+     55
+    ],
+    [
+     "verse",
+     14
+    ],
+    [
+     "interlude",
+     113
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 106,
+   "distinct_bars": 31,
+   "distinct_ratio": 0.292,
+   "pitches": 9,
+   "chords": 1
+  }
+ },
+ {
+  "style": "psytrance",
+  "form": "upstream",
+  "seed": 1,
+  "truncated": true,
+  "plan_seconds": 63.8,
+  "planned": {
+   "valid": true,
+   "seconds": 488.2,
+   "sections": [
+    [
+     "intro",
+     77
+    ],
+    [
+     "interlude",
+     411
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 356,
+   "distinct_bars": 15,
+   "distinct_ratio": 0.042,
+   "pitches": 8,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 181.0,
+   "sections": [
+    [
+     "intro",
+     77
+    ],
+    [
+     "interlude",
+     104
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 132,
+   "distinct_bars": 15,
+   "distinct_ratio": 0.114,
+   "pitches": 8,
+   "chords": 1
+  }
+ },
+ {
+  "style": "psytrance",
+  "form": "upstream",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 32.6,
+  "planned": {
+   "valid": true,
+   "seconds": 286.6,
+   "sections": [
+    [
+     "intro",
+     45
+    ],
+    [
+     "interlude",
+     147
+    ],
+    [
+     "interlude",
+     68
+    ],
+    [
+     "outro",
+     27
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 203,
+   "distinct_bars": 22,
+   "distinct_ratio": 0.108,
+   "pitches": 5,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 179.3,
+   "sections": [
+    [
+     "intro",
+     45
+    ],
+    [
+     "interlude",
+     107
+    ],
+    [
+     "outro",
+     27
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 127,
+   "distinct_bars": 22,
+   "distinct_ratio": 0.173,
+   "pitches": 5,
+   "chords": 1
+  }
+ },
+ {
+  "style": "psytrance",
+  "form": "inst-labels",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 50.9,
+  "planned": {
+   "valid": true,
+   "seconds": 438.9,
+   "sections": [
+    [
+     "intro",
+     44
+    ],
+    [
+     "interlude",
+     395
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 320,
+   "distinct_bars": 31,
+   "distinct_ratio": 0.097,
+   "pitches": 9,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 181.0,
+   "sections": [
+    [
+     "intro",
+     44
+    ],
+    [
+     "interlude",
+     137
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 132,
+   "distinct_bars": 27,
+   "distinct_ratio": 0.205,
+   "pitches": 7,
+   "chords": 1
+  }
+ },
+ {
+  "style": "psytrance",
+  "form": "inst-labels",
+  "seed": 2,
+  "truncated": true,
+  "plan_seconds": 62.8,
+  "planned": {
+   "valid": true,
+   "seconds": 500.6,
+   "sections": [
+    [
+     "intro",
+     501
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 292,
+   "distinct_bars": 30,
+   "distinct_ratio": 0.103,
+   "pitches": 8,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 178.3,
+   "sections": [
+    [
+     "intro",
+     178
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 104,
+   "distinct_bars": 30,
+   "distinct_ratio": 0.288,
+   "pitches": 8,
+   "chords": 1
+  }
+ },
+ {
+  "style": "melodic-techno",
+  "form": "bare",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 43.4,
+  "planned": {
+   "valid": true,
+   "seconds": 397.5,
+   "sections": [
+    [
+     "intro",
+     49
+    ],
+    [
+     "verse",
+     60
+    ],
+    [
+     "interlude",
+     180
+    ],
+    [
+     "chorus",
+     30
+    ],
+    [
+     "interlude",
+     79
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 212,
+   "distinct_bars": 34,
+   "distinct_ratio": 0.16,
+   "pitches": 8,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 180.0,
+   "sections": [
+    [
+     "intro",
+     49
+    ],
+    [
+     "verse",
+     60
+    ],
+    [
+     "interlude",
+     60
+    ],
+    [
+     "interlude",
+     11
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 96,
+   "distinct_bars": 24,
+   "distinct_ratio": 0.25,
+   "pitches": 8,
+   "chords": 3
+  }
+ },
+ {
+  "style": "melodic-techno",
+  "form": "bare",
+  "seed": 2,
+  "truncated": true,
+  "plan_seconds": 62.6,
+  "planned": {
+   "valid": true,
+   "seconds": 491.2,
+   "sections": [
+    [
+     "intro",
+     64
+    ],
+    [
+     "interlude",
+     428
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 262,
+   "distinct_bars": 44,
+   "distinct_ratio": 0.168,
+   "pitches": 5,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 183.8,
+   "sections": [
+    [
+     "intro",
+     64
+    ],
+    [
+     "interlude",
+     120
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 98,
+   "distinct_bars": 44,
+   "distinct_ratio": 0.449,
+   "pitches": 5,
+   "chords": 1
+  }
+ },
+ {
+  "style": "melodic-techno",
+  "form": "plenio",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 30.2,
+  "planned": {
+   "valid": true,
+   "seconds": 322.5,
+   "sections": [
+    [
+     "intro",
+     49
+    ],
+    [
+     "interlude",
+     274
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 172,
+   "distinct_bars": 15,
+   "distinct_ratio": 0.087,
+   "pitches": 5,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 180.0,
+   "sections": [
+    [
+     "intro",
+     49
+    ],
+    [
+     "interlude",
+     131
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 96,
+   "distinct_bars": 15,
+   "distinct_ratio": 0.156,
+   "pitches": 5,
+   "chords": 3
+  }
+ },
+ {
+  "style": "melodic-techno",
+  "form": "plenio",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 37.0,
+  "planned": {
+   "valid": true,
+   "seconds": 335.6,
+   "sections": [
+    [
+     "intro",
+     90
+    ],
+    [
+     "interlude",
+     30
+    ],
+    [
+     "verse",
+     30
+    ],
+    [
+     "interlude",
+     75
+    ],
+    [
+     "verse",
+     30
+    ],
+    [
+     "interlude",
+     60
+    ],
+    [
+     "outro",
+     21
+    ]
+   ],
+   "vocal_notes": 33,
+   "bars": 179,
+   "distinct_bars": 45,
+   "distinct_ratio": 0.251,
+   "pitches": 15,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 170.6,
+   "sections": [
+    [
+     "intro",
+     90
+    ],
+    [
+     "interlude",
+     30
+    ],
+    [
+     "verse",
+     30
+    ],
+    [
+     "outro",
+     21
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 91,
+   "distinct_bars": 38,
+   "distinct_ratio": 0.418,
+   "pitches": 15,
+   "chords": 3
+  }
+ },
+ {
+  "style": "melodic-techno",
+  "form": "upstream",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 39.4,
+  "planned": {
+   "valid": true,
+   "seconds": 470.6,
+   "sections": [
+    [
+     "intro",
+     75
+    ],
+    [
+     "interlude",
+     315
+    ],
+    [
+     "outro",
+     81
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 251,
+   "distinct_bars": 35,
+   "distinct_ratio": 0.139,
+   "pitches": 6,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 155.6,
+   "sections": [
+    [
+     "intro",
+     75
+    ],
+    [
+     "outro",
+     81
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 83,
+   "distinct_bars": 31,
+   "distinct_ratio": 0.373,
+   "pitches": 6,
+   "chords": 1
+  }
+ },
+ {
+  "style": "melodic-techno",
+  "form": "upstream",
+  "seed": 2,
+  "truncated": true,
+  "plan_seconds": 62.6,
+  "planned": {
+   "valid": true,
+   "seconds": 472.5,
+   "sections": [
+    [
+     "intro",
+     472
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 252,
+   "distinct_bars": 51,
+   "distinct_ratio": 0.202,
+   "pitches": 5,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 180.0,
+   "sections": [
+    [
+     "intro",
+     180
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 96,
+   "distinct_bars": 41,
+   "distinct_ratio": 0.427,
+   "pitches": 5,
+   "chords": 1
+  }
+ },
+ {
+  "style": "melodic-techno",
+  "form": "inst-labels",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 9.3,
+  "planned": {
+   "valid": true,
+   "seconds": 101.2,
+   "sections": [
+    [
+     "intro",
+     64
+    ],
+    [
+     "verse",
+     38
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 54,
+   "distinct_bars": 18,
+   "distinct_ratio": 0.333,
+   "pitches": 6,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 176.2,
+   "sections": [
+    [
+     "intro",
+     64
+    ],
+    [
+     "verse",
+     38
+    ],
+    [
+     "verse",
+     38
+    ],
+    [
+     "verse",
+     38
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 94,
+   "distinct_bars": 18,
+   "distinct_ratio": 0.191,
+   "pitches": 6,
+   "chords": 3
+  }
+ },
+ {
+  "style": "melodic-techno",
+  "form": "inst-labels",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 29.2,
+  "planned": {
+   "valid": true,
+   "seconds": 296.2,
+   "sections": [
+    [
+     "intro",
+     98
+    ],
+    [
+     "interlude",
+     199
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 158,
+   "distinct_bars": 54,
+   "distinct_ratio": 0.342,
+   "pitches": 6,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 183.8,
+   "sections": [
+    [
+     "intro",
+     98
+    ],
+    [
+     "interlude",
+     86
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 98,
+   "distinct_bars": 52,
+   "distinct_ratio": 0.531,
+   "pitches": 6,
+   "chords": 1
+  }
+ },
+ {
+  "style": "downtempo",
+  "form": "bare",
+  "seed": 1,
+  "truncated": true,
+  "plan_seconds": 63.9,
+  "planned": {
+   "valid": true,
+   "seconds": 940.2,
+   "sections": [
+    [
+     "intro",
+     71
+    ],
+    [
+     "interlude",
+     870
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 333,
+   "distinct_bars": 17,
+   "distinct_ratio": 0.051,
+   "pitches": 17,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 183.5,
+   "sections": [
+    [
+     "intro",
+     71
+    ],
+    [
+     "interlude",
+     113
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 65,
+   "distinct_bars": 17,
+   "distinct_ratio": 0.262,
+   "pitches": 17,
+   "chords": 1
+  }
+ },
+ {
+  "style": "downtempo",
+  "form": "bare",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 14.3,
+  "planned": {
+   "valid": true,
+   "seconds": 237.2,
+   "sections": [
+    [
+     "intro",
+     127
+    ],
+    [
+     "interlude",
+     110
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 86,
+   "distinct_bars": 45,
+   "distinct_ratio": 0.523,
+   "pitches": 13,
+   "chords": 2
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 182.1,
+   "sections": [
+    [
+     "intro",
+     127
+    ],
+    [
+     "interlude",
+     55
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 66,
+   "distinct_bars": 44,
+   "distinct_ratio": 0.667,
+   "pitches": 13,
+   "chords": 2
+  }
+ },
+ {
+  "style": "downtempo",
+  "form": "plenio",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 13.4,
+  "planned": {
+   "valid": true,
+   "seconds": 228.7,
+   "sections": [
+    [
+     "intro",
+     113
+    ],
+    [
+     "interlude",
+     116
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 81,
+   "distinct_bars": 14,
+   "distinct_ratio": 0.173,
+   "pitches": 13,
+   "chords": 2
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 183.5,
+   "sections": [
+    [
+     "intro",
+     113
+    ],
+    [
+     "interlude",
+     71
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 65,
+   "distinct_bars": 14,
+   "distinct_ratio": 0.215,
+   "pitches": 13,
+   "chords": 2
+  }
+ },
+ {
+  "style": "downtempo",
+  "form": "plenio",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 16.5,
+  "planned": {
+   "valid": true,
+   "seconds": 234.5,
+   "sections": [
+    [
+     "intro",
+     52
+    ],
+    [
+     "interlude",
+     22
+    ],
+    [
+     "chorus",
+     22
+    ],
+    [
+     "interlude",
+     22
+    ],
+    [
+     "chorus",
+     22
+    ],
+    [
+     "interlude",
+     44
+    ],
+    [
+     "chorus",
+     50
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 85,
+   "distinct_bars": 23,
+   "distinct_ratio": 0.271,
+   "pitches": 20,
+   "chords": 2
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 190.3,
+   "sections": [
+    [
+     "intro",
+     52
+    ],
+    [
+     "interlude",
+     22
+    ],
+    [
+     "chorus",
+     22
+    ],
+    [
+     "interlude",
+     22
+    ],
+    [
+     "chorus",
+     22
+    ],
+    [
+     "chorus",
+     50
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 69,
+   "distinct_bars": 20,
+   "distinct_ratio": 0.29,
+   "pitches": 20,
+   "chords": 2
+  }
+ },
+ {
+  "style": "downtempo",
+  "form": "upstream",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 12.2,
+  "planned": {
+   "valid": true,
+   "seconds": 254.1,
+   "sections": [
+    [
+     "intro",
+     254
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 90,
+   "distinct_bars": 9,
+   "distinct_ratio": 0.1,
+   "pitches": 8,
+   "chords": 2
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 175.1,
+   "sections": [
+    [
+     "intro",
+     175
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 62,
+   "distinct_bars": 9,
+   "distinct_ratio": 0.145,
+   "pitches": 8,
+   "chords": 2
+  }
+ },
+ {
+  "style": "downtempo",
+  "form": "upstream",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 11.4,
+  "planned": {
+   "valid": true,
+   "seconds": 184.8,
+   "sections": [
+    [
+     "intro",
+     47
+    ],
+    [
+     "interlude",
+     138
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 67,
+   "distinct_bars": 33,
+   "distinct_ratio": 0.493,
+   "pitches": 17,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 184.8,
+   "sections": [
+    [
+     "intro",
+     47
+    ],
+    [
+     "interlude",
+     138
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 67,
+   "distinct_bars": 33,
+   "distinct_ratio": 0.493,
+   "pitches": 17,
+   "chords": 3
+  }
+ },
+ {
+  "style": "downtempo",
+  "form": "inst-labels",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 8.8,
+  "planned": {
+   "valid": true,
+   "seconds": 172.2,
+   "sections": [
+    [
+     "intro",
+     71
+    ],
+    [
+     "interlude",
+     102
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 61,
+   "distinct_bars": 12,
+   "distinct_ratio": 0.197,
+   "pitches": 12,
+   "chords": 2
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 172.2,
+   "sections": [
+    [
+     "intro",
+     71
+    ],
+    [
+     "interlude",
+     102
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 61,
+   "distinct_bars": 12,
+   "distinct_ratio": 0.197,
+   "pitches": 12,
+   "chords": 2
+  }
+ },
+ {
+  "style": "downtempo",
+  "form": "inst-labels",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 14.7,
+  "planned": {
+   "valid": true,
+   "seconds": 259.3,
+   "sections": [
+    [
+     "intro",
+     72
+    ],
+    [
+     "interlude",
+     22
+    ],
+    [
+     "chorus",
+     22
+    ],
+    [
+     "interlude",
+     143
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 94,
+   "distinct_bars": 37,
+   "distinct_ratio": 0.394,
+   "pitches": 13,
+   "chords": 2
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 182.1,
+   "sections": [
+    [
+     "intro",
+     72
+    ],
+    [
+     "interlude",
+     22
+    ],
+    [
+     "chorus",
+     22
+    ],
+    [
+     "interlude",
+     66
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 66,
+   "distinct_bars": 32,
+   "distinct_ratio": 0.485,
+   "pitches": 13,
+   "chords": 2
+  }
+ },
+ {
+  "style": "dnb",
+  "form": "bare",
+  "seed": 1,
+  "truncated": true,
+  "plan_seconds": 63.6,
+  "planned": {
+   "valid": true,
+   "seconds": 318.2,
+   "sections": [
+    [
+     "intro",
+     181
+    ],
+    [
+     "interlude",
+     22
+    ],
+    [
+     "verse",
+     88
+    ],
+    [
+     "chorus",
+     22
+    ],
+    [
+     "outro",
+     5
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 232,
+   "distinct_bars": 7,
+   "distinct_ratio": 0.03,
+   "pitches": 8,
+   "chords": 4
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 181.0,
+   "sections": [
+    [
+     "intro",
+     176
+    ],
+    [
+     "outro",
+     5
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 132,
+   "distinct_bars": 6,
+   "distinct_ratio": 0.045,
+   "pitches": 8,
+   "chords": 3
+  }
+ },
+ {
+  "style": "dnb",
+  "form": "bare",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 37.2,
+  "planned": {
+   "valid": true,
+   "seconds": 299.0,
+   "sections": [
+    [
+     "intro",
+     55
+    ],
+    [
+     "interlude",
+     219
+    ],
+    [
+     "outro",
+     25
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 218,
+   "distinct_bars": 15,
+   "distinct_ratio": 0.069,
+   "pitches": 5,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 178.3,
+   "sections": [
+    [
+     "intro",
+     55
+    ],
+    [
+     "interlude",
+     99
+    ],
+    [
+     "outro",
+     25
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 130,
+   "distinct_bars": 15,
+   "distinct_ratio": 0.115,
+   "pitches": 5,
+   "chords": 3
+  }
+ },
+ {
+  "style": "dnb",
+  "form": "plenio",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 41.9,
+  "planned": {
+   "valid": true,
+   "seconds": 294.9,
+   "sections": [
+    [
+     "intro",
+     22
+    ],
+    [
+     "verse",
+     25
+    ],
+    [
+     "interlude",
+     22
+    ],
+    [
+     "chorus",
+     22
+    ],
+    [
+     "interlude",
+     47
+    ],
+    [
+     "verse",
+     69
+    ],
+    [
+     "chorus",
+     44
+    ],
+    [
+     "outro",
+     45
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 215,
+   "distinct_bars": 15,
+   "distinct_ratio": 0.07,
+   "pitches": 7,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 182.4,
+   "sections": [
+    [
+     "intro",
+     22
+    ],
+    [
+     "verse",
+     25
+    ],
+    [
+     "interlude",
+     22
+    ],
+    [
+     "chorus",
+     22
+    ],
+    [
+     "interlude",
+     47
+    ],
+    [
+     "outro",
+     45
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 133,
+   "distinct_bars": 15,
+   "distinct_ratio": 0.113,
+   "pitches": 7,
+   "chords": 3
+  }
+ },
+ {
+  "style": "dnb",
+  "form": "plenio",
+  "seed": 2,
+  "truncated": true,
+  "plan_seconds": 62.7,
+  "planned": {
+   "valid": true,
+   "seconds": 389.5,
+   "sections": [
+    [
+     "intro",
+     44
+    ],
+    [
+     "interlude",
+     346
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 284,
+   "distinct_bars": 4,
+   "distinct_ratio": 0.014,
+   "pitches": 4,
+   "chords": 4
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 181.0,
+   "sections": [
+    [
+     "intro",
+     44
+    ],
+    [
+     "interlude",
+     137
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 132,
+   "distinct_bars": 4,
+   "distinct_ratio": 0.03,
+   "pitches": 4,
+   "chords": 4
+  }
+ },
+ {
+  "style": "dnb",
+  "form": "upstream",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 43.1,
+  "planned": {
+   "valid": true,
+   "seconds": 331.9,
+   "sections": [
+    [
+     "intro",
+     22
+    ],
+    [
+     "verse",
+     44
+    ],
+    [
+     "interlude",
+     66
+    ],
+    [
+     "verse",
+     44
+    ],
+    [
+     "interlude",
+     88
+    ],
+    [
+     "verse",
+     22
+    ],
+    [
+     "chorus",
+     47
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 242,
+   "distinct_bars": 15,
+   "distinct_ratio": 0.062,
+   "pitches": 10,
+   "chords": 4
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 178.3,
+   "sections": [
+    [
+     "intro",
+     22
+    ],
+    [
+     "verse",
+     44
+    ],
+    [
+     "interlude",
+     66
+    ],
+    [
+     "chorus",
+     47
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 130,
+   "distinct_bars": 15,
+   "distinct_ratio": 0.115,
+   "pitches": 10,
+   "chords": 4
+  }
+ },
+ {
+  "style": "dnb",
+  "form": "upstream",
+  "seed": 2,
+  "truncated": true,
+  "plan_seconds": 62.6,
+  "planned": {
+   "valid": true,
+   "seconds": 378.5,
+   "sections": [
+    [
+     "intro",
+     44
+    ],
+    [
+     "interlude",
+     335
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 276,
+   "distinct_bars": 3,
+   "distinct_ratio": 0.011,
+   "pitches": 5,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 181.0,
+   "sections": [
+    [
+     "intro",
+     44
+    ],
+    [
+     "interlude",
+     137
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 132,
+   "distinct_bars": 3,
+   "distinct_ratio": 0.023,
+   "pitches": 5,
+   "chords": 3
+  }
+ },
+ {
+  "style": "dnb",
+  "form": "inst-labels",
+  "seed": 1,
+  "truncated": true,
+  "plan_seconds": 62.7,
+  "planned": {
+   "valid": true,
+   "seconds": 510.2,
+   "sections": [
+    [
+     "intro",
+     22
+    ],
+    [
+     "verse",
+     44
+    ],
+    [
+     "chorus",
+     22
+    ],
+    [
+     "interlude",
+     22
+    ],
+    [
+     "chorus",
+     22
+    ],
+    [
+     "interlude",
+     66
+    ],
+    [
+     "chorus",
+     22
+    ],
+    [
+     "interlude",
+     291
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 372,
+   "distinct_bars": 10,
+   "distinct_ratio": 0.027,
+   "pitches": 7,
+   "chords": 4
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 181.0,
+   "sections": [
+    [
+     "intro",
+     22
+    ],
+    [
+     "verse",
+     44
+    ],
+    [
+     "chorus",
+     22
+    ],
+    [
+     "interlude",
+     22
+    ],
+    [
+     "chorus",
+     22
+    ],
+    [
+     "interlude",
+     38
+    ],
+    [
+     "interlude",
+     11
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 132,
+   "distinct_bars": 10,
+   "distinct_ratio": 0.076,
+   "pitches": 7,
+   "chords": 4
+  }
+ },
+ {
+  "style": "dnb",
+  "form": "inst-labels",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 58.5,
+  "planned": {
+   "valid": true,
+   "seconds": 463.5,
+   "sections": [
+    [
+     "intro",
+     55
+    ],
+    [
+     "interlude",
+     132
+    ],
+    [
+     "verse",
+     22
+    ],
+    [
+     "interlude",
+     230
+    ],
+    [
+     "outro",
+     25
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 338,
+   "distinct_bars": 16,
+   "distinct_ratio": 0.047,
+   "pitches": 5,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 178.3,
+   "sections": [
+    [
+     "intro",
+     55
+    ],
+    [
+     "interlude",
+     99
+    ],
+    [
+     "outro",
+     25
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 130,
+   "distinct_bars": 16,
+   "distinct_ratio": 0.123,
+   "pitches": 5,
+   "chords": 3
+  }
+ },
+ {
+  "style": "string-quartet",
+  "form": "bare",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 9.9,
+  "planned": {
+   "valid": true,
+   "seconds": 112.0,
+   "sections": [
+    [
+     "intro",
+     39
+    ],
+    [
+     "interlude",
+     73
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 49,
+   "distinct_bars": 21,
+   "distinct_ratio": 0.429,
+   "pitches": 14,
+   "chords": 4
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 185.1,
+   "sections": [
+    [
+     "intro",
+     39
+    ],
+    [
+     "interlude",
+     73
+    ],
+    [
+     "interlude",
+     73
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 81,
+   "distinct_bars": 21,
+   "distinct_ratio": 0.259,
+   "pitches": 14,
+   "chords": 4
+  }
+ },
+ {
+  "style": "string-quartet",
+  "form": "bare",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 6.0,
+  "planned": {
+   "valid": true,
+   "seconds": 83.0,
+   "sections": [
+    [
+     "intro",
+     43
+    ],
+    [
+     "interlude",
+     40
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 37,
+   "distinct_bars": 25,
+   "distinct_ratio": 0.676,
+   "pitches": 20,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 163.7,
+   "sections": [
+    [
+     "intro",
+     43
+    ],
+    [
+     "interlude",
+     40
+    ],
+    [
+     "interlude",
+     40
+    ],
+    [
+     "interlude",
+     40
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 73,
+   "distinct_bars": 25,
+   "distinct_ratio": 0.342,
+   "pitches": 20,
+   "chords": 3
+  }
+ },
+ {
+  "style": "string-quartet",
+  "form": "plenio",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 7.7,
+  "planned": {
+   "valid": true,
+   "seconds": 98.3,
+   "sections": [
+    [
+     "intro",
+     55
+    ],
+    [
+     "interlude",
+     34
+    ],
+    [
+     "outro",
+     9
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 43,
+   "distinct_bars": 29,
+   "distinct_ratio": 0.674,
+   "pitches": 20,
+   "chords": 6
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 166.9,
+   "sections": [
+    [
+     "intro",
+     55
+    ],
+    [
+     "interlude",
+     34
+    ],
+    [
+     "interlude",
+     34
+    ],
+    [
+     "interlude",
+     34
+    ],
+    [
+     "outro",
+     9
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 73,
+   "distinct_bars": 29,
+   "distinct_ratio": 0.397,
+   "pitches": 20,
+   "chords": 6
+  }
+ },
+ {
+  "style": "string-quartet",
+  "form": "plenio",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 6.8,
+  "planned": {
+   "valid": true,
+   "seconds": 92.0,
+   "sections": [
+    [
+     "intro",
+     56
+    ],
+    [
+     "interlude",
+     36
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 41,
+   "distinct_bars": 31,
+   "distinct_ratio": 0.756,
+   "pitches": 25,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 163.7,
+   "sections": [
+    [
+     "intro",
+     56
+    ],
+    [
+     "interlude",
+     36
+    ],
+    [
+     "interlude",
+     36
+    ],
+    [
+     "interlude",
+     36
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 73,
+   "distinct_bars": 31,
+   "distinct_ratio": 0.425,
+   "pitches": 25,
+   "chords": 3
+  }
+ },
+ {
+  "style": "string-quartet",
+  "form": "upstream",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 3.8,
+  "planned": {
+   "valid": true,
+   "seconds": 48.0,
+   "sections": [
+    [
+     "intro",
+     48
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 21,
+   "distinct_bars": 18,
+   "distinct_ratio": 0.857,
+   "pitches": 13,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 48.0,
+   "sections": [
+    [
+     "intro",
+     48
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 21,
+   "distinct_bars": 18,
+   "distinct_ratio": 0.857,
+   "pitches": 13,
+   "chords": 3
+  }
+ },
+ {
+  "style": "string-quartet",
+  "form": "upstream",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 16.5,
+  "planned": {
+   "valid": true,
+   "seconds": 282.6,
+   "sections": [
+    [
+     "intro",
+     43
+    ],
+    [
+     "interlude",
+     215
+    ],
+    [
+     "outro",
+     25
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 126,
+   "distinct_bars": 24,
+   "distinct_ratio": 0.19,
+   "pitches": 22,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 183.9,
+   "sections": [
+    [
+     "intro",
+     43
+    ],
+    [
+     "interlude",
+     117
+    ],
+    [
+     "outro",
+     25
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 82,
+   "distinct_bars": 24,
+   "distinct_ratio": 0.293,
+   "pitches": 22,
+   "chords": 3
+  }
+ },
+ {
+  "style": "string-quartet",
+  "form": "inst-labels",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 11.2,
+  "planned": {
+   "valid": true,
+   "seconds": 166.9,
+   "sections": [
+    [
+     "intro",
+     62
+    ],
+    [
+     "interlude",
+     105
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 73,
+   "distinct_bars": 22,
+   "distinct_ratio": 0.301,
+   "pitches": 10,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 166.9,
+   "sections": [
+    [
+     "intro",
+     62
+    ],
+    [
+     "interlude",
+     105
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 73,
+   "distinct_bars": 22,
+   "distinct_ratio": 0.301,
+   "pitches": 10,
+   "chords": 3
+  }
+ },
+ {
+  "style": "string-quartet",
+  "form": "inst-labels",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 16.6,
+  "planned": {
+   "valid": true,
+   "seconds": 280.4,
+   "sections": [
+    [
+     "intro",
+     43
+    ],
+    [
+     "interlude",
+     215
+    ],
+    [
+     "outro",
+     22
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 125,
+   "distinct_bars": 25,
+   "distinct_ratio": 0.2,
+   "pitches": 22,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 181.7,
+   "sections": [
+    [
+     "intro",
+     43
+    ],
+    [
+     "interlude",
+     117
+    ],
+    [
+     "outro",
+     22
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 81,
+   "distinct_bars": 25,
+   "distinct_ratio": 0.309,
+   "pitches": 22,
+   "chords": 3
+  }
+ },
+ {
+  "style": "psytrance",
+  "form": "plenio+lora",
+  "seed": 1,
+  "truncated": true,
+  "plan_seconds": 65.2,
+  "planned": {
+   "valid": true,
+   "seconds": 444.3,
+   "sections": [
+    [
+     "intro",
+     55
+    ],
+    [
+     "interlude",
+     389
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 324,
+   "distinct_bars": 16,
+   "distinct_ratio": 0.049,
+   "pitches": 17,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 181.0,
+   "sections": [
+    [
+     "intro",
+     55
+    ],
+    [
+     "interlude",
+     126
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 132,
+   "distinct_bars": 16,
+   "distinct_ratio": 0.121,
+   "pitches": 17,
+   "chords": 1
+  }
+ },
+ {
+  "style": "psytrance",
+  "form": "plenio+lora",
+  "seed": 2,
+  "truncated": true,
+  "plan_seconds": 62.8,
+  "planned": {
+   "valid": true,
+   "seconds": 660.7,
+   "sections": [
+    [
+     "intro",
+     40
+    ],
+    [
+     "interlude",
+     621
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 468,
+   "distinct_bars": 12,
+   "distinct_ratio": 0.026,
+   "pitches": 9,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 180.7,
+   "sections": [
+    [
+     "intro",
+     40
+    ],
+    [
+     "interlude",
+     141
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 128,
+   "distinct_bars": 12,
+   "distinct_ratio": 0.094,
+   "pitches": 9,
+   "chords": 1
+  }
+ },
+ {
+  "style": "psytrance",
+  "form": "bare+lora",
+  "seed": 1,
+  "truncated": true,
+  "plan_seconds": 62.6,
+  "planned": {
+   "valid": true,
+   "seconds": 504.7,
+   "sections": [
+    [
+     "intro",
+     27
+    ],
+    [
+     "interlude",
+     11
+    ],
+    [
+     "chorus",
+     22
+    ],
+    [
+     "interlude",
+     444
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 368,
+   "distinct_bars": 18,
+   "distinct_ratio": 0.049,
+   "pitches": 14,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 181.0,
+   "sections": [
+    [
+     "intro",
+     27
+    ],
+    [
+     "interlude",
+     11
+    ],
+    [
+     "chorus",
+     22
+    ],
+    [
+     "interlude",
+     121
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 132,
+   "distinct_bars": 18,
+   "distinct_ratio": 0.136,
+   "pitches": 14,
+   "chords": 3
+  }
+ },
+ {
+  "style": "psytrance",
+  "form": "bare+lora",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 49.2,
+  "planned": {
+   "valid": true,
+   "seconds": 406.6,
+   "sections": [
+    [
+     "intro",
+     40
+    ],
+    [
+     "interlude",
+     367
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 288,
+   "distinct_bars": 11,
+   "distinct_ratio": 0.038,
+   "pitches": 9,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 180.7,
+   "sections": [
+    [
+     "intro",
+     40
+    ],
+    [
+     "interlude",
+     141
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 128,
+   "distinct_bars": 11,
+   "distinct_ratio": 0.086,
+   "pitches": 9,
+   "chords": 1
+  }
+ },
+ {
+  "style": "melodic-techno",
+  "form": "plenio+lora",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 26.2,
+  "planned": {
+   "valid": true,
+   "seconds": 269.1,
+   "sections": [
+    [
+     "intro",
+     29
+    ],
+    [
+     "verse",
+     58
+    ],
+    [
+     "interlude",
+     145
+    ],
+    [
+     "outro",
+     36
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 148,
+   "distinct_bars": 34,
+   "distinct_ratio": 0.23,
+   "pitches": 8,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 181.8,
+   "sections": [
+    [
+     "intro",
+     29
+    ],
+    [
+     "verse",
+     58
+    ],
+    [
+     "interlude",
+     58
+    ],
+    [
+     "outro",
+     36
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 100,
+   "distinct_bars": 34,
+   "distinct_ratio": 0.34,
+   "pitches": 8,
+   "chords": 3
+  }
+ },
+ {
+  "style": "melodic-techno",
+  "form": "plenio+lora",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 27.7,
+  "planned": {
+   "valid": true,
+   "seconds": 294.4,
+   "sections": [
+    [
+     "intro",
+     69
+    ],
+    [
+     "interlude",
+     225
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 157,
+   "distinct_bars": 71,
+   "distinct_ratio": 0.452,
+   "pitches": 18,
+   "chords": 4
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 181.9,
+   "sections": [
+    [
+     "intro",
+     69
+    ],
+    [
+     "interlude",
+     112
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 97,
+   "distinct_bars": 57,
+   "distinct_ratio": 0.588,
+   "pitches": 18,
+   "chords": 4
+  }
+ },
+ {
+  "style": "melodic-techno",
+  "form": "bare+lora",
+  "seed": 1,
+  "truncated": true,
+  "plan_seconds": 62.5,
+  "planned": {
+   "valid": true,
+   "seconds": 574.5,
+   "sections": [
+    [
+     "intro",
+     36
+    ],
+    [
+     "interlude",
+     538
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 316,
+   "distinct_bars": 8,
+   "distinct_ratio": 0.025,
+   "pitches": 8,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 181.8,
+   "sections": [
+    [
+     "intro",
+     36
+    ],
+    [
+     "interlude",
+     145
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 100,
+   "distinct_bars": 8,
+   "distinct_ratio": 0.08,
+   "pitches": 8,
+   "chords": 3
+  }
+ },
+ {
+  "style": "melodic-techno",
+  "form": "bare+lora",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 41.5,
+  "planned": {
+   "valid": true,
+   "seconds": 264.4,
+   "sections": [
+    [
+     "intro",
+     47
+    ],
+    [
+     "interlude",
+     195
+    ],
+    [
+     "outro",
+     22
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 141,
+   "distinct_bars": 20,
+   "distinct_ratio": 0.142,
+   "pitches": 13,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 181.9,
+   "sections": [
+    [
+     "intro",
+     47
+    ],
+    [
+     "interlude",
+     112
+    ],
+    [
+     "outro",
+     22
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 97,
+   "distinct_bars": 20,
+   "distinct_ratio": 0.206,
+   "pitches": 13,
+   "chords": 3
+  }
+ },
+ {
+  "style": "downtempo",
+  "form": "plenio+lora",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 19.9,
+  "planned": {
+   "valid": true,
+   "seconds": 320.0,
+   "sections": [
+    [
+     "intro",
+     44
+    ],
+    [
+     "verse",
+     44
+    ],
+    [
+     "interlude",
+     232
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 116,
+   "distinct_bars": 35,
+   "distinct_ratio": 0.302,
+   "pitches": 7,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 176.6,
+   "sections": [
+    [
+     "intro",
+     44
+    ],
+    [
+     "verse",
+     44
+    ],
+    [
+     "interlude",
+     88
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 64,
+   "distinct_bars": 19,
+   "distinct_ratio": 0.297,
+   "pitches": 4,
+   "chords": 1
+  }
+ },
+ {
+  "style": "downtempo",
+  "form": "plenio+lora",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 35.3,
+  "planned": {
+   "valid": true,
+   "seconds": 750.3,
+   "sections": [
+    [
+     "intro",
+     47
+    ],
+    [
+     "interlude",
+     703
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 272,
+   "distinct_bars": 7,
+   "distinct_ratio": 0.026,
+   "pitches": 6,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 176.6,
+   "sections": [
+    [
+     "intro",
+     47
+    ],
+    [
+     "interlude",
+     130
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 64,
+   "distinct_bars": 7,
+   "distinct_ratio": 0.109,
+   "pitches": 6,
+   "chords": 3
+  }
+ },
+ {
+  "style": "downtempo",
+  "form": "bare+lora",
+  "seed": 1,
+  "truncated": true,
+  "plan_seconds": 62.5,
+  "planned": {
+   "valid": true,
+   "seconds": 2055.5,
+   "sections": [
+    [
+     "intro",
+     45
+    ],
+    [
+     "verse",
+     23
+    ],
+    [
+     "interlude",
+     1988
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 728,
+   "distinct_bars": 23,
+   "distinct_ratio": 0.032,
+   "pitches": 8,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 180.7,
+   "sections": [
+    [
+     "intro",
+     45
+    ],
+    [
+     "verse",
+     23
+    ],
+    [
+     "interlude",
+     113
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 64,
+   "distinct_bars": 22,
+   "distinct_ratio": 0.344,
+   "pitches": 8,
+   "chords": 1
+  }
+ },
+ {
+  "style": "downtempo",
+  "form": "bare+lora",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 34.0,
+  "planned": {
+   "valid": true,
+   "seconds": 521.7,
+   "sections": [
+    [
+     "intro",
+     522
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 189,
+   "distinct_bars": 46,
+   "distinct_ratio": 0.243,
+   "pitches": 26,
+   "chords": 1
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 179.7,
+   "sections": [
+    [
+     "intro",
+     180
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 65,
+   "distinct_bars": 40,
+   "distinct_ratio": 0.615,
+   "pitches": 25,
+   "chords": 1
+  }
+ },
+ {
+  "style": "dnb",
+  "form": "plenio+lora",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 34.3,
+  "planned": {
+   "valid": true,
+   "seconds": 326.4,
+   "sections": [
+    [
+     "intro",
+     33
+    ],
+    [
+     "verse",
+     22
+    ],
+    [
+     "interlude",
+     44
+    ],
+    [
+     "chorus",
+     66
+    ],
+    [
+     "interlude",
+     44
+    ],
+    [
+     "chorus",
+     22
+    ],
+    [
+     "interlude",
+     44
+    ],
+    [
+     "outro",
+     52
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 238,
+   "distinct_bars": 16,
+   "distinct_ratio": 0.067,
+   "pitches": 9,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 178.3,
+   "sections": [
+    [
+     "intro",
+     33
+    ],
+    [
+     "verse",
+     22
+    ],
+    [
+     "interlude",
+     44
+    ],
+    [
+     "chorus",
+     27
+    ],
+    [
+     "outro",
+     52
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 130,
+   "distinct_bars": 16,
+   "distinct_ratio": 0.123,
+   "pitches": 9,
+   "chords": 3
+  }
+ },
+ {
+  "style": "dnb",
+  "form": "plenio+lora",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 24.5,
+  "planned": {
+   "valid": true,
+   "seconds": 267.4,
+   "sections": [
+    [
+     "intro",
+     22
+    ],
+    [
+     "verse",
+     44
+    ],
+    [
+     "interlude",
+     88
+    ],
+    [
+     "chorus",
+     44
+    ],
+    [
+     "interlude",
+     22
+    ],
+    [
+     "outro",
+     48
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 195,
+   "distinct_bars": 25,
+   "distinct_ratio": 0.128,
+   "pitches": 7,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 179.7,
+   "sections": [
+    [
+     "intro",
+     22
+    ],
+    [
+     "verse",
+     44
+    ],
+    [
+     "interlude",
+     66
+    ],
+    [
+     "outro",
+     48
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 131,
+   "distinct_bars": 25,
+   "distinct_ratio": 0.191,
+   "pitches": 7,
+   "chords": 3
+  }
+ },
+ {
+  "style": "dnb",
+  "form": "bare+lora",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 21.3,
+  "planned": {
+   "valid": true,
+   "seconds": 216.7,
+   "sections": [
+    [
+     "intro",
+     44
+    ],
+    [
+     "interlude",
+     173
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 158,
+   "distinct_bars": 19,
+   "distinct_ratio": 0.12,
+   "pitches": 9,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 178.3,
+   "sections": [
+    [
+     "intro",
+     44
+    ],
+    [
+     "interlude",
+     134
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 130,
+   "distinct_bars": 19,
+   "distinct_ratio": 0.146,
+   "pitches": 9,
+   "chords": 3
+  }
+ },
+ {
+  "style": "dnb",
+  "form": "bare+lora",
+  "seed": 2,
+  "truncated": true,
+  "plan_seconds": 62.5,
+  "planned": {
+   "valid": true,
+   "seconds": 543.1,
+   "sections": [
+    [
+     "intro",
+     22
+    ],
+    [
+     "verse",
+     44
+    ],
+    [
+     "interlude",
+     477
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 396,
+   "distinct_bars": 16,
+   "distinct_ratio": 0.04,
+   "pitches": 4,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 181.0,
+   "sections": [
+    [
+     "intro",
+     22
+    ],
+    [
+     "verse",
+     44
+    ],
+    [
+     "interlude",
+     115
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 132,
+   "distinct_bars": 16,
+   "distinct_ratio": 0.121,
+   "pitches": 4,
+   "chords": 3
+  }
+ },
+ {
+  "style": "string-quartet",
+  "form": "plenio+lora",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 10.8,
+  "planned": {
+   "valid": true,
+   "seconds": 178.3,
+   "sections": [
+    [
+     "intro",
+     39
+    ],
+    [
+     "interlude",
+     110
+    ],
+    [
+     "outro",
+     30
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 78,
+   "distinct_bars": 11,
+   "distinct_ratio": 0.141,
+   "pitches": 13,
+   "chords": 4
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 178.3,
+   "sections": [
+    [
+     "intro",
+     39
+    ],
+    [
+     "interlude",
+     110
+    ],
+    [
+     "outro",
+     30
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 78,
+   "distinct_bars": 11,
+   "distinct_ratio": 0.141,
+   "pitches": 13,
+   "chords": 4
+  }
+ },
+ {
+  "style": "string-quartet",
+  "form": "plenio+lora",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 17.3,
+  "planned": {
+   "valid": true,
+   "seconds": 255.7,
+   "sections": [
+    [
+     "intro",
+     43
+    ],
+    [
+     "interlude",
+     40
+    ],
+    [
+     "verse",
+     40
+    ],
+    [
+     "interlude",
+     132
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 114,
+   "distinct_bars": 9,
+   "distinct_ratio": 0.079,
+   "pitches": 10,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 183.9,
+   "sections": [
+    [
+     "intro",
+     43
+    ],
+    [
+     "interlude",
+     40
+    ],
+    [
+     "verse",
+     40
+    ],
+    [
+     "interlude",
+     61
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 82,
+   "distinct_bars": 9,
+   "distinct_ratio": 0.11,
+   "pitches": 10,
+   "chords": 3
+  }
+ },
+ {
+  "style": "string-quartet",
+  "form": "bare+lora",
+  "seed": 1,
+  "truncated": false,
+  "plan_seconds": 15.1,
+  "planned": {
+   "valid": true,
+   "seconds": 262.2,
+   "sections": [
+    [
+     "intro",
+     38
+    ],
+    [
+     "verse",
+     36
+    ],
+    [
+     "interlude",
+     36
+    ],
+    [
+     "verse",
+     36
+    ],
+    [
+     "interlude",
+     71
+    ],
+    [
+     "outro",
+     47
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 118,
+   "distinct_bars": 11,
+   "distinct_ratio": 0.093,
+   "pitches": 8,
+   "chords": 5
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 191.1,
+   "sections": [
+    [
+     "intro",
+     38
+    ],
+    [
+     "verse",
+     36
+    ],
+    [
+     "interlude",
+     36
+    ],
+    [
+     "verse",
+     36
+    ],
+    [
+     "outro",
+     47
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 86,
+   "distinct_bars": 11,
+   "distinct_ratio": 0.128,
+   "pitches": 8,
+   "chords": 5
+  }
+ },
+ {
+  "style": "string-quartet",
+  "form": "bare+lora",
+  "seed": 2,
+  "truncated": false,
+  "plan_seconds": 42.0,
+  "planned": {
+   "valid": true,
+   "seconds": 596.6,
+   "sections": [
+    [
+     "intro",
+     43
+    ],
+    [
+     "interlude",
+     554
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 266,
+   "distinct_bars": 9,
+   "distinct_ratio": 0.034,
+   "pitches": 9,
+   "chords": 3
+  },
+  "prepared": {
+   "valid": true,
+   "seconds": 183.9,
+   "sections": [
+    [
+     "intro",
+     43
+    ],
+    [
+     "interlude",
+     141
+    ]
+   ],
+   "vocal_notes": 0,
+   "bars": 82,
+   "distinct_bars": 9,
+   "distinct_ratio": 0.11,
+   "pitches": 9,
+   "chords": 3
+  }
+ }
+]

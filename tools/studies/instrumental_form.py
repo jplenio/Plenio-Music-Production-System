@@ -12,12 +12,15 @@ Two phases on a running, isolated ComfyUI with the real models (native nodes in 
   pitches, chords and bars), vocal notes, and the score after the Song path's preparation and fitting.
 * ``renders`` - chosen plans (prepared and fitted as the product does) rendered with render-lyrics and
   style variants: length, ending, and Check Vocals (SheetSage2 re-transcription) per take.
+* ``audio`` - variety of the rendered takes: how many 4-second windows sound unlike every earlier
+  window (chroma and timbre), and how much the loudness moves (sections that build and drop).
 
 Usage:
   <comfy python> tools/studies/instrumental_form.py --server http://127.0.0.1:8190 --out <dir> plans
       [--seeds 1 2] [--styles NAME ...] [--forms NAME ...]
   <comfy python> tools/studies/instrumental_form.py --server ... --out <dir> renders --from <plans.json>
       [--forms NAME ...] [--styles NAME ...] [--variants NAME ...]
+  <comfy python> tools/studies/instrumental_form.py --server ... --out <dir> audio --output <ComfyUI output dir>
 """
 
 from __future__ import annotations
@@ -35,6 +38,7 @@ from plenio.core import preparation
 from plenio.core.brief import LENGTHS, SongBrief
 from plenio.core.score import canonical as c
 from plenio.core.score import native
+from plenio.core.writing import instrumental_plan_form
 
 TARGET_SECONDS = 180.0
 
@@ -56,7 +60,7 @@ STYLES = {
 FORMS = {
     "bare": "[instrumental]",
     "upstream": "[Intro]\n\n[Verse]\n\n[Chorus]\n\n[Outro]\n",
-    "song": "[Intro]\n\n[Verse]\n\n[Chorus]\n\n[Verse]\n\n[Chorus]\n\n[Bridge]\n\n[Chorus]\n\n[Outro]\n",
+    "plenio": instrumental_plan_form(TARGET_SECONDS),  # the 0.3.1 product: the form by length
     "inst-labels": "[Intro]\n\n[Interlude]\n\n[Instrumental]\n\n[Interlude]\n\n[Outro]\n",
     "timed": "[intro 0:00-0:16]\n[verse 0:16-0:48]\n[chorus 0:48-1:20]\n[verse 1:20-1:52]\n[chorus 1:52-2:24]\n"
     "[bridge 2:24-2:40]\n[outro 2:40-3:00]",
@@ -82,7 +86,10 @@ VARIANTS = {
     "tags": ("tags", "plenio"),  # the score's section tags (upstream's rule)
     "tags-neg": ("tags", "upstream"),  # section tags and upstream's style
     "empty-neg": ("empty", "upstream"),  # empty lyrics and upstream's style
+    "arr": ("bare", "arrangement"),  # [instrumental] and arrangement words in the style (no vocal words)
 }
+
+ARRANGEMENT = "dynamic arrangement, breakdown, build-up, drop, evolving sections"
 
 
 # --- metrics --------------------------------------------------------------------------------------
@@ -141,7 +148,9 @@ def plans(
             for seed in seeds:
                 if (style, form, seed) in done:
                     continue
-                planned = run(server, plan_graph(STYLES[style], FORMS[form], seed, False))
+                # 'NAME+lora': the instrumental adapter on the planner's CLIP only (the render stays plain)
+                base, lora = form.removesuffix("+lora"), form.endswith("+lora")
+                planned = run(server, plan_graph(STYLES[style], FORMS[base], seed, lora))
                 plan = texts(planned, "4")[0] if texts(planned, "4") else ""
                 row: dict[str, Any] = {
                     "style": style,
@@ -183,6 +192,8 @@ def check_graph(name: str, style: str, lyrics: str, abc: str, seed: int) -> dict
         "class_type": "PlenioVocalCheck",
         "inputs": {"audio": ["8", 0], "audio_encoder": ["20", 0], "tolerance_seconds": 0.0},
     }
+    # Check Vocals is not an output node: without a consumer ComfyUI would not run it
+    nodes["22"] = {"class_type": "PreviewAny", "inputs": {"source": ["21", 1]}}
     return nodes
 
 
@@ -206,7 +217,11 @@ def renders(
         for variant in variants:
             lyrics_rule, style_rule = VARIANTS[variant]
             lyrics = {"bare": "[instrumental]", "tags": native.section_tags(abc), "empty": ""}[lyrics_rule]
-            style = STYLES[row["style"]] if style_rule == "plenio" else upstream_style(STYLES[row["style"]])
+            style = {
+                "plenio": STYLES[row["style"]],
+                "upstream": upstream_style(STYLES[row["style"]]),
+                "arrangement": f"{STYLES[row['style']]}, {ARRANGEMENT}",
+            }[style_rule]
             for seed in seeds:
                 key = (row["style"], row["form"], row["seed"], variant, seed)
                 if key in done:
@@ -245,22 +260,74 @@ def renders(
     return results
 
 
+WINDOW_S = 4.0
+
+
+def audio_variety(path: Path) -> dict[str, Any]:
+    """Variety of a take: the share of 4-s windows unlike every earlier window that is not its neighbour
+    (cosine similarity of chroma and MFCC means below a threshold), and the spread of the windows'
+    loudness in dB (a loop that never builds or drops stays flat)."""
+    import librosa
+    import numpy as np
+
+    y, rate = librosa.load(str(path), sr=22050, mono=True)
+    hop = 512
+    chroma = librosa.feature.chroma_stft(y=y, sr=rate, hop_length=hop)
+    mfcc = librosa.feature.mfcc(y=y, sr=rate, n_mfcc=20, hop_length=hop)
+    rms = librosa.feature.rms(y=y, hop_length=hop)[0]
+    per = int(WINDOW_S * rate / hop)
+    count = chroma.shape[1] // per
+    feats, levels = [], []
+    for i in range(count):
+        part = slice(i * per, (i + 1) * per)
+        c_mean = chroma[:, part].mean(axis=1)
+        m_mean = mfcc[1:, part].mean(axis=1)
+        vector = np.concatenate(
+            [c_mean / (np.linalg.norm(c_mean) + 1e-9), m_mean / (np.linalg.norm(m_mean) + 1e-9)]
+        )
+        feats.append(vector / np.linalg.norm(vector))
+        levels.append(20 * np.log10(rms[part].mean() + 1e-9))
+    sims = np.array(feats) @ np.array(feats).T
+    result: dict[str, Any] = {"seconds": round(len(y) / rate, 1), "windows": count}
+    for threshold in (0.97, 0.985):
+        novel = sum(1 for i in range(count) if i < 2 or sims[i, : i - 1].max() < threshold)
+        result[f"novel_{threshold}"] = round(novel / count, 3) if count else None
+    audible = [lv for lv in levels if lv > max(levels) - 40] if levels else []
+    result["loudness_spread_db"] = round(float(np.std(audible)), 2) if audible else None
+    result["mean_similarity"] = round(float(sims[np.triu_indices(count, 2)].mean()), 3) if count > 2 else None
+    return result
+
+
+def audio(out: Path, output_dir: Path) -> list[dict[str, Any]]:
+    target = out / "e6-renders.json"
+    results: list[dict[str, Any]] = read_json(target)
+    for row in results:
+        if row.get("files") and "variety" not in row:
+            row["variety"] = audio_variety(output_dir / row["files"][0])
+            print(row["name"], row["variety"], flush=True)
+            write_json(target, results)
+    return results
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("--server", required=True)
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("phase", choices=["plans", "renders"])
+    parser.add_argument("phase", choices=["plans", "renders", "audio"])
     parser.add_argument("--seeds", type=int, nargs="+", default=[1, 2])
     parser.add_argument("--styles", nargs="+", default=list(STYLES))
     parser.add_argument("--forms", nargs="+", default=list(FORMS))
     parser.add_argument("--variants", nargs="+", default=list(VARIANTS))
     parser.add_argument("--from", dest="source", type=Path)
+    parser.add_argument("--output", type=Path, help="the server's output folder (phase audio)")
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     if args.phase == "plans":
         plans(args.server, args.out, args.seeds, args.styles, args.forms)
+    elif args.phase == "audio":
+        audio(args.out, args.output)
     else:
         if not args.source:
             sys.exit("renders needs --from <e6-plans.json>")

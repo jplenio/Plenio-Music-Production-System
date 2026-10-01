@@ -1,0 +1,902 @@
+[
+ {
+  "name": "e6-psytrance-bare-p1-bare-s1",
+  "style": "psytrance",
+  "form": "bare",
+  "plan_seed": 1,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "Psytrance, Full-on, Driving kick, rolling triplet bass, acid synth, swirling pads, intricate percussion, supersaw lead, hypnotic intense, 160 BPM",
+  "score_seconds": 181.0,
+  "native_seconds": [
+   "178.6"
+  ],
+  "execution_seconds": 100.8,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 178.6,
+   "windows": 44,
+   "novel_0.97": 0.273,
+   "novel_0.985": 0.523,
+   "loudness_spread_db": 4.82,
+   "mean_similarity": 0.835
+  }
+ },
+ {
+  "name": "e6-psytrance-bare-p2-bare-s1",
+  "style": "psytrance",
+  "form": "bare",
+  "plan_seed": 2,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "Psytrance, Full-on, Driving kick, rolling triplet bass, acid synth, swirling pads, intricate percussion, supersaw lead, hypnotic intense, 160 BPM",
+  "score_seconds": 180.7,
+  "native_seconds": [
+   "186.68"
+  ],
+  "execution_seconds": 96.2,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": true,
+  "variety": {
+   "seconds": 186.7,
+   "windows": 46,
+   "novel_0.97": 0.239,
+   "novel_0.985": 0.457,
+   "loudness_spread_db": 4.3,
+   "mean_similarity": 0.871
+  }
+ },
+ {
+  "name": "e6-psytrance-plenio-p1-bare-s1",
+  "style": "psytrance",
+  "form": "plenio",
+  "plan_seed": 1,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "Psytrance, Full-on, Driving kick, rolling triplet bass, acid synth, swirling pads, intricate percussion, supersaw lead, hypnotic intense, 160 BPM",
+  "score_seconds": 181.0,
+  "native_seconds": [
+   "177.28"
+  ],
+  "execution_seconds": 90.2,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 177.3,
+   "windows": 44,
+   "novel_0.97": 0.318,
+   "novel_0.985": 0.341,
+   "loudness_spread_db": 3.26,
+   "mean_similarity": 0.921
+  }
+ },
+ {
+  "name": "e6-psytrance-plenio-p2-bare-s1",
+  "style": "psytrance",
+  "form": "plenio",
+  "plan_seed": 2,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "Psytrance, Full-on, Driving kick, rolling triplet bass, acid synth, swirling pads, intricate percussion, supersaw lead, hypnotic intense, 160 BPM",
+  "score_seconds": 181.7,
+  "native_seconds": [
+   "174.52"
+  ],
+  "execution_seconds": 86.5,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 174.5,
+   "windows": 43,
+   "novel_0.97": 0.302,
+   "novel_0.985": 0.535,
+   "loudness_spread_db": 3.64,
+   "mean_similarity": 0.918
+  }
+ },
+ {
+  "name": "e6-melodic-techno-bare-p1-bare-s1",
+  "style": "melodic-techno",
+  "form": "bare",
+  "plan_seed": 1,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "melodic techno, deep bass, powerful kick, evolving arpeggios, filtered pads, soaring synth lead, dark emotional driving, 128 BPM",
+  "score_seconds": 180.0,
+  "native_seconds": [
+   "183.2"
+  ],
+  "execution_seconds": 89.4,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 183.2,
+   "windows": 45,
+   "novel_0.97": 0.333,
+   "novel_0.985": 0.556,
+   "loudness_spread_db": 3.91,
+   "mean_similarity": 0.904
+  }
+ },
+ {
+  "name": "e6-melodic-techno-bare-p2-bare-s1",
+  "style": "melodic-techno",
+  "form": "bare",
+  "plan_seed": 2,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "melodic techno, deep bass, powerful kick, evolving arpeggios, filtered pads, soaring synth lead, dark emotional driving, 128 BPM",
+  "score_seconds": 183.8,
+  "native_seconds": [
+   "186.68"
+  ],
+  "execution_seconds": 98.1,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 186.7,
+   "windows": 46,
+   "novel_0.97": 0.522,
+   "novel_0.985": 0.696,
+   "loudness_spread_db": 4.03,
+   "mean_similarity": 0.817
+  }
+ },
+ {
+  "name": "e6-melodic-techno-plenio-p1-bare-s1",
+  "style": "melodic-techno",
+  "form": "plenio",
+  "plan_seed": 1,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "melodic techno, deep bass, powerful kick, evolving arpeggios, filtered pads, soaring synth lead, dark emotional driving, 128 BPM",
+  "score_seconds": 180.0,
+  "native_seconds": [
+   "179.92"
+  ],
+  "execution_seconds": 88.7,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 179.9,
+   "windows": 45,
+   "novel_0.97": 0.267,
+   "novel_0.985": 0.622,
+   "loudness_spread_db": 3.77,
+   "mean_similarity": 0.891
+  }
+ },
+ {
+  "name": "e6-melodic-techno-plenio-p2-bare-s1",
+  "style": "melodic-techno",
+  "form": "plenio",
+  "plan_seed": 2,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "melodic techno, deep bass, powerful kick, evolving arpeggios, filtered pads, soaring synth lead, dark emotional driving, 128 BPM",
+  "score_seconds": 170.6,
+  "native_seconds": [
+   "183.28"
+  ],
+  "execution_seconds": 94.0,
+  "vocal_notes": 16,
+  "vocal_seconds": 6.3,
+  "abrupt": true,
+  "variety": {
+   "seconds": 183.3,
+   "windows": 45,
+   "novel_0.97": 0.289,
+   "novel_0.985": 0.422,
+   "loudness_spread_db": 3.43,
+   "mean_similarity": 0.903
+  }
+ },
+ {
+  "name": "e6-downtempo-bare-p1-bare-s1",
+  "style": "downtempo",
+  "form": "bare",
+  "plan_seed": 1,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "downtempo electronica, balearic, deep organic grooves, warm analog synths, plucked strings, hypnotic lead synth, immersive, wide, 85 BPM",
+  "score_seconds": 183.5,
+  "native_seconds": [
+   "206.4"
+  ],
+  "execution_seconds": 91.9,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 206.4,
+   "windows": 51,
+   "novel_0.97": 0.235,
+   "novel_0.985": 0.588,
+   "loudness_spread_db": 2.85,
+   "mean_similarity": 0.874
+  }
+ },
+ {
+  "name": "e6-downtempo-bare-p2-bare-s1",
+  "style": "downtempo",
+  "form": "bare",
+  "plan_seed": 2,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "downtempo electronica, balearic, deep organic grooves, warm analog synths, plucked strings, hypnotic lead synth, immersive, wide, 85 BPM",
+  "score_seconds": 182.1,
+  "native_seconds": [
+   "196.64"
+  ],
+  "execution_seconds": 89.5,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 196.6,
+   "windows": 49,
+   "novel_0.97": 0.184,
+   "novel_0.985": 0.347,
+   "loudness_spread_db": 2.56,
+   "mean_similarity": 0.93
+  }
+ },
+ {
+  "name": "e6-downtempo-plenio-p1-bare-s1",
+  "style": "downtempo",
+  "form": "plenio",
+  "plan_seed": 1,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "downtempo electronica, balearic, deep organic grooves, warm analog synths, plucked strings, hypnotic lead synth, immersive, wide, 85 BPM",
+  "score_seconds": 183.5,
+  "native_seconds": [
+   "184.32"
+  ],
+  "execution_seconds": 84.1,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 184.3,
+   "windows": 46,
+   "novel_0.97": 0.239,
+   "novel_0.985": 0.522,
+   "loudness_spread_db": 3.79,
+   "mean_similarity": 0.917
+  }
+ },
+ {
+  "name": "e6-downtempo-plenio-p2-bare-s1",
+  "style": "downtempo",
+  "form": "plenio",
+  "plan_seed": 2,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "downtempo electronica, balearic, deep organic grooves, warm analog synths, plucked strings, hypnotic lead synth, immersive, wide, 85 BPM",
+  "score_seconds": 190.3,
+  "native_seconds": [
+   "186.8"
+  ],
+  "execution_seconds": 86.5,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 186.8,
+   "windows": 46,
+   "novel_0.97": 0.217,
+   "novel_0.985": 0.435,
+   "loudness_spread_db": 4.94,
+   "mean_similarity": 0.927
+  }
+ },
+ {
+  "name": "e6-dnb-bare-p1-bare-s1",
+  "style": "dnb",
+  "form": "bare",
+  "plan_seed": 1,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "Drum and bass, neurofunk, deep sub bass, crisp snares, acid synth, soaring arpeggiated lead, relentless, modern, 185 BPM",
+  "score_seconds": 181.0,
+  "native_seconds": [
+   "186.04"
+  ],
+  "execution_seconds": 107.4,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 186.0,
+   "windows": 46,
+   "novel_0.97": 0.217,
+   "novel_0.985": 0.522,
+   "loudness_spread_db": 3.88,
+   "mean_similarity": 0.908
+  }
+ },
+ {
+  "name": "e6-dnb-bare-p2-bare-s1",
+  "style": "dnb",
+  "form": "bare",
+  "plan_seed": 2,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "Drum and bass, neurofunk, deep sub bass, crisp snares, acid synth, soaring arpeggiated lead, relentless, modern, 185 BPM",
+  "score_seconds": 178.3,
+  "native_seconds": [
+   "189.04"
+  ],
+  "execution_seconds": 102.8,
+  "vocal_notes": 11,
+  "vocal_seconds": 7.2,
+  "abrupt": false,
+  "variety": {
+   "seconds": 189.0,
+   "windows": 47,
+   "novel_0.97": 0.255,
+   "novel_0.985": 0.617,
+   "loudness_spread_db": 4.85,
+   "mean_similarity": 0.887
+  }
+ },
+ {
+  "name": "e6-dnb-plenio-p1-bare-s1",
+  "style": "dnb",
+  "form": "plenio",
+  "plan_seed": 1,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "Drum and bass, neurofunk, deep sub bass, crisp snares, acid synth, soaring arpeggiated lead, relentless, modern, 185 BPM",
+  "score_seconds": 182.4,
+  "native_seconds": [
+   "186.64"
+  ],
+  "execution_seconds": 102.4,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 186.6,
+   "windows": 46,
+   "novel_0.97": 0.674,
+   "novel_0.985": 0.913,
+   "loudness_spread_db": 4.3,
+   "mean_similarity": 0.825
+  }
+ },
+ {
+  "name": "e6-dnb-plenio-p2-bare-s1",
+  "style": "dnb",
+  "form": "plenio",
+  "plan_seed": 2,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "Drum and bass, neurofunk, deep sub bass, crisp snares, acid synth, soaring arpeggiated lead, relentless, modern, 185 BPM",
+  "score_seconds": 181.0,
+  "native_seconds": [
+   "191.28"
+  ],
+  "execution_seconds": 108.9,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 191.3,
+   "windows": 47,
+   "novel_0.97": 0.298,
+   "novel_0.985": 0.702,
+   "loudness_spread_db": 3.13,
+   "mean_similarity": 0.904
+  }
+ },
+ {
+  "name": "e6-string-quartet-bare-p1-bare-s1",
+  "style": "string-quartet",
+  "form": "bare",
+  "plan_seed": 1,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "classical string quartet, two violins viola cello, first violin lead, elegant refined melancholic, 110 BPM",
+  "score_seconds": 185.1,
+  "native_seconds": [
+   "183.32"
+  ],
+  "execution_seconds": 84.8,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 183.3,
+   "windows": 45,
+   "novel_0.97": 0.311,
+   "novel_0.985": 0.489,
+   "loudness_spread_db": 3.37,
+   "mean_similarity": 0.842
+  }
+ },
+ {
+  "name": "e6-string-quartet-bare-p2-bare-s1",
+  "style": "string-quartet",
+  "form": "bare",
+  "plan_seed": 2,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "classical string quartet, two violins viola cello, first violin lead, elegant refined melancholic, 110 BPM",
+  "score_seconds": 163.7,
+  "native_seconds": [
+   "159.96"
+  ],
+  "execution_seconds": 72.4,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 160.0,
+   "windows": 40,
+   "novel_0.97": 0.225,
+   "novel_0.985": 0.4,
+   "loudness_spread_db": 3.26,
+   "mean_similarity": 0.863
+  }
+ },
+ {
+  "name": "e6-string-quartet-plenio-p1-bare-s1",
+  "style": "string-quartet",
+  "form": "plenio",
+  "plan_seed": 1,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "classical string quartet, two violins viola cello, first violin lead, elegant refined melancholic, 110 BPM",
+  "score_seconds": 166.9,
+  "native_seconds": [
+   "158.16"
+  ],
+  "execution_seconds": 74.9,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 158.2,
+   "windows": 39,
+   "novel_0.97": 0.538,
+   "novel_0.985": 0.821,
+   "loudness_spread_db": 3.29,
+   "mean_similarity": 0.844
+  }
+ },
+ {
+  "name": "e6-string-quartet-plenio-p2-bare-s1",
+  "style": "string-quartet",
+  "form": "plenio",
+  "plan_seed": 2,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "classical string quartet, two violins viola cello, first violin lead, elegant refined melancholic, 110 BPM",
+  "score_seconds": 163.7,
+  "native_seconds": [
+   "159.96"
+  ],
+  "execution_seconds": 73.8,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": true,
+  "variety": {
+   "seconds": 160.0,
+   "windows": 40,
+   "novel_0.97": 0.45,
+   "novel_0.985": 0.625,
+   "loudness_spread_db": 2.64,
+   "mean_similarity": 0.876
+  }
+ },
+ {
+  "name": "e6-psytrance-plenio-p1-arr-s1",
+  "style": "psytrance",
+  "form": "plenio",
+  "plan_seed": 1,
+  "variant": "arr",
+  "seed": 1,
+  "render_style": "Psytrance, Full-on, Driving kick, rolling triplet bass, acid synth, swirling pads, intricate percussion, supersaw lead, hypnotic intense, 160 BPM, dynamic arrangement, breakdown, build-up, drop, evolving sections",
+  "score_seconds": 181.0,
+  "native_seconds": [
+   "218.16"
+  ],
+  "execution_seconds": 124.9,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 218.2,
+   "windows": 54,
+   "novel_0.97": 0.333,
+   "novel_0.985": 0.537,
+   "loudness_spread_db": 5.12,
+   "mean_similarity": 0.83
+  }
+ },
+ {
+  "name": "e6-psytrance-plenio-p2-arr-s1",
+  "style": "psytrance",
+  "form": "plenio",
+  "plan_seed": 2,
+  "variant": "arr",
+  "seed": 1,
+  "render_style": "Psytrance, Full-on, Driving kick, rolling triplet bass, acid synth, swirling pads, intricate percussion, supersaw lead, hypnotic intense, 160 BPM, dynamic arrangement, breakdown, build-up, drop, evolving sections",
+  "score_seconds": 181.7,
+  "native_seconds": [
+   "178.48"
+  ],
+  "execution_seconds": 97.5,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 178.5,
+   "windows": 44,
+   "novel_0.97": 0.386,
+   "novel_0.985": 0.455,
+   "loudness_spread_db": 4.87,
+   "mean_similarity": 0.86
+  }
+ },
+ {
+  "name": "e6-melodic-techno-plenio-p1-arr-s1",
+  "style": "melodic-techno",
+  "form": "plenio",
+  "plan_seed": 1,
+  "variant": "arr",
+  "seed": 1,
+  "render_style": "melodic techno, deep bass, powerful kick, evolving arpeggios, filtered pads, soaring synth lead, dark emotional driving, 128 BPM, dynamic arrangement, breakdown, build-up, drop, evolving sections",
+  "score_seconds": 180.0,
+  "native_seconds": [
+   "179.64"
+  ],
+  "execution_seconds": 102.8,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 179.6,
+   "windows": 44,
+   "novel_0.97": 0.227,
+   "novel_0.985": 0.545,
+   "loudness_spread_db": 3.88,
+   "mean_similarity": 0.915
+  }
+ },
+ {
+  "name": "e6-melodic-techno-plenio-p2-arr-s1",
+  "style": "melodic-techno",
+  "form": "plenio",
+  "plan_seed": 2,
+  "variant": "arr",
+  "seed": 1,
+  "render_style": "melodic techno, deep bass, powerful kick, evolving arpeggios, filtered pads, soaring synth lead, dark emotional driving, 128 BPM, dynamic arrangement, breakdown, build-up, drop, evolving sections",
+  "score_seconds": 170.6,
+  "native_seconds": [
+   "169.92"
+  ],
+  "execution_seconds": 89.8,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 169.9,
+   "windows": 42,
+   "novel_0.97": 0.286,
+   "novel_0.985": 0.381,
+   "loudness_spread_db": 3.43,
+   "mean_similarity": 0.914
+  }
+ },
+ {
+  "name": "e6-downtempo-plenio-p1-arr-s1",
+  "style": "downtempo",
+  "form": "plenio",
+  "plan_seed": 1,
+  "variant": "arr",
+  "seed": 1,
+  "render_style": "downtempo electronica, balearic, deep organic grooves, warm analog synths, plucked strings, hypnotic lead synth, immersive, wide, 85 BPM, dynamic arrangement, breakdown, build-up, drop, evolving sections",
+  "score_seconds": 183.5,
+  "native_seconds": [
+   "187.28"
+  ],
+  "execution_seconds": 84.1,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 187.3,
+   "windows": 46,
+   "novel_0.97": 0.37,
+   "novel_0.985": 0.543,
+   "loudness_spread_db": 3.26,
+   "mean_similarity": 0.882
+  }
+ },
+ {
+  "name": "e6-downtempo-plenio-p2-arr-s1",
+  "style": "downtempo",
+  "form": "plenio",
+  "plan_seed": 2,
+  "variant": "arr",
+  "seed": 1,
+  "render_style": "downtempo electronica, balearic, deep organic grooves, warm analog synths, plucked strings, hypnotic lead synth, immersive, wide, 85 BPM, dynamic arrangement, breakdown, build-up, drop, evolving sections",
+  "score_seconds": 190.3,
+  "native_seconds": [
+   "186.8"
+  ],
+  "execution_seconds": 86.4,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 186.8,
+   "windows": 46,
+   "novel_0.97": 0.283,
+   "novel_0.985": 0.435,
+   "loudness_spread_db": 5.36,
+   "mean_similarity": 0.913
+  }
+ },
+ {
+  "name": "e6-dnb-plenio-p1-arr-s1",
+  "style": "dnb",
+  "form": "plenio",
+  "plan_seed": 1,
+  "variant": "arr",
+  "seed": 1,
+  "render_style": "Drum and bass, neurofunk, deep sub bass, crisp snares, acid synth, soaring arpeggiated lead, relentless, modern, 185 BPM, dynamic arrangement, breakdown, build-up, drop, evolving sections",
+  "score_seconds": 182.4,
+  "native_seconds": [
+   "179.64"
+  ],
+  "execution_seconds": 99.2,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 179.6,
+   "windows": 44,
+   "novel_0.97": 0.409,
+   "novel_0.985": 0.614,
+   "loudness_spread_db": 3.18,
+   "mean_similarity": 0.874
+  }
+ },
+ {
+  "name": "e6-dnb-plenio-p2-arr-s1",
+  "style": "dnb",
+  "form": "plenio",
+  "plan_seed": 2,
+  "variant": "arr",
+  "seed": 1,
+  "render_style": "Drum and bass, neurofunk, deep sub bass, crisp snares, acid synth, soaring arpeggiated lead, relentless, modern, 185 BPM, dynamic arrangement, breakdown, build-up, drop, evolving sections",
+  "score_seconds": 181.0,
+  "native_seconds": [
+   "169.96"
+  ],
+  "execution_seconds": 96.9,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 170.0,
+   "windows": 42,
+   "novel_0.97": 0.143,
+   "novel_0.985": 0.381,
+   "loudness_spread_db": 4.89,
+   "mean_similarity": 0.932
+  }
+ },
+ {
+  "name": "e6-psytrance-plenio+lora-p1-bare-s1",
+  "style": "psytrance",
+  "form": "plenio+lora",
+  "plan_seed": 1,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "Psytrance, Full-on, Driving kick, rolling triplet bass, acid synth, swirling pads, intricate percussion, supersaw lead, hypnotic intense, 160 BPM",
+  "score_seconds": 181.0,
+  "native_seconds": [
+   "197.52"
+  ],
+  "execution_seconds": 112.1,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 197.5,
+   "windows": 49,
+   "novel_0.97": 0.265,
+   "novel_0.985": 0.429,
+   "loudness_spread_db": 5.66,
+   "mean_similarity": 0.87
+  }
+ },
+ {
+  "name": "e6-psytrance-plenio+lora-p2-bare-s1",
+  "style": "psytrance",
+  "form": "plenio+lora",
+  "plan_seed": 2,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "Psytrance, Full-on, Driving kick, rolling triplet bass, acid synth, swirling pads, intricate percussion, supersaw lead, hypnotic intense, 160 BPM",
+  "score_seconds": 180.7,
+  "native_seconds": [
+   "191.0"
+  ],
+  "execution_seconds": 101.1,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 191.0,
+   "windows": 47,
+   "novel_0.97": 0.064,
+   "novel_0.985": 0.191,
+   "loudness_spread_db": 2.9,
+   "mean_similarity": 0.962
+  }
+ },
+ {
+  "name": "e6-melodic-techno-plenio+lora-p1-bare-s1",
+  "style": "melodic-techno",
+  "form": "plenio+lora",
+  "plan_seed": 1,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "melodic techno, deep bass, powerful kick, evolving arpeggios, filtered pads, soaring synth lead, dark emotional driving, 128 BPM",
+  "score_seconds": 181.8,
+  "native_seconds": [
+   "181.16"
+  ],
+  "execution_seconds": 92.6,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 181.2,
+   "windows": 45,
+   "novel_0.97": 0.4,
+   "novel_0.985": 0.578,
+   "loudness_spread_db": 4.2,
+   "mean_similarity": 0.903
+  }
+ },
+ {
+  "name": "e6-melodic-techno-plenio+lora-p2-bare-s1",
+  "style": "melodic-techno",
+  "form": "plenio+lora",
+  "plan_seed": 2,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "melodic techno, deep bass, powerful kick, evolving arpeggios, filtered pads, soaring synth lead, dark emotional driving, 128 BPM",
+  "score_seconds": 181.9,
+  "native_seconds": [
+   "188.08"
+  ],
+  "execution_seconds": 91.2,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 188.1,
+   "windows": 47,
+   "novel_0.97": 0.596,
+   "novel_0.985": 0.681,
+   "loudness_spread_db": 3.95,
+   "mean_similarity": 0.785
+  }
+ },
+ {
+  "name": "e6-downtempo-plenio+lora-p1-bare-s1",
+  "style": "downtempo",
+  "form": "plenio+lora",
+  "plan_seed": 1,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "downtempo electronica, balearic, deep organic grooves, warm analog synths, plucked strings, hypnotic lead synth, immersive, wide, 85 BPM",
+  "score_seconds": 176.6,
+  "native_seconds": [
+   "177.76"
+  ],
+  "execution_seconds": 83.4,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": true,
+  "variety": {
+   "seconds": 177.8,
+   "windows": 44,
+   "novel_0.97": 0.25,
+   "novel_0.985": 0.614,
+   "loudness_spread_db": 4.06,
+   "mean_similarity": 0.891
+  }
+ },
+ {
+  "name": "e6-downtempo-plenio+lora-p2-bare-s1",
+  "style": "downtempo",
+  "form": "plenio+lora",
+  "plan_seed": 2,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "downtempo electronica, balearic, deep organic grooves, warm analog synths, plucked strings, hypnotic lead synth, immersive, wide, 85 BPM",
+  "score_seconds": 176.6,
+  "native_seconds": [
+   "179.76"
+  ],
+  "execution_seconds": 77.4,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 179.8,
+   "windows": 45,
+   "novel_0.97": 0.289,
+   "novel_0.985": 0.444,
+   "loudness_spread_db": 5.51,
+   "mean_similarity": 0.915
+  }
+ },
+ {
+  "name": "e6-dnb-plenio+lora-p1-bare-s1",
+  "style": "dnb",
+  "form": "plenio+lora",
+  "plan_seed": 1,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "Drum and bass, neurofunk, deep sub bass, crisp snares, acid synth, soaring arpeggiated lead, relentless, modern, 185 BPM",
+  "score_seconds": 178.3,
+  "native_seconds": [
+   "170.28"
+  ],
+  "execution_seconds": 89.2,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 170.3,
+   "windows": 42,
+   "novel_0.97": 0.31,
+   "novel_0.985": 0.571,
+   "loudness_spread_db": 3.04,
+   "mean_similarity": 0.913
+  }
+ },
+ {
+  "name": "e6-dnb-plenio+lora-p2-bare-s1",
+  "style": "dnb",
+  "form": "plenio+lora",
+  "plan_seed": 2,
+  "variant": "bare",
+  "seed": 1,
+  "render_style": "Drum and bass, neurofunk, deep sub bass, crisp snares, acid synth, soaring arpeggiated lead, relentless, modern, 185 BPM",
+  "score_seconds": 179.7,
+  "native_seconds": [
+   "179.64"
+  ],
+  "execution_seconds": 87.9,
+  "vocal_notes": 0,
+  "vocal_seconds": 0.0,
+  "abrupt": false,
+  "variety": {
+   "seconds": 179.6,
+   "windows": 44,
+   "novel_0.97": 0.295,
+   "novel_0.985": 0.409,
+   "loudness_spread_db": 4.13,
+   "mean_similarity": 0.9
+  }
+ }
+]

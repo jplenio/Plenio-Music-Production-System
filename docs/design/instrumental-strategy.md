@@ -269,10 +269,18 @@ up to 250 s, 10 with pre-choruses above), passed by the text sheet's new output 
 render keeps `[instrumental]` (the owner's verdict of §0 stands), and *prepare from brief* still silences the Vocal
 voice (G1), so the singing-side conditioning is unchanged. User-written or edited lyrics reach the planner unchanged.
 
-**Still to measure**, with `tools/studies/instrumental_form.py` on the owner's GPU (phase *plans*:
-planner-only forms `bare`, `upstream`, `song` (a 3-minute verse/chorus form), `inst-labels`, `timed` x five styles
-x two seeds; phase *renders*: render lyrics `[instrumental]`, the score's tags, the tags with upstream's style, empty
-lyrics with upstream's style, each with Check Vocals). The first run was stopped because the owner's ComfyUI was using
-the GPU. Decision criteria: variety (pitches, chords, distinct bars), plan length, sections, and **no increase in
-Check Vocals flags** against today's `[instrumental]` - the owner's earlier verdict found humming with section tags in
-the render (§0), so section tags are only adopted for the render if the measurement and the owner's listening agree.
+**Measured 2026-10-01** (`tools/studies/instrumental_form.py`, the owner's RTX 5060 Ti, YuE2 int8, target 3:00;
+report [2026-10-01-e6.md](../test-reports/2026-10-01-e6.md), data `docs/test-reports/data/2026-10-01-e6/`):
+
+| Question | Result | Decision |
+|---|---|---|
+| Does a planner-only form change the plan? | Little. 60 plans (6 forms x 5 styles x 2 seeds): EDM plans stay 4-8 min, 1-3 sections, 1 chord, whatever the lyrics; the 0.3.1 form gives a few more sections (3.8 vs 2.8) and fewer plans cut at the token limit (2/10 vs 5/10) | keep the 0.3.1 form |
+| Is the rendered audio more varied? | 0.3.1 form vs `[instrumental]`, same style and seed: more varied in 7 of 10 pairs (novel windows 0.59 vs 0.52 at 0.985, 0.36 vs 0.28 at 0.97) | keep |
+| Arrangement words in the style (*dynamic arrangement, breakdown, build-up, drop, evolving sections*) | no more novel windows (2/8), a little more loudness movement (5/8) | **not adopted** |
+| Instrumental adapter on the planner only | no gain (4/8) | **not adopted** |
+| Vocals | Check Vocals flagged 1/10 with `[instrumental]` and 1/10 with the form (11 and 16 notes, short regions); 0/8 for the two rejected variants; the flagged form take came from the one plan in which the planner wrote a vocal melody (moved to Ins) | no measurable increase; the two takes are in the owner's listening pack |
+| Length | every render 158-191 s for 180 s (the length fitting of 0.3.0+) | - |
+
+The biggest lever was the length: the owner's over-long instrumentals score 0.19 novel windows, those within 0.8-1.2 x
+the target 0.64; at 3:00 all rendered variants lie at 0.49-0.59. The owner's blind listening pack (10 A/B pairs and the
+two flagged takes) decides whether the form is audibly better.
