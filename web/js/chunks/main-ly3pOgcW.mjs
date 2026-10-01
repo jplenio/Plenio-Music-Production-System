@@ -1160,7 +1160,7 @@ const Ci = (e, t, n) => {
     b.stopPropagation();
     const O = Rt(i);
     O === null && (s.textContent = "The stored state is unreadable; it will be replaced when you apply.");
-    const q = Ct(String(e.id)), V = (e.inputs ?? []).filter((_) => _.link != null).map((_) => _.name), a = O ?? { schema: "plenio.sheet_state/1", docs: {} }, P = q?.owned ?? Ni(V, a), E = String(e.widgets?.find((_) => _.name === "review")?.value ?? "continue"), p = E === "as the brief says" ? q?.review ?? "continue" : E, { openSheetDialog: d } = await import("./open-SWe5omG-.mjs"), { parseGuide: f, serializeGuide: m } = await import("./tracks-DEywwRcM.mjs");
+    const q = Ct(String(e.id)), V = (e.inputs ?? []).filter((_) => _.link != null).map((_) => _.name), a = O ?? { schema: "plenio.sheet_state/1", docs: {} }, P = q?.owned ?? Ni(V, a), E = String(e.widgets?.find((_) => _.name === "review")?.value ?? "continue"), p = E === "as the brief says" ? q?.review ?? "continue" : E, { openSheetDialog: d } = await import("./open-1Sh_gzLf.mjs"), { parseGuide: f, serializeGuide: m } = await import("./tracks-DEywwRcM.mjs");
     if (!it) throw new Error("Plenio: API not initialised");
     d({
       title: e.title || "Song Sheet",

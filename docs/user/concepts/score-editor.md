@@ -14,12 +14,12 @@ Typical uses:
 |---|---|
 | **Palette** (top) | undo/redo; pitch −8va, −1, +1, +8va; shorter / longer; rest / note; chord symbol set / remove; *Whole score*: transpose, tempo, remove chords, let the instrument play the melody, silence the Vocal voice |
 | **View** | the layout *Review* or *Text* (see below); in *Review*: *piano roll* and *ABC text (advanced)* on/off; notation zoom; *Export MIDI* and *Import MIDI…* (see below) |
-| **Piano roll** | both voices over time (Vocal blue, Ins orange) with a chord lane and the bars and sections above; draw, move, resize and delete notes and chord symbols with the mouse (see below) |
+| **Piano roll** | both voices over time (Vocal blue, Ins orange) with a chord lane and the bars and sections above; the **cursor** (click in the bar numbers); draw, move, resize and delete notes and chord symbols with the mouse (see below) |
 | **Inspector** (right, *Review*) | the selected note(s), chord symbol and bar as fields: voice, pitch, start, length, chord; insert, duplicate or delete bars, meter, key (see below) |
-| **Navigator** | the sections (go to, rename, start one bar earlier / later, join to the one before, new section at the selected bar) and a bar strip (sections in colour, bars with errors marked); in *Review* with the song's lyrics: *Lyrics fit* (the lyrics next to the score's sections) |
+| **Navigator** | the sections: select one or more and **duplicate, copy, move or delete** them (also by dragging - see [Arranging sections](#arranging-sections)); go to, rename, start one bar earlier / later, join to the one before, new section at the selected bar; a bar strip (sections in colour, bars with errors marked); in *Review* with the song's lyrics: *Lyrics fit* (the lyrics next to the score's sections) |
 | **Notation** | click a note or rest to select it, Shift+click to add to the selection |
 | **ABC text** | the canonical text with line numbers; errors are underlined at their bar; the cursor selects the note under it |
-| **Transport** | play from the selected bar, loop the section, metronome, voices (Vocal, Ins, chords), speed; with a source connected: play the source from the same bar and **A/B** |
+| **Transport** | play from the cursor, loop the cursor's section, metronome, voices (Vocal, Ins, chords), speed; with a source connected: play the source from the cursor's bar and **A/B** |
 | **Status line** | what is selected (voice, bar, pitch, length, chord) and what the last edit did |
 | **Diagnostics** | the backend's findings, each with a link to its bar |
 
@@ -63,6 +63,8 @@ Bar rules: an inserted bar joins the line of the bar before it; a line longer th
 
 The roll shows every sounding note of both voices as a bar: its left edge is where the note starts, its length is how long it sounds (tied notes are one bar), its height is its pitch (the rows are the semitones, C rows are marked and labelled). Above the notes are the **chord lane** and the bar numbers with the section names.
 
+The bar numbers are the **ruler**, as in Cubase: click in it (or drag along it) to put the **cursor** there - a white line through the roll with a marker in the ruler, on the grid of *snap*. Playback starts at the cursor (Space); while it plays, a green line follows the music and the roll pages along. On stop the green line disappears and the cursor stays where it was. Clicking a section or a bar in the navigator puts the cursor at the bar's start; **Home** / **End** put it at the start / end of the score. The transport shows where the cursor is as *bar.beat.sixteenth* (Cubase's position display, e.g. `5.2.1`). Without the roll (layout *Text*, or the roll switched off) the cursor follows the selected bar.
+
 Two modes, switched in the roll's toolbar, decide what a drag on an **empty place** does. The roll always opens in **✎ Draw**; the mode is not remembered.
 
 - **✎ Draw** - a drag on an empty place draws a new note, a double-click adds one.
@@ -72,6 +74,7 @@ Clicking, moving and resizing notes, and all keys, work the same in both modes. 
 
 | Gesture | Result |
 |---|---|
+| click or drag in the ruler (bar numbers) | set the cursor; the selection stays |
 | click a note | select it (Shift/Ctrl+click adds to the selection); the notation and the ABC text select it too |
 | drag a note | move it in time and pitch (all selected notes together); where it lands it replaces what its voice played there, and the place it left becomes a rest |
 | drag the right end of a note | make it longer or shorter; longer only grows into rests - hold **Alt** to play over the following note (it is shortened or removed) |
@@ -104,7 +107,8 @@ Select a note, then use the palette or the keyboard (in the notation):
 | `[` / `]` | shorter / longer |
 | R or Delete | turn into a rest |
 | N | turn a rest into a note (the pitch of the nearest note) |
-| Space | play / stop |
+| Space | play / stop (from the cursor) |
+| Home / End | cursor to the start / end of the score |
 | Ctrl+Z, Ctrl+Y (Ctrl+Shift+Z) | undo, redo |
 | Esc | clear the selection |
 
@@ -141,11 +145,26 @@ Section names are the `% name` comment lines in the score. They matter: YuE2 sin
 
 Names are stored in lower case and use letters, digits, spaces and hyphens (up to 30 characters), for example `verse`, `pre-chorus`, `chorus 2`, `outro`.
 
+### Arranging sections
+
+The section list works like Cubase's arranger track: whole sections are copied, moved and deleted - with their notes in both voices, their chord symbols, keys and bar lines. No ABC is needed.
+
+| Action | Mouse | Keys (list focused) |
+|---|---|---|
+| select | click a section (it also goes there); **Ctrl+click** adds or removes one, **Shift+click** selects a range | Ctrl+A all, Esc none |
+| duplicate | **Duplicate**: a copy of the selected sections right after the last of them | Ctrl+D |
+| copy | **Copy**: the selected sections into the clipboard, to paste them at the cursor in the roll | Ctrl+C |
+| move | **↑ / ↓**: one place earlier / later; or **drag** the sections to a new place (the line shows where they land) | Ctrl+↑ / Ctrl+↓ |
+| copy to a place | drag with **Alt** (or Ctrl) held | |
+| delete | **Delete**: the rest closes up (one section always stays) | Del |
+
+Every arrangement is **one undo step**, and the notation, the roll, the ABC text and the bar strip follow it at once. A note that was tied across into a section that no longer follows is cut at the section's end - it does not tie into a different note. A copied section keeps its name, so a song can have two `chorus` sections in a row.
+
 ## Playback and A/B
 
-**Play** plays simple tones of the notes from the selected bar, with a cursor in the notation and the piano roll - a guide to the notes, not a preview of what YuE2 will render. It works offline: no soundfont is downloaded. Choose the voices, the speed (the score's tempo is not changed), *loop section* and the *metronome* (a click on every beat, higher on the first beat of a bar).
+**Play** plays simple tones of the notes from the **cursor**, marking the sounding notes in the notation and the piano roll and drawing a playback line in the roll - a guide to the notes, not a preview of what YuE2 will render. It works offline: no soundfont is downloaded. Choose the voices, the speed (the score's tempo is not changed), *loop section* and the *metronome* (a click on every beat, higher on the first beat of a bar). *Loop section* plays from the cursor to the end of its section and then repeats the whole section, like Cubase's cycle.
 
-With **reference_audio** connected to the Song Sheet (the Cover template connects the source), **Source** plays the recording from the same bar, and **A/B** switches between the notes and the recording at the current bar. The bar times come from the transcription's beat grid, so the recording and the notes line up even where the source's tempo drifts. The reference is only for listening; it is not part of the sheet's documents.
+With **reference_audio** connected to the Song Sheet (the Cover template connects the source), **Source** plays the recording from the cursor's bar (the playback line follows it in the roll), and **A/B** switches between the notes and the recording at the current bar. The bar times come from the transcription's beat grid, so the recording and the notes line up even where the source's tempo drifts. The reference is only for listening; it is not part of the sheet's documents.
 
 ## Apply, Revert, Approve
 

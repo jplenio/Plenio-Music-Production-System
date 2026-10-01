@@ -580,6 +580,28 @@
   stroke-dasharray: 4 3;
   pointer-events: none;
 }
+/* the cursor (Cubase: project cursor) and the playback line */
+.plenio-overlay .roll-svg .ruler {
+  fill: transparent;
+  cursor: pointer;
+}
+.plenio-overlay .roll-svg .ruler:hover {
+  fill: rgba(255, 255, 255, 0.05);
+}
+.plenio-overlay .roll-svg line.locator,
+.plenio-overlay .roll-svg .locator-mark line {
+  stroke: #f4f6fa;
+  stroke-width: 1.5;
+  pointer-events: none;
+}
+.plenio-overlay .roll-svg .locator-mark path {
+  fill: #f4f6fa;
+}
+.plenio-overlay .roll-svg line.playhead {
+  stroke: #57d68d;
+  stroke-width: 1.5;
+  pointer-events: none;
+}
 .plenio-overlay .roll-svg .row {
   fill: rgba(255, 255, 255, 0.025);
 }

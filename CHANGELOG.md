@@ -2,6 +2,13 @@
 
 All notable changes are listed here. Versions follow semantic versioning; published Registry versions are immutable.
 
+## Unreleased
+
+### Added
+
+- **Arrange a score without ABC** (score editor). The section list works like Cubase's arranger track. Select one or more sections (Ctrl+click, Shift+click), then duplicate them (Ctrl+D), copy them (Ctrl+C), move them (Ctrl+↑/↓, or drag; Alt+drag copies) or delete them (Del). The notes of both voices, the chord symbols, keys and bar lines go with them. Each arrangement is one undo step, and the notation follows it.
+- **A cursor in the piano roll** (Cubase: project cursor). Click or drag in the ruler to set it, on the grid. Playback starts at the cursor, and a line follows the music. The cursor stays where it was on stop. *Loop section* plays to the end of the cursor's section and then repeats that section. Home and End move the cursor to the start and the end of the score. The section list and the bar strip put the cursor at the bar's start.
+
 ## 0.3.1 - 2026-10-01
 
 ### Changed

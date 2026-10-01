@@ -10,6 +10,10 @@
  * Layouts (plan §10.3): *review* - piano roll, notation, inspector, navigator (lyrics fit), the
  * ABC text under *Advanced*; *text* - the ABC text and the notation. A sheet opens in the layout
  * of its node property ``plenio_editor_layout`` (a template's choice), else in the viewer's last.
+ *
+ * The cursor (``locator``, units of L - Cubase: project cursor) is where playback starts and where a
+ * clip is pasted. The roll's ruler sets it, a section or bar in the navigator puts it at the bar's
+ * start, Home / End at the start / end of the score; without the roll it follows the selected bar.
  */
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
@@ -58,6 +62,7 @@ import {
   shareValue,
   sideWidthAfter
 } from '../paneSizes'
+import { barOfUnit, positionLabel, secondsOfUnit, unitOfBar, unitOfSeconds } from './locator'
 import { guideNotes, sameGuide } from './tracks'
 import { describeError, useScoreSession } from './useScoreSession'
 
@@ -117,6 +122,9 @@ function chooseLayout(value: Layout): void {
   prefs.value = { ...prefs.value, layout: value }
 }
 const cursor = ref<string[]>([])
+/** The cursor in units of L, and where playback is (``null``: stopped). */
+const locator = ref(0)
+const playhead = ref<number | null>(null)
 const revealRange = ref<[number, number] | null>(null)
 const transport = ref<InstanceType<typeof ScoreTransport> | null>(null)
 
@@ -141,6 +149,22 @@ const guideSeconds = computed(() => guideNotes(props.guide, shown.value?.model))
 const playGuide = computed(() => (daw.value ? (prefs.value.voices.guide ?? true) : false))
 const transportGuide = computed(() => (playGuide.value ? guideSeconds.value : []))
 const showRoll = computed(() => review.value && prefs.value.roll && !!(shown.value?.model || shown.value?.model_error))
+const model = computed(() => shown.value?.model ?? null)
+/** The cursor's bar (without a model - a score outside the editor's subset - the selected bar). */
+const locatorBar = computed(() => (model.value ? barOfUnit(model.value, locator.value) : selectedBar.value))
+const locatorSeconds = computed(() => (shown.value && model.value ? secondsOfUnit(shown.value, locator.value) : null))
+const locatorLabel = computed(() => (model.value ? positionLabel(model.value, locator.value) : ''))
+// a shorter score keeps the cursor inside it
+watch(
+  () => model.value?.total,
+  (total) => {
+    if (total !== undefined && locator.value > total) locator.value = total
+  }
+)
+// without the roll there is no ruler: the cursor follows the selected bar, as playback always did
+watch(selectedBar, (bar) => {
+  if (!showRoll.value && bar && model.value) locator.value = unitOfBar(model.value, bar)
+})
 const metronome = computed<boolean>({
   get: () => prefs.value.metronome,
   set: (value) => (prefs.value = { ...prefs.value, metronome: value })
@@ -177,6 +201,7 @@ function onCursor(offset: number): void {
 
 function goto(bar: number): void {
   if (!shown.value) return
+  if (shown.value.model) locator.value = unitOfBar(shown.value.model, bar)
   const element = firstElementOfBar(shown.value, bar)
   if (element) select(element.id, false, 'keys')
 }
@@ -195,6 +220,10 @@ function selectFromRoll(ids: string[]): void {
   session.select(ids)
   const element = elementById(shown.value, ids[0])
   if (element) revealRange.value = [element.source[0], element.source[1]]
+}
+
+function onPlayTime(seconds: number | null): void {
+  playhead.value = seconds === null || !shown.value ? null : unitOfSeconds(shown.value, seconds)
 }
 
 function clearGuide(): void {
@@ -346,6 +375,12 @@ function onKey(event: KeyboardEvent): void {
   if (event.key === ' ') {
     event.preventDefault()
     transport.value?.toggle()
+    return
+  }
+  if ((event.key === 'Home' || event.key === 'End') && model.value) {
+    // Cubase: to the start / the end of the project
+    event.preventDefault()
+    locator.value = event.key === 'Home' ? 0 : model.value.total
     return
   }
   if (!view || !primary) return
@@ -515,8 +550,11 @@ function onKey(event: KeyboardEvent): void {
       :readonly="readonly"
       :stale="invalid"
       :busy="session.busy"
+      :locator="model ? locator : null"
+      :playhead="playhead"
       resize-mode="rests"
       @select="selectFromRoll"
+      @locate="(unit: number) => (locator = unit)"
     />
     <div
       v-if="showRoll && shown?.model"
@@ -641,11 +679,14 @@ function onKey(event: KeyboardEvent): void {
       v-model:speed="speed"
       v-model:metronome="metronome"
       :view="shown"
-      :bar="selectedBar"
+      :bar="locatorBar"
+      :from="locatorSeconds"
+      :position="locatorLabel"
       :reference="reference"
       :timeline-bars="timelineBars"
       :guide="transportGuide"
       @cursor="(ids: string[]) => (cursor = ids)"
+      @time="onPlayTime"
     />
     <p class="status" aria-live="polite">
       <span>{{ session.selection.length > 1 ? `${session.selection.length} selected · ` : '' }}{{ describe(session.primary, unit) }}</span>

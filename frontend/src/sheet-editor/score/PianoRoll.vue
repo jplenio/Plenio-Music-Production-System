@@ -17,8 +17,14 @@
  * it) or *select* (a frame that selects every note it touches; with Shift the frame adds to the
  * selection). A click on a note selects it and a drag moves it (with the other selected notes) in
  * both modes. The selection is shared with the staff, so the framed notes are marked there too.
+ *
+ * The cursor (Cubase: project cursor, docs/design/score-arrange-design.md §2) is a line through the
+ * roll with a marker in the ruler: a click or a drag in the ruler (the bar numbers) puts it on the
+ * grid. Playback starts there; while it plays a second line follows the music and the pane pages along.
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+
+import { positionLabel, rulerUnit } from './locator'
 
 import type { ScoreOperation } from '../../api/client'
 import type { ModelChord, ScoreView } from '../../shared/scoreView'
@@ -79,10 +85,23 @@ const props = withDefaults(
     busy?: boolean
     resizeMode?: ResizeMode
     height?: number
+    /** The cursor in units of L (``null``: none shown). */
+    locator?: number | null
+    /** Where playback is, in units of L (``null``: stopped). */
+    playhead?: number | null
   }>(),
-  { playing: () => [], readonly: false, stale: false, busy: false, resizeMode: 'rests', height: 280 }
+  {
+    playing: () => [],
+    readonly: false,
+    stale: false,
+    busy: false,
+    resizeMode: 'rests',
+    height: 280,
+    locator: null,
+    playhead: null
+  }
 )
-const emit = defineEmits<{ select: [ids: string[]] }>()
+const emit = defineEmits<{ select: [ids: string[]]; locate: [unit: number] }>()
 /** Pixels per quarter note (the roll's horizontal zoom). */
 const zoom = defineModel<number>('zoom', { default: 48 })
 
@@ -113,6 +132,8 @@ interface Press {
   clear: boolean
   /** Set when the press pulls a selection frame: the selection it keeps. */
   keep: { notes: string[]; chords: ModelChord[] } | null
+  /** A press in the ruler: it moves the cursor while the button is held. */
+  ruler?: boolean
 }
 let press: Press | null = null
 let observer: ResizeObserver | null = null
@@ -144,6 +165,7 @@ const hint = computed(() =>
     : 'drag: frame the notes to select (Shift: add) · click: note (Shift: add or remove) · drag a selected note: move them all · ' +
       'Ctrl+A: all notes · ↑↓←→: move · Del: rest · Shift+Del: close the gap'
 )
+const position = computed(() => (model.value && props.locator !== null ? positionLabel(model.value, props.locator) : ''))
 const snapLabel = computed(() => (model.value ? `1/${Math.round(unitDenominator(model.value) / (geo.value?.snap ?? 1))}` : ''))
 
 /** The visible units (with a margin) - only this part of a long score is drawn. */
@@ -205,6 +227,13 @@ function onPointerDown(event: PointerEvent): void {
   root.value?.focus({ preventScroll: true })
   const [x, y] = local(event)
   const hit = hitTest(x, y, notes.value, chords.value, g, track.value, scrollTop.value)
+  if (hit.area === 'header') {
+    // the ruler: the cursor goes where it was clicked (on the grid) and follows a drag; the selection stays
+    emit('locate', rulerUnit(hit.unit, g.snap, g.total))
+    press = { x, y, start: null, started: false, clear: false, keep: null, ruler: true }
+    capture(event)
+    return
+  }
   const additive = event.shiftKey || event.ctrlKey || event.metaKey
   let start: Drag | null = null
   let clear = false
@@ -251,6 +280,10 @@ function onPointerDown(event: PointerEvent): void {
     clear = !additive
   }
   press = { x, y, start, started: false, clear, keep }
+  capture(event)
+}
+
+function capture(event: PointerEvent): void {
   try {
     svg.value?.setPointerCapture?.(event.pointerId)
   } catch {
@@ -274,9 +307,13 @@ function followEdge(event: PointerEvent): void {
 
 function onPointerMove(event: PointerEvent): void {
   const g = geo.value
-  if (!press || (!press.start && !press.keep) || !g) return
-  if (press.started) followEdge(event)
+  if (!press || (!press.start && !press.keep && !press.ruler) || !g) return
   const [x, y] = local(event)
+  if (press.ruler) {
+    emit('locate', rulerUnit(unitAt(x, g), g.snap, g.total))
+    return
+  }
+  if (press.started) followEdge(event)
   if (!press.started && Math.hypot(x - press.x, y - press.y) < MOVE_THRESHOLD_PX) return
   press.started = true
   if (press.keep) band.value = { x0: press.x, y0: press.y, x1: x, y1: y, keep: press.keep.notes }
@@ -296,7 +333,7 @@ async function commit(operation: ScoreOperation): Promise<void> {
 function onPointerUp(): void {
   const current = press
   press = null
-  if (!current) return
+  if (!current || current.ruler) return
   if (!current.started) {
     drag.value = null
     if (current.clear) select([])
@@ -415,14 +452,17 @@ function centre(): void {
   onScroll()
 }
 
-/** Scroll so that the (first) selected or playing note is visible - along the bars and in pitch. */
-function reveal(ids: Set<string>): void {
+/**
+ * Scroll so that the (first) selected or playing note is visible - along the bars and in pitch. While
+ * the playback line runs, it decides the bars (``alongBars`` false) and a note only scrolls the pitch.
+ */
+function reveal(ids: Set<string>, alongBars = true): void {
   const g = geo.value
   const el = scroller.value
   const note = notes.value.find((n) => ids.has(n.id))
   if (!g || !el || !note || !el.clientWidth) return
   const x = xOf(note.onset, g)
-  if (x < el.scrollLeft + KEYS_WIDTH || x > el.scrollLeft + el.clientWidth - 40) {
+  if (alongBars && (x < el.scrollLeft + KEYS_WIDTH || x > el.scrollLeft + el.clientWidth - 40)) {
     el.scrollLeft = Math.max(0, x - el.clientWidth / 3)
   }
   const top = el.clientHeight ? scrollTopToShow(g, el.scrollTop, el.clientHeight, note.pitch) : null
@@ -434,8 +474,21 @@ function zoomBy(factor: number): void {
   zoom.value = Math.max(12, Math.min(240, Math.round(zoom.value * factor)))
 }
 
+/** Page along the bars when ``unit`` (the playback line or a cursor set elsewhere) leaves the view. */
+function revealUnit(unit: number | null): void {
+  const g = geo.value
+  const el = scroller.value
+  if (unit === null || !g || !el || !el.clientWidth) return
+  const x = xOf(unit, g)
+  if (x >= el.scrollLeft + KEYS_WIDTH && x <= el.scrollLeft + el.clientWidth - 24) return
+  el.scrollLeft = Math.max(0, x - KEYS_WIDTH - 24)
+  onScroll()
+}
+
 watch(selectedNotes, (ids) => reveal(ids))
-watch(playingNotes, (ids) => reveal(ids))
+watch(playingNotes, (ids) => reveal(ids, props.playhead === null))
+watch(() => props.playhead, revealUnit)
+watch(() => props.locator, revealUnit)
 // the scroller exists only while there is a model: centre when it appears (a new or repaired score)
 watch(
   () => !!model.value,
@@ -564,6 +617,8 @@ onBeforeUnmount(() => observer?.disconnect())
         </rect>
         <rect v-for="(ghost, index) in ghostNotes" :key="'ghost' + index" class="ghost" :class="ghost.track" v-bind="noteRect(ghost, geo)" rx="2" />
         <rect v-if="banded" class="band" v-bind="banded.rect" />
+        <line v-if="locator !== null" class="locator" :x1="xOf(locator, geo)" :x2="xOf(locator, geo)" :y1="TOP" :y2="geo.height" />
+        <line v-if="playhead !== null" class="playhead" :x1="xOf(playhead, geo)" :x2="xOf(playhead, geo)" :y1="TOP" :y2="geo.height" />
         <g class="keys" :transform="`translate(${scrollLeft} 0)`">
           <rect class="keys-bg" :x="0" :y="TOP" :width="KEYS_WIDTH - 2" :height="geo.height - TOP" />
           <text
@@ -579,6 +634,9 @@ onBeforeUnmount(() => observer?.disconnect())
         <!-- the header (bar numbers, sections) and the chord lane stay on top while the pane scrolls -->
         <g class="roll-top" :transform="`translate(0 ${scrollTop})`">
           <rect class="top-bg" :x="0" :y="0" :width="geo.width" :height="TOP" />
+          <rect class="ruler" :x="KEYS_WIDTH" :y="0" :width="geo.width - KEYS_WIDTH" :height="HEADER">
+            <title>Click or drag here to set the cursor - playback and paste start there</title>
+          </rect>
           <rect class="lane" :x="0" :y="HEADER" :width="geo.width" :height="LANE" />
           <line
             v-for="line in visibleLines.filter((l) => l.kind === 'bar')"
@@ -608,6 +666,12 @@ onBeforeUnmount(() => observer?.disconnect())
           <g v-if="drag?.kind === 'chord'" class="chord ghost">
             <rect :x="xOf(drag.to, geo)" :y="HEADER + 3" :width="chordWidth(drag.chord, undefined, geo)" :height="LANE - 6" rx="3" />
             <text :x="xOf(drag.to, geo) + 4" :y="HEADER + LANE / 2 + 4">{{ drag.chord.name }}</text>
+          </g>
+          <line v-if="playhead !== null" class="playhead" :x1="xOf(playhead, geo)" :x2="xOf(playhead, geo)" :y1="0" :y2="TOP" />
+          <g v-if="locator !== null" class="locator-mark" :transform="`translate(${xOf(locator, geo)} 0)`">
+            <line :x1="0" :x2="0" :y1="0" :y2="TOP" />
+            <path d="M-5 0 H5 L0 7 Z" />
+            <title>Cursor at {{ position }} - click or drag in the ruler to move it</title>
           </g>
         </g>
       </svg>
