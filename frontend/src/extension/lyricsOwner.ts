@@ -14,9 +14,34 @@ function stateWidget(node: ComfyNode): ComfyWidget | null {
   return node.widgets?.find((w) => w.name === 'sheet_state') ?? null
 }
 
+interface GraphLinks {
+  links?: Map<number | string, { origin_id: number | string }> | Record<string, { origin_id: number | string }>
+  getLink?(id: number | string): { origin_id: number | string } | null | undefined
+  getNodeById?(id: number | string): ComfyNode | null | undefined
+}
+
+/**
+ * The node linked to input ``slot``, read from the graph's link table. The frontend's own
+ * ``getInputNode`` throws or answers nothing for some inputs of subgraph nodes (*YuE2 Plan*, *Write
+ * Song*; frontend 1.53), and an error here once kept the Score sheet's editor from opening. Never throws.
+ */
+function inputNode(node: ComfyNode, slot: number): ComfyNode | null {
+  const id = node.inputs?.[slot]?.link
+  if (id == null) return null
+  try {
+    const graph = (node as unknown as { graph?: GraphLinks }).graph
+    const table = graph?.links
+    const link = graph?.getLink?.(id) ?? (table instanceof Map ? table.get(id) : table?.[String(id)])
+    if (link && graph?.getNodeById) return graph.getNodeById(link.origin_id) ?? null
+    return node.getInputNode?.(slot) ?? null
+  } catch {
+    return null
+  }
+}
+
 function upstream(node: ComfyNode, name: string): ComfyNode | null {
   const slot = (node.inputs ?? []).findIndex((input) => input.name === name && input.link != null)
-  return slot < 0 ? null : (node.getInputNode?.(slot) ?? null)
+  return slot < 0 ? null : inputNode(node, slot)
 }
 
 /** The Song Sheet whose lyrics output is linked to ``node``'s ``context_lyrics``. */
@@ -37,8 +62,8 @@ export function feeds(ancestor: ComfyNode, node: ComfyNode, name: string): boole
     if (seen.has(id)) continue
     seen.add(id)
     if (current === ancestor || id === String(ancestor.id)) return true
-    ;(current.inputs ?? []).forEach((input, slot) => {
-      const next = input.link != null ? current.getInputNode?.(slot) : null
+    ;(current.inputs ?? []).forEach((_input, slot) => {
+      const next = inputNode(current, slot)
       if (next) queue.push(next)
     })
   }

@@ -73,8 +73,16 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
     getMaxHeight: () => SHEET_WIDGET_HEIGHT
   })
 
-  button.addEventListener('click', async (event) => {
+  button.addEventListener('click', (event) => {
     event.stopPropagation()
+    // whatever goes wrong, the click is answered: the reason stands on the node (and in the console)
+    void openEditor().catch((error: unknown) => {
+      console.error('Plenio: the Song Sheet editor could not open', error)
+      summary.textContent = `The editor could not open: ${error instanceof Error ? error.message : String(error)}`
+    })
+  })
+
+  async function openEditor(): Promise<void> {
     const state = parseState(value)
     if (state === null) {
       summary.textContent = 'The stored state is unreadable; it will be replaced when you apply.'
@@ -90,8 +98,14 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
     const { openSheetDialog } = await import('../sheet-editor/open')
     const { parseGuide, serializeGuide } = await import('../sheet-editor/score/tracks')
     if (!fetcher) throw new Error('Plenio: API not initialised')
-    // the lyrics of Song Sheet · Text follow this score's sections (templates 1 and 5)
-    const lyrics = lyricsTargetOf(node, payload, getPayload)
+    // the lyrics of Song Sheet · Text follow this score's sections (templates 1 and 5); when the graph
+    // cannot say where they come from, the editor opens without that (the lyrics are then not written back)
+    let lyrics: ReturnType<typeof lyricsTargetOf> = null
+    try {
+      lyrics = lyricsTargetOf(node, payload, getPayload)
+    } catch (error) {
+      console.warn('Plenio: the lyrics sheet of this score was not found', error)
+    }
     openSheetDialog({
       title: node.title || 'Song Sheet',
       state: current,
@@ -114,7 +128,7 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
         node.setDirtyCanvas?.(true, true)
       }
     })
-  })
+  }
 
   const unsubscribe = [
     onPayload((nodeId) => {

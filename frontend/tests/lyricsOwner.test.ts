@@ -55,6 +55,46 @@ describe('the owner of the context lyrics', () => {
     expect(lyricsOwner(node(12, 'PlenioSongSheet', { context_lyrics: node(13, 'Reroute') }, empty))).toBeNull()
   })
 
+  it("finds the planner behind a subgraph node whose getInputNode fails (frontend 1.53)", () => {
+    // the graph's link table knows every link; the frontend's getInputNode throws for some inputs of
+    // subgraph nodes - which once kept the Score sheet's editor from opening at all
+    const nodes = new Map<string, ComfyNode>()
+    const links = new Map<number, { origin_id: string }>()
+    const graph = { links, getNodeById: (id: string | number) => nodes.get(String(id)) ?? null }
+    const make = (id: string, type: string, inputs: Record<string, string | null>, state?: string): ComfyNode => {
+      const names = Object.keys(inputs)
+      const made = {
+        id,
+        type,
+        comfyClass: type,
+        title: type,
+        properties: {},
+        graph,
+        widgets: state === undefined ? [] : [{ name: 'sheet_state', type: 'PLENIO_SHEET_STATE', value: state, options: {} }],
+        inputs: names.map((name, slot) => {
+          const origin = inputs[name]
+          if (origin === null) return { name, link: null }
+          const link = Number(id) * 100 + slot
+          links.set(link, { origin_id: origin })
+          return { name, link }
+        }),
+        getInputNode: () => {
+          throw new TypeError("Cannot read properties of undefined (reading 'getLinks')")
+        }
+      } as unknown as ComfyNode
+      nodes.set(id, made)
+      return made
+    }
+    const text = make('6', 'PlenioSongSheet', {}, empty)
+    make('7', 'subgraph-yue2-plan', { clip: null, style: '6', lyrics: '6' })
+    make('8', 'PlenioScoreTools', { score: '7' })
+    const score = make('9', 'PlenioSongSheet', { score: '8', context_lyrics: '6' }, empty)
+    expect(lyricsOwner(score)).toBe(text)
+    expect(feeds(text, score, 'score')).toBe(true)
+    const payload = { context: { lyrics: LYRICS } } as unknown as SheetPayload
+    expect(lyricsTargetOf(score, payload, () => textPayload(LYRICS))?.target).toEqual({ title: 'PlenioSongSheet', blocked: null, replans: true })
+  })
+
   it('may be written only while its lyrics are what the last run showed', () => {
     const text = node(6, 'PlenioSongSheet', {}, empty)
     const daw = node(9, 'PlenioSongSheet', { context_lyrics: text }, empty)
