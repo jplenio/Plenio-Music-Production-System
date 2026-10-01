@@ -45,7 +45,7 @@ class Timeline:
     """Sounding vocal notes as (onset, end) in source seconds."""
     bar_prints: tuple[tuple[str, str], ...] = ()
     """The Vocal and Ins content of every transcribed bar (``bar_match``): an arranged score's bars find
-    their source bars by it. Empty in timelines made before 0.3.2."""
+    their source bars by it. Empty in timelines made before 0.4.0."""
     engine: str = "sheetsage2"
     extra: Mapping[str, Any] = field(default_factory=dict)
 

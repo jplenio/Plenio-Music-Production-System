@@ -7,7 +7,7 @@ Transcribes a recording into the native two-voice ABC score with **SheetSage2** 
 
 Outputs: **score** (with chords and section comments), **timeline** (for *Transcribe Lyrics*, the Song Sheet and *Check Vocals*), **report** (bars, key, tempo, sections with their start times, vocal and instrument notes).
 
-Why the timeline: SheetSage2 writes one tempo into the ABC but places the notes on the real beat grid, so reading the score at a constant tempo misplaces bars by up to two seconds. Lyrics are placed with the real bar times.
+Why the timeline: SheetSage2 writes one tempo into the ABC but places the notes on the real beat grid, so reading the score at a constant tempo misplaces bars by up to two seconds. Lyrics are placed with the real bar times. The timeline also keeps the content of every bar, so a score whose sections you copy, move or delete still finds its bars in the recording: the original words and the A/B times follow them.
 
 Limits:
 

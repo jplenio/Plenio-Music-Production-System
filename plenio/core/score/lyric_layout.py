@@ -153,16 +153,24 @@ def _phrases(notes: Sequence[canonical.Note], gap: int) -> list[list[canonical.N
     return phrases
 
 
-def _match(blocks: Sequence[lyrics_rules.LyricsSection], labels: Sequence[str]) -> tuple[list[int | None], list[int]]:
+def _key(tag: str) -> str:
+    """A tag or label as the lyrics checks compare them: no brackets, no trailing number, lower case."""
+    return re.sub(r"\s*\d+$", "", tag.strip("[]").strip()).lower()
+
+
+def _match(
+    blocks: Sequence[lyrics_rules.LyricsSection], labels: Sequence[str]
+) -> tuple[list[int | None], list[int]]:
     """For every labelled section the block it sings (by order, or by tag when the counts differ)."""
     if len(blocks) == len(labels):
         return list(range(len(blocks))), []
-    key = lambda tag: re.sub(r"\s*\d+$", "", tag.strip("[]").strip()).lower()  # noqa: E731
     mapping: list[int | None] = [None] * len(labels)
     unplaced: list[int] = []
     next_section = 0
     for index, block in enumerate(blocks):
-        found = next((i for i in range(next_section, len(labels)) if key(labels[i]) == key(block.tag)), None)
+        found = next(
+            (i for i in range(next_section, len(labels)) if _key(labels[i]) == _key(block.tag)), None
+        )
         if found is None:
             unplaced.append(index)
         else:

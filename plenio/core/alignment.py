@@ -225,7 +225,9 @@ def place_by_bars(
     per_section: list[list[int]] = [[] for _ in sections]
     if not section_of:
         return per_section, list(range(len(words)))
-    for final, index in sorted((final, index) for index, bar in enumerate(bars) for final in targets.get(bar, [])):
+    for final, index in sorted(
+        (final, index) for index, bar in enumerate(bars) for final in targets.get(bar, [])
+    ):
         per_section[section_of[min(final, len(section_of) - 1)]].append(index)
     return per_section, [index for index, bar in enumerate(bars) if bar not in targets]
 

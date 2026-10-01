@@ -196,7 +196,9 @@ def test_bar_operations_say_where_the_time_went() -> None:
 
 # --- the editor's lyrics follow the sections (frontend/tests/fixtures/arrange-edits.json) --------------
 
-FOLLOW_FIXTURE = Path(__file__).resolve().parents[2] / "frontend" / "tests" / "fixtures" / "arrange-edits.json"
+FOLLOW_FIXTURE = (
+    Path(__file__).resolve().parents[2] / "frontend" / "tests" / "fixtures" / "arrange-edits.json"
+)
 FOLLOW_LYRICS = (
     "[Intro]\n\n[Verse 1]\nverse one a\nverse one b\n\n[Chorus]\nchorus a\nchorus b\n\n"
     "[Verse 2]\nverse two a\n\n[Chorus]\nchorus a\nchorus b\n\n[Outro]\noutro a"
@@ -207,8 +209,12 @@ def _follow_edits(score: c.Score) -> dict[str, dict[str, object]]:
     """Real edits of the plan (sections at bars 1, 10, 18, 30, 39, 55): what the lyrics must follow."""
     chorus_start, chorus_end = score.starts[17], score.starts[29]
     clip = [
-        {"track": kind, "onset": max(n.onset, chorus_start) - chorus_start,
-         "duration": min(n.end, chorus_end) - max(n.onset, chorus_start), "pitch": n.pitch}
+        {
+            "track": kind,
+            "onset": max(n.onset, chorus_start) - chorus_start,
+            "duration": min(n.end, chorus_end) - max(n.onset, chorus_start),
+            "pitch": n.pitch,
+        }
         for kind in ("vocal", "ins")
         for n in score.track(kind)
         if n.onset < chorus_end and n.end > chorus_start
@@ -223,8 +229,14 @@ def _follow_edits(score: c.Score) -> dict[str, dict[str, object]]:
         "insert bars in the first verse": {"op": "insert_measures", "bar": 12, "count": 2},
         "rename the outro": {"op": "rename_section", "section": 6, "label": "ending"},
         "insert a copied chorus before the second verse": {
-            "op": "paste", "at": score.starts[29], "mode": "insert", "span": chorus_end - chorus_start,
-            "tracks": ["vocal", "ins"], "with_chords": True, "notes": clip, "chords": [],
+            "op": "paste",
+            "at": score.starts[29],
+            "mode": "insert",
+            "span": chorus_end - chorus_start,
+            "tracks": ["vocal", "ins"],
+            "with_chords": True,
+            "notes": clip,
+            "chords": [],
             "sections": [{"onset": 0, "label": "chorus"}],
         },
     }

@@ -495,12 +495,21 @@ def test_arranger_lyrics_and_musicxml_routes(server: ComfyServer) -> None:
     cursor, the lyrics layout and the notation's syllables, and the MusicXML export."""
     import json as _json
 
-    plan = _json.loads((ROOT / "tests" / "fixtures" / "cover" / "yue2-take-y3.json").read_text(encoding="utf-8"))["abc"]
-    lyrics = "\n\n".join(f"[{tag}]\nla la la la\nsing it again" for tag in ("Intro", "Verse", "Chorus", "Verse", "Chorus", "Outro"))
+    plan = _json.loads(
+        (ROOT / "tests" / "fixtures" / "cover" / "yue2-take-y3.json").read_text(encoding="utf-8")
+    )["abc"]
+    lyrics = "\n\n".join(
+        f"[{tag}]\nla la la la\nsing it again"
+        for tag in ("Intro", "Verse", "Chorus", "Verse", "Chorus", "Outro")
+    )
     status, arranged = server.request(
         "POST",
         "/plenio/score/transform",
-        {"abc": plan, "operation": {"op": "arrange_sections", "order": [1, 2, 3, 3, 4, 5, 6]}, "lyrics": lyrics},
+        {
+            "abc": plan,
+            "operation": {"op": "arrange_sections", "order": [1, 2, 3, 3, 4, 5, 6]},
+            "lyrics": lyrics,
+        },
     )
     assert status == 200 and arranged["changes"][0].startswith("sections copied chorus")
     assert arranged["time_map"] == [[0, 464, 0], [272, 1088, 464]]
@@ -534,7 +543,11 @@ def test_arranger_lyrics_and_musicxml_routes(server: ComfyServer) -> None:
     )
     assert status == 200 and exported["filename"] == "My Song.musicxml"
     assert exported["type"] == "application/vnd.recordare.musicxml+xml"
-    assert exported["data"].startswith("<?xml") and "<score-partwise" in exported["data"] and "<lyric" in exported["data"]
+    assert (
+        exported["data"].startswith("<?xml")
+        and "<score-partwise" in exported["data"]
+        and "<lyric" in exported["data"]
+    )
     status, refused = server.request("POST", "/plenio/score/musicxml/export", {"abc": "X:1\nnot a score"})
     assert status == 400
 

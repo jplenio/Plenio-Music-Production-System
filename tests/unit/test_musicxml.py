@@ -11,8 +11,12 @@ from plenio.core.score import canonical as c
 from plenio.core.score import musicxml, ops
 
 ROOT = Path(__file__).resolve().parents[2]
-TRICKY = json.loads((ROOT / "frontend" / "tests" / "fixtures" / "tricky-score.json").read_text(encoding="utf-8"))["abc"]
-PLAN = json.loads((ROOT / "tests" / "fixtures" / "cover" / "yue2-take-y3.json").read_text(encoding="utf-8"))["abc"]
+TRICKY = json.loads(
+    (ROOT / "frontend" / "tests" / "fixtures" / "tricky-score.json").read_text(encoding="utf-8")
+)["abc"]
+PLAN = json.loads((ROOT / "tests" / "fixtures" / "cover" / "yue2-take-y3.json").read_text(encoding="utf-8"))[
+    "abc"
+]
 LYRICS = "[Intro]\n\n[Verse]\nbeautiful morning\nsing it again\n\n[Chorus]\nhold on"
 
 
@@ -34,7 +38,9 @@ def test_every_measure_is_full_and_every_tie_is_closed() -> None:
             measures = part.findall("measure")
             assert len(measures) == score.measure_count
             for index, measure in enumerate(measures):
-                assert sum(int(n.findtext("duration")) for n in measure.findall("note")) == score.lengths[index]
+                assert (
+                    sum(int(n.findtext("duration")) for n in measure.findall("note")) == score.lengths[index]
+                )
             open_ties = 0
             for note in notes_of(part):
                 kinds = [t.get("type") for t in note.findall("tie")]
@@ -76,22 +82,45 @@ def test_pitches_are_spelled_for_the_key_and_chords_get_their_kind() -> None:
 def test_the_lyrics_stand_under_the_vocal_notes() -> None:
     score = c.from_abc(TRICKY)
     root = parse(musicxml.export_musicxml(score, lyrics=LYRICS))
-    lyrics = [(l.findtext("syllabic"), l.findtext("text")) for l in root.findall("part[@id='P1']//lyric")]
-    assert lyrics[:5] == [("begin", "beau"), ("middle", "ti"), ("end", "ful"), ("begin", "mor"), ("end", "ning")]
-    assert lyrics[5:] == [("single", "sing"), ("single", "it"), ("begin", "a"), ("end", "gain"), ("single", "hold"), ("single", "on")]
+    lyrics = [(x.findtext("syllabic"), x.findtext("text")) for x in root.findall("part[@id='P1']//lyric")]
+    assert lyrics[:5] == [
+        ("begin", "beau"),
+        ("middle", "ti"),
+        ("end", "ful"),
+        ("begin", "mor"),
+        ("end", "ning"),
+    ]
+    assert lyrics[5:] == [
+        ("single", "sing"),
+        ("single", "it"),
+        ("begin", "a"),
+        ("end", "gain"),
+        ("single", "hold"),
+        ("single", "on"),
+    ]
     assert root.findall("part[@id='P2']//lyric") == []
 
 
 def test_lengths_without_one_note_value_are_tied_and_an_empty_bar_is_a_bar_rest() -> None:
     score = c.from_abc(TRICKY)
     five = c.Note(onset=score.starts[2], duration=5, pitch=62)  # 5/32: an eighth tied to a 32nd
-    changed = ops.paste(score, score.starts[2], score.lengths[2], [{"track": "vocal", "onset": 0, "duration": 5, "pitch": 62}]).score
+    changed = ops.paste(
+        score, score.starts[2], score.lengths[2], [{"track": "vocal", "onset": 0, "duration": 5, "pitch": 62}]
+    ).score
     assert five in changed.vocal
     root = parse(musicxml.export_musicxml(changed, lyrics=LYRICS))
     bar = root.findall("part[@id='P1']/measure")[2]
     first, second = bar.findall("note")[:2]
-    assert (first.findtext("type"), first.findtext("duration"), first.find("tie").get("type")) == ("eighth", "4", "start")
-    assert (second.findtext("type"), second.findtext("duration"), second.find("tie").get("type")) == ("32nd", "1", "stop")
+    assert (first.findtext("type"), first.findtext("duration"), first.find("tie").get("type")) == (
+        "eighth",
+        "4",
+        "start",
+    )
+    assert (second.findtext("type"), second.findtext("duration"), second.find("tie").get("type")) == (
+        "32nd",
+        "1",
+        "stop",
+    )
     assert first.find("lyric") is not None and second.find("lyric") is None  # a tied note has one syllable
     rest = root.findall("part[@id='P2']/measure")[2].find("note/rest")  # Ins rests through bar 3
     assert rest is not None and rest.get("measure") == "yes"

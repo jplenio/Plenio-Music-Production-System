@@ -2,19 +2,35 @@
 
 All notable changes are listed here. Versions follow semantic versioning; published Registry versions are immutable.
 
-## Unreleased
+## 0.4.0 - 2026-10-02
+
+The score editor becomes an arranging tool in the manner of Cubase. You can copy, move and delete sections; a cursor sets where playback and paste start; the clipboard pastes at the cursor or inserts time there. Everything that depends on the bars follows: the Guide track, the lyrics of the text sheet and, in covers, the original words and the source times. The lyrics are shown and edited where they are sung. The sheet music goes out as MusicXML, and the editor's work can be saved as a project file and opened again later.
 
 ### Added
 
 - **Arrange a score without ABC** (score editor). The section list works like Cubase's arranger track. Select one or more sections (Ctrl+click, Shift+click), then duplicate them (Ctrl+D), copy them (Ctrl+C), move them (Ctrl+↑/↓, or drag; Alt+drag copies) or delete them (Del). The notes of both voices, the chord symbols, keys and bar lines go with them. Each arrangement is one undo step, and the notation follows it.
 - **A cursor in the piano roll** (Cubase: project cursor). Click or drag in the ruler to set it, on the grid. Playback starts at the cursor, and a line follows the music. The cursor stays where it was on stop. *Loop section* plays to the end of the cursor's section and then repeats that section. Home and End move the cursor to the start and the end of the score. The section list and the bar strip put the cursor at the bar's start.
 - **Copy and paste at the cursor** (Cubase: key editor). Ctrl+C, Ctrl+X and Ctrl+V, plus the roll's Copy, Cut, Paste and Insert buttons. Paste overwrites what the clip's voices play from the cursor on. Insert (Ctrl+Shift+V, Cubase's *Paste Time*) moves everything from the cursor on later by whole bars first. Ctrl+D duplicates the selection right after itself. Sections copied in the list paste with their chord symbols, and when inserted they keep their names. A select frame that reaches into the chord lane also selects the chord symbols there, and Ctrl+A selects all notes and chord symbols.
-- **The Guide track follows the bars** (DAW sheet). Its notes are moved, copied and deleted with their bars. This holds for arranged sections, *Insert* at the cursor, and inserted, deleted or duplicated bars, and undo brings them back with the score. Before, inserting or deleting bars left the Guide notes where they were.
+- **The Guide track follows the bars** (DAW sheet). Its notes are moved, copied and deleted with their bars. This holds for arranged sections, *Insert* at the cursor, and inserted, deleted or duplicated bars, and undo brings them back with the score.
 - **The lyrics follow the sections** (*1 · YuE2 · Song*, *5 · YuE2 · DAW*). This applies when the lyrics of *Song Sheet · Text* matched the score's sections. Then every arrangement in the score sheet lays them onto the new sections: a copied chorus copies its words, a deleted section loses them, a joined section adds its lines. Apply writes them into the text sheet as an edit, and that sheet asks for approval again. In the Song template, the planner plans again for the new lyrics, so the arranged score is kept as *manual*. Lyrics changed in the text sheet after the last run are not overwritten.
 - **Lyrics where they are sung** (score editor). With lyrics, the piano roll shows a lyrics lane under the chord lane: every line over the Vocal phrase it is sung on, every syllable over its note. A double-click edits the line there, and each edit is one undo step. In *1 · YuE2 · Song* and *5 · YuE2 · DAW* the edits go into *Song Sheet · Text* on Apply; in the cover's text sheet they go into its Lyrics tab. The notation shows the syllables under the Vocal notes (read-only). The placement follows the lyrics writer's rule: one line per phrase, about one syllable per note.
 - **Covers keep their original words through an arrangement** (*2 · YuE2 · Cover*). Transcribe Score now keeps the content of every transcribed bar in the timeline, and the final score's bars are matched to it. With the original lyrics, a copied chorus gets the chorus words again, a moved verse takes its words along, and a deleted section's words are left out (reported). In the editor, *A/B* plays the source's chorus for a copied chorus, and the section list shows the right source times. This needs a new transcription.
 - **Export MusicXML** (score editor). The sheet music in the format notation programs exchange (MuseScore, Sibelius, Finale, Dorico, Cubase, Logic). It has two parts. *Vocal* carries the chord symbols, the section names, the tempo and the lyrics under the notes; *Instrument* is the other part. Pitches are spelled for the key, and notes across bar lines are tied.
 - **Save project / Open project…** (score editor). One file, `<title>.plenio.json`, holds everything the score editor works on: the score, the Guide notes and the lyrics. Open it in any score sheet to go on where you stopped, as one undo step. Parts a sheet cannot hold are named and left out. This matters most in the DAW workflow.
+
+### Changed
+
+- Playback starts at the **cursor** (before: at the selected bar). Without the piano roll the cursor follows the selected bar, so the *Text* layout plays as before. *Loop section* now plays to the end of the cursor's section and then repeats the whole section.
+- Ctrl+A in the piano roll selects the chord symbols too (Cubase: *Select All*); before, it selected the notes only.
+- Timelines from Transcribe Score hold the content of every bar (`bar_prints`), which lets an arranged cover find its source bars. Older timelines are read as before.
+
+### Fixed
+
+- Inserting, deleting or duplicating bars in the inspector of a DAW sheet left the Guide notes where they were, so they no longer sat under their bars. They now move with them.
+
+### Studies
+
+- **E6** measured the 0.3.1 instrumental form on the GPU (60 plans, 36 renders): the form gives the plans a few more sections and fewer token-limit cuts, and the rendered songs are more varied in 7 of 10 pairs. The form stays as it is; see `docs/test-reports/2026-10-01-e6.md`.
 
 ## 0.3.1 - 2026-10-01
 

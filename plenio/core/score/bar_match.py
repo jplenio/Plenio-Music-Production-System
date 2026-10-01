@@ -41,7 +41,9 @@ def bar_prints(score: canonical.Score) -> tuple[BarPrint, ...]:
     result = []
     for index, meter in enumerate(score.meters):
         start, end = score.starts[index], score.starts[index] + score.lengths[index]
-        result.append((_voice_print(meter, score.vocal, start, end), _voice_print(meter, score.ins, start, end)))
+        result.append(
+            (_voice_print(meter, score.vocal, start, end), _voice_print(meter, score.ins, start, end))
+        )
     return tuple(result)
 
 

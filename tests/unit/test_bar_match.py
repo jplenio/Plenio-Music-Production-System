@@ -28,7 +28,9 @@ def timeline() -> Timeline:
         source_sha256="src",
         score_sha256="abc",
         duration_s=TAKE["duration_s"],
-        bars=tuple(TimelineBar(a, b, bar.meter) for a, b, bar in zip(starts, ends, analysis.bars, strict=True)),
+        bars=tuple(
+            TimelineBar(a, b, bar.meter) for a, b, bar in zip(starts, ends, analysis.bars, strict=True)
+        ),
         sections=tuple((s.label, s.start_bar, s.bars) for s in analysis.sections),
         vocal_notes=tuple((a, b) for a, b in TAKE["vocal_notes"]),
         bar_prints=bar_match.bar_prints(PLAN),
@@ -69,7 +71,9 @@ def test_arranged_bars_find_their_source_bars() -> None:
     assert bar_match.match_bars(bar_match.bar_prints(deleted), source)[29:] == list(range(54, 68))
     # a bar whose notes were edited keeps its place after the bar before it
     bar = PLAN.starts[11]
-    edited = ops.paste(PLAN, bar, PLAN.lengths[11], [{"track": "vocal", "onset": 0, "duration": 4, "pitch": 40}]).score
+    edited = ops.paste(
+        PLAN, bar, PLAN.lengths[11], [{"track": "vocal", "onset": 0, "duration": 4, "pitch": 40}]
+    ).score
     assert bar_match.match_bars(bar_match.bar_prints(edited), source)[11] == 11
 
 
@@ -94,7 +98,7 @@ def test_a_moved_section_takes_its_words_along_and_lines_break_at_the_jump() -> 
     words = blocks(moved.lyrics)
     assert [tag for tag, _ in words][:3] == ["Intro", "Chorus", "Verse"]
     assert words[1][1] == plain[2][1] and words[2][1] == plain[1][1]
-    # without the bars' content (a timeline from before 0.3.2) the old fallback stays
+    # without the bars' content (a timeline from before 0.4.0) the old fallback stays
     assert draft(ops.arrange_sections(PLAN, [1, 3, 2, 4, 5, 6]).score, prints=False).method != "matched bars"
 
 
@@ -102,20 +106,27 @@ def test_the_timeline_keeps_the_prints() -> None:
     line = timeline()
     data = json.loads(json.dumps(line.to_dict()))
     assert timeline_from_dict(data).bar_prints == line.bar_prints
-    assert "bar_prints" not in replace(line, bar_prints=()).to_dict()  # old timelines read and write as before
+    assert (
+        "bar_prints" not in replace(line, bar_prints=()).to_dict()
+    )  # old timelines read and write as before
 
 
 # --- the editor computes the same (frontend/tests/fixtures/bar-match.json) -------------------------
 
 MATCH_FIXTURE = ROOT / "frontend" / "tests" / "fixtures" / "bar-match.json"
-TRICKY = json.loads((ROOT / "frontend" / "tests" / "fixtures" / "tricky-score.json").read_text(encoding="utf-8"))["abc"]
+TRICKY = json.loads(
+    (ROOT / "frontend" / "tests" / "fixtures" / "tricky-score.json").read_text(encoding="utf-8")
+)["abc"]
 
 
 def match_fixture() -> dict[str, object]:
     source = bar_match.bar_prints(PLAN)
     edits = []
-    for name, order in (("copy the first chorus", [1, 2, 3, 3, 4, 5, 6]), ("move the first chorus up", [1, 3, 2, 4, 5, 6]),
-                        ("delete the second verse and chorus", [1, 2, 3, 6])):
+    for name, order in (
+        ("copy the first chorus", [1, 2, 3, 3, 4, 5, 6]),
+        ("move the first chorus up", [1, 3, 2, 4, 5, 6]),
+        ("delete the second verse and chorus", [1, 2, 3, 6]),
+    ):
         prints = bar_match.bar_prints(ops.arrange_sections(PLAN, order).score)
         edits.append({"name": name, "prints": prints, "mapping": bar_match.match_bars(prints, source)})
     data = {"tricky_prints": bar_match.bar_prints(c.from_abc(TRICKY)), "source": source, "edits": edits}
@@ -129,6 +140,6 @@ def write_match_fixture() -> None:
 
 def test_the_bar_match_fixture_is_current() -> None:
     assert json.loads(MATCH_FIXTURE.read_text(encoding="utf-8")) == match_fixture(), (
-        "regenerate frontend/tests/fixtures/bar-match.json: python -c \"import sys; "
+        'regenerate frontend/tests/fixtures/bar-match.json: python -c "import sys; '
         "sys.path[:0] = ['tests/unit', 'tests/support']; import test_bar_match as t; t.write_match_fixture()\""
     )

@@ -96,7 +96,7 @@ def test_the_notation_shows_the_syllables_and_keeps_every_element_in_place() -> 
         before = by_id[element["id"]]["display"]
         assert shown[slice(*element["display"])] == plain["display_abc"][slice(*before)]
     assert sung["lyrics"]["sections"][1]["lines"][0]["text"] == "beautiful morning"
-    assert operations.editor_view(TRICKY, "")  == plain
+    assert operations.editor_view(TRICKY, "") == plain
 
 
 def test_a_real_plan_gets_a_w_line_for_every_sung_vocal_line() -> None:
@@ -121,7 +121,9 @@ def test_a_real_plan_gets_a_w_line_for_every_sung_vocal_line() -> None:
 
 # --- the frontend's view with lyrics (frontend/tests/fixtures/tricky-lyrics.json) ------------------
 
-LYRICS_FIXTURE = Path(__file__).resolve().parents[2] / "frontend" / "tests" / "fixtures" / "tricky-lyrics.json"
+LYRICS_FIXTURE = (
+    Path(__file__).resolve().parents[2] / "frontend" / "tests" / "fixtures" / "tricky-lyrics.json"
+)
 
 
 def lyrics_fixture() -> dict[str, object]:
@@ -135,6 +137,6 @@ def write_lyrics_fixture() -> None:
 
 def test_the_lyrics_view_fixture_is_current() -> None:
     assert json.loads(LYRICS_FIXTURE.read_text(encoding="utf-8")) == lyrics_fixture(), (
-        "regenerate frontend/tests/fixtures/tricky-lyrics.json: python -c \"import sys; "
+        'regenerate frontend/tests/fixtures/tricky-lyrics.json: python -c "import sys; '
         "sys.path[:0] = ['tests/unit', 'tests/support']; import test_lyric_layout as t; t.write_lyrics_fixture()\""
     )

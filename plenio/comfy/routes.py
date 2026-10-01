@@ -146,7 +146,9 @@ async def score_musicxml_export(request: web.Request) -> web.StreamResponse:
     score = canonical.from_abc(_text(data, "abc"))
     title = _text(data, "title", required=False)
     text = musicxml.export_musicxml(score, title=title, lyrics=_lyrics(data))
-    return web.json_response({"filename": musicxml.filename_for(title), "data": text, "type": musicxml.MUSICXML_MIME})
+    return web.json_response(
+        {"filename": musicxml.filename_for(title), "data": text, "type": musicxml.MUSICXML_MIME}
+    )
 
 
 async def score_midi_import(request: web.Request) -> web.StreamResponse:

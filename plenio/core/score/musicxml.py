@@ -102,7 +102,9 @@ def _pieces(notes: Sequence[canonical.Note], start: int, end: int, cuts: Sequenc
         if note.onset > cursor:
             events.append(_Piece(cursor, note.onset - cursor, None, False, False, None))
         begin, finish = max(note.onset, start), min(note.end, end)
-        events.append(_Piece(begin, finish - begin, note.pitch, note.onset < start, note.end > end, note.onset))
+        events.append(
+            _Piece(begin, finish - begin, note.pitch, note.onset < start, note.end > end, note.onset)
+        )
         cursor = finish
     if cursor < end:
         events.append(_Piece(cursor, end - cursor, None, False, False, None))
@@ -150,7 +152,9 @@ def _harmony_xml(name: str, offset: int) -> str:
     parts.append("</root>")
     parts.append(f'<kind text="{escape(text)}">{kind}</kind>')
     if rest == "7sus4":
-        parts.append("<degree><degree-value>7</degree-value><degree-alter>-1</degree-alter><degree-type>add</degree-type></degree>")
+        parts.append(
+            "<degree><degree-value>7</degree-value><degree-alter>-1</degree-alter><degree-type>add</degree-type></degree>"
+        )
     if bass:
         bass_alter = _ALTER.get(bass[1:], 0)
         parts.append(f"<bass><bass-step>{bass[0]}</bass-step>")
@@ -230,8 +234,12 @@ def _part(
             )
         cuts = [k.onset for k in key_changes if start < k.onset]
         pieces = _pieces(notes, start, end, cuts)
-        if all(p.pitch is None for p in pieces) and not (lead and any(start <= c.onset < end for c in chords)):
-            lines.append(f'<note><rest measure="yes"/><duration>{end - start}</duration><voice>1</voice></note>')
+        if all(p.pitch is None for p in pieces) and not (
+            lead and any(start <= c.onset < end for c in chords)
+        ):
+            lines.append(
+                f'<note><rest measure="yes"/><duration>{end - start}</duration><voice>1</voice></note>'
+            )
             lines.append("</measure>")
             continue
         for piece in pieces:
@@ -247,7 +255,10 @@ def _part(
                 first, last = number == 0, number == len(values) - 1
                 tie_in = piece.pitch is not None and (piece.tie_in or not first)
                 tie_out = piece.pitch is not None and (piece.tie_out or not last)
-                body = [_pitch_xml(piece.pitch, key) if piece.pitch is not None else "<rest/>", f"<duration>{units}</duration>"]
+                body = [
+                    _pitch_xml(piece.pitch, key) if piece.pitch is not None else "<rest/>",
+                    f"<duration>{units}</duration>",
+                ]
                 if tie_in:
                     body.append('<tie type="stop"/>')
                 if tie_out:

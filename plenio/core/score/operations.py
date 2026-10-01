@@ -195,7 +195,9 @@ def editor_view(abc: str, lyrics: str | None = None) -> dict[str, Any]:
         except canonical.ScoreSyntaxError as error:
             score = None
             result["model_error"] = {"message": error.message, "diagnostics": error.diagnostics}
-        placed = lyric_layout.layout(score, lyrics) if score is not None and lyrics and lyrics.strip() else None
+        placed = (
+            lyric_layout.layout(score, lyrics) if score is not None and lyrics and lyrics.strip() else None
+        )
         words: dict[int, str] | None = None
         if placed is not None:
             words = {onset: lyric_layout.w_token(s) for onset, s in placed.syllables().items()}
