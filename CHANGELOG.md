@@ -2,6 +2,12 @@
 
 All notable changes are listed here. Versions follow semantic versioning; published Registry versions are immutable.
 
+## Unreleased
+
+### Changed
+
+- **2 · YuE2 · Cover** starts with the style template *pop/dance-pop-vocal*, *original lyrics* (the language detected from the singing) and *keep original chords*; genre and mood are empty, so they come from the style template. App mode shows the original lyrics' language and voice.
+
 ## 0.4.2 - 2026-10-02
 
 The score editor arranges single bars the way it arranges sections, and the transport moves next to the piano roll.

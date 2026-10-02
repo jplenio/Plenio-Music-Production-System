@@ -202,20 +202,20 @@
      "link": null
     },
     {
-     "localized_name": "vocals.melody",
-     "name": "vocals.melody",
-     "type": "COMBO",
+     "localized_name": "vocals.language",
+     "name": "vocals.language",
+     "type": "STRING",
      "widget": {
-      "name": "vocals.melody"
+      "name": "vocals.language"
      },
      "link": null
     },
     {
-     "localized_name": "vocals.lead_instrument",
-     "name": "vocals.lead_instrument",
+     "localized_name": "vocals.voice",
+     "name": "vocals.voice",
      "type": "STRING",
      "widget": {
-      "name": "vocals.lead_instrument"
+      "name": "vocals.voice"
      },
      "link": null
     },
@@ -281,14 +281,14 @@
    },
    "widgets_values": [
     "one cover, stop to review",
-    "none",
+    "pop/dance-pop-vocal",
     "",
-    "acoustic folk",
-    "warm, intimate",
-    "instrumental",
-    "instrument plays the lead",
     "",
-    "new accompaniment",
+    "",
+    "original lyrics",
+    "",
+    "",
+    "keep original chords",
     ""
    ]
   },
@@ -7218,11 +7218,11 @@
     ],
     [
      4,
-     "vocals.melody"
+     "vocals.language"
     ],
     [
      4,
-     "vocals.lead_instrument"
+     "vocals.voice"
     ],
     [
      4,

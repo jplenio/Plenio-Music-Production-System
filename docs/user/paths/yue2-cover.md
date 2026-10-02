@@ -16,7 +16,7 @@ Source -> (Excerpt) -> Transcribe Score -> Score Tools -> Song Sheet · Score
 
 1. Open **2 · YuE2 · Cover** from the template browser.
 2. Upload the source in **Source recording**. Up to 5:00 is transcribed in one pass; for longer songs enable **Excerpt** (Trim Audio Duration) and cover one part at a time.
-3. In **Cover Brief** choose the **mode** (below; the default *one cover, stop to review* is described here), the target style and the **vocals**: *instrumental* (default), *original lyrics* or *new lyrics*. **harmony**: *new accompaniment* (YuE2 re-harmonises) or *keep original chords*.
+3. In **Cover Brief** choose the **mode** (below; the default *one cover, stop to review* is described here), the target style and the **vocals**: *instrumental*, *original lyrics* or *new lyrics*. **harmony**: *new accompaniment* (YuE2 re-harmonises) or *keep original chords*. The template starts with the style template *pop/dance-pop-vocal* (genre and mood left empty, so they come from it), *original lyrics* with the language detected from the singing, and *keep original chords*.
 4. Press **Run**. SheetSage2 transcribes the source; the run **stops at Song Sheet · Score**. Open it, check the score - above all the section names and boundaries, because the lyrics follow them - and press **Approve**.
 5. Run again. The lyrics are drafted and the run **stops at Song Sheet · Text**. Check and correct the lyrics (your text always wins), then **Approve**. Its score tab shows the score with the lyrics over the notes, and you can still **edit the score there**. Apply or Approve writes it into Song Sheet · Score and keeps the lyrics as you see them (*manual*), so the two stay a pair. Approve also approves the changed score, so the next run renders without stopping again.
 6. Run again to render. Each further run is a new take (the take seed changes).
@@ -69,7 +69,7 @@ For instrumental covers Plenio silences the Vocal voice of the score (the melody
 
 ## App mode
 
-Switch **Graph / App** at the top left for a simple form: the source file, the mode, the cover style, *vocals* with the options of an instrumental cover, *harmony*, the take seed and the buttons **Song Sheet · Score** and **Song Sheet · Text** - the two review stops work in the app, the editor opens from the buttons. The options of *original lyrics* and *new lyrics* (language, voice, theme) are set in the graph. See [App mode](../concepts/app-mode.md).
+Switch **Graph / App** at the top left for a simple form: the source file, the mode, the cover style, *vocals* with the options of an original-lyrics cover (language, voice), *harmony*, the take seed and the buttons **Song Sheet · Score** and **Song Sheet · Text** - the two review stops work in the app, the editor opens from the buttons. The options of *instrumental* and *new lyrics* (melody, lead instrument, theme) are set in the graph. See [App mode](../concepts/app-mode.md).
 
 ## Limits
 

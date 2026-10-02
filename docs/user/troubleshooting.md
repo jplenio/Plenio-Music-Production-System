@@ -62,7 +62,7 @@ Start with **0 · System Check**: it shows versions, GPUs, which model files of 
 | A workflow saved with 0.2.0/0.2.1 shows the brief's mode *one song, stop to review* | the mode is new in 0.2.2; Plenio adds it when loading, with the earlier behaviour (the same song, new takes) | Choose *new song every run* for a series; the sheets keep their saved *review* (set them to *as the brief says* to follow the mode) |
 | API prompt: *Required input is missing: mode* | Song Brief and Cover Brief have a new first input in 0.2.2 | Add `"mode": "new song every run"` or `"one song, stop to review"` (Cover Brief: `"new cover every run"` / `"one cover, stop to review"`) |
 | A block's settings are not visible | model blocks are collapsed; blocks are subgraphs | Expand a collapsed block (the dot at its top left, or right-click > *Expand*); open a block with the icon at its top right |
-| App mode shows no instrumental options | App mode shows the options of the default *vocals* choice (sung songs; instrumental covers) | Set the other choice's options in the graph view |
+| App mode shows no instrumental options | App mode shows the options of the template's *vocals* choice (sung songs; covers with the original lyrics) | Set the other choice's options in the graph view |
 
 ## Reporting a problem
 
