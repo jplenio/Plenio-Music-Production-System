@@ -78,7 +78,7 @@ Check Vocals listens to the take,
 @ Master and Export finish the cover
 and Master and Export finish it.
 
-@ Done: the instrumental cover | +7
+@ Done: the instrumental cover | +7 | seed 8
 Done! Here's our instrumental cover. [pause:0.5s] Let's have a listen.
 
 @ Press Run again for another version
@@ -120,7 +120,7 @@ On the left, the sections, ready to be arranged.
 @ Shift + mouse wheel
 Shift and the mouse wheel scroll to where the singing starts.
 
-@ Click a note:
+@ Click a note: | seed 6
 Editing works just like in the song video: click a note to select it everywhere,
 
 @ The arrow keys move it
@@ -186,8 +186,8 @@ Faster Whisper listens to the vocals, and places every word into the score's sec
 @ Stop 2: Song Sheet · Text
 Stop two: the Text sheet.
 
-@ Open the text.
-Let's open it.
+@ Open the text. | seed 6
+Let's open it, and take a look.
 
 @ The Score tab shows the transcribed words
 The Score tab shows the transcribed words, right over the notes they're sung on.

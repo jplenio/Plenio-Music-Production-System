@@ -202,10 +202,10 @@ Playback starts right at the cursor. A green line follows the music, [pause:0.4s
 @ The transport sits right under the roll
 The transport sits right under the roll, within reach. Space plays and stops, Home and End jump to either end.
 
-@ Copy and paste work like
+@ Copy and paste work like | seed 4
 Copy and paste work just like in a DAW's key editor. Frame a phrase in Select mode,
 
-@ … Ctrl+C copies it
+@ … Ctrl+C copies it | seed 6
 press Control C, then set the cursor further along,
 
 @ … and Ctrl+V pastes it there
@@ -256,8 +256,8 @@ The Score sheet turns green. The Text sheet asks again, because its lyrics chang
 @ Run again: the run stops at Song Sheet · Text
 So, run again. It stops at the Text sheet, so you can see the new lyrics before anything is rendered.
 
-@ Open it: the lyrics now have
-Let's open it.
+@ Open it: the lyrics now have | seed 6
+Let's open it, and take a look.
 
 @ Lyrics: the copied chorus is there
 And there's the copied chorus, with all its words. [pause:0.4s] Nobody had to type a thing.
