@@ -180,6 +180,14 @@ const CAMERA = `(() => {
     }
     return null
   }
+  tut.audioSrc = (nodeId) => {
+    const n = tut.node(nodeId)
+    for (const w of n?.widgets ?? []) {
+      const a = w.element?.querySelector?.('audio') ?? (w.element?.tagName === 'AUDIO' ? w.element : null)
+      if (a) return a.currentSrc || a.src || null
+    }
+    return null
+  }
   tut.ids = (keys) => Object.fromEntries(keys.map((k) => [k, String(tut.node(k).id)]))
   tut.setWidget = (nodeId, name, value) => {
     const n = tut.node(nodeId)
@@ -211,7 +219,7 @@ export async function openStudio({ url, out, width = 1920, height = 1000, scale 
   page.on('pageerror', (e) => log('page error:', String(e).slice(0, 300)))
 
   const W = Math.round(width * scale), H = Math.round(height * scale)
-  const markers = { width: W, height: H, fps, captions: [], chapters: [], cards: [], fast: [], notes: [] }
+  const markers = { width: W, height: H, fps, captions: [], chapters: [], cards: [], fast: [], notes: [], sounds: [] }
   let t0 = null
   const now = () => (t0 === null ? 0 : (Date.now() - t0) / 1000)
 
@@ -414,6 +422,18 @@ export async function openStudio({ url, out, width = 1920, height = 1000, scale 
     if (error) throw new Error('the run failed: ' + JSON.stringify(error).slice(0, 600))
     return page.evaluate(() => window.__tut.stop)
   }
+  // The song a preview node plays from now on: saved next to the recording, the edit mixes it under the
+  // voice (the recording itself has no sound).
+  async function listen(nodeId, { seconds = 14, from = 0 } = {}) {
+    const src = await page.evaluate((n) => window.__tut.audioSrc(n), nodeId)
+    if (!src) return
+    const name = new URL(src, url).searchParams.get('filename') ?? 'song.flac'
+    const file = `sound-${markers.sounds.length + 1}${path.extname(name) || '.flac'}`
+    const r = await fetch(new URL(src, url))
+    if (!r.ok) throw new Error(`could not fetch the preview's audio: ${r.status}`)
+    fs.writeFileSync(path.join(out, file), Buffer.from(await r.arrayBuffer()))
+    markers.sounds.push({ t: now(), file, from, seconds })
+  }
   async function resetRunState() {
     await page.evaluate(() => { window.__tut.events = []; window.__tut.stop = null; window.__tut.error = null })
   }
@@ -428,7 +448,7 @@ export async function openStudio({ url, out, width = 1920, height = 1000, scale 
     startCapture, stopCapture, saveMarkers,
     moveTo, rest, hover, click, drag, type, keys, spotlight, boxOf, centre,
     caption, say, read, chapter, card, fast, wait,
-    openComfy, fly, flyGroups, flyNodes, widgetBox, nodeButton, audioBox, chooseCombo, run, follow, resetRunState,
+    openComfy, fly, flyGroups, flyNodes, widgetBox, nodeButton, audioBox, listen, chooseCombo, run, follow, resetRunState,
     get mouse() { return mouse },
   }
 }

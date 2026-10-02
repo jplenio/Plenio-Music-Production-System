@@ -1,0 +1,106 @@
+# Narration of enhance-master.mjs (Tutorial 4 · Enhance & Master). Format: lib/voice.mjs.
+
+@ card 4 · Enhance
+A recording that needs a final polish? This template masters it, no graphics card needed.
+
+@ Open the template browser
+Open the template browser,
+
+@ Plenio’s templates:
+and Plenio's folder under Extensions.
+
+@ 4 · Enhance & Master finishes
+Template four: Enhance and Master. [pause:0.4s] It finishes a recording you already have.
+
+@ Three steps, from left to right
+It's just three steps, from left to right.
+
+@ SOURCE - the recording
+Source: a take you rendered earlier, or any song file.
+
+@ MASTER - an EQ for the tone
+Master: an EQ shapes the tone, then Loudness and Dynamics sets the level.
+
+@ FINISH - the preview
+And Finish: a preview, and the export, with tags, and the original kept safe.
+
+@ Optional: Stems rebalances
+Two optional blocks stay off: Stems, to rebalance a mix, and Refine, for dull files.
+
+@ card Master a take
+Part one: master a take, with the default settings.
+
+@ Load the recording:
+First, load the recording into Source.
+
+@ Our example: a YuE2 take
+Our example is a YuE2 take, straight from the model, and not mastered yet.
+
+@ EQ: “match preset”, Warm
+The EQ matches the tone: it measures the song, and proposes gentle, warm bands.
+
+@ The curve under the node
+After the run, the curve shows those bands, right over the song's own spectrum.
+
+@ Loudness & Dynamics: streaming
+Loudness aims at streaming level: minus fourteen LUFS, peaks below zero.
+
+@ compression: Balanced
+Compression: gentle glue. Or just the limiter.
+
+@ Press Run.
+Press Run.
+
+@ EQ measures the song
+The EQ measures and matches,
+
+@ Loudness & Dynamics brings it
+Loudness and Dynamics brings up the level,
+
+@ Export writes the files
+and Export writes the files.
+
+@ The match: gentle bands
+Here's the match: a few gentle bands, over the spectrum of the take. [pause:0.4s] Subtle, on purpose.
+
+@ Measured, not estimated
+And these numbers are measured: minus fourteen LUFS. Target reached.
+
+@ Listen in the preview | +6
+Let's listen to the master.
+
+@ Export: FLAC and MP3
+Export wrote a FLAC and an MP3 with the source's tags, plus the original and a release record.
+
+@ card Your own sound
+Part two: make it your own sound.
+
+@ “Edit these bands”
+Edit these bands: now the bands are yours.
+
+@ Drag a handle:
+Drag a handle to change its frequency and gain. [pause:0.3s] The mouse wheel sets its width, and a double-click adds a new band.
+
+@ The presets menu
+Or pick a ready-made curve from the presets.
+
+@ target: Apple Music
+For Apple Music and podcasts, pick a slightly quieter target: minus sixteen LUFS.
+
+@ Run again.
+Run it again.
+
+@ Loudness & Dynamics brings it
+The new settings are applied,
+
+@ Export writes the files
+and exported.
+
+@ -16 LUFS, measured
+Minus sixteen, measured. And if a target needs too much limiting, the node stops short, and tells you.
+
+@ The new master | +6
+Here's the new master, with the original right next to it.
+
+@ card Next: 5 · YuE2 · DAW
+Next up: template five, YuE2 DAW, where you write the music yourself.

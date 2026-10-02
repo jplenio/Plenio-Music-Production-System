@@ -1,0 +1,269 @@
+# Narration of yue2-song.mjs (Tutorial 1 · YuE2 · Song). Format: lib/voice.mjs. Written forms; the
+# lexicon turns names into what the TTS should say.
+
+@ card 1 · YuE2 · Song
+Welcome to Plenio! In this video, we write, review and render a song with YuE2.
+
+@ Plenio adds six ready-made templates
+Plenio comes with six ready-made templates. To find them, open the template browser.
+
+@ Plenio’s templates are listed
+They live under Extensions, in the Plenio Music Production System folder.
+
+@ 1 · YuE2 · Song writes
+We start with template one: YuE2 Song. [pause:0.4s] It writes a brand-new song, and renders it with the YuE2 music model.
+
+@ The template reads from left to right
+The template reads from left to right, in numbered groups.
+
+@ SONG - the Song Brief
+First, the Song Brief: what the song should be about.
+
+@ WRITE - a local language model
+Next, a local language model writes the title, the style, and the lyrics.
+
+@ TEXT - Song Sheet · Text
+The Text sheet shows exactly what YuE2 is going to sing.
+
+@ SCORE - YuE2 plans
+Then YuE2 plans the melody as a score, and the Score sheet shows it.
+
+@ RENDER - YuE2 renders
+Here, YuE2 renders the actual song.
+
+@ FINISH - Master
+Finally, Master sets the loudness, and Export writes the files.
+
+@ Optional blocks
+Optional blocks, like stems or cover art, stay off until you need them.
+
+@ card A new song every run
+Part one: a new song, every single run. No stops, no questions asked.
+
+@ Everything starts in the Song Brief
+Everything starts in the Song Brief.
+
+@ mode: “new song every run”
+Set the mode to new song every run. Each run writes and renders a different song, straight through.
+
+@ template: a starting point
+A template fills in whatever you leave empty.
+
+@ Describe the song in your own words
+Then describe the song in your own words. [pause:0.5s] Here: a hopeful song about leaving a small town at sunrise.
+
+@ length: from about 1:00
+The length goes from about one minute, up to six. We'll keep this one short.
+
+@ vocals: a sung song
+And vocals: a sung song, or an instrumental.
+
+@ Press Run.
+That's all we need. Let's press Run.
+
+@ The writer model drafts
+The writer model drafts the title, the style and the lyrics.
+
+@ YuE2 plans the melody
+YuE2 plans the melody and the chords,
+
+@ YuE2 renders the song
+then renders the song from the lyrics and that score.
+
+@ Master and Export finish
+Master and Export add the finishing touches.
+
+@ Done: the finished song | +7
+Done! The finished song is right here, in the mastered preview. [pause:0.6s] Have a listen.
+
+@ Export wrote the mastered FLAC
+Export saved the mastered FLAC, the original take, and a release record.
+
+@ Press Run again for another
+Press Run again for a different song, or set a number next to Run, for a whole series.
+
+@ card One song, stop to review
+Part two: one song, with stops to review. You check everything, before anything is rendered.
+
+@ mode: “one song, stop to review”
+Now switch the mode to one song, stop to review. This time, the run pauses at both Song Sheets.
+
+@ Press Run.
+Press Run once more.
+
+@ The writer model drafts
+The writer drafts the text again.
+
+@ The run stopped at Song Sheet · Text
+And the run stops at the Text sheet: waiting for your approval. Nothing has been rendered yet.
+
+@ Open it with
+Open it with Edit Song Sheet.
+
+@ Lyrics: the words YuE2 will sing
+The Lyrics tab holds the words YuE2 will sing, section by section. Change anything you like: your edit always wins.
+
+@ Style: the genre
+Style describes the genre, the instruments, and the voice.
+
+@ Title & artwork
+And here's the title, plus a prompt for optional cover art.
+
+@ Approve: exactly these documents
+Happy with it? Approve. Exactly these words go on to the music model.
+
+@ The node says ✓ approved at once
+The node turns green right away. [pause:0.6s] Press Run again: YuE2 plans the score, and the run stops at the next sheet.
+
+@ YuE2 plans the melody
+YuE2 is planning the melody and the chords.
+
+@ Stop 2: Song Sheet · Score
+Stop number two: the Score sheet is waiting for us.
+
+@ Open the score.
+Let's open the score.
+
+@ ⛶ gives the editor
+This button gives the editor the whole window.
+
+@ card The score editor
+Part three: the score editor. A lot is new here, in version zero point four.
+
+@ The score is shown three ways
+The score is shown three ways: the piano roll on top, the sheet music below, and the inspector on the right.
+
+@ On the left, the song’s sections
+On the left: the sections, which you can now arrange, just like in a DAW.
+
+@ Shift + mouse wheel
+Shift plus the mouse wheel scrolls through the bars.
+
+@ Also new: the lyrics stand over
+Also new: the lyrics sit right above their notes, one syllable per note.
+
+@ The sheet warns
+But the sheet warns: the lyrics expect a chorus, not an interlude.
+
+@ Fix it in the section list
+That's easy to fix. In the section list, rename interlude to chorus.
+
+@ Fixed: the warning is gone
+Fixed! The warning is gone, and every word lands in the right section.
+
+@ The notation shows the same syllables
+The sheet music shows the same syllables, under the notes.
+
+@ Double-click a line in the lyrics lane
+To change a line, double-click it in the lyrics lane, and type, right where it's sung.
+
+@ The words move onto their notes
+The new words move onto their notes, and Apply will write them into the Text sheet.
+
+@ Ctrl+Z undoes a lyrics edit
+Control Z takes it back.
+
+@ Click a note:
+Now the notes. Click one, and all three views select it.
+
+@ The arrow keys move it
+The arrow keys move it: up and down in semitones, left and right along the grid.
+
+@ The toolbar does the same
+The toolbar can do the same, and more.
+
+@ Drag a note to move it
+Drag a note to move it in time and pitch, [pause:0.3s] and Control Z undoes any step.
+
+@ Drag its right end
+Drag its right edge to make it longer, or shorter.
+
+@ Draw mode:
+In Draw mode, drag across an empty spot, to draw a brand-new note.
+
+@ Select mode:
+Select mode is for groups: pull a frame around several notes,
+
+@ … and move them together
+and move them all at once. Here, two semitones up.
+
+@ Ctrl+Z again
+Control Z again, and the melody is back as it was.
+
+@ Double-click a chord symbol
+Chords work the same way. Double-click a chord symbol to change it, or the empty lane to add one.
+
+@ New: click in the ruler
+Next, the cursor. Click into the ruler, on the bar numbers, to place it, just like in Cubase.
+
+@ Playback starts at the cursor
+Playback starts right at the cursor. A green line follows the music, [pause:0.4s] and when you stop, the cursor stays where it was.
+
+@ Space plays and stops
+Space plays and stops. Home and End jump to the start, and the end.
+
+@ Copy and paste work like
+Copy and paste work just like in a DAW's key editor. Frame a phrase in Select mode,
+
+@ … Ctrl+C copies it
+press Control C, then set the cursor further along,
+
+@ … and Ctrl+V pastes it there
+and Control V pastes it there, replacing what was played.
+
+@ Ctrl+Shift+V inserts it instead
+Control Shift V inserts it instead, and everything after it moves back.
+
+@ Ctrl+Z - the song is as it was
+Undo, and the song is as it was. Cut and duplicate are here too, in the toolbar.
+
+@ Arrange the song
+Now, arranging. Select a section, here the chorus, and press Control D to duplicate it: notes, chords and all.
+
+@ The lyrics follow
+Watch the lyrics: the copy gets its words, too. And since YuE2 plans from them, this score is now kept as yours.
+
+@ Ctrl+↑ / Ctrl+↓ move the selection
+Control and the arrow keys move sections around. We keep the copy, but undo the move.
+
+@ Export MusicXML hands the sheet music
+Export MusicXML hands the sheet music, lyrics included, to MuseScore, Sibelius, Dorico, or Cubase.
+
+@ Save project keeps
+And Save project keeps the score, your guide notes and the lyrics together, in one file.
+
+@ Approve: this score
+Approve. This score, with the extra chorus, is what YuE2 will render.
+
+@ Song Sheet · Score says ✓ approved
+The Score sheet turns green. The Text sheet asks again, because its lyrics changed.
+
+@ Run again: the run stops at Song Sheet · Text
+So, run again. It stops at the Text sheet, so you can see the new lyrics before anything is rendered.
+
+@ Open it: the lyrics now have
+Let's open it.
+
+@ Lyrics: the copied chorus is there
+And there's the copied chorus, with all its words. [pause:0.4s] Nobody had to type a thing.
+
+@ Approve.
+Approve, one more time.
+
+@ ✓ approved. Run again
+Approved. Run again: YuE2 plans once more for the new lyrics, the Score sheet keeps your arrangement, and the song is rendered.
+
+@ YuE2 renders the song
+YuE2 renders the song,
+
+@ Master and Export finish
+and Master and Export finish it.
+
+@ The approved song is finished | +7
+And here it is: the approved song, finished and exported. [pause:0.5s] Take a listen.
+
+@ Every further Run
+Every further run renders a new take of the same song.
+
+@ card Next: 2 · YuE2 · Cover
+Next up: template two, YuE2 Cover. Thanks for watching!

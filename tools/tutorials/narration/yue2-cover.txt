@@ -1,0 +1,232 @@
+# Narration of yue2-cover.mjs (Tutorial 2 · YuE2 · Cover). Format: lib/voice.mjs.
+
+@ card 2 · YuE2 · Cover
+Welcome back! This time, we turn an existing recording into a brand-new cover.
+
+@ Open the template browser
+Open the template browser once more.
+
+@ Plenio’s templates:
+Plenio's templates are under Extensions.
+
+@ 2 · YuE2 · Cover makes
+We pick template two: YuE2 Cover. [pause:0.4s] It makes a new version of a recording, one you own, or are allowed to use.
+
+@ The template reads from left to right
+Again, the template reads from left to right.
+
+@ SOURCE - the recording
+Source: the recording to cover.
+
+@ COVER - the Cover Brief
+The Cover Brief sets the new style, and what happens to the vocals.
+
+@ SCORE - SheetSage2
+SheetSage2 transcribes the music into a score, and the Score sheet shows it.
+
+@ LYRICS - the original words
+Lyrics: the original words, brand-new lyrics, or just section tags.
+
+@ TEXT - Song Sheet · Text
+The Text sheet shows the words and the style YuE2 gets.
+
+@ RENDER - YuE2 renders the cover
+YuE2 renders the cover, and Check Vocals picks the best take.
+
+@ FINISH - Master
+And Master and Export finish the job.
+
+@ card A new cover every run
+Part one: a new cover, every run. Straight through, no stops.
+
+@ Load the recording:
+First, load the recording, right here in Source recording.
+
+@ Our example:
+Our example is a four-minute synth-pop song.
+
+@ Longer songs:
+For longer songs, switch on Excerpt, and cover one part at a time.
+
+@ The Cover Brief says
+The Cover Brief describes the new version.
+
+@ mode: “new cover every run”
+With new cover every run, each run makes a different version, without any stops.
+
+@ genre and mood:
+Genre and mood set the new style.
+
+@ vocals: “instrumental”
+Instrumental: an instrument plays the melody.
+
+@ harmony: keep the original chords
+Keep the original chords, or let YuE2 re-harmonize.
+
+@ Press Run.
+Now, press Run.
+
+@ SheetSage2 transcribes the recording
+SheetSage2 transcribes the melody, the chords and the sections,
+
+@ YuE2 renders the cover from the score
+YuE2 renders the cover from that score,
+
+@ Check Vocals listens
+Check Vocals listens to the take,
+
+@ Master and Export finish the cover
+and Master and Export finish it.
+
+@ Done: the instrumental cover | +7
+Done! Here's our instrumental cover. [pause:0.5s] Let's have a listen.
+
+@ Press Run again for another version
+Run again for another version. The transcription is reused, so only the new cover renders.
+
+@ card One cover, stop to review
+Part two: one cover, with stops to review. You check the score and the words first.
+
+@ mode: “one cover, stop to review”
+Switch the mode to one cover, stop to review. The run now pauses at both Song Sheets.
+
+@ vocals: “original lyrics”
+And set vocals to original lyrics: YuE2 sings the words of the recording.
+
+@ voice: describe the singer
+Describe the singer you'd like to hear.
+
+@ Press Run. The transcription
+Press Run. [pause:0.4s] The transcription from part one is simply reused.
+
+@ Stop 1: Song Sheet · Score
+Stop number one: the Score sheet waits for your approval.
+
+@ Open it with
+Open it with Edit Song Sheet,
+
+@ ⛶ gives the editor
+and give the editor the whole window.
+
+@ This sheet holds the score
+This is the score SheetSage2 transcribed. The words come at the next stop, and they follow this score.
+
+@ The score is shown three ways
+Three views again: the piano roll, the sheet music, and the inspector.
+
+@ On the left, the song’s sections
+On the left, the sections, ready to be arranged.
+
+@ Shift + mouse wheel
+Shift and the mouse wheel scroll to where the singing starts.
+
+@ Click a note:
+Editing works just like in the song video: click a note to select it everywhere,
+
+@ The arrow keys move it
+move it with the arrow keys, and undo with Control Z.
+
+@ The toolbar does the same
+The toolbar offers the same moves.
+
+@ Drag a note to move it
+Drag a note to move it, [pause:0.3s] and undo again.
+
+@ Drag its right end
+Drag its right edge to change its length.
+
+@ Draw mode:
+Draw a new note on an empty spot,
+
+@ Select mode:
+or frame several notes in Select mode,
+
+@ … and move them together
+and move them together.
+
+@ Ctrl+Z again
+One more undo, and the melody is back.
+
+@ New: click in the ruler
+Now, the cursor. Click into the ruler to set it, just like in Cubase.
+
+@ Playback starts at the cursor
+Playback starts at the cursor, with a green line following along. [pause:0.4s] Stop, and the cursor stays put.
+
+@ Space plays and stops
+Space plays and stops. Home and End jump to either end.
+
+@ ▶ source plays the original recording
+And here's the clever part for covers: source plays the original recording from the same bar. [pause:0.3s] So you can compare, A and B.
+
+@ Arrange the song
+Let's arrange. Select the chorus, and press Control D: a copy right after it.
+
+@ Ctrl+↑ / Ctrl+↓ move the selection
+Control and the arrow keys move sections. We keep the copy, and undo the move.
+
+@ With the original lyrics, the words follow
+With the original lyrics, the words follow their bars. So the copied chorus will sing the same words again.
+
+@ Export MusicXML hands the sheet music
+Export MusicXML hands the sheet music to MuseScore, Sibelius, Dorico, or Cubase.
+
+@ Save project keeps
+Save project keeps everything in one file, to open again later.
+
+@ Approve: this score
+Approve. The words will be placed into this score, extra chorus and all.
+
+@ The node says ✓ approved at once
+The node turns green at once. [pause:0.5s] Run again: now the words are transcribed, and the run stops at the Text sheet.
+
+@ faster-whisper transcribes
+Faster Whisper listens to the vocals, and places every word into the score's sections.
+
+@ Stop 2: Song Sheet · Text
+Stop two: the Text sheet.
+
+@ Open the text.
+Let's open it.
+
+@ The Score tab shows the transcribed words
+The Score tab shows the transcribed words, right over the notes they're sung on.
+
+@ Shift + mouse wheel
+Let's scroll to the vocals.
+
+@ Each line over its phrase
+Each line sits over its phrase. And to fix a word, just double-click its line.
+
+@ New: the score can still be changed here
+New: you can still change the score right here. Apply writes it back to the Score sheet.
+
+@ Lyrics: the transcribed words
+The Lyrics tab lists the words, section by section. Unsure words are highlighted, so you know where to look.
+
+@ Style: the new style
+Style: the new style, with the voice from the brief.
+
+@ Title & artwork
+And the title, with a prompt for optional cover art.
+
+@ Approve: exactly these words
+Approve: exactly these words go to YuE2.
+
+@ ✓ approved at once
+Approved. [pause:0.4s] One last run, and YuE2 renders the cover.
+
+@ YuE2 renders the cover from the score
+YuE2 sings the new version,
+
+@ Master and Export finish the cover
+and Master and Export finish it.
+
+@ The approved cover is finished | +7
+And there it is: the approved cover, finished and exported. [pause:0.5s] Enjoy!
+
+@ Every further Run
+Every further run renders a new take of the same cover.
+
+@ card Make it yours
+Now it's your turn. Make it yours! Thanks for watching.

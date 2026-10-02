@@ -1,0 +1,157 @@
+# Narration of yue2-daw.mjs (Tutorial 5 · YuE2 · DAW). Format: lib/voice.mjs.
+
+@ card 5 · YuE2 · DAW
+Welcome to the DAW template! The writer drafts the words. The music, [pause:0.2s] that's up to you.
+
+@ Open the template browser
+Open the template browser,
+
+@ Plenio’s templates:
+and Plenio's folder under Extensions.
+
+@ 5 · YuE2 · DAW: you compose
+Template five: YuE2 DAW. [pause:0.4s] Here, you compose the score yourself, or bring it in from your DAW.
+
+@ The template reads from left to right
+As always, it reads from left to right.
+
+@ SONG - the Song Brief
+The Song Brief,
+
+@ WRITE - the writer drafts
+the writer, for the title, the style and the lyrics,
+
+@ TEXT - Song Sheet · Text
+and the Text sheet, with the words YuE2 will sing.
+
+@ DAW - Score Tools builds
+Then Score Tools builds an empty score, and you write the music, in the DAW sheet.
+
+@ RENDER - YuE2 renders
+YuE2 renders exactly that score,
+
+@ FINISH - Master and Export
+and Master and Export finish the song.
+
+@ card The words
+Part one: the words.
+
+@ The brief: the mode is
+Here, the mode is one song, stop to review. So the run stops at each sheet, and waits for you.
+
+@ Describe the song.
+Describe the song: [pause:0.3s] a bright, hopeful pop song about the first warm morning of spring.
+
+@ length: short
+Keep it short. Tempo, key and meter can come from the brief, or later, from your sketch.
+
+@ Press Run.
+Press Run.
+
+@ The writer model drafts | optional
+The writer drafts the words,
+
+@ The run stopped at Song Sheet · Text
+And the run stops at the Text sheet.
+
+@ First the words:
+Words first. Open the Text sheet.
+
+@ The lyrics, section by section
+Here are the lyrics, section by section. Change anything you like.
+
+@ Approve.
+Approve.
+
+@ ✓ approved. Run again:
+Approved. [pause:0.3s] Run again: Score Tools builds an empty score from the brief, and the run stops at the DAW sheet.
+
+@ Stop 2: Song Sheet · DAW
+Stop two: the DAW sheet. [pause:0.3s] Now, the music is up to you.
+
+@ card The music
+Part two: the music. A sketch from your DAW comes in, and then it's yours to shape.
+
+@ Open Song Sheet · DAW.
+Open the DAW sheet,
+
+@ ⛶ gives the editor
+and give it the whole window.
+
+@ Four tracks:
+Four tracks: Vocal and Instrument, the two melodies YuE2 reads; the chords; and a guide track, just for you.
+
+@ The score from Score Tools is empty
+Right now the score is empty: one verse of rests, in the tempo and key of the brief.
+
+@ Write it here
+You could write it right here. Or bring a sketch from your DAW, with Import MIDI.
+
+@ Nothing changes yet:
+Nothing changes yet. The import first shows what it found: every track of the file, with its role.
+
+@ Our sketch’s bass goes to the Guide
+The bass of our sketch goes to the guide track. You hear it while you work, it's exported to MIDI, [pause:0.2s] and it's never sent to YuE2.
+
+@ “What the import did”
+What the import did lists every single change.
+
+@ Insert: one undo step.
+Insert. And it's one undo step, if you change your mind.
+
+@ The sketch is in:
+And the sketch is in: the melody, a second voice, the chords and the sections, in its own tempo and key.
+
+@ The score is shown three ways
+The usual three views: the piano roll, the sheet music, and the inspector.
+
+@ On the left, the song’s sections
+On the left, the sections from the sketch: intro, verse, chorus, and so on.
+
+@ The sheet warns: the lyrics have fewer sections | optional
+But the sheet warns us: the lyrics have fewer sections than the sketch, so some bars would have no words.
+
+@ Arrange the score to the words: | optional
+No problem: we arrange the score to fit the words. Select the extra sections, with Control click,
+
+@ … and Del deletes them | optional
+then press Delete. The bars after them simply move up.
+
+@ Now the score and the lyrics have the same sections | optional
+Now the score and the lyrics match. The warning is gone.
+
+@ The lyrics lane: | optional
+And the lyrics sit right over the melody: each line over its phrase, each syllable over its note.
+
+@ New: click in the ruler
+Click into the ruler to set the cursor,
+
+@ Playback starts at the cursor
+and play from there. You'll hear the guide too, so the sketch sounds the way you planned it.
+
+@ Space plays and stops
+Space plays and stops. Home and End jump to either end.
+
+@ Save project keeps
+Save project keeps the score, the guide notes and the lyrics in one file. Open it again later, in any DAW sheet.
+
+@ Approve: exactly this score
+Approve: exactly this score goes to YuE2, two voices and the chords. The guide stays here.
+
+@ ✓ approved. Press Run
+Approved. Press Run, and YuE2 renders the song.
+
+@ YuE2 renders exactly the approved score
+YuE2 renders exactly the approved score,
+
+@ Master and Export finish
+and Master and Export finish it.
+
+@ Done: your melody | +7
+Done! Your melody, your chords, sung by YuE2. [pause:0.4s] Let's listen.
+
+@ Every further Run
+Every further run renders a new take of the same score.
+
+@ card Make it yours
+That's the DAW template. Now make it yours! Thanks for watching.

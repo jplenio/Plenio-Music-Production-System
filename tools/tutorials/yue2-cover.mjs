@@ -234,6 +234,7 @@ async function afterRun(s, text) {
   if (player) {
     await s.spotlight(player, { ms: 2000 })
     await s.click({ x: player.x + 18, y: player.y + player.height / 2, width: 1, height: 1 }, { pause: 400 })
+    await s.listen(PREVIEW)
   }
   await s.read(text, 4200)
 }

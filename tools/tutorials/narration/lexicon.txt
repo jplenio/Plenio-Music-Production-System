@@ -1,0 +1,17 @@
+# Spellings a TTS (OmniVoice) pronounces right: "written => spoken", whole words, case-sensitive, in order.
+# The narration files use the written forms; the .srt files and the speech get the spoken ones.
+YuE2 => Yu-eh two
+YuE => Yu-eh
+ComfyUI => Comfy U I
+MusicXML => Music X M L
+SheetSage2 => Sheet Sage two
+MiniMax => Mini Max
+DAW => D A W
+ABC => A B C
+BPM => B P M
+LUFS => loudness units
+MP3 => M P three
+EQ => E Q
+GPU => G P U
+FLUX.2 => Flux two
+faster-whisper => faster whisper

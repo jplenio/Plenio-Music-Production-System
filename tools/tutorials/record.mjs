@@ -1,7 +1,10 @@
 // Record and edit a tutorial video against a running ComfyUI with Plenio and the real models.
 //
-//   node tools/tutorials/record.mjs <yue2-song | yue2-cover> [--url http://127.0.0.1:8190]
+//   node tools/tutorials/record.mjs <script> [--url http://127.0.0.1:8190] [--tts-url http://127.0.0.1:8191]
 //        [--out dist/tutorials] [--render-only] [--headed]
+//
+// <script> is a file name here without .mjs; its narration is narration/<script>.txt. --tts-url is a
+// ComfyUI with TTS Audio Suite (OmniVoice) for the lines not yet in the voice cache.
 //
 // See tools/tutorials/README.md for the server and the settings it expects.
 
@@ -20,7 +23,7 @@ const option = (name, fallback) => {
 }
 const which = args.find((a) => !a.startsWith('--') && !args[args.indexOf(a) - 1]?.startsWith('--'))
 if (!which) {
-  console.error('usage: node tools/tutorials/record.mjs <yue2-song | yue2-cover> [--url URL] [--out DIR] [--render-only]')
+  console.error('usage: node tools/tutorials/record.mjs <script> [--url URL] [--tts-url URL] [--out DIR] [--render-only]')
   process.exit(2)
 }
 const url = option('url', 'http://127.0.0.1:8190')
@@ -69,4 +72,12 @@ if (!args.includes('--render-only')) {
   }
   if (failure) process.exit(1)
 }
-await renderTutorial({ dir, name: script.meta.name, banner })
+await renderTutorial({
+  dir,
+  name: script.meta.name,
+  banner,
+  narration: path.join(HERE, 'narration', `${which}.txt`),
+  lexicon: path.join(HERE, 'narration', 'lexicon.txt'),
+  voiceDir: path.join(HERE, 'voice'),
+  ttsUrl: option('tts-url', null),
+})

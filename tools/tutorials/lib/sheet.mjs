@@ -7,7 +7,13 @@ export const DIALOG = '.plenio-overlay .plenio-dialog'
 
 export async function openSheet(s, nodeId, text) {
   if (text) s.caption(text)
-  const box = await s.nodeButton(nodeId, 'Edit Song Sheet')
+  let box = await s.nodeButton(nodeId, 'Edit Song Sheet')
+  // a node off screen: its button's box is off screen too (a click there hit the workflow tabs)
+  const view = s.page.viewportSize()
+  if (!box || box.x < 70 || box.y < 70 || box.x + box.width > view.width - 20 || box.y + box.height > view.height - 20) {
+    await s.flyNodes([nodeId], 1100, 0.9)
+    box = await s.nodeButton(nodeId, 'Edit Song Sheet')
+  }
   await s.spotlight(box, { ms: 1200 })
   await s.click(box, { pause: 400 })
   await s.page.locator(DIALOG).waitFor({ state: 'visible', timeout: 15000 })
@@ -113,6 +119,53 @@ export async function fixSections(s) {
   const done = 'Fixed: the warning is gone, and the words will land in the right sections. This edit stays.'
   s.caption(done)
   await s.read(done, 4400)
+}
+
+// The other real fix: the score has more sections than the lyrics (a sketch with two verses for lyrics
+// with one) - the extra ones are selected in the section list and deleted. This edit stays.
+export async function trimSections(s) {
+  const d = s.page.locator(DIALOG)
+  const extra = await s.page.evaluate((sel) => {
+    const dialog = document.querySelector(sel)
+    const text = [...dialog.querySelectorAll('li')].map((x) => x.innerText).find((t) => /lyrics have sections/.test(t))
+    const m = text?.match(/lyrics have sections \[(.*?)\] but the score has \[(.*?)\]/)
+    if (!m) return null
+    const list = (x) => [...x.matchAll(/'([^']*)'/g)].map((y) => y[1])
+    const lyrics = list(m[1]), score = list(m[2])
+    if (lyrics.length >= score.length) return null
+    // the lyrics as a subsequence of the score: what is left over goes
+    const out = []
+    let j = 0
+    score.forEach((name, i) => (j < lyrics.length && name === lyrics[j] ? j++ : out.push(i)))
+    return j === lyrics.length ? { out, names: out.map((i) => score[i]) } : null
+  }, DIALOG)
+  if (!extra) return false
+  const warning = `The sheet warns: the lyrics have fewer sections than the sketch - ${extra.names.length} of the score’s sections would have no words.`
+  s.caption(warning)
+  await s.spotlight(d.locator('li', { hasText: 'lyrics have sections' }).first(), { ms: 3200, pad: 4 })
+  await s.read(warning, 5000)
+  s.caption(`Arrange the score to the words: select the extra ${extra.names.join(' and the ')} - Ctrl+click adds to the selection …`)
+  const heads = d.locator('.navigator .sections li .section-head')
+  for (const [k, index] of extra.out.entries()) {
+    const head = heads.nth(index)
+    await head.scrollIntoViewIfNeeded()
+    if (k === 0) await s.click(head, { pause: 400 })
+    else {
+      await s.hover(head)
+      await s.page.keyboard.down('Control')
+      await s.page.mouse.down()
+      await s.page.mouse.up()
+      await s.page.keyboard.up('Control')
+    }
+    await s.wait(900)
+  }
+  s.caption('… and Del deletes them. The bars after them move up.')
+  await s.keys('Delete', { labels: ['Del'] })
+  await s.wait(2200)
+  const done = 'Now the score and the lyrics have the same sections: the warning is gone, and the words sit over the melody.'
+  s.caption(done)
+  await s.read(done, 5000)
+  return true
 }
 
 // Scroll the roll to where the voice starts (an instrumental intro can fill the first bars).

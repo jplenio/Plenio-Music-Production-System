@@ -1,0 +1,127 @@
+# Narration of minimax-song.mjs (Tutorial 3 · MiniMax · Song). Format: lib/voice.mjs.
+
+@ card 3 · MiniMax · Song
+Welcome! This time, the music comes from a different model: MiniMax Music 3.
+
+@ Open the template browser
+Open the template browser,
+
+@ Plenio’s templates:
+and Plenio's folder under Extensions.
+
+@ 3 · MiniMax · Song writes
+Template three: MiniMax Song. [pause:0.4s] It writes a new song, and renders it with MiniMax Music 3.
+
+@ Five groups, from left to right
+Five groups, from left to right.
+
+@ SONG - the Song Brief
+The Song Brief says what the song should be.
+
+@ WRITE - the writer drafts
+The writer drafts a title, a caption, and the lyrics.
+
+@ SHEET - the Song Sheet
+The Song Sheet shows what MiniMax gets. No score needed, so just one sheet.
+
+@ RENDER - MiniMax Music 3
+Then MiniMax renders the song.
+
+@ MUSIC MODEL - the MiniMax files
+Here are the model files: the diffusion model, the text encoder, and the decoder.
+
+@ REFINE - brings the take
+Then the take is refined, up to forty-eight kilohertz.
+
+@ FINISH - Master
+And Master and Export finish it, just like in the other templates.
+
+@ card A new song every run
+Part one: a new song, every run.
+
+@ The Song Brief works as in
+The Song Brief works just like in the YuE2 templates. Here, a new song every run.
+
+@ Describe the song in your own words
+Describe the song in your own words. [pause:0.4s] Tonight: late-night jazz pop, with soft piano and brushed drums.
+
+@ length: short
+Keep it short. MiniMax may end a song a little earlier than asked.
+
+@ Press Run.
+And press Run.
+
+@ The writer model drafts
+The writer drafts the title, the caption and the lyrics,
+
+@ MiniMax Music 3 renders
+MiniMax renders the song from them,
+
+@ Refine brings the take | seed 2
+then Refine raises the sample rate,
+
+@ Master and Export finish
+and Master and Export finish it.
+
+@ Done: the finished song | +6
+Done! Let's listen.
+
+@ Run again for another song
+Run again for another song, or set a number next to Run, for a whole series.
+
+@ card One song, stop to review
+Part two: one song, with a stop to review.
+
+@ mode: “one song, stop to review”
+Switch the mode to one song, stop to review. Now the run waits at the Song Sheet.
+
+@ Press Run.
+Press Run.
+
+@ The writer model drafts
+The writer drafts a new song.
+
+@ The run stopped at the Song Sheet
+And the run stops, waiting for your approval.
+
+@ Open it with
+Open it with Edit Song Sheet,
+
+@ ⛶ gives the editor
+and give it the whole window.
+
+@ Caption: MiniMax reads it in three parts
+The caption describes the song for MiniMax: tempo, key and genre first, then the vocals, then the arrangement. [pause:0.3s] The notes below check its form.
+
+@ Lyrics: section by section
+The lyrics, section by section. MiniMax sings roughly one line every five seconds.
+
+@ The budget:
+Caption and lyrics share five thousand tokens. If they don't fit, the run stops before rendering.
+
+@ Title & artwork
+Here's the title, and a prompt for optional cover art.
+
+@ Approve: exactly this caption
+Approve: exactly this caption and these lyrics go to MiniMax.
+
+@ The node says ✓ approved at once
+The node turns green right away. [pause:0.4s] Run again, and MiniMax renders the approved song.
+
+@ MiniMax Music 3 renders
+MiniMax renders,
+
+@ Refine brings the take
+Refine refines,
+
+@ Master and Export finish
+and Master and Export finish the job.
+
+@ The approved song is finished | +6
+Here it is: the approved song, finished and exported.
+
+@ Every further Run
+Every further run renders a new take of the same song.
+
+@ card Next: 4 · Enhance & Master
+Next up: template four, Enhance and Master.
