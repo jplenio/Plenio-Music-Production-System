@@ -2,6 +2,28 @@
 
 All notable changes are listed here. Versions follow semantic versioning; published Registry versions are immutable.
 
+## 0.4.1 - 2026-10-02
+
+Six video tutorials with a voice-over - one for every template - and a short promo, plus a few fixes found while recording them.
+
+### Added
+
+- **Video tutorials for all six templates** and a promo, recorded in ComfyUI with the real models and narrated in English: System Check, YuE2 Song, YuE2 Cover, MiniMax Song, Enhance & Master and YuE2 DAW (links in the README). The recording tools (`tools/tutorials`) now cut the picture for a voice-over: a narration file per video, speech through TTS Audio Suite's OmniVoice with one cloned narrator, the songs a preview plays mixed under the voice, and a folder per video with the SRT, the audio tracks and every spoken line for editing by hand.
+
+### Changed
+
+- **Export Release**: in the *tags* mode, the comment is preset to *Powered by Plenio Music Production System / ComfyUI* (edit or clear it like any tag).
+
+### Fixed
+
+- **Stems** did not load its separation model when the Python package `beartype` is installed (other custom nodes bring it): the model's config came as lists where the model's signature asks for tuples, and beartype refused them. The config is converted now.
+- After **Import MIDI…** or **Open project…** the lyrics lane and the syllables in the notation were gone (the imported score was shown without the song's lyrics); the score is checked again with the lyrics now.
+- Lyrics whose sections did not match the score when the editor opened stayed a plain text: renaming a section to the lyrics' tag, as the sheet's warning asks, did not make them follow a later arrangement. They now follow as soon as they match.
+- After Approve, the summary beside *Edit Song Sheet…* still showed the last run's *waiting for approval* next to *approved*; it is left out once the sheet is approved.
+- The System Check's tables (templates, model files, the hardware rule table) were shown as raw `| a | b |` lines on the node; node summaries now render tables. The templates table listed *4 · Enhance & Master* twice.
+- The EQ's band strip showed a match proposal's exact values (`Q 0.3982428666120445`); Q and gain are rounded there now.
+- The Lyrics tab said "YuE2 sings section by section" also in the MiniMax Song Sheet; it names no model now.
+
 ## 0.4.0 - 2026-10-02
 
 The score editor becomes an arranging tool in the manner of Cubase. You can copy, move and delete sections; a cursor sets where playback and paste start; the clipboard pastes at the cursor or inserts time there. Everything that depends on the bars follows: the Guide track, the lyrics of the text sheet and, in covers, the original words and the source times. The lyrics are shown and edited where they are sung. The sheet music goes out as MusicXML, and the editor's work can be saved as a project file and opened again later.
@@ -23,15 +45,12 @@ The score editor becomes an arranging tool in the manner of Cubase. You can copy
 
 - Playback starts at the **cursor** (before: at the selected bar). Without the piano roll the cursor follows the selected bar, so the *Text* layout plays as before. *Loop section* now plays to the end of the cursor's section and then repeats the whole section.
 - Ctrl+A in the piano roll selects the chord symbols too (Cubase: *Select All*); before, it selected the notes only.
-- **Approve shows on the node at once.** Approving a Song Sheet in its editor turns the node's badge and status line to *✓ approved* right away (and the summary beside the Edit button drops the last run's *waiting for approval*); before, the node said *waiting for your approval* until the next run started. An Apply that changes the documents of an approved sheet takes the approval back: the node shows its review stop again. This also applies to the other sheet when the editor writes its lyrics or its score back.
+- **Approve shows on the node at once.** Approving a Song Sheet in its editor turns the node's badge and status line to *✓ approved* right away; before, the node said *waiting for your approval* until the next run started. An Apply that changes the documents of an approved sheet takes the approval back: the node shows its review stop again. This also applies to the other sheet when the editor writes its lyrics or its score back.
 - Timelines from Transcribe Score hold the content of every bar (`bar_prints`), which lets an arranged cover find its source bars. Older timelines are read as before.
 
 ### Fixed
 
 - Inserting, deleting or duplicating bars in the inspector of a DAW sheet left the Guide notes where they were, so they no longer sat under their bars. They now move with them.
-- The System Check's tables (templates, model files, the hardware rule table) were shown as raw `| a | b |` lines on the node; node summaries now render tables. The templates table listed *4 · Enhance & Master* twice.
-- The EQ's band strip showed a match proposal's exact values (`Q 0.3982428666120445`); Q and gain are rounded there now.
-- The Lyrics tab said "YuE2 sings section by section" also in the MiniMax Song Sheet; it names no model now.
 
 ### Studies
 
