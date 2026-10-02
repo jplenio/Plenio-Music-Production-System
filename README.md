@@ -150,10 +150,10 @@ Open a Song Sheet and choose the score tab. The **piano roll** draws, moves and 
 Since 0.4.0 the editor also arranges. Select sections in the list and duplicate (Ctrl+D), copy, move (Ctrl+↑/↓ or drag; Alt copies) or delete them - and single bars the same way in the bar strip under the sections. Click in the ruler to set the **cursor**: playback starts there, and **Ctrl+V** pastes the clipboard there, overwriting the notes of its voices, while **Ctrl+Shift+V** inserts it and moves what follows. When the song has lyrics, a **lyrics lane** shows every line over the phrase it is sung on, and a double-click edits it; the notation shows the syllables under the notes. **Export MusicXML** hands the sheet music to MuseScore, Sibelius, Dorico or Cubase, and **Save project / Open project…** keeps the score, the Guide notes and the lyrics in one file. See the [score editor guide](docs/user/concepts/score-editor.md).
 
 <p align="center">
-  <img src="assets/branding/0.4.1/Screenshot%20Score-Editor.png" alt="The Song Sheet's score tab in the DAW layout, playing: an imported sketch in the piano roll with the lyrics lane over the notes, the syllables under the notation, the track panel with the Guide track, and the transport" width="100%" />
+  <img src="assets/branding/0.4.2/Screenshot%20Score-Editor.png" alt="The Song Sheet's score tab in the DAW layout, playing: an imported sketch in the piano roll with the lyrics lane over the notes, the transport right under the roll, the notation with the syllables, and two bars selected in the bar strip" width="100%" />
 </p>
 
-*The score tab of a Song Sheet in the DAW layout, playing a sketch brought in with Import MIDI: the lyrics lane over the piano roll (each line over its phrase, each syllable over its note), the chord lane, the notation with the syllables under the notes, the tracks (Vocal, Instrument, Chords and the Guide track that never reaches YuE2), the files (MIDI, MusicXML, project) and the transport.*
+*The score tab of a Song Sheet in the DAW layout, playing a sketch brought in with Import MIDI: the lyrics lane over the piano roll (each line over its phrase, each syllable over its note), the chord lane, the **transport** right under the roll, the notation with the syllables under the notes, the files (MIDI, MusicXML, project) - and on the left the sections and the **bar strip** with two bars selected, ready to be duplicated, copied, moved or deleted.*
 
 ### Compose a song yourself (YuE2 · DAW)
 

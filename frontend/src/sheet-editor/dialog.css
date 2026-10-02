@@ -831,16 +831,13 @@
 .plenio-overlay .navigator li.drop-after {
   box-shadow: 0 3px 0 #ffc440;
 }
+/* not sticky: the column scrolls as a whole, and a sticky bar covered the bar strip below it */
 .plenio-overlay .navigator .section-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 3px;
-  position: sticky;
-  top: 0;
-  z-index: 1;
   padding: 2px 0 4px;
-  background: var(--comfy-menu-bg, #252525);
 }
 .plenio-overlay .navigator .section-actions .hint {
   flex-basis: 100%;

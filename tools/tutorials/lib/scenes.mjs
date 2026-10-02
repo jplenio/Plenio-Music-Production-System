@@ -197,7 +197,9 @@ export async function barsDemo(s) {
   const spans = ranges.map((text) => /bars (\d+)-(\d+)/.exec(text)).filter(Boolean).map((m) => [Number(m[1]), Number(m[2])])
   const long = spans.find(([a, b]) => b - a >= 3) ?? [Math.floor(count * 0.35), count]
   const first = long[0] // 0-based position of the section's second bar
-  await bars.nth(first).scrollIntoViewIfNeeded()
+  const actions = d.locator('.bar-actions').first()
+  await actions.scrollIntoViewIfNeeded()
+  await bars.nth(first + 1).scrollIntoViewIfNeeded()
   await s.wait(600)
   const to = await undoMark(s)
   const intro = 'New: the bar strip under the sections arranges single bars, the same way as sections.'
@@ -213,7 +215,9 @@ export async function barsDemo(s) {
   await s.page.mouse.up()
   await s.page.keyboard.up('Shift')
   await s.wait(1400)
-  const actions = d.locator('.bar-actions').first()
+  // the keys must reach the bars, not the sections picked before
+  const picked = await d.locator('.bar-strip .bar.picked').count()
+  if (picked !== 2) throw new Error(`the bar scene picked ${picked} bars, not 2`)
   s.caption('… and the buttons above the strip work on them. Ctrl+D duplicates them, right after the last one.')
   await s.spotlight(actions, { ms: 2200, pad: 4 })
   await s.wait(1600)
