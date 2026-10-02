@@ -1,5 +1,7 @@
 # Getting started
 
+▶ **Videos:** [Plenio in 75 seconds](https://youtu.be/D6WUSzRbWWA) · [Tutorial 0 · System Check](https://youtu.be/otGrYj1Qlu8) - and one tutorial for every template ([the list](https://github.com/jplenio/Plenio-Music-Production-System#watch-the-tutorials)).
+
 ## Requirements
 
 - ComfyUI **0.37.0** or newer (it provides the native YuE2, SheetSage2, MiniMax Music 3, FLUX.2 and text-generation nodes Plenio builds on)

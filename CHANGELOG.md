@@ -8,7 +8,7 @@ Six video tutorials with a voice-over - one for every template - and a short pro
 
 ### Added
 
-- **Video tutorials for all six templates** and a promo, recorded in ComfyUI with the real models and narrated in English: System Check, YuE2 Song, YuE2 Cover, MiniMax Song, Enhance & Master and YuE2 DAW (links in the README). The recording tools (`tools/tutorials`) now cut the picture for a voice-over: a narration file per video, speech through TTS Audio Suite's OmniVoice with one cloned narrator, the songs a preview plays mixed under the voice, and a folder per video with the SRT, the audio tracks and every spoken line for editing by hand.
+- **Video tutorials for all six templates** and a promo, recorded in ComfyUI with the real models and narrated in English: System Check, YuE2 Song, YuE2 Cover, MiniMax Song, Enhance & Master and YuE2 DAW, linked in the README and in every user guide. The recording tools (`tools/tutorials`) now cut the picture for a voice-over: a narration file per video, speech through TTS Audio Suite's OmniVoice with one cloned narrator, the songs a preview plays mixed under the voice, and a folder per video with the SRT, the audio tracks and every spoken line for editing by hand.
 
 ### Changed
 

@@ -143,6 +143,7 @@ fs.mkdirSync(path.join(pkg, 'audio', 'lines'), { recursive: true })
 fs.mkdirSync(path.join(pkg, 'voice'), { recursive: true })
 ffmpeg(['-i', path.join(work, 'picture.mp4'), '-i', path.join(work, 'mix.wav'), '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', path.join(pkg, `${NAME}.mp4`)], work)
 ffmpeg(['-i', path.join(work, 'picture.mp4'), '-c:v', 'copy', '-movflags', '+faststart', path.join(pkg, `${NAME} (no sound).mp4`)], work)
+ffmpeg(['-ss', '1.5', '-i', path.join(work, 'picture.mp4'), '-frames:v', '1', '-vf', 'scale=1280:720:flags=lanczos', '-q:v', '2', path.join(pkg, 'thumbnail.jpg')], work)
 const stamp = (s) => {
   const ms = Math.round(s * 1000)
   return `${String(Math.floor(ms / 3600000)).padStart(2, '0')}:${String(Math.floor(ms / 60000) % 60).padStart(2, '0')}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')},${String(ms % 1000).padStart(3, '0')}`

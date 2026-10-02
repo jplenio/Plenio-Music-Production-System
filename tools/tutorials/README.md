@@ -81,6 +81,16 @@ the picture holds still before the next cue. `| +6` after a cue leaves six quiet
 "Plenio" is written as it is. The narrator's voice is cloned from `voice/narrator.wav`
 (see `voice/VOICE.md`).
 
+## The promo and the README's screenshots
+
+`promo.mjs` cuts about 75 seconds of shots from the six recordings with a narrator, into
+`<out>/Plenio - Music production in ComfyUI (promo)/` (no music; `--music` lays a song of the DAW
+recording under the voice). `screenshots.mjs` makes the README's screenshots again, at twice the
+screen resolution, into `assets/branding/<version>/`: the template graphs after real runs, App mode, the
+System Check report, the EQ panel and the Stem Mixer (`--only` for some of them; `--audio` the song for
+Enhance & Master). Every video's folder also has `youtube-chapters.txt` and `thumbnail.jpg` is cut from
+its title card.
+
 ## How the scripts are built
 
 `lib/studio.mjs` opens the browser (1920 x 1000; the edit adds an 80 px band below) and gives the scripts

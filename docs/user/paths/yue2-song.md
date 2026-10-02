@@ -2,6 +2,8 @@
 
 A new song from a short brief: a local text model writes title, style and lyrics, YuE2 plans a score (ABC notation) and renders the song, Master finishes it, and Export writes a 24-bit FLAC with a release record.
 
+▶ **Video:** [Tutorial 1 · YuE2 · Song](https://youtu.be/QVO9iWkVKUo) - the whole path in ComfyUI, narrated, with chapters.
+
 ```text
 Song Brief -> Write Song -> Song Sheet · Text -> YuE2 Plan -> Score Tools -> Song Sheet · Score -> YuE2 Render -> Master -> Export Release
                                   ^ YuE2 Model (loader, optional instrumental adapter, Engine Profile) feeds all YuE2 steps

@@ -2,6 +2,8 @@
 
 Finishes an existing recording - a take you rendered earlier, or any song file - without a music model and without a GPU: a gentle EQ, loudness and dynamics, and a release export with tags and cover.
 
+▶ **Video:** [Tutorial 4 · Enhance & Master](https://youtu.be/6BfORaIr5kE) - the whole path in ComfyUI, narrated, with chapters.
+
 ```text
 Load Audio -> EQ -> Loudness & Dynamics -> Preview
                                         -> Export Release (FLAC 24-bit + MP3 V0, tags copied, original kept)

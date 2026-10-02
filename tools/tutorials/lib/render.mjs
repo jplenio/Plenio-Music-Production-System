@@ -311,6 +311,7 @@ Plenio repository (\`--render-only\` cuts it again from the recording; see tools
 | \`audio/lines.tsv\` | per line: number, start, end and length in seconds, the written and the spoken text |
 | \`voice/\` | the narrator: the reference recording the voice is cloned from, its transcript, and how it was made |
 | \`youtube-chapters.txt\` | the chapters with their times in this video, to paste into a YouTube description |
+| \`thumbnail.jpg\` | the title card as a YouTube thumbnail (1280 x 720) |
 
 ## Timing
 
@@ -408,6 +409,8 @@ export async function renderTutorial({ dir: folder, name, banner, narration, lex
   ffmpeg(['-i', 'labelled.mp4', '-an', '-c:v', 'copy', '-movflags', '+faststart', silent], work)
   writePackage({ pkg, name, lines, work, voiceDir, hasMusic, silent, voiced })
   fs.writeFileSync(path.join(pkg, 'youtube-chapters.txt'), chaptersOf(markers, tl))
+  // the YouTube thumbnail: the title card
+  ffmpeg(['-ss', '1.5', '-i', path.join(pkg, `${name}.mp4`), '-frames:v', '1', '-vf', 'scale=1280:720:flags=lanczos', '-q:v', '2', path.join(pkg, 'thumbnail.jpg')], work)
   const held = [...room.holds.values()].reduce((a, b) => a + b, 0)
   log(`${pkg}: ${tl.duration.toFixed(1)} s, ${lines.length} lines (${lines.reduce((a, l) => a + l.seconds, 0).toFixed(0)} s of speech), ` +
     `${room.holds.size} holds (${held.toFixed(1)} s), ${room.fast.size} slower waits, ${room.cards.size} longer cards`)
