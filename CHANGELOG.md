@@ -2,7 +2,9 @@
 
 All notable changes are listed here. Versions follow semantic versioning; published Registry versions are immutable.
 
-## Unreleased
+## 0.4.3 - 2026-10-03
+
+The lyrics lane places lines by hand like notes, chord symbols move by semitones, and the cover template starts with the original lyrics on a pop style.
 
 ### Added
 

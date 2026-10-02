@@ -1,4 +1,4 @@
-import { a as Ry, P as mv, b as Iy, t as Fy, i as Hy, e as $y, c as zy, n as di, v as qy, s as Zf, g as Vy, r as Wy, u as Gy, w as ed, d as Ky, f as Uy, h as td } from "./main-BWrYBB_N.mjs";
+import { a as Ry, P as mv, b as Iy, t as Fy, i as Hy, e as $y, c as zy, n as di, v as qy, s as Zf, g as Vy, r as Wy, u as Gy, w as ed, d as Ky, f as Uy, h as td } from "./main-CGQviTd-.mjs";
 import { lineKey as Qa, parseSpans as vv, sameSpans as Fa, clipOfLines as id, sectionAt as jy, sectionRange as oa, placedLines as nd, settle as Yy, withSectionSpans as Xy, parseLineKey as Jy, remapSpans as Qy } from "./lyricPlacement-BhsY4vdw.mjs";
 import { notesLabel as Zy, trackRows as e4, parseGuide as t4, sameGuide as hs, remapGuide as i4, guideNotes as n4 } from "./tracks-DxmZeggM.mjs";
 // @__NO_SIDE_EFFECTS__
@@ -36300,7 +36300,7 @@ function j_(i, e) {
   if (e?.bars?.length)
     return !i || !e.bar_prints?.length ? i ? i.measures.map((t, n) => e.bars[n] ?? null) : e.bars : U_(G_(i), e.bar_prints).map((t) => t === null ? null : e.bars[t] ?? null);
 }
-const Y_ = "0.4.2", Ja = "plenio.score_project/1", _y = ".plenio.json";
+const Y_ = "0.4.3", Ja = "plenio.score_project/1", _y = ".plenio.json";
 function X_(i, e = /* @__PURE__ */ new Date()) {
   return {
     schema: Ja,
