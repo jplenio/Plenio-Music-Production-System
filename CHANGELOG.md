@@ -2,7 +2,9 @@
 
 All notable changes are listed here. Versions follow semantic versioning; published Registry versions are immutable.
 
-## Unreleased
+## 0.4.2 - 2026-10-02
+
+The score editor arranges single bars the way it arranges sections, and the transport moves next to the piano roll.
 
 ### Added
 

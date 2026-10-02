@@ -1,4 +1,4 @@
-import { a as oy, P as Um, b as ly, t as cy, i as hy, e as uy, c as fy, n as ai, v as dy, s as Df, g as py, r as gy, u as my, w as Of, d as vy, f as by, h as Nf } from "./main-RIYAYuqM.mjs";
+import { a as oy, P as Um, b as ly, t as cy, i as hy, e as uy, c as fy, n as ai, v as dy, s as Df, g as py, r as gy, u as my, w as Of, d as vy, f as by, h as Nf } from "./main-D2jz05eY.mjs";
 import { notesLabel as yy, trackRows as wy, parseGuide as xy, sameGuide as Jn, remapGuide as ky, guideNotes as Cy } from "./tracks-DxmZeggM.mjs";
 // @__NO_SIDE_EFFECTS__
 function bu(i) {
@@ -36180,7 +36180,7 @@ function u_(i, e) {
   if (e?.bars?.length)
     return !i || !e.bar_prints?.length ? i ? i.measures.map((t, r) => e.bars[r] ?? null) : e.bars : h_(l_(i), e.bar_prints).map((t) => t === null ? null : e.bars[t] ?? null);
 }
-const f_ = "0.4.1", Oa = "plenio.score_project/1", sy = ".plenio.json";
+const f_ = "0.4.2", Oa = "plenio.score_project/1", sy = ".plenio.json";
 function d_(i, e = /* @__PURE__ */ new Date()) {
   return {
     schema: Oa,
