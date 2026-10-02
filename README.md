@@ -16,7 +16,7 @@ Everything runs on your own machine, inside ComfyUI's own nodes: no cloud servic
   <a href="https://youtu.be/D6WUSzRbWWA"><img src="assets/branding/0.4.1/promo.jpg" alt="Plenio - Music production in ComfyUI: the promo video on YouTube" width="70%" /></a>
 </p>
 
-One narrated video for every template (English, 2 to 9 minutes, with chapters), recorded in ComfyUI with the real models - every song you hear in them was made right there:
+One narrated video for every template (English, 2 to 9 minutes, with chapters), recorded in ComfyUI with the real models - every song you hear in them was made right there. **▶ [All of them as a playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE)**
 
 <table>
   <tr>
@@ -269,7 +269,7 @@ Plenio is the successor of the [Music Production Toolkit](https://github.com/jpl
 
 - Users: [Getting started](docs/user/getting-started.md) · [YuE2 Song](docs/user/paths/yue2-song.md) · [YuE2 Cover](docs/user/paths/yue2-cover.md) · [YuE2 DAW](docs/user/paths/yue2-daw.md) · [MiniMax Song](docs/user/paths/minimax-song.md) · [Enhance & Master](docs/user/paths/enhance-master.md) · [Song Sheet](docs/user/concepts/song-sheet.md) · [Brief templates](docs/user/concepts/brief-templates.md) · [Score editor](docs/user/concepts/score-editor.md) · [Stems](docs/user/concepts/stems.md) · [Refine (48 kHz)](docs/user/concepts/refine.md) · [Instrumental](docs/user/concepts/instrumental.md) · [Mastering](docs/user/concepts/mastering.md) · [App mode](docs/user/concepts/app-mode.md) · [Models](docs/user/models.md) · [Configuration](docs/user/configuration.md) · [Licensing](docs/user/licensing.md) · [Troubleshooting](docs/user/troubleshooting.md)
 - Contributors: [Architecture](docs/dev/architecture.md) · [Extending Plenio](docs/dev/extending.md) · [Testing](docs/dev/testing.md) · [Design documents](docs/design/README.md) · [Decisions](docs/adr/README.md) · [Acceptance review](docs/audit/2026-09-25-phase-10-acceptance.md)
-- Videos: [Promo](https://youtu.be/D6WUSzRbWWA) · [0 · System Check](https://youtu.be/otGrYj1Qlu8) · [1 · YuE2 · Song](https://youtu.be/QVO9iWkVKUo) · [2 · YuE2 · Cover](https://youtu.be/HzE8Iz5h_5o) · [3 · MiniMax · Song](https://youtu.be/-iY-lJFuZE0) · [4 · Enhance & Master](https://youtu.be/6BfORaIr5kE) · [5 · YuE2 · DAW](https://youtu.be/LlcAPddMEhc)
+- Videos ([playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE)): [Promo](https://youtu.be/D6WUSzRbWWA) · [0 · System Check](https://youtu.be/otGrYj1Qlu8) · [1 · YuE2 · Song](https://youtu.be/QVO9iWkVKUo) · [2 · YuE2 · Cover](https://youtu.be/HzE8Iz5h_5o) · [3 · MiniMax · Song](https://youtu.be/-iY-lJFuZE0) · [4 · Enhance & Master](https://youtu.be/6BfORaIr5kE) · [5 · YuE2 · DAW](https://youtu.be/LlcAPddMEhc)
 - [Changelog](CHANGELOG.md)
 
 ## A few honest limits
