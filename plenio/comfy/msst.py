@@ -199,6 +199,16 @@ def instruments_of(config: Mapping[str, Any], model_config: Mapping[str, Any]) -
     return names
 
 
+def model_kwargs(config: dict[str, Any]) -> dict[str, Any]:
+    """The model's constructor arguments from a config: JSON lists become the tuples the upstream
+    signature declares (``freqs_per_bands``, ``multi_stft_resolutions_window_sizes``) - an installed
+    ``beartype`` enforces that at runtime."""
+    return {
+        key: tuple(value) if isinstance(value, list) else value
+        for key, value in dict(config["model"]).items()
+    }
+
+
 def load(path: Path) -> BSRoformerSeparator:
     """Build the separator for a checkpoint file (called by ``audio_models.load``)."""
     torch = _require_torch()
@@ -208,7 +218,7 @@ def load(path: Path) -> BSRoformerSeparator:
     from ..third_party.msst.bs_roformer import BSRoformer
 
     config, state = _read_checkpoint(path, torch)
-    model_config = dict(config["model"])
+    model_config = model_kwargs(config)
     try:
         model = BSRoformer(**model_config)
         model.load_state_dict(_match_state_dict(model, state))

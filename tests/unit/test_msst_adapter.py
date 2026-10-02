@@ -256,3 +256,18 @@ def test_the_adapter_does_not_import_torch_at_module_level() -> None:
         cwd=str(Path(__file__).resolve().parents[2]),
     )
     assert result.returncode == 0, result.stderr
+
+
+def test_the_released_config_builds_the_model_also_with_beartype_installed() -> None:
+    """The released config is JSON (lists); the upstream signature says tuples, and a real beartype -
+    installed by other custom nodes - refused the lists, so Stems failed to load (found 2026-10-02)."""
+    pytest.importorskip("beartype")
+    from plenio.third_party import msst as vendor
+
+    vendor.ensure_dependencies()
+    from plenio.third_party.msst.bs_roformer import BSRoformer
+
+    released = json.loads((msst.VENDOR / msst.CONFIG_NAME).read_text(encoding="utf-8"))
+    kwargs = msst.model_kwargs({"model": {**released["model"], "dim": 8, "depth": 1}})
+    assert isinstance(kwargs["freqs_per_bands"], tuple)
+    BSRoformer(**kwargs)  # no type-guard error
