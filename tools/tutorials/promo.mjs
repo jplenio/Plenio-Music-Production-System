@@ -1,7 +1,8 @@
-// The promo video: about 80 seconds of shots from the tutorial recordings, a narrator, and a song Plenio
-// rendered as the music bed - in the same kind of folder as the tutorials (<out>/<name>/).
+// The promo video: about 75 seconds of shots from the tutorial recordings and a narrator - in the same
+// kind of folder as the tutorials (<out>/<name>/). No music: the owner adds his own; `--music` puts a song
+// Plenio rendered under the voice (MUSIC).
 //
-//   node tools/tutorials/promo.mjs [--out dist/tutorials] [--tts-url http://127.0.0.1:8191]
+//   node tools/tutorials/promo.mjs [--out dist/tutorials] [--tts-url http://127.0.0.1:8191] [--music]
 //
 // It needs the recordings of the six tutorials in <out>/<script>/ (record.mjs). A shot is a stretch of a
 // recording, found by a caption of its script (`at`) and an offset; each shot lasts as long as its line
@@ -28,7 +29,7 @@ const W = 1920, H = 1080
 const LEAD = 0.25, TAIL = 0.45
 
 // the music bed: a song from a recording (sound-N of its folder), from `from` seconds
-const MUSIC = { video: 'yue2-daw', file: 'sound-1.flac', from: null }
+const MUSIC = args.includes('--music') ? { video: 'yue2-daw', file: 'sound-1.flac', from: null } : null
 
 const SHOTS = [
   { card: 'title', data: { kicker: 'Plenio Music Production System', title: 'Music production<br>inside ComfyUI', subtitle: 'Write · Plan · Edit · Render · Master', foot: 'Version 0.4 · free and open source · runs on your own GPU' }, seconds: 4,
@@ -56,7 +57,8 @@ const SHOTS = [
   { video: 'yue2-song', at: 'The approved song is finished', offset: 0.5, seconds: 4,
     say: 'Everything runs locally, on your own graphics card. [pause:0.3s] Your songs, your way.' },
   { card: 'end', data: { title: 'Plenio Music Production System', lines: ['Install: ComfyUI Manager → <b>Plenio Music Production System</b>', 'Guides and source: <b>github.com/jplenio/Plenio-Music-Production-System</b>'] }, seconds: 5,
-    say: 'Plenio. Install it from the ComfyUI Manager, and make your first song today.' },
+    // "Plenio" alone at the start of a sentence came out as "Plinio"; in the middle of one it keeps its "e"
+    say: 'Install Plenio from the ComfyUI Manager, and make your first song today.', seed: 2 },
 ]
 
 function ffmpeg(cmd, cwd) {
@@ -92,7 +94,7 @@ fs.mkdirSync(work, { recursive: true })
 
 // the speech first: it sets every shot's length
 const lexicon = parseLexicon(path.join(HERE, 'narration', 'lexicon.txt'))
-const lines = SHOTS.map((shot) => ({ text: shot.say, spoken: speakable(shot.say, lexicon), seed: null }))
+const lines = SHOTS.map((shot) => ({ text: shot.say, spoken: speakable(shot.say, lexicon), seed: shot.seed ?? null }))
 await synthesize(lines, { url: option('tts-url', null), cache: path.join(out, 'voice-cache'), voiceDir: path.join(HERE, 'voice') })
 let t = 0
 const pieces = SHOTS.map((shot, i) => {
@@ -127,10 +129,11 @@ ffmpeg(['-f', 'concat', '-safe', '0', '-i', 'list.txt', '-c', 'copy', 'picture.m
 
 // the voice, and the song under it (faded in and out, ducked while the narrator speaks)
 mixVoice(lines, total, path.join(work, 'voice.wav'), work)
-const song = path.join(out, MUSIC.video, MUSIC.file)
-const from = MUSIC.from ?? liveliest(song)
-ffmpeg(['-ss', String(from), '-t', total.toFixed(3), '-i', song, '-af', `aformat=sample_rates=48000:channel_layouts=stereo,afade=t=in:d=1.5,afade=t=out:st=${(total - 3).toFixed(2)}:d=3,volume=0.8`, 'music.wav'], work)
-ffmpeg(['-i', 'voice.wav', '-i', 'music.wav', '-filter_complex',
+const song = MUSIC && path.join(out, MUSIC.video, MUSIC.file)
+const from = MUSIC ? (MUSIC.from ?? liveliest(song)) : null
+if (!MUSIC) ffmpeg(['-i', 'voice.wav', '-af', 'aformat=sample_rates=48000:channel_layouts=stereo', '-c:a', 'pcm_s16le', 'mix.wav'], work)
+else ffmpeg(['-ss', String(from), '-t', total.toFixed(3), '-i', song, '-af', `aformat=sample_rates=48000:channel_layouts=stereo,afade=t=in:d=1.5,afade=t=out:st=${(total - 3).toFixed(2)}:d=3,volume=0.8`, 'music.wav'], work)
+if (MUSIC) ffmpeg(['-i', 'voice.wav', '-i', 'music.wav', '-filter_complex',
   '[0:a]aformat=sample_rates=48000:channel_layouts=stereo,asplit[v1][v2];[1:a][v1]sidechaincompress=threshold=0.02:ratio=5:attack=40:release=500[bed];[bed][v2]amix=inputs=2:normalize=0:duration=longest,alimiter=limit=0.95[out]',
   '-map', '[out]', '-c:a', 'pcm_s16le', 'mix.wav'], work)
 
@@ -147,7 +150,7 @@ const stamp = (s) => {
 const srt = (key) => lines.map((l, i) => `${i + 1}\n${stamp(l.start)} --> ${stamp(l.start + l.seconds)}\n${key(l)}\n`).join('\n')
 fs.writeFileSync(path.join(pkg, `${NAME}.srt`), srt((l) => l.spoken))
 fs.writeFileSync(path.join(pkg, `${NAME} (written).srt`), srt((l) => l.text.replace(/\s*\[pause:[^\]]*\]\s*/g, ' ').trim()))
-for (const f of ['voice.wav', 'music.wav', 'mix.wav']) fs.copyFileSync(path.join(work, f), path.join(pkg, 'audio', f))
+for (const f of MUSIC ? ['voice.wav', 'music.wav', 'mix.wav'] : ['voice.wav']) fs.copyFileSync(path.join(work, f), path.join(pkg, 'audio', f))
 lines.forEach((l, i) => fs.copyFileSync(l.audio, path.join(pkg, 'audio', 'lines', `${String(i + 1).padStart(3, '0')}.flac`)))
 for (const f of fs.readdirSync(path.join(HERE, 'voice'))) fs.copyFileSync(path.join(HERE, 'voice', f), path.join(pkg, 'voice', f))
 fs.writeFileSync(path.join(pkg, 'README.md'), `# ${NAME}
@@ -156,16 +159,16 @@ A promo of about ${Math.round(total)} seconds, cut from the tutorial recordings 
 
 | File | What it is |
 |---|---|
-| \`${NAME}.mp4\` | the promo: picture, narrator and the music bed |
+| \`${NAME}.mp4\` | the promo: picture and narrator${MUSIC ? ' and the music bed' : ' (no music - add your own)'} |
 | \`${NAME} (no sound).mp4\` | the picture alone |
 | \`${NAME}.srt\` / \`(written).srt\` | the narration, for a TTS (spoken spellings, pause tags) / as subtitles |
 | \`audio/voice.wav\` | the narrator alone (-16 LUFS) |
-| \`audio/music.wav\` | the music bed alone: "${MUSIC.file}" of the ${MUSIC.video} recording - a song rendered with Plenio - from ${from} s, faded |
+${MUSIC ? `| \`audio/music.wav\` | the music bed alone: "${MUSIC.file}" of the ${MUSIC.video} recording - a song rendered with Plenio - from ${from} s, faded |
 | \`audio/mix.wav\` | the soundtrack (the bed ducked under the voice) |
-| \`audio/lines/NNN.flac\` | every line as its own file |
+` : ''}| \`audio/lines/NNN.flac\` | every line as its own file |
 | \`voice/\` | the narrator's reference voice (see voice/VOICE.md) |
 
 Every shot lasts as long as its line needs; the shots, their source recordings and the lines are in
 promo.mjs. The OmniVoice settings: speed ${VOICE.speed}, ${VOICE.steps} steps, seed ${VOICE.seed}.
 `)
-console.log(`${pkg}: ${total.toFixed(1)} s, ${lines.length} lines, music from ${from} s of ${MUSIC.video}/${MUSIC.file}`)
+console.log(`${pkg}: ${total.toFixed(1)} s, ${lines.length} lines, ${MUSIC ? `music from ${from} s of ${MUSIC.video}/${MUSIC.file}` : 'no music'}`)

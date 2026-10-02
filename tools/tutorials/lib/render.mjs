@@ -93,7 +93,7 @@ export function timeline(markers, room = roomOf()) {
 
 // Where each line starts in the edit, and the room the edit makes so that no line runs into the next:
 // one shortfall at a time, then the timeline again, until every line fits.
-function fit(markers, lines) {
+export function fit(markers, lines) {
   const room = roomOf()
   const startOf = (tl, line) => (line.anchor.kind === 'card' ? tl.cardStart(line.anchor.index) : tl.map(line.anchor.t))
   for (let guard = 0; guard < lines.length * 6 + 20; guard++) {
@@ -233,6 +233,35 @@ function labelsAss(markers, tl) {
   return lines.join('\n') + '\n'
 }
 
+// --- chapters --------------------------------------------------------------------------------------
+
+// The video's chapters in edit time, for YouTube: a chapter starts at its card when the card comes right
+// before it; the title card is "Intro"; a chapter the script returns to is "(continued)"; chapters
+// shorter than ten seconds join the one before (YouTube's minimum).
+export function chaptersOf(markers, tl) {
+  const cards = tl.pieces.filter((p) => p.type === 'card')
+  const list = [{ start: 0, title: 'Intro' }]
+  const seen = new Set()
+  for (const c of [...markers.chapters].sort((a, b) => a.t - b.t)) {
+    const card = cards.find((p) => p.card.kind === 'chapter' && p.card.t <= c.t + 1e-6 && c.t - p.card.t < 2.5)
+    const start = card ? card.start : tl.map(c.t)
+    const title = seen.has(c.title) ? `${c.title} (continued)` : c.title
+    seen.add(c.title)
+    if (start < 1) list[0].title = title
+    else list.push({ start, title })
+  }
+  const end = cards.find((p) => p.card.kind === 'end')
+  if (end) list.push({ start: end.start, title: 'What next' })
+  const merged = []
+  list.forEach((c, i) => {
+    const next = list[i + 1]?.start ?? tl.duration
+    if (merged.length && next - c.start < 10) return
+    merged.push(c)
+  })
+  const stamp = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`
+  return merged.map((c) => `${stamp(c.start)} ${c.title}`).join('\n') + '\n'
+}
+
 // --- the songs ----------------------------------------------------------------------------------------
 
 // The songs the video plays (studio listen(): a preview started at raw time t) under the voice: each fades
@@ -281,6 +310,7 @@ Plenio repository (\`--render-only\` cuts it again from the recording; see tools
 | \`audio/lines/NNN.flac\` | every narration line as its own file (the TTS output, unprocessed) |
 | \`audio/lines.tsv\` | per line: number, start, end and length in seconds, the written and the spoken text |
 | \`voice/\` | the narrator: the reference recording the voice is cloned from, its transcript, and how it was made |
+| \`youtube-chapters.txt\` | the chapters with their times in this video, to paste into a YouTube description |
 
 ## Timing
 
@@ -377,6 +407,7 @@ export async function renderTutorial({ dir: folder, name, banner, narration, lex
   ffmpeg(['-i', 'labelled.mp4', '-i', 'audio.wav','-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', voiced], work)
   ffmpeg(['-i', 'labelled.mp4', '-an', '-c:v', 'copy', '-movflags', '+faststart', silent], work)
   writePackage({ pkg, name, lines, work, voiceDir, hasMusic, silent, voiced })
+  fs.writeFileSync(path.join(pkg, 'youtube-chapters.txt'), chaptersOf(markers, tl))
   const held = [...room.holds.values()].reduce((a, b) => a + b, 0)
   log(`${pkg}: ${tl.duration.toFixed(1)} s, ${lines.length} lines (${lines.reduce((a, l) => a + l.seconds, 0).toFixed(0)} s of speech), ` +
     `${room.holds.size} holds (${held.toFixed(1)} s), ${room.fast.size} slower waits, ${room.cards.size} longer cards`)
