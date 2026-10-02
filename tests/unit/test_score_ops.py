@@ -172,7 +172,6 @@ def test_selected_chord_symbols_move_by_semitones_with_the_notes() -> None:
         ops.transform(SMALL, {"op": "set_note_pitch", "ids": ["chord:0"], "midi": 60})
 
 
-
 def test_chord_edits_never_change_notes() -> None:
     before = score_of(SMALL)
     abc, _ = run(SMALL, op="put_chord", onset=6, name="Dm7")
