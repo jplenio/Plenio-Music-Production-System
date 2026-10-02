@@ -366,6 +366,20 @@ def test_the_brief_fields_route_answers_the_one_precedence_rule(server: ComfySer
     assert set(hints) >= {"length", "vocals"}
     assert hints["length"]["current"] == "very short (about 1:00)"
     assert hints["length"]["suggested"] in LENGTHS  # the template's own length
+    # a Cover Brief: its own fields and choices - no length, no tempo, vocals never "sung"
+    status, cover = server.request(
+        "POST",
+        "/plenio/brief/fields",
+        {"template": template, "kind": "cover", "fields": {"vocals": "original lyrics", "genre": ""}},
+    )
+    assert status == 200
+    assert cover["choices"] == []
+    assert {fill["field"] for fill in cover["fills"]} <= {"description", "genre", "mood", "voice"}
+    assert "tempo" not in cover["sources"] and "language" not in cover["sources"]
+    status, cover = server.request(
+        "POST", "/plenio/brief/fields", {"template": template, "kind": "cover", "fields": {"vocals": "instrumental"}}
+    )
+    assert [(c["field"], c["suggested"]) for c in cover["choices"]] == [("vocals", "original lyrics")]
     # a free-form length the template library does not know is refused, not guessed
     status, bad = server.request("POST", "/plenio/brief/fields", {"template": "nope", "fields": {}})
     assert status == 400 and "Unknown brief template" in bad["error"]["message"]

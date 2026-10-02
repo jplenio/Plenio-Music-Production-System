@@ -276,6 +276,8 @@ async def brief_fields(request: web.Request) -> web.StreamResponse:
     from ..core.brief import (
         DEFAULT_LENGTH,
         TEXT_FIELDS,
+        cover_choice_hints,
+        cover_text_fields,
         field_sources,
         resolve_text_fields,
         template_choice_hints,
@@ -288,17 +290,20 @@ async def brief_fields(request: web.Request) -> web.StreamResponse:
     fields = {name: value for name, value in values.items() if isinstance(value, str)}
     template_id = str(data.get("template") or "").strip()
     template = None if template_id in ("", "none") else template_library().get(template_id)
-    merged, from_template, notes = resolve_text_fields(fields, template, TEXT_FIELDS)
-    choices = template_choice_hints(fields, template)
+    # a Cover Brief has its own fields and choices (no length, no tempo/key/meter, vocals in its words)
+    cover = data.get("kind") == "cover"
+    names = cover_text_fields(fields.get("vocals", "")) if cover else TEXT_FIELDS
+    merged, from_template, notes = resolve_text_fields(fields, template, names)
+    choices = (cover_choice_hints if cover else template_choice_hints)(fields, template)
     return web.json_response(
         {
             "template": template.id if template else "none",
-            "sources": field_sources(fields, template),
+            "sources": field_sources(fields, template, names),
             "fields": dict(template.fields) if template else {},
             "fills": [
                 {"field": name, "value": merged[name], "template": template.fields[name]}
                 for name in from_template
-                if name in TEXT_FIELDS
+                if name in names
             ],
             "choices": [
                 {"field": name, "suggested": suggested, "current": str(fields.get(name, "") or "")}

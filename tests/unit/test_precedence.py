@@ -21,6 +21,8 @@ from plenio.core.brief import (
     TEXT_FIELDS,
     build_cover_brief,
     build_song_brief,
+    cover_choice_hints,
+    cover_text_fields,
     field_sources,
     parse_template,
     template_choice_hints,
@@ -76,6 +78,27 @@ def test_choice_fields_stay_explicit_and_the_template_only_hints() -> None:
     assert template_choice_hints(values, TEMPLATE) == {"length": "long (about 4:30)"}
     assert template_choice_hints({**values, "length": "long (about 4:30)"}, TEMPLATE) == {}
     assert template_choice_hints(values, None) == {}
+
+
+def test_a_cover_brief_gets_the_template_choices_in_its_own_words() -> None:
+    sung = parse_template("---\nname: S\ngenre: pop\nvocals: sung\nlength: short (about 1:30)\n---\nPop.", "pop/s")
+    plain = parse_template(
+        "---\nname: I\ngenre: ambient\nvocals: instrumental\nmelody: accompaniment only\n---\nAmbient.", "a/i"
+    )
+    # no length and never "sung": a sung template only turns an instrumental cover into one with the words
+    assert cover_choice_hints({"vocals": "original lyrics"}, sung) == {}
+    assert cover_choice_hints({"vocals": "new lyrics"}, sung) == {}
+    assert cover_choice_hints({"vocals": "instrumental"}, sung) == {"vocals": "original lyrics"}
+    assert cover_choice_hints({"vocals": "original lyrics"}, plain) == {
+        "vocals": "instrumental",
+        "melody": "accompaniment only",
+    }
+    assert cover_choice_hints({"vocals": "instrumental", "melody": "accompaniment only"}, plain) == {}
+    assert cover_choice_hints({"vocals": "instrumental"}, None) == {}
+    # the text fields a cover takes from a template: never tempo, key, meter or the language
+    assert cover_text_fields("original lyrics") == ("description", "genre", "mood", "voice")
+    assert cover_text_fields("new lyrics") == ("description", "genre", "mood", "voice", "theme")
+    assert cover_text_fields("instrumental") == ("description", "genre", "mood", "lead_instrument")
 
 
 @pytest.mark.parametrize("placeholder", ["custom", " Custom ", "CUSTOM"])

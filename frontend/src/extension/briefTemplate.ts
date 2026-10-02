@@ -74,6 +74,12 @@ export function briefValues(node: ComfyNode): Record<string, string> {
   return values
 }
 
+/** Which brief the node is: a Cover Brief has its own fields and choices (the backend knows them). */
+export function briefKind(node: ComfyNode): 'song' | 'cover' {
+  const type = (node as { comfyClass?: string; type?: string }).comfyClass ?? (node as { type?: string }).type
+  return type === 'PlenioCoverBrief' ? 'cover' : 'song'
+}
+
 /** What "copy template text" writes: only the empty text fields the template defines. */
 export function fillPlan(node: ComfyNode, answer: BriefFields): { field: string; value: string }[] {
   const plan: { field: string; value: string }[] = []
@@ -266,7 +272,7 @@ export function addBriefTemplatePanel(node: ComfyNode, fetcher: Fetcher): Templa
     wire()
     const template = String(node.widgets?.find((widget) => widget.name === 'template')?.value ?? 'none')
     try {
-      current = await briefFields(fetcher, { fields: briefValues(node), template })
+      current = await briefFields(fetcher, { fields: briefValues(node), template, kind: briefKind(node) })
       problem = null
     } catch (error) {
       current = null

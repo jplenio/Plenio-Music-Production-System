@@ -8,6 +8,10 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 - **2 · YuE2 · Cover** starts with the style template *pop/dance-pop-vocal*, *original lyrics* (the language detected from the singing) and *keep original chords*; genre and mood are empty, so they come from the style template. App mode shows the original lyrics' language and voice.
 
+### Fixed
+
+- **Use template choices** in the Cover Brief set *vocals* to *sung* and offered a length - words of the Song Brief. It now speaks the cover's: a sung style template turns an instrumental cover into one with the *original lyrics* (and leaves *original* or *new lyrics* alone), an instrumental one sets *instrumental* and its melody, and there is no length. *Template fills* names only the fields a cover takes from a template (no tempo, key, meter or language).
+
 ## 0.4.2 - 2026-10-02
 
 The score editor arranges single bars the way it arranges sections, and the transport moves next to the piano roll.

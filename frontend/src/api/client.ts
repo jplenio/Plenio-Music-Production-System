@@ -208,7 +208,7 @@ export interface BriefFields {
 /** Ask the backend what the template would fill (the rule lives in `core.brief`, not in the frontend). */
 export function briefFields(
   fetcher: Fetcher,
-  request: { fields: Record<string, string>; template: string }
+  request: { fields: Record<string, string>; template: string; kind?: 'song' | 'cover' }
 ): Promise<BriefFields> {
   return post(fetcher, '/plenio/brief/fields', request)
 }

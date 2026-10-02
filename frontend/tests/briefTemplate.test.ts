@@ -10,6 +10,7 @@ import {
   CHOICE_FIELDS,
   TEXT_FIELDS,
   addBriefTemplatePanel,
+  briefKind,
   briefValues,
   choicePlan,
   clearLegacyPlaceholders,
@@ -199,5 +200,13 @@ describe('the panel', () => {
     await vi.advanceTimersByTimeAsync(500)
     expect(asked).toHaveLength(5)
     expect(asked[4].theme).toBe('the sea')
+  })
+})
+
+describe('briefKind', () => {
+  it('tells a Cover Brief from a Song Brief (the backend answers each with its own fields and choices)', () => {
+    expect(briefKind({ comfyClass: 'PlenioCoverBrief' } as unknown as ComfyNode)).toBe('cover')
+    expect(briefKind({ type: 'PlenioCoverBrief' } as unknown as ComfyNode)).toBe('cover')
+    expect(briefKind({ comfyClass: 'PlenioSongBrief' } as unknown as ComfyNode)).toBe('song')
   })
 })

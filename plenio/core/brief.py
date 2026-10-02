@@ -381,14 +381,13 @@ def resolve_text_fields(
     return merged, from_template, notes
 
 
-def field_sources(values: Mapping[str, Any], template: Template | None) -> dict[str, str]:
-    """Where the effective value of every Song Brief text field comes from: ``typed``, ``template``
-    or ``empty`` (the editor shows template values as ghost text in empty fields)."""
-    merged, from_template, _notes = resolve_text_fields(values, template, TEXT_FIELDS)
-    return {
-        name: "template" if name in from_template else "typed" if merged[name] else "empty"
-        for name in TEXT_FIELDS
-    }
+def field_sources(
+    values: Mapping[str, Any], template: Template | None, names: tuple[str, ...] = TEXT_FIELDS
+) -> dict[str, str]:
+    """Where the effective value of every text field (``names``; a Song Brief's by default) comes from:
+    ``typed``, ``template`` or ``empty`` (the editor shows template values as ghost text in empty fields)."""
+    merged, from_template, _notes = resolve_text_fields(values, template, names)
+    return {name: "template" if name in from_template else "typed" if merged[name] else "empty" for name in names}
 
 
 def template_choice_hints(values: Mapping[str, Any], template: Template | None) -> dict[str, str]:
@@ -400,6 +399,40 @@ def template_choice_hints(values: Mapping[str, Any], template: Template | None) 
         suggested = template.fields.get(name, "")
         if suggested and str(values.get(name, "") or "").strip() != suggested:
             hints[name] = suggested
+    return hints
+
+
+def cover_text_fields(vocals: str) -> tuple[str, ...]:
+    """The text fields a Cover Brief takes from a template, for its *vocals* choice (the language never:
+    the original's is detected, new lyrics have their own)."""
+    mode = COVER_VOCALS.get(vocals, vocals)
+    extra = {"instrumental": ("lead_instrument",), "original": ("voice",), "new": ("voice", "theme")}
+    return ("description", "genre", "mood", *extra.get(mode, ()))
+
+
+def cover_choice_hints(values: Mapping[str, Any], template: Template | None) -> dict[str, str]:
+    """The template's choices in a Cover Brief's words (``use template choices``).
+
+    A style template speaks of songs: *sung* or *instrumental*, a length. A cover has no length, and
+    *sung* means *original lyrics* or *new lyrics* - so a sung template only turns an instrumental
+    cover into one with the original lyrics, and the melody counts only for an instrumental cover.
+    """
+    if template is None:
+        return {}
+    hints: dict[str, str] = {}
+    current = str(values.get("vocals", "") or "").strip()
+    suggested = template.fields.get("vocals", "")
+    if suggested == "instrumental" and current != "instrumental":
+        hints["vocals"] = "instrumental"
+    elif suggested == "sung" and current == "instrumental":
+        hints["vocals"] = "original lyrics"
+    melody = template.fields.get("melody", "")
+    if (
+        hints.get("vocals", current) == "instrumental"
+        and melody in MELODY_OPTIONS
+        and str(values.get("melody", "") or "").strip() != melody
+    ):
+        hints["melody"] = melody
     return hints
 
 
