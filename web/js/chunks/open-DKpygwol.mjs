@@ -1,4 +1,4 @@
-import { a as iy, P as qm, b as ny, t as ry, i as sy, e as ay, c as oy, n as ai, v as ly, s as Df, g as cy, r as hy, u as uy, w as Of, d as fy, f as dy, h as Nf } from "./main-M12MpuNH.mjs";
+import { a as iy, P as qm, b as ny, t as ry, i as sy, e as ay, c as oy, n as ai, v as ly, s as Df, g as cy, r as hy, u as uy, w as Of, d as fy, f as dy, h as Nf } from "./main-B4d36bNh.mjs";
 import { notesLabel as py, trackRows as gy, parseGuide as my, sameGuide as Xr, remapGuide as vy, guideNotes as by } from "./tracks-DxmZeggM.mjs";
 // @__NO_SIDE_EFFECTS__
 function bu(i) {
@@ -37359,7 +37359,7 @@ const l_ = {
               [Ot, _e.text]
             ]),
             _e.kind === "lyrics" ? (X(), Q("p", uE, [
-              ke[7] || (ke[7] = z("span", null, "Section tags (YuE2 sings section by section):", -1)),
+              ke[7] || (ke[7] = z("span", null, "Section tags (the model sings section by section):", -1)),
               (X(!0), Q($e, null, tt(fe(E6), (Ie) => (X(), Q("button", {
                 key: Ie,
                 title: `Add [${Ie}]`,

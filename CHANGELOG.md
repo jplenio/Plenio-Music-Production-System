@@ -31,6 +31,7 @@ The score editor becomes an arranging tool in the manner of Cubase. You can copy
 - Inserting, deleting or duplicating bars in the inspector of a DAW sheet left the Guide notes where they were, so they no longer sat under their bars. They now move with them.
 - The System Check's tables (templates, model files, the hardware rule table) were shown as raw `| a | b |` lines on the node; node summaries now render tables. The templates table listed *4 · Enhance & Master* twice.
 - The EQ's band strip showed a match proposal's exact values (`Q 0.3982428666120445`); Q and gain are rounded there now.
+- The Lyrics tab said "YuE2 sings section by section" also in the MiniMax Song Sheet; it names no model now.
 
 ### Studies
 

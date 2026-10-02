@@ -529,7 +529,7 @@ onBeforeUnmount(() => {
             @input="onInput(doc)"
           />
           <p v-if="doc.kind === 'lyrics'" class="tag-helpers">
-            <span>Section tags (YuE2 sings section by section):</span>
+            <span>Section tags (the model sings section by section):</span>
             <button v-for="tag in SECTION_TAGS" :key="tag" :title="`Add [${tag}]`" @click="insertTag(doc, tag)">
               [{{ tag }}]
             </button>
