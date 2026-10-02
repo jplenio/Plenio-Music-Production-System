@@ -325,6 +325,17 @@
   align-items: center;
   gap: 6px 12px;
 }
+/* the transport between the piano roll and the notation: a bar of its own */
+.plenio-overlay .score-tab > .transport {
+  padding: 4px 8px;
+  border: 1px solid var(--border-color, #444);
+  border-radius: 6px;
+  background: var(--comfy-input-bg, #2a2a2a);
+}
+.plenio-overlay .score-tab > .transport > button:first-child {
+  min-width: 78px;
+  font-weight: 600;
+}
 .plenio-overlay .palette .group {
   display: flex;
   align-items: center;
@@ -779,12 +790,13 @@
 .plenio-overlay .abc-editor .cm-editor {
   height: 100%;
 }
+/* the navigator keeps its full height: the side column scrolls as a whole (squeezed into the space the
+   track panel and the lyrics box left, the sections and the bar strip were out of reach) */
 .plenio-overlay .navigator {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  overflow: auto;
-  min-height: 0;
+  flex: none;
 }
 .plenio-overlay .navigator ol.sections {
   list-style: none;
@@ -881,6 +893,40 @@
 .plenio-overlay .bar-strip .bar.selected {
   background: #2f6fb0;
   color: #fff;
+}
+.plenio-overlay .bar-strip .bar.picked {
+  /* selected for arranging, like a picked section */
+  background: rgba(76, 154, 255, 0.35);
+  outline: 1px solid #4c9aff;
+}
+.plenio-overlay .bar-strip .bar[draggable='true'] {
+  cursor: grab;
+}
+.plenio-overlay .bar-strip .bar.drop-before {
+  box-shadow: -3px 0 0 #ffc440;
+}
+.plenio-overlay .bar-strip .bar.drop-after {
+  box-shadow: 3px 0 0 #ffc440;
+}
+.plenio-overlay .navigator .bar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border-color, #444);
+}
+.plenio-overlay .navigator .bar-actions .hint {
+  flex-basis: 100%;
+  font-size: 11px;
+  color: var(--descrip-text, #999);
+}
+.plenio-overlay .navigator .bar-actions button {
+  font-size: 11px;
+  padding: 1px 7px;
+}
+.plenio-overlay .navigator .bar-actions button.danger:not(:disabled) {
+  border-color: #a04a44;
 }
 .plenio-overlay .bar-strip .bar.error {
   border-color: #e0685e;

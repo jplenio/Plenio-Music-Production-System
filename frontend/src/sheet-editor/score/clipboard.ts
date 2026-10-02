@@ -89,6 +89,40 @@ export function clipOfSections(
   }
 }
 
+/** ``bars 5-7``, ``bar 3``, ``bars 2, 5-6`` (1-based bar numbers, sorted). */
+export function barsLabel(bars: readonly number[]): string {
+  const sorted = [...new Set(bars)].sort((a, b) => a - b)
+  const runs: string[] = []
+  for (let i = 0; i < sorted.length; ) {
+    let j = i
+    while (j + 1 < sorted.length && sorted[j + 1] === sorted[j] + 1) j++
+    runs.push(j > i ? `${sorted[i]}-${sorted[j]}` : `${sorted[i]}`)
+    i = j + 1
+  }
+  return `bar${sorted.length > 1 ? 's' : ''} ${runs.join(', ')}`
+}
+
+/** A clip of whole bars (0-based measure indices, in order): both voices and the chord symbols. */
+export function clipOfBars(model: ScoreModelView, indices: readonly number[]): Clip | null {
+  const order = [...new Set(indices)].sort((a, b) => a - b).filter((i) => model.measures[i])
+  if (!order.length) return null
+  const notes: ClipNote[] = []
+  const chords: Clip['chords'] = []
+  let offset = 0
+  for (const index of order) {
+    const { onset: start, length } = model.measures[index]
+    const end = start + length
+    for (const note of [...model.tracks.vocal, ...model.tracks.ins]) {
+      if (note.onset >= end || note.onset + note.duration <= start) continue
+      const onset = Math.max(note.onset, start)
+      notes.push({ track: trackOf(note), onset: onset - start + offset, duration: Math.min(note.onset + note.duration, end) - onset, pitch: note.pitch })
+    }
+    for (const chord of model.tracks.chords) if (chord.onset >= start && chord.onset < end) chords.push({ onset: chord.onset - start + offset, name: chord.name })
+    offset += length
+  }
+  return { unit: model.unit, span: offset, tracks: ['vocal', 'ins'], withChords: true, notes, chords, sections: [], label: barsLabel(order.map((i) => i + 1)) }
+}
+
 /** A clip of selected notes and chord symbols; it starts at the earliest of them (Cubase). */
 export function clipOfSelection(model: ScoreModelView, notes: readonly ModelNote[], chords: readonly ModelChord[]): Clip | null {
   if (!notes.length && !chords.length) return null

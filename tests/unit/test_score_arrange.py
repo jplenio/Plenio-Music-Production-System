@@ -267,3 +267,19 @@ def test_the_lyrics_follow_fixture_is_current() -> None:
         "regenerate frontend/tests/fixtures/arrange-edits.json: "
         "python -c \"import sys; sys.path[:0] = ['tests/unit', 'tests/support']; import test_score_arrange as t; t.write_follow_fixture()\""
     )
+
+
+def test_an_arrangement_of_bars_says_what_it_did() -> None:
+    """The bar strip arranges single bars (owner's request 2026-10-02): the undo label names them."""
+    score = c.from_abc(PLAN)
+    count = score.measure_count
+    keep = list(range(count))
+    deleted = ops.arrange_measures(score, [m for m in keep if m not in (4, 5, 6)])
+    assert deleted.changes == (f"deleted bars 5-7 ({count} -> {count - 3} bars)",)
+    copied = ops.arrange_measures(score, [*keep[:3], 2, *keep[3:]])
+    assert copied.changes == (f"copied bar 3 ({count} -> {count + 1} bars)",)
+    moved = ops.arrange_measures(score, [1, 0, *keep[2:]])
+    assert moved.changes == (f"bars moved ({count} -> {count} bars)",)
+    # through the operation dispatcher, as the editor sends it (0-based bars)
+    via = operations.apply(c.to_abc(score), {"op": "arrange_measures", "order": [0, 2, 3]})
+    assert "deleted" in via.changes[0]

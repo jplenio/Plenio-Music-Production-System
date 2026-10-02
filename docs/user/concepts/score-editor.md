@@ -16,10 +16,10 @@ Typical uses:
 | **View** | the layout *Review* or *Text* (see below); in *Review*: *piano roll* and *ABC text (advanced)* on/off; notation zoom; the files: *Export MIDI*, *Export MusicXML*, *Save project*, *Import MIDI…*, *Open project…* (see [Files](#files-midi-musicxml-and-the-project)) |
 | **Piano roll** | both voices over time (Vocal blue, Ins orange) with a chord lane and the bars and sections above; with lyrics a **lyrics lane** (the words over the phrases they are sung on - edit them there); the **cursor** (click in the bar numbers); draw, move, resize and delete notes and chord symbols with the mouse (see below) |
 | **Inspector** (right, *Review*) | the selected note(s), chord symbol and bar as fields: voice, pitch, start, length, chord; insert, duplicate or delete bars, meter, key (see below) |
-| **Navigator** | the sections: select one or more and **duplicate, copy, move or delete** them (also by dragging - see [Arranging sections](#arranging-sections)); go to, rename, start one bar earlier / later, join to the one before, new section at the selected bar; a bar strip (sections in colour, bars with errors marked); in *Review* with the song's lyrics: *Lyrics fit* (the lyrics next to the score's sections) |
+| **Navigator** | the sections: select one or more and **duplicate, copy, move or delete** them (also by dragging - see [Arranging sections](#arranging-sections)); go to, rename, start one bar earlier / later, join to the one before, new section at the selected bar; the **bar strip** (sections in colour, bars with errors marked): select one or more bars and **duplicate, copy, move or delete** them (see [Arranging bars](#arranging-bars)); in *Review* with the song's lyrics: *Lyrics fit* (the lyrics next to the score's sections) |
 | **Notation** | click a note or rest to select it, Shift+click to add to the selection; the lyrics stand under the Vocal notes (read-only) |
 | **ABC text** | the canonical text with line numbers; errors are underlined at their bar; the cursor selects the note under it |
-| **Transport** | play from the cursor, loop the cursor's section, metronome, voices (Vocal, Ins, chords), speed; with a source connected: play the source from the cursor's bar and **A/B** |
+| **Transport** (between the roll and the notation) | play from the cursor, loop the cursor's section, metronome, voices (Vocal, Ins, chords), speed; with a source connected: play the source from the cursor's bar and **A/B** |
 | **Status line** | what is selected (voice, bar, pitch, length, chord) and what the last edit did |
 | **Diagnostics** | the backend's findings, each with a link to its bar |
 
@@ -191,6 +191,21 @@ The section list works like Cubase's arranger track: whole sections are copied, 
 | delete | **Delete**: the rest closes up (one section always stays) | Del |
 
 Every arrangement is **one undo step**, and the notation, the roll, the ABC text and the bar strip follow it at once. A note that was tied across into a section that no longer follows is cut at the section's end - it does not tie into a different note. A copied section keeps its name, so a song can have two `chorus` sections in a row.
+
+### Arranging bars
+
+The **bar strip** under the sections arranges single bars the same way - for a bar too many in a verse, a fill to repeat, or two bars in the wrong order. Its buttons sit right above it.
+
+| Action | Mouse | Keys (after a click in the strip) |
+|---|---|---|
+| select | click a bar (it also goes there: the inspector and the cursor follow); **Ctrl+click** adds or removes one, **Shift+click** selects a range | Ctrl+A all, Esc none |
+| duplicate | **Duplicate**: a copy of the selected bars right after the last of them | Ctrl+D |
+| copy | **Copy**: the selected bars into the clipboard, to paste them at the cursor in the roll | Ctrl+C (Ctrl+X: copy and delete) |
+| move | **← / →**: one place earlier / later; or **drag** the bars to a new place (the line shows where they land) | Ctrl+← / Ctrl+→ |
+| copy to a place | drag with **Alt** (or Ctrl) held | |
+| delete | **Delete**: what follows moves up (one bar always stays) | Del |
+
+The keys act on what you clicked last: after a click in the section list they arrange sections, after a click in the bar strip they arrange bars. A bar keeps its section: deleting the first bars of a section starts the section at the next one; a bar copied out of another section starts a new section of that name. Every arrangement is **one undo step** (the undo button says what it did, for example *deleted bars 10-13*), and everything listed below follows it.
 
 ### What follows an arrangement
 

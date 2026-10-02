@@ -3,14 +3,15 @@
  * Sections and bars of the score: navigation, the section edits of the backend, and arranging
  * whole sections (docs/design/score-arrange-design.md §1; Cubase: arranger track) - select one or
  * more (Ctrl+click, Shift+click), duplicate, copy, delete, move them up or down or drag them to a new
- * place (with Alt held: a copy).
+ * place (with Alt held: a copy). The bar strip under the sections arranges single bars the same way
+ * (the backend's ``arrange_measures``); the keys act on what was clicked last - sections or bars.
  */
 import { computed, ref, watch } from 'vue'
 
 import type { ScoreOperation } from '../../api/client'
 import { type ScoreView, clock, sectionOfBar } from '../../shared/scoreView'
 import { type Arrangement, deleteSections, dropSections, duplicateSections, moveSections, selectSection } from './arrange'
-import { clipOfSections, clipboard } from './clipboard'
+import { clipOfBars, clipOfSections, clipboard } from './clipboard'
 import type { LyricBlock } from './lyricsFollow'
 
 const props = defineProps<{
@@ -34,6 +35,13 @@ const anchor = ref<number | null>(null)
 let pending: number[] | null = null
 const dragging = ref(false)
 const dropAt = ref<number | null>(null)
+/** The bars selected in the strip (0-based positions), and what the keys act on. */
+const barsPicked = ref<number[]>([])
+const barAnchor = ref<number | null>(null)
+let pendingBars: number[] | null = null
+const area = ref<'sections' | 'bars'>('sections')
+const barDragging = ref(false)
+const barDropAt = ref<number | null>(null)
 
 const sections = computed(() => props.view?.sections ?? [])
 const bars = computed(() => props.view?.bars ?? [])
@@ -44,6 +52,10 @@ const canArrange = computed(() => !props.readonly && !!props.view?.model && sect
 watch(sections, (list) => {
   selected.value = (pending ?? selected.value).filter((i) => i < list.length)
   pending = null
+})
+watch(bars, (list) => {
+  barsPicked.value = (pendingBars ?? barsPicked.value).filter((i) => i < list.length)
+  pendingBars = null
 })
 
 function startRename(index: number, label: string): void {
@@ -70,6 +82,7 @@ function sourceTime(bar: number): string | null {
 }
 
 function pick(index: number, event: MouseEvent): void {
+  area.value = 'sections'
   const toggle = event.ctrlKey || event.metaKey
   selected.value = selectSection(selected.value, index, { toggle, range: event.shiftKey }, anchor.value)
   if (!event.shiftKey) anchor.value = index
@@ -96,8 +109,91 @@ function copy(): void {
   emit('notice', `copied ${clip.label} - paste it at the cursor in the piano roll (Ctrl+V; Ctrl+Shift+V moves what follows)`)
 }
 
+// --- bars: the same arranging for single bars (0-based positions in the strip) ---
+function pickBar(position: number, event: MouseEvent): void {
+  area.value = 'bars'
+  const toggle = event.ctrlKey || event.metaKey
+  barsPicked.value = selectSection(barsPicked.value, position, { toggle, range: event.shiftKey }, barAnchor.value)
+  if (!event.shiftKey) barAnchor.value = position
+  // a plain click also goes to the bar (the inspector and the cursor follow)
+  const item = bars.value[position]
+  if (item && !toggle && !event.shiftKey) emit('goto', item.index)
+}
+
+function applyBars(arrangement: Arrangement | null): void {
+  if (!arrangement || !canArrange.value) return
+  pendingBars = arrangement.selection
+  emit('operate', { op: 'arrange_measures', order: arrangement.order.map((bar) => bar - 1) })
+}
+
+const duplicateBars = () => applyBars(duplicateSections(bars.value.length, barsPicked.value))
+const removeBars = () => applyBars(deleteSections(bars.value.length, barsPicked.value))
+const shiftBars = (delta: -1 | 1) => applyBars(moveSections(bars.value.length, barsPicked.value, delta))
+
+function copyBars(): void {
+  const model = props.view?.model
+  if (!model || !barsPicked.value.length) return
+  const clip = clipOfBars(model, barsPicked.value)
+  if (!clip) return
+  clipboard.value = clip
+  emit('notice', `copied ${clip.label} - paste it at the cursor in the piano roll (Ctrl+V; Ctrl+Shift+V moves what follows)`)
+}
+
+function onBarKey(event: KeyboardEvent): boolean {
+  const mod = event.ctrlKey || event.metaKey
+  const key = event.key.toLowerCase()
+  if (event.key === 'Delete' || event.key === 'Backspace') removeBars()
+  else if (mod && key === 'd') duplicateBars()
+  else if (mod && key === 'c') copyBars()
+  else if (mod && key === 'x' && barsPicked.value.length < bars.value.length) {
+    copyBars()
+    removeBars()
+  } else if (mod && (event.key === 'ArrowLeft' || event.key === 'ArrowUp')) shiftBars(-1)
+  else if (mod && (event.key === 'ArrowRight' || event.key === 'ArrowDown')) shiftBars(1)
+  else if (mod && key === 'a') barsPicked.value = bars.value.map((_, i) => i)
+  else if (event.key === 'Escape' && barsPicked.value.length) barsPicked.value = []
+  else return false
+  return true
+}
+
+function onBarDragStart(position: number, event: DragEvent): void {
+  if (!canArrange.value) return
+  area.value = 'bars'
+  if (!barsPicked.value.includes(position)) barsPicked.value = [position]
+  barDragging.value = true
+  event.dataTransfer?.setData('text/plain', 'plenio-bars')
+  if (event.dataTransfer) event.dataTransfer.effectAllowed = 'copyMove'
+}
+
+function onBarDragOver(position: number, event: DragEvent): void {
+  if (!barDragging.value) return
+  event.preventDefault()
+  const box = (event.currentTarget as HTMLElement).getBoundingClientRect()
+  barDropAt.value = event.clientX < box.left + box.width / 2 ? position : position + 1
+  if (event.dataTransfer) event.dataTransfer.dropEffect = event.altKey || event.ctrlKey ? 'copy' : 'move'
+}
+
+function onBarDrop(event: DragEvent): void {
+  if (!barDragging.value || barDropAt.value === null) return
+  event.preventDefault()
+  applyBars(dropSections(bars.value.length, barsPicked.value, barDropAt.value, event.altKey || event.ctrlKey))
+  onBarDragEnd()
+}
+
+function onBarDragEnd(): void {
+  barDragging.value = false
+  barDropAt.value = null
+}
+
 function onKey(event: KeyboardEvent): void {
   if (!canArrange.value || (event.target as HTMLElement | null)?.closest('input, textarea, select')) return
+  if (area.value === 'bars') {
+    if (onBarKey(event)) {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+    return
+  }
   const mod = event.ctrlKey || event.metaKey
   const key = event.key.toLowerCase()
   let handled = true
@@ -231,19 +327,49 @@ function onDragEnd(): void {
         Split
       </button>
     </div>
-    <div class="bar-strip" role="list" aria-label="Bars">
+    <div v-if="canArrange" class="bar-actions" role="toolbar" aria-label="Arrange bars">
+      <span class="hint">{{
+        barsPicked.length ? `${barsPicked.length} bar${barsPicked.length > 1 ? 's' : ''} selected` : 'Bars: click to select (Ctrl / Shift: more)'
+      }}</span>
+      <button :disabled="!barsPicked.length" title="Duplicate the selected bars after the last one (Ctrl+D)" @click="duplicateBars">
+        Duplicate
+      </button>
+      <button :disabled="!barsPicked.length" title="Copy the selected bars; paste them at the cursor in the piano roll (Ctrl+C)" @click="copyBars">
+        Copy
+      </button>
+      <button :disabled="!barsPicked.length" title="Move the selected bars one place earlier (Ctrl+←)" aria-label="Move bars earlier" @click="shiftBars(-1)">←</button>
+      <button :disabled="!barsPicked.length" title="Move the selected bars one place later (Ctrl+→)" aria-label="Move bars later" @click="shiftBars(1)">→</button>
       <button
-        v-for="item in bars"
+        :disabled="!barsPicked.length || barsPicked.length >= bars.length"
+        class="danger"
+        title="Delete the selected bars; what follows moves up (Del)"
+        @click="removeBars"
+      >
+        Delete
+      </button>
+    </div>
+    <div class="bar-strip" role="list" aria-label="Bars" @dragleave.self="barDropAt = null">
+      <button
+        v-for="(item, position) in bars"
         :key="item.index"
         role="listitem"
         class="bar"
         :class="{
           selected: item.index === bar,
+          picked: barsPicked.includes(position),
           error: errorSet.has(item.index),
-          alt: view ? sectionOfBar(view, item.index) % 2 === 1 : false
+          alt: view ? sectionOfBar(view, item.index) % 2 === 1 : false,
+          'drop-before': barDropAt === position,
+          'drop-after': barDropAt === position + 1 && position === bars.length - 1
         }"
-        :title="`Bar ${item.index} · ${clock(item.start_s)} · ${item.chords.join(' ') || 'no chord'}`"
-        @click="emit('goto', item.index)"
+        :draggable="canArrange"
+        :aria-selected="barsPicked.includes(position)"
+        :title="`Bar ${item.index} · ${clock(item.start_s)} · ${item.chords.join(' ') || 'no chord'}${canArrange ? ' - click to select (Ctrl+click: add, Shift+click: range), drag to move (Alt: copy)' : ''}`"
+        @click="pickBar(position, $event)"
+        @dragstart="onBarDragStart(position, $event)"
+        @dragover="onBarDragOver(position, $event)"
+        @drop="onBarDrop"
+        @dragend="onBarDragEnd"
       >
         {{ item.index }}
       </button>

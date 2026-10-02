@@ -886,9 +886,35 @@ def arrange_measures(score: Score, order: Sequence[object], *, change: str | Non
         chords=tuple(sorted(chords, key=lambda x: x.onset)),
         origins=tuple(origins[m] for m in measures),
     )
-    return _commit(
-        new_score, [change or f"bars rearranged ({count} -> {len(measures)} bars)"], time_map=time_map
-    )
+    return _commit(new_score, [change or _measures_change(count, measures)], time_map=time_map)
+
+
+def _bar_runs(bars: Sequence[int]) -> str:
+    """``5-7, 9`` for 1-based bar numbers."""
+    ordered = sorted(set(bars))
+    runs: list[str] = []
+    i = 0
+    while i < len(ordered):
+        j = i
+        while j + 1 < len(ordered) and ordered[j + 1] == ordered[j] + 1:
+            j += 1
+        runs.append(f"{ordered[i]}-{ordered[j]}" if j > i else str(ordered[i]))
+        i = j + 1
+    return ", ".join(runs)
+
+
+def _measures_change(count: int, measures: Sequence[int]) -> str:
+    """What an arrangement of bars did, in words (the undo label): deleted, copied or moved bars."""
+    removed = [m + 1 for m in range(count) if m not in measures]
+    copied = [m + 1 for m in sorted(set(measures)) if measures.count(m) > 1]
+    what = []
+    if removed:
+        what.append(f"deleted {'bar' if len(removed) == 1 else 'bars'} {_bar_runs(removed)}")
+    if copied:
+        what.append(f"copied {'bar' if len(copied) == 1 else 'bars'} {_bar_runs(copied)}")
+    if not removed and not copied:
+        what.append("bars moved")
+    return f"{'; '.join(what)} ({count} -> {len(measures)} bars)"
 
 
 def arrange_sections(score: Score, order: Sequence[object]) -> OpResult:

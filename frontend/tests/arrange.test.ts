@@ -9,7 +9,7 @@ import type { ScoreOperation } from '../src/api/client'
 import type { ScoreModelView, ScoreView } from '../src/shared/scoreView'
 import ScoreNavigator from '../src/sheet-editor/score/ScoreNavigator.vue'
 import { deleteSections, dropSections, duplicateSections, moveSections, selectSection } from '../src/sheet-editor/score/arrange'
-import { clipOfSections, clipOfSelection, clipboard, convertClip, pasteOperation } from '../src/sheet-editor/score/clipboard'
+import { barsLabel, clipOfBars, clipOfSections, clipOfSelection, clipboard, convertClip, pasteOperation } from '../src/sheet-editor/score/clipboard'
 import fixture from './fixtures/tricky-score.json'
 
 const VIEW = fixture.view as unknown as ScoreView
@@ -119,7 +119,9 @@ function mount(readonly = false) {
   const nav = host.querySelector('nav') as HTMLElement
   const heads = () => [...host.querySelectorAll('.section-head')] as HTMLElement[]
   const button = (name: string) => [...host.querySelectorAll('.section-actions button')].find((b) => b.textContent?.trim() === name || b.getAttribute('aria-label') === name) as HTMLButtonElement
-  return { host, nav, heads, button, operations, notices }
+  const bars = () => [...host.querySelectorAll('.bar-strip .bar')] as HTMLElement[]
+  const barButton = (name: string) => [...host.querySelectorAll('.bar-actions button')].find((b) => b.textContent?.trim() === name || b.getAttribute('aria-label') === name) as HTMLButtonElement
+  return { host, nav, heads, button, bars, barButton, operations, notices }
 }
 
 const click = (el: HTMLElement, init: MouseEventInit = {}) => el.dispatchEvent(new MouseEvent('click', { bubbles: true, ...init }))
@@ -188,5 +190,82 @@ describe('ScoreNavigator: arranging sections', () => {
     const { host } = mount(true)
     expect(host.querySelector('.section-actions')).toBeNull()
     expect(host.querySelector('li[draggable="true"]')).toBeNull()
+  })
+})
+
+describe('ScoreNavigator: arranging bars', () => {
+  it('selects bars in the strip and duplicates, moves and deletes them', async () => {
+    const { host, bars, barButton, operations } = mount()
+    expect(barButton('Duplicate').disabled).toBe(true)
+    click(bars()[2])
+    click(bars()[3], { shiftKey: true })
+    await nextTick()
+    expect(host.querySelectorAll('.bar-strip .bar.picked')).toHaveLength(2)
+    expect(host.querySelector('.bar-actions .hint')?.textContent).toContain('2 bars selected')
+    barButton('Duplicate').click()
+    expect(operations.at(-1)).toEqual({ op: 'arrange_measures', order: [0, 1, 2, 3, 2, 3, 4, 5, 6] }) // 0-based bars
+    barButton('Move bars earlier').click()
+    expect(operations.at(-1)).toEqual({ op: 'arrange_measures', order: [0, 2, 3, 1, 4, 5, 6] })
+    barButton('Delete').click()
+    expect(operations.at(-1)).toEqual({ op: 'arrange_measures', order: [0, 1, 4, 5, 6] })
+  })
+
+  it('has the keys of the sections, and they act on what was clicked last', async () => {
+    const { nav, heads, bars, operations, notices } = mount()
+    click(bars()[1])
+    click(bars()[5], { ctrlKey: true })
+    await nextTick()
+    expect(key(nav, 'd', { ctrlKey: true })).toBe(false) // handled, the browser's default prevented
+    expect(operations.at(-1)).toEqual({ op: 'arrange_measures', order: [0, 1, 2, 3, 4, 5, 1, 5, 6] })
+    key(nav, 'ArrowRight', { ctrlKey: true })
+    expect(operations.at(-1)).toEqual({ op: 'arrange_measures', order: [0, 2, 1, 3, 4, 6, 5] })
+    key(nav, 'c', { ctrlKey: true })
+    expect(clipboard.value?.label).toBe('bars 2, 6')
+    expect(notices.at(-1)).toContain('paste it at the cursor')
+    key(nav, 'Delete')
+    expect(operations.at(-1)).toEqual({ op: 'arrange_measures', order: [0, 2, 3, 4, 6] })
+    // a click on a section: the keys arrange sections again
+    click(heads()[1])
+    await nextTick()
+    key(nav, 'Delete')
+    expect(operations.at(-1)).toEqual({ op: 'arrange_sections', order: [1, 3] })
+  })
+
+  it('drags bars to a new place, and copies them with Alt', async () => {
+    const { bars, operations } = mount()
+    const drag = (from: number, to: number, alt: boolean) => {
+      bars()[from].dispatchEvent(new Event('dragstart', { bubbles: true }))
+      const over = new Event('dragover', { bubbles: true, cancelable: true }) as DragEvent
+      Object.defineProperty(over, 'clientX', { value: -1 }) // the left half: before this bar
+      bars()[to].dispatchEvent(over)
+      const drop = new Event('drop', { bubbles: true, cancelable: true }) as DragEvent
+      Object.defineProperty(drop, 'altKey', { value: alt })
+      bars()[to].dispatchEvent(drop)
+    }
+    drag(4, 1, false)
+    await nextTick()
+    expect(operations.at(-1)).toEqual({ op: 'arrange_measures', order: [0, 4, 1, 2, 3, 5, 6] })
+    drag(0, 6, true)
+    expect(operations.at(-1)).toEqual({ op: 'arrange_measures', order: [0, 1, 2, 3, 4, 5, 0, 6] })
+  })
+
+  it('offers no bar arranging on a read-only score, but the bars still go to their place', async () => {
+    const { host, bars } = mount(true)
+    expect(host.querySelector('.bar-actions')).toBeNull()
+    expect(host.querySelector('.bar-strip .bar[draggable="true"]')).toBeNull()
+    expect(bars()).toHaveLength(7)
+  })
+
+  it('copies bars with both voices and the chords, and names them', () => {
+    expect(barsLabel([5, 6, 7, 2])).toBe('bars 2, 5-7')
+    expect(barsLabel([3])).toBe('bar 3')
+    const clip = clipOfBars(MODEL, [2, 1])!
+    const [first, second] = [MODEL.measures[1], MODEL.measures[2]]
+    expect(clip.span).toBe(first.length + second.length)
+    expect(clip.tracks).toEqual(['vocal', 'ins'])
+    expect(clip.label).toBe('bars 2-3')
+    const inside = [...MODEL.tracks.vocal, ...MODEL.tracks.ins].filter((n) => n.onset >= first.onset && n.onset < second.onset + second.length)
+    expect(clip.notes.length).toBeGreaterThanOrEqual(inside.length)
+    expect(clip.notes.every((n) => n.onset >= 0 && n.onset + n.duration <= clip.span)).toBe(true)
   })
 })

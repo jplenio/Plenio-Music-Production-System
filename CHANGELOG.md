@@ -2,6 +2,17 @@
 
 All notable changes are listed here. Versions follow semantic versioning; published Registry versions are immutable.
 
+## Unreleased
+
+### Added
+
+- **Arrange single bars** (score editor). The bar strip under the sections now selects one or more bars (click, Ctrl+click, Shift+click) and **duplicates, copies, moves or deletes** them, with buttons right above it, the keys of the section list (Ctrl+D, Ctrl+C, Ctrl+X, Ctrl+←/→, Del) and drag and drop (Alt copies). The Guide track, the lyrics and a cover's words follow, as they follow arranged sections; each arrangement is one undo step that says what it did (*deleted bars 10-13*).
+
+### Changed
+
+- The **transport** (play, loop, metronome, voices, speed) sits between the piano roll and the notation, in reach of both (Cubase: the transport under the key editor); before, it was at the bottom of the editor.
+- The navigator column scrolls as a whole: in the DAW layout the track panel and the lyrics box had squeezed the sections and the bar strip out of reach.
+
 ## 0.4.1 - 2026-10-02
 
 Six video tutorials with a voice-over - one for every template - and a short promo, plus a few fixes found while recording them.

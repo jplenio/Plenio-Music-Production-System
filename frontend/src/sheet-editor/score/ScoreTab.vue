@@ -997,6 +997,22 @@ function onKey(event: KeyboardEvent): void {
       @pointerdown="startRollDrag"
       @keydown="nudgeRoll"
     />
+    <!-- between the roll and the notation, in reach of both (Cubase: the transport under the key editor) -->
+    <ScoreTransport
+      ref="transport"
+      v-model:voices="voices"
+      v-model:speed="speed"
+      v-model:metronome="metronome"
+      :view="shown"
+      :bar="locatorBar"
+      :from="locatorSeconds"
+      :position="locatorLabel"
+      :reference="reference"
+      :timeline-bars="timelineBars"
+      :guide="transportGuide"
+      @cursor="(ids: string[]) => (cursor = ids)"
+      @time="onPlayTime"
+    />
     <div
       class="score-main"
       :class="{ 'with-roll': showRoll && !!shown?.model, 'with-inspector': review }"
@@ -1124,21 +1140,6 @@ function onKey(event: KeyboardEvent): void {
         resize-mode="rests"
       />
     </div>
-    <ScoreTransport
-      ref="transport"
-      v-model:voices="voices"
-      v-model:speed="speed"
-      v-model:metronome="metronome"
-      :view="shown"
-      :bar="locatorBar"
-      :from="locatorSeconds"
-      :position="locatorLabel"
-      :reference="reference"
-      :timeline-bars="timelineBars"
-      :guide="transportGuide"
-      @cursor="(ids: string[]) => (cursor = ids)"
-      @time="onPlayTime"
-    />
     <p class="status" aria-live="polite">
       <span>{{ session.selection.length > 1 ? `${session.selection.length} selected · ` : '' }}{{ describe(session.primary, unit) }}</span>
       <span v-for="(note, index) in session.notes" :key="index" class="change">{{ note }}</span>
