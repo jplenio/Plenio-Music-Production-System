@@ -155,8 +155,14 @@ function ass(captions, markers, tl) {
   for (const c of captions) lines.push(`Dialogue: 0,${stamp(c.start)},${stamp(c.end)},Caption,,0,0,0,,{\\pos(${WIDTH / 2},${y})}${escape(c.text)}`)
   const chapters = [...markers.chapters].sort((a, b) => a.t - b.t)
   for (const p of tl.pieces.filter((x) => x.type === 'clip')) {
-    const ch = chapters.filter((c) => c.t <= p.a + 1e-6).pop()
-    if (ch) lines.push(`Dialogue: 0,${stamp(p.start)},${stamp(p.start + p.duration)},Chapter,,0,0,0,,{\\pos(28,${y})}${escape(ch.title.toUpperCase())}`)
+    // the chapter at the piece's start, then every chapter that begins inside it (raw time → edit time)
+    const at = (t) => p.start + Math.min(p.duration, Math.max(0, (t - p.a) / p.speed))
+    const first = chapters.filter((c) => c.t <= p.a + 1e-6).pop()
+    const runs = [...(first ? [{ t: p.a, title: first.title }] : []), ...chapters.filter((c) => c.t > p.a + 1e-6 && c.t < p.b)]
+    runs.forEach((c, i) => {
+      const end = i + 1 < runs.length ? at(runs[i + 1].t) : p.start + p.duration
+      lines.push(`Dialogue: 0,${stamp(at(c.t))},${stamp(end)},Chapter,,0,0,0,,{\\pos(28,${y})}${escape(c.title.toUpperCase())}`)
+    })
     if (p.speed > 1.4) lines.push(`Dialogue: 1,${stamp(p.start)},${stamp(p.start + p.duration)},Speed,,0,0,0,,{\\pos(${WIDTH - 28},${y})}▶▶ ${Math.round(p.speed)}× faster`)
   }
   return lines.join('\n') + '\n'

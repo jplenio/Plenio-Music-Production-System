@@ -5,8 +5,8 @@ screen and cut a finished 1920 x 1080 video with English subtitles:
 
 | Script | Video |
 |---|---|
-| `yue2-song.mjs` | **1 · YuE2 · Song**: open the template, a run straight through (*new song every run*), then *one song, stop to review*: Song Sheet · Text (the tabs, Approve), Song Sheet · Score (a section fix, the editing tools on an example, Approve) and the finished song |
-| `yue2-cover.mjs` | **2 · YuE2 · Cover**: load a recording, an instrumental cover straight through (*new cover every run*), then *one cover, stop to review* with the original lyrics: Song Sheet · Score (tabs, editing tools, Approve), Song Sheet · Text (the transcribed lyrics, Approve) and the finished cover |
+| `yue2-song.mjs` | **1 · YuE2 · Song**: open the template, a run straight through (*new song every run*), then *one song, stop to review*: Song Sheet · Text (the tabs, Approve), Song Sheet · Score with the score editor (the lyrics lane, editing a line where it is sung, notes, the cursor and playback, copy and paste, arranging sections - a duplicated chorus is kept - MusicXML and the project file, Approve), Song Sheet · Text again with the lyrics that followed the chorus, and the finished song |
+| `yue2-cover.mjs` | **2 · YuE2 · Cover**: load a recording, an instrumental cover straight through (*new cover every run*), then *one cover, stop to review* with the original lyrics: Song Sheet · Score with the score editor (notes, the cursor with A/B against the source, a duplicated section that is kept, the files, Approve), Song Sheet · Text (the transcribed words over their notes, the score still editable there, Approve) and the finished cover |
 
 The runs are real: the songs in the videos are rendered while they are recorded (on an RTX 5060 Ti a
 run takes about two minutes). Waiting is fast-forwarded in the edit, with a speed badge in the caption
@@ -56,10 +56,14 @@ camera follows the running node, every stage becomes a fast-forwarded piece with
 markers `caption`, `chapter`, `card` (title, chapter and end cards) and `fast`. Nodes are found by title
 or type - a template opened from the browser gets string ids.
 
-`lib/sheet.mjs` holds the Song Sheet parts: open a sheet, walk its tabs, approve, and the score demo.
-The demo fixes the sections first when the sheet warns that they do not match the lyrics (that edit
-stays), then shows the tools on an example and undoes each of those changes, so the rendered song keeps
-the model's melody.
+`lib/sheet.mjs` holds the Song Sheet parts: open a sheet, walk its tabs, approve, fix the sections when
+the sheet warns that they do not match the lyrics (that edit stays), and the note-editing scene, which
+shows the tools on an example and undoes each change, so the rendered song keeps the model's melody.
+
+`lib/scenes.mjs` holds the score editor's scenes of 0.4: the overview with the lyrics lane, a lyrics
+edit, the cursor and playback (A/B with a source), copy and paste at the cursor, arranging sections,
+the files, and the node turning green at Approve. Every scene undoes its changes except the duplicated
+section, which the scripts keep to show what follows it (the lyrics in the song, the words in the cover).
 
 `lib/render.mjs` cuts the video: the fast-forwarded pieces, the cards (HTML rendered by Chromium), the
 chapter name and speed badge in the band, the burned subtitles (ASS) and the `.srt`.

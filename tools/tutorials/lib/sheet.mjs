@@ -63,9 +63,20 @@ export async function roll(s, voice) {
 
 export const free = (geo, x, y) => !geo.notes.some((n) => x >= n.x - 6 && x <= n.x + n.width + 6 && y >= n.y - 4 && y <= n.y + n.height + 4)
 
-export async function undo(s, times = 1, text) {
+// The step Ctrl+Z would undo next (the Undo button's title) - a mark to undo back to.
+export function undoMark(s) {
+  return s.page.evaluate((sel) => document.querySelector(sel)?.querySelector('button[title^="Undo"]')?.title ?? '', DIALOG)
+}
+
+// Ctrl+Z up to `times` times, but never past `to` (an undoMark): a demo step that changed nothing (a
+// resize against the next note, say) must not undo an edit made before the demo.
+export async function undo(s, times = 1, text, { to } = {}) {
   if (text) s.caption(text)
-  await s.keys('Control+z', { labels: ['Ctrl', 'Z'], times, gap: 650 })
+  for (let i = 0; i < times; i++) {
+    if (to !== undefined && (await undoMark(s)) === to) break
+    await s.keys('Control+z', { labels: ['Ctrl', 'Z'] })
+    await s.wait(650)
+  }
   await s.wait(700)
 }
 
@@ -139,6 +150,7 @@ export async function noteEditing(s, { voice = 'vocal' } = {}) {
   await scrollToVoice(s, voice)
   let geo = await roll(s, voice)
   if (geo.visible.length < 3) throw new Error('not enough visible notes in the roll')
+  const to = await undoMark(s)
 
   // select a note
   const note = geo.visible[Math.min(2, geo.visible.length - 1)]
@@ -150,7 +162,7 @@ export async function noteEditing(s, { voice = 'vocal' } = {}) {
   s.caption('The arrow keys move it: ↑ ↓ a semitone, ← → along the grid.')
   await s.keys('ArrowUp', { times: 2, gap: 700 })
   await s.wait(900)
-  await undo(s, 2, 'Ctrl+Z undoes every step - the note is back where it was.')
+  await undo(s, 2, 'Ctrl+Z undoes every step - the note is back where it was.', { to })
 
   // the toolbar
   const tools = d.getByRole('button', { name: '+8va', exact: true }).first()
@@ -170,16 +182,17 @@ export async function noteEditing(s, { voice = 'vocal' } = {}) {
   s.caption('Drag a note to move it in time and pitch …')
   await s.drag(from, { x: from.x + 70, y: from.y - 2 * target.height }, { ms: 1100 })
   await s.wait(1400)
-  await undo(s, 1, '… and Ctrl+Z undoes any step.')
+  await undo(s, 1, '… and Ctrl+Z undoes any step.', { to })
 
   // resize by its end, then undo
   geo = await roll(s, voice)
-  const longer = geo.visible.find((n) => Math.abs(n.x - note.x) < 2 && Math.abs(n.y - note.y) < 2) ?? geo.visible[2]
+  const roomy = (n) => free(geo, n.x + n.width + 12, n.y + n.height / 2) && free(geo, n.x + n.width + 50, n.y + n.height / 2)
+  const longer = geo.visible.find((n) => Math.abs(n.x - note.x) < 2 && Math.abs(n.y - note.y) < 2 && roomy(n)) ?? geo.visible.find(roomy) ?? geo.visible[2]
   s.caption('Drag its right end to make it longer or shorter.')
   const end = { x: longer.x + longer.width - 2, y: longer.y + longer.height / 2 }
   await s.drag(end, { x: end.x + 45, y: end.y }, { ms: 900 })
   await s.wait(1300)
-  await undo(s, 1)
+  await undo(s, 1, undefined, { to })
 
   // draw a note on an empty place (in the row of the selected note, after it), then undo
   geo = await roll(s, voice)
@@ -195,7 +208,7 @@ export async function noteEditing(s, { voice = 'vocal' } = {}) {
     await s.wait(1200)
     await s.drag(spot, { x: spot.x + 60, y: spot.y }, { ms: 800 })
     await s.wait(1800)
-    await undo(s, 1)
+    await undo(s, 1, undefined, { to })
   }
 
   // select mode: a frame over a phrase, move it, undo
@@ -213,7 +226,7 @@ export async function noteEditing(s, { voice = 'vocal' } = {}) {
   s.caption('… and move them together: here two semitones up.')
   await s.keys('ArrowUp', { times: 2, gap: 800 })
   await s.wait(1400)
-  await undo(s, 2, 'Ctrl+Z again: back to the melody as it was.')
+  await undo(s, 2, 'Ctrl+Z again: back to the melody as it was.', { to })
   await s.click(d.locator('button', { hasText: 'Draw' }).first(), { pause: 250 })
 
   // chords
@@ -229,6 +242,6 @@ export async function noteEditing(s, { voice = 'vocal' } = {}) {
     await s.wait(500)
     await s.keys('Enter', { labels: ['Enter'] })
     await s.wait(1600)
-    await undo(s, 1)
+    await undo(s, 1, undefined, { to })
   }
 }

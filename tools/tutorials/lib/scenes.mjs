@@ -2,7 +2,7 @@
 // playback, copy and paste at the cursor, arranging sections and the files. Every scene leaves the song
 // as the model made it, except the arranged section (a script keeps it to show what follows).
 
-import { DIALOG, free, roll, scrollToVoice, undo } from './sheet.mjs'
+import { DIALOG, free, roll, scrollToVoice, undo, undoMark } from './sheet.mjs'
 
 // the visible elements of the roll matching `selector` (left of the pitch column and past the right edge excluded)
 function visible(s, selector) {
@@ -70,6 +70,7 @@ export async function lyricsDemo(s) {
   const lines = await visible(s, '.lyric-line rect')
   const line = lines.find((l) => l.width > 60) ?? lines[0]
   if (!line) return
+  const to = await undoMark(s)
   s.caption('Double-click a line in the lyrics lane to edit it right there.')
   await s.click({ x: line.x + Math.min(40, line.width / 2), y: line.y + line.height / 2, width: 0, height: 0 }, { count: 2, pause: 400 })
   const input = d.locator('input.lyric-edit')
@@ -85,7 +86,7 @@ export async function lyricsDemo(s) {
   s.caption(changed)
   await s.spotlight(d.locator('.lyrics-follow').first(), { ms: 3000, pad: 4 })
   await s.read(changed, 5400)
-  await undo(s, 1, 'Ctrl+Z undoes a lyrics edit too - back to the writer’s words.')
+  await undo(s, 1, 'Ctrl+Z undoes a lyrics edit too - back to the writer’s words.', { to })
   await s.wait(800)
 }
 
@@ -139,14 +140,15 @@ export async function clipboardDemo(s, { voice = 'vocal' } = {}) {
   s.caption('… set the cursor further on …')
   await cursorAt(s, 0.75)
   await s.wait(900)
+  const to = await undoMark(s)
   s.caption('… and Ctrl+V pastes it there, replacing what that voice played.')
   await s.keys('Control+v', { labels: ['Ctrl', 'V'] })
   await s.wait(2600)
-  await undo(s, 1, 'Ctrl+Z.')
+  await undo(s, 1, 'Ctrl+Z.', { to })
   s.caption('Ctrl+Shift+V inserts it instead: everything after the cursor moves later by whole bars - watch the bar numbers.')
   await s.keys('Control+Shift+V', { labels: ['Ctrl', 'Shift', 'V'] })
   await s.wait(3800)
-  await undo(s, 1, 'Ctrl+Z - the song is as it was. Ctrl+X cuts, Ctrl+D duplicates; the buttons are in the roll’s toolbar.')
+  await undo(s, 1, 'Ctrl+Z - the song is as it was. Ctrl+X cuts, Ctrl+D duplicates; the buttons are in the roll’s toolbar.', { to })
   await s.spotlight(d.locator('.clip-tools').first(), { ms: 2600, pad: 4 })
   await s.wait(3000)
   await s.click(d.locator('button', { hasText: 'Draw' }).first(), { pause: 250 })
@@ -171,10 +173,11 @@ export async function arrangeDemo(s, { follows } = {}) {
     if (await panel.count()) await s.spotlight(panel, { ms: 4400, pad: 4 })
     await s.read(follows, 6600)
   }
+  const to = await undoMark(s)
   s.caption('Ctrl+↑ / Ctrl+↓ move the selection, Del deletes it, and sections can be dragged - with Alt held, as a copy.')
-  await s.keys('Control+ArrowDown', { labels: ['Ctrl', '↓'] })
+  await s.keys('Control+ArrowUp', { labels: ['Ctrl', '↑'] }) // up: the copy may be the last section
   await s.wait(2200)
-  await undo(s, 1, 'We keep the extra section, but not the move: Ctrl+Z.')
+  await undo(s, 1, 'We keep the extra section, but not the move: Ctrl+Z.', { to })
   await s.wait(800)
   await s.spotlight(d.locator('.section-actions').first(), { ms: 2400, pad: 4 })
   await s.wait(2400)
