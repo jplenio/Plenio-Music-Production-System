@@ -153,8 +153,8 @@ Now, the cursor. Click into the ruler to set it, just like in Cubase.
 @ Playback starts at the cursor
 Playback starts at the cursor, with a green line following along. [pause:0.4s] Stop, and the cursor stays put.
 
-@ Space plays and stops
-Space plays and stops. Home and End jump to either end.
+@ The transport sits right under the roll
+The transport sits right under the roll, within reach. Space plays and stops, Home and End jump to either end.
 
 @ ▶ source plays the original recording
 And here's the clever part for covers: source plays the original recording from the same bar. [pause:0.3s] So you can compare, A and B.

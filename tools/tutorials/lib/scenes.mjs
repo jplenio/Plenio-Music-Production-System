@@ -105,7 +105,7 @@ export async function cursorDemo(s, { source = false } = {}) {
   await s.wait(6500)
   await s.click({ x: where.x, y: where.y, width: 0, height: 0 }, { pause: 200 })
   await s.wait(1000)
-  const keys = 'Space plays and stops; Home and End move the cursor to the start and the end; a click on a section puts it there.'
+  const keys = 'The transport sits right under the roll, in reach of both. Space plays and stops; Home and End go to the start and the end.'
   s.caption(keys)
   await s.spotlight(d.locator('.transport').first(), { ms: 2400, pad: 4 })
   await s.read(keys, 5200)
@@ -181,6 +181,49 @@ export async function arrangeDemo(s, { follows } = {}) {
   await s.wait(800)
   await s.spotlight(d.locator('.section-actions').first(), { ms: 2400, pad: 4 })
   await s.wait(2400)
+}
+
+// Arranging single bars in the bar strip: two bars selected, duplicated and moved - then undone.
+export async function barsDemo(s) {
+  const d = s.page.locator(DIALOG)
+  const strip = d.locator('.bar-strip').first()
+  if (!(await strip.count())) return
+  const bars = d.locator('.bar-strip .bar')
+  const count = await bars.count()
+  if (count < 6) return
+  // two bars from the middle of a section of at least four bars: the section just grows (copying a
+  // section's first bar would start a new section with that section's words)
+  const ranges = await d.locator('.navigator .sections li .facts').allTextContents()
+  const spans = ranges.map((text) => /bars (\d+)-(\d+)/.exec(text)).filter(Boolean).map((m) => [Number(m[1]), Number(m[2])])
+  const long = spans.find(([a, b]) => b - a >= 3) ?? [Math.floor(count * 0.35), count]
+  const first = long[0] // 0-based position of the section's second bar
+  await bars.nth(first).scrollIntoViewIfNeeded()
+  await s.wait(600)
+  const to = await undoMark(s)
+  const intro = 'New: the bar strip under the sections arranges single bars, the same way as sections.'
+  s.caption(intro)
+  await s.spotlight(strip, { ms: 2600, pad: 4 })
+  await s.read(intro, 4600)
+  s.caption('Click a bar, Shift+click the next one: two bars are selected …')
+  await s.click(bars.nth(first), { pause: 300 })
+  await s.wait(700)
+  await s.hover(bars.nth(first + 1))
+  await s.page.keyboard.down('Shift')
+  await s.page.mouse.down()
+  await s.page.mouse.up()
+  await s.page.keyboard.up('Shift')
+  await s.wait(1400)
+  const actions = d.locator('.bar-actions').first()
+  s.caption('… and the buttons above the strip work on them. Ctrl+D duplicates them, right after the last one.')
+  await s.spotlight(actions, { ms: 2200, pad: 4 })
+  await s.wait(1600)
+  await s.keys('Control+d', { labels: ['Ctrl', 'D'] })
+  await s.wait(2800)
+  s.caption('Ctrl+← and Ctrl+→ move them, Del deletes them, and bars can be dragged - with Alt held, as a copy.')
+  await s.keys('Control+ArrowLeft', { labels: ['Ctrl', '←'] })
+  await s.wait(2600)
+  await undo(s, 2, 'Ctrl+Z twice - the song is as it was. The Guide track and the lyrics follow every bar edit, as with sections.', { to })
+  await s.wait(1200)
 }
 
 // The files: MusicXML and the project file (next to MIDI).

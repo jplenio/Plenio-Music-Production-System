@@ -3,7 +3,7 @@
 // editor: the lyrics lane, notes, the cursor, copy and paste, arranging - a copied chorus is kept - and
 // the files), the text sheet again with the lyrics that followed the chorus, and the finished song.
 
-import { arrangeDemo, clipboardDemo, cursorDemo, filesDemo, lyricsDemo, overview, showApproved } from './lib/scenes.mjs'
+import { arrangeDemo, barsDemo, clipboardDemo, cursorDemo, filesDemo, lyricsDemo, overview, showApproved } from './lib/scenes.mjs'
 import { approve, fixSections, maximize, noteEditing, openSheet, tab } from './lib/sheet.mjs'
 
 export const meta = {
@@ -160,7 +160,7 @@ export default async function song(s) {
   s.card('chapter', {
     kicker: 'Part', part: '3', title: 'The score editor',
     subtitle: 'Lyrics where they are sung, notes, the cursor, copy and paste, arranging sections - new in 0.4',
-    steps: ['Lyrics', 'Notes', 'Cursor', 'Copy & paste', 'Arrange', 'Files'],
+    steps: ['Lyrics', 'Notes', 'Cursor', 'Copy & paste', 'Sections', 'Bars', 'Files'],
   }, 4.5)
   s.chapter('Score editor · Overview')
   await overview(s, { lyrics: true })
@@ -177,6 +177,8 @@ export default async function song(s) {
   await arrangeDemo(s, {
     follows: 'The lyrics follow: the copied chorus gets its words. Apply writes them into Song Sheet · Text - and since YuE2 plans from those lyrics, this score is kept as yours (manual).',
   })
+  s.chapter('Score editor · Arrange bars')
+  await barsDemo(s)
   s.chapter('Score editor · Files')
   await filesDemo(s)
   s.chapter('Part 2 · One song, stop to review')

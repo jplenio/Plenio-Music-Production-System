@@ -6,7 +6,7 @@
 // assets/Open Window Sketch.abc is its score), or $PLENIO_TUTORIAL_MIDI.
 
 import path from 'node:path'
-import { cursorDemo, overview, showApproved } from './lib/scenes.mjs'
+import { barsDemo, cursorDemo, overview, showApproved } from './lib/scenes.mjs'
 import { DIALOG, approve, fixSections, maximize, openSheet, scrollToVoice, tab, trimSections } from './lib/sheet.mjs'
 
 export const meta = {
@@ -164,7 +164,7 @@ export default async function daw(s, { project }) {
 
   s.chapter('Score editor · The sketch')
   await s.say('The sketch is in: the melody, a second voice, the chords, the sections - in its own tempo and key.', 5600)
-  await overview(s)
+  await overview(s, { lyrics: true })
   s.chapter('Score editor · Fit the words')
   await fixSections(s)
   if (await trimSections(s)) {
@@ -177,6 +177,8 @@ export default async function daw(s, { project }) {
       await s.read(text, 5600)
     }
   }
+  s.chapter('Score editor · Arrange bars')
+  await barsDemo(s)
   s.chapter('Score editor · Playback')
   await cursorDemo(s)
   s.chapter('Score editor · Files')

@@ -108,6 +108,12 @@ The usual three views: the piano roll, the sheet music, and the inspector.
 @ On the left, the song’s sections
 On the left, the sections from the sketch: intro, verse, chorus, and so on.
 
+@ Shift + mouse wheel | optional
+Let's scroll to the vocals.
+
+@ Also new: the lyrics stand over | optional
+And the writer's lyrics sit right over the melody: each line over its phrase, each syllable over its note.
+
 @ The sheet warns: the lyrics have fewer sections | optional
 But the sheet warns us: the lyrics have fewer sections than the sketch, so some bars would have no words.
 
@@ -123,14 +129,29 @@ Now the score and the lyrics match. The warning is gone.
 @ The lyrics lane: | optional
 And the lyrics sit right over the melody: each line over its phrase, each syllable over its note.
 
+@ New: the bar strip under the sections
+New: the bar strip, right under the sections, arranges single bars, just like sections.
+
+@ Click a bar, Shift+click the next one
+Click a bar, and Shift click the next one,
+
+@ … and the buttons above the strip
+and the buttons above the strip work on both. Control D duplicates them, right after the originals.
+
+@ Ctrl+← and Ctrl+→ move them
+Control and the arrow keys move them, Delete removes them, and you can drag them too. With Alt, as a copy.
+
+@ Ctrl+Z twice
+Two undos, and the song is as it was. The guide track and the lyrics follow every bar edit.
+
 @ New: click in the ruler
 Click into the ruler to set the cursor,
 
 @ Playback starts at the cursor
 and play from there. You'll hear the guide too, so the sketch sounds the way you planned it.
 
-@ Space plays and stops
-Space plays and stops. Home and End jump to either end.
+@ The transport sits right under the roll
+The transport sits right under the roll, within reach. Space plays and stops, Home and End jump to either end.
 
 @ Save project keeps
 Save project keeps the score, the guide notes and the lyrics in one file. Open it again later, in any DAW sheet.
