@@ -66,6 +66,16 @@ def test_system_check_schema(nodes: list[Any]) -> None:
     assert info["input"]["required"]["detail"][1]["options"] == ["summary", "full"]
 
 
+def test_export_presets_the_comment_tag(nodes: list[Any]) -> None:
+    """The *tags* mode's comment starts with the credit line, editable like any field (owner's request
+    2026-10-02); the other tags start empty."""
+    node = next(n for n in nodes if n.GET_SCHEMA().node_id == "PlenioExportRelease")
+    tags = next(item for item in node.GET_SCHEMA().inputs if item.id == "tags")
+    fields = {item.id: item for option in tags.options if option.key == "tags" for item in option.inputs}
+    assert fields["comment"].default == "Powered by Plenio Music Production System / ComfyUI"
+    assert all(item.default == "" for name, item in fields.items() if name != "comment")
+
+
 def test_sheet_state_widget_type_serialises_as_custom_type(comfy_path: Path) -> None:
     from plenio.comfy.types import SheetState
 

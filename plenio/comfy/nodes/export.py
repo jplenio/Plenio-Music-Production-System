@@ -37,6 +37,8 @@ ORIGINAL_SUFFIX = " (original).flac"
 RECORD_SUFFIX = ".plenio.json"
 TAG_MODES = ("title only", "tags", "copy from loaded file")
 EXTRA_TAGS = tuple(field for field in TAG_FIELDS if field != "title")
+# what the *tags* mode writes as the comment unless the user changes it
+DEFAULT_COMMENT = "Powered by Plenio Music Production System / ComfyUI"
 
 
 def _tag_inputs() -> list[Any]:
@@ -50,7 +52,8 @@ def _tag_inputs() -> list[Any]:
         "album_artist": "Album artist",
         "composer": "Composer",
     }
-    return [io.String.Input(field, default="", tooltip=tips[field]) for field in EXTRA_TAGS]
+    defaults = {"comment": DEFAULT_COMMENT}
+    return [io.String.Input(field, default=defaults.get(field, ""), tooltip=tips[field]) for field in EXTRA_TAGS]
 
 
 class PlenioExportRelease(io.ComfyNode):

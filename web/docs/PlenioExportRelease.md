@@ -7,7 +7,7 @@ Writes the finished song into the ComfyUI output folder with a **release record*
 **tags**
 
 - *title only* - the title from the Song Sheet (or the copied title).
-- *tags* - artist, album, year, track, genre, comment, album artist, composer.
+- *tags* - artist, album, year, track, genre, comment (preset to *Powered by Plenio Music Production System / ComfyUI*; change or clear it), album artist, composer.
 - *copy from loaded file* - copies tags and the embedded cover from the file loaded by the workflow's **Load Audio** node (as in *4 · Enhance & Master*); the workflow must contain exactly one Load Audio node. The *title* input and the *cover* input win over copied values.
 
 **cover** - an image input (for example from a cover-art block): cropped square, saved as `<name>.jpg` next to the audio and embedded into the FLAC and MP3 files - the mastered ones and the `(original).flac` - whichever *tags* option is chosen (*title only*, *tags* or *copy from loaded file*). A copied cover (*copy from loaded file*) is embedded the same way; the *cover* input wins over it. WAV has no place for a cover: it keeps the `.jpg` only. No extra package is needed. MP3 tags are ID3v2.3, which Windows Explorer, Windows Media Player and most players read (ffmpeg's default 2.4 is not shown there).
