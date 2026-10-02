@@ -1,7 +1,9 @@
-// The Song Sheet parts of the tutorials: open a sheet, walk through its tabs, approve it, and the
-// score editor demo (select, arrow keys, drag, resize, draw, frame-select, chords, undo, playback).
+// The Song Sheet parts of the tutorials: open a sheet, walk through its tabs, approve it, and the score
+// editor's scenes - the overview, the lyrics lane, editing notes, the cursor and playback, copy and paste
+// at the cursor, arranging sections and the files (0.4.0). Every scene leaves the song as the model made
+// it, except where a script asks to keep a change (an arranged section).
 
-const DIALOG = '.plenio-overlay .plenio-dialog'
+export const DIALOG = '.plenio-overlay .plenio-dialog'
 
 export async function openSheet(s, nodeId, text) {
   if (text) s.caption(text)
@@ -40,11 +42,11 @@ export async function maximize(s, text) {
 }
 
 // geometry of the roll: its visible box, the notes of a voice that are visible, the chords
-async function roll(s, voice) {
+export async function roll(s, voice) {
   return s.page.evaluate(([sel, v]) => {
     const d = document.querySelector(sel)
     const scroller = d.querySelector('.roll-scroll').getBoundingClientRect()
-    const lane = d.querySelector('.roll-svg .lane')?.getBoundingClientRect()
+    const lane = (d.querySelector('.roll-svg .lyrics-lane') ?? d.querySelector('.roll-svg .lane'))?.getBoundingClientRect()
     const top = lane ? lane.bottom + 2 : scroller.top + 44
     const inside = (r) => r.left >= scroller.left + 40 && r.right <= scroller.right - 10 && r.top >= top && r.bottom <= scroller.bottom - 12
     const notes = [...d.querySelectorAll('rect.note')].map((n) => {
@@ -59,9 +61,9 @@ async function roll(s, voice) {
   }, [DIALOG, voice])
 }
 
-const free = (geo, x, y) => !geo.notes.some((n) => x >= n.x - 6 && x <= n.x + n.width + 6 && y >= n.y - 4 && y <= n.y + n.height + 4)
+export const free = (geo, x, y) => !geo.notes.some((n) => x >= n.x - 6 && x <= n.x + n.width + 6 && y >= n.y - 4 && y <= n.y + n.height + 4)
 
-async function undo(s, times = 1, text) {
+export async function undo(s, times = 1, text) {
   if (text) s.caption(text)
   await s.keys('Control+z', { labels: ['Ctrl', 'Z'], times, gap: 650 })
   await s.wait(700)
@@ -69,7 +71,7 @@ async function undo(s, times = 1, text) {
 
 // A real fix first, when the sheet has one: the score's section names against the lyrics' (the
 // planner may call a section "interlude" where the lyrics have a chorus). This edit stays.
-async function fixSections(s) {
+export async function fixSections(s) {
   const d = s.page.locator(DIALOG)
   const mismatch = await s.page.evaluate((sel) => {
     const dialog = document.querySelector(sel)
@@ -103,7 +105,7 @@ async function fixSections(s) {
 }
 
 // Scroll the roll to where the voice starts (an instrumental intro can fill the first bars).
-async function scrollToVoice(s, voice) {
+export async function scrollToVoice(s, voice) {
   const page = s.page
   const need = () => page.evaluate(([sel, v]) => {
     const d = document.querySelector(sel)
@@ -129,21 +131,13 @@ async function scrollToVoice(s, voice) {
   await s.wait(1200)
 }
 
-// The score editor demo. Every change is undone again: the song keeps the model's melody.
-export async function scoreDemo(s, { voice = 'vocal', play = true, source = false } = {}) {
+// Editing notes: select, arrow keys, the toolbar, drag, resize, draw, frame-select, chords - each change
+// is undone again, so the song keeps the model's melody.
+export async function noteEditing(s, { voice = 'vocal' } = {}) {
   const page = s.page
   const d = page.locator(DIALOG)
-  let geo = await roll(s, voice)
-
-  await s.say('The score is shown three ways: the piano roll on top, the notation below, the inspector on the right.', 4200)
-  await s.spotlight(geo.box, { ms: 1500, pad: 2 })
-  await s.wait(1600)
-  await s.spotlight(d.locator('.notation-wrap').first(), { ms: 1500, pad: 2 })
-  await s.wait(1600)
-
-  await fixSections(s)
   await scrollToVoice(s, voice)
-  geo = await roll(s, voice)
+  let geo = await roll(s, voice)
   if (geo.visible.length < 3) throw new Error('not enough visible notes in the roll')
 
   // select a note
@@ -155,9 +149,8 @@ export async function scoreDemo(s, { voice = 'vocal', play = true, source = fals
   // arrow keys, then back
   s.caption('The arrow keys move it: ↑ ↓ a semitone, ← → along the grid.')
   await s.keys('ArrowUp', { times: 2, gap: 700 })
-  await s.wait(600)
-  await s.keys('ArrowDown', { times: 2, gap: 700 })
   await s.wait(900)
+  await undo(s, 2, 'Ctrl+Z undoes every step - the note is back where it was.')
 
   // the toolbar
   const tools = d.getByRole('button', { name: '+8va', exact: true }).first()
@@ -237,34 +230,5 @@ export async function scoreDemo(s, { voice = 'vocal', play = true, source = fals
     await s.keys('Enter', { labels: ['Enter'] })
     await s.wait(1600)
     await undo(s, 1)
-  }
-
-  // sections
-  const rename = d.locator('button', { hasText: 'Rename' }).first()
-  if (await rename.count()) {
-    s.caption('On the left: the song’s sections - rename them or move their boundaries bar by bar.')
-    await s.spotlight(rename, { ms: 2200 })
-    await s.hover(rename)
-    await s.wait(3000)
-  }
-
-  if (play) {
-    const button = d.locator('button', { hasText: '▶ notes' }).first()
-    if (await button.count()) {
-      s.caption('▶ plays the notes as a guide - simple tones, not the model’s sound.')
-      const where = await s.click(button, { pause: 300 })
-      await s.wait(5500)
-      await s.click({ x: where.x, y: where.y, width: 0, height: 0 }, { pause: 200 }) // the same button: ■ stop
-      await s.wait(600)
-    }
-  }
-  // a cover: the source recording plays from the same bar, A/B switches between the two
-  const original = d.locator('button', { hasText: '▶ source' }).first()
-  if (source && (await original.count())) {
-    s.caption('▶ source plays the original recording from the same bar - A/B switches between the notes and the source.')
-    const where = await s.click(original, { pause: 300 })
-    await s.wait(5500)
-    await s.click({ x: where.x, y: where.y, width: 0, height: 0 }, { pause: 200 })
-    await s.wait(600)
   }
 }

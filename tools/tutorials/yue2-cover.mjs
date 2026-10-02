@@ -1,10 +1,12 @@
-// Tutorial 2 · YuE2 · Cover: open the template, load a recording, one run straight through (new cover
-// every run, instrumental), then one cover with its two review stops (Song Sheet · Score: the tabs and
-// the editing tools on an example, Approve; Song Sheet · Text: the transcribed lyrics, Approve) and
-// the finished cover. The source is the repository's sample song (assets/sound-samples).
+// Tutorial 2 · YuE2 · Cover (0.4): open the template, load a recording, one run straight through (new
+// cover every run, instrumental), then one cover with its two review stops - Song Sheet · Score (the score
+// editor: notes, the cursor with A/B against the source, a copied section that is kept, the files) and
+// Song Sheet · Text (the transcribed words over their notes - the copied section sings them again - the
+// score still editable there) - and the finished cover. The source is the repository's sample song.
 
 import path from 'node:path'
-import { approve, maximize, openSheet, scoreDemo, tab } from './lib/sheet.mjs'
+import { arrangeDemo, cursorDemo, filesDemo, overview, showApproved } from './lib/scenes.mjs'
+import { DIALOG, approve, maximize, noteEditing, openSheet, scrollToVoice, tab } from './lib/sheet.mjs'
 
 export const meta = {
   name: 'Plenio tutorial 2 - YuE2 Cover',
@@ -37,7 +39,7 @@ export default async function cover(s, { project }) {
     kicker: 'Plenio tutorial',
     title: '<span class="num">2 ·</span> YuE2 · Cover',
     subtitle: 'A new version of a recording - transcribed, reviewed and rendered by YuE2',
-    foot: 'Plenio Music Production System 0.3 for ComfyUI',
+    foot: 'Plenio Music Production System 0.4 for ComfyUI',
   }, 5)
 
   // --- open the template -------------------------------------------------------------------------
@@ -163,16 +165,24 @@ export default async function cover(s, { project }) {
   await s.flyNodes([SCORE], 1100, 0.9)
   await s.read('Stop 1: Song Sheet · Score - ⏸ waiting for your approval.', 3400)
 
-  // stop 1: the score
+  // stop 1: the score - the score editor
   await openSheet(s, SCORE, 'Open it with “Edit Song Sheet…”.')
   await maximize(s, '⛶ gives the editor the whole window.')
-  await s.say('This sheet holds the score SheetSage2 transcribed: melody, chords, sections. The lyrics come at the next stop - they follow the sections, so check those first.', 6400)
-  await scoreDemo(s, { source: true })
-  s.caption('We undid our experiments - the transcription stays as it is.')
-  await s.wait(3200)
-  await approve(s, 'Approve: this score is what the lyrics are placed into, and what YuE2 renders.')
-  s.caption('Run again: the words are transcribed, and the run stops at Song Sheet · Text.')
-  await s.wait(2400)
+  await s.say('This sheet holds the score SheetSage2 transcribed: melody, chords, sections. The words come at the next stop - they follow the score.', 6400)
+  s.chapter('Score editor · Overview')
+  await overview(s)
+  s.chapter('Score editor · Notes')
+  await noteEditing(s)
+  s.chapter('Score editor · Cursor and A/B')
+  await cursorDemo(s, { source: true })
+  s.chapter('Score editor · Arrange sections')
+  await arrangeDemo(s)
+  await s.say('With the original lyrics, the words follow their bars: the copied section will sing the same words again - you will see it at the next stop.', 6400)
+  s.chapter('Score editor · Files')
+  await filesDemo(s)
+  s.chapter('Part 2 · One cover, stop to review')
+  await approve(s, 'Approve: this score - with the extra section - is what the words are placed into, and what YuE2 renders.')
+  await showApproved(s, SCORE, 'The node says ✓ approved at once. Run again: the words are transcribed, and the run stops at Song Sheet · Text.')
   await s.resetRunState()
   await s.run()
   await s.follow({ stages: { [LYRICS]: STAGES[LYRICS] }, groups: GROUPS })
@@ -180,14 +190,29 @@ export default async function cover(s, { project }) {
   await s.flyNodes([TEXT], 1100, 0.9)
   await s.read('Stop 2: Song Sheet · Text - ⏸ waiting for your approval.', 3400)
 
-  // stop 2: the text
+  // stop 2: the text - the words over their notes, the score still editable
   await openSheet(s, TEXT, 'Open the text.')
+  await tab(s, 'Score', 'The Score tab shows the transcribed words over the notes they are sung on.', { min: 4200 })
+  await scrollToVoice(s, 'vocal')
+  const lane = s.page.locator(DIALOG).locator('.lyrics-lane').first()
+  if (await lane.count()) {
+    const sung = 'Each line over its phrase - and the copied section sings the same words again. Double-click a line to correct it.'
+    s.caption(sung)
+    await s.spotlight(lane, { ms: 3600, pad: 2 })
+    await s.read(sung, 5600)
+  }
+  const owner = s.page.locator(DIALOG).locator('.score-owner').first()
+  if (await owner.count()) {
+    const note = 'New: the score can still be changed here. Apply writes it into Song Sheet · Score and keeps these words with it.'
+    s.caption(note)
+    await s.spotlight(owner, { ms: 3400, pad: 4 })
+    await s.read(note, 5400)
+  }
   await tab(s, 'Lyrics', 'Lyrics: the transcribed words, section by section. Unsure words are marked - correct anything; your text wins.', { min: 6200 })
   await tab(s, 'Style', 'Style: the new style, with the voice from the brief.', { min: 4200 })
   await tab(s, 'Title & artwork', 'Title & artwork: the title and the prompt for the optional cover art.', { min: 4200 })
   await approve(s, 'Approve: exactly these words go to YuE2.')
-  s.caption('Run again: YuE2 renders the cover.')
-  await s.wait(2200)
+  await showApproved(s, TEXT, '✓ approved at once. Run again: YuE2 renders the cover.')
   await s.resetRunState()
   await s.run()
   await s.follow({ stages: { [TAKES]: STAGES[TAKES], [CHECK]: STAGES[CHECK], [MASTER]: STAGES[MASTER] }, groups: GROUPS })

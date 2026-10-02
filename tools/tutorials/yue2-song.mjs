@@ -1,8 +1,10 @@
-// Tutorial 1 · YuE2 · Song: open the template, one run straight through (new song every run), then
-// one song with its two review stops (Song Sheet · Text: the tabs, Approve; Song Sheet · Score: the
-// editing tools on an example, Approve) and the finished song.
+// Tutorial 1 · YuE2 · Song (0.4): open the template, one run straight through (new song every run), then
+// one song with its review stops - Song Sheet · Text (the tabs, Approve), Song Sheet · Score (the score
+// editor: the lyrics lane, notes, the cursor, copy and paste, arranging - a copied chorus is kept - and
+// the files), the text sheet again with the lyrics that followed the chorus, and the finished song.
 
-import { approve, maximize, openSheet, scoreDemo, tab } from './lib/sheet.mjs'
+import { arrangeDemo, clipboardDemo, cursorDemo, filesDemo, lyricsDemo, overview, showApproved } from './lib/scenes.mjs'
+import { approve, fixSections, maximize, noteEditing, openSheet, tab } from './lib/sheet.mjs'
 
 export const meta = {
   name: 'Plenio tutorial 1 - YuE2 Song',
@@ -31,7 +33,7 @@ export default async function song(s) {
     kicker: 'Plenio tutorial',
     title: '<span class="num">1 ·</span> YuE2 · Song',
     subtitle: 'Write, review and render a song with YuE2 - in one run, or with two review stops',
-    foot: 'Plenio Music Production System 0.3 for ComfyUI',
+    foot: 'Plenio Music Production System 0.4 for ComfyUI',
   }, 5)
 
   // --- open the template -------------------------------------------------------------------------
@@ -121,7 +123,7 @@ export default async function song(s) {
   s.card('chapter', {
     kicker: 'Part', part: '2', title: 'One song, stop to review',
     subtitle: 'The run stops twice - you check and approve before anything is rendered',
-    steps: ['Brief', 'Write', 'Stop: text', 'Plan', 'Stop: score', 'Render', 'Master', 'Export'],
+    steps: ['Brief', 'Write', 'Stop: text', 'Plan', 'Stop: score', 'Stop: text', 'Render', 'Export'],
   }, 4.5)
   s.chapter('Part 2 · One song, stop to review')
   await s.flyNodes([BRIEF], 1100, 0.94)
@@ -143,7 +145,7 @@ export default async function song(s) {
   await tab(s, 'Style', 'Style: the genre, the instruments and the voice YuE2 is given.', { min: 4200 })
   await tab(s, 'Title & artwork', 'Title & artwork: the song’s title and the prompt for the optional cover art.', { min: 4200 })
   await approve(s, 'Approve: exactly these documents go on to the music model.')
-  s.caption('Approved. Press Run again: YuE2 plans the score, and the run stops at the next sheet.')
+  await showApproved(s, TEXT, 'The node says ✓ approved at once. Press Run again: YuE2 plans the score, and the run stops at the next sheet.')
   await s.wait(2600)
   await s.resetRunState()
   await s.run()
@@ -152,18 +154,54 @@ export default async function song(s) {
   await s.flyNodes([SCORE], 1100, 0.9)
   await s.read('Stop 2: Song Sheet · Score waits for your approval.', 3200)
 
-  // stop 2: the score
+  // stop 2: the score - the score editor
   await openSheet(s, SCORE, 'Open the score.')
   await maximize(s, '⛶ gives the editor the whole window.')
-  await scoreDemo(s)
-  s.caption('We undid our experiments - the melody stays as YuE2 planned it. The Lyrics and Style tabs are here too.')
-  await s.wait(4200)
-  await approve(s, 'Approve: this score is what YuE2 will render.')
-  s.caption('Run again: YuE2 renders the approved song.')
-  await s.wait(2200)
+  s.card('chapter', {
+    kicker: 'Part', part: '3', title: 'The score editor',
+    subtitle: 'Lyrics where they are sung, notes, the cursor, copy and paste, arranging sections - new in 0.4',
+    steps: ['Lyrics', 'Notes', 'Cursor', 'Copy & paste', 'Arrange', 'Files'],
+  }, 4.5)
+  s.chapter('Score editor · Overview')
+  await overview(s, { lyrics: true })
+  await fixSections(s)
+  s.chapter('Score editor · Lyrics')
+  await lyricsDemo(s)
+  s.chapter('Score editor · Notes')
+  await noteEditing(s)
+  s.chapter('Score editor · Cursor and playback')
+  await cursorDemo(s)
+  s.chapter('Score editor · Copy and paste')
+  await clipboardDemo(s)
+  s.chapter('Score editor · Arrange sections')
+  await arrangeDemo(s, {
+    follows: 'The lyrics follow: the copied chorus gets its words. Apply writes them into Song Sheet · Text - and since YuE2 plans from those lyrics, this score is kept as yours (manual).',
+  })
+  s.chapter('Score editor · Files')
+  await filesDemo(s)
+  s.chapter('Part 2 · One song, stop to review')
+  await approve(s, 'Approve: this score - with the extra chorus - is what YuE2 will render.')
+  await showApproved(s, SCORE, 'Song Sheet · Score says ✓ approved at once. Song Sheet · Text asks again: its lyrics changed with the chorus.')
+  s.caption('Run again: the run stops at Song Sheet · Text, so you see the new lyrics before anything is rendered.')
+  await s.wait(2600)
   await s.resetRunState()
   await s.run()
-  await s.follow({ stages: { [RENDER]: STAGES[RENDER], [MASTER]: STAGES[MASTER] }, groups: GROUPS })
+  await s.follow({ stages: { [TEXT]: 'Song Sheet · Text checks the new lyrics.' }, groups: GROUPS })
+  await s.flyNodes([TEXT], 1100, 0.9)
+  await openSheet(s, TEXT, 'Open it: the lyrics now have the copied chorus, with its words.')
+  await tab(s, 'Lyrics', 'Lyrics: the copied chorus is there, with its words - nobody had to type them.', { min: 5600 })
+  await approve(s, 'Approve.')
+  await showApproved(s, TEXT, '✓ approved. Run again: YuE2 plans once more for the new lyrics, Song Sheet · Score keeps your score, and the song is rendered.')
+  await s.resetRunState()
+  await s.run()
+  await s.follow({
+    stages: {
+      [PLAN]: 'YuE2 plans again for the new lyrics - Song Sheet · Score keeps your arranged score.',
+      [RENDER]: STAGES[RENDER],
+      [MASTER]: STAGES[MASTER],
+    },
+    groups: GROUPS,
+  })
   await afterRun(s, 'The approved song is finished and exported.')
   s.caption('Every further Run renders a new take of the same approved song.')
   await s.flyGroups(['1 · SONG', '2 · WRITE', '3 · TEXT', '4 · SCORE', '5 · RENDER', '6 · FINISH'], 1600)
