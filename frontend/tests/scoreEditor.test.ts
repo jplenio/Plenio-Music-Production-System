@@ -480,6 +480,26 @@ describe('score session', () => {
     expect(restored).toEqual([{ guide: [[0, 4, 60]] }, { guide: [] }])
   })
 
+  const NL = String.fromCharCode(10)
+  it('checks an imported score again with the lyrics (the import route does not lay them out)', async () => {
+    const session = useScoreSession(doc, { fetcher: backend.fetcher, debounceMs: 300, lyrics: () => '[Verse]' + NL + 'la la' })
+    await settle()
+    await backend.calls[0].answer(VIEW)
+    session.replaceText('IMPORTED', 'import MIDI (a.mid)', viewFor('imported'))
+    await settle()
+    const check = backend.calls.at(-1)!
+    expect(check.route).toBe('/plenio/score/analyze')
+    expect(check.body).toMatchObject({ abc: 'IMPORTED', lyrics: '[Verse]' + NL + 'la la' })
+    // without lyrics the route's own view is taken as it is
+    const plain = useScoreSession({ ...doc }, { fetcher: backend.fetcher, debounceMs: 300 })
+    await settle()
+    await backend.calls.at(-1)!.answer(VIEW)
+    const before = backend.calls.length
+    plain.replaceText('IMPORTED', 'import MIDI (a.mid)', viewFor('imported'))
+    await settle()
+    expect(backend.calls.length).toBe(before)
+  })
+
   it('refuses an operation whose text changed while it was computed', async () => {
     const session = await start()
     await backend.calls[0].answer(VIEW)

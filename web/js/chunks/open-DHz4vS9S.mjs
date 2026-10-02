@@ -1,4 +1,4 @@
-import { a as iy, P as qm, b as ny, t as ry, i as sy, e as ay, c as oy, n as ai, v as ly, s as Df, g as cy, r as hy, u as uy, w as Of, d as fy, f as dy, h as Nf } from "./main-B4d36bNh.mjs";
+import { a as iy, P as qm, b as ny, t as ry, i as sy, e as ay, c as oy, n as ai, v as ly, s as Df, g as cy, r as hy, u as uy, w as Of, d as fy, f as dy, h as Nf } from "./main-CheKApMR.mjs";
 import { notesLabel as py, trackRows as gy, parseGuide as my, sameGuide as Xr, remapGuide as vy, guideNotes as by } from "./tracks-DxmZeggM.mjs";
 // @__NO_SIDE_EFFECTS__
 function bu(i) {
@@ -19582,7 +19582,7 @@ function Uk(i, e) {
     _(V, "typing", "typing"), k();
   }
   function M(V, q, Z = null, me) {
-    return V === i.text ? !1 : (p.seal(), me && p.annotate(me.before), _(V, q, void 0, me?.after), p.seal(), clearTimeout(u), g = V, s.value = !1, c.value = [], Z && Z.ok ? (N(Z, V), o.value = null) : k(0), !0);
+    return V === i.text ? !1 : (p.seal(), me && p.annotate(me.before), _(V, q, void 0, me?.after), p.seal(), clearTimeout(u), g = V, s.value = !1, c.value = [], Z && Z.ok && (Z.lyrics || !e.lyrics?.()) ? (N(Z, V), o.value = null) : k(0), !0);
   }
   async function A(V) {
     const q = i.text;
@@ -36053,7 +36053,7 @@ function n_(i, e) {
   if (e?.bars?.length)
     return !i || !e.bar_prints?.length ? i ? i.measures.map((t, n) => e.bars[n] ?? null) : e.bars : i_(e_(i), e.bar_prints).map((t) => t === null ? null : e.bars[t] ?? null);
 }
-const r_ = "0.4.0", Oa = "plenio.score_project/1", ey = ".plenio.json";
+const r_ = "0.4.1", Oa = "plenio.score_project/1", ey = ".plenio.json";
 function s_(i, e = /* @__PURE__ */ new Date()) {
   return {
     schema: Oa,

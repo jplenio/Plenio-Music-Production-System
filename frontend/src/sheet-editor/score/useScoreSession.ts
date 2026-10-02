@@ -187,8 +187,10 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
     requested = text
     pending.value = false
     notes.value = []
-    if (view && view.ok) {
-      // the route computed this view for exactly this text, in the same response
+    // the route computed this view for exactly this text, in the same response - but without the song's
+    // lyrics (a MIDI import, a project file): with lyrics, the text is checked again, so the lyrics lane
+    // and the syllables are there for the new score
+    if (view && view.ok && (view.lyrics || !options.lyrics?.())) {
       accept(view, text)
       error.value = null
     } else {
