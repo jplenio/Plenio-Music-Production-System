@@ -53,7 +53,9 @@ def _tag_inputs() -> list[Any]:
         "composer": "Composer",
     }
     defaults = {"comment": DEFAULT_COMMENT}
-    return [io.String.Input(field, default=defaults.get(field, ""), tooltip=tips[field]) for field in EXTRA_TAGS]
+    return [
+        io.String.Input(field, default=defaults.get(field, ""), tooltip=tips[field]) for field in EXTRA_TAGS
+    ]
 
 
 class PlenioExportRelease(io.ComfyNode):

@@ -2107,7 +2107,7 @@
             "STRING",
             {
              "tooltip": "Comment",
-             "default": "",
+             "default": "Powered by Plenio Music Production System / ComfyUI",
              "multiline": false
             }
            ],
