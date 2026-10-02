@@ -218,6 +218,13 @@ describe('keyboard', () => {
     expect(key('Delete')).toEqual({ op: 'delete', ids: ['vocal:32', 'vocal:40'] })
     expect(key('Backspace', true)).toEqual({ op: 'delete_close_gap', ids: ['vocal:32', 'vocal:40'] })
     expect(keyOp('Delete', { shift: false, alt: false }, [], [CHORDS[0]], GEO, 'rests')).toEqual({ op: 'delete', ids: ['chord:0'] })
+    // chord symbols move by semitones too, alone or with the notes
+    expect(keyOp('ArrowUp', { shift: false, alt: false }, [], [CHORDS[0]], GEO, 'rests')).toEqual({ op: 'set_note_pitch', ids: ['chord:0'], semitones: 1 })
+    expect(keyOp('ArrowDown', { shift: false, alt: false }, selected, [CHORDS[0]], GEO, 'rests')).toEqual({
+      op: 'set_note_pitch',
+      ids: ['vocal:32', 'vocal:40', 'chord:0'],
+      semitones: -1
+    })
     expect(key('ArrowUp', true, false, [{ ...note('vocal:32'), pitch: 120 }])).toBeNull() // would leave MIDI
     expect(key('ArrowLeft', true, false, [note('ins:0')])).toBeNull() // already at the start
     expect(key('ArrowUp', false, false, [])).toBeUndefined()

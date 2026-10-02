@@ -8,6 +8,8 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 - **Lyrics lines placed by hand** (score editor). In the roll's lyrics lane a line is handled like a note: click to select it (Ctrl / Shift+click: more), drag to move it, drag its start or end to make it longer or shorter, Del deletes it, Ctrl+C / Ctrl+X / Ctrl+D copy, cut and duplicate, Ctrl+V pastes at the cursor; ← / → move by the grid. A section with a line placed by hand keeps every line's span, and the syllables take the notes inside it; a line moved past another is sung after it. The spans are kept with the sheet (node property `plenio_lyric_spans`), follow arranged sections and bars, go into the project file and the MusicXML export, and each edit is one undo step.
 
+- **Transpose chord symbols**: ↑ / ↓ in the roll and the palette's −1 / +1 move the selected chord symbols by a semitone - one or many, alone or together with selected notes, in one undo step. Each is spelled for the key where it stands (F + 1 in C major: F#); an octave leaves a chord symbol as it is.
+
 ### Changed
 
 - **2 · YuE2 · Cover** starts with the style template *pop/dance-pop-vocal*, *original lyrics* (the language detected from the singing) and *keep original chords*; genre and mood are empty, so they come from the style template. App mode shows the original lyrics' language and voice.

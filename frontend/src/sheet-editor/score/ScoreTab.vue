@@ -1052,9 +1052,11 @@ function onKey(event: KeyboardEvent): void {
         }
         if (props.readonly) return false
         const notes = session.selection.filter((id) => elementById(view, id)?.kind === 'note')
-        if (!notes.length) return true
+        const chordIds = [...selectedChordIds(session.selection)]
         const step = (event.shiftKey ? 12 : 1) * (event.key === 'ArrowUp' ? 1 : -1)
-        void operate({ op: 'shift_pitch', ids: notes, semitones: step })
+        // chord symbols in the selection move with the notes (the canonical operation does both)
+        if (chordIds.length) void operate({ op: 'set_note_pitch', ids: [...selectedNoteIds(view, session.selection), ...chordIds], semitones: step })
+        else if (notes.length) void operate({ op: 'shift_pitch', ids: notes, semitones: step })
         return true
       }
       case '[':

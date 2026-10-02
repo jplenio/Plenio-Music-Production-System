@@ -12,7 +12,7 @@ Typical uses:
 
 | Part | What it does |
 |---|---|
-| **Palette** (top) | undo/redo; pitch −8va, −1, +1, +8va; shorter / longer; rest / note; chord symbol set / remove; *Whole score*: transpose, tempo, remove chords, let the instrument play the melody, silence the Vocal voice |
+| **Palette** (top) | undo/redo; pitch −8va, −1, +1, +8va (the selected notes and chord symbols); shorter / longer; rest / note; chord symbol set / remove; *Whole score*: transpose, tempo, remove chords, let the instrument play the melody, silence the Vocal voice |
 | **View** | the layout *Review* or *Text* (see below); in *Review*: *piano roll* and *ABC text (advanced)* on/off; notation zoom; the files: *Export MIDI*, *Export MusicXML*, *Save project*, *Import MIDI…*, *Open project…* (see [Files](#files-midi-musicxml-and-the-project)) |
 | **Piano roll** | both voices over time (Vocal blue, Ins orange) with a chord lane and the bars and sections above; with lyrics a **lyrics lane** (the words over the phrases they are sung on - edit them there, and select, move, lengthen, delete, copy and paste lines like notes); the **cursor** (click in the bar numbers); draw, move, resize and delete notes and chord symbols with the mouse (see below) |
 | **Inspector** (right, *Review*) | the selected note(s), chord symbol and bar as fields: voice, pitch, start, length, chord; insert, duplicate or delete bars, meter, key (see below) |
@@ -88,7 +88,7 @@ Clicking, moving and resizing notes, and all keys, work the same in both modes. 
 
 While you drag, a dashed **ghost** shows the result; nothing changes before you let go. Then the backend checks the edit and writes the text; if it refuses (for example a note that cannot grow because another note follows), the ghost disappears and the reason is shown.
 
-Keys with the roll focused: ↑/↓ semitone (Shift: octave), ←/→ move by the grid (Shift: a beat), Alt+←/→ shorter/longer, **Delete** turns the selected notes into rests (and removes selected chord symbols), **Shift+Delete** deletes and lets the note before take the time (*close the gap*). **snap** sets the grid (*auto* is the score's finest length); **−/+** zoom. Only the visible part of a long score is drawn.
+Keys with the roll focused: ↑/↓ semitone (Shift: octave) - selected **chord symbols** move too, one or many, spelled for the key where they stand (an octave leaves them as they are), ←/→ move by the grid (Shift: a beat), Alt+←/→ shorter/longer, **Delete** turns the selected notes into rests (and removes selected chord symbols), **Shift+Delete** deletes and lets the note before take the time (*close the gap*). **snap** sets the grid (*auto* is the score's finest length); **−/+** zoom. Only the visible part of a long score is drawn.
 
 The roll covers the whole piano range (A0 to C8, more for a note beyond it) and **scrolls both ways**: the mouse wheel moves through the pitches, Shift+wheel (or the scrollbar) through the bars. It opens centred on the score's notes; the pitch names stay on the left and the bar numbers, sections and the chord lane stay on top while you scroll, and a note you select - or the note that plays - is scrolled into view. Dragging a note to the top or bottom edge scrolls along, so a note can be moved or drawn anywhere in the range.
 

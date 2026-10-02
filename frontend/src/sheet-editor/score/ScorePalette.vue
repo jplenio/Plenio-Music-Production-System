@@ -4,6 +4,7 @@ import { computed, ref, watch } from 'vue'
 
 import type { ScoreOperation } from '../../api/client'
 import { type ScoreElement, type ScoreView, nextDuration } from '../../shared/scoreView'
+import { selectedChordIds, selectedNoteIds } from './pianoRoll'
 
 const props = defineProps<{
   view: ScoreView | null
@@ -21,6 +22,9 @@ const chordName = ref('')
 const tempo = ref<number | null>(null)
 
 const notes = computed(() => props.selection.filter((id) => props.view?.elements?.find((e) => e.id === id)?.kind === 'note'))
+/** The selected chord symbols (the roll's chord lane): ±1 and ±8va move them with the notes. */
+const chords = computed(() => [...selectedChordIds(props.selection)])
+const movable = computed(() => notes.value.length > 0 || chords.value.length > 0)
 const isNote = computed(() => props.primary?.kind === 'note')
 const isRest = computed(() => props.primary !== null && props.primary.kind !== 'note')
 const chordAtSelection = computed(() => {
@@ -45,7 +49,10 @@ watch(chordAtSelection, (chord) => {
 })
 
 function shift(semitones: number): void {
-  if (notes.value.length) emit('operate', { op: 'shift_pitch', ids: notes.value, semitones })
+  if (chords.value.length) {
+    // with chord symbols: the canonical operation moves notes and chords in one step
+    emit('operate', { op: 'set_note_pitch', ids: [...selectedNoteIds(props.view, props.selection), ...chords.value], semitones })
+  } else if (notes.value.length) emit('operate', { op: 'shift_pitch', ids: notes.value, semitones })
 }
 </script>
 
@@ -56,10 +63,10 @@ function shift(semitones: number): void {
       <button :disabled="!canRedo || busy" :title="`Redo${redoLabel ? ': ' + redoLabel : ''} (Ctrl+Y)`" @click="emit('redo')">↷</button>
     </div>
     <div class="group" aria-label="Pitch">
-      <button :disabled="!notes.length || busy" title="Octave down (Shift+↓)" @click="shift(-12)">−8va</button>
-      <button :disabled="!notes.length || busy" title="Semitone down (↓)" @click="shift(-1)">−1</button>
-      <button :disabled="!notes.length || busy" title="Semitone up (↑)" @click="shift(1)">+1</button>
-      <button :disabled="!notes.length || busy" title="Octave up (Shift+↑)" @click="shift(12)">+8va</button>
+      <button :disabled="!movable || busy" title="Octave down (Shift+↓)" @click="shift(-12)">−8va</button>
+      <button :disabled="!movable || busy" title="Semitone down (↓): the selected notes and chord symbols" @click="shift(-1)">−1</button>
+      <button :disabled="!movable || busy" title="Semitone up (↑): the selected notes and chord symbols" @click="shift(1)">+1</button>
+      <button :disabled="!movable || busy" title="Octave up (Shift+↑)" @click="shift(12)">+8va</button>
     </div>
     <div class="group" aria-label="Length">
       <button

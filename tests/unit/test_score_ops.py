@@ -157,6 +157,22 @@ def test_a_tied_note_changes_as_one_sounding_note() -> None:
 # --- chords -----------------------------------------------------------------------------------
 
 
+def test_selected_chord_symbols_move_by_semitones_with_the_notes() -> None:
+    abc, result = run(SMALL, op="set_note_pitch", ids=["chord:0", "vocal:0", "chord:32"], semitones=2)
+    after = score_of(abc)
+    assert [(ch.onset, ch.name) for ch in after.chords][:1] == [(0, "D")]
+    assert next(ch.name for ch in after.chords if ch.onset == 32) == "G"  # F + 2
+    assert after.vocal[0].pitch == score_of(SMALL).vocal[0].pitch + 2
+    assert set(result.select) == {"vocal:0", "chord:0", "chord:32"}
+    abc, _ = run(SMALL, op="set_note_pitch", ids=["chord:32"], semitones=1)
+    assert next(ch.name for ch in score_of(abc).chords if ch.onset == 32) == "F#"  # spelled for C major
+    # an octave leaves a chord symbol as it is; a pitch cannot be set on one
+    assert ops.transform(SMALL, {"op": "set_note_pitch", "ids": ["chord:0"], "semitones": 12}).abc == SMALL
+    with pytest.raises(PlenioValidationError, match="no single pitch"):
+        ops.transform(SMALL, {"op": "set_note_pitch", "ids": ["chord:0"], "midi": 60})
+
+
+
 def test_chord_edits_never_change_notes() -> None:
     before = score_of(SMALL)
     abc, _ = run(SMALL, op="put_chord", onset=6, name="Dm7")

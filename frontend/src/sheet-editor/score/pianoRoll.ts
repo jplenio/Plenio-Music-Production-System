@@ -440,11 +440,12 @@ export function keyOp(
   switch (key) {
     case 'ArrowUp':
     case 'ArrowDown': {
-      if (!selected.length) return undefined
+      // the selected notes and chord symbols together (a chord symbol is spelled for its key)
+      if (!selected.length && !chords.length) return undefined
       const semitones = (modifiers.shift ? 12 : 1) * (key === 'ArrowUp' ? 1 : -1)
       const pitches = selected.map((n) => n.pitch + semitones)
-      if (Math.min(...pitches) < 0 || Math.max(...pitches) > 127) return null
-      return { op: 'set_note_pitch', ids, semitones }
+      if (pitches.length && (Math.min(...pitches) < 0 || Math.max(...pitches) > 127)) return null
+      return { op: 'set_note_pitch', ids: [...ids, ...chords.map((c) => c.id)], semitones }
     }
     case 'ArrowLeft':
     case 'ArrowRight': {

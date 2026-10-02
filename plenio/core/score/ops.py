@@ -340,12 +340,28 @@ def resize_note(score: Score, id_: object, duration: int, *, mode: str = "rests"
 def set_note_pitch(
     score: Score, ids: Sequence[object], *, midi: int | None = None, semitones: int | None = None
 ) -> OpResult:
-    """A new pitch for the selected notes (the spelling follows the key when the text is written)."""
+    """A new pitch for the selected notes (the spelling follows the key when the text is written).
+
+    Moved by ``semitones``, selected chord symbols move too (spelled for the key where they stand;
+    an octave leaves a chord symbol as it is)."""
     if (midi is None) == (semitones is None):
         raise PlenioValidationError("Give either a pitch or a number of semitones.")
-    picked = _notes_of(score, ids)
+    chosen = _selection(score, ids)
+    chord_onsets = [onset for kind, onset in chosen if kind == "chord"]
+    if chord_onsets and midi is not None:
+        raise PlenioValidationError(
+            "A chord symbol has no single pitch to set.", hint="Move it by semitones (↑ / ↓) or rename it."
+        )
+    picked = [(kind, _find(score, kind, onset)) for kind, onset in chosen if kind != "chord"]
     tracks = {"vocal": list(score.vocal), "ins": list(score.ins)}
     changes = []
+    chords = list(score.chords)
+    for onset in chord_onsets:
+        chord = _chord_at(score, onset)
+        name = _chord_name(chord.name, _whole(semitones, "semitones"), score.key_at(onset))
+        if name != chord.name:
+            chords[chords.index(chord)] = ChordSymbol(onset, name)
+            changes.append(f"{_bar(score, onset)}: chord {chord.name} -> {name}")
     for kind, note in picked:
         target = _pitch(midi) if midi is not None else note.pitch + _whole(semitones, "semitones")
         if not 0 <= target <= 127:
@@ -354,11 +370,13 @@ def set_note_pitch(
             continue
         tracks[kind][tracks[kind].index(note)] = Note(note.onset, note.duration, target)
         changes.append(f"{_describe(score, kind, note)} -> {pitch_name(target)}")
-    select = [note_id(k, n.onset) for k, n in picked]
+    select = [note_id(k, n.onset) for k, n in picked] + [chord_id(onset) for onset in chord_onsets]
     if not changes:
         return _unchanged(score, "no pitch changed", select)
     return _commit(
-        replace(score, vocal=tuple(tracks["vocal"]), ins=tuple(tracks["ins"])), changes, select=select
+        replace(score, vocal=tuple(tracks["vocal"]), ins=tuple(tracks["ins"]), chords=tuple(chords)),
+        changes,
+        select=select,
     )
 
 
