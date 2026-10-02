@@ -284,6 +284,14 @@ watch(
       if (follow.value && current && follow.value.blocks.length !== current.sections.length) {
         loose.value = lyricsNow.value
         follow.value = null
+      } else if (!follow.value && loose.value && current) {
+        // the sections were made to match the lyrics (a section renamed to the lyrics' tag): from now on
+        // the lyrics follow them
+        const laid = followOf(loose.value, current)
+        if (laid) {
+          follow.value = laid
+          loose.value = null
+        }
       }
       return
     }
