@@ -5,9 +5,11 @@
  */
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { setPayload } from '../src/extension/payloads'
 import { displayState, runState, setRunState } from '../src/extension/runStatus'
 import { setFetcher, sheetStateWidget } from '../src/extension/sheetStateWidget'
 import type { ComfyNode, ComfyWidget } from '../src/shared/comfy'
+import type { SheetPayload } from '../src/shared/sheetSession'
 import type { SheetState } from '../src/shared/sheetState'
 
 type ApplyArgs = [SheetState, unknown[], string | null, null, boolean]
@@ -23,11 +25,11 @@ afterEach(() => {
   opened.length = 0
 })
 
-function sheet(): { node: ComfyNode; element: () => HTMLElement } {
+function sheet(id = 9): { node: ComfyNode; element: () => HTMLElement } {
   let element: HTMLElement | undefined
   const widgets: ComfyWidget[] = [{ name: 'review', type: 'combo', value: 'stop for review', options: {} }]
   const node = {
-    id: 9,
+    id,
     type: 'PlenioSongSheet',
     title: 'Song Sheet · Text',
     properties: {},
@@ -58,8 +60,9 @@ function sheet(): { node: ComfyNode; element: () => HTMLElement } {
 }
 
 async function openAndApply(element: () => HTMLElement, state: SheetState, approved: boolean): Promise<void> {
+  const before = opened.length // this click's own dialog (an earlier one may still be in the list)
   ;(element().querySelector('button') as HTMLButtonElement).click()
-  await vi.waitFor(() => expect(opened.length).toBeGreaterThan(0))
+  await vi.waitFor(() => expect(opened.length).toBeGreaterThan(before))
   opened[opened.length - 1].onApply(state, [], null, null, approved)
 }
 
@@ -84,6 +87,22 @@ describe('Approve in the editor', () => {
     await openAndApply(element, { ...docs('la la'), review: { approved_fingerprint: 'f' } }, false)
     expect(runState(node)).toBeNull()
     expect(displayState(node)).toBe('stop')
+  })
+
+  it('drops the run’s “waiting for approval” from the summary once approved', async () => {
+    const { node, element } = sheet(10) // a node of its own: the payload store is module state
+    const payload: SheetPayload = {
+      schema: 'plenio.sheet_payload/1', owned: ['lyrics'], docs: {}, context: {}, findings: [], fingerprint: 'f',
+      review: 'stop for review', approved: false, waiting: true, status: 'waiting for approval', planning_mode: 'full',
+      score_seconds: 0, validation: null, engine: null, instrumental: false
+    }
+    setPayload(String(node.id), payload)
+    setRunState(node, 'waiting')
+    const summary = () => element().querySelector('.plenio-sheet-summary')?.textContent
+    await openAndApply(element, docs('la'), false)
+    expect(summary()).toContain('waiting for approval')
+    await openAndApply(element, { ...docs('la'), review: { approved_fingerprint: 'f' } }, true)
+    expect(summary()).not.toContain('waiting')
   })
 
   it('leaves a waiting sheet waiting when it is only applied', async () => {

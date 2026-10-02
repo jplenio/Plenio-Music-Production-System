@@ -45,8 +45,9 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
 
   const render = () => {
     const payload = getPayload(String(node.id))
-    summary.textContent = summarize(parseState(value)) + (payload ? ` · ${payload.status}` : '')
     const state = displayState(node)
+    // the last run's status, unless Approve has answered it since (it said "waiting for approval")
+    summary.textContent = summarize(parseState(value)) + (payload && state !== 'approved' ? ` · ${payload.status}` : '')
     status.textContent = sheetLine(state)
     status.dataset.state = state ?? ''
     // the review setting decides whether the sheet stops: follow it (the widget exists once the node is built)

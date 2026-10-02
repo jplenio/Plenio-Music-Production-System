@@ -1229,10 +1229,8 @@ const Xi = (e, t, n) => {
   h.className = "plenio-sheet-status", r.append(l, s, h);
   let g = !1;
   const _ = () => {
-    const w = he(String(e.id));
-    s.textContent = Ri(_e(i)) + (w ? ` · ${w.status}` : "");
-    const A = lt(e);
-    h.textContent = _i(A), h.dataset.state = A ?? "";
+    const w = he(String(e.id)), A = lt(e);
+    s.textContent = Ri(_e(i)) + (w && A !== "approved" ? ` · ${w.status}` : ""), h.textContent = _i(A), h.dataset.state = A ?? "";
     const V = g ? null : e.widgets?.find((a) => a.name === "review");
     if (V) {
       g = !0;
@@ -1259,7 +1257,7 @@ const Xi = (e, t, n) => {
   async function H() {
     const w = _e(i);
     w === null && (s.textContent = "The stored state is unreadable; it will be replaced when you apply.");
-    const A = he(String(e.id)), a = (e.inputs ?? []).filter((q) => q.link != null).map((q) => q.name), B = w ?? { schema: "plenio.sheet_state/1", docs: {} }, S = A?.owned ?? Bi(a, B), p = String(e.widgets?.find((q) => q.name === "review")?.value ?? "continue"), d = p === "as the brief says" ? A?.review ?? "continue" : p, { openSheetDialog: f } = await import("./open-CHCTpFfD.mjs"), { parseGuide: m, serializeGuide: M } = await import("./tracks-DxmZeggM.mjs");
+    const A = he(String(e.id)), a = (e.inputs ?? []).filter((q) => q.link != null).map((q) => q.name), B = w ?? { schema: "plenio.sheet_state/1", docs: {} }, S = A?.owned ?? Bi(a, B), p = String(e.widgets?.find((q) => q.name === "review")?.value ?? "continue"), d = p === "as the brief says" ? A?.review ?? "continue" : p, { openSheetDialog: f } = await import("./open-C-HI__ti.mjs"), { parseGuide: m, serializeGuide: M } = await import("./tracks-DxmZeggM.mjs");
     if (!He) throw new Error("Plenio: API not initialised");
     let y = null;
     try {
