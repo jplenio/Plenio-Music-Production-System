@@ -1,6 +1,6 @@
 /**
  * Minimal, safe Markdown rendering for node summaries (headings, lists, bold,
- * inline code, fenced code). Everything is escaped first; no HTML passes through.
+ * inline code, fenced code, pipe tables). Everything is escaped first; no HTML passes through.
  */
 
 export function escapeHtml(text: string): string {
@@ -18,14 +18,30 @@ function inline(text: string): string {
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
 }
 
+// a pipe table row's cells ("| a | b |"); the separator row ("|---|:--|") is null
+function tableCells(line: string): string[] | null {
+  const cells = line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((cell) => cell.trim())
+  return cells.every((cell) => /^:?-{3,}:?$/.test(cell)) ? null : cells
+}
+
 export function renderMarkdown(source: string): string {
   const out: string[] = []
   let list = false
   let code: string[] | null = null
+  let table: string[][] | null = null
   const closeList = () => {
     if (list) {
       out.push('</ul>')
       list = false
+    }
+  }
+  // the first row is the header (the System Check's tables of templates, model files and hardware)
+  const closeTable = () => {
+    if (table) {
+      const [head, ...body] = table
+      const row = (cells: string[], tag: string) => `<tr>${cells.map((cell) => `<${tag}>${inline(cell)}</${tag}>`).join('')}</tr>`
+      out.push(`<table><thead>${row(head, 'th')}</thead><tbody>${body.map((cells) => row(cells, 'td')).join('')}</tbody></table>`)
+      table = null
     }
   }
   for (const line of source.replace(/\r\n?/g, '\n').split('\n')) {
@@ -38,6 +54,13 @@ export function renderMarkdown(source: string): string {
       }
       continue
     }
+    if (line.trim().startsWith('|')) {
+      closeList()
+      const cells = tableCells(line)
+      if (cells) (table ??= []).push(cells)
+      continue
+    }
+    closeTable()
     if (line.startsWith('```')) {
       closeList()
       code = []
@@ -63,6 +86,7 @@ export function renderMarkdown(source: string): string {
     if (line.trim()) out.push(`<p>${inline(line)}</p>`)
   }
   closeList()
+  closeTable()
   if (code !== null) out.push(`<pre><code>${escapeHtml(code.join('\n'))}</code></pre>`)
   return out.join('')
 }

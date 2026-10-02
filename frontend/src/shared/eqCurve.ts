@@ -188,8 +188,8 @@ export function setType(settings: EqSettings, id: string, type: BandType): EqSet
 
 export function describeBand(band: Band): string {
   const hz = band.frequency_hz >= 1000 ? `${round(band.frequency_hz / 1000, 2)} kHz` : `${Math.round(band.frequency_hz)} Hz`
-  const gain = GAIN_TYPES.includes(band.type) ? ` ${band.gain_db > 0 ? '+' : ''}${band.gain_db} dB` : ''
-  return `${band.type.replace('_', ' ')} ${hz}${gain}, Q ${band.q}`
+  const gain = GAIN_TYPES.includes(band.type) ? ` ${band.gain_db > 0 ? '+' : ''}${round(band.gain_db, 1)} dB` : ''
+  return `${band.type.replace('_', ' ')} ${hz}${gain}, Q ${round(band.q, 2)}`
 }
 
 /** The chip of a band in the strip under the curve: ``● 2 Bell 1.20 kHz +2.0 dB Q 1.0``. */
@@ -197,7 +197,7 @@ export function bandChip(band: Band, index: number): string {
   const name = BAND_NAMES[band.type] ?? band.type
   const hz = band.frequency_hz >= 1000 ? `${(band.frequency_hz / 1000).toFixed(2)} kHz` : `${Math.round(band.frequency_hz)} Hz`
   const gain = GAIN_TYPES.includes(band.type) ? ` ${band.gain_db > 0 ? '+' : ''}${band.gain_db.toFixed(1)} dB` : ''
-  const shape = Q_TYPES.includes(band.type) ? ` Q ${band.q}` : ''
+  const shape = Q_TYPES.includes(band.type) ? ` Q ${round(band.q, 2)}` : ''
   return `● ${index + 1} ${name} ${hz}${gain}${shape}${band.enabled ? '' : ' (off)'}`
 }
 

@@ -21,6 +21,9 @@ const CSS = `
 .plenio-summary p { margin: 4px 0; }
 .plenio-summary pre { white-space: pre-wrap; font-size: 11px; }
 .plenio-summary code { font-family: var(--code-font, monospace); }
+.plenio-summary table { border-collapse: collapse; margin: 2px 0 8px; font-size: 11px; width: 100%; }
+.plenio-summary th, .plenio-summary td { text-align: left; vertical-align: top; padding: 2px 6px 2px 0; border-bottom: 1px solid rgba(127, 127, 127, 0.25); }
+.plenio-summary th { font-weight: 600; }
 .plenio-eq { display: flex; flex-direction: column; gap: 4px; font: 11px/1.4 var(--font-family, sans-serif);
   color: var(--descrip-text, #999); }
 .plenio-eq-tools { display: flex; gap: 6px; align-items: center; min-width: 0; }

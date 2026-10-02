@@ -89,6 +89,7 @@ def test_template_inventory_and_optional_packages() -> None:
     )
     assert report.status is Status.OK  # an optional package or a missing model is no warning
     rows = {row["template"]: row for row in report.data["templates"]}
+    assert len(rows) == len(report.data["templates"])  # each template once (4 was listed twice)
     assert list(rows) == sorted(rows) and set(rows) == {
         "0 · System Check",
         "1 · YuE2 · Song",

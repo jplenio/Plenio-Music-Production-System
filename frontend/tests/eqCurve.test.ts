@@ -144,6 +144,9 @@ describe('the panel helpers (M4/D8)', () => {
     expect(bandChip(band, 1)).toBe('● 2 Bell 1.20 kHz +2.0 dB Q 1')
     expect(bandChip({ ...band, type: 'highpass', enabled: false }, 0)).toBe('● 1 Low cut 1.20 kHz Q 1 (off)')
     expect(bandChip({ ...band, type: 'low_shelf' }, 0)).toBe('● 1 Low shelf 1.20 kHz +2.0 dB') // a slope, no Q
+    // a match proposal's exact values are rounded for the strip (they showed 16 digits)
+    expect(bandChip({ ...band, q: 0.3982428666120445, gain_db: -0.6532645 }, 0)).toBe('● 1 Bell 1.20 kHz -0.7 dB Q 0.4')
+    expect(describeBand({ ...band, q: 1.4321374925, gain_db: 1.2649 })).toBe('peak 1.2 kHz +1.3 dB, Q 1.43')
   })
 
   it('draws the spectrum area behind the curve and refuses mismatched data', () => {

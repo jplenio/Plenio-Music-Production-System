@@ -282,7 +282,10 @@ def check_system(facts: SystemFacts, catalogue: Mapping[str, ModelFile] | None =
                 "optional_missing": [],
                 "incomplete": [],
             }
+            # the CPU templates load no model - unless the catalogue knows them already (4 · Enhance &
+            # Master lists the models of its optional Stems and Refine blocks)
             for name in CPU_TEMPLATES
+            if name not in names
         ]
         data["templates"].sort(key=lambda row: row["template"])
         data["models"] = _model_rows(catalogue, inventory)
