@@ -281,9 +281,18 @@ def _part(
     return lines
 
 
-def export_musicxml(score: canonical.Score, *, title: str = "", lyrics: str | None = None) -> str:
-    """The score (and its lyrics, placed by ``lyric_layout``) as a MusicXML 4.0 partwise document."""
-    syllables = lyric_layout.layout(score, lyrics).syllables() if lyrics and lyrics.strip() else {}
+def export_musicxml(
+    score: canonical.Score,
+    *,
+    title: str = "",
+    lyrics: str | None = None,
+    lyric_spans: Sequence[Sequence[int]] | None = None,
+) -> str:
+    """The score (and its lyrics, placed by ``lyric_layout`` - by hand where ``lyric_spans`` say) as a
+    MusicXML 4.0 partwise document."""
+    syllables = (
+        lyric_layout.layout(score, lyrics, lyric_spans).syllables() if lyrics and lyrics.strip() else {}
+    )
     today = _dt.date.today().isoformat()
     name = escape(title.strip()) or "Score"
     head = [

@@ -13,7 +13,7 @@ views) and, for a score inside the supported subset, the canonical model view ``
 from __future__ import annotations
 
 import math
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from fractions import Fraction
 from typing import Any
 
@@ -179,13 +179,15 @@ def model_view(score: canonical.Score, heads: Mapping[tuple[str, int], list[str]
     }
 
 
-def editor_view(abc: str, lyrics: str | None = None) -> dict[str, Any]:
+def editor_view(
+    abc: str, lyrics: str | None = None, spans: Sequence[Sequence[int]] | None = None
+) -> dict[str, Any]:
     """The analysis plus, for a valid score, the element view and the canonical model view.
 
     A score the upstream parser accepts but that lies outside the supported subset (plan §9.2)
     is valid for YuE2 but has no ``model``: ``model_error`` says why graphical editing is off.
     With ``lyrics`` the view also says where they are sung (``lyrics``, see ``lyric_layout``) and
-    the notation shows the syllables under the Vocal notes.
+    the notation shows the syllables under the Vocal notes; ``spans`` are the lines placed by hand.
     """
     analysis = native.analyze(abc)
     result = analysis.to_dict()
@@ -196,7 +198,9 @@ def editor_view(abc: str, lyrics: str | None = None) -> dict[str, Any]:
             score = None
             result["model_error"] = {"message": error.message, "diagnostics": error.diagnostics}
         placed = (
-            lyric_layout.layout(score, lyrics) if score is not None and lyrics and lyrics.strip() else None
+            lyric_layout.layout(score, lyrics, spans)
+            if score is not None and lyrics and lyrics.strip()
+            else None
         )
         words: dict[int, str] | None = None
         if placed is not None:

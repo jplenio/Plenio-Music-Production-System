@@ -100,9 +100,31 @@ def _lyrics(data: dict[str, Any]) -> str | None:
     return value if isinstance(value, str) else None
 
 
+_MAX_SPANS = 4096
+
+
+def _spans(data: dict[str, Any]) -> list[tuple[int, int]] | None:
+    """The lyrics lines placed by hand (``lyric_spans``: ``[[start, end], ...]`` in units of L), optional."""
+    value = data.get("lyric_spans")
+    if value is None:
+        return None
+    if not isinstance(value, list) or len(value) > _MAX_SPANS:
+        raise PlenioUserError(f"'lyric_spans' must be a list of at most {_MAX_SPANS} [start, end] pairs.")
+    spans = []
+    for item in value:
+        if (
+            not isinstance(item, list)
+            or len(item) != 2
+            or not all(isinstance(x, int) and not isinstance(x, bool) and x >= 0 for x in item)
+        ):
+            raise PlenioUserError("Every lyrics span must be [start, end] in whole units (not negative).")
+        spans.append((item[0], item[1]))
+    return spans
+
+
 async def score_analyze(request: web.Request) -> web.StreamResponse:
     data = await read_json(request)
-    return web.json_response(score_rules.editor_view(_text(data, "abc"), _lyrics(data)))
+    return web.json_response(score_rules.editor_view(_text(data, "abc"), _lyrics(data), _spans(data)))
 
 
 async def score_transform(request: web.Request) -> web.StreamResponse:
@@ -120,7 +142,7 @@ async def score_transform(request: web.Request) -> web.StreamResponse:
             "warnings": list(result.warnings),
             "select": list(result.select),
             "time_map": [list(piece) for piece in result.time_map] if result.time_map is not None else None,
-            "analysis": score_rules.editor_view(result.abc, _lyrics(data)),
+            "analysis": score_rules.editor_view(result.abc, _lyrics(data), _spans(data)),
         }
     )
 
@@ -145,7 +167,7 @@ async def score_musicxml_export(request: web.Request) -> web.StreamResponse:
     data = await read_json(request)
     score = canonical.from_abc(_text(data, "abc"))
     title = _text(data, "title", required=False)
-    text = musicxml.export_musicxml(score, title=title, lyrics=_lyrics(data))
+    text = musicxml.export_musicxml(score, title=title, lyrics=_lyrics(data), lyric_spans=_spans(data))
     return web.json_response(
         {"filename": musicxml.filename_for(title), "data": text, "type": musicxml.MUSICXML_MIME}
     )

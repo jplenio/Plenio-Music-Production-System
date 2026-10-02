@@ -42,6 +42,8 @@ export interface ScoreSessionOptions {
   onTransform?: (result: TransformResult, operation: ScoreOperation) => { before: unknown; after: unknown } | undefined
   /** The song's lyrics, sent with every check: the view then says where they are sung. */
   lyrics?: () => string | null
+  /** The lyrics lines placed by hand, sent with the lyrics (``lyricPlacement``). */
+  lyricSpans?: () => readonly (readonly number[])[] | null
   debounceMs?: number
 }
 
@@ -128,7 +130,7 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
       return
     }
     try {
-      const result = await analyzeScore(options.fetcher, text, options.lyrics?.() ?? null)
+      const result = await analyzeScore(options.fetcher, text, options.lyrics?.() ?? null, options.lyricSpans?.() ?? null)
       if (mine !== ticket || requested !== text || doc.text !== text) return // an older text or lyrics: drop it
       accept(result, text)
       error.value = null
@@ -209,7 +211,7 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
     error.value = null
     try {
       ++ticket
-      const result = await transformScore(options.fetcher, text, operation, options.lyrics?.() ?? null)
+      const result = await transformScore(options.fetcher, text, operation, options.lyrics?.() ?? null, options.lyricSpans?.() ?? null)
       if (doc.text !== text) {
         error.value = 'The score changed while the edit was computed; it was not applied.'
         return false

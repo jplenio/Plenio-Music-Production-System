@@ -199,3 +199,21 @@ export function followReplace(follow: LyricsFollow, model: ScoreModelView, secti
   })
   return { preamble: follow.preamble, blocks }
 }
+
+/** ``text`` with all lines of block ``block`` replaced (a lyrics lane edit that moved or removed lines). */
+export function setBlockLines(text: string, block: number, lines: readonly string[]): string {
+  const lyrics = parseLyrics(text)
+  if (!lyrics.blocks[block]) return text
+  const parts = lyrics.preamble.length ? [lyrics.preamble.join('\n')] : []
+  lyrics.blocks.forEach((b, i) => parts.push([`[${b.tag}]`, ...(i === block ? lines : b.lines)].join('\n')))
+  return parts.join('\n\n')
+}
+
+/** The same while the lyrics follow the sections: the block of model section ``section`` gets ``lines``. */
+export function followSetLines(follow: LyricsFollow, model: ScoreModelView, section: number, lines: readonly string[]): LyricsFollow {
+  const label = model.sections[section]?.label ?? ''
+  const blocks = follow.blocks.map((block, i) =>
+    i === section ? { tag: (block ?? { tag: tagFor(label, null) }).tag, lines: [...lines] } : block
+  )
+  return { preamble: follow.preamble, blocks }
+}

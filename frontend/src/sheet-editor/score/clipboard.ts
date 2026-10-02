@@ -10,6 +10,7 @@ import { ref } from 'vue'
 
 import type { ScoreOperation } from '../../api/client'
 import type { ModelChord, ModelNote, ScoreModelView } from '../../shared/scoreView'
+import type { LyricClipLine } from './lyricPlacement'
 import type { LyricBlock } from './lyricsFollow'
 import type { Track } from './pianoRoll'
 
@@ -30,6 +31,8 @@ export interface Clip {
   chords: { onset: number; name: string }[]
   /** The sections of a range, with the lyrics they had (the lyrics follow a pasted section). */
   sections: { onset: number; label: string; lyrics?: LyricBlock | null }[]
+  /** Lyrics lines copied in the roll's lyrics lane (a clip of words only: pasted into the lyrics). */
+  lyricLines?: LyricClipLine[]
   /** What was copied, for the status line (``3 notes``, ``sections chorus, verse``). */
   label: string
 }
@@ -156,7 +159,13 @@ export function convertClip(clip: Clip, unit: string): Clip | null {
     const scaled = value * factor
     return Number.isInteger(scaled) ? scaled : null
   }
-  const values = [clip.span, ...clip.notes.flatMap((n) => [n.onset, n.duration]), ...clip.chords.map((c) => c.onset), ...clip.sections.map((s) => s.onset)]
+  const values = [
+    clip.span,
+    ...clip.notes.flatMap((n) => [n.onset, n.duration]),
+    ...clip.chords.map((c) => c.onset),
+    ...clip.sections.map((s) => s.onset),
+    ...(clip.lyricLines ?? []).flatMap((l) => [l.offset, l.length])
+  ]
   if (values.some((v) => scale(v) === null)) return null
   return {
     ...clip,
@@ -164,7 +173,25 @@ export function convertClip(clip: Clip, unit: string): Clip | null {
     span: clip.span * factor,
     notes: clip.notes.map((n) => ({ ...n, onset: n.onset * factor, duration: n.duration * factor })),
     chords: clip.chords.map((c) => ({ ...c, onset: c.onset * factor })),
-    sections: clip.sections.map((s) => ({ ...s, onset: s.onset * factor }))
+    sections: clip.sections.map((s) => ({ ...s, onset: s.onset * factor })),
+    ...(clip.lyricLines ? { lyricLines: clip.lyricLines.map((l) => ({ ...l, offset: l.offset * factor, length: l.length * factor })) } : {})
+  }
+}
+
+/** A clip of lyrics lines (copied in the lyrics lane): words only, no notes. */
+export function clipOfLyrics(unit: string, lines: readonly LyricClipLine[]): Clip | null {
+  if (!lines.length) return null
+  const span = Math.max(...lines.map((l) => l.offset + l.length))
+  return {
+    unit,
+    span,
+    tracks: [],
+    withChords: false,
+    notes: [],
+    chords: [],
+    sections: [],
+    lyricLines: lines.map((l) => ({ ...l })),
+    label: `${lines.length} lyrics line${lines.length > 1 ? 's' : ''}`
   }
 }
 

@@ -6,6 +6,7 @@
  */
 import { version } from '../../../package.json'
 import type { GuideNote } from '../../api/client'
+import { type LyricSpan, parseSpans } from './lyricPlacement'
 import { parseGuide } from './tracks'
 
 export const PROJECT_SCHEMA = 'plenio.score_project/1'
@@ -24,10 +25,12 @@ export interface ScoreProject {
   guide: GuideNote[]
   /** The song's lyrics (``null``: none). */
   lyrics: string | null
+  /** The lyrics lines placed by hand (``[start, end]`` in units of L; empty: placed by the phrases). */
+  lyric_spans: LyricSpan[]
 }
 
 export function buildProject(
-  parts: { title?: string | null; score: string; guide?: GuideNote[] | null; lyrics?: string | null },
+  parts: { title?: string | null; score: string; guide?: GuideNote[] | null; lyrics?: string | null; lyricSpans?: LyricSpan[] | null },
   now: Date = new Date()
 ): ScoreProject {
   return {
@@ -37,7 +40,8 @@ export function buildProject(
     title: (parts.title ?? '').trim(),
     score: parts.score,
     guide: (parts.guide ?? []).map(([onset, duration, pitch]) => [onset, duration, pitch]),
-    lyrics: parts.lyrics?.trim() ? parts.lyrics : null
+    lyrics: parts.lyrics?.trim() ? parts.lyrics : null,
+    lyric_spans: parts.lyrics?.trim() ? parseSpans(parts.lyricSpans ?? []) : []
   }
 }
 
@@ -70,6 +74,7 @@ export function parseProject(text: string): ScoreProject | string {
     title: typeof record.title === 'string' ? record.title : '',
     score: record.score,
     guide: parseGuide(record.guide),
-    lyrics: typeof record.lyrics === 'string' && record.lyrics.trim() ? record.lyrics : null
+    lyrics: typeof record.lyrics === 'string' && record.lyrics.trim() ? record.lyrics : null,
+    lyric_spans: parseSpans(record.lyric_spans)
   }
 }

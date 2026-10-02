@@ -27,6 +27,9 @@
  * lays them onto the new sections (a copied chorus copies its words, see ``lyricsFollow``).
  * ``lyricsChange`` reports them: the dialog writes them into their sheet on Apply (*Song Sheet · Text*)
  * or at once into its own Lyrics tab (``own``). Like the Guide notes, they are part of the undo steps.
+ * In the lane, lines are also placed by hand like notes - selected, moved, made longer or shorter,
+ * deleted, copied and pasted at the cursor (``lyricPlacement``): their spans are kept in the node's
+ * properties (``lyricSpans``) and move with the bars like the Guide notes.
  *
  * Files: *Export MIDI* and *Import MIDI…* (the score and the Guide notes), *Export MusicXML* (the sheet
  * music with the lyrics, for notation programs) and the project file - *Save project* writes the score,
@@ -82,7 +85,22 @@ import {
   shareValue,
   sideWidthAfter
 } from '../paneSizes'
-import { type ClipAction, clipOfSelection, clipboard, pasteOperation } from './clipboard'
+import { type ClipAction, clipOfLyrics, clipOfSelection, clipboard, pasteOperation } from './clipboard'
+import {
+  type LyricClipLine,
+  type LyricSpan,
+  type PlacedLine,
+  clipOfLines,
+  lineKey,
+  parseLineKey,
+  placedLines,
+  remapSpans,
+  sameSpans,
+  sectionAt,
+  sectionRange,
+  settle,
+  withSectionSpans
+} from './lyricPlacement'
 import {
   type LyricBlock,
   type LyricsFollow,
@@ -90,11 +108,13 @@ import {
   followEdit,
   followOf,
   followReplace,
+  followSetLines,
   followText,
   parseLyrics,
-  replaceLine
+  replaceLine,
+  setBlockLines
 } from './lyricsFollow'
-import type { LyricEdit } from './PianoRoll.vue'
+import type { LyricEdit, LyricPlace } from './PianoRoll.vue'
 import { sourceBars } from './barMatch'
 import { barOfUnit, positionLabel, secondsOfUnit, unitOfBar, unitOfSeconds } from './locator'
 import { selectedChordIds, selectedNoteIds } from './pianoRoll'
@@ -115,6 +135,8 @@ const props = defineProps<{
   title?: string | null
   /** The Guide notes kept in the node's properties; ``undefined``: this sheet keeps none. */
   guide?: GuideNote[]
+  /** The lyrics lines placed by hand (``lyricPlacement``), kept in the node's properties. */
+  lyricSpans?: LyricSpan[]
   /** Where edited lyrics go (another sheet on Apply, or this sheet's Lyrics tab); ``null``: shown only. */
   lyricsTarget?: LyricsTarget | null
   /** The lyrics as they were when this tab was last closed (the dialog keeps them until Apply). */
@@ -128,6 +150,8 @@ const emit = defineEmits<{
   guideChange: [guide: GuideNote[]]
   /** The lyrics as they are now - arranged with the sections, edited in the roll (``null``: none). */
   lyricsChange: [text: string | null]
+  /** The lyrics lines placed by hand changed (moved in the lane, or with the bars). */
+  lyricSpansChange: [spans: LyricSpan[]]
 }>()
 
 /**
@@ -140,6 +164,8 @@ interface SideState {
   lyrics?: LyricsFollow | null
   /** ... or as a text of their own (when they do not). */
   looseLyrics?: string | null
+  /** The lyrics lines placed by hand. */
+  spans?: LyricSpan[]
 }
 
 function isSideState(value: unknown): value is SideState {
@@ -172,6 +198,7 @@ const session = useScoreSession(props.doc, {
   fetcher: props.fetcher,
   onEdit: () => emit('edited'),
   lyrics: () => lyricsNow.value ?? props.lyrics ?? null,
+  lyricSpans: () => spansNow(),
   // an undo or redo brings the Guide notes and the lyrics of that step back with its text
   onRestore: (extra) => {
     if (!isSideState(extra)) return
@@ -180,6 +207,7 @@ const session = useScoreSession(props.doc, {
     }
     if ('lyrics' in extra) follow.value = extra.lyrics ?? null
     if ('looseLyrics' in extra) loose.value = extra.looseLyrics ?? null
+    if (Array.isArray(extra.spans)) setSpans(extra.spans)
   },
   // bars that moved (arranged sections, Insert at the cursor, inserted, deleted or duplicated bars)
   // take their Guide notes along, and the lyrics follow the sections - in the same undo step as the text
@@ -193,6 +221,15 @@ const session = useScoreSession(props.doc, {
         emit('guideChange', moved)
         before.guide = [...guide]
         after.guide = moved
+      }
+    }
+    const spans = spansNow()
+    if (spans.length && result.time_map?.length) {
+      const moved = remapSpans(spans, result.time_map)
+      if (!sameSpans(moved, spans)) {
+        setSpans(moved)
+        before.spans = [...spans]
+        after.spans = moved
       }
     }
     const lyrics = follow.value
@@ -334,12 +371,228 @@ const lyricsTags = computed(() => (lyricsNow.value ? parseLyrics(lyricsNow.value
 const fitLyrics = computed(() => lyricsNow.value ?? props.lyrics ?? null)
 
 function lyricsState(): SideState {
-  return { lyrics: follow.value, looseLyrics: loose.value }
+  return { lyrics: follow.value, looseLyrics: loose.value, spans: [...spansNow()] }
+}
+
+// --- lyrics lines placed by hand (the lane: select, move, lengthen, delete, copy, paste) ---
+/** The spans as they are now (the dialog keeps them; this tab reports every change at once). */
+const spansLocal = shallowRef<LyricSpan[] | null>(null)
+function spansNow(): LyricSpan[] {
+  return spansLocal.value ?? props.lyricSpans ?? []
+}
+function setSpans(next: LyricSpan[]): void {
+  if (sameSpans(next, spansNow())) return
+  spansLocal.value = next
+  emit('lyricSpansChange', next)
+  session.refreshLyrics()
+}
+watch(
+  () => props.lyricSpans,
+  (spans) => {
+    if (spans && spansLocal.value && sameSpans(spans, spansLocal.value)) return
+    spansLocal.value = null
+    session.refreshLyrics()
+  }
+)
+/** The lines selected in the lane (``section:line``); a note selected in the roll clears them. */
+const lyricSelection = ref<string[]>([])
+watch(
+  () => session.selection,
+  (ids) => {
+    if (ids.length) lyricSelection.value = []
+  }
+)
+
+/** The section has lines placed by hand (its lines take its spans in order). */
+function pinned(section: number): boolean {
+  const m = model.value
+  if (!m) return false
+  const [start, end] = sectionRange(m, section)
+  return spansNow().some(([at]) => at >= start && at < end)
+}
+
+/** The words of a section's lyric block as they are now (``null``: the section has none to edit). */
+function blockLines(section: number): string[] | null {
+  const laid = shown.value?.lyrics?.sections.find((s) => s.section === section)
+  if (follow.value) return [...(follow.value.blocks[section]?.lines ?? [])]
+  if (loose.value === null || !laid || laid.block === null) return null
+  return [...(parseLyrics(loose.value).blocks[laid.block]?.lines ?? [])]
+}
+
+/**
+ * Edit the placed lines of some sections in one undo step: each section is pinned (every line gets
+ * the span it has now), ``edit`` changes its lines, and they settle in the order of their spans.
+ * Returns the keys of the lines ``edit`` marked with an id starting with ``*`` (to select them).
+ */
+function editPlaced(sections: number[], edit: (section: number, lines: PlacedLine[]) => PlacedLine[], label: string): string[] {
+  const m = model.value
+  const layout = shown.value?.lyrics
+  if (!m || !layout || !lyricsEditable.value) return []
+  const before = lyricsState()
+  let spans = spansNow()
+  const marked: string[] = []
+  let changed = false
+  for (const section of [...new Set(sections)].sort((a, b) => a - b)) {
+    const lines = blockLines(section)
+    if (lines === null) continue
+    const range = sectionRange(m, section)
+    const next = settle(edit(section, placedLines(m, layout, section, lines)), range)
+    const words = next.map((line) => line.text)
+    if (follow.value) follow.value = followSetLines(follow.value, m, section, words)
+    else if (loose.value !== null) {
+      const block = layout.sections.find((s) => s.section === section)?.block
+      if (block === null || block === undefined) continue
+      loose.value = setBlockLines(loose.value, block, words)
+    } else continue
+    next.forEach((line, index) => {
+      if (line.id.startsWith('*')) marked.push(lineKey(section, index))
+    })
+    spans = withSectionSpans(spans, range, next)
+    changed = true
+  }
+  if (!changed) return []
+  setSpans(spans)
+  session.recordSide(label, before, lyricsState())
+  return marked
+}
+
+function bySection(keys: readonly string[]): Map<number, Set<number>> {
+  const map = new Map<number, Set<number>>()
+  for (const key of keys) {
+    const parsed = parseLineKey(key)
+    if (!parsed) continue
+    if (!map.has(parsed.section)) map.set(parsed.section, new Set())
+    map.get(parsed.section)?.add(parsed.line)
+  }
+  return map
+}
+
+/** Lines moved or made longer / shorter in the lane (new spans of some lines). */
+function onLyricPlace(moves: LyricPlace[]): void {
+  const wanted = new Map(moves.map((move) => [move.key, move]))
+  const count = moves.length
+  lyricSelection.value = editPlaced(
+    [...bySection(moves.map((m) => m.key)).keys()],
+    (section, lines) =>
+      lines.map((line, index) => {
+        const move = wanted.get(lineKey(section, index))
+        return move ? { ...line, id: `*${line.id}`, start: move.start, end: move.end } : line
+      }),
+    `lyrics: ${count === 1 ? 'line' : `${count} lines`} placed`
+  )
+}
+
+/** The selected lines go (with their words); the others stay where they are sung. */
+function deleteLyricLines(keys: readonly string[]): void {
+  const picked = bySection(keys)
+  if (!picked.size) return
+  editPlaced(
+    [...picked.keys()],
+    (section, lines) => lines.filter((_, index) => !picked.get(section)?.has(index)),
+    `lyrics: ${keys.length === 1 ? 'line' : `${keys.length} lines`} deleted`
+  )
+  lyricSelection.value = []
+}
+
+/** The selected lines with their words and where they are sung. */
+function selectedLyricLines(): PlacedLine[] {
+  const m = model.value
+  const layout = shown.value?.lyrics
+  if (!m || !layout) return []
+  const result: PlacedLine[] = []
+  for (const [section, indices] of bySection(lyricSelection.value)) {
+    const lines = blockLines(section)
+    if (!lines) continue
+    placedLines(m, layout, section, lines).forEach((line, index) => {
+      if (indices.has(index)) result.push(line)
+    })
+  }
+  return result
+}
+
+function copyLyrics(): boolean {
+  const clip = model.value ? clipOfLyrics(model.value.unit, clipOfLines(selectedLyricLines())) : null
+  if (!clip) return false
+  clipboard.value = clip
+  session.error = null
+  session.notes = [`copied ${clip.label} - Ctrl+V pastes them at the cursor`]
+  return true
+}
+
+/** The clip's lines into the section at ``at``, from there on (lines past the section's end stay out). */
+function pasteLyrics(lines: readonly LyricClipLine[], at: number, label: string): void {
+  const m = model.value
+  if (!m) return
+  const section = sectionAt(m, at)
+  if (section < 0 || blockLines(section) === null) {
+    session.error = 'The cursor is in a section without lyrics: set it into a section that has a lyrics block.'
+    return
+  }
+  const [, end] = sectionRange(m, section)
+  const fitting = lines.filter((line) => at + line.offset < end)
+  if (!fitting.length) return
+  lyricSelection.value = editPlaced(
+    [section],
+    (_, current) => [
+      ...current,
+      ...fitting.map((line, index) => ({
+        id: `*new${index}`,
+        text: line.text,
+        start: at + line.offset,
+        end: Math.min(at + line.offset + line.length, end)
+      }))
+    ],
+    label
+  )
+  session.error = null
+  if (fitting.length < lines.length) session.notes = [`${lines.length - fitting.length} line(s) did not fit before the section's end`]
+}
+
+/** The clipboard commands on lyrics lines (``false``: not about lyrics - the notes handle it). */
+function onLyricClipboard(action: ClipAction): boolean {
+  const clip = clipboard.value
+  if ((action === 'paste' || action === 'insert') && clip?.lyricLines?.length) {
+    if (!lyricsEditable.value) return true
+    if (model.value && clip.unit !== model.value.unit) {
+      session.error = `The lines were copied with L:${clip.unit} and do not fit this score's L:${model.value.unit}.`
+      return true
+    }
+    pasteLyrics(clip.lyricLines, locator.value, `lyrics: ${clip.label} pasted`)
+    return true
+  }
+  if (!lyricSelection.value.length) return false
+  if (action === 'copy') copyLyrics()
+  else if (action === 'cut') {
+    if (copyLyrics()) deleteLyricLines(lyricSelection.value)
+  } else if (action === 'duplicate') {
+    const lines = selectedLyricLines()
+    if (lines.length) {
+      const last = Math.max(...lines.map((line) => line.end))
+      pasteLyrics(clipOfLines(lines), last, `lyrics: ${lines.length === 1 ? 'line' : `${lines.length} lines`} duplicated`)
+    }
+  }
+  return true
 }
 
 /** A line edited in the roll's lyrics lane: one undo step of its own. */
 function onLyricEdit(edit: LyricEdit): void {
   const current = model.value
+  if (current && pinned(edit.section)) {
+    // a section placed by hand: the other lines keep their spans, a new line stands where it was typed
+    const beat = Math.max(1, Math.round(current.grid.units_per_quarter))
+    editPlaced(
+      [edit.section],
+      (_, lines) => {
+        if (edit.line < lines.length) {
+          return edit.text ? lines.map((line, index) => (index === edit.line ? { ...line, text: edit.text } : line)) : lines.filter((_, index) => index !== edit.line)
+        }
+        const at = edit.at ?? lines[lines.length - 1]?.end ?? sectionRange(current, edit.section)[0]
+        return edit.text ? [...lines, { id: '*typed', text: edit.text, start: at, end: at + beat }] : lines
+      },
+      `lyrics: ${edit.text || 'line removed'}`
+    )
+    return
+  }
   const before = lyricsState()
   if (follow.value && current) follow.value = followReplace(follow.value, current, edit.section, edit.line, edit.text)
   else if (loose.value !== null) loose.value = replaceLine(loose.value, edit.block, edit.line, edit.text)
@@ -460,6 +713,7 @@ function copySelection(): boolean {
 }
 
 async function onClipboard(action: ClipAction): Promise<void> {
+  if (onLyricClipboard(action)) return
   const m = model.value
   if (action === 'copy') {
     copySelection()
@@ -624,7 +878,8 @@ async function exportSheet(): Promise<void> {
     const file = await exportMusicXml(props.fetcher, {
       abc: props.doc.text,
       title: props.title ?? '',
-      lyrics: lyricsNow.value ?? props.lyrics ?? null
+      lyrics: lyricsNow.value ?? props.lyrics ?? null,
+      spans: spansNow()
     })
     downloadBytes(file.filename, new TextEncoder().encode(file.data), file.type)
   } catch (e) {
@@ -643,7 +898,8 @@ function saveProject(): void {
     title: props.title,
     score: props.doc.text,
     guide: props.guide ?? [],
-    lyrics: lyricsNow.value ?? props.lyrics ?? null
+    lyrics: lyricsNow.value ?? props.lyrics ?? null,
+    lyricSpans: spansNow()
   })
   downloadBytes(projectFilename(props.title), new TextEncoder().encode(`${JSON.stringify(project, null, 1)}\n`), 'application/json')
   midiError.value = null
@@ -694,6 +950,7 @@ function openProject(project: ScoreProject, name: string): void {
     loose.value = project.lyrics
     relayLyrics = true
     opened.push('lyrics')
+    setSpans(project.lyric_spans)
   } else if (project.lyrics) left.push('the lyrics (this sheet cannot change them here)')
   Object.assign(after, lyricsState())
   const label = `open project (${name})`
@@ -982,7 +1239,10 @@ function onKey(event: KeyboardEvent): void {
       @select="selectFromRoll"
       @locate="(unit: number) => (locator = unit)"
       @clipboard="onClipboard"
+      v-model:lyric-selection="lyricSelection"
       @lyric-edit="onLyricEdit"
+      @lyric-place="onLyricPlace"
+      @lyric-delete="deleteLyricLines"
     />
     <div
       v-if="showRoll && shown?.model"

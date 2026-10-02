@@ -36,6 +36,7 @@ import LyricsFit from './LyricsFit.vue'
 import ScoreTab from './score/ScoreTab.vue'
 import type { LyricsTarget } from './score/lyricsFollow'
 import { sameGuide } from './score/tracks'
+import { type LyricSpan, sameSpans } from './score/lyricPlacement'
 
 const props = defineProps<{
   title: string
@@ -49,6 +50,8 @@ const props = defineProps<{
   layout?: string | null
   /** The Guide notes of the node's ``plenio_guide`` property (playback and MIDI only). */
   guide?: GuideNote[]
+  /** The lyrics lines placed by hand (the node's ``plenio_lyric_spans`` property). */
+  lyricSpans?: LyricSpan[]
   /** The sheet that owns the context lyrics, when they can follow the score's sections. */
   lyricsTarget?: LyricsTarget | null
   /** The sheet that owns the context score (a cover's score sheet), when this sheet may edit it. */
@@ -60,7 +63,7 @@ const props = defineProps<{
  */
 const emit = defineEmits<{
   /** ``approved``: Approve was pressed - the sheet is released for the next run now. */
-  apply: [state: SheetState, guide: GuideNote[], lyrics: string | null, score: ScoreChange | null, approved: boolean]
+  apply: [state: SheetState, guide: GuideNote[], lyrics: string | null, score: ScoreChange | null, approved: boolean, lyricSpans: LyricSpan[]]
   close: []
 }>()
 
@@ -205,6 +208,7 @@ function revert(): void {
   const fresh = startSession(props.state, props.payload, props.owned)
   fresh.forEach((doc, index) => Object.assign(working[index], doc))
   guide.value = [...(props.guide ?? [])]
+  lyricSpans.value = [...(props.lyricSpans ?? [])]
   contextDoc.text = contextScore.value ?? ''
   revision.value++
 }
@@ -216,6 +220,10 @@ const pending = computed(() => nextState(props.state, props.payload, working))
 const guide = ref<GuideNote[]>([...(props.guide ?? [])])
 function setGuide(next: GuideNote[]): void {
   guide.value = next
+}
+const lyricSpans = ref<LyricSpan[]>([...(props.lyricSpans ?? [])])
+function setLyricSpans(next: LyricSpan[]): void {
+  lyricSpans.value = next
 }
 // --- the lyrics in the score editor: this sheet's own (Lyrics tab) or another sheet's (written on Apply) ---
 const followText = ref<string | null>(null)
@@ -254,6 +262,7 @@ const dirty = computed(
   () =>
     serializeState(pending.value) !== serializeState(props.state) ||
     !sameGuide(guide.value, props.guide ?? []) ||
+    !sameSpans(lyricSpans.value, props.lyricSpans ?? []) ||
     followedLyrics.value !== null ||
     changedScore.value !== null
 )
@@ -324,7 +333,8 @@ function apply() {
     guide.value,
     followedLyrics.value,
     scoreChange(false),
-    false
+    false,
+    lyricSpans.value
   )
 }
 async function approve() {
@@ -338,7 +348,8 @@ async function approve() {
       guide.value,
       followedLyrics.value,
       scoreChange(true),
-      true
+      true,
+      lyricSpans.value
     )
   }
 }
@@ -513,10 +524,12 @@ onBeforeUnmount(() => {
             :lyrics="lyricsText"
             :title="songTitle"
             :guide="guide"
+            :lyric-spans="lyricSpans"
             :lyrics-target="lyricsTarget"
             :lyrics-pending="ownLyrics ? null : followText"
             @edited="onInput(doc)"
             @guide-change="setGuide"
+            @lyric-spans-change="setLyricSpans"
             @lyrics-change="onLyricsChange"
             @gate="(text: string, reason: string | null) => (scoreGate = { text, reason })"
           />
@@ -588,6 +601,8 @@ onBeforeUnmount(() => {
             :layout-default="layout ?? null"
             :lyrics="lyricsText"
             :lyrics-target="ownLyrics ? lyricsTarget : null"
+            :lyric-spans="lyricSpans"
+            @lyric-spans-change="setLyricSpans"
             @lyrics-change="onLyricsChange"
             @gate="(text: string, reason: string | null) => (contextGate = { text, reason })"
           />

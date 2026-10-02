@@ -24,7 +24,10 @@
  *
  * With lyrics, a lyrics lane under the chord lane shows every line over the Vocal phrase it is sung on
  * and each syllable over its note (backend ``lyric_layout``); a double-click in the lane edits the line
- * there (``lyricEdit``: the Score tab changes the lyrics, the view follows).
+ * there (``lyricEdit``: the Score tab changes the lyrics, the view follows). The lines are handled like
+ * notes: a click selects one (Ctrl / Shift: more), a drag moves them, a drag at a line's start or end
+ * makes it longer or shorter (``lyricPlace``), Del deletes them (``lyricDelete``), ← / → move them by the
+ * grid; copy and paste go through the Score tab's clipboard (``lyricPlacement``).
  *
  * The clipboard buttons (Cubase: key editor - Copy, Cut, Paste, Paste Time) ask the Score tab, which
  * owns the clipboard and the cursor (``clipboard`` event); a frame that reaches into the chord lane
@@ -33,6 +36,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import type { ClipAction } from './clipboard'
+import { lineKey } from './lyricPlacement'
 import { positionLabel, rulerUnit } from './locator'
 
 import type { ScoreOperation } from '../../api/client'
@@ -127,13 +131,26 @@ export interface LyricEdit {
   block: number
   line: number
   text: string
+  /** Where the line is (a new one: the start of its phrase), in units of L. */
+  at?: number
+}
+
+/** A lyrics line placed anew in the lane: its key (``section:line``) and its span in units of L. */
+export interface LyricPlace {
+  key: string
+  start: number
+  end: number
 }
 const emit = defineEmits<{
   select: [ids: string[]]
   locate: [unit: number]
   clipboard: [action: ClipAction]
   lyricEdit: [edit: LyricEdit]
+  lyricPlace: [moves: LyricPlace[]]
+  lyricDelete: [keys: string[]]
 }>()
+/** The lyrics lines selected in the lane (``section:line``; the Score tab copies and pastes them). */
+const lyricSelection = defineModel<string[]>('lyricSelection', { default: () => [] })
 /** Pixels per quarter note (the roll's horizontal zoom). */
 const zoom = defineModel<number>('zoom', { default: 48 })
 
@@ -160,6 +177,17 @@ const lyricInput = ref<HTMLInputElement | null>(null)
 const lyricEdit = ref<(LyricEdit & { original: string; start: number }) | null>(null)
 /** Esc was pressed: the blur that follows does not commit. */
 let lyricCancelled = false
+/** A lyrics line dragged in the lane: moved (with the other selected ones), or at its start or end. */
+interface LyricDrag {
+  kind: 'move' | 'start' | 'end'
+  key: string
+  keys: string[]
+  origin: number
+  delta: number
+}
+const lyricDrag = ref<LyricDrag | null>(null)
+/** Pixels at a line's start or end that grab its edge instead of the whole line. */
+const LYRIC_EDGE_PX = 5
 interface Press {
   x: number
   y: number
@@ -170,6 +198,8 @@ interface Press {
   keep: { notes: string[]; chords: ModelChord[] } | null
   /** A press in the ruler: it moves the cursor while the button is held. */
   ruler?: boolean
+  /** A press on a lyrics line: it may become a drag of lines. */
+  lyric?: LyricDrag
 }
 let press: Press | null = null
 let observer: ResizeObserver | null = null
@@ -210,32 +240,87 @@ const hint = computed(() =>
       'into the chord lane: chords too · Ctrl+A: all · ↑↓←→: move · Del: rest · Shift+Del: close the gap · ' +
       'Ctrl+C / Ctrl+X: copy / cut · Ctrl+V: paste at the cursor · Ctrl+Shift+V: insert · Ctrl+D: duplicate'
 )
-const lyricsHint = computed(() => (props.lyrics && props.lyricsEditable ? ' · double-click the lyrics lane: edit the words' : ''))
+const lyricsHint = computed(() =>
+  props.lyrics && props.lyricsEditable
+    ? ' · lyrics lane: double-click: edit the words · drag a line: move · drag its start or end: longer / shorter · Del · Ctrl+C / Ctrl+V'
+    : ''
+)
 const position = computed(() => (model.value && props.locator !== null ? positionLabel(model.value, props.locator) : ''))
 
 // --- the lyrics lane ---
 const LETTER_PX = 6.2
-/** The lines with words, over their phrases, cut to the room before the next line. */
+/** Where a line is while a drag is pulled (the line itself elsewhere). */
+function draggedSpan(key: string, start: number, end: number): [number, number] {
+  const current = lyricDrag.value
+  if (!current || !current.delta) return [start, end]
+  if (current.kind === 'move' && current.keys.includes(key)) return [start + current.delta, end + current.delta]
+  if (current.key !== key) return [start, end]
+  if (current.kind === 'start') return [Math.min(start + current.delta, end - 1), end]
+  if (current.kind === 'end') return [start, Math.max(end + current.delta, start + 1)]
+  return [start, end]
+}
+function isDragged(key: string): boolean {
+  const current = lyricDrag.value
+  if (!current?.delta) return false
+  return current.kind === 'move' ? current.keys.includes(key) : current.key === key
+}
+/**
+ * The lines with words over their phrases: the box is the line's span (a drag at its ends changes it),
+ * the words are cut to the room before the next line.
+ */
 const lyricLines = computed(() => {
   const g = geo.value
   const layout = props.lyrics
   if (!g || !layout) return []
   const all = layout.sections
-    .flatMap((s) => s.lines.filter((l) => l.text).map((l) => ({ ...l, section: s.section })))
+    .flatMap((s) =>
+      s.lines
+        .filter((l) => l.text)
+        .map((l) => {
+          const key = lineKey(s.section, l.line)
+          const [start, end] = draggedSpan(key, l.start, l.end)
+          return { ...l, start, end, section: s.section, key }
+        })
+    )
     .sort((a, b) => a.start - b.start || a.line - b.line)
+  const selected = new Set(lyricSelection.value)
   return all
     .map((line, index) => {
       const x = xOf(line.start, g)
       const next = all.slice(index + 1).find((l) => l.start > line.start)
       const room = next ? xOf(next.start, g) - x - 2 : 640
-      const wanted = Math.max(xOf(line.end, g) - x, line.text.length * LETTER_PX + 8)
-      const width = Math.max(16, Math.min(room, wanted))
-      const chars = Math.max(1, Math.floor((width - 8) / LETTER_PX))
+      const width = Math.max(16, xOf(line.end, g) - x)
+      const chars = Math.max(1, Math.floor((Math.max(width, Math.min(room, line.text.length * LETTER_PX + 8)) - 8) / LETTER_PX))
       const shown = line.text.length > chars ? `${line.text.slice(0, Math.max(1, chars - 1))}…` : line.text
-      return { ...line, key: `${line.block}:${line.line}`, x, width, shown }
+      return { ...line, x, width, shown, selected: selected.has(line.key), dragged: isDragged(line.key) }
     })
     .filter((line) => inWindow(line.start, Math.max(line.end, line.start + 64)))
 })
+
+/** The lyrics line under ``x`` in the lane and which part of it was grabbed. */
+function lyricAt(x: number): { key: string; start: number; end: number; part: LyricDrag['kind'] } | null {
+  const hits = lyricLines.value.filter((l) => x >= l.x - LYRIC_EDGE_PX && x <= l.x + l.width + LYRIC_EDGE_PX)
+  const line = hits.find((l) => x >= l.x && x <= l.x + l.width) ?? hits[0]
+  if (!line) return null
+  const part = x >= line.x + line.width - LYRIC_EDGE_PX ? 'end' : x <= line.x + LYRIC_EDGE_PX && line.width > 3 * LYRIC_EDGE_PX ? 'start' : 'move'
+  return { key: line.key, start: line.start, end: line.end, part }
+}
+
+/** The new spans of the dragged (or nudged) lines. */
+function lyricMoves(current: LyricDrag): LyricPlace[] {
+  const moves: LyricPlace[] = []
+  for (const line of props.lyrics?.sections.flatMap((s) => s.lines.map((l) => ({ ...l, key: lineKey(s.section, l.line) }))) ?? []) {
+    const moved = current.kind === 'move' ? current.keys.includes(line.key) : line.key === current.key
+    if (!moved) continue
+    const end = Math.max(line.end, line.start + 1)
+    let span: [number, number] = [line.start, end]
+    if (current.kind === 'move') span = [line.start + current.delta, end + current.delta]
+    else if (current.kind === 'start') span = [Math.min(line.start + current.delta, end - 1), end]
+    else span = [line.start, Math.max(end + current.delta, line.start + 1)]
+    moves.push({ key: line.key, start: Math.max(0, span[0]), end: Math.max(1, span[1]) })
+  }
+  return moves
+}
 /** The syllable of every Vocal note that has one (``-``: the word goes on). */
 const syllables = computed(() => {
   const map = new Map<number, string>()
@@ -306,7 +391,7 @@ function commitLyric(): void {
   }
   root.value?.focus({ preventScroll: true })
   if (edit.text.trim() === edit.original.trim()) return
-  emit('lyricEdit', { section: edit.section, block: edit.block, line: edit.line, text: edit.text.trim() })
+  emit('lyricEdit', { section: edit.section, block: edit.block, line: edit.line, text: edit.text.trim(), at: edit.start })
 }
 
 function cancelLyric(): void {
@@ -383,6 +468,26 @@ function onPointerDown(event: PointerEvent): void {
     return
   }
   const additive = event.shiftKey || event.ctrlKey || event.metaKey
+  if (hit.area === 'lyrics') {
+    // a lyrics line: selected like a note, dragged to move it or at its ends to change its length
+    const line = lyricAt(x)
+    if (!line) {
+      if (!additive) lyricSelection.value = []
+      return
+    }
+    if (props.selection.length) select([])
+    const current = lyricSelection.value
+    const already = current.includes(line.key)
+    const picked = additive ? (already ? current.filter((k) => k !== line.key) : [...current, line.key]) : already ? current : [line.key]
+    if (picked !== current) lyricSelection.value = picked
+    if (props.lyricsEditable && (picked.includes(line.key) || line.part !== 'move')) {
+      const keys = line.part === 'move' ? [...picked] : [line.key]
+      press = { x, y, start: null, started: false, clear: false, keep: null, lyric: { kind: line.part, key: line.key, keys, origin: unitAt(x, g), delta: 0 } }
+      capture(event)
+    }
+    return
+  }
+  if (lyricSelection.value.length && !additive) lyricSelection.value = []
   let start: Drag | null = null
   let clear = false
   let keep: Press['keep'] = null
@@ -455,10 +560,17 @@ function followEdge(event: PointerEvent): void {
 
 function onPointerMove(event: PointerEvent): void {
   const g = geo.value
-  if (!press || (!press.start && !press.keep && !press.ruler) || !g) return
+  if (!press || (!press.start && !press.keep && !press.ruler && !press.lyric) || !g) return
   const [x, y] = local(event)
   if (press.ruler) {
     emit('locate', rulerUnit(unitAt(x, g), g.snap, g.total))
+    return
+  }
+  if (press.lyric) {
+    if (!press.started && Math.abs(x - press.x) < MOVE_THRESHOLD_PX) return
+    press.started = true
+    const delta = Math.round((unitAt(x, g) - press.lyric.origin) / g.snap) * g.snap
+    lyricDrag.value = { ...press.lyric, delta }
     return
   }
   if (press.started) followEdge(event)
@@ -484,6 +596,12 @@ function onPointerUp(): void {
   const current = press
   press = null
   if (!current || current.ruler) return
+  if (current.lyric) {
+    const dragged = lyricDrag.value
+    lyricDrag.value = null
+    if (current.started && dragged?.delta) emit('lyricPlace', lyricMoves(dragged))
+    return
+  }
   if (!current.started) {
     drag.value = null
     if (current.clear) select([])
@@ -508,6 +626,7 @@ function onPointerCancel(): void {
   press = null
   drag.value = null
   band.value = null
+  lyricDrag.value = null
 }
 
 function onDoubleClick(event: MouseEvent): void {
@@ -561,6 +680,19 @@ function onKey(event: KeyboardEvent): void {
   if (target?.closest('input, select, textarea')) return
   const g = geo.value
   if (!g) return
+  if (lyricSelection.value.length && !event.ctrlKey && !event.metaKey) {
+    // the selected lyrics lines: Del deletes them, the arrows move them by the grid, Esc lets them go
+    const step = event.key === 'ArrowLeft' ? -g.snap : event.key === 'ArrowRight' ? g.snap : 0
+    if (event.key === 'Delete' || event.key === 'Backspace' || step || event.key === 'Escape') {
+      event.preventDefault()
+      event.stopPropagation()
+      if (event.key === 'Escape') lyricSelection.value = []
+      else if (!props.lyricsEditable) return
+      else if (step) emit('lyricPlace', lyricMoves({ kind: 'move', key: '', keys: [...lyricSelection.value], origin: 0, delta: step }))
+      else emit('lyricDelete', [...lyricSelection.value])
+      return
+    }
+  }
   if (event.key === 'Escape') {
     if (press || drag.value || band.value) onPointerCancel()
     else if (props.selection.length) select([])
@@ -836,10 +968,20 @@ onBeforeUnmount(() => observer?.disconnect())
           <rect class="lane" :x="0" :y="HEADER" :width="geo.width" :height="LANE" />
           <template v-if="lyrics">
             <rect class="lyrics-lane" :x="0" :y="TOP" :width="geo.width" :height="LYRICS_LANE" />
-            <g v-for="line in lyricLines" :key="line.key" class="lyric-line" :class="{ unsung: !line.syllables.length }">
+            <g
+              v-for="line in lyricLines"
+              :key="line.key"
+              class="lyric-line"
+              :class="{ unsung: !line.syllables.length, selected: line.selected, dragged: line.dragged }"
+            >
               <rect :x="line.x" :y="TOP + 3" :width="line.width" :height="LYRICS_LANE - 6" rx="3" />
+              <rect v-if="lyricsEditable" class="edge" :x="line.x + line.width - 3" :y="TOP + 5" :width="3" :height="LYRICS_LANE - 10" />
               <text :x="line.x + 4" :y="TOP + LYRICS_LANE / 2 + 4">{{ line.shown }}</text>
-              <title>{{ line.text }}{{ lyricsEditable ? ' - double-click to edit the line' : '' }}</title>
+              <title>
+                {{ line.text }}{{
+                  lyricsEditable ? ' - click: select · drag: move · drag its start or end: longer / shorter · double-click: edit the words' : ''
+                }}
+              </title>
             </g>
           </template>
           <line

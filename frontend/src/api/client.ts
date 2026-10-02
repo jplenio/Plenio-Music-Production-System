@@ -57,9 +57,20 @@ export async function getAsrNote(fetcher: Fetcher, draftSha256: string): Promise
 }
 
 /** Analysis and element view of a score (valid or not: invalid scores come back with diagnostics). */
+/** The lyrics sent with a score: the text and the lines placed by hand (``[start, end]`` in units of L). */
+function withLyrics(body: Record<string, unknown>, lyrics?: string | null, spans?: readonly (readonly number[])[] | null): Record<string, unknown> {
+  if (!lyrics) return body
+  return spans?.length ? { ...body, lyrics, lyric_spans: spans } : { ...body, lyrics }
+}
+
 /** The score's view; with ``lyrics`` it also says where they are sung (``view.lyrics``, ``w:`` in the notation). */
-export function analyzeScore(fetcher: Fetcher, abc: string, lyrics?: string | null): Promise<ScoreView> {
-  return post<ScoreView>(fetcher, '/plenio/score/analyze', lyrics ? { abc, lyrics } : { abc })
+export function analyzeScore(
+  fetcher: Fetcher,
+  abc: string,
+  lyrics?: string | null,
+  spans?: readonly (readonly number[])[] | null
+): Promise<ScoreView> {
+  return post<ScoreView>(fetcher, '/plenio/score/analyze', withLyrics({ abc }, lyrics, spans))
 }
 
 export interface ScoreOperation {
@@ -82,18 +93,19 @@ export function transformScore(
   fetcher: Fetcher,
   abc: string,
   operation: ScoreOperation,
-  lyrics?: string | null
+  lyrics?: string | null,
+  spans?: readonly (readonly number[])[] | null
 ): Promise<TransformResult> {
-  return post<TransformResult>(fetcher, '/plenio/score/transform', lyrics ? { abc, operation, lyrics } : { abc, operation })
+  return post<TransformResult>(fetcher, '/plenio/score/transform', withLyrics({ abc, operation }, lyrics, spans))
 }
 
 /** The score as MusicXML 4.0 (sheet music for notation programs); ``data`` is the XML text. */
 export function exportMusicXml(
   fetcher: Fetcher,
-  request: { abc: string; title?: string; lyrics?: string | null }
+  request: { abc: string; title?: string; lyrics?: string | null; spans?: readonly (readonly number[])[] | null }
 ): Promise<{ filename: string; data: string; type: string }> {
-  const { lyrics, ...rest } = request
-  return post(fetcher, '/plenio/score/musicxml/export', lyrics ? { ...rest, lyrics } : rest)
+  const { lyrics, spans, ...rest } = request
+  return post(fetcher, '/plenio/score/musicxml/export', withLyrics(rest, lyrics, spans))
 }
 
 /** A Guide-track note ``[onset, duration, pitch]`` in units of the score's L (never sent to YuE2). */

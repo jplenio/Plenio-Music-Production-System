@@ -14,7 +14,7 @@ Typical uses:
 |---|---|
 | **Palette** (top) | undo/redo; pitch −8va, −1, +1, +8va; shorter / longer; rest / note; chord symbol set / remove; *Whole score*: transpose, tempo, remove chords, let the instrument play the melody, silence the Vocal voice |
 | **View** | the layout *Review* or *Text* (see below); in *Review*: *piano roll* and *ABC text (advanced)* on/off; notation zoom; the files: *Export MIDI*, *Export MusicXML*, *Save project*, *Import MIDI…*, *Open project…* (see [Files](#files-midi-musicxml-and-the-project)) |
-| **Piano roll** | both voices over time (Vocal blue, Ins orange) with a chord lane and the bars and sections above; with lyrics a **lyrics lane** (the words over the phrases they are sung on - edit them there); the **cursor** (click in the bar numbers); draw, move, resize and delete notes and chord symbols with the mouse (see below) |
+| **Piano roll** | both voices over time (Vocal blue, Ins orange) with a chord lane and the bars and sections above; with lyrics a **lyrics lane** (the words over the phrases they are sung on - edit them there, and select, move, lengthen, delete, copy and paste lines like notes); the **cursor** (click in the bar numbers); draw, move, resize and delete notes and chord symbols with the mouse (see below) |
 | **Inspector** (right, *Review*) | the selected note(s), chord symbol and bar as fields: voice, pitch, start, length, chord; insert, duplicate or delete bars, meter, key (see below) |
 | **Navigator** | the sections: select one or more and **duplicate, copy, move or delete** them (also by dragging - see [Arranging sections](#arranging-sections)); go to, rename, start one bar earlier / later, join to the one before, new section at the selected bar; the **bar strip** (sections in colour, bars with errors marked): select one or more bars and **duplicate, copy, move or delete** them (see [Arranging bars](#arranging-bars)); in *Review* with the song's lyrics: *Lyrics fit* (the lyrics next to the score's sections) |
 | **Notation** | click a note or rest to select it, Shift+click to add to the selection; the lyrics stand under the Vocal notes (read-only) |
@@ -102,6 +102,19 @@ When the song has lyrics, the roll shows a **lyrics lane** under the chord lane.
 |---|---|---|
 | score sheet of *1 · YuE2 · Song*, *5 · YuE2 · DAW* | *Song Sheet · Text* | into that sheet on **Apply** (the side column says so; *Revert the lyrics* goes back) - that sheet then asks for approval again |
 | text sheet of *2 · YuE2 · Cover* (the score is the other sheet's, read-only) | this sheet | straight into its **Lyrics** tab |
+
+**Place lines by hand**, like notes:
+
+| Action | Mouse | Keys (after a click on a line) |
+|---|---|---|
+| select | click a line; **Ctrl+click** or **Shift+click** adds or removes one; a click on a note or the empty lane lets them go | Esc: none |
+| move | drag the selected lines (on the grid of *snap*) | ← / →: one grid step |
+| longer / shorter | drag a line's **end** (the light edge) or its **start** | |
+| delete | | Del (the words go too) |
+| copy, cut, duplicate | the roll's **Copy** / **Cut** buttons | Ctrl+C, Ctrl+X, Ctrl+D (right after the last selected line) |
+| paste | set the cursor in the ruler, then the roll's **Paste** button | Ctrl+V: into the section at the cursor, from the cursor on |
+
+A section with a line placed by hand is placed by hand as a whole: every line keeps the span it has (the box), and its syllables take the notes that start inside that span. What you moved or pasted stands exactly where you put it; a line it covers in part starts after it, a line it covers whole moves behind it with its length. A line moved past another is sung after it - the lyrics text changes its order too. Lines stay inside their section. The spans are kept with the sheet (like the Guide notes), move with the bars when sections or bars are arranged, go into the project file and the MusicXML export, and every edit is one undo step. A section without lines placed by hand is placed by the rule below.
 
 How the words are placed is the lyrics writer's own rule. A block of the lyrics belongs to a section of the score, in order (by tag when the numbers differ). The section's Vocal notes form **phrases**, split at rests of a beat or more, and each line takes a phrase. Each syllable takes a note: a short line holds its last syllable over the rest of the phrase (a melisma), and a long one puts the rest on its last note.
 

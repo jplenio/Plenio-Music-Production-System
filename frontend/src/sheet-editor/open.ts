@@ -5,6 +5,7 @@ import type { Fetcher, GuideNote } from '../api/client'
 import type { AsrNote, ScoreChange, ScoreTarget, SheetPayload } from '../shared/sheetSession'
 import type { DocumentKind, SheetState } from '../shared/sheetState'
 import type { LyricsTarget } from './score/lyricsFollow'
+import type { LyricSpan } from './score/lyricPlacement'
 import dialogCss from './dialog.css?inline'
 import SheetDialog from './SheetDialog.vue'
 
@@ -20,6 +21,8 @@ export interface OpenOptions {
   layout?: string | null
   /** The Guide notes of the node's ``plenio_guide`` property (playback and MIDI only). */
   guide?: GuideNote[]
+  /** The lyrics lines placed by hand (the node's ``plenio_lyric_spans`` property). */
+  lyricSpans?: LyricSpan[]
   /** The sheet that owns the context lyrics, when they can follow the score's sections. */
   lyricsTarget?: LyricsTarget | null
   /** The sheet that owns the context score (a cover's score sheet), when this sheet may edit it. */
@@ -34,7 +37,8 @@ export interface OpenOptions {
     lyrics: string | null,
     score: ScoreChange | null,
     /** Approve was pressed: the sheet is released for the next run now. */
-    approved: boolean
+    approved: boolean,
+    lyricSpans: LyricSpan[]
   ) => void
 }
 
@@ -64,10 +68,18 @@ export function openSheetDialog(options: OpenOptions): () => void {
     fetcher: options.fetcher,
     layout: options.layout ?? null,
     guide: options.guide ?? [],
+    lyricSpans: options.lyricSpans ?? [],
     lyricsTarget: options.lyricsTarget ?? null,
     scoreTarget: options.scoreTarget ?? null,
-    onApply: (state: SheetState, guide: GuideNote[], lyrics: string | null, score: ScoreChange | null, approved: boolean) => {
-      options.onApply(state, guide, lyrics, score, approved)
+    onApply: (
+      state: SheetState,
+      guide: GuideNote[],
+      lyrics: string | null,
+      score: ScoreChange | null,
+      approved: boolean,
+      lyricSpans: LyricSpan[]
+    ) => {
+      options.onApply(state, guide, lyrics, score, approved, lyricSpans)
       close()
     },
     onClose: close

@@ -743,6 +743,23 @@
   font-size: 11px;
   font-style: italic;
 }
+/* lines placed by hand like notes: selected, dragged, and the end that changes the length */
+.plenio-overlay .roll-svg .lyric-line {
+  cursor: grab;
+}
+.plenio-overlay .roll-svg .lyric-line.selected rect {
+  fill: rgba(76, 154, 255, 0.42);
+  stroke: #4c9aff;
+  stroke-width: 1.5;
+}
+.plenio-overlay .roll-svg .lyric-line.dragged rect {
+  stroke-dasharray: 4 2;
+}
+.plenio-overlay .roll-svg .lyric-line rect.edge {
+  fill: rgba(76, 154, 255, 0.55);
+  stroke: none;
+  cursor: ew-resize;
+}
 .plenio-overlay .roll-svg text.syllable {
   fill: #9ecbff;
   font-size: 9px;

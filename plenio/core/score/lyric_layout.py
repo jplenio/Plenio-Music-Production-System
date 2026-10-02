@@ -10,6 +10,11 @@ Vocal phrase, about one syllable per note; ``native.phrasing``):
 - each syllable takes a note; a line with fewer syllables holds its last syllable over the remaining
   notes of its phrase (a melisma), one with more puts the rest on its last note.
 
+A line placed by hand (the piano roll's lyrics lane: moved, made longer or shorter, pasted) has a
+**span** - ``[start, end)`` in units of L, kept with the sheet. A section with spans is placed by them:
+its lines take its spans in order (the first line the earliest span), each syllable a note that starts
+inside its line's span; lines past the last span follow on the notes after it by the rule above.
+
 The piano roll draws the lines over their phrases and edits them there, the notation shows the
 syllables under the notes (``w:`` lines of the display text) and the MusicXML export writes them as
 ``<lyric>`` elements. A layout never changes the score or the lyrics.
@@ -19,7 +24,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 from .. import lyrics as lyrics_rules
@@ -179,13 +184,88 @@ def _match(
     return mapping, unplaced
 
 
-def layout(score: canonical.Score, text: str) -> LyricLayout:
-    """Where the lyrics ``text`` fall in ``score`` (an empty layout for empty or tag-only lyrics)."""
+def _placed(
+    block_index: int, j: int, line: str, pieces: Sequence[tuple[str, bool]], region: Sequence[canonical.Note]
+) -> Line:
+    """``line`` sung on the notes ``region``: a syllable per note, the last held or the rest joined."""
+    if len(pieces) <= len(region):
+        placed = [Syllable(n.onset, t, e) for n, (t, e) in zip(region, pieces, strict=False)]
+        holds = tuple(n.onset for n in region[len(pieces) :])
+    else:
+        placed = [Syllable(n.onset, t, e) for n, (t, e) in zip(region[:-1], pieces, strict=False)]
+        joined, end_of_word = _join(pieces[len(region) - 1 :])
+        placed.append(Syllable(region[-1].onset, joined, end_of_word))
+        holds = ()
+    return Line(block_index, j, line, region[0].onset, region[-1].end, tuple(placed), holds)
+
+
+def _auto(
+    block_index: int,
+    sung: Sequence[tuple[int, str]],
+    phrases: Sequence[Sequence[canonical.Note]],
+    cursor: int,
+) -> list[Line]:
+    """The lines ``sung`` (``(index in the block, text)``) on ``phrases`` by the rule of the module."""
+    lines: list[Line] = []
+    phrase, offset = 0, 0
+    for order, (j, line) in enumerate(sung):
+        pieces = [] if _DIRECTION.match(line) else syllables_of(line)
+        remaining_lines = sum(1 for _, rest in sung[order:] if not _DIRECTION.match(rest))
+        if not pieces or phrase >= len(phrases):
+            # a direction ("(guitar solo)") or a line without a phrase left: shown where the words stopped
+            lines.append(Line(block_index, j, line, cursor, cursor, ()))
+            continue
+        notes_left = phrases[phrase][offset:]
+        if remaining_lines <= len(phrases) - phrase:
+            region = notes_left
+            phrase, offset = phrase + 1, 0
+        else:
+            region = notes_left[: max(1, min(len(pieces), len(notes_left)))]
+            offset += len(region)
+            if offset >= len(phrases[phrase]):
+                phrase, offset = phrase + 1, 0
+        lines.append(_placed(block_index, j, line, pieces, region))
+        cursor = region[-1].end
+    return lines
+
+
+def _pinned(
+    block_index: int,
+    sung: Sequence[tuple[int, str]],
+    notes: Sequence[canonical.Note],
+    spans: Sequence[tuple[int, int]],
+    gap: int,
+) -> list[Line]:
+    """The lines ``sung`` on the spans placed by hand (in order); the lines past the last span follow
+    on the notes after it. A note belongs to the first span it starts in."""
+    lines: list[Line] = []
+    taken: set[int] = set()
+    for (j, line), (start, end) in zip(sung, spans, strict=False):
+        pieces = [] if _DIRECTION.match(line) else syllables_of(line)
+        region = [n for n in notes if start <= n.onset < end and n.onset not in taken]
+        if not pieces or not region:
+            lines.append(Line(block_index, j, line, start, end, ()))
+            continue
+        taken.update(n.onset for n in region)
+        placed = _placed(block_index, j, line, pieces, region)
+        lines.append(replace(placed, start=start, end=end))
+    rest = sung[len(spans) :]
+    if rest:
+        last = max(end for _, end in spans)
+        after = [n for n in notes if n.onset >= last and n.onset not in taken]
+        lines += _auto(block_index, rest, _phrases(after, gap), after[0].onset if after else last)
+    return lines
+
+
+def layout(score: canonical.Score, text: str, spans: Sequence[Sequence[int]] | None = None) -> LyricLayout:
+    """Where the lyrics ``text`` fall in ``score`` (an empty layout for empty or tag-only lyrics);
+    ``spans``: the lines placed by hand (``[start, end)`` in units of L, see the module)."""
     parsed = lyrics_rules.parse_lyrics(text or "")
     starts = ops._section_starts(score)
     labelled = [i for i, section in enumerate(starts) if section in score.sections]
     mapping, unplaced = _match(parsed.sections, [starts[i].label for i in labelled])
     gap = max(1, score.unit.denominator // 4)  # a beat of rest (a quarter) splits phrases
+    pinned = [(int(a), int(b)) for a, b in (spans or ()) if int(b) > int(a)]
     sections: list[SectionLayout] = []
     for position, index in enumerate(labelled):
         block_index = mapping[position]
@@ -194,42 +274,18 @@ def layout(score: canonical.Score, text: str) -> LyricLayout:
         start, end = score.starts[first], score.starts[last]
         notes = [n for n in score.vocal if start <= n.onset < end]
         phrases = _phrases(notes, gap)
-        spans = tuple((p[0].onset, p[-1].end) for p in phrases)
+        phrase_spans = tuple((p[0].onset, p[-1].end) for p in phrases)
         if block_index is None:
-            sections.append(SectionLayout(index, None, None, spans, ()))
+            sections.append(SectionLayout(index, None, None, phrase_spans, ()))
             continue
         block = parsed.sections[block_index]
-        lines: list[Line] = []
         sung = [(j, line) for j, line in enumerate(block.lines)]
-        phrase, offset = 0, 0
-        cursor = phrases[0][0].onset if phrases else start
-        for order, (j, line) in enumerate(sung):
-            pieces = [] if _DIRECTION.match(line) else syllables_of(line)
-            remaining_lines = sum(1 for _, rest in sung[order:] if not _DIRECTION.match(rest))
-            if not pieces or phrase >= len(phrases):
-                # a direction ("(guitar solo)") or a line without a phrase left: shown where the words stopped
-                lines.append(Line(block_index, j, line, cursor, cursor, ()))
-                continue
-            notes_left = phrases[phrase][offset:]
-            if remaining_lines <= len(phrases) - phrase:
-                region = notes_left
-                phrase, offset = phrase + 1, 0
-            else:
-                region = notes_left[: max(1, min(len(pieces), len(notes_left)))]
-                offset += len(region)
-                if offset >= len(phrases[phrase]):
-                    phrase, offset = phrase + 1, 0
-            if len(pieces) <= len(region):
-                placed = [Syllable(n.onset, t, e) for n, (t, e) in zip(region, pieces, strict=False)]
-                holds = tuple(n.onset for n in region[len(pieces) :])
-            else:
-                placed = [Syllable(n.onset, t, e) for n, (t, e) in zip(region[:-1], pieces, strict=False)]
-                joined, end_of_word = _join(pieces[len(region) - 1 :])
-                placed.append(Syllable(region[-1].onset, joined, end_of_word))
-                holds = ()
-            lines.append(Line(block_index, j, line, region[0].onset, region[-1].end, tuple(placed), holds))
-            cursor = region[-1].end
-        sections.append(SectionLayout(index, block_index, block.tag, spans, tuple(lines)))
+        mine = sorted((a, b) for a, b in pinned if start <= a < end)
+        if mine:
+            lines = _pinned(block_index, sung, notes, mine, gap)
+        else:
+            lines = _auto(block_index, sung, phrases, phrases[0][0].onset if phrases else start)
+        sections.append(SectionLayout(index, block_index, block.tag, phrase_spans, tuple(lines)))
     return LyricLayout(tuple(sections), tuple(unplaced))
 
 

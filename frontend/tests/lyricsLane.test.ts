@@ -103,7 +103,7 @@ describe('PianoRoll: the lyrics lane', () => {
     input.dispatchEvent(new Event('input'))
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
     await nextTick()
-    expect(edits).toEqual([{ section: 1, block: 1, line: 1, text: 'sing it once more' }])
+    expect(edits).toEqual([{ section: 1, block: 1, line: 1, text: 'sing it once more', at: 96 }])
     expect(host.querySelector('input.lyric-edit')).toBeNull()
     dblclick(svg, 10) // the intro: no Vocal notes, no words yet
     await nextTick()

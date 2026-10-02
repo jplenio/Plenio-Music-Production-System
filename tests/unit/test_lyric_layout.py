@@ -140,3 +140,38 @@ def test_the_lyrics_view_fixture_is_current() -> None:
         'regenerate frontend/tests/fixtures/tricky-lyrics.json: python -c "import sys; '
         "sys.path[:0] = ['tests/unit', 'tests/support']; import test_lyric_layout as t; t.write_lyrics_fixture()\""
     )
+
+
+def test_lines_placed_by_hand_take_their_spans_in_order() -> None:
+    score = c.from_abc(TRICKY)
+    # the verse's two lines by hand: the second first in the list (the spans are taken by their start)
+    placed = lyric_layout.layout(score, LYRICS, [(80, 160), (32, 72)])
+    _intro, verse, chorus = placed.sections
+    first, second = verse.lines
+    assert (first.start, first.end) == (32, 72) and (second.start, second.end) == (80, 160)
+    assert all(32 <= s.onset < 72 for s in first.syllables)
+    assert all(80 <= s.onset < 160 for s in second.syllables)
+    assert "".join(s.text for s in first.syllables).replace(" ", "") == "beautifulmorning"
+    # the chorus has no span: placed as before
+    assert [s.text for s in chorus.lines[0].syllables] == ["hold", "on"]
+    assert lyric_layout.layout(score, LYRICS).sections[2] == chorus
+
+
+def test_a_span_without_notes_shows_its_line_unsung_and_lines_past_the_spans_follow() -> None:
+    score = c.from_abc(TRICKY)
+    # a span in another section (bar 1 is the intro) does not place the verse
+    assert (
+        lyric_layout.layout(score, LYRICS, [(16, 24)]).sections[1]
+        == lyric_layout.layout(score, LYRICS).sections[1]
+    )
+    # no Vocal note starts inside 33-39: the line stands where it was put, without syllables
+    first, second = lyric_layout.layout(score, LYRICS, [(33, 39)]).sections[1].lines
+    assert (first.start, first.end, first.syllables) == (33, 39, ())
+    # the second line follows on the notes after the span, by the rule of the module
+    assert second.syllables and second.syllables[0].onset >= 39
+
+
+def test_the_view_places_the_lyrics_by_the_spans() -> None:
+    view = operations.editor_view(TRICKY, LYRICS, [[32, 72], [80, 160]])
+    lines = view["lyrics"]["sections"][1]["lines"]
+    assert [(line["start"], line["end"]) for line in lines] == [(32, 72), (80, 160)]
