@@ -387,7 +387,9 @@ def field_sources(
     """Where the effective value of every text field (``names``; a Song Brief's by default) comes from:
     ``typed``, ``template`` or ``empty`` (the editor shows template values as ghost text in empty fields)."""
     merged, from_template, _notes = resolve_text_fields(values, template, names)
-    return {name: "template" if name in from_template else "typed" if merged[name] else "empty" for name in names}
+    return {
+        name: "template" if name in from_template else "typed" if merged[name] else "empty" for name in names
+    }
 
 
 def template_choice_hints(values: Mapping[str, Any], template: Template | None) -> dict[str, str]:

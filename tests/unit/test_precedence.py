@@ -81,7 +81,9 @@ def test_choice_fields_stay_explicit_and_the_template_only_hints() -> None:
 
 
 def test_a_cover_brief_gets_the_template_choices_in_its_own_words() -> None:
-    sung = parse_template("---\nname: S\ngenre: pop\nvocals: sung\nlength: short (about 1:30)\n---\nPop.", "pop/s")
+    sung = parse_template(
+        "---\nname: S\ngenre: pop\nvocals: sung\nlength: short (about 1:30)\n---\nPop.", "pop/s"
+    )
     plain = parse_template(
         "---\nname: I\ngenre: ambient\nvocals: instrumental\nmelody: accompaniment only\n---\nAmbient.", "a/i"
     )

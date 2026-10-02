@@ -377,7 +377,9 @@ def test_the_brief_fields_route_answers_the_one_precedence_rule(server: ComfySer
     assert {fill["field"] for fill in cover["fills"]} <= {"description", "genre", "mood", "voice"}
     assert "tempo" not in cover["sources"] and "language" not in cover["sources"]
     status, cover = server.request(
-        "POST", "/plenio/brief/fields", {"template": template, "kind": "cover", "fields": {"vocals": "instrumental"}}
+        "POST",
+        "/plenio/brief/fields",
+        {"template": template, "kind": "cover", "fields": {"vocals": "instrumental"}},
     )
     assert [(c["field"], c["suggested"]) for c in cover["choices"]] == [("vocals", "original lyrics")]
     # a free-form length the template library does not know is refused, not guessed
