@@ -16,7 +16,7 @@ Everything runs on your own machine, inside ComfyUI's own nodes: no cloud servic
   <a href="https://youtu.be/D6WUSzRbWWA"><img src="assets/branding/0.4.1/promo.jpg" alt="Plenio - Music production in ComfyUI: the promo video on YouTube" width="70%" /></a>
 </p>
 
-One narrated video for every template (English, 2 to 10 minutes, with chapters), recorded in ComfyUI with the real models - every song you hear in them was made right there. **▶ [All of them as a playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE)**
+One narrated video for every template (English, 2 to 9 minutes, with chapters), recorded in ComfyUI with the real models - every song you hear in them was made right there. **▶ [All of them as a playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE)**
 
 <table>
   <tr>
