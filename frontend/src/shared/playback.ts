@@ -213,6 +213,18 @@ export function schedule(view: ScoreView, options: PlayOptions): ToneEvent[] {
   return events.sort((a, b) => a.at - b.at || a.midi - b.midi)
 }
 
+/**
+ * Real seconds from ``options.from`` to the end (``options.to`` or the score's end), at the speed: how
+ * long playback lasts - to the last bar's end, also when the bars before it are rests (a DAW plays on
+ * through empty bars; a recording into an empty score needs them).
+ */
+export function playLength(view: ScoreView, options: PlayOptions): number {
+  const end = Math.max(options.from, options.to ?? view.duration_s)
+  const clock = options.clock?.length ? options.clock : null
+  const real = clock ? toReal(clock, end) - toReal(clock, options.from) : end - options.from
+  return Math.max(0, real) / clampSpeed(options.speed)
+}
+
 /** Score seconds after ``elapsed`` real seconds of playback. */
 export function scoreTime(options: PlayOptions, elapsed: number): number {
   const clock = options.clock?.length ? options.clock : null

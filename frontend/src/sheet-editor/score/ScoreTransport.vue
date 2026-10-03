@@ -11,19 +11,29 @@
  * the recording stay together, and an arranged cover's copied chorus plays the source's chorus again.
  * *hear* chooses the notes and the source together, or one of them - switched at once while it plays
  * (A/B). The playback time is reported in score seconds (``time``) for the line in the piano roll.
+ *
+ * Recording (``record``): the same playback with a count-in of clicks first and the recorded voice
+ * muted; ``scoreSecondAt`` maps a MIDI key's time onto the score (the output latency taken out), and
+ * ``stopped`` tells the Score tab when playback ended - by the stop button, Space or the score's end.
  */
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
 import {
+  CLICK_SECONDS,
   type GuidePlayback,
   type PlayOptions,
   TIME_TOLERANCE,
+  type ToneEvent,
   type VoiceSwitches,
+  clampSpeed,
   playClock,
+  playLength,
   schedule,
   scoreTime,
   sounding,
-  sourceSegments
+  sourceSegments,
+  toReal,
+  toScore
 } from '../../shared/playback'
 import { type ScoreView, clock, sectionOfBar } from '../../shared/scoreView'
 import { type Levels, TonePlayer } from './player'
@@ -69,10 +79,16 @@ const shiftLabel = computed(() => {
   if (!ms) return 'in place'
   return `${Math.abs(ms)} ms ${ms > 0 ? 'later' : 'earlier'}`
 })
-const emit = defineEmits<{ cursor: [ids: string[]]; time: [seconds: number | null] }>()
+const emit = defineEmits<{ cursor: [ids: string[]]; time: [seconds: number | null]; stopped: [] }>()
 
 const player = new TonePlayer()
 const playing = ref(false)
+/** While a recording counts in: the clicks before the cursor. */
+const countingIn = ref(false)
+/** Seconds of count-in before the score's time starts (0: none). */
+let lead = 0
+/** The recording this playback is for (``null``: plain playback). */
+let recordingNow: RecordPlayback | null = null
 const loop = ref(false)
 const time = ref(0)
 const problem = ref<string | null>(null)
@@ -113,52 +129,118 @@ function loopSpan(second: number): [number, number] | null {
   return section ? [section.start_s, section.end_s] : null
 }
 
-function play(from = startSecond.value): void {
+/** A recording's playback: ``countIn`` bars of clicks first, the voice ``mute`` silent. */
+export interface RecordPlayback {
+  countIn: number
+  mute: 'Vocal' | 'Ins' | null
+}
+
+function play(from = startSecond.value, recording: RecordPlayback | null = null): void {
   const view = props.view
   if (!view) return
-  stop()
-  const span = loop.value ? loopSpan(from) : null
+  halt()
+  recordingNow = recording
+  const span = loop.value && !recording ? loopSpan(from) : null
   // a cursor after the loop's end starts the loop from its beginning (Cubase: cycle)
   const start = span && (from < span[0] - TIME_TOLERANCE || from >= span[1] - TIME_TOLERANCE) ? span[0] : from
   const withSource = sourceReady.value
   const clock = withSource ? playClock(view, props.timelineBars) : null
+  const played = { ...voices.value }
+  if (recording?.mute) played[recording.mute] = false
   options = {
     from: start,
     to: span ? span[1] : null,
-    voices: { ...voices.value },
+    voices: played,
     speed: speed.value,
     metronome: metronome.value,
     guide: props.guide ?? [],
     clock
   }
   const current = options
+  lead = recording ? countInSeconds(view, start, recording.countIn, clock) : 0
+  const events = schedule(view, current).map((event) => ({ ...event, at: event.at + lead }))
+  if (lead) events.unshift(...countInClicks(view, start, recording?.countIn ?? 0))
+  const segments = withSource && clock && props.source ? sourceSegments(clock, start, current.to).map((s) => ({ ...s, at: s.at + lead })) : []
   try {
-    player.play(schedule(view, current), {
-      source: withSource && clock && props.source ? { buffer: props.source.buffer, segments: sourceSegments(clock, start, current.to) } : null,
+    player.play(events, {
+      source: segments.length && props.source ? { buffer: props.source.buffer, segments } : null,
       levels: levels(),
+      length: lead + playLength(view, current),
       onTick: (elapsed) => {
-        time.value = scoreTime(current, elapsed)
+        countingIn.value = elapsed < lead
+        if (elapsed < lead) return
+        time.value = scoreTime(current, elapsed - lead)
         emit('cursor', sounding(view, time.value, current.voices))
         emit('time', time.value)
       },
       onEnd: () => {
         // Cubase's cycle: to the loop's end, then the loop again from its start
-        if (loop.value && playing.value) play(span?.[0] ?? current.from)
+        if (loop.value && playing.value && !recording) play(span?.[0] ?? current.from)
         else stop()
       }
     })
     playing.value = true
+    countingIn.value = lead > 0
     problem.value = null
   } catch (e) {
     problem.value = e instanceof Error ? e.message : String(e)
   }
 }
 
-function stop(): void {
+/** The bar's beat in playing seconds at score second ``second`` (on the playing clock, at the speed). */
+function beatSeconds(view: ScoreView, second: number, clock: ReturnType<typeof playClock> | null): { beat: number; beats: number } {
+  const bar = view.bars[barAt(second) - 1]
+  const beats = Number(bar?.meter.split('/')[0]) || 4
+  const real = clock?.[barAt(second) - 1]?.realDur ?? bar?.duration_s ?? 2
+  return { beat: real / beats / clampSpeed(speed.value), beats }
+}
+
+function countInSeconds(view: ScoreView, second: number, bars: number, clock: ReturnType<typeof playClock> | null): number {
+  if (bars <= 0) return 0
+  const { beat, beats } = beatSeconds(view, second, clock)
+  return bars * beats * beat
+}
+
+/** The count-in's clicks: every beat of ``bars`` bars, the first of a bar higher. */
+function countInClicks(view: ScoreView, second: number, bars: number): ToneEvent[] {
+  const clock = options?.clock ?? null
+  const { beat, beats } = beatSeconds(view, second, clock)
+  return Array.from({ length: bars * beats }, (_, i) => ({ at: i * beat, duration: CLICK_SECONDS, midi: i % beats === 0 ? 96 : 89, part: 'click' as const }))
+}
+
+/** Stop without telling anybody (a restart). */
+function halt(): void {
   player.stop()
   playing.value = false
+  countingIn.value = false
+  recordingNow = null
+}
+
+function stop(): void {
+  const was = playing.value
+  halt()
   emit('cursor', [])
   emit('time', null)
+  if (was) emit('stopped')
+}
+
+/** Start a recording's playback from score second ``from``. */
+function record(from: number, recording: RecordPlayback): boolean {
+  play(from, recording)
+  return playing.value
+}
+
+/**
+ * The score second of a moment in ``performance.now()`` milliseconds while it plays (before the cursor
+ * during the count-in), as the listener heard it.
+ */
+function scoreSecondAt(perfMs: number): number | null {
+  const current = options
+  if (!current || !playing.value) return null
+  const elapsed = player.elapsedAt(perfMs) - lead
+  const clock = current.clock?.length ? current.clock : null
+  const stretch = elapsed * clampSpeed(current.speed)
+  return clock ? toScore(clock, toReal(clock, current.from) + stretch) : current.from + stretch
 }
 
 function toggle(): void {
@@ -179,11 +261,12 @@ watch([hear, sourceLevel], () => {
 watch(
   () => props.from,
   (second, before) => {
-    if (playing.value && second !== null && second !== undefined && second !== before) play(second)
+    // (not while recording: the take keeps its start)
+    if (playing.value && !recordingNow && second !== null && second !== undefined && second !== before) play(second)
   }
 )
 
-defineExpose({ toggle, stop, swap, playing })
+defineExpose({ toggle, stop, swap, playing, record, scoreSecondAt, countingIn })
 onBeforeUnmount(() => player.close())
 </script>
 
@@ -192,6 +275,7 @@ onBeforeUnmount(() => player.close())
     <button :disabled="!canPlay" :title="playing ? 'Stop (Space)' : `Play from ${where} (Space)`" @click="toggle">
       {{ playing ? '■ stop' : '▶ play' }}
     </button>
+    <slot name="record" :playing="playing" :counting-in="countingIn" />
     <span v-if="reference" class="hear" role="radiogroup" aria-label="Hear">
       <button
         v-for="choice in (['both', 'notes', 'source'] as const)"

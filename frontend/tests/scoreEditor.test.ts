@@ -3,7 +3,7 @@ import { nextTick, reactive } from 'vue'
 
 import type { Fetcher } from '../src/api/client'
 import { History } from '../src/shared/history'
-import { clampSpeed, frequency, schedule, scoreTime, sounding, sourceSecond } from '../src/shared/playback'
+import { clampSpeed, frequency, playLength, playClock, schedule, scoreTime, sounding, sourceSecond } from '../src/shared/playback'
 import {
   type ScoreView,
   clock,
@@ -226,6 +226,16 @@ describe('playback', () => {
     expect(schedule(VIEW, { from: 0, voices: { Vocal: false, Ins: false, chords: false }, speed: 1 })).toEqual([])
   })
 
+  it('plays to the end of the score or the range, also through bars of rests', () => {
+    expect(playLength(VIEW, { from: 0, voices: ALL, speed: 1 })).toBeCloseTo(VIEW.duration_s)
+    expect(playLength(VIEW, { from: 1, to: 3, voices: ALL, speed: 0.5 })).toBeCloseTo(4)
+    // nothing sounds (every voice off), it still lasts to the end
+    expect(playLength(VIEW, { from: 2, voices: { Vocal: false, Ins: false, chords: false }, speed: 2 })).toBeCloseTo((VIEW.duration_s - 2) / 2)
+    // on the playing clock of a cover: as long as the source's bars
+    const sourceBars = VIEW.bars.map((bar) => [bar.start_s * 2, (bar.start_s + bar.duration_s) * 2, 'x'] as [number, number, string])
+    expect(playLength(VIEW, { from: 0, voices: ALL, speed: 1, clock: playClock(VIEW, sourceBars) })).toBeCloseTo(VIEW.duration_s * 2)
+  })
+
   it('maps playback time to score time and the cursor', () => {
     expect(scoreTime({ from: 10, voices: ALL, speed: 0.5 }, 4)).toBe(12)
     const at = elementById(VIEW, 'V3.1')!.start_s + 0.1
@@ -276,7 +286,9 @@ describe('editor preferences', () => {
       audition: true,
       rowHeight: 12,
       follow: true,
-      sung: true
+      sung: true,
+      record: { countIn: 1, quantize: 16, mode: 'replace', mute: true, thru: true, stepLength: 8 },
+      midiInput: 'all'
     })
     const roll = JSON.stringify({ roll: false, rollZoom: 96, metronome: true, advanced: true })
     expect(loadPrefs({ getItem: () => roll })).toMatchObject({ roll: false, rollZoom: 96, metronome: true, advanced: true })

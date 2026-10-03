@@ -258,6 +258,61 @@ def insert_note(score: Score, track: str, onset: int, duration: int, pitch: int)
     return _commit(new, [change], warnings, [note_id(track, onset)])
 
 
+def place_notes(
+    score: Score,
+    track: str,
+    notes: Sequence[Mapping[str, Any]],
+    *,
+    clear: Sequence[int] | None = None,
+    label: str = "",
+) -> OpResult:
+    """Notes played in (a MIDI recording, step input) into one voice, in one step.
+
+    ``clear`` ``[start, end)``: what the voice played there goes first (a recording that replaces);
+    without it only the new notes' spans are overwritten (one that merges). The voice stays one line:
+    a note that starts before the previous one ends cuts it short.
+    """
+    track = _track(track)
+    placed: list[Note] = []
+    for item in sorted(notes, key=lambda n: (int(n.get("onset", 0)), -int(n.get("pitch", 0)))):
+        onset = _whole(item.get("onset"), "onset", 0, score.total - 1)
+        duration = _whole(item.get("duration"), "duration", 1, score.total - onset)
+        pitch = _pitch(item.get("pitch"))
+        if placed and placed[-1].onset == onset:
+            continue  # a chord into one voice: its highest note
+        if placed and placed[-1].end > onset:
+            last = placed[-1]
+            placed[-1] = Note(last.onset, onset - last.onset, last.pitch)
+        placed.append(Note(onset, duration, pitch))
+    if not placed and clear is None:
+        return _unchanged(score, "no notes to place")
+    voice = list(score.track(track))
+    removed = 0
+    if clear is not None:
+        start = _whole(clear[0], "clear start", 0, score.total)
+        end = _whole(clear[1], "clear end", start, score.total)
+        voice, hit = _carve(voice, start, end)
+        removed = len(hit)
+    warnings: list[str] = []
+    for note in placed:
+        voice, hit = _carve(voice, note.onset, note.end)
+        warnings += [f"{_describe(score, track, n)} was overwritten" for n in hit]
+        voice = sorted([*voice, note], key=lambda n: n.onset)
+    new = score.with_track(track, voice)
+    if placed:
+        first = score.measure_at(placed[0].onset) + 1
+        last = score.measure_at(placed[-1].end - 1) + 1
+        where = f"bar {first}" if first == last else f"bars {first}-{last}"
+        change = f"{label or 'placed'} {len(placed)} note{'s' if len(placed) != 1 else ''} in {VOICE_OF[track]} ({where})"
+    else:
+        change = f"{label or 'placed'} no notes in {VOICE_OF[track]}"
+    if removed:
+        change += f", {removed} replaced"
+    return _commit(
+        new, [change], warnings if clear is None else [], [note_id(track, n.onset) for n in placed]
+    )
+
+
 def move_notes(
     score: Score, ids: Sequence[object], *, delta: int = 0, semitones: int = 0, track: str | None = None
 ) -> OpResult:
@@ -1442,6 +1497,13 @@ OPERATIONS: dict[str, Operation] = {
     # chord symbols
     "put_chord": lambda s, op: put_chord(s, _int(op, "onset"), _str(op, "name")),
     "move_chord": lambda s, op: move_chord(s, _int(op, "onset"), _int(op, "to")),
+    "place_notes": lambda s, op: place_notes(
+        s,
+        _str(op, "track"),
+        op.get("notes", []) if isinstance(op.get("notes"), list) else [],
+        clear=op.get("clear") if isinstance(op.get("clear"), list) and len(op["clear"]) == 2 else None,
+        label=str(op.get("label", ""))[:40],
+    ),
     "quantize": lambda s, op: quantize(
         s, op.get("ids", []), _int(op, "grid"), lengths=op.get("lengths") is True
     ),
@@ -1527,6 +1589,7 @@ __all__ = [
     "note_id",
     "paste",
     "parse_id",
+    "place_notes",
     "put_chord",
     "put_key",
     "quantize",

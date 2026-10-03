@@ -269,6 +269,34 @@ With **reference_audio** connected to the Song Sheet (the Cover template connect
 
 The reference is only for listening; it is not part of the sheet's documents and never reaches the model.
 
+## Recording with a MIDI keyboard
+
+Play a melody in with a MIDI keyboard, like the record button of a DAW. It works in Chrome and Edge (Firefox: allow MIDI for the site), with ComfyUI opened at `127.0.0.1` or `localhost` - the browser offers MIDI only to a secure page, not to `http://` and the computer's network address. The first **● rec**, **step** or *use MIDI* asks the browser for access; a keyboard plugged in later is found at once.
+
+**● rec** (Shift+R) records into the voice chosen in the roll's **draw into** (*Vocal* or *Ins*), from the **cursor**:
+
+1. Set the cursor in the ruler and press **● rec**. One bar of clicks counts in (the button blinks *count-in*), then the score plays from the cursor.
+2. Play. The keys show as red notes in the roll while you play, where you heard them: the audio output's latency is taken out, so a key played with a note you hear lands on that note. A key a little before the first beat lands on it.
+3. **Space**, **■ stop** or **● rec** again stops and **keeps** the take - one undo step (*recorded 12 notes in Vocal (bar 5)*), its notes selected. **Esc** throws it away. Playback also stops at the score's end.
+
+A voice of the score is one line, so the take is made one line: keys pressed together give their highest note, and a key pressed before the previous one is let go ends it (legato). Starts and ends go onto the *quantize* grid. With **replace** the voice plays only the take from the start to the stop (what it played there before is gone); with **merge** only the time under the new notes is overwritten and the rest stays. Nothing played changes nothing.
+
+**step** input writes without playback: every key writes a note of the step length at the cursor and moves the cursor on (keys pressed together: the highest); **rest ▶** moves on without a note. Click **step** again to end it.
+
+The light next to *step* flashes with every key. **🎹** holds the settings, remembered in this browser:
+
+| Setting | |
+|---|---|
+| keyboard | *all keyboards* or one of them; while the chosen one is unplugged, every keyboard is heard |
+| hear the keys | a simple tone while a key is held (for keyboards without a sound of their own) |
+| count-in | none, 1 or 2 bars of clicks |
+| quantize | 1/4, 1/8, 1/16, 1/32, or off (the score's finest length) |
+| mode | *replace* or *merge* |
+| mute its old notes | the recorded voice's notes are silent while recording |
+| step | the step input's length (1/1 to 1/16) |
+
+A key still held when the keyboard is unplugged (or sends *all notes off*) ends there; nothing hangs. The sustain pedal is not recorded: a note lasts as long as its key is down.
+
 ## Apply, Revert, Approve
 
 - **Apply** saves your documents into the node (they are stored in the workflow, so they survive saving and reloading it). An applied score is *edited* while its draft is unchanged, or *manual* if you made it manual.
@@ -278,7 +306,7 @@ The reference is only for listening; it is not part of the sheet's documents and
 
 ## Preferences
 
-Layout, *ABC text (advanced)*, zoom, piano roll (on/off and its zoom), metronome, voices, speed, *hear* and the source's level (covers) and the roll's *hear* switch (hearing the notes you edit) are remembered in this browser only (not in the workflow). A blocked or cleared browser storage simply gives the defaults.
+Layout, *ABC text (advanced)*, zoom, piano roll (on/off and its zoom), metronome, voices, speed, *hear* and the source's level (covers), the roll's *hear* switch (hearing the notes you edit) and the MIDI keyboard and recording settings (🎹) are remembered in this browser only (not in the workflow). A blocked or cleared browser storage simply gives the defaults.
 
 ## Limits
 

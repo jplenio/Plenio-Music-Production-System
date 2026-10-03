@@ -1223,3 +1223,77 @@
 .plenio-overlay .roll-tools label.unavailable {
   opacity: 0.55;
 }
+
+/* recording with a MIDI keyboard */
+.plenio-overlay .transport .record {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  position: relative;
+}
+.plenio-overlay .transport .record .rec {
+  color: #ff6b6b;
+  font-weight: 600;
+}
+.plenio-overlay .transport .record .rec.on {
+  background: #c62828;
+  color: #fff;
+  border-color: #ff6b6b;
+}
+/* the count-in blinks by its opacity: a hidden button would lose the focus (Space, Esc) and the click */
+.plenio-overlay .transport .record .rec.counting {
+  animation: plenio-blink 0.5s steps(2, start) infinite;
+}
+@keyframes plenio-blink {
+  to {
+    opacity: 0.35;
+  }
+}
+.plenio-overlay .transport .record .step.on {
+  background: #6a4fb3;
+  color: #fff;
+}
+.plenio-overlay .transport .midi-light {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #555;
+}
+.plenio-overlay .transport .midi-light.ready {
+  background: #2e7d32;
+}
+.plenio-overlay .transport .midi-light.active {
+  background: #7CFC00;
+  box-shadow: 0 0 6px #7CFC00;
+}
+.plenio-overlay .transport .midi-settings {
+  position: relative;
+}
+.plenio-overlay .transport .midi-panel {
+  position: absolute;
+  z-index: 30;
+  bottom: 30px;
+  left: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  width: 320px;
+  padding: 8px 10px;
+  background: var(--comfy-menu-bg, #202020);
+  border: 1px solid var(--border-color, #4e4e4e);
+  border-radius: 6px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+.plenio-overlay .transport .midi-panel .close {
+  justify-self: end;
+}
+.plenio-overlay .transport .midi-panel strong {
+  margin-top: 4px;
+}
+.plenio-overlay .roll-svg .rec-note {
+  fill: rgba(229, 57, 53, 0.85);
+  stroke: #ffcdd2;
+  stroke-width: 1;
+  pointer-events: none;
+}

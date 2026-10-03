@@ -169,6 +169,33 @@ def test_quantize_puts_starts_and_lengths_on_the_grid() -> None:
     assert result.abc == SMALL and result.result.changes == ("already on the grid",)
 
 
+def test_place_notes_records_into_one_voice_replacing_or_merging() -> None:
+    # SMALL's verse Vocal: c4 d4 e4 f4 | g8 z8 (L:1/16, 16 units a bar)
+    played = [
+        {"onset": 4, "duration": 6, "pitch": 74},
+        {"onset": 8, "duration": 4, "pitch": 76},
+        {"onset": 8, "duration": 4, "pitch": 72},
+    ]
+    abc, result = run(SMALL, op="place_notes", track="vocal", notes=played, label="recorded")
+    vocal = score_of(abc).vocal
+    # merge: the old c stays, the new notes overwrite their spans; a chord gives its highest note and the
+    # first note is cut where the next one starts
+    assert [(n.onset, n.duration, n.pitch) for n in vocal[:3]] == [(0, 4, 72), (4, 4, 74), (8, 4, 76)]
+    assert result.changes == ("recorded 2 notes in Vocal (bar 1)",)
+    # replace: everything the voice played in the range goes (bars 1-2), only the new notes remain there
+    abc, result = run(
+        SMALL, op="place_notes", track="vocal", notes=played[:1], clear=[0, 32], label="recorded"
+    )
+    vocal = score_of(abc).vocal
+    assert [(n.onset, n.pitch) for n in vocal if n.onset < 32] == [(4, 74)]
+    assert "replaced" in result.changes[0]
+    with pytest.raises(PlenioValidationError):
+        ops.transform(
+            SMALL,
+            {"op": "place_notes", "track": "vocal", "notes": [{"onset": 0, "duration": 0, "pitch": 60}]},
+        )
+
+
 # --- chords -----------------------------------------------------------------------------------
 
 

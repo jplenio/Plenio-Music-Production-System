@@ -4,6 +4,7 @@
  * storage simply gives the defaults.
  */
 import type { VoiceSwitches } from '../../shared/playback'
+import type { RecordSettings } from './midiRecording'
 import { NOTATION_MAX, NOTATION_MIN, ROLL_MAX, ROLL_MIN, SIDE_MAX, SIDE_MIN } from '../paneSizes'
 
 export interface EditorPrefs {
@@ -40,6 +41,28 @@ export interface EditorPrefs {
   follow: boolean
   /** Draw a cover's sung pitch (node Sung Pitch) over the notes. */
   sung: boolean
+  /** Recording and step input with a MIDI keyboard. */
+  record: RecordSettings
+  /** The MIDI keyboard to listen to (an input's id; ``all``: every one). */
+  midiInput: string
+}
+
+export function defaultRecord(): RecordSettings {
+  return { countIn: 1, quantize: 16, mode: 'replace', mute: true, thru: true, stepLength: 8 }
+}
+
+function recordOf(value: unknown): RecordSettings {
+  const defaults = defaultRecord()
+  const data = (typeof value === 'object' && value !== null ? value : {}) as Partial<RecordSettings>
+  const pick = <T>(candidate: unknown, allowed: readonly T[], fallback: T): T => (allowed.includes(candidate as T) ? (candidate as T) : fallback)
+  return {
+    countIn: pick(data.countIn, [0, 1, 2], defaults.countIn),
+    quantize: pick(data.quantize, [0, 4, 8, 16, 32], defaults.quantize),
+    mode: pick(data.mode, ['replace', 'merge'] as const, defaults.mode),
+    mute: typeof data.mute === 'boolean' ? data.mute : defaults.mute,
+    thru: typeof data.thru === 'boolean' ? data.thru : defaults.thru,
+    stepLength: pick(data.stepLength, [1, 2, 4, 8, 16], defaults.stepLength)
+  }
 }
 
 const KEY = 'plenio.score-editor.prefs'
@@ -62,7 +85,9 @@ export function defaultPrefs(): EditorPrefs {
     audition: true,
     rowHeight: 12,
     follow: true,
-    sung: true
+    sung: true,
+    record: defaultRecord(),
+    midiInput: 'all'
   }
 }
 
@@ -116,7 +141,9 @@ export function loadPrefs(storage: Pick<Storage, 'getItem'> | null = safeStorage
       rowHeight:
         typeof data.rowHeight === 'number' && data.rowHeight >= 6 && data.rowHeight <= 28 ? Math.round(data.rowHeight) : defaults.rowHeight,
       follow: data.follow !== false,
-      sung: data.sung !== false
+      sung: data.sung !== false,
+      record: recordOf(data.record),
+      midiInput: typeof data.midiInput === 'string' && data.midiInput ? data.midiInput : 'all'
     }
   } catch {
     return defaults

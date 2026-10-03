@@ -19,6 +19,16 @@ const GROUPS: { title: string; rows: [string, string][] }[] = [
     ]
   },
   {
+    title: 'MIDI keyboard',
+    rows: [
+      ['● rec · Shift+R', 'record from the cursor into the draw-into voice (after the count-in)'],
+      ['Space · ■ stop · rec again', 'stop and keep the take (one undo step)'],
+      ['Esc while recording', 'throw the take away'],
+      ['step', 'every key writes a note of the step length at the cursor; rest ▶ skips a step'],
+      ['🎹', 'the keyboard, hear the keys, count-in, quantize, replace / merge, step length']
+    ]
+  },
+  {
     title: 'Piano roll',
     rows: [
       ['click the empty grid (Draw)', 'a note of the last drawn length'],

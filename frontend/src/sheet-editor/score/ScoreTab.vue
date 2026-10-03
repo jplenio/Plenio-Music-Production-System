@@ -123,6 +123,10 @@ import { type ScoreProject, PROJECT_EXTENSION, buildProject, parseProject, proje
 import { guideNotes, remapGuide, sameGuide } from './tracks'
 import { type DecodedSource, decodeSource } from './sourceAudio'
 import { curveOf, octaveOffset } from './sungPitch'
+import RecordControls from './RecordControls.vue'
+import { midiHub } from './midiInput'
+import { useMidiRecording } from './midiRecording'
+import type { Track } from './pianoRoll'
 import { describeError, useScoreSession } from './useScoreSession'
 
 const props = defineProps<{
@@ -272,8 +276,60 @@ const playhead = ref<number | null>(null)
 const revealRange = ref<[number, number] | null>(null)
 const transport = ref<InstanceType<typeof ScoreTransport> | null>(null)
 const pianoRoll = ref<InstanceType<typeof PianoRoll> | null>(null)
+const tabRoot = ref<HTMLElement | null>(null)
+/** The voice new notes go into: the roll's *draw into* (drawing, recording, step input). */
+const drawTrack = ref<Track>('vocal')
 
 watch(prefs, (value) => savePrefs(value), { deep: true })
+
+// --- a MIDI keyboard: recording and step input ---
+const hub = midiHub()
+hub.selected.value = prefs.value.midiInput
+watch(hub.selected, (id) => (prefs.value = { ...prefs.value, midiInput: id }))
+const recordSettings = computed({
+  get: () => prefs.value.record,
+  set: (value) => (prefs.value = { ...prefs.value, record: value })
+})
+const midi = useMidiRecording({
+  hub,
+  transport: () => transport.value,
+  view: () => shown.value,
+  locator,
+  track: () => drawTrack.value,
+  readonly: () => props.readonly,
+  settings: () => prefs.value.record,
+  operate: operateRoll,
+  notify: (text) => (session.notes = [text]),
+  problem: (text) => (midiProblem.value = text)
+})
+const midiProblem = ref<string | null>(null)
+const recordBlock = computed(() => {
+  if (props.readonly) return 'This score belongs to the other sheet; record in that sheet.'
+  if (!model.value) return 'Recording needs the piano roll\u2019s score (a valid score in the editor\u2019s subset).'
+  return null
+})
+/**
+ * While a take runs, Space keeps it and Esc throws it away also when the focus left the score (a click
+ * on the page around it): the hands are on the keyboard, the stop must not go to ComfyUI.
+ */
+function onRecordingKey(event: KeyboardEvent): void {
+  const target = event.target as HTMLElement | null
+  if (tabRoot.value?.contains(target) || typesText(target) || event.ctrlKey || event.metaKey || event.altKey) return
+  if (event.key !== ' ' && event.key !== 'Escape') return
+  event.preventDefault()
+  event.stopPropagation()
+  if (event.key === ' ') midi.stop()
+  else midi.cancel()
+}
+watch(midi.recording, (on) => {
+  if (on) window.addEventListener('keydown', onRecordingKey, true)
+  else window.removeEventListener('keydown', onRecordingKey, true)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onRecordingKey, true)
+  midi.cancel()
+  midi.dispose()
+})
 onBeforeUnmount(() => session.dispose())
 
 const shown = computed(() => session.lastValid)
@@ -849,6 +905,7 @@ function clipKey(event: KeyboardEvent): ClipAction | null {
 
 function onPlayTime(seconds: number | null): void {
   playhead.value = seconds === null || !shown.value ? null : unitOfSeconds(shown.value, seconds)
+  midi.onTime(seconds)
 }
 
 function clearGuide(): void {
@@ -1122,6 +1179,19 @@ function onKey(event: KeyboardEvent): void {
     return
   }
   if (isTextTarget(event.target) || mod) return
+  if (event.key === 'Escape' && midi.recording.value) {
+    // Esc during a recording throws the take away
+    event.preventDefault()
+    midi.cancel()
+    return
+  }
+  if (event.key === 'R' && event.shiftKey && !event.altKey) {
+    // Shift+R: record from the cursor (again: stop and keep)
+    event.preventDefault()
+    if (midi.recording.value) midi.stop()
+    else void midi.start()
+    return
+  }
   if (event.key === 'Escape') {
     // Esc lets the selection go - in the score it never closes the editor (DAW habit: Esc to deselect)
     event.preventDefault()
@@ -1199,7 +1269,7 @@ function onKey(event: KeyboardEvent): void {
 </script>
 
 <template>
-  <div class="score-tab" @keydown="onKey" @keyup="onKeyUp">
+  <div ref="tabRoot" class="score-tab" @keydown="onKey" @keyup="onKeyUp">
     <ScorePalette
       v-if="!readonly"
       :view="shown"
@@ -1333,6 +1403,8 @@ function onKey(event: KeyboardEvent): void {
       v-model:zoom="rollZoom"
       v-model:row-height="prefs.rowHeight"
       v-model:follow="prefs.follow"
+      v-model:track="drawTrack"
+      :recorded="midi.recording.value ? { track: drawTrack, notes: midi.live.value } : null"
       v-model:sung-visible="prefs.sung"
       :sung="sungPitch"
       :height="prefs.rollHeight"
@@ -1394,7 +1466,25 @@ function onKey(event: KeyboardEvent): void {
       :loop-range="loopRange"
       @cursor="(ids: string[]) => (cursor = ids)"
       @time="onPlayTime"
-    />
+      @stopped="midi.onStopped"
+    >
+      <template #record="{ countingIn }">
+        <RecordControls
+          v-model:settings="recordSettings"
+          :hub="hub"
+          :recording="midi.recording.value"
+          :counting-in="countingIn"
+          :step="midi.step.value"
+          :target="drawTrack === 'vocal' ? 'Vocal' : 'Ins'"
+          :disabled="recordBlock"
+          @record="midi.start"
+          @stop="midi.stop"
+          @step="midi.toggleStep"
+          @rest="midi.rest"
+          @enable="midi.ready"
+        />
+      </template>
+    </ScoreTransport>
     <div
       class="score-main"
       :class="{ 'with-roll': showRoll && !!shown?.model, 'with-inspector': review }"
@@ -1528,6 +1618,7 @@ function onKey(event: KeyboardEvent): void {
     </p>
     <p v-if="session.error" class="error" role="alert">{{ session.error }}</p>
     <p v-if="midiError" class="error" role="alert">{{ midiError }}</p>
+    <p v-if="midiProblem" class="error" role="alert">{{ midiProblem }}</p>
     <MidiDialog
       v-if="midiRequest"
       :fetcher="fetcher"

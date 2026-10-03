@@ -135,6 +135,8 @@ const props = withDefaults(
       offset: number
       bars: readonly ([number, number, string] | null)[] | undefined
     } | null
+    /** A MIDI take while it is played: its notes so far (drawn red over the roll). */
+    recorded?: { track: Track; notes: readonly { onset: number; duration: number; pitch: number }[] } | null
   }>(),
   {
     playing: () => [],
@@ -149,7 +151,8 @@ const props = withDefaults(
     lyrics: null,
     lyricsEditable: false,
     source: null,
-    sung: null
+    sung: null,
+    recorded: null
   }
 )
 /** A line of the lyrics changed in the lane (``text`` empty: the line goes). */
@@ -193,7 +196,8 @@ const root = ref<HTMLDivElement | null>(null)
 const scroller = ref<HTMLDivElement | null>(null)
 const svg = ref<SVGSVGElement | null>(null)
 const chordInput = ref<HTMLInputElement | null>(null)
-const track = ref<Track>('vocal')
+/** The voice new notes go into (drawn, recorded, entered step by step). */
+const track = defineModel<Track>('track', { default: 'vocal' })
 /** Draw or select: not a preference - the roll always opens in draw mode. */
 const mode = ref<RollMode>('draw')
 const snapChoice = ref<SnapChoice>('auto')
@@ -1034,6 +1038,19 @@ watch(
   }
 )
 watch(() => props.locator, revealUnit)
+// a recorded key out of the view: the roll scrolls to its pitch (the playback line pages along the bars)
+watch(
+  () => props.recorded?.notes.at(-1)?.pitch,
+  (pitch) => {
+    const g = geo.value
+    const el = scroller.value
+    if (pitch === undefined || !g || !el?.clientHeight) return
+    const top = scrollTopToShow(g, el.scrollTop, el.clientHeight, pitch)
+    if (top === null) return
+    el.scrollTop = top
+    onScroll()
+  }
+)
 // the scroller exists only while there is a model: centre when it appears (a new or repaired score)
 watch(
   () => !!model.value,
@@ -1221,6 +1238,15 @@ defineExpose({ zoomBy, zoomRows })
         <text v-for="item in noteNames" :key="'p' + item.key" class="note-name" :x="item.x" :y="item.y">{{ item.text }}</text>
         <text v-for="item in visibleSyllables" :key="'y' + item.key" class="syllable" :x="item.x" :y="item.y">{{ item.text }}</text>
         <path v-for="path in sungPaths" :key="path.key" class="sung-pitch" :d="path.d" />
+        <template v-if="recorded">
+          <rect
+            v-for="(note, index) in recorded.notes"
+            :key="'rec' + index"
+            class="rec-note"
+            v-bind="noteRect({ onset: note.onset, duration: Math.max(note.duration, 0.5), pitch: note.pitch }, geo)"
+            rx="2"
+          />
+        </template>
         <rect v-for="(ghost, index) in ghostNotes" :key="'ghost' + index" class="ghost" :class="ghost.track" v-bind="noteRect(ghost, geo)" rx="2" />
         <rect v-if="banded && banded.rect.height > 0" class="band" v-bind="banded.rect" />
         <line v-if="locator !== null" class="locator" :x1="xOf(locator, geo)" :x2="xOf(locator, geo)" :y1="geo.top" :y2="geo.height" />

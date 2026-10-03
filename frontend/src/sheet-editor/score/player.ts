@@ -59,7 +59,7 @@ export class TonePlayer {
 
   play(
     events: ToneEvent[],
-    options: { onTick?: (elapsed: number) => void; onEnd?: () => void; source?: PlaySource | null; levels?: Levels } = {}
+    options: { onTick?: (elapsed: number) => void; onEnd?: () => void; source?: PlaySource | null; levels?: Levels; length?: number } = {}
   ): void {
     this.stop()
     const Context = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
@@ -75,7 +75,7 @@ export class TonePlayer {
     this.tones.gain.value = this.levels.tones
     this.tones.connect(this.master)
     this.events = events
-    this.length = events.reduce((end, e) => Math.max(end, e.at + e.duration), 0)
+    this.length = events.reduce((end, e) => Math.max(end, e.at + e.duration), options.length ?? 0)
     this.next = 0
     this.startedAt = context.currentTime + 0.05
     const source = options.source
@@ -90,6 +90,22 @@ export class TonePlayer {
     this.onEnd = options.onEnd ?? null
     this.timer = setInterval(() => this.tick(), TICK_MS)
     this.tick()
+  }
+
+  /**
+   * Seconds since playback started of a moment given in ``performance.now()`` milliseconds (a key of
+   * a MIDI keyboard), as the listener heard it: the audio output's latency is taken out, so a key
+   * played with a note one hears lands on that note.
+   */
+  elapsedAt(perfMs: number): number {
+    const context = this.context
+    if (!context) return 0
+    const stamp = typeof context.getOutputTimestamp === 'function' ? context.getOutputTimestamp() : null
+    if (stamp && typeof stamp.contextTime === 'number' && typeof stamp.performanceTime === 'number' && stamp.performanceTime > 0) {
+      return stamp.contextTime + (perfMs - stamp.performanceTime) / 1000 - this.startedAt
+    }
+    const latency = (context as AudioContext & { outputLatency?: number }).outputLatency || context.baseLatency || 0
+    return context.currentTime + (perfMs - performance.now()) / 1000 - latency - this.startedAt
   }
 
   /** The layers' levels now (A/B while playing: one of them 0). */
@@ -191,6 +207,63 @@ export class TonePlayer {
       fade.disconnect()
     }
     this.sources.push(node)
+  }
+}
+
+/**
+ * The keys of a MIDI keyboard, heard while they are held (many controllers have no sound of their own).
+ * One tone per key; a key pressed again restarts its tone.
+ */
+export class KeyMonitor {
+  private context: AudioContext | null = null
+  private tones = new Map<number, { oscillator: OscillatorNode; gain: GainNode }>()
+
+  on(midi: number, velocity = 100): void {
+    const Context = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+    if (!Context) return
+    try {
+      this.context ??= new Context()
+      const context = this.context
+      void context.resume()
+      this.off(midi)
+      const start = context.currentTime
+      const oscillator = context.createOscillator()
+      oscillator.type = 'triangle'
+      oscillator.frequency.value = frequency(midi)
+      const gain = context.createGain()
+      const level = 0.08 + 0.17 * Math.min(1, velocity / 127)
+      gain.gain.setValueAtTime(0, start)
+      gain.gain.linearRampToValueAtTime(level, start + 0.008)
+      gain.gain.setTargetAtTime(level * 0.7, start + 0.05, 0.3)
+      oscillator.connect(gain).connect(context.destination)
+      oscillator.start(start)
+      this.tones.set(midi, { oscillator, gain })
+    } catch {
+      // hearing the keys is a convenience
+    }
+  }
+
+  off(midi: number): void {
+    const tone = this.tones.get(midi)
+    const context = this.context
+    if (!tone || !context) return
+    this.tones.delete(midi)
+    const now = context.currentTime
+    tone.gain.gain.cancelScheduledValues(now)
+    tone.gain.gain.setValueAtTime(tone.gain.gain.value, now)
+    tone.gain.gain.linearRampToValueAtTime(0, now + 0.06)
+    tone.oscillator.stop(now + 0.08)
+    tone.oscillator.onended = () => tone.gain.disconnect()
+  }
+
+  allOff(): void {
+    for (const midi of [...this.tones.keys()]) this.off(midi)
+  }
+
+  close(): void {
+    this.allOff()
+    void this.context?.close()
+    this.context = null
   }
 }
 
