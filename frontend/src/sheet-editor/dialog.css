@@ -1181,3 +1181,32 @@
 .plenio-overlay .keys-panel td {
   color: var(--descrip-text, #aaa);
 }
+
+/* aligning a cover's source recording with the bars */
+.plenio-overlay .transport .align {
+  position: relative;
+}
+.plenio-overlay .transport .align > button.active {
+  border-color: #d6a14a;
+  color: #f0c27a;
+}
+.plenio-overlay .transport .align-panel {
+  position: absolute;
+  z-index: 30;
+  bottom: 30px;
+  left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  width: 460px;
+  padding: 8px 10px;
+  background: var(--comfy-menu-bg, #202020);
+  border: 1px solid var(--border-color, #4e4e4e);
+  border-radius: 6px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+.plenio-overlay .transport .align-panel .facts {
+  flex-basis: 100%;
+  margin-bottom: 4px;
+}

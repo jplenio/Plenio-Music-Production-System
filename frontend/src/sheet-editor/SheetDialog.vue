@@ -36,7 +36,7 @@ import LyricsFit from './LyricsFit.vue'
 import ScoreTab from './score/ScoreTab.vue'
 import type { LyricsTarget } from './score/lyricsFollow'
 import { sameGuide } from './score/tracks'
-import { type LyricSpan, sameSpans } from './score/lyricPlacement'
+import { type LyricSpan, type SheetExtras, sameSpans } from './score/lyricPlacement'
 
 const props = defineProps<{
   title: string
@@ -52,6 +52,8 @@ const props = defineProps<{
   guide?: GuideNote[]
   /** The lyrics lines placed by hand (the node's ``plenio_lyric_spans`` property). */
   lyricSpans?: LyricSpan[]
+  /** How far the source recording is moved against the bars (the node's ``plenio_source_shift``). */
+  sourceShift?: number
   /** The sheet that owns the context lyrics, when they can follow the score's sections. */
   lyricsTarget?: LyricsTarget | null
   /** The sheet that owns the context score (a cover's score sheet), when this sheet may edit it. */
@@ -63,7 +65,7 @@ const props = defineProps<{
  */
 const emit = defineEmits<{
   /** ``approved``: Approve was pressed - the sheet is released for the next run now. */
-  apply: [state: SheetState, guide: GuideNote[], lyrics: string | null, score: ScoreChange | null, approved: boolean, lyricSpans: LyricSpan[]]
+  apply: [state: SheetState, guide: GuideNote[], lyrics: string | null, score: ScoreChange | null, approved: boolean, extras: SheetExtras]
   close: []
 }>()
 
@@ -209,6 +211,7 @@ function revert(): void {
   fresh.forEach((doc, index) => Object.assign(working[index], doc))
   guide.value = [...(props.guide ?? [])]
   lyricSpans.value = [...(props.lyricSpans ?? [])]
+  sourceShift.value = props.sourceShift ?? 0
   contextDoc.text = contextScore.value ?? ''
   revision.value++
 }
@@ -224,6 +227,13 @@ function setGuide(next: GuideNote[]): void {
 const lyricSpans = ref<LyricSpan[]>([...(props.lyricSpans ?? [])])
 function setLyricSpans(next: LyricSpan[]): void {
   lyricSpans.value = next
+}
+const sourceShift = ref<number>(props.sourceShift ?? 0)
+function setSourceShift(next: number): void {
+  sourceShift.value = next
+}
+function extras(): SheetExtras {
+  return { lyricSpans: lyricSpans.value, sourceShift: sourceShift.value }
 }
 // --- the lyrics in the score editor: this sheet's own (Lyrics tab) or another sheet's (written on Apply) ---
 const followText = ref<string | null>(null)
@@ -263,6 +273,7 @@ const dirty = computed(
     serializeState(pending.value) !== serializeState(props.state) ||
     !sameGuide(guide.value, props.guide ?? []) ||
     !sameSpans(lyricSpans.value, props.lyricSpans ?? []) ||
+    sourceShift.value !== (props.sourceShift ?? 0) ||
     followedLyrics.value !== null ||
     changedScore.value !== null
 )
@@ -334,7 +345,7 @@ function apply() {
     followedLyrics.value,
     scoreChange(false),
     false,
-    lyricSpans.value
+    extras()
   )
 }
 async function approve() {
@@ -349,7 +360,7 @@ async function approve() {
       followedLyrics.value,
       scoreChange(true),
       true,
-      lyricSpans.value
+      extras()
     )
   }
 }
@@ -525,11 +536,13 @@ onBeforeUnmount(() => {
             :title="songTitle"
             :guide="guide"
             :lyric-spans="lyricSpans"
+            :source-shift="sourceShift"
             :lyrics-target="lyricsTarget"
             :lyrics-pending="ownLyrics ? null : followText"
             @edited="onInput(doc)"
             @guide-change="setGuide"
             @lyric-spans-change="setLyricSpans"
+            @source-shift-change="setSourceShift"
             @lyrics-change="onLyricsChange"
             @gate="(text: string, reason: string | null) => (scoreGate = { text, reason })"
           />
@@ -602,7 +615,9 @@ onBeforeUnmount(() => {
             :lyrics="lyricsText"
             :lyrics-target="ownLyrics ? lyricsTarget : null"
             :lyric-spans="lyricSpans"
+            :source-shift="sourceShift"
             @lyric-spans-change="setLyricSpans"
+            @source-shift-change="setSourceShift"
             @lyrics-change="onLyricsChange"
             @gate="(text: string, reason: string | null) => (contextGate = { text, reason })"
           />

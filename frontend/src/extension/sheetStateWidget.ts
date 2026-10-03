@@ -98,7 +98,7 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
     const review = setting === 'as the brief says' ? (payload?.review ?? 'continue') : setting
     const { openSheetDialog } = await import('../sheet-editor/open')
     const { parseGuide, serializeGuide } = await import('../sheet-editor/score/tracks')
-    const { parseSpans } = await import('../sheet-editor/score/lyricPlacement')
+    const { parseShift, parseSpans } = await import('../sheet-editor/score/lyricPlacement')
     if (!fetcher) throw new Error('Plenio: API not initialised')
     // the lyrics of Song Sheet · Text follow this score's sections (templates 1 and 5); when the graph
     // cannot say where they come from, the editor opens without that (the lyrics are then not written back)
@@ -130,15 +130,18 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
       guide: parseGuide(node.properties?.plenio_guide),
       // the lyrics lines placed by hand in the lyrics lane, kept like the Guide notes
       lyricSpans: parseSpans(node.properties?.plenio_lyric_spans),
+      // how far a cover's source recording is moved against the bars (the beat grid corrected by hand)
+      sourceShift: parseShift(node.properties?.plenio_source_shift),
       lyricsTarget: lyrics?.target ?? null,
       scoreTarget: score?.target ?? null,
-      onApply: (next, guide, arranged, changedScore, approved, lyricSpans) => {
+      onApply: (next, guide, arranged, changedScore, approved, extras) => {
         const before = String(widget.value ?? '')
         widget.value = serializeState(next)
         node.properties = {
           ...(node.properties ?? {}),
           plenio_guide: serializeGuide(guide),
-          plenio_lyric_spans: (lyricSpans ?? []).map(([start, end]) => [start, end])
+          plenio_lyric_spans: (extras?.lyricSpans ?? []).map(([start, end]) => [start, end]),
+          plenio_source_shift: extras?.sourceShift ?? 0
         }
         // the node says it at once: Approve released the sheet (no need to wait for the next run), and
         // changed documents of a sheet that was approved need a new approval

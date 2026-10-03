@@ -17,6 +17,21 @@ import type { LyricLayoutView, LyricLine, ScoreModelView } from '../../shared/sc
 /** ``[start, end)`` of a line placed by hand, in units of L. */
 export type LyricSpan = [number, number]
 
+/**
+ * What the score editor keeps in the node's properties besides the documents (they are no documents:
+ * they never reach the model): the lyrics lines placed by hand and how far a cover's source recording is
+ * moved against the bars (``sourceShift``, seconds, + later).
+ */
+export interface SheetExtras {
+  lyricSpans: LyricSpan[]
+  sourceShift: number
+}
+
+/** The source shift of a node property value (seconds within +-10, else 0). */
+export function parseShift(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) && Math.abs(value) <= 10 ? Math.round(value * 1000) / 1000 : 0
+}
+
 /** A line of a section as the edit sees it: its words and where it is sung (``id``: who it was). */
 export interface PlacedLine {
   id: string

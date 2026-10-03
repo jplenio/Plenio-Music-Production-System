@@ -264,6 +264,7 @@ With **reference_audio** connected to the Song Sheet (the Cover template connect
 - **hear: both** plays the notes and the recording **together**, on one clock: every bar lasts as long as the recording's bar (the transcription's beat grid), so the notes, the metronome and the recording stay together even where the singer drifts from the score's tempo. In an arranged cover, a copied chorus plays the source's chorus again.
 - **notes** / **source** play one of them; **A/B** switches between the two **at once**, also while it plays. The *source* slider sets the recording's level under the notes.
 - The source plays at 100 % speed only (no time stretching); at another speed the notes play alone.
+- **⇆ align**: when the recording runs ahead of or behind the bars - the transcription's beat detection was off - move it by a beat or in 10 ms steps (*reset* goes back to the detected grid). The waveform, the playback, A/B, the sections' source times and the sung pitch follow; the shift is kept with the sheet (node property `plenio_source_shift`), it changes no document.
 
 The reference is only for listening; it is not part of the sheet's documents and never reaches the model.
 

@@ -139,6 +139,8 @@ const props = defineProps<{
   guide?: GuideNote[]
   /** The lyrics lines placed by hand (``lyricPlacement``), kept in the node's properties. */
   lyricSpans?: LyricSpan[]
+  /** How far the source recording is moved against the bars (seconds, + later), kept with the sheet. */
+  sourceShift?: number
   /** Where edited lyrics go (another sheet on Apply, or this sheet's Lyrics tab); ``null``: shown only. */
   lyricsTarget?: LyricsTarget | null
   /** The lyrics as they were when this tab was last closed (the dialog keeps them until Apply). */
@@ -154,6 +156,8 @@ const emit = defineEmits<{
   lyricsChange: [text: string | null]
   /** The lyrics lines placed by hand changed (moved in the lane, or with the bars). */
   lyricSpansChange: [spans: LyricSpan[]]
+  /** The source recording was moved against the bars (the beat grid corrected by hand). */
+  sourceShiftChange: [seconds: number]
 }>()
 
 /**
@@ -678,7 +682,27 @@ const loopRange = computed(() => {
   return { from: start.start_s, to: end.start_s + end.duration_s, label: first === last ? `bar ${first}` : `bars ${first}-${last}` }
 })
 /** The source's bar for every score bar: by content when the timeline knows it (an arranged cover). */
-const timelineBars = computed(() => sourceBars(shown.value?.model, props.payload?.timeline))
+/**
+ * The source's bar for every score bar - moved by ``sourceShift`` when the transcription's beat grid was
+ * off (the recording later: every bar takes earlier seconds of it).
+ */
+const timelineBars = computed(() => {
+  const bars = sourceBars(shown.value?.model, props.payload?.timeline)
+  const shift = props.sourceShift ?? 0
+  if (!bars || !shift) return bars
+  return bars.map((bar) => (bar ? ([bar[0] - shift, bar[1] - shift, bar[2]] as [number, number, string]) : null))
+})
+/** A beat of the source at the cursor (seconds): the step of *align* by a beat. */
+const sourceBeat = computed(() => {
+  const bar = timelineBars.value?.[(locatorBar.value ?? 1) - 1] ?? timelineBars.value?.find((b) => b)
+  if (!bar) return 0.5
+  const beats = Number(bar[2].split('/')[0]) || 4
+  return (bar[1] - bar[0]) / beats
+})
+const sourceShift = computed<number>({
+  get: () => props.sourceShift ?? 0,
+  set: (value) => emit('sourceShiftChange', Math.round(value * 1000) / 1000)
+})
 const sourceStarts = computed(() => timelineBars.value?.map((bar) => bar?.[0] ?? null) ?? null)
 const unit = computed(() => shown.value?.header?.unit ?? '1/16')
 const voices = computed<VoiceSwitches>({
@@ -1349,6 +1373,8 @@ function onKey(event: KeyboardEvent): void {
       :reference="reference"
       v-model:hear="hear"
       v-model:source-level="sourceLevel"
+      v-model:source-shift="sourceShift"
+      :source-beat="sourceBeat"
       :timeline-bars="timelineBars"
       :guide="transportGuide"
       :source="source"

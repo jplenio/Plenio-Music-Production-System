@@ -176,7 +176,7 @@ describe('PianoRoll: DAW habits', () => {
     root.dispatchEvent(new KeyboardEvent('keydown', { key: 'Q', shiftKey: true, bubbles: true }))
     await settle()
     expect(operate).toHaveBeenLastCalledWith(expect.objectContaining({ op: 'quantize', lengths: true }))
-    expect((operate.mock.lastCall?.[0] as { ids: string[] }).ids).toHaveLength(NOTES.length)
+    expect((operate.mock.lastCall?.[0] as unknown as { ids: string[] }).ids).toHaveLength(NOTES.length)
     const svg = root.querySelector('svg.roll-svg') as SVGSVGElement
     const height = Number(svg.getAttribute('height'))
     root.dispatchEvent(new KeyboardEvent('keydown', { key: 'H', shiftKey: true, bubbles: true }))

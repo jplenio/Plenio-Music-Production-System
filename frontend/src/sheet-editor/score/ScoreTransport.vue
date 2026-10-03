@@ -49,12 +49,26 @@ const props = defineProps<{
   sourceProblem?: string | null
   /** What *loop* repeats when something is selected: score seconds and a label (``bars 12-13``). */
   loopRange?: { from: number; to: number; label: string } | null
+  /** A beat of the source at the cursor (seconds): the step of *align* by a beat. */
+  sourceBeat?: number
 }>()
 const voices = defineModel<VoiceSwitches>('voices', { required: true })
 const speed = defineModel<number>('speed', { required: true })
 const metronome = defineModel<boolean>('metronome', { default: false })
 const hear = defineModel<'both' | 'notes' | 'source'>('hear', { default: 'both' })
 const sourceLevel = defineModel<number>('sourceLevel', { default: 0.7 })
+/** How far the source recording is moved against the bars (seconds, + later): the beat grid by hand. */
+const sourceShift = defineModel<number>('sourceShift', { default: 0 })
+const aligning = ref(false)
+
+function nudge(seconds: number): void {
+  sourceShift.value = Math.max(-10, Math.min(10, Math.round((sourceShift.value + seconds) * 1000) / 1000))
+}
+const shiftLabel = computed(() => {
+  const ms = Math.round(sourceShift.value * 1000)
+  if (!ms) return 'in place'
+  return `${Math.abs(ms)} ms ${ms > 0 ? 'later' : 'earlier'}`
+})
 const emit = defineEmits<{ cursor: [ids: string[]]; time: [seconds: number | null] }>()
 
 const player = new TonePlayer()
@@ -203,6 +217,28 @@ onBeforeUnmount(() => player.close())
         source
         <input v-model.number="sourceLevel" type="range" min="0" max="1" step="0.05" :disabled="!sourceReady" aria-label="Source level" />
       </label>
+      <span class="align">
+        <button
+          :class="{ active: sourceShift !== 0 }"
+          :aria-expanded="aligning"
+          :title="`Align the recording with the bars (it is ${shiftLabel})`"
+          @click="aligning = !aligning"
+        >
+          ⇆ align{{ sourceShift ? ` ${Math.round(sourceShift * 1000)} ms` : '' }}
+        </button>
+        <span v-if="aligning" class="align-panel" role="group" aria-label="Align the source recording">
+          <span class="facts">
+            The recording runs ahead of or behind the bars (the beat detection was off)? Move it: the waveform, the playback
+            and the sung pitch follow. Kept with the sheet.
+          </span>
+          <button :title="`One beat earlier (${Math.round((sourceBeat ?? 0.5) * 1000)} ms)`" @click="nudge(-(sourceBeat ?? 0.5))">◀◀ beat</button>
+          <button title="10 ms earlier" @click="nudge(-0.01)">◀ 10 ms</button>
+          <strong>{{ shiftLabel }}</strong>
+          <button title="10 ms later" @click="nudge(0.01)">10 ms ▶</button>
+          <button :title="`One beat later (${Math.round((sourceBeat ?? 0.5) * 1000)} ms)`" @click="nudge(sourceBeat ?? 0.5)">beat ▶▶</button>
+          <button :disabled="!sourceShift" title="Back to the transcription's beat grid" @click="sourceShift = 0">reset</button>
+        </span>
+      </span>
       <span v-if="sourceNote" class="facts">{{ sourceNote }}</span>
     </span>
     <label :title="loopRange ? `Play to the end of the selection (${loopRange.label}), then repeat it` : 'Play to the end of the cursor\'s section, then repeat it (select notes to loop their bars)'">

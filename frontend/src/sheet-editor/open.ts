@@ -5,7 +5,7 @@ import type { Fetcher, GuideNote } from '../api/client'
 import type { AsrNote, ScoreChange, ScoreTarget, SheetPayload } from '../shared/sheetSession'
 import type { DocumentKind, SheetState } from '../shared/sheetState'
 import type { LyricsTarget } from './score/lyricsFollow'
-import type { LyricSpan } from './score/lyricPlacement'
+import type { LyricSpan, SheetExtras } from './score/lyricPlacement'
 import dialogCss from './dialog.css?inline'
 import SheetDialog from './SheetDialog.vue'
 
@@ -23,6 +23,8 @@ export interface OpenOptions {
   guide?: GuideNote[]
   /** The lyrics lines placed by hand (the node's ``plenio_lyric_spans`` property). */
   lyricSpans?: LyricSpan[]
+  /** How far the source recording is moved against the bars (the node's ``plenio_source_shift``). */
+  sourceShift?: number
   /** The sheet that owns the context lyrics, when they can follow the score's sections. */
   lyricsTarget?: LyricsTarget | null
   /** The sheet that owns the context score (a cover's score sheet), when this sheet may edit it. */
@@ -38,7 +40,7 @@ export interface OpenOptions {
     score: ScoreChange | null,
     /** Approve was pressed: the sheet is released for the next run now. */
     approved: boolean,
-    lyricSpans: LyricSpan[]
+    extras: SheetExtras
   ) => void
 }
 
@@ -69,6 +71,7 @@ export function openSheetDialog(options: OpenOptions): () => void {
     layout: options.layout ?? null,
     guide: options.guide ?? [],
     lyricSpans: options.lyricSpans ?? [],
+    sourceShift: options.sourceShift ?? 0,
     lyricsTarget: options.lyricsTarget ?? null,
     scoreTarget: options.scoreTarget ?? null,
     onApply: (
@@ -77,9 +80,9 @@ export function openSheetDialog(options: OpenOptions): () => void {
       lyrics: string | null,
       score: ScoreChange | null,
       approved: boolean,
-      lyricSpans: LyricSpan[]
+      extras: SheetExtras
     ) => {
-      options.onApply(state, guide, lyrics, score, approved, lyricSpans)
+      options.onApply(state, guide, lyrics, score, approved, extras)
       close()
     },
     onClose: close
