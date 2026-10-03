@@ -174,7 +174,7 @@ def _clean(midi: np.ndarray, voiced: np.ndarray) -> np.ndarray:
 
 def _despike(curve: np.ndarray) -> np.ndarray:
     """Excursions far from the local median removed; runs left too short removed too."""
-    out = curve.copy()
+    out: np.ndarray = curve.copy()
     half = SPIKE_WINDOW // 2
     for a, b in _runs(np.isfinite(curve)):
         run = curve[a:b]

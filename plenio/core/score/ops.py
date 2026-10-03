@@ -300,9 +300,9 @@ def place_notes(
         voice = sorted([*voice, note], key=lambda n: n.onset)
     new = score.with_track(track, voice)
     if placed:
-        first = score.measure_at(placed[0].onset) + 1
-        last = score.measure_at(placed[-1].end - 1) + 1
-        where = f"bar {first}" if first == last else f"bars {first}-{last}"
+        first_bar = score.measure_at(placed[0].onset) + 1
+        last_bar = score.measure_at(placed[-1].end - 1) + 1
+        where = f"bar {first_bar}" if first_bar == last_bar else f"bars {first_bar}-{last_bar}"
         change = f"{label or 'placed'} {len(placed)} note{'s' if len(placed) != 1 else ''} in {VOICE_OF[track]} ({where})"
     else:
         change = f"{label or 'placed'} no notes in {VOICE_OF[track]}"

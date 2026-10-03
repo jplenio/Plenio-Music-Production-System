@@ -13,8 +13,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       # numpy, scipy, av and Pillow come with ComfyUI; the unit tests of the audio chain and covers need them
@@ -32,15 +32,15 @@ jobs:
       PLENIO_COMFYUI_ROOT: ${{ github.workspace }}/ComfyUI
       PLENIO_COMFYUI_PYTHON: python
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           path: plenio
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: Comfy-Org/ComfyUI
           ref: v0.37.0
           path: ComfyUI
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - run: python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
@@ -55,8 +55,8 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "22"
           cache: npm
@@ -72,8 +72,8 @@ jobs:
     name: Registry package
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - run: python -m pip install comfy-cli

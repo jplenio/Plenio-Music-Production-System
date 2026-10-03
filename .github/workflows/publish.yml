@@ -15,7 +15,7 @@ jobs:
     name: Publish custom node
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       # comfy-cli reads `git ls-files`; unquoted paths keep the files with "·" in their names
       - run: git config --global core.quotePath false
       - name: Publish to Comfy Registry
@@ -30,8 +30,8 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - run: python -m pip install comfy-cli
