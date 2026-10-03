@@ -245,4 +245,27 @@ describe('ScoreTab: playback from the cursor', () => {
     await nextTick()
     expect(play.title).toContain('the cursor (1.1.1)')
   })
+
+  it('plays and stops with Space also from a clicked checkbox or button, and jumps with a click in the ruler while playing', async () => {
+    const { host, svg, play, tones } = await mountTab()
+    const loop = [...host.querySelectorAll('.transport label')].find((l) => l.textContent?.includes('loop'))?.querySelector('input') as HTMLInputElement
+    loop.click()
+    expect(loop.checked).toBe(true)
+    const down = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true })
+    loop.dispatchEvent(down)
+    const up = new KeyboardEvent('keyup', { key: ' ', bubbles: true, cancelable: true })
+    loop.dispatchEvent(up)
+    await nextTick()
+    expect(down.defaultPrevented && up.defaultPrevented).toBe(true) // the checkbox does not toggle back
+    expect(play.textContent).toContain('stop')
+    const before = tones.length
+    // a click in the ruler while it plays: playback starts again there
+    svg.dispatchEvent(new PointerEvent('pointerdown', { clientX: xOf(96, GEO), clientY: 6, button: 0, bubbles: true, pointerId: 1 }))
+    svg.dispatchEvent(new PointerEvent('pointerup', { clientX: xOf(96, GEO), clientY: 6, button: 0, bubbles: true, pointerId: 1 }))
+    await nextTick()
+    await new Promise((resolve) => setTimeout(resolve, 60))
+    expect(tones.length).toBeGreaterThan(before)
+    expect(play.textContent).toContain('stop')
+    play.click()
+  })
 })

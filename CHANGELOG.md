@@ -9,11 +9,13 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 - **The source recording as a track** (score editor, covers). The roll shows the source's waveform in a lane under the chord and lyrics lanes, bar by bar where the transcription puts it, and the transport plays it **together with the notes** on one clock - every bar as long as the recording's bar, so notes, metronome and recording stay together where the singer drifts, and an arranged cover's copied chorus plays the source's chorus again. *hear: both / notes / source* and **A/B** switch at once while it plays; a slider sets the source's level. *2 · YuE2 · Cover* now connects the source to *Song Sheet · Text* too, so the words can be checked against the singing there.
 - **DAW habits in the piano roll**: a click on the empty grid in draw mode inserts a note of the last drawn length; Shift+drag pulls a frame in draw mode; **Alt+drag copies** notes; a note's end **stops at the next note** instead of being refused (Alt: over it); **Ctrl+wheel** and **G / H** zoom along the bars (never the browser page); a click on the keyboard plays its pitch, and drawn, grabbed and moved notes are heard (*hear* in the roll's toolbar); notes wide enough show their pitch (`E5`).
 - Transport: a click in the ruler (or on a section) while it plays **jumps there**; *loop* repeats the **selected notes' bars** (*loop bars 12-13*), else the cursor's section.
+- **⌨ keys** in the view tools: every key and mouse gesture of the score editor at a glance.
 - Inspector: chord symbols transposed from their panel (−1 / +1), also several at once; the note panel's pitch buttons move selected chord symbols too.
 
 ### Changed
 
 - **Esc** in the score lets the selection go and no longer closes the editor (it closes it from outside the score, as before).
+- **Space** plays and stops also right after a click on a transport button or checkbox (it toggled the checkbox instead); only text fields keep it.
 - The transport's **▶ play** replaces *▶ notes* and *▶ source*; with a source, *hear* chooses what plays.
 
 ## 0.4.3 - 2026-10-03

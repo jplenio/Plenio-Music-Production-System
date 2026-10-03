@@ -20,6 +20,7 @@ Typical uses:
 | **Notation** | click a note or rest to select it, Shift+click to add to the selection; the lyrics stand under the Vocal notes (read-only) |
 | **ABC text** | the canonical text with line numbers; errors are underlined at their bar; the cursor selects the note under it |
 | **Transport** (between the roll and the notation) | play from the cursor (a click in the ruler while it plays jumps there), loop the selection's bars or the cursor's section, metronome, voices (Vocal, Ins, chords), speed; with a source connected (covers): **hear** the notes and the source recording together, or one of them (**A/B**), and the source's level |
+| **⌨ keys** (view tools) | every key and mouse gesture of the editor at a glance |
 | **Status line** | what is selected (voice, bar, pitch, length, chord) and what the last edit did |
 | **Diagnostics** | the backend's findings, each with a link to its bar |
 

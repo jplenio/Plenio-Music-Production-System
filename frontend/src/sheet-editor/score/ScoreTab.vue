@@ -62,6 +62,7 @@ import { type SheetPayload, type WorkingDoc, normalize } from '../../shared/shee
 import LyricsFit from '../LyricsFit.vue'
 import AbcEditor from './AbcEditor.vue'
 import Inspector from './Inspector.vue'
+import KeysHelp from './KeysHelp.vue'
 import MidiDialog from './MidiDialog.vue'
 import NotationView from './NotationView.vue'
 import PianoRoll from './PianoRoll.vue'
@@ -1049,6 +1050,22 @@ function isTextTarget(target: EventTarget | null): boolean {
   return !!element.closest('input, textarea, select, .cm-editor')
 }
 
+/** A control that takes Space itself only to toggle or press (a checkbox, a button): Space plays instead. */
+const SPACE_CONTROLS = new Set(['checkbox', 'radio', 'button', 'submit', 'reset', 'range', 'color'])
+function typesText(target: EventTarget | null): boolean {
+  const element = target as HTMLElement | null
+  if (!element) return false
+  if (element.closest('textarea, select, .cm-editor, [contenteditable="true"]')) return true
+  const input = element.closest('input') as HTMLInputElement | null
+  return !!input && !SPACE_CONTROLS.has(input.type)
+}
+
+/** Space plays and stops wherever the score has the focus - except while text is typed (DAW habit). */
+function onKeyUp(event: KeyboardEvent): void {
+  // a focused button or checkbox would also take the Space that started playback
+  if (event.key === ' ' && !typesText(event.target)) event.preventDefault()
+}
+
 function onKey(event: KeyboardEvent): void {
   const mod = event.ctrlKey || event.metaKey
   if (mod && !props.readonly && (event.key === 'z' || event.key === 'Z' || event.key === 'y')) {
@@ -1065,6 +1082,11 @@ function onKey(event: KeyboardEvent): void {
     void onClipboard(action)
     return
   }
+  if (event.key === ' ' && !mod && !typesText(event.target)) {
+    event.preventDefault()
+    transport.value?.toggle()
+    return
+  }
   if (isTextTarget(event.target) || mod) return
   if (event.key === 'Escape') {
     // Esc lets the selection go - in the score it never closes the editor (DAW habit: Esc to deselect)
@@ -1075,11 +1097,6 @@ function onKey(event: KeyboardEvent): void {
   }
   const view = shown.value
   const primary = session.primary
-  if (event.key === ' ') {
-    event.preventDefault()
-    transport.value?.toggle()
-    return
-  }
   if ((event.key === 'g' || event.key === 'h') && !event.altKey && pianoRoll.value) {
     // Cubase: G zooms out, H zooms in - wherever the score has the focus
     event.preventDefault()
@@ -1146,7 +1163,7 @@ function onKey(event: KeyboardEvent): void {
 </script>
 
 <template>
-  <div class="score-tab" @keydown="onKey">
+  <div class="score-tab" @keydown="onKey" @keyup="onKeyUp">
     <ScorePalette
       v-if="!readonly"
       :view="shown"
@@ -1205,6 +1222,7 @@ function onKey(event: KeyboardEvent): void {
         zoom
         <input v-model.number="prefs.zoom" type="range" min="0.6" max="1.8" step="0.1" aria-label="Notation zoom" />
       </label>
+      <KeysHelp />
       <span class="midi-tools" role="group" aria-label="Files">
         <button
           :disabled="midiBusy || !!midiBlock"

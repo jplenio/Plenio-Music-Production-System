@@ -22,7 +22,9 @@ export interface DecodedSource {
   envelope: SourceEnvelope
 }
 
+/** Decoded recordings by URL; every run brings a new file, so only the last few are kept. */
 const cache = new Map<string, Promise<DecodedSource>>()
+const KEEP = 2
 
 function mono(buffer: AudioBuffer, Context: typeof OfflineAudioContext): AudioBuffer {
   if (buffer.numberOfChannels === 1) return buffer
@@ -70,6 +72,7 @@ export function decodeSource(url: string, fetcher: (url: string) => Promise<Arra
       return { buffer, envelope: envelopeOf(buffer.getChannelData(0), buffer.sampleRate) }
     })()
     cache.set(url, pending)
+    while (cache.size > KEEP) cache.delete(cache.keys().next().value as string)
     pending.catch(() => cache.delete(url))
   }
   return pending

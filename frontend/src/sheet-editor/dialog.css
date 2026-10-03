@@ -1140,3 +1140,44 @@
   font-size: 11px;
   color: var(--descrip-text, #999);
 }
+
+/* the keys and gestures at a glance */
+.plenio-overlay .keys-help {
+  position: relative;
+}
+.plenio-overlay .keys-panel {
+  position: absolute;
+  z-index: 30;
+  top: 26px;
+  left: 0;
+  width: 560px;
+  max-height: 60vh;
+  overflow: auto;
+  padding: 8px 12px;
+  background: var(--comfy-menu-bg, #202020);
+  border: 1px solid var(--border-color, #4e4e4e);
+  border-radius: 6px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+.plenio-overlay .keys-panel .close {
+  float: right;
+}
+.plenio-overlay .keys-panel h5 {
+  margin: 6px 0 2px;
+}
+.plenio-overlay .keys-panel table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
+}
+.plenio-overlay .keys-panel th {
+  width: 210px;
+  text-align: left;
+  white-space: nowrap;
+  padding: 1px 10px 1px 0;
+  color: var(--input-text, #ddd);
+  font-weight: 600;
+}
+.plenio-overlay .keys-panel td {
+  color: var(--descrip-text, #aaa);
+}
