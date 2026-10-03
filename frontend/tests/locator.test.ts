@@ -22,6 +22,7 @@ import {
 import { geometry, xOf } from '../src/sheet-editor/score/pianoRoll'
 import { defaultPrefs, savePrefs } from '../src/sheet-editor/score/prefs'
 import fixture from './fixtures/tricky-score.json'
+import { audioNodes } from './support/fakeAudio'
 
 const VIEW = fixture.view as unknown as ScoreView
 const MODEL = VIEW.model as ScoreModelView // L:1/32, 4/4: 32 units a bar, 2.667 s a bar at 90 BPM
@@ -140,27 +141,15 @@ describe('PianoRoll: the ruler and the cursor', () => {
 function fakeAudio(): { tones: number[]; clock: { now: number } } {
   const tones: number[] = []
   const clock = { now: 0 }
-  const param = () => ({ value: 0, setValueAtTime: () => undefined, linearRampToValueAtTime: () => undefined })
+  const nodes = audioNodes((oscillator) => tones.push(oscillator.frequency.value))
   class FakeContext {
     get currentTime(): number {
       return clock.now
     }
-    destination = {}
     resume = () => Promise.resolve()
     close = () => Promise.resolve()
-    createGain = () => ({ gain: param(), connect: (to: unknown) => to, disconnect: () => undefined })
-    createOscillator = () => {
-      const oscillator = {
-        type: 'sine',
-        frequency: param(),
-        onended: null,
-        connect: (to: unknown) => to,
-        start: () => tones.push(oscillator.frequency.value),
-        stop: () => undefined
-      }
-      return oscillator
-    }
   }
+  Object.assign(FakeContext.prototype, nodes)
   vi.stubGlobal('AudioContext', FakeContext)
   return { tones, clock }
 }

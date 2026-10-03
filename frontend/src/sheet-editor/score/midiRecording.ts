@@ -16,6 +16,7 @@ import { type Ref, computed, ref, shallowRef } from 'vue'
 
 import type { ScoreOperation } from '../../api/client'
 import type { ScoreView } from '../../shared/scoreView'
+import type { InstrumentId } from './instruments'
 import { secondsOfUnit, unitOfSeconds } from './locator'
 import type { MidiHub, MidiNoteEvent } from './midiInput'
 import type { Track } from './pianoRoll'
@@ -53,6 +54,8 @@ export interface RecordingDeps {
   operate: (operation: ScoreOperation) => Promise<boolean>
   notify: (text: string) => void
   problem: (text: string | null) => void
+  /** The sound the keys are heard in (the recorded track's). */
+  sound?: () => InstrumentId
 }
 
 const STEP_CHORD_MS = 40
@@ -184,6 +187,7 @@ export function useMidiRecording(deps: RecordingDeps) {
   function onEvent(event: MidiNoteEvent): void {
     const settings = deps.settings()
     if (settings.thru) {
+      if (deps.sound) monitor.sound = deps.sound()
       if (event.kind === 'on') monitor.on(event.note, event.velocity)
       else monitor.off(event.note)
     }

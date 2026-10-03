@@ -1,10 +1,12 @@
 /**
- * A small WebAudio player for the editor: simple tones, scheduled a little ahead of time, and - for a
- * cover - the source recording on the same clock (``SourceSegment``s of a decoded buffer), each with its
- * own level so that A/B switches at once. No samples or soundfonts are downloaded - it works offline
- * and never leaves the machine.
+ * A small WebAudio player for the editor: the notes in each track's sound (``instruments.ts``: plain
+ * tones, piano, strings, pad ...), scheduled a little ahead of time, and - for a cover - the source
+ * recording on the same clock (``SourceSegment``s of a decoded buffer), each with its own level so that
+ * A/B switches at once. No samples or soundfonts are downloaded - it works offline and never leaves the
+ * machine.
  */
 import { type SourceSegment, type ToneEvent, frequency } from '../../shared/playback'
+import { type InstrumentId, type Sounds, type Voice, defaultSounds, startVoice } from './instruments'
 
 const LOOKAHEAD_S = 0.25
 const TICK_MS = 30
@@ -29,13 +31,6 @@ export interface PlaySource {
   segments: SourceSegment[]
 }
 
-const WAVE: Record<ToneEvent['part'], OscillatorType> = {
-  Vocal: 'triangle',
-  Ins: 'sine',
-  chord: 'sine',
-  click: 'square',
-  guide: 'sine'
-}
 
 export class TonePlayer {
   private context: AudioContext | null = null
@@ -48,7 +43,9 @@ export class TonePlayer {
   private next = 0
   private startedAt = 0
   private timer: ReturnType<typeof setInterval> | null = null
-  private voices: OscillatorNode[] = []
+  private voices: { voice: Voice; end: number }[] = []
+  private clicks: OscillatorNode[] = []
+  private sounds: Sounds = defaultSounds()
   private onTick: ((elapsed: number) => void) | null = null
   private onEnd: (() => void) | null = null
   private length = 0
@@ -59,7 +56,14 @@ export class TonePlayer {
 
   play(
     events: ToneEvent[],
-    options: { onTick?: (elapsed: number) => void; onEnd?: () => void; source?: PlaySource | null; levels?: Levels; length?: number } = {}
+    options: {
+      onTick?: (elapsed: number) => void
+      onEnd?: () => void
+      source?: PlaySource | null
+      levels?: Levels
+      length?: number
+      sounds?: Sounds
+    } = {}
   ): void {
     this.stop()
     const Context = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
@@ -71,6 +75,7 @@ export class TonePlayer {
     this.master.gain.value = 0.8
     this.master.connect(context.destination)
     this.levels = options.levels ?? { tones: 1, source: 1 }
+    this.sounds = options.sounds ?? this.sounds
     this.tones = context.createGain()
     this.tones.gain.value = this.levels.tones
     this.tones.connect(this.master)
@@ -108,6 +113,11 @@ export class TonePlayer {
     return context.currentTime + (perfMs - performance.now()) / 1000 - latency - this.startedAt
   }
 
+  /** The tracks' sounds from now on (the notes already scheduled keep theirs). */
+  setSounds(sounds: Sounds): void {
+    this.sounds = sounds
+  }
+
   /** The layers' levels now (A/B while playing: one of them 0). */
   setLevels(levels: Levels): void {
     this.levels = levels
@@ -131,14 +141,16 @@ export class TonePlayer {
     this.sourceGain = null
     this.tones?.disconnect()
     this.tones = null
-    for (const voice of this.voices) {
+    for (const { voice } of this.voices) voice.stop()
+    this.voices = []
+    for (const click of this.clicks) {
       try {
-        voice.stop()
+        click.stop()
       } catch {
         // already stopped
       }
     }
-    this.voices = []
+    this.clicks = []
     this.master?.disconnect()
     this.master = null
   }
@@ -169,23 +181,43 @@ export class TonePlayer {
     if (!context || !this.master) return
     const start = this.startedAt + event.at
     const stop = start + Math.max(0.05, event.duration)
+    const out = this.tones ?? this.master
+    if (event.part !== 'click') {
+      let voice: Voice
+      try {
+        voice = startVoice(context, out, this.sounds[event.part], event.midi, start, { level: LEVEL[event.part] })
+      } catch {
+        // a sound this browser cannot make: the plain tone, so the playback goes on
+        try {
+          voice = startVoice(context, out, 'plain', event.midi, start, { level: LEVEL[event.part] })
+        } catch {
+          return
+        }
+      }
+      voice.release(stop)
+      // forget the voices that have ended (they stop themselves)
+      const now = context.currentTime
+      this.voices = this.voices.filter((v) => v.end > now)
+      this.voices.push({ voice, end: stop + 2 })
+      return
+    }
     const oscillator = context.createOscillator()
-    oscillator.type = WAVE[event.part]
+    oscillator.type = 'square'
     oscillator.frequency.value = frequency(event.midi)
     const gain = context.createGain()
-    const level = LEVEL[event.part]
+    const level = LEVEL.click
     gain.gain.setValueAtTime(0, start)
-    gain.gain.linearRampToValueAtTime(level, start + (event.part === 'click' ? 0.002 : 0.012))
-    gain.gain.setValueAtTime(level * 0.8, Math.max(start + 0.013, stop - 0.04))
+    gain.gain.linearRampToValueAtTime(level, start + 0.002)
+    gain.gain.setValueAtTime(level * 0.8, Math.max(start + 0.003, stop - 0.04))
     gain.gain.linearRampToValueAtTime(0, stop)
-    oscillator.connect(gain).connect(this.tones ?? this.master)
+    oscillator.connect(gain).connect(out)
     oscillator.start(start)
     oscillator.stop(stop + 0.02)
     oscillator.onended = () => {
-      this.voices = this.voices.filter((v) => v !== oscillator)
+      this.clicks = this.clicks.filter((c) => c !== oscillator)
       gain.disconnect()
     }
-    this.voices.push(oscillator)
+    this.clicks.push(oscillator)
   }
 
   private playSegment(buffer: AudioBuffer, segment: SourceSegment): void {
@@ -216,7 +248,9 @@ export class TonePlayer {
  */
 export class KeyMonitor {
   private context: AudioContext | null = null
-  private tones = new Map<number, { oscillator: OscillatorNode; gain: GainNode }>()
+  private tones = new Map<number, Voice>()
+  /** The sound of the keys: the recorded track's. */
+  sound: InstrumentId = 'soft'
 
   on(midi: number, velocity = 100): void {
     const Context = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
@@ -226,34 +260,18 @@ export class KeyMonitor {
       const context = this.context
       void context.resume()
       this.off(midi)
-      const start = context.currentTime
-      const oscillator = context.createOscillator()
-      oscillator.type = 'triangle'
-      oscillator.frequency.value = frequency(midi)
-      const gain = context.createGain()
-      const level = 0.08 + 0.17 * Math.min(1, velocity / 127)
-      gain.gain.setValueAtTime(0, start)
-      gain.gain.linearRampToValueAtTime(level, start + 0.008)
-      gain.gain.setTargetAtTime(level * 0.7, start + 0.05, 0.3)
-      oscillator.connect(gain).connect(context.destination)
-      oscillator.start(start)
-      this.tones.set(midi, { oscillator, gain })
+      this.tones.set(midi, startVoice(context, context.destination, this.sound, midi, context.currentTime, { velocity: Math.min(1, velocity / 127), level: 0.25 }))
     } catch {
       // hearing the keys is a convenience
     }
   }
 
   off(midi: number): void {
-    const tone = this.tones.get(midi)
+    const voice = this.tones.get(midi)
     const context = this.context
-    if (!tone || !context) return
+    if (!voice || !context) return
     this.tones.delete(midi)
-    const now = context.currentTime
-    tone.gain.gain.cancelScheduledValues(now)
-    tone.gain.gain.setValueAtTime(tone.gain.gain.value, now)
-    tone.gain.gain.linearRampToValueAtTime(0, now + 0.06)
-    tone.oscillator.stop(now + 0.08)
-    tone.oscillator.onended = () => tone.gain.disconnect()
+    voice.release(context.currentTime)
   }
 
   allOff(): void {
@@ -261,15 +279,16 @@ export class KeyMonitor {
   }
 
   close(): void {
-    this.allOff()
+    for (const voice of this.tones.values()) voice.stop()
+    this.tones.clear()
     void this.context?.close()
     this.context = null
   }
 }
 
-/** One short tone to hear a pitch (a drawn or moved note, a key of the roll's keyboard). */
+/** One short note to hear a pitch (a drawn or moved note, a key of the roll's keyboard), in ``sound``. */
 let auditionContext: AudioContext | null = null
-export function audition(midi: number, seconds = 0.35): void {
+export function audition(midi: number, seconds = 0.35, sound: InstrumentId = 'soft'): void {
   const Context = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
   if (!Context) return
   try {
@@ -277,18 +296,7 @@ export function audition(midi: number, seconds = 0.35): void {
     const context = auditionContext
     void context.resume()
     const start = context.currentTime + 0.01
-    const oscillator = context.createOscillator()
-    oscillator.type = 'triangle'
-    oscillator.frequency.value = frequency(midi)
-    const gain = context.createGain()
-    gain.gain.setValueAtTime(0, start)
-    gain.gain.linearRampToValueAtTime(0.2, start + 0.01)
-    gain.gain.setValueAtTime(0.16, start + seconds - 0.06)
-    gain.gain.linearRampToValueAtTime(0, start + seconds)
-    oscillator.connect(gain).connect(context.destination)
-    oscillator.start(start)
-    oscillator.stop(start + seconds + 0.02)
-    oscillator.onended = () => gain.disconnect()
+    startVoice(context, context.destination, sound, midi, start, { level: 0.2 }).release(start + seconds)
   } catch {
     // hearing a pitch is a convenience
   }

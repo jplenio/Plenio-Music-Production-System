@@ -12,29 +12,20 @@ import type { WorkingDoc } from '../src/shared/sheetSession'
 import ScoreTab from '../src/sheet-editor/score/ScoreTab.vue'
 import { defaultPrefs, defaultRecord, savePrefs } from '../src/sheet-editor/score/prefs'
 import fixture from './fixtures/tricky-score.json'
+import { audioNodes } from './support/fakeAudio'
 
 const VIEW = fixture.view as unknown as ScoreView
 
 // --- a fake audio clock and a fake MIDI keyboard ------------------------------------------------
 const clock = { now: 0 }
-const param = () => ({
-  value: 0,
-  setValueAtTime: () => undefined,
-  linearRampToValueAtTime: () => undefined,
-  setTargetAtTime: () => undefined,
-  cancelScheduledValues: () => undefined
-})
 class FakeContext {
   get currentTime(): number {
     return clock.now
   }
-  baseLatency = 0
-  destination = {}
   resume = () => Promise.resolve()
   close = () => Promise.resolve()
-  createGain = () => ({ gain: param(), connect: (to: unknown) => to, disconnect: () => undefined })
-  createOscillator = () => ({ type: 'sine', frequency: param(), onended: null, connect: (to: unknown) => to, start: () => undefined, stop: () => undefined })
 }
+Object.assign(FakeContext.prototype, audioNodes())
 const keyboard = { onmidimessage: null as ((e: { data: Uint8Array; timeStamp: number }) => void) | null, id: 'k', name: 'Keys', manufacturer: 'Test', state: 'connected' }
 const access = { inputs: { forEach: (fn: (i: typeof keyboard) => void) => fn(keyboard) }, onstatechange: null }
 const PERF = 1000

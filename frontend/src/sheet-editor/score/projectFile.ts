@@ -1,11 +1,14 @@
 /**
  * The score editor's project file (owner's request 2026-10-01): everything the *Edit Score* area
  * holds in one file - the score (its canonical ABC: notes, chords, sections, tempo, keys), the Guide
- * notes and the lyrics - so that work can be saved and opened again later, in any sheet. JSON,
- * ``plenio.score_project/1``; reading checks every part and says what it left out.
+ * notes, the lyrics and (since 0.4.4) the editor's settings: the tracks' sounds, the metronome, the
+ * cover's view of its source, the recording and the paper - so that work can be saved and opened again
+ * later, in any sheet. JSON, ``plenio.score_project/1``; reading checks every part and says what it
+ * left out. ``settings`` is optional: older files have none, and older versions ignore it.
  */
 import { version } from '../../../package.json'
 import type { GuideNote } from '../../api/client'
+import { type EditorSettings, parseSettings } from './editorSettings'
 import { type LyricSpan, parseSpans } from './lyricPlacement'
 import { parseGuide } from './tracks'
 
@@ -27,10 +30,19 @@ export interface ScoreProject {
   lyrics: string | null
   /** The lyrics lines placed by hand (``[start, end]`` in units of L; empty: placed by the phrases). */
   lyric_spans: LyricSpan[]
+  /** The editor's settings (only the valid ones of a file; none in files before 0.4.4). */
+  settings: Partial<EditorSettings>
 }
 
 export function buildProject(
-  parts: { title?: string | null; score: string; guide?: GuideNote[] | null; lyrics?: string | null; lyricSpans?: LyricSpan[] | null },
+  parts: {
+    title?: string | null
+    score: string
+    guide?: GuideNote[] | null
+    lyrics?: string | null
+    lyricSpans?: LyricSpan[] | null
+    settings?: EditorSettings | null
+  },
   now: Date = new Date()
 ): ScoreProject {
   return {
@@ -41,7 +53,8 @@ export function buildProject(
     score: parts.score,
     guide: (parts.guide ?? []).map(([onset, duration, pitch]) => [onset, duration, pitch]),
     lyrics: parts.lyrics?.trim() ? parts.lyrics : null,
-    lyric_spans: parts.lyrics?.trim() ? parseSpans(parts.lyricSpans ?? []) : []
+    lyric_spans: parts.lyrics?.trim() ? parseSpans(parts.lyricSpans ?? []) : [],
+    settings: parts.settings ? parseSettings(parts.settings) : {}
   }
 }
 
@@ -75,6 +88,7 @@ export function parseProject(text: string): ScoreProject | string {
     score: record.score,
     guide: parseGuide(record.guide),
     lyrics: typeof record.lyrics === 'string' && record.lyrics.trim() ? record.lyrics : null,
-    lyric_spans: parseSpans(record.lyric_spans)
+    lyric_spans: parseSpans(record.lyric_spans),
+    settings: parseSettings(record.settings)
   }
 }

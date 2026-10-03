@@ -36,11 +36,14 @@ import {
   toScore
 } from '../../shared/playback'
 import { type ScoreView, clock, sectionOfBar } from '../../shared/scoreView'
+import type { Sounds } from './instruments'
 import { type Levels, TonePlayer } from './player'
 import type { DecodedSource } from './sourceAudio'
 
 const props = defineProps<{
   view: ScoreView | null
+  /** Each track's sound (``instruments.ts``); a change takes effect at once while it plays. */
+  sounds?: Sounds
   /** The cursor's bar (1-based): *loop* loops its section when nothing is selected. */
   bar: number | null
   /** The cursor in score seconds: playback starts there (default: the start of ``bar``). */
@@ -166,6 +169,7 @@ function play(from = startSecond.value, recording: RecordPlayback | null = null)
       source: segments.length && props.source ? { buffer: props.source.buffer, segments } : null,
       levels: levels(),
       length: lead + playLength(view, current),
+      sounds: props.sounds,
       onTick: (elapsed) => {
         countingIn.value = elapsed < lead
         if (elapsed < lead) return
@@ -252,6 +256,14 @@ function swap(): void {
   hear.value = hear.value === 'source' ? 'notes' : 'source'
 }
 
+// another sound for a track: the next notes play in it
+watch(
+  () => props.sounds,
+  (sounds) => {
+    if (sounds) player.setSounds(sounds)
+  },
+  { deep: true }
+)
 // A/B and the source's level take effect at once while it plays
 watch([hear, sourceLevel], () => {
   if (playing.value) player.setLevels(levels())

@@ -4,6 +4,8 @@
  * storage simply gives the defaults.
  */
 import type { VoiceSwitches } from '../../shared/playback'
+import type { Paper } from './editorSettings'
+import { type Sounds, defaultSounds, soundsOf } from './instruments'
 import type { RecordSettings } from './midiRecording'
 import { NOTATION_MAX, NOTATION_MIN, ROLL_MAX, ROLL_MIN, SIDE_MAX, SIDE_MIN } from '../paneSizes'
 
@@ -41,6 +43,12 @@ export interface EditorPrefs {
   follow: boolean
   /** Draw a cover's sung pitch (node Sung Pitch) over the notes. */
   sung: boolean
+  /** Show a cover's source waveform in the roll. */
+  wave: boolean
+  /** Each track's sound in the playback. */
+  sounds: Sounds
+  /** The paper of the notation's PDF and print. */
+  paper: Paper
   /** Recording and step input with a MIDI keyboard. */
   record: RecordSettings
   /** The MIDI keyboard to listen to (an input's id; ``all``: every one). */
@@ -51,7 +59,8 @@ export function defaultRecord(): RecordSettings {
   return { countIn: 1, quantize: 16, mode: 'replace', mute: true, thru: true, stepLength: 8 }
 }
 
-function recordOf(value: unknown): RecordSettings {
+/** Valid recording settings from stored ones (a missing or broken field: its default). */
+export function recordOf(value: unknown): RecordSettings {
   const defaults = defaultRecord()
   const data = (typeof value === 'object' && value !== null ? value : {}) as Partial<RecordSettings>
   const pick = <T>(candidate: unknown, allowed: readonly T[], fallback: T): T => (allowed.includes(candidate as T) ? (candidate as T) : fallback)
@@ -86,6 +95,9 @@ export function defaultPrefs(): EditorPrefs {
     rowHeight: 12,
     follow: true,
     sung: true,
+    wave: true,
+    sounds: defaultSounds(),
+    paper: 'a4',
     record: defaultRecord(),
     midiInput: 'all'
   }
@@ -142,6 +154,9 @@ export function loadPrefs(storage: Pick<Storage, 'getItem'> | null = safeStorage
         typeof data.rowHeight === 'number' && data.rowHeight >= 6 && data.rowHeight <= 28 ? Math.round(data.rowHeight) : defaults.rowHeight,
       follow: data.follow !== false,
       sung: data.sung !== false,
+      wave: data.wave !== false,
+      sounds: soundsOf(data.sounds),
+      paper: data.paper === 'letter' ? 'letter' : 'a4',
       record: recordOf(data.record),
       midiInput: typeof data.midiInput === 'string' && data.midiInput ? data.midiInput : 'all'
     }

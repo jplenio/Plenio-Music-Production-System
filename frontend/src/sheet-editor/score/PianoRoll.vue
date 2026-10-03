@@ -45,6 +45,7 @@ import type { ClipAction } from './clipboard'
 import { pitchName } from './inspector'
 import { lineKey } from './lyricPlacement'
 import { positionLabel, rulerUnit } from './locator'
+import type { InstrumentId } from './instruments'
 import { audition as hearPitch } from './player'
 import { type SourceEnvelope, waveColumns } from './sourceAudio'
 import { type SungCurve, curveRuns } from './sungPitch'
@@ -135,6 +136,8 @@ const props = withDefaults(
       offset: number
       bars: readonly ([number, number, string] | null)[] | undefined
     } | null
+    /** The sound a drawn, grabbed or moved note is heard in (the draw-into track's). */
+    sound?: InstrumentId
     /** A MIDI take while it is played: its notes so far (drawn red over the roll). */
     recorded?: { track: Track; notes: readonly { onset: number; duration: number; pitch: number }[] } | null
   }>(),
@@ -191,6 +194,10 @@ const rowHeight = defineModel<number>('rowHeight', { default: 12 })
 const follow = defineModel<boolean>('follow', { default: true })
 /** Draw the sung pitch (when the sheet has one). */
 const sungVisible = defineModel<boolean>('sungVisible', { default: true })
+/** Show the source's waveform lane (a cover; off for a cover far from the original). */
+const waveVisible = defineModel<boolean>('waveVisible', { default: true })
+/** The source lane is drawn (a cover's recording, switched on). */
+const sourceShown = computed(() => !!props.source && waveVisible.value)
 
 const root = ref<HTMLDivElement | null>(null)
 const scroller = ref<HTMLDivElement | null>(null)
@@ -254,7 +261,7 @@ const geo = computed(() =>
         pxPerQuarter: zoom.value,
         snap: snapChoice.value,
         lyrics: !!props.lyrics,
-        source: !!props.source,
+        source: sourceShown.value,
         rowHeight: rowHeight.value
       })
     : null
@@ -263,7 +270,7 @@ const geo = computed(() =>
 const lastLength = ref<number | null>(null)
 
 function hear(pitch: number): void {
-  if (audition.value) hearPitch(pitch)
+  if (audition.value) hearPitch(pitch, 0.35, props.sound)
 }
 const editable = computed(() => !props.readonly && !props.stale && !props.busy && !committing.value)
 const selectedNotes = computed(() => selectedNoteIds(props.view, props.selection))
@@ -528,7 +535,7 @@ function onPointerDown(event: PointerEvent): void {
   const hit = hitTest(x, y, notes.value, chords.value, g, track.value, scrollTop.value, scrollLeft.value)
   if (hit.area === 'keys') {
     // the keyboard: hear the key's pitch (the selection stays)
-    if (audition.value) hearPitch(hit.pitch)
+    if (audition.value) hearPitch(hit.pitch, 0.35, props.sound)
     return
   }
   if (hit.area === 'header' || hit.area === 'source') {
@@ -1187,6 +1194,9 @@ defineExpose({ zoomBy, zoomRows })
         <button title="Lower rows (Shift+G, Alt+wheel)" aria-label="Lower rows" @click="zoomRows(-2)">↕−</button>
         <button title="Taller rows (Shift+H, Alt+wheel)" aria-label="Taller rows" @click="zoomRows(2)">↕+</button>
       </span>
+      <label v-if="source" title="The source recording's waveform in a lane over the roll (untick it for a cover far from the original)">
+        <input v-model="waveVisible" type="checkbox" aria-label="Show the source's waveform" /> wave
+      </label>
       <label v-if="sung" :title="sungTitle" :class="{ unavailable: !!sung.problem }">
         <input v-model="sungVisible" type="checkbox" :disabled="!!sung.problem" aria-label="Show the sung pitch" /> {{ sungLabel }}
       </label>

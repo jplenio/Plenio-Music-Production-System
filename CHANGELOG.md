@@ -16,6 +16,11 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 - Inspector: chord symbols transposed from their panel (−1 / +1), also several at once; the note panel's pitch buttons move selected chord symbols too.
 - **Recording with a MIDI keyboard** (score editor, Web MIDI in Chrome and Edge). **● rec** (Shift+R) records into the roll's *draw into* voice from the cursor after a count-in on the song's beats: the keys show as red notes while they are played, timed as they were heard (the audio output's latency is taken out); Space, *■ stop* or *rec* again keep the take as **one undo step**, Esc throws it away. The take becomes one line on the *quantize* grid (keys pressed together: the highest; legato cut; a key let go a little early still reaches the next note), and *replace* or *merge* decide what happens to the notes that were there. **step** input writes a note of the step length at the cursor with every key (*rest ▶* skips a step). 🎹 holds the keyboard choice (a keyboard plugged in later is found at once), hearing the keys, count-in, quantize, mode, muting the voice's old notes and the step length; a key held while its keyboard is unplugged ends there.
 
+- **Export notation…** (score editor): the sheet music as **PDF** (A4 or Letter, 300 dpi pages with page numbers), **PNG**, **SVG** or **Print…** (the browser's dialog, also a vector PDF) - both voices, chord symbols, sections and the lyrics, with the song's title. No new dependency: abcjs draws the pages, a small PDF writer packs them.
+- **Sounds per track**: ♫ sounds in the transport (and the DAW layout's track headers) gives Vocal, Instrument, Chords and Guide a sound each - Plain, Soft lead, Piano, Electric piano, Strings, Pad, Organ, Flute, Voice “ah”, Pluck, Synth lead, Bass, Mallets - synthesized in the browser (offline, no download), levelled to the same loudness; ▶ previews a track's sound. Drawn notes and the MIDI keys are heard in the *draw into* track's sound.
+- **Presets** of the basic settings: built in by kind of song (Pop, Ballad, Rock, Electronic, Acoustic, Jazz, Orchestral ...) and way of working (*Composing with a MIDI keyboard*, *Cover: check the transcription*, *Cover: free arrangement*); **save current as preset…** keeps your own in ComfyUI's user data (`plenio/score-editor-presets.json`), so they are there in every browser.
+- **wave** in the roll's toolbar (covers): the source's waveform lane can be hidden, like the sung pitch - for covers far from the original.
+- The sheet warns about an **octave slip** in the vocal melody (below E2 or above C7 as written) - a MIDI keyboard played an octave off; the text stays valid ABC.
 - README: screenshots of a cover's score editor (waveform, sung pitch, *hear: both*) and of a MIDI recording.
 
 ### Changed
@@ -23,6 +28,7 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 - **Esc** in the score lets the selection go and no longer closes the editor (it closes it from outside the score, as before).
 - **Space** plays and stops also right after a click on a transport button or checkbox (it toggled the checkbox instead); only text fields keep it.
 - The transport's **▶ play** replaces *▶ notes* and *▶ source*; with a source, *hear* chooses what plays.
+- The **project file** also keeps the editor's settings - the tracks' sounds, the metronome, the cover's view of its source, the recording settings and the paper - and opening it restores them (the field is optional: older files and older versions work as before).
 - Playback lasts to the end of the score (or of the loop's bars), also through bars of rests at the end; it stopped with the last note, and a loop over bars ending in rests came round early.
 
 ## 0.4.3 - 2026-10-03

@@ -378,8 +378,11 @@ def draw_operation(data: st.DataObject, score: c.Score) -> dict[str, object]:
     """A random operation with plausible parameters (it may still be refused)."""
     notes = [("vocal", n) for n in score.vocal] + [("ins", n) for n in score.ins]
     kinds = ["insert_note", "put_chord", "insert_measures", "change_tempo", "fill_rest", "put_key"]
+    # a MIDI take, step input and paste: notes from outside the score (any pitch a keyboard has)
+    kinds += ["place_notes", "paste"]
     if notes:
         kinds += [
+            "quantize",
             "delete",
             "delete_close_gap",
             "move_notes",
@@ -399,6 +402,28 @@ def draw_operation(data: st.DataObject, score: c.Score) -> dict[str, object]:
     onset = data.draw(st.integers(0, total - 1))
     pick = data.draw(st.sampled_from(notes)) if notes else None
     ident = f"{pick[0]}:{pick[1].onset}" if pick else "vocal:0"
+    played = [
+        {
+            "onset": (at := data.draw(st.integers(0, total - 1))),
+            "duration": data.draw(st.integers(1, max(1, min(total - at, 32)))),
+            "pitch": data.draw(st.integers(21, 108)),
+        }
+        for _ in range(data.draw(st.integers(1, 6)))
+    ]
+    span = data.draw(st.integers(1, 32))
+    clip, cursor = [], 0
+    while cursor < span and len(clip) < 4:
+        length = data.draw(st.integers(1, span - cursor))
+        if data.draw(st.booleans()):
+            clip.append(
+                {
+                    "track": "vocal",
+                    "onset": cursor,
+                    "duration": length,
+                    "pitch": data.draw(st.integers(40, 90)),
+                }
+            )
+        cursor += length
     return {
         "insert_note": {
             "track": data.draw(st.sampled_from(("vocal", "ins"))),
@@ -407,6 +432,28 @@ def draw_operation(data: st.DataObject, score: c.Score) -> dict[str, object]:
             "pitch": data.draw(st.integers(36, 96)),
         },
         "put_chord": {"onset": onset, "name": data.draw(st.sampled_from(CHORDS))},
+        "place_notes": {
+            "track": data.draw(st.sampled_from(("vocal", "ins"))),
+            "notes": played,
+            "label": "recorded",
+        }
+        | (
+            {"clear": sorted([data.draw(st.integers(0, total)), data.draw(st.integers(0, total))])}
+            if data.draw(st.booleans())
+            else {}
+        ),
+        "paste": {
+            "at": onset,
+            "span": span,
+            "notes": clip,
+            "tracks": ["vocal"],
+            "mode": data.draw(st.sampled_from(("overwrite", "insert"))),
+        },
+        "quantize": {
+            "ids": [ident],
+            "grid": data.draw(st.sampled_from((1, 2, 3, 4, 8))),
+            "lengths": data.draw(st.booleans()),
+        },
         "insert_measures": {
             "bar": data.draw(st.integers(1, score.measure_count + 1)),
             "count": data.draw(st.integers(1, 5)),

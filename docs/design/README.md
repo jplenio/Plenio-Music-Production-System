@@ -11,6 +11,7 @@ Engineering source of truth for the Plenio Music Production System. Later phases
 | [yue2-cover-design.md](yue2-cover-design.md) | 1B, final 4A, **implemented 4B** (§21) | YuE2 Cover path: data flow, lyrics/score precedence, modes, contracts, validation, test matrix |
 | [instrumental-strategy.md](instrumental-strategy.md) | 1B, final 4A, **implemented 4B** (§13) | defense-in-depth instrumental strategy per model, adapter verdict, detectors |
 | [score-editor-design.md](score-editor-design.md) | 1B, **implemented 5** (§15) | reusable notation/ABC editor |
+| [score-editor-sounds-export.md](score-editor-sounds-export.md) | 0.4.4 | the score editor's notation export (PDF, PNG, SVG, print), synthesized track sounds, presets in ComfyUI's user data, settings in the project file, the YuE2-compatibility guarantee and the octave-slip warning - research, options, decisions (VST: why not) |
 | [usability-review.md](usability-review.md) | 8 | checklist, control inventory, parameter ownership and findings of the final templates |
 | [../audit/2026-09-25-phase-9-audit.md](../audit/2026-09-25-phase-9-audit.md) | 9 | full codebase audit: method, findings by severity and confidence, fixes, deferred items |
 | [../audit/2026-09-25-phase-10-acceptance.md](../audit/2026-09-25-phase-10-acceptance.md) | 10 | final architecture acceptance review: verdict (accepted with conditions), evidence, findings, remaining limitations, extension points |

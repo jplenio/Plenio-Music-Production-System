@@ -73,6 +73,10 @@ HIGH_MELODY_LOWEST = 60
 """A melody whose lowest note is at or above C4 lies in a female register."""
 LOW_MELODY_HIGHEST = 60
 """A melody whose highest note is at or below C4 lies in a male register."""
+VOCAL_WRITTEN_LOWEST = 40
+"""E2: a bass's lowest sung note - and transcriptions write melodies an octave above the singing."""
+VOCAL_WRITTEN_HIGHEST = 96
+"""C7: a soprano's high C written an octave up, as SheetSage2 writes melodies; no voice sings higher."""
 _NOTE_NAMES = ("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
 
 
@@ -118,6 +122,33 @@ def check_register(style: str, lowest: int | None, highest: int | None) -> list[
             highest=highest,
         )
     ]
+
+
+def check_vocal_range(lowest: int | None, highest: int | None) -> list[Finding]:
+    """Warn about a vocal melody that reaches where no voice sings: an octave slip (a MIDI keyboard
+    played an octave off, notes moved too far). The ABC stays valid - YuE2 just cannot sing it."""
+    if lowest is None or highest is None:
+        return []
+    found: list[Finding] = []
+    if lowest < VOCAL_WRITTEN_LOWEST:
+        found.append(
+            warning(
+                f"The vocal melody goes down to {note_name(lowest)}, below any singing voice; YuE2 cannot sing it "
+                "as written. An octave slip? Select the notes and move them up (+8va).",
+                "score",
+                lowest=lowest,
+            )
+        )
+    if highest > VOCAL_WRITTEN_HIGHEST:
+        found.append(
+            warning(
+                f"The vocal melody goes up to {note_name(highest)}, above any singing voice; YuE2 cannot sing it "
+                "as written. An octave slip? Select the notes and move them down (-8va).",
+                "score",
+                highest=highest,
+            )
+        )
+    return found
 
 
 _LANGUAGES = re.compile(
@@ -314,6 +345,8 @@ def check_score(
     findings: list[Finding] = [
         warning(d.message, "score") for d in analysis.diagnostics if d.severity == "warning"
     ]
+    vocal = analysis.voices["Vocal"]
+    findings += check_vocal_range(vocal.get("lowest"), vocal.get("highest"))
     if instrumental and vocal_notes:
         findings.append(
             error(

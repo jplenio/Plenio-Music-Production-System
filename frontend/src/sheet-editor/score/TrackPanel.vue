@@ -11,6 +11,7 @@ import { computed } from 'vue'
 
 import type { VoiceSwitches } from '../../shared/playback'
 import type { ScoreView } from '../../shared/scoreView'
+import { INSTRUMENTS, INSTRUMENT_IDS, type InstrumentId, type Sounds } from './instruments'
 import { notesLabel, trackRows } from './tracks'
 
 const props = defineProps<{
@@ -24,6 +25,14 @@ const props = defineProps<{
   guideActive?: boolean
 }>()
 const voices = defineModel<VoiceSwitches>('voices', { required: true })
+/** Each track's sound, as in a DAW's instrument slot. */
+const sounds = defineModel<Sounds>('sounds')
+const SOUND_OF: Record<string, keyof Sounds> = { Vocal: 'Vocal', Ins: 'Ins', chords: 'chord', guide: 'guide' }
+
+function setSound(voice: string, id: InstrumentId): void {
+  const key = SOUND_OF[voice]
+  if (sounds.value && key) sounds.value = { ...sounds.value, [key]: id }
+}
 const emit = defineEmits<{ clearGuide: [] }>()
 
 const visible = computed(() =>
@@ -53,6 +62,16 @@ function toggle(voice: string, on: boolean): void {
         <span class="track-name">{{ row.name }}</span>
         <span class="destination" :class="{ unsent: !row.sent }">{{ row.destination }}</span>
         <span class="count">{{ notesLabel(row.notes) }}</span>
+        <select
+          v-if="sounds && SOUND_OF[row.voice]"
+          class="sound"
+          :value="sounds[SOUND_OF[row.voice]]"
+          :aria-label="`Sound of the ${row.name} track`"
+          :title="`The ${row.name} track’s sound in the playback`"
+          @change="setSound(row.voice, ($event.target as HTMLSelectElement).value as InstrumentId)"
+        >
+          <option v-for="id in INSTRUMENT_IDS" :key="id" :value="id" :title="INSTRUMENTS[id].hint">{{ INSTRUMENTS[id].label }}</option>
+        </select>
         <label class="play" :title="`Play the ${row.name} track`">
           <input
             type="checkbox"

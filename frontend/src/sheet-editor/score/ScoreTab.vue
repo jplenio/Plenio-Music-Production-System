@@ -124,6 +124,10 @@ import { guideNotes, remapGuide, sameGuide } from './tracks'
 import { type DecodedSource, decodeSource } from './sourceAudio'
 import { curveOf, octaveOffset } from './sungPitch'
 import RecordControls from './RecordControls.vue'
+import NotationExport from './NotationExport.vue'
+import SoundsPanel from './SoundsPanel.vue'
+import { type EditorSettings, settingsOf, withSettings } from './editorSettings'
+import type { Sounds } from './instruments'
 import { midiHub } from './midiInput'
 import { useMidiRecording } from './midiRecording'
 import type { Track } from './pianoRoll'
@@ -279,6 +283,31 @@ const pianoRoll = ref<InstanceType<typeof PianoRoll> | null>(null)
 const tabRoot = ref<HTMLElement | null>(null)
 /** The voice new notes go into: the roll's *draw into* (drawing, recording, step input). */
 const drawTrack = ref<Track>('vocal')
+/** Each track's sound (♫ sounds, the DAW layout's track headers). */
+const sounds = computed<Sounds>({
+  get: () => prefs.value.sounds,
+  set: (value) => (prefs.value = { ...prefs.value, sounds: value })
+})
+/** The settings a preset or a project carries, as they are now. */
+const currentSettings = computed(() => settingsOf(prefs.value))
+/** A preset's (or a project's) settings: the ones it names change, the rest stays. */
+function applySettings(settings: Partial<EditorSettings>, name: string): void {
+  prefs.value = withSettings(prefs.value, settings)
+  session.notes = [`${name}: ${describeSettings(settings)}`]
+}
+/** What a preset sets, in a few words (for the status line). */
+function describeSettings(settings: Partial<EditorSettings>): string {
+  const parts: string[] = []
+  if (settings.sounds) parts.push('sounds')
+  if (settings.metronome !== undefined) parts.push(`metronome ${settings.metronome ? 'on' : 'off'}`)
+  if (settings.hear) parts.push(`hear ${settings.hear}`)
+  if (settings.wave !== undefined || settings.sung !== undefined) parts.push('the source view')
+  if (settings.record) parts.push('recording')
+  if (settings.paper) parts.push(`paper ${settings.paper === 'a4' ? 'A4' : 'Letter'}`)
+  return parts.length ? `${parts.join(', ')} set` : 'nothing to set'
+}
+/** The draw-into track's sound: drawn notes and the MIDI keys are heard in it. */
+const drawSound = computed(() => prefs.value.sounds[drawTrack.value === 'vocal' ? 'Vocal' : 'Ins'])
 
 watch(prefs, (value) => savePrefs(value), { deep: true })
 
@@ -300,7 +329,8 @@ const midi = useMidiRecording({
   settings: () => prefs.value.record,
   operate: operateRoll,
   notify: (text) => (session.notes = [text]),
-  problem: (text) => (midiProblem.value = text)
+  problem: (text) => (midiProblem.value = text),
+  sound: () => drawSound.value
 })
 const midiProblem = ref<string | null>(null)
 const recordBlock = computed(() => {
@@ -991,6 +1021,20 @@ const midiRequest = ref<{ data: string; filename: string } | null>(null)
 const midiError = ref<string | null>(null)
 const midiBusy = ref(false)
 const keepsGuide = computed(() => props.guide !== undefined)
+/** Why the notation cannot be exported (an invalid text shows the last valid score: not that). */
+const notationBlock = computed(() => {
+  if (session.commitBlock) return session.commitBlock
+  return props.doc.text.trim() && shown.value?.display_abc ? null : 'There is no score to export yet.'
+})
+const paper = computed({
+  get: () => prefs.value.paper,
+  set: (value) => (prefs.value = { ...prefs.value, paper: value })
+})
+function notationExported(message: string): void {
+  midiError.value = null
+  session.notes = [message]
+}
+
 const midiBlock = computed(() => {
   if (props.readonly) return 'This score belongs to the other sheet.'
   if (session.commitBlock) return session.commitBlock
@@ -1044,7 +1088,7 @@ async function exportSheet(): Promise<void> {
   }
 }
 
-// --- the project file: the score, the Guide notes and the lyrics, to go on later ---
+// --- the project file: the score, the Guide notes, the lyrics and the editor's settings, to go on later ---
 const projectFile = ref<HTMLInputElement | null>(null)
 
 /** Everything this editor holds, as one file - also an unfinished score (its text is kept as it is). */
@@ -1054,11 +1098,12 @@ function saveProject(): void {
     score: props.doc.text,
     guide: props.guide ?? [],
     lyrics: lyricsNow.value ?? props.lyrics ?? null,
-    lyricSpans: spansNow()
+    lyricSpans: spansNow(),
+    settings: currentSettings.value
   })
   downloadBytes(projectFilename(props.title), new TextEncoder().encode(`${JSON.stringify(project, null, 1)}\n`), 'application/json')
   midiError.value = null
-  session.notes = [`saved the project: score${project.guide.length ? `, ${guideCount(project.guide.length)}` : ''}${project.lyrics ? ', lyrics' : ''}`]
+  session.notes = [`saved the project: score${project.guide.length ? `, ${guideCount(project.guide.length)}` : ''}${project.lyrics ? ', lyrics' : ''}, settings`]
 }
 
 function chooseProject(): void {
@@ -1109,6 +1154,11 @@ function openProject(project: ScoreProject, name: string): void {
     setSpans(project.lyric_spans)
   } else if (project.lyrics) left.push('the lyrics (this sheet cannot change them here)')
   Object.assign(after, lyricsState())
+  // the project's sounds, metronome, cover view, recording and paper (a file before 0.4.4 has none)
+  if (Object.keys(project.settings).length) {
+    prefs.value = withSettings(prefs.value, project.settings)
+    opened.push('settings')
+  }
   const label = `open project (${name})`
   // the same score: the step holds the Guide notes and the lyrics alone
   if (!session.replaceText(project.score, label, null, { before, after })) session.recordSide(label, before, after)
@@ -1363,6 +1413,14 @@ function onKey(event: KeyboardEvent): void {
         >
           Export MusicXML
         </button>
+        <NotationExport
+          v-model:paper="paper"
+          :abc="notationBlock ? null : (shown?.display_abc ?? null)"
+          :title="title ?? ''"
+          :blocked="notationBlock"
+          @done="notationExported"
+          @failed="(message: string) => (midiError = message)"
+        />
         <button
           :disabled="!doc.text.trim()"
           title="Save the score, the Guide notes and the lyrics in one project file, to go on later (Open project…)"
@@ -1425,6 +1483,8 @@ function onKey(event: KeyboardEvent): void {
       v-model:track="drawTrack"
       :recorded="midi.recording.value ? { track: drawTrack, notes: midi.live.value } : null"
       v-model:sung-visible="prefs.sung"
+      v-model:wave-visible="prefs.wave"
+      :sound="drawSound"
       :sung="sungPitch"
       :height="prefs.rollHeight"
       :view="shown"
@@ -1468,6 +1528,7 @@ function onKey(event: KeyboardEvent): void {
       ref="transport"
       v-model:voices="voices"
       v-model:speed="speed"
+      :sounds="prefs.sounds"
       v-model:metronome="metronome"
       :view="shown"
       :bar="locatorBar"
@@ -1502,6 +1563,7 @@ function onKey(event: KeyboardEvent): void {
           @rest="midi.rest"
           @enable="midi.ready"
         />
+        <SoundsPanel v-model:sounds="sounds" :fetcher="fetcher" :settings="currentSettings" :keeps-guide="keepsGuide" @apply="applySettings" />
       </template>
     </ScoreTransport>
     <div
@@ -1517,6 +1579,7 @@ function onKey(event: KeyboardEvent): void {
           v-model:voices="voices"
           :view="shown"
           :guide-count="guide.length"
+          v-model:sounds="sounds"
           :keeps-guide="keepsGuide"
           :readonly="readonly"
           @clear-guide="clearGuide"

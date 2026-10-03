@@ -503,6 +503,26 @@ def test_register_check_matches_the_voice_to_the_fixed_melody() -> None:
     assert yue2.voice_register("female vocal") == "female" and yue2.voice_register("tenor-sax") == ""
 
 
+def test_vocal_range_warns_about_an_octave_slip_only() -> None:
+    # real transcriptions (SheetSage2, YuE2 plans) stay quiet
+    for name in ("minimax-excerpt", "yue2-take-y2", "yue2-take-y3"):
+        vocal = score_rules.analyze(fixture(name)["abc"]).voices["Vocal"]
+        assert yue2.check_vocal_range(vocal["lowest"], vocal["highest"]) == [], name
+    for path in sorted((FIXTURES.parent / "abc").glob("*.abc")):
+        vocal = score_rules.analyze(path.read_text(encoding="utf-8")).voices["Vocal"]
+        assert yue2.check_vocal_range(vocal["lowest"], vocal["highest"]) == [], path.name
+    # a melody played an octave or two off on a MIDI keyboard
+    low = yue2.check_vocal_range(36, 52)
+    assert len(low) == 1 and "C2" in low[0].message and "+8va" in low[0].message
+    high = yue2.check_vocal_range(70, 98)
+    assert len(high) == 1 and "D7" in high[0].message and "-8va" in high[0].message
+    assert yue2.check_vocal_range(None, None) == []
+    # and the sheet shows it with the score's findings
+    abc = fixture("yue2-take-y3")["abc"]
+    findings, _ = yue2.check_score(abc, instrumental=False)
+    assert not any("octave slip" in f.message for f in findings)
+
+
 def test_cover_prompt_names_the_melody_register() -> None:
     brief = build_cover_brief({"genre": "folk", "vocals": "original"})
     tags = ["[Verse]", "[Chorus]"]

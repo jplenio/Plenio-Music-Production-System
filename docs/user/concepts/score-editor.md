@@ -178,13 +178,14 @@ One undo history covers both kinds of edits: a burst of typing is one step, each
 
 ## Files: MIDI, MusicXML and the project
 
-A score goes in and out as a standard MIDI file, so a sketch from any DAW can become the score - and the score can go back to a DAW. The sheet music goes out as MusicXML, and the whole editor's work goes into a project file to go on later.
+A score goes in and out as a standard MIDI file, so a sketch from any DAW can become the score - and the score can go back to a DAW. The sheet music goes out as MusicXML, PDF, PNG or SVG, and the whole editor's work goes into a project file to go on later.
 
 | Button | What it does |
 |---|---|
-| **Save project** | Downloads everything the score editor holds as one file, `<title>.plenio.json`: the score (notes of both voices, chord symbols, sections, tempo, keys, meters), the **Guide notes** and the **lyrics**. An unfinished or even invalid score is saved as it is. |
-| **Open project…** | Opens such a file in any score sheet. Its score, Guide notes and lyrics replace these in **one undo step**. A part the sheet cannot hold is left out, and the status line says which: Guide notes need the DAW sheet, and lyrics need a sheet whose lyrics the editor can change. Lyrics opened in a score sheet of the Song or DAW template go into *Song Sheet · Text* on Apply, like any lyrics edit. |
-| **Export MusicXML** | Downloads the sheet music as MusicXML 4.0 (`<title>.musicxml`), the format notation programs exchange (MuseScore, Sibelius, Finale, Dorico, Cubase's score editor, Logic). Parts: *Vocal* (with the chord symbols, the section names as rehearsal marks, the tempo and the **lyrics** under the notes) and *Instrument* (bass clef when it plays low). Notes that cross a bar line or have no single note value are tied; pitches are spelled for the key. For a PDF, open the file in a notation program (MuseScore is free) and print it. The Guide track stays in the MIDI export. Off while the text is invalid. |
+| **Save project** | Downloads everything the score editor holds as one file, `<title>.plenio.json`: the score (notes of both voices, chord symbols, sections, tempo, keys, meters), the **Guide notes**, the **lyrics** and the editor's **settings** - the tracks' sounds, the metronome, a cover's *hear*, source level, *wave* and *sung*, the MIDI recording settings and the paper. An unfinished or even invalid score is saved as it is. |
+| **Open project…** | Opens such a file in any score sheet. Its score, Guide notes and lyrics replace these in **one undo step**, and its settings become the editor's (a file saved before 0.4.4 has none; older versions ignore them). A part the sheet cannot hold is left out, and the status line says which: Guide notes need the DAW sheet, and lyrics need a sheet whose lyrics the editor can change. Lyrics opened in a score sheet of the Song or DAW template go into *Song Sheet · Text* on Apply, like any lyrics edit. |
+| **Export notation…** | The notation as you see it - both voices, chord symbols, section names and the lyrics under the notes, with the song's title - as **PDF** (pages of A4 or Letter with page numbers, 300 dpi), **PNG** (the whole score as one picture, twice the screen resolution), **SVG** (the whole score as a vector drawing) or **Print…** (the browser's print dialog, which also saves a *vector* PDF). A line of music never breaks across pages. Off while the text is invalid. |
+| **Export MusicXML** | Downloads the sheet music as MusicXML 4.0 (`<title>.musicxml`), the format notation programs exchange (MuseScore, Sibelius, Finale, Dorico, Cubase's score editor, Logic). Parts: *Vocal* (with the chord symbols, the section names as rehearsal marks, the tempo and the **lyrics** under the notes) and *Instrument* (bass clef when it plays low). Notes that cross a bar line or have no single note value are tied; pitches are spelled for the key. For an engraved PDF with full control over the layout, open the file in a notation program (MuseScore is free). The Guide track stays in the MIDI export. Off while the text is invalid. |
 | **Export MIDI** | Downloads the score as a type-1 MIDI file named after the song's title. Tracks: *Vocal*, *Instrument*, *Chords* (block voicings plus `plenio:chord` text events) and the *Guide* track; tempo, time and key signatures and the section markers sit in the conductor track. Off while the text is invalid - the same gate as Apply. |
 | **Import MIDI…** | Reads a `.mid`/`.midi` file and shows what the import found **before** anything is replaced: the file's tracks with a role each, the grid, whether to read chords from the notes, and the import report. *Insert* replaces the score **and its Guide notes** - one undo step for both (the diagnostics of the imported text come with it); the sheet's old Guide notes belong to the replaced score and go with it, which the dialog says before you insert. |
 
@@ -265,9 +266,27 @@ With **reference_audio** connected to the Song Sheet (the Cover template connect
 - **notes** / **source** play one of them; **A/B** switches between the two **at once**, also while it plays. The *source* slider sets the recording's level under the notes.
 - The source plays at 100 % speed only (no time stretching); at another speed the notes play alone.
 - **sung**: with node **Sung Pitch** connected (the Cover template does), the roll draws the **sung pitch** of the source's vocals as a pink curve over the notes - every 20 ms, with the intonation - so you see where a transcribed note differs from the singing: a wrong pitch, an octave off, a note nobody sings, a sung note the transcription missed. SheetSage2 often writes the melody an octave away from where it is sung (a female voice around C4 notated around C5); the curve is then drawn in the notes' octave and the switch says so (*sung +8va*). Untick *sung* to hide it. Without the separation model the switch is greyed and its tooltip says why.
+- **wave** and **sung** in the roll's toolbar show or hide the waveform lane and the sung-pitch curve. For a cover that goes far from the original - another melody, another harmony - untick them: the roll shows only your score, and *hear: notes* plays only the notes. The choice is remembered, goes into the project file, and the presets *Cover: check the transcription* and *Cover: free arrangement* set all three at once.
 - **⇆ align**: when the recording runs ahead of or behind the bars - the transcription's beat detection was off - move it by a beat or in 10 ms steps (*reset* goes back to the detected grid). The waveform, the playback, A/B, the sections' source times and the sung pitch follow; the shift is kept with the sheet (node property `plenio_source_shift`), it changes no document.
 
 The reference is only for listening; it is not part of the sheet's documents and never reaches the model.
+
+## Sounds and presets
+
+Each track plays in a sound of its own - like the instrument slot of a DAW's track. **♫ sounds** in the transport (and, in the DAW layout, the select under each track header) chooses it; **▶** next to a track plays a few notes in its sound. Drawn and moved notes and the keys of a MIDI keyboard are heard in the sound of the roll's *draw into* track.
+
+| Sound | |
+|---|---|
+| Plain, Soft lead | the editor's classic sine and triangle tones (the default: Vocal in *Soft lead*, the rest *Plain*) |
+| Piano, Electric piano | a struck string that fades and darkens; a bell-like FM electric piano |
+| Strings, Pad | a bowed section with vibrato; a slow, wide synth pad |
+| Organ, Flute | drawbar organ; a breathy flute |
+| Voice “ah” | a sung “ah” (formant synthesis) - for the Vocal track |
+| Pluck, Synth lead, Bass, Mallets | a plucked string; a bright lead; a round bass; marimba / vibraphone |
+
+The sounds are synthesized in the browser: nothing is downloaded, they work offline and with the latency of the plain tones, and every sound is levelled to the loudness of the plain tone. They are sketches of the instruments, to tell the tracks apart and hear the music's character - YuE2 renders the song itself. VST plugins cannot run in a browser (see [the design note](../../design/score-editor-sounds-export.md)); for real instruments, export MIDI into a DAW.
+
+**Presets** set the basic settings at once. The built-in ones are starting points by kind of song - *Classic*, *Pop*, *Ballad*, *Rock*, *Electronic / dance*, *Acoustic / singer-songwriter*, *Jazz / soul*, *Orchestral / cinematic* (the tracks' sounds) - and by way of working: *Composing with a MIDI keyboard* (piano sounds, metronome, count-in, 1/16 quantize), *Cover: check the transcription* (the source under the notes, its waveform and sung pitch shown) and *Cover: free arrangement* (only the notes; waveform and sung pitch hidden). Choose one and press **use**: it changes what it names and leaves the rest. **save current as preset…** saves the current sounds, metronome, cover view, recording settings and paper under a name of yours; your presets are listed under *Yours* and can be deleted. They are kept in ComfyUI's user data (`user/<user>/plenio/score-editor-presets.json`, next to your workflows), so they are there in every browser; when that store cannot be reached they are kept in this browser, and the panel says so.
 
 ## Recording with a MIDI keyboard
 
@@ -297,6 +316,17 @@ The light next to *step* flashes with every key. **🎹** holds the settings, re
 
 A key still held when the keyboard is unplugged (or sends *all notes off*) ends there; nothing hangs. The sustain pedal is not recorded: a note lasts as long as its key is down.
 
+## The score stays YuE2's
+
+Whatever the editor does - a drawn note, a MIDI take, a paste, an arrangement, an import - the result is a score in the two-voice ABC dialect YuE2 reads:
+
+- every edit is one operation of the backend on the score model; its text is written by the serializer and **read back with the parser of YuE2's ABC dialect** (`yue2_abc_tools`). The text must parse and give exactly the same music, or the edit is refused with the reason. Durations become the note values the dialect has (tied where needed), a voice is always one line, every bar is exactly full, and chord symbols, keys and meters are the supported ones;
+- typed ABC is checked the same way after a short pause; an invalid text is marked and cannot be applied or approved;
+- the sheet then checks the score against YuE2's rules: no score of rests only, a silent Vocal voice for an instrumental song, the sections against the lyrics, the length against the brief, the register against the voice the style asks for - and since 0.4.4 a vocal melody that reaches **below E2 or above C7** (as written; transcriptions write melodies an octave above the singing) is flagged as an octave slip, such as a MIDI keyboard played an octave off. These are warnings: the text is valid, YuE2 just would not sing it well;
+- the exact token budget is counted when the workflow runs, with the loaded YuE2 tokenizer.
+
+A test drives hundreds of random edit sequences - MIDI takes over the whole keyboard, pastes, quantizing, notes, bars, keys, meters, sections - through the editor's operations and checks after every step that the parser accepts the text and that it reads back as the same music.
+
 ## Apply, Revert, Approve
 
 - **Apply** saves your documents into the node (they are stored in the workflow, so they survive saving and reloading it). An applied score is *edited* while its draft is unchanged, or *manual* if you made it manual.
@@ -306,7 +336,7 @@ A key still held when the keyboard is unplugged (or sends *all notes off*) ends 
 
 ## Preferences
 
-Layout, *ABC text (advanced)*, zoom, piano roll (on/off and its zoom), metronome, voices, speed, *hear* and the source's level (covers), the roll's *hear* switch (hearing the notes you edit) and the MIDI keyboard and recording settings (🎹) are remembered in this browser only (not in the workflow). A blocked or cleared browser storage simply gives the defaults.
+Layout, *ABC text (advanced)*, zoom, piano roll (on/off and its zoom), metronome, voices, speed, *hear*, the source's level, *wave* and *sung* (covers), the roll's *hear* switch (hearing the notes you edit), the tracks' sounds, the paper of the notation export and the MIDI keyboard and recording settings (🎹) are remembered in this browser (not in the workflow). The project file and the presets carry the basic ones (see [Sounds and presets](#sounds-and-presets)). A blocked or cleared browser storage simply gives the defaults.
 
 ## Limits
 

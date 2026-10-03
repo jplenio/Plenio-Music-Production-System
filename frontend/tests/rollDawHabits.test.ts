@@ -274,6 +274,39 @@ describe('the playing clock: the source recording, the notes and the metronome t
 })
 
 describe('the source waveform', () => {
+  it('can be hidden for a cover far from the original (wave), and comes back', async () => {
+    const host = document.createElement('div')
+    document.body.appendChild(host)
+    const samples = new Float32Array(4000).map((_, i) => Math.sin(i / 7) * 0.5)
+    const state = reactive({ wave: true })
+    const bars = VIEW.bars.map((bar) => [bar.start_s, bar.start_s + bar.duration_s, 'x'] as [number, number, string])
+    app = createApp({
+      render: () =>
+        h(PianoRoll, {
+          view: VIEW,
+          selection: [],
+          operate: () => Promise.resolve(true),
+          audition: false,
+          source: { envelope: envelopeOf(samples, 1000, 400), bars },
+          waveVisible: state.wave,
+          'onUpdate:waveVisible': (value: boolean) => (state.wave = value)
+        })
+    })
+    app.mount(host)
+    await nextTick()
+    expect(host.querySelector('rect.source-lane')).not.toBeNull()
+    const toggle = host.querySelector(`input[aria-label="Show the source's waveform"]`) as HTMLInputElement
+    expect(toggle.checked).toBe(true)
+    toggle.click()
+    await nextTick()
+    expect(state.wave).toBe(false)
+    expect(host.querySelector('rect.source-lane')).toBeNull()
+    expect(host.querySelectorAll('text.bar-number').length).toBeGreaterThan(0) // the roll itself stays
+    state.wave = true
+    await nextTick()
+    expect(host.querySelector('rect.source-lane')).not.toBeNull()
+  })
+
   it('keeps the extremes per column', () => {
     const samples = new Float32Array(1000)
     samples[100] = 0.5

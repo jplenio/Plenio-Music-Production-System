@@ -1086,7 +1086,8 @@
      track goes ("sung as V: Vocal", "never sent to YuE2") on the second */
   grid-template-areas:
     'dot name count play'
-    'dot destination destination clear';
+    'dot destination destination clear'
+    'dot sound sound sound';
   align-items: center;
   column-gap: 6px;
   row-gap: 1px;
@@ -1127,6 +1128,12 @@
   color: var(--descrip-text, #999);
   font-size: 11px;
   white-space: nowrap;
+}
+.plenio-overlay .track-panel select.sound {
+  grid-area: sound;
+  min-width: 0;
+  font-size: 11px;
+  padding: 1px 2px;
 }
 .plenio-overlay .track-panel .destination.unsent {
   color: #d8a31a;
@@ -1290,6 +1297,72 @@
 }
 .plenio-overlay .transport .midi-panel strong {
   margin-top: 4px;
+}
+/* Export notation…: PDF, PNG, SVG, print */
+.plenio-overlay .notation-export {
+  position: relative;
+  display: inline-flex;
+}
+.plenio-overlay .notation-export .export-panel {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 4px);
+  left: 0;
+  display: grid;
+  gap: 6px;
+  width: 260px;
+  padding: 8px 10px;
+  background: var(--comfy-menu-bg, #202020);
+  border: 1px solid var(--border-color, #4e4e4e);
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+.plenio-overlay .notation-export .export-panel .close {
+  justify-self: end;
+}
+.plenio-overlay .notation-export .formats {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+/* ♫ sounds: the tracks' sounds and the presets */
+.plenio-overlay .transport .sounds-settings {
+  position: relative;
+}
+.plenio-overlay .transport .sounds-panel {
+  position: absolute;
+  z-index: 30;
+  bottom: 30px;
+  left: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  width: 340px;
+  padding: 8px 10px;
+  background: var(--comfy-menu-bg, #202020);
+  border: 1px solid var(--border-color, #4e4e4e);
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+.plenio-overlay .transport .sounds-panel .close {
+  justify-self: end;
+}
+.plenio-overlay .transport .sounds-panel strong {
+  margin-top: 4px;
+}
+.plenio-overlay .transport .sounds-panel .row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.plenio-overlay .transport .sounds-panel .row select,
+.plenio-overlay .transport .sounds-panel .row input {
+  flex: 1;
+  min-width: 0;
+}
+.plenio-overlay .transport .sounds-panel .track {
+  width: 74px;
+  flex: none;
 }
 .plenio-overlay .roll-svg .rec-note {
   fill: rgba(229, 57, 53, 0.85);
