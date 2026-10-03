@@ -1,4 +1,4 @@
-import { a as Zy, P as Dv, b as Qy, t as e4, i as t4, e as i4, c as n4, n as xi, v as r4, s as pd, g as s4, r as a4, u as o4, w as gd, d as l4, f as c4, h as md } from "./main-D2LkoOKh.mjs";
+import { a as Zy, P as Dv, b as Qy, t as e4, i as t4, e as i4, c as n4, n as xi, v as r4, s as pd, g as s4, r as a4, u as o4, w as gd, d as l4, f as c4, h as md } from "./main-CzhStsvp.mjs";
 import { lineKey as po, parseSpans as Pv, sameSpans as Qa, clipOfLines as vd, sectionAt as h4, sectionRange as Ca, placedLines as bd, settle as u4, withSectionSpans as f4, parseLineKey as d4, remapSpans as p4 } from "./lyricPlacement-BhsY4vdw.mjs";
 import { notesLabel as g4, trackRows as m4, parseGuide as v4, sameGuide as ws, remapGuide as b4, guideNotes as y4 } from "./tracks-DxmZeggM.mjs";
 // @__NO_SIDE_EFFECTS__
@@ -3888,7 +3888,7 @@ const x5 = ["ctrl", "shift", "alt", "meta"], k5 = {
   right: "arrow-right",
   down: "arrow-down",
   delete: "backspace"
-}, Yt = (i, e) => {
+}, Xt = (i, e) => {
   const t = i._withKeys || (i._withKeys = {}), n = e.join(".");
   return t[n] || (t[n] = ((r) => {
     if (!("key" in r))
@@ -4940,16 +4940,16 @@ class qt extends Tn {
         if (s.done)
           break e;
         let h = Math.min(s.len, l - o);
-        Xt(r, h, -1);
+        Jt(r, h, -1);
         let p = s.ins == -1 ? -1 : s.off == 0 ? s.ins : 0;
-        Xt(t, h, p), p > 0 && Fn(n, t, s.text), s.forward(h), o += h;
+        Jt(t, h, p), p > 0 && Fn(n, t, s.text), s.forward(h), o += h;
       }
       let c = e[a++];
       for (; o < c; ) {
         if (s.done)
           break e;
         let h = Math.min(s.len, c - o);
-        Xt(t, h, -1), Xt(r, h, s.ins == -1 ? -1 : s.off == 0 ? s.ins : 0), s.forward(h), o += h;
+        Jt(t, h, -1), Jt(r, h, s.ins == -1 ? -1 : s.off == 0 ? s.ins : 0), s.forward(h), o += h;
       }
     }
     return {
@@ -4977,7 +4977,7 @@ class qt extends Tn {
     function l(h = !1) {
       if (!h && !r.length)
         return;
-      a < t && Xt(r, t - a, -1);
+      a < t && Jt(r, t - a, -1);
       let p = new qt(r, s);
       o = o ? o.compose(p.map(o)) : p, r = [], s = [], a = 0;
     }
@@ -4996,7 +4996,7 @@ class qt extends Tn {
         let d = g ? typeof g == "string" ? ht.of(g.split(n || lu)) : g : ht.empty, u = d.length;
         if (p == f && u == 0)
           return;
-        p < a && l(), p > a && Xt(r, p - a, -1), Xt(r, f - p, u), Fn(s, r, d), a = f;
+        p < a && l(), p > a && Jt(r, p - a, -1), Jt(r, f - p, u), Fn(s, r, d), a = f;
       }
     }
     return c(e), l(!o), o;
@@ -5040,7 +5040,7 @@ class qt extends Tn {
     return new qt(e, t);
   }
 }
-function Xt(i, e, t, n = !1) {
+function Jt(i, e, t, n = !1) {
   if (e == 0 && t <= 0)
     return;
   let r = i.length - 2;
@@ -5079,12 +5079,12 @@ function hu(i, e, t, n = !1) {
       throw new Error("Mismatched change set lengths");
     if (a.ins == -1 && o.ins == -1) {
       let c = Math.min(a.len, o.len);
-      Xt(r, c, -1), a.forward(c), o.forward(c);
+      Jt(r, c, -1), a.forward(c), o.forward(c);
     } else if (o.ins >= 0 && (a.ins < 0 || l == a.i || a.off == 0 && (o.len < a.len || o.len == a.len && !t))) {
       let c = o.len;
-      for (Xt(r, o.ins, -1); c; ) {
+      for (Jt(r, o.ins, -1); c; ) {
         let h = Math.min(a.len, c);
-        a.ins >= 0 && l < a.i && a.len <= h && (Xt(r, 0, a.ins), s && Fn(s, r, a.text), l = a.i), a.forward(h), c -= h;
+        a.ins >= 0 && l < a.i && a.len <= h && (Jt(r, 0, a.ins), s && Fn(s, r, a.text), l = a.i), a.forward(h), c -= h;
       }
       o.next();
     } else if (a.ins >= 0) {
@@ -5097,7 +5097,7 @@ function hu(i, e, t, n = !1) {
           h -= o.len, o.next();
         else
           break;
-      Xt(r, c, l < a.i ? a.ins : 0), s && l < a.i && Fn(s, r, a.text), l = a.i, a.forward(a.len - h);
+      Jt(r, c, l < a.i ? a.ins : 0), s && l < a.i && Fn(s, r, a.text), l = a.i, a.forward(a.len - h);
     } else {
       if (a.done && o.done)
         return s ? qt.createSet(r, s) : Tn.create(r);
@@ -5111,9 +5111,9 @@ function U2(i, e, t = !1) {
     if (s.done && a.done)
       return r ? qt.createSet(n, r) : Tn.create(n);
     if (s.ins == 0)
-      Xt(n, s.len, 0, o), s.next();
+      Jt(n, s.len, 0, o), s.next();
     else if (a.len == 0 && !a.done)
-      Xt(n, 0, a.ins, o), r && Fn(r, n, a.text), a.next();
+      Jt(n, 0, a.ins, o), r && Fn(r, n, a.text), a.next();
     else {
       if (s.done || a.done)
         throw new Error("Mismatched change set lengths");
@@ -5121,8 +5121,8 @@ function U2(i, e, t = !1) {
         let l = Math.min(s.len2, a.len), c = n.length;
         if (s.ins == -1) {
           let h = a.ins == -1 ? -1 : a.off ? 0 : a.ins;
-          Xt(n, l, h, o), r && h && Fn(r, n, a.text);
-        } else a.ins == -1 ? (Xt(n, s.off ? 0 : s.len, l, o), r && Fn(r, n, s.textBit(l))) : (Xt(n, s.off ? 0 : s.len, a.off ? 0 : a.ins, o), r && !a.off && Fn(r, n, a.text));
+          Jt(n, l, h, o), r && h && Fn(r, n, a.text);
+        } else a.ins == -1 ? (Jt(n, s.off ? 0 : s.len, l, o), r && Fn(r, n, s.textBit(l))) : (Jt(n, s.off ? 0 : s.len, a.off ? 0 : a.ins, o), r && !a.off && Fn(r, n, a.text));
         o = (s.ins > l || a.ins >= 0 && a.len > l) && (o || n.length > c), s.forward2(l), a.forward(l);
       }
     }
@@ -7107,10 +7107,10 @@ var Yn = {
   221: "}",
   222: '"'
 }, ww = typeof navigator < "u" && /Mac/.test(navigator.platform), xw = typeof navigator < "u" && /MSIE \d|Trident\/(?:[7-9]|\d{2,})\..*rv:(\d+)/.exec(navigator.userAgent);
-for (var Ut = 0; Ut < 10; Ut++) Yn[48 + Ut] = Yn[96 + Ut] = String(Ut);
-for (var Ut = 1; Ut <= 24; Ut++) Yn[Ut + 111] = "F" + Ut;
-for (var Ut = 65; Ut <= 90; Ut++)
-  Yn[Ut] = String.fromCharCode(Ut + 32), ea[Ut] = String.fromCharCode(Ut);
+for (var jt = 0; jt < 10; jt++) Yn[48 + jt] = Yn[96 + jt] = String(jt);
+for (var jt = 1; jt <= 24; jt++) Yn[jt + 111] = "F" + jt;
+for (var jt = 65; jt <= 90; jt++)
+  Yn[jt] = String.fromCharCode(jt + 32), ea[jt] = String.fromCharCode(jt);
 for (var Hl in Yn) ea.hasOwnProperty(Hl) || (ea[Hl] = Yn[Hl]);
 function kw(i) {
   var e = ww && i.metaKey && i.shiftKey && !i.ctrlKey && !i.altKey || xw && i.shiftKey && i.key && i.key.length == 1 || i.key == "Unidentified", t = !e && i.key || (i.shiftKey ? ea : Yn)[i.keyCode] || i.key || "Unidentified";
@@ -7290,9 +7290,9 @@ class pa {
   destroy(e) {
   }
 }
-var jt = /* @__PURE__ */ (function(i) {
+var Yt = /* @__PURE__ */ (function(i) {
   return i[i.Text = 0] = "Text", i[i.WidgetBefore = 1] = "WidgetBefore", i[i.WidgetAfter = 2] = "WidgetAfter", i[i.WidgetRange = 3] = "WidgetRange", i;
-})(jt || (jt = {}));
+})(Yt || (Yt = {}));
 class _t extends Cr {
   constructor(e, t, n, r) {
     super(), this.startSide = e, this.endSide = t, this.widget = n, this.spec = r;
@@ -7396,7 +7396,7 @@ class Sr extends _t {
   }
   // Only relevant when this.block == true
   get type() {
-    return this.startSide != this.endSide ? jt.WidgetRange : this.startSide <= 0 ? jt.WidgetBefore : jt.WidgetAfter;
+    return this.startSide != this.endSide ? Yt.WidgetRange : this.startSide <= 0 ? Yt.WidgetBefore : Yt.WidgetAfter;
   }
   get heightRelevant() {
     return this.block || !!this.widget && (this.widget.estimatedHeight >= 5 || this.widget.lineBreaks > 0);
@@ -9617,7 +9617,7 @@ function Lu(i, e, t) {
       if (!(s.to < e)) {
         if (s.from < e && s.to > e)
           return s;
-        (!r || s.type == jt.Text && (r.type != s.type || (t < 0 ? s.from < e : s.to > e))) && (r = s);
+        (!r || s.type == Yt.Text && (r.type != s.type || (t < 0 ? s.from < e : s.to > e))) && (r = s);
       }
     }
     return r || n;
@@ -9625,7 +9625,7 @@ function Lu(i, e, t) {
   return n;
 }
 function hx(i, e, t, n) {
-  let r = Lu(i, e.head, e.assoc || -1), s = !n || r.type != jt.Text || !(i.lineWrapping || r.widgetLineBreaks) ? null : i.coordsAtPos(e.assoc < 0 && e.head > r.from ? e.head - 1 : e.head);
+  let r = Lu(i, e.head, e.assoc || -1), s = !n || r.type != Yt.Text || !(i.lineWrapping || r.widgetLineBreaks) ? null : i.coordsAtPos(e.assoc < 0 && e.head > r.from ? e.head - 1 : e.head);
   if (s) {
     let a = i.dom.getBoundingClientRect(), o = i.textDirectionAt(r.from), l = i.posAtCoords({
       x: t == (o == Mt.LTR) ? a.right - 1 : a.left + 1,
@@ -9732,7 +9732,7 @@ function Du(i, e, t, n) {
       return new rn(i.state.doc.length, -1);
     if (c = i.elementAtHeight(l), n == null)
       break;
-    if (c.type == jt.Text) {
+    if (c.type == Yt.Text) {
       if (n < 0 ? c.to < i.viewport.from : c.from > i.viewport.to)
         break;
       let f = i.docView.coordsAt(n < 0 ? c.from : c.to, n > 0 ? -1 : 1);
@@ -9745,12 +9745,12 @@ function Du(i, e, t, n) {
   if (i.viewport.from >= c.to || i.viewport.to <= c.from) {
     if (t)
       return null;
-    if (c.type == jt.Text) {
+    if (c.type == Yt.Text) {
       let p = cx(i, r, c, a, o);
       return new rn(p, p == c.from ? 1 : -1);
     }
   }
-  if (c.type != jt.Text)
+  if (c.type != Yt.Text)
     return l < (c.top + c.bottom) / 2 ? new rn(c.from, 1) : new rn(c.to, -1);
   let h = i.docView.lineAt(c.from, 2);
   return (!h || h.length != c.length) && (h = i.docView.lineAt(c.from, -2)), new dx(i, a, o, i.textDirectionAt(c.from)).scanTile(h, c.from);
@@ -10670,7 +10670,7 @@ class Pi {
   an array of all the blocks that make up the line.
   */
   get type() {
-    return typeof this._content == "number" ? jt.Text : Array.isArray(this._content) ? this._content : this._content.type;
+    return typeof this._content == "number" ? Yt.Text : Array.isArray(this._content) ? this._content : this._content.type;
   }
   /**
   The end of the element as a document position.
@@ -11297,7 +11297,7 @@ class P1 {
       }
       o.push(m);
     }, c = (h) => {
-      if (h.length < a || h.type != jt.Text)
+      if (h.length < a || h.type != Yt.Text)
         return;
       let p = Yx(h.from, h.to, this.stateDeco);
       if (p.total < a)
@@ -13120,12 +13120,12 @@ function z1(i, e, t, n) {
 function h8(i, e, t) {
   if (t.to <= i.viewport.from || t.from >= i.viewport.to)
     return [];
-  let n = Math.max(t.from, i.viewport.from), r = Math.min(t.to, i.viewport.to), s = i.textDirection == Mt.LTR, a = i.contentDOM, o = a.getBoundingClientRect(), l = t3(i), c = a.querySelector(".cm-line"), h = c && window.getComputedStyle(c), p = o.left + (h ? parseInt(h.paddingLeft) + Math.min(0, parseInt(h.textIndent)) : 0), f = o.right - (h ? parseInt(h.paddingRight) : 0), g = Lu(i, n, 1), d = Lu(i, r, -1), u = g.type == jt.Text ? g : null, m = d.type == jt.Text ? d : null;
+  let n = Math.max(t.from, i.viewport.from), r = Math.min(t.to, i.viewport.to), s = i.textDirection == Mt.LTR, a = i.contentDOM, o = a.getBoundingClientRect(), l = t3(i), c = a.querySelector(".cm-line"), h = c && window.getComputedStyle(c), p = o.left + (h ? parseInt(h.paddingLeft) + Math.min(0, parseInt(h.textIndent)) : 0), f = o.right - (h ? parseInt(h.paddingRight) : 0), g = Lu(i, n, 1), d = Lu(i, r, -1), u = g.type == Yt.Text ? g : null, m = d.type == Yt.Text ? d : null;
   if (u && (i.lineWrapping || g.widgetLineBreaks) && (u = z1(i, n, 1, u)), m && (i.lineWrapping || d.widgetLineBreaks) && (m = z1(i, r, -1, m)), u && m && u.from == m.from && u.to == m.to)
     return v(y(t.from, t.to, u));
   {
     let S = u ? y(t.from, null, u) : w(g, !1), L = m ? y(null, t.to, m) : w(d, !0), B = [];
-    return (u || g).to < (m || d).from - (u && m ? 1 : 0) || g.widgetLineBreaks > 1 && S.bottom + i.defaultLineHeight / 2 < L.top ? B.push(b(p, S.bottom, f, L.top)) : S.bottom < L.top && i.elementAtHeight((S.bottom + L.top) / 2).type == jt.Text && (S.bottom = L.top = (S.bottom + L.top) / 2), v(S).concat(B).concat(v(L));
+    return (u || g).to < (m || d).from - (u && m ? 1 : 0) || g.widgetLineBreaks > 1 && S.bottom + i.defaultLineHeight / 2 < L.top ? B.push(b(p, S.bottom, f, L.top)) : S.bottom < L.top && i.elementAtHeight((S.bottom + L.top) / 2).type == Yt.Text && (S.bottom = L.top = (S.bottom + L.top) / 2), v(S).concat(B).concat(v(L));
   }
   function b(S, L, B, M) {
     return new xr(e, S - l.left, L - l.top, Math.max(0, B - S), M - L);
@@ -13957,7 +13957,7 @@ const N8 = /* @__PURE__ */ bi.fromClass(class {
       if (n.length && (n = []), Array.isArray(s.type)) {
         let a = !0;
         for (let o of s.type)
-          if (o.type == jt.Text && a) {
+          if (o.type == Yt.Text && a) {
             Hu(t, n, o.from);
             for (let l of r)
               l.line(this.view, o, n);
@@ -13965,7 +13965,7 @@ const N8 = /* @__PURE__ */ bi.fromClass(class {
           } else if (o.widget)
             for (let l of r)
               l.widget(this.view, o);
-      } else if (s.type == jt.Text) {
+      } else if (s.type == Yt.Text) {
         Hu(t, n, s.from);
         for (let a of r)
           a.line(this.view, s, n);
@@ -19166,7 +19166,7 @@ const Rk = {
               class: "pitch",
               disabled: !o.value,
               "aria-label": "Pitch (e.g. C#5 or a MIDI number)",
-              onKeydown: Yt(Dt(L, ["prevent"]), ["enter"]),
+              onKeydown: Xt(Dt(L, ["prevent"]), ["enter"]),
               onChange: L
             }, null, 40, Kk)), [
               [zt, f.value]
@@ -19193,7 +19193,7 @@ const Rk = {
                 min: "1",
                 disabled: !o.value,
                 "aria-label": "Bar",
-                onKeydown: Yt(Dt(B, ["prevent"]), ["enter"]),
+                onKeydown: Xt(Dt(B, ["prevent"]), ["enter"]),
                 onChange: B
               }, null, 40, Xk), [
                 [
@@ -19211,7 +19211,7 @@ const Rk = {
                 min: "0",
                 disabled: !o.value,
                 "aria-label": `Units of ${t.value.unit} from the start of the bar`,
-                onKeydown: Yt(Dt(B, ["prevent"]), ["enter"]),
+                onKeydown: Xt(Dt(B, ["prevent"]), ["enter"]),
                 onChange: B
               }, null, 40, Jk), [
                 [
@@ -19232,7 +19232,7 @@ const Rk = {
                 min: "1",
                 disabled: !o.value,
                 "aria-label": `Length in units of ${t.value.unit}`,
-                onKeydown: _[10] || (_[10] = Yt(Dt((P) => M(), ["prevent"]), ["enter"])),
+                onKeydown: _[10] || (_[10] = Xt(Dt((P) => M(), ["prevent"]), ["enter"])),
                 onChange: _[11] || (_[11] = (P) => M())
               }, null, 40, eC), [
                 [
@@ -19276,7 +19276,7 @@ const Rk = {
                 placeholder: "none",
                 disabled: !o.value,
                 "aria-label": "Chord symbol where the note starts (empty removes it)",
-                onKeydown: Yt(Dt(O, ["prevent"]), ["enter"]),
+                onKeydown: Xt(Dt(O, ["prevent"]), ["enter"]),
                 onChange: O
               }, null, 40, aC), [
                 [zt, b.value]
@@ -19307,7 +19307,7 @@ const Rk = {
               class: "chord",
               disabled: !o.value,
               "aria-label": "Chord symbol (empty removes it)",
-              onKeydown: Yt(Dt(O, ["prevent"]), ["enter"]),
+              onKeydown: Xt(Dt(O, ["prevent"]), ["enter"]),
               onChange: O
             }, null, 40, dC), [
               [zt, b.value]
@@ -19336,7 +19336,7 @@ const Rk = {
               min: "1",
               disabled: !o.value,
               "aria-label": "Bar",
-              onKeydown: Yt(Dt(B, ["prevent"]), ["enter"]),
+              onKeydown: Xt(Dt(B, ["prevent"]), ["enter"]),
               onChange: B
             }, null, 40, bC), [
               [
@@ -19354,7 +19354,7 @@ const Rk = {
               min: "0",
               disabled: !o.value,
               "aria-label": "Units from the start of the bar",
-              onKeydown: Yt(Dt(B, ["prevent"]), ["enter"]),
+              onKeydown: Xt(Dt(B, ["prevent"]), ["enter"]),
               onChange: B
             }, null, 40, yC), [
               [
@@ -19436,7 +19436,7 @@ const Rk = {
               list: "plenio-meters",
               disabled: !o.value,
               "aria-label": "Meter of this bar (empty bars only)",
-              onKeydown: _[31] || (_[31] = Yt(Dt((P) => S(pe(Tp)(a.value, v.value)), ["prevent"]), ["enter"])),
+              onKeydown: _[31] || (_[31] = Xt(Dt((P) => S(pe(Tp)(a.value, v.value)), ["prevent"]), ["enter"])),
               onChange: _[32] || (_[32] = (P) => S(pe(Tp)(a.value, v.value)))
             }, null, 40, IC), [
               [zt, v.value]
@@ -34308,7 +34308,7 @@ function wA(i, e) {
 function Hy(i, e, t) {
   let n = null;
   for (const r of i)
-    if (r[t] <= e + Jt) n = r;
+    if (r[t] <= e + Ut) n = r;
     else break;
   return n ?? i[0] ?? null;
 }
@@ -34329,13 +34329,16 @@ function kA(i, e, t) {
   for (const a of i) {
     if (!a.source) continue;
     const o = a.realStart + a.realDur, l = Math.max(a.realStart, n), c = Math.min(o, r);
-    if (c <= l + Jt) continue;
-    const h = a.source[0] + (l - a.realStart) / a.realDur * (a.source[1] - a.source[0]), p = l - n, f = c - l, g = s.at(-1);
-    g && Math.abs(g.at + g.duration - p) < Jt && Math.abs(g.offset + g.duration - h) < 0.01 ? g.duration += f : s.push({ at: p, offset: h, duration: f });
+    if (c <= l + Ut) continue;
+    let h = a.source[0] + (l - a.realStart) / a.realDur * (a.source[1] - a.source[0]), p = l - n, f = c - l;
+    if (h < 0 && (p -= h, f += h, h = 0, f <= Ut))
+      continue;
+    const g = s.at(-1);
+    g && Math.abs(g.at + g.duration - p) < Ut && Math.abs(g.offset + g.duration - h) < 0.01 ? g.duration += f : s.push({ at: p, offset: h, duration: f });
   }
   return s;
 }
-const CA = 0.04, Jt = 1e-3, SA = 0.25, TA = 2;
+const CA = 0.04, Ut = 1e-3, SA = 0.25, TA = 2;
 function Zu(i) {
   return Math.min(TA, Math.max(SA, Number.isFinite(i) ? i : 1));
 }
@@ -34344,20 +34347,20 @@ function AA(i, e) {
   for (const l of ["Vocal", "Ins"])
     if (e.voices[l])
       for (const c of i.notes?.[l] ?? []) {
-        if (c.start_s < e.from - Jt || c.start_s >= n - Jt) continue;
+        if (c.start_s < e.from - Ut || c.start_s >= n - Ut) continue;
         const h = Math.min(c.start_s + c.duration_s, n), p = Math.max(0, o(c.start_s));
         r.push({ at: p / t, duration: (o(h) - p) / t, midi: c.midi, part: l });
       }
   if (e.voices.chords)
     for (const l of i.chords ?? []) {
       const c = Math.min(l.start_s + l.duration_s, n), h = Math.max(l.start_s, e.from);
-      if (!(c <= h + Jt))
+      if (!(c <= h + Ut))
         for (const p of l.pitches)
           r.push({ at: o(h) / t, duration: (o(c) - o(h)) / t, midi: p, part: "chord" });
     }
   if (e.voices.guide)
     for (const l of e.guide ?? []) {
-      if (l.start_s < e.from - Jt || l.start_s >= n - Jt) continue;
+      if (l.start_s < e.from - Ut || l.start_s >= n - Ut) continue;
       const c = Math.min(l.start_s + l.duration_s, n), h = Math.max(0, o(l.start_s));
       r.push({ at: h / t, duration: (o(c) - h) / t, midi: l.midi, part: "guide" });
     }
@@ -34366,7 +34369,7 @@ function AA(i, e) {
       const c = Number(l.meter.split("/")[0]) || 1;
       for (let h = 0; h < c; h++) {
         const p = l.start_s + h * l.duration_s / c;
-        p < e.from - Jt || p >= n - Jt || r.push({
+        p < e.from - Ut || p >= n - Ut || r.push({
           at: Math.max(0, o(p)) / t,
           duration: CA,
           midi: h === 0 ? 96 : 89,
@@ -34382,7 +34385,7 @@ function MA(i, e) {
 }
 function _A(i, e, t) {
   return (i.elements ?? []).filter(
-    (n) => n.kind === "note" && t[n.voice] && n.start_s <= e + Jt && e < n.start_s + n.duration_s - Jt
+    (n) => n.kind === "note" && t[n.voice] && n.start_s <= e + Ut && e < n.start_s + n.duration_s - Ut
   ).map((n) => n.id);
 }
 function Fy(i) {
@@ -34413,7 +34416,7 @@ function BA(i, e) {
   const t = i.model;
   if (!t || !i.bars.length || !t.measures.length) return null;
   let n = 0;
-  for (let o = 0; o < i.bars.length && !(i.bars[o].start_s > e + Jt); o++)
+  for (let o = 0; o < i.bars.length && !(i.bars[o].start_s > e + Ut); o++)
     n = o;
   const r = i.bars[n], s = t.measures[Math.min(n, t.measures.length - 1)], a = r.duration_s > 0 ? (e - r.start_s) / r.duration_s : 0;
   return Math.max(0, Math.min(t.total, s.onset + Math.max(0, Math.min(1, a)) * s.length));
@@ -35493,8 +35496,8 @@ const VA = ["aria-label"], WA = {
           placeholder: "Am7",
           style: Sn({ left: `${pe(mt)(B.value.onset, I.value)}px`, top: `${pe(Ji) + 1 + y.value}px` }),
           onKeydown: [
-            Yt(Dt(ii, ["prevent"]), ["enter"]),
-            Yt(Dt(Vt, ["prevent", "stop"]), ["esc"])
+            Xt(Dt(ii, ["prevent"]), ["enter"]),
+            Xt(Dt(Vt, ["prevent", "stop"]), ["esc"])
           ],
           onBlur: Vt
         }, null, 44, qM)), [
@@ -35510,8 +35513,8 @@ const VA = ["aria-label"], WA = {
           placeholder: "the words of this phrase",
           style: Sn({ left: `${pe(mt)(O.value.start, I.value)}px`, top: `${pe(bn) + 1 + y.value}px` }),
           onKeydown: [
-            Yt(Dt(ye, ["prevent"]), ["enter"]),
-            Yt(Dt(fe, ["prevent", "stop"]), ["esc"])
+            Xt(Dt(ye, ["prevent"]), ["enter"]),
+            Xt(Dt(fe, ["prevent", "stop"]), ["esc"])
           ],
           onBlur: ye
         }, null, 44, VM)), [
@@ -35902,8 +35905,8 @@ const JM = {
               onClick: z[3] || (z[3] = Dt(() => {
               }, ["stop"])),
               onKeydown: [
-                Yt(Dt((ae) => M(re), ["prevent"]), ["enter"]),
-                z[4] || (z[4] = Yt(Dt((ae) => r.value = null, ["stop", "prevent"]), ["esc"]))
+                Xt(Dt((ae) => M(re), ["prevent"]), ["enter"]),
+                z[4] || (z[4] = Xt(Dt((ae) => r.value = null, ["stop", "prevent"]), ["esc"]))
               ],
               onBlur: (ae) => M(re)
             }, null, 40, l_)), [
@@ -36126,7 +36129,7 @@ const JM = {
           placeholder: "chord, e.g. Am7",
           "aria-label": "Chord symbol",
           disabled: !i.primary || i.busy,
-          onKeydown: m[11] || (m[11] = Yt(Dt((b) => i.primary && r.value.trim() && n("operate", { op: "set_chord", id: i.primary.id, name: r.value }), ["prevent"]), ["enter"]))
+          onKeydown: m[11] || (m[11] = Xt(Dt((b) => i.primary && r.value.trim() && n("operate", { op: "set_chord", id: i.primary.id, name: r.value }), ["prevent"]), ["enter"]))
         }, null, 40, z_), [
           [zt, r.value]
         ]),
@@ -36255,7 +36258,7 @@ const JM = {
     function B(P) {
       const A = n.view?.bars ?? [];
       let C = 1;
-      for (const D of A) D.start_s <= P + Jt && (C = D.index);
+      for (const D of A) D.start_s <= P + Ut && (C = D.index);
       return C;
     }
     function M(P) {
@@ -36269,7 +36272,7 @@ const JM = {
       const A = n.view;
       if (!A) return;
       H();
-      const C = f.value ? M(P) : null, D = C && (P < C[0] - Jt || P >= C[1] - Jt) ? C[0] : P, I = w.value, R = I ? wA(A, n.timelineBars) : null;
+      const C = f.value ? M(P) : null, D = C && (P < C[0] - Ut || P >= C[1] - Ut) ? C[0] : P, I = w.value, R = I ? wA(A, n.timelineBars) : null;
       u = {
         from: D,
         to: C ? C[1] : null,

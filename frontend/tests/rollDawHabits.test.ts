@@ -232,6 +232,9 @@ describe('the playing clock: the source recording, the notes and the metronome t
     expect(piece.at).toBe(0)
     expect(piece.offset).toBeCloseTo(13.1)
     expect(piece.duration).toBeCloseTo(0.9)
+    // a pickup bar padded before the recording: the recording starts when its first second comes
+    const padded = playClock(view, [[-0.5, 1.5, '4/4'], [1.5, 3.5, '4/4'], null])
+    expect(sourceSegments(padded, 0)).toEqual([{ at: 0.5, offset: 0, duration: 3.5 }])
   })
 
   it('schedules the notes and the clicks on the source clock and maps the time back', () => {

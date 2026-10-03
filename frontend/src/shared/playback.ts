@@ -116,9 +116,16 @@ export function sourceSegments(clock: readonly ClockBar[], from: number, to?: nu
     const start = Math.max(bar.realStart, begin)
     const stop = Math.min(barEnd, end)
     if (stop <= start + TIME_TOLERANCE) continue
-    const offset = bar.source[0] + ((start - bar.realStart) / bar.realDur) * (bar.source[1] - bar.source[0])
-    const at = start - begin
-    const duration = stop - start
+    let offset = bar.source[0] + ((start - bar.realStart) / bar.realDur) * (bar.source[1] - bar.source[0])
+    let at = start - begin
+    let duration = stop - start
+    if (offset < 0) {
+      // a pickup bar padded before the recording begins: silence until the recording starts
+      at -= offset
+      duration += offset
+      offset = 0
+      if (duration <= TIME_TOLERANCE) continue
+    }
     const last = segments.at(-1)
     if (last && Math.abs(last.at + last.duration - at) < TIME_TOLERANCE && Math.abs(last.offset + last.duration - offset) < 0.01) {
       last.duration += duration
