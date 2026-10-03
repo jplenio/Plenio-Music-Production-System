@@ -159,6 +159,12 @@ The transport sits right under the roll, within reach. Space plays and stops, Ho
 @ The original recording plays right under the notes
 And here's the clever part for covers: the original recording plays right under the notes, bar by bar. [pause:0.3s] And A-B switches between them, at once.
 
+@ The pink curve is the sung pitch | optional
+The pink curve is the singer's actual pitch, taken from the original vocals. [pause:0.3s] Where it leaves a note, the transcription is off: a wrong pitch, or a missed note.
+
+@ ⇆ align moves the recording | optional
+And if the beats don't line up, align moves the recording against the bars.
+
 @ Arrange the song
 Let's arrange. Select the chorus, and press Control D: a copy right after it.
 

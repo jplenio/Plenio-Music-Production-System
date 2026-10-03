@@ -3,7 +3,7 @@ import { nextTick, reactive } from 'vue'
 
 import type { Fetcher } from '../src/api/client'
 import { History } from '../src/shared/history'
-import { clampSpeed, frequency, playLength, playClock, schedule, scoreTime, sounding, sourceSecond } from '../src/shared/playback'
+import { clampSpeed, countInClicks, frequency, playLength, playClock, schedule, scoreTime, sounding, sourceSecond } from '../src/shared/playback'
 import {
   type ScoreView,
   clock,
@@ -234,6 +234,18 @@ describe('playback', () => {
     // on the playing clock of a cover: as long as the source's bars
     const sourceBars = VIEW.bars.map((bar) => [bar.start_s * 2, (bar.start_s + bar.duration_s) * 2, 'x'] as [number, number, string])
     expect(playLength(VIEW, { from: 0, voices: ALL, speed: 1, clock: playClock(VIEW, sourceBars) })).toBeCloseTo(VIEW.duration_s * 2)
+  })
+
+  it('counts in on the beats of the score, also from a cursor between two beats', () => {
+    const bar = { start_s: 0, duration_s: 2 }
+    const on = countInClicks(bar, 4, 0, 1, 2, 0.5)
+    expect(on.map((c) => [c.at, c.midi])).toEqual([[0, 96], [0.5, 89], [1, 89], [1.5, 89]])
+    // a sixteenth after the second beat: the clicks keep the beat grid and run on into the music
+    const between = countInClicks(bar, 4, 0.625, 1, 2, 0.5)
+    expect(between.map((c) => [c.at, c.midi])).toEqual([[0.375, 89], [0.875, 89], [1.375, 96], [1.875, 89]])
+    // at half speed the beats are twice as long
+    expect(countInClicks(bar, 4, 0.625, 1, 4, 1).map((c) => c.at)).toEqual([0.75, 1.75, 2.75, 3.75])
+    expect(countInClicks(bar, 4, 0, 0, 0, 0.5)).toEqual([])
   })
 
   it('maps playback time to score time and the cursor', () => {

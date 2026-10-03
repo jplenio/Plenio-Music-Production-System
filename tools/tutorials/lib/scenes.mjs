@@ -119,7 +119,93 @@ export async function cursorDemo(s, { source = false } = {}) {
     await s.wait(3000)
     await s.click({ x: at.x, y: at.y, width: 0, height: 0 }, { pause: 200 })
     await s.wait(800)
+    // the sung pitch (node Sung Pitch) and the beat grid by hand (0.4.4)
+    const curve = d.locator('.roll-svg path.sung-pitch')
+    if (await curve.count()) {
+      const sung = 'The pink curve is the sung pitch of the original vocals. Where it leaves a note, the transcription is off - a wrong pitch, a missed note.'
+      s.caption(sung)
+      await s.spotlight(d.locator('.roll-scroll').first(), { ms: 3200, pad: 2 })
+      await s.read(sung, 6200)
+    }
+    const align = d.locator('.transport button', { hasText: 'align' }).first()
+    if (await align.count()) {
+      const text = '⇆ align moves the recording against the bars, when the beat detection was off.'
+      s.caption(text)
+      await s.hover(align)
+      await s.read(text, 4200)
+    }
   }
+}
+
+// A simulated MIDI keyboard for recordDemo (Web MIDI is asked for at the first rec, so the page needs
+// no reload): window.__key(note, down) plays it.
+export async function simulateKeyboard(s) {
+  await s.page.evaluate(() => {
+    const input = { id: 'usb-1', name: 'USB MIDI Keyboard', manufacturer: '', state: 'connected', onmidimessage: null }
+    const access = { inputs: { forEach: (fn) => fn(input) }, onstatechange: null }
+    Object.defineProperty(navigator, 'requestMIDIAccess', { value: () => Promise.resolve(access), configurable: true })
+    window.__key = (note, on) => input.onmidimessage?.({ data: new Uint8Array([on ? 0x90 : 0x80, note, 96]), timeStamp: performance.now() })
+  })
+}
+
+// Recording with a MIDI keyboard (0.4.4): rec from the cursor into Ins, the keys appear while they are
+// played, Space keeps the take - then Ctrl+Z, so the sketch stays as it was. The script plays the
+// keyboard: a simulated one (window.__key, installed by the tutorial's init script) - the recording
+// has no sound of its own anyway. Returns false when there is no keyboard to play.
+export async function recordDemo(s) {
+  const d = s.page.locator(DIALOG)
+  const rec = d.locator('.transport button.rec').first()
+  if (!(await rec.count()) || !(await s.page.evaluate(() => typeof window.__key === 'function'))) return false
+  const intro = 'Got a MIDI keyboard? Play the notes in, like in a DAW: ● rec records from the cursor into the voice of “draw into”.'
+  s.caption(intro)
+  await s.spotlight(d.locator('.transport .record').first(), { ms: 2600, pad: 4 })
+  await s.read(intro, 5600)
+  s.caption('A counter-line for the instrument: draw into Ins, the cursor where it starts.')
+  await s.click(d.locator('[aria-label="Draw into"] button.ins').first(), { pause: 400 })
+  await s.wait(500)
+  await cursorAt(s, 0.3)
+  await s.wait(1600)
+  const to = await undoMark(s)
+  // the score's tempo (the notation's ♩ = n), for playing in time
+  const bpm = await s.page.evaluate((dialog) => Number(document.querySelector(dialog)?.querySelector('.notation-wrap')?.textContent.match(/=\s*(\d{2,3})/)?.[1]) || 88, DIALOG)
+  const beat = 60000 / bpm
+  // the cursor between two beats (bar.beat.sixteenth): the count-in keeps the beats, the line starts on the next
+  const sixteenth = await s.page.evaluate((dialog) => Number(document.querySelector(dialog)?.querySelector('.transport .facts')?.textContent.match(/cursor \d+\.\d+\.(\d+)/)?.[1]) || 1, DIALOG)
+  const phase = ((sixteenth - 1) * beat) / 4
+  const first = phase > 0 ? beat - phase : 0
+  s.caption('One bar of count-in, then play. The keys appear as you play them - where you heard them.')
+  // the counter-line, timed from the click on rec itself as a player hears it (the audio output a little
+  // later): E5 half, G5, E5 | C5 half, E5 - each key let go a little before the next
+  await s.page.evaluate(([dialog, ms, offset]) => {
+    const button = document.querySelector(dialog)?.querySelector('.transport button.rec')
+    button?.addEventListener('click', () => {
+      const lead = 4 * ms + 50 + offset + 50
+      const t0 = performance.now()
+      for (const [at, length, note] of [[0, 2, 76], [2, 1, 79], [3, 1, 76], [4, 2, 72], [6, 2, 76]]) {
+        setTimeout(() => window.__key(note, true), Math.max(0, t0 + lead + at * ms - performance.now()))
+        setTimeout(() => window.__key(note, false), Math.max(0, t0 + lead + (at + length) * ms - 60 - performance.now()))
+      }
+    }, { once: true, capture: true })
+  }, [DIALOG, beat, first])
+  await s.click(rec, { pause: 200 })
+  await s.wait(4 * beat + 50 + first + 8.4 * beat - 250)
+  const keep = 'Space keeps the take: one undo step, on the quantize grid. Esc would throw it away.'
+  s.caption(keep)
+  await s.keys('Space', { labels: ['Space'] })
+  await s.wait(1200)
+  await s.read(keep, 4600)
+  const panel = d.locator('.transport .midi-settings > button').first()
+  if (await panel.count()) {
+    const text = '🎹 holds the rest: the keyboard, count-in, quantize, replace or merge. And “step” writes a note at the cursor with every key - no need to play in time.'
+    s.caption(text)
+    await s.click(panel, { pause: 300 })
+    await s.wait(600)
+    await s.spotlight(d.locator('.midi-panel').first(), { ms: 3000, pad: 4 })
+    await s.read(text, 7000)
+    await s.click(d.locator('.midi-panel button.close').first(), { pause: 300 })
+  }
+  await undo(s, 1, 'Ctrl+Z - for this video the sketch stays as it was.', { to })
+  return true
 }
 
 // Copy and paste at the cursor: overwrite (Ctrl+V) and insert (Ctrl+Shift+V), both undone.

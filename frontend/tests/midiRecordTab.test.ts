@@ -209,6 +209,23 @@ describe('recording with a MIDI keyboard', () => {
     expect((ops[1] as { notes: { onset: number }[] }).notes[0].onset).toBe(8)
   })
 
+  it('gives the focus back to 🎹 when its panel closes (Space and Ctrl+Z stay in the editor)', async () => {
+    const { host } = await mountTab()
+    const toggle = host.querySelector('.midi-settings > button') as HTMLButtonElement
+    toggle.click()
+    await nextTick()
+    ;(host.querySelector('.midi-panel button.close') as HTMLButtonElement).click()
+    await settle()
+    expect(host.querySelector('.midi-panel')).toBeNull()
+    expect(document.activeElement).toBe(toggle)
+    toggle.click()
+    await nextTick()
+    host.querySelector('.midi-panel select')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
+    await settle()
+    expect(host.querySelector('.midi-panel')).toBeNull()
+    expect(document.activeElement).toBe(toggle)
+  })
+
   it('says what is wrong when the browser has no MIDI', async () => {
     Object.defineProperty(navigator, 'requestMIDIAccess', { value: undefined, configurable: true })
     const { MidiHub } = await import('../src/sheet-editor/score/midiInput')

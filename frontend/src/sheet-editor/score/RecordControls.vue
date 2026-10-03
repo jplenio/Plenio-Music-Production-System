@@ -5,7 +5,7 @@
  * muting the recorded voice's old notes, hearing the keys and the step length. Everything says where it
  * records to: the roll's *draw into* voice.
  */
-import { computed, onBeforeUnmount, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref } from 'vue'
 
 import type { MidiHub } from './midiInput'
 import type { RecordSettings } from './midiRecording'
@@ -23,6 +23,12 @@ const settings = defineModel<RecordSettings>('settings', { required: true })
 const emit = defineEmits<{ record: []; stop: []; step: []; rest: []; enable: [] }>()
 
 const open = ref(false)
+const toggle = ref<HTMLButtonElement | null>(null)
+/** Close the panel; the focus goes back to 🎹 (not to the page, where Space or Ctrl+Z would reach ComfyUI). */
+function close(): void {
+  open.value = false
+  void nextTick(() => toggle.value?.focus())
+}
 const now = ref(performance.now())
 const timer = setInterval(() => (now.value = performance.now()), 120)
 onBeforeUnmount(() => clearInterval(timer))
@@ -82,9 +88,9 @@ function set<K extends keyof RecordSettings>(key: K, value: RecordSettings[K]): 
     <button v-if="step" title="A rest: the cursor moves on by one step" @click="emit('rest')">rest ▶</button>
     <span class="midi-light" :class="{ active, ready: hub.status.value === 'ready' }" :title="status" aria-hidden="true" />
     <span class="midi-settings">
-      <button :aria-expanded="open" title="MIDI keyboard and recording settings" @click="open = !open">🎹</button>
-      <span v-if="open" class="midi-panel" role="dialog" aria-label="MIDI and recording">
-        <button class="close" aria-label="Close" @click="open = false">×</button>
+      <button ref="toggle" :aria-expanded="open" title="MIDI keyboard and recording settings" @click="open ? close() : (open = true)">🎹</button>
+      <span v-if="open" class="midi-panel" role="dialog" aria-label="MIDI and recording" @keydown.esc.stop.prevent="close">
+        <button class="close" aria-label="Close" @click="close">×</button>
         <strong>MIDI keyboard</strong>
         <span class="facts">{{ status }}</span>
         <label v-if="hub.status.value === 'ready'">

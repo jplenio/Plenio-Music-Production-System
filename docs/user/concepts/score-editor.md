@@ -275,7 +275,7 @@ Play a melody in with a MIDI keyboard, like the record button of a DAW. It works
 
 **● rec** (Shift+R) records into the voice chosen in the roll's **draw into** (*Vocal* or *Ins*), from the **cursor**:
 
-1. Set the cursor in the ruler and press **● rec**. One bar of clicks counts in (the button blinks *count-in*), then the score plays from the cursor.
+1. Set the cursor in the ruler and press **● rec**. One bar of clicks counts in (the button blinks *count-in*) - on the song's beats, also when the cursor is between two - then the score plays from the cursor.
 2. Play. The keys show as red notes in the roll while you play, where you heard them: the audio output's latency is taken out, so a key played with a note you hear lands on that note. A key a little before the first beat lands on it.
 3. **Space**, **■ stop** or **● rec** again stops and **keeps** the take - one undo step (*recorded 12 notes in Vocal (bar 5)*), its notes selected. **Esc** throws it away. Playback also stops at the score's end.
 

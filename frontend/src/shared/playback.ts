@@ -225,6 +225,34 @@ export function playLength(view: ScoreView, options: PlayOptions): number {
   return Math.max(0, real) / clampSpeed(options.speed)
 }
 
+/**
+ * A recording's count-in: ``bars`` bars of clicks before the music starts at ``lead`` (playing seconds),
+ * on the score's own beats - when the cursor (score second ``second`` in ``bar``) is between two beats,
+ * the clicks keep that beat grid, so they run on into the music (as Cubase's precount does). ``beat``:
+ * a beat in playing seconds; a bar's first beat is higher.
+ */
+export function countInClicks(
+  bar: { start_s: number; duration_s: number } | null,
+  beats: number,
+  second: number,
+  bars: number,
+  lead: number,
+  beat: number
+): ToneEvent[] {
+  const scoreBeat = bar && beats > 0 ? bar.duration_s / beats : 0
+  const into = bar && scoreBeat > 0 ? Math.max(0, second - bar.start_s) : 0
+  // the beat at or before the cursor, and how far the cursor is past it (in playing seconds)
+  const index = scoreBeat > 0 ? Math.floor(into / scoreBeat + 1e-6) : 0
+  const phase = scoreBeat > 0 ? ((into - index * scoreBeat) / scoreBeat) * beat : 0
+  const first = phase > 1e-3 ? 0 : 1 // on a beat: that beat is the music's own
+  const count = Math.max(0, bars * beats)
+  return Array.from({ length: count }, (_, i) => {
+    const back = first + count - 1 - i
+    const accent = (((index - back) % beats) + beats) % beats === 0
+    return { at: Math.max(0, lead - phase - back * beat), duration: CLICK_SECONDS, midi: accent ? 96 : 89, part: 'click' as const }
+  })
+}
+
 /** Score seconds after ``elapsed`` real seconds of playback. */
 export function scoreTime(options: PlayOptions, elapsed: number): number {
   const clock = options.clock?.length ? options.clock : null

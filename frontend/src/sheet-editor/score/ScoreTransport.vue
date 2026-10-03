@@ -19,13 +19,13 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
 import {
-  CLICK_SECONDS,
   type GuidePlayback,
   type PlayOptions,
   TIME_TOLERANCE,
   type ToneEvent,
   type VoiceSwitches,
   clampSpeed,
+  countInClicks,
   playClock,
   playLength,
   schedule,
@@ -159,7 +159,7 @@ function play(from = startSecond.value, recording: RecordPlayback | null = null)
   const current = options
   lead = recording ? countInSeconds(view, start, recording.countIn, clock) : 0
   const events = schedule(view, current).map((event) => ({ ...event, at: event.at + lead }))
-  if (lead) events.unshift(...countInClicks(view, start, recording?.countIn ?? 0))
+  if (lead) events.unshift(...clicksBefore(view, start, recording?.countIn ?? 0, lead))
   const segments = withSource && clock && props.source ? sourceSegments(clock, start, current.to).map((s) => ({ ...s, at: s.at + lead })) : []
   try {
     player.play(events, {
@@ -201,11 +201,10 @@ function countInSeconds(view: ScoreView, second: number, bars: number, clock: Re
   return bars * beats * beat
 }
 
-/** The count-in's clicks: every beat of ``bars`` bars, the first of a bar higher. */
-function countInClicks(view: ScoreView, second: number, bars: number): ToneEvent[] {
-  const clock = options?.clock ?? null
-  const { beat, beats } = beatSeconds(view, second, clock)
-  return Array.from({ length: bars * beats }, (_, i) => ({ at: i * beat, duration: CLICK_SECONDS, midi: i % beats === 0 ? 96 : 89, part: 'click' as const }))
+/** The count-in's clicks before the music starts at ``lead`` (on the score's beats). */
+function clicksBefore(view: ScoreView, second: number, bars: number, lead: number): ToneEvent[] {
+  const { beat, beats } = beatSeconds(view, second, options?.clock ?? null)
+  return countInClicks(view.bars[barAt(second) - 1] ?? null, beats, second, bars, lead, beat)
 }
 
 /** Stop without telling anybody (a restart). */

@@ -1,12 +1,12 @@
 // Tutorial 5 · YuE2 · DAW: the writer drafts the words, you bring the music. One song with its two review
 // stops - Song Sheet · Text (the lyrics, Approve) and Song Sheet · DAW, where a sketch from a DAW comes in
 // with Import MIDI… (melody, second voice, chords, sections and a bass on the Guide track, which YuE2 never
-// gets), plays from the cursor and is saved as a project - and the song YuE2 renders from exactly that
-// score. The sketch is assets/Open Window Sketch.mid (an original 18-bar song in C made for this video;
+// gets), plays from the cursor, takes a counter-line from a MIDI keyboard (simulated, undone again) and is
+// saved as a project - and the song YuE2 renders from exactly that score. The sketch is assets/Open Window Sketch.mid (an original 18-bar song in C made for this video;
 // assets/Open Window Sketch.abc is its score), or $PLENIO_TUTORIAL_MIDI.
 
 import path from 'node:path'
-import { barsDemo, cursorDemo, overview, showApproved } from './lib/scenes.mjs'
+import { barsDemo, cursorDemo, overview, recordDemo, showApproved, simulateKeyboard } from './lib/scenes.mjs'
 import { DIALOG, approve, fixSections, maximize, openSheet, scrollToVoice, tab, trimSections } from './lib/sheet.mjs'
 
 export const meta = {
@@ -33,6 +33,7 @@ const DESCRIPTION = 'A bright, hopeful pop song about opening the window on the 
 export default async function daw(s, { project }) {
   const page = s.page
   const sketch = process.env.PLENIO_TUTORIAL_MIDI || path.join(project, 'tools', 'tutorials', 'assets', 'Open Window Sketch.mid')
+  await simulateKeyboard(s)
   s.card('title', {
     kicker: 'Plenio tutorial',
     title: '<span class="num">5 ·</span> YuE2 · DAW',
@@ -181,6 +182,8 @@ export default async function daw(s, { project }) {
   await barsDemo(s)
   s.chapter('Score editor · Playback')
   await cursorDemo(s)
+  s.chapter('Score editor · Record with a MIDI keyboard')
+  await recordDemo(s)
   s.chapter('Score editor · Files')
   const save = d.locator('.midi-tools button', { hasText: 'Save project' }).first()
   if (await save.count()) {
