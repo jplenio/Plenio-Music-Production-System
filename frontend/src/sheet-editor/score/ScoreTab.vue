@@ -804,14 +804,32 @@ function goto(bar: number): void {
   if (element) select(element.id, false, 'keys')
 }
 
+/**
+ * While a take runs, the score stays as it was at *rec*: the take's notes go to its bars at the stop, so
+ * an edit (or an undo) in between waits - it is refused with a note.
+ */
+function recordingBlocks(): boolean {
+  if (!midi.recording.value) return false
+  session.notes = ['recording - stop it (Space) before editing']
+  return true
+}
+
 async function operate(operation: ScoreOperation): Promise<void> {
-  if (props.readonly) return
+  if (props.readonly || recordingBlocks()) return
   await session.operate(operation)
 }
 
 /** The piano roll's commit: one canonical operation; ``false`` when refused (the ghost goes away). */
 function operateRoll(operation: ScoreOperation): Promise<boolean> {
-  return props.readonly ? Promise.resolve(false) : session.operate(operation)
+  return props.readonly || recordingBlocks() ? Promise.resolve(false) : session.operate(operation)
+}
+
+function undo(): void {
+  if (!recordingBlocks()) session.undo()
+}
+
+function redo(): void {
+  if (!recordingBlocks()) session.redo()
 }
 
 function selectFromRoll(ids: string[]): void {
@@ -1068,6 +1086,7 @@ let relayLyrics = false
  * this sheet cannot hold are left out, and the status line says which.
  */
 function openProject(project: ScoreProject, name: string): void {
+  if (recordingBlocks()) return
   if (props.readonly) {
     midiError.value = 'This score belongs to the other sheet; open the project in that sheet.'
     return
@@ -1124,7 +1143,7 @@ async function onMidiFile(event: Event): Promise<void> {
  * brings both back); unticking *keep the Guide notes* leaves the new score without any.
  */
 function insertMidi(result: MidiImportResult, keepGuide: boolean): void {
-  if (props.readonly) return
+  if (props.readonly || recordingBlocks()) return
   const name = midiRequest.value?.filename ?? 'file'
   const before = props.guide
   const after = before === undefined ? undefined : keepGuide ? [...result.guide] : []
@@ -1162,8 +1181,8 @@ function onKey(event: KeyboardEvent): void {
   if (mod && !props.readonly && (event.key === 'z' || event.key === 'Z' || event.key === 'y')) {
     if (isTextTarget(event.target) && !(event.target as HTMLElement).closest('.cm-editor')) return
     event.preventDefault()
-    if (event.key === 'y' || (event.key.toLowerCase() === 'z' && event.shiftKey)) session.redo()
-    else session.undo()
+    if (event.key === 'y' || (event.key.toLowerCase() === 'z' && event.shiftKey)) redo()
+    else undo()
     return
   }
   const action = mod && !isTextTarget(event.target) ? clipKey(event) : null
@@ -1281,8 +1300,8 @@ function onKey(event: KeyboardEvent): void {
       :undo-label="session.undoLabel"
       :redo-label="session.redoLabel"
       @operate="operate"
-      @undo="session.undo"
-      @redo="session.redo"
+      @undo="undo"
+      @redo="redo"
     />
     <div class="view-tools" role="group" aria-label="View">
       <span class="layouts" role="radiogroup" aria-label="Layout">

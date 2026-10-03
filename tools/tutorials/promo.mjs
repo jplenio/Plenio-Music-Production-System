@@ -44,7 +44,7 @@ const SHOTS = [
     say: 'YuE2 plans the melody as a real score, with the lyrics right over the notes.' },
   { video: 'yue2-song', at: 'Arrange the song', offset: 0.5, seconds: 4,
     say: 'Edit it like in your DAW: arrange sections, copy, paste, and play from the cursor.' },
-  { video: 'yue2-cover', at: '▶ source plays the original', offset: 0.5, seconds: 4,
+  { video: 'yue2-cover', at: 'The original recording plays right under the notes', offset: 1.2, seconds: 4,
     say: 'Turn a recording into a brand-new cover, and compare it with the original, bar by bar.' },
   { video: 'yue2-daw', at: 'Nothing changes yet:', offset: 0.3, seconds: 4,
     say: 'Bring your own sketch from any DAW, and let YuE2 sing it.' },

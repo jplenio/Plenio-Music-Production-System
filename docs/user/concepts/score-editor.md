@@ -277,7 +277,7 @@ Play a melody in with a MIDI keyboard, like the record button of a DAW. It works
 
 1. Set the cursor in the ruler and press **● rec**. One bar of clicks counts in (the button blinks *count-in*) - on the song's beats, also when the cursor is between two - then the score plays from the cursor.
 2. Play. The keys show as red notes in the roll while you play, where you heard them: the audio output's latency is taken out, so a key played with a note you hear lands on that note. A key a little before the first beat lands on it.
-3. **Space**, **■ stop** or **● rec** again stops and **keeps** the take - one undo step (*recorded 12 notes in Vocal (bar 5)*), its notes selected. **Esc** throws it away. Playback also stops at the score's end.
+3. **Space**, **■ stop** or **● rec** again stops and **keeps** the take - one undo step (*recorded 12 notes in Vocal (bar 5)*), its notes selected. **Esc** throws it away. Playback also stops at the score's end. While the take runs, the score is not edited (an edit or Ctrl+Z says so and waits): the take's notes go to the bars as they were at *rec*.
 
 A voice of the score is one line, so the take is made one line: keys pressed together give their highest note, and a key pressed before the previous one is let go ends it (legato). Starts and ends go onto the *quantize* grid, and a gap of at most one grid step before the next note closes - a key let go a little early still gives a half note, not a dotted quarter and a sixteenth rest. With **replace** the voice plays only the take from the start to the stop (what it played there before is gone); with **merge** only the time under the new notes is overwritten and the rest stays. Nothing played changes nothing.
 

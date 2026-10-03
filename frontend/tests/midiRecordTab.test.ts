@@ -174,6 +174,23 @@ describe('recording with a MIDI keyboard', () => {
     expect(host.querySelector('.status')?.textContent).toContain('nothing recorded')
   })
 
+  it('leaves the score as it was while a take runs: an edit or an undo waits', async () => {
+    const { host, button } = await mountTab()
+    button('● rec').click()
+    await settle()
+    host.querySelector('.score-tab')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true, cancelable: true }))
+    await settle()
+    expect(host.querySelector('.status')?.textContent).toContain('stop it (Space) before editing')
+    expect(ops).toEqual([])
+    clock.now = 0.5
+    key(72, true)
+    clock.now = 0.9
+    await wait(40)
+    button('● rec').click() // the take itself is written
+    await settle(6)
+    expect((ops[0] as { op: string }).op).toBe('place_notes')
+  })
+
   it('keeps the take with Space also when the focus left the score', async () => {
     const { button } = await mountTab()
     button('● rec').click()
