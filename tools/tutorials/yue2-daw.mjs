@@ -6,7 +6,7 @@
 // assets/Open Window Sketch.abc is its score), or $PLENIO_TUTORIAL_MIDI.
 
 import path from 'node:path'
-import { barsDemo, cursorDemo, overview, recordDemo, showApproved, simulateKeyboard } from './lib/scenes.mjs'
+import { barsDemo, cursorDemo, editorTour, filesDemo, recordDemo, showApproved, simulateKeyboard, soundsDemo } from './lib/scenes.mjs'
 import { DIALOG, approve, fixSections, maximize, openSheet, scrollToVoice, tab, trimSections } from './lib/sheet.mjs'
 
 export const meta = {
@@ -121,7 +121,7 @@ export default async function daw(s, { project }) {
   s.card('chapter', {
     kicker: 'Part', part: '2', title: 'The music',
     subtitle: 'A sketch from your DAW comes in - then it is yours to edit',
-    steps: ['Tracks', 'Import MIDI', 'Guide', 'Play', 'Save', 'Approve'],
+    steps: ['Tracks', 'Import MIDI', 'Tour', 'Play & sounds', 'Record', 'Files', 'Approve'],
   }, 4.5)
   s.chapter('Part 2 · The music')
   await openSheet(s, DAW, 'Open Song Sheet · DAW.')
@@ -163,9 +163,9 @@ export default async function daw(s, { project }) {
   await dialog.waitFor({ state: 'detached', timeout: 15000 }).catch(() => {})
   await s.wait(1800)
 
-  s.chapter('Score editor · The sketch')
+  s.chapter('Score editor · Tour')
   await s.say('The sketch is in: the melody, a second voice, the chords, the sections - in its own tempo and key.', 5600)
-  await overview(s, { lyrics: true })
+  await editorTour(s, { daw: true })
   s.chapter('Score editor · Fit the words')
   await fixSections(s)
   if (await trimSections(s)) {
@@ -182,16 +182,12 @@ export default async function daw(s, { project }) {
   await barsDemo(s)
   s.chapter('Score editor · Playback')
   await cursorDemo(s)
+  s.chapter('Score editor · Sounds and presets')
+  await soundsDemo(s, { preset: 'Composing with a MIDI keyboard', daw: true })
   s.chapter('Score editor · Record with a MIDI keyboard')
   await recordDemo(s)
   s.chapter('Score editor · Files')
-  const save = d.locator('.midi-tools button', { hasText: 'Save project' }).first()
-  if (await save.count()) {
-    s.caption('Save project keeps the score, the Guide notes and the lyrics in one file - Open project… brings them back, in any DAW sheet.')
-    await s.spotlight(d.locator('.midi-tools').first(), { ms: 2600, pad: 4 })
-    await s.hover(save)
-    await s.read('Save project keeps the score, the Guide notes and the lyrics in one file - Open project… brings them back, in any DAW sheet.', 6000)
-  }
+  await filesDemo(s)
   s.chapter('Part 2 · The music')
   await approve(s, 'Approve: exactly this score is what YuE2 gets - two voices and the chords. The Guide stays here.')
   await showApproved(s, DAW, '✓ approved. Press Run: YuE2 renders the song.')

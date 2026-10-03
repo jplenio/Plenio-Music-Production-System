@@ -5,7 +5,7 @@
 // score still editable there) - and the finished cover. The source is the repository's sample song.
 
 import path from 'node:path'
-import { arrangeDemo, cursorDemo, filesDemo, overview, showApproved } from './lib/scenes.mjs'
+import { arrangeDemo, cursorDemo, editorTour, filesDemo, showApproved, soundsDemo } from './lib/scenes.mjs'
 import { DIALOG, approve, maximize, noteEditing, openSheet, scrollToVoice, tab } from './lib/sheet.mjs'
 
 export const meta = {
@@ -169,12 +169,14 @@ export default async function cover(s, { project }) {
   await openSheet(s, SCORE, 'Open it with “Edit Song Sheet…”.')
   await maximize(s, '⛶ gives the editor the whole window.')
   await s.say('This sheet holds the score SheetSage2 transcribed: melody, chords, sections. The words come at the next stop - they follow the score.', 6400)
-  s.chapter('Score editor · Overview')
-  await overview(s)
+  s.chapter('Score editor · Tour')
+  await editorTour(s, { cover: true })
   s.chapter('Score editor · Notes')
   await noteEditing(s)
-  s.chapter('Score editor · Cursor and A/B')
+  s.chapter('Score editor · Cursor and the original')
   await cursorDemo(s, { source: true })
+  s.chapter('Score editor · Sounds and presets')
+  await soundsDemo(s, { preset: 'Cover: check the transcription' })
   s.chapter('Score editor · Arrange sections')
   await arrangeDemo(s)
   await s.say('With the original lyrics, the words follow their bars: the copied section will sing the same words again - you will see it at the next stop.', 6400)
@@ -203,7 +205,7 @@ export default async function cover(s, { project }) {
   }
   const owner = s.page.locator(DIALOG).locator('.score-owner').first()
   if (await owner.count()) {
-    const note = 'New: the score can still be changed here. Apply writes it into Song Sheet · Score and keeps these words with it.'
+    const note = 'The score can still be changed here. Apply writes it into Song Sheet · Score and keeps these words with it.'
     s.caption(note)
     await s.spotlight(owner, { ms: 3400, pad: 4 })
     await s.read(note, 5400)

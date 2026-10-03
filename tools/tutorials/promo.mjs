@@ -40,7 +40,7 @@ const SHOTS = [
     say: 'Describe your song in plain words. A local language model writes the lyrics.' },
   { video: 'yue2-song', at: 'Lyrics: the words YuE2 will sing', offset: 0.3, seconds: 4,
     say: 'And every step can stop for your review. You check, you change, you approve.' },
-  { video: 'yue2-song', at: 'Also new: the lyrics stand over', offset: 0.5, seconds: 4,
+  { video: 'yue2-song', at: 'Under it, the lyrics lane', offset: 0.8, seconds: 4,
     say: 'YuE2 plans the melody as a real score, with the lyrics right over the notes.' },
   { video: 'yue2-song', at: 'Arrange the song', offset: 0.5, seconds: 4,
     say: 'Edit it like in your DAW: arrange sections, copy, paste, and play from the cursor.' },

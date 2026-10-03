@@ -111,11 +111,38 @@ and give the editor the whole window.
 @ This sheet holds the score
 This is the score SheetSage2 transcribed. The words come at the next stop, and they follow this score.
 
-@ The score is shown three ways
-Three views again: the piano roll, the sheet music, and the inspector.
+@ First a quick tour, then the details
+First, a quick tour, then the details. The score editor shows one score in several views, and they always stay in step.
 
-@ On the left, the song’s sections
-On the left, the sections, ready to be arranged.
+@ On top, the piano roll
+On top, the piano roll: the notes of the melody and of the second voice, bar by bar. The bar numbers are the ruler.
+
+@ Above the notes, the chord lane
+Above the notes, the chord lane, with each chord where it starts.
+
+@ For a cover, the original recording runs in a lane | optional
+For a cover, the original recording runs in a lane of its own. [pause:0.3s] And the pink curve is the pitch the singer really sang.
+
+@ The roll’s toolbar
+The roll's toolbar: draw or select, the voice you draw into, the grid, copy and paste, zoom, and quantize.
+
+@ Under the roll, the transport
+Under the roll, the transport: play from the cursor, record with a MIDI keyboard, the sounds of the tracks, [pause:0.2s] and what you hear: the notes, the original, or both.
+
+@ Below, the notation
+Below, the notation: both voices, with the chords, the sections, and the lyrics. Click a note there, and it's selected everywhere.
+
+@ On the right, the inspector
+On the right, the inspector, for the exact values of a note, a chord, or a bar.
+
+@ And the song’s sections with the bar strip
+And the song's sections, with the bar strip, to arrange the song, like on a DAW's arranger track.
+
+@ At the top: undo and the edit buttons
+At the top: undo and the edit buttons, the layouts, and the files: MIDI, MusicXML, the notation as PDF or picture, and the project.
+
+@ “keys” lists every key
+And keys lists every shortcut and mouse gesture.
 
 @ Shift + mouse wheel
 Shift and the mouse wheel scroll to where the singing starts.
@@ -147,7 +174,7 @@ and move them together.
 @ Ctrl+Z again
 One more undo, and the melody is back.
 
-@ New: click in the ruler
+@ Click in the ruler - the bar numbers
 Now, the cursor. Click into the ruler to set it, just like in Cubase.
 
 @ Playback starts at the cursor
@@ -162,8 +189,23 @@ And here's the clever part for covers: the original recording plays right under 
 @ The pink curve is the sung pitch | optional
 The pink curve is the singer's actual pitch, taken from the original vocals. [pause:0.3s] Where it leaves a note, the transcription is off: a wrong pitch, or a missed note.
 
+@ A cover far from the original? | optional
+A cover far from the original? Untick wave and sung, and the roll shows only your notes.
+
 @ ⇆ align moves the recording | optional
 And if the beats don't line up, align moves the recording against the bars.
+
+@ Every track plays in a sound of its own
+Every track plays in a sound of its own. Sounds, in the transport, sets them.
+
+@ Vocal, Instrument, Chords and Guide
+Vocal, instrument, chords, and guide: piano, strings, pad, organ, a sung ah, and more. [pause:0.2s] The play button lets you hear a few notes in each sound.
+
+@ Presets set them for a kind of song
+Presets set them all at once. Here: cover, check the transcription, with the original under the notes.
+
+@ “save current as preset…” keeps your own
+And save current as preset keeps your own: in ComfyUI, ready for every song, in every browser.
 
 @ Arrange the song
 Let's arrange. Select the chorus, and press Control D: a copy right after it.
@@ -175,10 +217,16 @@ Control and the arrow keys move sections. We keep the copy, and undo the move.
 With the original lyrics, the words follow their bars. So the copied chorus will sing the same words again.
 
 @ Export MusicXML hands the sheet music
-Export MusicXML hands the sheet music to MuseScore, Sibelius, Dorico, or Cubase.
+Export MusicXML hands the sheet music, lyrics included, to MuseScore, Sibelius, Dorico, or Cubase.
+
+@ Export notation… gives the sheet music
+Export notation gives the sheet music as a PDF, on A4 or letter pages, as a PNG or SVG picture, [pause:0.2s] or prints it.
+
+@ A click on PDF
+One click on PDF: both voices, the chords, the sections, and the lyrics, with the song's title, ready to print.
 
 @ Save project keeps
-Save project keeps everything in one file, to open again later.
+And save project keeps the score, the guide notes, the lyrics, and the editor's settings together, in one file.
 
 @ Approve: this score
 Approve. The words will be placed into this score, extra chorus and all.
@@ -204,8 +252,8 @@ Let's scroll to the vocals.
 @ Each line over its phrase
 Each line sits over its phrase. And to fix a word, just double-click its line.
 
-@ New: the score can still be changed here
-New: you can still change the score right here. Apply writes it back to the Score sheet.
+@ The score can still be changed here
+You can still change the score right here. Apply writes it back to the Score sheet.
 
 @ Lyrics: the transcribed words
 The Lyrics tab lists the words, section by section. Unsure words are highlighted, so you know where to look.

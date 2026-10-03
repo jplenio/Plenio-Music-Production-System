@@ -1,6 +1,8 @@
-// The score editor's scenes of 0.4.0: the overview with the lyrics lane, the lyrics, the cursor and
-// playback, copy and paste at the cursor, arranging sections and the files. Every scene leaves the song
-// as the model made it, except the arranged section (a script keeps it to show what follows).
+// The score editor's scenes: a tour of every area first, then the details - the lyrics, the cursor and
+// playback (a cover: the original under the notes, its sung pitch, wave, align), the sounds and presets,
+// copy and paste at the cursor, arranging sections and bars, recording with a MIDI keyboard and the
+// files. Every scene leaves the song as the model made it, except the arranged section (a script keeps
+// it to show what follows).
 
 import { DIALOG, free, roll, scrollToVoice, undo, undoMark } from './sheet.mjs'
 
@@ -31,28 +33,66 @@ async function cursorAt(s, which = 0.4) {
   return bar.text
 }
 
-// The three views, the section list and - with lyrics - the lyrics lane.
-export async function overview(s, { lyrics = false } = {}) {
+// The visible part of an element of the roll (its lanes are as wide as the whole score).
+function inRoll(s, selector) {
+  return async () =>
+    s.page.evaluate(
+      ([dialog, sel]) => {
+        const d = document.querySelector(dialog)
+        const el = d.querySelector(sel)
+        const view = d.querySelector('.roll-scroll').getBoundingClientRect()
+        if (!el) return null
+        const r = el.getBoundingClientRect()
+        const x = Math.max(r.left, view.left + 40), right = Math.min(r.right, view.right)
+        const y = Math.max(r.top, view.top), bottom = Math.min(r.bottom, view.bottom)
+        return { x, y, width: Math.max(0, right - x), height: Math.max(0, bottom - y) }
+      },
+      [DIALOG, selector]
+    )
+}
+
+// A tour of the editor before the details: every area and what it is for. `cover`: the source lane and
+// the original under the notes; `daw`: the track headers with their sounds.
+export async function editorTour(s, { cover = false, daw = false } = {}) {
   const d = s.page.locator(DIALOG)
-  const geo = await roll(s, 'vocal')
-  await s.say('The score is shown three ways: the piano roll on top, the notation below, the inspector on the right.', 4200)
-  await s.spotlight(geo.box, { ms: 1500, pad: 2 })
-  await s.wait(1600)
-  await s.spotlight(d.locator('.notation-wrap').first(), { ms: 1500, pad: 2 })
-  await s.wait(1600)
-  const sections = d.locator('.navigator .sections').first()
-  if (await sections.count()) {
-    const text = 'On the left, the song’s sections - new in 0.4: you arrange them like on a DAW’s arranger track.'
+  const show = async (text, target, ms, read) => {
     s.caption(text)
-    await s.spotlight(sections, { ms: 2600, pad: 4 })
-    await s.read(text, 4200)
+    if (target && (await (typeof target === 'function' ? target() : target.count()))) await s.spotlight(target, { ms, pad: 4 })
+    await s.read(text, read)
   }
-  if (lyrics && (await d.locator('.lyrics-lane').count())) {
+  await s.say('First a quick tour, then the details. The score editor shows one score in several views, always in step.', 5600)
+  await show('On top, the piano roll: the notes of the melody and of the second voice, bar by bar - the bar numbers are the ruler.', d.locator('.roll-scroll').first(), 3000, 6000)
+  await show('Above the notes, the chord lane: each chord symbol where it starts.', inRoll(s, '.roll-svg rect.lane'), 2600, 4200)
+  if (await d.locator('.lyrics-lane').count()) {
     await scrollToVoice(s, 'vocal')
-    const text = 'Also new: the lyrics stand over the notes they are sung on - each line over its phrase, each syllable over its note.'
-    s.caption(text)
-    await s.spotlight(d.locator('.lyrics-lane').first(), { ms: 3400, pad: 2 })
-    await s.read(text, 5800)
+    await show('Under it, the lyrics lane: each line over its phrase, each syllable over its note.', inRoll(s, '.lyrics-lane'), 3000, 5400)
+  }
+  if (cover && (await d.locator('.roll-svg rect.source-lane').count())) {
+    await show('For a cover, the original recording runs in a lane of its own - and the pink curve is the pitch the singer really sang.', inRoll(s, '.roll-svg rect.source-lane'), 3400, 6600)
+  }
+  await show('The roll’s toolbar: draw or select, the voice you draw into, the grid, copy and paste, zoom and quantize.', d.locator('.roll-tools').first(), 3000, 5800)
+  await show(
+    cover
+      ? 'Under the roll, the transport: play from the cursor, record with a MIDI keyboard, the tracks’ sounds - and what you hear: the notes, the original, or both.'
+      : 'Under the roll, the transport: play from the cursor, record with a MIDI keyboard, step input, the tracks’ sounds, loop, metronome and speed.',
+    d.locator('.transport').first(),
+    3400,
+    7000
+  )
+  await show('Below, the notation: both voices with the chords, the sections and the lyrics. Click a note there, and it is selected everywhere.', d.locator('.notation-wrap').first(), 3000, 6400)
+  await show('On the right, the inspector: the selected note, chord or bar, to the exact value.', d.locator('.inspector').first(), 2600, 4600)
+  if (daw) await show('On the left, the tracks - each with its own sound and a play switch.', d.locator('.track-panel').first(), 2800, 4800)
+  await show('And the song’s sections with the bar strip: arrange the song like on a DAW’s arranger track.', d.locator('.navigator').first(), 2800, 5400)
+  await show('At the top: undo and the edit buttons, the layouts, and the files - MIDI, MusicXML, the notation as PDF or picture, and the project.', d.locator('.palette').first(), 2400, 6200)
+  const keys = d.locator('.keys-help > button').first()
+  if (await keys.count()) {
+    s.caption('“keys” lists every key and mouse gesture of the editor.')
+    await s.click(keys, { pause: 300 })
+    await s.wait(500)
+    await s.spotlight(d.locator('.keys-panel').first(), { ms: 2600, pad: 4 })
+    await s.read('“keys” lists every key and mouse gesture of the editor.', 4400)
+    await s.click(d.locator('.keys-panel button.close').first(), { pause: 250 })
+    await s.wait(400)
   }
 }
 
@@ -93,7 +133,7 @@ export async function lyricsDemo(s) {
 // The cursor: a click in the ruler, playback from there with a line that follows; with a source, A/B.
 export async function cursorDemo(s, { source = false } = {}) {
   const d = s.page.locator(DIALOG)
-  const intro = 'New: click in the ruler - the bar numbers - to set the cursor, as in Cubase.'
+  const intro = 'Click in the ruler - the bar numbers - to set the cursor, as in Cubase.'
   s.caption(intro)
   const bar = await cursorAt(s, 0.35)
   await s.wait(900)
@@ -119,13 +159,26 @@ export async function cursorDemo(s, { source = false } = {}) {
     await s.wait(3000)
     await s.click({ x: at.x, y: at.y, width: 0, height: 0 }, { pause: 200 })
     await s.wait(800)
-    // the sung pitch (node Sung Pitch) and the beat grid by hand (0.4.4)
+    // the sung pitch (node Sung Pitch), the view of the source, the beat grid by hand
     const curve = d.locator('.roll-svg path.sung-pitch')
     if (await curve.count()) {
       const sung = 'The pink curve is the sung pitch of the original vocals. Where it leaves a note, the transcription is off - a wrong pitch, a missed note.'
       s.caption(sung)
       await s.spotlight(d.locator('.roll-scroll').first(), { ms: 3200, pad: 2 })
       await s.read(sung, 6200)
+    }
+    const wave = d.locator(`input[aria-label="Show the source's waveform"]`).first()
+    const sungSwitch = d.locator('input[aria-label="Show the sung pitch"]').first()
+    if (await wave.count()) {
+      const free = 'A cover far from the original? Untick “wave” and “sung”: the roll shows only your notes.'
+      s.caption(free)
+      await s.click(wave, { pause: 300 })
+      if (await sungSwitch.count()) await s.click(sungSwitch, { pause: 300 })
+      await s.wait(900)
+      await s.read(free, 4600)
+      await s.click(wave, { pause: 250 })
+      if (await sungSwitch.count()) await s.click(sungSwitch, { pause: 250 })
+      await s.wait(500)
     }
     const align = d.locator('.transport button', { hasText: 'align' }).first()
     if (await align.count()) {
@@ -291,7 +344,7 @@ export async function barsDemo(s) {
   await bars.nth(first + 1).scrollIntoViewIfNeeded()
   await s.wait(600)
   const to = await undoMark(s)
-  const intro = 'New: the bar strip under the sections arranges single bars, the same way as sections.'
+  const intro = 'The bar strip under the sections arranges single bars, the same way as sections.'
   s.caption(intro)
   await s.spotlight(strip, { ms: 2600, pad: 4 })
   await s.read(intro, 4600)
@@ -319,7 +372,7 @@ export async function barsDemo(s) {
   await s.wait(1200)
 }
 
-// The files: MusicXML and the project file (next to MIDI).
+// The files: MusicXML, the notation as PDF or picture, and the project file (next to MIDI).
 export async function filesDemo(s) {
   const d = s.page.locator(DIALOG)
   const group = d.locator('.midi-tools').first()
@@ -329,10 +382,67 @@ export async function filesDemo(s) {
   await s.spotlight(group, { ms: 3000, pad: 4 })
   await s.hover(d.locator('.midi-tools button', { hasText: 'Export MusicXML' }).first())
   await s.read(xml, 4600)
-  const project = 'Save project keeps the score, the Guide notes and the lyrics in one file - Open project… brings them back later.'
+  const notation = d.locator('.notation-export > button').first()
+  if (await notation.count()) {
+    const text = 'Export notation… gives the sheet music as a PDF - pages of A4 or Letter - as a PNG or SVG picture, or prints it.'
+    s.caption(text)
+    await s.click(notation, { pause: 300 })
+    await s.wait(600)
+    await s.spotlight(d.locator('.export-panel').first(), { ms: 2800, pad: 4 })
+    await s.read(text, 5200)
+    const pdf = 'A click on PDF: both voices, the chords, the sections and the lyrics, with the song’s title - ready to print.'
+    s.caption(pdf)
+    await s.click(d.locator('.export-panel .formats button', { hasText: 'PDF' }).first(), { pause: 300 })
+    await s.wait(1500)
+    await s.read(pdf, 4600)
+  }
+  const project = 'Save project keeps the score, the Guide notes, the lyrics and the editor’s settings in one file - Open project… brings them back later.'
   s.caption(project)
   await s.hover(d.locator('.midi-tools button', { hasText: 'Save project' }).first())
-  await s.read(project, 4800)
+  await s.read(project, 5600)
+}
+
+// The tracks' sounds and the presets: ♫ sounds, a sound per track, a preset for the kind of song (kept),
+// saving one's own. The video has no sound of its own: what ▶ plays is said, not heard.
+export async function soundsDemo(s, { preset = 'Pop', daw = false } = {}) {
+  const d = s.page.locator(DIALOG)
+  const button = d.locator('.transport .sounds-settings > button').first()
+  if (!(await button.count())) return
+  const intro = 'Every track plays in a sound of its own: “sounds” in the transport.'
+  s.caption(intro)
+  await s.click(button, { pause: 300 })
+  await s.wait(600)
+  const panel = d.locator('.sounds-panel').first()
+  await s.spotlight(panel, { ms: 2600, pad: 4 })
+  await s.read(intro, 4200)
+  const tracks = 'Vocal, Instrument, Chords and Guide: piano, strings, pad, organ, a sung “ah” and more - ▶ plays a few notes in the sound.'
+  s.caption(tracks)
+  await s.hover(panel.locator('select[aria-label="Sound of the Vocal track"]').first())
+  await s.wait(800)
+  await s.click(panel.locator('button[aria-label="Hear the Vocal sound"]').first(), { pause: 300 })
+  await s.read(tracks, 6400)
+  const presets = `Presets set them for a kind of song or a way of working - here “${preset}”.`
+  s.caption(presets)
+  const choose = panel.locator('select[aria-label="Preset"]').first()
+  await s.hover(choose)
+  await choose.selectOption(preset)
+  await s.wait(900)
+  await s.click(panel.locator('button', { hasText: /^\s*use\s*$/ }).first(), { pause: 300 })
+  await s.wait(900)
+  await s.read(presets, 5200)
+  const own = '“save current as preset…” keeps your own - in ComfyUI, for every song, in every browser.'
+  s.caption(own)
+  await s.hover(panel.locator('button', { hasText: 'save current as preset' }).first())
+  await s.read(own, 5200)
+  await s.click(panel.locator('button.close').first(), { pause: 300 })
+  await s.wait(500)
+  const headers = d.locator('.track-panel select.sound').first()
+  if (daw && (await headers.count())) {
+    const text = 'In the DAW layout, every track header has its sound too.'
+    s.caption(text)
+    await s.spotlight(d.locator('.track-panel').first(), { ms: 2600, pad: 4 })
+    await s.read(text, 4200)
+  }
 }
 
 // After Approve the node turns green at once (0.4.0) - no run needed to see it.

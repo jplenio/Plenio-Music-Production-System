@@ -1,9 +1,22 @@
 // Tutorial 1 · YuE2 · Song (0.4): open the template, one run straight through (new song every run), then
 // one song with its review stops - Song Sheet · Text (the tabs, Approve), Song Sheet · Score (the score
-// editor: the lyrics lane, notes, the cursor, copy and paste, arranging - a copied chorus is kept - and
-// the files), the text sheet again with the lyrics that followed the chorus, and the finished song.
+// editor: a tour of every area, then the lyrics lane, notes, the cursor and playback, the sounds and
+// presets, copy and paste, arranging - a copied chorus is kept - recording with a (simulated) MIDI
+// keyboard and the files), the text sheet again with the lyrics that followed the chorus, and the song.
 
-import { arrangeDemo, barsDemo, clipboardDemo, cursorDemo, filesDemo, lyricsDemo, overview, showApproved } from './lib/scenes.mjs'
+import {
+  arrangeDemo,
+  barsDemo,
+  clipboardDemo,
+  cursorDemo,
+  editorTour,
+  filesDemo,
+  lyricsDemo,
+  recordDemo,
+  showApproved,
+  simulateKeyboard,
+  soundsDemo,
+} from './lib/scenes.mjs'
 import { approve, fixSections, maximize, noteEditing, openSheet, tab } from './lib/sheet.mjs'
 
 export const meta = {
@@ -29,6 +42,7 @@ const DESCRIPTION = 'A hopeful song about leaving a small town at sunrise, with 
 
 export default async function song(s) {
   const page = s.page
+  await simulateKeyboard(s)
   s.card('title', {
     kicker: 'Plenio tutorial',
     title: '<span class="num">1 ·</span> YuE2 · Song',
@@ -159,11 +173,11 @@ export default async function song(s) {
   await maximize(s, '⛶ gives the editor the whole window.')
   s.card('chapter', {
     kicker: 'Part', part: '3', title: 'The score editor',
-    subtitle: 'Lyrics where they are sung, notes, the cursor, copy and paste, arranging sections - new in 0.4',
-    steps: ['Lyrics', 'Notes', 'Cursor', 'Copy & paste', 'Sections', 'Bars', 'Files'],
+    subtitle: 'A tour of the editor, then the details: lyrics, notes, playback and sounds, arranging, recording, files',
+    steps: ['Tour', 'Lyrics', 'Notes', 'Playback & sounds', 'Arranging', 'Recording', 'Files'],
   }, 4.5)
-  s.chapter('Score editor · Overview')
-  await overview(s, { lyrics: true })
+  s.chapter('Score editor · Tour')
+  await editorTour(s)
   await fixSections(s)
   s.chapter('Score editor · Lyrics')
   await lyricsDemo(s)
@@ -171,6 +185,8 @@ export default async function song(s) {
   await noteEditing(s)
   s.chapter('Score editor · Cursor and playback')
   await cursorDemo(s)
+  s.chapter('Score editor · Sounds and presets')
+  await soundsDemo(s, { preset: 'Pop' })
   s.chapter('Score editor · Copy and paste')
   await clipboardDemo(s)
   s.chapter('Score editor · Arrange sections')
@@ -179,6 +195,8 @@ export default async function song(s) {
   })
   s.chapter('Score editor · Arrange bars')
   await barsDemo(s)
+  s.chapter('Score editor · Record with a MIDI keyboard')
+  await recordDemo(s)
   s.chapter('Score editor · Files')
   await filesDemo(s)
   s.chapter('Part 2 · One song, stop to review')
