@@ -34,6 +34,97 @@ export interface PlayOptions {
   metronome?: boolean
   /** The Guide notes to play (only with ``voices.guide``). */
   guide?: GuidePlayback[]
+  /** Bar by bar, how score time becomes playing time (``playClock``); none: the score's own time. */
+  clock?: ClockBar[] | null
+}
+
+/**
+ * One bar of the playing clock: where it is in the score (seconds) and while playing. With a source
+ * recording the bars take the recording's time (``source``: its seconds of that bar), so the notes,
+ * the metronome and the recording stay together even where the singer drifts from the score's tempo,
+ * and an arranged cover's copied chorus plays the source's chorus again.
+ */
+export interface ClockBar {
+  scoreStart: number
+  scoreDur: number
+  realStart: number
+  realDur: number
+  source: [number, number] | null
+}
+
+/**
+ * The playing clock of a score: every bar as long as its source bar (``sourceBars``, the timeline's
+ * bars as the score's bars see them; ``null``: a bar the source does not have keeps its own length).
+ */
+export function playClock(view: ScoreView, sourceBars: readonly ([number, number, string] | null)[] | null | undefined): ClockBar[] {
+  const clock: ClockBar[] = []
+  let real = 0
+  view.bars.forEach((bar, i) => {
+    const source = sourceBars?.[i] ?? null
+    const span: [number, number] | null = source && source[1] > source[0] ? [source[0], source[1]] : null
+    const realDur = span ? span[1] - span[0] : bar.duration_s
+    clock.push({ scoreStart: bar.start_s, scoreDur: bar.duration_s, realStart: real, realDur, source: span })
+    real += realDur
+  })
+  return clock
+}
+
+function clockBarAt(clock: readonly ClockBar[], second: number, key: 'scoreStart' | 'realStart'): ClockBar | null {
+  let found: ClockBar | null = null
+  for (const bar of clock) {
+    if (bar[key] <= second + TIME_TOLERANCE) found = bar
+    else break
+  }
+  return found ?? clock[0] ?? null
+}
+
+/** Playing seconds of score second ``second`` (bar by bar). */
+export function toReal(clock: readonly ClockBar[], second: number): number {
+  const bar = clockBarAt(clock, second, 'scoreStart')
+  if (!bar) return second
+  const part = bar.scoreDur > 0 ? (second - bar.scoreStart) / bar.scoreDur : 0
+  return bar.realStart + part * bar.realDur
+}
+
+/** Score seconds of playing second ``second`` (the inverse of ``toReal``). */
+export function toScore(clock: readonly ClockBar[], second: number): number {
+  const bar = clockBarAt(clock, second, 'realStart')
+  if (!bar) return second
+  const part = bar.realDur > 0 ? (second - bar.realStart) / bar.realDur : 0
+  return bar.scoreStart + part * bar.scoreDur
+}
+
+/** A piece of the source recording to play: ``at`` seconds after the start, from ``offset`` on. */
+export interface SourceSegment {
+  at: number
+  offset: number
+  duration: number
+}
+
+/**
+ * The pieces of the source that play from score second ``from`` to ``to``: bar after bar, joined where
+ * the recording runs on (a copied chorus jumps back to the source's chorus; a bar without a source is
+ * silent). Seconds of playing time at speed 1.
+ */
+export function sourceSegments(clock: readonly ClockBar[], from: number, to?: number | null): SourceSegment[] {
+  const begin = toReal(clock, from)
+  const end = to === null || to === undefined ? Infinity : toReal(clock, to)
+  const segments: SourceSegment[] = []
+  for (const bar of clock) {
+    if (!bar.source) continue
+    const barEnd = bar.realStart + bar.realDur
+    const start = Math.max(bar.realStart, begin)
+    const stop = Math.min(barEnd, end)
+    if (stop <= start + TIME_TOLERANCE) continue
+    const offset = bar.source[0] + ((start - bar.realStart) / bar.realDur) * (bar.source[1] - bar.source[0])
+    const at = start - begin
+    const duration = stop - start
+    const last = segments.at(-1)
+    if (last && Math.abs(last.at + last.duration - at) < TIME_TOLERANCE && Math.abs(last.offset + last.duration - offset) < 0.01) {
+      last.duration += duration
+    } else segments.push({ at, offset, duration })
+  }
+  return segments
 }
 
 export interface ToneEvent {
@@ -66,13 +157,17 @@ export function schedule(view: ScoreView, options: PlayOptions): ToneEvent[] {
   const speed = clampSpeed(options.speed)
   const end = options.to ?? view.duration_s
   const events: ToneEvent[] = []
+  const clock = options.clock?.length ? options.clock : null
+  const origin = clock ? toReal(clock, options.from) : options.from
+  /** Playing seconds (from the start of playback, before the speed) of a score second. */
+  const real = (second: number): number => (clock ? toReal(clock, second) : second) - origin
   for (const voice of ['Vocal', 'Ins'] as Voice[]) {
     if (!options.voices[voice]) continue
     for (const note of view.notes?.[voice] ?? []) {
       if (note.start_s < options.from - TIME_TOLERANCE || note.start_s >= end - TIME_TOLERANCE) continue
-      const duration = Math.min(note.duration_s, end - note.start_s)
-      const at = Math.max(0, note.start_s - options.from)
-      events.push({ at: at / speed, duration: duration / speed, midi: note.midi, part: voice })
+      const stop = Math.min(note.start_s + note.duration_s, end)
+      const at = Math.max(0, real(note.start_s))
+      events.push({ at: at / speed, duration: (real(stop) - at) / speed, midi: note.midi, part: voice })
     }
   }
   if (options.voices.chords) {
@@ -81,20 +176,16 @@ export function schedule(view: ScoreView, options: PlayOptions): ToneEvent[] {
       const start = Math.max(chord.start_s, options.from)
       if (chordEnd <= start + TIME_TOLERANCE) continue
       for (const midi of chord.pitches) {
-        events.push({ at: (start - options.from) / speed, duration: (chordEnd - start) / speed, midi, part: 'chord' })
+        events.push({ at: real(start) / speed, duration: (real(chordEnd) - real(start)) / speed, midi, part: 'chord' })
       }
     }
   }
   if (options.voices.guide) {
     for (const note of options.guide ?? []) {
       if (note.start_s < options.from - TIME_TOLERANCE || note.start_s >= end - TIME_TOLERANCE) continue
-      const duration = Math.min(note.duration_s, end - note.start_s)
-      events.push({
-        at: Math.max(0, note.start_s - options.from) / speed,
-        duration: duration / speed,
-        midi: note.midi,
-        part: 'guide'
-      })
+      const stop = Math.min(note.start_s + note.duration_s, end)
+      const at = Math.max(0, real(note.start_s))
+      events.push({ at: at / speed, duration: (real(stop) - at) / speed, midi: note.midi, part: 'guide' })
     }
   }
   if (options.metronome) {
@@ -104,7 +195,7 @@ export function schedule(view: ScoreView, options: PlayOptions): ToneEvent[] {
         const time = bar.start_s + (beat * bar.duration_s) / beats
         if (time < options.from - TIME_TOLERANCE || time >= end - TIME_TOLERANCE) continue
         events.push({
-          at: Math.max(0, time - options.from) / speed,
+          at: Math.max(0, real(time)) / speed,
           duration: CLICK_SECONDS,
           midi: beat === 0 ? 96 : 89,
           part: 'click'
@@ -117,7 +208,9 @@ export function schedule(view: ScoreView, options: PlayOptions): ToneEvent[] {
 
 /** Score seconds after ``elapsed`` real seconds of playback. */
 export function scoreTime(options: PlayOptions, elapsed: number): number {
-  return options.from + elapsed * clampSpeed(options.speed)
+  const clock = options.clock?.length ? options.clock : null
+  if (!clock) return options.from + elapsed * clampSpeed(options.speed)
+  return toScore(clock, toReal(clock, options.from) + elapsed * clampSpeed(options.speed))
 }
 
 /** Ids of the written notes sounding at score second ``time`` (for the playback cursor). */

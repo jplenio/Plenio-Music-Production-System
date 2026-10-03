@@ -156,8 +156,8 @@ Playback starts at the cursor, with a green line following along. [pause:0.4s] S
 @ The transport sits right under the roll
 The transport sits right under the roll, within reach. Space plays and stops, Home and End jump to either end.
 
-@ ▶ source plays the original recording
-And here's the clever part for covers: source plays the original recording from the same bar. [pause:0.3s] So you can compare, A and B.
+@ The original recording plays right under the notes
+And here's the clever part for covers: the original recording plays right under the notes, bar by bar. [pause:0.3s] And A-B switches between them, at once.
 
 @ Arrange the song
 Let's arrange. Select the chorus, and press Control D: a copy right after it.

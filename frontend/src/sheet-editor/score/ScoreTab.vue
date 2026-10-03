@@ -120,6 +120,7 @@ import { barOfUnit, positionLabel, secondsOfUnit, unitOfBar, unitOfSeconds } fro
 import { selectedChordIds, selectedNoteIds } from './pianoRoll'
 import { type ScoreProject, PROJECT_EXTENSION, buildProject, parseProject, projectFilename } from './projectFile'
 import { guideNotes, remapGuide, sameGuide } from './tracks'
+import { type DecodedSource, decodeSource } from './sourceAudio'
 import { describeError, useScoreSession } from './useScoreSession'
 
 const props = defineProps<{
@@ -264,6 +265,7 @@ const locator = ref(0)
 const playhead = ref<number | null>(null)
 const revealRange = ref<[number, number] | null>(null)
 const transport = ref<InstanceType<typeof ScoreTransport> | null>(null)
+const pianoRoll = ref<InstanceType<typeof PianoRoll> | null>(null)
 
 watch(prefs, (value) => savePrefs(value), { deep: true })
 onBeforeUnmount(() => session.dispose())
@@ -631,6 +633,49 @@ const metronome = computed<boolean>({
   set: (value) => (prefs.value = { ...prefs.value, metronome: value })
 })
 const reference = computed(() => (props.payload?.reference_audio ? viewUrl(props.fetcher, props.payload.reference_audio) : null))
+/** A cover's source recording, decoded for playback with the notes and the waveform lane. */
+const source = shallowRef<DecodedSource | null>(null)
+const sourceProblem = ref<string | null>(null)
+watch(
+  reference,
+  (url) => {
+    source.value = null
+    sourceProblem.value = null
+    if (!url) return
+    decodeSource(url).then(
+      (decoded) => {
+        if (reference.value === url) source.value = decoded
+      },
+      (e: unknown) => {
+        if (reference.value === url) sourceProblem.value = `the source recording could not be read: ${e instanceof Error ? e.message : String(e)}`
+      }
+    )
+  },
+  { immediate: true }
+)
+const hear = computed<'both' | 'notes' | 'source'>({
+  get: () => prefs.value.hear,
+  set: (value) => (prefs.value = { ...prefs.value, hear: value })
+})
+const sourceLevel = computed<number>({
+  get: () => prefs.value.sourceLevel,
+  set: (value) => (prefs.value = { ...prefs.value, sourceLevel: value })
+})
+/** *loop* with notes or chord symbols selected: the bars they lie in (Cubase: a cycle around them). */
+const loopRange = computed(() => {
+  const view = shown.value
+  const m = view?.model
+  if (!view || !m) return null
+  const events = selectedEvents()
+  const spans = [...events.notes.map((n) => [n.onset, n.onset + n.duration]), ...events.chords.map((c) => [c.onset, c.onset + 1])]
+  if (!spans.length) return null
+  const first = barOfUnit(m, Math.min(...spans.map(([a]) => a)))
+  const last = barOfUnit(m, Math.max(...spans.map(([, b]) => b)) - 1)
+  const start = view.bars[first - 1]
+  const end = view.bars[last - 1]
+  if (!start || !end) return null
+  return { from: start.start_s, to: end.start_s + end.duration_s, label: first === last ? `bar ${first}` : `bars ${first}-${last}` }
+})
 /** The source's bar for every score bar: by content when the timeline knows it (an arranged cover). */
 const timelineBars = computed(() => sourceBars(shown.value?.model, props.payload?.timeline))
 const sourceStarts = computed(() => timelineBars.value?.map((bar) => bar?.[0] ?? null) ?? null)
@@ -1021,11 +1066,24 @@ function onKey(event: KeyboardEvent): void {
     return
   }
   if (isTextTarget(event.target) || mod) return
+  if (event.key === 'Escape') {
+    // Esc lets the selection go - in the score it never closes the editor (DAW habit: Esc to deselect)
+    event.preventDefault()
+    if (session.selection.length) session.select([])
+    lyricSelection.value = []
+    return
+  }
   const view = shown.value
   const primary = session.primary
   if (event.key === ' ') {
     event.preventDefault()
     transport.value?.toggle()
+    return
+  }
+  if ((event.key === 'g' || event.key === 'h') && !event.altKey && pianoRoll.value) {
+    // Cubase: G zooms out, H zooms in - wherever the score has the focus
+    event.preventDefault()
+    pianoRoll.value.zoomBy(event.key === 'h' ? 1.25 : 1 / 1.25)
     return
   }
   if ((event.key === 'Home' || event.key === 'End') && model.value) {
@@ -1076,12 +1134,6 @@ function onKey(event: KeyboardEvent): void {
         if (props.readonly) return false
         if (primary.kind !== 'note') void operate({ op: 'rest_to_note', id: primary.id })
         return true
-      case 'Escape':
-        if (session.selection.length) {
-          session.select([])
-          return true
-        }
-        return false
       default:
         return false
     }
@@ -1223,6 +1275,7 @@ function onKey(event: KeyboardEvent): void {
     </p>
     <PianoRoll
       v-if="showRoll"
+      ref="pianoRoll"
       v-model:zoom="rollZoom"
       :height="prefs.rollHeight"
       :view="shown"
@@ -1237,6 +1290,8 @@ function onKey(event: KeyboardEvent): void {
       :clip="clipboard?.label ?? null"
       :lyrics="shown?.lyrics ?? null"
       :lyrics-editable="lyricsEditable"
+      :source="source ? { envelope: source.envelope, bars: timelineBars } : null"
+      v-model:audition="prefs.audition"
       resize-mode="rests"
       @select="selectFromRoll"
       @locate="(unit: number) => (locator = unit)"
@@ -1270,8 +1325,13 @@ function onKey(event: KeyboardEvent): void {
       :from="locatorSeconds"
       :position="locatorLabel"
       :reference="reference"
+      v-model:hear="hear"
+      v-model:source-level="sourceLevel"
       :timeline-bars="timelineBars"
       :guide="transportGuide"
+      :source="source"
+      :source-problem="sourceProblem"
+      :loop-range="loopRange"
       @cursor="(ids: string[]) => (cursor = ids)"
       @time="onPlayTime"
     />

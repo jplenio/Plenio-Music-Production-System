@@ -760,6 +760,46 @@
   stroke: none;
   cursor: ew-resize;
 }
+/* a cover's source recording under the lanes: its waveform bar by bar */
+.plenio-overlay .roll-svg .source-lane {
+  fill: rgba(150, 190, 150, 0.07);
+  cursor: pointer;
+}
+.plenio-overlay .roll-svg .source-wave {
+  stroke: rgba(140, 200, 140, 0.75);
+  stroke-width: 1.2;
+  fill: none;
+  pointer-events: none;
+}
+.plenio-overlay .roll-svg .source-missing {
+  fill: rgba(224, 104, 94, 0.08);
+  stroke: rgba(224, 104, 94, 0.35);
+  stroke-dasharray: 3 3;
+}
+.plenio-overlay .roll-svg .source-label {
+  fill: rgba(160, 210, 160, 0.9);
+  font-size: 9px;
+  pointer-events: none;
+}
+.plenio-overlay .transport .hear {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.plenio-overlay .transport .hear button.active {
+  background: #2f6fd0;
+  color: #fff;
+}
+.plenio-overlay .transport .hear .level input {
+  width: 70px;
+  vertical-align: middle;
+}
+.plenio-overlay .roll-svg text.note-name {
+  fill: rgba(10, 18, 30, 0.85);
+  font-size: 8px;
+  font-weight: 600;
+  pointer-events: none;
+}
 .plenio-overlay .roll-svg text.syllable {
   fill: #9ecbff;
   font-size: 9px;

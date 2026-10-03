@@ -100,7 +100,7 @@ export async function cursorDemo(s, { source = false } = {}) {
   await s.spotlight(d.locator('.roll-svg .locator-mark').first(), { ms: 2200, pad: 14 })
   await s.read(intro, 3600)
   s.caption(`Playback starts at the cursor (bar ${bar}). A green line follows the music; on stop the cursor stays where it was.`)
-  const play = d.locator('button', { hasText: '▶ notes' }).first()
+  const play = d.locator('button', { hasText: '▶ play' }).first()
   const where = await s.click(play, { pause: 300 })
   await s.wait(6500)
   await s.click({ x: where.x, y: where.y, width: 0, height: 0 }, { pause: 200 })
@@ -109,11 +109,14 @@ export async function cursorDemo(s, { source = false } = {}) {
   s.caption(keys)
   await s.spotlight(d.locator('.transport').first(), { ms: 2400, pad: 4 })
   await s.read(keys, 5200)
-  const original = d.locator('button', { hasText: '▶ source' }).first()
-  if (source && (await original.count())) {
-    s.caption('▶ source plays the original recording from the cursor’s bar - A/B switches between the notes and the source.')
-    const at = await s.click(original, { pause: 300 })
-    await s.wait(6000)
+  const both = d.locator('.transport .hear button', { hasText: 'both' }).first()
+  if (source && (await both.count())) {
+    s.caption('The original recording plays right under the notes, bar by bar - A/B switches between the notes and the source at once.')
+    await s.click(both, { pause: 300 })
+    const at = await s.click(play, { pause: 300 })
+    await s.wait(4000)
+    await s.click(d.locator('.transport button', { hasText: 'A/B' }).first(), { pause: 300 })
+    await s.wait(3000)
     await s.click({ x: at.x, y: at.y, width: 0, height: 0 }, { pause: 200 })
     await s.wait(800)
   }

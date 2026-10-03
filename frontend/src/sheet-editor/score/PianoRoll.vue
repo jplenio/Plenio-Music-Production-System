@@ -29,6 +29,12 @@
  * makes it longer or shorter (``lyricPlace``), Del deletes them (``lyricDelete``), ← / → move them by the
  * grid; copy and paste go through the Score tab's clipboard (``lyricPlacement``).
  *
+ * DAW habits (owner's request 2026-10-03): in draw mode a click on the empty grid inserts a note of the
+ * last drawn length, Shift+drag pulls a frame; Alt+drag copies notes; a note's end stops at the next
+ * note (Alt: over it); Ctrl+wheel zooms around the pointer, G / H zoom out / in; a click on the keyboard
+ * plays its pitch, and a drawn, grabbed or moved note is heard (``audition``). A cover's source
+ * recording (``source``) is drawn as a waveform lane, bar by bar where the transcription puts it.
+ *
  * The clipboard buttons (Cubase: key editor - Copy, Cut, Paste, Paste Time) ask the Score tab, which
  * owns the clipboard and the cursor (``clipboard`` event); a frame that reaches into the chord lane
  * also selects the chord symbols there, and Ctrl+A selects all notes and chord symbols.
@@ -36,8 +42,11 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import type { ClipAction } from './clipboard'
+import { pitchName } from './inspector'
 import { lineKey } from './lyricPlacement'
 import { positionLabel, rulerUnit } from './locator'
+import { audition as hearPitch } from './player'
+import { type SourceEnvelope, waveColumns } from './sourceAudio'
 
 import type { ScoreOperation } from '../../api/client'
 import type { LyricLayoutView, ModelChord, ScoreView } from '../../shared/scoreView'
@@ -49,6 +58,7 @@ import {
   LANE,
   LYRICS_LANE,
   MOVE_THRESHOLD_PX,
+  SOURCE_LANE,
   type ResizeMode,
   type RollMode,
   type RollNote,
@@ -110,6 +120,8 @@ const props = withDefaults(
     lyrics?: LyricLayoutView | null
     /** The lyrics lane edits lines (also on a read-only score: the lyrics may be this sheet's). */
     lyricsEditable?: boolean
+    /** A cover's source recording: its envelope and the source's seconds of every score bar. */
+    source?: { envelope: SourceEnvelope; bars: readonly ([number, number, string] | null)[] | undefined } | null
   }>(),
   {
     playing: () => [],
@@ -122,7 +134,8 @@ const props = withDefaults(
     playhead: null,
     clip: null,
     lyrics: null,
-    lyricsEditable: false
+    lyricsEditable: false,
+    source: null
   }
 )
 /** A line of the lyrics changed in the lane (``text`` empty: the line goes). */
@@ -153,6 +166,8 @@ const emit = defineEmits<{
 const lyricSelection = defineModel<string[]>('lyricSelection', { default: () => [] })
 /** Pixels per quarter note (the roll's horizontal zoom). */
 const zoom = defineModel<number>('zoom', { default: 48 })
+/** Hear the pitch of a drawn, grabbed or moved note and of a clicked key. */
+const audition = defineModel<boolean>('audition', { default: true })
 
 const root = ref<HTMLDivElement | null>(null)
 const scroller = ref<HTMLDivElement | null>(null)
@@ -200,6 +215,8 @@ interface Press {
   ruler?: boolean
   /** A press on a lyrics line: it may become a drag of lines. */
   lyric?: LyricDrag
+  /** A click (no drag) on the empty grid in draw mode inserts a note (nothing was selected). */
+  insert?: boolean
 }
 let press: Press | null = null
 let observer: ResizeObserver | null = null
@@ -208,8 +225,16 @@ const model = computed(() => props.view?.model ?? null)
 const notes = computed<RollNote[]>(() => (model.value ? notesOf(model.value) : []))
 const chords = computed<ModelChord[]>(() => model.value?.tracks.chords ?? [])
 const geo = computed(() =>
-  model.value ? geometry(model.value, { pxPerQuarter: zoom.value, snap: snapChoice.value, lyrics: !!props.lyrics }) : null
+  model.value
+    ? geometry(model.value, { pxPerQuarter: zoom.value, snap: snapChoice.value, lyrics: !!props.lyrics, source: !!props.source })
+    : null
 )
+/** The length of the last drawn or resized note: a click in draw mode inserts one this long (FL, Cubase). */
+const lastLength = ref<number | null>(null)
+
+function hear(pitch: number): void {
+  if (audition.value) hearPitch(pitch)
+}
 const editable = computed(() => !props.readonly && !props.stale && !props.busy && !committing.value)
 const selectedNotes = computed(() => selectedNoteIds(props.view, props.selection))
 const selectedChords = computed(() => selectedChordIds(props.selection))
@@ -234,11 +259,12 @@ const banded = computed(() => {
 })
 const hint = computed(() =>
   mode.value === 'draw'
-    ? 'drag: draw · drag a note: move (↕ pitch) · drag its end: length (Alt: over the next note) · double-click: note · ' +
-      'double-click the lane: chord · Del: rest · Shift+Del: close the gap'
-    : 'drag: frame the notes to select (Shift: add) · click: note (Shift: add or remove) · drag a selected note: move them all · ' +
-      'into the chord lane: chords too · Ctrl+A: all · ↑↓←→: move · Del: rest · Shift+Del: close the gap · ' +
-      'Ctrl+C / Ctrl+X: copy / cut · Ctrl+V: paste at the cursor · Ctrl+Shift+V: insert · Ctrl+D: duplicate'
+    ? 'click: a note (the last length) · drag: draw · Shift+drag: frame · drag a note: move (↕ pitch, Alt: copy) · ' +
+      'drag its end: length (stops at the next note, Alt: over it) · double-click the lane: chord · Del: rest · ' +
+      'Shift+Del: close the gap · Ctrl+wheel or G / H: zoom'
+    : 'drag: frame the notes to select (Shift: add) · click: note (Shift: add or remove) · drag a selected note: move them all ' +
+      '(Alt: copy) · into the chord lane: chords too · Ctrl+A: all · ↑↓←→: move · Del: rest · Shift+Del: close the gap · ' +
+      'Ctrl+C / Ctrl+X: copy / cut · Ctrl+V: paste at the cursor · Ctrl+Shift+V: insert · Ctrl+D: duplicate · Ctrl+wheel or G / H: zoom'
 )
 const lyricsHint = computed(() =>
   props.lyrics && props.lyricsEditable
@@ -327,6 +353,16 @@ const syllables = computed(() => {
   for (const section of props.lyrics?.sections ?? [])
     for (const line of section.lines) for (const s of line.syllables) map.set(s.onset, s.end_of_word ? s.text : `${s.text}-`)
   return map
+})
+/** The pitch in every note wide enough to hold it (Cubase's key editor shows note names). */
+const NAME_MIN_PX = 26
+const noteNames = computed(() => {
+  const g = geo.value
+  if (!g) return []
+  return visibleNotes.value
+    .map((n) => ({ n, rect: noteRect(n, g) }))
+    .filter(({ rect }) => rect.width >= NAME_MIN_PX)
+    .map(({ n, rect }) => ({ key: n.id, x: rect.x + 2, y: rect.y + rect.height - 2.5, text: pitchName(n.pitch) }))
 })
 const visibleSyllables = computed(() => {
   const g = geo.value
@@ -459,9 +495,15 @@ function onPointerDown(event: PointerEvent): void {
   if (!g || event.button !== 0) return
   root.value?.focus({ preventScroll: true })
   const [x, y] = local(event)
-  const hit = hitTest(x, y, notes.value, chords.value, g, track.value, scrollTop.value)
-  if (hit.area === 'header') {
-    // the ruler: the cursor goes where it was clicked (on the grid) and follows a drag; the selection stays
+  const hit = hitTest(x, y, notes.value, chords.value, g, track.value, scrollTop.value, scrollLeft.value)
+  if (hit.area === 'keys') {
+    // the keyboard: hear the key's pitch (the selection stays)
+    if (audition.value) hearPitch(hit.pitch)
+    return
+  }
+  if (hit.area === 'header' || hit.area === 'source') {
+    // the ruler (and the source's waveform): the cursor goes where it was clicked (on the grid) and
+    // follows a drag; the selection stays
     emit('locate', rulerUnit(hit.unit, g.snap, g.total))
     press = { x, y, start: null, started: false, clear: false, keep: null, ruler: true }
     capture(event)
@@ -509,9 +551,10 @@ function onPointerDown(event: PointerEvent): void {
     if (editable.value && moving.some((n) => n.id === hit.note.id)) {
       start =
         hit.edge === 'end' && moving.length === 1
-          ? startResize(hit.note)
+          ? startResize(hit.note, notes.value, g.total)
           : startMove(moving, hit.note, unitAt(x, g), pitchAt(y, g))
     }
+    hear(hit.note.pitch)
   } else if (hit.area === 'chord') {
     if (additive) {
       const ids = new Set(selectedChords.value)
@@ -520,15 +563,23 @@ function onPointerDown(event: PointerEvent): void {
       select([...props.selection.filter((id) => !id.startsWith('chord:')), ...ids])
     } else if (!selectedChords.value.has(hit.chord.id)) select([hit.chord.id])
     if (editable.value) start = startChord(hit.chord, unitAt(x, g))
-  } else if ((hit.area === 'grid' || hit.area === 'lane') && mode.value === 'select') {
-    // a frame selects - also while the score cannot be edited; started in the lane it takes chord symbols
+  } else if ((hit.area === 'grid' || hit.area === 'lane') && (mode.value === 'select' || event.shiftKey)) {
+    // a frame selects - also while the score cannot be edited; started in the lane it takes chord symbols;
+    // in draw mode Shift+drag pulls one too (and adds to the selection)
     keep = additive
       ? { notes: [...selectedNotes.value], chords: chords.value.filter((c) => selectedChords.value.has(c.id)) }
       : { notes: [], chords: [] }
     clear = !additive
   } else if (hit.area === 'grid') {
-    if (editable.value && !additive) start = startDraw(track.value, hit.unit, hit.pitch, g)
+    const nothingSelected = !props.selection.length && !lyricSelection.value.length
+    if (editable.value && !additive) {
+      start = startDraw(track.value, hit.unit, hit.pitch, g)
+      hear(hit.pitch)
+    }
     clear = !additive
+    press = { x, y, start, started: false, clear, keep, insert: editable.value && !additive && nothingSelected }
+    capture(event)
+    return
   } else {
     clear = !additive
   }
@@ -578,8 +629,13 @@ function onPointerMove(event: PointerEvent): void {
   press.started = true
   if (press.keep) {
     band.value = { x0: press.x, y0: press.y, x1: x, y1: y, keep: press.keep.notes, keepChords: press.keep.chords.map((c) => c.id) }
+  } else if (press.start) {
+    const before = drag.value
+    const next = dragTo(press.start, unitAt(x, g), pitchAt(y, g), g, { alt: event.altKey })
+    // a note moved to another pitch is heard there
+    if (next.kind === 'move' && next.semitones !== (before?.kind === 'move' ? before.semitones : 0)) hear(next.anchor.pitch + next.semitones)
+    drag.value = next
   }
-  else if (press.start) drag.value = dragTo(press.start, unitAt(x, g), pitchAt(y, g), g, { alt: event.altKey })
 }
 
 async function commit(operation: ScoreOperation): Promise<void> {
@@ -604,6 +660,13 @@ function onPointerUp(): void {
   }
   if (!current.started) {
     drag.value = null
+    if (current.insert && current.start?.kind === 'draw' && geo.value) {
+      // draw mode: a click inserts a note of the last drawn length (a beat at first)
+      const g = geo.value
+      const length = Math.min(lastLength.value ?? g.drawLength, g.total - current.start.start)
+      void commit({ op: 'insert_note', track: current.start.track, onset: current.start.start, duration: length, pitch: current.start.pitch })
+      return
+    }
     if (current.clear) select([])
     return
   }
@@ -614,11 +677,14 @@ function onPointerUp(): void {
     select(selectionFor(notes.value.filter((n) => ids.has(n.id)), chords.value.filter((c) => chordIds.has(c.id))))
     return
   }
-  const operation = drag.value ? dragOp(drag.value, props.resizeMode) : null
+  const finished = drag.value
+  const operation = finished ? dragOp(finished, props.resizeMode) : null
   if (!operation) {
     drag.value = null
     return
   }
+  if (finished?.kind === 'draw') lastLength.value = finished.end - finished.start
+  else if (finished?.kind === 'resize') lastLength.value = finished.end - finished.note.onset
   void commit(operation)
 }
 
@@ -633,7 +699,7 @@ function onDoubleClick(event: MouseEvent): void {
   const g = geo.value
   if (!g) return
   const [x, y] = local(event)
-  const hit = hitTest(x, y, notes.value, chords.value, g, track.value, scrollTop.value)
+  const hit = hitTest(x, y, notes.value, chords.value, g, track.value, scrollTop.value, scrollLeft.value)
   if (hit.area === 'lyrics') {
     // the lyrics may be edited where the score may not (they can belong to this sheet)
     if (props.lyricsEditable) startLyricEdit(hit.unit)
@@ -701,6 +767,13 @@ function onKey(event: KeyboardEvent): void {
     event.stopPropagation()
     return
   }
+  if ((event.key === 'g' || event.key === 'h') && !event.ctrlKey && !event.metaKey && !event.altKey) {
+    // Cubase: G zooms out, H zooms in (around the cursor)
+    event.preventDefault()
+    event.stopPropagation()
+    zoomBy(event.key === 'h' ? 1.25 : 1 / 1.25)
+    return
+  }
   if (event.key.toLowerCase() === 'a' && (event.ctrlKey || event.metaKey) && !event.altKey) {
     // all notes of both voices and all chord symbols (Cubase: Select All)
     event.preventDefault()
@@ -759,9 +832,75 @@ function reveal(ids: Set<string>, alongBars = true): void {
   onScroll()
 }
 
-function zoomBy(factor: number): void {
-  zoom.value = Math.max(12, Math.min(240, Math.round(zoom.value * factor)))
+/**
+ * Zoom along the bars, keeping the point at ``clientX`` (default: the cursor, else the middle of the
+ * pane) where it is on the screen.
+ */
+function zoomBy(factor: number, clientX?: number): void {
+  const el = scroller.value
+  const g = geo.value
+  const next = Math.max(12, Math.min(240, Math.round(zoom.value * factor)))
+  if (next === zoom.value) return
+  if (!el || !g) {
+    zoom.value = next
+    return
+  }
+  const box = el.getBoundingClientRect()
+  const cursorX = props.locator !== null ? xOf(props.locator, g) - el.scrollLeft : null
+  const offset =
+    clientX !== undefined ? clientX - box.left : cursorX !== null && cursorX >= KEYS_WIDTH && cursorX <= el.clientWidth ? cursorX : el.clientWidth / 2
+  const unit = unitAt(el.scrollLeft + offset, g)
+  zoom.value = next
+  void nextTick(() => {
+    const after = geo.value
+    if (!after) return
+    el.scrollLeft = Math.max(0, xOf(unit, after) - offset)
+    onScroll()
+  })
 }
+
+/** Ctrl+wheel (Cmd+wheel): zoom along the bars around the pointer, never the page (DAWs do so). */
+function onWheel(event: WheelEvent): void {
+  if (!event.ctrlKey && !event.metaKey) return
+  event.preventDefault()
+  zoomBy(event.deltaY < 0 ? 1.15 : 1 / 1.15, event.clientX)
+}
+
+/** The source's waveform of the visible bars: one path per bar, scaled to the recording's peak. */
+const sourcePeak = computed(() => {
+  const envelope = props.source?.envelope
+  if (!envelope) return 1
+  let peak = 0
+  for (let i = 0; i < envelope.max.length; i++) peak = Math.max(peak, envelope.max[i], -envelope.min[i])
+  return peak || 1
+})
+const sourceWave = computed(() => {
+  const g = geo.value
+  const m = model.value
+  const source = props.source
+  if (!g || !m || !source || g.sourceTop === null) return []
+  const middle = g.sourceTop + SOURCE_LANE / 2
+  const scale = (SOURCE_LANE / 2 - 3) / sourcePeak.value
+  const paths: { key: string; d: string; missing: boolean; x: number; width: number }[] = []
+  m.measures.forEach((measure, index) => {
+    if (!inWindow(measure.onset, measure.onset + measure.length)) return
+    const x = xOf(measure.onset, g)
+    const width = measure.length * g.pxPerUnit
+    const bar = source.bars?.[index]
+    if (!bar) {
+      paths.push({ key: `w${index}`, d: '', missing: true, x, width })
+      return
+    }
+    const columns = Math.max(1, Math.floor(width / 2))
+    const parts: string[] = []
+    waveColumns(source.envelope, bar[0], bar[1], columns).forEach(([low, high], c) => {
+      const cx = (x + (c + 0.5) * (width / columns)).toFixed(1)
+      parts.push(`M${cx} ${(middle - high * scale - 0.5).toFixed(1)}V${(middle - low * scale + 0.5).toFixed(1)}`)
+    })
+    paths.push({ key: `w${index}`, d: parts.join(''), missing: false, x, width })
+  })
+  return paths
+})
 
 /** Page along the bars when ``unit`` (the playback line or a cursor set elsewhere) leaves the view. */
 function revealUnit(unit: number | null): void {
@@ -799,6 +938,7 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => observer?.disconnect())
+defineExpose({ zoomBy })
 </script>
 
 <template>
@@ -895,6 +1035,9 @@ onBeforeUnmount(() => observer?.disconnect())
           Insert
         </button>
       </span>
+      <label title="Hear a note's pitch when it is drawn, grabbed or moved, and a key of the keyboard when it is clicked">
+        <input v-model="audition" type="checkbox" aria-label="Hear the notes you edit" /> hear
+      </label>
       <span class="group" role="group" aria-label="Zoom">
         <button title="Zoom out" aria-label="Zoom out" @click="zoomBy(1 / 1.25)">−</button>
         <button title="Zoom in" aria-label="Zoom in" @click="zoomBy(1.25)">+</button>
@@ -908,6 +1051,7 @@ onBeforeUnmount(() => observer?.disconnect())
       class="roll-scroll"
       :style="{ height: `${Math.min(height, geo.height + 16)}px` }"
       @scroll="onScroll"
+      @wheel="onWheel"
     >
       <svg
         ref="svg"
@@ -942,13 +1086,16 @@ onBeforeUnmount(() => observer?.disconnect())
         <rect v-for="note in visibleNotes" :key="note.id" :class="noteClasses(note)" v-bind="noteRect(note, geo)" rx="2">
           <title>{{ describeNote(note) }}</title>
         </rect>
+        <text v-for="item in noteNames" :key="'p' + item.key" class="note-name" :x="item.x" :y="item.y">{{ item.text }}</text>
         <text v-for="item in visibleSyllables" :key="'y' + item.key" class="syllable" :x="item.x" :y="item.y">{{ item.text }}</text>
         <rect v-for="(ghost, index) in ghostNotes" :key="'ghost' + index" class="ghost" :class="ghost.track" v-bind="noteRect(ghost, geo)" rx="2" />
         <rect v-if="banded && banded.rect.height > 0" class="band" v-bind="banded.rect" />
         <line v-if="locator !== null" class="locator" :x1="xOf(locator, geo)" :x2="xOf(locator, geo)" :y1="geo.top" :y2="geo.height" />
         <line v-if="playhead !== null" class="playhead" :x1="xOf(playhead, geo)" :x2="xOf(playhead, geo)" :y1="geo.top" :y2="geo.height" />
         <g class="keys" :transform="`translate(${scrollLeft} 0)`">
-          <rect class="keys-bg" :x="0" :y="geo.top" :width="KEYS_WIDTH - 2" :height="geo.height - geo.top" />
+          <rect class="keys-bg" :x="0" :y="geo.top" :width="KEYS_WIDTH - 2" :height="geo.height - geo.top">
+            <title>Click a key to hear its pitch</title>
+          </rect>
           <text
             v-for="pitch in rows.filter((p) => p % 12 === 0)"
             :key="'k' + pitch"
@@ -966,6 +1113,18 @@ onBeforeUnmount(() => observer?.disconnect())
             <title>Click or drag here to set the cursor - playback and paste start there</title>
           </rect>
           <rect class="lane" :x="0" :y="HEADER" :width="geo.width" :height="LANE" />
+          <template v-if="source && geo.sourceTop !== null">
+            <rect class="source-lane" :x="0" :y="geo.sourceTop" :width="geo.width" :height="SOURCE_LANE">
+              <title>The source recording, bar by bar where the transcription puts it - click to set the cursor</title>
+            </rect>
+            <template v-for="wave in sourceWave" :key="wave.key">
+              <rect v-if="wave.missing" class="source-missing" :x="wave.x" :y="geo.sourceTop + 2" :width="wave.width" :height="SOURCE_LANE - 4">
+                <title>A bar the source does not have (inserted): silent while the source plays</title>
+              </rect>
+              <path v-else class="source-wave" :d="wave.d" />
+            </template>
+            <text class="source-label" :x="scrollLeft + 3" :y="geo.sourceTop + 11">source</text>
+          </template>
           <template v-if="lyrics">
             <rect class="lyrics-lane" :x="0" :y="TOP" :width="geo.width" :height="LYRICS_LANE" />
             <g

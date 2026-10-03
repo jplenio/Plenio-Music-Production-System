@@ -156,8 +156,8 @@ function remove(closeGap: boolean): void {
         </div>
         <div class="field" role="group" aria-label="Pitch">
           <span class="name">pitch</span>
-          <button :disabled="!editable" title="Octave down" @click="commit(shiftOp(focus.notes, -12))">−8va</button>
-          <button :disabled="!editable" title="Semitone down" @click="commit(shiftOp(focus.notes, -1))">−1</button>
+          <button :disabled="!editable" title="Octave down" @click="commit(shiftOp(focus.notes, -12, focus.chords))">−8va</button>
+          <button :disabled="!editable" title="Semitone down" @click="commit(shiftOp(focus.notes, -1, focus.chords))">−1</button>
           <input
             v-if="note"
             v-model="pitchText"
@@ -167,8 +167,8 @@ function remove(closeGap: boolean): void {
             @keydown.enter.prevent="commitPitch"
             @change="commitPitch"
           />
-          <button :disabled="!editable" title="Semitone up" @click="commit(shiftOp(focus.notes, 1))">+1</button>
-          <button :disabled="!editable" title="Octave up" @click="commit(shiftOp(focus.notes, 12))">+8va</button>
+          <button :disabled="!editable" title="Semitone up" @click="commit(shiftOp(focus.notes, 1, focus.chords))">+1</button>
+          <button :disabled="!editable" title="Octave up" @click="commit(shiftOp(focus.notes, 12, focus.chords))">+8va</button>
         </div>
         <template v-if="note">
           <div class="field" role="group" aria-label="Start">
@@ -235,6 +235,11 @@ function remove(closeGap: boolean): void {
           <span class="name">name</span>
           <input v-model="chordText" class="chord" :disabled="!editable" aria-label="Chord symbol (empty removes it)" @keydown.enter.prevent="commitChord" @change="commitChord" />
         </div>
+        <div class="field" role="group" aria-label="Transpose the chord symbol">
+          <span class="name">pitch</span>
+          <button :disabled="!editable" title="A semitone down (↓), spelled for the key" @click="commit(shiftOp([], -1, focus.chords))">−1</button>
+          <button :disabled="!editable" title="A semitone up (↑), spelled for the key" @click="commit(shiftOp([], 1, focus.chords))">+1</button>
+        </div>
         <div class="field" role="group" aria-label="Start">
           <span class="name">start</span>
           bar
@@ -244,6 +249,18 @@ function remove(closeGap: boolean): void {
         </div>
         <div class="field">
           <button :disabled="!editable" @click="remove(false)">remove</button>
+        </div>
+      </section>
+
+      <section v-else-if="focus.chords.length > 1" class="panel" aria-label="Selected chord symbols">
+        <h4>{{ focus.chords.length }} chord symbols <span class="facts">{{ focus.chords.map((c) => c.name).join(' ') }}</span></h4>
+        <div class="field" role="group" aria-label="Transpose the chord symbols">
+          <span class="name">pitch</span>
+          <button :disabled="!editable" title="All a semitone down (↓), each spelled for its key" @click="commit(shiftOp([], -1, focus.chords))">−1</button>
+          <button :disabled="!editable" title="All a semitone up (↑), each spelled for its key" @click="commit(shiftOp([], 1, focus.chords))">+1</button>
+        </div>
+        <div class="field">
+          <button :disabled="!editable" title="Remove them (Delete)" @click="remove(false)">remove</button>
         </div>
       </section>
 

@@ -28,6 +28,12 @@ export interface EditorPrefs {
   /** Width of the side column (navigator, track panel, lyrics fit; 160-460 px). */
   sideWidth: number
   metronome: boolean
+  /** A cover's playback: the notes and the source recording together, or one of them (A/B). */
+  hear: 'both' | 'notes' | 'source'
+  /** The source recording's level under the notes (0-1). */
+  sourceLevel: number
+  /** Hear a note's pitch when it is drawn, moved or a key of the roll is clicked. */
+  audition: boolean
 }
 
 const KEY = 'plenio.score-editor.prefs'
@@ -44,7 +50,10 @@ export function defaultPrefs(): EditorPrefs {
     rollHeight: 280,
     notationShare: 0.6,
     sideWidth: 230,
-    metronome: false
+    metronome: false,
+    hear: 'both',
+    sourceLevel: 0.7,
+    audition: true
   }
 }
 
@@ -90,7 +99,11 @@ export function loadPrefs(storage: Pick<Storage, 'getItem'> | null = safeStorage
         typeof data.sideWidth === 'number' && data.sideWidth >= SIDE_MIN && data.sideWidth <= SIDE_MAX
           ? Math.round(data.sideWidth)
           : defaults.sideWidth,
-      metronome: data.metronome === true
+      metronome: data.metronome === true,
+      hear: data.hear === 'notes' || data.hear === 'source' ? data.hear : defaults.hear,
+      sourceLevel:
+        typeof data.sourceLevel === 'number' && data.sourceLevel >= 0 && data.sourceLevel <= 1 ? data.sourceLevel : defaults.sourceLevel,
+      audition: data.audition !== false
     }
   } catch {
     return defaults

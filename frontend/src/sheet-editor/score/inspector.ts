@@ -122,9 +122,11 @@ export function pitchOp(notes: readonly RollNote[], midi: number): ScoreOperatio
   return { op: 'set_note_pitch', ids: notes.map((n) => n.id), midi }
 }
 
-export function shiftOp(notes: readonly RollNote[], semitones: number): ScoreOperation | null {
-  if (!notes.length || notes.some((n) => n.pitch + semitones < 0 || n.pitch + semitones > 127)) return null
-  return { op: 'set_note_pitch', ids: notes.map((n) => n.id), semitones }
+/** The selected notes - and chord symbols, spelled for their key - moved by ``semitones``. */
+export function shiftOp(notes: readonly RollNote[], semitones: number, chords: readonly { id: string }[] = []): ScoreOperation | null {
+  if (!notes.length && !chords.length) return null
+  if (notes.some((n) => n.pitch + semitones < 0 || n.pitch + semitones > 127)) return null
+  return { op: 'set_note_pitch', ids: [...notes.map((n) => n.id), ...chords.map((c) => c.id)], semitones }
 }
 
 export function voiceOp(notes: readonly RollNote[], track: Track): ScoreOperation | null {

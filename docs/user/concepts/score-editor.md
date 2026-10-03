@@ -19,7 +19,7 @@ Typical uses:
 | **Navigator** | the sections: select one or more and **duplicate, copy, move or delete** them (also by dragging - see [Arranging sections](#arranging-sections)); go to, rename, start one bar earlier / later, join to the one before, new section at the selected bar; the **bar strip** (sections in colour, bars with errors marked): select one or more bars and **duplicate, copy, move or delete** them (see [Arranging bars](#arranging-bars)); in *Review* with the song's lyrics: *Lyrics fit* (the lyrics next to the score's sections) |
 | **Notation** | click a note or rest to select it, Shift+click to add to the selection; the lyrics stand under the Vocal notes (read-only) |
 | **ABC text** | the canonical text with line numbers; errors are underlined at their bar; the cursor selects the note under it |
-| **Transport** (between the roll and the notation) | play from the cursor, loop the cursor's section, metronome, voices (Vocal, Ins, chords), speed; with a source connected: play the source from the cursor's bar and **A/B** |
+| **Transport** (between the roll and the notation) | play from the cursor (a click in the ruler while it plays jumps there), loop the selection's bars or the cursor's section, metronome, voices (Vocal, Ins, chords), speed; with a source connected (covers): **hear** the notes and the source recording together, or one of them (**A/B**), and the source's level |
 | **Status line** | what is selected (voice, bar, pitch, length, chord) and what the last edit did |
 | **Diagnostics** | the backend's findings, each with a link to its bar |
 
@@ -67,7 +67,7 @@ The bar numbers are the **ruler**, as in Cubase: click in it (or drag along it) 
 
 Two modes, switched in the roll's toolbar, decide what a drag on an **empty place** does. The roll always opens in **✎ Draw**; the mode is not remembered.
 
-- **✎ Draw** - a drag on an empty place draws a new note, a double-click adds one.
+- **✎ Draw** - a click on an empty place inserts a note of the last drawn length (a beat at first; while notes are selected, the click only lets them go), a drag draws one, **Shift+drag** pulls a selection frame.
 - **⬚ Select** - a drag on an empty place pulls a dashed **frame**: every note it touches is selected when you let go (the roll shows them while you pull). Hold **Shift** to add the framed notes to the selection. The frame selects notes of both voices; when it reaches into the **chord lane** (or starts there) it takes the chord symbols it passes too. The notation and the ABC text show the same selection, so you can see there which notes you caught. Select mode never draws a note.
 
 Clicking, moving and resizing notes, and all keys, work the same in both modes. So you can frame a phrase in *Select*, then drag one of its notes to move the whole phrase, or press ↑ to transpose it.
@@ -76,19 +76,24 @@ Clicking, moving and resizing notes, and all keys, work the same in both modes. 
 |---|---|
 | click or drag in the ruler (bar numbers) | set the cursor; the selection stays |
 | click a note | select it (Shift/Ctrl+click adds to the selection); the notation and the ABC text select it too |
-| drag a note | move it in time and pitch (all selected notes together); where it lands it replaces what its voice played there, and the place it left becomes a rest |
-| drag the right end of a note | make it longer or shorter; longer only grows into rests - hold **Alt** to play over the following note (it is shortened or removed) |
-| drag on an empty place (**Draw**) | draw a new note into the voice chosen under *draw into* (Vocal or Ins) |
+| drag a note | move it in time and pitch (all selected notes together; you hear the new pitch); where it lands it replaces what its voice played there, and the place it left becomes a rest |
+| **Alt**+drag a note | copy it (all selected notes) to where you drop it; the originals stay |
+| drag the right end of a note | make it longer or shorter; longer grows into the rests after it and **stops at the next note** of its voice - hold **Alt** to play over it (it is shortened or removed) |
+| click an empty place (**Draw**) | a new note of the last drawn length into the voice chosen under *draw into* (with notes selected: only lets them go) |
+| drag on an empty place (**Draw**) | draw a new note of that length |
 | double-click an empty place (**Draw**) | a new note of one beat |
+| Shift+drag on an empty place (**Draw**) | a frame, as in Select mode |
+| click a key of the keyboard (left) | hear its pitch |
+| Ctrl+wheel, **G** / **H** | zoom along the bars (around the pointer / the cursor); never the browser page |
 | drag on an empty place (**Select**) | a frame: select every note it touches (Shift: add them to the selection) |
 | Ctrl+A | select all notes of both voices and all chord symbols |
-| click an empty place / Esc | clear the selection (Esc during a frame cancels the frame) |
+| click an empty place / Esc | clear the selection (Esc during a frame cancels the frame; in the score, Esc never closes the editor) |
 | drag a chord symbol | move it; a chord already at that place is replaced |
 | double-click the chord lane | type a new chord symbol (Enter adds it, Esc cancels); double-click a chord to rename it, an empty name removes it |
 
 While you drag, a dashed **ghost** shows the result; nothing changes before you let go. Then the backend checks the edit and writes the text; if it refuses (for example a note that cannot grow because another note follows), the ghost disappears and the reason is shown.
 
-Keys with the roll focused: ↑/↓ semitone (Shift: octave) - selected **chord symbols** move too, one or many, spelled for the key where they stand (an octave leaves them as they are), ←/→ move by the grid (Shift: a beat), Alt+←/→ shorter/longer, **Delete** turns the selected notes into rests (and removes selected chord symbols), **Shift+Delete** deletes and lets the note before take the time (*close the gap*). **snap** sets the grid (*auto* is the score's finest length); **−/+** zoom. Only the visible part of a long score is drawn.
+Keys with the roll focused: ↑/↓ semitone (Shift: octave) - selected **chord symbols** move too, one or many, spelled for the key where they stand (an octave leaves them as they are), ←/→ move by the grid (Shift: a beat), Alt+←/→ shorter/longer, **Delete** turns the selected notes into rests (and removes selected chord symbols), **Shift+Delete** deletes and lets the note before take the time (*close the gap*). **snap** sets the grid (*auto* is the score's finest length); **−/+**, **G / H** and Ctrl+wheel zoom. A note wide enough shows its pitch (`E5`), and a drawn, grabbed or moved note is heard (switch it off with *hear* in the roll's toolbar). Only the visible part of a long score is drawn.
 
 The roll covers the whole piano range (A0 to C8, more for a note beyond it) and **scrolls both ways**: the mouse wheel moves through the pitches, Shift+wheel (or the scrollbar) through the bars. It opens centred on the score's notes; the pitch names stay on the left and the bar numbers, sections and the chord lane stay on top while you scroll, and a note you select - or the note that plays - is scrolled into view. Dragging a note to the top or bottom edge scrolls along, so a note can be moved or drawn anywhere in the range.
 
@@ -246,9 +251,18 @@ Untick the box to leave the lyrics as they are. Lyrics that were changed in *Son
 
 ## Playback and A/B
 
-**Play** plays simple tones of the notes from the **cursor**, marking the sounding notes in the notation and the piano roll and drawing a playback line in the roll - a guide to the notes, not a preview of what YuE2 will render. It works offline: no soundfont is downloaded. Choose the voices, the speed (the score's tempo is not changed), *loop section* and the *metronome* (a click on every beat, higher on the first beat of a bar). *Loop section* plays from the cursor to the end of its section and then repeats the whole section, like Cubase's cycle.
+**▶ Play** (Space) plays simple tones of the notes from the **cursor**, marking the sounding notes in the notation and the piano roll and drawing a playback line in the roll - a guide to the notes, not a preview of what YuE2 will render. It works offline: no soundfont is downloaded. A click in the ruler (or on a section) while it plays jumps there. Choose the voices, the speed (the score's tempo is not changed), *loop* and the *metronome* (a click on every beat, higher on the first beat of a bar). *Loop* repeats the bars of the selected notes (*loop bars 12-13*), or - with nothing selected - plays from the cursor to the end of its section and then repeats the whole section, like Cubase's cycle.
 
-With **reference_audio** connected to the Song Sheet (the Cover template connects the source), **Source** plays the recording from the cursor's bar (the playback line follows it in the roll), and **A/B** switches between the notes and the recording at the current bar. The bar times come from the transcription's beat grid, so the recording and the notes line up even where the source's tempo drifts. The reference is only for listening; it is not part of the sheet's documents.
+### The source recording (covers)
+
+With **reference_audio** connected to the Song Sheet (the Cover template connects the source to both sheets), the source recording is a track of its own, like an audio track under the MIDI in a DAW:
+
+- The roll shows its **waveform** in a lane under the chord and lyrics lanes, bar by bar where the transcription puts it - you see where the singing starts, a phrase ends or a bar is silent. A bar the source does not have (inserted) is marked. A click in the lane sets the cursor.
+- **hear: both** plays the notes and the recording **together**, on one clock: every bar lasts as long as the recording's bar (the transcription's beat grid), so the notes, the metronome and the recording stay together even where the singer drifts from the score's tempo. In an arranged cover, a copied chorus plays the source's chorus again.
+- **notes** / **source** play one of them; **A/B** switches between the two **at once**, also while it plays. The *source* slider sets the recording's level under the notes.
+- The source plays at 100 % speed only (no time stretching); at another speed the notes play alone.
+
+The reference is only for listening; it is not part of the sheet's documents and never reaches the model.
 
 ## Apply, Revert, Approve
 
@@ -259,7 +273,7 @@ With **reference_audio** connected to the Song Sheet (the Cover template connect
 
 ## Preferences
 
-Layout, *ABC text (advanced)*, zoom, piano roll (on/off and its zoom), metronome, voices and speed are remembered in this browser only (not in the workflow). A blocked or cleared browser storage simply gives the defaults.
+Layout, *ABC text (advanced)*, zoom, piano roll (on/off and its zoom), metronome, voices, speed, *hear* and the source's level (covers) and the roll's *hear* switch (hearing the notes you edit) are remembered in this browser only (not in the workflow). A blocked or cleared browser storage simply gives the defaults.
 
 ## Limits
 

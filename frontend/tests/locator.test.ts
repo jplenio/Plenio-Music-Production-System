@@ -195,7 +195,7 @@ describe('ScoreTab: playback from the cursor', () => {
     app.mount(host)
     await settle()
     const svg = host.querySelector('svg.roll-svg') as SVGSVGElement
-    const play = [...host.querySelectorAll('.transport button')].find((b) => b.textContent?.includes('notes')) as HTMLButtonElement
+    const play = [...host.querySelectorAll('.transport button')].find((b) => b.textContent?.includes('play')) as HTMLButtonElement
     return { host, svg, play, tones, clock }
   }
 
@@ -210,7 +210,7 @@ describe('ScoreTab: playback from the cursor', () => {
     await nextTick()
     expect(midiOf(tones[0])).toBe(71) // the Vocal note of bar 4, not the first of the song
     expect(Number(svg.querySelector('line.playhead')?.getAttribute('x1'))).toBeCloseTo(xOf(96, GEO))
-    expect(host.querySelector('.transport .facts')?.textContent).toContain('notes')
+    expect(host.querySelector('.transport .facts')?.textContent).toContain('▶')
     play.click() // stop
     await nextTick()
     expect(svg.querySelector('line.playhead')).toBeNull()

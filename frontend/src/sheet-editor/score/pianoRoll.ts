@@ -32,6 +32,8 @@ export const LANE = 24
 export const TOP = HEADER + LANE
 /** The lyrics lane under the chord lane, when the song has lyrics. */
 export const LYRICS_LANE = 22
+/** A cover's source recording: its waveform under the chord and lyrics lanes, bar by bar. */
+export const SOURCE_LANE = 34
 export const KEYS_WIDTH = 36
 export const EDGE_PX = 6
 export const MOVE_THRESHOLD_PX = 3
@@ -58,6 +60,8 @@ export interface Geometry {
   height: number
   /** Where the rows start: under the header, the chord lane and - with lyrics - the lyrics lane. */
   top: number
+  /** The top of the source lane (a cover's recording), ``null`` without one. */
+  sourceTop: number | null
 }
 
 export interface Rect {
@@ -118,9 +122,10 @@ export function rollRange(notes: readonly { pitch: number }[]): [number, number]
  */
 export function geometry(
   model: ScoreModelView,
-  options: { pxPerQuarter: number; height?: number; snap: SnapChoice; lyrics?: boolean }
+  options: { pxPerQuarter: number; height?: number; snap: SnapChoice; lyrics?: boolean; source?: boolean }
 ): Geometry {
-  const top = TOP + (options.lyrics ? LYRICS_LANE : 0)
+  const lanes = TOP + (options.lyrics ? LYRICS_LANE : 0)
+  const top = lanes + (options.source ? SOURCE_LANE : 0)
   const notes = notesOf(model)
   const [low, high] = rollRange(notes)
   const rows = high - low + 1
@@ -139,7 +144,8 @@ export function geometry(
     drawLength: Math.max(snap, Math.round(beat / snap) * snap),
     width: KEYS_WIDTH + model.total * pxPerUnit + 40,
     height: top + rows * rowHeight,
-    top
+    top,
+    sourceTop: options.source ? lanes : null
   }
 }
 
@@ -221,12 +227,15 @@ export type Hit =
   | { area: 'chord'; chord: ModelChord }
   | { area: 'lane'; unit: number }
   | { area: 'lyrics'; unit: number }
+  | { area: 'source'; unit: number }
   | { area: 'header'; unit: number }
+  | { area: 'keys'; pitch: number }
 
 /**
- * What lies under ``(x, y)`` (roll coordinates). The header and the chord lane stay at the top of the
- * pane while it scrolls: with ``scrollTop`` the first ``TOP`` pixels of the *visible* area are them,
- * and a note scrolled underneath cannot be hit there.
+ * What lies under ``(x, y)`` (roll coordinates). The header and the lanes stay at the top of the pane
+ * while it scrolls: with ``scrollTop`` the first ``geo.top`` pixels of the *visible* area are them, and
+ * a note scrolled underneath cannot be hit there. The keyboard stays at the left (``scrollLeft``): a
+ * note scrolled under it cannot be hit there either.
  */
 export function hitTest(
   x: number,
@@ -235,11 +244,13 @@ export function hitTest(
   chords: readonly ModelChord[],
   geo: Geometry,
   prefer: Track,
-  scrollTop = 0
+  scrollTop = 0,
+  scrollLeft = 0
 ): Hit {
   const unit = Math.max(0, Math.min(geo.total, unitAt(x, geo)))
   const inPane = y - scrollTop
   if (inPane < HEADER) return { area: 'header', unit }
+  if (geo.sourceTop !== null && inPane >= geo.sourceTop && inPane < geo.top) return { area: 'source', unit }
   if (inPane >= TOP && inPane < geo.top) return { area: 'lyrics', unit }
   if (inPane < TOP) {
     for (let i = chords.length - 1; i >= 0; i--) {
@@ -249,6 +260,7 @@ export function hitTest(
     }
     return { area: 'lane', unit }
   }
+  if (x - scrollLeft < KEYS_WIDTH) return { area: 'keys', pitch: pitchAt(y, geo) }
   const hits = notes.filter((note) => {
     const rect = noteRect(note, geo)
     return x >= rect.x && x <= rect.x + rect.width && y >= rect.y - 0.5 && y <= rect.y + rect.height + 0.5
@@ -316,8 +328,18 @@ export function chordsInBand(
 // --- gestures ---------------------------------------------------------------------------------
 
 export type Drag =
-  | { kind: 'move'; notes: RollNote[]; anchor: RollNote; fromUnit: number; fromPitch: number; delta: number; semitones: number }
-  | { kind: 'resize'; note: RollNote; end: number; overwrite: boolean }
+  | {
+      kind: 'move'
+      notes: RollNote[]
+      anchor: RollNote
+      fromUnit: number
+      fromPitch: number
+      delta: number
+      semitones: number
+      /** Alt held: the notes are copied there (Cubase), the originals stay. */
+      copy?: boolean
+    }
+  | { kind: 'resize'; note: RollNote; end: number; overwrite: boolean; limit: number }
   | { kind: 'draw'; track: Track; start: number; end: number; pitch: number }
   | { kind: 'chord'; chord: ModelChord; fromUnit: number; to: number }
 
@@ -325,8 +347,15 @@ export function startMove(notes: RollNote[], anchor: RollNote, unit: number, pit
   return { kind: 'move', notes, anchor, fromUnit: unit, fromPitch: pitch, delta: 0, semitones: 0 }
 }
 
-export function startResize(note: RollNote): Drag {
-  return { kind: 'resize', note, end: note.onset + note.duration, overwrite: false }
+/**
+ * Resizing ``note`` by its end. Into rests it grows up to the next note of its voice (``limit``: that
+ * note's start, else the end of the score) - it stops there like a note against the next one; with
+ * Alt it grows over the notes that follow (they are shortened or removed).
+ */
+export function startResize(note: RollNote, notes: readonly RollNote[] = [], total = Infinity): Drag {
+  const next = notes.filter((n) => n.track === note.track && n.onset > note.onset).map((n) => n.onset)
+  const limit = Math.min(total, ...next)
+  return { kind: 'resize', note, end: note.onset + note.duration, overwrite: false, limit }
 }
 
 export function startDraw(track: Track, unit: number, pitch: number, geo: Geometry): Drag {
@@ -352,12 +381,13 @@ export function dragTo(drag: Drag, unit: number, pitch: number, geo: Geometry, m
       const lowest = Math.min(...drag.notes.map((n) => n.pitch))
       const highest = Math.max(...drag.notes.map((n) => n.pitch))
       const semitones = clamp(pitch - drag.fromPitch, -lowest, 127 - highest)
-      return { ...drag, delta, semitones }
+      return { ...drag, delta, semitones, copy: modifiers.alt }
     }
     case 'resize': {
       const shortest = Math.min(geo.snap, geo.total - drag.note.onset)
-      const end = clamp(snapRound(unit, geo.snap), drag.note.onset + Math.max(1, shortest), geo.total)
-      return { ...drag, end, overwrite: modifiers.alt }
+      const high = modifiers.alt ? geo.total : Math.max(drag.note.onset + drag.note.duration, Math.min(geo.total, drag.limit))
+      const end = clamp(snapRound(unit, geo.snap), drag.note.onset + Math.max(1, shortest), high)
+      return { ...drag, end: Math.min(end, high), overwrite: modifiers.alt }
     }
     case 'draw': {
       const end = unit <= drag.start ? drag.start + geo.snap : Math.max(drag.start + geo.snap, snapRound(unit, geo.snap))
@@ -371,9 +401,27 @@ export function dragTo(drag: Drag, unit: number, pitch: number, geo: Geometry, m
 /** The one canonical operation a finished gesture commits (``null``: nothing changed). */
 export function dragOp(drag: Drag, resizeMode: ResizeMode): ScoreOperation | null {
   switch (drag.kind) {
-    case 'move':
+    case 'move': {
+      if (drag.copy) {
+        // a copy of the notes where they were dragged (the paste at the cursor, without the clipboard)
+        const start = Math.min(...drag.notes.map((n) => n.onset))
+        const end = Math.max(...drag.notes.map((n) => n.onset + n.duration))
+        if (!drag.delta && !drag.semitones) return null
+        return {
+          op: 'paste',
+          at: start + drag.delta,
+          mode: 'overwrite',
+          span: end - start,
+          tracks: [...new Set(drag.notes.map((n) => n.track))],
+          with_chords: false,
+          notes: drag.notes.map((n) => ({ track: n.track, onset: n.onset - start, duration: n.duration, pitch: n.pitch + drag.semitones })),
+          chords: [],
+          sections: []
+        }
+      }
       if (!drag.delta && !drag.semitones) return null
       return { op: 'move_notes', ids: drag.notes.map((n) => n.id), delta: drag.delta, semitones: drag.semitones }
+    }
     case 'resize': {
       const duration = drag.end - drag.note.onset
       if (duration === drag.note.duration) return null
@@ -416,7 +464,7 @@ export function ghosts(drag: Drag | null): Ghost[] {
 /** Notes (by id) that the gesture moves or changes (drawn dimmed under the ghost). */
 export function draggedIds(drag: Drag | null): Set<string> {
   if (!drag) return new Set()
-  if (drag.kind === 'move') return new Set(drag.notes.map((n) => n.id))
+  if (drag.kind === 'move') return drag.copy ? new Set() : new Set(drag.notes.map((n) => n.id))
   if (drag.kind === 'resize') return new Set([drag.note.id])
   return new Set()
 }

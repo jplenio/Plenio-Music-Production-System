@@ -35,7 +35,7 @@ One narrated video for every template (English, 2 to 9 minutes, with chapters), 
     <td width="50%" align="center">
       <a href="https://youtu.be/HzE8Iz5h_5o"><img src="assets/branding/0.4.1/tutorial-2-yue2-cover.jpg" alt="Tutorial 2 · YuE2 · Cover - watch on YouTube" width="100%" /></a>
       <br /><b><a href="https://youtu.be/HzE8Iz5h_5o">Tutorial 2 · YuE2 · Cover</a></b>
-      <br />Turn a recording into a new version: A/B against the original bar by bar, a copied chorus that sings its words again.
+      <br />Turn a recording into a new version: the original under the notes (waveform, both together or A/B), a copied chorus that sings its words again.
     </td>
     <td width="50%" align="center">
       <a href="https://youtu.be/-iY-lJFuZE0"><img src="assets/branding/0.4.1/tutorial-3-minimax-song.jpg" alt="Tutorial 3 · MiniMax · Song - watch on YouTube" width="100%" /></a>
