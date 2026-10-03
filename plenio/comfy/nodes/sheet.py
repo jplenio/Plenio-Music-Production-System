@@ -21,7 +21,7 @@ from ...core.sheet import (
     parse_sheet_state,
 )
 from .. import host
-from ..types import Brief, Engine, ReportType, SheetState, TimelineType
+from ..types import Brief, Engine, PitchType, ReportType, SheetState, TimelineType
 
 DOC_TOOLTIPS = {
     "title": "Song title draft.",
@@ -70,6 +70,12 @@ class PlenioSongSheet(io.ComfyNode):
                 optional=True,
                 tooltip="The recording the score was transcribed from: the editor plays it from the selected bar "
                 "(A/B with the notes). Display only; it never reaches the model.",
+            ),
+            PitchType.Input(
+                "sung_pitch",
+                optional=True,
+                tooltip="From Sung Pitch: the source's vocal line, drawn as a curve over the notes in the piano roll. "
+                "Display only; it never reaches the model.",
             ),
             Brief.Input("brief", optional=True, tooltip="Vocal mode and length for validation."),
             Engine.Input(
@@ -173,6 +179,9 @@ class PlenioSongSheet(io.ComfyNode):
         reference = kwargs.get("reference_audio")
         if reference is not None:
             payload["reference_audio"] = host.save_reference_audio(reference)
+        sung = kwargs.get("sung_pitch")
+        if sung is not None:
+            payload["sung_pitch"] = sung.to_dict()
         if evaluation.conflicts or has_errors(evaluation.findings):
             host.send_event(EVENT, payload)  # the editor needs the new drafts to resolve the problem
         if evaluation.conflicts:

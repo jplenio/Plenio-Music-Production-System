@@ -275,7 +275,8 @@ describe('editor preferences', () => {
       sourceLevel: 0.7,
       audition: true,
       rowHeight: 12,
-      follow: true
+      follow: true,
+      sung: true
     })
     const roll = JSON.stringify({ roll: false, rollZoom: 96, metronome: true, advanced: true })
     expect(loadPrefs({ getItem: () => roll })).toMatchObject({ roll: false, rollZoom: 96, metronome: true, advanced: true })

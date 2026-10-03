@@ -11,6 +11,7 @@ Engine = io.Custom("PLENIO_ENGINE")
 Request = io.Custom("PLENIO_REQUEST")
 ReportType = io.Custom("PLENIO_REPORT")
 TimelineType = io.Custom("PLENIO_TIMELINE")
+PitchType = io.Custom("PLENIO_PITCH")
 AudioModelType = io.Custom("PLENIO_AUDIO_MODEL")
 """A loaded super-resolution or separation model (``audio_models.AudioModel``)."""
 StemsType = io.Custom("PLENIO_STEMS")

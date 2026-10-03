@@ -3387,6 +3387,12 @@
        "tooltip": "The recording the score was transcribed from: the editor plays it from the selected bar (A/B with the notes). Display only; it never reaches the model."
       }
      ],
+     "sung_pitch": [
+      "PLENIO_PITCH",
+      {
+       "tooltip": "From Sung Pitch: the source's vocal line, drawn as a curve over the notes in the piano roll. Display only; it never reaches the model."
+      }
+     ],
      "brief": [
       "PLENIO_BRIEF",
       {
@@ -3428,6 +3434,7 @@
      "context_score",
      "timeline",
      "reference_audio",
+     "sung_pitch",
      "brief",
      "engine"
     ],
@@ -3517,6 +3524,46 @@
    "output_node": false,
    "category": "Plenio/Audio",
    "display_name": "Stem Mixer"
+  },
+  "PlenioSungPitch": {
+   "input": {
+    "required": {
+     "audio": [
+      "AUDIO",
+      {
+       "tooltip": "The source recording (the cover's original)."
+      }
+     ],
+     "separation": [
+      "COMBO",
+      {
+       "tooltip": "A separation model in models/audio_separation (the one of Separate Stems) for the vocal stem; 'whole mix' tracks the loudest pitch of the mix, which is often an instrument.",
+       "multiselect": false,
+       "options": [
+        "whole mix (no separation - less reliable)"
+       ]
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "audio",
+     "separation"
+    ]
+   },
+   "output": [
+    "PLENIO_PITCH"
+   ],
+   "output_name": [
+    "sung_pitch"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Audio analysis",
+   "display_name": "Sung Pitch"
   },
   "PlenioSystemCheck": {
    "input": {

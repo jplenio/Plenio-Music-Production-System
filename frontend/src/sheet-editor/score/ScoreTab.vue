@@ -122,6 +122,7 @@ import { selectedChordIds, selectedNoteIds } from './pianoRoll'
 import { type ScoreProject, PROJECT_EXTENSION, buildProject, parseProject, projectFilename } from './projectFile'
 import { guideNotes, remapGuide, sameGuide } from './tracks'
 import { type DecodedSource, decodeSource } from './sourceAudio'
+import { curveOf, octaveOffset } from './sungPitch'
 import { describeError, useScoreSession } from './useScoreSession'
 
 const props = defineProps<{
@@ -698,6 +699,15 @@ const sourceBeat = computed(() => {
   if (!bar) return 0.5
   const beats = Number(bar[2].split('/')[0]) || 4
   return (bar[1] - bar[0]) / beats
+})
+/** A cover's sung pitch (node Sung Pitch), moved onto the notes' octave; or why there is none. */
+const sungPitch = computed(() => {
+  const payload = props.payload?.sung_pitch
+  if (!payload) return null
+  const curve = curveOf(payload)
+  const m = model.value
+  if (!curve || !m) return { problem: 'problem' in payload ? payload.problem : 'the sung pitch could not be read', curve: null, offset: 0, bars: undefined }
+  return { problem: null, curve, offset: octaveOffset(m, timelineBars.value, curve), bars: timelineBars.value }
 })
 const sourceShift = computed<number>({
   get: () => props.sourceShift ?? 0,
@@ -1323,6 +1333,8 @@ function onKey(event: KeyboardEvent): void {
       v-model:zoom="rollZoom"
       v-model:row-height="prefs.rowHeight"
       v-model:follow="prefs.follow"
+      v-model:sung-visible="prefs.sung"
+      :sung="sungPitch"
       :height="prefs.rollHeight"
       :view="shown"
       :selection="session.selection"

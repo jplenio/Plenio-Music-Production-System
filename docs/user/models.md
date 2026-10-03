@@ -51,7 +51,7 @@ The block stays bypassed there until you turn it on; the one file serves every t
 |---|---|---|---|
 | `model_bs_roformer_ep_17_sdr_9.6568.ckpt` | `audio_separation` | 527 MB | MIT (training code; vendored inference code in `plenio/third_party/msst`); the checkpoint was trained on MUSDB18-HQ, whose dataset terms are research-oriented |
 
-*Separate Stems* and *Stem Mixer* stay bypassed in every template until you turn them on. Place the file in `ComfyUI/models/audio_separation` (create the folder if needed); the checkpoint is a plain `.ckpt` with its config inside, so no second file is required. Without it the template runs exactly as before.
+*Separate Stems* and *Stem Mixer* stay bypassed in every template until you turn them on. *2 · YuE2 · Cover* also uses the file for **Sung Pitch** (the source's vocal line in the score editor); without it the cover runs as before and the editor says that there is no sung pitch. Place the file in `ComfyUI/models/audio_separation` (create the folder if needed); the checkpoint is a plain `.ckpt` with its config inside, so no second file is required. Without it the template runs exactly as before.
 
 The block is **experimental** until its listening check (L2) is accepted: the separation itself is measured (MUSDB18-HQ SDR 9.66 reported by the authors), but how the stems are used here is not.
 

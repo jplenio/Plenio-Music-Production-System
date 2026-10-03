@@ -48,6 +48,8 @@ export interface SheetPayload {
   target_seconds?: number | null
   timeline?: TimelinePayload
   reference_audio?: { filename: string; subfolder: string; type: string }
+  /** From Sung Pitch: the source's vocal line (a MIDI pitch every 20 ms), or why there is none. */
+  sung_pitch?: { rate: number; start: number; midi: (number | null)[]; source?: string } | { problem: string }
 }
 
 /** Plenio timeline (plenio.timeline/1) as far as the editor uses it. */

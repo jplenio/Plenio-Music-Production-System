@@ -47,6 +47,7 @@ import { lineKey } from './lyricPlacement'
 import { positionLabel, rulerUnit } from './locator'
 import { audition as hearPitch } from './player'
 import { type SourceEnvelope, waveColumns } from './sourceAudio'
+import { type SungCurve, curveRuns } from './sungPitch'
 
 import type { ScoreOperation } from '../../api/client'
 import type { LyricLayoutView, ModelChord, ScoreView } from '../../shared/scoreView'
@@ -124,6 +125,16 @@ const props = withDefaults(
     lyricsEditable?: boolean
     /** A cover's source recording: its envelope and the source's seconds of every score bar. */
     source?: { envelope: SourceEnvelope; bars: readonly ([number, number, string] | null)[] | undefined } | null
+    /**
+     * A cover's sung pitch (node Sung Pitch): the curve, the source's seconds of every score bar and the
+     * octaves that bring it onto the notes - or why there is none.
+     */
+    sung?: {
+      problem: string | null
+      curve: SungCurve | null
+      offset: number
+      bars: readonly ([number, number, string] | null)[] | undefined
+    } | null
   }>(),
   {
     playing: () => [],
@@ -137,7 +148,8 @@ const props = withDefaults(
     clip: null,
     lyrics: null,
     lyricsEditable: false,
-    source: null
+    source: null,
+    sung: null
   }
 )
 /** A line of the lyrics changed in the lane (``text`` empty: the line goes). */
@@ -174,6 +186,8 @@ const audition = defineModel<boolean>('audition', { default: true })
 const rowHeight = defineModel<number>('rowHeight', { default: 12 })
 /** The roll pages along with the playback line (Cubase: autoscroll). */
 const follow = defineModel<boolean>('follow', { default: true })
+/** Draw the sung pitch (when the sheet has one). */
+const sungVisible = defineModel<boolean>('sungVisible', { default: true })
 
 const root = ref<HTMLDivElement | null>(null)
 const scroller = ref<HTMLDivElement | null>(null)
@@ -935,6 +949,41 @@ const sourcePeak = computed(() => {
   for (let i = 0; i < envelope.max.length; i++) peak = Math.max(peak, envelope.max[i], -envelope.min[i])
   return peak || 1
 })
+/** The sung pitch over the visible bars: one path per unbroken run. */
+const sungPaths = computed(() => {
+  const g = geo.value
+  const m = model.value
+  const sung = props.sung
+  if (!g || !m || !sung?.curve || !sungVisible.value) return []
+  const [from, to] = window_.value
+  let first = 0
+  let last = m.measures.length - 1
+  m.measures.forEach((measure, index) => {
+    if (measure.onset + measure.length < from) first = index + 1
+    if (measure.onset <= to) last = index
+  })
+  const y = (midi: number): number => g.top + (g.high - midi) * g.rowHeight + g.rowHeight / 2
+  return curveRuns(m, sung.bars, sung.curve, first, last, sung.offset).map((run, index) => ({
+    key: `c${first}-${index}`,
+    d: run.map(([unit, midi], i) => `${i ? 'L' : 'M'}${xOf(unit, g).toFixed(1)} ${y(midi).toFixed(1)}`).join('')
+  }))
+})
+const sungLabel = computed(() => {
+  const offset = props.sung?.offset ?? 0
+  if (!offset) return 'sung'
+  const octaves = Math.abs(offset / 12)
+  return `sung ${offset > 0 ? '+' : '−'}${octaves > 1 ? octaves : ''}8va`
+})
+const sungTitle = computed(() => {
+  const sung = props.sung
+  if (!sung) return ''
+  if (sung.problem) return `No sung pitch: ${sung.problem}`
+  const offset = sung.offset
+  const moved = offset
+    ? ` - drawn ${Math.abs(offset / 12)} octave${Math.abs(offset) > 12 ? 's' : ''} ${offset > 0 ? 'higher' : 'lower'} than sung, where the transcription writes the melody`
+    : ''
+  return `The source's sung pitch over the notes (node Sung Pitch)${moved}`
+})
 const sourceWave = computed(() => {
   const g = geo.value
   const m = model.value
@@ -1119,6 +1168,9 @@ defineExpose({ zoomBy, zoomRows })
         <button title="Lower rows (Shift+G, Alt+wheel)" aria-label="Lower rows" @click="zoomRows(-2)">↕−</button>
         <button title="Taller rows (Shift+H, Alt+wheel)" aria-label="Taller rows" @click="zoomRows(2)">↕+</button>
       </span>
+      <label v-if="sung" :title="sungTitle" :class="{ unavailable: !!sung.problem }">
+        <input v-model="sungVisible" type="checkbox" :disabled="!!sung.problem" aria-label="Show the sung pitch" /> {{ sungLabel }}
+      </label>
       <label title="The roll pages along with the playback line">
         <input v-model="follow" type="checkbox" aria-label="Follow the playback" /> follow
       </label>
@@ -1168,6 +1220,7 @@ defineExpose({ zoomBy, zoomRows })
         </rect>
         <text v-for="item in noteNames" :key="'p' + item.key" class="note-name" :x="item.x" :y="item.y">{{ item.text }}</text>
         <text v-for="item in visibleSyllables" :key="'y' + item.key" class="syllable" :x="item.x" :y="item.y">{{ item.text }}</text>
+        <path v-for="path in sungPaths" :key="path.key" class="sung-pitch" :d="path.d" />
         <rect v-for="(ghost, index) in ghostNotes" :key="'ghost' + index" class="ghost" :class="ghost.track" v-bind="noteRect(ghost, geo)" rx="2" />
         <rect v-if="banded && banded.rect.height > 0" class="band" v-bind="banded.rect" />
         <line v-if="locator !== null" class="locator" :x1="xOf(locator, geo)" :x2="xOf(locator, geo)" :y1="geo.top" :y2="geo.height" />

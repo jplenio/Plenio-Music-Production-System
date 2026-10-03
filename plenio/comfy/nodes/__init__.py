@@ -13,6 +13,7 @@ from .refine import PlenioRefine
 from .score_tools import PlenioScoreTools
 from .sheet import PlenioSongSheet
 from .stems import PlenioSeparateStems, PlenioStemMixer
+from .sung_pitch import PlenioSungPitch
 from .system_check import PlenioSystemCheck
 from .transcribe_lyrics import PlenioTranscribeLyrics
 from .transcribe_score import PlenioTranscribeScore
@@ -28,6 +29,7 @@ NODES = (
     PlenioScoreTools,
     PlenioTranscribeScore,
     PlenioTranscribeLyrics,
+    PlenioSungPitch,
     PlenioVocalCheck,
     PlenioEQ,
     PlenioLoudness,

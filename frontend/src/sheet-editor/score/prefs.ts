@@ -38,6 +38,8 @@ export interface EditorPrefs {
   rowHeight: number
   /** The roll pages along with the playback line (Cubase: autoscroll). */
   follow: boolean
+  /** Draw a cover's sung pitch (node Sung Pitch) over the notes. */
+  sung: boolean
 }
 
 const KEY = 'plenio.score-editor.prefs'
@@ -59,7 +61,8 @@ export function defaultPrefs(): EditorPrefs {
     sourceLevel: 0.7,
     audition: true,
     rowHeight: 12,
-    follow: true
+    follow: true,
+    sung: true
   }
 }
 
@@ -112,7 +115,8 @@ export function loadPrefs(storage: Pick<Storage, 'getItem'> | null = safeStorage
       audition: data.audition !== false,
       rowHeight:
         typeof data.rowHeight === 'number' && data.rowHeight >= 6 && data.rowHeight <= 28 ? Math.round(data.rowHeight) : defaults.rowHeight,
-      follow: data.follow !== false
+      follow: data.follow !== false,
+      sung: data.sung !== false
     }
   } catch {
     return defaults

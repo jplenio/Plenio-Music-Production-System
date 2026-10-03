@@ -1,8 +1,8 @@
 {
  "id": "dac7a916-31bb-521d-b75c-0944f452bb94",
  "revision": 0,
- "last_node_id": 29,
- "last_link_id": 75,
+ "last_node_id": 30,
+ "last_link_id": 78,
  "nodes": [
   {
    "id": 1,
@@ -120,7 +120,8 @@
       3,
       8,
       11,
-      75
+      75,
+      76
      ]
     }
    ],
@@ -726,6 +727,13 @@
      "link": 8
     },
     {
+     "localized_name": "sung_pitch",
+     "name": "sung_pitch",
+     "shape": 7,
+     "type": "PLENIO_PITCH",
+     "link": 77
+    },
+    {
      "localized_name": "brief",
      "name": "brief",
      "shape": 7,
@@ -1328,6 +1336,13 @@
      "shape": 7,
      "type": "AUDIO",
      "link": 75
+    },
+    {
+     "localized_name": "sung_pitch",
+     "name": "sung_pitch",
+     "shape": 7,
+     "type": "PLENIO_PITCH",
+     "link": 78
     },
     {
      "localized_name": "brief",
@@ -2517,6 +2532,63 @@
     "Node name for S&R": "PreviewImage"
    },
    "widgets_values": []
+  },
+  {
+   "id": 30,
+   "type": "PlenioSungPitch",
+   "pos": [
+    460,
+    480
+   ],
+   "size": [
+    340,
+    106
+   ],
+   "flags": {},
+   "order": 29,
+   "mode": 0,
+   "inputs": [
+    {
+     "localized_name": "audio",
+     "name": "audio",
+     "type": "AUDIO",
+     "link": 76
+    },
+    {
+     "localized_name": "separation",
+     "name": "separation",
+     "type": "COMBO",
+     "widget": {
+      "name": "separation"
+     },
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "localized_name": "sung_pitch",
+     "name": "sung_pitch",
+     "type": "PLENIO_PITCH",
+     "links": [
+      77,
+      78
+     ]
+    }
+   ],
+   "title": "Sung Pitch (for the editor)",
+   "properties": {
+    "Node name for S&R": "PlenioSungPitch",
+    "models": [
+     {
+      "name": "model_bs_roformer_ep_17_sdr_9.6568.ckpt",
+      "url": "https://github.com/ZFTurbo/Music-Source-Separation-Training/releases/download/v1.0.12/model_bs_roformer_ep_17_sdr_9.6568.ckpt",
+      "directory": "audio_separation"
+     }
+    ]
+   },
+   "widgets_values": [
+    "model_bs_roformer_ep_17_sdr_9.6568.ckpt"
+   ]
   }
  ],
  "links": [
@@ -2589,7 +2661,7 @@
    4,
    0,
    10,
-   10,
+   11,
    "PLENIO_BRIEF"
   ],
   [
@@ -2597,7 +2669,7 @@
    5,
    3,
    10,
-   11,
+   12,
    "PLENIO_ENGINE"
   ],
   [
@@ -2773,7 +2845,7 @@
    4,
    0,
    16,
-   10,
+   11,
    "PLENIO_BRIEF"
   ],
   [
@@ -2781,7 +2853,7 @@
    5,
    3,
    16,
-   11,
+   12,
    "PLENIO_ENGINE"
   ],
   [
@@ -3119,6 +3191,30 @@
    16,
    9,
    "AUDIO"
+  ],
+  [
+   76,
+   3,
+   0,
+   30,
+   0,
+   "AUDIO"
+  ],
+  [
+   77,
+   30,
+   0,
+   10,
+   10,
+   "PLENIO_PITCH"
+  ],
+  [
+   78,
+   30,
+   0,
+   16,
+   10,
+   "PLENIO_PITCH"
   ]
  ],
  "groups": [
@@ -3207,7 +3303,7 @@
     430,
     -70,
     900,
-    560
+    700
    ],
    "color": "#3f789e",
    "font_size": 24,

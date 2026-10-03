@@ -1210,3 +1210,16 @@
   flex-basis: 100%;
   margin-bottom: 4px;
 }
+
+/* a cover's sung pitch over the notes */
+.plenio-overlay .roll-svg .sung-pitch {
+  fill: none;
+  stroke: #ff5fa2;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.plenio-overlay .roll-tools label.unavailable {
+  opacity: 0.55;
+}
