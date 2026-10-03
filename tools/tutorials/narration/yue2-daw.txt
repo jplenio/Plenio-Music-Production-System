@@ -159,7 +159,7 @@ Got a MIDI keyboard? Then play the notes in, like in any DAW. Record captures fr
 @ A counter-line for the instrument | optional
 Let's add a counter-line for the instrument: draw into the instrument voice, and set the cursor where it starts.
 
-@ One bar of count-in, then play | optional
+@ One bar of count-in, then play | optional | seed 2
 One bar of count-in, then play. [pause:0.3s] The notes appear as you play them, right where you heard them.
 
 @ Space keeps the take | optional
@@ -168,7 +168,7 @@ Space keeps the take, as one undo step, snapped to the grid. Escape would throw 
 @ 🎹 holds the rest | optional
 The keyboard menu holds the rest: which keyboard, the count-in, quantize, replace or merge. [pause:0.3s] And step input writes one note per key, so you don't have to play in time.
 
-@ Ctrl+Z - for this video | optional
+@ Ctrl+Z - for this video | optional | seed 2
 One undo, and for this video, the sketch stays as it was.
 
 @ Save project keeps
