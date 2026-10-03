@@ -1029,6 +1029,8 @@ function revealUnit(unit: number | null): void {
 
 watch(selectedNotes, (ids) => reveal(ids))
 watch(playingNotes, (ids) => {
+  // while a take is recorded, the played keys decide the rows (below), not the notes playing along
+  if (props.recorded && props.playhead !== null) return
   if (follow.value || props.playhead === null) reveal(ids, props.playhead === null)
 })
 watch(

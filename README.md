@@ -74,12 +74,12 @@ Plenio is a rewrite from scratch, not a new version of the toolkit. It keeps wha
 - **The Song Sheet: what you see is what the model gets.** Every document that conditions the music (title, style or caption, lyrics, score) passes through one sheet. Each document is *automatic*, *edited* or *manual*. Manual text is never replaced. If the draft changes under an edit, the run stops and asks instead of guessing. When a sheet stops for review, nothing is rendered until you approve exactly what you saw.
 - **A real score editor.** YuE2's score is ABC notation, and the Song Sheet opens it as notation, as a **piano roll** and as ABC text, with playback. Draw, move and resize notes, set **chord symbols** in the chord lane, work through the **bar inspector** (bars, meter, key changes), and export or import **MIDI**. Every edit is checked by the same parser the model uses; a malformed text is refused with a reason and can be reverted.
 - **Arrange like in a DAW** (0.4.0; single bars since 0.4.2). Copy, move and delete whole sections in the section list, as on Cubase's arranger track - or single bars in the bar strip under it. A **cursor** in the ruler sets where playback and paste start, and **Ctrl+V** / **Ctrl+Shift+V** paste at it, overwriting or inserting time. The Guide track, the lyrics and, in covers, the original words and the source recording's times follow every arrangement. The **lyrics** stand over the notes they are sung on and are edited right there - since 0.4.3 their lines are also moved, made longer or shorter, copied and pasted like notes, and chord symbols move by semitones with the notes. The sheet music goes out as **MusicXML**, and a **project file** keeps the score, the Guide notes and the lyrics to go on later.
-- **Or write the score yourself.** **5 · YuE2 · DAW** is the song template for composing: an all-rest score is built from the brief, you draw the melody and the chords - or bring a sketch from your DAW with **Import MIDI…** - and YuE2 renders exactly what you approved. The **Guide** track plays with the sheet but is never sent to the model.
-- **Covers from the actual music.** SheetSage2 reads the score out of your recording and keeps its beat grid. faster-whisper transcribes the sung words and places them into the score's sections. You choose *instrumental*, *original lyrics* or *new lyrics* (written to the phrasing of the original), and whether the harmony stays.
+- **Or write the score yourself.** **5 · YuE2 · DAW** is the song template for composing: an all-rest score is built from the brief, you draw the melody and the chords - play them in with a **MIDI keyboard** or bring a sketch from your DAW with **Import MIDI…** - and YuE2 renders exactly what you approved. The **Guide** track plays with the sheet but is never sent to the model.
+- **Covers from the actual music.** SheetSage2 reads the score out of your recording and keeps its beat grid. faster-whisper transcribes the sung words and places them into the score's sections. You choose *instrumental*, *original lyrics* or *new lyrics* (written to the phrasing of the original), and whether the harmony stays. In the score editor the source recording plays under the notes, bar by bar, and the **sung pitch** is drawn over them, so you hear and see where the transcription is off.
 - **After the render, before the master.** **Refine (48 kHz)** can extend a band-limited render with a super-resolution model or just resample it; **Stems** splits a song into vocals, drums, bass and other and mixes them back with a **residual** that keeps a neutral mix exact. Both are optional blocks in every template, bypassed until you switch them on.
 - **Finishing built in.** Every song template ends in **Plenio · Master**: a gentle tone match, compression and a true-peak limiter to **-14 LUFS / -1 dBTP**. Export writes FLAC 24-bit, MP3 V0 or WAV 32-bit float with tags and embedded cover art, the unmastered take, and a **release record** of the documents, seeds, settings, loudness and model licences.
 - **Video tutorials for every template** (0.4.1): six narrated walkthroughs and a promo, recorded with the real models - [watch them](#watch-the-tutorials).
-- **Native ComfyUI all the way.** Generation, loaders, samplers, loops and downloads are ComfyUI's own nodes. Plenio adds 18 small nodes where ComfyUI has nothing equivalent (the predecessor had 55). ComfyUI manages GPU memory and offers missing model downloads itself.
+- **Native ComfyUI all the way.** Generation, loaders, samplers, loops and downloads are ComfyUI's own nodes. Plenio adds 19 small nodes where ComfyUI has nothing equivalent (the predecessor had 55). ComfyUI manages GPU memory and offers missing model downloads itself.
 
 ## The templates
 
@@ -155,6 +155,14 @@ Since 0.4.0 the editor also arranges. Select sections in the list and duplicate 
 
 *The score tab of a Song Sheet in the DAW layout, playing a sketch brought in with Import MIDI: the lyrics lane over the piano roll (each line over its phrase, each syllable over its note), the chord lane, the **transport** right under the roll, the notation with the syllables under the notes, the files (MIDI, MusicXML, project) - and on the left the sections and the **bar strip** with two bars selected, ready to be duplicated, copied, moved or deleted.*
 
+For a **cover** the source recording is a track of its own, like an audio track under the MIDI in a DAW: its **waveform** runs under the chord and lyrics lanes, **hear: both** plays the notes and the recording together on the transcription's beat grid (**A/B** switches at once), **⇆ align** moves the recording when the beat detection was off, and the new **Sung Pitch** node draws the sung melody as a curve over the notes - so a wrong pitch, an octave off or a missed note shows at a glance. Quantize (Q), vertical zoom and a *follow* switch round off the roll; **⌨ keys** lists every key and gesture.
+
+<p align="center">
+  <img src="assets/branding/0.4.4/Screenshot%20Cover-Score-Editor.png" alt="The score editor of a cover, playing the chorus: the source's waveform in a lane over the piano roll, the sung pitch as a pink curve over the transcribed vocal notes, and the transport with hear both, notes, source, A/B and align" width="100%" />
+</p>
+
+*A cover's chorus playing in Song Sheet · Score: the source recording's waveform over the roll, the sung pitch (pink) over the transcribed notes - here an octave lower in the singing, so the curve is drawn in the notes' octave (*sung +8va*) - and the transport with **hear: both**, **A/B** and **⇆ align**.*
+
 ### Compose a song yourself (YuE2 · DAW)
 
 Open **5 · YuE2 · DAW**, describe the song in the brief and run: the run stops at **Song Sheet · Text** with the writer's lyrics; approve them and run again. *Score Tools* builds an empty score in the right length, meter and key, and the run stops at **Song Sheet · DAW**. Draw the notes, set the chords, split the score into sections - or press **Import MIDI…** and bring a sketch from your DAW: the dialog shows every track of the file with its role (Vocal, Instrument, Chords, Guide) before anything changes. Approve and run again: YuE2 renders exactly the score you approved. The fourth track, **Guide**, is played with the sheet but never sent to the model ([guide](docs/user/paths/yue2-daw.md), [video](https://youtu.be/LlcAPddMEhc)).
@@ -170,6 +178,14 @@ Open **5 · YuE2 · DAW**, describe the song in the brief and run: the run stops
 </p>
 
 *Import MIDI…: the file's tracks with a role each - the bass of this sketch goes to the Guide track - the grid, and a report of what the import did, before *Insert* replaces the score (one undo step).*
+
+Or play it in: with a **MIDI keyboard** (Chrome or Edge), **● rec** (Shift+R) records into the roll's *draw into* voice from the cursor after a bar of count-in. The keys show as notes while you play, timed as you heard them; Space keeps the take as one undo step, on the *quantize* grid, and Esc throws it away. **step** input writes a note at the cursor with every key - a melody can be entered without playing in time.
+
+<p align="center">
+  <img src="assets/branding/0.4.4/Screenshot%20MIDI-Record.png" alt="Recording with a MIDI keyboard in Song Sheet · DAW: red notes appear in the piano roll from bar 5 while the score plays, the rec button is lit, and the MIDI panel shows the keyboard, count-in, quantize, replace and step length" width="100%" />
+</p>
+
+*Recording a counter-line into Ins from bar 5: the played keys appear red in the roll while the score plays, and 🎹 holds the keyboard, hearing the keys, count-in, quantize, replace or merge and the step input's length.*
 
 ### Make a song with MiniMax Music 3
 

@@ -136,6 +136,21 @@ describe('a take', () => {
     ])
   })
 
+  it('closes a gap of one grid step (a key let go a little early), keeps a real rest', () => {
+    const take = new Take(32, 'vocal')
+    take.noteOn(60, 32)
+    take.noteOff(60, 38.6) // a half note let go a sixteenth early
+    take.noteOn(62, 40)
+    take.noteOff(62, 43)
+    take.noteOn(64, 48) // after a quarter's rest
+    take.noteOff(64, 50)
+    expect(lineOf(take.finish(96), options)).toEqual([
+      { onset: 32, duration: 8, pitch: 60 },
+      { onset: 40, duration: 4, pitch: 62 },
+      { onset: 48, duration: 2, pitch: 64 }
+    ])
+  })
+
   it('lands a key of the count-in on the start, ends held keys at the stop and keeps inside the score', () => {
     const take = new Take(32, 'ins')
     take.noteOn(55, 30.4) // half a beat early

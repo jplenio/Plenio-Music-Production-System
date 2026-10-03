@@ -1263,7 +1263,7 @@ const Ji = (e, t, n) => {
   async function O() {
     const _ = Ee(i);
     _ === null && (s.textContent = "The stored state is unreadable; it will be replaced when you apply.");
-    const $ = ge(String(e.id)), a = (e.inputs ?? []).filter((M) => M.link != null).map((M) => M.name), D = _ ?? { schema: "plenio.sheet_state/1", docs: {} }, E = $?.owned ?? Di(a, D), p = String(e.widgets?.find((M) => M.name === "review")?.value ?? "continue"), d = p === "as the brief says" ? $?.review ?? "continue" : p, { openSheetDialog: h } = await import("./open-psfcJUe7.mjs"), { parseGuide: g, serializeGuide: q } = await import("./tracks-DxmZeggM.mjs"), { parseShift: x, parseSpans: F } = await import("./lyricPlacement-lv7ThC8m.mjs");
+    const $ = ge(String(e.id)), a = (e.inputs ?? []).filter((M) => M.link != null).map((M) => M.name), D = _ ?? { schema: "plenio.sheet_state/1", docs: {} }, E = $?.owned ?? Di(a, D), p = String(e.widgets?.find((M) => M.name === "review")?.value ?? "continue"), d = p === "as the brief says" ? $?.review ?? "continue" : p, { openSheetDialog: h } = await import("./open-vNX3O46-.mjs"), { parseGuide: g, serializeGuide: q } = await import("./tracks-DxmZeggM.mjs"), { parseShift: x, parseSpans: F } = await import("./lyricPlacement-lv7ThC8m.mjs");
     if (!Fe) throw new Error("Plenio: API not initialised");
     let A = null;
     try {

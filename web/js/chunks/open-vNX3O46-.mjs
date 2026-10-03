@@ -1,4 +1,4 @@
-import { a as x4, P as Xv, b as k4, t as C4, i as S4, e as T4, c as M4, n as _n, v as A4, s as Bd, g as _4, r as E4, u as B4, w as Ld, d as L4, f as D4, h as Dd } from "./main-CgaQPTwB.mjs";
+import { a as x4, P as Xv, b as k4, t as C4, i as S4, e as T4, c as M4, n as _n, v as A4, s as Bd, g as _4, r as E4, u as B4, w as Ld, d as L4, f as D4, h as Dd } from "./main-De578nRj.mjs";
 import { lineKey as vo, parseSpans as Jv, sameSpans as io, clipOfLines as Pd, sectionAt as P4, sectionRange as Aa, placedLines as Od, settle as O4, withSectionSpans as N4, parseLineKey as I4, remapSpans as R4 } from "./lyricPlacement-lv7ThC8m.mjs";
 import { notesLabel as $4, trackRows as H4, parseGuide as F4, sameGuide as Ms, remapGuide as z4, guideNotes as q4 } from "./tracks-DxmZeggM.mjs";
 // @__NO_SIDE_EFFECTS__
@@ -35286,7 +35286,7 @@ const pA = ["aria-label"], gA = {
       be >= X.scrollLeft + Bn && be <= X.scrollLeft + X.clientWidth - 24 || (X.scrollLeft = Math.max(0, be - Bn - 24), Vt());
     }
     return ht(G, (j) => he(j)), ht(ee, (j) => {
-      (c.value || i.playhead === null) && he(j, i.playhead === null);
+      i.recorded && i.playhead !== null || (c.value || i.playhead === null) && he(j, i.playhead === null);
     }), ht(
       () => i.playhead,
       (j) => {
@@ -37508,7 +37508,7 @@ function sL(n, e) {
       d - g > m.duration && (u[u.length - 1] = { onset: m.onset, duration: d - m.onset, pitch: f.pitch });
       continue;
     }
-    m && m.onset + m.duration > g && (m.duration = g - m.onset), d > g && u.push({ onset: g, duration: d - g, pitch: f.pitch });
+    m && m.onset + m.duration > g && (m.duration = g - m.onset), m && g - (m.onset + m.duration) <= o && (m.duration = g - m.onset), d > g && u.push({ onset: g, duration: d - g, pitch: f.pitch });
   }
   return u;
 }

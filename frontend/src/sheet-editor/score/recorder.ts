@@ -6,8 +6,10 @@
  * the audio output's latency - onto the bars). A voice of the score is one line, so the take is made
  * one line too: keys pressed together (within ``CHORD_SECONDS``) give their highest note, and a key
  * pressed before the previous one is let go ends it (legato, as on a monophonic synthesizer). Then the
- * starts and ends go onto the grid (or to the score's finest unit without one), and a key played just
- * before the start - during the count-in's last beat - lands on the start.
+ * starts and ends go onto the grid (or to the score's finest unit without one), a gap of at most one
+ * grid step before the next note closes (a key let go a little early: a half note, not a dotted quarter
+ * and a sixteenth rest), and a key played just before the start - during the count-in's last beat -
+ * lands on the start.
  *
  * ``recordOperation`` is the one backend operation (``place_notes``) that writes the take: *replace*
  * clears what the voice played from the start to the stop, *merge* overwrites only the new notes' spans.
@@ -118,6 +120,8 @@ export function lineOf(
       continue
     }
     if (previous && previous.onset + previous.duration > onset) previous.duration = onset - previous.onset
+    // a key let go a little early: the note lasts to the next one
+    if (previous && onset - (previous.onset + previous.duration) <= grid) previous.duration = onset - previous.onset
     if (end > onset) notes.push({ onset, duration: end - onset, pitch: key.pitch })
   }
   return notes
