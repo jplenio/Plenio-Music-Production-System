@@ -1,4 +1,4 @@
-import { a as k6, P as D2, b as C6, t as S6, i as T6, e as M6, c as A6, n as _n, v as _6, s as o1, g as E6, r as B6, u as L6, w as a1, d as P6, f as D6, h as l1 } from "./main-BrzPbRxM.mjs";
+import { a as k6, P as D2, b as C6, t as S6, i as T6, e as M6, c as A6, n as _n, v as _6, s as o1, g as E6, r as B6, u as L6, w as a1, d as P6, f as D6, h as l1 } from "./main-C9slfJQu.mjs";
 import { lineKey as $a, parseSpans as O2, sameSpans as Sa, clipOfLines as c1, sectionAt as O6, sectionRange as Ko, placedLines as u1, settle as I6, withSectionSpans as N6, parseLineKey as R6, remapSpans as $6 } from "./lyricPlacement-lv7ThC8m.mjs";
 import { notesLabel as H6, trackRows as F6, parseGuide as z6, sameGuide as Fs, remapGuide as q6, guideNotes as V6 } from "./tracks-DxmZeggM.mjs";
 // @__NO_SIDE_EFFECTS__
@@ -37513,7 +37513,7 @@ function ML(n, e) {
   if (e?.bars?.length)
     return !n || !e.bar_prints?.length ? n ? n.measures.map((t, i) => e.bars[i] ?? null) : e.bars : TL(CL(n), e.bar_prints).map((t) => t === null ? null : e.bars[t] ?? null);
 }
-const AL = "0.4.3";
+const AL = "0.4.4";
 function _L(n) {
   return {
     sounds: { ...n.sounds },

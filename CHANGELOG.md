@@ -2,7 +2,9 @@
 
 All notable changes are listed here. Versions follow semantic versioning; published Registry versions are immutable.
 
-## Unreleased
+## 0.4.4 - 2026-10-03
+
+The score editor plays like a small DAW: record a melody with a MIDI keyboard, hear every track in a sound of its own, export the sheet music as PDF - and for covers, the original recording and the sung pitch right under the notes.
 
 ### Added
 
@@ -21,10 +23,11 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 - **Presets** of the basic settings: built in by kind of song (Pop, Ballad, Rock, Electronic, Acoustic, Jazz, Orchestral ...) and way of working (*Composing with a MIDI keyboard*, *Cover: check the transcription*, *Cover: free arrangement*); **save current as preset…** keeps your own in ComfyUI's user data (`plenio/score-editor-presets.json`), so they are there in every browser.
 - **wave** in the roll's toolbar (covers): the source's waveform lane can be hidden, like the sung pitch - for covers far from the original.
 - The sheet warns about an **octave slip** in the vocal melody (below E2 or above C7 as written) - a MIDI keyboard played an octave off; the text stays valid ABC.
-- README: screenshots of a cover's score editor (waveform, sung pitch, *hear: both*) and of a MIDI recording.
+- README: new screenshots of the score editor - the DAW layout with the tracks' sounds, the sounds and presets, a page of the notation's PDF, a cover with its waveform and sung pitch, and a MIDI recording.
 
 ### Changed
 
+- **Tutorials 1, 2 and 5**: the score editor part recorded again - a tour of every area first, then the details: notes, playback, the tracks' sounds and presets, arranging, recording with a MIDI keyboard, the files with the notation's PDF, and for a cover the original under the notes, its sung pitch, *wave* and *align*. The promo follows.
 - **Esc** in the score lets the selection go and no longer closes the editor (it closes it from outside the score, as before).
 - **Space** plays and stops also right after a click on a transport button or checkbox (it toggled the checkbox instead); only text fields keep it.
 - The transport's **▶ play** replaces *▶ notes* and *▶ source*; with a source, *hear* chooses what plays.
