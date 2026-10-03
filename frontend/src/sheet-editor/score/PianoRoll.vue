@@ -58,6 +58,8 @@ import {
   LANE,
   LYRICS_LANE,
   MOVE_THRESHOLD_PX,
+  ROW_MAX,
+  ROW_MIN,
   SOURCE_LANE,
   type ResizeMode,
   type RollMode,
@@ -168,6 +170,10 @@ const lyricSelection = defineModel<string[]>('lyricSelection', { default: () => 
 const zoom = defineModel<number>('zoom', { default: 48 })
 /** Hear the pitch of a drawn, grabbed or moved note and of a clicked key. */
 const audition = defineModel<boolean>('audition', { default: true })
+/** Pixels per key row (the roll's vertical zoom). */
+const rowHeight = defineModel<number>('rowHeight', { default: 12 })
+/** The roll pages along with the playback line (Cubase: autoscroll). */
+const follow = defineModel<boolean>('follow', { default: true })
 
 const root = ref<HTMLDivElement | null>(null)
 const scroller = ref<HTMLDivElement | null>(null)
@@ -226,7 +232,13 @@ const notes = computed<RollNote[]>(() => (model.value ? notesOf(model.value) : [
 const chords = computed<ModelChord[]>(() => model.value?.tracks.chords ?? [])
 const geo = computed(() =>
   model.value
-    ? geometry(model.value, { pxPerQuarter: zoom.value, snap: snapChoice.value, lyrics: !!props.lyrics, source: !!props.source })
+    ? geometry(model.value, {
+        pxPerQuarter: zoom.value,
+        snap: snapChoice.value,
+        lyrics: !!props.lyrics,
+        source: !!props.source,
+        rowHeight: rowHeight.value
+      })
     : null
 )
 /** The length of the last drawn or resized note: a click in draw mode inserts one this long (FL, Cubase). */
@@ -767,11 +779,20 @@ function onKey(event: KeyboardEvent): void {
     event.stopPropagation()
     return
   }
-  if ((event.key === 'g' || event.key === 'h') && !event.ctrlKey && !event.metaKey && !event.altKey) {
-    // Cubase: G zooms out, H zooms in (around the cursor)
+  const lower = event.key.toLowerCase()
+  if ((lower === 'g' || lower === 'h') && !event.ctrlKey && !event.metaKey && !event.altKey) {
+    // Cubase: G zooms out, H zooms in (around the cursor); with Shift vertically
     event.preventDefault()
     event.stopPropagation()
-    zoomBy(event.key === 'h' ? 1.25 : 1 / 1.25)
+    if (event.shiftKey) zoomRows(lower === 'h' ? 2 : -2)
+    else zoomBy(lower === 'h' ? 1.25 : 1 / 1.25)
+    return
+  }
+  if (lower === 'q' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+    // Cubase: Q quantizes the selected notes (all notes when none is selected) to the grid; Shift: lengths too
+    event.preventDefault()
+    event.stopPropagation()
+    quantize(event.shiftKey)
     return
   }
   if (event.key.toLowerCase() === 'a' && (event.ctrlKey || event.metaKey) && !event.altKey) {
@@ -859,11 +880,51 @@ function zoomBy(factor: number, clientX?: number): void {
   })
 }
 
-/** Ctrl+wheel (Cmd+wheel): zoom along the bars around the pointer, never the page (DAWs do so). */
+/**
+ * Ctrl+wheel (Cmd+wheel): zoom along the bars around the pointer, never the page (DAWs do so);
+ * Alt+wheel or Ctrl+Shift+wheel: zoom the rows.
+ */
 function onWheel(event: WheelEvent): void {
+  const delta = event.deltaY || event.deltaX
+  if (event.altKey || ((event.ctrlKey || event.metaKey) && event.shiftKey)) {
+    event.preventDefault()
+    zoomRows(delta < 0 ? 1 : -1, event.clientY)
+    return
+  }
   if (!event.ctrlKey && !event.metaKey) return
   event.preventDefault()
-  zoomBy(event.deltaY < 0 ? 1.15 : 1 / 1.15, event.clientX)
+  zoomBy(delta < 0 ? 1.15 : 1 / 1.15, event.clientX)
+}
+
+/** The rows taller or lower by ``step`` pixels, keeping the pitch at ``clientY`` (default: the middle) in place. */
+function zoomRows(step: number, clientY?: number): void {
+  const el = scroller.value
+  const g = geo.value
+  const next = Math.max(ROW_MIN, Math.min(ROW_MAX, rowHeight.value + step))
+  if (next === rowHeight.value) return
+  if (!el || !g) {
+    rowHeight.value = next
+    return
+  }
+  const box = el.getBoundingClientRect()
+  const offset = clientY !== undefined ? clientY - box.top : el.clientHeight / 2
+  const pitch = g.high - (el.scrollTop + offset - g.top) / g.rowHeight
+  rowHeight.value = next
+  void nextTick(() => {
+    const after = geo.value
+    if (!after) return
+    el.scrollTop = Math.max(0, after.top + (after.high - pitch) * after.rowHeight - offset)
+    onScroll()
+  })
+}
+
+/** Q: the selected notes (all when none is) on the snap grid; ``lengths``: their lengths too. */
+function quantize(lengths: boolean): void {
+  const g = geo.value
+  if (!g || !editable.value) return
+  const picked = selectedNotes.value.size ? notes.value.filter((n) => selectedNotes.value.has(n.id)) : notes.value
+  if (!picked.length) return
+  void commit({ op: 'quantize', ids: picked.map((n) => n.id), grid: g.snap, lengths })
 }
 
 /** The source's waveform of the visible bars: one path per bar, scaled to the recording's peak. */
@@ -914,8 +975,15 @@ function revealUnit(unit: number | null): void {
 }
 
 watch(selectedNotes, (ids) => reveal(ids))
-watch(playingNotes, (ids) => reveal(ids, props.playhead === null))
-watch(() => props.playhead, revealUnit)
+watch(playingNotes, (ids) => {
+  if (follow.value || props.playhead === null) reveal(ids, props.playhead === null)
+})
+watch(
+  () => props.playhead,
+  (unit) => {
+    if (follow.value) revealUnit(unit)
+  }
+)
 watch(() => props.locator, revealUnit)
 // the scroller exists only while there is a model: centre when it appears (a new or repaired score)
 watch(
@@ -938,7 +1006,7 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => observer?.disconnect())
-defineExpose({ zoomBy })
+defineExpose({ zoomBy, zoomRows })
 </script>
 
 <template>
@@ -1038,10 +1106,22 @@ defineExpose({ zoomBy })
       <label title="Hear a note's pitch when it is drawn, grabbed or moved, and a key of the keyboard when it is clicked">
         <input v-model="audition" type="checkbox" aria-label="Hear the notes you edit" /> hear
       </label>
+      <button
+        :disabled="!editable"
+        :title="`Quantize (Q): the selected notes - all notes when none is selected - to the grid (${snapLabel}); Shift+Q: their lengths too`"
+        @click="quantize(false)"
+      >
+        Q
+      </button>
       <span class="group" role="group" aria-label="Zoom">
-        <button title="Zoom out" aria-label="Zoom out" @click="zoomBy(1 / 1.25)">−</button>
-        <button title="Zoom in" aria-label="Zoom in" @click="zoomBy(1.25)">+</button>
+        <button title="Zoom out along the bars (G, Ctrl+wheel)" aria-label="Zoom out" @click="zoomBy(1 / 1.25)">−</button>
+        <button title="Zoom in along the bars (H, Ctrl+wheel)" aria-label="Zoom in" @click="zoomBy(1.25)">+</button>
+        <button title="Lower rows (Shift+G, Alt+wheel)" aria-label="Lower rows" @click="zoomRows(-2)">↕−</button>
+        <button title="Taller rows (Shift+H, Alt+wheel)" aria-label="Taller rows" @click="zoomRows(2)">↕+</button>
       </span>
+      <label title="The roll pages along with the playback line">
+        <input v-model="follow" type="checkbox" aria-label="Follow the playback" /> follow
+      </label>
       <span class="hint">{{ hint }}{{ lyricsHint }}</span>
     </div>
     <p v-if="!model && view?.model_error" class="roll-note">{{ view.model_error.message }}</p>

@@ -29,6 +29,9 @@ const GROUPS: { title: string; rows: [string, string][] }[] = [
       ['← / → (Shift) · Alt+← / →', 'move by the grid (a beat) · shorter / longer'],
       ['Del · Shift+Del', 'rest · delete and close the gap'],
       ['Ctrl+wheel · G / H', 'zoom along the bars'],
+      ['Alt+wheel · Shift+G / H', 'zoom the rows (taller / lower)'],
+      ['Q · Shift+Q', 'quantize the selection (all notes when none) to the grid · lengths too'],
+      ['follow', 'the roll pages along with the playback (off: it stays where you look)'],
       ['click a key', 'hear its pitch']
     ]
   },

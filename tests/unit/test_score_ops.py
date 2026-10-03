@@ -154,6 +154,21 @@ def test_a_tied_note_changes_as_one_sounding_note() -> None:
     assert abc.split("\n")[15] == '"F"^A8g8|f16|'  # A#4, spelled for the key (C: sharps first)
 
 
+def test_quantize_puts_starts_and_lengths_on_the_grid() -> None:
+    loose = SMALL.replace('"C"c4d4e4f4|', '"C"c3d4-de4f4|')
+    abc, result = run(loose, op="quantize", ids=["vocal:3"], grid=4)
+    vocal = score_of(abc).vocal
+    d = next(n for n in vocal if n.pitch == score_of(SMALL).vocal[1].pitch)
+    assert (d.onset, d.duration) == (4, 5)  # the start on the grid, the length kept
+    assert result.changes == ("quantized 1 note (starts) to 4 units",)
+    abc, _ = run(loose, op="quantize", ids=["vocal:3"], grid=4, lengths=True)
+    d = next(n for n in score_of(abc).vocal if n.pitch == score_of(SMALL).vocal[1].pitch)
+    assert (d.onset, d.duration) == (4, 4)
+    # notes already on the grid: nothing changes
+    result = ops.transform(SMALL, {"op": "quantize", "ids": ["vocal:0", "vocal:4"], "grid": 4})
+    assert result.abc == SMALL and result.result.changes == ("already on the grid",)
+
+
 # --- chords -----------------------------------------------------------------------------------
 
 

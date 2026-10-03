@@ -166,6 +166,31 @@ describe('PianoRoll: DAW habits', () => {
     expect(state.selection).toEqual(['V2.0', 'V2.1', 'V2.2'])
   })
 
+  it('quantizes with Q (the selection, else all notes) and zooms the rows with Shift+G / H and Alt+wheel', async () => {
+    const { root, operate, state } = mount(['V2.0'])
+    root.dispatchEvent(new KeyboardEvent('keydown', { key: 'q', bubbles: true }))
+    await settle()
+    expect(operate).toHaveBeenLastCalledWith({ op: 'quantize', ids: ['vocal:32'], grid: GEO.snap, lengths: false })
+    state.selection = []
+    await nextTick()
+    root.dispatchEvent(new KeyboardEvent('keydown', { key: 'Q', shiftKey: true, bubbles: true }))
+    await settle()
+    expect(operate).toHaveBeenLastCalledWith(expect.objectContaining({ op: 'quantize', lengths: true }))
+    expect((operate.mock.lastCall?.[0] as { ids: string[] }).ids).toHaveLength(NOTES.length)
+    const svg = root.querySelector('svg.roll-svg') as SVGSVGElement
+    const height = Number(svg.getAttribute('height'))
+    root.dispatchEvent(new KeyboardEvent('keydown', { key: 'H', shiftKey: true, bubbles: true }))
+    await settle()
+    const taller = Number(svg.getAttribute('height'))
+    expect(taller).toBeGreaterThan(height)
+    const wheel = new MouseEvent('wheel', { altKey: true, bubbles: true, cancelable: true })
+    Object.defineProperty(wheel, 'deltaY', { value: 100 })
+    ;(root.querySelector('.roll-scroll') as HTMLElement).dispatchEvent(wheel)
+    await settle()
+    expect(wheel.defaultPrevented).toBe(true)
+    expect(Number(svg.getAttribute('height'))).toBeLessThan(taller)
+  })
+
   it('zooms with Ctrl+wheel and with G / H, never the page', async () => {
     const { root, state } = mount()
     const scroller = root.querySelector('.roll-scroll') as HTMLElement

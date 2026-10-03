@@ -86,6 +86,8 @@ Clicking, moving and resizing notes, and all keys, work the same in both modes. 
 | Shift+drag on an empty place (**Draw**) | a frame, as in Select mode |
 | click a key of the keyboard (left) | hear its pitch |
 | Ctrl+wheel, **G** / **H** | zoom along the bars (around the pointer / the cursor); never the browser page |
+| Alt+wheel, **Shift+G** / **Shift+H** | zoom the rows (taller or lower key rows) |
+| **Q** / **Shift+Q** | quantize: the selected notes' starts on the grid of *snap* (all notes when none is selected) / their lengths too; where a note lands it replaces what its voice played there |
 | drag on an empty place (**Select**) | a frame: select every note it touches (Shift: add them to the selection) |
 | Ctrl+A | select all notes of both voices and all chord symbols |
 | click an empty place / Esc | clear the selection (Esc during a frame cancels the frame; in the score, Esc never closes the editor) |
@@ -94,7 +96,7 @@ Clicking, moving and resizing notes, and all keys, work the same in both modes. 
 
 While you drag, a dashed **ghost** shows the result; nothing changes before you let go. Then the backend checks the edit and writes the text; if it refuses (for example a note that cannot grow because another note follows), the ghost disappears and the reason is shown.
 
-Keys with the roll focused: ↑/↓ semitone (Shift: octave) - selected **chord symbols** move too, one or many, spelled for the key where they stand (an octave leaves them as they are), ←/→ move by the grid (Shift: a beat), Alt+←/→ shorter/longer, **Delete** turns the selected notes into rests (and removes selected chord symbols), **Shift+Delete** deletes and lets the note before take the time (*close the gap*). **snap** sets the grid (*auto* is the score's finest length); **−/+**, **G / H** and Ctrl+wheel zoom. A note wide enough shows its pitch (`E5`), and a drawn, grabbed or moved note is heard (switch it off with *hear* in the roll's toolbar). Only the visible part of a long score is drawn.
+Keys with the roll focused: ↑/↓ semitone (Shift: octave) - selected **chord symbols** move too, one or many, spelled for the key where they stand (an octave leaves them as they are), ←/→ move by the grid (Shift: a beat), Alt+←/→ shorter/longer, **Delete** turns the selected notes into rests (and removes selected chord symbols), **Shift+Delete** deletes and lets the note before take the time (*close the gap*). **snap** sets the grid (*auto* is the score's finest length) - also for **Q** (quantize); **−/+**, **G / H** and Ctrl+wheel zoom along the bars, **↕−/↕+**, **Shift+G / H** and Alt+wheel zoom the rows. With *follow* switched off the roll stays where you look while it plays. A note wide enough shows its pitch (`E5`), and a drawn, grabbed or moved note is heard (switch it off with *hear* in the roll's toolbar). Only the visible part of a long score is drawn.
 
 The roll covers the whole piano range (A0 to C8, more for a note beyond it) and **scrolls both ways**: the mouse wheel moves through the pitches, Shift+wheel (or the scrollbar) through the bars. It opens centred on the score's notes; the pitch names stay on the left and the bar numbers, sections and the chord lane stay on top while you scroll, and a note you select - or the note that plays - is scrolled into view. Dragging a note to the top or bottom edge scrolls along, so a note can be moved or drawn anywhere in the range.
 

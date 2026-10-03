@@ -1097,10 +1097,12 @@ function onKey(event: KeyboardEvent): void {
   }
   const view = shown.value
   const primary = session.primary
-  if ((event.key === 'g' || event.key === 'h') && !event.altKey && pianoRoll.value) {
-    // Cubase: G zooms out, H zooms in - wherever the score has the focus
+  const lower = event.key.toLowerCase()
+  if ((lower === 'g' || lower === 'h') && !event.altKey && pianoRoll.value) {
+    // Cubase: G zooms out, H zooms in - wherever the score has the focus (Shift: the rows)
     event.preventDefault()
-    pianoRoll.value.zoomBy(event.key === 'h' ? 1.25 : 1 / 1.25)
+    if (event.shiftKey) pianoRoll.value.zoomRows(lower === 'h' ? 2 : -2)
+    else pianoRoll.value.zoomBy(lower === 'h' ? 1.25 : 1 / 1.25)
     return
   }
   if ((event.key === 'Home' || event.key === 'End') && model.value) {
@@ -1295,6 +1297,8 @@ function onKey(event: KeyboardEvent): void {
       v-if="showRoll"
       ref="pianoRoll"
       v-model:zoom="rollZoom"
+      v-model:row-height="prefs.rowHeight"
+      v-model:follow="prefs.follow"
       :height="prefs.rollHeight"
       :view="shown"
       :selection="session.selection"

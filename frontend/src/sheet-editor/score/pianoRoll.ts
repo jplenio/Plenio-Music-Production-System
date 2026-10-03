@@ -39,6 +39,9 @@ export const EDGE_PX = 6
 export const MOVE_THRESHOLD_PX = 3
 /** One key row: the roll scrolls vertically through the whole range instead of squeezing it. */
 export const ROW_HEIGHT = 12
+/** The vertical zoom's range (pixels per key row). */
+export const ROW_MIN = 6
+export const ROW_MAX = 28
 /** The range the roll always offers - the piano's A0 to C8 - widened for notes outside it. */
 export const PIANO_LOW = 21
 export const PIANO_HIGH = 108
@@ -122,7 +125,7 @@ export function rollRange(notes: readonly { pitch: number }[]): [number, number]
  */
 export function geometry(
   model: ScoreModelView,
-  options: { pxPerQuarter: number; height?: number; snap: SnapChoice; lyrics?: boolean; source?: boolean }
+  options: { pxPerQuarter: number; height?: number; snap: SnapChoice; lyrics?: boolean; source?: boolean; rowHeight?: number }
 ): Geometry {
   const lanes = TOP + (options.lyrics ? LYRICS_LANE : 0)
   const top = lanes + (options.source ? SOURCE_LANE : 0)
@@ -130,7 +133,7 @@ export function geometry(
   const [low, high] = rollRange(notes)
   const rows = high - low + 1
   const pxPerUnit = options.pxPerQuarter / Math.max(model.grid.units_per_quarter, 1e-9)
-  const rowHeight = ROW_HEIGHT
+  const rowHeight = Math.max(ROW_MIN, Math.min(ROW_MAX, Math.round(options.rowHeight ?? ROW_HEIGHT)))
   const snap = snapUnits(model, options.snap)
   const beat = Math.max(1, Math.round(model.grid.units_per_quarter))
   return {

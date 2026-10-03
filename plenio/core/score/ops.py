@@ -308,6 +308,44 @@ def move_notes(
     return _commit(new, changes, warnings, survivors)
 
 
+def quantize(score: Score, ids: Sequence[object], grid: int, *, lengths: bool = False) -> OpResult:
+    """The selected notes' starts on a grid of ``grid`` units (Cubase: Quantize), their lengths too with
+    ``lengths`` (at least one step). Where a note lands it replaces what its voice played there."""
+    picked = _notes_of(score, ids)
+    grid = _whole(grid, "grid", 1, score.total)
+    targets: list[tuple[str, Note, Note]] = []
+    for kind, note in picked:
+        onset = min(max(0, round(note.onset / grid) * grid), score.total - 1)
+        if lengths:
+            end = max(onset + grid, round(note.end / grid) * grid)
+        else:
+            end = onset + note.duration
+        end = min(end, score.total)
+        if end <= onset:
+            end = min(onset + 1, score.total)
+        targets.append((kind, note, Note(onset, end - onset, note.pitch, note.spelling)))
+    moved = [(kind, old, new) for kind, old, new in targets if (old.onset, old.duration) != (new.onset, new.duration)]
+    if not moved:
+        return _unchanged(score, "already on the grid", [note_id(k, n.onset) for k, n in picked])
+    tracks = {"vocal": list(score.vocal), "ins": list(score.ins)}
+    for kind, old, _new in moved:
+        tracks[kind].remove(old)
+    warnings: list[str] = []
+    for kind, _old, note in sorted(moved, key=lambda item: (item[0], item[2].onset, item[1].onset)):
+        kept, hit = _carve(tracks[kind], note.onset, note.end)
+        warnings += [f"{_describe(score, kind, n)} was overwritten" for n in hit]
+        tracks[kind] = sorted([*kept, note], key=lambda n: n.onset)
+    new_score = replace(score, vocal=tuple(tracks["vocal"]), ins=tuple(tracks["ins"]))
+    survivors = [
+        note_id(kind, note.onset)
+        for kind, _old, note in targets
+        if any(n.onset == note.onset and n.end == note.end for n in (new_score.vocal if kind == "vocal" else new_score.ins))
+    ]
+    what = "starts and lengths" if lengths else "starts"
+    change = f"quantized {len(moved)} note{'s' if len(moved) != 1 else ''} ({what}) to {grid} unit{'s' if grid != 1 else ''}"
+    return _commit(new_score, [change], warnings, survivors)
+
+
 def resize_note(score: Score, id_: object, duration: int, *, mode: str = "rests") -> OpResult:
     """Give a note a new length: grow into rests only (``rests``) or over what follows (``overwrite``)."""
     kind, onset = parse_id(id_)
@@ -1397,6 +1435,7 @@ OPERATIONS: dict[str, Operation] = {
     # chord symbols
     "put_chord": lambda s, op: put_chord(s, _int(op, "onset"), _str(op, "name")),
     "move_chord": lambda s, op: move_chord(s, _int(op, "onset"), _int(op, "to")),
+    "quantize": lambda s, op: quantize(s, op.get("ids", []), _int(op, "grid"), lengths=op.get("lengths") is True),
     "delete_chord": lambda s, op: delete_chord(s, _int(op, "onset")),
     # measures
     "insert_measures": lambda s, op: insert_measures(
@@ -1481,6 +1520,7 @@ __all__ = [
     "parse_id",
     "put_chord",
     "put_key",
+    "quantize",
     "remove_section",
     "rename_section_at",
     "resize_note",

@@ -34,6 +34,10 @@ export interface EditorPrefs {
   sourceLevel: number
   /** Hear a note's pitch when it is drawn, moved or a key of the roll is clicked. */
   audition: boolean
+  /** The piano roll's vertical zoom: pixels per key row (6-28). */
+  rowHeight: number
+  /** The roll pages along with the playback line (Cubase: autoscroll). */
+  follow: boolean
 }
 
 const KEY = 'plenio.score-editor.prefs'
@@ -53,7 +57,9 @@ export function defaultPrefs(): EditorPrefs {
     metronome: false,
     hear: 'both',
     sourceLevel: 0.7,
-    audition: true
+    audition: true,
+    rowHeight: 12,
+    follow: true
   }
 }
 
@@ -103,7 +109,10 @@ export function loadPrefs(storage: Pick<Storage, 'getItem'> | null = safeStorage
       hear: data.hear === 'notes' || data.hear === 'source' ? data.hear : defaults.hear,
       sourceLevel:
         typeof data.sourceLevel === 'number' && data.sourceLevel >= 0 && data.sourceLevel <= 1 ? data.sourceLevel : defaults.sourceLevel,
-      audition: data.audition !== false
+      audition: data.audition !== false,
+      rowHeight:
+        typeof data.rowHeight === 'number' && data.rowHeight >= 6 && data.rowHeight <= 28 ? Math.round(data.rowHeight) : defaults.rowHeight,
+      follow: data.follow !== false
     }
   } catch {
     return defaults
