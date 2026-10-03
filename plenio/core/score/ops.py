@@ -324,7 +324,11 @@ def quantize(score: Score, ids: Sequence[object], grid: int, *, lengths: bool = 
         if end <= onset:
             end = min(onset + 1, score.total)
         targets.append((kind, note, Note(onset, end - onset, note.pitch, note.spelling)))
-    moved = [(kind, old, new) for kind, old, new in targets if (old.onset, old.duration) != (new.onset, new.duration)]
+    moved = [
+        (kind, old, new)
+        for kind, old, new in targets
+        if (old.onset, old.duration) != (new.onset, new.duration)
+    ]
     if not moved:
         return _unchanged(score, "already on the grid", [note_id(k, n.onset) for k, n in picked])
     tracks = {"vocal": list(score.vocal), "ins": list(score.ins)}
@@ -339,7 +343,10 @@ def quantize(score: Score, ids: Sequence[object], grid: int, *, lengths: bool = 
     survivors = [
         note_id(kind, note.onset)
         for kind, _old, note in targets
-        if any(n.onset == note.onset and n.end == note.end for n in (new_score.vocal if kind == "vocal" else new_score.ins))
+        if any(
+            n.onset == note.onset and n.end == note.end
+            for n in (new_score.vocal if kind == "vocal" else new_score.ins)
+        )
     ]
     what = "starts and lengths" if lengths else "starts"
     change = f"quantized {len(moved)} note{'s' if len(moved) != 1 else ''} ({what}) to {grid} unit{'s' if grid != 1 else ''}"
@@ -1435,7 +1442,9 @@ OPERATIONS: dict[str, Operation] = {
     # chord symbols
     "put_chord": lambda s, op: put_chord(s, _int(op, "onset"), _str(op, "name")),
     "move_chord": lambda s, op: move_chord(s, _int(op, "onset"), _int(op, "to")),
-    "quantize": lambda s, op: quantize(s, op.get("ids", []), _int(op, "grid"), lengths=op.get("lengths") is True),
+    "quantize": lambda s, op: quantize(
+        s, op.get("ids", []), _int(op, "grid"), lengths=op.get("lengths") is True
+    ),
     "delete_chord": lambda s, op: delete_chord(s, _int(op, "onset")),
     # measures
     "insert_measures": lambda s, op: insert_measures(
