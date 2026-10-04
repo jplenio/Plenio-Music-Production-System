@@ -38,8 +38,8 @@ One narrated video for every template (English, 2 to 9 minutes, with chapters), 
       <br />Turn a recording into a new version: the original under the notes (waveform, both together or A/B), a copied chorus that sings its words again.
     </td>
     <td width="50%" align="center">
-      <a href="https://youtu.be/-iY-lJFuZE0"><img src="assets/branding/0.4.1/tutorial-3-minimax-song.jpg" alt="Tutorial 3 · MiniMax · Song - watch on YouTube" width="100%" /></a>
-      <br /><b><a href="https://youtu.be/-iY-lJFuZE0">Tutorial 3 · MiniMax · Song</a></b>
+      <a href="https://youtu.be/o0I_PRRFIUA"><img src="assets/branding/0.4.1/tutorial-3-minimax-song.jpg" alt="Tutorial 3 · MiniMax · Song - watch on YouTube" width="100%" /></a>
+      <br /><b><a href="https://youtu.be/o0I_PRRFIUA">Tutorial 3 · MiniMax · Song</a></b>
       <br />Songs with MiniMax Music 3: the caption, the lyrics and the 5,000-token budget, checked before rendering.
     </td>
   </tr>
