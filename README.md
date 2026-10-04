@@ -26,15 +26,15 @@ One narrated video for every template (English, 2 to 9 minutes, with chapters), 
       <br />Is your ComfyUI ready? Versions, the GPU, which model files every template needs, and the hardware table.
     </td>
     <td width="50%" align="center">
-      <a href="https://youtu.be/QVO9iWkVKUo"><img src="assets/branding/0.4.1/tutorial-1-yue2-song.jpg" alt="Tutorial 1 · YuE2 · Song - watch on YouTube" width="100%" /></a>
-      <br /><b><a href="https://youtu.be/QVO9iWkVKUo">Tutorial 1 · YuE2 · Song</a></b>
+      <a href="https://youtu.be/saYm0goB6EQ"><img src="assets/branding/0.4.1/tutorial-1-yue2-song.jpg" alt="Tutorial 1 · YuE2 · Song - watch on YouTube" width="100%" /></a>
+      <br /><b><a href="https://youtu.be/saYm0goB6EQ">Tutorial 1 · YuE2 · Song</a></b>
       <br />Write a song from a brief, check the lyrics, then the score editor: lyrics over the notes, cursor, copy and paste, arranging sections.
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
-      <a href="https://youtu.be/HzE8Iz5h_5o"><img src="assets/branding/0.4.1/tutorial-2-yue2-cover.jpg" alt="Tutorial 2 · YuE2 · Cover - watch on YouTube" width="100%" /></a>
-      <br /><b><a href="https://youtu.be/HzE8Iz5h_5o">Tutorial 2 · YuE2 · Cover</a></b>
+      <a href="https://youtu.be/xczkVQ_-ciU"><img src="assets/branding/0.4.1/tutorial-2-yue2-cover.jpg" alt="Tutorial 2 · YuE2 · Cover - watch on YouTube" width="100%" /></a>
+      <br /><b><a href="https://youtu.be/xczkVQ_-ciU">Tutorial 2 · YuE2 · Cover</a></b>
       <br />Turn a recording into a new version: the original under the notes (waveform, both together or A/B), a copied chorus that sings its words again.
     </td>
     <td width="50%" align="center">
@@ -50,8 +50,8 @@ One narrated video for every template (English, 2 to 9 minutes, with chapters), 
       <br />Master any song without a GPU: a warm tone match, measured loudness, release export - then your own curve.
     </td>
     <td width="50%" align="center">
-      <a href="https://youtu.be/LlcAPddMEhc"><img src="assets/branding/0.4.1/tutorial-5-yue2-daw.jpg" alt="Tutorial 5 · YuE2 · DAW - watch on YouTube" width="100%" /></a>
-      <br /><b><a href="https://youtu.be/LlcAPddMEhc">Tutorial 5 · YuE2 · DAW</a></b>
+      <a href="https://youtu.be/IeJaIjkbplQ"><img src="assets/branding/0.4.1/tutorial-5-yue2-daw.jpg" alt="Tutorial 5 · YuE2 · DAW - watch on YouTube" width="100%" /></a>
+      <br /><b><a href="https://youtu.be/IeJaIjkbplQ">Tutorial 5 · YuE2 · DAW</a></b>
       <br />Bring your own MIDI sketch from any DAW: tracks and roles, the Guide track, and YuE2 sings your melody.
     </td>
   </tr>
@@ -172,7 +172,7 @@ For a **cover** the source recording is a track of its own, like an audio track 
 
 ### Compose a song yourself (YuE2 · DAW)
 
-Open **5 · YuE2 · DAW**, describe the song in the brief and run: the run stops at **Song Sheet · Text** with the writer's lyrics; approve them and run again. *Score Tools* builds an empty score in the right length, meter and key, and the run stops at **Song Sheet · DAW**. Draw the notes, set the chords, split the score into sections - or press **Import MIDI…** and bring a sketch from your DAW: the dialog shows every track of the file with its role (Vocal, Instrument, Chords, Guide) before anything changes. Approve and run again: YuE2 renders exactly the score you approved. The fourth track, **Guide**, is played with the sheet but never sent to the model ([guide](docs/user/paths/yue2-daw.md), [video](https://youtu.be/LlcAPddMEhc)).
+Open **5 · YuE2 · DAW**, describe the song in the brief and run: the run stops at **Song Sheet · Text** with the writer's lyrics; approve them and run again. *Score Tools* builds an empty score in the right length, meter and key, and the run stops at **Song Sheet · DAW**. Draw the notes, set the chords, split the score into sections - or press **Import MIDI…** and bring a sketch from your DAW: the dialog shows every track of the file with its role (Vocal, Instrument, Chords, Guide) before anything changes. Approve and run again: YuE2 renders exactly the score you approved. The fourth track, **Guide**, is played with the sheet but never sent to the model ([guide](docs/user/paths/yue2-daw.md), [video](https://youtu.be/IeJaIjkbplQ)).
 
 <p align="center">
   <img src="assets/branding/0.4.1/Screenshot%20YuE2-DAW-graph.png" alt="The 5 · YuE2 · DAW template: brief, writer, Song Sheet · Text, Score Tools and Song Sheet · DAW, render and finish" width="100%" />
@@ -292,7 +292,7 @@ Plenio is the successor of the [Music Production Toolkit](https://github.com/jpl
 
 - Users: [Getting started](docs/user/getting-started.md) · [YuE2 Song](docs/user/paths/yue2-song.md) · [YuE2 Cover](docs/user/paths/yue2-cover.md) · [YuE2 DAW](docs/user/paths/yue2-daw.md) · [MiniMax Song](docs/user/paths/minimax-song.md) · [Enhance & Master](docs/user/paths/enhance-master.md) · [Song Sheet](docs/user/concepts/song-sheet.md) · [Brief templates](docs/user/concepts/brief-templates.md) · [Score editor](docs/user/concepts/score-editor.md) · [Stems](docs/user/concepts/stems.md) · [Refine (48 kHz)](docs/user/concepts/refine.md) · [Instrumental](docs/user/concepts/instrumental.md) · [Mastering](docs/user/concepts/mastering.md) · [App mode](docs/user/concepts/app-mode.md) · [Models](docs/user/models.md) · [Configuration](docs/user/configuration.md) · [Licensing](docs/user/licensing.md) · [Troubleshooting](docs/user/troubleshooting.md)
 - Contributors: [Architecture](docs/dev/architecture.md) · [Extending Plenio](docs/dev/extending.md) · [Testing](docs/dev/testing.md) · [Design documents](docs/design/README.md) · [Decisions](docs/adr/README.md) · [Acceptance review](docs/audit/2026-09-25-phase-10-acceptance.md)
-- Videos ([playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE)): [Promo](https://youtu.be/D6WUSzRbWWA) · [0 · System Check](https://youtu.be/otGrYj1Qlu8) · [1 · YuE2 · Song](https://youtu.be/QVO9iWkVKUo) · [2 · YuE2 · Cover](https://youtu.be/HzE8Iz5h_5o) · [3 · MiniMax · Song](https://youtu.be/-iY-lJFuZE0) · [4 · Enhance & Master](https://youtu.be/6BfORaIr5kE) · [5 · YuE2 · DAW](https://youtu.be/LlcAPddMEhc)
+- Videos ([playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE)): [Promo](https://youtu.be/D6WUSzRbWWA) · [0 · System Check](https://youtu.be/otGrYj1Qlu8) · [1 · YuE2 · Song](https://youtu.be/saYm0goB6EQ) · [2 · YuE2 · Cover](https://youtu.be/xczkVQ_-ciU) · [3 · MiniMax · Song](https://youtu.be/-iY-lJFuZE0) · [4 · Enhance & Master](https://youtu.be/6BfORaIr5kE) · [5 · YuE2 · DAW](https://youtu.be/IeJaIjkbplQ)
 - [Changelog](CHANGELOG.md)
 
 ## A few honest limits
