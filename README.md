@@ -10,10 +10,10 @@ Everything runs on your own machine, inside ComfyUI's own nodes: no cloud servic
 
 ## Watch the tutorials
 
-**▶ [Plenio in 75 seconds](https://youtu.be/D6WUSzRbWWA)** - the promo: what Plenio does, from the first idea to the mastered song.
+**▶ [Plenio in 75 seconds](https://youtu.be/q_dMH834E1o)** - the promo: what Plenio does, from the first idea to the mastered song.
 
 <p align="center">
-  <a href="https://youtu.be/D6WUSzRbWWA"><img src="assets/branding/0.4.1/promo.jpg" alt="Plenio - Music production in ComfyUI: the promo video on YouTube" width="70%" /></a>
+  <a href="https://youtu.be/q_dMH834E1o"><img src="assets/branding/0.4.1/promo.jpg" alt="Plenio - Music production in ComfyUI: the promo video on YouTube" width="70%" /></a>
 </p>
 
 One narrated video for every template (English, 2 to 9 minutes, with chapters), recorded in ComfyUI with the real models - every song you hear in them was made right there. **▶ [All of them as a playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE)**
