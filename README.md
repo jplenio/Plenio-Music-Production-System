@@ -33,8 +33,8 @@ One narrated video for every template (English, 2 to 9 minutes, with chapters), 
   </tr>
   <tr>
     <td width="50%" align="center">
-      <a href="https://youtu.be/xczkVQ_-ciU"><img src="assets/branding/0.4.1/tutorial-2-yue2-cover.jpg" alt="Tutorial 2 · YuE2 · Cover - watch on YouTube" width="100%" /></a>
-      <br /><b><a href="https://youtu.be/xczkVQ_-ciU">Tutorial 2 · YuE2 · Cover</a></b>
+      <a href="https://youtu.be/--jV5sNzXrg"><img src="assets/branding/0.4.1/tutorial-2-yue2-cover.jpg" alt="Tutorial 2 · YuE2 · Cover - watch on YouTube" width="100%" /></a>
+      <br /><b><a href="https://youtu.be/--jV5sNzXrg">Tutorial 2 · YuE2 · Cover</a></b>
       <br />Turn a recording into a new version: the original under the notes (waveform, both together or A/B), a copied chorus that sings its words again.
     </td>
     <td width="50%" align="center">
