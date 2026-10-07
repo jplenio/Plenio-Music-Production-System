@@ -1,6 +1,6 @@
 # Getting started
 
-▶ **Videos:** [Plenio in 75 seconds](https://youtu.be/D6WUSzRbWWA) · [Tutorial 0 · System Check](https://youtu.be/otGrYj1Qlu8) - and one tutorial for every template ([the playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE)).
+▶ **Videos:** [Plenio in 75 seconds](https://youtu.be/D6WUSzRbWWA) - and one tutorial for every template, starting with *Tutorial 0 · System Check*, in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE).
 
 ## Requirements
 

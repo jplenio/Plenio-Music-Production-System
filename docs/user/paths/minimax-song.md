@@ -2,7 +2,7 @@
 
 A new song from a short brief with **MiniMax Music 3**: a local text model writes title, a structured caption and lyrics, MiniMax renders the song from caption and lyrics, Master finishes it, and Export writes a 24-bit FLAC with a release record. MiniMax takes no score, so there is one Song Sheet.
 
-▶ **Video:** [Tutorial 3 · MiniMax · Song](https://youtu.be/-iY-lJFuZE0) - the whole path in ComfyUI, narrated, with chapters.
+▶ **Video:** *Tutorial 3 · MiniMax · Song* in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE) - the whole path in ComfyUI, narrated, with chapters.
 
 ```text
 Song Brief -> Write Song -> Song Sheet -> MiniMax Render -> Master -> Export Release

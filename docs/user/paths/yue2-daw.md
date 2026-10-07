@@ -2,7 +2,7 @@
 
 Compose the score yourself - the writer drafts the words, you write the music, and YuE2 renders exactly what you approved.
 
-▶ **Video:** [Tutorial 5 · YuE2 · DAW](https://youtu.be/IeJaIjkbplQ) - the whole path in ComfyUI, narrated, with chapters.
+▶ **Video:** *Tutorial 5 · YuE2 · DAW* in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE) - the whole path in ComfyUI, narrated, with chapters.
 
 ```
 Song Brief ─► Write Song ─► Song Sheet · Text        (title, style, lyrics)
