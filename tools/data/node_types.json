@@ -2187,6 +2187,125 @@
    "category": "Plenio/Release",
    "display_name": "Export Release"
   },
+  "PlenioLocalLLM": {
+   "input": {
+    "required": {
+     "prompt": [
+      "STRING",
+      {
+       "tooltip": "The request (connect Compose Writing Prompt, or type).",
+       "default": "",
+       "multiline": true
+      }
+     ],
+     "model": [
+      "COMBO",
+      {
+       "tooltip": "'models/LLM · file.gguf' and other '... files' / 'HF cache' entries are GGUF files, run by llama.cpp for the call; 'LM Studio · ...', 'Ollama · ...' are models of a running app.",
+       "multiselect": false,
+       "options": [
+        "(choose a model)"
+       ]
+      }
+     ],
+     "seed": [
+      "INT",
+      {
+       "tooltip": "Same seed, same prompt: the same answer (cached). Change it for a new answer.",
+       "default": 0,
+       "min": 0,
+       "max": 18446744073709551615,
+       "control_after_generate": "fixed"
+      }
+     ],
+     "max_tokens": [
+      "INT",
+      {
+       "tooltip": "Longest answer in tokens; a cut-off answer stops the run with a message.",
+       "advanced": true,
+       "default": 2048,
+       "min": 16,
+       "max": 131072
+      }
+     ],
+     "temperature": [
+      "FLOAT",
+      {
+       "tooltip": "0 = always the most likely words; higher = more varied.",
+       "advanced": true,
+       "default": 0.8,
+       "min": 0.0,
+       "max": 2.0,
+       "step": 0.05
+      }
+     ],
+     "thinking": [
+      "BOOLEAN",
+      {
+       "tooltip": "Let a reasoning model think first (Qwen, Gemma, DeepSeek ...); the thoughts come out separately. Slower; needs more max tokens.",
+       "advanced": true,
+       "default": false
+      }
+     ],
+     "context": [
+      "INT",
+      {
+       "tooltip": "Context length in tokens (prompt + answer) for GGUF files and Ollama. Other apps use the length set in the app.",
+       "advanced": true,
+       "default": 8192,
+       "min": 1024,
+       "max": 262144,
+       "step": 1024
+      }
+     ],
+     "keep_loaded": [
+      "BOOLEAN",
+      {
+       "tooltip": "Off: the model's memory is freed after the answer, so ComfyUI's models have the GPU. On: the model stays loaded for the next run (faster, needs the memory for both).",
+       "advanced": true,
+       "default": false
+      }
+     ],
+     "system_prompt": [
+      "STRING",
+      {
+       "tooltip": "Optional standing instructions sent before the prompt.",
+       "advanced": true,
+       "default": "",
+       "multiline": true
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "prompt",
+     "model",
+     "seed",
+     "max_tokens",
+     "temperature",
+     "thinking",
+     "context",
+     "keep_loaded",
+     "system_prompt"
+    ]
+   },
+   "output": [
+    "STRING",
+    "STRING"
+   ],
+   "output_name": [
+    "text",
+    "thinking"
+   ],
+   "output_is_list": [
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Text",
+   "display_name": "Local LLM"
+  },
   "PlenioLoudness": {
    "input": {
     "required": {

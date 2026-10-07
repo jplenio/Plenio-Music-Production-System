@@ -47,6 +47,9 @@ class SystemFacts:
     """Installed catalogue model files: file name -> size on disk."""
     assets: Mapping[str, str] = field(default_factory=dict)
     """Plenio assets: id -> ``installed``, ``configured folder`` or ``not downloaded``."""
+    llm: Mapping[str, Any] = field(default_factory=dict)
+    """Local LLM: ``runtimes`` (names, best first), ``models`` (source -> count), ``files`` (GGUF files
+    among them), ``notes``."""
 
 
 @dataclass(frozen=True)
@@ -184,6 +187,25 @@ def _model_rows(catalogue: Mapping[str, ModelFile], inventory: Inventory) -> lis
     return rows
 
 
+def _llm_lines(llm: Mapping[str, Any]) -> list[str]:
+    """What the Local LLM node can use on this machine (nothing when the facts were not gathered)."""
+    if not llm:
+        return []
+    counts = dict(llm.get("models", {}))
+    found = ", ".join(f"{source}: {count}" for source, count in counts.items()) or "none"
+    runtimes = list(llm.get("runtimes", []))
+    lines = [f"Local LLM models: {found}."]
+    if runtimes:
+        lines.append(f"Local LLM runtime for GGUF files: {runtimes[0]}.")
+    elif llm.get("files", 0) or not counts:
+        lines.append(
+            "Local LLM: no llama.cpp runtime for GGUF files - install llama.cpp (winget/brew) or "
+            "llama-cpp-python, or set PLENIO_LLAMA_SERVER; models of running apps work without it."
+        )
+    lines.extend(f"Local LLM note: {note}" for note in llm.get("notes", []))
+    return lines
+
+
 def check_system(facts: SystemFacts, catalogue: Mapping[str, ModelFile] | None = None) -> Report:
     statuses: list[Status] = []
     messages: list[str] = []
@@ -221,6 +243,7 @@ def check_system(facts: SystemFacts, catalogue: Mapping[str, ModelFile] | None =
             messages.append(f"Package '{module}' {version}.")
     for asset, state in sorted(facts.assets.items()):
         messages.append(f"Plenio asset '{asset}': {state}.")
+    messages.extend(_llm_lines(facts.llm))
     config = dict(facts.config)
     if config.get("error"):
         statuses.append(Status.WARNING)
@@ -246,6 +269,7 @@ def check_system(facts: SystemFacts, catalogue: Mapping[str, ModelFile] | None =
             "config": config,
             "models": dict(facts.models),
             "assets": dict(facts.assets),
+            "llm": dict(facts.llm),
         },
         "recommendations": _recommendations(facts.devices),
         "rules": [

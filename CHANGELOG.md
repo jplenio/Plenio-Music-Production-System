@@ -2,6 +2,15 @@
 
 All notable changes are listed here. Versions follow semantic versioning; published Registry versions are immutable.
 
+## Unreleased
+
+### Added
+
+- **Local LLM** (new node, *Plenio/Text*): one prompt in, one answer out, with the language models already on the machine - GGUF files from ComfyUI's `models/LLM` folder (and `extra_model_paths.yaml`), LM Studio's download folder, the Hugging Face cache (Unsloth Studio, `llama-server -hf`), llama.cpp's cache and GPT4All, or the models of a running LM Studio, Ollama, llama.cpp, vLLM, Jan, KoboldCpp, text-generation-webui, GPT4All or Unsloth Studio. One list; press R after adding a model. A GGUF file runs in a llama.cpp server started for the call (`llama-server` from the PATH, Unsloth Studio, winget, Homebrew or `PLENIO_LLAMA_SERVER`; llama-cpp-python as the fallback): ComfyUI frees the GPU memory it needs first, and all of it is free again when the server stops. Thinking on/off with the thoughts on their own output, a fixed seed (cached answers), context, *keep loaded*, system prompt. No new Python packages, no stored keys. Plenio now has 20 nodes ([guide](docs/user/concepts/local-llm.md), ADR-0010).
+- Blueprint **Plenio · Write Song (local LLM)**: *Write Song* with Local LLM as the writer, same inputs and outputs; the templates keep the native Gemma 4 writer.
+- `config.toml` `[llm]`: the llama-server program, extra GGUF folders and servers, other apps on/off; `PLENIO_LLAMA_SERVER`, `PLENIO_LLM_OTHER_APPS`.
+- System Check: the Local LLM models per source and the runtime for GGUF files.
+
 ## 0.4.4 - 2026-10-03
 
 The score editor plays like a small DAW: record a melody with a MIDI keyboard, hear every track in a sound of its own, export the sheet music as PDF - and for covers, the original recording and the sung pitch right under the notes.

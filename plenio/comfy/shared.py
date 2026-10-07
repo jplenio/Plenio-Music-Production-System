@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 from ..core.assets import Asset, load_catalogue
 from ..core.audio.presets import Library
 from ..core.brief import TemplateLibrary
+from ..core.config import PlenioConfig
 from ..core.models import ModelFile
 from ..core.models import load_catalogue as load_model_catalogue
 from ..core.reports import Report
@@ -47,7 +50,29 @@ def model_catalogue() -> dict[str, ModelFile]:
     return load_model_catalogue(RESOURCES / "models.toml")
 
 
+def llm_facts() -> dict[str, Any]:
+    """What Local LLM finds on this machine, for the System Check."""
+    from ..core.errors import PlenioError
+    from . import llm
+
+    try:
+        config = host.load_config()
+    except PlenioError:
+        config = PlenioConfig()  # the System Check reports the configuration error itself
+    found = llm.discovery(config, fresh=True)
+    counts: dict[str, int] = {}
+    for model in found.models:
+        counts[model.source] = counts.get(model.source, 0) + 1
+    return {
+        "runtimes": [runtime.name for runtime in llm.runtimes(config)],
+        "models": counts,
+        "files": sum(1 for model in found.models if model.path is not None),
+        "notes": list(found.notes),
+    }
+
+
 def system_report() -> tuple[Report, str]:
     """The System Check report and its Markdown (node and route)."""
-    report = check_system(host.system_facts(model_catalogue(), asset_catalogue()), model_catalogue())
+    facts = replace(host.system_facts(model_catalogue(), asset_catalogue()), llm=llm_facts())
+    report = check_system(facts, model_catalogue())
     return report, to_markdown(report)

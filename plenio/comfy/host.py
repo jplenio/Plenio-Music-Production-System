@@ -84,11 +84,37 @@ def models_directory() -> Path:
     return Path(folder_paths.models_dir)
 
 
+LLM_FOLDER = "LLM"
+"""ComfyUI's folder for GGUF language models (``models/LLM``); some node packs register it as ``llm``."""
+
+
+def llm_folders() -> list[Path]:
+    """The folders of ComfyUI's ``LLM`` model folder (and of ``llm``, if another node pack registered it)."""
+    import folder_paths
+
+    folders: list[Path] = []
+    seen: set[str] = set()
+    for name in (LLM_FOLDER, LLM_FOLDER.lower()):
+        try:
+            paths = folder_paths.get_folder_paths(name)
+        except KeyError:
+            continue
+        for path in paths:
+            key = os.path.normcase(os.path.abspath(path))
+            if key not in seen:
+                seen.add(key)
+                folders.append(Path(path))
+    return folders
+
+
 def register_model_folders() -> None:
-    """Register ``models/plenio`` (assets) and the audio model folders next to the other models."""
+    """Register ``models/plenio`` (assets), the audio model folders and ``models/LLM`` next to the other models."""
     import folder_paths
 
     from ..core.models import AUDIO_MODEL_FOLDERS
+
+    # also when extra_model_paths.yaml created the key first: models/LLM itself stays in the list
+    folder_paths.add_model_folder_path(LLM_FOLDER, str(models_directory() / LLM_FOLDER))
 
     for folder in (ASSET_FOLDER, *AUDIO_MODEL_FOLDERS.values()):
         if folder not in folder_paths.folder_names_and_paths:

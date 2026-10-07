@@ -98,6 +98,10 @@ The templates default to the files above. The System Check marks the row of its 
 
 "Legacy toolkit rating" means the rating Plenio's predecessor gave these files; Plenio has not measured them itself. The YuE2 int8 checkpoint with the Gemma 4 E4B writer is measured on a 16 GB card (RTX 5060 Ti).
 
+## Your own language models
+
+The writer can also be a GGUF file from `models/LLM` (or LM Studio's folder, the Hugging Face cache) or a model of a running LM Studio, Ollama, llama.cpp ... - see [Local LLMs](concepts/local-llm.md). Those files are not in the catalogue; the System Check counts what it finds.
+
 ## Plenio assets
 
 Some models are not ComfyUI model files but run in a separate Plenio worker. Plenio fetches them itself, pinned to an exact revision, when a node first needs them:

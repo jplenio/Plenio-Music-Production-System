@@ -489,7 +489,7 @@ Verified in frontend 1.52.7 (browser check, Phase 8 report §3): legacy `[node i
 | Vocal separation (candidates: Demucs 4.1, MIT [VF PyPI]; Mel-Band RoFormer weights reported as MIT [CM], to verify) | **optional**, isolated or ComfyUI-managed | Only if D-05 accepted and 4A shows value. `audio-separator` (heavy deps: onnx, librosa, samplerate, diffq … [VF]) **avoided** in-host. |
 | abcjs 6.7.1 (MIT), CodeMirror 6 (MIT), Vue 3 (MIT) | **bundled in the built frontend** | licence texts in `THIRD_PARTY.md`; built with Vite. |
 | pyloudnorm (MIT) | **dev/test only** | reference oracle for Plenio's own BS.1770 implementation. |
-| llama-cpp-python | **avoided** | replaced by native TextGenerate (D-03). |
+| llama-cpp-python | **avoided in-process**; optional runtime of Local LLM (ADR-0010) | replaced by native TextGenerate (D-03); Local LLM runs GGUF files in a `llama-server` process, or with llama-cpp-python in Plenio's server process when it is installed - never in ComfyUI's process. |
 | imageio-ffmpeg / FFmpeg binary | **avoided** | PyAV covers encoding. |
 | pedalboard, matchering (GPL-3), soxr (LGPL) | **avoided** | own DSP + scipy. |
 | FlashSR code | **avoided** (not bundled) | no root licence [VF]; users may install a separate SR custom node. |
@@ -597,7 +597,7 @@ Plenio-Music-Production-System/          # the custom-node folder (installed und
 | Extension | Where | What to add |
 |---|---|---|
 | New music engine | `core.engines.<x>`, Engine Profile detection, `subgraphs/Plenio · <X> Model/Render`, template | see §7.3 |
-| New LLM | inside *Write Song* | replace `TextGenerate` with any STRING→STRING node |
+| New LLM | inside *Write Song* | replace `TextGenerate` with any STRING→STRING node; local models: *Plenio · Write Song (local LLM)* (ADR-0010) |
 | New ASR engine | `core.asr` adapter + worker | one DynamicCombo option on Transcribe Lyrics |
 | New vocal detector | `core.vocals` + Check Vocals option | metric + calibration data |
 | New score dialect | `core.score.dialects.<x>` | parser/validator/ops; editor works through routes |

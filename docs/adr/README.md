@@ -13,5 +13,6 @@ Decisions confirmed by the owner on 2026-09-25 (design: `docs/design/target-arch
 | [0007](0007-clean-break.md) | Clean break from the legacy toolkit |
 | [0008](0008-english-everywhere.md) | English everywhere |
 | [0009](0009-package-identity.md) | Package identity |
+| [0010](0010-local-llm.md) | Local LLMs from GGUF files and local apps (amends 0003) |
 
 New decisions get the next number and the same structure (context, decision, consequences).

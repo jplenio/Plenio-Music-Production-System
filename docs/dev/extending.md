@@ -77,4 +77,8 @@ An `AsrEngine` entry in `ENGINES` (`plenio/core/asr.py`) and a worker in `plenio
 
 ## Other LLMs and image models
 
-No code: replace `TextGenerate` inside *Plenio · Write Song* with any node that turns a prompt `STRING` into a `STRING`, or replace *Plenio · Cover Art* with any text-to-image blueprint that takes a prompt and returns an `IMAGE`.
+No code: replace `TextGenerate` inside *Plenio · Write Song* with any node that turns a prompt `STRING` into a `STRING`, or replace *Plenio · Cover Art* with any text-to-image blueprint that takes a prompt and returns an `IMAGE`. Local models already have one: **Local LLM** and the blueprint *Plenio · Write Song (local LLM)* (ADR-0010).
+
+## Another local LLM app or model folder
+
+`plenio/core/llm` is standard library only and knows nothing about songs (reuse it as is). A new app with an OpenAI-compatible server is one `Server` row in `known_servers()` (`catalog.py`: name, default address, `start_hint`, `api_key_env` if it needs a key); a different wire protocol is one function next to `_openai`/`_ollama` in `client.py`. A new app folder is one `Store` in `app_stores()` (`hf_cache=True` for the Hugging Face layout). A new place where a `llama-server` program lives is one candidate in `runtime.find_runtimes()`. Guards: `tests/unit/test_llm.py` (fake servers and a fake `llama-server` script; no model, no network).

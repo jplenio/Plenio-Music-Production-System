@@ -1,0 +1,746 @@
+{
+ "revision": 0,
+ "last_node_id": 1,
+ "last_link_id": 0,
+ "nodes": [
+  {
+   "id": 1,
+   "type": "4fa4227c-1f77-51c1-9074-b8e2a0322626",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    340,
+    200
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [
+    {
+     "localized_name": "brief",
+     "name": "brief",
+     "type": "PLENIO_BRIEF",
+     "link": null
+    },
+    {
+     "localized_name": "engine",
+     "name": "engine",
+     "type": "PLENIO_ENGINE",
+     "link": null
+    },
+    {
+     "localized_name": "score",
+     "name": "score",
+     "type": "STRING",
+     "link": null
+    },
+    {
+     "localized_name": "language",
+     "name": "language",
+     "type": "STRING",
+     "link": null
+    },
+    {
+     "localized_name": "reference_lyrics",
+     "name": "reference_lyrics",
+     "type": "STRING",
+     "link": null
+    },
+    {
+     "localized_name": "model",
+     "name": "model",
+     "label": "writer model",
+     "type": "COMBO",
+     "widget": {
+      "name": "model"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "seed",
+     "name": "seed",
+     "label": "draft seed",
+     "type": "INT",
+     "widget": {
+      "name": "seed"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "thinking",
+     "name": "thinking",
+     "type": "BOOLEAN",
+     "widget": {
+      "name": "thinking"
+     },
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "localized_name": "title",
+     "name": "title",
+     "type": "STRING",
+     "links": null
+    },
+    {
+     "localized_name": "style",
+     "name": "style",
+     "type": "STRING",
+     "links": null
+    },
+    {
+     "localized_name": "lyrics",
+     "name": "lyrics",
+     "type": "STRING",
+     "links": null
+    },
+    {
+     "localized_name": "artwork_prompt",
+     "name": "artwork_prompt",
+     "type": "STRING",
+     "links": null
+    },
+    {
+     "localized_name": "report",
+     "name": "report",
+     "type": "PLENIO_REPORT",
+     "links": null
+    }
+   ],
+   "title": "Plenio · Write Song (local LLM)",
+   "properties": {},
+   "widgets_values": [
+    "(choose a model)",
+    0,
+    false
+   ]
+  }
+ ],
+ "links": [],
+ "version": 0.4,
+ "definitions": {
+  "subgraphs": [
+   {
+    "id": "4fa4227c-1f77-51c1-9074-b8e2a0322626",
+    "version": 1,
+    "state": {
+     "lastGroupId": 0,
+     "lastNodeId": 1303,
+     "lastLinkId": 16,
+     "lastRerouteId": 0
+    },
+    "revision": 0,
+    "config": {},
+    "name": "Plenio · Write Song (local LLM)",
+    "inputNode": {
+     "id": -10,
+     "bounding": [
+      -260,
+      0,
+      160,
+      200
+     ]
+    },
+    "outputNode": {
+     "id": -20,
+     "bounding": [
+      1160,
+      0,
+      160,
+      140
+     ]
+    },
+    "inputs": [
+     {
+      "id": "6b363038-872d-5635-a867-08897141fded",
+      "name": "brief",
+      "type": "PLENIO_BRIEF",
+      "linkIds": [
+       4
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     },
+     {
+      "id": "395d52e2-ac28-5abc-ae35-8bbfcc361a29",
+      "name": "engine",
+      "type": "PLENIO_ENGINE",
+      "linkIds": [
+       5
+      ],
+      "pos": [
+       0,
+       20
+      ]
+     },
+     {
+      "id": "4258f373-9ab1-5ed7-a971-8022d3828bd8",
+      "name": "score",
+      "type": "STRING",
+      "linkIds": [
+       6
+      ],
+      "pos": [
+       0,
+       40
+      ]
+     },
+     {
+      "id": "900f7c3c-6fce-5539-86cf-657882e17105",
+      "name": "language",
+      "type": "STRING",
+      "linkIds": [
+       7
+      ],
+      "pos": [
+       0,
+       60
+      ]
+     },
+     {
+      "id": "1a053528-d328-52ff-b097-0d38ed04a773",
+      "name": "reference_lyrics",
+      "type": "STRING",
+      "linkIds": [
+       8
+      ],
+      "pos": [
+       0,
+       80
+      ]
+     },
+     {
+      "id": "0ec426fe-3afc-5510-b570-91e9dee07b6a",
+      "name": "model",
+      "type": "COMBO",
+      "linkIds": [
+       9
+      ],
+      "pos": [
+       0,
+       100
+      ],
+      "label": "writer model"
+     },
+     {
+      "id": "015a9ecb-6416-5f59-b1c7-1a51a1d55c24",
+      "name": "seed",
+      "type": "INT",
+      "linkIds": [
+       10
+      ],
+      "pos": [
+       0,
+       120
+      ],
+      "label": "draft seed"
+     },
+     {
+      "id": "4d3047ed-2307-521f-9ec9-41a72e41e812",
+      "name": "thinking",
+      "type": "BOOLEAN",
+      "linkIds": [
+       11
+      ],
+      "pos": [
+       0,
+       140
+      ]
+     }
+    ],
+    "outputs": [
+     {
+      "id": "1f517d5c-b279-5f2a-bee6-b5acfaa851b3",
+      "name": "title",
+      "type": "STRING",
+      "linkIds": [
+       12
+      ],
+      "pos": [
+       0,
+       0
+      ]
+     },
+     {
+      "id": "61651bf2-9903-524d-a2aa-6fd9704cc248",
+      "name": "style",
+      "type": "STRING",
+      "linkIds": [
+       13
+      ],
+      "pos": [
+       0,
+       20
+      ]
+     },
+     {
+      "id": "f4ffe157-98e0-5dfa-9563-1818a0a6da8d",
+      "name": "lyrics",
+      "type": "STRING",
+      "linkIds": [
+       14
+      ],
+      "pos": [
+       0,
+       40
+      ]
+     },
+     {
+      "id": "4e0b0509-f5f7-5ed2-8efe-919a7b4ed021",
+      "name": "artwork_prompt",
+      "type": "STRING",
+      "linkIds": [
+       15
+      ],
+      "pos": [
+       0,
+       60
+      ]
+     },
+     {
+      "id": "04c32a5c-57b1-55e0-9ef9-f910ec3ea7b0",
+      "name": "report",
+      "type": "PLENIO_REPORT",
+      "linkIds": [
+       16
+      ],
+      "pos": [
+       0,
+       80
+      ]
+     }
+    ],
+    "widgets": [],
+    "nodes": [
+     {
+      "id": 1301,
+      "type": "PlenioComposePrompt",
+      "pos": [
+       0,
+       0
+      ],
+      "size": [
+       300,
+       100
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "brief",
+        "name": "brief",
+        "type": "PLENIO_BRIEF",
+        "link": 4
+       },
+       {
+        "localized_name": "engine",
+        "name": "engine",
+        "type": "PLENIO_ENGINE",
+        "link": 5
+       },
+       {
+        "localized_name": "score",
+        "name": "score",
+        "shape": 7,
+        "type": "STRING",
+        "link": 6
+       },
+       {
+        "localized_name": "language",
+        "name": "language",
+        "shape": 7,
+        "type": "STRING",
+        "link": 7
+       },
+       {
+        "localized_name": "reference_lyrics",
+        "name": "reference_lyrics",
+        "shape": 7,
+        "type": "STRING",
+        "link": 8
+       },
+       {
+        "localized_name": "detail",
+        "name": "detail",
+        "type": "COMBO",
+        "widget": {
+         "name": "detail"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "prompt",
+        "name": "prompt",
+        "type": "STRING",
+        "links": [
+         1
+        ]
+       },
+       {
+        "localized_name": "request",
+        "name": "request",
+        "type": "PLENIO_REQUEST",
+        "links": [
+         3
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "PlenioComposePrompt"
+      },
+      "widgets_values": [
+       "standard"
+      ]
+     },
+     {
+      "id": 1302,
+      "type": "PlenioLocalLLM",
+      "pos": [
+       360,
+       0
+      ],
+      "size": [
+       340,
+       330
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "prompt",
+        "name": "prompt",
+        "type": "STRING",
+        "widget": {
+         "name": "prompt"
+        },
+        "link": 1
+       },
+       {
+        "localized_name": "model",
+        "name": "model",
+        "type": "COMBO",
+        "widget": {
+         "name": "model"
+        },
+        "link": 9
+       },
+       {
+        "localized_name": "seed",
+        "name": "seed",
+        "type": "INT",
+        "widget": {
+         "name": "seed"
+        },
+        "link": 10
+       },
+       {
+        "localized_name": "max_tokens",
+        "name": "max_tokens",
+        "type": "INT",
+        "widget": {
+         "name": "max_tokens"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "temperature",
+        "name": "temperature",
+        "type": "FLOAT",
+        "widget": {
+         "name": "temperature"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "thinking",
+        "name": "thinking",
+        "type": "BOOLEAN",
+        "widget": {
+         "name": "thinking"
+        },
+        "link": 11
+       },
+       {
+        "localized_name": "context",
+        "name": "context",
+        "type": "INT",
+        "widget": {
+         "name": "context"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "keep_loaded",
+        "name": "keep_loaded",
+        "type": "BOOLEAN",
+        "widget": {
+         "name": "keep_loaded"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "system_prompt",
+        "name": "system_prompt",
+        "type": "STRING",
+        "widget": {
+         "name": "system_prompt"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "text",
+        "name": "text",
+        "type": "STRING",
+        "links": [
+         2
+        ]
+       },
+       {
+        "localized_name": "thinking",
+        "name": "thinking",
+        "type": "STRING",
+        "links": null
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "PlenioLocalLLM"
+      },
+      "widgets_values": [
+       "",
+       "(choose a model)",
+       0,
+       "fixed",
+       2048,
+       0.8,
+       false,
+       8192,
+       false,
+       ""
+      ]
+     },
+     {
+      "id": 1303,
+      "type": "PlenioParseDraft",
+      "pos": [
+       760,
+       0
+      ],
+      "size": [
+       300,
+       140
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "text",
+        "name": "text",
+        "type": "STRING",
+        "link": 2
+       },
+       {
+        "localized_name": "request",
+        "name": "request",
+        "type": "PLENIO_REQUEST",
+        "link": 3
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "title",
+        "name": "title",
+        "type": "STRING",
+        "links": [
+         12
+        ]
+       },
+       {
+        "localized_name": "style",
+        "name": "style",
+        "type": "STRING",
+        "links": [
+         13
+        ]
+       },
+       {
+        "localized_name": "lyrics",
+        "name": "lyrics",
+        "type": "STRING",
+        "links": [
+         14
+        ]
+       },
+       {
+        "localized_name": "artwork_prompt",
+        "name": "artwork_prompt",
+        "type": "STRING",
+        "links": [
+         15
+        ]
+       },
+       {
+        "localized_name": "report",
+        "name": "report",
+        "type": "PLENIO_REPORT",
+        "links": [
+         16
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "PlenioParseDraft"
+      },
+      "widgets_values": []
+     }
+    ],
+    "groups": [],
+    "links": [
+     {
+      "id": 1,
+      "origin_id": 1301,
+      "origin_slot": 0,
+      "target_id": 1302,
+      "target_slot": 0,
+      "type": "STRING"
+     },
+     {
+      "id": 2,
+      "origin_id": 1302,
+      "origin_slot": 0,
+      "target_id": 1303,
+      "target_slot": 0,
+      "type": "STRING"
+     },
+     {
+      "id": 3,
+      "origin_id": 1301,
+      "origin_slot": 1,
+      "target_id": 1303,
+      "target_slot": 1,
+      "type": "PLENIO_REQUEST"
+     },
+     {
+      "id": 4,
+      "origin_id": -10,
+      "origin_slot": 0,
+      "target_id": 1301,
+      "target_slot": 0,
+      "type": "PLENIO_BRIEF"
+     },
+     {
+      "id": 5,
+      "origin_id": -10,
+      "origin_slot": 1,
+      "target_id": 1301,
+      "target_slot": 1,
+      "type": "PLENIO_ENGINE"
+     },
+     {
+      "id": 6,
+      "origin_id": -10,
+      "origin_slot": 2,
+      "target_id": 1301,
+      "target_slot": 2,
+      "type": "STRING"
+     },
+     {
+      "id": 7,
+      "origin_id": -10,
+      "origin_slot": 3,
+      "target_id": 1301,
+      "target_slot": 3,
+      "type": "STRING"
+     },
+     {
+      "id": 8,
+      "origin_id": -10,
+      "origin_slot": 4,
+      "target_id": 1301,
+      "target_slot": 4,
+      "type": "STRING"
+     },
+     {
+      "id": 9,
+      "origin_id": -10,
+      "origin_slot": 5,
+      "target_id": 1302,
+      "target_slot": 1,
+      "type": "COMBO"
+     },
+     {
+      "id": 10,
+      "origin_id": -10,
+      "origin_slot": 6,
+      "target_id": 1302,
+      "target_slot": 2,
+      "type": "INT"
+     },
+     {
+      "id": 11,
+      "origin_id": -10,
+      "origin_slot": 7,
+      "target_id": 1302,
+      "target_slot": 5,
+      "type": "BOOLEAN"
+     },
+     {
+      "id": 12,
+      "origin_id": 1303,
+      "origin_slot": 0,
+      "target_id": -20,
+      "target_slot": 0,
+      "type": "STRING"
+     },
+     {
+      "id": 13,
+      "origin_id": 1303,
+      "origin_slot": 1,
+      "target_id": -20,
+      "target_slot": 1,
+      "type": "STRING"
+     },
+     {
+      "id": 14,
+      "origin_id": 1303,
+      "origin_slot": 2,
+      "target_id": -20,
+      "target_slot": 2,
+      "type": "STRING"
+     },
+     {
+      "id": 15,
+      "origin_id": 1303,
+      "origin_slot": 3,
+      "target_id": -20,
+      "target_slot": 3,
+      "type": "STRING"
+     },
+     {
+      "id": 16,
+      "origin_id": 1303,
+      "origin_slot": 4,
+      "target_id": -20,
+      "target_slot": 4,
+      "type": "PLENIO_REPORT"
+     }
+    ],
+    "extra": {},
+    "category": "Plenio/Writing",
+    "description": "Writes title, style, lyrics and an artwork prompt with a local LLM - a GGUF file from models/LLM, LM Studio or the Hugging Face cache (run by llama.cpp for the draft, its memory freed afterwards), or a model of a running app (LM Studio, Ollama, llama.cpp, vLLM, Jan ...). Same inputs and outputs as Write Song: put it in that block's place."
+   }
+  ]
+ },
+ "extra": {}
+}

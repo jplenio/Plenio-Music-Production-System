@@ -158,7 +158,12 @@ class ComfyServer:
         if self.models_dir is not None:
             command += ["--models-directory", str(self.models_dir)]
         env = {k: v for k, v in os.environ.items() if k not in {"PYTHONPATH", "PYTHONHOME"}}
-        env.update({"PYTHONDONTWRITEBYTECODE": "1", "PYTHONIOENCODING": "utf-8"}, **self.extra_env)
+        # PLENIO_LLM_OTHER_APPS=0: Local LLM lists only the test server's own models/LLM, never the
+        # models and servers of the user's other apps (the node-type snapshot stays machine-independent)
+        env.update(
+            {"PYTHONDONTWRITEBYTECODE": "1", "PYTHONIOENCODING": "utf-8", "PLENIO_LLM_OTHER_APPS": "0"},
+            **self.extra_env,
+        )
         self.base.mkdir(parents=True, exist_ok=True)
         log = self.log_path.open("wb")
         self.process = subprocess.Popen(command, cwd=self.root, stdout=log, stderr=subprocess.STDOUT, env=env)  # noqa: S603

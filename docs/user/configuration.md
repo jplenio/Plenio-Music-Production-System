@@ -12,6 +12,8 @@ Plenio has very few settings. Everything else is chosen in the workflow.
 | `PLENIO_ASSET_DIR` | a folder | where Plenio assets are stored (default: `models/plenio`) |
 | `PLENIO_WORKER_TIMEOUT` | seconds | how long an out-of-process worker may run in total (default 3600) |
 | `PLENIO_WORKER_IDLE_TIMEOUT` | seconds | how long a worker may run without reporting progress (default 300) |
+| `PLENIO_LLAMA_SERVER` | a program or its folder | the llama.cpp server that runs GGUF files for **Local LLM** (default: found on the PATH, in Unsloth Studio, winget or Homebrew) |
+| `PLENIO_LLM_OTHER_APPS` | `1` (default) / `0` | **Local LLM** also lists the model folders and running servers of other apps |
 
 Invalid values stop with an error message instead of being ignored.
 
@@ -27,7 +29,19 @@ asset_dir = "D:/models/plenio"
 [workers]
 timeout_seconds = 3600
 idle_timeout_seconds = 300
+
+[llm]                                  # Local LLM
+llama_server = "D:/tools/llama.cpp"    # the llama-server program or its folder
+other_apps = true                      # LM Studio, Hugging Face cache, Ollama ...
+
+[llm.folders]                          # more GGUF folders: label = folder
+"My GGUFs" = "E:/gguf"
+
+[llm.servers]                          # more OpenAI-compatible servers: label = API base
+"Workstation" = "http://192.168.1.20:1234/v1"
 ```
+
+Labels appear in the Local LLM list (`My GGUFs · model.gguf`, `Workstation · model-id`); they must not contain ` · `. Plenio stores no API keys; see [Local LLMs](concepts/local-llm.md).
 
 Unknown keys are reported as errors so that typos do not go unnoticed.
 

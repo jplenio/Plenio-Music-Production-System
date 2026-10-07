@@ -12,10 +12,17 @@ Environment variables:
 ``PLENIO_ASSET_DIR``            folder for Plenio assets (default: ``models/plenio``)
 ``PLENIO_WORKER_TIMEOUT``       seconds a worker may run in total
 ``PLENIO_WORKER_IDLE_TIMEOUT``  seconds a worker may go without reporting progress
+``PLENIO_LLAMA_SERVER``         the llama.cpp server program that runs GGUF files (Local LLM)
+``PLENIO_LLM_OTHER_APPS``       ``1``/``0``: Local LLM also lists other apps' models and servers
 
 Config file only: ``[asset_paths]`` maps an asset id to an existing folder that
 already holds its files (for example a Whisper model you downloaded before);
 Plenio then uses that folder instead of ``<asset_dir>/<kind>/<id>``.
+
+``[llm]`` (Local LLM): ``llama_server`` (path of the program), ``other_apps``
+(``false``: do not look into other apps' model folders and servers),
+``[llm.folders]`` (a label for each extra GGUF folder) and ``[llm.servers]``
+(a label for each extra OpenAI-compatible server, its API base ending in ``/v1``).
 """
 
 from __future__ import annotations
@@ -44,6 +51,14 @@ class PlenioConfig:
     worker_idle_timeout_s: float = 300.0
     asset_paths: Mapping[str, Path] = field(default_factory=dict)
     """Asset id -> an existing folder with the asset's files (config file ``[asset_paths]``)."""
+    llama_server: Path | None = None
+    """The llama.cpp server program for GGUF files; ``None`` = search the usual places."""
+    llm_other_apps: bool = True
+    """Look for models in other apps' folders and at their local servers."""
+    llm_folders: Mapping[str, Path] = field(default_factory=dict)
+    """Label -> an extra folder with GGUF files (``[llm.folders]``)."""
+    llm_servers: Mapping[str, str] = field(default_factory=dict)
+    """Label -> the API base of an extra OpenAI-compatible server (``[llm.servers]``)."""
     sources: Mapping[str, str] = field(default_factory=dict)
     """Where each non-default value came from (``file`` or the variable name)."""
 
@@ -65,6 +80,10 @@ class PlenioConfig:
             "worker_timeout_s": self.worker_timeout_s,
             "worker_idle_timeout_s": self.worker_idle_timeout_s,
             "asset_paths": {key: str(value) for key, value in self.asset_paths.items()},
+            "llama_server": str(self.llama_server) if self.llama_server else None,
+            "llm_other_apps": self.llm_other_apps,
+            "llm_folders": {key: str(value) for key, value in self.llm_folders.items()},
+            "llm_servers": dict(self.llm_servers),
             "sources": dict(self.sources),
         }
 
@@ -91,7 +110,7 @@ def _parse_seconds(value: Any, name: str) -> float:
 def _apply_file(
     config: PlenioConfig, values: dict[str, Any], path: Path, sources: dict[str, str]
 ) -> PlenioConfig:
-    allowed = {"offline", "auto_download", "asset_dir", "workers", "asset_paths"}
+    allowed = {"offline", "auto_download", "asset_dir", "workers", "asset_paths", "llm"}
     unknown = sorted(set(values) - allowed)
     if unknown:
         raise PlenioUserError(
@@ -126,8 +145,43 @@ def _apply_file(
         updates["worker_idle_timeout_s"] = _parse_seconds(
             workers["idle_timeout_seconds"], "workers.idle_timeout_seconds"
         )
+    updates.update(_llm_settings(values.get("llm", {}), path))
     sources.update({key: "file" for key in updates})
     return replace(config, **updates)
+
+
+def _llm_settings(llm: Any, path: Path) -> dict[str, Any]:
+    if not isinstance(llm, dict):
+        raise PlenioUserError(f"{path}: [llm] must be a table.")
+    unknown = sorted(set(llm) - {"llama_server", "other_apps", "folders", "servers"})
+    if unknown:
+        raise PlenioUserError(f"{path}: unknown [llm] settings {unknown}.")
+    updates: dict[str, Any] = {}
+    if "llama_server" in llm:
+        if not isinstance(llm["llama_server"], str) or not llm["llama_server"].strip():
+            raise PlenioUserError(f"{path}: 'llm.llama_server' must be a non-empty path string.")
+        updates["llama_server"] = Path(llm["llama_server"]).expanduser()
+    if "other_apps" in llm:
+        if not isinstance(llm["other_apps"], bool):
+            raise PlenioUserError(f"{path}: 'llm.other_apps' must be true or false.")
+        updates["llm_other_apps"] = llm["other_apps"]
+    for key, field_name in (("folders", "llm_folders"), ("servers", "llm_servers")):
+        table = llm.get(key, {})
+        if not isinstance(table, dict) or not all(
+            isinstance(k, str) and k.strip() and " · " not in k and isinstance(v, str) and v.strip()
+            for k, v in table.items()
+        ):
+            raise PlenioUserError(
+                f"{path}: [llm.{key}] must map labels to {'folder paths' if key == 'folders' else 'API addresses'}.",
+                hint='Example: "My models" = "E:/gguf" (labels without \' · \').',
+            )
+        if key == "servers" and not all(v.startswith(("http://", "https://")) for v in table.values()):
+            raise PlenioUserError(f"{path}: [llm.servers] addresses must start with http:// or https://.")
+        if table:
+            updates[field_name] = (
+                {k: Path(v).expanduser() for k, v in table.items()} if key == "folders" else dict(table)
+            )
+    return updates
 
 
 def _apply_env(config: PlenioConfig, env: Mapping[str, str], sources: dict[str, str]) -> PlenioConfig:
@@ -158,4 +212,10 @@ def _apply_env(config: PlenioConfig, env: Mapping[str, str], sources: dict[str, 
             env["PLENIO_WORKER_IDLE_TIMEOUT"], "PLENIO_WORKER_IDLE_TIMEOUT"
         )
         sources["worker_idle_timeout_s"] = "PLENIO_WORKER_IDLE_TIMEOUT"
+    if "PLENIO_LLM_OTHER_APPS" in env:
+        updates["llm_other_apps"] = _parse_bool(env["PLENIO_LLM_OTHER_APPS"], "PLENIO_LLM_OTHER_APPS")
+        sources["llm_other_apps"] = "PLENIO_LLM_OTHER_APPS"
+    if env.get("PLENIO_LLAMA_SERVER", "").strip():
+        updates["llama_server"] = Path(env["PLENIO_LLAMA_SERVER"]).expanduser()
+        sources["llama_server"] = "PLENIO_LLAMA_SERVER"
     return replace(config, **updates)

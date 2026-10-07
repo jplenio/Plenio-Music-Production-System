@@ -63,6 +63,11 @@ Start with **0 · System Check**: it shows versions, GPUs, which model files of 
 | API prompt: *Required input is missing: mode* | Song Brief and Cover Brief have a new first input in 0.2.2 | Add `"mode": "new song every run"` or `"one song, stop to review"` (Cover Brief: `"new cover every run"` / `"one cover, stop to review"`) |
 | A block's settings are not visible | model blocks are collapsed; blocks are subgraphs | Expand a collapsed block (the dot at its top left, or right-click > *Expand*); open a block with the icon at its top right |
 | App mode shows no instrumental options | App mode shows the options of the template's *vocals* choice (sung songs; covers with the original lyrics) | Set the other choice's options in the graph view |
+| Local LLM lists only *(choose a model)* | no GGUF in `models/LLM` and no local LLM app server running (or `other_apps = false`) | Put a GGUF into `ComfyUI/models/LLM` or start LM Studio's or Ollama's server, then press **R** |
+| *No llama.cpp runtime was found* | GGUF files need a llama.cpp server program | `winget install llama.cpp` (Windows) or `brew install llama.cpp`, or set `PLENIO_LLAMA_SERVER`; the System Check shows what was found |
+| *... stopped while loading ... unknown model architecture* | the llama.cpp build is older than the model | Update llama.cpp, or point `PLENIO_LLAMA_SERVER` at a newer `llama-server` |
+| *... answer was cut off after N tokens* | *max tokens* (or the app's context) too small, often with *thinking* on | Raise *max tokens* and *context*, or turn *thinking* off; in LM Studio set the model's context length to 8192 or more |
+| *LM Studio is not reachable* | LM Studio runs, but not its local server | Developer tab > *Start server*, or `lms server start` |
 
 ## Reporting a problem
 

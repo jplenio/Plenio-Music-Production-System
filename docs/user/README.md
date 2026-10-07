@@ -2,7 +2,7 @@
 
 - [Getting started](getting-started.md) - install, first run, choosing a template, how templates are laid out, the two ways to work (a new song every run, or one song with review stops)
 - [Models and downloads](models.md) - which files each template needs, where they go, alternatives for smaller GPUs
-- [Configuration](configuration.md) - offline mode, downloads, worker limits
+- [Configuration](configuration.md) - offline mode, downloads, worker limits, Local LLM folders and servers
 - [Licensing](licensing.md) - what the model licences mean for your songs
 - [Troubleshooting](troubleshooting.md) - common messages and what to do
 - [1 · YuE2 · Song](paths/yue2-song.md) - new songs with YuE2, the Song Sheet, takes, instrumentals
@@ -21,3 +21,4 @@ Concepts:
 - [Instrumental](concepts/instrumental.md) - what Plenio guarantees for instrumentals and what it checks
 - [Mastering and audio formats](concepts/mastering.md) - metering, EQ, dynamics, resampling, export formats and their limits
 - [App mode](concepts/app-mode.md) - the templates as simple forms, with the mode and the Song Sheet buttons
+- [Local LLMs](concepts/local-llm.md) - GGUF files from models/LLM and the models of LM Studio, Ollama, llama.cpp ... as the song writer or anywhere else

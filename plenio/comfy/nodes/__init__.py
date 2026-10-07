@@ -7,6 +7,7 @@ from .cover_brief import PlenioCoverBrief
 from .engine import PlenioEngine
 from .eq import PlenioEQ
 from .export import PlenioExportRelease
+from .local_llm import PlenioLocalLLM
 from .loudness import PlenioLoudness
 from .parse import PlenioParseDraft
 from .refine import PlenioRefine
@@ -25,6 +26,7 @@ NODES = (
     PlenioEngine,
     PlenioComposePrompt,
     PlenioParseDraft,
+    PlenioLocalLLM,
     PlenioSongSheet,
     PlenioScoreTools,
     PlenioTranscribeScore,

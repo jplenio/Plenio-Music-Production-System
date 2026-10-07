@@ -30,6 +30,7 @@ from graph_builder import (  # noqa: E402
 
 sys.path.insert(0, str(PROJECT))
 
+from plenio.core.llm import CHOOSE  # noqa: E402
 from plenio.core.models import ModelFile, by_file, load_catalogue  # noqa: E402
 
 CATALOGUE = by_file(load_catalogue(PROJECT / "resources" / "models.toml"))
@@ -46,6 +47,7 @@ YUE2_CHECKPOINT = "yue2_3b_int8_convrot.safetensors"
 LORA = "ar_lora_inst_v3abc_comfyui.safetensors"
 SHEETSAGE = "sheetsage2_bf16.safetensors"
 WRITER = "gemma4_e4b_it_fp8_scaled.safetensors"
+LOCAL_LLM_CHOICE = CHOOSE  # Local LLM's placeholder: the user picks a model of their machine
 MINIMAX_DIT = "minimax_music3_dit_fp16.safetensors"
 MINIMAX_TE = "minimax_music3_text_encoder_pruned_int8_convrot.safetensors"
 MINIMAX_VAE = "minimax_music3_dav.safetensors"
@@ -518,6 +520,68 @@ def write_song() -> Blueprint:
                 default=0,
                 label="draft seed",
             ),
+            BlueprintInput("thinking", "BOOLEAN", [(generate, "thinking")], widget=True, default=False),
+        ],
+        [
+            BlueprintOutput("title", "STRING", (parse, "title")),
+            BlueprintOutput("style", "STRING", (parse, "style")),
+            BlueprintOutput("lyrics", "STRING", (parse, "lyrics")),
+            BlueprintOutput("artwork_prompt", "STRING", (parse, "artwork_prompt")),
+            BlueprintOutput("report", "PLENIO_REPORT", (parse, "report")),
+        ],
+    )
+
+
+def write_song_local() -> Blueprint:
+    """*Write Song* with Local LLM as the writer: GGUF files (models/LLM, LM Studio, the Hugging Face cache)
+    and the models of running LLM apps (ADR-0010). Same inputs and outputs as *Write Song*, so it takes
+    that block's place in a template; node ids 1301+."""
+    g = Graph(first_id=1301)
+    compose = g.add("PlenioComposePrompt", (0, 0), size=(300, 100))
+    generate = g.add(
+        "PlenioLocalLLM",
+        (360, 0),
+        size=(340, 330),
+        widgets={
+            "prompt": "",
+            "model": LOCAL_LLM_CHOICE,
+            "seed": 0,
+            "seed.control": "fixed",
+            "max_tokens": 2048,
+            "temperature": 0.8,
+            "thinking": False,
+            "context": 8192,
+            "keep_loaded": False,
+            "system_prompt": "",
+        },
+    )
+    parse = g.add("PlenioParseDraft", (760, 0), size=(300, 140))
+    g.link(compose, "prompt", generate, "prompt")
+    g.link(generate, "text", parse, "text")
+    g.link(compose, "request", parse, "request")
+    return Blueprint(
+        "Plenio · Write Song (local LLM)",
+        "Plenio/Writing",
+        "Writes title, style, lyrics and an artwork prompt with a local LLM - a GGUF file from models/LLM, "
+        "LM Studio or the Hugging Face cache (run by llama.cpp for the draft, its memory freed afterwards), "
+        "or a model of a running app (LM Studio, Ollama, llama.cpp, vLLM, Jan ...). Same inputs and outputs "
+        "as Write Song: put it in that block's place.",
+        g,
+        [
+            BlueprintInput("brief", "PLENIO_BRIEF", [(compose, "brief")]),
+            BlueprintInput("engine", "PLENIO_ENGINE", [(compose, "engine")]),
+            BlueprintInput("score", "STRING", [(compose, "score")]),
+            BlueprintInput("language", "STRING", [(compose, "language")]),
+            BlueprintInput("reference_lyrics", "STRING", [(compose, "reference_lyrics")]),
+            BlueprintInput(
+                "model",
+                "COMBO",
+                [(generate, "model")],
+                widget=True,
+                default=LOCAL_LLM_CHOICE,
+                label="writer model",
+            ),
+            BlueprintInput("seed", "INT", [(generate, "seed")], widget=True, default=0, label="draft seed"),
             BlueprintInput("thinking", "BOOLEAN", [(generate, "thinking")], widget=True, default=False),
         ],
         [
@@ -1609,6 +1673,7 @@ def blueprints() -> dict[str, Blueprint]:
     return {
         "yue2_model": yue2_model(),
         "write": write_song(),
+        "write_local": write_song_local(),
         "yue2_plan": yue2_plan(),
         "yue2_render": yue2_render(),
         "transcribe": transcribe_score(),
