@@ -1,5 +1,7 @@
 # Creative modes
 
+> **Experimental (0.4.5).** Creative modes and the closeness sliders can give unexpected results - a chord that surprises, an instrument line that does not fit every song, a plan that is not applied. They are meant for experimenting first: try a mode, listen, change the score in the Song Sheet or run again with another *arrangement seed*, and keep what you like. *simple* is the dependable choice.
+
 How freely a song is written and arranged. Song Brief and Cover Brief have an **arrangement** choice:
 
 - **simple** (default) - as before: the writer drafts title, style and lyrics, and the music model plans melody, chords and instruments by itself.

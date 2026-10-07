@@ -18,6 +18,7 @@ import {
   ROW_HEIGHT,
   TOP,
   type RollNote,
+  bandInLane,
   bandRect,
   dragOp,
   dragTo,
@@ -149,6 +150,16 @@ describe('the selection frame (select mode)', () => {
       height: 700 - 500 - TOP
     })
     expect(bandRect({ x0: 100, y0: 800, x1: 1e6, y1: 1e6 }, GEO)).toMatchObject({ width: GEO.width - 100, height: GEO.height - 800 })
+  })
+
+  it('keeps its start when the pane scrolls along under the pointer', () => {
+    // started on the rows at scroll 400, pulled to the bottom edge: the pane scrolled to 700, which moved
+    // the start under the pinned lanes - the frame still reaches up to it (the tutorial 2 bug of 0.4.4)
+    const frame = { x0: 300, y0: 400 + TOP + 40, x1: 500, y1: 700 + TOP + 300, from: { scrollTop: 400, scrollLeft: 0 } }
+    expect(bandRect(frame, GEO, 700, 0)).toEqual({ x: 300, y: 400 + TOP + 40, width: 200, height: 300 + 260 })
+    expect(bandInLane(frame, 700)).toBe(false)
+    // pulled up into the lane of the scrolled pane, it does reach it
+    expect(bandInLane({ ...frame, y1: 700 + HEADER + 4 }, 700)).toBe(true)
   })
 
   it('selects every note it touches', () => {

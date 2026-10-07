@@ -69,6 +69,38 @@ export async function roll(s, voice) {
 
 export const free = (geo, x, y) => !geo.notes.some((n) => x >= n.x - 6 && x <= n.x + n.width + 6 && y >= n.y - 4 && y <= n.y + n.height + 4)
 
+// A frame over a phrase of the visible notes (up to six in a row) that stays clear of the pane's edges -
+// at the bottom edge the pane scrolls along with the pointer, which pulled the frame away from its notes
+// in the 0.4.4 recording. Returns where the drag starts and ends (the start on an empty place).
+export function framePhrase(geo) {
+  const notes = [...geo.visible].sort((a, b) => a.x - b.x)
+  const right = geo.box.x + geo.box.width - 40, bottom = geo.box.y + geo.box.height - 34, top = geo.top + 14
+  const frameOf = (run) => ({
+    x0: Math.min(...run.map((n) => n.x)) - 8, y0: Math.min(...run.map((n) => n.y)) - 8,
+    x1: Math.max(...run.map((n) => n.x + n.width)) + 8, y1: Math.max(...run.map((n) => n.y + n.height)) + 8
+  })
+  const fits = (f) => f.y0 > top && f.y1 < bottom && f.x1 < right && f.x0 > geo.box.x + 50
+  let best = null
+  for (let i = 0; i < notes.length; i++) {
+    for (let j = Math.min(notes.length, i + 6); j > i + 1; j--) {
+      const f = frameOf(notes.slice(i, j))
+      if (fits(f) && (!best || j - i > best.count)) best = { count: j - i, f }
+    }
+  }
+  if (!best) throw new Error('no phrase to frame clear of the roll’s edges')
+  const { x0, y0, x1, y1 } = best.f
+  const corners = [[{ x: x0, y: y0 }, { x: x1, y: y1 }], [{ x: x1, y: y1 }, { x: x0, y: y0 }], [{ x: x1, y: y0 }, { x: x0, y: y1 }], [{ x: x0, y: y1 }, { x: x1, y: y0 }]]
+  return corners.find(([a]) => free(geo, a.x, a.y)) ?? corners[0]
+}
+
+// What the roll has selected: notes and chord symbols.
+export function selectedInRoll(s) {
+  return s.page.evaluate((sel) => {
+    const d = document.querySelector(sel)
+    return { notes: d.querySelectorAll('rect.note.selected').length, chords: d.querySelectorAll('g.chord.selected').length }
+  }, DIALOG)
+}
+
 // The step Ctrl+Z would undo next (the Undo button's title) - a mark to undo back to.
 export function undoMark(s) {
   return s.page.evaluate((sel) => document.querySelector(sel)?.querySelector('button[title^="Undo"]')?.title ?? '', DIALOG)
@@ -266,16 +298,15 @@ export async function noteEditing(s, { voice = 'vocal' } = {}) {
 
   // select mode: a frame over a phrase, move it, undo
   geo = await roll(s, voice)
-  const phrase = geo.visible.slice(0, Math.min(6, geo.visible.length))
-  const x0 = Math.min(...phrase.map((n) => n.x)) - 8, y0 = Math.min(...phrase.map((n) => n.y)) - 8
-  const x1 = Math.max(...phrase.map((n) => n.x + n.width)) + 8, y1 = Math.max(...phrase.map((n) => n.y + n.height)) + 8
-  const corners = [[{ x: x0, y: y0 }, { x: x1, y: y1 }], [{ x: x1, y: y1 }, { x: x0, y: y0 }], [{ x: x1, y: y0 }, { x: x0, y: y1 }], [{ x: x0, y: y1 }, { x: x1, y: y0 }]]
-  const [startFrame, endFrame] = corners.find(([a]) => free(geo, a.x, a.y) && a.y > geo.top && a.y < geo.box.y + geo.box.height - 12) ?? corners[0]
+  const [startFrame, endFrame] = framePhrase(geo)
   s.caption('Select mode: pull a frame to select several notes at once …')
   await s.click(d.locator('button', { hasText: 'Select' }).first(), { pause: 300 })
   await s.wait(700)
   await s.drag(startFrame, endFrame, { ms: 1300, hold: 250 })
   await s.wait(1400)
+  // the frame must have taken notes (and nothing else) before the arrow keys move them
+  const picked = await selectedInRoll(s)
+  if (picked.notes < 2 || picked.chords) throw new Error(`the frame selected ${picked.notes} notes and ${picked.chords} chords`)
   s.caption('… and move them together: here two semitones up.')
   await s.keys('ArrowUp', { times: 2, gap: 800 })
   await s.wait(1400)

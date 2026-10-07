@@ -194,6 +194,16 @@
 .plenio-overlay .arrangement summary {
   cursor: pointer;
 }
+.plenio-overlay .arrangement .experimental {
+  display: inline-block;
+  margin: 0 4px;
+  padding: 0 6px;
+  border: 1px solid #d8a31a;
+  border-radius: 8px;
+  color: #d8a31a;
+  font-size: 0.85em;
+  line-height: 1.5;
+}
 .plenio-overlay .arrangement .idea,
 .plenio-overlay .arrangement .kept {
   color: var(--descrip-text, #999);

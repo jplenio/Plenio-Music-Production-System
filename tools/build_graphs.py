@@ -1187,7 +1187,9 @@ WRITER_TEXT = (
     "is answered from Plenio's cache, without asking the model again."
 )
 CREATIVE_TEXT = (
-    "**Creative modes:** *arrangement* in the brief. *simple* (default): {simple}. A creative mode - *standard*, "
+    "**Creative modes (experimental):** *arrangement* in the brief. They can give unexpected results and are "
+    "meant for experimenting - try a mode, listen, keep what you like. *simple* (default, the dependable "
+    "choice): {simple}. A creative mode - *standard*, "
     "*varied*, *fantasy*, *sterile*, *many instruments*, *dramatic* or your own file in `user/plenio/arrangement` "
     "- adds its hints to the writing and lets the writer model plan every section of the score in **Arrange**: "
     "chords, what the instrument line plays, energy, a key lift. {closeness} The writer answers with a small "
@@ -1250,7 +1252,7 @@ ABOUT_YUE2 = f"""# 1 · YuE2 · Song
 
 def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g = Graph()
-    about_note(g, ABOUT_YUE2, height=1040)
+    about_note(g, ABOUT_YUE2, height=1100)
     brief = g.add(
         "PlenioSongBrief",
         (0, 0),
@@ -1419,7 +1421,7 @@ ABOUT_COVER = f"""# 2 · YuE2 · Cover
 
 def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g = Graph()
-    about_note(g, ABOUT_COVER, height=1180)
+    about_note(g, ABOUT_COVER, height=1240)
     source = g.add("LoadAudio", (0, 0), size=(360, 140), title="Source recording")
     excerpt = g.add(
         "TrimAudioDuration",

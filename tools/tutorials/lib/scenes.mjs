@@ -4,7 +4,7 @@
 // files. Every scene leaves the song as the model made it, except the arranged section (a script keeps
 // it to show what follows).
 
-import { DIALOG, free, roll, scrollToVoice, undo, undoMark } from './sheet.mjs'
+import { DIALOG, framePhrase, roll, scrollToVoice, selectedInRoll, undo, undoMark } from './sheet.mjs'
 
 // the visible elements of the roll matching `selector` (left of the pitch column and past the right edge excluded)
 function visible(s, selector) {
@@ -266,16 +266,14 @@ export async function clipboardDemo(s, { voice = 'vocal' } = {}) {
   const d = s.page.locator(DIALOG)
   await scrollToVoice(s, voice)
   const geo = await roll(s, voice)
-  const phrase = geo.visible.slice(0, Math.min(5, geo.visible.length))
-  if (phrase.length < 2) return
-  const x0 = Math.min(...phrase.map((n) => n.x)) - 8, y0 = Math.min(...phrase.map((n) => n.y)) - 8
-  const x1 = Math.max(...phrase.map((n) => n.x + n.width)) + 8, y1 = Math.max(...phrase.map((n) => n.y + n.height)) + 8
-  const corners = [[{ x: x1, y: y1 }, { x: x0, y: y0 }], [{ x: x0, y: y0 }, { x: x1, y: y1 }], [{ x: x1, y: y0 }, { x: x0, y: y1 }]]
-  const [a, b] = corners.find(([c]) => free(geo, c.x, c.y) && c.y > geo.top) ?? corners[0]
+  if (geo.visible.length < 2) return
+  const [a, b] = framePhrase(geo)
   s.caption('Copy and paste work like a DAW’s key editor. Frame a phrase in Select mode …')
   await s.click(d.locator('button', { hasText: 'Select' }).first(), { pause: 300 })
   await s.drag(a, b, { ms: 1200, hold: 250 })
   await s.wait(900)
+  const picked = await selectedInRoll(s)
+  if (picked.notes < 2 || picked.chords) throw new Error(`the frame selected ${picked.notes} notes and ${picked.chords} chords`)
   s.caption('… Ctrl+C copies it …')
   await s.keys('Control+c', { labels: ['Ctrl', 'C'] })
   await s.wait(1600)

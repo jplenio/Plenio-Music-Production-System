@@ -279,24 +279,44 @@ export function hitTest(
 
 // --- the selection frame ----------------------------------------------------------------------
 
-/** A selection frame (select mode): where the drag started and where the pointer is, in roll coordinates. */
+/**
+ * A selection frame (select mode): where the drag started and where the pointer is, in roll coordinates,
+ * and how far the pane was scrolled when it started (``from``; without it, as far as it is now).
+ */
 export interface Band {
   x0: number
   y0: number
   x1: number
   y1: number
+  from?: { scrollTop: number; scrollLeft: number }
+}
+
+/** Whether a frame's start or its pointer lies above the rows: in the header and the lanes. */
+function inLanes(band: Band, below: number, scrollTop: number): boolean {
+  return band.y0 < (band.from?.scrollTop ?? scrollTop) + below || band.y1 < scrollTop + below
 }
 
 /**
- * The frame's rectangle, kept to the rows that can be seen: below the header and the chord lane and
+ * The frame's rectangle, kept to the rows that could be seen: below the header and the chord lane and
  * right of the pitch column, which stay in place while the pane scrolls (``scrollTop``, ``scrollLeft``).
+ * Its start is kept where it was when the frame started: a pane that scrolls along while the frame is
+ * pulled (the pointer at its edge) keeps the notes framed before it scrolled.
  */
 export function bandRect(band: Band, geo: Geometry, scrollTop = 0, scrollLeft = 0): Rect {
-  const clampX = (x: number): number => Math.max(scrollLeft + KEYS_WIDTH, Math.min(geo.width, x))
-  const clampY = (y: number): number => Math.max(scrollTop + geo.top, Math.min(geo.height, y))
-  const left = clampX(Math.min(band.x0, band.x1))
-  const top = clampY(Math.min(band.y0, band.y1))
-  return { x: left, y: top, width: clampX(Math.max(band.x0, band.x1)) - left, height: clampY(Math.max(band.y0, band.y1)) - top }
+  const fromTop = band.from?.scrollTop ?? scrollTop
+  const fromLeft = band.from?.scrollLeft ?? scrollLeft
+  const clampX = (x: number, left: number): number => Math.max(left + KEYS_WIDTH, Math.min(geo.width, x))
+  const clampY = (y: number, top: number): number => Math.max(top + geo.top, Math.min(geo.height, y))
+  const xs = [clampX(band.x0, fromLeft), clampX(band.x1, scrollLeft)]
+  const ys = [clampY(band.y0, fromTop), clampY(band.y1, scrollTop)]
+  const left = Math.min(...xs)
+  const top = Math.min(...ys)
+  return { x: left, y: top, width: Math.max(...xs) - left, height: Math.max(...ys) - top }
+}
+
+/** Whether the frame reaches into the chord lane (``below``: where the lane ends, ``TOP``). */
+export function bandInLane(band: Band, scrollTop = 0, below = TOP): boolean {
+  return inLanes(band, below, scrollTop)
 }
 
 /** The notes a selection frame touches (a note needs to overlap it, not to lie inside it). */
@@ -310,7 +330,8 @@ export function notesInRect(notes: readonly RollNote[], rect: Rect, geo: Geometr
 
 /**
  * The chord symbols a selection frame takes: when it reaches into the chord lane (it started there or
- * was pulled up into it), every chord whose box it overlaps along the bars.
+ * was pulled up into it), every chord whose box it overlaps along the bars. A frame started on the rows
+ * does not take them because the pane scrolled its start under the lanes.
  */
 export function chordsInBand(
   chords: readonly ModelChord[],
@@ -319,7 +340,7 @@ export function chordsInBand(
   scrollTop = 0,
   scrollLeft = 0
 ): ModelChord[] {
-  if (Math.min(band.y0, band.y1) >= scrollTop + geo.top) return []
+  if (!inLanes(band, geo.top, scrollTop)) return []
   const rect = bandRect(band, geo, scrollTop, scrollLeft)
   if (rect.width <= 0) return []
   return chords.filter((chord, index) => {

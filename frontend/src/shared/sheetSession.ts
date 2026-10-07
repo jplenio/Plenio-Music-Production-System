@@ -79,6 +79,11 @@ export interface ArrangementPayload {
   notes?: string[]
 }
 
+/** What the sheet says about creative modes (0.4.5: experimental, they invite trying rather than relying). */
+export const ARRANGEMENT_EXPERIMENTAL =
+  'Creative modes are experimental: the writer’s plan can surprise - listen, change the score here, or run ' +
+  'again with another arrangement seed; simple keeps the music model’s own plan.'
+
 /** The arrangement's headline: mode and closeness in words. */
 export function arrangementLabel(arrangement: ArrangementPayload): string {
   const closeness = arrangement.kind === 'cover' ? 'song flow closeness' : 'genre closeness'

@@ -59,6 +59,9 @@ describe('the select frame and chord symbols', () => {
     for (const onset of taken) expect(onset).toBeLessThan(70)
     // below the lane it takes none
     expect(chordsInBand(CHORDS, { ...across, y1: TOP + 2 }, GEO)).toEqual([])
+    // nor when the pane scrolled the start of a frame on the rows under the lanes
+    const scrolled = { x0: xOf(30, GEO), y0: yOf(70, GEO), x1: xOf(70, GEO), y1: yOf(60, GEO) + 600, from: { scrollTop: 0, scrollLeft: 0 } }
+    expect(chordsInBand(CHORDS, scrolled, GEO, 600)).toEqual([])
   })
 })
 

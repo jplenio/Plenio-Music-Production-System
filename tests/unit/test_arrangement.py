@@ -427,6 +427,18 @@ def test_a_key_lift_that_leaves_the_voice_range_is_not_made() -> None:
     assert "would leave the singing range" in lifted.sections[1].kept[0]
 
 
+def test_a_key_lift_that_leaves_the_midi_range_is_not_reported_as_made() -> None:
+    # found by the fuzz test: an instrument note on G9 (127) cannot go up; the report said "key +1" anyway
+    model = c.from_abc(FIXTURE)
+    second = model.starts[section_ranges(model)[1][1]]
+    top = c.validate(replace(model, ins=(c.Note(second, 1, 127),)))
+    result = arrange(c.to_abc(top), plan(entry(1), entry(2, key_shift=1)), rules(), seed=0)
+    assert not any(a.startswith("key ") for s in result.sections for a in s.applied)
+    assert any("would leave the MIDI range" in kept for kept in result.sections[1].kept)
+    if result.status != "unchanged":
+        assert c.from_abc(result.abc).vocal == top.vocal
+
+
 def test_motifs_follow_the_chords() -> None:
     figure = [{"note": "C4", "beats": 1}, {"note": "E4", "beats": 1}, {"note": "G4", "beats": 2}]
     result = arrange(FIXTURE, plan(entry(1, lead="motif", motif=figure), entry(2)), rules())

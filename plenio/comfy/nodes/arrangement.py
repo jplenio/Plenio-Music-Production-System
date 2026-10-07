@@ -65,6 +65,7 @@ class PlenioComposeArrangement(io.ComfyNode):
             display_name="Compose Arrangement",
             category="Plenio/Score",
             description=(
+                "Experimental (creative modes can give unexpected results - try them and listen). "
                 "The arrangement prompt of the brief's creative mode: the score as a table (sections, chords, the "
                 "melody on the strong beats, what the instrument line plays), the mode's rules, the closeness and "
                 "the exact answer format - a small JSON plan, never notes. Connect the prompt to a writer (Generate "
@@ -189,11 +190,11 @@ def _markdown(result: arrangement.Arrangement, rules: arrangement.Policy) -> str
     if result.status == "skipped":
         return f"**Arrangement: skipped** - {rules.skip_reason}"
     if result.status == "fallback":
-        lines = [f"**Arrangement not applied** - {result.summary}"]
+        lines = [f"**Arrangement not applied** (experimental) - {result.summary}"]
         if any("writer's answer" in note for note in result.notes):
             lines.append(f"- {RECOMMENDATION}")
         return "\n".join(lines)
-    lines = [f"**Arrangement {rules.mode.name}** ({_closeness(rules)}) - {result.summary}"]
+    lines = [f"**Arrangement {rules.mode.name}** (experimental, {_closeness(rules)}) - {result.summary}"]
     if result.idea:
         lines.append(f"- idea: {result.idea}")
     for section in result.sections:
@@ -215,6 +216,7 @@ class PlenioApplyArrangement(io.ComfyNode):
             display_name="Apply Arrangement",
             category="Plenio/Score",
             description=(
+                "Experimental (creative modes can give unexpected results - try them and listen). "
                 "Writes the writer's section plan into the score: chords that fit the melody, the instrument line "
                 "of every section (written note by note by Plenio), key lifts and the tempo - each step validated. "
                 "The result must pass YuE2's parser, read back unchanged, open in the score editor and fit YuE2's "

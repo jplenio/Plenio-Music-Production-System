@@ -69,6 +69,7 @@ import {
   type SnapChoice,
   TOP,
   type Track,
+  bandInLane,
   bandRect,
   chordWidth,
   chordsInBand,
@@ -242,6 +243,8 @@ interface Press {
   clear: boolean
   /** Set when the press pulls a selection frame: the selection it keeps. */
   keep: { notes: string[]; chords: ModelChord[] } | null
+  /** The pane's scroll when the press started (a frame keeps its start there). */
+  from?: { scrollTop: number; scrollLeft: number }
   /** A press in the ruler: it moves the cursor while the button is held. */
   ruler?: boolean
   /** A press on a lyrics line: it may become a drag of lines. */
@@ -291,7 +294,7 @@ const banded = computed(() => {
   for (const note of notesInRect(notes.value, rect, g)) ids.add(note.id)
   const chordIds = new Set(current.keepChords)
   for (const chord of chordsInBand(chords.value, current, g, scrollTop.value, scrollLeft.value)) chordIds.add(chord.id)
-  const lane = Math.min(current.y0, current.y1) < scrollTop.value + TOP // the chord lane (not the lyrics lane)
+  const lane = bandInLane(current, scrollTop.value) // the chord lane (not the lyrics lane)
   return { rect, ids, chords: chordIds, lane }
 })
 const hint = computed(() =>
@@ -620,7 +623,7 @@ function onPointerDown(event: PointerEvent): void {
   } else {
     clear = !additive
   }
-  press = { x, y, start, started: false, clear, keep }
+  press = { x, y, start, started: false, clear, keep, from: { scrollTop: scrollTop.value, scrollLeft: scrollLeft.value } }
   capture(event)
 }
 
@@ -665,7 +668,15 @@ function onPointerMove(event: PointerEvent): void {
   if (!press.started && Math.hypot(x - press.x, y - press.y) < MOVE_THRESHOLD_PX) return
   press.started = true
   if (press.keep) {
-    band.value = { x0: press.x, y0: press.y, x1: x, y1: y, keep: press.keep.notes, keepChords: press.keep.chords.map((c) => c.id) }
+    band.value = {
+      x0: press.x,
+      y0: press.y,
+      x1: x,
+      y1: y,
+      from: press.from,
+      keep: press.keep.notes,
+      keepChords: press.keep.chords.map((c) => c.id)
+    }
   } else if (press.start) {
     const before = drag.value
     const next = dragTo(press.start, unitAt(x, g), pitchAt(y, g), g, { alt: event.altKey })

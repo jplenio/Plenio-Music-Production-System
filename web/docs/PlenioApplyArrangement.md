@@ -1,5 +1,7 @@
 # Apply Arrangement
 
+> **Experimental (0.4.5).** Creative modes and the closeness sliders can give unexpected results - a chord that surprises, an instrument line that does not fit every song, a plan that is not applied. They are meant for experimenting first: try a mode, listen, change the score in the Song Sheet or run again with another *arrangement seed*, and keep what you like. *simple* is the dependable choice.
+
 Writes the writer's section plan into the score - or keeps the score as it was and says why. Plenio writes every note itself, with the same validated operations as *Score Tools*, so the result is always a score that YuE2 and the score editor read.
 
 Per section, in this order:

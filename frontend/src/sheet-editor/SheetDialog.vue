@@ -10,6 +10,7 @@ import { type Fetcher, type GuideNote, PlenioApiError, getAsrNote, resolveSheet 
 import {
   type AsrNote,
   type Finding,
+  ARRANGEMENT_EXPERIMENTAL,
   arrangementLabel,
   type ScoreChange,
   type ScoreTarget,
@@ -659,13 +660,17 @@ onBeforeUnmount(() => {
       <section class="findings" aria-label="Validation">
         <div v-if="arrangement" class="arrangement" :data-status="arrangement.status">
           <p v-if="arrangement.status === 'fallback'">
-            <strong>Arrangement not applied</strong> - {{ arrangementLabel(arrangement) }}:
-            {{ arrangement.summary.replace(/^not applied: /, '') }}
+            <strong>Arrangement not applied</strong>
+            <span class="experimental" :title="ARRANGEMENT_EXPERIMENTAL">experimental</span>
+            - {{ arrangementLabel(arrangement) }}: {{ arrangement.summary.replace(/^not applied: /, '') }}
           </p>
           <details v-else>
             <summary>
-              <strong>Arrangement</strong> {{ arrangementLabel(arrangement) }}: {{ arrangement.summary }}
+              <strong>Arrangement</strong>
+              <span class="experimental" :title="ARRANGEMENT_EXPERIMENTAL">experimental</span>
+              {{ arrangementLabel(arrangement) }}: {{ arrangement.summary }}
             </summary>
+            <p class="idea">{{ ARRANGEMENT_EXPERIMENTAL }}</p>
             <p v-if="arrangement.idea" class="idea">{{ arrangement.idea }}</p>
             <ul>
               <li v-for="section in arrangement.sections ?? []" :key="section.index">

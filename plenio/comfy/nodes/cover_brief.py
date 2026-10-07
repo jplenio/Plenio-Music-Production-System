@@ -21,7 +21,14 @@ from ...core.brief import (
 from ...core.errors import PlenioError
 from ..shared import mode_library, mode_names, template_library
 from ..types import Brief
-from .brief import SONG_SEED_TOOLTIP, arrangement_line, check_arrangement, mode_line, series_song
+from .brief import (
+    EXPERIMENTAL,
+    SONG_SEED_TOOLTIP,
+    arrangement_line,
+    check_arrangement,
+    mode_line,
+    series_song,
+)
 
 MODE_TOOLTIP = (
     "one cover, stop to review: Song Sheet · Score and Song Sheet · Text stop so you can check the transcription "
@@ -37,16 +44,16 @@ ARRANGEMENT_TOOLTIP = (
     "writing prompt and lets the writer model re-arrange the score's sections within the song flow closeness: "
     "chords, what the instrument line plays, energy, key. The melody and the form always stay. Plenio writes the "
     "notes itself and checks the result; a plan it cannot use leaves the transcription as it was (the score's "
-    "Song Sheet says so)."
+    "Song Sheet says so). " + EXPERIMENTAL
 )
 SONG_FLOW_TOOLTIP = (
-    "Creative modes only (simple ignores it): how close the cover's song flow stays to the original - 100 exactly "
-    "the original (nothing is planned), 80 chords, key and tempo stay (only silent sections get a line), 50 "
-    "recognisable (chords recoloured, lines changed, a small key lift), 20 a free version (new chords and lines, "
-    "another tempo), 0 only a hint of the original. The melody and the form always remain."
+    "Creative modes only (simple ignores it; experimental): how close the cover's song flow stays to the "
+    "original - 100 exactly the original (nothing is planned), 80 chords, key and tempo stay (only silent sections "
+    "get a line), 50 recognisable (chords recoloured, lines changed, a small key lift), 20 a free version (new "
+    "chords and lines, another tempo), 0 only a hint of the original. The melody and the form always remain."
 )
 LYRICS_CLOSENESS_TOOLTIP = (
-    "New lyrics only: how close they stay to the source's lyrics - 0 written without the source's text (as "
+    "New lyrics only (experimental): how close they stay to the source's lyrics - 0 written without the source's text (as "
     "before), 1-29 only a hint of it, 30-59 its theme and mood, 60-89 its story in new words, 90-100 its meaning "
     "line by line (a singable translation when the language differs). Above 0 the source's lyrics are "
     "transcribed for the writer (lyrics ASR); the source must have clear singing."
@@ -175,6 +182,7 @@ class PlenioCoverBrief(io.ComfyNode):
                 # appended: a saved workflow's values are assigned by position, new widgets go last
                 io.Combo.Input(
                     "arrangement",
+                    display_name="arrangement (experimental)",
                     options=mode_names(),
                     default=ARRANGEMENT_DEFAULT,
                     optional=True,  # an API prompt of an older version runs as before (simple)

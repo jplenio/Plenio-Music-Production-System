@@ -123,7 +123,7 @@ describe('SheetDialog: a cover text sheet edits the score it shows', () => {
     savePrefs({ ...defaultPrefs() })
   })
 
-  async function mountText(blocked: string | null = null) {
+  async function mountText(blocked: string | null = null, arrangement: Record<string, unknown> | null = null) {
     const { default: SheetDialog } = await import('../src/sheet-editor/SheetDialog.vue')
     const resolves: Record<string, unknown>[] = []
     const payload = {
@@ -141,7 +141,8 @@ describe('SheetDialog: a cover text sheet edits the score it shows', () => {
       score_seconds: 18.7,
       validation: null,
       engine: null,
-      instrumental: false
+      instrumental: false,
+      ...(arrangement ? { arrangement } : {})
     } as unknown as SheetPayload
     const fetcher: Fetcher = {
       fetchApi: (route: string, init?: RequestInit) => {
@@ -219,6 +220,18 @@ describe('SheetDialog: a cover text sheet edits the score it shows', () => {
     await settle()
     expect(applied.at(-1)?.[3]).toEqual({ text: `${ABC}% arranged\n`, approved: true })
     expect(applied.at(-1)?.[0].review).toEqual({ approved_fingerprint: 'e'.repeat(64) })
+  })
+
+  it('marks a creative arrangement as experimental', async () => {
+    const plan = { status: 'applied', summary: '2 of 3 sections changed', mode: 'fantasy', closeness: 50, kind: 'cover', sections: [] }
+    const { host } = await mountText(null, plan)
+    expect(host.querySelector('.arrangement .experimental')?.textContent).toBe('experimental')
+    expect(host.querySelector('.arrangement summary')?.textContent).toContain('fantasy (song flow closeness 50)')
+    expect(host.querySelector('.arrangement')?.textContent).toContain('Creative modes are experimental')
+    app?.unmount()
+    document.body.innerHTML = ''
+    const { host: fallback } = await mountText(null, { ...plan, status: 'fallback', summary: 'not applied: no usable plan' })
+    expect(fallback.querySelector('.arrangement p')?.textContent).toMatch(/Arrangement not applied\s*experimental/)
   })
 
   it('keeps the score read-only when it changed in its own sheet after the run', async () => {

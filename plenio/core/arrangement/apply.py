@@ -242,6 +242,14 @@ def _apply_shifts(
                 f"section {i + 1}: the key shift {final[i]:+d} would leave the singing range; the key stays"
             )
             final[i] = 0
+            continue
+        # every note that sounds in the section (also one tied in from before) must stay a MIDI pitch
+        moved = [n.pitch + final[i] for n in (*score.vocal, *score.ins) if n.onset < stop and n.end > start]
+        if moved and (min(moved) < 0 or max(moved) > 127):
+            kept.append(
+                f"section {i + 1}: the key shift {final[i]:+d} would leave the MIDI range; the key stays"
+            )
+            final[i] = 0
     if not any(final):
         return score, kept
     vocal, ins = list(score.vocal), list(score.ins)
@@ -257,8 +265,15 @@ def _apply_shifts(
 
     moved_vocal = [c.Note(n.onset, n.duration, n.pitch + shift_of(n.onset)) for n in vocal]
     moved_ins = [c.Note(n.onset, n.duration, n.pitch + shift_of(n.onset)) for n in ins]
-    if any(not 0 <= n.pitch <= 127 for n in (*moved_vocal, *moved_ins)):
-        return score, [*kept, "the key shifts would leave the MIDI range; the keys stay"]
+    if any(not 0 <= n.pitch <= 127 for n in (*moved_vocal, *moved_ins)):  # checked per section above
+        return score, [
+            *kept,
+            *(
+                f"section {i + 1}: the key shift {s:+d} would leave the MIDI range; the key stays"
+                for i, s in enumerate(final)
+                if s
+            ),
+        ]
     groups = {score.starts[g] for g in score.group_firsts}
     keys: list[c.KeyChange] = []
     boundaries = sorted({score.starts[first] for first, _ in ranges} | {k.onset for k in score.keys})

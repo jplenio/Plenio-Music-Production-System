@@ -50,18 +50,23 @@ SONG_SEED_TOOLTIP = (
     "0 for one song."
 )
 
+EXPERIMENTAL = (
+    "Experimental: creative modes can give unexpected results - they are meant for experimenting: try a mode, "
+    "listen, keep what you like or run again with another arrangement seed. simple is the dependable choice."
+)
 ARRANGEMENT_TOOLTIP = (
     "simple: the music model plans melody, chords and instruments by itself (as before). A creative mode "
     "(standard, varied, fantasy, sterile, many instruments, dramatic - or your own file in "
     "user/plenio/arrangement) adds its hints to the writing prompt and, in YuE2 Song, lets the writer model plan "
     "every section of YuE2's score: chords, what the instrument line plays, energy, a key lift. Plenio writes the "
     "notes itself and checks the result; a plan it cannot use leaves YuE2's score as it was (the Song Sheet says "
-    "so). Planning works with every writer model - GGUF files, LM Studio and Ollama keep to the format exactly."
+    "so). Planning works with every writer model - GGUF files, LM Studio and Ollama keep to the format exactly. "
+    + EXPERIMENTAL
 )
 GENRE_CLOSENESS_TOOLTIP = (
-    "Creative modes only (simple ignores it): how close the song stays to its genre - 100 strictly typical, 70 "
-    "typical with personal touches, 40 free within the genre, 0 borrow from any style. It shapes the style words "
-    "and the section plan."
+    "Creative modes only (simple ignores it; experimental): how close the song stays to its genre - 100 strictly "
+    "typical, 70 typical with personal touches, 40 free within the genre, 0 borrow from any style. It shapes the "
+    "style words and the section plan."
 )
 TEXT = {
     "description": "What the song is about and how it should sound. Sent to the writing model.",
@@ -78,9 +83,11 @@ def arrangement_line(brief: Any) -> str:
     if brief.arrangement == ARRANGEMENT_DEFAULT:
         return "Arrangement: simple (the music model plans the music by itself)"
     if brief.kind == "song":
-        return f"Arrangement: **{brief.arrangement}**, genre closeness {brief.closeness}"
+        return f"Arrangement: **{brief.arrangement}** (experimental), genre closeness {brief.closeness}"
     lyrics = f", lyrics closeness {brief.lyrics_closeness}" if brief.writes_lyrics else ""
-    return f"Arrangement: **{brief.arrangement}**, song flow closeness {brief.closeness}{lyrics}"
+    return (
+        f"Arrangement: **{brief.arrangement}** (experimental), song flow closeness {brief.closeness}{lyrics}"
+    )
 
 
 def check_arrangement(name: Any) -> str | None:
@@ -198,6 +205,7 @@ class PlenioSongBrief(io.ComfyNode):
                 # appended: a saved workflow's values are assigned by position, new widgets go last
                 io.Combo.Input(
                     "arrangement",
+                    display_name="arrangement (experimental)",
                     options=mode_names(),
                     default=ARRANGEMENT_DEFAULT,
                     optional=True,  # an API prompt of an older version runs as before (simple)
