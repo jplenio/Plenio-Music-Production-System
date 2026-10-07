@@ -1103,11 +1103,13 @@ def finish(
     export_widgets: dict[str, object] | None = None,
     cover_y: float = 560,
     export_size: tuple[float, float] = (380, 470 + SUMMARY_ROOM),
+    sheet_music: str = "off",
 ) -> tuple[Node, Node, Node]:
     """Master -> Preview + Export (the unmastered take as the original), and the optional Cover Art.
 
     ``cover_y``/``export_size`` carry the owner's layout choices (2026-09-28): the optional blocks sit
-    under the wired path, and a taller export shows more report slots.
+    under the wired path, and a taller export shows more report slots. ``sheet_music``: the YuE2 templates
+    save the score's notation with the lyrics as ``<name>.pdf`` (owner's request 2026-10-08).
     """
     master = g.add_subgraph(blueprints["master"], (x, 0), size=(340, 170))
     preview = g.add("PreviewAudio", (x, 230), size=(340, 120), title="Preview (mastered)")
@@ -1117,7 +1119,7 @@ def finish(
         (x + 400, 0),
         size=export_size,
         autogrow={"reports": len(all_reports)},
-        widgets=export_widgets,
+        widgets={**(export_widgets or {}), "sheet_music": sheet_music},
     )
     cover = g.add_subgraph(
         blueprints["cover"], (x, cover_y), size=(340, 170), mode=4, title="Cover Art (optional)"
@@ -1143,7 +1145,9 @@ def finish(
 FINISH_TEXT = (
     "**Finish:** *Plenio · Master* brings the take to -14 LUFS / -1 dBTP with a gentle tone match (open the "
     "block to change the EQ or the loudness target). Export writes the mastered FLAC 24-bit, the unmastered "
-    "take as `(original).flac` and a release record to `output/plenio`."
+    "take as `(original).flac` and a release record to `output/plenio` - in the YuE2 templates also the "
+    "**sheet music** with the lyrics as `<name>.pdf` (*sheet music* in Export: A4, Letter or off; this page "
+    "draws it right after the export)."
 )
 COVER_TEXT = (
     "**Cover art (optional, bypassed):** *Cover Art* paints a cover from the sheet's artwork prompt with "
@@ -1330,6 +1334,7 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         ],
         group="6 · FINISH",
         cover_y=700,
+        sheet_music="PDF (A4)",
     )
     g.group("1 · SONG", [brief])
     g.group("2 · WRITE", [write, draft, writer])
@@ -1570,6 +1575,7 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         ],
         group="7 · FINISH",
         cover_y=780,
+        sheet_music="PDF (A4)",
         export_size=(380, 560 + SUMMARY_ROOM),
     )
     # Sung Pitch (0.4.4): the source's vocals as a pitch curve for both sheets' editors, once per source;
@@ -1838,6 +1844,7 @@ def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         ],
         group="6 · FINISH",
         cover_y=755,
+        sheet_music="PDF (A4)",
         export_size=(385, 530 + SUMMARY_ROOM),
     )
     g.group("1 · SONG", [brief])

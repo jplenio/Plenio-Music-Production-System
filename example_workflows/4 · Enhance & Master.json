@@ -655,6 +655,15 @@
       "name": "tags"
      },
      "link": null
+    },
+    {
+     "localized_name": "sheet_music",
+     "name": "sheet_music",
+     "type": "COMBO",
+     "widget": {
+      "name": "sheet_music"
+     },
+     "link": null
     }
    ],
    "outputs": [
@@ -681,7 +690,8 @@
     true,
     true,
     false,
-    "copy from loaded file"
+    "copy from loaded file",
+    "off"
    ]
   }
  ],

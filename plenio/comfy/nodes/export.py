@@ -9,6 +9,7 @@ from typing import Any
 from comfy_api.latest import io
 
 from ... import __version__
+from ...core import score as score_rules
 from ...core.audio import measure
 from ...core.engines import ENGINES
 from ...core.errors import PlenioUserError
@@ -30,6 +31,7 @@ from ...core.release import (
 )
 from ...core.reports import Report, Status
 from .. import host
+from ..sheet_music import JOBS, OFF, PAPERS, SHEET_MUSIC_OPTIONS
 from ..types import ReportType
 
 COLLISIONS = ("number", "overwrite", "error")
@@ -39,6 +41,27 @@ TAG_MODES = ("title only", "tags", "copy from loaded file")
 EXTRA_TAGS = tuple(field for field in TAG_FIELDS if field != "title")
 # what the *tags* mode writes as the comment unless the user changes it
 DEFAULT_COMMENT = "Powered by Plenio Music Production System / ComfyUI"
+SHEET_SUFFIX = ".pdf"
+SHEET_TOOLTIP = (
+    "Also save the sheet music - both voices, chord symbols, sections and the lyrics under the notes - as "
+    "'<name>.pdf' next to the audio, on A4 or Letter pages. The browser that runs the workflow draws it right "
+    "after the export (as Export notation… in the Song Sheet does) and Plenio saves it; a run without an open "
+    "ComfyUI page gets no PDF. Needs a score (YuE2)."
+)
+
+
+def sheet_documents(reports: list[dict[str, Any]]) -> dict[str, Any]:
+    """The final score and lyrics of the release (the Song Sheets' reports) and the sheets that hold them."""
+    found: dict[str, Any] = {"score": "", "lyrics": "", "score_sheet": None, "lyrics_sheet": None}
+    for report in reports:
+        data = report.get("data") or {}
+        documents = data.get("documents") or {}
+        for kind in ("score", "lyrics"):
+            doc = documents.get(kind)
+            if isinstance(doc, dict) and str(doc.get("text") or "").strip():
+                found[kind] = str(doc["text"])
+                found[f"{kind}_sheet"] = data.get("node_id")
+    return found
 
 
 def _tag_inputs() -> list[Any]:
@@ -130,6 +153,15 @@ class PlenioExportRelease(io.ComfyNode):
                     advanced=True,
                     tooltip="When the file exists: number (add ' (2)'), overwrite, or stop with an error.",
                 ),
+                # appended: a saved workflow's values are assigned by position, new widgets go last
+                io.Combo.Input(
+                    "sheet_music",
+                    display_name="sheet music",
+                    options=list(SHEET_MUSIC_OPTIONS),
+                    default=OFF,
+                    optional=True,
+                    tooltip=SHEET_TOOLTIP,
+                ),
             ],
             outputs=[
                 io.String.Output(display_name="files", tooltip="Written files, one per line."),
@@ -155,7 +187,12 @@ class PlenioExportRelease(io.ComfyNode):
         original: dict[str, Any] | None = None,
         cover: Any = None,
         reports: dict[str, Any] | None = None,
+        sheet_music: str = OFF,
     ) -> io.NodeOutput:
+        if sheet_music not in SHEET_MUSIC_OPTIONS:
+            raise PlenioUserError(
+                f"Unknown sheet music option {sheet_music!r}; use one of {list(SHEET_MUSIC_OPTIONS)}."
+            )
         kinds = [kind for kind, wanted in (("flac", flac), ("mp3", mp3), ("wav", wav)) if wanted]
         if not kinds:
             raise PlenioUserError("Choose at least one format (flac, mp3 or wav).")
@@ -170,8 +207,21 @@ class PlenioExportRelease(io.ComfyNode):
         report_dicts = [r.to_dict() if isinstance(r, Report) else dict(r) for r in received]
         relative = expand_pattern(naming, naming_values(song_title, None))
         takes = ["" if len(items) == 1 else f" take {index + 1}" for index in range(len(items))]
+        sheet = sheet_documents(report_dicts) if sheet_music != OFF else {}
+        display = ""
+        if sheet_music != OFF:
+            if not sheet["score"].strip():
+                notes.append(
+                    "sheet music: this release has no score (MiniMax Music 3, or planning was off) - no PDF"
+                )
+            else:
+                view = score_rules.editor_view(sheet["score"], sheet["lyrics"] or None)
+                display = str(view.get("display_abc") or "")
+                if not display:
+                    notes.append("sheet music: the score cannot be drawn as notation - no PDF")
         suffixes = [take + FORMATS[kind]["extension"] for take in takes for kind in kinds]
         suffixes += [ORIGINAL_SUFFIX] * (original is not None) + [".jpg"] * (picture is not None)
+        suffixes += [SHEET_SUFFIX] * bool(display)
         # one base name for every file of this export, record included (AUD-04)
         stem = plan_release(target_folder, relative, [*suffixes, RECORD_SUFFIX], collision=collision)
 
@@ -231,10 +281,36 @@ class PlenioExportRelease(io.ComfyNode):
                 },
                 title=song_title,
                 licences=licences,
+                sheet_music=(
+                    {
+                        "file": file(SHEET_SUFFIX).name,
+                        "paper": sheet_music.removeprefix("PDF (").removesuffix(")"),
+                        "status": "drawn by the browser after the export",
+                    }
+                    if display
+                    else None
+                ),
             )
         )
         record_path = file(RECORD_SUFFIX)
         atomic_write_text(record_path, json.dumps(record, indent=2, ensure_ascii=False))
+        notation: list[dict[str, Any]] = []
+        if display:
+            # the browser that runs the workflow draws the PDF and posts it back (sheet_music.py)
+            pdf_path = file(SHEET_SUFFIX)
+            notation.append(
+                {
+                    "token": JOBS.reserve(pdf_path, record_path),
+                    "file": pdf_path.name,
+                    "title": song_title,
+                    "paper": PAPERS[sheet_music],
+                    "abc": sheet["score"],
+                    "lyrics": sheet["lyrics"],
+                    "display_abc": display,
+                    "score_sheet": sheet["score_sheet"],
+                    "lyrics_sheet": sheet["lyrics_sheet"],
+                }
+            )
         relative_names = [str(Path(p).relative_to(base)) for p in written]
         # the released files: a clip there is a mistake (a limiter before the export avoids it)
         released = [f for f in facts if f.get("role") not in ("original", "cover")]
@@ -273,6 +349,11 @@ class PlenioExportRelease(io.ComfyNode):
                 *[f"- {name}" for name in relative_names],
                 *([f"- cover: {cover_path.name}"] if cover_path else []),
                 f"- record: {record_path.name}",
+                *(
+                    [f"- sheet music: {notation[0]['file']} - this browser draws and saves it now"]
+                    if notation
+                    else []
+                ),
                 (
                     f"- loudness: {level['integrated_lufs']} LUFS, true peak {level['true_peak_dbtp']} dBTP"
                     if level["valid"]
@@ -289,6 +370,7 @@ class PlenioExportRelease(io.ComfyNode):
             str(record_path),
             ui={
                 "plenio_summary": [{"status": summary.status.value, "markdown": markdown}],
+                "plenio_notation": notation,
                 "audio": [
                     {
                         "filename": Path(p).name,

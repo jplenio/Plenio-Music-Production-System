@@ -9,7 +9,7 @@ import { api } from '../../../scripts/api.js'
 // @ts-expect-error - provided by ComfyUI at runtime (scripts shim), kept external by the build
 import { app } from '../../../scripts/app.js'
 
-import type { Fetcher } from '../api/client'
+import { type Fetcher, PlenioApiError } from '../api/client'
 import { chain, type ComfyApp, type ComfyNode } from '../shared/comfy'
 import type { AsrNote, SheetPayload } from '../shared/sheetSession'
 import { BRIEF_NODES, installBriefTemplatePanel } from './briefTemplate'
@@ -25,10 +25,11 @@ import {
   setRunState,
   sheetState
 } from './runStatus'
+import { type SheetMusicHost, enqueue, saveSheetMusic, sheetMusicJobs } from './sheetMusic'
 import { SHEET_STATE_TYPE, setFetcher, sheetStateWidget } from './sheetStateWidget'
 import { addStemMixer } from './stemMixer'
 import { installStyles } from './style'
-import { addSummaryDisplay } from './summary'
+import { addSummaryDisplay, setSummaryLine } from './summary'
 
 export const EXTENSION_NAME = 'Plenio.Core'
 
@@ -57,6 +58,39 @@ function nodeById(id: unknown): ComfyNode | null {
 const statusHost: StatusHost = {
   scale: () => comfyApp.canvas?.ds?.scale ?? 1,
   toast: (summary, detail) => comfyApp.extensionManager?.toast?.add({ severity: 'info', summary, detail, life: 12000 })
+}
+
+/** Export Release's sheet music: drawn here with the score editor's notation code, saved by Plenio. */
+const sheetHost: SheetMusicHost = {
+  fetcher: comfyApi,
+  property: (id) => nodeById(id)?.properties?.plenio_lyric_spans,
+  async draw(abc, title, paper) {
+    const { notationPdf, renderLines } = await import('../sheet-editor/score/notationExport')
+    const drawing = renderLines(abc, title, paper)
+    try {
+      if (!drawing.lines.length) throw new Error('the score has no music to draw')
+      return await notationPdf(drawing.lines, paper, title)
+    } finally {
+      drawing.dispose()
+    }
+  }
+}
+
+function saveSheets(node: ComfyNode, output: Record<string, unknown> | undefined): void {
+  for (const job of sheetMusicJobs(output)) {
+    const prefix = `- sheet music: ${job.file}`
+    enqueue(() => saveSheetMusic(job, sheetHost)).then(
+      (saved) => {
+        setSummaryLine(node, prefix, `${prefix} - saved (${Math.max(1, Math.round(saved.bytes / 1024))} KB)`)
+        comfyApp.extensionManager?.toast?.add({ severity: 'success', summary: 'Sheet music saved', detail: saved.file, life: 6000 })
+      },
+      (error: unknown) => {
+        const message = error instanceof PlenioApiError && error.hint ? `${error.message} ${error.hint}` : String(error instanceof Error ? error.message : error)
+        setSummaryLine(node, prefix, `${prefix} - not saved: ${message}`, 'warning')
+        comfyApp.extensionManager?.toast?.add({ severity: 'error', summary: 'Sheet music not saved', detail: message, life: 15000 })
+      }
+    )
+  }
 }
 
 ;(app as ComfyApp).registerExtension({
@@ -113,6 +147,11 @@ const statusHost: StatusHost = {
       }
       nodeType.prototype.onExecuted = chain(nodeType.prototype.onExecuted, function (this: ComfyNode, output) {
         mixers.get(this)?.showExecuted(output)
+      })
+    }
+    if (nodeData.name === 'PlenioExportRelease') {
+      nodeType.prototype.onExecuted = chain(nodeType.prototype.onExecuted, function (this: ComfyNode, output) {
+        saveSheets(this, output)
       })
     }
     if (nodeData.name === 'PlenioSongSheet') {

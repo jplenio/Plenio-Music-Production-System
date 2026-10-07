@@ -21,6 +21,7 @@ from ..core.engines import rules_for
 from ..core.errors import PlenioError, PlenioUserError
 from ..core.sheet import DOCUMENT_KINDS, REVIEW_MODES, evaluate_sheet, parse_sheet_state
 from .shared import preset_library, system_report, template_library
+from .sheet_music import JOBS, MAX_BYTES
 
 log = logging.getLogger("plenio")
 
@@ -383,6 +384,19 @@ async def eq_response(request: web.Request) -> web.StreamResponse:
     )
 
 
+async def export_sheet_music(request: web.Request) -> web.StreamResponse:
+    """The browser's sheet music PDF of an export (Export Release, *sheet music*): written next to the audio
+    under the file name the node reserved for ``token`` (``sheet_music.Jobs``)."""
+    token = request.query.get("token", "")
+    if not token:
+        raise PlenioUserError("The request needs the export's 'token'.")
+    if request.content_length is not None and request.content_length > MAX_BYTES:
+        raise PlenioUserError(f"The sheet music PDF is larger than {MAX_BYTES // 2**20} MB.")
+    data = await request.read()  # the whole body (ComfyUI's upload limit applies)
+    facts = JOBS.save(token, data)
+    return web.json_response({"file": facts["name"], "bytes": facts["bytes"]})
+
+
 ROUTES: tuple[tuple[str, str, Handler], ...] = (
     ("GET", "/plenio/system", system),
     ("POST", "/plenio/score/analyze", score_analyze),
@@ -399,6 +413,7 @@ ROUTES: tuple[tuple[str, str, Handler], ...] = (
     ("GET", "/plenio/asr/notes/{draft_sha256}", asr_note),
     ("GET", "/plenio/presets/{kind}", presets),
     ("POST", "/plenio/eq/response", eq_response),
+    ("POST", "/plenio/export/sheet-music", export_sheet_music),
 )
 
 

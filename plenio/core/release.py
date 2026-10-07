@@ -8,7 +8,7 @@ import re
 import time
 import unicodedata
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -554,6 +554,25 @@ class RecordInput:
     audio: Mapping[str, Any]
     title: str
     licences: Sequence[str]
+    sheet_music: Mapping[str, Any] | None = field(default=None)
+    """The sheet music PDF the export asked for (``file``, ``paper``, ``status``); ``None``: none."""
+
+
+def record_fingerprint(record: Mapping[str, Any]) -> str:
+    """The record's content hash: everything but the creation time (and the fingerprint itself)."""
+    return sha256_text(
+        canonical_json({k: v for k, v in record.items() if k not in ("created", "fingerprint")})
+    )
+
+
+def with_sheet_music(record: Mapping[str, Any], facts: Mapping[str, Any]) -> dict[str, Any]:
+    """``record`` once its sheet music PDF is written: the file listed (role ``sheet_music``), the status
+    ``saved``, the fingerprint computed again."""
+    updated = dict(record)
+    updated["files"] = [*record.get("files", []), {**facts, "role": "sheet_music"}]
+    updated["sheet_music"] = {**dict(record.get("sheet_music") or {}), "status": "saved"}
+    updated["fingerprint"] = record_fingerprint(updated)
+    return updated
 
 
 def build_record(data: RecordInput) -> dict[str, Any]:
@@ -574,5 +593,7 @@ def build_record(data: RecordInput) -> dict[str, Any]:
         "licences": list(data.licences),
         "prompt": prompt_for_record(data.prompt) if data.prompt else None,
     }
-    record["fingerprint"] = sha256_text(canonical_json({k: v for k, v in record.items() if k != "created"}))
+    if data.sheet_music is not None:
+        record["sheet_music"] = dict(data.sheet_music)
+    record["fingerprint"] = record_fingerprint(record)
     return record

@@ -16,6 +16,10 @@ Writes the finished song into the ComfyUI output folder with a **release record*
 
 **Naming** - *naming* pattern with `{title}`, `{date}`, `{time}`, `{seed}`; `/` makes sub-folders; *collision* decides what happens when a file exists (number, overwrite, error). All files of one export share one name: with *number* the whole set becomes `<name> (2)` when any of its files - audio, original, cover or record - already exists, so an earlier export is never overwritten.
 
+**sheet music** - *off*, *PDF (A4)* or *PDF (Letter)*: also saves the score's sheet music as `<name>.pdf` next to the audio - both voices, chord symbols, section names and the **lyrics under the notes**, with the title, exactly as the Song Sheet's *Export notation… > PDF* draws it (lyrics lines placed by hand included). The notation is drawn by the browser that runs the workflow: the export reserves the name, the page draws the PDF right after the export and Plenio saves it; the node's summary then says *saved*, and the record lists the file. A run without an open ComfyUI page (queued over the API, the tab closed) gets no PDF - the record says *drawn by the browser after the export* and nothing more. Needs a score: MiniMax Music 3 and runs without planning have none (noted). The YuE2 templates save it on A4.
+
 **Release record** (`<name>.plenio.json`) - the documents with their hashes, the executed graph (secrets redacted), all connected reports, every written file with size and SHA-256, the delivered audio's loudness (LUFS, true peak, loudness range), the tags, and the licences of the models used.
+
+With *sheet music* on the record also says which PDF belongs to the export and whether it was saved.
 
 Samples above full scale are clipped in FLAC and MP3; the node warns. MP3 holds at most 48 kHz: hi-res audio (88.2/96/192 kHz) is converted for the MP3 only (to 44.1 or 48 kHz); FLAC and WAV keep the rate, and the node notes the conversion. Audio with NaN or infinite samples is refused. Put **Loudness & Dynamics** before the export.

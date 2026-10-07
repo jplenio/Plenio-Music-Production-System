@@ -80,7 +80,7 @@ For instrumental covers Plenio silences the Vocal voice of the score (the melody
 ## Finishing: Master, cover art, files
 
 - **Plenio · Master** (group *FINISH*) masters the take Check Vocals keeps before Export: a gentle warm tone match and -14 LUFS with a true peak of at most -1 dBTP. Open the block to change the EQ, the loudness target or the compression style; its *sample rate* is on the block. Details: [Mastering and audio formats](../concepts/mastering.md).
-- **Export Release** writes the mastered song, the unmastered take as `(original).flac` and the release record. Formats (FLAC, MP3, WAV) and tags are set on the node.
+- **Export Release** writes the mastered song, the unmastered take as `(original).flac`, the release record and the **sheet music** as `<name>.pdf` - the final score with the lyrics under the notes, on A4 (*sheet music* on the node: A4, Letter or off; the open ComfyUI page draws it right after the export). Formats (FLAC, MP3, WAV) and tags are set on the node.
 - **Cover Art (optional)** paints a cover from the sheet's *artwork prompt* with FLUX.2 Klein 4B (4 steps, 1024 x 1024; about 16 GB of extra model files, Apache-2.0). It is bypassed: select *Cover Art* and *Cover preview* and press **Ctrl+B**. Export embeds the cover in the FLAC and MP3 files and saves it next to the song as `.jpg`. The cover seed is fixed, so new takes keep the cover; change the seed for another one.
 
 ## App mode

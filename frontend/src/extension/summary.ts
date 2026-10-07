@@ -75,6 +75,22 @@ function show(node: ComfyNode, item: Summary): void {
   node.setDirtyCanvas?.(true, true)
 }
 
+/**
+ * Put ``line`` into the summary a node shows, in place of its line that starts with ``prefix`` (added at
+ * the end when there is none) - for results that arrive after the run, such as the export's sheet music.
+ */
+export function setSummaryLine(node: ComfyNode, prefix: string, line: string, status?: string): void {
+  const saved = node.properties?.[SUMMARY_KEY] as Summary | undefined
+  const lines = (saved?.markdown ?? '').split('\n')
+  const index = lines.findIndex((text) => text.startsWith(prefix))
+  if (index >= 0) lines[index] = line
+  else lines.push(line)
+  const item = { markdown: lines.join('\n').trim(), status: status ?? saved?.status ?? '' }
+  node.properties = node.properties ?? {}
+  node.properties[SUMMARY_KEY] = item
+  show(node, item)
+}
+
 /** Show the `plenio_summary` UI payload of an executed Plenio node as rendered Markdown.
  *
  * The last summary is kept in the node's properties, so it is back after a page reload, a tab

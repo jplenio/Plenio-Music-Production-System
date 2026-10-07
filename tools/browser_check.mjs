@@ -310,6 +310,73 @@ for (const name of names) {
   }
 }
 
+// 7. sheet music (Export Release, owner's request 2026-10-08): a run started from this page exports a song
+// with *sheet music* on; this page draws the PDF the export reserved, Plenio saves it next to the audio
+// and the release record lists it
+{
+  const check = 'export: the sheet music PDF is saved next to the audio'
+  const folder = `browser-check/sheet-music-${Date.now()}`
+  const score = fs.readFileSync(path.join(PROJECT, 'tests', 'fixtures', 'abc', 'upstream-score.abc'), 'utf8')
+  const lyrics = '[verse]\nMorning light on the window\nCoffee warm in my hand\n\n[chorus]\nSing it slow, let it go\nEvery road leads home'
+  const title = 'Browser Check Sheet'
+  consoleErrors = []
+  const queued = await page.evaluate(async ([folder, score, lyrics, title]) => {
+    const app = window.app
+    app.graph.clear()
+    const add = (type) => {
+      const node = window.LiteGraph.createNode(type)
+      app.graph.add(node)
+      return node
+    }
+    const set = (node, name, value) => {
+      const widget = node.widgets.find((w) => w.name === name)
+      if (!widget) throw new Error(`${node.type} has no widget ${name}`)
+      widget.value = value
+      widget.callback?.(value)
+    }
+    const sheet = add('PlenioSongSheet')
+    const audio = add('LoadAudio')
+    const exporter = add('PlenioExportRelease')
+    set(sheet, 'review', 'continue')
+    const manual = (text) => ({ state: 'manual', text })
+    set(sheet, 'sheet_state', JSON.stringify({ schema: 'plenio.sheet_state/1', docs: { title: manual(title), lyrics: manual(lyrics), score: manual(score) } }))
+    set(audio, 'audio', 'browser-check.flac')
+    set(exporter, 'folder', folder)
+    set(exporter, 'naming', '{title}')
+    set(exporter, 'sheet_music', 'PDF (A4)')
+    const out = (node, name) => node.outputs.findIndex((o) => o.name === name)
+    const inp = (node, name) => node.inputs.findIndex((i) => i.name === name)
+    audio.connect(out(audio, 'AUDIO'), exporter, inp(exporter, 'audio'))
+    sheet.connect(out(sheet, 'title'), exporter, inp(exporter, 'title'))
+    sheet.connect(out(sheet, 'report'), exporter, inp(exporter, 'reports.report_0'))
+    await app.queuePrompt(0, 1)
+    return exporter.id
+  }, [folder, score, lyrics, title])
+  // wait for the record to say the PDF is saved (the page draws it after the export ran)
+  const outcome = await page.evaluate(async ([folder, title, exporterId]) => {
+    const view = (name) => fetch(`/view?filename=${encodeURIComponent(name)}&type=output&subfolder=${encodeURIComponent(folder)}`)
+    const deadline = Date.now() + 120000
+    while (Date.now() < deadline) {
+      const response = await view(`${title}.plenio.json`)
+      if (response.ok) {
+        const record = await response.json()
+        if (record.sheet_music?.status === 'saved') {
+          const pdf = new Uint8Array(await (await view(`${title}.pdf`)).arrayBuffer())
+          const head = new TextDecoder().decode(pdf.slice(0, 5))
+          const listed = (record.files ?? []).some((f) => f.name === `${title}.pdf` && f.role === 'sheet_music')
+          const node = window.app.graph.getNodeById(exporterId)
+          const summary = String(node?.properties?.plenio_summary?.markdown ?? '')
+          return { head, bytes: pdf.length, listed, summary: summary.split('\n').find((l) => l.startsWith('- sheet music')) ?? '' }
+        }
+      }
+      await new Promise((r) => setTimeout(r, 1000))
+    }
+    return { timeout: true }
+  }, [folder, title, queued])
+  const ok = !outcome.timeout && outcome.head === '%PDF-' && outcome.bytes > 10000 && outcome.listed && /saved/.test(outcome.summary)
+  record('Export Release', check, ok, ok ? `${outcome.bytes} bytes; ${outcome.summary}` : JSON.stringify(outcome) + ' ' + plenioErrors().join(' | '))
+}
+
 fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify(results, null, 1) + '\n')
 const failed = results.filter((r) => !r.ok)
 console.log(`\n${results.length - failed.length}/${results.length} checks passed; screenshots and results in ${OUT}`)

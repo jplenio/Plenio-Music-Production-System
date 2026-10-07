@@ -228,16 +228,20 @@ class PlenioSongSheet(io.ComfyNode):
             )
         _follow_series(brief, evaluation.waiting_for_approval)
         report = evaluation.report()
-        if arrangement is not None:  # the release record keeps what the creative mode did
-            report = Report(
-                report.kind,
-                report.status,
-                report.summary,
-                report.messages,
-                {**dict(report.data), "arrangement": dict(arrangement.data)},
-                report.source,
-                report.source_id,
-            )
+        # the node id: Export Release's sheet music finds the lyrics lines placed by hand on this node;
+        # the arrangement: the release record keeps what the creative mode did
+        extra: dict[str, Any] = {"node_id": str(cls.hidden.unique_id)}
+        if arrangement is not None:
+            extra["arrangement"] = dict(arrangement.data)
+        report = Report(
+            report.kind,
+            report.status,
+            report.summary,
+            report.messages,
+            {**dict(report.data), **extra},
+            report.source,
+            report.source_id,
+        )
         documents: list[Any] = [evaluation.text(kind) for kind in DOCUMENT_KINDS]
         final_score = evaluation.text("score") if "score" in evaluation.owned else ""
         tags = score_rules.section_tags(final_score) if final_score.strip() else ""
