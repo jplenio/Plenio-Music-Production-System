@@ -30,6 +30,7 @@ from .catalog import (
 )
 from .client import Answer, Server, Settings, chat, split_thinking
 from .runtime import Runtime, find_runtimes, serve_file
+from .writer import NATIVE, Route, native_writers, route
 
 GIB = 1024**3
 KV_BYTES_PER_TOKEN = 128 * 1024
@@ -91,11 +92,13 @@ def generate(
 
 __all__ = [
     "CHOOSE",
+    "NATIVE",
     "SEPARATOR",
     "Answer",
     "Discovery",
     "Model",
     "Result",
+    "Route",
     "Runtime",
     "Server",
     "Settings",
@@ -108,7 +111,9 @@ __all__ = [
     "generate",
     "known_servers",
     "memory_estimate",
+    "native_writers",
     "resolve",
+    "route",
     "split_ref",
     "split_thinking",
 ]

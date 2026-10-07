@@ -3,6 +3,7 @@ apps) and how to make room before a GGUF file is loaded. The work itself is ``pl
 
 from __future__ import annotations
 
+import logging
 import os
 import threading
 import time
@@ -10,13 +11,25 @@ from pathlib import Path
 
 from ..core import llm
 from ..core.config import PlenioConfig
+from ..core.errors import PlenioError
 from . import host
+
+log = logging.getLogger("plenio")
 
 COMFYUI_LABEL = "models/LLM"
 LIST_TTL_S = 5.0
 """How long a model list is reused (ComfyUI asks for every node definition at once)."""
 _cache: dict[str, tuple[float, llm.Discovery]] = {}
 _lock = threading.Lock()
+
+
+def load_config() -> PlenioConfig:
+    """Plenio's configuration, or the defaults when it cannot be read (the System Check reports why)."""
+    try:
+        return host.load_config()
+    except (PlenioError, ImportError, AttributeError) as error:
+        log.warning("Plenio Local LLM: using the default settings (%s)", error)
+        return PlenioConfig()
 
 
 def stores(config: PlenioConfig) -> list[llm.Store]:
@@ -51,6 +64,11 @@ def discovery(config: PlenioConfig, *, fresh: bool = False) -> llm.Discovery:
         _cache.clear()
         _cache[key] = (time.monotonic(), found)
         return found
+
+
+def writers(config: PlenioConfig) -> list[str]:
+    """Write Song's writer list: ComfyUI's text models that can write, then every Local LLM model."""
+    return llm.native_writers(host.model_files("text_encoders")) + [m.ref for m in discovery(config).models]
 
 
 def make_room(required_bytes: int) -> None:

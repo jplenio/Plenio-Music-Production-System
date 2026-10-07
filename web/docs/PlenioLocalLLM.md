@@ -10,7 +10,7 @@ Answers a prompt with a language model on this machine. One list holds everythin
 
 Press **R** (refresh node definitions) after adding a file or starting an app.
 
-**Inputs:** *prompt* (type it or connect a text, e.g. Compose Writing Prompt), *model*, *seed* (the same seed and prompt give the same, cached answer). Advanced: *max tokens*, *temperature*, *thinking* (let a reasoning model think first; the thoughts come out separately), *context* (for GGUF files and Ollama; other apps use the length set in the app), *keep loaded* (off: memory is freed after the answer), *system prompt*.
+**Inputs:** *prompt* (type it or connect a text, e.g. Compose Writing Prompt), *model*, *seed* (the same seed and prompt give the same, cached answer). Advanced: *max tokens* (6144: room for a long draft and a reasoning model's thoughts), *temperature*, *thinking* (let a reasoning model think first; the thoughts come out separately), *context* (12288, for GGUF files and Ollama; other apps use the length set in the app), *keep loaded* (off: memory is freed after the answer), *system prompt*.
 
 **Outputs:** *text* (the answer, thoughts removed) and *thinking*.
 
@@ -18,4 +18,4 @@ Press **R** (refresh node definitions) after adding a file or starting an app.
 
 The run stops with a message - never with a half answer - when the answer is cut off at *max tokens*, the app is not running, the model is unknown to the app, or the file needs a newer llama.cpp.
 
-In Plenio's song templates the block **Plenio · Write Song (local LLM)** uses this node as the writer. See the user guide *Local LLMs*.
+In Plenio's song templates *Write Song* uses this node when its **writer model** is one of these models (Writer Choice). See the user guide *Local LLMs*.

@@ -1,7 +1,8 @@
 """S-1, S-2, S-6: the YuE2 Song path and the writer with the real models on local hardware (V3).
 
 * S-6 - the writer (Gemma 4 E4B, native Generate Text) drafts from a fixed brief; Parse and the Song
-  Sheet accept the draft. The time is printed (``-s`` shows it).
+  Sheet accept the draft. The time is printed (``-s`` shows it). S-6b: the same through Write Song's
+  Writer Choice, once with the native writer and once with a GGUF from ``models/LLM``.
 * S-1 - a short sung song from fixed documents: YuE2 plans the score, Score Tools prepares it, the score
   sheet validates it, YuE2 renders it, Export writes FLAC and record. The record holds exactly the
   documents the sheets released and the audio stays within the score's ceiling.
@@ -277,6 +278,97 @@ def test_s6_writer_draft_parses(gpu_server: ComfyServer) -> None:
     sheet = payload(entry, "8")
     print(f"S-6 writer draft: {seconds:.1f} s; title {sheet['docs']['title']['text']!r}")
     assert sheet["docs"]["lyrics"]["text"].count("[") >= 2  # sectioned lyrics
+    assert sheet["docs"]["style"]["text"].strip() and sheet["docs"]["title"]["text"].strip()
+    assert errors(sheet) == [], sheet["status"]
+
+
+GGUF_WRITER = os.environ.get("PLENIO_SMOKE_GGUF", "Qwen_Qwen3.5-9B-Q4_K_M.gguf")
+
+
+@pytest.mark.parametrize(
+    "writer",
+    [WRITER, f"models/LLM · {GGUF_WRITER}"],
+    ids=["native", "gguf"],
+)
+def test_s6b_write_song_routes_the_chosen_writer(gpu_server: ComfyServer, writer: str) -> None:
+    """Write Song's writer part as in the blueprint: Writer Choice -> (CLIPLoader -> Generate Text | Local
+    LLM) -> lazy switch -> Parse. Both writers draft a song the sheet accepts; only the chosen one runs.
+    The GGUF needs a llama.cpp runtime on the machine (``PLENIO_SMOKE_GGUF`` in ``models/LLM``)."""
+    if writer.startswith("models/LLM") and not (MODELS / "LLM" / GGUF_WRITER).exists():
+        pytest.skip(f"{GGUF_WRITER} not found under {MODELS / 'LLM'}")
+    prompt = {
+        "1": brief("sung"),
+        "2": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": CHECKPOINT}},
+        "3": {"class_type": "PlenioEngine", "inputs": {"clip": ["2", 1]}},
+        "4": {
+            "class_type": "PlenioComposePrompt",
+            "inputs": {"brief": ["1", 0], "engine": ["3", 0], "detail": "standard"},
+        },
+        "10": {"class_type": "PlenioWriterChoice", "inputs": {"model": writer}},
+        "5": {
+            "class_type": "CLIPLoader",
+            "inputs": {"clip_name": ["10", 0], "type": "stable_diffusion", "device": "default"},
+        },
+        "6": {
+            "class_type": "TextGenerate",
+            "inputs": {
+                "clip": ["5", 0],
+                "prompt": ["4", 0],
+                "max_length": 6144,
+                "sampling_mode": "on",
+                "sampling_mode.temperature": 0.8,
+                "sampling_mode.top_k": 64,
+                "sampling_mode.top_p": 0.95,
+                "sampling_mode.min_p": 0.05,
+                "sampling_mode.repetition_penalty": 1.05,
+                "sampling_mode.seed": 0,
+                "sampling_mode.presence_penalty": 0.0,
+                "thinking": False,
+                "use_default_template": True,
+                "mtp": "auto",
+            },
+        },
+        "11": {
+            "class_type": "PlenioLocalLLM",
+            "inputs": {
+                "prompt": ["4", 0],
+                "model": ["10", 1],
+                "seed": 0,
+                "max_tokens": 6144,
+                "temperature": 0.8,
+                "thinking": False,
+                "context": 12288,
+                "keep_loaded": False,
+                "system_prompt": "",
+            },
+        },
+        "12": {
+            "class_type": "ComfySwitchNode",
+            "inputs": {"switch": ["10", 2], "on_false": ["6", 0], "on_true": ["11", 0]},
+        },
+        "7": {"class_type": "PlenioParseDraft", "inputs": {"text": ["12", 0], "request": ["4", 1]}},
+        "8": {
+            "class_type": "PlenioSongSheet",
+            "inputs": {
+                "title": ["7", 0],
+                "style": ["7", 1],
+                "lyrics": ["7", 2],
+                "artwork_prompt": ["7", 3],
+                "brief": ["1", 0],
+                "engine": ["3", 0],
+                "review": "continue",
+                "sheet_state": "",
+            },
+        },
+    }
+    started = time.monotonic()
+    entry = gpu_server.run(prompt, timeout=1800)
+    seconds = time.monotonic() - started
+    sheet = payload(entry, "8")
+    ran = set(entry["outputs"])
+    print(f"S-6b {writer}: {seconds:.1f} s; title {sheet['docs']['title']['text']!r}")
+    assert ("11" in ran) == writer.startswith("models/LLM")  # Local LLM's summary only when it ran
+    assert sheet["docs"]["lyrics"]["text"].count("[") >= 2
     assert sheet["docs"]["style"]["text"].strip() and sheet["docs"]["title"]["text"].strip()
     assert errors(sheet) == [], sheet["status"]
 

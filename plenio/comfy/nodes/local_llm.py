@@ -2,34 +2,26 @@
 
 from __future__ import annotations
 
-import logging
-
 from comfy_api.latest import io
 
 from ...core import llm
-from ...core.config import PlenioConfig
-from ...core.errors import PlenioCancelledError, PlenioError, PlenioUserError
+from ...core.errors import PlenioCancelledError, PlenioUserError
 from .. import host
 from .. import llm as local
 
-log = logging.getLogger("plenio")
 SEED_RANGE = 2**32
 """llama.cpp takes a 32-bit seed; larger seeds (a linked Seed node) are wrapped into it."""
-
-
-def _config() -> PlenioConfig:
-    try:
-        return host.load_config()
-    except (PlenioError, ImportError, AttributeError) as error:
-        log.warning("Plenio Local LLM: using the default settings (%s)", error)
-        return PlenioConfig()
+MAX_TOKENS = 6144
+"""Room for a long answer and a reasoning model's thoughts (Qwen thinks 500-3000 tokens before it answers)."""
+CONTEXT = 12288
+"""The prompt (a few thousand tokens for a detailed brief), MAX_TOKENS and a margin."""
 
 
 def _model_list() -> list[str]:
     try:
-        refs = [model.ref for model in local.discovery(_config()).models]
+        refs = [model.ref for model in local.discovery(local.load_config()).models]
     except Exception as error:  # a broken folder must not take the node definitions down
-        log.warning("Plenio Local LLM: listing models failed: %s", error)
+        local.log.warning("Plenio Local LLM: listing models failed: %s", error)
         refs = []
     return refs or [llm.CHOOSE]
 
@@ -47,7 +39,8 @@ class PlenioLocalLLM(io.ComfyNode):
                 "Answers a prompt with a local language model: a GGUF file from models/LLM (or from LM Studio, "
                 "the Hugging Face cache, llama.cpp or GPT4All) run by llama.cpp just for this call, or a model of "
                 "a running app (LM Studio, Ollama, llama.cpp, vLLM, Jan, KoboldCpp, ...). Works anywhere a "
-                "STRING is needed; in Plenio it replaces Generate Text in Write Song. Press R to refresh the list."
+                "STRING is needed; Plenio's Write Song uses it when its writer model is one of these. Press R to "
+                "refresh the list."
             ),
             inputs=[
                 io.String.Input(
@@ -72,7 +65,7 @@ class PlenioLocalLLM(io.ComfyNode):
                 ),
                 io.Int.Input(
                     "max_tokens",
-                    default=2048,
+                    default=MAX_TOKENS,
                     min=16,
                     max=131072,
                     advanced=True,
@@ -96,7 +89,7 @@ class PlenioLocalLLM(io.ComfyNode):
                 ),
                 io.Int.Input(
                     "context",
-                    default=8192,
+                    default=CONTEXT,
                     min=1024,
                     max=262144,
                     step=1024,
@@ -126,9 +119,12 @@ class PlenioLocalLLM(io.ComfyNode):
         )
 
     @classmethod
-    def validate_inputs(cls, model: str) -> bool | str:
+    def validate_inputs(cls, model: str | None = None) -> bool | str:
         # A model of another machine or of an app that is not running is not in this machine's list;
-        # the run says what to do instead of a bare "value not in list".
+        # the run says what to do instead of a bare "value not in list". A linked model (Writer Choice in
+        # Write Song) is not known before the run: ComfyUI passes no value, and nothing is checked here.
+        if model is None:
+            return True
         if model == llm.CHOOSE:
             return (
                 "Local LLM: choose a model. If the list offers none, put a GGUF file into ComfyUI's models/LLM "
@@ -146,10 +142,10 @@ class PlenioLocalLLM(io.ComfyNode):
         prompt: str,
         model: str,
         seed: int,
-        max_tokens: int = 2048,
+        max_tokens: int = MAX_TOKENS,
         temperature: float = 0.8,
         thinking: bool = False,
-        context: int = 8192,
+        context: int = CONTEXT,
         keep_loaded: bool = False,
         system_prompt: str = "",
     ) -> io.NodeOutput:
@@ -157,7 +153,7 @@ class PlenioLocalLLM(io.ComfyNode):
             raise PlenioUserError(
                 "The prompt is empty.", hint="Type a request or connect a text to 'prompt'."
             )
-        config = _config()
+        config = local.load_config()
         target = llm.resolve(model, local.stores(config), local.servers(config))
         settings = llm.Settings(
             max_tokens=max_tokens,

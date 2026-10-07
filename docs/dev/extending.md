@@ -77,7 +77,7 @@ An `AsrEngine` entry in `ENGINES` (`plenio/core/asr.py`) and a worker in `plenio
 
 ## Other LLMs and image models
 
-No code: replace `TextGenerate` inside *Plenio · Write Song* with any node that turns a prompt `STRING` into a `STRING`, or replace *Plenio · Cover Art* with any text-to-image blueprint that takes a prompt and returns an `IMAGE`. Local models already have one: **Local LLM** and the blueprint *Plenio · Write Song (local LLM)* (ADR-0010).
+No code: replace `TextGenerate` inside *Plenio · Write Song* with any node that turns a prompt `STRING` into a `STRING`, or replace *Plenio · Cover Art* with any text-to-image blueprint that takes a prompt and returns an `IMAGE`. Local models need no replacement: *Write Song*'s writer model already lists them (Writer Choice routes to **Local LLM**, ADR-0010).
 
 ## Another local LLM app or model folder
 

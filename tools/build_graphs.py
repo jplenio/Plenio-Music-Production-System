@@ -47,7 +47,8 @@ YUE2_CHECKPOINT = "yue2_3b_int8_convrot.safetensors"
 LORA = "ar_lora_inst_v3abc_comfyui.safetensors"
 SHEETSAGE = "sheetsage2_bf16.safetensors"
 WRITER = "gemma4_e4b_it_fp8_scaled.safetensors"
-LOCAL_LLM_CHOICE = CHOOSE  # Local LLM's placeholder: the user picks a model of their machine
+WRITER_MAX_TOKENS = 6144  # a long draft plus a reasoning model's thoughts (Qwen thinks 500-3000 tokens)
+WRITER_CONTEXT = 12288  # Local LLM: a detailed prompt, WRITER_MAX_TOKENS and a margin
 MINIMAX_DIT = "minimax_music3_dit_fp16.safetensors"
 MINIMAX_TE = "minimax_music3_text_encoder_pruned_int8_convrot.safetensors"
 MINIMAX_VAE = "minimax_music3_dav.safetensors"
@@ -457,23 +458,37 @@ def stems() -> Blueprint:
 
 
 def write_song() -> Blueprint:
+    """Compose -> writer -> Parse. One *writer model* list (Writer Choice) holds ComfyUI's text models and
+    every Local LLM model (ADR-0010); a lazy switch takes the answer of the chosen branch only, so the
+    other model is never loaded. The model names reach the loaders by link, so ComfyUI does not require the
+    default writer's file when a Local LLM model is chosen."""
     g = Graph(first_id=501)
     compose = g.add("PlenioComposePrompt", (0, 0), size=(300, 100))
+    choice = g.add(
+        "PlenioWriterChoice",
+        (0, 160),
+        size=(320, 120),
+        title="Writer Choice",
+        widgets={"model": WRITER},
+        # the frontend's missing-model dialog reads the download from the node that shows the file name
+        properties=model(WRITER),
+    )
     loader = g.add(
         "CLIPLoader",
-        (0, 160),
+        (380, 0),
         size=(300, 110),
-        title="Writer model",
+        title="Writer model (ComfyUI)",
         widgets={"clip_name": WRITER, "type": "stable_diffusion", "device": "default"},
         properties=model(WRITER),
     )
     generate = g.add(
         "TextGenerate",
-        (360, 0),
+        (380, 160),
         size=(340, 420),
+        title="Generate Text (ComfyUI)",
         widgets={
             "prompt": "",
-            "max_length": 2048,
+            "max_length": WRITER_MAX_TOKENS,
             "sampling_mode": "on",
             "sampling_mode.temperature": 0.8,
             "sampling_mode.top_k": 64,
@@ -487,85 +502,42 @@ def write_song() -> Blueprint:
             "mtp": "auto",
         },
     )
-    parse = g.add("PlenioParseDraft", (760, 0), size=(300, 140))
-    g.link(compose, "prompt", generate, "prompt")
-    g.link(loader, "CLIP", generate, "clip")
-    g.link(generate, "generated_text", parse, "text")
-    g.link(compose, "request", parse, "request")
-    return Blueprint(
-        "Plenio · Write Song",
-        "Plenio/Writing",
-        "Writes title, style, lyrics and an artwork prompt with a local text model (native Generate Text), "
-        "following the rules of the loaded music model. Replace Generate Text with any other LLM node if you like.",
-        g,
-        [
-            BlueprintInput("brief", "PLENIO_BRIEF", [(compose, "brief")]),
-            BlueprintInput("engine", "PLENIO_ENGINE", [(compose, "engine")]),
-            BlueprintInput("score", "STRING", [(compose, "score")]),
-            BlueprintInput("language", "STRING", [(compose, "language")]),
-            BlueprintInput("reference_lyrics", "STRING", [(compose, "reference_lyrics")]),
-            BlueprintInput(
-                "clip_name",
-                "COMBO",
-                [(loader, "clip_name")],
-                widget=True,
-                default=WRITER,
-                label="writer model",
-            ),
-            BlueprintInput(
-                "sampling_mode.seed",
-                "INT",
-                [(generate, "sampling_mode.seed")],
-                widget=True,
-                default=0,
-                label="draft seed",
-            ),
-            BlueprintInput("thinking", "BOOLEAN", [(generate, "thinking")], widget=True, default=False),
-        ],
-        [
-            BlueprintOutput("title", "STRING", (parse, "title")),
-            BlueprintOutput("style", "STRING", (parse, "style")),
-            BlueprintOutput("lyrics", "STRING", (parse, "lyrics")),
-            BlueprintOutput("artwork_prompt", "STRING", (parse, "artwork_prompt")),
-            BlueprintOutput("report", "PLENIO_REPORT", (parse, "report")),
-        ],
-    )
-
-
-def write_song_local() -> Blueprint:
-    """*Write Song* with Local LLM as the writer: GGUF files (models/LLM, LM Studio, the Hugging Face cache)
-    and the models of running LLM apps (ADR-0010). Same inputs and outputs as *Write Song*, so it takes
-    that block's place in a template; node ids 1301+."""
-    g = Graph(first_id=1301)
-    compose = g.add("PlenioComposePrompt", (0, 0), size=(300, 100))
-    generate = g.add(
+    local_llm = g.add(
         "PlenioLocalLLM",
-        (360, 0),
+        (380, 640),
         size=(340, 330),
         widgets={
             "prompt": "",
-            "model": LOCAL_LLM_CHOICE,
+            "model": CHOOSE,
             "seed": 0,
             "seed.control": "fixed",
-            "max_tokens": 2048,
+            "max_tokens": WRITER_MAX_TOKENS,
             "temperature": 0.8,
             "thinking": False,
-            "context": 8192,
+            "context": WRITER_CONTEXT,
             "keep_loaded": False,
             "system_prompt": "",
         },
     )
-    parse = g.add("PlenioParseDraft", (760, 0), size=(300, 140))
+    switch = g.add("ComfySwitchNode", (780, 160), size=(260, 90), title="ComfyUI or Local LLM")
+    parse = g.add("PlenioParseDraft", (1100, 0), size=(300, 140))
     g.link(compose, "prompt", generate, "prompt")
-    g.link(generate, "text", parse, "text")
+    g.link(compose, "prompt", local_llm, "prompt")
+    g.link(choice, "text_encoder", loader, "clip_name")
+    g.link(loader, "CLIP", generate, "clip")
+    g.link(choice, "local_model", local_llm, "model")
+    g.link(choice, "use_local", switch, "switch")
+    g.link(generate, "generated_text", switch, "on_false")
+    g.link(local_llm, "text", switch, "on_true")
+    g.link(switch, "output", parse, "text")
     g.link(compose, "request", parse, "request")
     return Blueprint(
-        "Plenio · Write Song (local LLM)",
+        "Plenio · Write Song",
         "Plenio/Writing",
-        "Writes title, style, lyrics and an artwork prompt with a local LLM - a GGUF file from models/LLM, "
-        "LM Studio or the Hugging Face cache (run by llama.cpp for the draft, its memory freed afterwards), "
-        "or a model of a running app (LM Studio, Ollama, llama.cpp, vLLM, Jan ...). Same inputs and outputs "
-        "as Write Song: put it in that block's place.",
+        "Writes title, style, lyrics and an artwork prompt following the rules of the loaded music model. The "
+        "writer model is one list: ComfyUI's own text models (native Generate Text, the default) and every "
+        "local LLM - GGUF files from models/LLM, LM Studio or the Hugging Face cache, or the models of a "
+        "running LM Studio, Ollama, llama.cpp ... Only the chosen one is loaded.",
         g,
         [
             BlueprintInput("brief", "PLENIO_BRIEF", [(compose, "brief")]),
@@ -574,15 +546,23 @@ def write_song_local() -> Blueprint:
             BlueprintInput("language", "STRING", [(compose, "language")]),
             BlueprintInput("reference_lyrics", "STRING", [(compose, "reference_lyrics")]),
             BlueprintInput(
-                "model",
-                "COMBO",
-                [(generate, "model")],
-                widget=True,
-                default=LOCAL_LLM_CHOICE,
-                label="writer model",
+                "model", "COMBO", [(choice, "model")], widget=True, default=WRITER, label="writer model"
             ),
-            BlueprintInput("seed", "INT", [(generate, "seed")], widget=True, default=0, label="draft seed"),
-            BlueprintInput("thinking", "BOOLEAN", [(generate, "thinking")], widget=True, default=False),
+            BlueprintInput(
+                "sampling_mode.seed",
+                "INT",
+                [(generate, "sampling_mode.seed"), (local_llm, "seed")],
+                widget=True,
+                default=0,
+                label="draft seed",
+            ),
+            BlueprintInput(
+                "thinking",
+                "BOOLEAN",
+                [(generate, "thinking"), (local_llm, "thinking")],
+                widget=True,
+                default=False,
+            ),
         ],
         [
             BlueprintOutput("title", "STRING", (parse, "title")),
@@ -1692,7 +1672,6 @@ def blueprints() -> dict[str, Blueprint]:
     return {
         "yue2_model": yue2_model(),
         "write": write_song(),
-        "write_local": write_song_local(),
         "yue2_plan": yue2_plan(),
         "yue2_render": yue2_render(),
         "transcribe": transcribe_score(),

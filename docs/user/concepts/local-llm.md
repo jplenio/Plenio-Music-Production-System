@@ -1,14 +1,18 @@
 # Local LLMs
 
-The song templates write their lyrics with ComfyUI's native **Generate Text** and the Gemma 4 writer, which ComfyUI downloads for you. If you already have language models - GGUF files in ComfyUI's `models/LLM` folder, or models in LM Studio, Ollama, llama.cpp, Unsloth Studio or another local app - the **Local LLM** node uses them instead. It is a general node: one prompt in, one answer out, usable in any workflow.
+The song templates write their lyrics with ComfyUI's native **Generate Text** and the Gemma 4 writer, which ComfyUI downloads for you. If you already have language models - GGUF files in ComfyUI's `models/LLM` folder, or models in LM Studio, Ollama, llama.cpp, Unsloth Studio or another local app - you can write with them instead. Outside the song templates the **Local LLM** node is a general node: one prompt in, one answer out, usable in any workflow.
 
-## Use it as the song writer
+## Choose the song writer
 
-1. In the node library open *Plenio / Writing* and add **Plenio · Write Song (local LLM)** next to the template's *Write Song* block.
-2. Connect it like *Write Song*: *brief*, *engine* (and in covers *score*, *language*, *reference_lyrics*) in, *title*, *style*, *lyrics*, *artwork_prompt* and *report* out; link the **Draft seed** node to its *draft seed*. Then delete the old block.
-3. Choose the **writer model** and run.
+The **writer model** field of the *Write Song* block lists every model:
 
-Quicker, for one template: open *Write Song* (the icon at its top right), delete *Writer model* and *Generate Text*, add **Local LLM**, and connect *Compose Writing Prompt → prompt* and *text → Parse Song Draft*.
+| In the list | Written by |
+|---|---|
+| `gemma4_e4b_it_fp8_scaled.safetensors` (the default) and the other ComfyUI text models - bare file names from `models/text_encoders`, as in every ComfyUI loader | ComfyUI's own **Generate Text**; ComfyUI manages the memory and offers the default's download |
+| `models/LLM · …gguf`, `LM Studio files · …`, `HF cache · …` - with where it comes from in front | a GGUF file, run by llama.cpp for the draft (see below) |
+| `LM Studio · …`, `Ollama · …`, `llama.cpp · …` … | a model of a running app |
+
+Choose one and run - nothing else changes. Inside the block, a switch takes the answer of the chosen writer only: the other one is never loaded, and a GGUF does not need the Gemma file at all. *draft seed* and *thinking* apply to whichever writer you chose. The ComfyUI list shows the text encoders of language-model families (Gemma, Qwen, Llama, Mistral) by name; CLIP and T5 encoders are left out.
 
 ## Which models it finds
 
@@ -26,7 +30,7 @@ Vision projectors (`mmproj`), embedding models and the later parts of split file
 ## Files or apps?
 
 - **A file** (`models/LLM · …`, `… files · …`, `HF cache · …`) runs in a llama.cpp server that Plenio starts for the draft and stops right after. Before it starts, ComfyUI frees enough GPU memory for the file and its context; afterwards all of it is free again for YuE2 or MiniMax. This is the best choice on a single 16 GB card. Loading takes a few seconds per draft (a fixed draft seed keeps the draft cached, so it is written once).
-- **An app's model** (`LM Studio · …`, `Ollama · …`) is answered by the running app. The app manages its own memory: Plenio asks Ollama, and LM Studio for models it loaded by itself, to unload after the answer (*keep loaded* off), but a model you loaded by hand in LM Studio stays. Set the context length in LM Studio to 8192 or more; Ollama gets it from the node.
+- **An app's model** (`LM Studio · …`, `Ollama · …`) is answered by the running app. The app manages its own memory: Plenio asks Ollama, and LM Studio for models it loaded by itself, to unload after the answer (*keep loaded* off), but a model you loaded by hand in LM Studio stays. Set the context length in LM Studio to 12288 or more (a draft with thoughts needs it); Ollama gets it from the node.
 
 ## Running GGUF files: the llama.cpp server
 
@@ -44,10 +48,10 @@ Without any of them, models of running apps still work. LM Studio's bundled llam
 | Setting | Default | Meaning |
 |---|---|---|
 | seed | 0, fixed | the same seed and prompt give the same, cached answer |
-| max tokens | 2048 | a longer answer stops the run with a message instead of being cut |
+| max tokens | 6144 | room for a long draft and a reasoning model's thoughts; a longer answer stops the run with a message instead of being cut |
 | temperature | 0.8 | 0 = most likely words; higher = more varied |
 | thinking | off | let a reasoning model think first; slower and needs more max tokens; the thoughts come out on *thinking* |
-| context | 8192 | prompt + answer, for files and Ollama |
+| context | 12288 | prompt + answer, for files and Ollama |
 | keep loaded | off | on: the model stays loaded for the next run - faster, but it keeps its GPU memory next to ComfyUI's models |
 | system prompt | empty | standing instructions before the prompt |
 

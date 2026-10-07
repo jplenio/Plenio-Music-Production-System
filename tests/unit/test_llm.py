@@ -507,3 +507,47 @@ def test_system_check_names_the_runtime_or_how_to_get_one() -> None:
     ]
     assert "winget" in _llm_lines({"runtimes": [], "models": {"models/LLM": 1}, "files": 1})[1]
     assert len(_llm_lines({"runtimes": [], "models": {"Ollama": 1}, "files": 0})) == 1  # apps need no runtime
+
+
+# --- Write Song's writer list -----------------------------------------------------------------
+
+
+def test_native_writers_are_the_language_models_among_the_text_encoders() -> None:
+    files = [
+        "gemma4_e4b_it_fp8_scaled.safetensors",
+        "qwen3.5_2b_bf16.safetensors",
+        "sub/llama_3.1_8b_instruct_fp8_scaled.safetensors",
+        "ministral-3-3b.safetensors",
+        "clip_l.safetensors",
+        "t5xxl_fp16.safetensors",
+        "t5gemma_b_b_ul2.safetensors",
+        "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+        "ltx-2.3_text_projection_bf16.safetensors",
+        "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+        "minimax_music3_text_encoder_pruned_int8_convrot.safetensors",
+        "Qwen2.5-VL-7B-Instruct-Q4_K_M.gguf",  # ComfyUI's loader reads no GGUF
+    ]
+    assert llm.native_writers(files) == [  # bare names, as ComfyUI's loaders list them
+        "gemma4_e4b_it_fp8_scaled.safetensors",
+        "ministral-3-3b.safetensors",
+        "qwen3.5_2b_bf16.safetensors",
+        "sub/llama_3.1_8b_instruct_fp8_scaled.safetensors",
+    ]
+
+
+def test_a_writer_reference_routes_to_one_branch() -> None:
+    native = llm.route("gemma4_e4b_it_fp8_scaled.safetensors")
+    assert (native.text_encoder, native.local_model, native.use_local) == (
+        "gemma4_e4b_it_fp8_scaled.safetensors",
+        "",
+        False,
+    )
+    local = llm.route("models/LLM · Qwen3.8-27B-UD-IQ3_XXS.gguf")
+    assert (local.text_encoder, local.local_model, local.use_local) == (
+        "",
+        "models/LLM · Qwen3.8-27B-UD-IQ3_XXS.gguf",
+        True,
+    )
+    assert llm.route("Ollama · qwen3:8b").use_local
+    with pytest.raises(PlenioUserError):
+        llm.route(llm.CHOOSE)

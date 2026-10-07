@@ -365,7 +365,7 @@ Blueprints live in `subgraphs/` and appear in the node library [VF]. Templates e
 |---|---|---|---|
 | **Plenio · YuE2 Model** | `CheckpointLoaderSimple` → `LoraLoader` *(instrumental adapter, bypassed by default)* → Plenio Engine Profile | checkpoint (A), adapter strength (A) | MODEL, CLIP, VAE, ENGINE |
 | **Plenio · MiniMax Model** | `UNETLoader`, `CLIPLoader(type=minimax)`, `VAELoader` → Plenio Engine Profile | model files (A) | MODEL, CLIP, VAE, ENGINE |
-| **Plenio · Write Song** | Plenio Compose → `CLIPLoader` (text model) → **`TextGenerate`** → Plenio Parse | brief, engine, score (opt), reference lyrics (opt), language (opt); writer model (N), draft seed (N), thinking (A) | title, style, lyrics, artwork prompt, report |
+| **Plenio · Write Song** | Plenio Compose → Plenio Writer Choice → (`CLIPLoader` (text model) → **`TextGenerate`** or Plenio Local LLM) → lazy `ComfySwitchNode` → Plenio Parse (ADR-0010) | brief, engine, score (opt), reference lyrics (opt), language (opt); writer model (N), draft seed (N), thinking (A) | title, style, lyrics, artwork prompt, report |
 | **Plenio · YuE2 Plan** | `YuE2GenerateABC` + `ComfySwitchNode` (planning on/off, native pattern) | clip, style, lyrics, plan seed; planning (N: on/off), plan type (N: full/melody) | score |
 | **Plenio · YuE2 Render** | `YuE2GenerateMusic` → `EmptyYuE2LatentAudio` → `ConditioningZeroOut` → `KSampler` → `VAEDecodeAudio` | model, clip, vae, style, lyrics, score, planning mode, take seed, max seconds | audio, seconds |
 | **Plenio · MiniMax Render** | `MiniMaxMusic3TextEncode` → `EmptyMiniMaxMusic3LatentAudio` → `ConditioningZeroOut` → `KSampler` → `VAEDecodeAudio`/`VAEDecodeAudioTiled` (switch) | model, clip, vae, caption, lyrics, take seed, max seconds, tiled decode (A) | audio, seconds |
@@ -597,7 +597,7 @@ Plenio-Music-Production-System/          # the custom-node folder (installed und
 | Extension | Where | What to add |
 |---|---|---|
 | New music engine | `core.engines.<x>`, Engine Profile detection, `subgraphs/Plenio · <X> Model/Render`, template | see §7.3 |
-| New LLM | inside *Write Song* | replace `TextGenerate` with any STRING→STRING node; local models: *Plenio · Write Song (local LLM)* (ADR-0010) |
+| New LLM | inside *Write Song* | local models: already in the writer model list (Writer Choice -> Local LLM, ADR-0010); others: connect any STRING→STRING node to the switch in front of Parse |
 | New ASR engine | `core.asr` adapter + worker | one DynamicCombo option on Transcribe Lyrics |
 | New vocal detector | `core.vocals` + Check Vocals option | metric + calibration data |
 | New score dialect | `core.score.dialects.<x>` | parser/validator/ops; editor works through routes |

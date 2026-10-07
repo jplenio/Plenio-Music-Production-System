@@ -2223,7 +2223,7 @@
       {
        "tooltip": "Longest answer in tokens; a cut-off answer stops the run with a message.",
        "advanced": true,
-       "default": 2048,
+       "default": 6144,
        "min": 16,
        "max": 131072
       }
@@ -2252,7 +2252,7 @@
       {
        "tooltip": "Context length in tokens (prompt + answer) for GGUF files and Ollama. Other apps use the length set in the app.",
        "advanced": true,
-       "default": 8192,
+       "default": 12288,
        "min": 1024,
        "max": 262144,
        "step": 1024
@@ -3950,6 +3950,45 @@
    "output_node": false,
    "category": "Plenio/Audio analysis",
    "display_name": "Check Vocals"
+  },
+  "PlenioWriterChoice": {
+   "input": {
+    "required": {
+     "model": [
+      "COMBO",
+      {
+       "tooltip": "A bare file name (gemma4_e4b_it_fp8_scaled.safetensors): a text model in models/text_encoders, written by ComfyUI's Generate Text. 'models/LLM · ...gguf', '... files · ...', 'HF cache · ...': a GGUF run by llama.cpp for the draft. 'LM Studio · ...', 'Ollama · ...': a model of a running app.",
+       "multiselect": false,
+       "options": [
+        "(choose a model)"
+       ]
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "model"
+    ]
+   },
+   "output": [
+    "*",
+    "*",
+    "BOOLEAN"
+   ],
+   "output_name": [
+    "text_encoder",
+    "local_model",
+    "use_local"
+   ],
+   "output_is_list": [
+    false,
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Writing",
+   "display_name": "Writer Choice"
   },
   "PreviewAny": {
    "input": {

@@ -19,6 +19,7 @@ from .system_check import PlenioSystemCheck
 from .transcribe_lyrics import PlenioTranscribeLyrics
 from .transcribe_score import PlenioTranscribeScore
 from .vocal_check import PlenioVocalCheck
+from .writer_choice import PlenioWriterChoice
 
 NODES = (
     PlenioSongBrief,
@@ -26,6 +27,7 @@ NODES = (
     PlenioEngine,
     PlenioComposePrompt,
     PlenioParseDraft,
+    PlenioWriterChoice,
     PlenioLocalLLM,
     PlenioSongSheet,
     PlenioScoreTools,

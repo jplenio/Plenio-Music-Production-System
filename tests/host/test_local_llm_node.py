@@ -1,7 +1,9 @@
-"""Local LLM in a real ComfyUI server: the model list, a server from config.toml, and a GGUF file.
+"""Local LLM and Writer Choice in a real ComfyUI server: the lists, a server from config.toml, a GGUF file,
+and Write Song's routing (only the chosen branch runs; the native loader needs no file for a local model).
 
 The app is a fake OpenAI-compatible server in the test process; the GGUF is a dummy file, so its run
 must stop with a readable error (no runtime on the CI machine; a real llama-server refuses the file).
+The text encoders are empty files: listed by name, never loaded.
 """
 
 from __future__ import annotations
@@ -60,6 +62,9 @@ def llm_server(tmp_path_factory: pytest.TempPathFactory, comfy_path: Path) -> It
     (base / "models" / "LLM" / "sub").mkdir(parents=True)
     (base / "models" / "LLM" / "sub" / "tiny-Q4.gguf").write_bytes(b"GGUF not really")
     (base / "models" / "LLM" / "mmproj-F16.gguf").write_bytes(b"")
+    (base / "models" / "text_encoders").mkdir(parents=True)
+    for name in ("gemma4_e4b_it_fp8_scaled.safetensors", "clip_l.safetensors", "t5xxl_fp16.safetensors"):
+        (base / "models" / "text_encoders" / name).write_bytes(b"")
     (base / "user" / "plenio").mkdir(parents=True)
     (base / "user" / "plenio" / "config.toml").write_text(
         f'[llm.servers]\n"Fake app" = "http://127.0.0.1:{app.server_address[1]}/v1"\n', encoding="utf-8"
@@ -122,3 +127,69 @@ def test_a_model_of_another_machine_is_reported_at_run_time(llm_server: ComfySer
     assert "is not in models/LLM" in error["exception_message"]
     status, data = llm_server.request("POST", "/prompt", {"prompt": prompt("(choose a model)")})
     assert status == 400 and "choose a model" in json.dumps(data)
+
+
+def write_song_branches(writer: str) -> dict[str, Any]:
+    """Write Song's writer part as the frontend sends it: Writer Choice -> (CLIPLoader -> Generate Text |
+    Local LLM) -> lazy switch. The loader's file name arrives by link, as in the blueprint."""
+    return {
+        "1": {"class_type": "PlenioWriterChoice", "inputs": {"model": writer}},
+        "2": {
+            "class_type": "CLIPLoader",
+            "inputs": {"clip_name": ["1", 0], "type": "stable_diffusion", "device": "default"},
+        },
+        "3": {
+            "class_type": "TextGenerate",
+            "inputs": {
+                "clip": ["2", 0],
+                "prompt": "Write a line",
+                "max_length": 64,
+                "sampling_mode": "off",
+                "thinking": False,
+                "use_default_template": True,
+                "mtp": "auto",
+            },
+        },
+        "4": {
+            "class_type": "PlenioLocalLLM",
+            "inputs": {
+                "prompt": "Write a line",
+                "model": ["1", 1],
+                "seed": 0,
+                "max_tokens": 64,
+                "temperature": 0.0,
+                "thinking": False,
+                "context": 2048,
+                "keep_loaded": False,
+                "system_prompt": "",
+            },
+        },
+        "5": {
+            "class_type": "ComfySwitchNode",
+            "inputs": {"switch": ["1", 2], "on_false": ["3", 0], "on_true": ["4", 0]},
+        },
+        "6": {"class_type": "PlenioTestSink", "inputs": {"value": ["5", 0], "label": "draft"}},
+    }
+
+
+def test_the_writer_list_holds_text_models_and_local_models(llm_server: ComfyServer) -> None:
+    info = llm_server.get("/object_info/PlenioWriterChoice")["PlenioWriterChoice"]
+    assert info["input"]["required"]["model"][1]["options"] == [
+        "gemma4_e4b_it_fp8_scaled.safetensors",  # bare name; CLIP and T5 encoders are left out
+        "models/LLM · sub/tiny-Q4.gguf",
+        "Fake app · served-model",
+    ]
+
+
+def test_a_local_writer_runs_only_its_branch(llm_server: ComfyServer) -> None:
+    """The native branch never runs: its loader gets an empty name by link (no file needed, not validated)."""
+    entry = llm_server.run(write_song_branches("Fake app · served-model"))
+    assert entry["outputs"]["6"]["received"] == ["Answer to: Write a line"]
+    assert "Local LLM" in entry["outputs"]["1"]["plenio_summary"][0]["markdown"]
+    assert {"2", "3"}.isdisjoint(entry["outputs"])  # neither the loader nor Generate Text executed
+
+
+def test_a_missing_native_writer_is_named(llm_server: ComfyServer) -> None:
+    error = llm_server.run_expect_error(write_song_branches("gemma4_e2b_it_bf16.safetensors"))
+    assert error["node_type"] == "PlenioWriterChoice"
+    assert "gemma4_e2b_it_bf16.safetensors is not in models/text_encoders" in error["exception_message"]
