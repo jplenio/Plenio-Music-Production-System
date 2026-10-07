@@ -58,6 +58,11 @@ class PlenioWriterChoice(io.ComfyNode):
                     display_name="use_local",
                     tooltip="True for a Local LLM model: the switch after the two branches takes its answer.",
                 ),
+                io.AnyType.Output(
+                    display_name="model",
+                    tooltip="The chosen entry as listed: link it to another writer (Write Song, Arrange) so that "
+                    "every writing step uses the same model.",
+                ),
             ],
         )
 
@@ -95,5 +100,6 @@ class PlenioWriterChoice(io.ComfyNode):
             route.text_encoder,
             route.local_model,
             route.use_local,
+            model,
             ui={"plenio_summary": [{"status": "ok", "markdown": markdown}]},
         )

@@ -109,6 +109,25 @@ def resolve_mode(value: str | None, modes: Mapping[str, str] = SONG_MODES) -> st
 
 
 MELODY_OPTIONS = {"instrument plays the lead": "lead", "accompaniment only": "accompaniment"}
+ARRANGEMENT_DEFAULT = "simple"
+"""The creative mode of a new brief: the music model plans the music by itself (``core.arrangement``)."""
+CLOSENESS_DEFAULT = 70
+"""Genre closeness of a song, song flow closeness of a cover (0 free ... 100 strict / the original)."""
+LYRICS_CLOSENESS_DEFAULT = 0
+"""A new-lyrics cover's closeness to the source's lyrics; 0 writes them without the source's text."""
+
+
+def closeness_value(value: Any, default: int = CLOSENESS_DEFAULT) -> int:
+    """A closeness slider's value: a whole number from 0 to 100 (an empty value takes ``default``)."""
+    if value is None or str(value).strip() == "":
+        return default
+    try:
+        number = round(float(value))
+    except (TypeError, ValueError):
+        raise PlenioUserError(f"Closeness {value!r} is not a number.", hint="Use 0 to 100.") from None
+    return max(0, min(100, number))
+
+
 TEXT_FIELDS = (
     "description",
     "genre",
@@ -141,6 +160,10 @@ class SongBrief:
     theme: str = ""
     melody: str = "lead"
     lead_instrument: str = ""
+    arrangement: str = ARRANGEMENT_DEFAULT
+    """The creative mode (``core.arrangement``): ``simple`` or the name of a mode file."""
+    closeness: int = CLOSENESS_DEFAULT
+    """How close the song stays to its genre (creative modes only): 0 free ... 100 strictly typical."""
     template: str = ""
     from_template: tuple[str, ...] = field(default=(), compare=False)
     notes: tuple[str, ...] = field(default=(), compare=False)
@@ -255,6 +278,12 @@ class CoverBrief:
     lead_instrument: str = ""
     harmony: str = "new"
     title: str = ""
+    arrangement: str = ARRANGEMENT_DEFAULT
+    """The creative mode (``core.arrangement``): ``simple`` keeps the transcribed score as it is."""
+    closeness: int = CLOSENESS_DEFAULT
+    """Song flow closeness (creative modes only): 0 only a hint of the original ... 100 exactly the original."""
+    lyrics_closeness: int = LYRICS_CLOSENESS_DEFAULT
+    """New lyrics only: 0 without the source's text, 1 only a hint of it ... 100 its meaning line by line."""
     template: str = ""
     from_template: tuple[str, ...] = field(default=(), compare=False)
     notes: tuple[str, ...] = field(default=(), compare=False)
@@ -285,6 +314,11 @@ class CoverBrief:
     def target_seconds(self) -> float | None:
         """Covers have no target length: the source defines it."""
         return None
+
+    @property
+    def uses_source_lyrics_text(self) -> bool:
+        """New lyrics that follow the source's text (lyrics closeness above 0): its transcription is needed."""
+        return self.writes_lyrics and self.lyrics_closeness > 0
 
     @property
     def max_seconds(self) -> float:
@@ -500,6 +534,13 @@ def build_cover_brief(
         lead_instrument=merged["lead_instrument"] if vocals == "instrumental" else "",
         harmony=harmony,
         title=str(values.get("title", "") or "").strip(),
+        arrangement=str(values.get("arrangement", "") or ARRANGEMENT_DEFAULT).strip(),
+        closeness=closeness_value(values.get("closeness")),
+        lyrics_closeness=(
+            closeness_value(values.get("lyrics_closeness"), LYRICS_CLOSENESS_DEFAULT)
+            if vocals == "new"
+            else 0
+        ),
         template=template.id if template else "",
         from_template=tuple(from_template),
         notes=tuple(notes),
@@ -533,7 +574,7 @@ class Template:
 
 
 def build_song_brief(
-    values: Mapping[str, str],
+    values: Mapping[str, Any],
     template: Template | None = None,
     *,
     mode: str = "careful",
@@ -555,6 +596,8 @@ def build_song_brief(
         length=length,
         vocals=vocals,
         melody=melody,
+        arrangement=str(values.get("arrangement", "") or ARRANGEMENT_DEFAULT).strip(),
+        closeness=closeness_value(values.get("closeness")),
         template=template.id if template else "",
         from_template=tuple(from_template),
         notes=tuple(notes),

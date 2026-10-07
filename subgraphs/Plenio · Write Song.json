@@ -471,6 +471,12 @@
         "links": [
          9
         ]
+       },
+       {
+        "localized_name": "model",
+        "name": "model",
+        "type": "*",
+        "links": null
        }
       ],
       "title": "Writer Choice",
@@ -764,6 +770,13 @@
       "mode": 0,
       "inputs": [
        {
+        "localized_name": "schema",
+        "name": "schema",
+        "shape": 7,
+        "type": "STRING",
+        "link": null
+       },
+       {
         "localized_name": "prompt",
         "name": "prompt",
         "type": "STRING",
@@ -843,6 +856,15 @@
          "name": "system_prompt"
         },
         "link": null
+       },
+       {
+        "localized_name": "reuse_answers",
+        "name": "reuse_answers",
+        "type": "BOOLEAN",
+        "widget": {
+         "name": "reuse_answers"
+        },
+        "link": null
        }
       ],
       "outputs": [
@@ -874,7 +896,8 @@
        false,
        12288,
        false,
-       ""
+       "",
+       true
       ]
      },
      {
@@ -1149,7 +1172,7 @@
       "origin_id": 509,
       "origin_slot": 1,
       "target_id": 505,
-      "target_slot": 2,
+      "target_slot": 3,
       "type": "INT"
      },
      {
@@ -1165,7 +1188,7 @@
       "origin_id": 501,
       "origin_slot": 0,
       "target_id": 505,
-      "target_slot": 0,
+      "target_slot": 1,
       "type": "STRING"
      },
      {
@@ -1189,7 +1212,7 @@
       "origin_id": 502,
       "origin_slot": 1,
       "target_id": 505,
-      "target_slot": 1,
+      "target_slot": 2,
       "type": "*"
      },
      {
@@ -1309,7 +1332,7 @@
       "origin_id": -10,
       "origin_slot": 8,
       "target_id": 505,
-      "target_slot": 5,
+      "target_slot": 6,
       "type": "BOOLEAN"
      },
      {

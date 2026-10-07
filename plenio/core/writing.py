@@ -14,6 +14,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from . import lyrics as lyrics_rules
+from .arrangement import CreativeMode, writer_lines
 from .brief import CoverBrief, SongBrief
 from .engines import EngineInfo, rules_for
 from .engines.yue2 import melody_register, note_name
@@ -155,11 +156,14 @@ def compose(
     reference_lyrics: str = "",
     score_tempo: int | None = None,
     vocal_range: tuple[int, int] | None = None,
+    mode: CreativeMode | None = None,
 ) -> tuple[str, Request]:
     """The writing prompt for ``brief`` under the rules of ``engine``.
 
     Songs: the LLM writes title, style and lyrics; instrumental songs get the single tag
     ``[instrumental]`` from Plenio. Covers: the score defines the sections (see ``_compose_cover``).
+    ``mode``: the brief's creative mode, whose writer hints (and, for a song, the genre closeness) are
+    added to the rules; ``simple`` adds nothing.
     """
     if isinstance(brief, CoverBrief):
         return _compose_cover(
@@ -172,6 +176,7 @@ def compose(
             reference_lyrics=reference_lyrics,
             score_tempo=score_tempo,
             vocal_range=vocal_range,
+            creative=mode,
         )
     rules = rules_for(engine.engine_id).writing_rules(
         instrumental=brief.instrumental, target_seconds=brief.target_seconds
@@ -218,6 +223,8 @@ def compose(
     parts += series_lines(brief)
     if DETAIL.get(detail):
         parts.append(f"- {DETAIL[detail]}")
+    if mode is not None:
+        parts += writer_lines(mode, kind="song", closeness=brief.closeness, genre=brief.genre)
     example = lyrics_rules.tags_only(sections) if brief.instrumental else f"[{sections[0]}]\n<lines>\n..."
     parts += [*_example_style(rules), "", *_layout(example, multiline=bool(rules.get("style_multiline")))]
     return "\n".join(parts), request
@@ -280,6 +287,22 @@ def reference_lines(reference_lyrics: str, sections: Sequence[str]) -> list[str]
     return lines
 
 
+def lyrics_closeness_text(closeness: int) -> str:
+    """A new-lyrics cover's lyrics closeness in words (empty for 0: the source's text plays no role)."""
+    if closeness <= 0:
+        return ""
+    if closeness < 30:
+        return "only a hint of the source's lyrics: your own story on the theme; at most one image or phrase may echo them."
+    if closeness < 60:
+        return "keep the source's theme and mood, told with your own story and images."
+    if closeness < 90:
+        return "retell the source's story and keep its central images, in new words."
+    return (
+        "stay as close to the source's lyrics as possible: the meaning, the images and the rhymes of every line; "
+        "where the language differs, translate them line by line, singable on the same notes."
+    )
+
+
 def phrasing_lines(phrasing: Sequence[Mapping[str, Any]]) -> list[str]:
     """One line per score section: how many lyric lines and about how many syllables each."""
     lines = []
@@ -304,6 +327,7 @@ def _compose_cover(
     reference_lyrics: str,
     score_tempo: int | None,
     vocal_range: tuple[int, int] | None = None,
+    creative: CreativeMode | None = None,
 ) -> tuple[str, Request]:
     """Cover prompt: melody, form and tempo come from the score; the LLM describes the new version.
 
@@ -360,11 +384,19 @@ def _compose_cover(
             "sung (no stage directions, no repeat marks).",
         ]
         targets = reference_lines(reference_lyrics, sections) if reference_lyrics.strip() else []
+        closeness = brief.lyrics_closeness if reference_lyrics.strip() else 0
+        own_words = (
+            "Do not copy the source words" if closeness < 90 else "Keep the source words where they fit"
+        )
+        if closeness:
+            parts.append(
+                f"- Closeness to the source's lyrics ({closeness} of 100): {lyrics_closeness_text(closeness)}"
+            )
         if targets:
             parts += [
                 "- Fit the melody exactly: the melody was sung with the source lines below. Write the same "
                 "number of lines per section, each new line with the SAME number of syllables as the source "
-                "line it replaces (count them). Do not copy the source words:",
+                f"line it replaces (count them). {own_words}:",
                 *[f"  {line}" for line in targets],
             ]
         else:
@@ -373,7 +405,12 @@ def _compose_cover(
                 *[f"  {line}" for line in phrasing_lines(phrasing)],
             ]
             if reference_lyrics.strip():
-                parts.append("- The source's lyrics, for phrasing and meaning only (do not copy them):")
+                use = (
+                    "for phrasing and meaning only (do not copy them)"
+                    if closeness < 90
+                    else "to stay close to"
+                )
+                parts.append(f"- The source's lyrics, {use}:")
                 parts += [f"  {line}" for line in reference_lyrics.strip().splitlines() if line.strip()]
         if brief.theme:
             parts.append(f"- Theme of the new lyrics: {brief.theme}")
@@ -388,6 +425,8 @@ def _compose_cover(
     parts += series_lines(brief)
     if DETAIL.get(detail):
         parts.append(f"- {DETAIL[detail]}")
+    if creative is not None:
+        parts += writer_lines(creative, kind="cover", closeness=brief.closeness, genre=brief.genre)
     parts += [*_example_style(rules), "", *_layout(example, multiline=bool(rules.get("style_multiline")))]
     return "\n".join(parts), request
 

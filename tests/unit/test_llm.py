@@ -189,6 +189,99 @@ def test_http_errors_name_the_app_and_the_fix(app: Callable[[Reply], FakeApp]) -
     assert "refresh" in str(error.value)
 
 
+SCHEMA = {"type": "object", "properties": {"plan": {"type": "string"}}, "required": ["plan"]}
+
+
+def test_a_schema_holds_the_answer_to_its_shape(app: Callable[[Reply], FakeApp]) -> None:
+    fake = app(lambda path, body: (200, completion('{"plan": "x"}')))
+    answer = llm.chat(fake.server(protocol="lmstudio"), "m", "x", llm.Settings(schema=SCHEMA))
+    assert answer.constrained and answer.text == '{"plan": "x"}'
+    assert fake.requests[-1][1]["response_format"] == {
+        "type": "json_schema",
+        "json_schema": {"name": "answer", "strict": True, "schema": SCHEMA},
+    }
+    assert not llm.chat(fake.server(), "m", "x").constrained
+    assert "response_format" not in fake.requests[-1][1]
+
+
+def test_an_app_that_refuses_the_schema_is_asked_without_it(app: Callable[[Reply], FakeApp]) -> None:
+    def reply(path: str, body: dict[str, Any] | None) -> tuple[int, dict[str, Any]]:
+        if body and "response_format" in body:
+            return 400, {"error": {"message": "response_format is not supported"}}
+        return 200, completion("free text")
+
+    fake = app(reply)
+    answer = llm.chat(fake.server("KoboldCpp"), "m", "x", llm.Settings(schema=SCHEMA))
+    assert answer.text == "free text" and not answer.constrained
+    assert [("response_format" in body) for _, body, _ in fake.requests] == [True, False]
+
+
+def test_a_failure_that_is_not_about_the_schema_is_not_repeated(app: Callable[[Reply], FakeApp]) -> None:
+    fake = app(lambda path, body: (500, {"error": {"message": "out of memory"}}))
+    with pytest.raises(PlenioUserError, match="out of memory"):
+        llm.chat(fake.server(), "m", "x", llm.Settings(schema=SCHEMA))
+    assert len(fake.requests) == 1
+
+
+def test_ollama_takes_the_schema_as_format(app: Callable[[Reply], FakeApp]) -> None:
+    def reply(path: str, body: dict[str, Any] | None) -> tuple[int, dict[str, Any]]:
+        if body and body.get("format") and body["model"] == "old:latest":
+            return 400, {"error": "invalid format"}
+        return 200, {"model": "m", "message": {"content": '{"plan": "x"}'}, "done_reason": "stop"}
+
+    fake = app(reply)
+    server = fake.server(protocol="ollama")
+    assert llm.chat(server, "qwen3:8b", "x", llm.Settings(schema=SCHEMA)).constrained
+    assert fake.requests[-1][1]["format"] == SCHEMA
+    answer = llm.chat(server, "old:latest", "x", llm.Settings(schema=SCHEMA))
+    assert not answer.constrained and "format" not in fake.requests[-1][1]
+
+
+def test_the_server_shim_turns_a_schema_into_a_grammar_request() -> None:
+    from plenio.workers.llama_http import response_format
+
+    wanted = {"response_format": {"type": "json_schema", "json_schema": {"name": "a", "schema": SCHEMA}}}
+    assert response_format(wanted) == {"type": "json_object", "schema": SCHEMA}
+    assert response_format({"response_format": {"type": "json_object"}}) == {"type": "json_object"}
+    assert response_format({"response_format": {"type": "text"}}) is None
+    assert response_format({}) is None
+
+
+def test_answers_come_from_the_cache_for_the_same_request(
+    app: Callable[[Reply], FakeApp], tmp_path: Path
+) -> None:
+    fake = app(lambda path, body: (200, completion("an answer")))
+    model = llm.Model("LM Studio", "m", server=fake.server("LM Studio"))
+    cache = llm.AnswerCache(tmp_path / "cache")
+    settings = llm.Settings(seed=5, schema=SCHEMA)
+    first = llm.generate(model, "Write", settings, cache=cache)
+    again = llm.generate(model, "Write", settings, cache=cache)
+    assert not first.cached and again.cached and again.answer == first.answer and again.runtime == "LM Studio"
+    assert len(fake.requests) == 1  # the model was asked once
+    llm.generate(model, "Write", llm.Settings(seed=6, schema=SCHEMA), cache=cache)  # a new seed: a new answer
+    llm.generate(model, "Write more", settings, cache=cache)
+    llm.generate(model, "Write", settings)  # no cache: always asked
+    assert len(fake.requests) == 4
+    # keeping the model loaded does not change the answer, so it is the same request
+    assert llm.generate(model, "Write", settings, cache=cache, keep_loaded=True).cached
+
+
+def test_a_changed_model_file_is_another_model(tmp_path: Path) -> None:
+    path = touch(tmp_path / "tiny.gguf", 10)
+    model = llm.Model("models/LLM", "tiny.gguf", path=path, size=10)
+    key = llm.request_key(model, "x", llm.Settings())
+    assert llm.request_key(model, "x", llm.Settings()) == key
+    path.write_bytes(b"0" * 20)  # a new download of the same name
+    assert llm.request_key(model, "x", llm.Settings()) != key
+    assert llm.request_key(model, "x", llm.Settings(max_tokens=99)) != llm.request_key(
+        model, "x", llm.Settings()
+    )
+    broken = llm.AnswerCache(tmp_path / "c")
+    broken.folder.mkdir()
+    broken.path("k").write_text("{not json", encoding="utf-8")
+    assert broken.get("k") is None  # an unreadable entry is a miss
+
+
 def test_an_app_that_is_not_running_gets_its_start_hint() -> None:
     server = llm.Server(
         "Ollama", f"http://127.0.0.1:{closed_port()}", protocol="ollama", start_hint="Run it."

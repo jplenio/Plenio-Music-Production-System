@@ -43,6 +43,15 @@ other_apps = true                      # LM Studio, Hugging Face cache, Ollama .
 
 Labels appear in the Local LLM list (`My GGUFs · model.gguf`, `Workstation · model-id`); they must not contain ` · `. Plenio stores no API keys; see [Local LLMs](concepts/local-llm.md).
 
+## Files Plenio keeps in the ComfyUI user directory
+
+| Folder | What |
+|---|---|
+| `plenio/templates/` | your brief templates ([Brief templates](concepts/brief-templates.md)) |
+| `plenio/arrangement/` | your creative modes, one Markdown file each ([Creative modes](concepts/creative-modes.md)) |
+| `plenio/cache/llm/` | Local LLM answers: the same request with the same seed is answered from here without a call (delete the folder to forget them, or turn *reuse answers* off in the node) |
+| `plenio/cache/asr/`, `plenio/cache/asr-notes/` | lyrics transcriptions and the editor's notes about them |
+
 Unknown keys are reported as errors so that typos do not go unnoticed.
 
 ## Model files

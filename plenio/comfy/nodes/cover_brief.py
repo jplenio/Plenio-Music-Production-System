@@ -8,17 +8,20 @@ from typing import Any
 from comfy_api.latest import io
 
 from ...core.brief import (
+    ARRANGEMENT_DEFAULT,
+    CLOSENESS_DEFAULT,
     COVER_MODES,
     COVER_VOCALS,
     HARMONY_OPTIONS,
+    LYRICS_CLOSENESS_DEFAULT,
     MELODY_OPTIONS,
     build_cover_brief,
     options,
 )
 from ...core.errors import PlenioError
-from ..shared import template_library
+from ..shared import mode_library, mode_names, template_library
 from ..types import Brief
-from .brief import SONG_SEED_TOOLTIP, mode_line, series_song
+from .brief import SONG_SEED_TOOLTIP, arrangement_line, check_arrangement, mode_line, series_song
 
 MODE_TOOLTIP = (
     "one cover, stop to review: Song Sheet · Score and Song Sheet · Text stop so you can check the transcription "
@@ -28,6 +31,26 @@ MODE_TOOLTIP = (
     "Approve the next run renders it, the run after it writes the next one."
 )
 COVER_INPUTS = ("mode", "template", "description", "genre", "mood", "vocals", "harmony", "title")
+ARRANGEMENT_TOOLTIP = (
+    "simple: the transcribed score stays as it is (as before). A creative mode (standard, varied, fantasy, "
+    "sterile, many instruments, dramatic - or your own file in user/plenio/arrangement) adds its hints to the "
+    "writing prompt and lets the writer model re-arrange the score's sections within the song flow closeness: "
+    "chords, what the instrument line plays, energy, key. The melody and the form always stay. Plenio writes the "
+    "notes itself and checks the result; a plan it cannot use leaves the transcription as it was (the score's "
+    "Song Sheet says so)."
+)
+SONG_FLOW_TOOLTIP = (
+    "Creative modes only (simple ignores it): how close the cover's song flow stays to the original - 100 exactly "
+    "the original (nothing is planned), 80 chords, key and tempo stay (only silent sections get a line), 50 "
+    "recognisable (chords recoloured, lines changed, a small key lift), 20 a free version (new chords and lines, "
+    "another tempo), 0 only a hint of the original. The melody and the form always remain."
+)
+LYRICS_CLOSENESS_TOOLTIP = (
+    "New lyrics only: how close they stay to the source's lyrics - 0 written without the source's text (as "
+    "before), 1-29 only a hint of it, 30-59 its theme and mood, 60-89 its story in new words, 90-100 its meaning "
+    "line by line (a singable translation when the language differs). Above 0 the source's lyrics are "
+    "transcribed for the writer (lyrics ASR); the source must have clear singing."
+)
 
 
 def _summary(brief: Any) -> str:
@@ -37,7 +60,15 @@ def _summary(brief: Any) -> str:
         "instrumental": "Instrumental" + (" · accompaniment only" if brief.melody == "accompaniment" else ""),
     }[brief.vocals]
     lines = [f"**Note:** {note}\n" for note in brief.notes]
-    lines += [f"**Cover: {mode}**, harmony {brief.harmony}", "", mode_line(brief), "", brief.to_text()]
+    lines += [
+        f"**Cover: {mode}**, harmony {brief.harmony}",
+        "",
+        mode_line(brief),
+        "",
+        arrangement_line(brief),
+        "",
+        brief.to_text(),
+    ]
     lines += [f"\n- warning: {w}" for w in brief.warnings()]
     return "\n".join(lines)
 
@@ -141,6 +172,36 @@ class PlenioCoverBrief(io.ComfyNode):
                     advanced=True,
                     tooltip="Optional fixed title, e.g. 'Original Title (Jazz Cover)'. Empty: the writer proposes one.",
                 ),
+                # appended: a saved workflow's values are assigned by position, new widgets go last
+                io.Combo.Input(
+                    "arrangement",
+                    options=mode_names(),
+                    default=ARRANGEMENT_DEFAULT,
+                    optional=True,  # an API prompt of an older version runs as before (simple)
+                    tooltip=ARRANGEMENT_TOOLTIP,
+                ),
+                io.Int.Input(
+                    "song_flow_closeness",
+                    display_name="song flow closeness",
+                    default=CLOSENESS_DEFAULT,
+                    optional=True,
+                    min=0,
+                    max=100,
+                    step=1,
+                    display_mode=io.NumberDisplay.slider,
+                    tooltip=SONG_FLOW_TOOLTIP,
+                ),
+                io.Int.Input(
+                    "lyrics_closeness",
+                    display_name="lyrics closeness",
+                    default=LYRICS_CLOSENESS_DEFAULT,
+                    optional=True,
+                    min=0,
+                    max=100,
+                    step=1,
+                    display_mode=io.NumberDisplay.slider,
+                    tooltip=LYRICS_CLOSENESS_TOOLTIP,
+                ),
             ],
             outputs=[
                 Brief.Output(display_name="brief", tooltip="The cover brief."),
@@ -175,7 +236,7 @@ class PlenioCoverBrief(io.ComfyNode):
                 return str(error)
         if "harmony" in kwargs and kwargs["harmony"] not in HARMONY_OPTIONS:
             return f"Unknown harmony {kwargs['harmony']!r}; choose one of {list(HARMONY_OPTIONS)}."
-        return True
+        return check_arrangement(kwargs.get("arrangement")) or True
 
     @classmethod
     def execute(
@@ -188,8 +249,12 @@ class PlenioCoverBrief(io.ComfyNode):
         vocals: dict[str, Any],
         harmony: str,
         title: str = "",
+        arrangement: str = ARRANGEMENT_DEFAULT,
+        song_flow_closeness: int = CLOSENESS_DEFAULT,
+        lyrics_closeness: int = LYRICS_CLOSENESS_DEFAULT,
     ) -> io.NodeOutput:
         chosen = None if template == "none" else template_library().get(template)
+        mode_library().by_name(arrangement)  # an unknown mode stops here, with the list to choose from
         vocal_mode = vocals.get("vocals", "instrumental")
         values = {
             "description": description,
@@ -204,6 +269,9 @@ class PlenioCoverBrief(io.ComfyNode):
             "lead_instrument": vocals.get("lead_instrument", ""),
             "harmony": harmony,
             "title": title,
+            "arrangement": arrangement,
+            "closeness": song_flow_closeness,
+            "lyrics_closeness": lyrics_closeness,
         }
         inputs = dict(
             zip(COVER_INPUTS, (mode, template, description, genre, mood, vocals, harmony, title), strict=True)

@@ -14,5 +14,6 @@ Decisions confirmed by the owner on 2026-09-25 (design: `docs/design/target-arch
 | [0008](0008-english-everywhere.md) | English everywhere |
 | [0009](0009-package-identity.md) | Package identity |
 | [0010](0010-local-llm.md) | Local LLMs from GGUF files and local apps (amends 0003) |
+| [0011](0011-section-plan-not-abc.md) | Creative modes: the writer plans a section plan, Plenio writes the notes |
 
 New decisions get the next number and the same structure (context, decision, consequences).

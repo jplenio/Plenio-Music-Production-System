@@ -53,6 +53,36 @@ export interface SheetPayload {
   reference_audio?: { filename: string; subfolder: string; type: string }
   /** From Sung Pitch: the source's vocal line (a MIDI pitch every 20 ms), or why there is none. */
   sung_pitch?: { rate: number; start: number; midi: (number | null)[]; source?: string } | { problem: string }
+  /** From Apply Arrangement: what the creative mode did to the score's draft, or why it kept it. */
+  arrangement?: ArrangementPayload
+}
+
+/** One section of an arrangement: what was applied and what stayed (``core.arrangement``). */
+export interface ArrangementSection {
+  index: number
+  label: string
+  bars: string
+  applied: string[]
+  kept: string[]
+}
+
+/** Apply Arrangement's result as the Song Sheet passes it on. */
+export interface ArrangementPayload {
+  status: 'applied' | 'partial' | 'unchanged' | 'fallback' | 'skipped'
+  summary: string
+  mode: string
+  closeness: number
+  /** ``song`` (genre closeness) or ``cover`` (song flow closeness). */
+  kind?: string
+  idea?: string
+  sections?: ArrangementSection[]
+  notes?: string[]
+}
+
+/** The arrangement's headline: mode and closeness in words. */
+export function arrangementLabel(arrangement: ArrangementPayload): string {
+  const closeness = arrangement.kind === 'cover' ? 'song flow closeness' : 'genre closeness'
+  return `${arrangement.mode} (${closeness} ${arrangement.closeness})`
 }
 
 /** Plenio timeline (plenio.timeline/1) as far as the editor uses it. */

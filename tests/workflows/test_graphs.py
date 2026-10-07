@@ -229,7 +229,8 @@ def test_app_configurations() -> None:
     for name in TEMPLATES:
         assert apps[name]["inputs"] and apps[name]["outputs"], name
     # 0.2.2: the mode comes first; the Song Sheet editor buttons make the review stops usable in the app
-    # (the cover path has an app since then). Brief, take seed and sheets only: no model files.
+    # (the cover path has an app since then). Brief, seeds, the writer model and sheets: no model files
+    # of the music model.
     sheets = {"1 · YuE2 · Song": 2, "2 · YuE2 · Cover": 2, "3 · MiniMax · Song": 1, "5 · YuE2 · DAW": 2}
     for name, count in sheets.items():
         nodes = {n["id"]: n for n in TEMPLATES[name]["nodes"]}
@@ -242,12 +243,22 @@ def test_app_configurations() -> None:
         assert {kind for kind, _ in shown} <= {
             "PlenioSongBrief",
             "PlenioCoverBrief",
+            "PlenioWriterChoice",
             "SeedNode",
             "PlenioSongSheet",
             "LoadAudio",
             *refine,
         }
         assert [widget for kind, widget in shown if kind == "PlenioRefine"] == (["preset"] if refine else [])
+        # the creative mode and its sliders, and the one writer model of every writing step (0.5.0)
+        assert [widget for kind, widget in shown if kind == "PlenioWriterChoice"] == ["model"], name
+        assert "arrangement" in brief, name
+        closeness = (
+            ["song_flow_closeness", "lyrics_closeness"] if name == "2 · YuE2 · Cover" else ["genre_closeness"]
+        )
+        assert set(closeness) <= set(brief), name
+        seeds = [nodes[i]["title"] for i, widget in apps[name]["inputs"] if nodes[i]["type"] == "SeedNode"]
+        assert ("Arrangement seed" in seeds) == (name in ("1 · YuE2 · Song", "2 · YuE2 · Cover")), name
         if (
             name != "2 · YuE2 · Cover"
         ):  # the song briefs: key and meter too (the DAW's empty score follows them)

@@ -5,7 +5,7 @@ A new song from a short brief: a local text model writes title, style and lyrics
 ▶ **Video:** *Tutorial 1 · YuE2 · Song* in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE) - the whole path in ComfyUI, narrated, with chapters.
 
 ```text
-Song Brief -> Write Song -> Song Sheet · Text -> YuE2 Plan -> Score Tools -> Song Sheet · Score -> YuE2 Render -> Master -> Export Release
+Song Brief -> Write Song -> Song Sheet · Text -> YuE2 Plan -> Score Tools -> Arrange -> Song Sheet · Score -> YuE2 Render -> Master -> Export Release
                                   ^ YuE2 Model (loader, optional instrumental adapter, Engine Profile) feeds all YuE2 steps
 ```
 
@@ -50,6 +50,16 @@ In a conflict you choose: keep your edit (manual), use the new draft, or merge b
 
 Two sheets are needed because the score is planned from the final text: **Song Sheet · Text** owns title, style, lyrics and artwork prompt; **Song Sheet · Score** owns the score and shows the text as context.
 
+## Creative modes: a planned arrangement
+
+The brief's **arrangement** is *simple* by default: YuE2 plans melody, chords and instruments by itself, and **Arrange** passes its score through untouched (nothing runs there). Choose a creative mode - *standard*, *varied*, *fantasy*, *sterile*, *many instruments*, *dramatic* or your own - and set the **genre closeness** (100 strictly typical, 70 typical with personal touches, 40 free within the genre, 0 any style):
+
+1. The writer's prompt gets the mode's hints (for example *many instruments*: a large ensemble in the style).
+2. After YuE2's plan, **Arrange** asks the writer model for a section plan - chords per bar, what the instrument line plays, energy, a key lift, the tempo - and Plenio writes those notes into the score and checks it.
+3. **Song Sheet · Score** shows the arranged score; its summary and the editor's *Arrangement* line say what was arranged and what stayed. A plan Plenio cannot use leaves YuE2's score as it was, and the sheet warns.
+
+**Arrangement seed** (in *4 · SCORE* and in App mode): another arrangement of the same song - only Arrange and what follows run again. The plan is written by the template's **Writer model** (the same as for the text); details, the modes and what each slider allows: [Creative modes](../concepts/creative-modes.md).
+
 ## Instrumental songs
 
 Set *vocals* to *instrumental* and choose *instrument plays the lead* or *accompaniment only*. Plenio then guarantees an instrumental **conditioning**: the lyrics are the single tag `[instrumental]` (YuE2 plans the form itself - bare tags gave the most instrument-like takes in the owner's listening), a style without vocal or language words, and a score whose Vocal voice is silent (the melody moves to the instrument, or is removed).
@@ -73,7 +83,7 @@ The audio itself is not guaranteed free of voice-like sounds. To measure it, add
 
 ## App mode
 
-Switch **Graph / App** at the top left for a simple form with the mode, the brief, the take seed and the buttons **Song Sheet · Text** and **Song Sheet · Score** - review and editing work in the app as in the graph; see [App mode](../concepts/app-mode.md).
+Switch **Graph / App** at the top left for a simple form with the mode, the brief (with *arrangement* and *genre closeness*), the writer model, the take, draft and arrangement seeds and the buttons **Song Sheet · Text** and **Song Sheet · Score** - review and editing work in the app as in the graph; see [App mode](../concepts/app-mode.md).
 
 ## Licence
 

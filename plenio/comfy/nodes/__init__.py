@@ -1,5 +1,6 @@
 """All Plenio nodes. One module per node (target-architecture section 8)."""
 
+from .arrangement import PlenioApplyArrangement, PlenioComposeArrangement
 from .audio_model import PlenioAudioModelLoader
 from .brief import PlenioSongBrief
 from .compose import PlenioComposePrompt
@@ -31,6 +32,8 @@ NODES = (
     PlenioLocalLLM,
     PlenioSongSheet,
     PlenioScoreTools,
+    PlenioComposeArrangement,
+    PlenioApplyArrangement,
     PlenioTranscribeScore,
     PlenioTranscribeLyrics,
     PlenioSungPitch,

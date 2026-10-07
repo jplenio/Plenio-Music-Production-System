@@ -3,7 +3,8 @@
 Two wire protocols cover the local apps: OpenAI-compatible chat completions (LM Studio, llama.cpp,
 vLLM, Jan, KoboldCpp, text-generation-webui, GPT4All, Unsloth Studio, and the llama.cpp servers Plenio
 starts itself) and Ollama's own API, which - unlike its OpenAI endpoint - takes the context length.
-A failed request is never retried; errors name the app and what to do.
+A request that ran is never repeated; one the app refused before running it (a JSON schema or a thinking
+switch it does not support) is sent again without that part. Errors name the app and what to do.
 """
 
 from __future__ import annotations
@@ -12,8 +13,8 @@ import json
 import re
 import threading
 import time
-from collections.abc import Callable
-from dataclasses import dataclass
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass, replace
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import ProxyHandler, Request, build_opener
@@ -58,6 +59,9 @@ class Settings:
     unload_after: bool = True
     """Ask the app to free the model's memory after the answer (Ollama; LM Studio for models it loaded itself)."""
     timeout_s: float = 900.0
+    schema: Mapping[str, Any] | None = None
+    """A JSON schema for the answer: llama.cpp, LM Studio, Ollama and vLLM hold the model to it (constrained
+    decoding), so the answer is always valid JSON of that shape. An app that refuses it is asked without."""
 
 
 @dataclass(frozen=True)
@@ -68,6 +72,16 @@ class Answer:
     seconds: float
     prompt_tokens: int | None = None
     completion_tokens: int | None = None
+    constrained: bool = False
+    """The app held the answer to the request's JSON schema."""
+
+
+class HttpError(PlenioUserError):
+    """The app answered with an HTTP error (``code``)."""
+
+    def __init__(self, message: str, *, code: int, hint: str | None = None):
+        super().__init__(message, hint=hint, details={"http_status": code})
+        self.code = code
 
 
 def split_thinking(text: str) -> tuple[str, str]:
@@ -116,7 +130,9 @@ def _http(
             error.code,
             f"See {server.name}'s log; a context length too small for the prompt is a common cause.",
         )
-        raise PlenioUserError(f"{server.name} answered HTTP {error.code}: {message}", hint=hint) from None
+        raise HttpError(
+            f"{server.name} answered HTTP {error.code}: {message}", code=error.code, hint=hint
+        ) from None
     except (TimeoutError, OSError) as error:
         reason = getattr(error, "reason", error)
         if isinstance(error, TimeoutError) or isinstance(reason, TimeoutError):
@@ -161,7 +177,26 @@ def _messages(prompt: str, settings: Settings) -> list[dict[str, str]]:
     return [*messages, {"role": "user", "content": prompt}]
 
 
+def _refused_schema(error: HttpError, settings: Settings) -> bool:
+    """The app refused the request because of its JSON schema (it was not run)."""
+    if settings.schema is None:
+        return False
+    text = error.message.lower()
+    return error.code in (400, 422) or (
+        error.code == 500 and any(word in text for word in ("schema", "grammar", "response_format", "format"))
+    )
+
+
 def _openai(server: Server, model: str, prompt: str, settings: Settings, api_key: str) -> Answer:
+    try:
+        return _openai_once(server, model, prompt, settings, api_key)
+    except HttpError as error:
+        if not _refused_schema(error, settings):
+            raise
+        return _openai_once(server, model, prompt, replace(settings, schema=None), api_key)
+
+
+def _openai_once(server: Server, model: str, prompt: str, settings: Settings, api_key: str) -> Answer:
     payload: dict[str, Any] = {
         "model": model,
         "messages": _messages(prompt, settings),
@@ -176,6 +211,11 @@ def _openai(server: Server, model: str, prompt: str, settings: Settings, api_key
         payload["seed"] = settings.seed
     if server.protocol == "lmstudio" and settings.unload_after:
         payload["ttl"] = LM_STUDIO_TTL_S
+    if settings.schema is not None:
+        payload["response_format"] = {
+            "type": "json_schema",
+            "json_schema": {"name": "answer", "strict": True, "schema": dict(settings.schema)},
+        }
     start = time.monotonic()
     result = _http(server, "/chat/completions", payload, api_key=api_key, timeout=settings.timeout_s)
     try:
@@ -199,6 +239,7 @@ def _openai(server: Server, model: str, prompt: str, settings: Settings, api_key
             time.monotonic() - start,
             usage.get("prompt_tokens"),
             usage.get("completion_tokens"),
+            settings.schema is not None,
         ),
         finish == "length",
         settings,
@@ -222,14 +263,23 @@ def _ollama(server: Server, model: str, prompt: str, settings: Settings, api_key
         "options": options,
         "keep_alive": 0 if settings.unload_after else "5m",
     }
+    if settings.schema is not None:
+        payload["format"] = dict(settings.schema)
     start = time.monotonic()
-    try:
-        result = _http(server, "/api/chat", payload, api_key=api_key, timeout=settings.timeout_s)
-    except PlenioUserError as error:
-        if "does not support thinking" not in error.message:
-            raise
-        del payload["think"]  # a model without a thinking switch (the request was refused, not run)
-        result = _http(server, "/api/chat", payload, api_key=api_key, timeout=settings.timeout_s)
+    result: dict[str, Any] | None = None
+    for _attempt in range(3):  # the request was refused, not run: without the part the model does not support
+        try:
+            result = _http(server, "/api/chat", payload, api_key=api_key, timeout=settings.timeout_s)
+            break
+        except HttpError as error:
+            if "does not support thinking" in error.message and "think" in payload:
+                del payload["think"]
+            elif "format" in payload and _refused_schema(error, settings):
+                del payload["format"]
+            else:
+                raise
+    if result is None:
+        raise PlenioUserError(f"{server.name} refused the request.")
     message: dict[str, Any] = result["message"] if isinstance(result.get("message"), dict) else {}
     text, inline = split_thinking(str(message.get("content") or ""))
     thinking = "\n\n".join(t for t in (str(message.get("thinking") or "").strip(), inline) if t)
@@ -240,6 +290,7 @@ def _ollama(server: Server, model: str, prompt: str, settings: Settings, api_key
         time.monotonic() - start,
         result.get("prompt_eval_count"),
         result.get("eval_count"),
+        "format" in payload,
     )
     return _checked(server, answer, result.get("done_reason") == "length", settings)
 

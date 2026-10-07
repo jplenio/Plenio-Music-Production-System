@@ -9,6 +9,8 @@ from typing import Any
 from comfy_api.latest import io
 
 from ...core.brief import (
+    ARRANGEMENT_DEFAULT,
+    CLOSENESS_DEFAULT,
     COVER_MODES,
     DEFAULT_LENGTH,
     LENGTHS,
@@ -21,7 +23,7 @@ from ...core.brief import (
 )
 from ...core.errors import PlenioError
 from ...core.series import series_key
-from ..shared import SERIES, template_library
+from ..shared import SERIES, mode_library, mode_names, template_library
 from ..types import Brief
 
 MODE_TOOLTIP = (
@@ -48,6 +50,19 @@ SONG_SEED_TOOLTIP = (
     "0 for one song."
 )
 
+ARRANGEMENT_TOOLTIP = (
+    "simple: the music model plans melody, chords and instruments by itself (as before). A creative mode "
+    "(standard, varied, fantasy, sterile, many instruments, dramatic - or your own file in "
+    "user/plenio/arrangement) adds its hints to the writing prompt and, in YuE2 Song, lets the writer model plan "
+    "every section of YuE2's score: chords, what the instrument line plays, energy, a key lift. Plenio writes the "
+    "notes itself and checks the result; a plan it cannot use leaves YuE2's score as it was (the Song Sheet says "
+    "so). Planning works with every writer model - GGUF files, LM Studio and Ollama keep to the format exactly."
+)
+GENRE_CLOSENESS_TOOLTIP = (
+    "Creative modes only (simple ignores it): how close the song stays to its genre - 100 strictly typical, 70 "
+    "typical with personal touches, 40 free within the genre, 0 borrow from any style. It shapes the style words "
+    "and the section plan."
+)
 TEXT = {
     "description": "What the song is about and how it should sound. Sent to the writing model.",
     "genre": "Genre and sub-genre, e.g. 'indie pop'.",
@@ -56,6 +71,26 @@ TEXT = {
     "key": "Optional key, e.g. 'G major'. Music models that use a score take the key from the score.",
     "meter": "Optional meter, e.g. '3/4'.",
 }
+
+
+def arrangement_line(brief: Any) -> str:
+    """The summary line of the creative mode (Song Brief and Cover Brief)."""
+    if brief.arrangement == ARRANGEMENT_DEFAULT:
+        return "Arrangement: simple (the music model plans the music by itself)"
+    if brief.kind == "song":
+        return f"Arrangement: **{brief.arrangement}**, genre closeness {brief.closeness}"
+    lyrics = f", lyrics closeness {brief.lyrics_closeness}" if brief.writes_lyrics else ""
+    return f"Arrangement: **{brief.arrangement}**, song flow closeness {brief.closeness}{lyrics}"
+
+
+def check_arrangement(name: Any) -> str | None:
+    """Why ``name`` is not a creative mode (``None``: it is one)."""
+    if name is None or str(name) in mode_names():
+        return None
+    return (
+        f"Unknown creative mode {name!r}. Choose one of {mode_names()} (a mode file of your own appears after a "
+        "refresh, R; a file with a mistake is named in the ComfyUI log)."
+    )
 
 
 def mode_line(brief: Any) -> str:
@@ -84,7 +119,7 @@ def _summary(brief: Any) -> str:
     source = f" (from template: {', '.join(brief.from_template)})" if brief.from_template else ""
     return (
         f"**{'Instrumental' if brief.instrumental else 'Sung'} song**, {brief.length}{source}\n\n"
-        f"{mode_line(brief)}\n\n" + brief.to_text()
+        f"{mode_line(brief)}\n\n{arrangement_line(brief)}\n\n" + brief.to_text()
     )
 
 
@@ -160,6 +195,25 @@ class PlenioSongBrief(io.ComfyNode):
                 # template's empty score follows the key and the meter
                 io.String.Input("key", default="", tooltip=TEXT["key"]),
                 io.String.Input("meter", default="", tooltip=TEXT["meter"]),
+                # appended: a saved workflow's values are assigned by position, new widgets go last
+                io.Combo.Input(
+                    "arrangement",
+                    options=mode_names(),
+                    default=ARRANGEMENT_DEFAULT,
+                    optional=True,  # an API prompt of an older version runs as before (simple)
+                    tooltip=ARRANGEMENT_TOOLTIP,
+                ),
+                io.Int.Input(
+                    "genre_closeness",
+                    display_name="genre closeness",
+                    default=CLOSENESS_DEFAULT,
+                    optional=True,
+                    min=0,
+                    max=100,
+                    step=1,
+                    display_mode=io.NumberDisplay.slider,
+                    tooltip=GENRE_CLOSENESS_TOOLTIP,
+                ),
             ],
             outputs=[
                 Brief.Output(
@@ -197,7 +251,7 @@ class PlenioSongBrief(io.ComfyNode):
                 resolve_length(str(kwargs["length"]))  # a free-form duration takes the nearest option
             except PlenioError as error:
                 return f"{error} Choose one of {list(LENGTHS)}."
-        return True
+        return check_arrangement(kwargs.get("arrangement")) or True
 
     @classmethod
     def execute(
@@ -212,8 +266,11 @@ class PlenioSongBrief(io.ComfyNode):
         vocals: dict[str, Any],
         key: str = "",
         meter: str = "",
+        arrangement: str = ARRANGEMENT_DEFAULT,
+        genre_closeness: int = CLOSENESS_DEFAULT,
     ) -> io.NodeOutput:
         chosen = None if template == "none" else template_library().get(template)
+        mode_library().by_name(arrangement)  # an unknown mode stops here, with the list to choose from
         length_input = length
         length, length_note = resolve_length(length)
         values = {
@@ -230,6 +287,8 @@ class PlenioSongBrief(io.ComfyNode):
             "theme": vocals.get("theme", ""),
             "melody": vocals.get("melody", ""),
             "lead_instrument": vocals.get("lead_instrument", ""),
+            "arrangement": arrangement,
+            "closeness": genre_closeness,
         }
         inputs = dict(
             zip(

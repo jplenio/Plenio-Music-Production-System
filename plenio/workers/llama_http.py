@@ -4,7 +4,8 @@ Run as ``python -m plenio.workers.llama_http -m <file.gguf> --host 127.0.0.1 --p
 - the same command line as llama.cpp's ``llama-server``, so ``plenio.core.llm.runtime`` treats both
 alike. It is the fallback when no ``llama-server`` program is installed but llama-cpp-python is.
 Endpoints: ``GET /health`` (503 while the model loads), ``GET /v1/models``, ``POST /v1/chat/completions``
-(no streaming). One request at a time; the process ends when Plenio stops it.
+(no streaming; an OpenAI ``response_format`` with a JSON schema becomes llama-cpp-python's grammar). One
+request at a time; the process ends when Plenio stops it.
 """
 
 from __future__ import annotations
@@ -21,6 +22,24 @@ from typing import Any
 _state: dict[str, Any] = {"llama": None}
 _lock = threading.Lock()
 _ACCEPTED = ("max_tokens", "temperature", "top_p", "top_k", "min_p", "seed", "stop", "repeat_penalty")
+
+
+def response_format(request: dict[str, Any]) -> dict[str, Any] | None:
+    """llama-cpp-python's form of an OpenAI ``response_format`` (``json_schema`` or ``json_object``)."""
+    wanted = request.get("response_format")
+    if not isinstance(wanted, dict):
+        return None
+    if wanted.get("type") == "json_schema":
+        schema = (wanted.get("json_schema") or {}).get("schema")
+        return (
+            {"type": "json_object", "schema": schema} if isinstance(schema, dict) else {"type": "json_object"}
+        )
+    if wanted.get("type") == "json_object":
+        return {
+            "type": "json_object",
+            **({"schema": wanted["schema"]} if isinstance(wanted.get("schema"), dict) else {}),
+        }
+    return None
 
 
 def _load(model: Path, context: int) -> None:
@@ -70,6 +89,9 @@ class _Handler(BaseHTTPRequestHandler):
         try:
             request = json.loads(self.rfile.read(int(self.headers.get("Content-Length", "0"))))
             options = {name: request[name] for name in _ACCEPTED if name in request}
+            constrained = response_format(request)
+            if constrained is not None:
+                options["response_format"] = constrained
             # the GGUF's own chat template; llama-cpp-python takes no template switches (thinking on/off)
             with _lock:
                 result = llama.create_chat_completion(messages=request["messages"], **options)

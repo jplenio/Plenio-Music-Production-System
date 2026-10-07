@@ -47,13 +47,23 @@ Without any of them, models of running apps still work. LM Studio's bundled llam
 
 | Setting | Default | Meaning |
 |---|---|---|
-| seed | 0, fixed | the same seed and prompt give the same, cached answer |
+| seed | 0, fixed | the same seed, prompt and settings give the same answer - from Plenio's answer cache, without asking the model again |
 | max tokens | 6144 | room for a long draft and a reasoning model's thoughts; a longer answer stops the run with a message instead of being cut |
 | temperature | 0.8 | 0 = most likely words; higher = more varied |
 | thinking | off | let a reasoning model think first; slower and needs more max tokens; the thoughts come out on *thinking* |
 | context | 12288 | prompt + answer, for files and Ollama |
 | keep loaded | off | on: the model stays loaded for the next run - faster, but it keeps its GPU memory next to ComfyUI's models |
 | system prompt | empty | standing instructions before the prompt |
+| reuse answers | on | keep every answer in `user/plenio/cache/llm` and answer the same request from there (see below) |
+| schema | - | an optional JSON schema the answer must follow (Arrange connects one) |
+
+## The same request is never sent twice
+
+ComfyUI runs a node again when anything before it changed - also when its own inputs stayed the same (for example after you changed a slider that does not reach this prompt, or after a restart). With *reuse answers* on, Local LLM then answers from Plenio's **answer cache**: the same model (for a file also its size and date), prompt, system prompt, seed and settings give the stored answer, and the summary says *from Plenio's answer cache - the model was not asked again*. A new seed asks the model again. The cache is in `user/plenio/cache/llm`; delete it to forget all answers.
+
+## Answers in a fixed format
+
+With a **schema** connected (the creative modes' *Arrange* does this), GGUF files, LM Studio, Ollama and vLLM are held to that JSON schema while they write - the answer cannot leave the format. An app that does not take a schema answers freely (the summary says so) and Plenio reads the answer leniently. Keep *thinking* off with a schema: a reasoning model cannot think inside the format.
 
 ## Limits
 

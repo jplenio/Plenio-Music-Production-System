@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import secrets
+import threading
+import time
 from dataclasses import replace
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from ..core.arrangement import ModeLibrary
 from ..core.assets import Asset, load_catalogue
 from ..core.audio.presets import Library
 from ..core.brief import TemplateLibrary
@@ -35,6 +38,33 @@ def template_library() -> TemplateLibrary:
     ):  # outside a running ComfyUI (contract tests): package templates only
         user_dir = None
     return TemplateLibrary(RESOURCES / "templates", user_dir)
+
+
+@lru_cache(maxsize=1)
+def mode_library() -> ModeLibrary:
+    """The creative modes: the package's (``resources/arrangement``) and the user's own files."""
+    try:
+        user_dir: Path | None = host.user_directory() / "plenio" / "arrangement"
+    except (ImportError, AttributeError):  # outside a running ComfyUI (contract tests): package modes only
+        user_dir = None
+    return ModeLibrary(RESOURCES / "arrangement", user_dir)
+
+
+MODES_TTL_S = 5.0
+"""How long the list of creative modes is reused before the files are read again (a refresh, R, then
+lists a mode file the user just added)."""
+_modes_read = [0.0]
+_modes_lock = threading.Lock()
+
+
+def mode_names() -> list[str]:
+    """The options of the briefs' *arrangement* list, read again when older than ``MODES_TTL_S``."""
+    library = mode_library()
+    with _modes_lock:
+        if time.monotonic() - _modes_read[0] > MODES_TTL_S:
+            library.reload()
+            _modes_read[0] = time.monotonic()
+        return library.names()
 
 
 @lru_cache(maxsize=1)

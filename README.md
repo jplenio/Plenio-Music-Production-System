@@ -50,7 +50,8 @@ Plenio is a rewrite from scratch, not a new version of the toolkit. It keeps wha
 - **Finishing built in.** Every song template ends in **Plenio · Master**: a gentle tone match, compression and a true-peak limiter to **-14 LUFS / -1 dBTP**. Export writes FLAC 24-bit, MP3 V0 or WAV 32-bit float with tags and embedded cover art, the unmastered take, and a **release record** of the documents, seeds, settings, loudness and model licences.
 - **Video tutorials for every template** (0.4.1): six narrated walkthroughs and a promo, recorded with the real models - [watch them](#watch-the-tutorials).
 - **Your own local LLMs as the writer.** The **Local LLM** node runs any GGUF from ComfyUI's `models/LLM` folder (or from LM Studio and the Hugging Face cache) in a llama.cpp server that is started for the draft and gone afterwards, so the GPU is free again for the music model - or asks a running LM Studio, Ollama, llama.cpp, vLLM or Jan. *Write Song*'s **writer model** lists them next to the native Gemma 4 writer (the default) - choose one, and only that one is loaded. No extra packages ([guide](docs/user/concepts/local-llm.md)).
-- **Native ComfyUI all the way.** Generation, loaders, samplers, loops and downloads are ComfyUI's own nodes. Plenio adds 21 small nodes where ComfyUI has nothing equivalent (the predecessor had 55). ComfyUI manages GPU memory and offers missing model downloads itself.
+- **Creative modes and closeness sliders.** Besides the simple generation, *standard*, *varied*, *fantasy*, *sterile*, *many instruments* and *dramatic* shape the writing and let the writer model plan every section of YuE2's score - chords, what the instrument line plays, energy, a key lift - with a slider for how close a song stays to its genre, and for covers how close the song flow and the new lyrics stay to the original. The writer plans, Plenio writes and checks every note: the score always stays valid, and a plan that cannot be used leaves it as it was, said in the Song Sheet ([guide](docs/user/concepts/creative-modes.md)).
+- **Native ComfyUI all the way.** Generation, loaders, samplers, loops and downloads are ComfyUI's own nodes. Plenio adds 23 small nodes where ComfyUI has nothing equivalent (the predecessor had 55). ComfyUI manages GPU memory and offers missing model downloads itself.
 
 ## The templates
 
@@ -101,12 +102,14 @@ The cover template has the same choice (*one cover, stop to review* is its defau
 3. Fill in the brief: pick one of about 240 genre templates or describe your own idea; set mood, tempo, length (1:00 to 6:00), vocals (language, voice, theme) or *instrumental*.
 4. Queue. The writer (Gemma 4 through ComfyUI's native text generation) drafts title, style and lyrics; YuE2 plans a score; the Song Sheets show both.
 5. *New song every run:* every further run is the next song of the series (set the **Draft seed** to *randomize* for even more variety). *One song, stop to review:* approve the sheets, then every further run is a new take - the take seed changes, the draft and the plan stay cached and your edits stay valid.
+6. Want more than YuE2's own plan? Choose a **creative mode** in the brief's *arrangement* (and its *genre closeness*): the writer then plans every section of the score, and **Song Sheet · Score** shows the arranged score and what was changed. *Arrangement seed* gives another arrangement of the same song ([Creative modes](docs/user/concepts/creative-modes.md)).
 
 ### Make a cover
 
 1. Open **2 · YuE2 · Cover** and load the source recording.
 2. Choose the mode, the target style in the **Cover Brief**, the vocals (the template starts with the *original lyrics* on the style template *pop/dance-pop-vocal*; *instrumental* lets an instrument play the vocal melody) and the harmony (*keep original chords* by default).
 3. Queue: with *one cover, stop to review* the run stops at **Song Sheet · Score** and later at **Song Sheet · Text**, so you can inspect and edit the transcribed score and the lyrics before YuE2 renders. With *new cover every run* it renders straight through, a new version every run.
+4. Optional: a **creative mode** re-arranges the transcription within the *song flow closeness* (100 the original ... 0 only a hint; the melody and the form always stay), and with *new lyrics* the *lyrics closeness* sets how close the new words stay to the original ones.
 
 <p align="center">
   <img src="assets/branding/0.4.1/Screenshot%20YuE2-cover-graph.png" alt="The 2 · YuE2 · Cover template: source, Cover Brief, score, lyrics, render and finish" width="100%" />

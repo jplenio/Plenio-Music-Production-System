@@ -111,6 +111,16 @@ def _model_folder(asset_id: str, progress: host.Progress) -> tuple[Path, str]:
     return folder, asset.revision
 
 
+def _new_lyrics_hint(brief: Any) -> str:
+    """New lyrics ask for the source's words only for the phrasing reference or the lyrics closeness."""
+    if not isinstance(brief, CoverBrief) or not brief.writes_lyrics:
+        return ""
+    return (
+        " New lyrics need the source's words only for the phrasing reference and a lyrics closeness above 0: "
+        "set lyrics closeness to 0 and the phrasing reference off to write them without the source's text."
+    )
+
+
 def asr_notes() -> AsrNotes:
     return AsrNotes(host.user_directory() / "plenio" / "cache" / "asr-notes")
 
@@ -263,7 +273,7 @@ class PlenioTranscribeLyrics(io.ComfyNode):
             raise PlenioUserError(
                 "The transcription found no vocal melody in the source, so there are no sung words to transcribe.",
                 hint="Is the source instrumental? Choose 'instrumental' in the Cover Brief, or enter the lyrics "
-                "manually in the Song Sheet.",
+                "manually in the Song Sheet." + _new_lyrics_hint(brief),
             )
         regions = tuple(own_timeline.vocal_regions()) if own_timeline is not None else ()
         settings = AsrSettings(
@@ -330,7 +340,7 @@ class PlenioTranscribeLyrics(io.ComfyNode):
             raise PlenioUserError(
                 f"No reliable singing was found ({reliable} clear word(s)); the automatic lyrics would be guesswork.",
                 hint="Set the language explicitly, trim the source to the sung part, or enter the lyrics manually in "
-                "the Song Sheet.",
+                "the Song Sheet." + _new_lyrics_hint(brief),
             )
         sections: list[Any] = []
         meters: list[str] = []

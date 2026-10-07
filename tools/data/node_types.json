@@ -1157,6 +1157,97 @@
    "category": "model/conditioning/minimax music",
    "display_name": "MiniMax Music3 Text Encode"
   },
+  "PlenioApplyArrangement": {
+   "input": {
+    "required": {
+     "score": [
+      "STRING",
+      {
+       "tooltip": "The score to arrange (native two-voice ABC).",
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "brief": [
+      "PLENIO_BRIEF",
+      {
+       "tooltip": "Song Brief or Cover Brief: the creative mode and the closeness."
+      }
+     ],
+     "seed": [
+      "INT",
+      {
+       "tooltip": "Varies the notes of the instrument lines Plenio writes (the same seed, the same notes).",
+       "default": 0,
+       "min": 0,
+       "max": 18446744073709551615,
+       "control_after_generate": "fixed"
+      }
+     ]
+    },
+    "optional": {
+     "answer": [
+      "STRING",
+      {
+       "tooltip": "The writer's answer to Compose Arrangement's prompt; requested only when a plan is wanted.",
+       "lazy": true,
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "engine": [
+      "PLENIO_ENGINE",
+      {
+       "tooltip": "The music model: YuE2's context budget is checked with it."
+      }
+     ],
+     "style": [
+      "STRING",
+      {
+       "tooltip": "The song's style, for the exact context budget (a cover's is estimated).",
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "lyrics": [
+      "STRING",
+      {
+       "tooltip": "The song's lyrics, for the exact context budget (a cover's are estimated).",
+       "forceInput": true,
+       "multiline": false
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "score",
+     "brief",
+     "seed"
+    ],
+    "optional": [
+     "answer",
+     "engine",
+     "style",
+     "lyrics"
+    ]
+   },
+   "output": [
+    "STRING",
+    "PLENIO_REPORT"
+   ],
+   "output_name": [
+    "score",
+    "report"
+   ],
+   "output_is_list": [
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Score",
+   "display_name": "Apply Arrangement"
+  },
   "PlenioAudioModelLoader": {
    "input": {
     "required": {
@@ -1218,6 +1309,76 @@
    "category": "Plenio/Audio",
    "display_name": "Load Audio Model"
   },
+  "PlenioComposeArrangement": {
+   "input": {
+    "required": {
+     "score": [
+      "STRING",
+      {
+       "tooltip": "The score to arrange (native two-voice ABC).",
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "brief": [
+      "PLENIO_BRIEF",
+      {
+       "tooltip": "Song Brief or Cover Brief: the creative mode and the closeness."
+      }
+     ]
+    },
+    "optional": {
+     "engine": [
+      "PLENIO_ENGINE",
+      {
+       "tooltip": "The music model (its name in the prompt)."
+      }
+     ],
+     "style": [
+      "STRING",
+      {
+       "tooltip": "The song's style, for the mood (optional).",
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "lyrics": [
+      "STRING",
+      {
+       "tooltip": "The song's lyrics, for the mood (optional).",
+       "forceInput": true,
+       "multiline": false
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "score",
+     "brief"
+    ],
+    "optional": [
+     "engine",
+     "style",
+     "lyrics"
+    ]
+   },
+   "output": [
+    "STRING",
+    "STRING"
+   ],
+   "output_name": [
+    "prompt",
+    "schema"
+   ],
+   "output_is_list": [
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Score",
+   "display_name": "Compose Arrangement"
+  },
   "PlenioComposePrompt": {
    "input": {
     "required": {
@@ -1269,7 +1430,7 @@
      "reference_lyrics": [
       "STRING",
       {
-       "tooltip": "The source's lyrics draft (Transcribe Lyrics: lyrics); requested only for new-lyrics covers with the phrasing reference. Sectioned lyrics give the writer a syllable target per line.",
+       "tooltip": "The source's lyrics draft (Transcribe Lyrics: lyrics); requested only for new-lyrics covers with the phrasing reference or a lyrics closeness above 0. Sectioned lyrics give the writer a syllable target per line.",
        "lazy": true,
        "forceInput": true,
        "multiline": false
@@ -1711,6 +1872,49 @@
        "multiline": false
       }
      ]
+    },
+    "optional": {
+     "arrangement": [
+      "COMBO",
+      {
+       "tooltip": "simple: the transcribed score stays as it is (as before). A creative mode (standard, varied, fantasy, sterile, many instruments, dramatic - or your own file in user/plenio/arrangement) adds its hints to the writing prompt and lets the writer model re-arrange the score's sections within the song flow closeness: chords, what the instrument line plays, energy, key. The melody and the form always stay. Plenio writes the notes itself and checks the result; a plan it cannot use leaves the transcription as it was (the score's Song Sheet says so).",
+       "default": "simple",
+       "multiselect": false,
+       "options": [
+        "simple",
+        "standard",
+        "varied",
+        "fantasy",
+        "sterile",
+        "many instruments",
+        "dramatic"
+       ]
+      }
+     ],
+     "song_flow_closeness": [
+      "INT",
+      {
+       "display_name": "song flow closeness",
+       "tooltip": "Creative modes only (simple ignores it): how close the cover's song flow stays to the original - 100 exactly the original (nothing is planned), 80 chords, key and tempo stay (only silent sections get a line), 50 recognisable (chords recoloured, lines changed, a small key lift), 20 a free version (new chords and lines, another tempo), 0 only a hint of the original. The melody and the form always remain.",
+       "default": 70,
+       "min": 0,
+       "max": 100,
+       "step": 1,
+       "display": "slider"
+      }
+     ],
+     "lyrics_closeness": [
+      "INT",
+      {
+       "display_name": "lyrics closeness",
+       "tooltip": "New lyrics only: how close they stay to the source's lyrics - 0 written without the source's text (as before), 1-29 only a hint of it, 30-59 its theme and mood, 60-89 its story in new words, 90-100 its meaning line by line (a singable translation when the language differs). Above 0 the source's lyrics are transcribed for the writer (lyrics ASR); the source must have clear singing.",
+       "default": 0,
+       "min": 0,
+       "max": 100,
+       "step": 1,
+       "display": "slider"
+      }
+     ]
     }
    },
    "input_order": {
@@ -1723,6 +1927,11 @@
      "vocals",
      "harmony",
      "title"
+    ],
+    "optional": [
+     "arrangement",
+     "song_flow_closeness",
+     "lyrics_closeness"
     ]
    },
    "output": [
@@ -2214,7 +2423,7 @@
      "seed": [
       "INT",
       {
-       "tooltip": "Same seed, same prompt: the same answer (cached). Change it for a new answer.",
+       "tooltip": "Same seed, same prompt, same settings: the same answer - taken from Plenio's answer cache without asking the model again (see reuse_answers). Change it for a new answer.",
        "default": 0,
        "min": 0,
        "max": 18446744073709551615,
@@ -2278,6 +2487,24 @@
        "multiline": true
       }
      ]
+    },
+    "optional": {
+     "reuse_answers": [
+      "BOOLEAN",
+      {
+       "tooltip": "On: a request answered before (same model file or app model, prompt, seed and settings) is answered from Plenio's answer cache (user/plenio/cache/llm) - no call, also after a restart or when an earlier node ran again. Off: always ask the model.",
+       "advanced": true,
+       "default": true
+      }
+     ],
+     "schema": [
+      "STRING",
+      {
+       "tooltip": "Optional JSON schema of the answer (Compose Arrangement provides one): GGUF files, LM Studio, Ollama and vLLM are held to it while they write, so the answer always has that format. Apps without this feature answer freely.",
+       "forceInput": true,
+       "multiline": false
+      }
+     ]
     }
    },
    "input_order": {
@@ -2291,6 +2518,10 @@
      "context",
      "keep_loaded",
      "system_prompt"
+    ],
+    "optional": [
+     "reuse_answers",
+     "schema"
     ]
    },
    "output": [
@@ -3364,6 +3595,37 @@
        "multiline": false
       }
      ]
+    },
+    "optional": {
+     "arrangement": [
+      "COMBO",
+      {
+       "tooltip": "simple: the music model plans melody, chords and instruments by itself (as before). A creative mode (standard, varied, fantasy, sterile, many instruments, dramatic - or your own file in user/plenio/arrangement) adds its hints to the writing prompt and, in YuE2 Song, lets the writer model plan every section of YuE2's score: chords, what the instrument line plays, energy, a key lift. Plenio writes the notes itself and checks the result; a plan it cannot use leaves YuE2's score as it was (the Song Sheet says so). Planning works with every writer model - GGUF files, LM Studio and Ollama keep to the format exactly.",
+       "default": "simple",
+       "multiselect": false,
+       "options": [
+        "simple",
+        "standard",
+        "varied",
+        "fantasy",
+        "sterile",
+        "many instruments",
+        "dramatic"
+       ]
+      }
+     ],
+     "genre_closeness": [
+      "INT",
+      {
+       "display_name": "genre closeness",
+       "tooltip": "Creative modes only (simple ignores it): how close the song stays to its genre - 100 strictly typical, 70 typical with personal touches, 40 free within the genre, 0 borrow from any style. It shapes the style words and the section plan.",
+       "default": 70,
+       "min": 0,
+       "max": 100,
+       "step": 1,
+       "display": "slider"
+      }
+     ]
     }
    },
    "input_order": {
@@ -3378,6 +3640,10 @@
      "vocals",
      "key",
      "meter"
+    ],
+    "optional": [
+     "arrangement",
+     "genre_closeness"
     ]
    },
    "output": [
@@ -3529,6 +3795,13 @@
       {
        "tooltip": "Rules and exact token counts of the loaded music model."
       }
+     ],
+     "arrangement": [
+      "PLENIO_REPORT",
+      {
+       "tooltip": "From Apply Arrangement: what the creative mode changed in the score - or why the score stayed as planned. Shown here and in the editor; requested only while the score comes from upstream.",
+       "lazy": true
+      }
      ]
     },
     "hidden": {
@@ -3561,7 +3834,8 @@
      "reference_audio",
      "sung_pitch",
      "brief",
-     "engine"
+     "engine",
+     "arrangement"
     ],
     "hidden": [
      "unique_id",
@@ -3980,14 +4254,17 @@
    "output": [
     "*",
     "*",
-    "BOOLEAN"
+    "BOOLEAN",
+    "*"
    ],
    "output_name": [
     "text_encoder",
     "local_model",
-    "use_local"
+    "use_local",
+    "model"
    ],
    "output_is_list": [
+    false,
     false,
     false,
     false

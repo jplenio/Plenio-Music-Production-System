@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 from comfy_api.latest import io
 
 from ...core import llm
@@ -61,7 +63,8 @@ class PlenioLocalLLM(io.ComfyNode):
                     min=0,
                     max=0xFFFFFFFFFFFFFFFF,
                     control_after_generate=io.ControlAfterGenerate.fixed,
-                    tooltip="Same seed, same prompt: the same answer (cached). Change it for a new answer.",
+                    tooltip="Same seed, same prompt, same settings: the same answer - taken from Plenio's answer "
+                    "cache without asking the model again (see reuse_answers). Change it for a new answer.",
                 ),
                 io.Int.Input(
                     "max_tokens",
@@ -111,6 +114,24 @@ class PlenioLocalLLM(io.ComfyNode):
                     advanced=True,
                     tooltip="Optional standing instructions sent before the prompt.",
                 ),
+                # appended: a saved workflow's values are assigned by position, new widgets go last
+                io.Boolean.Input(
+                    "reuse_answers",
+                    default=True,
+                    optional=True,
+                    advanced=True,
+                    tooltip="On: a request answered before (same model file or app model, prompt, seed and "
+                    "settings) is answered from Plenio's answer cache (user/plenio/cache/llm) - no call, also "
+                    "after a restart or when an earlier node ran again. Off: always ask the model.",
+                ),
+                io.String.Input(
+                    "schema",
+                    optional=True,
+                    force_input=True,
+                    tooltip="Optional JSON schema of the answer (Compose Arrangement provides one): GGUF files, "
+                    "LM Studio, Ollama and vLLM are held to it while they write, so the answer always has that "
+                    "format. Apps without this feature answer freely.",
+                ),
             ],
             outputs=[
                 io.String.Output(display_name="text", tooltip="The answer (thoughts removed)."),
@@ -148,11 +169,25 @@ class PlenioLocalLLM(io.ComfyNode):
         context: int = CONTEXT,
         keep_loaded: bool = False,
         system_prompt: str = "",
+        reuse_answers: bool = True,
+        schema: str | None = None,
     ) -> io.NodeOutput:
         if not prompt.strip():
             raise PlenioUserError(
                 "The prompt is empty.", hint="Type a request or connect a text to 'prompt'."
             )
+        answer_schema = None
+        if schema and schema.strip():
+            try:
+                answer_schema = json.loads(schema)
+            except ValueError as error:
+                raise PlenioUserError(
+                    f"The schema is not valid JSON ({error}).", hint="Connect a JSON schema, or nothing."
+                ) from None
+            if not isinstance(answer_schema, dict):
+                raise PlenioUserError(
+                    "The schema must be a JSON object.", hint="Connect a JSON schema, or nothing."
+                )
         config = local.load_config()
         target = llm.resolve(model, local.stores(config), local.servers(config))
         settings = llm.Settings(
@@ -162,6 +197,7 @@ class PlenioLocalLLM(io.ComfyNode):
             thinking=thinking,
             system_prompt=system_prompt,
             context=context,
+            schema=answer_schema,
         )
         try:
             result = llm.generate(
@@ -172,19 +208,26 @@ class PlenioLocalLLM(io.ComfyNode):
                 keep_loaded=keep_loaded,
                 make_room=local.make_room,
                 is_cancelled=host.is_interrupted,
+                cache=local.answer_cache() if reuse_answers else None,
             )
         except PlenioCancelledError:
             host.raise_if_interrupted()
             raise
         answer = result.answer
         tokens = f", {answer.completion_tokens} tokens" if answer.completion_tokens else ""
-        markdown = "\n".join(
-            [
-                f"**{llm.describe(target)}**",
-                f"answered by {result.runtime} in {answer.seconds:.1f} s: {len(answer.text.split())} words{tokens}"
-                + (" (+ thoughts)" if answer.thinking else ""),
-            ]
-        )
+        words = f"{len(answer.text.split())} words{tokens}" + (" (+ thoughts)" if answer.thinking else "")
+        lines = [f"**{llm.describe(target)}**"]
+        if result.cached:
+            lines.append(f"from Plenio's answer cache - the model was not asked again: {words}")
+        else:
+            lines.append(f"answered by {result.runtime} in {answer.seconds:.1f} s: {words}")
+        if answer_schema is not None:
+            lines.append(
+                "- format held to the schema while writing"
+                if answer.constrained
+                else "- the app does not take a schema: the answer is read leniently"
+            )
+        markdown = "\n".join(lines)
         return io.NodeOutput(
             answer.text, answer.thinking, ui={"plenio_summary": [{"status": "ok", "markdown": markdown}]}
         )

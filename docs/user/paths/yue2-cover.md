@@ -5,7 +5,7 @@ A new version of a recorded song: SheetSage2 transcribes the source into a score
 ▶ **Video:** *Tutorial 2 · YuE2 · Cover* in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE) - the whole path in ComfyUI, narrated, with chapters.
 
 ```text
-Source -> (Excerpt) -> Transcribe Score -> Score Tools -> Song Sheet · Score
+Source -> (Excerpt) -> Transcribe Score -> Score Tools -> Arrange -> Song Sheet · Score
                                                              |
             Transcribe Lyrics (original lyrics) / Write Song (new lyrics) / section tags (instrumental)
                                                              |
@@ -55,6 +55,22 @@ YuE2 sings the melody exactly as transcribed. Two things decide whether the new 
 
 Enable **Check sung lyrics** (bypassed by default) to measure what was sung: word error rate overall and per section.
 
+## Creative modes: how close to the original
+
+The Cover Brief's **arrangement** is *simple* by default: the transcribed score goes to the sheet as it is. With a creative mode **Arrange** lets the writer model re-arrange the score's sections within the **song flow closeness**:
+
+| song flow closeness | what may change |
+|---|---|
+| 95-100 | nothing - the writer is not even asked |
+| 80-94 | only sections whose instrument line rests get a line; chords, key and tempo stay |
+| 50-79 (default 70) | chords recoloured, the instrument lines changed, a small key lift |
+| 20-49 | new chords and lines, another energy, the tempo by up to 10 % |
+| 0-19 | only a hint of the original: harmony, lines, tempo and energy reinvented |
+
+The **melody and the form always remain** - an instrument line that carries the melody (an instrumental cover) is never replaced. *harmony: new accompaniment* removes the source's chords first; a creative mode may then plan new ones (without chords a section keeps its line). **Song Sheet · Score** shows the arranged score and what was changed; a plan Plenio cannot use leaves the transcription as it was, with a warning. **Arrangement seed**: another arrangement of the same cover. See [Creative modes](../concepts/creative-modes.md).
+
+**Lyrics closeness** (*new lyrics*): 0 (default) writes the new lyrics without the source's text, as before; 1-29 keeps only a hint of it, 30-59 its theme and mood, 60-89 its story in new words, 90-100 its meaning line by line (a singable translation when the language differs). Above 0 *Transcribe Lyrics* runs on the source so the writer sees the original words - it needs clear singing.
+
 ## Instrumental covers and vocal checks
 
 For instrumental covers Plenio silences the Vocal voice of the score (the melody moves to an instrument, or is removed), writes only section tags, removes voice and language words from the style and renders with the **instrumental adapter** (a LoRA; bypass *Instrumental adapter* to switch it off - the optional adapter inside the collapsed model block stays bypassed in this template). See [Instrumental](../concepts/instrumental.md).
@@ -69,7 +85,7 @@ For instrumental covers Plenio silences the Vocal voice of the score (the melody
 
 ## App mode
 
-Switch **Graph / App** at the top left for a simple form: the source file, the mode, the cover style, *vocals* with the options of an original-lyrics cover (language, voice), *harmony*, the take seed and the buttons **Song Sheet · Score** and **Song Sheet · Text** - the two review stops work in the app, the editor opens from the buttons. The options of *instrumental* and *new lyrics* (melody, lead instrument, theme) are set in the graph. See [App mode](../concepts/app-mode.md).
+Switch **Graph / App** at the top left for a simple form: the source file, the mode, the cover style, *vocals* with the options of an original-lyrics cover (language, voice), *harmony*, the creative mode with *song flow closeness* and *lyrics closeness*, the writer model, the take, draft and arrangement seeds and the buttons **Song Sheet · Score** and **Song Sheet · Text** - the two review stops work in the app, the editor opens from the buttons. The options of *instrumental* and *new lyrics* (melody, lead instrument, theme) are set in the graph. See [App mode](../concepts/app-mode.md).
 
 ## Limits
 

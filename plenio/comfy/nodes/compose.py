@@ -9,16 +9,19 @@ from comfy_api.latest import io
 from ...core import score as score_rules
 from ...core.brief import CoverBrief
 from ...core.writing import DETAIL, compose
+from ..shared import mode_library
 from ..types import Brief, Engine, Request
 
 
 def _needs(brief: Any) -> dict[str, bool]:
     """Which lazy inputs this brief needs: the ASR language (original lyrics, language 'auto') and the
-    source lyrics draft (new lyrics with the phrasing reference)."""
+    source lyrics draft (new lyrics with the phrasing reference, or close to the source's lyrics)."""
     cover = isinstance(brief, CoverBrief)
     return {
         "language": cover and brief.vocals == "original" and not brief.language,
-        "reference_lyrics": cover and brief.writes_lyrics and brief.phrasing_reference,
+        "reference_lyrics": cover
+        and brief.writes_lyrics
+        and (brief.phrasing_reference or brief.lyrics_closeness > 0),
     }
 
 
@@ -59,7 +62,8 @@ class PlenioComposePrompt(io.ComfyNode):
                     lazy=True,
                     force_input=True,
                     tooltip="The source's lyrics draft (Transcribe Lyrics: lyrics); requested only for new-lyrics covers with "
-                    "the phrasing reference. Sectioned lyrics give the writer a syllable target per line.",
+                    "the phrasing reference or a lyrics closeness above 0. Sectioned lyrics give the writer a syllable "
+                    "target per line.",
                 ),
                 io.Combo.Input(
                     "detail",
@@ -107,6 +111,7 @@ class PlenioComposePrompt(io.ComfyNode):
             if isinstance(brief, CoverBrief) and brief.writes_lyrics:
                 phrasing = score_rules.phrasing(score)
         needs = _needs(brief)
+        mode = mode_library().by_name(brief.arrangement)
         prompt, request = compose(
             brief,
             engine,
@@ -117,7 +122,16 @@ class PlenioComposePrompt(io.ComfyNode):
             reference_lyrics=(reference_lyrics or "") if needs["reference_lyrics"] else "",
             score_tempo=tempo if isinstance(brief, CoverBrief) else None,
             vocal_range=vocal_range if isinstance(brief, CoverBrief) else None,
+            mode=mode if mode.arranges else None,
         )
         kind = "cover" if request.kind == "cover" else "song"
-        markdown = f"Prompt for **{engine.engine_id}** ({kind}), {len(request.sections)} section(s), lyrics: {request.lyrics_mode}"
-        return io.NodeOutput(prompt, request, ui={"plenio_summary": [{"status": "ok", "markdown": markdown}]})
+        lines = [
+            f"Prompt for **{engine.engine_id}** ({kind}), {len(request.sections)} section(s), lyrics: {request.lyrics_mode}"
+        ]
+        if mode.arranges:
+            lines.append(f"- creative mode **{mode.name}**: its writer hints are part of the rules")
+        if isinstance(brief, CoverBrief) and brief.writes_lyrics and brief.lyrics_closeness:
+            lines.append(f"- close to the source's lyrics: {brief.lyrics_closeness} of 100")
+        return io.NodeOutput(
+            prompt, request, ui={"plenio_summary": [{"status": "ok", "markdown": "\n".join(lines)}]}
+        )

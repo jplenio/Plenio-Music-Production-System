@@ -1068,11 +1068,15 @@ function Ti(e) {
   ), n = e.review?.approved_fingerprint ? " · approved" : "";
   return (t.length ? t.join(" · ") : "all documents automatic") + n;
 }
+function Dr(e) {
+  const t = e.kind === "cover" ? "song flow closeness" : "genre closeness";
+  return `${e.mode} (${t} ${e.closeness})`;
+}
 function Dt(e) {
   const t = Math.max(0, e), n = Math.floor(t / 60), i = Math.round(t - n * 60);
   return `${n}:${String(i).padStart(2, "0")}`;
 }
-function Dr(e) {
+function Hr(e) {
   return e?.bars?.length ? (e.sections ?? []).map(([t, n, i]) => {
     const r = e.bars[Math.max(0, n - 1)], s = e.bars[Math.min(e.bars.length - 1, n - 1 + i - 1)];
     return { label: t, bars: i, start: Dt(r?.[0] ?? 0), end: Dt(s?.[1] ?? e.duration_s) };
@@ -1092,7 +1096,7 @@ function Bi(e, t, n) {
   const i = e.docs[n];
   return i ? i.text : t?.docs[n]?.upstream ?? "";
 }
-function Hr(e, t, n) {
+function Ir(e, t, n) {
   return n.map((i) => ({ kind: i, text: Bi(e, t, i), intent: "keep" }));
 }
 function dn(e, t, n) {
@@ -1263,7 +1267,7 @@ const Ji = (e, t, n) => {
   async function O() {
     const _ = Ee(i);
     _ === null && (s.textContent = "The stored state is unreadable; it will be replaced when you apply.");
-    const $ = ge(String(e.id)), a = (e.inputs ?? []).filter((M) => M.link != null).map((M) => M.name), D = _ ?? { schema: "plenio.sheet_state/1", docs: {} }, E = $?.owned ?? Di(a, D), p = String(e.widgets?.find((M) => M.name === "review")?.value ?? "continue"), d = p === "as the brief says" ? $?.review ?? "continue" : p, { openSheetDialog: h } = await import("./open-B6bVqcDD.mjs"), { parseGuide: g, serializeGuide: q } = await import("./tracks-DxmZeggM.mjs"), { parseShift: x, parseSpans: F } = await import("./lyricPlacement-lv7ThC8m.mjs");
+    const $ = ge(String(e.id)), a = (e.inputs ?? []).filter((M) => M.link != null).map((M) => M.name), D = _ ?? { schema: "plenio.sheet_state/1", docs: {} }, E = $?.owned ?? Di(a, D), p = String(e.widgets?.find((M) => M.name === "review")?.value ?? "continue"), d = p === "as the brief says" ? $?.review ?? "continue" : p, { openSheetDialog: h } = await import("./open-rV8_lXZ7.mjs"), { parseGuide: g, serializeGuide: q } = await import("./tracks-DxmZeggM.mjs"), { parseShift: x, parseSpans: F } = await import("./lyricPlacement-lv7ThC8m.mjs");
     if (!Fe) throw new Error("Plenio: API not initialised");
     let A = null;
     try {
@@ -1863,13 +1867,14 @@ export {
   Rr as c,
   Dr as d,
   Or as e,
-  dn as f,
+  Hr as f,
   Lr as g,
-  Ge as h,
+  dn as h,
   Tr as i,
+  Ge as j,
   he as n,
   On as r,
-  Hr as s,
+  Ir as s,
   zr as t,
   Hi as u,
   Pr as v,

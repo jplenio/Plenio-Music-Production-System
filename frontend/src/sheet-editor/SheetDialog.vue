@@ -10,6 +10,7 @@ import { type Fetcher, type GuideNote, PlenioApiError, getAsrNote, resolveSheet 
 import {
   type AsrNote,
   type Finding,
+  arrangementLabel,
   type ScoreChange,
   type ScoreTarget,
   type SheetPayload,
@@ -277,6 +278,11 @@ const dirty = computed(
     followedLyrics.value !== null ||
     changedScore.value !== null
 )
+/** What the creative mode did to the score's draft (Apply Arrangement), shown above the findings. */
+const arrangement = computed(() => {
+  const value = props.payload?.arrangement
+  return value && value.status !== 'skipped' ? value : null
+})
 const findings = computed<Finding[]>(() => (result.value?.findings ?? []).filter((f) => f.severity !== 'info'))
 const infos = computed<Finding[]>(() => (result.value?.findings ?? []).filter((f) => f.severity === 'info'))
 const hasErrors = computed(() => findings.value.some((f) => f.severity === 'error'))
@@ -651,6 +657,29 @@ onBeforeUnmount(() => {
         </template>
       </div>
       <section class="findings" aria-label="Validation">
+        <div v-if="arrangement" class="arrangement" :data-status="arrangement.status">
+          <p v-if="arrangement.status === 'fallback'">
+            <strong>Arrangement not applied</strong> - {{ arrangementLabel(arrangement) }}:
+            {{ arrangement.summary.replace(/^not applied: /, '') }}
+          </p>
+          <details v-else>
+            <summary>
+              <strong>Arrangement</strong> {{ arrangementLabel(arrangement) }}: {{ arrangement.summary }}
+            </summary>
+            <p v-if="arrangement.idea" class="idea">{{ arrangement.idea }}</p>
+            <ul>
+              <li v-for="section in arrangement.sections ?? []" :key="section.index">
+                <strong>{{ section.index }} {{ section.label }}</strong>
+                <span class="where">bars {{ section.bars }}</span>
+                {{ section.applied.length ? section.applied.join('; ') : 'unchanged' }}
+                <span v-if="section.kept.length" class="kept"> - kept: {{ section.kept.join('; ') }}</span>
+              </li>
+              <li v-for="(note, index) in arrangement.notes ?? []" :key="'note' + index" data-severity="info">
+                {{ note }}
+              </li>
+            </ul>
+          </details>
+        </div>
         <p v-if="error" class="error">{{ error }}</p>
         <p v-if="unresolvedConflicts.length" class="error">
           Resolve the conflict in: {{ unresolvedConflicts.join(', ') }}.

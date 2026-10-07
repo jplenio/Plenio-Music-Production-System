@@ -9,9 +9,10 @@ from comfy_api.latest import io
 from ...core import score as score_rules
 from ...core import writing
 from ...core.brief import CoverBrief
-from ...core.diagnostics import has_errors, warning
+from ...core.diagnostics import has_errors, info, warning
 from ...core.engines import rules_for
 from ...core.errors import PlenioConflictError, PlenioValidationError
+from ...core.reports import Report
 from ...core.sheet import (
     BRIEF_REVIEW,
     DOCUMENT_KINDS,
@@ -95,6 +96,14 @@ class PlenioSongSheet(io.ComfyNode):
                 "sheet_state",
                 tooltip="Your edits and manual documents (edit them with the Song Sheet editor).",
             ),
+            # appended (no widget): the slots of saved workflows stay where they were
+            ReportType.Input(
+                "arrangement",
+                optional=True,
+                lazy=True,
+                tooltip="From Apply Arrangement: what the creative mode changed in the score - or why the score "
+                "stayed as planned. Shown here and in the editor; requested only while the score comes from upstream.",
+            ),
         ]
         return io.Schema(
             node_id="PlenioSongSheet",
@@ -140,11 +149,15 @@ class PlenioSongSheet(io.ComfyNode):
     @classmethod
     def check_lazy_status(cls, sheet_state: str, review: str, **kwargs: Any) -> list[str]:
         state = parse_sheet_state(sheet_state)
-        return [
+        wanted = [
             kind
             for kind in DOCUMENT_KINDS
             if kind in kwargs and kwargs[kind] is None and needs_upstream(state, kind)
         ]
+        # the arrangement report belongs to the score's draft: needed while that draft is
+        if "arrangement" in kwargs and kwargs["arrangement"] is None and "score" in wanted:
+            wanted.append("arrangement")
+        return wanted
 
     @classmethod
     def execute(cls, sheet_state: str, review: str, **kwargs: Any) -> io.NodeOutput:
@@ -156,6 +169,8 @@ class PlenioSongSheet(io.ComfyNode):
         upstream = {kind: kwargs.get(kind) for kind in owned}
         brief, engine = kwargs.get("brief"), kwargs.get("engine")
         timeline = kwargs.get("timeline")
+        report_in = kwargs.get("arrangement")
+        arrangement = report_in if isinstance(report_in, Report) and "score" in owned else None
         context = {
             key.removeprefix("context_"): kwargs[key] for key in CONTEXT if kwargs.get(key) is not None
         }
@@ -172,7 +187,7 @@ class PlenioSongSheet(io.ComfyNode):
             max_seconds=brief.max_seconds if brief is not None else None,
             target_seconds=brief.target_seconds if brief is not None else None,
             context=context,
-            extra_findings=_cover_findings(brief, upstream, state),
+            extra_findings=[*_cover_findings(brief, upstream, state), *_arrangement_findings(arrangement)],
         )
         payload = {**evaluation.payload(), "node_id": str(cls.hidden.unique_id)}
         if engine is not None:
@@ -185,6 +200,8 @@ class PlenioSongSheet(io.ComfyNode):
         sung = kwargs.get("sung_pitch")
         if sung is not None:
             payload["sung_pitch"] = sung.to_dict()
+        if arrangement is not None:
+            payload["arrangement"] = {**dict(arrangement.data), "report_status": arrangement.status.value}
         if evaluation.conflicts or has_errors(evaluation.findings):
             host.send_event(EVENT, payload)  # the editor needs the new drafts to resolve the problem
         if evaluation.conflicts:
@@ -211,6 +228,16 @@ class PlenioSongSheet(io.ComfyNode):
             )
         _follow_series(brief, evaluation.waiting_for_approval)
         report = evaluation.report()
+        if arrangement is not None:  # the release record keeps what the creative mode did
+            report = Report(
+                report.kind,
+                report.status,
+                report.summary,
+                report.messages,
+                {**dict(report.data), "arrangement": dict(arrangement.data)},
+                report.source,
+                report.source_id,
+            )
         documents: list[Any] = [evaluation.text(kind) for kind in DOCUMENT_KINDS]
         final_score = evaluation.text("score") if "score" in evaluation.owned else ""
         tags = score_rules.section_tags(final_score) if final_score.strip() else ""
@@ -224,7 +251,9 @@ class PlenioSongSheet(io.ComfyNode):
             plan_lyrics = host.execution_blocker(None)
         ui = {
             "plenio_sheet": [payload],
-            "plenio_summary": [{"status": report.status.value, "markdown": _markdown(evaluation)}],
+            "plenio_summary": [
+                {"status": report.status.value, "markdown": _markdown(evaluation, arrangement)}
+            ],
         }
         return io.NodeOutput(*documents, *derived, report, tags, plan_lyrics, ui=ui)
 
@@ -262,7 +291,26 @@ def _cover_findings(brief: Any, upstream: dict[str, Any], state: Any) -> list[An
     return findings
 
 
-def _markdown(evaluation: Any) -> str:
+def _arrangement_findings(arrangement: Report | None) -> list[Any]:
+    """The creative mode's result as findings: a fallback is a warning (the plan was not used)."""
+    if arrangement is None:
+        return []
+    data = dict(arrangement.data)
+    status, summary = str(data.get("status", "")), str(data.get("summary", ""))
+    if status == "fallback":
+        return [
+            warning(
+                f"The arrangement ({data.get('mode')}) was not applied: {summary.removeprefix('not applied: ')}. "
+                "Run again with another arrangement seed, or choose another writer model.",
+                "arrangement",
+            )
+        ]
+    if status in ("applied", "partial", "unchanged"):
+        return [info(f"Arrangement ({data.get('mode')}): {summary}", "arrangement")]
+    return []
+
+
+def _markdown(evaluation: Any, arrangement: Report | None = None) -> str:
     lines = [f"**{evaluation.status_line()}**"]
     for kind in evaluation.owned:
         doc = evaluation.resolution.docs[kind]
@@ -277,5 +325,7 @@ def _markdown(evaluation: Any) -> str:
         )
     if "score" in evaluation.owned:
         lines.append(f"- render: {evaluation.planning_mode}, ceiling {evaluation.score_seconds:.0f} s")
+    if arrangement is not None and str(arrangement.data.get("status")) in ("applied", "partial", "unchanged"):
+        lines.append(f"- arrangement: {arrangement.data.get('summary')}")
     lines += [f"- {f.severity}: {f.message}" for f in evaluation.findings if f.severity != "info"]
     return "\n".join(lines)

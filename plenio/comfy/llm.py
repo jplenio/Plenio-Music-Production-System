@@ -71,6 +71,11 @@ def writers(config: PlenioConfig) -> list[str]:
     return llm.native_writers(host.model_files("text_encoders")) + [m.ref for m in discovery(config).models]
 
 
+def answer_cache() -> llm.AnswerCache:
+    """Local LLM answers kept on disk (``user/plenio/cache/llm``): the same request is not sent twice."""
+    return llm.AnswerCache(host.user_directory() / "plenio" / "cache" / "llm")
+
+
 def make_room(required_bytes: int) -> None:
     """Ask ComfyUI to free GPU memory for a GGUF server (R9); nothing to do on a CPU-only host."""
     if host.torch_device() != "cpu":

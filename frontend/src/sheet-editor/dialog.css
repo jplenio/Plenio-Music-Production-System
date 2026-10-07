@@ -182,6 +182,22 @@
   margin: 6px 0;
   padding-left: 18px;
 }
+.plenio-overlay .arrangement {
+  margin: 6px 0;
+}
+.plenio-overlay .arrangement p {
+  margin: 4px 0;
+}
+.plenio-overlay .arrangement[data-status='fallback'] strong {
+  color: #d8a31a;
+}
+.plenio-overlay .arrangement summary {
+  cursor: pointer;
+}
+.plenio-overlay .arrangement .idea,
+.plenio-overlay .arrangement .kept {
+  color: var(--descrip-text, #999);
+}
 .plenio-overlay li[data-severity='error'] strong {
   color: #e0685e;
 }

@@ -4,7 +4,7 @@
 |---|---|
 | Date | 2026-10-07 |
 | Question (owner) | The drafts YuE2 receives are short (a ~30-word style, the lyrics). Would more detail - what each section or time span should do musically - give better, less monotonous songs, above all instrumentals? If so: an option for more detail, and how it fits the Song Sheet (editable per section). |
-| Status | **Proposal; the owner decides.** Nothing of it is built. |
+| Status | **Built in part (2026-10-07)** as the creative modes: the writer plans a JSON section plan (chords, the Ins line's role, energy, key lift, tempo) that Plenio writes into the score with the score operations - option *score-level detail*, with the owner's modes and closeness sliders ([ADR-0011](../adr/0011-section-plan-not-abc.md), [guide](../user/concepts/creative-modes.md), study A1). Per-section prose for YuE2 stays out (section 2). The listening study of arranged against plain plans (E7) is still open. |
 
 ## 1. What YuE2 reads
 
