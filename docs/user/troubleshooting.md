@@ -38,6 +38,8 @@ Start with **0 · System Check**: it shows versions, GPUs, which model files of 
 | MiniMax: the sheet reports more than **5 000 tokens** | caption and lyrics together are too long for the MiniMax text encoder | Shorten the caption or the lyrics by the number of tokens the sheet shows |
 | Every run renders a new take | the take seed is set to *randomize* | That is the intent: in *one song, stop to review* text and score stay cached; set the seed to *fixed* to repeat a take |
 | The writer runs again although you only wanted a new take | the brief's mode is *new song every run*, or an input of the writer changed (brief, writer model, draft seed) | Choose *one song, stop to review* and keep the brief unchanged; set the **Draft seed** node to *fixed* (the default) |
+| A series with a sheet on *stop for review* shows the same song again | it waits for your approval: a series writes the next song only after the reviewed one was rendered | *Approve* in the editor and run; or set the sheet to *continue* for a series without stops |
+| After a ComfyUI restart a series starts a new song although one was waiting | the song under review is kept in the running server only | Review the new song (or change nothing and approve it) |
 | The text sheet asks for approval on every run | the **Draft seed** is set to *randomize*: every run writes a new draft | Set the Draft seed to *fixed* while you review |
 | **Out of memory** while rendering | the GPU is too small for the defaults | Follow the System Check's rule table (smaller files, [Models](models.md)); MiniMax: turn on *tiled decode* in MiniMax Render; keep songs short |
 | SheetSage2 runs out of memory on a long source | long sources need a lot of VRAM | Use the optional *Excerpt* node (up to 5:00 is supported) |

@@ -5,7 +5,10 @@ Rules (one implementation, used by the node and by the editor route):
 * ``manual``  - the user's text; the upstream input is never evaluated.
 * ``edited``  - the user's text while the upstream draft still hashes to the
   ``base_sha256`` the edit was made from; otherwise a **conflict** that stops
-  the run. An edit is never silently replaced by a newer draft.
+  the run. An edit is never silently replaced by a newer draft. In a series
+  (*new song every run*) a new draft is a new song: the edit belonged to an
+  earlier song, so the new song takes its own draft and says so
+  (``SERIES_EDIT``) - text for every song is *manual*.
 * ``auto``    - the upstream draft, or *missing* when nothing is connected.
 """
 
@@ -20,6 +23,7 @@ from ..hashing import sha256_json, sha256_text
 from .state import DocState, SheetState
 
 FINGERPRINT_SCHEMA = "plenio.sheet_fingerprint/1"
+SERIES_EDIT = "your edit was for an earlier song of the series; this song uses its own draft"
 
 
 class DocStatus(str, Enum):
@@ -105,11 +109,14 @@ def needs_upstream(state: SheetState, kind: str) -> bool:
     return state.entry(kind).state is not DocState.MANUAL
 
 
-def resolve(state: SheetState, upstream: Mapping[str, str | None], kinds: Iterable[str]) -> Resolution:
+def resolve(
+    state: SheetState, upstream: Mapping[str, str | None], kinds: Iterable[str], *, series: bool = False
+) -> Resolution:
     """Resolve ``kinds`` from the persisted ``state`` and the upstream drafts.
 
     ``upstream[kind]`` is ``None`` when the input is not connected or was not
-    evaluated. Upstream texts are normalised before hashing.
+    evaluated. Upstream texts are normalised before hashing. ``series``: the
+    brief makes a new song every run (an outdated edit gives way, see above).
     """
     docs: dict[str, ResolvedDoc] = {}
     for kind in kinds:
@@ -132,6 +139,8 @@ def resolve(state: SheetState, upstream: Mapping[str, str | None], kinds: Iterab
         assert entry.text is not None and entry.base_sha256 is not None
         if draft_sha == entry.base_sha256:
             docs[kind] = ResolvedDoc(kind, DocStatus.EDITED, normalize_document(entry.text), draft_sha)
+        elif series and draft is not None:
+            docs[kind] = ResolvedDoc(kind, DocStatus.AUTO, draft, draft_sha, reason=SERIES_EDIT)
         elif draft_sha is None:
             docs[kind] = ResolvedDoc(
                 kind,

@@ -53,6 +53,13 @@
      "link": null
     },
     {
+     "localized_name": "song_seed",
+     "name": "song_seed",
+     "label": "song seed",
+     "type": "INT",
+     "link": null
+    },
+    {
      "localized_name": "switch",
      "name": "switch",
      "label": "planning",
@@ -101,8 +108,8 @@
     "version": 1,
     "state": {
      "lastGroupId": 0,
-     "lastNodeId": 703,
-     "lastLinkId": 9,
+     "lastNodeId": 705,
+     "lastLinkId": 12,
      "lastRerouteId": 0
     },
     "revision": 0,
@@ -114,7 +121,7 @@
       -260,
       0,
       160,
-      160
+      180
      ]
     },
     "outputNode": {
@@ -132,7 +139,7 @@
       "name": "clip",
       "type": "CLIP",
       "linkIds": [
-       3
+       5
       ],
       "pos": [
        0,
@@ -144,7 +151,7 @@
       "name": "style",
       "type": "STRING",
       "linkIds": [
-       4
+       6
       ],
       "pos": [
        0,
@@ -156,7 +163,7 @@
       "name": "lyrics",
       "type": "STRING",
       "linkIds": [
-       5
+       7
       ],
       "pos": [
        0,
@@ -168,7 +175,7 @@
       "name": "seed",
       "type": "INT",
       "linkIds": [
-       6
+       8
       ],
       "pos": [
        0,
@@ -177,15 +184,28 @@
       "label": "plan seed"
      },
      {
-      "id": "4fd01d79-c347-5143-85ac-75440f6cb017",
-      "name": "switch",
-      "type": "BOOLEAN",
+      "id": "3f238fff-eeb6-5c9f-8b9f-5f9f177ad5a0",
+      "name": "song_seed",
+      "type": "INT",
       "linkIds": [
-       7
+       9
       ],
       "pos": [
        0,
        80
+      ],
+      "label": "song seed"
+     },
+     {
+      "id": "4fd01d79-c347-5143-85ac-75440f6cb017",
+      "name": "switch",
+      "type": "BOOLEAN",
+      "linkIds": [
+       10
+      ],
+      "pos": [
+       0,
+       100
       ],
       "label": "planning"
      },
@@ -194,11 +214,11 @@
       "name": "mode",
       "type": "COMBO",
       "linkIds": [
-       8
+       11
       ],
       "pos": [
        0,
-       100
+       120
       ],
       "label": "plan type"
      }
@@ -209,7 +229,7 @@
       "name": "score",
       "type": "*",
       "linkIds": [
-       9
+       12
       ],
       "pos": [
        0,
@@ -238,7 +258,7 @@
         "localized_name": "clip",
         "name": "clip",
         "type": "CLIP",
-        "link": 3
+        "link": 5
        },
        {
         "localized_name": "style",
@@ -247,7 +267,7 @@
         "widget": {
          "name": "style"
         },
-        "link": 4
+        "link": 6
        },
        {
         "localized_name": "lyrics",
@@ -256,7 +276,7 @@
         "widget": {
          "name": "lyrics"
         },
-        "link": 5
+        "link": 7
        },
        {
         "localized_name": "seed",
@@ -265,7 +285,7 @@
         "widget": {
          "name": "seed"
         },
-        "link": 6
+        "link": 4
        },
        {
         "localized_name": "mode",
@@ -274,7 +294,7 @@
         "widget": {
          "name": "mode"
         },
-        "link": 8
+        "link": 11
        },
        {
         "localized_name": "max_abc_tokens",
@@ -437,7 +457,7 @@
         "widget": {
          "name": "switch"
         },
-        "link": 7
+        "link": 10
        }
       ],
       "outputs": [
@@ -446,7 +466,7 @@
         "name": "output",
         "type": "COMFY_MATCHTYPE_V3",
         "links": [
-         9
+         12
         ]
        }
       ],
@@ -455,6 +475,121 @@
       },
       "widgets_values": [
        true
+      ]
+     },
+     {
+      "id": 704,
+      "type": "PrimitiveInt",
+      "pos": [
+       0,
+       480
+      ],
+      "size": [
+       300,
+       80
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "value",
+        "name": "value",
+        "type": "INT",
+        "widget": {
+         "name": "value"
+        },
+        "link": 8
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "INT",
+        "name": "INT",
+        "type": "INT",
+        "links": [
+         3
+        ]
+       }
+      ],
+      "title": "Plan seed",
+      "properties": {
+       "Node name for S&R": "PrimitiveInt"
+      },
+      "widgets_values": [
+       0,
+       "fixed"
+      ]
+     },
+     {
+      "id": 705,
+      "type": "ComfyMathExpression",
+      "pos": [
+       0,
+       610
+      ],
+      "size": [
+       300,
+       150
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "values.a",
+        "name": "values.a",
+        "label": "a",
+        "shape": 7,
+        "type": "FLOAT,INT,BOOLEAN",
+        "link": 3
+       },
+       {
+        "localized_name": "values.b",
+        "name": "values.b",
+        "label": "b",
+        "shape": 7,
+        "type": "FLOAT,INT,BOOLEAN",
+        "link": 9
+       },
+       {
+        "localized_name": "expression",
+        "name": "expression",
+        "type": "STRING",
+        "widget": {
+         "name": "expression"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "FLOAT",
+        "name": "FLOAT",
+        "type": "FLOAT",
+        "links": null
+       },
+       {
+        "localized_name": "INT",
+        "name": "INT",
+        "type": "INT",
+        "links": [
+         4
+        ]
+       },
+       {
+        "localized_name": "BOOL",
+        "name": "BOOL",
+        "type": "BOOLEAN",
+        "links": null
+       }
+      ],
+      "title": "plan seed + song seed",
+      "properties": {
+       "Node name for S&R": "ComfyMathExpression"
+      },
+      "widgets_values": [
+       "sum(values)"
       ]
      }
     ],
@@ -478,6 +613,22 @@
      },
      {
       "id": 3,
+      "origin_id": 704,
+      "origin_slot": 0,
+      "target_id": 705,
+      "target_slot": 0,
+      "type": "INT"
+     },
+     {
+      "id": 4,
+      "origin_id": 705,
+      "origin_slot": 1,
+      "target_id": 701,
+      "target_slot": 3,
+      "type": "INT"
+     },
+     {
+      "id": 5,
       "origin_id": -10,
       "origin_slot": 0,
       "target_id": 701,
@@ -485,7 +636,7 @@
       "type": "CLIP"
      },
      {
-      "id": 4,
+      "id": 6,
       "origin_id": -10,
       "origin_slot": 1,
       "target_id": 701,
@@ -493,7 +644,7 @@
       "type": "STRING"
      },
      {
-      "id": 5,
+      "id": 7,
       "origin_id": -10,
       "origin_slot": 2,
       "target_id": 701,
@@ -501,31 +652,39 @@
       "type": "STRING"
      },
      {
-      "id": 6,
+      "id": 8,
       "origin_id": -10,
       "origin_slot": 3,
-      "target_id": 701,
-      "target_slot": 3,
+      "target_id": 704,
+      "target_slot": 0,
       "type": "INT"
      },
      {
-      "id": 7,
+      "id": 9,
       "origin_id": -10,
       "origin_slot": 4,
+      "target_id": 705,
+      "target_slot": 1,
+      "type": "INT"
+     },
+     {
+      "id": 10,
+      "origin_id": -10,
+      "origin_slot": 5,
       "target_id": 703,
       "target_slot": 2,
       "type": "BOOLEAN"
      },
      {
-      "id": 8,
+      "id": 11,
       "origin_id": -10,
-      "origin_slot": 5,
+      "origin_slot": 6,
       "target_id": 701,
       "target_slot": 4,
       "type": "COMBO"
      },
      {
-      "id": 9,
+      "id": 12,
       "origin_id": 703,
       "origin_slot": 0,
       "target_id": -20,
@@ -535,7 +694,7 @@
     ],
     "extra": {},
     "category": "Plenio/YuE2",
-    "description": "Plans the song's score (ABC) from style and lyrics with YuE2. With planning off, no score is made and YuE2 renders without a plan."
+    "description": "Plans the song's score (ABC) from style and lyrics with YuE2. With planning off, no score is made and YuE2 renders without a plan. The brief's song seed is added to the plan seed: every song of a 'new song every run' series gets its own plan."
    }
   ]
  },

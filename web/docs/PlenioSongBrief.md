@@ -3,7 +3,7 @@
 The intent of a new song. It is the only place where the *work mode*, *sung or instrumental* and the *length* are chosen.
 
 - **mode** - how the runs of this workflow behave:
-  - *new song every run* - every run writes and renders a **different song** from this brief (a new *series variation*: the writer is asked for its own title, story, images and hook). Song Sheets set to *as the brief says* do not stop. Set the batch count next to **Run** (App mode: *Number of runs*) to make a whole series with one click.
+  - *new song every run* - every run writes and renders a **different song** from this brief (a new *series variation*: the writer is asked for its own title, story, images and hook, with its own draft and plan seeds). Song Sheets set to *as the brief says* do not stop; a sheet set to *stop for review* stops every new song, and the run after *Approve* renders that song before the next one is written. Set the batch count next to **Run** (App mode: *Number of runs*) to make a whole series with one click.
   - *one song, stop to review* - the brief stays the same, so its song is written once: Song Sheets set to *as the brief says* stop until you **Approve** the documents, and later runs are new takes of the approved song.
 - **template** - a starting point from the template library. Text fields you leave empty are taken from the template; selecting a template never overwrites what you typed.
 - **description, genre, mood, tempo** - what the song is and how it sounds. Sent to the writing model.
@@ -11,4 +11,4 @@ The intent of a new song. It is the only place where the *work mode*, *sung or i
 - **vocals** - *sung* (language, voice character, lyrics theme) or *instrumental* (the instrument plays the lead melody, or accompaniment only; optional lead instrument).
 - **key, meter** - optional musical constraints (the DAW template's empty score takes both; also in App mode).
 
-Outputs: the brief, a readable summary, a render headroom for the length, and whether the song is instrumental. The node's summary shows the mode and, in *new song every run*, the variation of the current run.
+Outputs: the brief, a readable summary, a render headroom for the length, whether the song is instrumental, and the *song seed* - added to the draft and plan seeds: a new value for every song of a series (kept while it waits for review), 0 for one song. The node's summary shows the mode and, in *new song every run*, the variation of the current run.

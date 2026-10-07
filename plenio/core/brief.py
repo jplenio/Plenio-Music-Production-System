@@ -148,7 +148,14 @@ class SongBrief:
     kind: str = "song"
     mode: str = "careful"
     variation: int | None = None
-    """batch mode: drawn anew for every run, so the writer is asked for a new song."""
+    """batch mode: drawn anew for every song of the series, so the writer is asked for a new song."""
+    series: str = field(default="", compare=False)
+    """batch mode: the series this song belongs to (``core.series``; not part of the brief's content)."""
+
+    @property
+    def song_seed(self) -> int:
+        """Added to the draft and plan seeds: the song's own seeds in a series, 0 for one song."""
+        return self.variation or 0
 
     @property
     def instrumental(self) -> bool:
@@ -167,6 +174,7 @@ class SongBrief:
         data = asdict(self)
         data["from_template"] = list(self.from_template)
         data["notes"] = list(self.notes)
+        data.pop("series")
         data["schema"] = BRIEF_SCHEMA
         data["target_seconds"] = self.target_seconds
         return data
@@ -253,6 +261,13 @@ class CoverBrief:
     kind: str = "cover"
     mode: str = "careful"
     variation: int | None = None
+    series: str = field(default="", compare=False)
+    """batch mode: the series this cover belongs to (``core.series``; not part of the brief's content)."""
+
+    @property
+    def song_seed(self) -> int:
+        """Added to the draft seed: the cover's own seed in a series, 0 for one cover."""
+        return self.variation or 0
 
     @property
     def instrumental(self) -> bool:
@@ -294,6 +309,7 @@ class CoverBrief:
         data = asdict(self)
         data["from_template"] = list(self.from_template)
         data["notes"] = list(self.notes)
+        data.pop("series")
         data["schema"] = BRIEF_SCHEMA
         return data
 

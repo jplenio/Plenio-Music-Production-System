@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import secrets
+from dataclasses import replace
 from typing import Any
 
 from comfy_api.latest import io
@@ -18,14 +18,16 @@ from ...core.brief import (
 from ...core.errors import PlenioError
 from ..shared import template_library
 from ..types import Brief
-from .brief import draw_variation, mode_line
+from .brief import SONG_SEED_TOOLTIP, mode_line, series_song
 
 MODE_TOOLTIP = (
     "one cover, stop to review: Song Sheet · Score and Song Sheet · Text stop so you can check the transcription "
     "and the lyrics; later runs keep them and render new takes. new cover every run: each run writes a different "
-    "version (title, style and - for new lyrics - the lyrics) and renders it without stops; the transcription "
-    "of the source is reused."
+    "version (title, style and - for new lyrics - the lyrics, with its own draft seed) and renders it; the "
+    "transcription of the source is reused. A Song Sheet set to 'stop for review' stops each new version; after "
+    "Approve the next run renders it, the run after it writes the next one."
 )
+COVER_INPUTS = ("mode", "template", "description", "genre", "mood", "vocals", "harmony", "title")
 
 
 def _summary(brief: Any) -> str:
@@ -148,13 +150,18 @@ class PlenioCoverBrief(io.ComfyNode):
                     tooltip="True for original-lyrics covers (lyrics from the ASR).",
                 ),
                 io.Boolean.Output(display_name="instrumental", tooltip="True for instrumental covers."),
+                io.Int.Output(
+                    display_name="song_seed", tooltip=SONG_SEED_TOOLTIP.replace("and plan seeds", "seed")
+                ),
             ],
         )
 
     @classmethod
     def fingerprint_inputs(cls, **kwargs: Any) -> Any:
-        # new cover every run: the brief runs again (a new variation) and with it everything after it
-        return secrets.token_hex(8) if kwargs.get("mode") == "new cover every run" else ""
+        # new cover every run: a new version - unless a Song Sheet holds the current one for review
+        inputs = {name: kwargs.get(name) for name in COVER_INPUTS}
+        key, song = series_song("cover", str(kwargs.get("mode", "")), inputs, fresh=True)
+        return f"{key}:{song}" if key else ""
 
     @classmethod
     def validate_inputs(cls, **kwargs: Any) -> bool | str:
@@ -198,12 +205,17 @@ class PlenioCoverBrief(io.ComfyNode):
             "harmony": harmony,
             "title": title,
         }
-        brief = build_cover_brief(values, chosen, mode=mode, variation=draw_variation(mode))
+        inputs = dict(
+            zip(COVER_INPUTS, (mode, template, description, genre, mood, vocals, harmony, title), strict=True)
+        )
+        series, song = series_song("cover", mode, inputs, fresh=False)
+        brief = replace(build_cover_brief(values, chosen, mode=mode, variation=song), series=series)
         status = "warning" if brief.warnings() or brief.notes else "ok"
         return io.NodeOutput(
             brief,
             brief.to_text(),
             brief.use_source_lyrics,
             brief.instrumental,
+            brief.song_seed,
             ui={"plenio_summary": [{"status": status, "markdown": _summary(brief)}]},
         )

@@ -69,6 +69,13 @@
      "link": null
     },
     {
+     "localized_name": "song_seed",
+     "name": "song_seed",
+     "label": "song seed",
+     "type": "INT",
+     "link": null
+    },
+    {
      "localized_name": "thinking",
      "name": "thinking",
      "type": "BOOLEAN",
@@ -128,8 +135,8 @@
     "version": 1,
     "state": {
      "lastGroupId": 0,
-     "lastNodeId": 507,
-     "lastLinkId": 25,
+     "lastNodeId": 509,
+     "lastLinkId": 28,
      "lastRerouteId": 0
     },
     "revision": 0,
@@ -141,7 +148,7 @@
       -260,
       0,
       160,
-      200
+      220
      ]
     },
     "outputNode": {
@@ -159,7 +166,7 @@
       "name": "brief",
       "type": "PLENIO_BRIEF",
       "linkIds": [
-       11
+       14
       ],
       "pos": [
        0,
@@ -171,7 +178,7 @@
       "name": "engine",
       "type": "PLENIO_ENGINE",
       "linkIds": [
-       12
+       15
       ],
       "pos": [
        0,
@@ -183,7 +190,7 @@
       "name": "score",
       "type": "STRING",
       "linkIds": [
-       13
+       16
       ],
       "pos": [
        0,
@@ -195,7 +202,7 @@
       "name": "language",
       "type": "STRING",
       "linkIds": [
-       14
+       17
       ],
       "pos": [
        0,
@@ -207,7 +214,7 @@
       "name": "reference_lyrics",
       "type": "STRING",
       "linkIds": [
-       15
+       18
       ],
       "pos": [
        0,
@@ -219,7 +226,7 @@
       "name": "model",
       "type": "COMBO",
       "linkIds": [
-       16
+       19
       ],
       "pos": [
        0,
@@ -232,8 +239,7 @@
       "name": "sampling_mode.seed",
       "type": "INT",
       "linkIds": [
-       17,
-       18
+       20
       ],
       "pos": [
        0,
@@ -242,16 +248,29 @@
       "label": "draft seed"
      },
      {
-      "id": "42a1c8f5-c11a-517e-9698-20337cb1f27a",
-      "name": "thinking",
-      "type": "BOOLEAN",
+      "id": "ed6c8635-714c-5949-b45a-2818735ca7b0",
+      "name": "song_seed",
+      "type": "INT",
       "linkIds": [
-       19,
-       20
+       21
       ],
       "pos": [
        0,
        140
+      ],
+      "label": "song seed"
+     },
+     {
+      "id": "42a1c8f5-c11a-517e-9698-20337cb1f27a",
+      "name": "thinking",
+      "type": "BOOLEAN",
+      "linkIds": [
+       22,
+       23
+      ],
+      "pos": [
+       0,
+       160
       ]
      }
     ],
@@ -261,7 +280,7 @@
       "name": "title",
       "type": "STRING",
       "linkIds": [
-       21
+       24
       ],
       "pos": [
        0,
@@ -273,7 +292,7 @@
       "name": "style",
       "type": "STRING",
       "linkIds": [
-       22
+       25
       ],
       "pos": [
        0,
@@ -285,7 +304,7 @@
       "name": "lyrics",
       "type": "STRING",
       "linkIds": [
-       23
+       26
       ],
       "pos": [
        0,
@@ -297,7 +316,7 @@
       "name": "artwork_prompt",
       "type": "STRING",
       "linkIds": [
-       24
+       27
       ],
       "pos": [
        0,
@@ -309,7 +328,7 @@
       "name": "report",
       "type": "PLENIO_REPORT",
       "linkIds": [
-       25
+       28
       ],
       "pos": [
        0,
@@ -338,34 +357,34 @@
         "localized_name": "brief",
         "name": "brief",
         "type": "PLENIO_BRIEF",
-        "link": 11
+        "link": 14
        },
        {
         "localized_name": "engine",
         "name": "engine",
         "type": "PLENIO_ENGINE",
-        "link": 12
+        "link": 15
        },
        {
         "localized_name": "score",
         "name": "score",
         "shape": 7,
         "type": "STRING",
-        "link": 13
+        "link": 16
        },
        {
         "localized_name": "language",
         "name": "language",
         "shape": 7,
         "type": "STRING",
-        "link": 14
+        "link": 17
        },
        {
         "localized_name": "reference_lyrics",
         "name": "reference_lyrics",
         "shape": 7,
         "type": "STRING",
-        "link": 15
+        "link": 18
        },
        {
         "localized_name": "detail",
@@ -383,8 +402,8 @@
         "name": "prompt",
         "type": "STRING",
         "links": [
-         1,
-         2
+         4,
+         5
         ]
        },
        {
@@ -392,7 +411,7 @@
         "name": "request",
         "type": "PLENIO_REQUEST",
         "links": [
-         10
+         13
         ]
        }
       ],
@@ -425,7 +444,7 @@
         "widget": {
          "name": "model"
         },
-        "link": 16
+        "link": 19
        }
       ],
       "outputs": [
@@ -434,7 +453,7 @@
         "name": "text_encoder",
         "type": "*",
         "links": [
-         3
+         6
         ]
        },
        {
@@ -442,7 +461,7 @@
         "name": "local_model",
         "type": "*",
         "links": [
-         5
+         8
         ]
        },
        {
@@ -450,7 +469,7 @@
         "name": "use_local",
         "type": "BOOLEAN",
         "links": [
-         6
+         9
         ]
        }
       ],
@@ -491,7 +510,7 @@
         "widget": {
          "name": "clip_name"
         },
-        "link": 3
+        "link": 6
        },
        {
         "localized_name": "type",
@@ -518,7 +537,7 @@
         "name": "CLIP",
         "type": "CLIP",
         "links": [
-         4
+         7
         ]
        }
       ],
@@ -558,7 +577,7 @@
         "localized_name": "clip",
         "name": "clip",
         "type": "CLIP",
-        "link": 4
+        "link": 7
        },
        {
         "localized_name": "image",
@@ -588,7 +607,7 @@
         "widget": {
          "name": "prompt"
         },
-        "link": 1
+        "link": 4
        },
        {
         "localized_name": "max_length",
@@ -660,7 +679,7 @@
         "widget": {
          "name": "sampling_mode.seed"
         },
-        "link": 17
+        "link": 2
        },
        {
         "localized_name": "sampling_mode.presence_penalty",
@@ -678,7 +697,7 @@
         "widget": {
          "name": "thinking"
         },
-        "link": 19
+        "link": 22
        },
        {
         "localized_name": "use_default_template",
@@ -705,7 +724,7 @@
         "name": "generated_text",
         "type": "STRING",
         "links": [
-         7
+         10
         ]
        }
       ],
@@ -751,7 +770,7 @@
         "widget": {
          "name": "prompt"
         },
-        "link": 2
+        "link": 5
        },
        {
         "localized_name": "model",
@@ -760,7 +779,7 @@
         "widget": {
          "name": "model"
         },
-        "link": 5
+        "link": 8
        },
        {
         "localized_name": "seed",
@@ -769,7 +788,7 @@
         "widget": {
          "name": "seed"
         },
-        "link": 18
+        "link": 3
        },
        {
         "localized_name": "max_tokens",
@@ -796,7 +815,7 @@
         "widget": {
          "name": "thinking"
         },
-        "link": 20
+        "link": 23
        },
        {
         "localized_name": "context",
@@ -832,7 +851,7 @@
         "name": "text",
         "type": "STRING",
         "links": [
-         8
+         11
         ]
        },
        {
@@ -878,14 +897,14 @@
         "name": "on_false",
         "shape": 7,
         "type": "COMFY_MATCHTYPE_V3",
-        "link": 7
+        "link": 10
        },
        {
         "localized_name": "on_true",
         "name": "on_true",
         "shape": 7,
         "type": "COMFY_MATCHTYPE_V3",
-        "link": 8
+        "link": 11
        },
        {
         "localized_name": "switch",
@@ -894,7 +913,7 @@
         "widget": {
          "name": "switch"
         },
-        "link": 6
+        "link": 9
        }
       ],
       "outputs": [
@@ -903,7 +922,7 @@
         "name": "output",
         "type": "COMFY_MATCHTYPE_V3",
         "links": [
-         9
+         12
         ]
        }
       ],
@@ -934,13 +953,13 @@
         "localized_name": "text",
         "name": "text",
         "type": "STRING",
-        "link": 9
+        "link": 12
        },
        {
         "localized_name": "request",
         "name": "request",
         "type": "PLENIO_REQUEST",
-        "link": 10
+        "link": 13
        }
       ],
       "outputs": [
@@ -949,7 +968,7 @@
         "name": "title",
         "type": "STRING",
         "links": [
-         21
+         24
         ]
        },
        {
@@ -957,7 +976,7 @@
         "name": "style",
         "type": "STRING",
         "links": [
-         22
+         25
         ]
        },
        {
@@ -965,7 +984,7 @@
         "name": "lyrics",
         "type": "STRING",
         "links": [
-         23
+         26
         ]
        },
        {
@@ -973,7 +992,7 @@
         "name": "artwork_prompt",
         "type": "STRING",
         "links": [
-         24
+         27
         ]
        },
        {
@@ -981,7 +1000,7 @@
         "name": "report",
         "type": "PLENIO_REPORT",
         "links": [
-         25
+         28
         ]
        }
       ],
@@ -989,12 +1008,152 @@
        "Node name for S&R": "PlenioParseDraft"
       },
       "widgets_values": []
+     },
+     {
+      "id": 508,
+      "type": "PrimitiveInt",
+      "pos": [
+       0,
+       340
+      ],
+      "size": [
+       320,
+       80
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "value",
+        "name": "value",
+        "type": "INT",
+        "widget": {
+         "name": "value"
+        },
+        "link": 20
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "INT",
+        "name": "INT",
+        "type": "INT",
+        "links": [
+         1
+        ]
+       }
+      ],
+      "title": "Draft seed",
+      "properties": {
+       "Node name for S&R": "PrimitiveInt"
+      },
+      "widgets_values": [
+       0,
+       "fixed"
+      ]
+     },
+     {
+      "id": 509,
+      "type": "ComfyMathExpression",
+      "pos": [
+       0,
+       470
+      ],
+      "size": [
+       320,
+       150
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "values.a",
+        "name": "values.a",
+        "label": "a",
+        "shape": 7,
+        "type": "FLOAT,INT,BOOLEAN",
+        "link": 1
+       },
+       {
+        "localized_name": "values.b",
+        "name": "values.b",
+        "label": "b",
+        "shape": 7,
+        "type": "FLOAT,INT,BOOLEAN",
+        "link": 21
+       },
+       {
+        "localized_name": "expression",
+        "name": "expression",
+        "type": "STRING",
+        "widget": {
+         "name": "expression"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "FLOAT",
+        "name": "FLOAT",
+        "type": "FLOAT",
+        "links": null
+       },
+       {
+        "localized_name": "INT",
+        "name": "INT",
+        "type": "INT",
+        "links": [
+         2,
+         3
+        ]
+       },
+       {
+        "localized_name": "BOOL",
+        "name": "BOOL",
+        "type": "BOOLEAN",
+        "links": null
+       }
+      ],
+      "title": "draft seed + song seed",
+      "properties": {
+       "Node name for S&R": "ComfyMathExpression"
+      },
+      "widgets_values": [
+       "sum(values)"
+      ]
      }
     ],
     "groups": [],
     "links": [
      {
       "id": 1,
+      "origin_id": 508,
+      "origin_slot": 0,
+      "target_id": 509,
+      "target_slot": 0,
+      "type": "INT"
+     },
+     {
+      "id": 2,
+      "origin_id": 509,
+      "origin_slot": 1,
+      "target_id": 504,
+      "target_slot": 12,
+      "type": "INT"
+     },
+     {
+      "id": 3,
+      "origin_id": 509,
+      "origin_slot": 1,
+      "target_id": 505,
+      "target_slot": 2,
+      "type": "INT"
+     },
+     {
+      "id": 4,
       "origin_id": 501,
       "origin_slot": 0,
       "target_id": 504,
@@ -1002,7 +1161,7 @@
       "type": "STRING"
      },
      {
-      "id": 2,
+      "id": 5,
       "origin_id": 501,
       "origin_slot": 0,
       "target_id": 505,
@@ -1010,7 +1169,7 @@
       "type": "STRING"
      },
      {
-      "id": 3,
+      "id": 6,
       "origin_id": 502,
       "origin_slot": 0,
       "target_id": 503,
@@ -1018,7 +1177,7 @@
       "type": "*"
      },
      {
-      "id": 4,
+      "id": 7,
       "origin_id": 503,
       "origin_slot": 0,
       "target_id": 504,
@@ -1026,7 +1185,7 @@
       "type": "CLIP"
      },
      {
-      "id": 5,
+      "id": 8,
       "origin_id": 502,
       "origin_slot": 1,
       "target_id": 505,
@@ -1034,7 +1193,7 @@
       "type": "*"
      },
      {
-      "id": 6,
+      "id": 9,
       "origin_id": 502,
       "origin_slot": 2,
       "target_id": 506,
@@ -1042,7 +1201,7 @@
       "type": "BOOLEAN"
      },
      {
-      "id": 7,
+      "id": 10,
       "origin_id": 504,
       "origin_slot": 0,
       "target_id": 506,
@@ -1050,7 +1209,7 @@
       "type": "STRING"
      },
      {
-      "id": 8,
+      "id": 11,
       "origin_id": 505,
       "origin_slot": 0,
       "target_id": 506,
@@ -1058,7 +1217,7 @@
       "type": "STRING"
      },
      {
-      "id": 9,
+      "id": 12,
       "origin_id": 506,
       "origin_slot": 0,
       "target_id": 507,
@@ -1066,7 +1225,7 @@
       "type": "COMFY_MATCHTYPE_V3"
      },
      {
-      "id": 10,
+      "id": 13,
       "origin_id": 501,
       "origin_slot": 1,
       "target_id": 507,
@@ -1074,7 +1233,7 @@
       "type": "PLENIO_REQUEST"
      },
      {
-      "id": 11,
+      "id": 14,
       "origin_id": -10,
       "origin_slot": 0,
       "target_id": 501,
@@ -1082,7 +1241,7 @@
       "type": "PLENIO_BRIEF"
      },
      {
-      "id": 12,
+      "id": 15,
       "origin_id": -10,
       "origin_slot": 1,
       "target_id": 501,
@@ -1090,7 +1249,7 @@
       "type": "PLENIO_ENGINE"
      },
      {
-      "id": 13,
+      "id": 16,
       "origin_id": -10,
       "origin_slot": 2,
       "target_id": 501,
@@ -1098,7 +1257,7 @@
       "type": "STRING"
      },
      {
-      "id": 14,
+      "id": 17,
       "origin_id": -10,
       "origin_slot": 3,
       "target_id": 501,
@@ -1106,7 +1265,7 @@
       "type": "STRING"
      },
      {
-      "id": 15,
+      "id": 18,
       "origin_id": -10,
       "origin_slot": 4,
       "target_id": 501,
@@ -1114,7 +1273,7 @@
       "type": "STRING"
      },
      {
-      "id": 16,
+      "id": 19,
       "origin_id": -10,
       "origin_slot": 5,
       "target_id": 502,
@@ -1122,39 +1281,39 @@
       "type": "COMBO"
      },
      {
-      "id": 17,
+      "id": 20,
       "origin_id": -10,
       "origin_slot": 6,
-      "target_id": 504,
-      "target_slot": 12,
+      "target_id": 508,
+      "target_slot": 0,
       "type": "INT"
      },
      {
-      "id": 18,
-      "origin_id": -10,
-      "origin_slot": 6,
-      "target_id": 505,
-      "target_slot": 2,
-      "type": "INT"
-     },
-     {
-      "id": 19,
+      "id": 21,
       "origin_id": -10,
       "origin_slot": 7,
+      "target_id": 509,
+      "target_slot": 1,
+      "type": "INT"
+     },
+     {
+      "id": 22,
+      "origin_id": -10,
+      "origin_slot": 8,
       "target_id": 504,
       "target_slot": 14,
       "type": "BOOLEAN"
      },
      {
-      "id": 20,
+      "id": 23,
       "origin_id": -10,
-      "origin_slot": 7,
+      "origin_slot": 8,
       "target_id": 505,
       "target_slot": 5,
       "type": "BOOLEAN"
      },
      {
-      "id": 21,
+      "id": 24,
       "origin_id": 507,
       "origin_slot": 0,
       "target_id": -20,
@@ -1162,7 +1321,7 @@
       "type": "STRING"
      },
      {
-      "id": 22,
+      "id": 25,
       "origin_id": 507,
       "origin_slot": 1,
       "target_id": -20,
@@ -1170,7 +1329,7 @@
       "type": "STRING"
      },
      {
-      "id": 23,
+      "id": 26,
       "origin_id": 507,
       "origin_slot": 2,
       "target_id": -20,
@@ -1178,7 +1337,7 @@
       "type": "STRING"
      },
      {
-      "id": 24,
+      "id": 27,
       "origin_id": 507,
       "origin_slot": 3,
       "target_id": -20,
@@ -1186,7 +1345,7 @@
       "type": "STRING"
      },
      {
-      "id": 25,
+      "id": 28,
       "origin_id": 507,
       "origin_slot": 4,
       "target_id": -20,
@@ -1196,7 +1355,7 @@
     ],
     "extra": {},
     "category": "Plenio/Writing",
-    "description": "Writes title, style, lyrics and an artwork prompt following the rules of the loaded music model. The writer model is one list: ComfyUI's own text models (native Generate Text, the default) and every local LLM - GGUF files from models/LLM, LM Studio or the Hugging Face cache, or the models of a running LM Studio, Ollama, llama.cpp ... Only the chosen one is loaded."
+    "description": "Writes title, style, lyrics and an artwork prompt following the rules of the loaded music model. The writer model is one list: ComfyUI's own text models (native Generate Text, the default) and every local LLM - GGUF files from models/LLM, LM Studio or the Hugging Face cache, or the models of a running LM Studio, Ollama, llama.cpp ... Only the chosen one is loaded. The brief's song seed is added to the draft seed: every song of a 'new song every run' series gets its own."
    }
   ]
  },

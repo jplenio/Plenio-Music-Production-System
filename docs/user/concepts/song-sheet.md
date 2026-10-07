@@ -40,7 +40,18 @@ Neither happens when the other sheet's document changed after the last run: then
 | **stop for review** | always |
 | **continue** | never |
 
-A stopped run waits after the sheet until you **Approve** in the editor. The approval is bound to exactly the documents you saw (a fingerprint); if anything changes, the sheet waits again. The templates set every sheet to *as the brief says*, so the mode in the brief decides for the whole path: the song templates start with *new song every run* (no stops), the cover template with *one cover, stop to review* (both sheets stop).
+A stopped run waits after the sheet until you **Approve** in the editor. The approval is bound to exactly the documents you saw (a fingerprint); if anything changes, the sheet waits again. The templates set every sheet to *as the brief says*, so the mode in the brief decides for the whole path: the song templates start with *new song every run* (no stops), the cover template with *one cover, stop to review* (both sheets stop). *Song Sheet · DAW* always stops: its score is composed there.
+
+### Every combination
+
+| Brief mode | Sheet *review* | What the runs do |
+|---|---|---|
+| *one song, stop to review* | *as the brief says* or *stop for review* | the first run stops at the sheet; after *Approve* the next run goes on; every later run is a **new take of the same song** (text and score stay) |
+| *one song, stop to review* | *continue* | this sheet never stops; the song stays, every run is a new take |
+| *new song every run* | *as the brief says* or *continue* | every run writes and renders a **new song** (its own draft and plan seeds), without stopping |
+| *new song every run* | *stop for review* | every **new song stops** at this sheet. Run again without approving: the same song waits again (no new one is written). *Approve* and run: **that song is rendered**. The run after it writes the next song, which stops again - unless its documents are exactly the ones you approved (a cover series on a checked score goes on) |
+
+With two sheets on *stop for review* in a series, each new song stops at both in turn (text, then score) before it is rendered.
 
 ### Where the run stands
 
@@ -53,7 +64,7 @@ The canvas shows it on the nodes, the sheet's button line says it in words (also
 
 Every other Plenio node shows its result the same way (✓, ⚠ warning, ✖ error with a red frame). A new run clears the badges first, so they show how far the current run got - a node after the stop has none. The frame stays visible when you zoom out.
 
-**Edits in a series:** in the mode *new song every run* every run brings a new draft, so an *edited* document conflicts on the next run (the error says so). Use *manual* for a text the whole series should keep, or *Use draft* to let the series write it.
+**Edits in a series:** in the mode *new song every run* an edit belongs to its song. A song that waits for review keeps your edit until it is rendered; the next song takes its own new draft (the sheet notes *your edit was for an earlier song*) instead of stopping with a conflict. Use *manual* for a text the whole series should keep - *Use my own lyrics*, for example. Outside a series an edit whose draft changed still stops the run with a conflict, so nothing of yours is replaced unseen.
 
 ## The editor
 

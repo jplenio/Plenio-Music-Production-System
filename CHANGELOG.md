@@ -11,6 +11,13 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 - `config.toml` `[llm]`: the llama-server program, extra GGUF folders and servers, other apps on/off; `PLENIO_LLAMA_SERVER`, `PLENIO_LLM_OTHER_APPS`.
 - System Check: the Local LLM models per source and the runtime for GGUF files.
 
+### Fixed
+
+- **A review stop in a series never ended.** With *new song every run* and a Song Sheet on *stop for review*, every run wrote a new song, so *Approve* was always for the previous one and the run stopped again and again. Now a song that waits for review is kept: running again without approving shows the same song, the run after *Approve* renders that song, and the run after it writes the next one. *new cover every run* behaves the same.
+- **Every song of a series gets its own seeds.** The briefs have a new output *song seed* (a new value for every song of a series, kept while it waits for review, 0 for one song); *Write Song* adds it to the draft seed and *YuE2 Plan* to the plan seed, so a series no longer draws every song with the same seeds. The Draft seed and plan seed stay *fixed* by default.
+- **An edit in a series belongs to its song.** The next song takes its own draft (the sheet notes *your edit was for an earlier song*) instead of stopping with a conflict; *manual* text still stays for the whole series, and outside a series an outdated edit still stops with a conflict. The editor resolves with the brief's mode, as the node does.
+- *Song Sheet · DAW* always stops for review: its score starts as rests and is composed there (on *as the brief says* a series stopped with an invalid empty score).
+
 ### Changed
 
 - README and user guides: the tutorials are one link to the playlist (the README with a short summary of every video) - no links to single videos, which change with every new upload.

@@ -31,7 +31,7 @@ There is no fourth conditioning track and no hidden arrangement: what you see in
    - **navigator**: split the score into sections (`verse`, `chorus`, ...), because YuE2 sings section by section;
    - **ABC text**: still there, under *Advanced* - the same text, synchronised both ways.
    You can also press **Import MIDI…** and read a sketch from any DAW; the dialog shows what the import did before anything is replaced. With the lyrics of Song Sheet · Text, the lyrics lane shows the words over the imported melody - give the sketch the lyrics' sections (verse, chorus, ...) so that every section has its words.
-4. **Approve** the sheet (in the brief's review mode), then press **Run** again: YuE2 renders exactly this score, and Master and Export finish the song. Every further run is a new **take** of the same score.
+4. **Approve** the sheet, then press **Run** again: YuE2 renders exactly this score, and Master and Export finish the song. Every further run is a new **take** of the same score. *Song Sheet · DAW* always stops for review - the score is composed there; in *new song every run* each new song (new lyrics) stops there to be composed or approved.
 
 A score that has only rests cannot be rendered - YuE2 needs at least one note. The sheet says so instead of rendering silence.
 

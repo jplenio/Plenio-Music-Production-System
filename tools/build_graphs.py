@@ -47,6 +47,7 @@ YUE2_CHECKPOINT = "yue2_3b_int8_convrot.safetensors"
 LORA = "ar_lora_inst_v3abc_comfyui.safetensors"
 SHEETSAGE = "sheetsage2_bf16.safetensors"
 WRITER = "gemma4_e4b_it_fp8_scaled.safetensors"
+SEED_SUM = "sum(values)"  # works with or without the song seed (a blueprint used without a brief)
 WRITER_MAX_TOKENS = 6144  # a long draft plus a reasoning model's thoughts (Qwen thinks 500-3000 tokens)
 WRITER_CONTEXT = 12288  # Local LLM: a detailed prompt, WRITER_MAX_TOKENS and a margin
 MINIMAX_DIT = "minimax_music3_dit_fp16.safetensors"
@@ -521,6 +522,23 @@ def write_song() -> Blueprint:
     )
     switch = g.add("ComfySwitchNode", (780, 160), size=(260, 90), title="ComfyUI or Local LLM")
     parse = g.add("PlenioParseDraft", (1100, 0), size=(300, 140))
+    draft = g.add(
+        "PrimitiveInt",
+        (0, 340),
+        size=(320, 80),
+        title="Draft seed",
+        widgets={"value": 0, "value.control": "fixed"},
+    )
+    seed = g.add(
+        "ComfyMathExpression",
+        (0, 470),
+        size=(320, 150),
+        title="draft seed + song seed",
+        widgets={"expression": SEED_SUM},
+    )
+    g.link(draft, "INT", seed, "values.a")
+    g.link(seed, "INT", generate, "sampling_mode.seed")
+    g.link(seed, "INT", local_llm, "seed")
     g.link(compose, "prompt", generate, "prompt")
     g.link(compose, "prompt", local_llm, "prompt")
     g.link(choice, "text_encoder", loader, "clip_name")
@@ -537,7 +555,8 @@ def write_song() -> Blueprint:
         "Writes title, style, lyrics and an artwork prompt following the rules of the loaded music model. The "
         "writer model is one list: ComfyUI's own text models (native Generate Text, the default) and every "
         "local LLM - GGUF files from models/LLM, LM Studio or the Hugging Face cache, or the models of a "
-        "running LM Studio, Ollama, llama.cpp ... Only the chosen one is loaded.",
+        "running LM Studio, Ollama, llama.cpp ... Only the chosen one is loaded. The brief's song seed is "
+        "added to the draft seed: every song of a 'new song every run' series gets its own.",
         g,
         [
             BlueprintInput("brief", "PLENIO_BRIEF", [(compose, "brief")]),
@@ -549,13 +568,9 @@ def write_song() -> Blueprint:
                 "model", "COMBO", [(choice, "model")], widget=True, default=WRITER, label="writer model"
             ),
             BlueprintInput(
-                "sampling_mode.seed",
-                "INT",
-                [(generate, "sampling_mode.seed"), (local_llm, "seed")],
-                widget=True,
-                default=0,
-                label="draft seed",
+                "sampling_mode.seed", "INT", [(draft, "value")], widget=True, default=0, label="draft seed"
             ),
+            BlueprintInput("song_seed", "INT", [(seed, "values.b")], label="song seed"),
             BlueprintInput(
                 "thinking",
                 "BOOLEAN",
@@ -613,19 +628,37 @@ def yue2_plan() -> Blueprint:
     )
     empty = g.add("PrimitiveString", (0, 380), size=(300, 60), title="No score", widgets={"value": ""})
     switch = g.add("ComfySwitchNode", (400, 0), size=(260, 90), widgets={"switch": True})
+    plan_seed = g.add(
+        "PrimitiveInt",
+        (0, 480),
+        size=(300, 80),
+        title="Plan seed",
+        widgets={"value": 0, "value.control": "fixed"},
+    )
+    seed = g.add(
+        "ComfyMathExpression",
+        (0, 610),
+        size=(300, 150),
+        title="plan seed + song seed",
+        widgets={"expression": SEED_SUM},
+    )
     g.link(empty, "STRING", switch, "on_false")
     g.link(plan, "abc", switch, "on_true")
+    g.link(plan_seed, "INT", seed, "values.a")
+    g.link(seed, "INT", plan, "seed")
     return Blueprint(
         "Plenio · YuE2 Plan",
         "Plenio/YuE2",
         "Plans the song's score (ABC) from style and lyrics with YuE2. With planning off, no score is made and "
-        "YuE2 renders without a plan.",
+        "YuE2 renders without a plan. The brief's song seed is added to the plan seed: every song of a 'new "
+        "song every run' series gets its own plan.",
         g,
         [
             BlueprintInput("clip", "CLIP", [(plan, "clip")]),
             BlueprintInput("style", "STRING", [(plan, "style")]),
             BlueprintInput("lyrics", "STRING", [(plan, "lyrics")]),
-            BlueprintInput("seed", "INT", [(plan, "seed")], widget=True, default=0, label="plan seed"),
+            BlueprintInput("seed", "INT", [(plan_seed, "value")], widget=True, default=0, label="plan seed"),
+            BlueprintInput("song_seed", "INT", [(seed, "values.b")], label="song seed"),
             BlueprintInput(
                 "switch", "BOOLEAN", [(switch, "switch")], widget=True, default=True, label="planning"
             ),
@@ -1049,12 +1082,14 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     audio, stems_node = stems_stage(g, bp, 2320, audio=(render, "AUDIO"), y=665)
     audio, refine_node = refine_stage(g, 2320, audio=audio, y=815)
     g.link(brief, "brief", write, "brief")
+    g.link(brief, "song_seed", write, "song_seed")
     g.link(model_node, "engine", write, "engine")
     for kind in ("title", "style", "lyrics", "artwork_prompt"):
         g.link(write, kind, text_sheet, kind)
     g.link(brief, "brief", text_sheet, "brief")
     g.link(model_node, "engine", text_sheet, "engine")
     g.link(model_node, "CLIP", plan, "clip")
+    g.link(brief, "song_seed", plan, "song_seed")
     g.link(text_sheet, "style", plan, "style")
     g.link(text_sheet, "plan_lyrics", plan, "lyrics")
     g.link(plan, "score", tools, "score")
@@ -1249,6 +1284,7 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g.link(transcribe, "timeline", asr, "timeline")
     g.link(brief, "brief", asr, "brief")
     g.link(brief, "brief", write, "brief")
+    g.link(brief, "song_seed", write, "song_seed")
     g.link(model_node, "engine", write, "engine")
     g.link(score_sheet, "score", write, "score")
     g.link(asr, "language", write, "language")
@@ -1388,6 +1424,7 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     seed = take_seed(g, (1400, 0))
     render = g.add_subgraph(bp["minimax_render"], (1400, 150), size=(320, 250))
     g.link(brief, "brief", write, "brief")
+    g.link(brief, "song_seed", write, "song_seed")
     g.link(model_node, "engine", write, "engine")
     for kind in ("title", "style", "lyrics", "artwork_prompt"):
         g.link(write, kind, sheet, kind)
@@ -1502,25 +1539,27 @@ def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         title="Score Tools · new score from brief",
         widgets={"operation": "new score from brief"},
     )
-    # The DAW layout: track headers, piano roll, staff, inspector and the MIDI tools.
+    # The DAW layout: track headers, piano roll, staff, inspector and the MIDI tools. It always stops for
+    # review: the score starts as rests and is composed there - in a 'new song every run' series every
+    # new song stops to be composed (on 'as the brief says' the empty score would stop the run as invalid).
     score_sheet = g.add(
         "PlenioSongSheet",
         (1820, 0),
         size=(420, 360 + SUMMARY_ROOM),
         title="Song Sheet · DAW",
-        widgets=FOLLOW_BRIEF,
+        widgets={"review": "stop for review"},
         labels={"sheet_state": "Song Sheet · DAW"},
         properties={"plenio_editor_layout": "daw"},
     )
     seed = take_seed(g, (2320, 0))
     render = g.add_subgraph(bp["yue2_render"], (2320, 150), size=(320, 310))
     g.link(brief, "brief", write, "brief")
+    g.link(brief, "song_seed", write, "song_seed")
     g.link(model_node, "engine", write, "engine")
     for kind in ("title", "style", "lyrics", "artwork_prompt"):
         g.link(write, kind, text_sheet, kind)
     g.link(brief, "brief", text_sheet, "brief")
     g.link(model_node, "engine", text_sheet, "engine")
-    # The score input of Score Tools stays unconnected: 'new score from brief' builds the skeleton.
     # The score input of Score Tools stays unconnected: 'new score from brief' builds the skeleton.
     g.link(brief, "brief", tools, "brief")
     g.link(tools, "score", score_sheet, "score")

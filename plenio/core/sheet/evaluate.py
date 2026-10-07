@@ -11,7 +11,7 @@ from ..diagnostics import Finding, has_errors, info, summarize
 from ..hashing import sha256_text
 from ..lyrics import check_lyrics
 from ..reports import Report, Status
-from .resolve import DocStatus, Resolution, approval_matches, resolve
+from .resolve import SERIES_EDIT, DocStatus, Resolution, approval_matches, resolve
 from .state import DOCUMENT_KINDS, SheetState
 
 PAYLOAD_SCHEMA = "plenio.sheet_payload/1"
@@ -45,6 +45,8 @@ class SheetEvaluation:
     engine_id: str | None
     instrumental: bool
     target_seconds: float | None = None
+    brief_mode: str | None = None
+    """The brief's work mode: in a series (``batch``) an edit belongs to its song."""
 
     @property
     def fingerprint(self) -> str | None:
@@ -108,6 +110,7 @@ class SheetEvaluation:
             "engine": self.engine_id,
             "instrumental": self.instrumental,
             "target_seconds": self.target_seconds,
+            "brief_mode": self.brief_mode,
         }
 
     def report(self) -> Report:
@@ -187,7 +190,7 @@ def evaluate_sheet(
     """
     review = effective_review(review, brief_mode)
     kinds = tuple(k for k in DOCUMENT_KINDS if k in set(owned))
-    resolution = resolve(state, upstream, kinds)
+    resolution = resolve(state, upstream, kinds, series=brief_mode == "batch")
     findings: list[Finding] = []
     context = dict(context or {})
     docs = {**context, **{k: resolution.text(k) for k in kinds}}
@@ -218,6 +221,11 @@ def evaluate_sheet(
         if resolution.docs[kind].status is DocStatus.MISSING and kind in ("style", "lyrics"):
             findings.append(info(f"No {kind} is connected or entered.", kind))
     findings.extend(_manual_lyrics_note(resolution, kinds))
+    findings.extend(
+        info(f"{kind}: {SERIES_EDIT} (make it manual to keep one text for every song).", kind)
+        for kind in kinds
+        if resolution.docs[kind].reason == SERIES_EDIT
+    )
     findings.extend(extra_findings)
     return SheetEvaluation(
         state,
@@ -233,4 +241,5 @@ def evaluate_sheet(
         engine_id,
         instrumental,
         target_seconds,
+        brief_mode,
     )

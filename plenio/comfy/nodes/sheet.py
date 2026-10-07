@@ -21,6 +21,7 @@ from ...core.sheet import (
     parse_sheet_state,
 )
 from .. import host
+from ..shared import SERIES
 from ..types import Brief, Engine, PitchType, ReportType, SheetState, TimelineType
 
 DOC_TOOLTIPS = {
@@ -87,7 +88,8 @@ class PlenioSongSheet(io.ComfyNode):
                 default=BRIEF_REVIEW,
                 tooltip="as the brief says: stop for review when the brief's mode is 'one song/cover, stop to "
                 "review', continue for 'new song/cover every run'. stop for review: the documents are released "
-                "only after you approve them in the editor. continue: never stop for review.",
+                "only after you approve them in the editor - in a series every new song stops, and the run after "
+                "Approve renders that song before the next one is written. continue: never stop for review.",
             ),
             SheetState.Input(
                 "sheet_state",
@@ -101,7 +103,8 @@ class PlenioSongSheet(io.ComfyNode):
             description=(
                 "Shows the documents that condition the music model and lets you edit or replace them. Manual "
                 "text always wins; an edit whose draft changed stops the run with a conflict instead of being "
-                "replaced. What leaves the sheet reaches the model unchanged."
+                "replaced (in a 'new song every run' series an edit belongs to its song, and the next song takes "
+                "its own draft). What leaves the sheet reaches the model unchanged."
             ),
             inputs=inputs,
             outputs=[
@@ -187,8 +190,9 @@ class PlenioSongSheet(io.ComfyNode):
         if evaluation.conflicts:
             reasons = "; ".join(f"{doc.kind}: {doc.reason}" for doc in evaluation.resolution.conflicts)
             hint = (
-                f"In the mode 'new {brief.kind} every run' each run brings a new draft: set the document to "
-                "automatic (Use draft), or make it manual - the whole series then uses your text."
+                f"In the mode 'new {brief.kind} every run' the draft of an edited document is no longer "
+                "connected: set the document to automatic (Use draft), or make it manual - the whole series "
+                "then uses your text."
                 if getattr(brief, "mode", None) == "batch"
                 else None
             )
@@ -205,6 +209,7 @@ class PlenioSongSheet(io.ComfyNode):
                 diagnostics=[f.to_dict() for f in evaluation.findings if f.severity == "error"],
                 hint="Open the Song Sheet editor to fix them, or change the upstream draft.",
             )
+        _follow_series(brief, evaluation.waiting_for_approval)
         report = evaluation.report()
         documents: list[Any] = [evaluation.text(kind) for kind in DOCUMENT_KINDS]
         final_score = evaluation.text("score") if "score" in evaluation.owned else ""
@@ -222,6 +227,18 @@ class PlenioSongSheet(io.ComfyNode):
             "plenio_summary": [{"status": report.status.value, "markdown": _markdown(evaluation)}],
         }
         return io.NodeOutput(*documents, *derived, report, tags, plan_lyrics, ui=ui)
+
+
+def _follow_series(brief: Any, waiting: bool) -> None:
+    """New song/cover every run (``core.series``): a sheet that waits for approval keeps the song for the next
+    runs, a sheet that lets it through releases it, so the run after the render writes the next song."""
+    series, song = getattr(brief, "series", ""), getattr(brief, "variation", None)
+    if not series or song is None:
+        return
+    if waiting:
+        SERIES.hold(series, song)
+    else:
+        SERIES.release(series, song)
 
 
 def _cover_findings(brief: Any, upstream: dict[str, Any], state: Any) -> list[Any]:

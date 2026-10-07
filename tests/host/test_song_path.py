@@ -268,12 +268,13 @@ def test_new_song_every_run_writes_a_new_song_without_stops(server: ComfyServer,
     folder = server.output_dir / "plenio-test" / name
     assert (folder / "Neon Rain.flac").is_file() and (folder / "Neon Rain (2).flac").is_file()  # nothing lost
     summary = entries[1]["outputs"]["1"]["plenio_summary"][0]["markdown"]
-    assert "new song every run" in summary and "variation" in summary
-    # an edit made on an earlier song's draft conflicts; the error explains what a series does
+    assert "new song every run" in summary and "of the series" in summary
+    # an edit made on an earlier song's draft belongs to that song: the new song takes its own draft
+    # (2026-10-07; before, the run stopped with a conflict - tests/host/test_series.py has the details)
     edited = {"lyrics": {"state": "edited", "text": "[Verse]\nMine", "base_sha256": "0" * 64}}
-    stale = song_prompt(label=name, mode="new song every run", text_state=sheet_state(edited))
-    message = server.run_expect_error(stale)["exception_message"]
-    assert "conflict" in message and "new song every run" in message and "manual" in message
+    stale = server.run(song_prompt(label=name, mode="new song every run", text_state=sheet_state(edited)))
+    lyrics = sheet_payload(stale, "6")["docs"]["lyrics"]
+    assert lyrics["status"] == "auto" and "earlier song" in lyrics["reason"]
 
 
 def test_one_song_stops_at_both_sheets_as_the_brief_says(server: ComfyServer, log: Log) -> None:

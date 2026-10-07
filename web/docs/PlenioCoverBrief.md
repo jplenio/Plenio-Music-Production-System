@@ -16,6 +16,6 @@ The intent of a cover. Melody, song form and tempo come from the source recordin
 
 The brief does not decide which lyrics text is used in the end: that is the job of the **Song Sheet**, where manual text always wins.
 
-Outputs: the brief, a readable summary, *use_source_lyrics* (original lyrics) and *instrumental* - the two switches of the Cover template.
+Outputs: the brief, a readable summary, *use_source_lyrics* (original lyrics) and *instrumental* - the two switches of the Cover template - and the *song seed* (added to the draft seed: a new value for every version of a series, 0 for one cover). In *new cover every run* a sheet set to *stop for review* stops every new version; the run after *Approve* renders it.
 
 Choose a **voice that fits the melody's range**: YuE2 sings the melody as written. A high (female) melody sung by a "male baritone" became hard to understand in the Phase 4B tests; the Song Sheet warns about it.

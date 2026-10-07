@@ -8,6 +8,7 @@ Song Sheet's outputs (WYSIWYG).
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -50,6 +51,10 @@ ANSWERS = {
     "ARTWORK: A rainy street at night with neon reflections.",
     "b": "TITLE: Neon Rain\nSTYLE: English, warm piano pop, expressive female voice, light drums, 88 BPM\n"
     "LYRICS:\n[Verse]\nA second draft of the verse\n\n[Chorus]\nWe run through neon rain\n"
+    "ARTWORK: A rainy street at night with neon reflections.",
+    # a series: every song differs - {n} is the brief's variation from the prompt ("variation 1234")
+    "series": "TITLE: Song {n}\nSTYLE: English, warm piano pop, expressive female voice, light drums, 88 BPM\n"
+    "LYRICS:\n[Verse]\nThe verse of song {n}\n\n[Chorus]\nWe run through neon rain\n"
     "ARTWORK: A rainy street at night with neon reflections.",
 }
 
@@ -336,7 +341,8 @@ def make_nodes(record: Any) -> list[type[io.ComfyNode]]:
         @classmethod
         def execute(cls, prompt: str, variant: str) -> io.NodeOutput:
             record("llm", variant=variant, prompt_chars=len(prompt), prompt=prompt)
-            return io.NodeOutput(ANSWERS[variant])
+            series = re.search(r"variation (\d+)", prompt)
+            return io.NodeOutput(ANSWERS[variant].replace("{n}", series.group(1) if series else "0"))
 
     class PlenioTestFakePlan(io.ComfyNode):
         @classmethod

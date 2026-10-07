@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import secrets
 from dataclasses import replace
 from functools import lru_cache
 from pathlib import Path
@@ -14,10 +15,13 @@ from ..core.config import PlenioConfig
 from ..core.models import ModelFile
 from ..core.models import load_catalogue as load_model_catalogue
 from ..core.reports import Report
+from ..core.series import Series
 from ..core.system import check_system, to_markdown
 from . import host
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[2]
+SERIES = Series(lambda: secrets.randbelow(9999) + 1)
+"""The songs of the 'new song/cover every run' series of this server (``core.series``)."""
 RESOURCES = PACKAGE_ROOT / "resources"
 
 

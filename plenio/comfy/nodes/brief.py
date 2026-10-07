@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
-import secrets
+from collections.abc import Mapping
+from dataclasses import replace
 from typing import Any
 
 from comfy_api.latest import io
 
 from ...core.brief import (
+    COVER_MODES,
     DEFAULT_LENGTH,
     LENGTHS,
     MELODY_OPTIONS,
@@ -18,13 +20,32 @@ from ...core.brief import (
     resolve_mode,
 )
 from ...core.errors import PlenioError
-from ..shared import template_library
+from ...core.series import series_key
+from ..shared import SERIES, template_library
 from ..types import Brief
 
 MODE_TOOLTIP = (
-    "new song every run: each run writes and renders a different song from this brief, without stops - set "
-    "the batch count next to Run for a whole series. one song, stop to review: the Song Sheets stop so you "
-    "can check and edit the documents before rendering; later runs keep them and render new takes."
+    "new song every run: each run writes and renders a different song from this brief (with its own draft and "
+    "plan seeds) - set the batch count next to Run for a whole series. A Song Sheet set to 'stop for review' "
+    "stops each new song; after Approve the next run renders that song, the run after it writes the next one. "
+    "one song, stop to review: the Song Sheets stop so you can check and edit the documents before rendering; "
+    "later runs keep them and render new takes."
+)
+SONG_INPUTS = (
+    "mode",
+    "template",
+    "description",
+    "genre",
+    "mood",
+    "tempo",
+    "length",
+    "vocals",
+    "key",
+    "meter",
+)
+SONG_SEED_TOOLTIP = (
+    "Added to the draft and plan seeds: every song of a series gets its own (kept while it waits for review); "
+    "0 for one song."
 )
 
 TEXT = {
@@ -40,13 +61,23 @@ TEXT = {
 def mode_line(brief: Any) -> str:
     """The summary line of the work mode (Song Brief and Cover Brief)."""
     if brief.mode == "batch":
-        return f"Mode: new {brief.kind} every run (series variation {brief.variation}; the Song Sheets do not stop)"
+        held = " - kept until the reviewed song is rendered" if SERIES.is_held(brief.series) else ""
+        return (
+            f"Mode: new {brief.kind} every run (song {brief.variation} of the series{held}; Song Sheets on "
+            "'as the brief says' do not stop)"
+        )
     return f"Mode: one {brief.kind}, stop to review (the Song Sheets stop for approval; later runs are new takes)"
 
 
-def draw_variation(mode: str) -> int | None:
-    """A new series variation for every batch run; none in the careful mode."""
-    return secrets.randbelow(9999) + 1 if resolve_mode(mode) == "batch" else None
+def series_song(kind: str, mode: str, inputs: Mapping[str, Any], *, fresh: bool) -> tuple[str, int | None]:
+    """The series key and the song (variation) of this run; ``('', None)`` for one song.
+
+    ``fresh`` (the node's fingerprint, once per run): a new song unless one is held for review;
+    otherwise the song that fingerprint chose (``execute``)."""
+    if resolve_mode(mode, SONG_MODES if kind == "song" else COVER_MODES) != "batch":
+        return "", None
+    key = series_key(kind, inputs)
+    return key, SERIES.song(key) if fresh else SERIES.current(key)
 
 
 def _summary(brief: Any) -> str:
@@ -137,13 +168,17 @@ class PlenioSongBrief(io.ComfyNode):
                 io.String.Output(display_name="brief_text", tooltip="The brief as readable text."),
                 io.Float.Output(display_name="max_seconds", tooltip="Render headroom for the target length."),
                 io.Boolean.Output(display_name="instrumental", tooltip="True for instrumental songs."),
+                io.Int.Output(display_name="song_seed", tooltip=SONG_SEED_TOOLTIP),
             ],
         )
 
     @classmethod
     def fingerprint_inputs(cls, **kwargs: Any) -> Any:
-        # new song every run: the brief runs again (a new variation) and with it everything after it
-        return secrets.token_hex(8) if kwargs.get("mode") == "new song every run" else ""
+        # new song every run: a new song (and with it everything after the brief) - unless a Song Sheet
+        # holds the current one for review (core.series); one song: the inputs alone decide
+        inputs = {name: kwargs.get(name) for name in SONG_INPUTS}
+        key, song = series_song("song", str(kwargs.get("mode", "")), inputs, fresh=True)
+        return f"{key}:{song}" if key else ""
 
     @classmethod
     def validate_inputs(cls, **kwargs: Any) -> bool | str:
@@ -179,6 +214,7 @@ class PlenioSongBrief(io.ComfyNode):
         meter: str = "",
     ) -> io.NodeOutput:
         chosen = None if template == "none" else template_library().get(template)
+        length_input = length
         length, length_note = resolve_length(length)
         values = {
             "description": description,
@@ -195,13 +231,22 @@ class PlenioSongBrief(io.ComfyNode):
             "melody": vocals.get("melody", ""),
             "lead_instrument": vocals.get("lead_instrument", ""),
         }
-        brief = build_song_brief(values, chosen, mode=mode, variation=draw_variation(mode))
+        inputs = dict(
+            zip(
+                SONG_INPUTS,
+                (mode, template, description, genre, mood, tempo, length_input, vocals, key, meter),
+                strict=True,
+            )
+        )
+        series, song = series_song("song", mode, inputs, fresh=False)
+        brief = replace(build_song_brief(values, chosen, mode=mode, variation=song), series=series)
         notes = [note for note in (length_note, *brief.notes) if note]
         return io.NodeOutput(
             brief,
             brief.to_text(),
             brief.max_seconds,
             brief.instrumental,
+            brief.song_seed,
             ui={
                 "plenio_summary": [
                     {

@@ -41,6 +41,7 @@ export interface ResolveRequest {
   context: Record<string, string>
   max_seconds?: number
   target_seconds?: number | null
+  brief_mode?: 'batch' | 'careful' | null
 }
 
 export function resolveSheet(fetcher: Fetcher, request: ResolveRequest): Promise<SheetPayload> {

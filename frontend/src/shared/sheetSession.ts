@@ -46,6 +46,9 @@ export interface SheetPayload {
   style_label?: string
   instrumental: boolean
   target_seconds?: number | null
+  /** The brief's work mode (``batch``: a new song every run, where an edit belongs to its song); the editor
+   * sends it back when it validates, so it resolves the documents as the node does. */
+  brief_mode?: 'batch' | 'careful' | null
   timeline?: TimelinePayload
   reference_audio?: { filename: string; subfolder: string; type: string }
   /** From Sung Pitch: the source's vocal line (a MIDI pitch every 20 ms), or why there is none. */

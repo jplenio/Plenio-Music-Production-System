@@ -57,10 +57,10 @@ Every template reads from left to right in numbered groups, with the same anatom
 
 The first field of the **Song Brief** - and of the **Cover Brief** - is the **mode**. It decides what a run does:
 
-- **new song every run** (default of the song templates): every run writes and renders a **different song** from the same brief, without stopping. To make a series with one click, set the batch count next to **Run** (in App mode: *Number of runs*) - ten runs, ten songs, each exported under its own title (a repeated title gets ` (2)`, ` (3)`, ...).
+- **new song every run** (default of the song templates): every run writes and renders a **different song** from the same brief, without stopping - each with its own draft and plan seeds. To make a series with one click, set the batch count next to **Run** (in App mode: *Number of runs*) - ten runs, ten songs, each exported under its own title (a repeated title gets ` (2)`, ` (3)`, ...). Want to check each song first? Set a Song Sheet to *stop for review*: every new song stops there, and the run after *Approve* renders it before the next song is written ([Song Sheet](concepts/song-sheet.md#every-combination)).
 - **one song, stop to review**: the run stops at each **Song Sheet**. Open it, check or edit the documents, press *Approve*, and run again; YuE2 stops twice (text, then score). Once everything is approved, every further run is a **new take** of the same song.
 
-The writer's **Draft seed** (its own node next to *Write Song*, also in App mode) is *fixed* by default; set it to *randomize* for even more varied series - in *one song, stop to review* keep it *fixed*, or every run brings a new text to approve.
+The writer's **Draft seed** (its own node next to *Write Song*, also in App mode) is *fixed* by default - keep it so: in a series every song gets its own seeds anyway (the brief's *song seed* is added to the draft and plan seeds), and in *one song, stop to review* a fixed seed keeps the approved text. Change it by hand when you want another draft of the same song.
 
 The cover template offers *one cover, stop to review* (its default) and *new cover every run* (a new title, style and - for new lyrics - new lyrics on the same transcription every run). The Song Sheets' *review* is set to **as the brief says**; set a single sheet to *continue* or *stop for review* to override the brief.
 

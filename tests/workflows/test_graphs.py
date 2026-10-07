@@ -269,12 +269,23 @@ def test_app_configurations() -> None:
     ],
 )
 def test_the_sheets_follow_the_brief_mode(name: str, mode: str) -> None:
-    """0.2.2 work mode: the brief decides; every Song Sheet of a template is set to 'as the brief says'."""
+    """0.2.2 work mode: the brief decides; every Song Sheet of a template is set to 'as the brief says' -
+    except Song Sheet · DAW, which always stops: its score starts as rests and is composed there (in a
+    series every new song stops to be composed)."""
     nodes = TEMPLATES[name]["nodes"]
     brief = next(n for n in nodes if n["type"] in ("PlenioSongBrief", "PlenioCoverBrief"))
     assert brief["widgets_values"][0] == mode
     for sheet in (n for n in nodes if n["type"] == "PlenioSongSheet"):
-        assert sheet["widgets_values"][0] == "as the brief says", sheet["title"]
+        expected = "stop for review" if sheet["title"] == "Song Sheet · DAW" else "as the brief says"
+        assert sheet["widgets_values"][0] == expected, sheet["title"]
+    # every song of a series gets its own draft (and plan) seed: the brief's song seed reaches the blocks
+    targets = [
+        next(n for n in nodes if n["id"] == link[3]).get("title") or ""
+        for link in TEMPLATES[name]["links"]
+        if link[1] == brief["id"] and link[2] == 4  # the brief's song_seed output
+    ]
+    assert "Plenio · Write Song" in targets
+    assert ("Plenio · YuE2 Plan" in targets) == (name == "1 · YuE2 · Song")
     # the writer's seed is its own node (fixed by default; randomize is one click away), linked to Write Song
     draft = next(n for n in nodes if n.get("title") == "Draft seed")
     assert draft["type"] == "SeedNode" and draft["widgets_values"][1] == "fixed"

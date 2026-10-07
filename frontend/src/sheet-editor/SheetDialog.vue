@@ -314,7 +314,9 @@ async function validate() {
       instrumental: props.payload.instrumental,
       // the lyrics are checked against the score as edited here
       context: changedScore.value ? { ...props.payload.context, score: changedScore.value } : props.payload.context,
-      target_seconds: props.payload.target_seconds ?? null
+      target_seconds: props.payload.target_seconds ?? null,
+      // a series: the same rule as the node (an edit belongs to its song)
+      brief_mode: props.payload.brief_mode ?? null
     })
   } catch (e) {
     error.value = e instanceof PlenioApiError ? `${e.message}${e.hint ? ` — ${e.hint}` : ''}` : String(e)

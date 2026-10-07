@@ -2,7 +2,7 @@
  "id": "9636130e-6f72-5b33-a1b9-97c929135bfd",
  "revision": 0,
  "last_node_id": 19,
- "last_link_id": 46,
+ "last_link_id": 48,
  "nodes": [
   {
    "id": 1,
@@ -168,9 +168,9 @@
      "type": "PLENIO_BRIEF",
      "links": [
       5,
-      11,
-      17,
-      21
+      12,
+      19,
+      23
      ]
     },
     {
@@ -190,6 +190,15 @@
      "name": "instrumental",
      "type": "BOOLEAN",
      "links": null
+    },
+    {
+     "localized_name": "song_seed",
+     "name": "song_seed",
+     "type": "INT",
+     "links": [
+      6,
+      15
+     ]
     }
    ],
    "properties": {
@@ -245,7 +254,7 @@
      "name": "MODEL",
      "type": "MODEL",
      "links": [
-      23
+      25
      ]
     },
     {
@@ -253,8 +262,8 @@
      "name": "CLIP",
      "type": "CLIP",
      "links": [
-      13,
-      24
+      14,
+      26
      ]
     },
     {
@@ -262,7 +271,7 @@
      "name": "VAE",
      "type": "VAE",
      "links": [
-      25
+      27
      ]
     },
     {
@@ -270,9 +279,9 @@
      "name": "engine",
      "type": "PLENIO_ENGINE",
      "links": [
-      6,
-      12,
-      22
+      7,
+      13,
+      24
      ]
     }
    ],
@@ -307,7 +316,7 @@
      "localized_name": "engine",
      "name": "engine",
      "type": "PLENIO_ENGINE",
-     "link": 6
+     "link": 7
     },
     {
      "localized_name": "score",
@@ -348,6 +357,13 @@
      "link": 1
     },
     {
+     "localized_name": "song_seed",
+     "name": "song_seed",
+     "label": "song seed",
+     "type": "INT",
+     "link": 6
+    },
+    {
      "localized_name": "thinking",
      "name": "thinking",
      "type": "BOOLEAN",
@@ -363,7 +379,7 @@
      "name": "title",
      "type": "STRING",
      "links": [
-      7
+      8
      ]
     },
     {
@@ -371,7 +387,7 @@
      "name": "style",
      "type": "STRING",
      "links": [
-      8
+      9
      ]
     },
     {
@@ -379,7 +395,7 @@
      "name": "lyrics",
      "type": "STRING",
      "links": [
-      9
+      10
      ]
     },
     {
@@ -387,7 +403,7 @@
      "name": "artwork_prompt",
      "type": "STRING",
      "links": [
-      10
+      11
      ]
     },
     {
@@ -470,21 +486,21 @@
      "name": "title",
      "shape": 7,
      "type": "STRING",
-     "link": 7
+     "link": 8
     },
     {
      "localized_name": "style",
      "name": "style",
      "shape": 7,
      "type": "STRING",
-     "link": 8
+     "link": 9
     },
     {
      "localized_name": "lyrics",
      "name": "lyrics",
      "shape": 7,
      "type": "STRING",
-     "link": 9
+     "link": 10
     },
     {
      "localized_name": "score",
@@ -498,7 +514,7 @@
      "name": "artwork_prompt",
      "shape": 7,
      "type": "STRING",
-     "link": 10
+     "link": 11
     },
     {
      "localized_name": "context_style",
@@ -547,14 +563,14 @@
      "name": "brief",
      "shape": 7,
      "type": "PLENIO_BRIEF",
-     "link": 11
+     "link": 12
     },
     {
      "localized_name": "engine",
      "name": "engine",
      "shape": 7,
      "type": "PLENIO_ENGINE",
-     "link": 12
+     "link": 13
     },
     {
      "localized_name": "review",
@@ -582,7 +598,7 @@
      "name": "title",
      "type": "STRING",
      "links": [
-      36
+      38
      ]
     },
     {
@@ -590,9 +606,9 @@
      "name": "style",
      "type": "STRING",
      "links": [
-      14,
-      19,
-      26
+      16,
+      21,
+      28
      ]
     },
     {
@@ -600,8 +616,8 @@
      "name": "lyrics",
      "type": "STRING",
      "links": [
-      20,
-      27
+      22,
+      29
      ]
     },
     {
@@ -615,7 +631,7 @@
      "name": "artwork_prompt",
      "type": "STRING",
      "links": [
-      37
+      39
      ]
     },
     {
@@ -635,7 +651,7 @@
      "name": "report",
      "type": "PLENIO_REPORT",
      "links": [
-      40
+      42
      ]
     },
     {
@@ -649,7 +665,7 @@
      "name": "plan_lyrics",
      "type": "STRING",
      "links": [
-      15
+      17
      ]
     }
    ],
@@ -681,7 +697,7 @@
      "localized_name": "clip",
      "name": "clip",
      "type": "CLIP",
-     "link": 13
+     "link": 14
     },
     {
      "localized_name": "style",
@@ -690,7 +706,7 @@
      "widget": {
       "name": "style"
      },
-     "link": 14
+     "link": 16
     },
     {
      "localized_name": "lyrics",
@@ -699,7 +715,7 @@
      "widget": {
       "name": "lyrics"
      },
-     "link": 15
+     "link": 17
     },
     {
      "localized_name": "seed",
@@ -710,6 +726,13 @@
       "name": "seed"
      },
      "link": null
+    },
+    {
+     "localized_name": "song_seed",
+     "name": "song_seed",
+     "label": "song seed",
+     "type": "INT",
+     "link": 15
     },
     {
      "localized_name": "switch",
@@ -738,7 +761,7 @@
      "name": "score",
      "type": "*",
      "links": [
-      16
+      18
      ]
     }
    ],
@@ -772,14 +795,14 @@
      "name": "score",
      "shape": 7,
      "type": "STRING",
-     "link": 16
+     "link": 18
     },
     {
      "localized_name": "brief",
      "name": "brief",
      "shape": 7,
      "type": "PLENIO_BRIEF",
-     "link": 17
+     "link": 19
     },
     {
      "localized_name": "operation",
@@ -797,7 +820,7 @@
      "name": "score",
      "type": "STRING",
      "links": [
-      18
+      20
      ]
     },
     {
@@ -861,7 +884,7 @@
      "name": "score",
      "shape": 7,
      "type": "STRING",
-     "link": 18
+     "link": 20
     },
     {
      "localized_name": "artwork_prompt",
@@ -875,14 +898,14 @@
      "name": "context_style",
      "shape": 7,
      "type": "STRING",
-     "link": 19
+     "link": 21
     },
     {
      "localized_name": "context_lyrics",
      "name": "context_lyrics",
      "shape": 7,
      "type": "STRING",
-     "link": 20
+     "link": 22
     },
     {
      "localized_name": "context_score",
@@ -917,14 +940,14 @@
      "name": "brief",
      "shape": 7,
      "type": "PLENIO_BRIEF",
-     "link": 21
+     "link": 23
     },
     {
      "localized_name": "engine",
      "name": "engine",
      "shape": 7,
      "type": "PLENIO_ENGINE",
-     "link": 22
+     "link": 24
     },
     {
      "localized_name": "review",
@@ -970,7 +993,7 @@
      "name": "score",
      "type": "STRING",
      "links": [
-      28
+      30
      ]
     },
     {
@@ -984,7 +1007,7 @@
      "name": "planning_mode",
      "type": "COMBO",
      "links": [
-      29
+      31
      ]
     },
     {
@@ -992,7 +1015,7 @@
      "name": "score_seconds",
      "type": "FLOAT",
      "links": [
-      30
+      32
      ]
     },
     {
@@ -1000,7 +1023,7 @@
      "name": "report",
      "type": "PLENIO_REPORT",
      "links": [
-      41
+      43
      ]
     },
     {
@@ -1057,7 +1080,7 @@
      "name": "seed",
      "type": "INT",
      "links": [
-      31
+      33
      ]
     }
    ],
@@ -1089,19 +1112,19 @@
      "localized_name": "model",
      "name": "model",
      "type": "MODEL",
-     "link": 23
+     "link": 25
     },
     {
      "localized_name": "clip",
      "name": "clip",
      "type": "CLIP",
-     "link": 24
+     "link": 26
     },
     {
      "localized_name": "vae",
      "name": "vae",
      "type": "VAE",
-     "link": 25
+     "link": 27
     },
     {
      "localized_name": "style",
@@ -1110,7 +1133,7 @@
      "widget": {
       "name": "style"
      },
-     "link": 26
+     "link": 28
     },
     {
      "localized_name": "lyrics",
@@ -1119,7 +1142,7 @@
      "widget": {
       "name": "lyrics"
      },
-     "link": 27
+     "link": 29
     },
     {
      "localized_name": "abc",
@@ -1129,7 +1152,7 @@
      "widget": {
       "name": "abc"
      },
-     "link": 28
+     "link": 30
     },
     {
      "localized_name": "mode",
@@ -1139,7 +1162,7 @@
      "widget": {
       "name": "mode"
      },
-     "link": 29
+     "link": 31
     },
     {
      "localized_name": "seed",
@@ -1149,7 +1172,7 @@
      "widget": {
       "name": "seed"
      },
-     "link": 31
+     "link": 33
     },
     {
      "localized_name": "max_duration",
@@ -1159,7 +1182,7 @@
      "widget": {
       "name": "max_duration"
      },
-     "link": 30
+     "link": 32
     }
    ],
    "outputs": [
@@ -1227,7 +1250,7 @@
      "name": "report",
      "type": "PLENIO_REPORT",
      "links": [
-      42
+      44
      ]
     },
     {
@@ -1235,7 +1258,7 @@
      "name": "separation_report",
      "type": "PLENIO_REPORT",
      "links": [
-      43
+      45
      ]
     }
    ],
@@ -1405,8 +1428,8 @@
      "name": "audio",
      "type": "AUDIO",
      "links": [
-      32,
-      35
+      34,
+      37
      ]
     },
     {
@@ -1414,7 +1437,7 @@
      "name": "report",
      "type": "PLENIO_REPORT",
      "links": [
-      44
+      46
      ]
     }
    ],
@@ -1452,7 +1475,7 @@
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
-     "link": 32
+     "link": 34
     },
     {
      "localized_name": "reference",
@@ -1477,8 +1500,8 @@
      "name": "audio",
      "type": "AUDIO",
      "links": [
-      33,
-      34
+      35,
+      36
      ]
     },
     {
@@ -1486,7 +1509,7 @@
      "name": "eq_report",
      "type": "PLENIO_REPORT",
      "links": [
-      45
+      47
      ]
     },
     {
@@ -1494,7 +1517,7 @@
      "name": "loudness_report",
      "type": "PLENIO_REPORT",
      "links": [
-      46
+      48
      ]
     }
    ],
@@ -1523,7 +1546,7 @@
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
-     "link": 33
+     "link": 35
     }
    ],
    "outputs": [
@@ -1559,28 +1582,28 @@
      "localized_name": "audio",
      "name": "audio",
      "type": "AUDIO",
-     "link": 34
+     "link": 36
     },
     {
      "localized_name": "title",
      "name": "title",
      "shape": 7,
      "type": "STRING",
-     "link": 36
+     "link": 38
     },
     {
      "localized_name": "original",
      "name": "original",
      "shape": 7,
      "type": "AUDIO",
-     "link": 35
+     "link": 37
     },
     {
      "localized_name": "cover",
      "name": "cover",
      "shape": 7,
      "type": "IMAGE",
-     "link": 38
+     "link": 40
     },
     {
      "localized_name": "reports.report_0",
@@ -1588,7 +1611,7 @@
      "label": "report_0",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 40
+     "link": 42
     },
     {
      "localized_name": "reports.report_1",
@@ -1596,7 +1619,7 @@
      "label": "report_1",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 41
+     "link": 43
     },
     {
      "localized_name": "reports.report_2",
@@ -1604,7 +1627,7 @@
      "label": "report_2",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 42
+     "link": 44
     },
     {
      "localized_name": "reports.report_3",
@@ -1612,7 +1635,7 @@
      "label": "report_3",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 43
+     "link": 45
     },
     {
      "localized_name": "reports.report_4",
@@ -1620,7 +1643,7 @@
      "label": "report_4",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 44
+     "link": 46
     },
     {
      "localized_name": "reports.report_5",
@@ -1628,7 +1651,7 @@
      "label": "report_5",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 45
+     "link": 47
     },
     {
      "localized_name": "reports.report_6",
@@ -1636,7 +1659,7 @@
      "label": "report_6",
      "shape": 7,
      "type": "PLENIO_REPORT",
-     "link": 46
+     "link": 48
     },
     {
      "localized_name": "reports.report_7",
@@ -1760,7 +1783,7 @@
      "widget": {
       "name": "text"
      },
-     "link": 37
+     "link": 39
     },
     {
      "localized_name": "noise_seed",
@@ -1789,8 +1812,8 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      38,
-      39
+      40,
+      41
      ]
     }
    ],
@@ -1821,7 +1844,7 @@
      "localized_name": "images",
      "name": "images",
      "type": "IMAGE",
-     "link": 39
+     "link": 41
     }
    ],
    "outputs": [
@@ -1882,6 +1905,14 @@
   ],
   [
    6,
+   2,
+   4,
+   4,
+   7,
+   "INT"
+  ],
+  [
+   7,
    3,
    3,
    4,
@@ -1889,31 +1920,31 @@
    "PLENIO_ENGINE"
   ],
   [
-   7,
-   4,
-   0,
-   6,
-   0,
-   "STRING"
-  ],
-  [
    8,
    4,
-   1,
+   0,
    6,
-   1,
+   0,
    "STRING"
   ],
   [
    9,
    4,
+   1,
+   6,
+   1,
+   "STRING"
+  ],
+  [
+   10,
+   4,
    2,
    6,
    2,
    "STRING"
   ],
   [
-   10,
+   11,
    4,
    3,
    6,
@@ -1921,7 +1952,7 @@
    "STRING"
   ],
   [
-   11,
+   12,
    2,
    0,
    6,
@@ -1929,7 +1960,7 @@
    "PLENIO_BRIEF"
   ],
   [
-   12,
+   13,
    3,
    3,
    6,
@@ -1937,7 +1968,7 @@
    "PLENIO_ENGINE"
   ],
   [
-   13,
+   14,
    3,
    1,
    7,
@@ -1945,7 +1976,15 @@
    "CLIP"
   ],
   [
-   14,
+   15,
+   2,
+   4,
+   7,
+   4,
+   "INT"
+  ],
+  [
+   16,
    6,
    1,
    7,
@@ -1953,7 +1992,7 @@
    "STRING"
   ],
   [
-   15,
+   17,
    6,
    9,
    7,
@@ -1961,7 +2000,7 @@
    "STRING"
   ],
   [
-   16,
+   18,
    7,
    0,
    8,
@@ -1969,7 +2008,7 @@
    "*"
   ],
   [
-   17,
+   19,
    2,
    0,
    8,
@@ -1977,7 +2016,7 @@
    "PLENIO_BRIEF"
   ],
   [
-   18,
+   20,
    8,
    0,
    9,
@@ -1985,7 +2024,7 @@
    "STRING"
   ],
   [
-   19,
+   21,
    6,
    1,
    9,
@@ -1993,7 +2032,7 @@
    "STRING"
   ],
   [
-   20,
+   22,
    6,
    2,
    9,
@@ -2001,7 +2040,7 @@
    "STRING"
   ],
   [
-   21,
+   23,
    2,
    0,
    9,
@@ -2009,7 +2048,7 @@
    "PLENIO_BRIEF"
   ],
   [
-   22,
+   24,
    3,
    3,
    9,
@@ -2017,7 +2056,7 @@
    "PLENIO_ENGINE"
   ],
   [
-   23,
+   25,
    3,
    0,
    11,
@@ -2025,7 +2064,7 @@
    "MODEL"
   ],
   [
-   24,
+   26,
    3,
    1,
    11,
@@ -2033,7 +2072,7 @@
    "CLIP"
   ],
   [
-   25,
+   27,
    3,
    2,
    11,
@@ -2041,7 +2080,7 @@
    "VAE"
   ],
   [
-   26,
+   28,
    6,
    1,
    11,
@@ -2049,7 +2088,7 @@
    "STRING"
   ],
   [
-   27,
+   29,
    6,
    2,
    11,
@@ -2057,7 +2096,7 @@
    "STRING"
   ],
   [
-   28,
+   30,
    9,
    3,
    11,
@@ -2065,7 +2104,7 @@
    "STRING"
   ],
   [
-   29,
+   31,
    9,
    5,
    11,
@@ -2073,7 +2112,7 @@
    "COMBO"
   ],
   [
-   30,
+   32,
    9,
    6,
    11,
@@ -2081,7 +2120,7 @@
    "FLOAT"
   ],
   [
-   31,
+   33,
    10,
    0,
    11,
@@ -2089,7 +2128,7 @@
    "INT"
   ],
   [
-   32,
+   34,
    14,
    0,
    15,
@@ -2097,7 +2136,7 @@
    "AUDIO"
   ],
   [
-   33,
+   35,
    15,
    0,
    16,
@@ -2105,7 +2144,7 @@
    "AUDIO"
   ],
   [
-   34,
+   36,
    15,
    0,
    17,
@@ -2113,7 +2152,7 @@
    "AUDIO"
   ],
   [
-   35,
+   37,
    14,
    0,
    17,
@@ -2121,7 +2160,7 @@
    "AUDIO"
   ],
   [
-   36,
+   38,
    6,
    0,
    17,
@@ -2129,7 +2168,7 @@
    "STRING"
   ],
   [
-   37,
+   39,
    6,
    4,
    18,
@@ -2137,7 +2176,7 @@
    "STRING"
   ],
   [
-   38,
+   40,
    18,
    0,
    17,
@@ -2145,7 +2184,7 @@
    "IMAGE"
   ],
   [
-   39,
+   41,
    18,
    0,
    19,
@@ -2153,7 +2192,7 @@
    "IMAGE"
   ],
   [
-   40,
+   42,
    6,
    7,
    17,
@@ -2161,7 +2200,7 @@
    "PLENIO_REPORT"
   ],
   [
-   41,
+   43,
    9,
    7,
    17,
@@ -2169,7 +2208,7 @@
    "PLENIO_REPORT"
   ],
   [
-   42,
+   44,
    12,
    1,
    17,
@@ -2177,7 +2216,7 @@
    "PLENIO_REPORT"
   ],
   [
-   43,
+   45,
    12,
    2,
    17,
@@ -2185,7 +2224,7 @@
    "PLENIO_REPORT"
   ],
   [
-   44,
+   46,
    14,
    1,
    17,
@@ -2193,7 +2232,7 @@
    "PLENIO_REPORT"
   ],
   [
-   45,
+   47,
    15,
    1,
    17,
@@ -2201,7 +2240,7 @@
    "PLENIO_REPORT"
   ],
   [
-   46,
+   48,
    15,
    2,
    17,
@@ -2710,8 +2749,8 @@
     "version": 1,
     "state": {
      "lastGroupId": 0,
-     "lastNodeId": 507,
-     "lastLinkId": 25,
+     "lastNodeId": 509,
+     "lastLinkId": 28,
      "lastRerouteId": 0
     },
     "revision": 0,
@@ -2723,7 +2762,7 @@
       -260,
       0,
       160,
-      200
+      220
      ]
     },
     "outputNode": {
@@ -2741,7 +2780,7 @@
       "name": "brief",
       "type": "PLENIO_BRIEF",
       "linkIds": [
-       11
+       14
       ],
       "pos": [
        0,
@@ -2753,7 +2792,7 @@
       "name": "engine",
       "type": "PLENIO_ENGINE",
       "linkIds": [
-       12
+       15
       ],
       "pos": [
        0,
@@ -2765,7 +2804,7 @@
       "name": "score",
       "type": "STRING",
       "linkIds": [
-       13
+       16
       ],
       "pos": [
        0,
@@ -2777,7 +2816,7 @@
       "name": "language",
       "type": "STRING",
       "linkIds": [
-       14
+       17
       ],
       "pos": [
        0,
@@ -2789,7 +2828,7 @@
       "name": "reference_lyrics",
       "type": "STRING",
       "linkIds": [
-       15
+       18
       ],
       "pos": [
        0,
@@ -2801,7 +2840,7 @@
       "name": "model",
       "type": "COMBO",
       "linkIds": [
-       16
+       19
       ],
       "pos": [
        0,
@@ -2814,8 +2853,7 @@
       "name": "sampling_mode.seed",
       "type": "INT",
       "linkIds": [
-       17,
-       18
+       20
       ],
       "pos": [
        0,
@@ -2824,16 +2862,29 @@
       "label": "draft seed"
      },
      {
-      "id": "42a1c8f5-c11a-517e-9698-20337cb1f27a",
-      "name": "thinking",
-      "type": "BOOLEAN",
+      "id": "ed6c8635-714c-5949-b45a-2818735ca7b0",
+      "name": "song_seed",
+      "type": "INT",
       "linkIds": [
-       19,
-       20
+       21
       ],
       "pos": [
        0,
        140
+      ],
+      "label": "song seed"
+     },
+     {
+      "id": "42a1c8f5-c11a-517e-9698-20337cb1f27a",
+      "name": "thinking",
+      "type": "BOOLEAN",
+      "linkIds": [
+       22,
+       23
+      ],
+      "pos": [
+       0,
+       160
       ]
      }
     ],
@@ -2843,7 +2894,7 @@
       "name": "title",
       "type": "STRING",
       "linkIds": [
-       21
+       24
       ],
       "pos": [
        0,
@@ -2855,7 +2906,7 @@
       "name": "style",
       "type": "STRING",
       "linkIds": [
-       22
+       25
       ],
       "pos": [
        0,
@@ -2867,7 +2918,7 @@
       "name": "lyrics",
       "type": "STRING",
       "linkIds": [
-       23
+       26
       ],
       "pos": [
        0,
@@ -2879,7 +2930,7 @@
       "name": "artwork_prompt",
       "type": "STRING",
       "linkIds": [
-       24
+       27
       ],
       "pos": [
        0,
@@ -2891,7 +2942,7 @@
       "name": "report",
       "type": "PLENIO_REPORT",
       "linkIds": [
-       25
+       28
       ],
       "pos": [
        0,
@@ -2920,34 +2971,34 @@
         "localized_name": "brief",
         "name": "brief",
         "type": "PLENIO_BRIEF",
-        "link": 11
+        "link": 14
        },
        {
         "localized_name": "engine",
         "name": "engine",
         "type": "PLENIO_ENGINE",
-        "link": 12
+        "link": 15
        },
        {
         "localized_name": "score",
         "name": "score",
         "shape": 7,
         "type": "STRING",
-        "link": 13
+        "link": 16
        },
        {
         "localized_name": "language",
         "name": "language",
         "shape": 7,
         "type": "STRING",
-        "link": 14
+        "link": 17
        },
        {
         "localized_name": "reference_lyrics",
         "name": "reference_lyrics",
         "shape": 7,
         "type": "STRING",
-        "link": 15
+        "link": 18
        },
        {
         "localized_name": "detail",
@@ -2965,8 +3016,8 @@
         "name": "prompt",
         "type": "STRING",
         "links": [
-         1,
-         2
+         4,
+         5
         ]
        },
        {
@@ -2974,7 +3025,7 @@
         "name": "request",
         "type": "PLENIO_REQUEST",
         "links": [
-         10
+         13
         ]
        }
       ],
@@ -3007,7 +3058,7 @@
         "widget": {
          "name": "model"
         },
-        "link": 16
+        "link": 19
        }
       ],
       "outputs": [
@@ -3016,7 +3067,7 @@
         "name": "text_encoder",
         "type": "*",
         "links": [
-         3
+         6
         ]
        },
        {
@@ -3024,7 +3075,7 @@
         "name": "local_model",
         "type": "*",
         "links": [
-         5
+         8
         ]
        },
        {
@@ -3032,7 +3083,7 @@
         "name": "use_local",
         "type": "BOOLEAN",
         "links": [
-         6
+         9
         ]
        }
       ],
@@ -3073,7 +3124,7 @@
         "widget": {
          "name": "clip_name"
         },
-        "link": 3
+        "link": 6
        },
        {
         "localized_name": "type",
@@ -3100,7 +3151,7 @@
         "name": "CLIP",
         "type": "CLIP",
         "links": [
-         4
+         7
         ]
        }
       ],
@@ -3140,7 +3191,7 @@
         "localized_name": "clip",
         "name": "clip",
         "type": "CLIP",
-        "link": 4
+        "link": 7
        },
        {
         "localized_name": "image",
@@ -3170,7 +3221,7 @@
         "widget": {
          "name": "prompt"
         },
-        "link": 1
+        "link": 4
        },
        {
         "localized_name": "max_length",
@@ -3242,7 +3293,7 @@
         "widget": {
          "name": "sampling_mode.seed"
         },
-        "link": 17
+        "link": 2
        },
        {
         "localized_name": "sampling_mode.presence_penalty",
@@ -3260,7 +3311,7 @@
         "widget": {
          "name": "thinking"
         },
-        "link": 19
+        "link": 22
        },
        {
         "localized_name": "use_default_template",
@@ -3287,7 +3338,7 @@
         "name": "generated_text",
         "type": "STRING",
         "links": [
-         7
+         10
         ]
        }
       ],
@@ -3333,7 +3384,7 @@
         "widget": {
          "name": "prompt"
         },
-        "link": 2
+        "link": 5
        },
        {
         "localized_name": "model",
@@ -3342,7 +3393,7 @@
         "widget": {
          "name": "model"
         },
-        "link": 5
+        "link": 8
        },
        {
         "localized_name": "seed",
@@ -3351,7 +3402,7 @@
         "widget": {
          "name": "seed"
         },
-        "link": 18
+        "link": 3
        },
        {
         "localized_name": "max_tokens",
@@ -3378,7 +3429,7 @@
         "widget": {
          "name": "thinking"
         },
-        "link": 20
+        "link": 23
        },
        {
         "localized_name": "context",
@@ -3414,7 +3465,7 @@
         "name": "text",
         "type": "STRING",
         "links": [
-         8
+         11
         ]
        },
        {
@@ -3460,14 +3511,14 @@
         "name": "on_false",
         "shape": 7,
         "type": "COMFY_MATCHTYPE_V3",
-        "link": 7
+        "link": 10
        },
        {
         "localized_name": "on_true",
         "name": "on_true",
         "shape": 7,
         "type": "COMFY_MATCHTYPE_V3",
-        "link": 8
+        "link": 11
        },
        {
         "localized_name": "switch",
@@ -3476,7 +3527,7 @@
         "widget": {
          "name": "switch"
         },
-        "link": 6
+        "link": 9
        }
       ],
       "outputs": [
@@ -3485,7 +3536,7 @@
         "name": "output",
         "type": "COMFY_MATCHTYPE_V3",
         "links": [
-         9
+         12
         ]
        }
       ],
@@ -3516,13 +3567,13 @@
         "localized_name": "text",
         "name": "text",
         "type": "STRING",
-        "link": 9
+        "link": 12
        },
        {
         "localized_name": "request",
         "name": "request",
         "type": "PLENIO_REQUEST",
-        "link": 10
+        "link": 13
        }
       ],
       "outputs": [
@@ -3531,7 +3582,7 @@
         "name": "title",
         "type": "STRING",
         "links": [
-         21
+         24
         ]
        },
        {
@@ -3539,7 +3590,7 @@
         "name": "style",
         "type": "STRING",
         "links": [
-         22
+         25
         ]
        },
        {
@@ -3547,7 +3598,7 @@
         "name": "lyrics",
         "type": "STRING",
         "links": [
-         23
+         26
         ]
        },
        {
@@ -3555,7 +3606,7 @@
         "name": "artwork_prompt",
         "type": "STRING",
         "links": [
-         24
+         27
         ]
        },
        {
@@ -3563,7 +3614,7 @@
         "name": "report",
         "type": "PLENIO_REPORT",
         "links": [
-         25
+         28
         ]
        }
       ],
@@ -3571,12 +3622,152 @@
        "Node name for S&R": "PlenioParseDraft"
       },
       "widgets_values": []
+     },
+     {
+      "id": 508,
+      "type": "PrimitiveInt",
+      "pos": [
+       0,
+       340
+      ],
+      "size": [
+       320,
+       80
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "value",
+        "name": "value",
+        "type": "INT",
+        "widget": {
+         "name": "value"
+        },
+        "link": 20
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "INT",
+        "name": "INT",
+        "type": "INT",
+        "links": [
+         1
+        ]
+       }
+      ],
+      "title": "Draft seed",
+      "properties": {
+       "Node name for S&R": "PrimitiveInt"
+      },
+      "widgets_values": [
+       0,
+       "fixed"
+      ]
+     },
+     {
+      "id": 509,
+      "type": "ComfyMathExpression",
+      "pos": [
+       0,
+       470
+      ],
+      "size": [
+       320,
+       150
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "values.a",
+        "name": "values.a",
+        "label": "a",
+        "shape": 7,
+        "type": "FLOAT,INT,BOOLEAN",
+        "link": 1
+       },
+       {
+        "localized_name": "values.b",
+        "name": "values.b",
+        "label": "b",
+        "shape": 7,
+        "type": "FLOAT,INT,BOOLEAN",
+        "link": 21
+       },
+       {
+        "localized_name": "expression",
+        "name": "expression",
+        "type": "STRING",
+        "widget": {
+         "name": "expression"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "FLOAT",
+        "name": "FLOAT",
+        "type": "FLOAT",
+        "links": null
+       },
+       {
+        "localized_name": "INT",
+        "name": "INT",
+        "type": "INT",
+        "links": [
+         2,
+         3
+        ]
+       },
+       {
+        "localized_name": "BOOL",
+        "name": "BOOL",
+        "type": "BOOLEAN",
+        "links": null
+       }
+      ],
+      "title": "draft seed + song seed",
+      "properties": {
+       "Node name for S&R": "ComfyMathExpression"
+      },
+      "widgets_values": [
+       "sum(values)"
+      ]
      }
     ],
     "groups": [],
     "links": [
      {
       "id": 1,
+      "origin_id": 508,
+      "origin_slot": 0,
+      "target_id": 509,
+      "target_slot": 0,
+      "type": "INT"
+     },
+     {
+      "id": 2,
+      "origin_id": 509,
+      "origin_slot": 1,
+      "target_id": 504,
+      "target_slot": 12,
+      "type": "INT"
+     },
+     {
+      "id": 3,
+      "origin_id": 509,
+      "origin_slot": 1,
+      "target_id": 505,
+      "target_slot": 2,
+      "type": "INT"
+     },
+     {
+      "id": 4,
       "origin_id": 501,
       "origin_slot": 0,
       "target_id": 504,
@@ -3584,7 +3775,7 @@
       "type": "STRING"
      },
      {
-      "id": 2,
+      "id": 5,
       "origin_id": 501,
       "origin_slot": 0,
       "target_id": 505,
@@ -3592,7 +3783,7 @@
       "type": "STRING"
      },
      {
-      "id": 3,
+      "id": 6,
       "origin_id": 502,
       "origin_slot": 0,
       "target_id": 503,
@@ -3600,7 +3791,7 @@
       "type": "*"
      },
      {
-      "id": 4,
+      "id": 7,
       "origin_id": 503,
       "origin_slot": 0,
       "target_id": 504,
@@ -3608,7 +3799,7 @@
       "type": "CLIP"
      },
      {
-      "id": 5,
+      "id": 8,
       "origin_id": 502,
       "origin_slot": 1,
       "target_id": 505,
@@ -3616,7 +3807,7 @@
       "type": "*"
      },
      {
-      "id": 6,
+      "id": 9,
       "origin_id": 502,
       "origin_slot": 2,
       "target_id": 506,
@@ -3624,7 +3815,7 @@
       "type": "BOOLEAN"
      },
      {
-      "id": 7,
+      "id": 10,
       "origin_id": 504,
       "origin_slot": 0,
       "target_id": 506,
@@ -3632,7 +3823,7 @@
       "type": "STRING"
      },
      {
-      "id": 8,
+      "id": 11,
       "origin_id": 505,
       "origin_slot": 0,
       "target_id": 506,
@@ -3640,7 +3831,7 @@
       "type": "STRING"
      },
      {
-      "id": 9,
+      "id": 12,
       "origin_id": 506,
       "origin_slot": 0,
       "target_id": 507,
@@ -3648,7 +3839,7 @@
       "type": "COMFY_MATCHTYPE_V3"
      },
      {
-      "id": 10,
+      "id": 13,
       "origin_id": 501,
       "origin_slot": 1,
       "target_id": 507,
@@ -3656,7 +3847,7 @@
       "type": "PLENIO_REQUEST"
      },
      {
-      "id": 11,
+      "id": 14,
       "origin_id": -10,
       "origin_slot": 0,
       "target_id": 501,
@@ -3664,7 +3855,7 @@
       "type": "PLENIO_BRIEF"
      },
      {
-      "id": 12,
+      "id": 15,
       "origin_id": -10,
       "origin_slot": 1,
       "target_id": 501,
@@ -3672,7 +3863,7 @@
       "type": "PLENIO_ENGINE"
      },
      {
-      "id": 13,
+      "id": 16,
       "origin_id": -10,
       "origin_slot": 2,
       "target_id": 501,
@@ -3680,7 +3871,7 @@
       "type": "STRING"
      },
      {
-      "id": 14,
+      "id": 17,
       "origin_id": -10,
       "origin_slot": 3,
       "target_id": 501,
@@ -3688,7 +3879,7 @@
       "type": "STRING"
      },
      {
-      "id": 15,
+      "id": 18,
       "origin_id": -10,
       "origin_slot": 4,
       "target_id": 501,
@@ -3696,7 +3887,7 @@
       "type": "STRING"
      },
      {
-      "id": 16,
+      "id": 19,
       "origin_id": -10,
       "origin_slot": 5,
       "target_id": 502,
@@ -3704,39 +3895,39 @@
       "type": "COMBO"
      },
      {
-      "id": 17,
+      "id": 20,
       "origin_id": -10,
       "origin_slot": 6,
-      "target_id": 504,
-      "target_slot": 12,
+      "target_id": 508,
+      "target_slot": 0,
       "type": "INT"
      },
      {
-      "id": 18,
-      "origin_id": -10,
-      "origin_slot": 6,
-      "target_id": 505,
-      "target_slot": 2,
-      "type": "INT"
-     },
-     {
-      "id": 19,
+      "id": 21,
       "origin_id": -10,
       "origin_slot": 7,
+      "target_id": 509,
+      "target_slot": 1,
+      "type": "INT"
+     },
+     {
+      "id": 22,
+      "origin_id": -10,
+      "origin_slot": 8,
       "target_id": 504,
       "target_slot": 14,
       "type": "BOOLEAN"
      },
      {
-      "id": 20,
+      "id": 23,
       "origin_id": -10,
-      "origin_slot": 7,
+      "origin_slot": 8,
       "target_id": 505,
       "target_slot": 5,
       "type": "BOOLEAN"
      },
      {
-      "id": 21,
+      "id": 24,
       "origin_id": 507,
       "origin_slot": 0,
       "target_id": -20,
@@ -3744,7 +3935,7 @@
       "type": "STRING"
      },
      {
-      "id": 22,
+      "id": 25,
       "origin_id": 507,
       "origin_slot": 1,
       "target_id": -20,
@@ -3752,7 +3943,7 @@
       "type": "STRING"
      },
      {
-      "id": 23,
+      "id": 26,
       "origin_id": 507,
       "origin_slot": 2,
       "target_id": -20,
@@ -3760,7 +3951,7 @@
       "type": "STRING"
      },
      {
-      "id": 24,
+      "id": 27,
       "origin_id": 507,
       "origin_slot": 3,
       "target_id": -20,
@@ -3768,7 +3959,7 @@
       "type": "STRING"
      },
      {
-      "id": 25,
+      "id": 28,
       "origin_id": 507,
       "origin_slot": 4,
       "target_id": -20,
@@ -3778,15 +3969,15 @@
     ],
     "extra": {},
     "category": "Plenio/Writing",
-    "description": "Writes title, style, lyrics and an artwork prompt following the rules of the loaded music model. The writer model is one list: ComfyUI's own text models (native Generate Text, the default) and every local LLM - GGUF files from models/LLM, LM Studio or the Hugging Face cache, or the models of a running LM Studio, Ollama, llama.cpp ... Only the chosen one is loaded."
+    "description": "Writes title, style, lyrics and an artwork prompt following the rules of the loaded music model. The writer model is one list: ComfyUI's own text models (native Generate Text, the default) and every local LLM - GGUF files from models/LLM, LM Studio or the Hugging Face cache, or the models of a running LM Studio, Ollama, llama.cpp ... Only the chosen one is loaded. The brief's song seed is added to the draft seed: every song of a 'new song every run' series gets its own."
    },
    {
     "id": "630d16a8-090b-5961-9853-4f71db8d2d06",
     "version": 1,
     "state": {
      "lastGroupId": 0,
-     "lastNodeId": 703,
-     "lastLinkId": 9,
+     "lastNodeId": 705,
+     "lastLinkId": 12,
      "lastRerouteId": 0
     },
     "revision": 0,
@@ -3798,7 +3989,7 @@
       -260,
       0,
       160,
-      160
+      180
      ]
     },
     "outputNode": {
@@ -3816,7 +4007,7 @@
       "name": "clip",
       "type": "CLIP",
       "linkIds": [
-       3
+       5
       ],
       "pos": [
        0,
@@ -3828,7 +4019,7 @@
       "name": "style",
       "type": "STRING",
       "linkIds": [
-       4
+       6
       ],
       "pos": [
        0,
@@ -3840,7 +4031,7 @@
       "name": "lyrics",
       "type": "STRING",
       "linkIds": [
-       5
+       7
       ],
       "pos": [
        0,
@@ -3852,7 +4043,7 @@
       "name": "seed",
       "type": "INT",
       "linkIds": [
-       6
+       8
       ],
       "pos": [
        0,
@@ -3861,15 +4052,28 @@
       "label": "plan seed"
      },
      {
-      "id": "4fd01d79-c347-5143-85ac-75440f6cb017",
-      "name": "switch",
-      "type": "BOOLEAN",
+      "id": "3f238fff-eeb6-5c9f-8b9f-5f9f177ad5a0",
+      "name": "song_seed",
+      "type": "INT",
       "linkIds": [
-       7
+       9
       ],
       "pos": [
        0,
        80
+      ],
+      "label": "song seed"
+     },
+     {
+      "id": "4fd01d79-c347-5143-85ac-75440f6cb017",
+      "name": "switch",
+      "type": "BOOLEAN",
+      "linkIds": [
+       10
+      ],
+      "pos": [
+       0,
+       100
       ],
       "label": "planning"
      },
@@ -3878,11 +4082,11 @@
       "name": "mode",
       "type": "COMBO",
       "linkIds": [
-       8
+       11
       ],
       "pos": [
        0,
-       100
+       120
       ],
       "label": "plan type"
      }
@@ -3893,7 +4097,7 @@
       "name": "score",
       "type": "*",
       "linkIds": [
-       9
+       12
       ],
       "pos": [
        0,
@@ -3922,7 +4126,7 @@
         "localized_name": "clip",
         "name": "clip",
         "type": "CLIP",
-        "link": 3
+        "link": 5
        },
        {
         "localized_name": "style",
@@ -3931,7 +4135,7 @@
         "widget": {
          "name": "style"
         },
-        "link": 4
+        "link": 6
        },
        {
         "localized_name": "lyrics",
@@ -3940,7 +4144,7 @@
         "widget": {
          "name": "lyrics"
         },
-        "link": 5
+        "link": 7
        },
        {
         "localized_name": "seed",
@@ -3949,7 +4153,7 @@
         "widget": {
          "name": "seed"
         },
-        "link": 6
+        "link": 4
        },
        {
         "localized_name": "mode",
@@ -3958,7 +4162,7 @@
         "widget": {
          "name": "mode"
         },
-        "link": 8
+        "link": 11
        },
        {
         "localized_name": "max_abc_tokens",
@@ -4121,7 +4325,7 @@
         "widget": {
          "name": "switch"
         },
-        "link": 7
+        "link": 10
        }
       ],
       "outputs": [
@@ -4130,7 +4334,7 @@
         "name": "output",
         "type": "COMFY_MATCHTYPE_V3",
         "links": [
-         9
+         12
         ]
        }
       ],
@@ -4139,6 +4343,121 @@
       },
       "widgets_values": [
        true
+      ]
+     },
+     {
+      "id": 704,
+      "type": "PrimitiveInt",
+      "pos": [
+       0,
+       480
+      ],
+      "size": [
+       300,
+       80
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "value",
+        "name": "value",
+        "type": "INT",
+        "widget": {
+         "name": "value"
+        },
+        "link": 8
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "INT",
+        "name": "INT",
+        "type": "INT",
+        "links": [
+         3
+        ]
+       }
+      ],
+      "title": "Plan seed",
+      "properties": {
+       "Node name for S&R": "PrimitiveInt"
+      },
+      "widgets_values": [
+       0,
+       "fixed"
+      ]
+     },
+     {
+      "id": 705,
+      "type": "ComfyMathExpression",
+      "pos": [
+       0,
+       610
+      ],
+      "size": [
+       300,
+       150
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "values.a",
+        "name": "values.a",
+        "label": "a",
+        "shape": 7,
+        "type": "FLOAT,INT,BOOLEAN",
+        "link": 3
+       },
+       {
+        "localized_name": "values.b",
+        "name": "values.b",
+        "label": "b",
+        "shape": 7,
+        "type": "FLOAT,INT,BOOLEAN",
+        "link": 9
+       },
+       {
+        "localized_name": "expression",
+        "name": "expression",
+        "type": "STRING",
+        "widget": {
+         "name": "expression"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "FLOAT",
+        "name": "FLOAT",
+        "type": "FLOAT",
+        "links": null
+       },
+       {
+        "localized_name": "INT",
+        "name": "INT",
+        "type": "INT",
+        "links": [
+         4
+        ]
+       },
+       {
+        "localized_name": "BOOL",
+        "name": "BOOL",
+        "type": "BOOLEAN",
+        "links": null
+       }
+      ],
+      "title": "plan seed + song seed",
+      "properties": {
+       "Node name for S&R": "ComfyMathExpression"
+      },
+      "widgets_values": [
+       "sum(values)"
       ]
      }
     ],
@@ -4162,6 +4481,22 @@
      },
      {
       "id": 3,
+      "origin_id": 704,
+      "origin_slot": 0,
+      "target_id": 705,
+      "target_slot": 0,
+      "type": "INT"
+     },
+     {
+      "id": 4,
+      "origin_id": 705,
+      "origin_slot": 1,
+      "target_id": 701,
+      "target_slot": 3,
+      "type": "INT"
+     },
+     {
+      "id": 5,
       "origin_id": -10,
       "origin_slot": 0,
       "target_id": 701,
@@ -4169,7 +4504,7 @@
       "type": "CLIP"
      },
      {
-      "id": 4,
+      "id": 6,
       "origin_id": -10,
       "origin_slot": 1,
       "target_id": 701,
@@ -4177,7 +4512,7 @@
       "type": "STRING"
      },
      {
-      "id": 5,
+      "id": 7,
       "origin_id": -10,
       "origin_slot": 2,
       "target_id": 701,
@@ -4185,31 +4520,39 @@
       "type": "STRING"
      },
      {
-      "id": 6,
+      "id": 8,
       "origin_id": -10,
       "origin_slot": 3,
-      "target_id": 701,
-      "target_slot": 3,
+      "target_id": 704,
+      "target_slot": 0,
       "type": "INT"
      },
      {
-      "id": 7,
+      "id": 9,
       "origin_id": -10,
       "origin_slot": 4,
+      "target_id": 705,
+      "target_slot": 1,
+      "type": "INT"
+     },
+     {
+      "id": 10,
+      "origin_id": -10,
+      "origin_slot": 5,
       "target_id": 703,
       "target_slot": 2,
       "type": "BOOLEAN"
      },
      {
-      "id": 8,
+      "id": 11,
       "origin_id": -10,
-      "origin_slot": 5,
+      "origin_slot": 6,
       "target_id": 701,
       "target_slot": 4,
       "type": "COMBO"
      },
      {
-      "id": 9,
+      "id": 12,
       "origin_id": 703,
       "origin_slot": 0,
       "target_id": -20,
@@ -4219,7 +4562,7 @@
     ],
     "extra": {},
     "category": "Plenio/YuE2",
-    "description": "Plans the song's score (ABC) from style and lyrics with YuE2. With planning off, no score is made and YuE2 renders without a plan."
+    "description": "Plans the song's score (ABC) from style and lyrics with YuE2. With planning off, no score is made and YuE2 renders without a plan. The brief's song seed is added to the plan seed: every song of a 'new song every run' series gets its own plan."
    },
    {
     "id": "601f9d71-b118-51b3-a1fb-fa2a8d2c5ede",
