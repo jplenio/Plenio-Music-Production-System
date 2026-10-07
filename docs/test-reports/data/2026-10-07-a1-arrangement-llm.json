@@ -1,0 +1,316 @@
+{
+ "study": "A1",
+ "date": "2026-10-07",
+ "samples": [
+  {
+   "id": "S1",
+   "kind": "song",
+   "sections": 7,
+   "bars": 49
+  },
+  {
+   "id": "S2",
+   "kind": "song",
+   "sections": 8,
+   "bars": 60
+  },
+  {
+   "id": "I1",
+   "kind": "instrumental",
+   "sections": 3,
+   "bars": 83
+  },
+  {
+   "id": "I2",
+   "kind": "instrumental",
+   "sections": 3,
+   "bars": 42
+  },
+  {
+   "id": "C1",
+   "kind": "cover",
+   "sections": 6,
+   "bars": 63
+  },
+  {
+   "id": "C2",
+   "kind": "cover",
+   "sections": 6,
+   "bars": 63
+  }
+ ],
+ "notation": {
+  "Gemma 4 E2B (Q4_K_XL, 3.0 GB)": {
+   "abc": {
+    "n": 12,
+    "parses": 2,
+    "valid": 0,
+    "chord_fit_of_valid": null,
+    "seconds": 0.97
+   },
+   "motif": {
+    "n": 12,
+    "readable": 12,
+    "whole_bars": 11,
+    "chord_fit_before_snapping": 0.63,
+    "seconds": 0.86
+   }
+  },
+  "Gemma 4 E4B (Q4_K_M, 5.0 GB)": {
+   "abc": {
+    "n": 12,
+    "parses": 0,
+    "valid": 0,
+    "chord_fit_of_valid": null,
+    "seconds": 3.1
+   },
+   "motif": {
+    "n": 12,
+    "readable": 12,
+    "whole_bars": 4,
+    "chord_fit_before_snapping": 0.41,
+    "seconds": 0.92
+   }
+  },
+  "Qwen 3.5 9B (Q4_K_M, 6.2 GB)": {
+   "abc": {
+    "n": 12,
+    "parses": 2,
+    "valid": 0,
+    "chord_fit_of_valid": null,
+    "seconds": 7.37
+   },
+   "motif": {
+    "n": 12,
+    "readable": 12,
+    "whole_bars": 6,
+    "chord_fit_before_snapping": 0.83,
+    "seconds": 1.57
+   }
+  },
+  "Gemma 4 12B QAT (Q4_0, 7.0 GB)": {
+   "abc": {
+    "n": 12,
+    "parses": 0,
+    "valid": 0,
+    "chord_fit_of_valid": null,
+    "seconds": 8.05
+   },
+   "motif": {
+    "n": 12,
+    "readable": 12,
+    "whole_bars": 8,
+    "chord_fit_before_snapping": 0.75,
+    "seconds": 2.68
+   }
+  },
+  "Qwen 3.8 27B (IQ3_XXS, 10.9 GB)": {
+   "abc": {
+    "n": 12,
+    "parses": 3,
+    "valid": 3,
+    "chord_fit_of_valid": 0.64,
+    "seconds": 11.3
+   },
+   "motif": {
+    "n": 12,
+    "readable": 12,
+    "whole_bars": 12,
+    "chord_fit_before_snapping": 0.75,
+    "seconds": 3.35
+   }
+  }
+ },
+ "plan": {
+  "Gemma 4 E2B (Q4_K_XL, 3.0 GB)": {
+   "plan": {
+    "n": 12,
+    "strict_json": 12,
+    "usable_when_measured": 12,
+    "usable_final_reader": 12,
+    "applied": 2,
+    "partial": 10,
+    "unchanged": 0,
+    "fallback": 0,
+    "dropped_parts_per_plan": 0.25,
+    "clashing_chords_kept_per_plan": 11.33,
+    "sections_changed_per_plan": 5.42,
+    "sections_with_new_chords": "66/66",
+    "chord_bars_written": 715,
+    "chord_bars_clashing_kept": 136,
+    "instrument_lines_written": 38,
+    "seconds": 4.24
+   },
+   "plan+schema": {
+    "n": 12,
+    "strict_json": 12,
+    "usable_when_measured": 12,
+    "usable_final_reader": 12,
+    "applied": 2,
+    "partial": 10,
+    "unchanged": 0,
+    "fallback": 0,
+    "dropped_parts_per_plan": 0.33,
+    "clashing_chords_kept_per_plan": 11.17,
+    "sections_changed_per_plan": 5.33,
+    "sections_with_new_chords": "66/66",
+    "chord_bars_written": 710,
+    "chord_bars_clashing_kept": 134,
+    "instrument_lines_written": 39,
+    "seconds": 3.92
+   }
+  },
+  "Gemma 4 E4B (Q4_K_M, 5.0 GB)": {
+   "plan": {
+    "n": 12,
+    "strict_json": 7,
+    "usable_when_measured": 12,
+    "usable_final_reader": 12,
+    "applied": 3,
+    "partial": 9,
+    "unchanged": 0,
+    "fallback": 0,
+    "dropped_parts_per_plan": 0.0,
+    "clashing_chords_kept_per_plan": 8.5,
+    "sections_changed_per_plan": 4.75,
+    "sections_with_new_chords": "34/66",
+    "chord_bars_written": 347,
+    "chord_bars_clashing_kept": 102,
+    "instrument_lines_written": 41,
+    "seconds": 3.58
+   },
+   "plan+schema": {
+    "n": 12,
+    "strict_json": 12,
+    "usable_when_measured": 12,
+    "usable_final_reader": 12,
+    "applied": 4,
+    "partial": 8,
+    "unchanged": 0,
+    "fallback": 0,
+    "dropped_parts_per_plan": 0.08,
+    "clashing_chords_kept_per_plan": 6.75,
+    "sections_changed_per_plan": 4.92,
+    "sections_with_new_chords": "36/66",
+    "chord_bars_written": 377,
+    "chord_bars_clashing_kept": 81,
+    "instrument_lines_written": 41,
+    "seconds": 4.15
+   }
+  },
+  "Qwen 3.5 9B (Q4_K_M, 6.2 GB)": {
+   "plan": {
+    "n": 12,
+    "strict_json": 12,
+    "usable_when_measured": 12,
+    "usable_final_reader": 12,
+    "applied": 3,
+    "partial": 8,
+    "unchanged": 1,
+    "fallback": 0,
+    "dropped_parts_per_plan": 0.25,
+    "clashing_chords_kept_per_plan": 3.58,
+    "sections_changed_per_plan": 3.42,
+    "sections_with_new_chords": "18/66",
+    "chord_bars_written": 164,
+    "chord_bars_clashing_kept": 43,
+    "instrument_lines_written": 33,
+    "seconds": 5.57
+   },
+   "plan+schema": {
+    "n": 12,
+    "strict_json": 12,
+    "usable_when_measured": 12,
+    "usable_final_reader": 12,
+    "applied": 3,
+    "partial": 8,
+    "unchanged": 1,
+    "fallback": 0,
+    "dropped_parts_per_plan": 0.0,
+    "clashing_chords_kept_per_plan": 2.17,
+    "sections_changed_per_plan": 3.33,
+    "sections_with_new_chords": "16/66",
+    "chord_bars_written": 144,
+    "chord_bars_clashing_kept": 26,
+    "instrument_lines_written": 31,
+    "seconds": 4.78
+   }
+  },
+  "Gemma 4 12B QAT (Q4_0, 7.0 GB)": {
+   "plan": {
+    "n": 12,
+    "strict_json": 10,
+    "usable_when_measured": 12,
+    "usable_final_reader": 12,
+    "applied": 1,
+    "partial": 11,
+    "unchanged": 0,
+    "fallback": 0,
+    "dropped_parts_per_plan": 0.25,
+    "clashing_chords_kept_per_plan": 7.5,
+    "sections_changed_per_plan": 3.83,
+    "sections_with_new_chords": "17/66",
+    "chord_bars_written": 180,
+    "chord_bars_clashing_kept": 90,
+    "instrument_lines_written": 35,
+    "seconds": 7.48
+   },
+   "plan+schema": {
+    "n": 12,
+    "strict_json": 12,
+    "usable_when_measured": 12,
+    "usable_final_reader": 12,
+    "applied": 3,
+    "partial": 9,
+    "unchanged": 0,
+    "fallback": 0,
+    "dropped_parts_per_plan": 0.17,
+    "clashing_chords_kept_per_plan": 10.17,
+    "sections_changed_per_plan": 4.25,
+    "sections_with_new_chords": "26/66",
+    "chord_bars_written": 286,
+    "chord_bars_clashing_kept": 122,
+    "instrument_lines_written": 33,
+    "seconds": 8.13
+   }
+  },
+  "Qwen 3.8 27B (IQ3_XXS, 10.9 GB)": {
+   "plan": {
+    "n": 12,
+    "strict_json": 12,
+    "usable_when_measured": 12,
+    "usable_final_reader": 12,
+    "applied": 3,
+    "partial": 7,
+    "unchanged": 2,
+    "fallback": 0,
+    "dropped_parts_per_plan": 0.0,
+    "clashing_chords_kept_per_plan": 2.25,
+    "sections_changed_per_plan": 3.5,
+    "sections_with_new_chords": "9/66",
+    "chord_bars_written": 88,
+    "chord_bars_clashing_kept": 27,
+    "instrument_lines_written": 33,
+    "seconds": 11.34
+   },
+   "plan+schema": {
+    "n": 12,
+    "strict_json": 12,
+    "usable_when_measured": 12,
+    "usable_final_reader": 12,
+    "applied": 3,
+    "partial": 7,
+    "unchanged": 2,
+    "fallback": 0,
+    "dropped_parts_per_plan": 0.0,
+    "clashing_chords_kept_per_plan": 2.25,
+    "sections_changed_per_plan": 3.5,
+    "sections_with_new_chords": "9/66",
+    "chord_bars_written": 88,
+    "chord_bars_clashing_kept": 27,
+    "instrument_lines_written": 33,
+    "seconds": 9.81
+   }
+  }
+ }
+}
