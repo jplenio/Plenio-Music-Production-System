@@ -16,46 +16,16 @@ Everything runs on your own machine, inside ComfyUI's own nodes: no cloud servic
   <a href="https://youtu.be/D6WUSzRbWWA"><img src="assets/branding/0.4.1/promo.jpg" alt="Plenio - Music production in ComfyUI: the promo video on YouTube" width="70%" /></a>
 </p>
 
-One narrated video for every template (English, 2 to 9 minutes, with chapters), recorded in ComfyUI with the real models - every song you hear in them was made right there. **▶ [All of them as a playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE)**
+**▶ [All tutorials as a YouTube playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE)** - one narrated video for every template (English, 2 to 13 minutes, with chapters), recorded in ComfyUI with the real models: every song you hear in them was made right there. Watch them in order, or jump to the template you need.
 
-<table>
-  <tr>
-    <td width="50%" align="center">
-      <a href="https://youtu.be/otGrYj1Qlu8"><img src="assets/branding/0.4.1/tutorial-0-system-check.jpg" alt="Tutorial 0 · System Check - watch on YouTube" width="100%" /></a>
-      <br /><b><a href="https://youtu.be/otGrYj1Qlu8">Tutorial 0 · System Check</a></b>
-      <br />Is your ComfyUI ready? Versions, the GPU, which model files every template needs, and the hardware table.
-    </td>
-    <td width="50%" align="center">
-      <a href="https://youtu.be/saYm0goB6EQ"><img src="assets/branding/0.4.1/tutorial-1-yue2-song.jpg" alt="Tutorial 1 · YuE2 · Song - watch on YouTube" width="100%" /></a>
-      <br /><b><a href="https://youtu.be/saYm0goB6EQ">Tutorial 1 · YuE2 · Song</a></b>
-      <br />Write a song from a brief, check the lyrics, then the score editor: lyrics over the notes, cursor, copy and paste, arranging sections.
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <a href="https://youtu.be/xczkVQ_-ciU"><img src="assets/branding/0.4.1/tutorial-2-yue2-cover.jpg" alt="Tutorial 2 · YuE2 · Cover - watch on YouTube" width="100%" /></a>
-      <br /><b><a href="https://youtu.be/xczkVQ_-ciU">Tutorial 2 · YuE2 · Cover</a></b>
-      <br />Turn a recording into a new version: the original under the notes (waveform, both together or A/B), a copied chorus that sings its words again.
-    </td>
-    <td width="50%" align="center">
-      <a href="https://youtu.be/-iY-lJFuZE0"><img src="assets/branding/0.4.1/tutorial-3-minimax-song.jpg" alt="Tutorial 3 · MiniMax · Song - watch on YouTube" width="100%" /></a>
-      <br /><b><a href="https://youtu.be/-iY-lJFuZE0">Tutorial 3 · MiniMax · Song</a></b>
-      <br />Songs with MiniMax Music 3: the caption, the lyrics and the 5,000-token budget, checked before rendering.
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <a href="https://youtu.be/6BfORaIr5kE"><img src="assets/branding/0.4.1/tutorial-4-enhance-master.jpg" alt="Tutorial 4 · Enhance & Master - watch on YouTube" width="100%" /></a>
-      <br /><b><a href="https://youtu.be/6BfORaIr5kE">Tutorial 4 · Enhance & Master</a></b>
-      <br />Master any song without a GPU: a warm tone match, measured loudness, release export - then your own curve.
-    </td>
-    <td width="50%" align="center">
-      <a href="https://youtu.be/IeJaIjkbplQ"><img src="assets/branding/0.4.1/tutorial-5-yue2-daw.jpg" alt="Tutorial 5 · YuE2 · DAW - watch on YouTube" width="100%" /></a>
-      <br /><b><a href="https://youtu.be/IeJaIjkbplQ">Tutorial 5 · YuE2 · DAW</a></b>
-      <br />Bring your own MIDI sketch from any DAW: tracks and roles, the Guide track, and YuE2 sings your melody.
-    </td>
-  </tr>
-</table>
+| | Tutorial | What you will see |
+|:---:|---|---|
+| <img src="assets/branding/0.4.1/tutorial-0-system-check.jpg" alt="Tutorial 0 · System Check" width="180" /> | **0 · System Check** | Is your ComfyUI ready? Versions, the GPU, the model files every template needs and the hardware table with your machine's row. |
+| <img src="assets/branding/0.4.1/tutorial-1-yue2-song.jpg" alt="Tutorial 1 · YuE2 · Song" width="180" /> | **1 · YuE2 · Song** | From a brief to a finished song - as a series or one song with review stops. Then a tour of the score editor: notes, lyrics, playback, track sounds and presets, copy and paste, arranging sections and bars, recording with a MIDI keyboard, the files. |
+| <img src="assets/branding/0.4.1/tutorial-2-yue2-cover.jpg" alt="Tutorial 2 · YuE2 · Cover" width="180" /> | **2 · YuE2 · Cover** | A recording becomes a new version. In the score editor the original plays under the notes (waveform, A/B), a copied chorus sings its words again, and the sheet music goes out as files. |
+| <img src="assets/branding/0.4.1/tutorial-3-minimax-song.jpg" alt="Tutorial 3 · MiniMax · Song" width="180" /> | **3 · MiniMax · Song** | Songs with MiniMax Music 3: the caption, the lyrics and the 5,000-token budget, checked before anything is rendered. |
+| <img src="assets/branding/0.4.1/tutorial-4-enhance-master.jpg" alt="Tutorial 4 · Enhance & Master" width="180" /> | **4 · Enhance & Master** | Master any recording without a GPU: a warm tone match, measured loudness and the release export - then your own sound. |
+| <img src="assets/branding/0.4.1/tutorial-5-yue2-daw.jpg" alt="Tutorial 5 · YuE2 · DAW" width="180" /> | **5 · YuE2 · DAW** | Compose it yourself: the words first, then the music - draw the notes, import a MIDI sketch or play it in with a MIDI keyboard - and YuE2 sings your melody. |
 
 ## Listen first
 
@@ -79,7 +49,8 @@ Plenio is a rewrite from scratch, not a new version of the toolkit. It keeps wha
 - **After the render, before the master.** **Refine (48 kHz)** can extend a band-limited render with a super-resolution model or just resample it; **Stems** splits a song into vocals, drums, bass and other and mixes them back with a **residual** that keeps a neutral mix exact. Both are optional blocks in every template, bypassed until you switch them on.
 - **Finishing built in.** Every song template ends in **Plenio · Master**: a gentle tone match, compression and a true-peak limiter to **-14 LUFS / -1 dBTP**. Export writes FLAC 24-bit, MP3 V0 or WAV 32-bit float with tags and embedded cover art, the unmastered take, and a **release record** of the documents, seeds, settings, loudness and model licences.
 - **Video tutorials for every template** (0.4.1): six narrated walkthroughs and a promo, recorded with the real models - [watch them](#watch-the-tutorials).
-- **Native ComfyUI all the way.** Generation, loaders, samplers, loops and downloads are ComfyUI's own nodes. Plenio adds 19 small nodes where ComfyUI has nothing equivalent (the predecessor had 55). ComfyUI manages GPU memory and offers missing model downloads itself.
+- **Your own local LLMs as the writer.** The **Local LLM** node runs any GGUF from ComfyUI's `models/LLM` folder (or from LM Studio and the Hugging Face cache) in a llama.cpp server that is started for the draft and gone afterwards, so the GPU is free again for the music model - or asks a running LM Studio, Ollama, llama.cpp, vLLM or Jan. One list, no extra packages; the block *Plenio · Write Song (local LLM)* puts it in place of the native writer ([guide](docs/user/concepts/local-llm.md)).
+- **Native ComfyUI all the way.** Generation, loaders, samplers, loops and downloads are ComfyUI's own nodes. Plenio adds 20 small nodes where ComfyUI has nothing equivalent (the predecessor had 55). ComfyUI manages GPU memory and offers missing model downloads itself.
 
 ## The templates
 
@@ -172,7 +143,7 @@ For a **cover** the source recording is a track of its own, like an audio track 
 
 ### Compose a song yourself (YuE2 · DAW)
 
-Open **5 · YuE2 · DAW**, describe the song in the brief and run: the run stops at **Song Sheet · Text** with the writer's lyrics; approve them and run again. *Score Tools* builds an empty score in the right length, meter and key, and the run stops at **Song Sheet · DAW**. Draw the notes, set the chords, split the score into sections - or press **Import MIDI…** and bring a sketch from your DAW: the dialog shows every track of the file with its role (Vocal, Instrument, Chords, Guide) before anything changes. Approve and run again: YuE2 renders exactly the score you approved. The fourth track, **Guide**, is played with the sheet but never sent to the model ([guide](docs/user/paths/yue2-daw.md), [video](https://youtu.be/IeJaIjkbplQ)).
+Open **5 · YuE2 · DAW**, describe the song in the brief and run: the run stops at **Song Sheet · Text** with the writer's lyrics; approve them and run again. *Score Tools* builds an empty score in the right length, meter and key, and the run stops at **Song Sheet · DAW**. Draw the notes, set the chords, split the score into sections - or press **Import MIDI…** and bring a sketch from your DAW: the dialog shows every track of the file with its role (Vocal, Instrument, Chords, Guide) before anything changes. Approve and run again: YuE2 renders exactly the score you approved. The fourth track, **Guide**, is played with the sheet but never sent to the model ([guide](docs/user/paths/yue2-daw.md), [video: tutorial 5 in the playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE)).
 
 <p align="center">
   <img src="assets/branding/0.4.1/Screenshot%20YuE2-DAW-graph.png" alt="The 5 · YuE2 · DAW template: brief, writer, Song Sheet · Text, Score Tools and Song Sheet · DAW, render and finish" width="100%" />
@@ -290,9 +261,9 @@ Plenio is the successor of the [Music Production Toolkit](https://github.com/jpl
 
 ## Documentation
 
-- Users: [Getting started](docs/user/getting-started.md) · [YuE2 Song](docs/user/paths/yue2-song.md) · [YuE2 Cover](docs/user/paths/yue2-cover.md) · [YuE2 DAW](docs/user/paths/yue2-daw.md) · [MiniMax Song](docs/user/paths/minimax-song.md) · [Enhance & Master](docs/user/paths/enhance-master.md) · [Song Sheet](docs/user/concepts/song-sheet.md) · [Brief templates](docs/user/concepts/brief-templates.md) · [Score editor](docs/user/concepts/score-editor.md) · [Stems](docs/user/concepts/stems.md) · [Refine (48 kHz)](docs/user/concepts/refine.md) · [Instrumental](docs/user/concepts/instrumental.md) · [Mastering](docs/user/concepts/mastering.md) · [App mode](docs/user/concepts/app-mode.md) · [Models](docs/user/models.md) · [Configuration](docs/user/configuration.md) · [Licensing](docs/user/licensing.md) · [Troubleshooting](docs/user/troubleshooting.md)
+- Users: [Getting started](docs/user/getting-started.md) · [YuE2 Song](docs/user/paths/yue2-song.md) · [YuE2 Cover](docs/user/paths/yue2-cover.md) · [YuE2 DAW](docs/user/paths/yue2-daw.md) · [MiniMax Song](docs/user/paths/minimax-song.md) · [Enhance & Master](docs/user/paths/enhance-master.md) · [Song Sheet](docs/user/concepts/song-sheet.md) · [Brief templates](docs/user/concepts/brief-templates.md) · [Score editor](docs/user/concepts/score-editor.md) · [Stems](docs/user/concepts/stems.md) · [Refine (48 kHz)](docs/user/concepts/refine.md) · [Instrumental](docs/user/concepts/instrumental.md) · [Mastering](docs/user/concepts/mastering.md) · [App mode](docs/user/concepts/app-mode.md) · [Local LLMs](docs/user/concepts/local-llm.md) · [Models](docs/user/models.md) · [Configuration](docs/user/configuration.md) · [Licensing](docs/user/licensing.md) · [Troubleshooting](docs/user/troubleshooting.md)
 - Contributors: [Architecture](docs/dev/architecture.md) · [Extending Plenio](docs/dev/extending.md) · [Testing](docs/dev/testing.md) · [Design documents](docs/design/README.md) · [Decisions](docs/adr/README.md) · [Acceptance review](docs/audit/2026-09-25-phase-10-acceptance.md)
-- Videos ([playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE)): [Promo](https://youtu.be/D6WUSzRbWWA) · [0 · System Check](https://youtu.be/otGrYj1Qlu8) · [1 · YuE2 · Song](https://youtu.be/saYm0goB6EQ) · [2 · YuE2 · Cover](https://youtu.be/xczkVQ_-ciU) · [3 · MiniMax · Song](https://youtu.be/-iY-lJFuZE0) · [4 · Enhance & Master](https://youtu.be/6BfORaIr5kE) · [5 · YuE2 · DAW](https://youtu.be/IeJaIjkbplQ)
+- Videos: [all tutorials (playlist)](https://www.youtube.com/playlist?list=PLAFqTtP59fgE) · [Promo](https://youtu.be/D6WUSzRbWWA)
 - [Changelog](CHANGELOG.md)
 
 ## A few honest limits

@@ -13,6 +13,7 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 ### Changed
 
+- README: the tutorials are one link to the playlist, with a short summary of every video - no links to single videos, which change with every new upload.
 - `tools/build_graphs.py` builds the shipped templates again: the cover defaults of 0.4.3 and the Sung Pitch wiring of 0.4.4 had been edited into the JSON only. A test now fails when a shipped graph differs from the generator's output. The Song Sheets of *1 · YuE2 · Song*, *3 · MiniMax · Song* and *5 · YuE2 · DAW* carry the (unconnected) *sung_pitch* input like the node, and the About note of *2 · YuE2 · Cover* names *original lyrics* as the default vocals, as the brief has it since 0.4.3.
 
 ## 0.4.4 - 2026-10-03
