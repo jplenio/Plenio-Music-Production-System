@@ -535,6 +535,13 @@
      "link": null
     },
     {
+     "localized_name": "sung_pitch",
+     "name": "sung_pitch",
+     "shape": 7,
+     "type": "PLENIO_PITCH",
+     "link": null
+    },
+    {
      "localized_name": "brief",
      "name": "brief",
      "shape": 7,
@@ -803,6 +810,13 @@
      "name": "reference_audio",
      "shape": 7,
      "type": "AUDIO",
+     "link": null
+    },
+    {
+     "localized_name": "sung_pitch",
+     "name": "sung_pitch",
+     "shape": 7,
+     "type": "PLENIO_PITCH",
      "link": null
     },
     {
@@ -1795,7 +1809,7 @@
    2,
    0,
    6,
-   10,
+   11,
    "PLENIO_BRIEF"
   ],
   [
@@ -1803,7 +1817,7 @@
    3,
    3,
    6,
-   11,
+   12,
    "PLENIO_ENGINE"
   ],
   [
@@ -1843,7 +1857,7 @@
    2,
    0,
    8,
-   10,
+   11,
    "PLENIO_BRIEF"
   ],
   [
@@ -1851,7 +1865,7 @@
    3,
    3,
    8,
-   11,
+   12,
    "PLENIO_ENGINE"
   ],
   [

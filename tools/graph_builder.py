@@ -334,7 +334,17 @@ class Graph:
         )
         return link_id
 
-    def group(self, title: str, nodes: list[Node], *, color: str = "#3f789e", padding: float = 30) -> None:
+    def group(
+        self,
+        title: str,
+        nodes: list[Node],
+        *,
+        color: str = "#3f789e",
+        padding: float = 30,
+        min_height: float = 0,
+    ) -> None:
+        """A group around ``nodes``; ``min_height`` keeps room below them (a run summary grows the last node)."""
+
         def extent(node: Node) -> tuple[float, float]:
             return (min(node.size[0], 260), 30) if node.collapsed else node.size
 
@@ -346,7 +356,7 @@ class Graph:
             {
                 "id": len(self.groups) + 1,
                 "title": title,
-                "bounding": [left, top, right - left, bottom - top],
+                "bounding": [left, top, right - left, max(bottom - top, min_height)],
                 "color": color,
                 "font_size": 24,
                 "flags": {},

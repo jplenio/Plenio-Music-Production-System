@@ -1154,7 +1154,7 @@ ABOUT_COVER = f"""# 2 · YuE2 · Cover
 **Source -> Transcribe Score -> Song Sheet · Score -> lyrics (ASR, writer or section tags) -> Song Sheet · Text -> YuE2 Takes -> Check Vocals -> Master -> Export**
 
 1. Load the **source** recording (upload in *Load Audio*; up to 5:00 - trim longer songs with the optional *Excerpt* node).
-2. In **Cover Brief** choose the **mode** - *one cover, stop to review* (default, steps 4-6) or *new cover every run*: every run writes and renders a **different version** (title, style and - with new lyrics - the lyrics) without stops; the batch count next to **Run** makes a series. Then the target style and what happens to the vocals: *instrumental* (default; an instrument plays the melody, or accompaniment only), *original lyrics* (transcribed from the source) or *new lyrics* (written on the source's melody). *harmony* keeps or replaces the original chords.
+2. In **Cover Brief** choose the **mode** - *one cover, stop to review* (default, steps 4-6) or *new cover every run*: every run writes and renders a **different version** (title, style and - with new lyrics - the lyrics) without stops; the batch count next to **Run** makes a series. Then the target style and what happens to the vocals: *original lyrics* (default; transcribed from the source), *instrumental* (an instrument plays the melody, or accompaniment only) or *new lyrics* (written on the source's melody). *harmony* keeps or replaces the original chords.
 3. Press **Run**: SheetSage2 transcribes the source (once; later runs reuse it).
 4. The run **stops at Song Sheet · Score**. Open it, check the score (fix section names and boundaries), then *Approve*.
 5. Run again: the lyrics are drafted (ASR of the original, the writer's new lyrics, or the section tags) and the run **stops at Song Sheet · Text**. Correct or replace the lyrics - your text always wins - and *Approve*.
@@ -1196,11 +1196,16 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         "PlenioCoverBrief",
         (0, 480),
         size=(380, 520 + SUMMARY_ROOM),
+        # the owner's defaults since 0.4.3: a pop style template (genre and mood come from it), the
+        # original lyrics in the language detected from the singing, the original chords
         widgets={
             "mode": "one cover, stop to review",
-            "genre": "acoustic folk",
-            "mood": "warm, intimate",
-            "vocals": "instrumental",
+            "template": "pop/dance-pop-vocal",
+            "genre": "",
+            "mood": "",
+            "vocals": "original lyrics",
+            "vocals.language": "",
+            "harmony": "keep original chords",
         },
     )
     model_node = g.add_subgraph(bp["yue2_model"], (0, 1275), size=(380, 140), collapsed=True)
@@ -1324,18 +1329,32 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         cover_y=780,
         export_size=(380, 560 + SUMMARY_ROOM),
     )
+    # Sung Pitch (0.4.4): the source's vocals as a pitch curve for both sheets' editors, once per source;
+    # the text sheet plays the source too, so the words can be checked against the singing
+    sung_pitch = g.add(
+        "PlenioSungPitch",
+        (460, 480),
+        size=(340, 106),
+        title="Sung Pitch (for the editor)",
+        widgets={"separation": SEPARATION_MODEL},
+        properties=model(SEPARATION_MODEL),
+    )
+    g.link(excerpt, "AUDIO", text_sheet, "reference_audio")
+    g.link(excerpt, "AUDIO", sung_pitch, "audio")
+    g.link(sung_pitch, "sung_pitch", score_sheet, "sung_pitch")
+    g.link(sung_pitch, "sung_pitch", text_sheet, "sung_pitch")
     g.group("1 · SOURCE", [source, excerpt])
     g.group("2 · COVER", [brief])
-    g.group("3 · SCORE", [transcribe, tools, score_sheet])
+    g.group("3 · SCORE", [transcribe, tools, score_sheet, sung_pitch], min_height=700)
     g.group("4 · LYRICS", [asr, write, draft, source_switch, tags_switch])
     g.group("5 · TEXT", [text_sheet])
     g.group("6 · RENDER", [seed, render, check_vocals, takes_preview])
     g.group("CHECK SUNG LYRICS (optional)", [check_lyrics], color=OPTIONAL_GROUP)
     g.group("MUSIC MODEL", [model_node, adapter, adapter_switch], color=MODEL_GROUP)
-    # The instrumental options (the default) only, as in song_app; the two review stops use the sheets'
-    # editor buttons.
+    # The options of the default vocals (original lyrics) only, as in song_app; the two review stops use
+    # the sheets' editor buttons.
     controls = ["mode", "template", "description", "genre", "mood", "vocals"]
-    controls += ["vocals.melody", "vocals.lead_instrument", "harmony"]
+    controls += ["vocals.language", "vocals.voice", "harmony"]
     inputs = [(source, "audio"), *[(brief, name) for name in controls], (seed, "seed"), (draft, "seed")]
     inputs += [(score_sheet, "sheet_state"), (text_sheet, "sheet_state")]
     return g, App(inputs, [takes_preview, preview, export])

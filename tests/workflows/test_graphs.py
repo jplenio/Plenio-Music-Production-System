@@ -474,3 +474,28 @@ def test_the_song_planner_reads_the_plan_lyrics_and_the_render_the_sheets_lyrics
 
     assert source("Plenio · YuE2 Plan", "lyrics") == ("Song Sheet · Text", "plan_lyrics")
     assert source("Plenio · YuE2 Render", "lyrics") == ("Song Sheet · Text", "lyrics")
+
+
+def test_the_committed_graphs_are_the_generators_output() -> None:
+    """Templates and blueprints come from ``tools/build_graphs.py`` and are never edited by hand. After
+    0.3.1 four templates were (the cover defaults of 0.4.3, the Sung Pitch wiring of 0.4.4), so a rebuild
+    would have reverted them unnoticed (found 2026-10-07)."""
+    import build_graphs
+    from graph_builder import blueprint_file, workflow
+
+    bp = build_graphs.blueprints()
+    expected = {f"subgraphs/{b.name}.json": blueprint_file(b) for b in bp.values()}
+    for name, graph, used, app in build_graphs.templates(bp):
+        expected[f"example_workflows/{name}.json"] = workflow(graph, name, used, app)
+    shipped = {
+        path.relative_to(PROJECT).as_posix()
+        for folder in ("subgraphs", "example_workflows")
+        for path in (PROJECT / folder).glob("*.json")
+    }
+    assert shipped == set(expected), "every shipped graph is generated, and every generated graph is shipped"
+    stale = [
+        path
+        for path, data in expected.items()
+        if json.loads((PROJECT / path).read_text(encoding="utf-8")) != json.loads(json.dumps(data))
+    ]
+    assert stale == [], f"run tools/build_graphs.py, or move the hand edit into it: {stale}"
