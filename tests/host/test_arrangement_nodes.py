@@ -1,7 +1,7 @@
 """Compose Arrangement, a writer and Apply Arrangement in a real ComfyUI server.
 
 The writer is a fake OpenAI-compatible app in the test process (configured in config.toml) whose answer
-the test chooses: a good plan, garbage, or nothing at all (it must not be asked). Checked: the simple mode
+the test chooses: a good plan, garbage, or nothing at all (it must not be asked). Checked: arrangement off
 and a cover kept at its original song flow never reach the writer (the lazy answer); a plan becomes a
 valid score with its report; garbage keeps the score as it was and says so; the same request is answered
 from Plenio's answer cache; the Song Sheet shows the arrangement and warns about a fallback.
@@ -194,12 +194,13 @@ def summary(entry: dict[str, Any], node: str) -> str:
 def test_the_mode_list_holds_the_users_modes(server: ComfyServer) -> None:
     info = server.get("/object_info/PlenioSongBrief")["PlenioSongBrief"]
     options = info["input"]["optional"]["arrangement"][1]["options"]
-    assert options[:4] == ["simple", "standard", "calm", "varied"]
+    assert options[:4] == ["off", "standard", "calm", "varied"]
 
 
-def test_the_simple_mode_does_not_ask_the_writer(server: ComfyServer) -> None:
+@pytest.mark.parametrize("name", ["off", "simple"])  # "simple": the name until 0.4.5, still accepted
+def test_arrangement_off_does_not_ask_the_writer(server: ComfyServer, name: str) -> None:
     ASKED.clear()
-    entry = server.run(graph(song_brief("simple")))
+    entry = server.run(graph(song_brief(name)))
     assert entry["outputs"]["7"]["received"] == [SCORE]
     assert ASKED == [] and {"4", "5"}.isdisjoint(entry["outputs"])  # neither the prompt nor the writer ran
     assert "skipped" in summary(entry, "6")

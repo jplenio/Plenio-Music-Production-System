@@ -2,6 +2,12 @@
 
 All notable changes are listed here. Versions follow semantic versioning; published Registry versions are immutable.
 
+## Unreleased
+
+### Changed
+
+- **arrangement: *off*** instead of *simple* (Song Brief and Cover Brief): the default is no arrangement, not a mode of its own - the music model plans the music by itself, as before. Saved workflows and API prompts with *simple* still run (read as *off*); the editor shows *off* when it loads them.
+
 ## 0.4.5 - 2026-10-08
 
 The writer model can plan the arrangement: creative modes and closeness sliders for songs and covers - **experimental**, made for trying out - one writer model for every writing step (ComfyUI's text models or your own local LLMs), and the sheet music of every export as a PDF. Two new tutorials show the creative modes; all other tutorials are recorded again.

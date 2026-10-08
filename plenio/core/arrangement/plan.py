@@ -212,13 +212,13 @@ class Policy:
 
     @property
     def skip(self) -> bool:
-        """No section plan: the simple mode, or a cover that keeps its original song flow completely."""
+        """No section plan: arrangement off, or a cover that keeps its original song flow completely."""
         return not self.mode.arranges or (self.kind == "cover" and self.closeness >= SKIP_FROM)
 
     @property
     def skip_reason(self) -> str:
         if not self.mode.arranges:
-            return "simple mode: the music model plans the music by itself"
+            return "arrangement off: the music model plans the music by itself"
         if self.skip:
             return f"song flow closeness {self.closeness}: the original stays as it is"
         return ""
@@ -311,7 +311,7 @@ def closeness_text(kind: str, closeness: int, genre: str = "") -> str:
 
 
 def writer_lines(mode: CreativeMode, *, kind: str, closeness: int, genre: str) -> list[str]:
-    """The rules a creative mode adds to the writing prompt (none for ``simple``): its writer hints and,
+    """The rules a creative mode adds to the writing prompt (none for ``off``): its writer hints and,
     for a song, the genre closeness (a cover's song flow closeness concerns the score only)."""
     if not mode.arranges:
         return []

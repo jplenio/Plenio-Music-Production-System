@@ -594,7 +594,7 @@ def write_song() -> Blueprint:
 
 def arrange() -> Blueprint:
     """Compose Arrangement -> writer (the same writer list as Write Song) -> Apply Arrangement. Apply's answer
-    is lazy: in the simple mode, for a cover kept at its original song flow and without a score, nothing
+    is lazy: with arrangement off, for a cover kept at its original song flow and without a score, nothing
     before it runs - no prompt, no writer model. The arrangement seed plus the song seed drives the writer
     and the notes Plenio writes; a Local LLM is held to the plan's JSON schema."""
     g = Graph(first_id=1301)
@@ -695,7 +695,7 @@ def arrange() -> Blueprint:
         "The creative modes' section plan: the writer model plans every section of the score (chords, what the "
         "instrument line plays, energy, a key lift) as a small JSON plan, and Plenio writes the notes and checks "
         "the result - or keeps the score as it was and says why (in the report and the Song Sheet). In the "
-        "brief's simple mode nothing runs here. The writer model is the same list as Write Song's; GGUF files, "
+        "brief's arrangement off nothing runs here. The writer model is the same list as Write Song's; GGUF files, "
         "LM Studio and Ollama keep to the plan's format exactly. The arrangement seed gives another arrangement "
         "of the same song.",
         g,
@@ -1188,8 +1188,8 @@ WRITER_TEXT = (
 )
 CREATIVE_TEXT = (
     "**Creative modes (experimental):** *arrangement* in the brief. They can give unexpected results and are "
-    "meant for experimenting - try a mode, listen, keep what you like. *simple* (default, the dependable "
-    "choice): {simple}. A creative mode - *standard*, "
+    "meant for experimenting - try a mode, listen, keep what you like. *off* (default, the dependable "
+    "choice): no arrangement - {off}. A creative mode - *standard*, "
     "*varied*, *fantasy*, *sterile*, *many instruments*, *dramatic* or your own file in `user/plenio/arrangement` "
     "- adds its hints to the writing and lets the writer model plan every section of the score in **Arrange**: "
     "chords, what the instrument line plays, energy, a key lift. {closeness} The writer answers with a small "
@@ -1199,12 +1199,12 @@ CREATIVE_TEXT = (
     "Local LLM answers from its cache when the request is the same."
 )
 CREATIVE_SONG_TEXT = CREATIVE_TEXT.format(
-    simple="YuE2 plans melody, chords and instruments by itself, as before",
+    off="YuE2 plans melody, chords and instruments by itself, as before",
     closeness="*genre closeness* sets how free it may be: 100 strictly typical, 70 typical with personal touches, "
     "40 free within the genre, 0 any style.",
 )
 CREATIVE_COVER_TEXT = CREATIVE_TEXT.format(
-    simple="the transcribed score stays as it is",
+    off="the transcribed score stays as it is",
     closeness="*song flow closeness* sets how close it stays to the original: 100 exactly the original (no "
     "plan), 80 chords and key stay, 50 recognisable, 20 a free version, 0 only a hint - the melody and the form "
     "always remain. *lyrics closeness* (new lyrics) sets how close the new words stay to the source's: 0 without "
@@ -1628,7 +1628,7 @@ ABOUT_MINIMAX = f"""# 3 · MiniMax · Song
 
 **Instrumentals:** the lyrics are a map of section tags ([Intro], [Instrumental], [Solo], ...), about twice as long as a sung song's, and the caption's Vocal Details are *n/a*.
 
-**Creative modes:** *arrangement* in the brief adds the mode's hints to the caption (for example *many instruments*: a large ensemble) and, with *genre closeness*, says how typical it stays. MiniMax Music 3 has no score, so there is no section plan here; *simple* writes as before.
+**Creative modes:** *arrangement* in the brief adds the mode's hints to the caption (for example *many instruments*: a large ensemble) and, with *genre closeness*, says how typical it stays. MiniMax Music 3 has no score, so there is no section plan here; *off* writes as before.
 
 {WRITER_TEXT}
 
@@ -1745,7 +1745,7 @@ How to work:
 
 **Empty score:** a score of rests cannot be rendered - YuE2 needs at least one note (the Song Sheet says so). Draw the first note or import a MIDI file.
 
-**Creative modes:** *arrangement* in the brief adds the mode's hints to the writing (the style); the score is yours, so nothing is planned here. *simple* writes as before.
+**Creative modes:** *arrangement* in the brief adds the mode's hints to the writing (the style); the score is yours, so nothing is planned here. *off* writes as before.
 
 {WRITER_TEXT}
 

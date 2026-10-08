@@ -8,7 +8,16 @@ result = arrange(abc, answer, rules, seed=...)                 # -> a valid scor
 """
 
 from .apply import STATUSES, Arrangement, SectionResult, arrange, skipped
-from .modes import LEAD_ROLES, SIMPLE, SIMPLE_MODE, CreativeMode, ModeLibrary, parse_mode
+from .modes import (
+    LEAD_ROLES,
+    LEGACY_NAMES,
+    OFF,
+    OFF_MODE,
+    CreativeMode,
+    ModeLibrary,
+    canonical_name,
+    parse_mode,
+)
 from .plan import (
     MELODY,
     NEEDS_CHORDS,
@@ -32,10 +41,11 @@ from .plan import (
 
 __all__ = [
     "LEAD_ROLES",
+    "LEGACY_NAMES",
     "MELODY",
     "NEEDS_CHORDS",
-    "SIMPLE",
-    "SIMPLE_MODE",
+    "OFF",
+    "OFF_MODE",
     "SKIP_FROM",
     "STATUSES",
     "Arrangement",
@@ -48,6 +58,7 @@ __all__ = [
     "SectionPlan",
     "SectionResult",
     "arrange",
+    "canonical_name",
     "closeness_text",
     "melody_of",
     "melody_voice",

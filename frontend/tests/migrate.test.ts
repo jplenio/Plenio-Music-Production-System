@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { comboOptions, migrateWidgetValues } from '../src/extension/migrate'
+import { comboOptions, migrateWidgetValues, renameWidgetValues } from '../src/extension/migrate'
 import type { ComfyNodeDef } from '../src/shared/comfy'
 
 const songBrief: ComfyNodeDef = {
@@ -29,6 +29,17 @@ describe('widget values of older workflows', () => {
       'pop'
     ])
     expect(info.widgets_values).toHaveLength(3) // the saved data itself is not changed
+  })
+
+  it('renames the arrangement "simple" of 0.4.5 to "off"', () => {
+    const widgets = [
+      { name: 'arrangement', value: 'simple' },
+      { name: 'description', value: 'simple' } // a text that happens to be the word stays
+    ]
+    expect(renameWidgetValues('PlenioCoverBrief', widgets)).toEqual(['arrangement'])
+    expect(widgets.map((w) => w.value)).toEqual(['off', 'simple'])
+    expect(renameWidgetValues('PlenioSongBrief', [{ name: 'arrangement', value: 'varied' }])).toEqual([])
+    expect(renameWidgetValues('PlenioSongSheet', [{ name: 'arrangement', value: 'simple' }])).toEqual([])
   })
 
   it('keeps current values and other nodes as they are', () => {

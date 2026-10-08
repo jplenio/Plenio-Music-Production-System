@@ -85,7 +85,7 @@ class Arrangement:
 
 
 def skipped(text: str, policy: Policy) -> Arrangement:
-    """The score unchanged, without asking the writer: the simple mode, or a cover kept as it is."""
+    """The score unchanged, without asking the writer: arrangement off, or a cover kept as it is."""
     return Arrangement(text, "skipped", f"skipped: {policy.skip_reason}", policy.mode.name, policy.closeness)
 
 

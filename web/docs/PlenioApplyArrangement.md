@@ -12,7 +12,7 @@ Per section, in this order:
 
 At the end the **tempo** change. Then the result must pass YuE2's parser, read back unchanged, open note by note in the score editor and - with the engine connected - fit YuE2's context (the instrument lines are left out first; a cover's style and lyrics are estimated, as they are written later). Anything else keeps the score as it was: status *fallback* with the reason.
 
-- **answer** - the writer's answer; requested only when a plan is wanted (not in the simple mode, not for a cover at song flow closeness 95 or more, not without a score). Read leniently: code fences, thoughts, a missing last brace, single quotes, chord aliases (*Cmaj9* -> *Cmaj7*, *H* -> *B*) are repaired and reported.
+- **answer** - the writer's answer; requested only when a plan is wanted (not with arrangement *off*, not for a cover at song flow closeness 95 or more, not without a score). Read leniently: code fences, thoughts, a missing last brace, single quotes, chord aliases (*Cmaj9* -> *Cmaj7*, *H* -> *B*) are repaired and reported.
 - **seed** - varies the notes Plenio writes for the lines (the same seed, the same notes).
 - **engine**, **style**, **lyrics** (optional) - for the exact context budget.
 

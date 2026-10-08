@@ -39,7 +39,8 @@ MODE_TOOLTIP = (
 )
 COVER_INPUTS = ("mode", "template", "description", "genre", "mood", "vocals", "harmony", "title")
 ARRANGEMENT_TOOLTIP = (
-    "simple: the transcribed score stays as it is (as before). A creative mode (standard, varied, fantasy, "
+    "off: no arrangement - the transcribed score stays as it is (as before). A creative mode (standard, "
+    "varied, fantasy, "
     "sterile, many instruments, dramatic - or your own file in user/plenio/arrangement) adds its hints to the "
     "writing prompt and lets the writer model re-arrange the score's sections within the song flow closeness: "
     "chords, what the instrument line plays, energy, key. The melody and the form always stay. Plenio writes the "
@@ -47,7 +48,7 @@ ARRANGEMENT_TOOLTIP = (
     "Song Sheet says so). " + EXPERIMENTAL
 )
 SONG_FLOW_TOOLTIP = (
-    "Creative modes only (simple ignores it; experimental): how close the cover's song flow stays to the "
+    "Creative modes only (off ignores it; experimental): how close the cover's song flow stays to the "
     "original - 100 exactly the original (nothing is planned), 80 chords, key and tempo stay (only silent sections "
     "get a line), 50 recognisable (chords recoloured, lines changed, a small key lift), 20 a free version (new "
     "chords and lines, another tempo), 0 only a hint of the original. The melody and the form always remain."
@@ -185,7 +186,7 @@ class PlenioCoverBrief(io.ComfyNode):
                     display_name="arrangement (experimental)",
                     options=mode_names(),
                     default=ARRANGEMENT_DEFAULT,
-                    optional=True,  # an API prompt of an older version runs as before (simple)
+                    optional=True,  # an API prompt of an older version runs as before (off)
                     tooltip=ARRANGEMENT_TOOLTIP,
                 ),
                 io.Int.Input(
@@ -262,7 +263,8 @@ class PlenioCoverBrief(io.ComfyNode):
         lyrics_closeness: int = LYRICS_CLOSENESS_DEFAULT,
     ) -> io.NodeOutput:
         chosen = None if template == "none" else template_library().get(template)
-        mode_library().by_name(arrangement)  # an unknown mode stops here, with the list to choose from
+        # an unknown mode stops here, with the list to choose from; 0.4.5's "simple" is read as "off"
+        arrangement = mode_library().by_name(arrangement).name
         vocal_mode = vocals.get("vocals", "instrumental")
         values = {
             "description": description,

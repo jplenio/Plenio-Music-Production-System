@@ -21,7 +21,8 @@ A mode is a Markdown file with a front matter block (``resources/arrangement/*.m
     ## Arranger
     Lines added to the arrangement prompt (the section plan).
 
-``simple`` is built in and has no file: the music model plans the music by itself, as before.
+``off`` is built in and has no file: no arrangement - the music model plans the music by itself, as
+before. Until 0.4.5 it was called ``simple``; that name is still read (``LEGACY_NAMES``).
 """
 
 from __future__ import annotations
@@ -36,8 +37,11 @@ from ..errors import PlenioUserError
 
 log = logging.getLogger("plenio")
 
-SIMPLE = "simple"
-"""The built-in mode: no writer hints, no section plan - the music model plans the music by itself."""
+OFF = "off"
+"""The built-in choice: no arrangement - no writer hints, no section plan; the music model plans the music
+by itself."""
+LEGACY_NAMES = {"simple": OFF}
+"""Names of the built-in choice in saved workflows and API prompts of older versions."""
 LEAD_ROLES = ("keep", "none", "pad", "arpeggio", "riff", "countermelody", "solo", "octave", "motif")
 """What the instrument line (the score's Ins voice) plays in a section; see ``lines``."""
 CHORD_COLORS = {
@@ -90,19 +94,24 @@ class CreativeMode:
 
     @property
     def arranges(self) -> bool:
-        """Whether this mode writes a section plan (every mode but ``simple``)."""
-        return self.id != SIMPLE
+        """Whether this mode writes a section plan (every mode but ``off``)."""
+        return self.id != OFF
 
     def qualities(self) -> tuple[str, ...]:
         return CHORD_COLORS[self.chord_colors]
 
 
-SIMPLE_MODE = CreativeMode(
-    SIMPLE,
-    SIMPLE,
-    "The music model plans melody, chords and instruments by itself (as before); no section plan.",
+OFF_MODE = CreativeMode(
+    OFF,
+    OFF,
+    "No arrangement: the music model plans melody, chords and instruments by itself (as before).",
     order=0,
 )
+
+
+def canonical_name(name: str) -> str:
+    """The current name of a mode name (``simple`` of 0.4.5 is ``off``)."""
+    return LEGACY_NAMES.get(name, name)
 
 
 def _range(value: str, name: str, limits: tuple[int, int], mode_id: str) -> tuple[int, int]:
@@ -136,10 +145,10 @@ def parse_mode(text: str, mode_id: str, source: str = "package") -> CreativeMode
     if unknown:
         raise PlenioUserError(f"Creative mode {mode_id!r}: unknown fields {unknown}.")
     name = fields.get("name", mode_id.rsplit("/", 1)[-1].replace("-", " ")).strip().lower()
-    if not _NAME.match(name) or name == SIMPLE:
+    if not _NAME.match(name) or name == OFF or name in LEGACY_NAMES:
         raise PlenioUserError(
             f"Creative mode {mode_id!r}: the name {name!r} must be 1-40 lower-case letters, digits, spaces or "
-            f"( ) - and not {SIMPLE!r}."
+            f"( ) - and not {OFF!r} or {', '.join(repr(n) for n in LEGACY_NAMES)}."
         )
     lead = tuple(
         dict.fromkeys(part.strip().lower() for part in fields.get("lead", "keep").split(",") if part.strip())
@@ -182,7 +191,7 @@ def parse_mode(text: str, mode_id: str, source: str = "package") -> CreativeMode
 
 
 class ModeLibrary:
-    """The package's modes (read-only) plus the user's (ComfyUI user directory); ``simple`` built in."""
+    """The package's modes (read-only) plus the user's (ComfyUI user directory); ``off`` built in."""
 
     def __init__(self, package_dir: Path, user_dir: Path | None = None):
         self.package_dir = package_dir
@@ -192,7 +201,7 @@ class ModeLibrary:
         """User mode files that could not be read (file -> reason); they are skipped."""
 
     def _load(self) -> dict[str, CreativeMode]:
-        modes: dict[str, CreativeMode] = {SIMPLE: SIMPLE_MODE}
+        modes: dict[str, CreativeMode] = {OFF: OFF_MODE}
         self.problems = {}
         for folder, source in ((self.package_dir, "package"), (self.user_dir, "user")):
             if folder is None or not folder.is_dir():
@@ -225,10 +234,11 @@ class ModeLibrary:
         self._modes = None
 
     def names(self) -> list[str]:
-        """The options of the brief's *arrangement* list: ``simple`` first, then by ``order``."""
+        """The options of the brief's *arrangement* list: ``off`` first, then by ``order``."""
         return [m.name for m in sorted(self.modes().values(), key=lambda m: (m.order, m.name))]
 
     def by_name(self, name: str) -> CreativeMode:
+        name = canonical_name(name)
         for mode in self.modes().values():
             if mode.name == name:
                 return mode

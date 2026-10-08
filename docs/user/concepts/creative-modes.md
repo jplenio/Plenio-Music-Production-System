@@ -6,7 +6,7 @@
 
 How freely a song is written and arranged. Song Brief and Cover Brief have an **arrangement** choice:
 
-- **simple** (default) - as before: the writer drafts title, style and lyrics, and the music model plans melody, chords and instruments by itself.
+- **off** (default; called *simple* until 0.4.5 - saved workflows are read as *off*) - no arrangement, as before: the writer drafts title, style and lyrics, and the music model plans melody, chords and instruments by itself.
 - **a creative mode** - the mode's hints go into the writing prompt (for example *many instruments*: a large ensemble in the style), and in *YuE2 Song* and *YuE2 Cover* the writer model also plans **every section of YuE2's score**: which chords, what the instrument line plays, how busy it is, whether a section lifts its key. Plenio turns that plan into notes, checks the result and shows it in *Song Sheet · Score*.
 
 ## The modes

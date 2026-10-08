@@ -109,8 +109,9 @@ def resolve_mode(value: str | None, modes: Mapping[str, str] = SONG_MODES) -> st
 
 
 MELODY_OPTIONS = {"instrument plays the lead": "lead", "accompaniment only": "accompaniment"}
-ARRANGEMENT_DEFAULT = "simple"
-"""The creative mode of a new brief: the music model plans the music by itself (``core.arrangement``)."""
+ARRANGEMENT_DEFAULT = "off"
+"""The creative mode of a new brief: no arrangement, the music model plans the music by itself
+(``core.arrangement``; ``simple`` until 0.4.5)."""
 CLOSENESS_DEFAULT = 70
 """Genre closeness of a song, song flow closeness of a cover (0 free ... 100 strict / the original)."""
 LYRICS_CLOSENESS_DEFAULT = 0
@@ -161,7 +162,7 @@ class SongBrief:
     melody: str = "lead"
     lead_instrument: str = ""
     arrangement: str = ARRANGEMENT_DEFAULT
-    """The creative mode (``core.arrangement``): ``simple`` or the name of a mode file."""
+    """The creative mode (``core.arrangement``): ``off`` or the name of a mode file."""
     closeness: int = CLOSENESS_DEFAULT
     """How close the song stays to its genre (creative modes only): 0 free ... 100 strictly typical."""
     template: str = ""
@@ -279,7 +280,7 @@ class CoverBrief:
     harmony: str = "new"
     title: str = ""
     arrangement: str = ARRANGEMENT_DEFAULT
-    """The creative mode (``core.arrangement``): ``simple`` keeps the transcribed score as it is."""
+    """The creative mode (``core.arrangement``): ``off`` keeps the transcribed score as it is."""
     closeness: int = CLOSENESS_DEFAULT
     """Song flow closeness (creative modes only): 0 only a hint of the original ... 100 exactly the original."""
     lyrics_closeness: int = LYRICS_CLOSENESS_DEFAULT

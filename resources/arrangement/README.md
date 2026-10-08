@@ -1,11 +1,11 @@
 # Creative modes
 
-The *arrangement* choice of the Song Brief and the Cover Brief. Each file is one mode; `simple` is built in (no file): the music model plans the music by itself, as before.
+The *arrangement* choice of the Song Brief and the Cover Brief. Each file is one mode; `off` is built in (no file; *simple* until 0.4.5): the music model plans the music by itself, as before.
 
 ```text
 ---
 name: varied                 # the option in the brief's list (lower case, unique)
-order: 20                    # position in the list (simple is 0)
+order: 20                    # position in the list (off is 0)
 description: One line for the tooltip.
 lead: keep, pad, arpeggio, riff, countermelody, solo, octave, motif
 key shift: 0..2              # semitones a section may move (-5..5)

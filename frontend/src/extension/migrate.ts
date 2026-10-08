@@ -9,6 +9,9 @@
  * The predecessor toolkit's placeholder ``custom`` ("let the model decide", arriving through
  * *Reuse parameters* of old jobs) is cleared from the text fields here as well: the backend treats
  * it as empty with a note, and the widget should not show a word the writer never sees (plan §8.3).
+ *
+ * Renamed combo values are set to their new name once the node is configured (0.4.6: the briefs'
+ * *arrangement* "simple" is "off"; the backend still reads the old name).
  */
 import type { ComfyNodeDef } from '../shared/comfy'
 import { TEXT_FIELDS, isLegacyPlaceholder, WIDGET_OF } from './briefTemplate'
@@ -39,6 +42,26 @@ export function comboOptions(nodeData: ComfyNodeDef, name: string): unknown[] {
     return Array.isArray(options) ? options : []
   }
   return []
+}
+
+/** Combo values renamed since they were saved: node type -> widget -> old value -> new value. */
+export const RENAMED_VALUES: Readonly<Record<string, Readonly<Record<string, Readonly<Record<string, string>>>>>> = {
+  PlenioSongBrief: { arrangement: { simple: 'off' } },
+  PlenioCoverBrief: { arrangement: { simple: 'off' } }
+}
+
+/** Gives the widgets of a configured node that hold a renamed value the new one; returns their names. */
+export function renameWidgetValues(type: string, widgets: readonly { name: string; value: unknown }[] | undefined): string[] {
+  const renamed = RENAMED_VALUES[type]
+  if (!renamed) return []
+  const changed: string[] = []
+  for (const widget of widgets ?? []) {
+    const value = renamed[widget.name]?.[String(widget.value)]
+    if (value === undefined) continue
+    widget.value = value
+    changed.push(widget.name)
+  }
+  return changed
 }
 
 /** ``info`` with the work mode added in front when it was saved without one; otherwise ``info`` itself. */

@@ -163,7 +163,7 @@ def compose(
     Songs: the LLM writes title, style and lyrics; instrumental songs get the single tag
     ``[instrumental]`` from Plenio. Covers: the score defines the sections (see ``_compose_cover``).
     ``mode``: the brief's creative mode, whose writer hints (and, for a song, the genre closeness) are
-    added to the rules; ``simple`` adds nothing.
+    added to the rules; ``off`` adds nothing.
     """
     if isinstance(brief, CoverBrief):
         return _compose_cover(

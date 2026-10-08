@@ -1878,11 +1878,11 @@
       "COMBO",
       {
        "display_name": "arrangement (experimental)",
-       "tooltip": "simple: the transcribed score stays as it is (as before). A creative mode (standard, varied, fantasy, sterile, many instruments, dramatic - or your own file in user/plenio/arrangement) adds its hints to the writing prompt and lets the writer model re-arrange the score's sections within the song flow closeness: chords, what the instrument line plays, energy, key. The melody and the form always stay. Plenio writes the notes itself and checks the result; a plan it cannot use leaves the transcription as it was (the score's Song Sheet says so). Experimental: creative modes can give unexpected results - they are meant for experimenting: try a mode, listen, keep what you like or run again with another arrangement seed. simple is the dependable choice.",
-       "default": "simple",
+       "tooltip": "off: no arrangement - the transcribed score stays as it is (as before). A creative mode (standard, varied, fantasy, sterile, many instruments, dramatic - or your own file in user/plenio/arrangement) adds its hints to the writing prompt and lets the writer model re-arrange the score's sections within the song flow closeness: chords, what the instrument line plays, energy, key. The melody and the form always stay. Plenio writes the notes itself and checks the result; a plan it cannot use leaves the transcription as it was (the score's Song Sheet says so). Experimental: creative modes can give unexpected results - they are meant for experimenting: try a mode, listen, keep what you like or run again with another arrangement seed. off is the dependable choice.",
+       "default": "off",
        "multiselect": false,
        "options": [
-        "simple",
+        "off",
         "standard",
         "varied",
         "fantasy",
@@ -1896,7 +1896,7 @@
       "INT",
       {
        "display_name": "song flow closeness",
-       "tooltip": "Creative modes only (simple ignores it; experimental): how close the cover's song flow stays to the original - 100 exactly the original (nothing is planned), 80 chords, key and tempo stay (only silent sections get a line), 50 recognisable (chords recoloured, lines changed, a small key lift), 20 a free version (new chords and lines, another tempo), 0 only a hint of the original. The melody and the form always remain.",
+       "tooltip": "Creative modes only (off ignores it; experimental): how close the cover's song flow stays to the original - 100 exactly the original (nothing is planned), 80 chords, key and tempo stay (only silent sections get a line), 50 recognisable (chords recoloured, lines changed, a small key lift), 20 a free version (new chords and lines, another tempo), 0 only a hint of the original. The melody and the form always remain.",
        "default": 70,
        "min": 0,
        "max": 100,
@@ -3617,11 +3617,11 @@
       "COMBO",
       {
        "display_name": "arrangement (experimental)",
-       "tooltip": "simple: the music model plans melody, chords and instruments by itself (as before). A creative mode (standard, varied, fantasy, sterile, many instruments, dramatic - or your own file in user/plenio/arrangement) adds its hints to the writing prompt and, in YuE2 Song, lets the writer model plan every section of YuE2's score: chords, what the instrument line plays, energy, a key lift. Plenio writes the notes itself and checks the result; a plan it cannot use leaves YuE2's score as it was (the Song Sheet says so). Planning works with every writer model - GGUF files, LM Studio and Ollama keep to the format exactly. Experimental: creative modes can give unexpected results - they are meant for experimenting: try a mode, listen, keep what you like or run again with another arrangement seed. simple is the dependable choice.",
-       "default": "simple",
+       "tooltip": "off: no arrangement - the music model plans melody, chords and instruments by itself (as before). A creative mode (standard, varied, fantasy, sterile, many instruments, dramatic - or your own file in user/plenio/arrangement) adds its hints to the writing prompt and, in YuE2 Song, lets the writer model plan every section of YuE2's score: chords, what the instrument line plays, energy, a key lift. Plenio writes the notes itself and checks the result; a plan it cannot use leaves YuE2's score as it was (the Song Sheet says so). Planning works with every writer model - GGUF files, LM Studio and Ollama keep to the format exactly. Experimental: creative modes can give unexpected results - they are meant for experimenting: try a mode, listen, keep what you like or run again with another arrangement seed. off is the dependable choice.",
+       "default": "off",
        "multiselect": false,
        "options": [
-        "simple",
+        "off",
         "standard",
         "varied",
         "fantasy",
@@ -3635,7 +3635,7 @@
       "INT",
       {
        "display_name": "genre closeness",
-       "tooltip": "Creative modes only (simple ignores it; experimental): how close the song stays to its genre - 100 strictly typical, 70 typical with personal touches, 40 free within the genre, 0 borrow from any style. It shapes the style words and the section plan.",
+       "tooltip": "Creative modes only (off ignores it; experimental): how close the song stays to its genre - 100 strictly typical, 70 typical with personal touches, 40 free within the genre, 0 borrow from any style. It shapes the style words and the section plan.",
        "default": 70,
        "min": 0,
        "max": 100,

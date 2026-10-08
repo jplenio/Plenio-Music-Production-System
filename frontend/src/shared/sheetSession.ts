@@ -82,7 +82,7 @@ export interface ArrangementPayload {
 /** What the sheet says about creative modes (0.4.5: experimental, they invite trying rather than relying). */
 export const ARRANGEMENT_EXPERIMENTAL =
   'Creative modes are experimental: the writer’s plan can surprise - listen, change the score here, or run ' +
-  'again with another arrangement seed; simple keeps the music model’s own plan.'
+  'again with another arrangement seed; arrangement off keeps the music model’s own plan.'
 
 /** Notes said once, a repeated one with how often (``... (5 times)``), in the order they first came. */
 export function countedNotes(notes: readonly string[]): string[] {

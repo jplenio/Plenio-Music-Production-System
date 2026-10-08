@@ -20,7 +20,7 @@ from hypothesis import strategies as st
 
 from plenio.core.arrangement import (
     LEAD_ROLES,
-    SIMPLE,
+    OFF,
     ModeLibrary,
     PlanError,
     arrange,
@@ -75,7 +75,7 @@ def readable(text: str) -> bool:
 
 def test_the_shipped_modes() -> None:
     assert LIBRARY.names() == [
-        "simple",
+        "off",
         "standard",
         "varied",
         "fantasy",
@@ -87,12 +87,15 @@ def test_the_shipped_modes() -> None:
         mode = LIBRARY.by_name(name)
         assert mode.arranges and mode.description and mode.arranger and mode.writer, name
         assert set(mode.lead) <= set(LEAD_ROLES)
-    assert not LIBRARY.by_name(SIMPLE).arranges
+    assert not LIBRARY.by_name(OFF).arranges
+    # 0.4.5 called it "simple": saved workflows and API prompts with that name still mean "off"
+    assert LIBRARY.by_name("simple") is LIBRARY.by_name(OFF)
 
 
 @pytest.mark.parametrize(
     ("front", "message"),
     [
+        ("name: off", "must be 1-40"),
         ("name: simple", "must be 1-40"),
         ("lead: keep, dance", "unknown lead roles"),
         ("key shift: 0..9", "outside -5..5"),
@@ -119,7 +122,7 @@ def test_user_modes_join_the_list_and_broken_ones_are_skipped(tmp_path: Path) ->
     (tmp_path / "broken.md").write_text("no front matter", encoding="utf-8")
     library = ModeLibrary(PACKAGE, tmp_path)
     names = library.names()
-    assert names[:3] == ["simple", "standard", "calm"]
+    assert names[:3] == ["off", "standard", "calm"]
     assert "varied (mine)" in names and names.count("varied") == 1
     assert list(library.problems) == [str(tmp_path / "broken.md")]
 
@@ -150,7 +153,7 @@ def test_genre_closeness_bands() -> None:
     assert rules("fantasy", closeness=75).key_shift == (-2, 3)
     assert rules("fantasy", closeness=50).tensions == "colour"
     assert rules("fantasy", closeness=10).tensions == "free"
-    assert not rules(closeness=0).skip and rules("simple").skip
+    assert not rules(closeness=0).skip and rules("off").skip and rules("simple").skip
 
 
 def test_the_melody_always_stays() -> None:
@@ -165,7 +168,7 @@ def test_the_melody_always_stays() -> None:
 
 
 def test_writer_lines() -> None:
-    assert writer_lines(LIBRARY.by_name("simple"), kind="song", closeness=70, genre="pop") == []
+    assert writer_lines(LIBRARY.by_name("off"), kind="song", closeness=70, genre="pop") == []
     song = writer_lines(LIBRARY.by_name("sterile"), kind="song", closeness=95, genre="pop")
     assert song[0].startswith("- Creative mode 'sterile': Style:")
     assert any(
@@ -380,8 +383,8 @@ def test_a_plan_that_keeps_everything_changes_nothing() -> None:
     assert result.status == "unchanged" and result.abc == FIXTURE
 
 
-def test_the_simple_mode_and_a_kept_cover_skip_the_writer() -> None:
-    assert arrange(FIXTURE, "", rules("simple")).status == "skipped"
+def test_arrangement_off_and_a_kept_cover_skip_the_writer() -> None:
+    assert arrange(FIXTURE, "", rules("off")).status == "skipped"
     kept = arrange(FIXTURE, "", rules(kind="cover", closeness=100))
     assert kept.status == "skipped" and kept.abc == FIXTURE and "song flow closeness 100" in kept.summary
 

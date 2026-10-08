@@ -15,7 +15,7 @@ import type { AsrNote, SheetPayload } from '../shared/sheetSession'
 import { BRIEF_NODES, installBriefTemplatePanel } from './briefTemplate'
 import { dynamicComboNames, restoreWidgetValues, savedWidgetValues } from './dynamicCombo'
 import { addEqCurve } from './eqWidget'
-import { MODE_BEFORE_0_2_2, migrateWidgetValues } from './migrate'
+import { MODE_BEFORE_0_2_2, migrateWidgetValues, renameWidgetValues } from './migrate'
 import { setAsrNote, setPayload } from './payloads'
 import {
   type StatusHost,
@@ -114,6 +114,7 @@ function saveSheets(node: ComfyNode, output: Record<string, unknown> | undefined
         const saved = savedWidgetValues(current)
         const result = configure?.call(this, current)
         restoreWidgetValues(this, saved, combos)
+        renameWidgetValues(nodeData.name, this.widgets)
         return result
       }
     }

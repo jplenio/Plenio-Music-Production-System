@@ -8,6 +8,7 @@ from typing import Any
 
 from comfy_api.latest import io
 
+from ...core.arrangement import canonical_name
 from ...core.brief import (
     ARRANGEMENT_DEFAULT,
     CLOSENESS_DEFAULT,
@@ -52,10 +53,11 @@ SONG_SEED_TOOLTIP = (
 
 EXPERIMENTAL = (
     "Experimental: creative modes can give unexpected results - they are meant for experimenting: try a mode, "
-    "listen, keep what you like or run again with another arrangement seed. simple is the dependable choice."
+    "listen, keep what you like or run again with another arrangement seed. off is the dependable choice."
 )
 ARRANGEMENT_TOOLTIP = (
-    "simple: the music model plans melody, chords and instruments by itself (as before). A creative mode "
+    "off: no arrangement - the music model plans melody, chords and instruments by itself (as before). A "
+    "creative mode "
     "(standard, varied, fantasy, sterile, many instruments, dramatic - or your own file in "
     "user/plenio/arrangement) adds its hints to the writing prompt and, in YuE2 Song, lets the writer model plan "
     "every section of YuE2's score: chords, what the instrument line plays, energy, a key lift. Plenio writes the "
@@ -64,7 +66,7 @@ ARRANGEMENT_TOOLTIP = (
     + EXPERIMENTAL
 )
 GENRE_CLOSENESS_TOOLTIP = (
-    "Creative modes only (simple ignores it; experimental): how close the song stays to its genre - 100 strictly "
+    "Creative modes only (off ignores it; experimental): how close the song stays to its genre - 100 strictly "
     "typical, 70 typical with personal touches, 40 free within the genre, 0 borrow from any style. It shapes the "
     "style words and the section plan."
 )
@@ -81,7 +83,7 @@ TEXT = {
 def arrangement_line(brief: Any) -> str:
     """The summary line of the creative mode (Song Brief and Cover Brief)."""
     if brief.arrangement == ARRANGEMENT_DEFAULT:
-        return "Arrangement: simple (the music model plans the music by itself)"
+        return "Arrangement: off (the music model plans the music by itself)"
     if brief.kind == "song":
         return f"Arrangement: **{brief.arrangement}** (experimental), genre closeness {brief.closeness}"
     lyrics = f", lyrics closeness {brief.lyrics_closeness}" if brief.writes_lyrics else ""
@@ -92,7 +94,7 @@ def arrangement_line(brief: Any) -> str:
 
 def check_arrangement(name: Any) -> str | None:
     """Why ``name`` is not a creative mode (``None``: it is one)."""
-    if name is None or str(name) in mode_names():
+    if name is None or canonical_name(str(name)) in mode_names():
         return None
     return (
         f"Unknown creative mode {name!r}. Choose one of {mode_names()} (a mode file of your own appears after a "
@@ -208,7 +210,7 @@ class PlenioSongBrief(io.ComfyNode):
                     display_name="arrangement (experimental)",
                     options=mode_names(),
                     default=ARRANGEMENT_DEFAULT,
-                    optional=True,  # an API prompt of an older version runs as before (simple)
+                    optional=True,  # an API prompt of an older version runs as before (off)
                     tooltip=ARRANGEMENT_TOOLTIP,
                 ),
                 io.Int.Input(
@@ -278,7 +280,8 @@ class PlenioSongBrief(io.ComfyNode):
         genre_closeness: int = CLOSENESS_DEFAULT,
     ) -> io.NodeOutput:
         chosen = None if template == "none" else template_library().get(template)
-        mode_library().by_name(arrangement)  # an unknown mode stops here, with the list to choose from
+        # an unknown mode stops here, with the list to choose from; 0.4.5's "simple" is read as "off"
+        arrangement = mode_library().by_name(arrangement).name
         length_input = length
         length, length_note = resolve_length(length)
         values = {

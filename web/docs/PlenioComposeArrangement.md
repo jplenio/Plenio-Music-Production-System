@@ -11,6 +11,6 @@ The arrangement prompt of the brief's **creative mode** (Song Brief / Cover Brie
 
 Outputs: **prompt** for a writer (*Generate Text* or *Local LLM*) and **schema**, the JSON schema of the answer. Connect the schema to *Local LLM*: GGUF files, LM Studio, Ollama and vLLM are then held to it while they write, so the answer always has the plan's format.
 
-In the simple mode, for a cover kept at its original song flow (closeness 95 or more) and without a score, the prompt is empty - and since *Apply Arrangement* does not ask for an answer then, neither this node nor the writer runs.
+With arrangement *off*, for a cover kept at its original song flow (closeness 95 or more) and without a score, the prompt is empty - and since *Apply Arrangement* does not ask for an answer then, neither this node nor the writer runs.
 
 The block *Plenio · Arrange* contains this node, the writer branches and *Apply Arrangement*. See the user guide *Creative modes*.

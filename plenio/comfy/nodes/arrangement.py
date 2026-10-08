@@ -3,7 +3,7 @@
 Compose Arrangement turns the score and the brief into the arrangement prompt and its JSON schema; a writer
 (native Generate Text or Local LLM) answers; Apply Arrangement writes the plan into the score with the
 validated score operations - or keeps the score as it was and says why. Its ``answer`` input is lazy: in
-the simple mode, for a cover kept at its original song flow and without a score, no writer is asked.
+arrangement off, for a cover kept at its original song flow and without a score, no writer is asked.
 """
 
 from __future__ import annotations
@@ -220,7 +220,7 @@ class PlenioApplyArrangement(io.ComfyNode):
                 "Writes the writer's section plan into the score: chords that fit the melody, the instrument line "
                 "of every section (written note by note by Plenio), key lifts and the tempo - each step validated. "
                 "The result must pass YuE2's parser, read back unchanged, open in the score editor and fit YuE2's "
-                "context; otherwise the score stays as it was and the report says why. In the simple mode (and "
+                "context; otherwise the score stays as it was and the report says why. With arrangement off (and "
                 "for a cover kept at its original song flow) the writer is not asked at all."
             ),
             inputs=[
