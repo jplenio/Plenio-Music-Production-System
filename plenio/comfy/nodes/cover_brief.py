@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from pathlib import Path
 from typing import Any
 
 from comfy_api.latest import io
@@ -17,8 +18,11 @@ from ...core.brief import (
     MELODY_OPTIONS,
     build_cover_brief,
     options,
+    source_cover_title,
 )
 from ...core.errors import PlenioError
+from ...core.release import read_tags
+from .. import host
 from ..shared import mode_library, mode_names, template_library
 from ..types import Brief
 from .brief import (
@@ -62,7 +66,30 @@ LYRICS_CLOSENESS_TOOLTIP = (
 )
 
 
-def _summary(brief: Any) -> str:
+SOURCE_TOOLTIP = (
+    "The source recording (its Load Audio node): with an empty title the cover is named after it - the "
+    "recording's title tag, else its file name, with '-cover' - so a cover is easy to match with its source."
+)
+
+
+def source_title(prompt: Any, node_id: Any) -> tuple[str, str]:
+    """The default title from the Load Audio node linked to ``source`` and where it came from (``""``: none)."""
+    name = host.linked_file(prompt, node_id, "source")
+    if not name:
+        return "", ""
+    try:
+        path = host.input_file(name)
+    except PlenioError:
+        return source_cover_title(None, Path(name.split(" [")[0]).stem), "the file name"
+    try:
+        tag = read_tags(path)[0].get("title", "")
+    except Exception:  # noqa: BLE001 - an unreadable tag falls back to the file name
+        tag = ""
+    title = source_cover_title(tag, path.stem)
+    return title, ("the title tag" if tag.strip() else "the file name") + f" of {path.name}"
+
+
+def _summary(brief: Any, title_from: str = "") -> str:
     mode = {
         "original": "Original lyrics",
         "new": "New lyrics",
@@ -78,6 +105,8 @@ def _summary(brief: Any) -> str:
         "",
         brief.to_text(),
     ]
+    if title_from:
+        lines.append(f"\n- title from {title_from}")
     lines += [f"\n- warning: {w}" for w in brief.warnings()]
     return "\n".join(lines)
 
@@ -179,7 +208,9 @@ class PlenioCoverBrief(io.ComfyNode):
                     "title",
                     default="",
                     advanced=True,
-                    tooltip="Optional fixed title, e.g. 'Original Title (Jazz Cover)'. Empty: the writer proposes one.",
+                    tooltip="Optional fixed title, e.g. 'Original Title (Jazz Cover)'. Empty: the source recording's "
+                    "title with '-cover' (its title tag, else its file name) when 'source' is connected, as in the "
+                    "template; without it the writer proposes one.",
                 ),
                 # appended: a saved workflow's values are assigned by position, new widgets go last
                 io.Combo.Input(
@@ -219,6 +250,8 @@ class PlenioCoverBrief(io.ComfyNode):
                     optional=True,
                     tooltip=UNDER_SINGING_TOOLTIP,
                 ),
+                # linked (not a widget): a changed source file runs the brief again
+                io.Audio.Input("source", optional=True, tooltip=SOURCE_TOOLTIP),
             ],
             outputs=[
                 Brief.Output(display_name="brief", tooltip="The cover brief."),
@@ -232,6 +265,7 @@ class PlenioCoverBrief(io.ComfyNode):
                     display_name="song_seed", tooltip=SONG_SEED_TOOLTIP.replace("and plan seeds", "seed")
                 ),
             ],
+            hidden=[io.Hidden.prompt, io.Hidden.unique_id],
         )
 
     @classmethod
@@ -270,6 +304,7 @@ class PlenioCoverBrief(io.ComfyNode):
         song_flow_closeness: int = CLOSENESS_DEFAULT,
         lyrics_closeness: int = LYRICS_CLOSENESS_DEFAULT,
         lines_under_singing: bool = False,
+        source: Any = None,
     ) -> io.NodeOutput:
         chosen = None if template == "none" else template_library().get(template)
         # an unknown mode stops here, with the list to choose from; 0.4.5's "simple" is read as "off"
@@ -293,6 +328,10 @@ class PlenioCoverBrief(io.ComfyNode):
             "lyrics_closeness": lyrics_closeness,
             "lines_under_singing": bool(lines_under_singing),
         }
+        # a typed title wins; else the source recording names the cover (the series key keeps the typed one)
+        title_from = ""
+        if not title.strip() and source is not None:
+            values["title"], title_from = source_title(cls.hidden.prompt, cls.hidden.unique_id)
         inputs = dict(
             zip(COVER_INPUTS, (mode, template, description, genre, mood, vocals, harmony, title), strict=True)
         )
@@ -305,5 +344,5 @@ class PlenioCoverBrief(io.ComfyNode):
             brief.use_source_lyrics,
             brief.instrumental,
             brief.song_seed,
-            ui={"plenio_summary": [{"status": status, "markdown": _summary(brief)}]},
+            ui={"plenio_summary": [{"status": status, "markdown": _summary(brief, title_from)}]},
         )

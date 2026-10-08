@@ -1671,6 +1671,8 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     )
 
     g.link(source, "AUDIO", excerpt, "audio")
+    # the cover is named after the recording (owner's request 2026-10-08)
+    g.link(source, "AUDIO", brief, "source")
     g.link(excerpt, "AUDIO", transcribe, "audio")
     g.link(transcribe, "score", tools, "score")
     g.link(brief, "brief", tools, "brief")

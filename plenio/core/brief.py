@@ -493,6 +493,18 @@ def cover_choice_hints(values: Mapping[str, Any], template: Template | None) -> 
     return hints
 
 
+COVER_TITLE_SUFFIX = "-cover"
+
+
+def source_cover_title(tag_title: str | None, file_stem: str) -> str:
+    """A cover's title by default (owner's request 2026-10-08, so a cover is easy to match with its source):
+    the source recording's title tag, else its file name, with ``-cover``."""
+    base = " ".join(str(tag_title or "").split()) or " ".join(file_stem.split())
+    if not base:
+        return ""
+    return base if base.lower().endswith(COVER_TITLE_SUFFIX) else base + COVER_TITLE_SUFFIX
+
+
 def build_cover_brief(
     values: Mapping[str, Any],
     template: Template | None = None,

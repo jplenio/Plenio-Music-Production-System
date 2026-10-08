@@ -9,6 +9,7 @@ from typing import Any
 import numpy as np
 import pytest
 
+from plenio.comfy.host import linked_file
 from plenio.core import alignment as al
 from plenio.core import lyrics as lyrics_rules
 from plenio.core import score as score_rules
@@ -21,7 +22,7 @@ from plenio.core.asr import (
     result_from_dict,
     weak_segments,
 )
-from plenio.core.brief import TemplateLibrary, build_cover_brief, build_song_brief
+from plenio.core.brief import TemplateLibrary, build_cover_brief, build_song_brief, source_cover_title
 from plenio.core.engines import EngineInfo, yue2
 from plenio.core.errors import PlenioUserError
 from plenio.core.preparation import prepare_for_brief
@@ -551,3 +552,22 @@ def test_asr_notes_are_stored_by_draft_hash(tmp_path: Path) -> None:
     assert notes.get("../../etc/passwd") is None  # only hashes name files
     with pytest.raises(PlenioUserError):
         notes.put({"draft_sha256": "../x"})
+
+
+def test_a_cover_is_named_after_its_source_recording() -> None:
+    # owner's request 2026-10-08: the source's title tag with "-cover", else its file name
+    assert source_cover_title("Morning  Song", "track01") == "Morning Song-cover"
+    assert source_cover_title("", "Neon Nights (live)") == "Neon Nights (live)-cover"
+    assert source_cover_title(None, "") == ""
+    assert source_cover_title("Old Tune-Cover", "x") == "Old Tune-Cover"  # not twice
+    # the file comes from the Load Audio node linked to the brief's source input
+    prompt = {
+        "1": {"class_type": "LoadAudio", "inputs": {"audio": "song.flac [input]"}},
+        "2": {"class_type": "PlenioCoverBrief", "inputs": {"source": ["1", 0], "title": ""}},
+        "3": {"class_type": "TrimAudioDuration", "inputs": {"audio": ["1", 0]}},
+        "4": {"class_type": "PlenioCoverBrief", "inputs": {"source": ["3", 0]}},
+    }
+    assert linked_file(prompt, "2", "source") == "song.flac [input]"
+    assert linked_file(prompt, 2, "source") == "song.flac [input]"
+    assert linked_file(prompt, "4", "source") is None  # not a Load Audio node
+    assert linked_file(prompt, "1", "source") is None and linked_file(None, "2", "source") is None

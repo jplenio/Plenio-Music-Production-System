@@ -78,6 +78,22 @@ def input_file(name: str) -> Path:
     return path
 
 
+def linked_file(prompt: Any, node_id: Any, name: str) -> str | None:
+    """The file of the native Load Audio node linked to input ``name`` of node ``node_id`` in the executed
+    ``prompt`` (``None``: nothing linked there, or not a Load Audio node)."""
+    if not isinstance(prompt, dict):
+        return None
+    node = prompt.get(str(node_id))
+    link = node.get("inputs", {}).get(name) if isinstance(node, dict) else None
+    if not isinstance(link, list) or len(link) != 2:
+        return None
+    upstream = prompt.get(str(link[0]))
+    if not isinstance(upstream, dict) or upstream.get("class_type") != "LoadAudio":
+        return None
+    audio = upstream.get("inputs", {}).get("audio")
+    return audio if isinstance(audio, str) and audio.strip() else None
+
+
 def models_directory() -> Path:
     import folder_paths
 

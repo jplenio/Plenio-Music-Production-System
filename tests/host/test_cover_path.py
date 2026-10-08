@@ -632,3 +632,49 @@ def test_takes_loop_waits_with_the_sheets_under_review(server: ComfyServer, log:
     entry = server.run(takes_prompt(2, 70, "no vocals", **review), timeout=120)
     assert sheet_payload(entry, "7" if sheet == "score" else "14")["waiting"]
     assert events(log, "render") == [] and "18" not in entry["outputs"]
+
+
+# --- the title from the source recording -----------------------------------------------------------
+
+
+def test_a_cover_is_named_after_its_source_recording(server: ComfyServer) -> None:
+    """Owner's request 2026-10-08: an empty title takes the source's title tag (else its file name) with
+    '-cover'; a typed title wins; a brief without a linked source lets the writer propose one."""
+    import uuid
+
+    import numpy as np
+
+    from plenio.core.release import write_audio
+
+    (server.base / "input").mkdir(exist_ok=True)
+    t = np.arange(44100) / 44100
+    tone = 0.1 * np.vstack([np.sin(2 * np.pi * 220 * t)] * 2)
+    tagged, plain = (f"{kind}-{uuid.uuid4().hex[:8]}.flac" for kind in ("tagged", "plain"))
+    write_audio(server.base / "input" / tagged, tone, 44100, "flac", {"title": "Morning Song"})
+    write_audio(server.base / "input" / plain, tone, 44100, "flac", {})
+
+    def brief_text(audio: str | None, title: str = "") -> str:
+        inputs = {
+            "mode": "one cover, stop to review",
+            "template": "none",
+            "description": "",
+            "genre": "acoustic folk",
+            "mood": "warm",
+            **VOCALS["instrumental"],
+            "harmony": "new accompaniment",
+            "title": title,
+        }
+        prompt: dict[str, Any] = {
+            "2": {"class_type": "PlenioCoverBrief", "inputs": inputs},
+            "3": {"class_type": "PreviewAny", "inputs": {"source": ["2", 1]}},  # a prompt needs an output
+        }
+        if audio:
+            prompt["1"] = {"class_type": "LoadAudio", "inputs": {"audio": audio}}
+            inputs["source"] = ["1", 0]
+        return str(server.run(prompt)["outputs"]["2"]["plenio_summary"][0]["markdown"])
+
+    named = brief_text(tagged)
+    assert "Title: Morning Song-cover" in named and f"title from the title tag of {tagged}" in named
+    assert f"Title: {Path(plain).stem}-cover" in brief_text(f"{plain} [input]")
+    assert "Title: Fixed Name" in brief_text(tagged, title="Fixed Name")
+    assert "Title:" not in brief_text(None)

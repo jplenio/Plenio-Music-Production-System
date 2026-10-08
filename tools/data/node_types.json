@@ -1882,7 +1882,7 @@
      "title": [
       "STRING",
       {
-       "tooltip": "Optional fixed title, e.g. 'Original Title (Jazz Cover)'. Empty: the writer proposes one.",
+       "tooltip": "Optional fixed title, e.g. 'Original Title (Jazz Cover)'. Empty: the source recording's title with '-cover' (its title tag, else its file name) when 'source' is connected, as in the template; without it the writer proposes one.",
        "advanced": true,
        "default": "",
        "multiline": false
@@ -1939,6 +1939,20 @@
        "tooltip": "Creative modes only (experimental): off (default) - the instrument line plays where the voice rests (intros, interludes, gaps between phrases), as in YuE2's own scores, where the second voice is the instrumental melody. On - it also sounds under the singing: calm, below the voice and never a minor second against it. More accompaniment, but further from what YuE2 knows.",
        "default": false
       }
+     ],
+     "source": [
+      "AUDIO",
+      {
+       "tooltip": "The source recording (its Load Audio node): with an empty title the cover is named after it - the recording's title tag, else its file name, with '-cover' - so a cover is easy to match with its source."
+      }
+     ]
+    },
+    "hidden": {
+     "prompt": [
+      "PROMPT"
+     ],
+     "unique_id": [
+      "UNIQUE_ID"
      ]
     }
    },
@@ -1957,7 +1971,12 @@
      "arrangement",
      "song_flow_closeness",
      "lyrics_closeness",
-     "lines_under_singing"
+     "lines_under_singing",
+     "source"
+    ],
+    "hidden": [
+     "prompt",
+     "unique_id"
     ]
    },
    "output": [
