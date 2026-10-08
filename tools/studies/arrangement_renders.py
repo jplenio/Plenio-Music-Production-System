@@ -209,7 +209,8 @@ def evaluate(models: Path, takes: Path, out: Path) -> None:
         take_items, _ = _items(take_abc, ("Vocal",))
         record = {
             **{k: row[k] for k in ("sample", "condition", "seed")},
-            "melody": melody_f1(reference, take_items),
+            # no sung melody (an instrumental cover): nothing to compare the take's singing with
+            "melody": melody_f1(reference, take_items) if reference else {},
             "chords": chord_agreement(conditioning, take_abc),
         }
         try:
@@ -250,7 +251,8 @@ def summary(results: list[dict[str, Any]]) -> str:
             values = [r[key] for r in group if isinstance(r.get(key), int | float)]
             return statistics.mean(values) if values else float("nan")
 
-        f1 = statistics.mean(r["melody"].get("f1", 0) for r in group)
+        scores = [r["melody"]["f1"] for r in group if r.get("melody")]
+        f1 = statistics.mean(scores) if scores else float("nan")
         lines.append(
             f"| {condition} | {len(group)} | {f1:.2f} | {mean('chords'):.2f} | {mean('on_chord'):.0%} | "
             f"{mean('accented_per_min'):.1f} | {mean('key_clarity'):.2f} |"
@@ -288,7 +290,7 @@ def pack(takes: Path, out: Path, folder: Path) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("step", choices=("prepare", "render", "evaluate", "pack"))
+    parser.add_argument("step", choices=("prepare", "render", "evaluate", "summary", "pack"))
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--records", type=Path)
     parser.add_argument("--plans", type=Path)
@@ -304,6 +306,17 @@ def main() -> int:
         render(args.server, args.out)
     elif args.step == "evaluate":
         evaluate(args.models, args.takes, args.out)
+    elif args.step == "summary":
+        rows = json.loads((args.out / "evaluation.json").read_text(encoding="utf-8"))
+        jobs = {j["sample"]: j for j in json.loads((args.out / "jobs.json").read_text(encoding="utf-8"))}
+        for row in rows:
+            if not _items(jobs[row["sample"]]["conditions"][row["condition"]]["abc"], ("Vocal",))[0]:
+                row["melody"] = {}
+        (args.out / "evaluation.json").write_text(json.dumps(rows, indent=1), encoding="utf-8")
+        print(summary(rows))
+        for kind in ("song", "cover"):
+            print(f"\n{kind}s:")
+            print(summary([r for r in rows if jobs[r["sample"]]["kind"] == kind]))
     else:
         pack(args.takes, args.out, args.pack)
     return 0

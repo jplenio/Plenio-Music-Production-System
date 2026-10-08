@@ -1,0 +1,314 @@
+{
+ "studies": [
+  "G1",
+  "A2",
+  "E7"
+ ],
+ "date": "2026-10-08",
+ "G1": {
+  "songs_with_plan": 307,
+  "instrumental_or_skipped": 112,
+  "sung": 195,
+  "match": 49,
+  "assemble": 27,
+  "rename": 41,
+  "differs": 78,
+  "differs_after_last_resort": 14,
+  "substitute": 64,
+  "assembled_length_ratio_median": 0.89,
+  "assembled_length_ratio_max": 1.08
+ },
+ "A2": {
+  "samples": 6,
+  "seeds": 2,
+  "models": {
+   "gemma-4-E2B-it-UD-Q4_K_XL.gguf (schema)": {
+    "runs": 12,
+    "failed": 0,
+    "lines_fitting": {
+     "draft": 0.317,
+     "round 1": 0.862,
+     "round 2": 0.97,
+     "last step": 0.978
+    },
+    "deviation_median": [
+     0.467,
+     0.136
+    ],
+    "lines_sent_back": 218,
+    "came_back_fitting": 0.803,
+    "content_words_kept": 0.669,
+    "form_conformed": 0,
+    "writer_calls_mean": 2.75,
+    "seconds_per_song": 15.7
+   },
+   "gemma-4-E4B-it-Q4_K_M.gguf (schema)": {
+    "runs": 12,
+    "failed": 0,
+    "lines_fitting": {
+     "draft": 0.55,
+     "round 1": 0.93,
+     "round 2": 0.963,
+     "last step": 0.967
+    },
+    "deviation_median": [
+     0.253,
+     0.14
+    ],
+    "lines_sent_back": 141,
+    "came_back_fitting": 0.794,
+    "content_words_kept": 0.484,
+    "form_conformed": 1,
+    "writer_calls_mean": 2.5,
+    "seconds_per_song": 17.4
+   },
+   "Qwen_Qwen3.5-9B-Q4_K_M.gguf (schema)": {
+    "runs": 11,
+    "failed": 1,
+    "lines_fitting": {
+     "draft": 0.299,
+     "round 1": 0.923,
+     "round 2": 0.985,
+     "last step": 0.985
+    },
+    "deviation_median": [
+     0.221,
+     0.143
+    ],
+    "lines_sent_back": 108,
+    "came_back_fitting": 0.611,
+    "content_words_kept": 0.798,
+    "form_conformed": 4,
+    "writer_calls_mean": 2.73,
+    "seconds_per_song": 27.5
+   },
+   "gemma-4-12B-it-QAT-Q4_0.gguf (schema)": {
+    "runs": 12,
+    "failed": 0,
+    "lines_fitting": {
+     "draft": 0.561,
+     "round 1": 0.996,
+     "round 2": 1.0,
+     "last step": 1.0
+    },
+    "deviation_median": [
+     0.185,
+     0.148
+    ],
+    "lines_sent_back": 117,
+    "came_back_fitting": 0.966,
+    "content_words_kept": 0.685,
+    "form_conformed": 0,
+    "writer_calls_mean": 2.08,
+    "seconds_per_song": 26.3
+   },
+   "gemma-4-E4B-it-Q4_K_M.gguf (free)": {
+    "runs": 12,
+    "failed": 0,
+    "lines_fitting": {
+     "draft": 0.55,
+     "round 1": 0.731,
+     "round 2": 0.771,
+     "last step": 0.775
+    },
+    "deviation_median": [
+     0.253,
+     0.186
+    ],
+    "lines_sent_back": 195,
+    "came_back_fitting": 0.308,
+    "content_words_kept": 0.501,
+    "form_conformed": 1,
+    "writer_calls_mean": 2.83,
+    "seconds_per_song": 16.4
+   },
+   "Qwen_Qwen3.5-9B-Q4_K_M.gguf (free)": {
+    "runs": 11,
+    "failed": 1,
+    "lines_fitting": {
+     "draft": 0.299,
+     "round 1": 0.682,
+     "round 2": 0.816,
+     "last step": 0.816
+    },
+    "deviation_median": [
+     0.221,
+     0.231
+    ],
+    "lines_sent_back": 171,
+    "came_back_fitting": 0.386,
+    "content_words_kept": 0.718,
+    "form_conformed": 4,
+    "writer_calls_mean": 2.91,
+    "seconds_per_song": 27.1
+   },
+   "Qwen3.8-27B-UD-IQ3_XXS.gguf (schema)": {
+    "runs": 12,
+    "failed": 0,
+    "lines_fitting": {
+     "draft": 0.213,
+     "round 1": 0.944,
+     "round 2": 1.0,
+     "last step": 1.0
+    },
+    "deviation_median": [
+     0.273,
+     0.178
+    ],
+    "lines_sent_back": 111,
+    "came_back_fitting": 0.676,
+    "content_words_kept": 0.836,
+    "form_conformed": 1,
+    "writer_calls_mean": 2.42,
+    "seconds_per_song": 55.3
+   },
+   "gemma-4-E4B-it-Q4_K_M.gguf (free numbered)": {
+    "runs": 12,
+    "failed": 0,
+    "lines_fitting": {
+     "draft": 0.55,
+     "round 1": 0.705,
+     "round 2": 0.753,
+     "last step": 0.771
+    },
+    "deviation_median": [
+     0.253,
+     0.171
+    ],
+    "lines_sent_back": 202,
+    "came_back_fitting": 0.277,
+    "content_words_kept": 0.53,
+    "form_conformed": 1,
+    "writer_calls_mean": 3,
+    "seconds_per_song": 29.0
+   },
+   "Qwen_Qwen3.5-9B-Q4_K_M.gguf (free numbered)": {
+    "runs": 11,
+    "failed": 1,
+    "lines_fitting": {
+     "draft": 0.299,
+     "round 1": 0.689,
+     "round 2": 0.966,
+     "last step": 0.973
+    },
+    "deviation_median": [
+     0.221,
+     0.087
+    ],
+    "lines_sent_back": 163,
+    "came_back_fitting": 0.613,
+    "content_words_kept": 0.684,
+    "form_conformed": 4,
+    "writer_calls_mean": 2.91,
+    "seconds_per_song": 40.1
+   },
+   "gemma-4-E4B-it-Q4_K_M.gguf (schema numbered)": {
+    "runs": 12,
+    "failed": 0,
+    "lines_fitting": {
+     "draft": 0.55,
+     "round 1": 0.849,
+     "round 2": 0.963,
+     "last step": 0.967
+    },
+    "deviation_median": [
+     0.253,
+     0.107
+    ],
+    "lines_sent_back": 163,
+    "came_back_fitting": 0.693,
+    "content_words_kept": 0.56,
+    "form_conformed": 1,
+    "writer_calls_mean": 2.92,
+    "seconds_per_song": 28.2
+   }
+  }
+ },
+ "E7": {
+  "samples": {
+   "S1": {
+    "kind": "song",
+    "mode": "varied"
+   },
+   "S2": {
+    "kind": "song",
+    "mode": "varied"
+   },
+   "C1": {
+    "kind": "cover",
+    "mode": "varied"
+   },
+   "C2": {
+    "kind": "cover",
+    "mode": "varied"
+   }
+  },
+  "seeds": 2,
+  "conditions": {
+   "songs / plan": {
+    "takes": 4,
+    "sung_melody_f1": 0.979,
+    "chord_roots": 1.0,
+    "sung_notes_on_chord_tones": 0.838,
+    "accented_clashes_per_min": 0.0,
+    "key_clarity": 0.79
+   },
+   "songs / 0.4.5": {
+    "takes": 4,
+    "sung_melody_f1": 0.792,
+    "chord_roots": 0.834,
+    "sung_notes_on_chord_tones": 0.824,
+    "accented_clashes_per_min": 0.109,
+    "key_clarity": 0.797
+   },
+   "songs / guard": {
+    "takes": 4,
+    "sung_melody_f1": 0.968,
+    "chord_roots": 0.977,
+    "sung_notes_on_chord_tones": 0.775,
+    "accented_clashes_per_min": 0.27,
+    "key_clarity": 0.763
+   },
+   "songs / guard-under": {
+    "takes": 4,
+    "sung_melody_f1": 0.947,
+    "chord_roots": 0.938,
+    "sung_notes_on_chord_tones": 0.803,
+    "accented_clashes_per_min": 0.273,
+    "key_clarity": 0.757
+   },
+   "covers / plan": {
+    "takes": 4,
+    "sung_melody_f1": 0.974,
+    "chord_roots": null,
+    "sung_notes_on_chord_tones": 0.733,
+    "accented_clashes_per_min": 1.524,
+    "key_clarity": 0.751
+   },
+   "covers / 0.4.5": {
+    "takes": 4,
+    "sung_melody_f1": 0.976,
+    "chord_roots": 0.667,
+    "sung_notes_on_chord_tones": 0.669,
+    "accented_clashes_per_min": 2.534,
+    "key_clarity": 0.791
+   },
+   "covers / guard": {
+    "takes": 2,
+    "sung_melody_f1": null,
+    "chord_roots": null,
+    "sung_notes_on_chord_tones": 0.701,
+    "accented_clashes_per_min": 0.0,
+    "key_clarity": 0.739
+   },
+   "covers / guard-under": {
+    "takes": 2,
+    "sung_melody_f1": null,
+    "chord_roots": null,
+    "sung_notes_on_chord_tones": 0.701,
+    "accented_clashes_per_min": 0.0,
+    "key_clarity": 0.739
+   }
+  }
+ }
+}

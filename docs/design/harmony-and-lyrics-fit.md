@@ -4,7 +4,7 @@
 |---|---|
 | Date | 2026-10-08 |
 | Question (owner) | Songs made with the creative modes vary in quality; sometimes notes clash badly. How does the song stay harmonic and genre-typical when the flow changes? Lyrics must stay meaningful when they depart from the original, and their syllables must always fit the (new or modified) melody - with a bounded, efficient re-generation where a check fails. Research what is sensible with local models, check as many variants as possible, propose an implementation with alternatives, and ask for approval before starting. |
-| Status | **Proposal - waiting for the owner's approval.** Nothing of it is built. |
+| Status | **Approved 2026-10-08 (D1-D5 as recommended) and built** (`723c03b`..): the harmony guard and lines in the rests (3.1-3.3), Fit Lyrics with two repair rounds (3.4; D3 on the lyrics side: contractions, melisma - the score is approved before the lyrics and stays), Match Song Form with one second plan (3.4, songs), the arranger's re-ask (3.5); arrangement *off* instead of *simple*. Measured in studies G1, A2 and E7 ([report](../test-reports/2026-10-08-harmony-lyrics.md)); 3.6 (take selection) is not built. |
 | Data | The owner's release records (369, read-only; only counts and averages are reported), the tutorial runs of 0.4.5, and the 120 writer plans of study A1 replayed with today's Apply Arrangement. Scripts: scratch (to become `tools/studies/harmony_check.py`). |
 
 ## 1. What was measured

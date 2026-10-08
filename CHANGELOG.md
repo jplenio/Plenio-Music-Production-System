@@ -14,6 +14,8 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 - **Syllable counter** for English and German (owner's decision D4: own rules, no new dependency): silent *e*, *-ed*/*-es*, *-le*, *y* between vowels, two vowels that are two syllables (*li-on*, but *na-tion*), compounds after a silent *e* (*side-walk*), contractions (*would-n't*, *ev'ry*) and a list of common lyric words; other languages keep the vowel-group estimate. The score editor's lyrics layout splits words with it, and the writer's line targets use it.
 - **Harmony check** in Apply Arrangement's summary, the Song Sheet's arrangement details and the release record: the melody on chord tones, accented clashes with a chord, clashes between voice and line, chords in the key - before and after. Replayed on the 120 writer plans of study A1: 5.8 clashes a minute against the voice with 0.4.5, none now; all chords in the key or the genre's vocabulary.
 
+- **Studies G1, A2 and E7** ([report](docs/test-reports/2026-10-08-harmony-lyrics.md)): with the guard YuE2 follows the sung melody of an arranged song as closely as its own plan (note F1 0.97 against 0.79 with 0.4.5's arrangements); new cover lyrics fit 97-100 % of their phrases after the repair rounds with a schema-held local writer (drafts 21-56 %), 77-97 % with the native writer; a blind listening pack of 28 takes for the owner.
+
 ### Changed
 
 - A score **without chords** (a cover on *new accompaniment*) gets none from a creative mode: YuE2 harmonises it itself, as chosen (owner's decision D2); the plan keeps to lines that need no chords (*solo*) and to energy, key and tempo.
