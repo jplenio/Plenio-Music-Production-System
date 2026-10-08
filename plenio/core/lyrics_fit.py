@@ -38,6 +38,9 @@ from . import syllables
 FIT_SCHEMA = "plenio.lyrics_fit/1"
 MAX_ROUNDS = 2
 """Repair rounds after the draft (the owner: not endlessly)."""
+MAX_LINES = 20
+"""Lines asked for in one round (the furthest off first): about 80 tokens each with their syllables, so the
+answer stays well inside a writer's limit (study A2: 38 lines were cut off at 2048 tokens)."""
 GROUP_COST = 0.6
 """The alignment's cost of every extra phrase on a line (or line on a phrase): one to one is preferred."""
 
@@ -304,6 +307,10 @@ def _label(section: SectionFit) -> str:
     return f"section {section.number} [{section.tag}]"
 
 
+def _key_of(section: int, line: int) -> str:
+    return f"{section}-{line}"
+
+
 def _fix(section: SectionFit, line: LineFit) -> str:
     low, high = line.target
     where = (
@@ -316,10 +323,30 @@ def _fix(section: SectionFit, line: LineFit) -> str:
     )
     rhyme = _rhymes_with(section, line)
     keep = f' It rhymes with line {rhyme.line} ("{rhyme.text}") - keep the rhyme.' if rhyme else ""
+    count = f"{low}" if low == high else f"{low} to {high}"
     return (
-        f'- {_label(section)} line {line.line}: "{line.text}" has {line.syllables} syllables, {where} - '
-        f"write {low}-{high} syllables.{keep}"
+        f'- "{_key_of(section.number, line.line)}": {_label(section)} line {line.line}, "{line.text}" - '
+        f"{line.syllables} syllables, {where}: write {count} syllables.{keep}"
     )
+
+
+def _slot(low: int, high: int) -> dict[str, Any]:
+    """One line of the answer: its syllables as a list of exactly ``low`` to ``high`` items (a schema-held
+    writer cannot write more or fewer), then the line."""
+    return {
+        "type": "object",
+        "properties": {
+            "syllables": {
+                "type": "array",
+                "items": {"type": "string", "minLength": 1, "maxLength": 16},
+                "minItems": low,
+                "maxItems": high,
+            },
+            "text": {"type": "string", "minLength": 1, "maxLength": 200},
+        },
+        "required": ["syllables", "text"],
+        "additionalProperties": False,
+    }
 
 
 def request(
@@ -331,44 +358,75 @@ def request(
     reference: str = "",
     theme: str = "",
 ) -> Request | None:
-    """The repair request for ``fit`` (``None`` when the lyrics fit)."""
+    """The repair request for ``fit`` (``None`` when the lyrics fit). The answer is an object with one entry
+    per line written, keyed ``"<section>-<line>"``; each entry spells the line as its list of syllables (held to
+    the target count by the schema) and then the line itself."""
     if fit.fits:
         return None
     asked: list[tuple[int, int]] = []
     fixes: list[str] = []
+    slots: dict[str, dict[str, Any]] = {}
+    # the lines furthest off first, at most MAX_LINES per round (a long answer is cut off; the rest is the
+    # next round's)
+    budget = MAX_LINES
+    chosen: set[tuple[int, int]] = set()
+    whole: set[int] = set()
     for section in fit.sections:
+        if section.rewrite and len(section.phrases) <= budget:
+            whole.add(section.number)
+            budget -= len(section.phrases)
+    failing = sorted(
+        (line for s in fit.sections if not s.rewrite for line in s.failing),
+        key=lambda line: -abs(line.syllables - sum(line.target) / 2),
+    )
+    for line in failing[:budget]:
+        chosen.add((line.section, line.line))
+    if not whole and not chosen:  # one section larger than the budget: it is written anew all the same
+        whole.add(next(s.number for s in fit.sections if s.rewrite))
+    for section in fit.sections:
+        if section.rewrite and section.number not in whole:
+            continue
         if section.rewrite:
-            sizes = ", ".join(str(n) for n in section.phrases)
+            targets = []
+            for index, notes in enumerate(section.phrases, start=1):
+                low, high = window(notes)
+                high = min(high, notes)
+                slots[_key_of(section.number, index)] = _slot(low, high)
+                targets.append(f'"{_key_of(section.number, index)}" {low}-{high}')
             fixes.append(
-                f"- {_label(section)} has {len(section.texts)} line(s) for {len(section.phrases)} phrase(s): write "
-                f"the section again with exactly {len(section.phrases)} lines of about {sizes} syllables "
-                f"(lines 1 to {len(section.phrases)}), telling what it tells now."
+                f"- {_label(section)} has {len(section.texts)} line(s) for {len(section.phrases)} phrase(s): write the "
+                f"section again with exactly {len(section.phrases)} lines, telling what it tells now - syllables per "
+                f"line: {', '.join(targets)}."
             )
             asked.append((section.number, 0))
             continue
         for line in section.failing:
+            if (section.number, line.line) not in chosen:
+                continue
             fixes.append(_fix(section, line))
+            slots[_key_of(section.number, line.line)] = _slot(*line.target)
             asked.append((section.number, line.line))
     numbered = []
     for section in fit.sections:
         numbered.append(f"{_label(section)}")
         numbered += [f"  {index}. {line}" for index, line in enumerate(section.texts, start=1)]
     parts = [
-        f"You wrote song lyrics{f' in {language}' if language else ''} for an existing melody. Some lines do not fit the melody: a phrase "
-        "has a fixed number of notes, and a line needs about one syllable per note - one or two fewer is fine "
-        "(a syllable may stretch over two notes), more is not.",
+        f"You wrote song lyrics{f' in {language}' if language else ''} for an existing melody. Some lines do not "
+        "fit the melody: a phrase has a fixed number of notes, and a line is sung with one syllable per note - "
+        "one or two fewer are fine (a syllable may stretch over two notes), more are not.",
         "",
         "THE LYRICS",
         *numbered,
         "",
-        "FIX ONLY THESE",
+        "WRITE THESE LINES ANEW",
         *fixes,
         "",
         "RULES",
         "- Keep each line's meaning and its place in the story; keep the rhymes named; keep the language"
         f"{f' ({language})' if language else ''} and the voice of the other lines. Change no other line.",
-        "- Count the syllables: write every word of the new line split into syllables with hyphens in "
-        '"syllables" (to-night, ev-er-y-thing), then the line itself in "text" (no hyphens added).',
+        '- Build each line syllable by syllable: "syllables" lists the syllables of the new line in order, one '
+        'per item ("to-night" is "to", "night"; "every" is "ev", "er", "y") - exactly as many as asked for. '
+        '"text" is the same line written normally.',
         "- Only words to be sung: no stage directions, no section tags, no line numbers in a line.",
     ]
     if closeness_text:
@@ -377,35 +435,19 @@ def request(
         parts.append(f"- Theme: {theme}")
     if reference.strip():
         parts += ["", "THE SOURCE'S LYRICS (for meaning only)", reference.strip()[:1500]]
-    first = asked[0]
-    example = {"lines": [{"section": first[0], "line": max(1, first[1]), "syllables": "...", "text": "..."}]}
+    first = next(iter(slots))
+    example = {
+        first: {"syllables": ["I", "walk", "a", "long", "the", "riv", "er"], "text": "I walk along the river"}
+    }
     parts += [
         "",
-        "ANSWER: only this JSON - one entry per line you write (for a section written anew, every one of its "
-        "lines, numbered from 1):",
+        "ANSWER: only this JSON object, one entry per line asked for (its key as above):",
         json.dumps(example, ensure_ascii=False),
     ]
     schema = {
         "type": "object",
-        "properties": {
-            "lines": {
-                "type": "array",
-                "minItems": 1,
-                "maxItems": 64,
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "section": {"type": "integer", "enum": sorted({number for number, _ in asked})},
-                        "line": {"type": "integer", "minimum": 1, "maximum": 32},
-                        "syllables": {"type": "string", "maxLength": 300},
-                        "text": {"type": "string", "minLength": 1, "maxLength": 200},
-                    },
-                    "required": ["section", "line", "syllables", "text"],
-                    "additionalProperties": False,
-                },
-            }
-        },
-        "required": ["lines"],
+        "properties": slots,
+        "required": list(slots),
         "additionalProperties": False,
     }
     return Request("\n".join(parts), schema, tuple(asked))
@@ -415,9 +457,12 @@ def request(
 
 _THINK = re.compile(r"<think>.*?</think>", re.DOTALL)
 _FENCE = re.compile(r"```(?:json)?")
+_KEY = re.compile(r"^\s*(\d+)\s*-\s*(\d+)\s*$")
 
 
 def _answer_lines(answer: str) -> list[dict[str, Any]]:
+    """The answer's lines as ``{"section", "line", "text"}``: from the keyed object (``"2-4": {...}``) or a
+    ``"lines"`` list (an answer in the older form)."""
     text = _FENCE.sub("", _THINK.sub("", answer or ""))
     if "</think>" in text:
         text = text.split("</think>", 1)[1]
@@ -430,9 +475,19 @@ def _answer_lines(answer: str) -> list[dict[str, Any]]:
             data = json.loads(attempt)
         except ValueError:
             continue
-        found = data.get("lines") if isinstance(data, dict) else None
+        if not isinstance(data, dict):
+            continue
+        found = data.get("lines")
         if isinstance(found, list):
             return [item for item in found if isinstance(item, dict)]
+        items = []
+        for key, value in data.items():
+            match = _KEY.match(str(key))
+            if match is None:
+                continue
+            line_text = value.get("text") if isinstance(value, dict) else value
+            items.append({"section": int(match.group(1)), "line": int(match.group(2)), "text": line_text})
+        return items
     return []
 
 

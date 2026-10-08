@@ -89,12 +89,13 @@ def test_the_request_asks_for_failing_lines_only_with_targets_and_rhymes() -> No
     fit = lyrics_fit.check(text, phrasing(("Verse", [9, 6, 9, 6])), language="English")
     request = lyrics_fit.request(text, fit, language="English", theme="a long walk home")
     assert request is not None and request.asked == ((1, 3),)
-    assert 'section 1 [Verse] line 3: "I keep on walking' in request.prompt
-    assert "has 16 syllables, its phrase has 9 notes - write 6-9 syllables" in request.prompt
+    assert '"1-3": section 1 [Verse] line 3, "I keep on walking' in request.prompt
+    assert "16 syllables, its phrase has 9 notes: write 6 to 9 syllables" in request.prompt
     assert 'rhymes with line 1 ("I walk along the river tonight")' in request.prompt
     assert "Theme: a long walk home" in request.prompt and "in English" in request.prompt
-    items = request.schema["properties"]["lines"]["items"]
-    assert items["properties"]["section"]["enum"] == [1]
+    # the schema holds the line's syllables to the target: 6 to 9 items
+    slot = request.schema["properties"]["1-3"]["properties"]["syllables"]
+    assert (slot["minItems"], slot["maxItems"]) == (6, 9) and request.schema["required"] == ["1-3"]
     assert (
         lyrics_fit.request(text, lyrics_fit.check(text, phrasing(("Verse", [9, 6, 17, 6]))), language="")
         is None
@@ -127,9 +128,10 @@ def test_a_section_asked_anew_is_taken_only_complete() -> None:
     fit = lyrics_fit.check(text, phrasing(("Verse", [6, 6, 6])), language="English")
     request = lyrics_fit.request(text, fit)
     assert request is not None and request.asked == ((1, 0),)
-    assert "write the section again with exactly 3 lines of about 6, 6, 6 syllables" in request.prompt
+    assert "write the section again with exactly 3 lines" in request.prompt
+    assert request.schema["required"] == ["1-1", "1-2", "1-3"]
     lines = ["I walk along the road", "The night is calling me", "And I am going home"]
-    answer = json.dumps({"lines": [{"section": 1, "line": n + 1, "text": t} for n, t in enumerate(lines)]})
+    answer = json.dumps({f"1-{n + 1}": {"syllables": t.split(), "text": t} for n, t in enumerate(lines)})
     merged, _notes = lyrics_fit.merge(text, answer, request.asked, fit)
     assert merged == "[Verse]\n" + "\n".join(lines)
     partial = json.dumps({"lines": [{"section": 1, "line": 2, "text": lines[1]}]})
@@ -157,3 +159,30 @@ def test_the_last_step_shortens_english_lines_by_one_or_two_syllables() -> None:
         "[Verse]\nIch bin so müde heute Nacht",
         [],
     )
+
+
+def test_a_keyed_answer_and_the_older_list_answer_both_merge() -> None:
+    text = "[Verse]\nI walk along the river tonight\nThe water knows my name"
+    fit = lyrics_fit.check(text, phrasing(("Verse", [7, 6])), language="English")
+    keyed = json.dumps(
+        {
+            "1-1": {
+                "syllables": ["I", "walk", "a", "long", "the", "riv", "er"],
+                "text": "I walk along the river",
+            }
+        }
+    )
+    listed = json.dumps({"lines": [{"section": 1, "line": 1, "text": "I walk along the river"}]})
+    expected = "[Verse]\nI walk along the river\nThe water knows my name"
+    assert lyrics_fit.merge(text, keyed, [(1, 1)], fit)[0] == expected
+    assert lyrics_fit.merge(text, listed, [(1, 1)], fit)[0] == expected
+
+
+def test_a_round_asks_for_the_lines_furthest_off_first_and_at_most_max_lines() -> None:
+    lines = [("Oh " * (1 + n % 5)).strip() for n in range(30)]  # 1-5 syllables on phrases of 10 notes
+    text = "[Verse]\n" + "\n".join(lines)
+    fit = lyrics_fit.check(text, phrasing(("Verse", [10] * 30)), language="English")
+    request = lyrics_fit.request(text, fit)
+    assert request is not None and len(request.asked) == lyrics_fit.MAX_LINES
+    asked = {line for _section, line in request.asked}
+    assert all(n + 1 in asked for n in range(30) if n % 5 == 0)  # every one-syllable line is among them

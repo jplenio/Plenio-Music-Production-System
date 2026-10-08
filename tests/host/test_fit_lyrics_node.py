@@ -181,14 +181,16 @@ def test_lyrics_that_fit_never_reach_the_writer(server: ComfyServer) -> None:
 
 def test_a_failing_line_goes_back_once_and_is_merged(server: ComfyServer) -> None:
     ASKED.clear()
-    ANSWERS[:] = [json.dumps({"lines": [{"section": 2, "line": 1, "syllables": "...", "text": CHORUS}]})]
+    ANSWERS[:] = [json.dumps({"2-1": {"syllables": CHORUS.split(), "text": CHORUS}})]
     entry = server.run(graph(cover_brief(), f"[Verse]\n{VERSE}\n\n[Chorus]\n{SHORT}", seed=2))
     assert entry["outputs"]["9"]["received"] == [f"[Verse]\n{VERSE}\n\n[Chorus]\n{CHORUS}"]
     assert len(ASKED) == 1 and "7" not in entry["outputs"]  # the second repair writer never ran
     request = ASKED[0]
     assert request["response_format"]["type"] == "json_schema"
     content = request["messages"][-1]["content"]
-    assert f'section 2 [Chorus] line 1: "{SHORT}" has 4 syllables, its phrase has 28 notes' in content
+    assert f'"2-1": section 2 [Chorus] line 1, "{SHORT}" - 4 syllables, its phrase has 28 notes' in content
+    slot = request["response_format"]["json_schema"]["schema"]["properties"]["2-1"]["properties"]["syllables"]
+    assert (slot["minItems"], slot["maxItems"]) == (21, 28)  # the writer cannot write fewer or more
     assert "Theme: a river at night" in content
     assert "2 of 2 line(s) fit the melody (draft: 1 of 2)" in summary(entry, "8")
 
