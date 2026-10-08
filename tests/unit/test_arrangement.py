@@ -36,6 +36,7 @@ from plenio.core.arrangement import (
     summarize,
     writer_lines,
 )
+from plenio.core.arrangement.apply import SHARE_TOLERANCE
 from plenio.core.arrangement.plan import CHORD_PATTERN, closeness_text, melody_voice, normalize_chord
 from plenio.core.errors import PlenioUserError
 from plenio.core.score import canonical as c
@@ -636,7 +637,7 @@ def test_any_answer_gives_a_readable_score_or_the_old_one(
     before_m = harmony.measure(score, melody_voice(score, melody))
     after_m = harmony.measure(after, melody_voice(after, melody))
     # (as time: a key lift splits a note held across a section's boundary into two attacks)
-    assert after_m.clash_share <= before_m.clash_share + 1e-9, result.sections
+    assert after_m.clash_share <= before_m.clash_share + SHARE_TOLERANCE + 1e-9, result.sections
     assert after_m.clashes <= before_m.clashes, result.sections
     assert after.measure_count == score.measure_count and after.sections == score.sections
     shifted = {

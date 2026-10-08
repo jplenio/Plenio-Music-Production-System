@@ -39,6 +39,10 @@ from .plan import (
 STATUSES = ("applied", "partial", "unchanged", "fallback", "skipped")
 VOCAL_LIMITS = (40, 84)
 """Sung notes stay between E2 and C6 when a section changes key."""
+SHARE_TOLERANCE = 1e-9
+"""How much more of a section's melody time may clash with its chords after the arrangement: none (a rounding
+margin only). Replayed on study A1's 120 plans, a margin for passing notes (0.15) changed nothing - the guard
+already keeps such chords out - but a fuzz case showed a short weak-beat note half the melody's time."""
 KEY_LIFT_HEADROOM = 2
 """A shifted section may sing at most this many semitones above the song's highest note."""
 
@@ -256,9 +260,27 @@ def _span(score: c.Score, first: int, end: int) -> tuple[int, int]:
     return score.starts[first], score.starts[end] if end < score.measure_count else score.total
 
 
-def _trouble(score: c.Score, first: int, end: int, melody: str) -> tuple[int, int]:
-    """A section's clashes: melody notes a half step above their chord's tone on a strong beat or held for a
-    beat, and moments of an eighth or more with the voice and the line a minor second / major seventh apart."""
+@dataclass(frozen=True)
+class Trouble:
+    """A section's clashes (the gate compares them before and after the arrangement)."""
+
+    accented: int
+    """Melody notes a half step above their chord's tone on a strong beat or held for a beat."""
+    clashes: int
+    """Moments of an eighth or more with the voice and the line a minor second / major seventh apart."""
+    share: float
+    """The share of the melody's time that clashes with its chord (``harmony.Measures.clash_share``)."""
+
+    def worse_than(self, before: Trouble) -> bool:
+        return (
+            self.accented > before.accented
+            or self.clashes > before.clashes
+            or self.share > before.share + SHARE_TOLERANCE
+        )
+
+
+def _trouble(score: c.Score, first: int, end: int, melody: str) -> Trouble:
+    """A section's clashes (``Trouble``)."""
     start, stop = _span(score, first, end)
     voice = melody_voice(score, melody)
     accented = 0
@@ -278,7 +300,9 @@ def _trouble(score: c.Score, first: int, end: int, melody: str) -> tuple[int, in
             continue
     sung = sorted((n for n in score.vocal if n.onset < stop and n.end > start), key=lambda n: n.onset)
     line = sorted((n for n in score.ins if n.onset < stop and n.end > start), key=lambda n: n.onset)
-    return accented, harmony.clashes(score, sung, line)
+    inside = [n for n in voice if n.onset < stop and n.end > start]
+    share = harmony.measure(score, inside).clash_share if inside else 0.0
+    return Trouble(accented, harmony.clashes(score, sung, line), share)
 
 
 def _restore(working: c.Score, original: c.Score, first: int, end: int) -> c.Score:
@@ -539,12 +563,13 @@ def arrange(
                         kept.append(f'lead "{lead}" left out ({error})')
             trouble_before = _trouble(score, first, end, policy.melody)
             trouble_after = _trouble(working, first, end, policy.melody)
-            if applied and any(a > b for a, b in zip(trouble_after, trouble_before, strict=True)):
+            if applied and trouble_after.worse_than(trouble_before):
                 working = _restore(working, score, first, end)
                 kept.append(
                     "the arranged section clashed more than before (melody against chords "
-                    f"{trouble_before[0]} -> {trouble_after[0]}, voice against line {trouble_before[1]} -> "
-                    f"{trouble_after[1]}); it stays as it was"
+                    f"{trouble_before.accented} -> {trouble_after.accented} accented, "
+                    f"{trouble_before.share:.0%} -> {trouble_after.share:.0%} of its time; voice against line "
+                    f"{trouble_before.clashes} -> {trouble_after.clashes}); it stays as it was"
                 )
                 applied = []
             shifts.append(section.key_shift)
