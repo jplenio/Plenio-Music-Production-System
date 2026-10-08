@@ -15,3 +15,5 @@ EQ => E Q
 GPU => G P U
 FLUX.2 => Flux two
 faster-whisper => faster whisper
+LLM => L L M
+GGUF => G G U F

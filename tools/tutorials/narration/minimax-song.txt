@@ -48,6 +48,12 @@ Describe the song in your own words. [pause:0.4s] Tonight: late-night jazz pop, 
 @ length: short
 Keep it short. MiniMax may end a song a little earlier than asked.
 
+@ arrangement: MiniMax takes no score
+MiniMax takes no score, so a creative mode, which is experimental, only shapes the writing here. Simple is fine.
+
+@ The Writer model writes caption and lyrics
+The Writer model writes the caption and the lyrics: Gemma 4 by default, or a local LLM from your own machine.
+
 @ Press Run.
 And press Run.
 

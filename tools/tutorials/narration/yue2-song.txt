@@ -19,14 +19,14 @@ The template reads from left to right, in numbered groups.
 @ SONG - the Song Brief
 First, the Song Brief: what the song should be about.
 
-@ WRITE - a local language model
-Next, a local language model writes the title, the style, and the lyrics.
+@ WRITE - the writer model
+Next, the writer model you choose writes the title, the style, and the lyrics.
 
 @ TEXT - Song Sheet · Text
 The Text sheet shows exactly what YuE2 is going to sing.
 
 @ SCORE - YuE2 plans
-Then YuE2 plans the melody as a score, and the Score sheet shows it.
+Then YuE2 plans the melody as a score. Arrange can re-arrange it, and the Score sheet shows it.
 
 @ RENDER - YuE2 renders
 Here, YuE2 renders the actual song.
@@ -58,6 +58,12 @@ The length goes from about one minute, up to six. We'll keep this one short.
 @ vocals: a sung song
 And vocals: a sung song, or an instrumental.
 
+@ arrangement: “simple”
+The arrangement stays on simple: YuE2 plans melody, chords and instruments by itself. [pause:0.3s] The experimental creative modes get a video of their own: tutorial six.
+
+@ The Writer model writes the text
+The Writer model writes the text: Gemma 4 by default, or a local LLM from your own machine.
+
 @ Press Run.
 That's all we need. Let's press Run.
 
@@ -77,7 +83,7 @@ Master and Export add the finishing touches.
 Done! The finished song is right here, in the mastered preview. [pause:0.6s] Have a listen.
 
 @ Export wrote the mastered FLAC
-Export saved the mastered FLAC, the original take, and a release record.
+Export saved the mastered FLAC, the original take, a release record, [pause:0.2s] and now also the sheet music, with the lyrics, as a PDF.
 
 @ Press Run again for another
 Press Run again for a different song, or set a number next to Run, for a whole series.

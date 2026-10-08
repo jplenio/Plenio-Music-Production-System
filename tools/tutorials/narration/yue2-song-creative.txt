@@ -1,0 +1,179 @@
+# Narration of yue2-song-creative.mjs (Tutorial 6 · YuE2 · Song · Creative modes). Format: lib/voice.mjs.
+# Written forms; the lexicon turns names into what the TTS should say.
+
+@ card 6 · YuE2 · Song · Creative modes
+Welcome back! In this video, the writer model plans the arrangement of a YuE2 song, and Plenio writes the notes.
+
+@ card Made for experimenting
+One thing first: creative modes are new, and experimental. They can surprise you, in good ways and in odd ones. [pause:0.4s] So treat them as a playground: try a mode, listen, and keep what you like.
+
+@ Open the template browser
+Open the template browser.
+
+@ Plenio’s templates: Extensions
+Plenio's templates are under Extensions.
+
+@ Creative modes live in the song templates
+Creative modes live in the song templates. We take YuE2 Song, where they reach the furthest.
+
+@ The template is the one from tutorial 1
+It's the same template as in tutorial one. Three parts make the creative modes.
+
+@ In the Song Brief: arrangement
+First, in the Song Brief: arrangement, marked experimental. [pause:0.3s] Simple, the default, lets YuE2 plan everything by itself, just like before.
+
+@ The creative modes: standard, varied
+The creative modes: standard, varied, fantasy, sterile, many instruments, and dramatic. [pause:0.3s] Or a mode of your own, written as a small Markdown file.
+
+@ We take “dramatic”
+We take dramatic: one long arc, from a quiet start to a big last chorus.
+
+@ genre closeness: how typical
+Genre closeness sets how typical the song stays. A hundred is strictly by the book, seventy adds personal touches, forty is free within the genre, and zero borrows from any style.
+
+@ Writer model: one choice for every writing step
+Second, the Writer model: one choice for every writing step, the lyrics and the arrangement. Gemma 4 by default, or any local LLM on your machine.
+
+@ In SCORE, the new block Arrange
+Third, in the score group, the new block Arrange. After YuE2 has planned the score, it asks the writer for a section plan: chords, what the instrument line plays, the energy, and maybe a key lift.
+
+@ The writer never writes notes
+The writer never writes notes itself. Plenio writes every note, and checks the score. [pause:0.3s] If a plan can't be used, the score simply stays as it was.
+
+@ Arrangement seed: another arrangement
+And the arrangement seed gives you another arrangement of the same song.
+
+@ card A dramatic song
+Part one: a dramatic song, with stops to review the text and the arranged score.
+
+@ mode: “one song, stop to review” - we want
+Set the mode to one song, stop to review. We want to see what the mode does, before anything is rendered.
+
+@ Describe the song.
+Describe the song. Here: a night drive along the coast, from quiet doubt to a chorus that opens up like the sea.
+
+@ length: short - about 1:30
+And keep it short: about a minute and a half.
+
+@ Press Run.
+Press Run.
+
+@ The writer drafts title, style and lyrics
+The writer drafts the title, the style and the lyrics, with the hints of the dramatic mode.
+
+@ Stop 1: Song Sheet · Text
+First stop: the Text sheet.
+
+@ Open it.
+Let's open it.
+
+@ Style: the sound YuE2 is asked for
+The style is the sound YuE2 is asked for. The dramatic mode's hints went into the writer's prompt, [pause:0.2s] and the template keeps the song acoustic here.
+
+@ Lyrics: the words YuE2 will sing - edit anything
+The lyrics are what YuE2 will sing. Edit anything you like.
+
+@ Approve.
+Approve.
+
+@ ✓ approved. Run again: YuE2 plans the score
+Approved. Run again: YuE2 plans the score, and Arrange arranges it.
+
+@ YuE2 plans the melody and the chords
+YuE2 plans the melody and the chords.
+
+@ Arrange: the writer answers with a section plan
+Then Arrange: the writer answers with a section plan, and Plenio writes the notes and checks the score.
+
+@ Stop 2: Song Sheet · Score - the arranged score
+Second stop: the Score sheet, where the arranged score waits for your approval.
+
+@ Open the score.
+Let's open the score.
+
+@ ⛶ gives the editor
+This button gives the editor the whole window.
+
+@ Arrangement not applied | optional
+Here, the arrangement wasn't applied: the writer's plan couldn't be used, so the score stays as YuE2 wrote it. The line says why.
+
+@ Under the editor, the arrangement | optional
+Under the editor, you find the arrangement: the mode, its closeness, and how many sections it changed. [pause:0.2s] And yes, it's marked experimental.
+
+@ Open it: the writer’s idea | optional
+Open it, and you see the writer's idea, and for every section what Plenio wrote: chords, the instrument line, a key lift. And what stayed as it was.
+
+@ In the roll, the instrument line | optional
+In the roll, the instrument line is the second voice. Plenio wrote it note by note from the plan, on the chords above it.
+
+@ The sheet also warns | optional
+The sheet also warns: YuE2's plan has fewer sections than the lyrics. Tutorial one shows how to fix sections. Here, we keep the plan.
+
+@ That is what experimental means | optional
+That's what experimental means: sometimes a plan doesn't fit. Approve YuE2's own score, or run Arrange again with another seed.
+
+@ Everything stays editable | optional
+And everything stays editable: chords, notes, sections. The arrangement is a starting point, not the last word.
+
+@ Approve: this arranged score
+Approve. This arranged score is what YuE2 renders.
+
+@ ✓ approved. Run again: YuE2 renders the song.
+Approved. Run again, and YuE2 renders the song.
+
+@ YuE2 renders the song from the lyrics and the arranged score
+YuE2 renders the song from the lyrics and the arranged score,
+
+@ Master and Export finish the song
+and Master and Export finish it.
+
+@ The dramatic song - listen | +8
+Here's our dramatic song. [pause:0.4s] Listen to how it builds.
+
+@ Export also saved the sheet music
+Export also saved the sheet music: the arranged score with the lyrics, as a PDF, right next to the song.
+
+@ card Another arrangement
+Part two: another arrangement of the same song.
+
+@ Not your taste? Change the arrangement seed
+Not quite your taste? Change the arrangement seed. Only Arrange and what follows run again. The lyrics and YuE2's plan stay as they are.
+
+@ Press Run.
+Press Run.
+
+@ The writer plans again, with the new seed
+The writer plans again, with the new seed.
+
+@ The new score stops for review again
+The new score stops for review again.
+
+@ Open it: a different arrangement
+Open it: a different arrangement of the same melody.
+
+@ Another plan from the same mode | optional
+Another plan from the same mode. Open it, and compare the sections with the first one. Keep what you like, and edit the rest.
+
+@ Approve.
+Approve, and run.
+
+@ YuE2 renders the song from the lyrics and the arranged score
+YuE2 renders the new version,
+
+@ Master and Export finish the song
+and Master and Export finish it.
+
+@ The same song with its new arrangement | +8
+The same song, with its new arrangement. [pause:0.4s] Have a listen.
+
+@ Creative modes are experimental: try several
+Creative modes are experimental. Try several modes and closeness values, and keep the takes you like. Simple stays the dependable choice.
+
+@ Your own modes are Markdown files
+You can also write your own modes: small Markdown files in your ComfyUI user folder. They say which instruments, lines and key changes a mode allows.
+
+@ A local LLM as the writer model
+And a local LLM as the writer model is held to the plan's format exactly. When nothing changed, it answers from its cache.
+
+@ card Next: 7 · YuE2 · Cover · Creative modes
+Next up: creative modes for covers. Thanks for watching!

@@ -30,6 +30,9 @@ The verdict first, then the versions of ComfyUI, Plenio, Python and torch.
 @ The GPU with its memory
 Below that: the graphics card and its memory, the system RAM, the Python packages, and the download policy.
 
+@ And the local LLMs Plenio found
+And the local language models Plenio found: GGUF files, LM Studio, or Ollama. Each one can be the writer model, for lyrics and arrangements.
+
 @ The templates: for each one
 For every template: are its model files installed? If not, you see what's missing, and how big it is.
 

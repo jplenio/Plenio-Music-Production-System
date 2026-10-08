@@ -22,7 +22,7 @@ Source: the recording to cover.
 The Cover Brief sets the new style, and what happens to the vocals.
 
 @ SCORE - SheetSage2
-SheetSage2 transcribes the music into a score, and the Score sheet shows it.
+SheetSage2 transcribes the music into a score. Arrange can re-arrange it, and the Score sheet shows it.
 
 @ LYRICS - the original words
 Lyrics: the original words, brand-new lyrics, or just section tags.
@@ -62,6 +62,9 @@ Instrumental: an instrument plays the melody.
 
 @ harmony: keep the original chords
 Keep the original chords, or let YuE2 re-harmonize.
+
+@ arrangement: “simple” keeps the transcription
+The arrangement stays on simple, which keeps the transcription as it is. [pause:0.3s] The experimental creative modes, with their sliders, get a video of their own: tutorial seven.
 
 @ Press Run.
 Now, press Run.
@@ -234,7 +237,7 @@ Approve. The words will be placed into this score, extra chorus and all.
 @ The node says ✓ approved at once
 The node turns green at once. [pause:0.5s] Run again: now the words are transcribed, and the run stops at the Text sheet.
 
-@ faster-whisper transcribes
+@ faster-whisper transcribes | optional
 Faster Whisper listens to the vocals, and places every word into the score's sections.
 
 @ Stop 2: Song Sheet · Text
@@ -279,8 +282,11 @@ and Master and Export finish it.
 @ The approved cover is finished | +7
 And there it is: the approved cover, finished and exported. [pause:0.5s] Enjoy!
 
+@ Export also saved the sheet music
+Export also saved the sheet music: your score, with the original words under the notes, as a PDF next to the cover.
+
 @ Every further Run
 Every further run renders a new take of the same cover.
 
-@ card Make it yours
-Now it's your turn. Make it yours! Thanks for watching.
+@ card Next: 3 · MiniMax · Song | seed 2
+Next up: template three, MiniMax Song. Thanks for watching!

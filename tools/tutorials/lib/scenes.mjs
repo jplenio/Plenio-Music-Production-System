@@ -449,3 +449,76 @@ export async function showApproved(s, nodeId, text = 'The node says ✓ approved
   await s.flyNodes([nodeId], 1000, 0.9)
   await s.read(text, 3600)
 }
+
+// The creative mode's arrangement in Song Sheet · Score (0.4.5, experimental): its line above the
+// findings with the badge, then the details - the writer's idea and what every section got. Returns
+// the status ('applied', 'partial', 'unchanged', 'fallback') or null when the sheet has none.
+export async function arrangementDemo(s, { cover = false } = {}) {
+  const d = s.page.locator(DIALOG)
+  const panel = d.locator('.arrangement').first()
+  if (!(await panel.count())) return null
+  const status = await panel.getAttribute('data-status')
+  if (status === 'fallback') {
+    const text = 'Arrangement not applied: the writer’s plan could not be used, so the score stays as it was - the line says why.'
+    s.caption(text)
+    await s.spotlight(panel, { ms: 4200, pad: 4 })
+    await s.read(text, 6400)
+    return status
+  }
+  const line = 'Under the editor, the arrangement: the mode, its closeness and how many sections were arranged - marked “experimental”.'
+  s.caption(line)
+  await s.spotlight(panel, { ms: 3800, pad: 4 })
+  await s.read(line, 6200)
+  const summary = panel.locator('summary').first()
+  const details = 'Open it: the writer’s idea, and for every section what Plenio wrote - chords, the instrument line, a key lift - and what stayed.'
+  s.caption(details)
+  await s.click(summary, { fx: 0.05, pause: 300 })
+  await s.wait(900)
+  await s.spotlight(panel, { ms: 6000, pad: 4 })
+  await s.read(details, 8600)
+  await s.click(summary, { fx: 0.05, pause: 200 })
+  await s.wait(600)
+  // the instrument line in the roll: the second voice, where the plan wrote it
+  const ins = await roll(s, 'ins')
+  if (ins.visible.length) {
+    const x0 = Math.min(...ins.visible.map((n) => n.x)) - 6, y0 = Math.min(...ins.visible.map((n) => n.y)) - 6
+    const x1 = Math.max(...ins.visible.map((n) => n.x + n.width)) + 6, y1 = Math.max(...ins.visible.map((n) => n.y + n.height)) + 6
+    const text = cover
+      ? 'In the roll, the instrument line is the second voice: Plenio wrote it note by note from the plan - the melody stays the original.'
+      : 'In the roll, the instrument line is the second voice: Plenio wrote it note by note from the plan, on the chords above it.'
+    s.caption(text)
+    await s.spotlight({ x: x0, y: y0, width: x1 - x0, height: y1 - y0 }, { ms: 4200, pad: 4 })
+    await s.read(text, 6600)
+  }
+  return status
+}
+
+// Export's sheet music (0.4.5): the page draws the PDF right after the export and Plenio saves it next
+// to the song; the node's summary then says saved.
+export async function sheetMusicSaved(s, node, text) {
+  await s.page
+    .waitForFunction((key) => {
+      const el = window.__tut.node(key).widgets?.find((w) => w.name === 'plenio_summary')?.element
+      return /sheet music[^]*saved/i.test(el?.textContent ?? '')
+    }, node, { timeout: 120000 })
+    .catch(() => {})
+  // a long summary (the cover's export lists many reports) is clipped by the node: let it show all
+  await s.page.evaluate((key) => {
+    const n = window.__tut.node(key)
+    const el = n.widgets?.find((w) => w.name === 'plenio_summary')?.element
+    const extra = el ? el.scrollHeight - el.clientHeight : 0
+    if (extra > 0) {
+      n.setSize([n.size[0], n.size[1] + extra + 12])
+      window.app.canvas.setDirty(true, true)
+    }
+  }, node)
+  await s.wait(400)
+  await s.flyNodes([node], 1100, 0.9)
+  s.caption(text)
+  const box = await s.page.evaluate(
+    (key) => window.__tut.node(key).widgets?.find((w) => w.name === 'plenio_summary')?.element?.getBoundingClientRect().toJSON(),
+    node
+  )
+  if (box?.width) await s.spotlight(box, { ms: 3800, pad: 4 })
+  await s.read(text, 6000)
+}

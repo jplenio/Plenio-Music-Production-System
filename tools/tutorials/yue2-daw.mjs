@@ -6,7 +6,7 @@
 // assets/Open Window Sketch.abc is its score), or $PLENIO_TUTORIAL_MIDI.
 
 import path from 'node:path'
-import { barsDemo, cursorDemo, editorTour, filesDemo, recordDemo, showApproved, simulateKeyboard, soundsDemo } from './lib/scenes.mjs'
+import { barsDemo, cursorDemo, editorTour, filesDemo, recordDemo, sheetMusicSaved, showApproved, simulateKeyboard, soundsDemo } from './lib/scenes.mjs'
 import { DIALOG, approve, fixSections, maximize, openSheet, scrollToVoice, tab, trimSections } from './lib/sheet.mjs'
 
 export const meta = {
@@ -17,7 +17,7 @@ export const meta = {
 // the template's nodes by title or type (example_workflows/5 · YuE2 · DAW.json)
 const BRIEF = 'PlenioSongBrief', WRITE = 'Plenio · Write Song', TEXT = 'Song Sheet · Text'
 const TOOLS = 'Score Tools · new score from brief', DAW = 'Song Sheet · DAW', RENDER = 'Plenio · YuE2 Render'
-const MASTER = 'Plenio · Master', PREVIEW = 'Preview (mastered)', EXPORT = 'PlenioExportRelease'
+const MASTER = 'Plenio · Master', PREVIEW = 'Preview (mastered)', EXPORT = 'PlenioExportRelease', WRITER = 'Writer model'
 const GROUPS = {
   [WRITE]: '2 · WRITE', [TEXT]: '3 · TEXT', [TOOLS]: '4 · DAW', [DAW]: '4 · DAW',
   'Take seed': '5 · RENDER', [RENDER]: '5 · RENDER', [MASTER]: '6 · FINISH', [PREVIEW]: '6 · FINISH', [EXPORT]: '6 · FINISH',
@@ -38,7 +38,7 @@ export default async function daw(s, { project }) {
     kicker: 'Plenio tutorial',
     title: '<span class="num">5 ·</span> YuE2 · DAW',
     subtitle: 'The writer drafts the words, you bring the music - YuE2 renders exactly your score',
-    foot: 'Plenio Music Production System 0.4 for ComfyUI',
+    foot: 'Plenio Music Production System 0.4.5 for ComfyUI',
   }, 5)
 
   // --- open the template -------------------------------------------------------------------------
@@ -68,7 +68,7 @@ export default async function daw(s, { project }) {
   await s.say('The template reads from left to right, in numbered groups.', 3000)
   const tour = [
     ['1 · SONG', 'SONG - the Song Brief.'],
-    ['2 · WRITE', 'WRITE - the writer drafts the title, the style and the lyrics.'],
+    ['2 · WRITE', 'WRITE - the writer drafts the title, the style and the lyrics - with the writer model you choose.'],
     ['3 · TEXT', 'TEXT - Song Sheet · Text: the words YuE2 will sing.'],
     ['4 · DAW', 'DAW - Score Tools builds an empty score from the brief; you write the music in Song Sheet · DAW.'],
     ['5 · RENDER', 'RENDER - YuE2 renders exactly that score.'],
@@ -98,6 +98,10 @@ export default async function daw(s, { project }) {
   s.caption('length: short. Tempo, key and meter come from the brief - or later from your sketch.')
   await s.chooseCombo(BRIEF, 'length', 'short (about 1:30)', { read: 2400 })
   await s.wait(1200)
+  s.caption('The Writer model writes the words: Gemma 4 by default - or a local LLM from your machine.')
+  await s.flyNodes([WRITER], 1000, 0.9)
+  await s.spotlight(await s.widgetBox(WRITER, 'model'), { ms: 2400 })
+  await s.read('The Writer model writes the words: Gemma 4 by default - or a local LLM from your machine.', 4800)
   s.caption('Press Run.')
   await s.resetRunState()
   await s.run()
@@ -197,11 +201,12 @@ export default async function daw(s, { project }) {
   await s.run()
   await s.follow({ stages: { [RENDER]: STAGES[RENDER], [MASTER]: STAGES[MASTER] }, groups: GROUPS })
   await afterRun(s, 'Done: your melody, your chords - sung by YuE2.')
+  await sheetMusicSaved(s, EXPORT, 'Export also saved your score as sheet music - both voices, the chords and the lyrics, as a PDF next to the song.')
   s.caption('Every further Run renders a new take of the same score.')
   await s.flyGroups(all, 1600)
   await s.read('Every further Run renders a new take of the same score.', 3800)
   s.card('end', {
-    title: 'Make it yours',
+    title: 'Next: 6 · YuE2 · Song · Creative modes',
     lines: ['Install: ComfyUI Manager → <b>Plenio Music Production System</b>', 'Guides and source: <b>github.com/jplenio/Plenio-Music-Production-System</b>'],
   }, 5)
 }

@@ -51,7 +51,7 @@ Compression: gentle glue. Or just the limiter.
 @ Press Run.
 Press Run.
 
-@ EQ measures the song
+@ EQ measures the song | optional
 The EQ measures and matches,
 
 @ Loudness & Dynamics brings it
@@ -70,7 +70,7 @@ And these numbers are measured: minus fourteen LUFS. Target reached.
 Let's listen to the master.
 
 @ Export: FLAC and MP3
-Export wrote a FLAC and an MP3 with the source's tags, plus the original and a release record.
+Export wrote a FLAC and an MP3 with the source's tags, plus the original and a release record. Sheet music stays off here: a recording has no score.
 
 @ card Your own sound
 Part two: make it your own sound.

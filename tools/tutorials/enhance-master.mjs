@@ -30,7 +30,7 @@ export default async function enhance(s, { project }) {
     kicker: 'Plenio tutorial',
     title: '<span class="num">4 ·</span> Enhance &amp; Master',
     subtitle: 'Finish any recording - tone, loudness and a release export, without a music model or a GPU',
-    foot: 'Plenio Music Production System 0.4 for ComfyUI',
+    foot: 'Plenio Music Production System 0.4.5 for ComfyUI',
   }, 5)
 
   // --- open the template -------------------------------------------------------------------------
@@ -127,11 +127,11 @@ export default async function enhance(s, { project }) {
   await s.wait(5600)
 
   await afterRun(s, 'Listen in the preview.')
-  s.caption('Export: FLAC and MP3 with the source’s tags, the unmastered source as (original), and a release record.')
+  s.caption('Export: FLAC and MP3 with the source’s tags, the unmastered source as (original), and a release record - sheet music stays off, a recording has no score.')
   await s.flyNodes([EXPORT], 1000, 0.9)
   const files = await summaryBox(s, EXPORT).catch(() => null)
   if (files) await s.spotlight(files, { ms: 3000, pad: 4 })
-  await s.read('Export: FLAC and MP3 with the source’s tags, the unmastered source as (original), and a release record.', 6000)
+  await s.read('Export: FLAC and MP3 with the source’s tags, the unmastered source as (original), and a release record - sheet music stays off, a recording has no score.', 6000)
 
   // --- part 2: your own sound ---------------------------------------------------------------------
   s.card('chapter', {

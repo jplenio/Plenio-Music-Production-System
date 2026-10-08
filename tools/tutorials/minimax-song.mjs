@@ -13,7 +13,7 @@ export const meta = {
 // the template's nodes by title or type (example_workflows/3 · MiniMax · Song.json)
 const BRIEF = 'PlenioSongBrief', SHEET = 'Song Sheet', WRITE = 'Plenio · Write Song', RENDER = 'Plenio · MiniMax Render'
 const REFINE = 'Refine (48 kHz)', MASTER = 'Plenio · Master', PREVIEW = 'Preview (mastered)', EXPORT = 'PlenioExportRelease'
-const MODEL = 'Plenio · MiniMax Model'
+const MODEL = 'Plenio · MiniMax Model', WRITER = 'Writer model'
 const GROUPS = {
   [WRITE]: '2 · WRITE', 'Draft seed': '2 · WRITE', [SHEET]: '3 · SHEET', [MODEL]: 'MUSIC MODEL', 'Take seed': '4 · RENDER',
   [RENDER]: '4 · RENDER', [REFINE]: 'REFINE (48 kHz)', [MASTER]: '5 · FINISH', [PREVIEW]: '5 · FINISH', [EXPORT]: '5 · FINISH',
@@ -32,7 +32,7 @@ export default async function minimax(s) {
     kicker: 'Plenio tutorial',
     title: '<span class="num">3 ·</span> MiniMax · Song',
     subtitle: 'A new song with MiniMax Music 3 - in one run, or with a review stop',
-    foot: 'Plenio Music Production System 0.4 for ComfyUI',
+    foot: 'Plenio Music Production System 0.4.5 for ComfyUI',
   }, 5)
 
   // --- open the template -------------------------------------------------------------------------
@@ -93,6 +93,13 @@ export default async function minimax(s) {
   s.caption('length: short. MiniMax may end a song a little earlier than asked.')
   await s.chooseCombo(BRIEF, 'length', 'short (about 1:30)', { read: 2400 })
   await s.wait(1200)
+  s.caption('arrangement: MiniMax takes no score, so a creative mode (experimental) shapes only the writing here - simple is fine.')
+  await s.spotlight(await s.widgetBox(BRIEF, 'arrangement'), { ms: 2600 })
+  await s.read('arrangement: MiniMax takes no score, so a creative mode (experimental) shapes only the writing here - simple is fine.', 6000)
+  s.caption('The Writer model writes caption and lyrics: Gemma 4 by default - or a local LLM from your machine.')
+  await s.flyNodes([WRITER], 1000, 0.9)
+  await s.spotlight(await s.widgetBox(WRITER, 'model'), { ms: 2400 })
+  await s.read('The Writer model writes caption and lyrics: Gemma 4 by default - or a local LLM from your machine.', 4800)
 
   s.caption('Press Run.')
   await s.resetRunState()

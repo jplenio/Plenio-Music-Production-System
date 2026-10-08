@@ -57,7 +57,7 @@ Enable **Check sung lyrics** (bypassed by default) to measure what was sung: wor
 
 ## Creative modes: how close to the original
 
-> **Experimental (0.4.5).** Creative modes and the closeness sliders can give unexpected results - a chord that surprises, an instrument line that does not fit every song, a plan that is not applied. They are meant for experimenting first: try a mode, listen, change the score in the Song Sheet or run again with another *arrangement seed*, and keep what you like. *simple* is the dependable choice.
+> **Experimental (0.4.5).** Creative modes and the closeness sliders can give unexpected results - a chord that surprises, an instrument line that does not fit every song, a plan that is not applied. They are meant for experimenting first: try a mode, listen, change the score in the Song Sheet or run again with another *arrangement seed*, and keep what you like. *simple* is the dependable choice. ▶ *Tutorial 7 · YuE2 · Cover · Creative modes* shows it.
 
 The Cover Brief's **arrangement** is *simple* by default: the transcribed score goes to the sheet as it is. With a creative mode **Arrange** lets the writer model re-arrange the score's sections within the **song flow closeness**:
 

@@ -376,6 +376,19 @@ export async function openStudio({ url, out, width = 1920, height = 1000, scale 
     await page.waitForTimeout(300)
   }
 
+  // Pull a canvas slider to `value`: the pointer drags along it, then the exact value is set (a canvas
+  // slider rounds by the pixel).
+  async function slide(nodeId, name, value, { min = 0, max = 100, ms = 1300 } = {}) {
+    const box = await widgetBox(nodeId, name)
+    const current = await page.evaluate(([n, w]) => window.__tut.node(n).widgets.find((x) => x.name === w).value, [nodeId, name])
+    const at = (v) => ({ x: box.x + 12 + (box.width - 24) * ((v - min) / (max - min)), y: box.y + box.height / 2 })
+    await drag(at(current), at(value), { ms })
+    await page.evaluate(([n, w, v]) => window.__tut.setWidget(n, w, v), [nodeId, name, value])
+    await page.waitForTimeout(400)
+  }
+  // A widget's value now.
+  const widgetValue = (nodeId, name) => page.evaluate(([n, w]) => window.__tut.node(n).widgets.find((x) => x.name === w)?.value, [nodeId, name])
+
   // Queue the workflow with a click on Run.
   async function run() {
     const button = page.locator('button', { hasText: /^\s*Run\s*$/ }).first()
@@ -448,7 +461,7 @@ export async function openStudio({ url, out, width = 1920, height = 1000, scale 
     startCapture, stopCapture, saveMarkers,
     moveTo, rest, hover, click, drag, type, keys, spotlight, boxOf, centre,
     caption, say, read, chapter, card, fast, wait,
-    openComfy, fly, flyGroups, flyNodes, widgetBox, nodeButton, audioBox, listen, chooseCombo, run, follow, resetRunState,
+    openComfy, fly, flyGroups, flyNodes, widgetBox, nodeButton, audioBox, listen, chooseCombo, slide, widgetValue, run, follow, resetRunState,
     get mouse() { return mouse },
   }
 }

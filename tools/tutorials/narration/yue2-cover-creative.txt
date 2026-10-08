@@ -1,0 +1,161 @@
+# Narration of yue2-cover-creative.mjs (Tutorial 7 · YuE2 · Cover · Creative modes). Format: lib/voice.mjs.
+# Written forms; the lexicon turns names into what the TTS should say.
+
+@ card 7 · YuE2 · Cover · Creative modes
+Welcome back! In this video, we give a recording a new arrangement, and new lyrics that keep its story.
+
+@ card Made for experimenting
+One thing first: creative modes are new, and experimental. The results can surprise you. [pause:0.4s] So play with them: choose a mode, set the sliders, listen, and keep what you like.
+
+@ Open the template browser
+Open the template browser.
+
+@ Plenio’s templates: Extensions
+Plenio's templates are under Extensions.
+
+@ 2 · YuE2 · Cover - the template from tutorial 2
+We take YuE2 Cover, the template from tutorial two, which now has creative modes.
+
+@ Load the recording
+Load the recording into Source recording.
+
+@ The example from tutorial 2
+It's the example from tutorial two: a four-minute synth-pop song, sung in English.
+
+@ In the Cover Brief: arrangement, marked experimental
+In the Cover Brief, there's arrangement, marked experimental. Simple, the default, keeps the transcribed score just as it is.
+
+@ A creative mode lets the writer model re-arrange
+A creative mode lets the writer model re-arrange every section. We take many instruments: a full ensemble.
+
+@ song flow closeness: how close the music stays
+Song flow closeness sets how close the music stays to the original. A hundred is exactly the original, eighty keeps chords and key, fifty stays recognisable, and twenty is a free version.
+
+@ Whatever the slider says
+Whatever the slider says, the melody and the form always stay. That's what makes it a cover.
+
+@ vocals: “new lyrics”
+For the vocals, we choose new lyrics: YuE2 sings new words on the original melody.
+
+@ voice: describe the singer
+Describe the singer.
+
+@ lyrics closeness: how close the new words stay
+Lyrics closeness sets how close the new words stay to the original's. Zero ignores them, thirty keeps the mood, sixty tells the story in new words, and ninety keeps the meaning, line by line.
+
+@ harmony: “keep original chords”
+Harmony stays on keep original chords: the arrangement recolours them, and YuE2 follows the chords.
+
+@ In SCORE, the new block Arrange
+In the score group, the new block Arrange: the writer answers with a plan for every section, and Plenio writes the notes and checks the score.
+
+@ Writer model: the same writer
+The Writer model is the same writer for the new lyrics and for the arrangement: Gemma 4, or a local LLM.
+
+@ card An arranged cover
+Part one: an arranged cover, with stops to review the score and the new words.
+
+@ mode: “one cover, stop to review” - the default
+The mode stays on one cover, stop to review, the default. The run stops at both Song Sheets.
+
+@ Press Run.
+Press Run.
+
+@ Sung Pitch separates the vocals | optional
+Sung Pitch separates the vocals once, for the curve in the editor.
+
+@ SheetSage2 transcribes the recording
+SheetSage2 transcribes the recording into a score: melody, chords, sections, and tempo.
+
+@ Arrange: the writer plans the sections anew
+Then Arrange: the writer plans the sections anew, and Plenio writes the notes. The melody stays.
+
+@ Stop 1: Song Sheet · Score - the arranged transcription
+First stop: the Score sheet, with the arranged transcription.
+
+@ Open it.
+Let's open it.
+
+@ ⛶ gives the editor
+This button gives the editor the whole window.
+
+@ Arrangement not applied | optional
+Here, the arrangement wasn't applied: the writer's plan couldn't be used, so the transcription stays as it was. The line says why.
+
+@ Under the editor, the arrangement | optional
+Under the editor, you find the arrangement: the mode, its closeness, and how many sections it changed. [pause:0.2s] Marked experimental, of course.
+
+@ Open it: the writer’s idea | optional
+Open it, and you see the writer's idea, and for every section what Plenio wrote: chords, the instrument line, a key lift. And what stayed.
+
+@ In the roll, the instrument line | optional
+In the roll, the instrument line is the second voice. Plenio wrote it note by note from the plan, while the melody stays the original.
+
+@ That is what experimental means | optional
+That's what experimental means: sometimes a plan doesn't fit. Approve the transcription, or run again with another arrangement seed.
+
+@ Compare with the original | optional
+Compare it with the original: both plays the source under the notes, and A B switches between them at once.
+
+@ Approve: the new lyrics are written for this score
+Approve. The new lyrics will be written for this score.
+
+@ ✓ approved. Run again: the original words
+Approved. Run again: the original words are transcribed, and the writer writes the new ones.
+
+@ The original words are transcribed | optional
+First, the original words are transcribed, for the writer, who keeps their story.
+
+@ The writer drafts the new lyrics
+Then the writer drafts the new lyrics on the original melody.
+
+@ Stop 2: Song Sheet · Text - the new lyrics
+Second stop: the Text sheet, with the new lyrics.
+
+@ Open it.
+Open it.
+
+@ Lyrics: new words, section by section
+New words, section by section. With lyrics closeness at seventy, they tell the original's story, in their own way.
+
+@ The Score tab: the new words over the original melody
+The Score tab shows the new words over the original melody, each line where it's sung.
+
+@ Shift + mouse wheel | optional
+Shift and the mouse wheel scroll to where the singing starts.
+
+@ Style: the mode asked for a full ensemble
+And in the style, the mode asked for a full ensemble, with the voice from the brief.
+
+@ Approve.
+Approve.
+
+@ ✓ approved. Run again: YuE2 renders the cover.
+Approved. Run again, and YuE2 renders the cover.
+
+@ YuE2 renders the cover from the arranged score
+YuE2 renders the cover from the arranged score and the new lyrics.
+
+@ Check Vocals listens to the take | optional
+Check Vocals listens to the take,
+
+@ Master and Export finish the cover
+and Master and Export finish the cover.
+
+@ The arranged cover, with its new lyrics | +8
+Here's the arranged cover, with its new lyrics. [pause:0.4s] Listen for the fuller arrangement.
+
+@ Export saved the sheet music too
+Export saved the sheet music too: the arranged score with the new lyrics, as a PDF next to the cover.
+
+@ Creative modes are experimental: the plan can surprise
+Creative modes are experimental, and the plan can surprise you. Try other modes, other closeness values, or another arrangement seed, and keep what you like.
+
+@ song flow closeness 100 keeps the original exactly
+Song flow closeness one hundred keeps the original exactly: the writer isn't even asked. And lyrics closeness zero writes new lyrics as before, without the original's.
+
+@ Above 90, lyrics closeness keeps the meaning
+Above ninety, lyrics closeness keeps the meaning line by line: a singable translation, when you choose another language.
+
+@ card Make it yours
+Now it's your turn: make it yours. Thanks for watching!

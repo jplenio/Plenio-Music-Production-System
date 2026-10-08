@@ -1,7 +1,8 @@
 # Tutorial videos
 
 Scripts that drive the real ComfyUI frontend with Plenio and the real models in Chromium, record the
-screen and cut a finished 1920 x 1080 video with an English voice-over:
+screen and cut a finished 1920 x 1080 video with an English voice-over (all re-recorded for 0.4.5: the
+Writer model, the block Arrange, the experimental creative modes and the sheet music PDF of every export):
 
 | Script | Video |
 |---|---|
@@ -11,6 +12,8 @@ screen and cut a finished 1920 x 1080 video with an English voice-over:
 | `minimax-song.mjs` | **3 · MiniMax · Song**: a run straight through, then *one song, stop to review*: the Song Sheet (the caption in three parts, the lyrics, the 5,000-token budget, Approve) and the finished song |
 | `enhance-master.mjs` | **4 · Enhance & Master**: master an unmastered take with the defaults (a warm tone match, -14 LUFS) and read the curve, the measured loudness and the files; then edit the bands by hand, pick -16 LUFS and run again |
 | `yue2-daw.mjs` | **5 · YuE2 · DAW**: the writer's lyrics (Song Sheet · Text, Approve), then Song Sheet · DAW: the four tracks, a sketch imported with *Import MIDI…* (the import dialog, the Guide track), the tour (with the track headers and their sounds), the words fitted, bars arranged, playback from the cursor, the sounds with the preset *Composing with a MIDI keyboard*, a counter-line recorded with a MIDI keyboard (simulated in the video, and undone), the files (MusicXML, PDF, project), Approve - and the song YuE2 renders from that score |
+| `yue2-song-creative.mjs` | **6 · YuE2 · Song · Creative modes** (0.4.5, experimental): the note that creative modes are made for experimenting, the brief's *arrangement (experimental)* with its modes and *genre closeness*, the *Writer model*, the block *Arrange* and its seed; one song (*dramatic*) with its stops - the style the mode wrote, the arrangement in Song Sheet · Score (its line with the badge, the details, the instrument line in the roll) - the song and its sheet music PDF; then another arrangement of the same song from the arrangement seed |
+| `yue2-cover-creative.mjs` | **7 · YuE2 · Cover · Creative modes** (0.4.5, experimental): the sample song re-arranged (*many instruments*, *song flow closeness* 50) with new lyrics that keep its story (*lyrics closeness* 70); Song Sheet · Score with the arrangement and A/B against the original, Song Sheet · Text with the new words over the original melody, the cover and its sheet music PDF |
 
 The runs are real: the songs in the videos are rendered while they are recorded (on an RTX 5060 Ti a
 YuE2 run takes about two minutes). Waiting is fast-forwarded in the edit, with a speed badge in the band
@@ -83,7 +86,7 @@ the picture holds still before the next cue. `| +6` after a cue leaves six quiet
 
 ## The promo and the README's screenshots
 
-`promo.mjs` cuts about 75 seconds of shots from the six recordings with a narrator, into
+`promo.mjs` cuts about 80 seconds of shots from the recordings (the creative modes of 0.4.5 included) with a narrator, into
 `<out>/Plenio - Music production in ComfyUI (promo)/` (no music; `--music` lays a song of the DAW
 recording under the voice). `screenshots.mjs` makes the README's screenshots again, at twice the
 screen resolution, into `assets/branding/<version>/`: the template graphs after real runs, App mode, the

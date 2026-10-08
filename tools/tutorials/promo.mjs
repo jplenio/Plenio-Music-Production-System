@@ -4,7 +4,7 @@
 //
 //   node tools/tutorials/promo.mjs [--out dist/tutorials] [--tts-url http://127.0.0.1:8191] [--music]
 //
-// It needs the recordings of the six tutorials in <out>/<script>/ (record.mjs). A shot is a stretch of a
+// It needs the recordings of the tutorials in <out>/<script>/ (record.mjs). A shot is a stretch of a
 // recording, found by a caption of its script (`at`) and an offset; each shot lasts as long as its line
 // needs (and at least its `seconds`). The picture fills the frame (no band).
 
@@ -32,7 +32,7 @@ const LEAD = 0.25, TAIL = 0.45
 const MUSIC = args.includes('--music') ? { video: 'yue2-daw', file: 'sound-1.flac', from: null } : null
 
 const SHOTS = [
-  { card: 'title', data: { kicker: 'Plenio Music Production System', title: 'Music production<br>inside ComfyUI', subtitle: 'Write · Plan · Edit · Render · Master', foot: 'Version 0.4 · free and open source · runs on your own GPU' }, seconds: 4,
+  { card: 'title', data: { kicker: 'Plenio Music Production System', title: 'Music production<br>inside ComfyUI', subtitle: 'Write · Plan · Edit · Render · Master', foot: 'Version 0.4.5 · free and open source · runs on your own GPU' }, seconds: 4,
     say: 'Meet Plenio: a complete music production system, right inside ComfyUI.' },
   { video: 'yue2-song', at: '1 · YuE2 · Song writes', offset: -3, seconds: 4,
     say: 'Six ready-made templates take you from a first idea to a finished, mastered song.' },
@@ -44,6 +44,8 @@ const SHOTS = [
     say: 'YuE2 plans the melody as a real score, with the lyrics right over the notes.' },
   { video: 'yue2-song', at: 'Arrange the song', offset: 0.5, seconds: 4,
     say: 'Edit it like in your DAW: arrange sections, copy, paste, and play from the cursor.' },
+  { video: 'yue2-song-creative', at: 'Under the editor, the arrangement', offset: 0.4, seconds: 4,
+    say: 'New, and still experimental: let the writer model plan the arrangement, while Plenio writes every note.' },
   { video: 'yue2-cover', at: 'The original recording plays right under the notes', offset: 1.2, seconds: 4,
     say: 'Turn a recording into a brand-new cover, and compare it with the original, bar by bar.' },
   { video: 'yue2-daw', at: 'Nothing changes yet:', offset: 0.3, seconds: 4,

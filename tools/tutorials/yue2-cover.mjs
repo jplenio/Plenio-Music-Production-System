@@ -5,7 +5,7 @@
 // score still editable there) - and the finished cover. The source is the repository's sample song.
 
 import path from 'node:path'
-import { arrangeDemo, cursorDemo, editorTour, filesDemo, showApproved, soundsDemo } from './lib/scenes.mjs'
+import { arrangeDemo, cursorDemo, editorTour, filesDemo, sheetMusicSaved, showApproved, soundsDemo } from './lib/scenes.mjs'
 import { DIALOG, approve, maximize, noteEditing, openSheet, scrollToVoice, tab } from './lib/sheet.mjs'
 
 export const meta = {
@@ -19,9 +19,9 @@ const SOURCE_FILE = ['assets', 'sound-samples', 'Example Album - A Feeling With 
 const SOURCE = 'Source recording', EXCERPT = 'Excerpt (optional)', BRIEF = 'PlenioCoverBrief'
 const TRANSCRIBE = 'Plenio · Transcribe Score', SCORE = 'Song Sheet · Score', LYRICS = 'Transcribe Lyrics', WRITE = 'Plenio · Write Song'
 const TEXT = 'Song Sheet · Text', TAKES = 'YuE2 Takes', CHECK = 'PlenioVocalCheck', MASTER = 'Plenio · Master'
-const PREVIEW = 'Preview (mastered)', EXPORT = 'PlenioExportRelease'
+const PREVIEW = 'Preview (mastered)', EXPORT = 'PlenioExportRelease', ARRANGE = 'Arrange', SUNG = 'Sung Pitch (for the editor)'
 const GROUPS = {
-  [TRANSCRIBE]: '3 · SCORE', PlenioScoreTools: '3 · SCORE', [SCORE]: '3 · SCORE',
+  [TRANSCRIBE]: '3 · SCORE', PlenioScoreTools: '3 · SCORE', [SUNG]: '3 · SCORE', [ARRANGE]: '3 · SCORE', [SCORE]: '3 · SCORE',
   [LYRICS]: '4 · LYRICS', [WRITE]: '4 · LYRICS', [TEXT]: '5 · TEXT',
   [TAKES]: '6 · RENDER', [CHECK]: '6 · RENDER', [MASTER]: '7 · FINISH', [PREVIEW]: '7 · FINISH', [EXPORT]: '7 · FINISH',
 }
@@ -39,7 +39,7 @@ export default async function cover(s, { project }) {
     kicker: 'Plenio tutorial',
     title: '<span class="num">2 ·</span> YuE2 · Cover',
     subtitle: 'A new version of a recording - transcribed, reviewed and rendered by YuE2',
-    foot: 'Plenio Music Production System 0.4 for ComfyUI',
+    foot: 'Plenio Music Production System 0.4.5 for ComfyUI',
   }, 5)
 
   // --- open the template -------------------------------------------------------------------------
@@ -70,8 +70,8 @@ export default async function cover(s, { project }) {
   const tour = [
     ['1 · SOURCE', 'SOURCE - the recording to cover.'],
     ['2 · COVER', 'COVER - the Cover Brief: the new style, and what happens to the vocals.'],
-    ['3 · SCORE', 'SCORE - SheetSage2 transcribes the music into a score; Song Sheet · Score shows it.'],
-    ['4 · LYRICS', 'LYRICS - the original words (speech recognition), new lyrics (the writer) or section tags.'],
+    ['3 · SCORE', 'SCORE - SheetSage2 transcribes the music into a score, Arrange can re-arrange it, Song Sheet · Score shows it.'],
+    ['4 · LYRICS', 'LYRICS - the original words (speech recognition), new lyrics (the writer model) or section tags.'],
     ['5 · TEXT', 'TEXT - Song Sheet · Text shows the lyrics and the style YuE2 gets.'],
     ['6 · RENDER', 'RENDER - YuE2 renders the cover; Check Vocals picks the best take.'],
     ['7 · FINISH', 'FINISH - Master brings it to -14 LUFS, Export writes the files.'],
@@ -126,6 +126,9 @@ export default async function cover(s, { project }) {
   s.caption('harmony: keep the original chords, or let YuE2 re-harmonise.')
   await s.hover(await s.widgetBox(BRIEF, 'harmony'), { fx: 0.7 })
   await s.wait(3000)
+  s.caption('arrangement: “simple” keeps the transcription as it is. The experimental creative modes, with their sliders, are tutorial 7.')
+  await s.spotlight(await s.widgetBox(BRIEF, 'arrangement'), { ms: 2600 })
+  await s.read('arrangement: “simple” keeps the transcription as it is. The experimental creative modes, with their sliders, are tutorial 7.', 6000)
 
   s.caption('Press Run.')
   await s.resetRunState()
@@ -219,11 +222,12 @@ export default async function cover(s, { project }) {
   await s.run()
   await s.follow({ stages: { [TAKES]: STAGES[TAKES], [CHECK]: STAGES[CHECK], [MASTER]: STAGES[MASTER] }, groups: GROUPS })
   await afterRun(s, 'The approved cover is finished and exported.')
+  await sheetMusicSaved(s, EXPORT, 'Export also saved the sheet music: your score with the original words under the notes, as a PDF next to the cover.')
   s.caption('Every further Run renders a new take of the same approved cover.')
   await s.flyGroups(all, 1600)
   await s.read('Every further Run renders a new take of the same approved cover.', 3800)
   s.card('end', {
-    title: 'Make it yours',
+    title: 'Next: 3 · MiniMax · Song',
     lines: ['Install: ComfyUI Manager → <b>Plenio Music Production System</b>', 'Guides and source: <b>github.com/jplenio/Plenio-Music-Production-System</b>'],
   }, 5)
 }

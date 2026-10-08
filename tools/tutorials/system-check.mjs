@@ -48,7 +48,7 @@ export default async function systemCheck(s) {
     kicker: 'Plenio tutorial',
     title: '<span class="num">0 ·</span> System Check',
     subtitle: 'Is this ComfyUI ready for Plenio? One run tells you - and changes nothing',
-    foot: 'Plenio Music Production System 0.4 for ComfyUI',
+    foot: 'Plenio Music Production System 0.4.5 for ComfyUI',
   }, 5)
 
   s.chapter('Getting started')
@@ -94,6 +94,7 @@ export default async function systemCheck(s) {
   await showSection(s, null)
   await s.say('The verdict first - then ComfyUI, the frontend, Plenio, Python and torch, with their versions.', 5600)
   await s.say('The GPU with its memory, the system RAM, the Python packages - and the download policy.', 5600)
+  await s.say('And the local LLMs Plenio found - GGUF files, LM Studio, Ollama: each can be the writer model for lyrics and arrangements.', 6400)
   await showSection(s, 'templates')
   await s.say('The templates: for each one, whether its model files are installed - or what is missing.', 6000)
   await showSection(s, 'model files')

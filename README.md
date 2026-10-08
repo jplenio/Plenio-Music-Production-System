@@ -13,19 +13,21 @@ Everything runs on your own machine, inside ComfyUI's own nodes: no cloud servic
 **▶ [Plenio in 75 seconds](https://youtu.be/D6WUSzRbWWA)** - the promo: what Plenio does, from the first idea to the mastered song.
 
 <p align="center">
-  <a href="https://youtu.be/D6WUSzRbWWA"><img src="assets/branding/0.4.1/promo.jpg" alt="Plenio - Music production in ComfyUI: the promo video on YouTube" width="70%" /></a>
+  <a href="https://youtu.be/D6WUSzRbWWA"><img src="assets/branding/0.4.5/promo.jpg" alt="Plenio - Music production in ComfyUI: the promo video on YouTube" width="70%" /></a>
 </p>
 
-**▶ [All tutorials as a YouTube playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE)** - one narrated video for every template (English, 2 to 13 minutes, with chapters), recorded in ComfyUI with the real models: every song you hear in them was made right there. Watch them in order, or jump to the template you need.
+**▶ [All tutorials as a YouTube playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE)** - one narrated video for every template and two for the creative modes (English, 2 to 15 minutes, with chapters; all re-recorded for 0.4.5), recorded in ComfyUI with the real models: every song you hear in them was made right there. Watch them in order, or jump to the template you need.
 
 | | Tutorial | What you will see |
 |:---:|---|---|
-| <img src="assets/branding/0.4.1/tutorial-0-system-check.jpg" alt="Tutorial 0 · System Check" width="180" /> | **0 · System Check** | Is your ComfyUI ready? Versions, the GPU, the model files every template needs and the hardware table with your machine's row. |
-| <img src="assets/branding/0.4.1/tutorial-1-yue2-song.jpg" alt="Tutorial 1 · YuE2 · Song" width="180" /> | **1 · YuE2 · Song** | From a brief to a finished song - as a series or one song with review stops. Then a tour of the score editor: notes, lyrics, playback, track sounds and presets, copy and paste, arranging sections and bars, recording with a MIDI keyboard, the files. |
-| <img src="assets/branding/0.4.1/tutorial-2-yue2-cover.jpg" alt="Tutorial 2 · YuE2 · Cover" width="180" /> | **2 · YuE2 · Cover** | A recording becomes a new version. In the score editor the original plays under the notes (waveform, A/B), a copied chorus sings its words again, and the sheet music goes out as files. |
-| <img src="assets/branding/0.4.1/tutorial-3-minimax-song.jpg" alt="Tutorial 3 · MiniMax · Song" width="180" /> | **3 · MiniMax · Song** | Songs with MiniMax Music 3: the caption, the lyrics and the 5,000-token budget, checked before anything is rendered. |
-| <img src="assets/branding/0.4.1/tutorial-4-enhance-master.jpg" alt="Tutorial 4 · Enhance & Master" width="180" /> | **4 · Enhance & Master** | Master any recording without a GPU: a warm tone match, measured loudness and the release export - then your own sound. |
-| <img src="assets/branding/0.4.1/tutorial-5-yue2-daw.jpg" alt="Tutorial 5 · YuE2 · DAW" width="180" /> | **5 · YuE2 · DAW** | Compose it yourself: the words first, then the music - draw the notes, import a MIDI sketch or play it in with a MIDI keyboard - and YuE2 sings your melody. |
+| <img src="assets/branding/0.4.5/tutorial-0-system-check.jpg" alt="Tutorial 0 · System Check" width="180" /> | **0 · System Check** | Is your ComfyUI ready? Versions, the GPU, the model files every template needs and the hardware table with your machine's row. |
+| <img src="assets/branding/0.4.5/tutorial-1-yue2-song.jpg" alt="Tutorial 1 · YuE2 · Song" width="180" /> | **1 · YuE2 · Song** | From a brief to a finished song - as a series or one song with review stops, with the writer model of your choice and the sheet music PDF of every export. Then a tour of the score editor: notes, lyrics, playback, track sounds and presets, copy and paste, arranging sections and bars, recording with a MIDI keyboard, the files. |
+| <img src="assets/branding/0.4.5/tutorial-2-yue2-cover.jpg" alt="Tutorial 2 · YuE2 · Cover" width="180" /> | **2 · YuE2 · Cover** | A recording becomes a new version. In the score editor the original plays under the notes (waveform, A/B), a copied chorus sings its words again, and the sheet music goes out as files. |
+| <img src="assets/branding/0.4.5/tutorial-3-minimax-song.jpg" alt="Tutorial 3 · MiniMax · Song" width="180" /> | **3 · MiniMax · Song** | Songs with MiniMax Music 3: the caption, the lyrics and the 5,000-token budget, checked before anything is rendered. |
+| <img src="assets/branding/0.4.5/tutorial-4-enhance-master.jpg" alt="Tutorial 4 · Enhance & Master" width="180" /> | **4 · Enhance & Master** | Master any recording without a GPU: a warm tone match, measured loudness and the release export - then your own sound. |
+| <img src="assets/branding/0.4.5/tutorial-5-yue2-daw.jpg" alt="Tutorial 5 · YuE2 · DAW" width="180" /> | **5 · YuE2 · DAW** | Compose it yourself: the words first, then the music - draw the notes, import a MIDI sketch or play it in with a MIDI keyboard - and YuE2 sings your melody. |
+| <img src="assets/branding/0.4.5/tutorial-6-yue2-song-creative.jpg" alt="Tutorial 6 · YuE2 · Song · Creative modes" width="180" /> | **6 · YuE2 · Song · Creative modes** *(experimental)* | The writer model plans the arrangement, Plenio writes the notes: a *dramatic* song, its arranged score in the Song Sheet, the rendered song - and another arrangement from the arrangement seed. |
+| <img src="assets/branding/0.4.5/tutorial-7-yue2-cover-creative.jpg" alt="Tutorial 7 · YuE2 · Cover · Creative modes" width="180" /> | **7 · YuE2 · Cover · Creative modes** *(experimental)* | A recording re-arranged for a full ensemble, with new lyrics that keep its story - *song flow closeness* and *lyrics closeness*, A/B against the original, the cover and its sheet music. |
 
 ## Listen first
 
@@ -82,7 +84,7 @@ The first field of the **Song Brief** (and of the **Cover Brief**) is the **mode
 The cover template has the same choice (*one cover, stop to review* is its default; *new cover every run* writes a new version - title, style and, with new lyrics, the lyrics - on the same transcription every time). The Song Sheets follow the brief (*review: as the brief says*); you can still set a single sheet to *continue* or *stop for review*.
 
 <p align="center">
-  <img src="assets/branding/0.4.1/Screenshot%20YuE2-graph.png" alt="The 1 · YuE2 · Song template in ComfyUI: brief, writer, Song Sheets, render and finish in numbered groups" width="100%" />
+  <img src="assets/branding/0.4.5/Screenshot%20YuE2-graph.png" alt="The 1 · YuE2 · Song template in ComfyUI: brief, writer, Song Sheets, render and finish in numbered groups" width="100%" />
 </p>
 
 *1 · YuE2 · Song: the brief on the left, the writer and the Song Sheets in the middle, render, mastering and export on the right; the model block and the optional Stems, Refine and Cover Art blocks sit below.*
@@ -91,7 +93,7 @@ The cover template has the same choice (*one cover, stop to review* is its defau
 
 | 1 · YuE2 · Song | 3 · MiniMax · Song | 4 · Enhance & Master |
 |---|---|---|
-| <img src="assets/branding/0.4.1/Screenshot%20YuE2-appmode.png" alt="1 · YuE2 · Song in App mode: brief fields, take seed and the finished song" width="100%" /> | <img src="assets/branding/0.4.1/Screenshot%20Minimax-appmode.png" alt="3 · MiniMax · Song in App mode" width="100%" /> | <img src="assets/branding/0.4.1/Screenshot%20SoundEnhance-appmode.png" alt="4 · Enhance & Master in App mode" width="100%" /> |
+| <img src="assets/branding/0.4.5/Screenshot%20YuE2-appmode.png" alt="1 · YuE2 · Song in App mode: brief fields, take seed and the finished song" width="100%" /> | <img src="assets/branding/0.4.1/Screenshot%20Minimax-appmode.png" alt="3 · MiniMax · Song in App mode" width="100%" /> | <img src="assets/branding/0.4.1/Screenshot%20SoundEnhance-appmode.png" alt="4 · Enhance & Master in App mode" width="100%" /> |
 
 *Since 0.2.2 the apps also show the mode and the Song Sheet buttons, and 2 · YuE2 · Cover has an app too.*
 
@@ -112,7 +114,7 @@ The cover template has the same choice (*one cover, stop to review* is its defau
 4. Optional: a **creative mode** re-arranges the transcription within the *song flow closeness* (100 the original ... 0 only a hint; the melody and the form always stay), and with *new lyrics* the *lyrics closeness* sets how close the new words stay to the original ones.
 
 <p align="center">
-  <img src="assets/branding/0.4.1/Screenshot%20YuE2-cover-graph.png" alt="The 2 · YuE2 · Cover template: source, Cover Brief, score, lyrics, render and finish" width="100%" />
+  <img src="assets/branding/0.4.5/Screenshot%20YuE2-cover-graph.png" alt="The 2 · YuE2 · Cover template: source, Cover Brief, score, lyrics, render and finish" width="100%" />
 </p>
 
 *2 · YuE2 · Cover: source and Cover Brief, then Song Sheet · Score and Song Sheet · Text with their review stops, render, mastering and export.*
@@ -149,7 +151,7 @@ For a **cover** the source recording is a track of its own, like an audio track 
 Open **5 · YuE2 · DAW**, describe the song in the brief and run: the run stops at **Song Sheet · Text** with the writer's lyrics; approve them and run again. *Score Tools* builds an empty score in the right length, meter and key, and the run stops at **Song Sheet · DAW**. Draw the notes, set the chords, split the score into sections - or press **Import MIDI…** and bring a sketch from your DAW: the dialog shows every track of the file with its role (Vocal, Instrument, Chords, Guide) before anything changes. Approve and run again: YuE2 renders exactly the score you approved. The fourth track, **Guide**, is played with the sheet but never sent to the model ([guide](docs/user/paths/yue2-daw.md), [video: tutorial 5 in the playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE)).
 
 <p align="center">
-  <img src="assets/branding/0.4.1/Screenshot%20YuE2-DAW-graph.png" alt="The 5 · YuE2 · DAW template: brief, writer, Song Sheet · Text, Score Tools and Song Sheet · DAW, render and finish" width="100%" />
+  <img src="assets/branding/0.4.5/Screenshot%20YuE2-DAW-graph.png" alt="The 5 · YuE2 · DAW template: brief, writer, Song Sheet · Text, Score Tools and Song Sheet · DAW, render and finish" width="100%" />
 </p>
 
 *5 · YuE2 · DAW: the writer and Song Sheet · Text for the words, Score Tools and Song Sheet · DAW for the music, then render, mastering and export.*
@@ -173,7 +175,7 @@ Or play it in: with a **MIDI keyboard** (Chrome or Edge), **● rec** (Shift+R) 
 The same brief and writer, one Song Sheet with the structured caption (Global Metadata, Vocal Details, Arrangement) and the lyrics; the sheet checks the exact 5,000-token prompt budget with the model's own tokenizer before rendering.
 
 <p align="center">
-  <img src="assets/branding/0.4.1/Screenshot%20Minimax-graph.png" alt="The 3 · MiniMax · Song template: brief, writer, Song Sheet, MiniMax render and finish" width="100%" />
+  <img src="assets/branding/0.4.5/Screenshot%20Minimax-graph.png" alt="The 3 · MiniMax · Song template: brief, writer, Song Sheet, MiniMax render and finish" width="100%" />
 </p>
 
 *3 · MiniMax · Song: one Song Sheet between the writer and the MiniMax Music 3 render.*
@@ -181,7 +183,7 @@ The same brief and writer, one Song Sheet with the structured caption (Global Me
 ### Finish a recording
 
 <p align="center">
-  <img src="assets/branding/0.4.1/Screenshot%20SoundEnhance-graph.png" alt="The 4 · Enhance & Master template: load a file, EQ, loudness and export" width="100%" />
+  <img src="assets/branding/0.4.5/Screenshot%20SoundEnhance-graph.png" alt="The 4 · Enhance & Master template: load a file, EQ, loudness and export" width="100%" />
 </p>
 
 *4 · Enhance & Master: load a file, shape it with the EQ (manual bands with the curve, or tone match), set the loudness target and export with the file's own tags and cover.*
@@ -218,7 +220,7 @@ Details and limits: [Mastering and audio formats](docs/user/concepts/mastering.m
 The **0 · System Check** template reads your GPU and marks your row. Nothing is switched automatically; you choose the model files in the loaders.
 
 <p align="center">
-  <img src="assets/branding/0.4.1/Screenshot%200-System%20Check.png" alt="The 0 · System Check template: versions, GPU and RAM, the model files of every template, the hardware table with this machine's row marked, and recommendations" width="70%" />
+  <img src="assets/branding/0.4.5/Screenshot%200-System%20Check.png" alt="The 0 · System Check template: versions, GPU and RAM, the model files of every template, the hardware table with this machine's row marked, and recommendations" width="70%" />
 </p>
 
 *0 · System Check: versions, GPU and memory, which model files each template has or still needs, and the hardware table with this machine's row marked.*

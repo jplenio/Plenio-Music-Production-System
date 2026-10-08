@@ -13,6 +13,7 @@ import {
   filesDemo,
   lyricsDemo,
   recordDemo,
+  sheetMusicSaved,
   showApproved,
   simulateKeyboard,
   soundsDemo,
@@ -27,9 +28,9 @@ export const meta = {
 // the template's nodes by title or type (example_workflows/1 · YuE2 · Song.json)
 const BRIEF = 'PlenioSongBrief', TEXT = 'Song Sheet · Text', SCORE = 'Song Sheet · Score'
 const WRITE = 'Plenio · Write Song', PLAN = 'Plenio · YuE2 Plan', RENDER = 'Plenio · YuE2 Render', MASTER = 'Plenio · Master'
-const PREVIEW = 'Preview (mastered)', EXPORT = 'PlenioExportRelease'
+const PREVIEW = 'Preview (mastered)', EXPORT = 'PlenioExportRelease', WRITER = 'Writer model', ARRANGE = 'Arrange'
 const GROUPS = {
-  [WRITE]: '2 · WRITE', [TEXT]: '3 · TEXT', [PLAN]: '4 · SCORE', 'PlenioScoreTools': '4 · SCORE', [SCORE]: '4 · SCORE',
+  [WRITE]: '2 · WRITE', [TEXT]: '3 · TEXT', [PLAN]: '4 · SCORE', 'PlenioScoreTools': '4 · SCORE', [ARRANGE]: '4 · SCORE', [SCORE]: '4 · SCORE',
   'Take seed': '5 · RENDER', [RENDER]: '5 · RENDER', [MASTER]: '6 · FINISH', [PREVIEW]: '6 · FINISH', [EXPORT]: '6 · FINISH',
 }
 const STAGES = {
@@ -47,7 +48,7 @@ export default async function song(s) {
     kicker: 'Plenio tutorial',
     title: '<span class="num">1 ·</span> YuE2 · Song',
     subtitle: 'Write, review and render a song with YuE2 - in one run, or with two review stops',
-    foot: 'Plenio Music Production System 0.4 for ComfyUI',
+    foot: 'Plenio Music Production System 0.4.5 for ComfyUI',
   }, 5)
 
   // --- open the template -------------------------------------------------------------------------
@@ -77,9 +78,9 @@ export default async function song(s) {
   await s.say('The template reads from left to right, in numbered groups.', 3000)
   const tour = [
     ['1 · SONG', 'SONG - the Song Brief: what the song should be.'],
-    ['2 · WRITE', 'WRITE - a local language model writes the title, the style and the lyrics.'],
+    ['2 · WRITE', 'WRITE - the writer model you choose writes the title, the style and the lyrics.'],
     ['3 · TEXT', 'TEXT - Song Sheet · Text shows exactly what YuE2 will sing.'],
-    ['4 · SCORE', 'SCORE - YuE2 plans the melody as a score; Song Sheet · Score shows it.'],
+    ['4 · SCORE', 'SCORE - YuE2 plans the melody as a score, Arrange can re-arrange it, and Song Sheet · Score shows it.'],
     ['5 · RENDER', 'RENDER - YuE2 renders the song.'],
     ['6 · FINISH', 'FINISH - Master brings it to -14 LUFS, Export writes the files.'],
   ]
@@ -118,15 +119,20 @@ export default async function song(s) {
   s.caption('vocals: a sung song - or an instrumental.')
   await s.hover(await s.widgetBox(BRIEF, 'vocals'), { fx: 0.7 })
   await s.wait(2600)
+  s.caption('arrangement: “simple” - YuE2 plans melody, chords and instruments itself. The experimental creative modes are tutorial 6.')
+  await s.spotlight(await s.widgetBox(BRIEF, 'arrangement'), { ms: 2600 })
+  await s.read('arrangement: “simple” - YuE2 plans melody, chords and instruments itself. The experimental creative modes are tutorial 6.', 6000)
+  s.caption('The Writer model writes the text: Gemma 4 by default - or a local LLM from your machine.')
+  await s.flyNodes([WRITER], 1000, 0.9)
+  await s.spotlight(await s.widgetBox(WRITER, 'model'), { ms: 2400 })
+  await s.read('The Writer model writes the text: Gemma 4 by default - or a local LLM from your machine.', 4800)
 
   s.caption('Press Run.')
   await s.resetRunState()
   await s.run()
   await s.follow({ stages: STAGES, groups: GROUPS })
   await afterRun(s, 'Done: the finished song is in Preview (mastered).')
-  s.caption('Export wrote the mastered FLAC, the unmastered take and a release record to output/plenio.')
-  await s.flyNodes([EXPORT], 1000, 0.9)
-  await s.read('Export wrote the mastered FLAC, the unmastered take and a release record to output/plenio.', 4200)
+  await sheetMusicSaved(s, EXPORT, 'Export wrote the mastered FLAC, the unmastered take, a release record - and the sheet music with the lyrics as a PDF.')
   s.caption('Press Run again for another, different song - or set a number next to Run for a whole series.')
   const batch = page.locator('.actionbar input, .queue-button-group input, [data-testid="batch-count-edit"] input').first()
   if (await batch.count()) await s.spotlight(batch, { ms: 2600, pad: 10 })
