@@ -1272,7 +1272,7 @@ def finish(
     group: str,
     export_widgets: dict[str, object] | None = None,
     cover_y: float = 560,
-    export_size: tuple[float, float] = (380, 470 + SUMMARY_ROOM),
+    export_size: tuple[float, float] = (380, 494 + SUMMARY_ROOM),
     sheet_music: str = "off",
 ) -> tuple[Node, Node, Node]:
     """Master -> Preview + Export (the unmastered take as the original), and the optional Cover Art.
@@ -1316,8 +1316,8 @@ FINISH_TEXT = (
     "**Finish:** *Plenio · Master* brings the take to -14 LUFS / -1 dBTP with a gentle tone match (open the "
     "block to change the EQ or the loudness target). Export writes the mastered FLAC 24-bit, the unmastered "
     "take as `(original).flac` and a release record to `output/plenio` - in the YuE2 templates also the "
-    "**sheet music** with the lyrics as `<name>.pdf` (*sheet music* in Export: A4, Letter or off; this page "
-    "draws it right after the export)."
+    "**sheet music** with the lyrics as `<name>.pdf` (*sheet music* in Export: A4, Letter or off; *sheet music "
+    "size*: standard about 3 bars a line, smaller, compact or large; this page draws it right after the export)."
 )
 COVER_TEXT = (
     "**Cover art (optional, bypassed):** *Cover Art* paints a cover from the sheet's artwork prompt with "
@@ -1749,9 +1749,9 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             (refine_node, "report"),
         ],
         group="7 · FINISH",
-        cover_y=780,
+        cover_y=804,
         sheet_music="PDF (A4)",
-        export_size=(380, 560 + SUMMARY_ROOM),
+        export_size=(380, 584 + SUMMARY_ROOM),
     )
     # Sung Pitch (0.4.4): the source's vocals as a pitch curve for both sheets' editors, once per source;
     # the text sheet plays the source too, so the words can be checked against the singing
@@ -2020,7 +2020,7 @@ def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         group="6 · FINISH",
         cover_y=755,
         sheet_music="PDF (A4)",
-        export_size=(385, 530 + SUMMARY_ROOM),
+        export_size=(385, 554 + SUMMARY_ROOM),
     )
     g.group("1 · SONG", [brief])
     g.group("2 · WRITE", [write, draft, writer])
@@ -2076,7 +2076,7 @@ def enhance_master(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     export = g.add(
         "PlenioExportRelease",
         (2490, 180),
-        size=(380, 400 + SUMMARY_ROOM),
+        size=(380, 424 + SUMMARY_ROOM),
         autogrow={"reports": 5},
         widgets={
             "folder": "plenio/enhanced",

@@ -4,7 +4,7 @@
  * storage simply gives the defaults.
  */
 import type { VoiceSwitches } from '../../shared/playback'
-import type { Paper } from './editorSettings'
+import type { NotationSize, Paper } from './editorSettings'
 import { type Sounds, defaultSounds, soundsOf } from './instruments'
 import type { RecordSettings } from './midiRecording'
 import { NOTATION_MAX, NOTATION_MIN, ROLL_MAX, ROLL_MIN, SIDE_MAX, SIDE_MIN } from '../paneSizes'
@@ -49,10 +49,16 @@ export interface EditorPrefs {
   sounds: Sounds
   /** The paper of the notation's PDF and print. */
   paper: Paper
+  /** How large the notation export draws the music. */
+  notationSize: NotationSize
   /** Recording and step input with a MIDI keyboard. */
   record: RecordSettings
   /** The MIDI keyboard to listen to (an input's id; ``all``: every one). */
   midiInput: string
+}
+
+export function isNotationSize(value: unknown): value is NotationSize {
+  return value === 'large' || value === 'standard' || value === 'smaller' || value === 'compact'
 }
 
 export function defaultRecord(): RecordSettings {
@@ -98,6 +104,7 @@ export function defaultPrefs(): EditorPrefs {
     wave: true,
     sounds: defaultSounds(),
     paper: 'a4',
+    notationSize: 'standard',
     record: defaultRecord(),
     midiInput: 'all'
   }
@@ -157,6 +164,7 @@ export function loadPrefs(storage: Pick<Storage, 'getItem'> | null = safeStorage
       wave: data.wave !== false,
       sounds: soundsOf(data.sounds),
       paper: data.paper === 'letter' ? 'letter' : 'a4',
+      notationSize: isNotationSize(data.notationSize) ? data.notationSize : defaults.notationSize,
       record: recordOf(data.record),
       midiInput: typeof data.midiInput === 'string' && data.midiInput ? data.midiInput : 'all'
     }

@@ -64,9 +64,9 @@ const statusHost: StatusHost = {
 const sheetHost: SheetMusicHost = {
   fetcher: comfyApi,
   property: (id) => nodeById(id)?.properties?.plenio_lyric_spans,
-  async draw(abc, title, paper) {
+  async draw(abc, title, paper, size) {
     const { notationPdf, renderLines } = await import('../sheet-editor/score/notationExport')
-    const drawing = renderLines(abc, title, paper)
+    const drawing = renderLines(abc, title, paper, size)
     try {
       if (!drawing.lines.length) throw new Error('the score has no music to draw')
       return await notationPdf(drawing.lines, paper, title)

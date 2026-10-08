@@ -1,23 +1,23 @@
-function As(_) {
-  return _ && _.__esModule && Object.prototype.hasOwnProperty.call(_, "default") ? _.default : _;
+function Bs(k) {
+  return k && k.__esModule && Object.prototype.hasOwnProperty.call(k, "default") ? k.default : k;
 }
-var je, ra;
-function Ms() {
-  if (ra) return je;
-  ra = 1;
-  var _ = "6.7.1";
-  return je = _, je;
-}
-var $e, aa;
-function Rr() {
-  if (aa) return $e;
+var je, aa;
+function Ns() {
+  if (aa) return je;
   aa = 1;
-  var _ = function(g, l) {
+  var k = "6.7.1";
+  return je = k, je;
+}
+var $e, na;
+function Rr() {
+  if (na) return $e;
+  na = 1;
+  var k = function(g, l) {
     var r = this;
     l || (l = {}), r.qpm = l.qpm ? parseInt(l.qpm, 10) : null, r.extraMeasuresAtBeginning = l.extraMeasuresAtBeginning ? parseInt(l.extraMeasuresAtBeginning, 10) : 0, r.beatCallback = l.beatCallback, r.eventCallback = l.eventCallback, r.lineEndCallback = l.lineEndCallback, r.lineEndAnticipation = l.lineEndAnticipation ? parseInt(l.lineEndAnticipation, 10) : 0, r.beatSubdivisions = l.beatSubdivisions ? parseInt(l.beatSubdivisions, 10) : 1, r.beatSubdivisions || (r.beatSubdivisions = 1), r.joggerTimer = null, r.replaceTarget = function(a) {
       if (!l.qpm) {
-        var s = a.metaText ? a.metaText.tempo : null;
-        r.qpm = a.getBpm(s);
+        var o = a.metaText ? a.metaText.tempo : null;
+        r.qpm = a.getBpm(o);
       }
       if (r.noteTimings = a.setTiming(r.qpm, r.extraMeasuresAtBeginning), a.noteTimings.length === 0 && (r.noteTimings = a.setTiming(0, 0)), r.lineEndCallback && (r.lineEndTimings = m(a.noteTimings, r.lineEndAnticipation)), r.startTime = null, r.currentBeat = 0, r.currentEvent = 0, r.currentLine = 0, r.currentTime = 0, r.isPaused = !1, r.isRunning = !1, r.pausedPercent = null, r.justUnpaused = !1, r.newSeekPercent = 0, r.lastTimestamp = 0, r.noteTimings.length !== 0) {
         r.millisecondsPerBeat = 1e3 / (r.qpm / 60) / r.beatSubdivisions, r.lastMoment = r.noteTimings[r.noteTimings.length - 1].milliseconds;
@@ -48,8 +48,8 @@ function Rr() {
       if (r.lastTimestamp !== a && (r.lastTimestamp = a, !r.isPaused && r.isRunning)) {
         for (r.startTime || (r.startTime = a), r.currentTime = a - r.startTime, r.currentTime += 16; r.noteTimings.length > r.currentEvent && r.noteTimings[r.currentEvent].milliseconds < r.currentTime; ) {
           if (r.eventCallback && r.noteTimings[r.currentEvent].type === "event") {
-            var s = r.startTime;
-            r.eventCallback(r.noteTimings[r.currentEvent]), s !== r.startTime && (r.currentTime = a - r.startTime);
+            var o = r.startTime;
+            r.eventCallback(r.noteTimings[r.currentEvent]), o !== r.startTime && (r.currentTime = a - r.startTime);
           }
           r.currentEvent++;
         }
@@ -76,24 +76,24 @@ function Rr() {
             r.stop();
       }
     }, r.shouldStop = function(a) {
-      return new Promise(function(s) {
+      return new Promise(function(o) {
         if (!a)
-          return s(!0);
+          return o(!0);
         if (a === "continue")
-          return s(!1);
+          return o(!1);
         a.then && a.then(function(p) {
-          s(p !== "continue");
+          o(p !== "continue");
         });
       });
     }, r.doBeatCallback = function(a) {
       if (r.beatCallback) {
-        for (var s = r.currentEvent; s < r.noteTimings.length && r.noteTimings[s].left === null; )
-          s++;
+        for (var o = r.currentEvent; o < r.noteTimings.length && r.noteTimings[o].left === null; )
+          o++;
         var p, u;
-        if (s < r.noteTimings.length) {
-          for (p = r.noteTimings[s].milliseconds, s = Math.max(0, r.currentEvent - 1); s >= 0 && r.noteTimings[s].left === null; )
-            s--;
-          u = r.noteTimings[s];
+        if (o < r.noteTimings.length) {
+          for (p = r.noteTimings[o].milliseconds, o = Math.max(0, r.currentEvent - 1); o >= 0 && r.noteTimings[o].left === null; )
+            o--;
+          u = r.noteTimings[o];
         }
         var d = {}, f = {};
         if (u) {
@@ -151,19 +151,19 @@ function Rr() {
       }
       return null;
     };
-    var o = 60;
+    var s = 60;
     r.animationJogger = function() {
-      r.isRunning && (r.doTiming(performance.now()), r.joggerTimer = setTimeout(r.animationJogger, o));
-    }, r.start = function(a, s) {
+      r.isRunning && (r.doTiming(performance.now()), r.joggerTimer = setTimeout(r.animationJogger, s));
+    }, r.start = function(a, o) {
       if (r.isRunning = !0, r.isPaused && (r.isPaused = !1, a === void 0 && (r.justUnpaused = !0)), a)
-        r.setProgress(a, s);
+        r.setProgress(a, o);
       else if (a === 0)
         r.reset();
       else if (r.pausedPercent !== null) {
         var p = performance.now();
         r.currentTime = r.lastMoment * r.pausedPercent, r.startTime = p - r.currentTime, r.pausedPercent = null, r.reportNext = !0;
       }
-      requestAnimationFrame(r.doTiming), r.joggerTimer = setTimeout(r.animationJogger, o);
+      requestAnimationFrame(r.doTiming), r.joggerTimer = setTimeout(r.animationJogger, s);
     }, r.pause = function() {
       r.isPaused = !0;
       var a = performance.now();
@@ -174,9 +174,9 @@ function Rr() {
       r.currentBeat = 0, r.currentEvent = 0, r.currentLine = 0, r.startTime = null, r.pausedPercent = null;
     }, r.stop = function() {
       r.pause(), r.reset();
-    }, r.setProgress = function(a, s) {
+    }, r.setProgress = function(a, o) {
       var p;
-      switch (s) {
+      switch (o) {
         case "seconds":
           r.currentTime = a * 1e3, r.currentTime < 0 && (r.currentTime = 0), r.currentTime > r.lastMoment && (r.currentTime = r.lastMoment), p = r.currentTime / r.lastMoment;
           break;
@@ -197,28 +197,28 @@ function Rr() {
       var d = r.currentBeat;
       for (r.currentBeat = 0; r.currentBeat < r.beatStarts.length && !(r.beatStarts[r.currentBeat].ts > r.currentTime); r.currentBeat++)
         ;
-      r.currentBeat--, r.beatCallback && d !== r.currentBeat && (r.doBeatCallback(r.startTime + r.currentTime), r.currentBeat++), r.eventCallback && r.currentEvent >= 0 && r.noteTimings[r.currentEvent].type === "event" && r.eventCallback(r.noteTimings[r.currentEvent]), r.lineEndCallback && r.lineEndCallback(r.lineEndTimings[r.currentLine], r.noteTimings[r.currentEvent], { line: r.currentLine, endTimings: r.lineEndTimings }), r.joggerTimer = setTimeout(r.animationJogger, o);
+      r.currentBeat--, r.beatCallback && d !== r.currentBeat && (r.doBeatCallback(r.startTime + r.currentTime), r.currentBeat++), r.eventCallback && r.currentEvent >= 0 && r.noteTimings[r.currentEvent].type === "event" && r.eventCallback(r.noteTimings[r.currentEvent]), r.lineEndCallback && r.lineEndCallback(r.lineEndTimings[r.currentLine], r.noteTimings[r.currentEvent], { line: r.currentLine, endTimings: r.lineEndTimings }), r.joggerTimer = setTimeout(r.animationJogger, s);
     };
   };
   function m(g, l) {
-    for (var r = [], o = null, a = 0; a < g.length; a++) {
-      var s = g[a];
-      s.type !== "end" && s.top !== o && (r.push({ measureNumber: s.measureNumber, milliseconds: s.milliseconds - l, top: s.top, bottom: s.top + s.height }), o = s.top);
+    for (var r = [], s = null, a = 0; a < g.length; a++) {
+      var o = g[a];
+      o.type !== "end" && o.top !== s && (r.push({ measureNumber: o.measureNumber, milliseconds: o.milliseconds - l, top: o.top, bottom: o.top + o.height }), s = o.top);
     }
     return r;
   }
-  return $e = _, $e;
+  return $e = k, $e;
 }
-var Ve, na;
-function Bs() {
-  if (na) return Ve;
-  na = 1;
-  var _ = Rr(), m = {};
+var Ve, ia;
+function Ps() {
+  if (ia) return Ve;
+  ia = 1;
+  var k = Rr(), m = {};
   return (function() {
     var g, l;
-    m.startAnimation = function(r, o, a) {
+    m.startAnimation = function(r, s, a) {
       g && (g.stop(), g = void 0), a.showCursor && (l = r.querySelector(".abcjs-cursor"), l || (l = document.createElement("DIV"), l.className = "abcjs-cursor cursor", l.style.position = "absolute", r.appendChild(l), r.style.position = "relative"));
-      function s(t) {
+      function o(t) {
         for (var e = 0; e < t.length; e++) {
           var c = t[e];
           c.classList.contains("abcjs-bar") || (c.style.display = "none");
@@ -228,13 +228,13 @@ function Bs() {
       function u(t) {
         if (p) {
           var e = r.querySelectorAll(p);
-          s(e);
+          o(e);
         }
         p = t;
       }
       function d(t) {
         var e = r.querySelectorAll(t);
-        s(e);
+        o(e);
       }
       function f(t) {
         a.hideCurrentMeasure ? d(t) : a.hideFinishedMeasures && u(t);
@@ -252,7 +252,7 @@ function Bs() {
         } else
           g.stop(), g = void 0;
       }
-      g = new _(o, {
+      g = new k(s, {
         qpm: a.bpm,
         eventCallback: n
       }), g.start();
@@ -263,48 +263,48 @@ function Bs() {
     };
   })(), Ve = m, Ve;
 }
-var Ke, ia;
+var Ke, sa;
 function _e() {
-  if (ia) return Ke;
-  ia = 1;
-  var _ = {};
-  return _.cloneArray = function(m) {
+  if (sa) return Ke;
+  sa = 1;
+  var k = {};
+  return k.cloneArray = function(m) {
     for (var g = [], l = 0; l < m.length; l++)
       g.push(Object.assign({}, m[l]));
     return g;
-  }, _.cloneHashOfHash = function(m) {
+  }, k.cloneHashOfHash = function(m) {
     var g = {};
     for (var l in m)
       m.hasOwnProperty(l) && (g[l] = Object.assign({}, m[l]));
     return g;
-  }, _.cloneHashOfArrayOfHash = function(m) {
+  }, k.cloneHashOfArrayOfHash = function(m) {
     var g = {};
     for (var l in m)
-      m.hasOwnProperty(l) && (g[l] = _.cloneArray(m[l]));
+      m.hasOwnProperty(l) && (g[l] = k.cloneArray(m[l]));
     return g;
-  }, _.strip = function(m) {
+  }, k.strip = function(m) {
     return m.replace(/^\s+/, "").replace(/\s+$/, "");
-  }, _.startsWith = function(m, g) {
+  }, k.startsWith = function(m, g) {
     return m.indexOf(g) === 0;
-  }, _.endsWith = function(m, g) {
+  }, k.endsWith = function(m, g) {
     var l = m.length - g.length;
     return l >= 0 && m.lastIndexOf(g) === l;
-  }, _.last = function(m) {
+  }, k.last = function(m) {
     return m.length === 0 ? null : m[m.length - 1];
-  }, Ke = _, Ke;
+  }, Ke = k, Ke;
 }
-var Qe, sa;
+var Qe, oa;
 function Ir() {
-  if (sa) return Qe;
-  sa = 1;
-  var _ = _e(), m = {};
+  if (oa) return Qe;
+  oa = 1;
+  var k = _e(), m = {};
   return (function() {
-    var g, l, r, o, a;
+    var g, l, r, s, a;
     m.initialize = function(b, x, E, D, O) {
-      g = b, l = x, r = E, o = D, a = O, s();
+      g = b, l = x, r = E, s = D, a = O, o();
     };
-    function s() {
-      r.annotationfont = { face: "Helvetica", size: 12, weight: "normal", style: "normal", decoration: "none" }, r.gchordfont = { face: "Helvetica", size: 12, weight: "normal", style: "normal", decoration: "none" }, r.historyfont = { face: '"Times New Roman"', size: 16, weight: "normal", style: "normal", decoration: "none" }, r.infofont = { face: '"Times New Roman"', size: 14, weight: "normal", style: "italic", decoration: "none" }, r.measurefont = { face: '"Times New Roman"', size: 14, weight: "normal", style: "italic", decoration: "none" }, r.partsfont = { face: '"Times New Roman"', size: 15, weight: "normal", style: "normal", decoration: "none" }, r.repeatfont = { face: '"Times New Roman"', size: 13, weight: "normal", style: "normal", decoration: "none" }, r.textfont = { face: '"Times New Roman"', size: 16, weight: "normal", style: "normal", decoration: "none" }, r.tripletfont = { face: "Times", size: 11, weight: "normal", style: "italic", decoration: "none" }, r.vocalfont = { face: '"Times New Roman"', size: 13, weight: "bold", style: "normal", decoration: "none" }, r.wordsfont = { face: '"Times New Roman"', size: 16, weight: "normal", style: "normal", decoration: "none" }, o.formatting.composerfont = { face: '"Times New Roman"', size: 14, weight: "normal", style: "italic", decoration: "none" }, o.formatting.subtitlefont = { face: '"Times New Roman"', size: 16, weight: "normal", style: "normal", decoration: "none" }, o.formatting.tempofont = { face: '"Times New Roman"', size: 15, weight: "bold", style: "normal", decoration: "none" }, o.formatting.titlefont = { face: '"Times New Roman"', size: 20, weight: "normal", style: "normal", decoration: "none" }, o.formatting.footerfont = { face: '"Times New Roman"', size: 12, weight: "normal", style: "normal", decoration: "none" }, o.formatting.headerfont = { face: '"Times New Roman"', size: 12, weight: "normal", style: "normal", decoration: "none" }, o.formatting.voicefont = { face: '"Times New Roman"', size: 13, weight: "bold", style: "normal", decoration: "none" }, o.formatting.tablabelfont = { face: '"Trebuchet MS"', size: 16, weight: "normal", style: "normal", decoration: "none" }, o.formatting.tabnumberfont = { face: '"Arial"', size: 11, weight: "normal", style: "normal", decoration: "none" }, o.formatting.tabgracefont = { face: '"Arial"', size: 8, weight: "normal", style: "normal", decoration: "none" }, o.formatting.annotationfont = r.annotationfont, o.formatting.gchordfont = r.gchordfont, o.formatting.historyfont = r.historyfont, o.formatting.infofont = r.infofont, o.formatting.measurefont = r.measurefont, o.formatting.partsfont = r.partsfont, o.formatting.repeatfont = r.repeatfont, o.formatting.textfont = r.textfont, o.formatting.tripletfont = r.tripletfont, o.formatting.vocalfont = r.vocalfont, o.formatting.wordsfont = r.wordsfont;
+    function o() {
+      r.annotationfont = { face: "Helvetica", size: 12, weight: "normal", style: "normal", decoration: "none" }, r.gchordfont = { face: "Helvetica", size: 12, weight: "normal", style: "normal", decoration: "none" }, r.historyfont = { face: '"Times New Roman"', size: 16, weight: "normal", style: "normal", decoration: "none" }, r.infofont = { face: '"Times New Roman"', size: 14, weight: "normal", style: "italic", decoration: "none" }, r.measurefont = { face: '"Times New Roman"', size: 14, weight: "normal", style: "italic", decoration: "none" }, r.partsfont = { face: '"Times New Roman"', size: 15, weight: "normal", style: "normal", decoration: "none" }, r.repeatfont = { face: '"Times New Roman"', size: 13, weight: "normal", style: "normal", decoration: "none" }, r.textfont = { face: '"Times New Roman"', size: 16, weight: "normal", style: "normal", decoration: "none" }, r.tripletfont = { face: "Times", size: 11, weight: "normal", style: "italic", decoration: "none" }, r.vocalfont = { face: '"Times New Roman"', size: 13, weight: "bold", style: "normal", decoration: "none" }, r.wordsfont = { face: '"Times New Roman"', size: 16, weight: "normal", style: "normal", decoration: "none" }, s.formatting.composerfont = { face: '"Times New Roman"', size: 14, weight: "normal", style: "italic", decoration: "none" }, s.formatting.subtitlefont = { face: '"Times New Roman"', size: 16, weight: "normal", style: "normal", decoration: "none" }, s.formatting.tempofont = { face: '"Times New Roman"', size: 15, weight: "bold", style: "normal", decoration: "none" }, s.formatting.titlefont = { face: '"Times New Roman"', size: 20, weight: "normal", style: "normal", decoration: "none" }, s.formatting.footerfont = { face: '"Times New Roman"', size: 12, weight: "normal", style: "normal", decoration: "none" }, s.formatting.headerfont = { face: '"Times New Roman"', size: 12, weight: "normal", style: "normal", decoration: "none" }, s.formatting.voicefont = { face: '"Times New Roman"', size: 13, weight: "bold", style: "normal", decoration: "none" }, s.formatting.tablabelfont = { face: '"Trebuchet MS"', size: 16, weight: "normal", style: "normal", decoration: "none" }, s.formatting.tabnumberfont = { face: '"Arial"', size: 11, weight: "normal", style: "normal", decoration: "none" }, s.formatting.tabgracefont = { face: '"Arial"', size: 8, weight: "normal", style: "normal", decoration: "none" }, s.formatting.annotationfont = r.annotationfont, s.formatting.gchordfont = r.gchordfont, s.formatting.historyfont = r.historyfont, s.formatting.infofont = r.infofont, s.formatting.measurefont = r.measurefont, s.formatting.partsfont = r.partsfont, s.formatting.repeatfont = r.repeatfont, s.formatting.textfont = r.textfont, s.formatting.tripletfont = r.tripletfont, s.formatting.vocalfont = r.vocalfont, s.formatting.wordsfont = r.wordsfont;
     }
     var p = { gchordfont: !0, measurefont: !0, partsfont: !0, annotationfont: !0, composerfont: !0, historyfont: !0, infofont: !0, subtitlefont: !0, textfont: !0, titlefont: !0, voicefont: !0 }, u = function(b) {
       switch (b) {
@@ -418,9 +418,9 @@ function Ir() {
       var oe = u(H), ce = {};
       return oe ? (ce.face = oe.face, ce.weight = oe.weight, ce.style = oe.style, ce.decoration = oe.decoration, ce.size = $, J && (ce.box = !0), ce) : (ce.face = H, ce.weight = Q, ce.style = W, ce.decoration = ne, ce.size = $, J && (ce.box = !0), ce);
     }, f = function(b, x, E) {
-      return x.length === 0 ? 'Directive "' + b + '" requires a font as a parameter.' : (r[b] = d(x, r[b], E, 0, b), r.is_in_header && (o.formatting[b] = r[b]), null);
+      return x.length === 0 ? 'Directive "' + b + '" requires a font as a parameter.' : (r[b] = d(x, r[b], E, 0, b), r.is_in_header && (s.formatting[b] = r[b]), null);
     }, i = function(b, x, E) {
-      return x.length === 0 ? 'Directive "' + b + '" requires a font as a parameter.' : (o.formatting[b] = d(x, o.formatting[b], E, 0, b), null);
+      return x.length === 0 ? 'Directive "' + b + '" requires a font as a parameter.' : (s.formatting[b] = d(x, s.formatting[b], E, 0, b), null);
     }, n = function(b, x) {
       var E = "";
       x.forEach(function(O) {
@@ -429,7 +429,7 @@ function Ir() {
       var D = parseFloat(E);
       if (isNaN(D) || D === 0)
         return 'Directive "' + b + '" requires a number as a parameter.';
-      o.formatting.scale = D;
+      s.formatting.scale = D;
     }, t = [
       "acoustic-bass-drum",
       "bass-drum-1",
@@ -492,7 +492,7 @@ function Ir() {
       return E.used === 0 || x.length !== 0 ? { error: 'Directive "' + b + '" requires a measurement as a parameter.' } : E.value;
     }, v = function(b, x) {
       var E = g.getMeasurement(x);
-      return E.used === 0 || x.length !== 0 ? 'Directive "' + b + '" requires a measurement as a parameter.' : (o.formatting[b] = E.value, null);
+      return E.used === 0 || x.length !== 0 ? 'Directive "' + b + '" requires a measurement as a parameter.' : (s.formatting[b] = E.value, null);
     }, h = function(b, x, E, D, O) {
       if (E.length !== 1 || E[0].type !== "number")
         return 'Directive "' + x + '" requires a number as a parameter.';
@@ -569,7 +569,7 @@ function Ir() {
     ], S = [
       "drum",
       "chordname"
-    ], k = [
+    ], _ = [
       "bassprog",
       "chordprog"
     ], M = function(b, x, E) {
@@ -606,7 +606,7 @@ function Ir() {
           for (O.push(z.token); b.length > 0; )
             z = b.shift(), z.type !== "number" && l("Expected integer parameter in MIDI " + D, E, 0), O.push(z.intt);
         }
-      else if (k.indexOf(D) >= 0) {
+      else if (_.indexOf(D) >= 0) {
         if (b.length !== 1 && b.length !== 2)
           l("Expected one or two parameters in MIDI " + D, E, 0);
         else if (b[0].type !== "number")
@@ -673,19 +673,19 @@ function Ir() {
         //					stretchstaff: { type: "boolean", optional: true },
         //					titleformat: { type: "string", optional: true },
         case "bagpipes":
-          o.formatting.bagpipes = !0;
+          s.formatting.bagpipes = !0;
           break;
         case "flatbeams":
-          o.formatting.flatbeams = !0;
+          s.formatting.flatbeams = !0;
           break;
         case "jazzchords":
-          o.formatting.jazzchords = !0;
+          s.formatting.jazzchords = !0;
           break;
         case "accentAbove":
-          o.formatting.accentAbove = !0;
+          s.formatting.accentAbove = !0;
           break;
         case "germanAlphabet":
-          o.formatting.germanAlphabet = !0;
+          s.formatting.germanAlphabet = !0;
           break;
         case "landscape":
           r.landscape = !0;
@@ -697,30 +697,30 @@ function Ir() {
           if (x.length !== 1)
             return "Directive graceslurs requires one parameter: 0 or 1";
           if (x[0].token === "0" || x[0].token === "false")
-            o.formatting.graceSlurs = !1;
+            s.formatting.graceSlurs = !1;
           else if (x[0].token === "1" || x[0].token === "true")
-            o.formatting.graceSlurs = !0;
+            s.formatting.graceSlurs = !0;
           else
             return "Directive graceslurs requires one parameter: 0 or 1 (received " + x[0].token + ")";
           break;
         case "lineThickness":
           var H = L(x);
-          if (H.value !== void 0 && (o.formatting.lineThickness = H.value), H.error)
+          if (H.value !== void 0 && (s.formatting.lineThickness = H.value), H.error)
             return H.error;
           break;
         case "stretchlast":
           var $ = L(x);
-          if ($.value !== void 0 && (o.formatting.stretchlast = $.value), $.error)
+          if ($.value !== void 0 && (s.formatting.stretchlast = $.value), $.error)
             return $.error;
           break;
         case "titlecaps":
           r.titlecaps = !0;
           break;
         case "titleleft":
-          o.formatting.titleleft = !0;
+          s.formatting.titleleft = !0;
           break;
         case "measurebox":
-          o.formatting.measurebox = !0;
+          s.formatting.measurebox = !0;
           break;
         case "vocal":
           return w("vocalPosition", D, x, F);
@@ -829,7 +829,7 @@ function Ir() {
         case "begintext":
           var V = "";
           for (z = g.nextLine(); z && z.indexOf("%%endtext") !== 0; ) {
-            if (_.startsWith(z, "%%")) {
+            if (k.startsWith(z, "%%")) {
               var oe = z.substring(2);
               oe = oe.trim() + `
 `, V += oe;
@@ -895,10 +895,10 @@ function Ir() {
         case "staves":
         case "score":
           r.score_is_present = !0;
-          for (var ge = function(Fe, Ss, ea, ta, Es) {
-            (Ss || r.staves.length === 0) && r.staves.push({ index: r.staves.length, numVoices: 0 });
-            var Be = _.last(r.staves);
-            ea !== void 0 && Be.bracket === void 0 && (Be.bracket = ea), ta !== void 0 && Be.brace === void 0 && (Be.brace = ta), Es && (Be.connectBarLines = "end"), r.voices[Fe] === void 0 && (r.voices[Fe] = { staffNum: Be.index, index: Be.numVoices }, Be.numVoices++);
+          for (var ge = function(Fe, As, ta, ra, Ms) {
+            (As || r.staves.length === 0) && r.staves.push({ index: r.staves.length, numVoices: 0 });
+            var Be = k.last(r.staves);
+            ta !== void 0 && Be.bracket === void 0 && (Be.bracket = ta), ra !== void 0 && Be.brace === void 0 && (Be.brace = ra), Ms && (Be.connectBarLines = "end"), r.voices[Fe] === void 0 && (r.voices[Fe] = { staffNum: Be.index, index: Be.numVoices }, Be.numVoices++);
           }, ye = !1, Y = !1, j = !1, G = !1, X = !1, K = !1, Z = !1, ae, le = function() {
             if (Z = !0, ae) {
               var Fe = "start";
@@ -939,7 +939,7 @@ function Ir() {
           break;
         case "maxstaves":
           var de = g.getInt(E);
-          de.digits === 0 ? l("Expected number of staves in maxstaves") : de.value > 0 && (o.formatting.maxStaves = de.value);
+          de.digits === 0 ? l("Expected number of staves in maxstaves") : de.value > 0 && (s.formatting.maxStaves = de.value);
           break;
         case "newpage":
           var me = g.getInt(E);
@@ -969,11 +969,11 @@ function Ir() {
           break;
         case "midi":
           var Ae = g.tokenize(E, 0, E.length, !0);
-          Ae.length > 0 && Ae[0].token === "=" && Ae.shift(), Ae.length === 0 ? l("Expected midi command", E, 0) : M(Ae, o, E);
+          Ae.length > 0 && Ae[0].token === "=" && Ae.shift(), Ae.length === 0 ? l("Expected midi command", E, 0) : M(Ae, s, E);
           break;
         case "percmap":
           var Me = e(E);
-          Me.error ? l(Me.error, b, 8) : (o.formatting.percmap || (o.formatting.percmap = {}), o.formatting.percmap[Me.key] = Me.value);
+          Me.error ? l(Me.error, b, 8) : (s.formatting.percmap || (s.formatting.percmap = {}), s.formatting.percmap[Me.key] = Me.value);
           break;
         case "visualtranspose":
           var Ie = g.getInt(E);
@@ -984,7 +984,7 @@ function Ir() {
         case "auquality":
         case "continuous":
         case "nobarcheck":
-          o.formatting[D] = E;
+          s.formatting[D] = E;
           break;
         default:
           return "Unknown directive: " + D;
@@ -1028,14 +1028,14 @@ function Ir() {
               O = y("freegchord", x, D), O !== null && l(O);
               break;
             case "fontboxpadding":
-              (D.length !== 1 || D[0].type !== "number") && l('Directive "' + x + '" requires a number as a parameter.'), o.formatting.fontboxpadding = D[0].floatt;
+              (D.length !== 1 || D[0].type !== "number") && l('Directive "' + x + '" requires a number as a parameter.'), s.formatting.fontboxpadding = D[0].floatt;
               break;
             case "stafftopmargin":
-              (D.length !== 1 || D[0].type !== "number") && l('Directive "' + x + '" requires a number as a parameter.'), o.formatting.stafftopmargin = D[0].floatt;
+              (D.length !== 1 || D[0].type !== "number") && l('Directive "' + x + '" requires a number as a parameter.'), s.formatting.stafftopmargin = D[0].floatt;
               break;
             case "stretchlast":
               var z = L(D);
-              if (z.value !== void 0 && (o.formatting.stretchlast = z.value), z.error)
+              if (z.value !== void 0 && (s.formatting.stretchlast = z.value), z.error)
                 return z.error;
               break;
             default:
@@ -1060,11 +1060,11 @@ function Ir() {
     }
   })(), Qe = m, Qe;
 }
-var Je, oa;
-function Ns() {
-  if (oa) return Je;
-  oa = 1;
-  var _ = {};
+var Je, ca;
+function Ls() {
+  if (ca) return Je;
+  ca = 1;
+  var k = {};
   const m = [
     "C,,,",
     "D,,,",
@@ -1123,43 +1123,43 @@ function Ns() {
     "a'''",
     "b'''"
   ];
-  return _.pitchIndex = function(g) {
+  return k.pitchIndex = function(g) {
     return m.indexOf(g);
-  }, _.noteName = function(g) {
+  }, k.noteName = function(g) {
     return m[g];
-  }, Je = _, Je;
+  }, Je = k, Je;
 }
-var Ze, ca;
-function $i() {
-  if (ca) return Ze;
-  ca = 1;
-  var _ = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"], m = ["C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B"], g = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"], l = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
-  function r(o, a, s, p) {
+var Ze, la;
+function Vi() {
+  if (la) return Ze;
+  la = 1;
+  var k = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"], m = ["C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B"], g = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"], l = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+  function r(s, a, o, p) {
     if (!a || a % 12 === 0)
-      return o;
+      return s;
     for (; a < 0; ) a += 12;
     a > 11 && (a = a % 12);
-    var u = o.match(/^([A-G][b#♭♯]?)([^\/]+)?\/?([A-G][b#♭♯]?)?(.+)?/);
+    var u = s.match(/^([A-G][b#♭♯]?)([^\/]+)?\/?([A-G][b#♭♯]?)?(.+)?/);
     if (!u)
-      return o;
-    var d = u[1], f = u[2], i = u[3], n = u[4], t = _.indexOf(d);
+      return s;
+    var d = u[1], f = u[2], i = u[3], n = u[4], t = k.indexOf(d);
     if (t < 0 && (t = m.indexOf(d)), t < 0 && (t = g.indexOf(d)), t < 0 && (t = l.indexOf(d)), t < 0)
-      return o;
-    t += a, t = t % 12, s ? p ? o = l[t] : o = m[t] : p ? o = g[t] : o = _[t];
+      return s;
+    t += a, t = t % 12, o ? p ? s = l[t] : s = m[t] : p ? s = g[t] : s = k[t];
     var e = f && (f.indexOf("dim") >= 0 || f.indexOf("°") >= 0);
-    if (e && o === "A#" && (o = "Bb"), e && o === "D#" && (o = "Eb"), e && o === "A♯" && (o = "B♭"), e && o === "D♯" && (o = "E♭"), f && (o += f), i) {
-      var t = _.indexOf(i);
-      t < 0 && (t = m.indexOf(i)), t < 0 && (t = g.indexOf(i)), t < 0 && (t = l.indexOf(i)), o += "/", t >= 0 ? (t += a, t = t % 12, s ? p ? o += l[t] : o += m[t] : p ? o += g[t] : o += _[t]) : o += i;
+    if (e && s === "A#" && (s = "Bb"), e && s === "D#" && (s = "Eb"), e && s === "A♯" && (s = "B♭"), e && s === "D♯" && (s = "E♭"), f && (s += f), i) {
+      var t = k.indexOf(i);
+      t < 0 && (t = m.indexOf(i)), t < 0 && (t = g.indexOf(i)), t < 0 && (t = l.indexOf(i)), s += "/", t >= 0 ? (t += a, t = t % 12, o ? p ? s += l[t] : s += m[t] : p ? s += g[t] : s += k[t]) : s += i;
     }
-    return n && (o += n), o;
+    return n && (s += n), s;
   }
   return Ze = r, Ze;
 }
-var et, la;
-function Vi() {
-  if (la) return et;
-  la = 1;
-  var _ = {
+var et, fa;
+function Ki() {
+  if (fa) return et;
+  fa = 1;
+  var k = {
     C: { modes: ["CMaj", "CIon", "Amin", "AAeo", "Am", "GMix", "DDor", "EPhr", "FLyd", "BLoc"], stepsFromC: 0 },
     Db: { modes: ["DbMaj", "DbIon", "Bbmin", "BbAeo", "Bbm", "AbMix", "EbDor", "FPhr", "GbLyd", "CLoc"], stepsFromC: 1 },
     D: { modes: ["DMaj", "DIon", "Bmin", "BAeo", "Bm", "AMix", "EDor", "F#Phr", "GLyd", "C#Loc"], stepsFromC: 2 },
@@ -1183,8 +1183,8 @@ function Vi() {
   var l = null;
   function r() {
     l = {};
-    for (var p = Object.keys(_), u = 0; u < p.length; u++) {
-      var d = _[p[u]];
+    for (var p = Object.keys(k), u = 0; u < p.length; u++) {
+      var d = k[p[u]];
       l[p[u].toLowerCase()] = p[u];
       for (var f = 0; f < d.modes.length; f++) {
         var i = d.modes[f].toLowerCase();
@@ -1192,7 +1192,7 @@ function Vi() {
       }
     }
   }
-  function o(p) {
+  function s(p) {
     l || r();
     var u = p.toLowerCase().match(/([a-g][b#]?)(maj|ion|min|aeo|mix|dor|phr|lyd|loc|m)?/);
     if (!u || !u[2])
@@ -1202,7 +1202,7 @@ function Vi() {
     return d || p;
   }
   function a(p, u) {
-    var d = _[p];
+    var d = k[p];
     if (!d || u === "")
       return p;
     var f = u.toLowerCase().match(/^(maj|ion|min|aeo|mix|dor|phr|lyd|loc|m)/);
@@ -1215,28 +1215,28 @@ function Vi() {
     }
     return p;
   }
-  function s(p, u) {
-    var d = _[p];
+  function o(p, u) {
+    var d = k[p];
     if (!d)
       return p;
     for (; u < 0; ) u += 12;
-    for (var f = (d.stepsFromC + u) % 12, i = 0; i < Object.keys(_).length; i++) {
-      var n = Object.keys(_)[i];
-      if (_[n].stepsFromC === f)
+    for (var f = (d.stepsFromC + u) % 12, i = 0; i < Object.keys(k).length; i++) {
+      var n = Object.keys(k)[i];
+      if (k[n].stepsFromC === f)
         return n;
     }
     return p;
   }
-  return et = { relativeMajor: o, relativeMode: a, transposeKey: s, isLegalMode: g }, et;
+  return et = { relativeMajor: s, relativeMode: a, transposeKey: o, isLegalMode: g }, et;
 }
-var tt, fa;
-function Ki() {
-  if (fa) return tt;
-  fa = 1;
-  var { relativeMajor: _ } = Vi(), m = { acc: "sharp", note: "f" }, g = { acc: "sharp", note: "c" }, l = { acc: "sharp", note: "g" }, r = { acc: "sharp", note: "d" }, o = { acc: "sharp", note: "A" }, a = { acc: "sharp", note: "e" }, s = { acc: "sharp", note: "B" }, p = { acc: "flat", note: "B" }, u = { acc: "flat", note: "e" }, d = { acc: "flat", note: "A" }, f = { acc: "flat", note: "d" }, i = { acc: "flat", note: "G" }, n = { acc: "flat", note: "c" }, t = { acc: "flat", note: "F" }, e = {
-    "C#": [m, g, l, r, o, a, s],
-    "F#": [m, g, l, r, o, a],
-    B: [m, g, l, r, o],
+var tt, ha;
+function Qi() {
+  if (ha) return tt;
+  ha = 1;
+  var { relativeMajor: k } = Ki(), m = { acc: "sharp", note: "f" }, g = { acc: "sharp", note: "c" }, l = { acc: "sharp", note: "g" }, r = { acc: "sharp", note: "d" }, s = { acc: "sharp", note: "A" }, a = { acc: "sharp", note: "e" }, o = { acc: "sharp", note: "B" }, p = { acc: "flat", note: "B" }, u = { acc: "flat", note: "e" }, d = { acc: "flat", note: "A" }, f = { acc: "flat", note: "d" }, i = { acc: "flat", note: "G" }, n = { acc: "flat", note: "c" }, t = { acc: "flat", note: "F" }, e = {
+    "C#": [m, g, l, r, s, a, o],
+    "F#": [m, g, l, r, s, a],
+    B: [m, g, l, r, s],
     E: [m, g, l, r],
     A: [m, g, l],
     D: [m, g],
@@ -1260,16 +1260,16 @@ function Ki() {
     none: []
   };
   function c(v) {
-    var h = e[_(v)];
+    var h = e[k(v)];
     return h ? JSON.parse(JSON.stringify(h)) : null;
   }
   return tt = c, tt;
 }
-var rt, ha;
-function Qi() {
-  if (ha) return rt;
-  ha = 1;
-  var _ = Ns(), m = $i(), g = Ki(), l = {}, r = {
+var rt, ua;
+function Ji() {
+  if (ua) return rt;
+  ua = 1;
+  var k = Ls(), m = Vi(), g = Qi(), l = {}, r = {
     C: 0,
     "C#": 1,
     Db: 1,
@@ -1287,7 +1287,7 @@ function Qi() {
     "A#": 10,
     Bb: 10,
     B: 11
-  }, o = ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"], a = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "Bb", "B"];
+  }, s = ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"], a = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "Bb", "B"];
   l.keySignature = function(i, n, t, e, c) {
     if (i.clef.type === "perc" || i.clef.type === "none")
       return { accidentals: g(n), root: t, acc: e };
@@ -1304,18 +1304,18 @@ function Qi() {
     w || (y = 0, h = "C", n = "");
     for (var A = y + i.localTranspose; A < 0; ) A += 12;
     A > 11 && (A = A % 12);
-    var P = n[0] === "m" ? a[A] : o[A], N = P + n, T = g(N);
+    var P = n[0] === "m" ? a[A] : s[A], N = P + n, T = g(N);
     (T.length === 0 || T[0].acc === "flat") && (i.localTransposePreferFlats = !0);
     var q = N.charCodeAt(0) - h.charCodeAt(0);
     return i.localTranspose > 0 ? (q < 0 || q === 0 && (h[1] === "#" || N[1] === "b")) && (q += 7) : i.localTranspose < 0 && (q > 0 || q === 0 && (h[1] === "b" || N[1] === "#")) && (q -= 7), i.localTranspose > 0 ? i.localTransposeVerticalMovement = q + Math.floor(i.localTranspose / 12) * 7 : i.localTransposeVerticalMovement = q + Math.ceil(i.localTranspose / 12) * 7, w ? { accidentals: T, root: P[0], acc: P.length > 1 ? P[1] : "" } : { accidentals: [], root: t, acc: e };
   }, l.chordName = function(i, n) {
     return m(n, i.localTranspose, i.localTransposePreferFlats, i.freegchord);
   };
-  var s = ["c", "d", "e", "f", "g", "a", "b"];
+  var o = ["c", "d", "e", "f", "g", "a", "b"];
   function p(i, n, t, e, c) {
-    for (var v = s[(i + 49) % 7], h = 0, y = 0; y < e.length; y++)
+    for (var v = o[(i + 49) % 7], h = 0, y = 0; y < e.length; y++)
       e[y].note.toLowerCase() === v && (h = u[e[y].acc]);
-    for (var w = u[t], A = w - h, P = s[(n + 49) % 7], N = 0, T = 0; T < c.accidentals.length; T++)
+    for (var w = u[t], A = w - h, P = o[(n + 49) % 7], N = 0, T = 0; T < c.accidentals.length; T++)
       c.accidentals[T].note.toLowerCase() === P && (N = u[c.accidentals[T].acc]);
     var q = A + N;
     return q < -2 && (n--, q += P === "c" || P === "f" ? 1 : 2), q > 2 && (n++, q -= P === "b" || P === "e" ? 1 : 2), [n, q];
@@ -1343,8 +1343,8 @@ function Qi() {
     if (!(!i.localTranspose || i.clef.type === "perc")) {
       var t = n.pitch;
       if (i.localTransposeVerticalMovement && (n.pitch = n.pitch + i.localTransposeVerticalMovement, n.name)) {
-        var e = n.accidental ? n.name.substring(1) : n.name, c = n.accidental ? n.name[0] : "", v = _.pitchIndex(e);
-        n.name = c + _.noteName(v + i.localTransposeVerticalMovement);
+        var e = n.accidental ? n.name.substring(1) : n.name, c = n.accidental ? n.name[0] : "", v = k.pitchIndex(e);
+        n.name = c + k.noteName(v + i.localTransposeVerticalMovement);
       }
       if (n.accidental) {
         var h = p(t, n.pitch, n.accidental, i.globalTransposeOrigKeySig, i.targetKey);
@@ -1353,19 +1353,19 @@ function Qi() {
     }
   }, rt = l, rt;
 }
-var at, ua;
+var at, da;
 function Fr() {
-  if (ua) return at;
-  ua = 1;
-  var _ = Ir(), m = Qi(), g = {};
+  if (da) return at;
+  da = 1;
+  var k = Ir(), m = Ji(), g = {};
   return (function() {
-    var l, r, o, a;
+    var l, r, s, a;
     g.initialize = function(t, e, c, v, h) {
-      l = t, r = e, o = c, a = h;
+      l = t, r = e, s = c, a = h;
     }, g.standardKey = function(t, e, c, v) {
-      return m.keySignature(o, t, e, c, v);
+      return m.keySignature(s, t, e, c, v);
     };
-    var s = {
+    var o = {
       treble: { clef: "treble", pitch: 4, mid: 0 },
       "treble+8": { clef: "treble+8", pitch: 4, mid: 0 },
       "treble-8": { clef: "treble-8", pitch: 4, mid: 0 },
@@ -1409,11 +1409,11 @@ function Fr() {
       "alto^8": { clef: "alto+8", pitch: 6, mid: -6 },
       alto_8: { clef: "alto-8", pitch: 6, mid: -6 }
     }, p = function(t, e) {
-      var c = s[t], v = c ? c.mid : 0;
+      var c = o[t], v = c ? c.mid : 0;
       return v + e;
     };
     g.fixClef = function(t) {
-      var e = s[t.type];
+      var e = o[t.type];
       e && (t.clefPos = e.pitch, t.type = e.clef);
     }, g.deepCopyKey = function(t) {
       var e = { accidentals: [], root: t.root, acc: t.acc, mode: t.mode };
@@ -1424,7 +1424,7 @@ function Fr() {
       })), e;
     };
     var u = function() {
-      o.currentVoice && (o.currentVoice.key = g.deepCopyKey(o.key));
+      s.currentVoice && (s.currentVoice.key = g.deepCopyKey(s.key));
     }, d = { A: 5, B: 6, C: 0, D: 1, E: 2, F: 3, G: 4, a: 12, b: 13, c: 7, d: 8, e: 9, f: 10, g: 11 };
     g.addPosToKey = function(t, e) {
       var c = t.verticalPos;
@@ -1471,13 +1471,13 @@ function Fr() {
         return r("Must pass in key signature.", t, 0), v;
       switch (c[0].token) {
         case "HP":
-          _.addDirective("bagpipes"), o.key = { root: "HP", accidentals: [], acc: "", mode: "" }, v.foundKey = !0, c.shift(), e || (o.globalKey = g.deepCopyKey(o.key)), u();
+          k.addDirective("bagpipes"), s.key = { root: "HP", accidentals: [], acc: "", mode: "" }, v.foundKey = !0, c.shift(), e || (s.globalKey = g.deepCopyKey(s.key)), u();
           break;
         case "Hp":
-          _.addDirective("bagpipes"), o.key = { root: "Hp", accidentals: [{ acc: "natural", note: "g" }, { acc: "sharp", note: "f" }, { acc: "sharp", note: "c" }], acc: "", mode: "" }, v.foundKey = !0, c.shift(), e || (o.globalKey = g.deepCopyKey(o.key)), u();
+          k.addDirective("bagpipes"), s.key = { root: "Hp", accidentals: [{ acc: "natural", note: "g" }, { acc: "sharp", note: "f" }, { acc: "sharp", note: "c" }], acc: "", mode: "" }, v.foundKey = !0, c.shift(), e || (s.globalKey = g.deepCopyKey(s.key)), u();
           break;
         case "none":
-          o.key = { root: "none", accidentals: [], acc: "", mode: "" }, v.foundKey = !0, c.shift(), e || (o.globalKey = g.deepCopyKey(o.key)), u();
+          s.key = { root: "none", accidentals: [], acc: "", mode: "" }, v.foundKey = !0, c.shift(), e || (s.globalKey = g.deepCopyKey(s.key)), u();
           break;
         default:
           var h = l.getKeyPitch(c[0].token);
@@ -1495,30 +1495,30 @@ function Fr() {
               if (g.standardKey(A, h.token, y, 0) === void 0)
                 return r("Unsupported key signature: " + A, t, 0), v;
             }
-            var T = g.deepCopyKey(o.key), q = !e && o.globalTranspose ? -o.globalTranspose : 0, I;
-            if (e && (I = o.globalTransposeOrigKeySig), o.key = g.deepCopyKey(g.standardKey(A, h.token, y, q)), e && (o.globalTransposeOrigKeySig = I), o.key.mode = w, T && o.keywarn !== !1) {
-              for (var C, B = 0; B < o.key.accidentals.length; B++)
+            var T = g.deepCopyKey(s.key), q = !e && s.globalTranspose ? -s.globalTranspose : 0, I;
+            if (e && (I = s.globalTransposeOrigKeySig), s.key = g.deepCopyKey(g.standardKey(A, h.token, y, q)), e && (s.globalTransposeOrigKeySig = I), s.key.mode = w, T && s.keywarn !== !1) {
+              for (var C, B = 0; B < s.key.accidentals.length; B++)
                 for (C = 0; C < T.accidentals.length; C++)
-                  T.accidentals[C].note && o.key.accidentals[B].note.toLowerCase() === T.accidentals[C].note.toLowerCase() && (T.accidentals[C].note = null);
+                  T.accidentals[C].note && s.key.accidentals[B].note.toLowerCase() === T.accidentals[C].note.toLowerCase() && (T.accidentals[C].note = null);
               for (C = 0; C < T.accidentals.length; C++)
-                T.accidentals[C].note && (o.key.impliedNaturals || (o.key.impliedNaturals = []), o.key.impliedNaturals.push({ acc: "natural", note: T.accidentals[C].note }));
+                T.accidentals[C].note && (s.key.impliedNaturals || (s.key.impliedNaturals = []), s.key.impliedNaturals.push({ acc: "natural", note: T.accidentals[C].note }));
             }
-            e || (o.globalKey = g.deepCopyKey(o.key)), u();
+            e || (s.globalKey = g.deepCopyKey(s.key)), u();
           }
           break;
       }
       if (c.length === 0 || (c[0].token === "exp" && c.shift(), c.length === 0) || (c[0].token === "oct" && c.shift(), c.length === 0)) return v;
       var R = l.getKeyAccidentals2(c);
       if (R.warn && r(R.warn, t, 0), R.accs) {
-        v.foundKey || (v.foundKey = !0, o.key = { root: "none", acc: "", mode: "", accidentals: [] }), i(R.accs);
+        v.foundKey || (v.foundKey = !0, s.key = { root: "none", acc: "", mode: "", accidentals: [] }), i(R.accs);
         for (var S = 0; S < R.accs.length; S++) {
-          for (var k = !1, M = 0; M < o.key.accidentals.length && !k; M++)
-            o.key.accidentals[M].note === R.accs[S].note && (k = !0, o.key.accidentals[M].acc !== R.accs[S].acc && (o.key.accidentals[M].acc = R.accs[S].acc, o.key.explicitAccidentals || (o.key.explicitAccidentals = []), o.key.explicitAccidentals.push(R.accs[S])));
-          if (!k && (o.key.explicitAccidentals || (o.key.explicitAccidentals = []), o.key.explicitAccidentals.push(R.accs[S]), o.key.accidentals.push(R.accs[S]), o.key.impliedNaturals))
-            for (var F = 0; F < o.key.impliedNaturals.length; F++)
-              o.key.impliedNaturals[F].note === R.accs[S].note && o.key.impliedNaturals.splice(F, 1);
+          for (var _ = !1, M = 0; M < s.key.accidentals.length && !_; M++)
+            s.key.accidentals[M].note === R.accs[S].note && (_ = !0, s.key.accidentals[M].acc !== R.accs[S].acc && (s.key.accidentals[M].acc = R.accs[S].acc, s.key.explicitAccidentals || (s.key.explicitAccidentals = []), s.key.explicitAccidentals.push(R.accs[S])));
+          if (!_ && (s.key.explicitAccidentals || (s.key.explicitAccidentals = []), s.key.explicitAccidentals.push(R.accs[S]), s.key.accidentals.push(R.accs[S]), s.key.impliedNaturals))
+            for (var F = 0; F < s.key.impliedNaturals.length; F++)
+              s.key.impliedNaturals[F].note === R.accs[S].note && s.key.impliedNaturals.splice(F, 1);
         }
-        e || (o.globalKey = g.deepCopyKey(o.key)), u();
+        e || (s.globalKey = g.deepCopyKey(s.key)), u();
       }
       for (var L; c.length > 0; )
         switch (c[0].token) {
@@ -1533,7 +1533,7 @@ function Fr() {
             if (c.length === 0)
               return r("Expected parameter after middle=", t, 0), v;
             var b = l.getPitchFromTokens(c);
-            b.warn && r(b.warn, t, 0), b.position && (o.clef.verticalPos = b.position - 6);
+            b.warn && r(b.warn, t, 0), b.position && (s.clef.verticalPos = b.position - 6);
             break;
           case "transpose":
             if (c.shift(), c.length === 0)
@@ -1548,7 +1548,7 @@ function Fr() {
               r("Expected number after transpose", t, c[0].start);
               break;
             }
-            o.clef.transpose = c[0].intt, c.shift();
+            s.clef.transpose = c[0].intt, c.shift();
             break;
           case "stafflines":
             if (c.shift(), c.length === 0)
@@ -1563,7 +1563,7 @@ function Fr() {
               r("Expected number after stafflines", t, c[0].start);
               break;
             }
-            o.clef.stafflines = c[0].intt, c.shift();
+            s.clef.stafflines = c[0].intt, c.shift();
             break;
           case "staffscale":
             if (c.shift(), c.length === 0)
@@ -1578,7 +1578,7 @@ function Fr() {
               r("Expected number after staffscale", t, c[0].start);
               break;
             }
-            o.clef.staffscale = c[0].floatt, c.shift();
+            s.clef.staffscale = c[0].floatt, c.shift();
             break;
           case "octave":
             if (c.shift(), c.length === 0)
@@ -1593,7 +1593,7 @@ function Fr() {
               r("Expected number after octave", t, c[0].start);
               break;
             }
-            o.octave = c[0].intt, c.shift();
+            s.octave = c[0].intt, c.shift();
             break;
           case "style":
             if (c.shift(), c.length === 0)
@@ -1610,7 +1610,7 @@ function Fr() {
               case "rhythm":
               case "x":
               case "triangle":
-                o.style = c[0].token, c.shift();
+                s.style = c[0].token, c.shift();
                 break;
               default:
                 r("error parsing style element: " + c[0].token, t, c[0].start);
@@ -1664,7 +1664,7 @@ function Fr() {
                 r("Expected clef name. Found " + x.token, t, x.start);
                 break;
             }
-            c.length > 0 && c[0].type === "number" && (x.token += c[0].token, c.shift()), c.length > 1 && (c[0].token === "-" || c[0].token === "+" || c[0].token === "^" || c[0].token === "_") && c[1].token === "8" && (x.token += c[0].token + c[1].token, c.shift(), c.shift()), o.clef = { type: x.token, verticalPos: p(x.token, 0) }, o.currentVoice && o.currentVoice.transpose !== void 0 && (o.clef.transpose = o.currentVoice.transpose), v.foundClef = !0;
+            c.length > 0 && c[0].type === "number" && (x.token += c[0].token, c.shift()), c.length > 1 && (c[0].token === "-" || c[0].token === "+" || c[0].token === "^" || c[0].token === "_") && c[1].token === "8" && (x.token += c[0].token + c[1].token, c.shift(), c.shift()), s.clef = { type: x.token, verticalPos: p(x.token, 0) }, s.currentVoice && s.currentVoice.transpose !== void 0 && (s.clef.transpose = s.currentVoice.transpose), v.foundClef = !0;
             break;
           default:
             r("Unknown parameter: " + c[0].token, t, c[0].start), c.shift();
@@ -1672,9 +1672,9 @@ function Fr() {
       return v;
     };
     var n = function(t) {
-      var e = o.voices[t];
-      if (!(o.currentVoice && o.currentVoice.index === e.index && o.currentVoice.staffNum === e.staffNum))
-        return o.currentVoice = e, e.key ? o.key = g.deepCopyKey(e.key) : o.globalKey && (o.key = g.deepCopyKey(o.globalKey)), a.setCurrentVoice(e.staffNum, e.index, t);
+      var e = s.voices[t];
+      if (!(s.currentVoice && s.currentVoice.index === e.index && s.currentVoice.staffNum === e.staffNum))
+        return s.currentVoice = e, e.key ? s.key = g.deepCopyKey(e.key) : s.globalKey && (s.key = g.deepCopyKey(s.globalKey)), a.setCurrentVoice(e.staffNum, e.index, t);
     };
     g.parseVoice = function(t, e, c) {
       var v = l.getMeat(t, e, c), h = v.start, y = v.end, w = l.getToken(t, h, y);
@@ -1683,13 +1683,13 @@ function Fr() {
         return;
       }
       var A = !1;
-      o.voices[w] === void 0 && (o.voices[w] = {}, A = !0, o.score_is_present && r("Can't have an unknown V: id when the %score directive is present", t, h)), h += w.length, h += l.eatWhiteSpace(t, h);
+      s.voices[w] === void 0 && (s.voices[w] = {}, A = !0, s.score_is_present && r("Can't have an unknown V: id when the %score directive is present", t, h)), h += w.length, h += l.eatWhiteSpace(t, h);
       for (var P = { startStaff: A }, N = function(b) {
         var x = l.getVoiceToken(t, h, y);
         x.warn !== void 0 ? r("Expected value for " + b + " in voice: " + x.warn, t, h) : x.err !== void 0 ? r("Expected value for " + b + " in voice: " + x.err, t, h) : x.token.length === 0 && t[h] !== '"' ? r("Expected value for " + b + " in voice", t, h) : P[b] = x.token, h += x.len;
       }, T = function(b, x, E) {
         var D = l.getVoiceToken(t, h, y);
-        D.warn !== void 0 ? r("Expected value for " + x + " in voice: " + D.warn, t, h) : D.err !== void 0 ? r("Expected value for " + x + " in voice: " + D.err, t, h) : D.token.length === 0 && t[h] !== '"' ? r("Expected value for " + x + " in voice", t, h) : (D.token = parseFloat(D.token), o.voices[b][x] = D.token), h += D.len;
+        D.warn !== void 0 ? r("Expected value for " + x + " in voice: " + D.warn, t, h) : D.err !== void 0 ? r("Expected value for " + x + " in voice: " + D.err, t, h) : D.token.length === 0 && t[h] !== '"' ? r("Expected value for " + x + " in voice", t, h) : (D.token = parseFloat(D.token), s.voices[b][x] = D.token), h += D.len;
       }, q = function(b, x) {
         var E = l.getVoiceToken(t, h, y);
         if (E.warn !== void 0)
@@ -1714,7 +1714,7 @@ function Fr() {
           r("Expected one of (_B, _E, _b, _e) for " + x + " in voice", t, h);
         else {
           var O = E[D.token];
-          O ? o.voices[b][x] = O : r("Expected one of (_B, _E, _b, _e) for " + x + " in voice", t, h);
+          O ? s.voices[b][x] = O : r("Expected one of (_B, _E, _b, _e) for " + x + " in voice", t, h);
         }
         h += D.len;
       }; h < y; ) {
@@ -1794,7 +1794,7 @@ function Fr() {
             case "alto^8":
             case "alto_8":
               var S = 0;
-              P.clef = C.token.replace(/[',]/g, ""), P.verticalPos = p(P.clef, S), o.voices[w].clef = C.token;
+              P.clef = C.token.replace(/[',]/g, ""), P.verticalPos = p(P.clef, S), s.voices[w].clef = C.token;
               break;
             case "staves":
             case "stave":
@@ -1823,11 +1823,11 @@ function Fr() {
               break;
             case "stem":
             case "stems":
-              B = l.getVoiceToken(t, h, y), B.warn !== void 0 ? r("Expected value for stems in voice: " + B.warn, t, h) : B.err !== void 0 ? r("Expected value for stems in voice: " + B.err, t, h) : B.token === "up" || B.token === "down" ? o.voices[w].stem = B.token : r("Expected up or down for voice stem", t, h), h += B.len;
+              B = l.getVoiceToken(t, h, y), B.warn !== void 0 ? r("Expected value for stems in voice: " + B.warn, t, h) : B.err !== void 0 ? r("Expected value for stems in voice: " + B.err, t, h) : B.token === "up" || B.token === "down" ? s.voices[w].stem = B.token : r("Expected up or down for voice stem", t, h), h += B.len;
               break;
             case "up":
             case "down":
-              o.voices[w].stem = C.token;
+              s.voices[w].stem = C.token;
               break;
             case "middle":
             case "m":
@@ -1835,7 +1835,7 @@ function Fr() {
               break;
             case "gchords":
             case "gch":
-              o.voices[w].suppressChords = !0, B = l.getVoiceToken(t, h, y), B.token === "0" && (h = h + B.len);
+              s.voices[w].suppressChords = !0, B = l.getVoiceToken(t, h, y), B.token === "0" && (h = h + B.len);
               break;
             case "space":
             case "spc":
@@ -1863,36 +1863,36 @@ function Fr() {
               T(w, "volume");
               break;
             case "cue":
-              var k = q("cue");
-              k === "on" ? o.voices[w].scale = 0.6 : o.voices[w].scale = 1;
+              var _ = q("cue");
+              _ === "on" ? s.voices[w].scale = 0.6 : s.voices[w].scale = 1;
               break;
             case "style":
-              B = l.getVoiceToken(t, h, y), B.warn !== void 0 ? r("Expected value for style in voice: " + B.warn, t, h) : B.err !== void 0 ? r("Expected value for style in voice: " + B.err, t, h) : B.token === "normal" || B.token === "harmonic" || B.token === "rhythm" || B.token === "x" || B.token === "triangle" ? o.voices[w].style = B.token : r("Expected one of [normal, harmonic, rhythm, x, triangle] for voice style", t, h), h += B.len;
+              B = l.getVoiceToken(t, h, y), B.warn !== void 0 ? r("Expected value for style in voice: " + B.warn, t, h) : B.err !== void 0 ? r("Expected value for style in voice: " + B.err, t, h) : B.token === "normal" || B.token === "harmonic" || B.token === "rhythm" || B.token === "x" || B.token === "triangle" ? s.voices[w].style = B.token : r("Expected one of [normal, harmonic, rhythm, x, triangle] for voice style", t, h), h += B.len;
               break;
           }
         }
         h += l.eatWhiteSpace(t, h);
       }
-      if ((P.startStaff || o.staves.length === 0) && (o.staves.push({ index: o.staves.length, meter: o.origMeter }), o.score_is_present || (o.staves[o.staves.length - 1].numVoices = 0)), o.voices[w].staffNum === void 0) {
-        o.voices[w].staffNum = o.staves.length - 1;
+      if ((P.startStaff || s.staves.length === 0) && (s.staves.push({ index: s.staves.length, meter: s.origMeter }), s.score_is_present || (s.staves[s.staves.length - 1].numVoices = 0)), s.voices[w].staffNum === void 0) {
+        s.voices[w].staffNum = s.staves.length - 1;
         var M = 0;
-        for (var F in o.voices)
-          o.voices.hasOwnProperty(F) && o.voices[F].staffNum === o.voices[w].staffNum && M++;
-        o.voices[w].index = M - 1;
+        for (var F in s.voices)
+          s.voices.hasOwnProperty(F) && s.voices[F].staffNum === s.voices[w].staffNum && M++;
+        s.voices[w].index = M - 1;
       }
-      var L = o.staves[o.voices[w].staffNum];
-      return o.score_is_present || L.numVoices++, P.clef && (L.clef = { type: P.clef, verticalPos: P.verticalPos }), P.spacing && (L.spacing_below_offset = P.spacing), P.verticalPos && (L.verticalPos = P.verticalPos), P.name && (L.name ? L.name.push(P.name) : L.name = [P.name]), P.subname && (L.subname ? L.subname.push(P.subname) : L.subname = [P.subname]), n(w);
+      var L = s.staves[s.voices[w].staffNum];
+      return s.score_is_present || L.numVoices++, P.clef && (L.clef = { type: P.clef, verticalPos: P.verticalPos }), P.spacing && (L.spacing_below_offset = P.spacing), P.verticalPos && (L.verticalPos = P.verticalPos), P.name && (L.name ? L.name.push(P.name) : L.name = [P.name]), P.subname && (L.subname ? L.subname.push(P.subname) : L.subname = [P.subname]), n(w);
     };
   })(), at = g, at;
 }
-var nt, da;
-function Ps() {
-  if (da) return nt;
-  da = 1;
-  var _ = _e(), m = Ir(), g = Fr(), l = function(r, o, a, s, p) {
+var nt, pa;
+function qs() {
+  if (pa) return nt;
+  pa = 1;
+  var k = _e(), m = Ir(), g = Fr(), l = function(r, s, a, o, p) {
     this.reset = function(f, i, n, t) {
       g.initialize(f, i, n, t, p), m.initialize(f, i, n, t, p);
-    }, this.reset(r, o, a, s), this.setTitle = function(f, i) {
+    }, this.reset(r, s, a, o), this.setTitle = function(f, i) {
       a.hasMainTitle ? p.addSubtitle(f, { startChar: a.iChar, endChar: a.iChar + i + 2 }) : (p.addMetaText("title", f, { startChar: a.iChar, endChar: a.iChar + i + 2 }), a.hasMainTitle = !0);
     }, this.setMeter = function(f) {
       if (f = r.stripComment(f), f === "C")
@@ -1941,7 +1941,7 @@ function Ps() {
         }
         return a.havent_set_length === !0 && (a.default_length = c < 0.75 ? 0.0625 : 0.125, a.havent_set_length = !1), e;
       } catch (y) {
-        o(y, f, 0);
+        s(y, f, 0);
       }
       return null;
     }, this.calcTempo = function(f) {
@@ -1951,25 +1951,25 @@ function Ps() {
         f.duration[n] = i * f.duration[n];
       return f;
     }, this.resolveTempo = function() {
-      a.tempo && (this.calcTempo(a.tempo), s.metaText.tempo = a.tempo, delete a.tempo);
+      a.tempo && (this.calcTempo(a.tempo), o.metaText.tempo = a.tempo, delete a.tempo);
     }, this.addUserDefinition = function(f, i, n) {
       var t = f.indexOf("=", i);
       if (t === -1) {
-        o("Need an = in a macro definition", f, i);
+        s("Need an = in a macro definition", f, i);
         return;
       }
-      var e = _.strip(f.substring(i, t)), c = _.strip(f.substring(t + 1));
+      var e = k.strip(f.substring(i, t)), c = k.strip(f.substring(t + 1));
       if (e.length !== 1) {
-        o("Macro definitions can only be one character", f, i);
+        s("Macro definitions can only be one character", f, i);
         return;
       }
       var v = "HIJKLMNOPQRSTUVWXYhijklmnopqrstuvw~";
       if (v.indexOf(e) === -1) {
-        o("Macro definitions must be H-Y, h-w, or tilde", f, i);
+        s("Macro definitions must be H-Y, h-w, or tilde", f, i);
         return;
       }
       if (c.length === 0) {
-        o("Missing macro definition", f, i);
+        s("Missing macro definition", f, i);
         return;
       }
       a.macros === void 0 && (a.macros = {}), a.macros[e] = c;
@@ -2048,7 +2048,7 @@ function Ps() {
           throw "Unexpected string at end of Q: field";
         return a.printTempo === !1 && (c.suppress = !0), { type: v ? "delaySet" : "immediate", tempo: c };
       } catch (A) {
-        return o(A, f, i), { type: "none" };
+        return s(A, f, i), { type: "none" };
       }
     }, this.letter_to_inline_header = function(f, i, n) {
       var t = !1, e = r.eatWhiteSpace(f, i);
@@ -2057,7 +2057,7 @@ function Ps() {
         switch (f.substring(i, i + 3)) {
           case "[I:":
             var y = m.addDirective(f.substring(i + 3, c));
-            return y && o(y, f, i), [c - i + 1 + e];
+            return y && s(y, f, i), [c - i + 1 + e];
           case "[M:":
             var w = this.setMeter(f.substring(i + 3, c));
             return n && a.currentVoice && w ? a.staves[a.currentVoice.staffNum].meter = w : p.hasBeginMusic() && w ? p.appendStartingElement("meter", v, h, w) : a.meter = w, [c - i + 1 + e];
@@ -2066,7 +2066,7 @@ function Ps() {
             return A.foundClef && p.hasBeginMusic() && p.appendStartingElement("clef", v, h, a.clef), A.foundKey && p.hasBeginMusic() && p.appendStartingElement("key", v, h, g.fixKey(a.clef, a.key)), [c - i + 1 + e];
           case "[P:":
             var P = m.parseFontChangeLine(f.substring(i + 3, c));
-            return n || s.lines.length <= s.lineNum ? a.partForNextLine = { title: P, startChar: v, endChar: h } : p.appendElement("part", v, h, { title: P }), [c - i + 1 + e];
+            return n || o.lines.length <= o.lineNum ? a.partForNextLine = { title: P, startChar: v, endChar: h } : p.appendElement("part", v, h, { title: P }), [c - i + 1 + e];
           case "[L:":
             return this.setDefaultLength(f, i + 3, c), [c - i + 1 + e];
           case "[Q:":
@@ -2090,7 +2090,7 @@ function Ps() {
         switch (f.substring(i, i + 2)) {
           case "I:":
             var t = m.addDirective(f.substring(i + 2));
-            return t && o(t, f, i), [f.length];
+            return t && s(t, f, i), [f.length];
           case "M:":
             var e = this.setMeter(f.substring(i + 2));
             return p.hasBeginMusic() && e && p.appendStartingElement("meter", a.iChar + i, a.iChar + f.length, e), [f.length];
@@ -2105,9 +2105,9 @@ function Ps() {
             var v = f.indexOf("", i + 2);
             v === -1 && (v = f.length);
             var h = this.setTempo(f, i + 2, v, a.iChar);
-            return h.type === "delaySet" ? p.appendElement("tempo", a.iChar + i, a.iChar + f.length, this.calcTempo(h.tempo)) : h.type === "immediate" && p.appendElement("tempo", a.iChar + i, a.iChar + f.length, h.tempo), [v, f[i], _.strip(f.substring(i + 2))];
+            return h.type === "delaySet" ? p.appendElement("tempo", a.iChar + i, a.iChar + f.length, this.calcTempo(h.tempo)) : h.type === "immediate" && p.appendElement("tempo", a.iChar + i, a.iChar + f.length, h.tempo), [v, f[i], k.strip(f.substring(i + 2))];
           case "V:":
-            return n = g.parseVoice(f, i + 2, f.length), [f.length, f[i], _.strip(f.substring(i + 2)), n];
+            return n = g.parseVoice(f, i + 2, f.length), [f.length, f[i], k.strip(f.substring(i + 2)), n];
         }
       return [0];
     };
@@ -2155,7 +2155,7 @@ function Ps() {
             break;
           case "Q":
             var h = this.setTempo(f, 2, f.length, a.iChar);
-            h.type === "delaySet" ? a.tempo = h.tempo : h.type === "immediate" && (s.metaText.tempo ? a.tempoForNextLine = ["tempo", e, c, h.tempo] : s.metaText.tempo = h.tempo);
+            h.type === "delaySet" ? a.tempo = h.tempo : h.type === "immediate" && (o.metaText.tempo ? a.tempoForNextLine = ["tempo", e, c, h.tempo] : o.metaText.tempo = h.tempo);
             break;
           case "T":
             a.titlecaps && (t = t.toUpperCase()), this.setTitle(m.parseFontChangeLine(r.theReverser(t)), n);
@@ -2175,7 +2175,7 @@ function Ps() {
             break;
           case "E":
           case "m":
-            o("Ignored header", f, 0);
+            s("Ignored header", f, 0);
             break;
           default:
             return { regular: !0 };
@@ -2186,9 +2186,9 @@ function Ps() {
   };
   return nt = l, nt;
 }
-var ke = {}, pa;
-function Ls() {
-  return pa || (pa = 1, ke.legalAccents = [
+var ke = {}, va;
+function Ds() {
+  return va || (va = 1, ke.legalAccents = [
     "trill",
     "trillh",
     "lowermordent",
@@ -2369,11 +2369,11 @@ function Ls() {
     // TODO-PER: not handling 6/8 rhythm yet
   }), ke;
 }
-var it, va;
-function qs() {
-  if (va) return it;
-  va = 1;
-  var _ = Fr(), m = Qi(), g, l, r, o, a, s, {
+var it, ga;
+function Rs() {
+  if (ga) return it;
+  ga = 1;
+  var k = Fr(), m = Ji(), g, l, r, s, a, o, {
     legalAccents: p,
     volumeDecorations: u,
     dynamicDecorations: d,
@@ -2385,8 +2385,8 @@ function qs() {
     rests: c,
     accMap: v,
     tripletQ: h
-  } = Ls(), y = function(b, x, E, D, O, z) {
-    g = b, l = x, r = E, o = D, a = O, s = z, this.lineContinuation = !1;
+  } = Ds(), y = function(b, x, E, D, O, z) {
+    g = b, l = x, r = E, s = D, a = O, o = z, this.lineContinuation = !1;
   }, w = function(b, x, E) {
     if (b.inTie[x] === void 0)
       return !1;
@@ -2394,25 +2394,25 @@ function qs() {
     return !!(b.inTie[x][D] && (E.pitches !== void 0 || E.rest.type !== "spacer"));
   }, A = {};
   y.prototype.parseMusic = function(b) {
-    s.resolveTempo(), r.is_in_header = !1;
+    o.resolveTempo(), r.is_in_header = !1;
     for (var x = 0, E = r.iChar; g.isWhiteSpace(b[x]) && x < b.length; )
       x++;
     if (!(x === b.length || b[x] === "%")) {
       var D = r.start_new_line;
       r.continueall === void 0 ? r.start_new_line = !0 : r.start_new_line = !1;
-      var O = 0, z = s.letter_to_body_header(b, x);
+      var O = 0, z = o.letter_to_body_header(b, x);
       z[0] > 0 && (x += z[0], z[1] === "V" && this.startNewLine());
       for (var H = 0; x < b.length; ) {
         var $ = x;
         if (b[x] === "%")
           break;
-        var Q = s.letter_to_inline_header(b, x, D);
+        var Q = o.letter_to_inline_header(b, x, D);
         if (Q[0] > 0)
           x += Q[0], Q[1] === "V" && (D = !0);
         else {
           (!a.hasBeginMusic() || D && !this.lineContinuation) && (this.startNewLine(), D = !1);
           for (var W; ; )
-            if (W = g.eatWhiteSpace(b, x), W > 0 && (x += W), x > 0 && b[x - 1] === "" && (W = s.letter_to_body_header(b, x), W[0] > 0 && (W[1] === "V" && this.startNewLine(), x = W[0], r.start_new_line = !1)), W = B(b, x), W[0] > 0 && (x += W[0]), W = N(b, x), W[0] > 0) {
+            if (W = g.eatWhiteSpace(b, x), W > 0 && (x += W), x > 0 && b[x - 1] === "" && (W = o.letter_to_body_header(b, x), W[0] > 0 && (W[1] === "V" && this.startNewLine(), x = W[0], r.start_new_line = !1)), W = B(b, x), W[0] > 0 && (x += W[0]), W = N(b, x), W[0] > 0) {
               A.chord || (A.chord = []);
               var ne = g.translateString(W[1]);
               ne = ne.replace(/;/g, `
@@ -2430,9 +2430,9 @@ function qs() {
             else
               break;
           if (W = R(b, x), W[0] > 0) {
-            H = 0, A.gracenotes !== void 0 && (A.rest = { type: "spacer" }, A.duration = 0.125, r.addFormattingOptions(A, o.formatting, "note"), a.appendElement("note", E + x, E + x + W[0], A), r.measureNotEmpty = !0, A = {});
+            H = 0, A.gracenotes !== void 0 && (A.rest = { type: "spacer" }, A.duration = 0.125, r.addFormattingOptions(A, s.formatting, "note"), a.appendElement("note", E + x, E + x + W[0], A), r.measureNotEmpty = !0, A = {});
             var re = { type: W[1] };
-            re.type.length === 0 ? l("Unknown bar type", b, x) : (r.inEnding && re.type !== "bar_thin" && (re.endEnding = !0, r.inEnding = !1), W[2] && (re.startEnding = W[2], r.inEnding && (re.endEnding = !0), r.inEnding = !0, W[1] === "bar_right_repeat" ? r.restoreStartEndingHoldOvers() : r.duplicateStartEndingHoldOvers()), A.decoration !== void 0 && (re.decoration = A.decoration), A.chord !== void 0 && (re.chord = A.chord), re.startEnding && r.barFirstEndingNum === void 0 ? r.barFirstEndingNum = r.currBarNumber : re.startEnding && re.endEnding && r.barFirstEndingNum ? r.currBarNumber = r.barFirstEndingNum : re.endEnding && (r.barFirstEndingNum = void 0), re.type !== "bar_invisible" && r.measureNotEmpty && L() && (r.currBarNumber++, r.barNumbers && r.currBarNumber % r.barNumbers === 0 && (re.barNumber = r.currBarNumber)), r.addFormattingOptions(A, o.formatting, "bar"), a.appendElement("bar", E + $, E + x + W[0], re), r.measureNotEmpty = !1, A = {}), x += W[0];
+            re.type.length === 0 ? l("Unknown bar type", b, x) : (r.inEnding && re.type !== "bar_thin" && (re.endEnding = !0, r.inEnding = !1), W[2] && (re.startEnding = W[2], r.inEnding && (re.endEnding = !0), r.inEnding = !0, W[1] === "bar_right_repeat" ? r.restoreStartEndingHoldOvers() : r.duplicateStartEndingHoldOvers()), A.decoration !== void 0 && (re.decoration = A.decoration), A.chord !== void 0 && (re.chord = A.chord), re.startEnding && r.barFirstEndingNum === void 0 ? r.barFirstEndingNum = r.currBarNumber : re.startEnding && re.endEnding && r.barFirstEndingNum ? r.currBarNumber = r.barFirstEndingNum : re.endEnding && (r.barFirstEndingNum = void 0), re.type !== "bar_invisible" && r.measureNotEmpty && L() && (r.currBarNumber++, r.barNumbers && r.currBarNumber % r.barNumbers === 0 && (re.barNumber = r.currBarNumber)), r.addFormattingOptions(A, s.formatting, "bar"), a.appendElement("bar", E + $, E + x + W[0], re), r.measureNotEmpty = !1, A = {}), x += W[0];
           } else if (b[x] === "&")
             W = q(b, x), W[0] > 0 && (a.appendElement("overlay", E, E + 1, {}), x += 1, H++);
           else {
@@ -2455,7 +2455,7 @@ function qs() {
                       switch (b[x]) {
                         case " ":
                         case "	":
-                          k(A);
+                          _(A);
                           break;
                         case ")":
                           A.endSlur === void 0 ? A.endSlur = 1 : A.endSlur++;
@@ -2496,13 +2496,13 @@ function qs() {
                     }
                   } else
                     l("Expected ']' to end the chords", b, x);
-                  A.pitches !== void 0 && (V !== null && (A.duration = A.duration * V, oe && k(A)), r.addFormattingOptions(A, o.formatting, "note"), a.appendElement("note", E + $, E + x, A), r.measureNotEmpty = !0, A = {}), ce = !0;
+                  A.pitches !== void 0 && (V !== null && (A.duration = A.duration * V, oe && _(A)), r.addFormattingOptions(A, s.formatting, "note"), a.appendElement("note", E + $, E + x, A), r.measureNotEmpty = !0, A = {}), ce = !0;
                 }
               }
             } else {
               var j = {}, G = M(b, x, j, !0);
               if (j.endTie !== void 0 && P(r, H, !0), G !== null) {
-                G.pitch !== void 0 ? (A.pitches = [{}], G.accidental !== void 0 && (A.pitches[0].accidental = G.accidental), A.pitches[0].pitch = G.pitch, A.pitches[0].name = G.name, (G.midipitch || G.midipitch === 0) && (A.pitches[0].midipitch = G.midipitch), G.endSlur !== void 0 && (A.pitches[0].endSlur = G.endSlur), G.endTie !== void 0 && (A.pitches[0].endTie = G.endTie), G.startSlur !== void 0 && (A.pitches[0].startSlur = G.startSlur), A.startSlur !== void 0 && (A.pitches[0].startSlur = A.startSlur), A.dottedSlur !== void 0 && (A.pitches[0].dottedSlur = !0), G.startTie !== void 0 && (A.pitches[0].startTie = G.startTie), A.startTie !== void 0 && (A.pitches[0].startTie = A.startTie)) : (A.rest = G.rest, G.rest.type === "multimeasure" && L() && (r.currBarNumber += G.rest.text - 1), G.endSlur !== void 0 && (A.endSlur = G.endSlur), G.endTie !== void 0 && (A.rest.endTie = G.endTie), G.startSlur !== void 0 && (A.startSlur = G.startSlur), G.startTie !== void 0 && (A.rest.startTie = G.startTie), A.startTie !== void 0 && (A.rest.startTie = A.startTie)), G.chord !== void 0 && (A.chord = G.chord), G.duration !== void 0 && (A.duration = G.duration), G.decoration !== void 0 && (A.decoration = G.decoration), G.graceNotes !== void 0 && (A.graceNotes = G.graceNotes), delete A.startSlur, delete A.dottedSlur, w(r, H, A) && (A.pitches !== void 0 ? A.pitches[0].endTie = !0 : A.rest.type !== "spacer" && (A.rest.endTie = !0), P(r, H, !1)), (G.startTie || A.startTie) && P(r, H, !0), x = G.endChar, O > 0 && !(G.rest && G.rest.type === "spacer") && (O--, O === 0 && (A.endTriplet = !0)), G.end_beam && k(A), A.rest && A.rest.type === "rest" && A.duration === 1 && I(r) <= 1 && (A.rest.type = "whole", A.duration = I(r)), A.duration < 1 && t.indexOf(A.duration) === -1 && A.duration !== 0 && (!A.rest || A.rest.type !== "spacer") && l("Duration not representable: " + b.substring($, x), b, x), r.addFormattingOptions(A, o.formatting, "note");
+                G.pitch !== void 0 ? (A.pitches = [{}], G.accidental !== void 0 && (A.pitches[0].accidental = G.accidental), A.pitches[0].pitch = G.pitch, A.pitches[0].name = G.name, (G.midipitch || G.midipitch === 0) && (A.pitches[0].midipitch = G.midipitch), G.endSlur !== void 0 && (A.pitches[0].endSlur = G.endSlur), G.endTie !== void 0 && (A.pitches[0].endTie = G.endTie), G.startSlur !== void 0 && (A.pitches[0].startSlur = G.startSlur), A.startSlur !== void 0 && (A.pitches[0].startSlur = A.startSlur), A.dottedSlur !== void 0 && (A.pitches[0].dottedSlur = !0), G.startTie !== void 0 && (A.pitches[0].startTie = G.startTie), A.startTie !== void 0 && (A.pitches[0].startTie = A.startTie)) : (A.rest = G.rest, G.rest.type === "multimeasure" && L() && (r.currBarNumber += G.rest.text - 1), G.endSlur !== void 0 && (A.endSlur = G.endSlur), G.endTie !== void 0 && (A.rest.endTie = G.endTie), G.startSlur !== void 0 && (A.startSlur = G.startSlur), G.startTie !== void 0 && (A.rest.startTie = G.startTie), A.startTie !== void 0 && (A.rest.startTie = A.startTie)), G.chord !== void 0 && (A.chord = G.chord), G.duration !== void 0 && (A.duration = G.duration), G.decoration !== void 0 && (A.decoration = G.decoration), G.graceNotes !== void 0 && (A.graceNotes = G.graceNotes), delete A.startSlur, delete A.dottedSlur, w(r, H, A) && (A.pitches !== void 0 ? A.pitches[0].endTie = !0 : A.rest.type !== "spacer" && (A.rest.endTie = !0), P(r, H, !1)), (G.startTie || A.startTie) && P(r, H, !0), x = G.endChar, O > 0 && !(G.rest && G.rest.type === "spacer") && (O--, O === 0 && (A.endTriplet = !0)), G.end_beam && _(A), A.rest && A.rest.type === "rest" && A.duration === 1 && I(r) <= 1 && (A.rest.type = "whole", A.duration = I(r)), A.duration < 1 && t.indexOf(A.duration) === -1 && A.duration !== 0 && (!A.rest || A.rest.type !== "spacer") && l("Duration not representable: " + b.substring($, x), b, x), r.addFormattingOptions(A, s.formatting, "note");
                 var X = a.appendElement("note", E + $, E + x, A);
                 X || (this.startNewLine(), a.appendElement("note", E + $, E + x, A)), r.measureNotEmpty = !0, A = {};
               }
@@ -2658,13 +2658,13 @@ function qs() {
     var b = { startChar: -1, endChar: -1 };
     r.partForNextLine.title && (b.part = r.partForNextLine), b.clef = r.currentVoice && r.staves[r.currentVoice.staffNum].clef !== void 0 ? Object.assign({}, r.staves[r.currentVoice.staffNum].clef) : Object.assign({}, r.clef);
     var x = r.currentVoice ? r.currentVoice.scoreTranspose : 0;
-    if (b.key = _.standardKey(r.key.root + r.key.acc + r.key.mode, r.key.root, r.key.acc, x), b.key.mode = r.key.mode, r.key.impliedNaturals && (b.key.impliedNaturals = r.key.impliedNaturals), r.key.explicitAccidentals)
+    if (b.key = k.standardKey(r.key.root + r.key.acc + r.key.mode, r.key.root, r.key.acc, x), b.key.mode = r.key.mode, r.key.impliedNaturals && (b.key.impliedNaturals = r.key.impliedNaturals), r.key.explicitAccidentals)
       for (var E = 0; E < r.key.explicitAccidentals.length; E++) {
         for (var D = !1, O = 0; O < b.key.accidentals.length; O++)
           b.key.accidentals[O].note === r.key.explicitAccidentals[E].note && (b.key.accidentals[O].acc = r.key.explicitAccidentals[E].acc, D = !0);
         D || b.key.accidentals.push(r.key.explicitAccidentals[E]);
       }
-    if (r.targetKey = b.key, b.key.explicitAccidentals && delete b.key.explicitAccidentals, _.addPosToKey(b.clef, b.key), r.meter !== null ? (r.currentVoice ? (r.staves.forEach(function(Q) {
+    if (r.targetKey = b.key, b.key.explicitAccidentals && delete b.key.explicitAccidentals, k.addPosToKey(b.clef, b.key), r.meter !== null ? (r.currentVoice ? (r.staves.forEach(function(Q) {
       Q.meter = r.meter;
     }), b.meter = r.staves[r.currentVoice.staffNum].meter, r.staves[r.currentVoice.staffNum].meter = null) : b.meter = r.meter, r.meter = null) : r.currentVoice && r.staves[r.currentVoice.staffNum].meter && (b.meter = r.staves[r.currentVoice.staffNum].meter, r.staves[r.currentVoice.staffNum].meter = null), r.currentVoice && r.currentVoice.name && (b.name = r.currentVoice.name), r.vocalfont && (b.vocalfont = r.vocalfont), r.tripletfont && (b.tripletfont = r.tripletfont), r.gchordfont && (b.gchordfont = r.gchordfont), r.style && (b.style = r.style), r.currentVoice) {
       var z = r.staves[r.currentVoice.staffNum];
@@ -2674,7 +2674,7 @@ function qs() {
     }
     r.barNumbers === 0 && L() && r.currBarNumber !== 1 && (b.barNumber = r.currBarNumber), a.startNewLine(b), r.key.impliedNaturals && delete r.key.impliedNaturals, r.partForNextLine = {}, r.tempoForNextLine.length === 4 && a.appendElement(r.tempoForNextLine[0], r.tempoForNextLine[1], r.tempoForNextLine[2], r.tempoForNextLine[3]), r.tempoForNextLine = [];
   };
-  var k = function(b) {
+  var _ = function(b) {
     return b.duration !== void 0 && b.duration < 0.25 && (b.end_beam = !0), b;
   }, M = function(b, x, E, D) {
     var O = function(te) {
@@ -2729,7 +2729,7 @@ function qs() {
           if (H === "startSlur" || H === "sharp2" || H === "flat2" || H === "pitch") {
             if (E.pitch = e[b[x]], E.pitch += 7 * (r.currentVoice && r.currentVoice.octave !== void 0 ? r.currentVoice.octave : r.octave), E.name = b[x], E.accidental && (E.name = v[E.accidental] + E.name), m.note(r, E), H = "octave", D && r.next_note_duration !== 0 ? (E.duration = r.default_length * r.next_note_duration, r.next_note_duration = 0, $ = !0) : E.duration = r.default_length, r.clef && r.clef.type === "perc" || r.currentVoice && r.currentVoice.clef === "perc") {
               var Q = b[x];
-              E.accidental && (Q = v[E.accidental] + Q), o.formatting && o.formatting.midi && o.formatting.midi.drummap && (E.midipitch = o.formatting.midi.drummap[Q]);
+              E.accidental && (Q = v[E.accidental] + Q), s.formatting && s.formatting.midi && s.formatting.midi.drummap && (E.midipitch = s.formatting.midi.drummap[Q]);
             }
           } else return O(H) ? (E.endChar = x, E) : null;
           break;
@@ -2749,7 +2749,7 @@ function qs() {
         case "z":
         case "Z":
           if (H === "startSlur")
-            E.rest = { type: c[b[x]] }, delete E.accidental, delete E.startSlur, delete E.startTie, delete E.endSlur, delete E.endTie, delete E.end_beam, delete E.grace_notes, E.rest.type.indexOf("multimeasure") >= 0 ? (E.duration = o.getBarLength(), E.rest.text = 1, H = "Zduration") : (D && r.next_note_duration !== 0 ? (E.duration = r.default_length * r.next_note_duration, r.next_note_duration = 0, $ = !0) : E.duration = r.default_length, H = "duration");
+            E.rest = { type: c[b[x]] }, delete E.accidental, delete E.startSlur, delete E.startTie, delete E.endSlur, delete E.endTie, delete E.end_beam, delete E.grace_notes, E.rest.type.indexOf("multimeasure") >= 0 ? (E.duration = s.getBarLength(), E.rest.text = 1, H = "Zduration") : (D && r.next_note_duration !== 0 ? (E.duration = r.default_length * r.next_note_duration, r.next_note_duration = 0, $ = !0) : E.duration = r.default_length, H = "duration");
           else return O(H) ? (E.endChar = x, E) : null;
           break;
         case "1":
@@ -2766,7 +2766,7 @@ function qs() {
           if (H === "octave" || H === "duration") {
             var W = g.getFraction(b, x);
             for (E.duration = E.duration * W.value, E.endChar = W.index; W.index < b.length && (g.isWhiteSpace(b[W.index]) || b[W.index] === "-"); )
-              b[W.index] === "-" ? E.startTie = {} : E = k(E), W.index++;
+              b[W.index] === "-" ? E.startTie = {} : E = _(E), W.index++;
             x = W.index - 1, H = "broken_rhythm";
           } else if (H === "sharp2")
             E.accidental = "quartersharp", H = "pitch";
@@ -2774,7 +2774,7 @@ function qs() {
             E.accidental = "quarterflat", H = "pitch";
           else if (H === "Zduration") {
             var ne = g.getNumber(b, x);
-            return E.duration = ne.num * o.getBarLength(), E.rest.text = ne.num, E.endChar = ne.index, E;
+            return E.duration = ne.num * s.getBarLength(), E.rest.text = ne.num, E.endChar = ne.index, E;
           } else return null;
           break;
         case "-":
@@ -2784,7 +2784,7 @@ function qs() {
             if (E.startTie = {}, !$ && D)
               H = "broken_rhythm";
             else
-              return g.isWhiteSpace(b[x + 1]) && k(E), E.endChar = x + 1, E;
+              return g.isWhiteSpace(b[x + 1]) && _(E), E.endChar = x + 1, E;
           else return H === "broken_rhythm" ? (E.endChar = x, E) : null;
           break;
         case " ":
@@ -2832,11 +2832,11 @@ function qs() {
   }
   return it = y, it;
 }
-var st, ga;
-function Ds() {
-  if (ga) return st;
-  ga = 1;
-  var _ = _e(), m = function(g, l) {
+var st, ba;
+function Is() {
+  if (ba) return st;
+  ba = 1;
+  var k = _e(), m = function(g, l) {
     this.lineIndex = 0, this.lines = g, this.multilineVars = l, this.skipWhiteSpace = function(n) {
       for (var t = 0; t < n.length; t++)
         if (!this.isWhiteSpace(n[t]))
@@ -2919,36 +2919,36 @@ function Ds() {
       if (r(n, c))
         return { len: 0 };
       var v = !1, h = n.substring(c);
-      if (_.startsWith(h, "clef=") && (v = !0, h = h.substring(5), c += 5), h.length === 0 && v)
+      if (k.startsWith(h, "clef=") && (v = !0, h = h.substring(5), c += 5), h.length === 0 && v)
         return { len: c + 5, warn: "No clef specified: " + e };
       var y = this.skipWhiteSpace(h);
       if (r(h, y))
         return { len: 0 };
       y > 0 && (c += y, h = h.substring(y));
       var w = null;
-      if (_.startsWith(h, "treble"))
+      if (k.startsWith(h, "treble"))
         w = "treble";
-      else if (_.startsWith(h, "bass3"))
+      else if (k.startsWith(h, "bass3"))
         w = "bass3";
-      else if (_.startsWith(h, "bass"))
+      else if (k.startsWith(h, "bass"))
         w = "bass";
-      else if (_.startsWith(h, "tenor"))
+      else if (k.startsWith(h, "tenor"))
         w = "tenor";
-      else if (_.startsWith(h, "alto2"))
+      else if (k.startsWith(h, "alto2"))
         w = "alto2";
-      else if (_.startsWith(h, "alto1"))
+      else if (k.startsWith(h, "alto1"))
         w = "alto1";
-      else if (_.startsWith(h, "alto"))
+      else if (k.startsWith(h, "alto"))
         w = "alto";
-      else if (!t && v && _.startsWith(h, "none"))
+      else if (!t && v && k.startsWith(h, "none"))
         w = "none";
-      else if (_.startsWith(h, "perc"))
+      else if (k.startsWith(h, "perc"))
         w = "perc";
-      else if (!t && v && _.startsWith(h, "C"))
+      else if (!t && v && k.startsWith(h, "C"))
         w = "tenor";
-      else if (!t && v && _.startsWith(h, "F"))
+      else if (!t && v && k.startsWith(h, "F"))
         w = "bass";
-      else if (!t && v && _.startsWith(h, "G"))
+      else if (!t && v && k.startsWith(h, "G"))
         w = "treble";
       else
         return { len: c + 5, warn: "Unknown clef specified: " + e };
@@ -3017,7 +3017,7 @@ function Ds() {
       return n.substring(t, c);
     }, this.isMatch = function(n, t) {
       var e = this.skipWhiteSpace(n);
-      return r(n, e) ? 0 : _.startsWith(n.substring(e), t) ? e + t.length : 0;
+      return r(n, e) ? 0 : k.startsWith(n.substring(e), t) ? e + t.length : 0;
     }, this.getPitchFromTokens = function(n) {
       var t = {}, e = { A: 5, B: 6, C: 0, D: 1, E: 2, F: 3, G: 4, a: 12, b: 13, c: 7, d: 8, e: 9, f: 10, g: 11 };
       if (t.position = e[n[0].token], t.position === void 0)
@@ -3162,7 +3162,7 @@ function Ds() {
         e--;
       return { start: t, end: e };
     };
-    var o = function(n) {
+    var s = function(n) {
       return n >= "A" && n <= "Z" || n >= "a" && n <= "z";
     }, a = function(n) {
       return n >= "0" && n <= "9";
@@ -3174,16 +3174,16 @@ function Ds() {
         if (n[t] === '"') {
           for (y = t + 1; y < e && n[y] !== '"'; ) y++;
           h.push({ type: "quote", token: n.substring(t + 1, y), start: t + 1, end: y }), y++;
-        } else if (o(n[t])) {
+        } else if (s(n[t])) {
           if (y = t + 1, c)
             for (; y < e && !this.isWhiteSpace(n[y]); ) y++;
           else
-            for (; y < e && o(n[y]); ) y++;
+            for (; y < e && s(n[y]); ) y++;
           h.push({ type: "alpha", token: n.substring(t, y), continueId: a(n[y]), start: t, end: y }), t = y + 1;
         } else if (n[t] === "." && a(n[y + 1])) {
           y = t + 1;
           for (var w = null, A = null; y < e && a(n[y]); ) y++;
-          A = parseFloat(n.substring(t, y)), h.push({ type: "number", token: n.substring(t, y), intt: w, floatt: A, continueId: o(n[y]), start: t, end: y }), t = y + 1;
+          A = parseFloat(n.substring(t, y)), h.push({ type: "number", token: n.substring(t, y), intt: w, floatt: A, continueId: s(n[y]), start: t, end: y }), t = y + 1;
         } else if (a(n[t]) || n[t] === "-" && a(n[y + 1])) {
           y = t + 1;
           for (var P = null, N = null; y < e && a(n[y]); ) y++;
@@ -3191,7 +3191,7 @@ function Ds() {
             for (y++; y < e && a(n[y]); ) y++;
           else
             P = parseInt(n.substring(t, y));
-          N = parseFloat(n.substring(t, y)), h.push({ type: "number", token: n.substring(t, y), intt: P, floatt: N, continueId: o(n[y]), start: t, end: y }), t = y + 1;
+          N = parseFloat(n.substring(t, y)), h.push({ type: "number", token: n.substring(t, y), intt: P, floatt: N, continueId: s(n[y]), start: t, end: y }), t = y + 1;
         } else n[t] === " " || n[t] === "	" || h.push({ type: "punct", token: n[t], start: t, end: t + 1 }), y = t + 1;
         t = y;
       }
@@ -3208,7 +3208,7 @@ function Ds() {
         return { len: h - t + 1, token: n.substring(c, h) };
       }
     };
-    var s = {
+    var o = {
       "`a": "à",
       "'a": "á",
       "^a": "â",
@@ -3442,7 +3442,7 @@ function Ds() {
         if (e === null)
           e = c;
         else {
-          var v = s[c.substring(0, 2)];
+          var v = o[c.substring(0, 2)];
           v !== void 0 ? e += v + c.substring(2) : (v = u[c.substring(0, 3)], v !== void 0 ? e += v + c.substring(3) : (v = p[c.substring(0, 1)], v !== void 0 ? e += v + c.substring(1) : e += "\\" + c));
         }
       }), e;
@@ -3530,7 +3530,7 @@ function Ds() {
       return n;
     }, this.stripComment = function(n) {
       var t = n.indexOf("%");
-      return t >= 0 ? _.strip(n.substring(0, t)) : _.strip(n);
+      return t >= 0 ? k.strip(n.substring(0, t)) : k.strip(n);
     }, this.getInt = function(n) {
       var t = parseInt(n);
       if (isNaN(t))
@@ -3590,11 +3590,11 @@ function Ds() {
     return null;
   }, st = m, st;
 }
-var ot, ba;
-function Ji() {
-  if (ba) return ot;
-  ba = 1;
-  function _(d, f, i) {
+var ot, ma;
+function Zi() {
+  if (ma) return ot;
+  ma = 1;
+  function k(d, f, i) {
     if (!(!f || d.lines.length === 0)) {
       var n = d.deline({ lineBreaks: !1 }), t = g(n, f);
       d.lines = m(n, t, i), d.lineBreaks = t;
@@ -3682,7 +3682,7 @@ function Ji() {
       f.push(d[i]);
     return f;
   }
-  function o(d, f, i, n, t, e, c, v, h, y, w) {
+  function s(d, f, i, n, t, e, c, v, h, y, w) {
     for (var A = y; A < d.length; A++) {
       var P = d[A];
       i += P, n += P;
@@ -3730,7 +3730,7 @@ function Ji() {
       startIndex: 0
     });
     for (var y = 0; y < h.length; )
-      o(
+      s(
         d.measureWidths,
         c,
         h[y].accumulator,
@@ -3757,7 +3757,7 @@ function Ji() {
       w = h[v], w.aveVariance < N && (N = w.aveVariance, T = v);
     return { failed: !1, lineBreaks: h[T].lineBreaks, variance: h[T].highestVariance };
   }
-  function s(d, f, i) {
+  function o(d, f, i) {
     for (var n = [], t = [], e = 0, c = !1, v = 0; v < d.length; v++)
       e += d[v], e > f && (c = !0), v % i === i - 1 && (v !== d.length - 1 && n.push(v), t.push(Math.round(e)), e = 0);
     return { failed: c, totals: t, lineBreaks: n };
@@ -3790,7 +3790,7 @@ function Ji() {
         minWidth: Math.round(q)
       }, C = null;
       if (v) {
-        var B = s(A.measureWidths, N, v);
+        var B = o(A.measureWidths, N, v);
         I.attempts.push({
           type: "Fixed Measures Per Line",
           preferredMeasuresPerLine: v,
@@ -3811,16 +3811,16 @@ function Ji() {
       }
       h.push(C), y.push(I);
     }
-    var S = i.staffwidth, k = p(h, S, i);
-    return k.explanation = y, k.reParse = !0, k;
+    var S = i.staffwidth, _ = p(h, S, i);
+    return _.explanation = y, _.reParse = !0, _;
   }
-  return ot = { wrapLines: _, calcLineWraps: u }, ot;
+  return ot = { wrapLines: k, calcLineWraps: u }, ot;
 }
-var ct, ma;
-function Rs() {
-  if (ma) return ct;
-  ma = 1;
-  function _(p) {
+var ct, ya;
+function Fs() {
+  if (ya) return ct;
+  ya = 1;
+  function k(p) {
     const u = p.getMeterFraction(), d = u.num === 4 && u.den === 4;
     if (!(u.num === 2 && u.den === 2) && !d)
       throw new Error("notCommonTime");
@@ -3842,7 +3842,7 @@ function Rs() {
         const c = e.staff, v = g(c);
         n = n.concat(v);
       }
-    }), r(n), o(n), a(n), n;
+    }), r(n), s(n), a(n), n;
   }
   const m = ["break", "(break)", "no chord", "n.c.", "tacet"];
   function g(p) {
@@ -3859,7 +3859,7 @@ function Rs() {
               lines: [f]
             }), f = []), d = A.title;
           else if (A.el_type === "note") {
-            s(A, i);
+            o(A, i);
             const P = Math.floor(y);
             if (A.chord && A.chord.length > 0) {
               const N = A.chord[0], T = N.position === "default" || m.indexOf(N.name.toLowerCase()) >= 0 ? N.name : "";
@@ -3877,7 +3877,7 @@ function Rs() {
               }
             }
           } else if (A.el_type === "bar") {
-            if (t && (i.ending = t, t = ""), s(A, i), A.chord && A.chord.forEach((P) => {
+            if (t && (i.ending = t, t = ""), o(A, i), A.chord && A.chord.forEach((P) => {
               P.position !== "default" && (i.annotations || (i.annotations = []), i.annotations.push(P.name));
             }), (A.type === "bar_dbl_repeat" || A.type === "bar_left_repeat") && (i.hasStartRepeat = !0), (A.type === "bar_dbl_repeat" || A.type === "bar_right_repeat") && (i.hasEndRepeat = !0), A.startEnding && (t = A.startEnding), y >= 4) {
               if (i.chord[0] === "" && (i.chord[1] || i.chord[2] || i.chord[3]) && (i.chord[0] = l(f)), c === 0 && h === 0)
@@ -3933,7 +3933,7 @@ function Rs() {
       }
     });
   }
-  function o(p) {
+  function s(p) {
     p.forEach((u) => {
       if (u.type === "part") {
         const d = [], f = u.lines[0];
@@ -3971,7 +3971,7 @@ function Rs() {
       }
     });
   }
-  function s(p, u) {
+  function o(p, u) {
     if (p.decoration)
       for (let d = 0; d < p.decoration.length; d++)
         switch (p.decoration[d]) {
@@ -3989,26 +3989,26 @@ function Rs() {
             break;
         }
   }
-  return ct = _, ct;
+  return ct = k, ct;
 }
-var lt, ya;
+var lt, wa;
 function Ce() {
-  if (ya) return lt;
-  ya = 1;
-  var _ = {};
-  return _.FONTEM = 360, _.FONTSIZE = 30, _.STEP = _.FONTSIZE * 93 / 720, _.SPACE = 10, _.TOPNOTE = 15, _.STAVEHEIGHT = 100, _.INDENT = 50, lt = _, lt;
-}
-var ft, wa;
-function Is() {
-  if (wa) return ft;
+  if (wa) return lt;
   wa = 1;
-  const _ = _e();
+  var k = {};
+  return k.FONTEM = 360, k.FONTSIZE = 30, k.STEP = k.FONTSIZE * 93 / 720, k.SPACE = 10, k.TOPNOTE = 15, k.STAVEHEIGHT = 100, k.INDENT = 50, lt = k, lt;
+}
+var ft, xa;
+function Os() {
+  if (xa) return ft;
+  xa = 1;
+  const k = _e();
   function m(a) {
-    this.sections = [{ type: "startRepeat", index: -1 }], this.addBar = function(s) {
-      var p = a.length - 1, u = s.type === "bar_left_repeat" || s.type === "bar_dbl_repeat", d = s.type === "bar_right_repeat" || s.type === "bar_dbl_repeat", f = s.startEnding ? o(s.startEnding) : void 0;
+    this.sections = [{ type: "startRepeat", index: -1 }], this.addBar = function(o) {
+      var p = a.length - 1, u = o.type === "bar_left_repeat" || o.type === "bar_dbl_repeat", d = o.type === "bar_right_repeat" || o.type === "bar_dbl_repeat", f = o.startEnding ? s(o.startEnding) : void 0;
       d && (this.sections.length > 0 && this.sections[this.sections.length - 1].type === "endRepeat" && this.sections.push({ type: "startRepeat", index: this.sections[this.sections.length - 1].index }), this.sections.push({ type: "endRepeat", index: p })), f && this.sections.push({ type: "startEnding", index: p, endings: f }), u && this.sections.push({ type: "startRepeat", index: p });
     }, this.resolveRepeats = function() {
-      var s, p = this.sections[this.sections.length - 1], u = a.length - 1;
+      var o, p = this.sections[this.sections.length - 1], u = a.length - 1;
       if (p.type === "startRepeat" ? p.end = u : p.index + 1 < u && this.sections.push({ type: "startRepeat", index: p.index + 1 }), this.sections.length < 2)
         return a;
       for (var d = [], f = null, i = 0; i < this.sections.length; i++) {
@@ -4017,30 +4017,30 @@ function Is() {
           case "startRepeat":
             if (f) {
               if (f.common.end || (f.common.end = n.index), f.endings)
-                for (s = 0; s < f.endings.length; s++)
-                  f.endings[s] && !f.endings[s].end && f.endings[s].start !== n.index && (f.endings[s].end = n.index);
+                for (o = 0; o < f.endings.length; o++)
+                  f.endings[o] && !f.endings[o].end && f.endings[o].start !== n.index && (f.endings[o].end = n.index);
               this.sections[i - 1].type === "endRepeat" && f.endings && f.endings.length && (f.endings[f.endings.length] = { start: -1, end: -1 }), d.push(f);
             }
             if (f) {
               var t = f.common.end;
               if (f.endings)
-                for (s = 0; s < f.endings.length; s++)
-                  f.endings[s] && (t = Math.max(t, f.endings[s].end));
+                for (o = 0; o < f.endings.length; o++)
+                  f.endings[o] && (t = Math.max(t, f.endings[o].end));
               t < n.index - 1 && d.push({ common: { start: t + 1, end: n.index } });
             }
             f = { common: { start: n.index } };
             break;
           case "startEnding": {
             if (f)
-              for (f.common.end || (f.common.end = n.index), f.endings || (f.endings = []), s = 0; s < n.endings.length; s++)
-                f.endings[n.endings[s]] = { start: n.index + 1 };
+              for (f.common.end || (f.common.end = n.index), f.endings || (f.endings = []), o = 0; o < n.endings.length; o++)
+                f.endings[n.endings[o]] = { start: n.index + 1 };
             break;
           }
           case "endRepeat":
             if (f) {
               if (f.endings || (f.endings = []), f.endings.length > 0)
-                for (s = 0; s < f.endings.length; s++)
-                  f.endings[s] && !f.endings[s].end && (f.endings[s].end = n.index);
+                for (o = 0; o < f.endings.length; o++)
+                  f.endings[o] && !f.endings[o].end && (f.endings[o].end = n.index);
               f.common.end || (f.common.end = n.index);
             }
             break;
@@ -4048,8 +4048,8 @@ function Is() {
       }
       if (f) {
         if (f.common.end || (f.common.end = u), f.endings)
-          for (s = 0; s < f.endings.length; s++)
-            f.endings[s] && !f.endings[s].end && (f.endings[s].end = u);
+          for (o = 0; o < f.endings.length; o++)
+            f.endings[o] && !f.endings[o].end && (f.endings[o].end = u);
         d.push(f);
       }
       for (var e = [], c = -1, v = 0; v < d.length; v++) {
@@ -4059,57 +4059,57 @@ function Is() {
         else if (h.endings.length === 0)
           g(a, e, h.common.start, h.common.end), g(a, e, h.common.start, h.common.end);
         else
-          for (s = 0; s < h.endings.length; s++) {
-            var y = h.endings[s];
+          for (o = 0; o < h.endings.length; o++) {
+            var y = h.endings[o];
             y && (g(a, e, h.common.start, h.common.end), y.start > 0 && g(a, e, y.start, y.end), c = Math.max(c, y.end));
           }
       }
       return e;
     };
   }
-  function g(a, s, p, u) {
-    p < 0 && (p = 0), s.length > 0 && a[p].el_type === "bar" && s[s.length - 1].el_type === "bar" && p++;
+  function g(a, o, p, u) {
+    p < 0 && (p = 0), o.length > 0 && a[p].el_type === "bar" && o[o.length - 1].el_type === "bar" && p++;
     for (var d = p; d <= u; d++) {
       var f, i = !1;
       if (a[d].el_type === "key" || a[d].el_type === "meter" || a[d].el_type === "tempo" || a[d].el_type === "instrument") {
-        for (f = s.length - 1; f >= 0 && s[f].el_type !== a[d].el_type; )
+        for (f = o.length - 1; f >= 0 && o[f].el_type !== a[d].el_type; )
           f--;
-        f >= 0 && (a[d].el_type === "key" && r(a[d], s[f]) || a[d].el_type === "meter" && a[d].num === s[f].num && a[d].den === s[f].den || a[d].el_type === "instrument" && a[d].program === s[f].program || a[d].el_type === "tempo" && a[d].qpm === s[f].qpm) && (i = !0);
+        f >= 0 && (a[d].el_type === "key" && r(a[d], o[f]) || a[d].el_type === "meter" && a[d].num === o[f].num && a[d].den === o[f].den || a[d].el_type === "instrument" && a[d].program === o[f].program || a[d].el_type === "tempo" && a[d].qpm === o[f].qpm) && (i = !0);
       }
-      i || s.push(l(a[d]));
+      i || o.push(l(a[d]));
     }
   }
   function l(a) {
-    var s = Object.assign({}, a);
-    return s.pitches && (s.pitches = _.cloneArray(s.pitches)), s;
+    var o = Object.assign({}, a);
+    return o.pitches && (o.pitches = k.cloneArray(o.pitches)), o;
   }
-  function r(a, s) {
-    return !a.accidentals || !s.accidentals ? !1 : JSON.stringify(a.accidentals) === JSON.stringify(s.accidentals);
+  function r(a, o) {
+    return !a.accidentals || !o.accidentals ? !1 : JSON.stringify(a.accidentals) === JSON.stringify(o.accidentals);
   }
-  function o(a) {
-    var s = [], p, u, d;
+  function s(a) {
+    var o = [], p, u, d;
     if (a.indexOf(",") > 0)
       for (u = a.split(","), d = 0; d < u.length; d++)
-        p = parseInt(u[d], 10), p > 0 && s.push(p);
+        p = parseInt(u[d], 10), p > 0 && o.push(p);
     else if (a.indexOf("-") > 0) {
       u = a.split("-");
       var f = parseInt(u[0], 10), i = parseInt(u[1], 10);
       for (d = f; d <= i; d++)
-        s.push(d);
+        o.push(d);
     } else
-      p = parseInt(a, 10), p > 0 && s.push(p);
-    return s;
+      p = parseInt(a, 10), p > 0 && o.push(p);
+    return o;
   }
   return ft = m, ft;
 }
-var ht, xa;
-function Zi() {
-  if (xa) return ht;
-  xa = 1;
-  var _, m = _e(), g = Is();
+var ht, Ca;
+function es() {
+  if (Ca) return ht;
+  Ca = 1;
+  var k, m = _e(), g = Os();
   return (function() {
     var l = 1, r = 128;
-    _ = function(c, v) {
+    k = function(c, v) {
       v = v || {};
       var h, y = v.program || 0, w = v.midiTranspose || 0;
       c.visualTranspose && (w -= c.visualTranspose);
@@ -4117,16 +4117,16 @@ function Zi() {
       y = parseInt(y, 10), w = parseInt(w, 10), A = parseInt(A, 10), A === 10 && (y = r), N = N.split(" "), T = parseInt(T, 10), q = parseInt(q, 10);
       var S = c.formatting.bagpipes;
       S && (y = 71);
-      var k = [];
+      var _ = [];
       if (c.formatting.midi) {
         var M = c.formatting.midi;
-        M.program && M.program.length > 0 && (y = M.program[0], M.program.length > 1 && (y = M.program[1], A = M.program[0]), P = !0), M.transpose && (w = M.transpose[0]), M.channel && (A = M.channel[0], P = !0), M.drum && (N = M.drum), M.drumbars && (T = M.drumbars[0]), M.drumon && (I = !0), A === 10 && (y = r), M.beat && k.push({ el_type: "beat", beats: M.beat }), M.nobeataccents && k.push({ el_type: "beataccents", value: !1 });
+        M.program && M.program.length > 0 && (y = M.program[0], M.program.length > 1 && (y = M.program[1], A = M.program[0]), P = !0), M.transpose && (w = M.transpose[0]), M.channel && (A = M.channel[0], P = !0), M.drum && (N = M.drum), M.drumbars && (T = M.drumbars[0]), M.drumon && (I = !0), A === 10 && (y = r), M.beat && _.push({ el_type: "beat", beats: M.beat }), M.nobeataccents && _.push({ el_type: "beataccents", value: !1 });
       }
       v.qpm ? h = parseInt(v.qpm, 10) : c.metaText.tempo ? h = d(c.metaText.tempo, c.getBeatLength()) : v.defaultQpm ? h = v.defaultQpm : h = 180;
       var F = [];
       S && F.push({ el_type: "bagpipes" }), F.push({ el_type: "instrument", program: y }), A && F.push({ el_type: "channel", channel: A }), w && F.push({ el_type: "transpose", transpose: w }), F.push({ el_type: "tempo", qpm: h });
-      for (var L = 0; L < k.length; L++)
-        F.push(k[L]);
+      for (var L = 0; L < _.length; L++)
+        F.push(_[L]);
       var b = [], x = [], E = [], D = [], O = [0], z = {};
       z[0] = { el_type: "tempo", qpm: h, timing: 0 };
       for (var H, $ = [], Q = !1, W = c.lines, ne = 0; ne < W.length; ne++) {
@@ -4155,12 +4155,12 @@ function Zi() {
                 })), b[U].push({ el_type: "beat", beats: H.slice(0), volumesPerNotePitch: Me }), E[oe] = !1, D[oe] = !1;
               }
               if (ie.decoration.indexOf("crescendo(") >= 0) {
-                var he = o(ce, j, "crescendo)"), Ee = Math.min(127, H[0] + R), xe = a(ce, j + he + 1, Object.keys(de));
+                var he = s(ce, j, "crescendo)"), Ee = Math.min(127, H[0] + R), xe = a(ce, j + he + 1, Object.keys(de));
                 xe && (Ee = de[xe][0]), he > 0 ? E[oe] = Math.floor((Ee - H[0]) / he) : E[oe] = !1, D[oe] = !1;
               } else if (ie.decoration.indexOf("crescendo)") >= 0)
                 E[oe] = !1;
               else if (ie.decoration.indexOf("diminuendo(") >= 0) {
-                var we = o(ce, j, "diminuendo)"), Le = Math.max(15, H[0] - R), Ae = a(ce, j + we + 1, Object.keys(de));
+                var we = s(ce, j, "diminuendo)"), Le = Math.max(15, H[0] - R), Ae = a(ce, j + we + 1, Object.keys(de));
                 Ae && (Le = de[Ae][0]), E[oe] = !1, we > 0 ? D[oe] = Math.floor((Le - H[0]) / we) : D[oe] = !1;
               } else ie.decoration.indexOf("diminuendo)") >= 0 && (D[oe] = !1);
             }
@@ -4311,7 +4311,7 @@ function Zi() {
       }
       for (var le = 0; le < $.length; le++)
         b[le] = $[le].resolveRepeats();
-      if (s(b, z), q)
+      if (o(b, z), q)
         for (var ee = c.getPickupLength(), se = 0; se < b.length; se++) {
           for (var pe = 0; b[se][pe].el_type !== "note" && b[se].length > pe; )
             pe++;
@@ -4328,7 +4328,7 @@ function Zi() {
         }
       return b.length > 0 && b[0].length > 0 && (b[0][0].pickupLength = c.getPickupLength()), b;
     };
-    function o(c, v, h) {
+    function s(c, v, h) {
       for (var y = 0, w = v + 1; w < c.length; w++)
         if (c[w].el_type === "note" && y++, c[w].decoration && c[w].decoration.indexOf(h) >= 0)
           return y;
@@ -4343,7 +4343,7 @@ function Zi() {
         }
       return null;
     }
-    function s(c, v) {
+    function o(c, v) {
       if (!(!v || v.length === 0))
         for (var h = Object.keys(v), y = 0; y < c.length; y++)
           for (var w = c[y], A = v[0] ? v[0].qpm : 0, P = 0; P < w.length; P++) {
@@ -4410,24 +4410,24 @@ function Zi() {
         }
       c.push(v);
     }
-  })(), ht = _, ht;
+  })(), ht = k, ht;
 }
-var ut, Ca;
-function Fs() {
-  if (Ca) return ut;
-  Ca = 1;
-  var _ = function(d, f, i, n) {
+var ut, ka;
+function Hs() {
+  if (ka) return ut;
+  ka = 1;
+  var k = function(d, f, i, n) {
     this.chordTrack = [], this.chordTrackFinished = !1, this.chordChannel = d, this.currentChords = [], this.lastChord, this.chordLastBar, this.chordsOff = !!f, this.gChordTacet = this.chordsOff, this.hasRhythmHead = !1, this.transpose = 0, this.lastBarTime = 0, this.meter = n, this.tempoChangeFactor = 1, this.bassInstrument = i.bassprog && i.bassprog.length >= 1 ? i.bassprog[0] : 0, this.chordInstrument = i.chordprog && i.chordprog.length >= 1 ? i.chordprog[0] : 0, this.bassOctaveShift = i.bassprog && i.bassprog.length === 2 ? i.bassprog[1] : 0, this.chordOctaveShift = i.chordprog && i.chordprog.length === 2 ? i.chordprog[1] : 0, this.boomVolume = i.bassvol && i.bassvol.length === 1 ? i.bassvol[0] : 64, this.chickVolume = i.chordvol && i.chordvol.length === 1 ? i.chordvol[0] : 48, i.gchord && i.gchord.length > 0 ? this.overridePattern = l(i.gchord[0]) : this.overridePattern = void 0;
   };
-  _.prototype.setMeter = function(u) {
+  k.prototype.setMeter = function(u) {
     this.meter = u;
-  }, _.prototype.setTempoChangeFactor = function(u) {
+  }, k.prototype.setTempoChangeFactor = function(u) {
     this.tempoChangeFactor = u;
-  }, _.prototype.setLastBarTime = function(u) {
+  }, k.prototype.setLastBarTime = function(u) {
     this.lastBarTime = u;
-  }, _.prototype.setTranspose = function(u) {
+  }, k.prototype.setTranspose = function(u) {
     this.transpose = u;
-  }, _.prototype.setRhythmHead = function(u, d) {
+  }, k.prototype.setRhythmHead = function(u, d) {
     this.hasRhythmHead = u;
     var f = [];
     if (u && this.lastChord && this.lastChord.chick)
@@ -4436,11 +4436,11 @@ function Fs() {
         n.actualPitch = this.lastChord.chick[i], f.push(n);
       }
     return f;
-  }, _.prototype.barEnd = function(u) {
-    this.chordTrack.length > 0 && !this.chordTrackFinished && (this.resolveChords(this.lastBarTime, s(u.time)), this.currentChords = []), this.chordLastBar = this.lastChord;
-  }, _.prototype.gChordOn = function(u) {
+  }, k.prototype.barEnd = function(u) {
+    this.chordTrack.length > 0 && !this.chordTrackFinished && (this.resolveChords(this.lastBarTime, o(u.time)), this.currentChords = []), this.chordLastBar = this.lastChord;
+  }, k.prototype.gChordOn = function(u) {
     this.chordsOff || (this.gChordTacet = u.tacet);
-  }, _.prototype.paramChange = function(u) {
+  }, k.prototype.paramChange = function(u) {
     switch (u.el_type) {
       case "gchord":
         u.param && u.param.length > 0 ? this.overridePattern = l(u.param) : this.overridePattern = void 0;
@@ -4460,11 +4460,11 @@ function Fs() {
       default:
         console.log("unhandled midi param", u);
     }
-  }, _.prototype.finish = function() {
+  }, k.prototype.finish = function() {
     this.chordTrackEmpty() || (this.chordTrackFinished = !0);
-  }, _.prototype.addTrack = function(u) {
+  }, k.prototype.addTrack = function(u) {
     this.chordTrackEmpty() || u.push(this.chordTrack);
-  }, _.prototype.findChord = function(u) {
+  }, k.prototype.findChord = function(u) {
     if (this.gChordTacet)
       return "break";
     if (this.chordTrackFinished || !u.chord || u.chord.length === 0)
@@ -4477,7 +4477,7 @@ function Fs() {
         return "break";
     }
     return null;
-  }, _.prototype.interpretChord = function(u) {
+  }, k.prototype.interpretChord = function(u) {
     if (u.length !== 0) {
       if (u === "break")
         return { chick: [] };
@@ -4515,20 +4515,20 @@ function Fs() {
         return { boom: f, boom2: t, chick: e };
       }
     }
-  }, _.prototype.chordNotes = function(u, d) {
+  }, k.prototype.chordNotes = function(u, d) {
     d = d.replace(/♭/g, "b").replace(/♯/g, "#");
     var f = a[d];
     f || (d.slice(0, 2).toLowerCase() === "ma" || d[0] === "M" ? f = a.M : d[0] === "m" || d[0] === "-" ? f = a.m : f = a.M), u += 12, u += this.chordOctaveShift * 12;
     for (var i = [], n = 0; n < f.length; n++)
       i.push(u + f[n]);
     return i;
-  }, _.prototype.writeNote = function(u, d, f, i, n, t) {
+  }, k.prototype.writeNote = function(u, d, f, i, n, t) {
     u !== void 0 && this.chordTrack.push({ cmd: "note", pitch: u, volume: f, start: this.lastBarTime + i * p(d, this.tempoChangeFactor), duration: p(n, this.tempoChangeFactor), gap: 0, instrument: t });
-  }, _.prototype.chordTrackEmpty = function() {
+  }, k.prototype.chordTrackEmpty = function() {
     for (var u = !0, d = 0; d < this.chordTrack.length && u; d++)
       this.chordTrack[d].cmd === "note" && (u = !1);
     return u;
-  }, _.prototype.resolveChords = function(u, d) {
+  }, k.prototype.resolveChords = function(u, d) {
     if (!this.hasRhythmHead) {
       var f = this.meter.num, i = this.meter.den, n = 1 / i, t = n / 2, e = parseInt(f, 10) / parseInt(i, 10), c = e - (d - u) / this.tempoChangeFactor;
       Math.abs(c) < 1e-5 && (c = 0), (this.currentChords.length === 0 || this.currentChords[0].beat !== 0) && this.currentChords.unshift({ beat: 0, chord: this.chordLastBar });
@@ -4558,15 +4558,15 @@ function Fs() {
           ), q ? q = !1 : T = !1;
       }
     }
-  }, _.prototype.processChord = function(u) {
+  }, k.prototype.processChord = function(u) {
     if (!this.chordTrackFinished) {
       var d = this.findChord(u);
       if (d) {
         var f = this.interpretChord(d);
         if (f) {
           this.chordTrack.length === 0 && this.chordTrack.push({ cmd: "program", channel: this.chordChannel, instrument: this.chordInstrument }), this.lastChord = f;
-          var i = o(this.lastBarTime, s(u.time));
-          this.currentChords.push({ chord: this.lastChord, beat: i, start: s(u.time) });
+          var i = s(this.lastBarTime, o(u.time));
+          this.currentChords.push({ chord: this.lastChord, beat: i, start: o(u.time) });
         }
       }
     }
@@ -4685,11 +4685,11 @@ function Fs() {
       i.push(n);
     return i;
   }
-  function o(u, d) {
+  function s(u, d) {
     var f = d - u;
     return f * 8;
   }
-  _.prototype.breakSynonyms = ["break", "(break)", "no chord", "n.c.", "tacet"], _.prototype.basses = {
+  k.prototype.breakSynonyms = ["break", "(break)", "no chord", "n.c.", "tacet"], k.prototype.basses = {
     A: 33,
     B: 35,
     C: 36,
@@ -5059,7 +5059,7 @@ function Fs() {
     "#5": [0, 8],
     b6: [0, 8]
   };
-  _.prototype.rhythmPatterns = {
+  k.prototype.rhythmPatterns = {
     "2/2": ["boom", "", "", "", "chick", "", "", ""],
     "3/2": ["boom", "", "", "", "chick", "", "", "", "chick", "", "", ""],
     "4/2": ["boom", "", "", "", "chick", "", "", "", "boom", "", "", "", "chick", "", "", ""],
@@ -5077,19 +5077,19 @@ function Fs() {
     "11/8": ["boom", "chick", "chick", "boom", "chick", "chick", "boom", "chick", "boom", "chick", "chick"],
     "12/8": ["boom", "", "chick", "boom", "", "chick", "boom", "", "chick", "boom", "", "chick"]
   };
-  function s(u) {
+  function o(u) {
     return u / 1e6;
   }
   function p(u, d) {
     return Math.round(u * d * 1e6) / 1e6;
   }
-  return ut = _, ut;
+  return ut = k, ut;
 }
-var dt, ka;
-function es() {
-  if (ka) return dt;
-  ka = 1;
-  var _ = {
+var dt, _a;
+function ts() {
+  if (_a) return dt;
+  _a = 1;
+  var k = {
     f0: "_C",
     n0: "=C",
     s0: "^C",
@@ -5161,21 +5161,21 @@ function es() {
   };
   function m(g) {
     var l = (g.accidental ? g.accidental[0] : "x") + g.verticalPos;
-    return _[l];
+    return k[l];
   }
   return dt = m, dt;
 }
-var pt, _a;
-function Os() {
-  if (_a) return pt;
-  _a = 1;
-  var _, m = Fs(), g = es();
+var pt, Ta;
+function zs() {
+  if (Ta) return pt;
+  Ta = 1;
+  var k, m = Hs(), g = ts();
   return (function() {
-    var l, r, o, a, s, p = 1, u, d, f, i, n, t, e = { num: 4, den: 4 }, c = 128, v, h = !0, y = 105, w = 95, A = 85, P = [[y, w, A]], N = 0.25, T, q, I = 0, C, B = {}, R, S = 0, k, M = 0, F = -1e-3, L = 0.4;
-    _ = function(Y, j, G, X) {
-      j || (j = {}), X || (X = {}), l = [], r = [0, 0, 0, 0, 0, 0, 0], a = [], s = j.qpm, p = 1, u = void 0, d = void 0, f = void 0, i = void 0, n = 0, k = G, e = { num: 4, den: 4 }, h = !0, y = 105, w = 95, A = 85, P = [], N = 0.25, T = void 0, q = void 0, I = 0, C = [], B = {}, R = 1, Y.length > 0 && Y[0].length > 0 && (S = Y[0][0].pickupLength), j.bassprog !== void 0 && !X.bassprog && (X.bassprog = [j.bassprog]), j.bassvol !== void 0 && !X.bassvol && (X.bassvol = [j.bassvol]), j.chordprog !== void 0 && !X.chordprog && (X.chordprog = [j.chordprog]), j.chordvol !== void 0 && !X.chordvol && (X.chordvol = [j.chordvol]), j.gchord !== void 0 && !X.gchord && (X.gchord = [j.gchord]), t = new m(Y.length, j.chordsOff, X, e), D(Y, j);
+    var l, r, s, a, o, p = 1, u, d, f, i, n, t, e = { num: 4, den: 4 }, c = 128, v, h = !0, y = 105, w = 95, A = 85, P = [[y, w, A]], N = 0.25, T, q, I = 0, C, B = {}, R, S = 0, _, M = 0, F = -1e-3, L = 0.4;
+    k = function(Y, j, G, X) {
+      j || (j = {}), X || (X = {}), l = [], r = [0, 0, 0, 0, 0, 0, 0], a = [], o = j.qpm, p = 1, u = void 0, d = void 0, f = void 0, i = void 0, n = 0, _ = G, e = { num: 4, den: 4 }, h = !0, y = 105, w = 95, A = 85, P = [], N = 0.25, T = void 0, q = void 0, I = 0, C = [], B = {}, R = 1, Y.length > 0 && Y[0].length > 0 && (S = Y[0][0].pickupLength), j.bassprog !== void 0 && !X.bassprog && (X.bassprog = [j.bassprog]), j.bassvol !== void 0 && !X.bassvol && (X.bassvol = [j.bassvol]), j.chordprog !== void 0 && !X.chordprog && (X.chordprog = [j.chordprog]), j.chordvol !== void 0 && !X.chordvol && (X.chordvol = [j.chordvol]), j.gchord !== void 0 && !X.gchord && (X.gchord = [j.gchord]), t = new m(Y.length, j.chordsOff, X, e), D(Y, j);
       for (var K = 0; K < Y.length; K++) {
-        o = 0, t.setTranspose(o);
+        s = 0, t.setTranspose(s);
         var Z = Y[K];
         f = [{ cmd: "program", channel: K, instrument: u }], i = void 0, v = 0, t.setLastBarTime(0);
         var ae = !1;
@@ -5196,10 +5196,10 @@ function Os() {
               e = ee, t.setMeter(e), N = O(e), be();
               break;
             case "tempo":
-              s ? p = ee.qpm ? s / ee.qpm : 1 : s = ee.qpm, t.setTempoChangeFactor(p);
+              o ? p = ee.qpm ? o / ee.qpm : 1 : o = ee.qpm, t.setTempoChangeFactor(p);
               break;
             case "transpose":
-              o = ee.transpose, t.setTranspose(o);
+              s = ee.transpose, t.setTranspose(s);
               break;
             case "bar":
               t.barEnd(ee), l = [], K === 0 && ge(Y.length + 1), t.setRhythmHead(!1), v = x(ee.time), t.setLastBarTime(v);
@@ -5253,7 +5253,7 @@ function Os() {
         }
         f[0].instrument === void 0 && (f[0].instrument = u || 0), i && f.unshift(i), a.push(f), t.finish(), C.length > 0;
       }
-      return j.detuneOctave && ye(a, parseInt(j.detuneOctave, 10)), t.addTrack(a), C.length > 0 && a.push(C), { tempo: s, instrument: u, tracks: a, totalDuration: n };
+      return j.detuneOctave && ye(a, parseInt(j.detuneOctave, 10)), t.addTrack(a), C.length > 0 && a.push(C), { tempo: o, instrument: u, tracks: a, totalDuration: n };
     };
     function b(Y) {
       for (var j = f.length - 1; j >= 0; j--)
@@ -5387,7 +5387,7 @@ function Os() {
       t.processChord(Y);
       var X;
       if (Y.gracenotes && Y.pitches && Y.pitches.length > 0 && Y.pitches[0] && (X = re(Y.gracenotes, Y.pitches[0].duration), Y.elem && (Y.elem.midiGraceNotePitches = V(X, x(Y.time), G * 2 / 3, d))), Y.elem) {
-        var K = x(Y.time), Z = K / N / s * 60 * 1e3;
+        var K = x(Y.time), Z = K / N / o * 60 * 1e3;
         if (Y.elem.currentTrackMilliseconds === void 0)
           Y.elem.currentTrackMilliseconds = Z, Y.elem.currentTrackWholeNotes = K;
         else if (Y.elem.currentTrackMilliseconds.length === void 0)
@@ -5410,9 +5410,9 @@ function Os() {
           if (ie) {
             ie.startSlur && (I += ie.startSlur.length), ie.endSlur && (I -= ie.endSlur.length);
             var de = ie.actualPitch ? ie.actualPitch : te(ie);
-            if (d === c && k) {
+            if (d === c && _) {
               var me = g(ie);
-              me && k[me] && (de = k[me].sound);
+              me && _[me] && (de = _[me].sound);
             }
             var he = { cmd: "note", pitch: de, volume: we, start: x(Y.time), duration: E(ie.duration), instrument: d, startChar: Y.elem.startChar, endChar: Y.elem.endChar };
             if (he = oe(he), Y.gracenotes && (he.duration = he.duration / 2, he.start = he.start + he.duration), Y.elem && Y.elem.midiPitches.push(he), se.noteModification)
@@ -5424,7 +5424,7 @@ function Os() {
                   break;
                 case "staccato":
                   var Ee = he.duration * L;
-                  he.gap = s / 60 * Ee;
+                  he.gap = o / 60 * Ee;
                   break;
                 default:
                   he.gap = M;
@@ -5473,7 +5473,7 @@ function Os() {
             break;
         }
       var G = ce(j) * 12 + J[ue(j)] + 60;
-      return l[j] !== void 0 ? G += l[j] : G += r[ue(j)], G += o, G;
+      return l[j] !== void 0 ? G += l[j] : G += r[ue(j)], G += s, G;
     }
     function U(Y) {
       var j = [0, 0, 0, 0, 0, 0, 0];
@@ -5509,9 +5509,9 @@ function Os() {
       for (Z = 0; Z < Y.length; Z++) {
         K = Y[Z];
         var le = te(K);
-        if (d === c && k) {
+        if (d === c && _) {
           var ee = g(K);
-          ee && k[ee] && (le = k[ee].sound);
+          ee && _[ee] && (le = _[ee].sound);
         }
         var se = { pitch: le, duration: K.duration * ae };
         se = oe(se), X.push(se);
@@ -5636,21 +5636,21 @@ function Os() {
         }
       }
     }
-  })(), pt = _, pt;
+  })(), pt = k, pt;
 }
-var vt, Ta;
-function Hs() {
-  if (Ta) return vt;
-  Ta = 1;
-  function _(p, u) {
+var vt, Sa;
+function Gs() {
+  if (Sa) return vt;
+  Sa = 1;
+  function k(p, u) {
     u || (u = {});
     for (var d = !!u.lineBreaks, f = [], i = !1, n = [], t = [], e = [], c = [], v = [], h = [], y = [], w = 0; w < p.length; w++) {
-      var A = s(p[w]);
+      var A = o(p[w]);
       if (A.staff) {
         if (i && !A.vskip)
           for (var P = f[f.length - 1], N = 0; N < P.staff.length; N++) {
             var T = A.staff[N], q = P.staff[N];
-            if (T && (a(T.meter, n[N]) || (g(T.meter, T.voices), n[N] = T.meter, delete T.meter), a(T.key, t[N]) || (l(T.key, T.voices), t[N] = T.key, delete T.key), T.title && (q.abbrevTitle = T.title), a(T.clef, e[N]) || (r(T.clef, T.voices), e[N] = T.clef, delete T.clef), a(T.vocalfont, c[N]) || (o(T.vocalfont, T.voices, "vocalfont"), c[N] = T.vocalfont, delete T.vocalfont), a(T.gchordfont, v[N]) || (o(T.gchordfont, T.voices, "gchordfont"), v[N] = T.gchordfont, delete T.gchordfont), a(T.tripletfont, h[N]) || (o(T.tripletfont, T.voices, "tripletfont"), h[N] = T.tripletfont, delete T.tripletfont), a(T.annotationfont, y[N]) || (o(T.annotationfont, T.voices, "annotationfont"), y[N] = T.annotationfont, delete T.annotationfont)), T)
+            if (T && (a(T.meter, n[N]) || (g(T.meter, T.voices), n[N] = T.meter, delete T.meter), a(T.key, t[N]) || (l(T.key, T.voices), t[N] = T.key, delete T.key), T.title && (q.abbrevTitle = T.title), a(T.clef, e[N]) || (r(T.clef, T.voices), e[N] = T.clef, delete T.clef), a(T.vocalfont, c[N]) || (s(T.vocalfont, T.voices, "vocalfont"), c[N] = T.vocalfont, delete T.vocalfont), a(T.gchordfont, v[N]) || (s(T.gchordfont, T.voices, "gchordfont"), v[N] = T.gchordfont, delete T.gchordfont), a(T.tripletfont, h[N]) || (s(T.tripletfont, T.voices, "tripletfont"), h[N] = T.tripletfont, delete T.tripletfont), a(T.annotationfont, y[N]) || (s(T.annotationfont, T.voices, "annotationfont"), y[N] = T.annotationfont, delete T.annotationfont)), T)
               for (var I = 0; I < q.voices.length; I++) {
                 var C = q.voices[I], B = T.voices[I];
                 d && C.push({ el_type: "break" }), B && (q.voices[I] = C.concat(B));
@@ -5659,7 +5659,7 @@ function Hs() {
         else {
           for (var R = 0; R < A.staff.length; R++)
             t[R] = A.staff[R].key, n[R] = A.staff[R].meter, e[R] = A.staff[R].clef;
-          f.push(s(A));
+          f.push(o(A));
         }
         i = !0;
       } else
@@ -5685,7 +5685,7 @@ function Hs() {
     for (var d = 0; d < u.length; d++)
       u[d].unshift(p);
   }
-  function o(p, u, d) {
+  function s(p, u, d) {
     p.el_type = "font", p.type = d, p.startChar = -1, p.endChar = -1;
     for (var f = 0; f < u.length; f++)
       u[f].unshift(p);
@@ -5696,7 +5696,7 @@ function Hs() {
     var d = JSON.stringify(p, m), f = JSON.stringify(u, m);
     return d === f;
   }
-  function s(p) {
+  function o(p) {
     for (var u = {}, d = Object.keys(p), f = 0; f < d.length; f++)
       if (d[f] !== "staff")
         u[d[f]] = p[d[f]];
@@ -5716,13 +5716,13 @@ function Hs() {
       }
     return u;
   }
-  return vt = _, vt;
+  return vt = k, vt;
 }
-var gt, Sa;
-function ts() {
-  if (Sa) return gt;
-  Sa = 1;
-  var _ = _e(), m = Ce(), g = Zi(), l = Os(), r = Hs(), o = function() {
+var gt, Ea;
+function rs() {
+  if (Ea) return gt;
+  Ea = 1;
+  var k = _e(), m = Ce(), g = es(), l = zs(), r = Gs(), s = function() {
     this.reset = function() {
       this.version = "1.1.0", this.media = "screen", this.metaText = {}, this.metaTextInfo = {}, this.formatting = {}, this.lines = [], this.staffNum = 0, this.voiceNum = 0, this.lineNum = 0, this.runningFonts = {}, delete this.visualTranspose;
     }, this.reset();
@@ -5752,7 +5752,7 @@ function ts() {
       var i = this.getMeterFraction(), n = 1;
       return i.num === 6 || i.num === 9 || i.num === 12 || i.num === 3 && i.den === 8 ? n = 3 : i.den === 8 && (i.num === 5 || i.num === 7) && (n = 2), n / i.den;
     };
-    function s(i, n) {
+    function o(i, n) {
       for (var t = 0, e = 0; e < i.length; e++)
         if (i[e].staff)
           for (var c = 0; c < i[e].staff.length; c++)
@@ -5765,7 +5765,7 @@ function ts() {
       return t;
     }
     this.getPickupLength = function() {
-      var i = this.getBarLength(), n = s(this.lines, i);
+      var i = this.getBarLength(), n = o(this.lines, i);
       return n < 1e-8 || i - n < 1e-8 ? 0 : n;
     }, this.getBarLength = function() {
       var i = this.getMeterFraction();
@@ -5892,8 +5892,8 @@ function ts() {
               endChar: n.abcelem.endChar,
               startCharArray: [n.abcelem.startChar],
               endCharArray: [n.abcelem.endChar],
-              midiPitches: n.abcelem.midiPitches ? _.cloneArray(n.abcelem.midiPitches) : []
-            }, n.abcelem.midiGraceNotePitches && (i["event" + t].midiGraceNotePitches = _.cloneArray(n.abcelem.midiGraceNotePitches));
+              midiPitches: n.abcelem.midiPitches ? k.cloneArray(n.abcelem.midiPitches) : []
+            }, n.abcelem.midiGraceNotePitches && (i["event" + t].midiGraceNotePitches = k.cloneArray(n.abcelem.midiGraceNotePitches));
           else {
             if (i["event" + t].left ? i["event" + t].left = Math.min(i["event" + t].left, n.x) : i["event" + t].left = n.x, i["event" + t].elements.push(N), i["event" + t].startCharArray.push(n.abcelem.startChar), i["event" + t].endCharArray.push(n.abcelem.endChar), i["event" + t].startChar === null && (i["event" + t].startChar = n.abcelem.startChar), i["event" + t].endChar === null && (i["event" + t].endChar = n.abcelem.endChar), n.abcelem.midiPitches && n.abcelem.midiPitches.length) {
               i["event" + t].midiPitches || (i["event" + t].midiPitches = []);
@@ -5931,16 +5931,16 @@ function ts() {
       for (var c = [], v = {}, h = i, y, w = !0, A = this.makeVoicesArray(), P = 0, N = 0; N < A.length; N++) {
         var T = h, q = Math.round(T * 1e3), I = 0, C = -1, B = A[N], R = t;
         n = this.getBeatLength() * R / 60;
-        for (var S = -1, k = 0; k < B.length; k++) {
-          var M = B[k].measureNumber;
+        for (var S = -1, _ = 0; _ < B.length; _++) {
+          var M = B[_].measureNumber;
           S !== M && this.tempoLocations[M] && (R = this.tempoLocations[M], n = e * this.getBeatLength() * R / 60, S = M);
-          var F = B[k].elem, L = this.addElementToEvents(v, F, q, B[k].top, B[k].height, B[k].line, B[k].measureNumber, n, y, w);
+          var F = B[_].elem, L = this.addElementToEvents(v, F, q, B[_].top, B[_].height, B[_].line, B[_].measureNumber, n, y, w);
           y = L.isTiedState, w = L.nextIsBar, T += L.duration;
           var b;
           if (F.duration > 0 && v["event" + q] && (b = "event" + q), q = Math.round(T * 1e3), F.type === "bar") {
             var x = F.abcelem.type, E = x === "bar_right_repeat" || x === "bar_dbl_repeat", D = F.abcelem.startEnding === "1", O = x === "bar_left_repeat" || x === "bar_dbl_repeat" || x === "bar_right_repeat";
             if (E) {
-              k > 0 && (v[b].endX = F.x), C === -1 && (C = k);
+              _ > 0 && (v[b].endX = F.x), C === -1 && (C = _);
               var z = 0;
               S = -1;
               for (var H = I; H < C; H++) {
@@ -5950,7 +5950,7 @@ function ts() {
               }
               v["event" + z] && (v["event" + z].endX = B[C].elem.x), w = !0, C = -1;
             }
-            D && (C = k), O && (I = k);
+            D && (C = _), O && (I = _);
           }
         }
         P = Math.max(P, q);
@@ -6014,17 +6014,17 @@ function ts() {
       return this.engraver && this.engraver.selectables ? this.engraver.selectables : [];
     };
   };
-  return gt = o, gt;
+  return gt = s, gt;
 }
-var bt, Ea;
-function zs() {
-  if (Ea) return bt;
-  Ea = 1;
-  var _ = Fr(), m = function(C) {
+var bt, Aa;
+function Ys() {
+  if (Aa) return bt;
+  Aa = 1;
+  var k = Fr(), m = function(C) {
     var B = this, R = {}, S = "";
-    C.reset(), this.setVisualTranspose = function(k) {
-      k !== void 0 && (C.visualTranspose = k);
-    }, this.cleanUp = function(k, M, F) {
+    C.reset(), this.setVisualTranspose = function(_) {
+      _ !== void 0 && (C.visualTranspose = _);
+    }, this.cleanUp = function(_, M, F) {
       n(C), delete C.runningFonts, l(C), C.metaText.tempo && C.metaText.tempo.bpm && !C.metaText.tempo.duration && (C.metaText.tempo.duration = [C.getBeatLength()]), I(C);
       var L = !1, b, x, E;
       for (b = 0; b < C.lines.length; b++)
@@ -6044,8 +6044,8 @@ function zs() {
         te.staff && (te.staff = te.staff.filter(function(U) {
           return !!U;
         }));
-      })), k)
-        for (; p(C.lines, k); )
+      })), _)
+        for (; p(C.lines, _); )
           ;
       if (M) {
         for (L = !1, b = 0; b < C.lines.length; b++)
@@ -6075,11 +6075,11 @@ function zs() {
         var Q = C.lines[b].staff;
         if (Q)
           for (C.staffNum = 0; C.staffNum < Q.length; C.staffNum++)
-            for (Q[C.staffNum].clef && _.fixClef(Q[C.staffNum].clef), C.voiceNum = 0; C.voiceNum < Q[C.staffNum].voices.length; C.voiceNum++) {
+            for (Q[C.staffNum].clef && k.fixClef(Q[C.staffNum].clef), C.voiceNum = 0; C.voiceNum < Q[C.staffNum].voices.length; C.voiceNum++) {
               var W = Q[C.staffNum].voices[C.voiceNum];
-              s(W, C.staffNum, C.voiceNum, F);
+              o(W, C.staffNum, C.voiceNum, F);
               for (var ne = 0; ne < W.length; ne++)
-                W[ne].el_type === "clef" && _.fixClef(W[ne]);
+                W[ne].el_type === "clef" && k.fixClef(W[ne]);
               if (W.length > 0 && W[W.length - 1].barNumber) {
                 var J = d(C.lines, b);
                 J && (J.staff[0].barNumber = W[W.length - 1].barNumber), delete W[W.length - 1].barNumber;
@@ -6087,96 +6087,96 @@ function zs() {
             }
       }
       return delete C.staffNum, delete C.voiceNum, delete C.lineNum, delete C.potentialStartBeam, delete C.potentialEndBeam, delete C.vskipPending, F;
-    }, this.addTieToLastNote = function(k) {
+    }, this.addTieToLastNote = function(_) {
       var M = f(C);
-      return M && M.pitches && M.pitches.length > 0 ? (M.pitches[0].startTie = {}, k && (M.pitches[0].startTie.style = "dotted"), !0) : !1;
-    }, this.appendElement = function(k, M, F, L) {
-      if (L.el_type = k, M !== null && (L.startChar = M), F !== null && (L.endChar = F), k === "note") {
+      return M && M.pitches && M.pitches.length > 0 ? (M.pitches[0].startTie = {}, _ && (M.pitches[0].startTie.style = "dotted"), !0) : !1;
+    }, this.appendElement = function(_, M, F, L) {
+      if (L.el_type = _, M !== null && (L.startChar = M), F !== null && (L.endChar = F), _ === "note") {
         var b = i(L);
         b >= 0.25 || L.force_end_beam_last && C.potentialStartBeam !== void 0 ? y(C) : L.end_beam && C.potentialStartBeam !== void 0 ? L.rest === void 0 ? h(L, C) : y(C) : L.rest === void 0 && (C.potentialStartBeam === void 0 ? L.end_beam || (C.potentialStartBeam = L, delete C.potentialEndBeam) : C.potentialEndBeam = L);
       } else
         y(C);
       return delete L.end_beam, delete L.force_end_beam_last, L.rest && L.rest.type === "invisible" && delete L.decoration, C.lines.length <= C.lineNum || C.lines[C.lineNum].staff.length <= C.staffNum ? !1 : (v(B, C, L, R, S), !0);
-    }, this.appendStartingElement = function(k, M, F, L) {
+    }, this.appendStartingElement = function(_, M, F, L) {
       n(C);
       var b;
-      k === "key" && (b = L.impliedNaturals, delete L.impliedNaturals, delete L.explicitAccidentals);
+      _ === "key" && (b = L.impliedNaturals, delete L.impliedNaturals, delete L.explicitAccidentals);
       var x = Object.assign({}, L);
       if (C.lines[C.lineNum]) {
         var E = C.lines[C.lineNum].staff;
         if (E) {
-          E.length <= C.staffNum && (E[C.staffNum] = {}, E[C.staffNum].clef = Object.assign({}, E[0].clef), E[C.staffNum].key = Object.assign({}, E[0].key), E[0].meter && (E[C.staffNum].meter = Object.assign({}, E[0].meter)), E[C.staffNum].workingClef = Object.assign({}, E[0].workingClef), E[C.staffNum].voices = [[]]), k === "clef" && (E[C.staffNum].workingClef = x);
+          E.length <= C.staffNum && (E[C.staffNum] = {}, E[C.staffNum].clef = Object.assign({}, E[0].clef), E[C.staffNum].key = Object.assign({}, E[0].key), E[0].meter && (E[C.staffNum].meter = Object.assign({}, E[0].meter)), E[C.staffNum].workingClef = Object.assign({}, E[0].workingClef), E[C.staffNum].voices = [[]]), _ === "clef" && (E[C.staffNum].workingClef = x);
           for (var D = E[C.staffNum].voices[C.voiceNum], O = 0; O < D.length; O++) {
             if (D[O].el_type === "note" || D[O].el_type === "bar") {
-              x.el_type = k, x.startChar = M, x.endChar = F, b && (x.accidentals = b.concat(x.accidentals)), D.push(x);
+              x.el_type = _, x.startChar = M, x.endChar = F, b && (x.accidentals = b.concat(x.accidentals)), D.push(x);
               return;
             }
-            if (D[O].el_type === k) {
-              x.el_type = k, x.startChar = M, x.endChar = F, b && (x.accidentals = b.concat(x.accidentals)), D[O] = x;
+            if (D[O].el_type === _) {
+              x.el_type = _, x.startChar = M, x.endChar = F, b && (x.accidentals = b.concat(x.accidentals)), D[O] = x;
               return;
             }
           }
-          E[C.staffNum][k] = L;
+          E[C.staffNum][_] = L;
         }
       }
-    }, this.addSubtitle = function(k, M) {
-      c(C, { subtitle: { text: k, startChar: M.startChar, endChar: M.endChar } });
-    }, this.addSpacing = function(k) {
-      C.vskipPending = k;
-    }, this.addNewPage = function(k) {
-      c(C, { newpage: k });
-    }, this.addSeparator = function(k, M, F, L) {
-      c(C, { separator: { spaceAbove: Math.round(k), spaceBelow: Math.round(M), lineLength: Math.round(F), startChar: L.startChar, endChar: L.endChar } });
-    }, this.addText = function(k, M) {
-      c(C, { text: { text: k, startChar: M.startChar, endChar: M.endChar } });
-    }, this.addCentered = function(k) {
-      c(C, { text: [{ text: k, center: !0 }] });
-    }, this.changeVoiceScale = function(k) {
-      B.appendElement("scale", null, null, { size: k });
-    }, this.changeVoiceColor = function(k) {
-      B.appendElement("color", null, null, { color: k });
-    }, this.startNewLine = function(k) {
-      n(C), k.currentVoiceName && (S = k.currentVoiceName, R[k.currentVoiceName] = k), C.lines[C.lineNum] === void 0 ? N(B, C, k) : C.lines[C.lineNum].staff === void 0 ? (C.lineNum++, this.startNewLine(k)) : C.lines[C.lineNum].staff[C.staffNum] === void 0 ? P(B, C, k) : C.lines[C.lineNum].staff[C.staffNum].voices[C.voiceNum] === void 0 ? A(B, C, k) : t(C.lines[C.lineNum].staff[C.staffNum].voices[C.voiceNum]) ? (C.lineNum++, this.startNewLine(k)) : k.part && B.appendElement("part", k.part.startChar, k.part.endChar, { title: k.part.title });
-    }, this.setRunningFont = function(k, M) {
-      C.runningFonts[k] = M;
-    }, this.setBarNumberImmediate = function(k) {
+    }, this.addSubtitle = function(_, M) {
+      c(C, { subtitle: { text: _, startChar: M.startChar, endChar: M.endChar } });
+    }, this.addSpacing = function(_) {
+      C.vskipPending = _;
+    }, this.addNewPage = function(_) {
+      c(C, { newpage: _ });
+    }, this.addSeparator = function(_, M, F, L) {
+      c(C, { separator: { spaceAbove: Math.round(_), spaceBelow: Math.round(M), lineLength: Math.round(F), startChar: L.startChar, endChar: L.endChar } });
+    }, this.addText = function(_, M) {
+      c(C, { text: { text: _, startChar: M.startChar, endChar: M.endChar } });
+    }, this.addCentered = function(_) {
+      c(C, { text: [{ text: _, center: !0 }] });
+    }, this.changeVoiceScale = function(_) {
+      B.appendElement("scale", null, null, { size: _ });
+    }, this.changeVoiceColor = function(_) {
+      B.appendElement("color", null, null, { color: _ });
+    }, this.startNewLine = function(_) {
+      n(C), _.currentVoiceName && (S = _.currentVoiceName, R[_.currentVoiceName] = _), C.lines[C.lineNum] === void 0 ? N(B, C, _) : C.lines[C.lineNum].staff === void 0 ? (C.lineNum++, this.startNewLine(_)) : C.lines[C.lineNum].staff[C.staffNum] === void 0 ? P(B, C, _) : C.lines[C.lineNum].staff[C.staffNum].voices[C.voiceNum] === void 0 ? A(B, C, _) : t(C.lines[C.lineNum].staff[C.staffNum].voices[C.voiceNum]) ? (C.lineNum++, this.startNewLine(_)) : _.part && B.appendElement("part", _.part.startChar, _.part.endChar, { title: _.part.title });
+    }, this.setRunningFont = function(_, M) {
+      C.runningFonts[_] = M;
+    }, this.setBarNumberImmediate = function(_) {
       var M = this.getCurrentVoice();
       if (M && M.length > 0) {
         var F = M[M.length - 1];
         if (F.el_type === "bar")
-          F.barNumber !== void 0 && (F.barNumber = k);
+          F.barNumber !== void 0 && (F.barNumber = _);
         else
-          return k - 1;
+          return _ - 1;
       }
-      return k;
+      return _;
     }, this.hasBeginMusic = function() {
-      for (var k = 0; k < C.lines.length; k++)
-        if (C.lines[k].staff)
+      for (var _ = 0; _ < C.lines.length; _++)
+        if (C.lines[_].staff)
           return !0;
       return !1;
-    }, this.isFirstLine = function(k) {
-      for (var M = k - 1; M >= 0; M--)
+    }, this.isFirstLine = function(_) {
+      for (var M = _ - 1; M >= 0; M--)
         if (C.lines[M].staff !== void 0) return !1;
       return !0;
     }, this.getCurrentVoice = function() {
-      var k = u(C.lines, C.lineNum);
-      if (!k)
+      var _ = u(C.lines, C.lineNum);
+      if (!_)
         return null;
-      var M = k.staff[C.staffNum];
+      var M = _.staff[C.staffNum];
       return M && M.voices[C.voiceNum] !== void 0 ? M.voices[C.voiceNum] : null;
-    }, this.setCurrentVoice = function(k, M, F) {
-      C.staffNum = k, C.voiceNum = M, S = F;
+    }, this.setCurrentVoice = function(_, M, F) {
+      C.staffNum = _, C.voiceNum = M, S = F;
       for (var L = 0; L < C.lines.length; L++)
-        if (C.lines[L].staff && (C.lines[L].staff[k] === void 0 || C.lines[L].staff[k].voices[M] === void 0 || !t(C.lines[L].staff[k].voices[M])))
-          return C.lineNum = L, !!(!C.lines[L].staff[k] || C.lines[L].staff[k].voices[M]);
+        if (C.lines[L].staff && (C.lines[L].staff[_] === void 0 || C.lines[L].staff[_].voices[M] === void 0 || !t(C.lines[L].staff[_].voices[M])))
+          return C.lineNum = L, !!(!C.lines[L].staff[_] || C.lines[L].staff[_].voices[M]);
       return C.lineNum = L, !1;
-    }, this.addMetaText = function(k, M, F) {
-      C.metaText[k] === void 0 ? (C.metaText[k] = M, C.metaTextInfo[k] = F) : (typeof C.metaText[k] == "string" && typeof M == "string" ? C.metaText[k] += `
-` + M : (C.metaText[k] === "string" && (C.metaText[k] = [{ text: C.metaText[k] }]), typeof M == "string" && (M = [{ text: M }]), C.metaText[k] = C.metaText[k].concat(M)), C.metaTextInfo[k].endChar = F.endChar);
-    }, this.addMetaTextArray = function(k, M, F) {
-      C.metaText[k] === void 0 ? (C.metaText[k] = [M], C.metaTextInfo[k] = F) : (C.metaText[k].push(M), C.metaTextInfo[k].endChar = F.endChar);
-    }, this.addMetaTextObj = function(k, M, F) {
-      C.metaText[k] = M, C.metaTextInfo[k] = F;
+    }, this.addMetaText = function(_, M, F) {
+      C.metaText[_] === void 0 ? (C.metaText[_] = M, C.metaTextInfo[_] = F) : (typeof C.metaText[_] == "string" && typeof M == "string" ? C.metaText[_] += `
+` + M : (C.metaText[_] === "string" && (C.metaText[_] = [{ text: C.metaText[_] }]), typeof M == "string" && (M = [{ text: M }]), C.metaText[_] = C.metaText[_].concat(M)), C.metaTextInfo[_].endChar = F.endChar);
+    }, this.addMetaTextArray = function(_, M, F) {
+      C.metaText[_] === void 0 ? (C.metaText[_] = [M], C.metaTextInfo[_] = F) : (C.metaText[_].push(M), C.metaTextInfo[_].endChar = F.endChar);
+    }, this.addMetaTextObj = function(_, M, F) {
+      C.metaText[_] = M, C.metaTextInfo[_] = F;
     };
   };
   function g(C) {
@@ -6195,8 +6195,8 @@ function zs() {
     for (var B = !1, R = 0; R < C.lines.length; R++) {
       var S = C.lines[R];
       if (S.staff)
-        for (var k = 0; k < S.staff.length; k++) {
-          for (var M = S.staff[k], F = [], L = 0; L < M.voices.length; L++) {
+        for (var _ = 0; _ < S.staff.length; _++) {
+          for (var M = S.staff[_], F = [], L = 0; L < M.voices.length; L++) {
             var b = M.voices[L];
             F.push({ hasOverlay: !1, voice: [], snip: [] });
             for (var x = 0, E = !1, D = -1, O = 0; O < b.length; O++) {
@@ -6229,7 +6229,7 @@ function zs() {
               for (var Q = $.snip.length - 1; Q >= 0; Q--) {
                 var W = $.snip[Q];
                 M.voices[L].splice(W.start, W.len), M.voices[L].splice(W.start + 1, 0, { el_type: "stem", direction: "auto" });
-                var ne = o(M.voices[L], W.start);
+                var ne = s(M.voices[L], W.start);
                 M.voices[L].splice(ne, 0, { el_type: "stem", direction: "up" });
               }
               for (Q = 0; Q < M.voices[M.voices.length - 1].length; Q++) {
@@ -6243,7 +6243,7 @@ function zs() {
     }
     return B;
   }
-  function o(C, B) {
+  function s(C, B) {
     for (var R = B - 1; R > 0 && C[R].el_type !== "bar"; R--)
       ;
     return R;
@@ -6252,8 +6252,8 @@ function zs() {
     for (var B = !0, R = 0; R < C.length; R++) {
       var S = C[R];
       if (S.staff) {
-        for (var k = 0; k < S.staff.length; k++) {
-          var M = S.staff[k];
+        for (var _ = 0; _ < S.staff.length; _++) {
+          var M = S.staff[_];
           if (M.title) {
             for (var F = !1, L = 0; L < M.title.length; L++)
               M.title[L] ? (M.title[L] = B ? M.title[L].name : M.title[L].subname, M.title[L] ? F = !0 : M.title[L] = "") : M.title[L] = "";
@@ -6264,13 +6264,13 @@ function zs() {
       }
     }
   }
-  function s(C, B, R, S) {
+  function o(C, B, R, S) {
     S[B] || (S[B] = []), S[B][R] || (S[B][R] = []);
-    for (var k, M = function(W, ne, J) {
+    for (var _, M = function(W, ne, J) {
       if (S[B][R][J] === void 0) {
-        for (k = 0; k < S[B][R].length; k++)
-          if (S[B][R][k] !== void 0) {
-            J = k;
+        for (_ = 0; _ < S[B][R].length; _++)
+          if (S[B][R][_] !== void 0) {
+            J = _;
             break;
           }
         if (S[B][R][J] === void 0) {
@@ -6308,9 +6308,9 @@ function zs() {
               for (var D = 0; D < E; D++)
                 M(b.gracenotes[x], 1, 20);
             }
-            b.gracenotes[x].startSlur && (k = b.gracenotes[x].startSlur, F(b.gracenotes[x], k, 20));
+            b.gracenotes[x].startSlur && (_ = b.gracenotes[x].startSlur, F(b.gracenotes[x], _, 20));
           }
-        if (b.endSlur && (k = b.endSlur, b.endSlur = [], M(b, k, 0)), b.startSlur && (k = b.startSlur, F(b, k, 0)), b.pitches) {
+        if (b.endSlur && (_ = b.endSlur, b.endSlur = [], M(b, _, 0)), b.startSlur && (_ = b.startSlur, F(b, _, 0)), b.pitches) {
           for (var O = [], z = 0; z < b.pitches.length; z++)
             if (b.pitches[z].endSlur) {
               var H = b.pitches[z].endSlur;
@@ -6321,7 +6321,7 @@ function zs() {
               }
             }
           for (z = 0; z < b.pitches.length; z++)
-            b.pitches[z].startSlur && (k = b.pitches[z].startSlur, F(b.pitches[z], k, z + 1, O));
+            b.pitches[z].startSlur && (_ = b.pitches[z].startSlur, F(b.pitches[z], _, z + 1, O));
           b.gracenotes && b.pitches[0].endSlur && b.pitches[0].endSlur[0] === 100 && b.pitches[0].startSlur && (b.gracenotes[0].endSlur ? b.gracenotes[0].endSlur.push(b.pitches[0].startSlur[0].label) : b.gracenotes[0].endSlur = [b.pitches[0].startSlur[0].label], b.pitches[0].endSlur.length === 1 ? delete b.pitches[0].endSlur : b.pitches[0].endSlur[0] === 100 ? b.pitches[0].endSlur.shift() : b.pitches[0].endSlur[b.pitches[0].endSlur.length - 1] === 100 && b.pitches[0].endSlur.pop(), S[B][R][1].length === 1 ? delete S[B][R][1] : S[B][R][1].pop());
         }
       }
@@ -6331,7 +6331,7 @@ function zs() {
     for (var R = 0; R < C.length; R++)
       if (C[R].staff !== void 0)
         for (var S = 0; S < C[R].staff.length; S++)
-          for (var k = [], M = 0; M < C[R].staff[S].voices.length; M++)
+          for (var _ = [], M = 0; M < C[R].staff[S].voices.length; M++)
             for (var F = C[R].staff[S].voices[M], L = 0, b = 0; b < F.length; b++)
               if (F[b].el_type === "bar") {
                 if (L++, L >= B && b < F.length - 1) {
@@ -6344,9 +6344,9 @@ function zs() {
                         x.staff[D].voices[O] = [];
                   }
                   var z = b + 1, H = C[R].staff[S].voices[M].slice(z);
-                  return C[R].staff[S].voices[M] = C[R].staff[S].voices[M].slice(0, z), x.staff[S].voices[M] = k.concat(H.concat(x.staff[S].voices[M])), !0;
+                  return C[R].staff[S].voices[M] = C[R].staff[S].voices[M].slice(0, z), x.staff[S].voices[M] = _.concat(H.concat(x.staff[S].voices[M])), !0;
                 }
-              } else F[b].duration || k.push(F[b]);
+              } else F[b].duration || _.push(F[b]);
     return !1;
   }
   function u(C, B) {
@@ -6399,7 +6399,7 @@ function zs() {
   function c(C, B) {
     C.vskipPending && (B.vskip = C.vskipPending, delete C.vskipPending), C.lines.push(B);
   }
-  function v(C, B, R, S, k) {
+  function v(C, B, R, S, _) {
     var M = B.lines[B.lineNum].staff[B.staffNum];
     if (R.pitches !== void 0) {
       var F = M.workingClef.verticalPos;
@@ -6413,7 +6413,7 @@ function zs() {
         b.verticalPos = b.pitch - L;
       });
     }
-    M.voices.length <= B.voiceNum && (S[k] || (S[k] = {}), A(C, B, S[k])), M.voices[B.voiceNum].push(R);
+    M.voices.length <= B.voiceNum && (S[_] || (S[_] = {}), A(C, B, S[_])), M.voices[B.voiceNum].push(R);
   }
   function h(C, B) {
     B.potentialStartBeam.startBeam = !0, C.endBeam = !0, delete B.potentialStartBeam, delete B.potentialEndBeam;
@@ -6423,8 +6423,8 @@ function zs() {
   }
   function w(C, B, R) {
     if (C.runningFonts[B]) {
-      for (var S = !1, k = Object.keys(R), M = 0; M < k.length; M++)
-        C.runningFonts[B][k[M]] !== R[k[M]] && (S = !0);
+      for (var S = !1, _ = Object.keys(R), M = 0; M < _.length; M++)
+        C.runningFonts[B][_[M]] !== R[_[M]] && (S = !0);
       S && (C.lines[C.lineNum].staff[C.staffNum][B] = R);
     }
     C.runningFonts[B] = R;
@@ -6435,9 +6435,9 @@ function zs() {
       C.appendElement("stem", null, null, { direction: R.stem });
     else if (B.voiceNum > 0) {
       if (S.voices[0] !== void 0) {
-        for (var k = !1, M = 0; M < S.voices[0].length; M++)
-          S.voices[0].el_type === "stem" && (k = !0);
-        if (!k) {
+        for (var _ = !1, M = 0; M < S.voices[0].length; M++)
+          S.voices[0].el_type === "stem" && (_ = !0);
+        if (!_) {
           var F = { el_type: "stem", direction: "up" };
           S.voices[0].splice(0, 0, F);
         }
@@ -6455,8 +6455,8 @@ function zs() {
     B.lines[B.lineNum] = { staff: [] }, P(C, B, R);
   }
   function T(C, B) {
-    for (var R = !1, S = !1, k = 0; k < C.length; k++) {
-      var M = C[k].staff;
+    for (var R = !1, S = !1, _ = 0; _ < C.length; _++) {
+      var M = C[_].staff;
       if (M)
         for (var F = 0; F < M.length; F++) {
           var L = M[F];
@@ -6475,8 +6475,8 @@ function zs() {
     for (var R = 0; R < C.length; R++) {
       var S = C[R].staff;
       if (S)
-        for (var k = 0; k < S.length; k++) {
-          var M = S[k];
+        for (var _ = 0; _ < S.length; _++) {
+          var M = S[_];
           B < M.voices.length && M.voices.splice(B, 1);
         }
     }
@@ -6487,9 +6487,9 @@ function zs() {
       if (R.subtitle) {
         var S = C.lines[B - 1];
         if (S.staff)
-          for (var k = 0; k < S.staff.length; k++)
-            for (var M = 0; M < S.staff[k].voices.length; M++) {
-              var F = S.staff[k].voices[M];
+          for (var _ = 0; _ < S.staff.length; _++)
+            for (var M = 0; M < S.staff[_].voices.length; M++) {
+              var F = S.staff[_].voices[M];
               if (F[F.length - 1].el_type === "key") {
                 F.pop();
                 for (var L = C.lines[B]; B < C.lines.length && !L.staff; )
@@ -6507,12 +6507,12 @@ function zs() {
   }
   return bt = m, bt;
 }
-var mt, Aa;
+var mt, Ma;
 function Or() {
-  if (Aa) return mt;
-  Aa = 1;
-  var _ = _e(), m = Ir(), g = Ps(), l = qs(), r = Ds(), o = Ji(), a = Rs(), s = ts(), p = zs(), u = function() {
-    var d = new s(), f = new p(d), i, n = "", t = "";
+  if (Ma) return mt;
+  Ma = 1;
+  var k = _e(), m = Ir(), g = qs(), l = Rs(), r = Is(), s = Zi(), a = Fs(), o = rs(), p = Ys(), u = function() {
+    var d = new o(), f = new p(d), i, n = "", t = "";
     this.getTune = function() {
       var S = {
         formatting: d.formatting,
@@ -6545,11 +6545,11 @@ function Or() {
       };
       return d.lineBreaks && (S.lineBreaks = d.lineBreaks), d.visualTranspose && (S.visualTranspose = d.visualTranspose), d.chordGrid && (S.chordGrid = d.chordGrid), S;
     };
-    function e(S, k, M) {
-      S.positioning || (S.positioning = {}), S.positioning[k] = M;
+    function e(S, _, M) {
+      S.positioning || (S.positioning = {}), S.positioning[_] = M;
     }
-    function c(S, k, M) {
-      S.fonts || (S.fonts = {}), S.fonts[k] = M;
+    function c(S, _, M) {
+      S.fonts || (S.fonts = {}), S.fonts[_] = M;
     }
     var v = {
       reset: function() {
@@ -6557,11 +6557,11 @@ function Or() {
           this.hasOwnProperty(S) && typeof this[S] != "function" && delete this[S];
         this.iChar = 0, this.key = { accidentals: [], root: "none", acc: "", mode: "" }, this.meter = null, this.origMeter = null, this.hasMainTitle = !1, this.default_length = 0.125, this.clef = { type: "treble", verticalPos: 0 }, this.octave = 0, this.next_note_duration = 0, this.start_new_line = !0, this.is_in_header = !0, this.partForNextLine = {}, this.tempoForNextLine = [], this.havent_set_length = !0, this.voices = {}, this.staves = [], this.macros = {}, this.currBarNumber = 1, this.barCounter = {}, this.ignoredDecorations = [], this.score_is_present = !1, this.inEnding = !1, this.inTie = [], this.inTieChord = {}, this.vocalPosition = "auto", this.dynamicPosition = "auto", this.chordPosition = "auto", this.ornamentPosition = "auto", this.volumePosition = "auto", this.openSlurs = [], this.freegchord = !1, this.endingHoldOver = {};
       },
-      differentFont: function(S, k) {
-        return this[S].decoration !== k[S].decoration || this[S].face !== k[S].face || this[S].size !== k[S].size || this[S].style !== k[S].style || this[S].weight !== k[S].weight;
+      differentFont: function(S, _) {
+        return this[S].decoration !== _[S].decoration || this[S].face !== _[S].face || this[S].size !== _[S].size || this[S].style !== _[S].style || this[S].weight !== _[S].weight;
       },
-      addFormattingOptions: function(S, k, M) {
-        M === "note" ? (this.vocalPosition !== "auto" && e(S, "vocalPosition", this.vocalPosition), this.dynamicPosition !== "auto" && e(S, "dynamicPosition", this.dynamicPosition), this.chordPosition !== "auto" && e(S, "chordPosition", this.chordPosition), this.ornamentPosition !== "auto" && e(S, "ornamentPosition", this.ornamentPosition), this.volumePosition !== "auto" && e(S, "volumePosition", this.volumePosition), this.differentFont("annotationfont", k) && c(S, "annotationfont", this.annotationfont), this.differentFont("gchordfont", k) && c(S, "gchordfont", this.gchordfont), this.differentFont("vocalfont", k) && c(S, "vocalfont", this.vocalfont), this.differentFont("tripletfont", k) && c(S, "tripletfont", this.tripletfont)) : M === "bar" && (this.dynamicPosition !== "auto" && e(S, "dynamicPosition", this.dynamicPosition), this.chordPosition !== "auto" && e(S, "chordPosition", this.chordPosition), this.ornamentPosition !== "auto" && e(S, "ornamentPosition", this.ornamentPosition), this.volumePosition !== "auto" && e(S, "volumePosition", this.volumePosition), this.differentFont("measurefont", k) && c(S, "measurefont", this.measurefont), this.differentFont("repeatfont", k) && c(S, "repeatfont", this.repeatfont));
+      addFormattingOptions: function(S, _, M) {
+        M === "note" ? (this.vocalPosition !== "auto" && e(S, "vocalPosition", this.vocalPosition), this.dynamicPosition !== "auto" && e(S, "dynamicPosition", this.dynamicPosition), this.chordPosition !== "auto" && e(S, "chordPosition", this.chordPosition), this.ornamentPosition !== "auto" && e(S, "ornamentPosition", this.ornamentPosition), this.volumePosition !== "auto" && e(S, "volumePosition", this.volumePosition), this.differentFont("annotationfont", _) && c(S, "annotationfont", this.annotationfont), this.differentFont("gchordfont", _) && c(S, "gchordfont", this.gchordfont), this.differentFont("vocalfont", _) && c(S, "vocalfont", this.vocalfont), this.differentFont("tripletfont", _) && c(S, "tripletfont", this.tripletfont)) : M === "bar" && (this.dynamicPosition !== "auto" && e(S, "dynamicPosition", this.dynamicPosition), this.chordPosition !== "auto" && e(S, "chordPosition", this.chordPosition), this.ornamentPosition !== "auto" && e(S, "ornamentPosition", this.ornamentPosition), this.volumePosition !== "auto" && e(S, "volumePosition", this.volumePosition), this.differentFont("measurefont", _) && c(S, "measurefont", this.measurefont), this.differentFont("repeatfont", _) && c(S, "repeatfont", this.repeatfont));
       },
       duplicateStartEndingHoldOvers: function() {
         this.endingHoldOver = {
@@ -6570,8 +6570,8 @@ function Or() {
         };
         for (var S = 0; S < this.inTie.length; S++)
           if (this.endingHoldOver.inTie.push([]), this.inTie[S])
-            for (var k = 0; k < this.inTie[S].length; k++)
-              this.endingHoldOver.inTie[S].push(this.inTie[S][k]);
+            for (var _ = 0; _ < this.inTie[S].length; _++)
+              this.endingHoldOver.inTie[S].push(this.inTie[S][_]);
         for (var M in this.inTieChord)
           this.inTieChord.hasOwnProperty(M) && (this.endingHoldOver.inTieChord[M] = this.inTieChord[M]);
       },
@@ -6580,8 +6580,8 @@ function Or() {
           this.inTie = [], this.inTieChord = {};
           for (var S = 0; S < this.endingHoldOver.inTie.length; S++) {
             this.inTie.push([]);
-            for (var k = 0; k < this.endingHoldOver.inTie[S].length; k++)
-              this.inTie[S].push(this.endingHoldOver.inTie[S][k]);
+            for (var _ = 0; _ < this.endingHoldOver.inTie[S].length; _++)
+              this.inTie[S].push(this.endingHoldOver.inTie[S][_]);
           }
           for (var M in this.endingHoldOver.inTieChord)
             this.endingHoldOver.inTieChord.hasOwnProperty(M) && (this.inTieChord[M] = this.endingHoldOver.inTieChord[M]);
@@ -6592,46 +6592,46 @@ function Or() {
     }, y = function(S) {
       v.warningObjects || (v.warningObjects = []), v.warningObjects.push(S);
     }, w = function(S) {
-      var k = S.replace(/\x12/g, " ");
-      return k = k.replace(/&/g, "&amp;"), k = k.replace(/</g, "&lt;"), k.replace(/>/g, "&gt;");
-    }, A = function(S, k, M) {
-      k || (k = " ");
-      var F = k[M];
+      var _ = S.replace(/\x12/g, " ");
+      return _ = _.replace(/&/g, "&amp;"), _ = _.replace(/</g, "&lt;"), _.replace(/>/g, "&gt;");
+    }, A = function(S, _, M) {
+      _ || (_ = " ");
+      var F = _[M];
       (F === " " || !F) && (F = "SPACE");
-      var L = w(k.substring(M - 64, M)) + '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">' + F + "</span>" + w(k.substring(M + 1).substring(0, 64));
-      h("Music Line:" + i.lineIndex + ":" + (M + 1) + ": " + S + ":  " + L), y({ message: S, line: k, startChar: v.iChar + M, column: M });
+      var L = w(_.substring(M - 64, M)) + '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">' + F + "</span>" + w(_.substring(M + 1).substring(0, 64));
+      h("Music Line:" + i.lineIndex + ":" + (M + 1) + ": " + S + ":  " + L), y({ message: S, line: _, startChar: v.iChar + M, column: M });
     }, P, N;
     this.getWarnings = function() {
       return v.warnings;
     }, this.getWarningObjects = function() {
       return v.warningObjects;
     };
-    var T = function(S, k) {
-      if (k.indexOf("") >= 0) {
-        n += k;
+    var T = function(S, _) {
+      if (_.indexOf("") >= 0) {
+        n += _;
         return;
       }
-      if (k = n + k, n = "", !S) {
+      if (_ = n + _, n = "", !S) {
         A("Can't add words before the first line of music", S, 0);
         return;
       }
-      k = _.strip(k), k[k.length - 1] !== "-" && (k = k + " ");
+      _ = k.strip(_), _[_.length - 1] !== "-" && (_ = _ + " ");
       for (var M = [], F = 0, L = !1, b = function(D) {
-        var O = _.strip(k.substring(F, D));
+        var O = k.strip(_.substring(F, D));
         if (O = O.replace(/\\([-_*|~])/g, "$1"), F = D + 1, O.length > 0) {
           L && (O = O.replace(/~/g, " "));
-          var z = k[D];
+          var z = _[D];
           return z !== "_" && z !== "-" && (z = " "), M.push({ syllable: i.translateString(O), divider: z }), L = !1, !0;
         }
         return !1;
-      }, x = !1, E = 0; E < k.length; E++) {
-        switch (k[E]) {
+      }, x = !1, E = 0; E < _.length; E++) {
+        switch (_[E]) {
           case " ":
           case "":
             b(E);
             break;
           case "-":
-            !x && !b(E) && M.length > 0 && (_.last(M).divider = "-", M.push({ skip: !0, to: "next" }));
+            !x && !b(E) && M.length > 0 && (k.last(M).divider = "-", M.push({ skip: !0, to: "next" }));
             break;
           case "_":
             x || (b(E), M.push({ skip: !0, to: "slur" }));
@@ -6646,7 +6646,7 @@ function Or() {
             x || (L = !0);
             break;
         }
-        x = k[E] === "\\";
+        x = _[E] === "\\";
       }
       S.forEach(function(D) {
         if (M.length !== 0) {
@@ -6669,32 +6669,32 @@ function Or() {
           }
         }
       });
-    }, q = function(S, k) {
-      if (k.indexOf("") >= 0) {
-        t += k;
+    }, q = function(S, _) {
+      if (_.indexOf("") >= 0) {
+        t += _;
         return;
       }
-      if (k = t + k, t = "", !S) {
+      if (_ = t + _, t = "", !S) {
         A("Can't add symbols before the first line of music", S, 0);
         return;
       }
-      k = _.strip(k), k[k.length - 1] !== "-" && (k = k + " ");
+      _ = k.strip(_), _[_.length - 1] !== "-" && (_ = _ + " ");
       for (var M = [], F = 0, L = !1, b = function(E) {
-        var D = _.strip(k.substring(F, E));
+        var D = k.strip(_.substring(F, E));
         if (F = E + 1, D.length > 0) {
           L && (D = D.replace(/~/g, " "));
-          var O = k[E];
+          var O = _[E];
           return O !== "_" && O !== "-" && (O = " "), M.push({ syllable: i.translateString(D), divider: O }), L = !1, !0;
         }
         return !1;
-      }, x = 0; x < k.length; x++)
-        switch (k[x]) {
+      }, x = 0; x < _.length; x++)
+        switch (_[x]) {
           case " ":
           case "":
             b(x);
             break;
           case "-":
-            !b(x) && M.length > 0 && (_.last(M).divider = "-", M.push({ skip: !0, to: "next" }));
+            !b(x) && M.length > 0 && (k.last(M).divider = "-", M.push({ skip: !0, to: "next" }));
             break;
           case "_":
             b(x), M.push({ skip: !0, to: "slur" });
@@ -6730,9 +6730,9 @@ function Or() {
         }
       });
     }, I = function(S) {
-      if (_.startsWith(S, "%%")) {
-        var k = m.addDirective(S.substring(2));
-        k && A(k, S, 2);
+      if (k.startsWith(S, "%%")) {
+        var _ = m.addDirective(S.substring(2));
+        _ && A(_, S, 2);
         return;
       }
       var M = S.indexOf("%");
@@ -6753,19 +6753,19 @@ function Or() {
         F.regular && N.parseMusic(S), F.newline && N.startNewLine(), F.words && T(f.getCurrentVoice(), S.substring(2)), F.symbols && q(f.getCurrentVoice(), S.substring(2));
       }
     };
-    function C(S, k) {
+    function C(S, _) {
       S.push({
         el_type: "hint"
       });
-      for (var M = 0; M < k.length; M++) {
-        var F = k[M], L = Object.assign({}, F);
+      for (var M = 0; M < _.length; M++) {
+        var F = _[M], L = Object.assign({}, F);
         if (S.push(L), F.el_type === "bar")
           return;
       }
     }
-    function B(S, k) {
+    function B(S, _) {
       for (var M = 0; M < S.length; M++) {
-        var F = S[M], L = k[M];
+        var F = S[M], L = _[M];
         if (L)
           for (var b = 0; b < L.voices.length; b++) {
             var x = L.voices[b], E = F.voices[b];
@@ -6775,19 +6775,19 @@ function Or() {
     }
     function R() {
       for (var S = 0; S < d.lines.length; S++) {
-        var k = d.lines[S].staff;
-        if (k) {
+        var _ = d.lines[S].staff;
+        if (_) {
           for (var M = S + 1; M < d.lines.length && d.lines[M].staff === void 0; )
             M++;
           if (M < d.lines.length) {
             var F = d.lines[M].staff;
-            B(k, F);
+            B(_, F);
           }
         }
       }
     }
-    this.parse = function(S, k, M) {
-      k || (k = {}), M || (M = 0), d.reset(), S = S.replace(/\r\n?/g, `
+    this.parse = function(S, _, M) {
+      _ || (_ = {}), M || (M = 0), d.reset(), S = S.replace(/\r\n?/g, `
 `) + `
 `;
       var F = S.split(`
@@ -6806,11 +6806,11 @@ function Or() {
       });
       var b = S.split(`
 `);
-      _.last(b).length === 0 && b.pop(), i = new r(b, v), P = new g(i, A, v, d, f), N = new l(i, A, v, d, f, P), k.print && (d.media = "print"), v.reset(), v.iChar = M, k.visualTranspose ? (v.globalTranspose = parseInt(k.visualTranspose), v.globalTranspose === 0 ? v.globalTranspose = void 0 : f.setVisualTranspose(k.visualTranspose)) : v.globalTranspose = void 0, k.lineBreaks && (v.lineBreaks = k.lineBreaks), P.reset(i, A, v, d);
+      k.last(b).length === 0 && b.pop(), i = new r(b, v), P = new g(i, A, v, d, f), N = new l(i, A, v, d, f, P), _.print && (d.media = "print"), v.reset(), v.iChar = M, _.visualTranspose ? (v.globalTranspose = parseInt(_.visualTranspose), v.globalTranspose === 0 ? v.globalTranspose = void 0 : f.setVisualTranspose(_.visualTranspose)) : v.globalTranspose = void 0, _.lineBreaks && (v.lineBreaks = _.lineBreaks), P.reset(i, A, v, d);
       try {
-        k.format && m.globalFormatting(k.format);
+        _.format && m.globalFormatting(_.format);
         for (var x = i.nextLine(); x; ) {
-          if (k.header_only && v.is_in_header === !1 || k.stop_on_warning && v.warnings)
+          if (_.header_only && v.is_in_header === !1 || _.stop_on_warning && v.warnings)
             throw "normal_abort";
           var E = v.is_in_header;
           I(x), E && !v.is_in_header && (f.setRunningFont("annotationfont", v.annotationfont), f.setRunningFont("gchordfont", v.gchordfont), f.setRunningFont("tripletfont", v.tripletfont), f.setRunningFont("vocalfont", v.vocalfont)), x = i.nextLine();
@@ -6834,7 +6834,7 @@ function Or() {
         var z = D;
         D = O, O = z;
       }
-      if (d.formatting.pagewidth || (d.formatting.pagewidth = O), d.formatting.pageheight || (d.formatting.pageheight = D), k.hint_measures && R(), o.wrapLines(d, v.lineBreaks, v.barNumbers), k.chordGrid)
+      if (d.formatting.pagewidth || (d.formatting.pagewidth = O), d.formatting.pageheight || (d.formatting.pageheight = D), _.hint_measures && R(), s.wrapLines(d, v.lineBreaks, v.barNumbers), _.chordGrid)
         try {
           d.chordGrid = a(d);
         } catch (H) {
@@ -6853,24 +6853,24 @@ function Or() {
   };
   return mt = u, mt;
 }
-var yt, Ma;
-function Gs() {
-  if (Ma) return yt;
-  Ma = 1;
-  var _ = _e(), m = function(g) {
+var yt, Ba;
+function Ws() {
+  if (Ba) return yt;
+  Ba = 1;
+  var k = _e(), m = function(g) {
     var l = "", r = g.match(/(\s*)/);
-    g = _.strip(g);
-    for (var o = g.split(`
-X:`), a = 1; a < o.length; a++)
-      o[a] = "X:" + o[a];
-    var s = r ? r[0].length : 0, p = [];
-    if (o.forEach(function(i) {
-      p.push({ abc: i, startPos: s }), s += i.length + 1;
-    }), p.length > 1 && !_.startsWith(p[0].abc, "X:")) {
+    g = k.strip(g);
+    for (var s = g.split(`
+X:`), a = 1; a < s.length; a++)
+      s[a] = "X:" + s[a];
+    var o = r ? r[0].length : 0, p = [];
+    if (s.forEach(function(i) {
+      p.push({ abc: i, startPos: o }), o += i.length + 1;
+    }), p.length > 1 && !k.startsWith(p[0].abc, "X:")) {
       var u = p.shift(), d = u.abc.split(`
 `);
       d.forEach(function(i) {
-        _.startsWith(i, "%%") && (l += i + `
+        k.startsWith(i, "%%") && (l += i + `
 `);
       });
     }
@@ -6882,10 +6882,10 @@ X:`), a = 1; a < o.length; a++)
       n > 0 && (i.abc = i.abc.substring(0, n)), i.pure = i.abc, i.abc = l + i.abc, i.title = "";
       var t = i.pure.split("T:");
       t.length > 1 && (t = t[1].split(`
-`), i.title = _.strip(t[0]));
+`), i.title = k.strip(t[0]));
       var e = i.pure.substring(2, i.pure.indexOf(`
 `));
-      i.id = _.strip(e);
+      i.id = k.strip(e);
     }), {
       header: f,
       tunes: p
@@ -6893,11 +6893,11 @@ X:`), a = 1; a < o.length; a++)
   };
   return yt = m, yt;
 }
-var wt, Ba;
-function Ys() {
-  if (Ba) return wt;
-  Ba = 1;
-  function _(m, g) {
+var wt, Na;
+function Us() {
+  if (Na) return wt;
+  Na = 1;
+  function k(m, g) {
     this.numLines = m, this.lineSpace = g, this.verticalSize = this.numLines * this.lineSpace;
     var l = 3;
     this.bar = {
@@ -6906,10 +6906,10 @@ function Ys() {
       height: 5
     };
   }
-  return _.prototype.bypass = function(m) {
+  return k.prototype.bypass = function(m) {
     var g = m.staffGroup.voices;
     return !!(g.length > 0 && g[0].isPercussion);
-  }, _.prototype.setRelative = function(m, g, l) {
+  }, k.prototype.setRelative = function(m, g, l) {
     switch (m.type) {
       case "bar":
         g.pitch = this.bar.pitch, g.pitch2 = this.bar.pitch2, g.height = this.height;
@@ -6921,13 +6921,13 @@ function Ys() {
         break;
     }
     return l;
-  }, wt = _, wt;
+  }, wt = k, wt;
 }
-var xt, Na;
-function rs() {
-  if (Na) return xt;
-  Na = 1;
-  var _ = function(g, l) {
+var xt, Pa;
+function as() {
+  if (Pa) return xt;
+  Pa = 1;
+  var k = function(g, l) {
     this.children = [], this.beams = [], this.otherchildren = [], this.w = 0, this.duplicate = !1, this.voicenumber = g, this.voicetotal = l, this.bottom = 7, this.top = 7, this.specialY = {
       tempoHeightAbove: 0,
       partHeightAbove: 0,
@@ -6942,67 +6942,67 @@ function rs() {
       dynamicHeightBelow: 0
     };
   };
-  return _.prototype.addChild = function(m) {
+  return k.prototype.addChild = function(m) {
     if (m.type === "bar") {
       for (var g = !0, l = 0; g && l < this.children.length; l++)
         this.children[l].type.indexOf("staff-extra") < 0 && this.children[l].type !== "tempo" && (g = !1);
       g || (this.beams.push("bar"), this.otherchildren.push("bar"));
     }
     this.children[this.children.length] = m, this.setRange(m);
-  }, _.prototype.setLimit = function(m, g) {
+  }, k.prototype.setLimit = function(m, g) {
     var l = g.specialY;
     l || (l = g), l[m] && (this.specialY[m] ? this.specialY[m] = Math.max(this.specialY[m], l[m]) : this.specialY[m] = l[m]);
-  }, _.prototype.adjustRange = function(m) {
+  }, k.prototype.adjustRange = function(m) {
     m.bottom !== void 0 && (this.bottom = Math.min(this.bottom, m.bottom)), m.top !== void 0 && (this.top = Math.max(this.top, m.top));
-  }, _.prototype.setRange = function(m) {
+  }, k.prototype.setRange = function(m) {
     this.adjustRange(m), this.setLimit("tempoHeightAbove", m), this.setLimit("partHeightAbove", m), this.setLimit("volumeHeightAbove", m), this.setLimit("dynamicHeightAbove", m), this.setLimit("endingHeightAbove", m), this.setLimit("chordHeightAbove", m), this.setLimit("lyricHeightAbove", m), this.setLimit("lyricHeightBelow", m), this.setLimit("chordHeightBelow", m), this.setLimit("volumeHeightBelow", m), this.setLimit("dynamicHeightBelow", m);
-  }, _.prototype.addOther = function(m) {
+  }, k.prototype.addOther = function(m) {
     this.otherchildren.push(m), this.setRange(m);
-  }, _.prototype.addBeam = function(m) {
+  }, k.prototype.addBeam = function(m) {
     this.beams.push(m);
-  }, _.prototype.setWidth = function(m) {
+  }, k.prototype.setWidth = function(m) {
     this.w = m;
-  }, xt = _, xt;
+  }, xt = k, xt;
 }
-var Ct, Pa;
+var Ct, La;
 function Hr() {
-  if (Pa) return Ct;
-  Pa = 1;
-  var _ = function(m, g, l, r) {
+  if (La) return Ct;
+  La = 1;
+  var k = function(m, g, l, r) {
     if (m)
-      for (var o = 0; o < m.length; o++) {
-        var a = m[o], s = a.getAttribute("highlight");
-        s || (s = "fill"), a.setAttribute(s, r);
+      for (var s = 0; s < m.length; s++) {
+        var a = m[s], o = a.getAttribute("highlight");
+        o || (o = "fill"), a.setAttribute(o, r);
         var p = a.getAttribute("class");
         p || (p = ""), p = p.replace(l, ""), p = p.replace(g, ""), g.length > 0 && (p.length > 0 && p[p.length - 1] !== " " && (p += " "), p += g), a.setAttribute("class", p);
       }
   };
-  return Ct = _, Ct;
+  return Ct = k, Ct;
 }
-var kt, La;
-function as() {
-  if (La) return kt;
-  La = 1;
-  var _ = Hr(), m = function(g, l) {
-    g === void 0 && (g = "abcjs-note_selected"), l === void 0 && (l = "#ff0000"), _(this.elemset, g, "", l);
+var kt, qa;
+function ns() {
+  if (qa) return kt;
+  qa = 1;
+  var k = Hr(), m = function(g, l) {
+    g === void 0 && (g = "abcjs-note_selected"), l === void 0 && (l = "#ff0000"), k(this.elemset, g, "", l);
   };
   return kt = m, kt;
 }
-var _t, qa;
-function ns() {
-  if (qa) return _t;
-  qa = 1;
-  var _ = Hr(), m = function(g, l) {
-    g === void 0 && (g = "abcjs-note_selected"), l === void 0 && (l = "#000000"), _(this.elemset, "", g, l);
+var _t, Da;
+function is() {
+  if (Da) return _t;
+  Da = 1;
+  var k = Hr(), m = function(g, l) {
+    g === void 0 && (g = "abcjs-note_selected"), l === void 0 && (l = "#000000"), k(this.elemset, "", g, l);
   };
   return _t = m, _t;
 }
-var Tt, Da;
+var Tt, Ra;
 function De() {
-  if (Da) return Tt;
-  Da = 1;
-  var _ = as(), m = ns(), g = function(r, o, a, s, p, u) {
-    u || (u = {}), this.tuneNumber = p, this.abcelem = r, this.duration = o, this.durationClass = u.durationClassOveride ? u.durationClassOveride : this.duration, this.minspacing = a || 0, this.x = 0, this.children = [], this.heads = [], this.extra = [], this.extraw = 0, this.w = 0, this.right = [], this.invisible = !1, this.bottom = void 0, this.top = void 0, this.type = s, r.extraClass && (this.extraClass = r.extraClass), this.fixed = { w: 0, t: void 0, b: void 0 }, this.specialY = {
+  if (Ra) return Tt;
+  Ra = 1;
+  var k = ns(), m = is(), g = function(r, s, a, o, p, u) {
+    u || (u = {}), this.tuneNumber = p, this.abcelem = r, this.duration = s, this.durationClass = u.durationClassOveride ? u.durationClassOveride : this.duration, this.minspacing = a || 0, this.x = 0, this.children = [], this.heads = [], this.extra = [], this.extraw = 0, this.w = 0, this.right = [], this.invisible = !1, this.bottom = void 0, this.top = void 0, this.type = o, r.extraClass && (this.extraClass = r.extraClass), this.fixed = { w: 0, t: void 0, b: void 0 }, this.specialY = {
       tempoHeightAbove: 0,
       partHeightAbove: 0,
       volumeHeightAbove: 0,
@@ -7045,24 +7045,24 @@ function De() {
     for (var r = 0; r < this.children.length; r++)
       this.children[r].setX(l);
   }, g.prototype.center = function(l, r) {
-    var o = (r.x - l.x) / 2 + l.x;
-    this.x = o - this.w / 2;
+    var s = (r.x - l.x) / 2 + l.x;
+    this.x = s - this.w / 2;
     for (var a = 0; a < this.children.length; a++)
       this.children[a].setX(this.x);
   }, g.prototype.setHint = function() {
     this.hint = !0;
   }, g.prototype.highlight = function(l, r) {
-    _.bind(this)(l, r);
+    k.bind(this)(l, r);
   }, g.prototype.unhighlight = function(l, r) {
     m.bind(this)(l, r);
   }, Tt = g, Tt;
 }
-var St, Ra;
+var St, Ia;
 function Te() {
-  if (Ra) return St;
-  Ra = 1;
-  var _ = function(g, l, r, o, a) {
-    switch (a = a || {}, this.x = 0, this.c = g, this.dx = l, this.w = r, this.pitch = o, this.scalex = a.scalex || 1, this.scaley = a.scaley || 1, this.type = a.type || "symbol", this.pitch2 = a.pitch2, this.linewidth = a.linewidth, this.klass = a.klass, this.chordPos = a.chordPos, this.anchor = a.anchor ? a.anchor : "middle", this.top = o, this.pitch2 !== void 0 && this.pitch2 > this.top && (this.top = this.pitch2), this.bottom = o, this.pitch2 !== void 0 && this.pitch2 < this.bottom && (this.bottom = this.pitch2), a.thickness && (this.top += a.thickness / 2, this.bottom -= a.thickness / 2), a.stemHeight && (a.stemHeight > 0 ? this.top += a.stemHeight : this.bottom += a.stemHeight), a.dim && (this.dim = a.dim), a.position && (this.position = a.position), a.voiceNumber !== void 0 && (this.voiceNumber = a.voiceNumber), this.height = a.height ? a.height : 4, a.top && (this.top = a.top), a.bottom && (this.bottom = a.bottom), a.name ? this.name = a.name : this.c ? this.name = this.c : this.name = this.type, a.realWidth ? this.realWidth = a.realWidth : this.realWidth = this.w, this.centerVertically = !1, this.type) {
+  if (Ia) return St;
+  Ia = 1;
+  var k = function(g, l, r, s, a) {
+    switch (a = a || {}, this.x = 0, this.c = g, this.dx = l, this.w = r, this.pitch = s, this.scalex = a.scalex || 1, this.scaley = a.scaley || 1, this.type = a.type || "symbol", this.pitch2 = a.pitch2, this.linewidth = a.linewidth, this.klass = a.klass, this.chordPos = a.chordPos, this.anchor = a.anchor ? a.anchor : "middle", this.top = s, this.pitch2 !== void 0 && this.pitch2 > this.top && (this.top = this.pitch2), this.bottom = s, this.pitch2 !== void 0 && this.pitch2 < this.bottom && (this.bottom = this.pitch2), a.thickness && (this.top += a.thickness / 2, this.bottom -= a.thickness / 2), a.stemHeight && (a.stemHeight > 0 ? this.top += a.stemHeight : this.bottom += a.stemHeight), a.dim && (this.dim = a.dim), a.position && (this.position = a.position), a.voiceNumber !== void 0 && (this.voiceNumber = a.voiceNumber), this.height = a.height ? a.height : 4, a.top && (this.top = a.top), a.bottom && (this.bottom = a.bottom), a.name ? this.name = a.name : this.c ? this.name = this.c : this.name = this.type, a.realWidth ? this.realWidth = a.realWidth : this.realWidth = this.w, this.centerVertically = !1, this.type) {
       case "debug":
         this.chordHeightAbove = this.height;
         break;
@@ -7080,26 +7080,26 @@ function Te() {
         break;
     }
   };
-  return _.prototype.getChordDim = function() {
+  return k.prototype.getChordDim = function() {
     if (this.type === "debug" || !this.chordHeightAbove && !this.chordHeightBelow)
       return null;
     var m = 0, g = this.type === "chord" ? this.realWidth / 2 : 0, l = this.x - g - m, r = l + this.realWidth + m;
     return { left: l, right: r };
-  }, _.prototype.invertLane = function(m) {
+  }, k.prototype.invertLane = function(m) {
     this.lane === void 0 && (this.lane = 0), this.lane = m - this.lane - 1;
-  }, _.prototype.putChordInLane = function(m) {
+  }, k.prototype.putChordInLane = function(m) {
     this.lane = m, this.chordHeightAbove ? this.chordHeightAbove = this.height * 1.25 * this.lane : this.chordHeightBelow = this.height * 1.25 * this.lane;
-  }, _.prototype.getLane = function() {
+  }, k.prototype.getLane = function() {
     return this.lane === void 0 ? 0 : this.lane;
-  }, _.prototype.setX = function(m) {
+  }, k.prototype.setX = function(m) {
     this.x = m + this.dx;
-  }, St = _, St;
+  }, St = k, St;
 }
-var Et, Ia;
-function Ws() {
-  if (Ia) return Et;
-  Ia = 1;
-  var _ = De(), m = Te();
+var Et, Fa;
+function Xs() {
+  if (Fa) return Et;
+  Fa = 1;
+  var k = De(), m = Te();
   function g(e) {
     return e != null && e.constructor === Object;
   }
@@ -7108,10 +7108,10 @@ function Ws() {
       c.hasOwnProperty(v) && (Array.isArray(c[v]) || g(c[v]) || (e[v] = c[v]));
   }
   function r(e) {
-    var c = new _("", 0, 0, "", 0);
+    var c = new k("", 0, 0, "", 0);
     return l(c, e), c.top = 0, c.bottom = -1, e.abcelem && (c.abcelem = {}, l(c.abcelem, e.abcelem), c.abcelem.el_type === "note" && (c.abcelem.el_type = "tabNumber")), e.cloned = c, c;
   }
-  function o(e, c) {
+  function s(e, c) {
     var v = r(e);
     if (c)
       for (var h = e.children, y = !0, w = 0; w < h.length; w++) {
@@ -7129,14 +7129,14 @@ function Ws() {
       Ypos: y
     };
     if (y += e.tabSymbolOffset, !e.hideTabSymbol) {
-      var A = new _(w, 0, 0, "symbol", 0);
+      var A = new k(w, 0, 0, "symbol", 0);
       A.x = c;
       var P = new m(h, 0, 0, 7.5, "tab");
       P.x = v, A.children.push(P), A.abcelem.el_type == "tab" && (P.pitch = y);
     }
     return A;
   }
-  function s(e) {
+  function o(e) {
     if (e.extra)
       for (var c = 0; c < e.extra.length; c++) {
         var v = e.extra[c];
@@ -7222,21 +7222,21 @@ function Ws() {
           e.semantics.measureAccidentals = {};
           var S = !1;
           I === P.children.length - 1 && (S = !0);
-          var k = o(C, e);
-          if (k.abcelem.barNumber) {
-            delete k.abcelem.barNumber;
-            for (var M = 0; M < k.children.length; M++)
-              if (k.children[M].type === "barNumber") {
-                k.children.splice(M, 1);
+          var _ = s(C, e);
+          if (_.abcelem.barNumber) {
+            delete _.abcelem.barNumber;
+            for (var M = 0; M < _.children.length; M++)
+              if (_.children[M].type === "barNumber") {
+                _.children.splice(M, 1);
                 break;
               }
           }
-          k.abcelem.lastBar = S, N.children.push(k), v.push({
+          _.abcelem.lastBar = S, N.children.push(_), v.push({
             el_type: C.abcelem.el_type,
             type: C.abcelem.type,
             endChar: C.abcelem.endChar,
             startChar: C.abcelem.startChar,
-            abselem: k
+            abselem: _
           });
           break;
         case "rest":
@@ -7248,7 +7248,7 @@ function Ws() {
           break;
         case "note":
           var L = r(C);
-          L.x = C.heads[0].x + C.heads[0].w / 2, L.lyricDim = s(C);
+          L.x = C.heads[0].x + C.heads[0].w / 2, L.lyricDim = o(C);
           var b = C.abcelem.pitches, x = C.abcelem.gracenotes;
           if (L.type = "tabNumber", T = n(e, b, x), T.error) return;
           if (T.graces) {
@@ -7272,11 +7272,11 @@ function Ws() {
     }
   }, Et = p, Et;
 }
-var At, Fa;
-function Us() {
-  if (Fa) return At;
-  Fa = 1;
-  var _ = rs(), m = Ws(), g = Ce();
+var At, Oa;
+function js() {
+  if (Oa) return At;
+  Oa = 1;
+  var k = as(), m = Xs(), g = Ce();
   function l() {
     return {
       tempoHeightAbove: 0,
@@ -7299,7 +7299,7 @@ function Us() {
     }
     return c;
   }
-  function o(e, c, v) {
+  function s(e, c, v) {
     var h = e.semantics, y = c.controller.getTextSize, w = h.tabInfos(e), A = h.suppress(e), P = !0;
     if (A && (P = !1), P) {
       var N = y.calc(w, "tablabelfont", "text instrumentname");
@@ -7313,7 +7313,7 @@ function Us() {
   function a(e, c) {
     return c[e].isTabStaff ? e === c.length - 1 ? !0 : !c[e + 1].isTabStaff : !1;
   }
-  function s(e) {
+  function o(e) {
     for (var c = 0, v = 0; v < e.length; v++)
       e[v].isTabStaff || c++;
     return c;
@@ -7332,7 +7332,7 @@ function Us() {
       }
   }
   function d(e, c) {
-    return s(e) === 1 && c.voices.length > 1;
+    return o(e) === 1 && c.voices.length > 1;
   }
   function f(e, c) {
     for (var v = 0, h = 0, y = !0, w = 0; y; ) {
@@ -7374,8 +7374,8 @@ function Us() {
         w
       );
     }
-    var T = v.staffGroup, q = T.voices, I = q[0], C = r(I), B = 3, R = h, S = T.staffs[R], k = A + B - S.bottom - C;
-    S.isTabStaff && (k = S.top);
+    var T = v.staffGroup, q = T.voices, I = q[0], C = r(I), B = 3, R = h, S = T.staffs[R], _ = A + B - S.bottom - C;
+    S.isTabStaff && (_ = S.top);
     var M = {
       bottom: -1,
       isTabStaff: !0,
@@ -7383,16 +7383,16 @@ function Us() {
       lines: e.nbLines,
       linePitch: e.linePitch,
       dy: 0.15,
-      top: k
+      top: _
     }, F = f(h, T.staffs);
     if (F !== -1) {
       M.parentIndex = F - 1, T.staffs.splice(F, 0, M), T.height += A + B;
       var L = i(T.staffs, F), b = 1;
       d(T.staffs, L) && (b = L.voices.length), w.voices = [];
       for (var x = 0; x < b; x++) {
-        var E = new _(0, 0);
+        var E = new k(0, 0);
         x > 0 && (E.duplicate = !0);
-        var D = o(e, c, E) / g.STEP;
+        var D = s(e, c, E) / g.STEP;
         D = Math.max(D, 1), T.staffs[h].top += 1, T.height += D, E.staff = M;
         var O = q.length;
         q.splice(q.length, 0, E);
@@ -7404,11 +7404,11 @@ function Us() {
   }
   return At = t, At;
 }
-var Mt, Oa;
-function is() {
-  if (Oa) return Mt;
-  Oa = 1;
-  var _ = {
+var Mt, Ha;
+function ss() {
+  if (Ha) return Mt;
+  Ha = 1;
+  var k = {
     __: -2,
     _: -1,
     "_/": -0.5,
@@ -7419,51 +7419,51 @@ function is() {
     "^^": 2
   }, m = ["C", "-", "D", "-", "E", "F", "-", "G", "-", "A", "-", "B", "c", "-", "d", "-", "e", "f", "-", "g", "-", "a", "-", "b"];
   function g(r) {
-    var o = r.match(/([_^\/]*)([ABCDEFGabcdefg])(,*)('*)/);
-    if (o && o.length === 5) {
-      var a = _[o[1]], s = m.indexOf(o[2]), p = o[4].length - o[3].length;
-      return 48 + s + a + p * 12;
+    var s = r.match(/([_^\/]*)([ABCDEFGabcdefg])(,*)('*)/);
+    if (s && s.length === 5) {
+      var a = k[s[1]], o = m.indexOf(s[2]), p = s[4].length - s[3].length;
+      return 48 + o + a + p * 12;
     }
     return 0;
   }
   function l(r) {
     r = parseInt(r, 10);
-    var o = Math.floor(r / 12), a = r % 12, s = m[a];
-    if (s === "-" && (s = "^" + m[a - 1]), o > 4)
-      for (s = s.toLowerCase(), o -= 5; o > 0; )
-        s += "'", o--;
+    var s = Math.floor(r / 12), a = r % 12, o = m[a];
+    if (o === "-" && (o = "^" + m[a - 1]), s > 4)
+      for (o = o.toLowerCase(), s -= 5; s > 0; )
+        o += "'", s--;
     else
-      for (; o < 4; )
-        s += ",", o++;
-    return s;
+      for (; s < 4; )
+        o += ",", s++;
+    return o;
   }
   return Mt = { noteToMidi: g, midiToNote: l }, Mt;
 }
-var Bt, Ha;
-function ss() {
-  if (Ha) return Bt;
-  Ha = 1;
-  var { noteToMidi: _, midiToNote: m } = is();
-  function g(r, o) {
-    var a = _(r);
-    o && (a += o);
-    var s = m(a), p = !1, u = !1, d = !1, f = null, i = null, n = !1, t = 0;
-    r.startsWith("_") ? (p = !0, t = -1, r[1] == "/" ? (p = !1, i = "v", t = 0) : r[1] == "_" && (n = !0, t -= 1)) : r.startsWith("^") ? (u = !0, t = 1, r[1] == "/" ? (u = !1, i = "^", t = 0) : r[1] == "^" && (n = !0, t += 1)) : r.startsWith("=") && (f = !0, t = 0), d = p || u || i != null, (d || f) && (i != null || n ? s = r.slice(2) : s = r.slice(1));
-    var e = (s.match(/,/g) || []).length, c = (s.match(/'/g) || []).length;
-    this.pitch = a, this.pitchAltered = 0, this.name = s, this.acc = t, this.isSharp = u, this.isKeySharp = !1, this.isDouble = n, this.isAltered = d, this.isFlat = p, this.isKeyFlat = !1, this.natural = f, this.quarter = i, this.isLower = this.name == this.name.toLowerCase(), this.name = this.name[0].toUpperCase(), this.hasComma = e, this.isQuoted = c;
+var Bt, za;
+function os() {
+  if (za) return Bt;
+  za = 1;
+  var { noteToMidi: k, midiToNote: m } = ss();
+  function g(r, s) {
+    var a = k(r);
+    s && (a += s);
+    var o = m(a), p = !1, u = !1, d = !1, f = null, i = null, n = !1, t = 0;
+    r.startsWith("_") ? (p = !0, t = -1, r[1] == "/" ? (p = !1, i = "v", t = 0) : r[1] == "_" && (n = !0, t -= 1)) : r.startsWith("^") ? (u = !0, t = 1, r[1] == "/" ? (u = !1, i = "^", t = 0) : r[1] == "^" && (n = !0, t += 1)) : r.startsWith("=") && (f = !0, t = 0), d = p || u || i != null, (d || f) && (i != null || n ? o = r.slice(2) : o = r.slice(1));
+    var e = (o.match(/,/g) || []).length, c = (o.match(/'/g) || []).length;
+    this.pitch = a, this.pitchAltered = 0, this.name = o, this.acc = t, this.isSharp = u, this.isKeySharp = !1, this.isDouble = n, this.isAltered = d, this.isFlat = p, this.isKeyFlat = !1, this.natural = f, this.quarter = i, this.isLower = this.name == this.name.toLowerCase(), this.name = this.name[0].toUpperCase(), this.hasComma = e, this.isQuoted = c;
   }
   function l(r) {
-    var o = r.name, a = new g(o);
+    var s = r.name, a = new g(s);
     return a.pitch = r.pitch, a.hasComma = r.hasComma, a.isLower = r.isLower, a.isQuoted = r.isQuoted, a.isSharp = r.isSharp, a.isKeySharp = r.isKeySharp, a.isFlat = r.isFlat, a.isKeyFlat = r.isKeyFlat, a;
   }
   return g.prototype.sameNoteAs = function(r) {
     return r.pitch === this.pitch;
   }, g.prototype.isLowerThan = function(r) {
     return r.pitch > this.pitch;
-  }, g.prototype.checkKeyAccidentals = function(r, o) {
+  }, g.prototype.checkKeyAccidentals = function(r, s) {
     if (!(this.isAltered || this.natural)) {
-      if (o[this.name.toUpperCase()])
-        switch (o[this.name.toUpperCase()]) {
+      if (s[this.name.toUpperCase()])
+        switch (s[this.name.toUpperCase()]) {
           case "__":
             this.acc = -2, this.pitchAltered = -2;
             return;
@@ -7481,8 +7481,8 @@ function ss() {
             return;
         }
       else if (r)
-        for (var a = this.name, s = 0; s < r.length; s++) {
-          var p = r[s];
+        for (var a = this.name, o = 0; o < r.length; o++) {
+          var p = r[o];
           a == p.note.toUpperCase() && (p.acc == "flat" && (this.acc = -1, this.isKeyFlat = !0, this.pitchAltered = -1), p.acc == "sharp" && (this.acc = 1, this.isKeySharp = !0, this.pitchAltered = 1));
         }
     }
@@ -7498,7 +7498,7 @@ function ss() {
   }, g.prototype.emitNoAccidentals = function() {
     var r = this.name;
     this.isLower && (r = r.toLowerCase());
-    for (var o = 0; o < this.isQuoted; o++)
+    for (var s = 0; s < this.isQuoted; s++)
       r += "'";
     for (var a = 0; a < this.hasComma; a++)
       r += ",";
@@ -7506,7 +7506,7 @@ function ss() {
   }, g.prototype.emit = function() {
     var r = this.name;
     (this.isSharp || this.isKeySharp) && (r = "^" + r, this.isDouble && (r = "^" + r)), (this.isFlat || this.isKeyFlat) && (r = "_" + r, this.isDouble && (r = "_" + r)), this.quarter && (this.quarter == "^" ? r = "^/" + r : r = "_/" + r), this.natural && (r = "=" + r);
-    for (var o = 1; o <= this.hasComma; o++)
+    for (var s = 1; s <= this.hasComma; s++)
       r += ",";
     if (this.isLower) {
       r = r.toLowerCase();
@@ -7516,34 +7516,34 @@ function ss() {
     return r;
   }, Bt = g, Bt;
 }
-var Nt, za;
-function Xs() {
-  if (za) return Nt;
-  za = 1;
-  var _ = ss(), m = ["A", "B", "C", "D", "E", "F", "G"];
+var Nt, Ga;
+function $s() {
+  if (Ga) return Nt;
+  Ga = 1;
+  var k = os(), m = ["A", "B", "C", "D", "E", "F", "G"];
   function g(l, r) {
-    var o = new _(l), a = new _(r);
-    if (a.isLowerThan(o)) {
-      var s = o.emit(), p = a.emit();
+    var s = new k(l), a = new k(r);
+    if (a.isLowerThan(s)) {
+      var o = s.emit(), p = a.emit();
       return {
-        error: "Invalid string Instrument tuning : " + p + " string lower than " + s + " string"
+        error: "Invalid string Instrument tuning : " + p + " string lower than " + o + " string"
       };
     }
-    var u = [], d = m.indexOf(o.name), f = m.indexOf(a.name);
+    var u = [], d = m.indexOf(s.name), f = m.indexOf(a.name);
     if (d == -1 || f == -1)
       return u;
     for (var i = !1; !i; )
-      u.push(o.emit()), o = o.nextNote(), o.sameNoteAs(a) && (i = !0);
+      u.push(s.emit()), s = s.nextNote(), s.sameNoteAs(a) && (i = !0);
     return u;
   }
   return Nt = g, Nt;
 }
-var Pt, Ga;
-function js() {
-  if (Ga) return Pt;
-  Ga = 1;
-  const { noteToMidi: _ } = is();
-  var m = ss(), g = Xs();
+var Pt, Ya;
+function Vs() {
+  if (Ya) return Pt;
+  Ya = 1;
+  const { noteToMidi: k } = ss();
+  var m = os(), g = $s();
   function l(i) {
     var n = null, t = i.tuning;
     if (i.capo > 0) {
@@ -7569,7 +7569,7 @@ function js() {
     }
     return n;
   }
-  function o(i) {
+  function s(i) {
     var n = [];
     n[0] = [];
     for (var t = i.strings, e = 1; e < t.length; e++)
@@ -7601,7 +7601,7 @@ function js() {
     }
     return null;
   }
-  function s(i, n) {
+  function o(i, n) {
     for (var t = [], e = 0; e < n.length; e++)
       if (!n[e].endTie) {
         var c = new m(n[e].name, i.clefTranspose);
@@ -7663,7 +7663,7 @@ function js() {
   }
   f.prototype.notesToNumber = function(i, n) {
     var t, e, c = null, v = null;
-    if (i && (v = [], i.length > 1 ? (v = s(this, i), v.error && (c = v.error)) : i[0].endTie || (t = new m(i[0].name, this.clefTranspose), t.checkKeyAccidentals(this.accidentals, this.measureAccidentals), e = u(this, t), e ? v.push(e) : (d(v, t), c = v.error))), c) return v;
+    if (i && (v = [], i.length > 1 ? (v = o(this, i), v.error && (c = v.error)) : i[0].endTie || (t = new m(i[0].name, this.clefTranspose), t.checkKeyAccidentals(this.accidentals, this.measureAccidentals), e = u(this, t), e ? v.push(e) : (d(v, t), c = v.error))), c) return v;
     var h = null;
     if (n) {
       h = [];
@@ -7696,30 +7696,30 @@ function js() {
     var n = i.tuning, t = i.capo, e = i.params.highestNote;
     this.linePitch = i.linePitch, this.highestNote = "a'", e && (this.highestNote = e), this.measureAccidentals = {}, this.capo = 0, t && (this.capo = parseInt(t, 10)), this.transpose = i.transpose ? i.transpose : 0, this.tuning = n, this.stringPitches = [];
     for (var c = 0; c < this.tuning.length; c++) {
-      var v = _(this.tuning[c]) + this.capo;
+      var v = k(this.tuning[c]) + this.capo;
       this.stringPitches.push(v);
     }
     if (this.capo > 0 && (this.capoTuning = l(this)), this.strings = r(this), this.strings.error) {
       i.setError(this.strings.error), i.inError = !0;
       return;
     }
-    this.secondPos = o(this);
+    this.secondPos = s(this);
   }
   return Pt = f, Pt;
 }
-var Lt, Ya;
-function $s() {
-  if (Ya) return Lt;
-  Ya = 1;
-  var _ = Ys(), m = Us(), g = js();
-  l.prototype.init = function(o, a, s, p) {
-    this.tune = o, this.params = s, this.tuneNumber = a, this.inError = !1, this.abcTune = o, this.linePitch = 3, this.nbLines = p.defaultTuning.length, this.isTabBig = p.isTabBig, this.tabSymbolOffset = p.tabSymbolOffset, this.capo = s.capo, this.transpose = s.visualTranspose, this.hideTabSymbol = s.hideTabSymbol, this.tablature = new _(this.nbLines, this.linePitch);
-    var u = s.tuning;
+var Lt, Wa;
+function Ks() {
+  if (Wa) return Lt;
+  Wa = 1;
+  var k = Us(), m = js(), g = Vs();
+  l.prototype.init = function(s, a, o, p) {
+    this.tune = s, this.params = o, this.tuneNumber = a, this.inError = !1, this.abcTune = s, this.linePitch = 3, this.nbLines = p.defaultTuning.length, this.isTabBig = p.isTabBig, this.tabSymbolOffset = p.tabSymbolOffset, this.capo = o.capo, this.transpose = o.visualTranspose, this.hideTabSymbol = o.hideTabSymbol, this.tablature = new k(this.nbLines, this.linePitch);
+    var u = o.tuning;
     u || (u = p.defaultTuning), this.tuning = u, this.semantics = new g(this);
-  }, l.prototype.setError = function(o) {
-    o && (this.error = o, this.inError = !0, this.tune.warnings ? this.tune.warnings.push(o) : this.tune.warnings = [o]);
-  }, l.prototype.render = function(o, a, s) {
-    this.inError || this.tablature.bypass(a) || m(this, o, a, s);
+  }, l.prototype.setError = function(s) {
+    s && (this.error = s, this.inError = !0, this.tune.warnings ? this.tune.warnings.push(s) : this.tune.warnings = [s]);
+  }, l.prototype.render = function(s, a, o) {
+    this.inError || this.tablature.bypass(a) || m(this, s, a, o);
   };
   function l() {
   }
@@ -7728,11 +7728,11 @@ function $s() {
   };
   return Lt = r, Lt;
 }
-var qt, Wa;
-function os() {
-  if (Wa) return qt;
-  Wa = 1;
-  var _ = $s(), m = {
+var qt, Ua;
+function cs() {
+  if (Ua) return qt;
+  Ua = 1;
+  var k = Ks(), m = {
     violin: { name: "StringTab", defaultTuning: ["G,", "D", "A", "e"], isTabBig: !1, tabSymbolOffset: 0 },
     fiddle: { name: "StringTab", defaultTuning: ["G,", "D", "A", "e"], isTabBig: !1, tabSymbolOffset: 0 },
     mandolin: { name: "StringTab", defaultTuning: ["G,", "D", "A", "e"], isTabBig: !1, tabSymbolOffset: 0 },
@@ -7746,8 +7746,8 @@ function os() {
      * @param {*} plugin 
      */
     register: function(l) {
-      var r = l.name, o = l.tablature;
-      this.plugins[r] = o;
+      var r = l.name, s = l.tablature;
+      this.plugins[r] = s;
     },
     setError: function(l, r) {
       l.warnings ? l.warning.push(r) : l.warnings = [r];
@@ -7759,19 +7759,19 @@ function os() {
      * @param {*} params params to be processed for tablature
      * @return prepared tablatures plugin instances for current tune
      */
-    preparePlugins: function(l, r, o) {
-      this.inited || (this.register(new _()), this.inited = !0);
+    preparePlugins: function(l, r, s) {
+      this.inited || (this.register(new k()), this.inited = !0);
       var a = null;
-      if (o.tablature) {
-        var s = o.tablature;
+      if (s.tablature) {
+        var o = s.tablature;
         a = [];
-        for (var p = 0; p < s.length; p++) {
-          var u = s[p], d = u.instrument;
+        for (var p = 0; p < o.length; p++) {
+          var u = o[p], d = u.instrument;
           if (d == null)
             return this.setError(l, "tablature 'instrument' is missing"), a;
           var f = m[d], i = null;
           if (f && (i = this.plugins[f.name]), i) {
-            o.visualTranspose != 0 && (u.visualTranspose = o.visualTranspose), u.abcSrc = o.tablature.abcSrc;
+            s.visualTranspose != 0 && (u.visualTranspose = s.visualTranspose), u.abcSrc = s.tablature.abcSrc;
             var n = {
               classz: i,
               tuneNumber: r,
@@ -7793,14 +7793,14 @@ function os() {
      * @param {*} renderer 
      * @param {*} abcTune 
      */
-    layoutTablatures: function(r, o) {
-      var a = o.tablatures, s = 0;
+    layoutTablatures: function(r, s) {
+      var a = s.tablatures, o = 0;
       if (a && a.length > 0)
         for (var p = a.length, u = 0; u < p; ++u)
           a[u] && a[u].params.firstStaffOnly && (a[u].params.suppress = !1);
-      for (var d = 0; d < o.lines.length; d++) {
-        var f = o.lines[d];
-        if (f.staff && s++, s > 1 && a && a.length > 0)
+      for (var d = 0; d < s.lines.length; d++) {
+        var f = s.lines[d];
+        if (f.staff && o++, o > 1 && a && a.length > 0)
           for (var p = a.length, u = 0; u < p; ++u)
             a[u].params.firstStaffOnly && (a[u].params.suppress = !0);
         var i = f.staff;
@@ -7809,7 +7809,7 @@ function os() {
             if (a[t] && t < n) {
               var e = a[t];
               e.instance == null && (e.instance = new e.classz(), e.instance.init(
-                o,
+                s,
                 e.tuneNumber,
                 e.params,
                 e.tabType
@@ -7821,44 +7821,44 @@ function os() {
   };
   return qt = g, qt;
 }
-var Dt, Ua;
+var Dt, Xa;
 function Ye() {
-  if (Ua) return Dt;
-  Ua = 1;
-  var _ = Or(), m = Gs(), g = os(), l = {};
+  if (Xa) return Dt;
+  Xa = 1;
+  var k = Or(), m = Ws(), g = cs(), l = {};
   return (function() {
-    l.numberOfTunes = function(o) {
-      var a = o.split(`
-X:`), s = a.length;
-      return s === 0 && (s = 1), s;
+    l.numberOfTunes = function(s) {
+      var a = s.split(`
+X:`), o = a.length;
+      return o === 0 && (o = 1), o;
     };
-    var r = l.TuneBook = function(o) {
-      var a = m(o);
+    var r = l.TuneBook = function(s) {
+      var a = m(s);
       this.header = a.header, this.tunes = a.tunes;
     };
-    r.prototype.getTuneById = function(o) {
+    r.prototype.getTuneById = function(s) {
       for (var a = 0; a < this.tunes.length; a++)
-        if (this.tunes[a].id === "" + o)
+        if (this.tunes[a].id === "" + s)
           return this.tunes[a];
       return null;
-    }, r.prototype.getTuneByTitle = function(o) {
+    }, r.prototype.getTuneByTitle = function(s) {
       for (var a = 0; a < this.tunes.length; a++)
-        if (this.tunes[a].title === o)
+        if (this.tunes[a].title === s)
           return this.tunes[a];
       return null;
-    }, l.parseOnly = function(o, a) {
-      for (var s = l.numberOfTunes(o), p = [], u = 0; u < s; u++)
+    }, l.parseOnly = function(s, a) {
+      for (var o = l.numberOfTunes(s), p = [], u = 0; u < o; u++)
         p.push(1);
       function d() {
       }
-      return l.renderEngine(d, p, o, a);
-    }, l.renderEngine = function(o, a, s, p) {
+      return l.renderEngine(d, p, s, a);
+    }, l.renderEngine = function(s, a, o, p) {
       var u = [], d = function(y) {
         return y && !y.propertyIsEnumerable("length") && typeof y == "object" && typeof y.length == "number";
       };
-      if (!(a === void 0 || s === void 0)) {
+      if (!(a === void 0 || o === void 0)) {
         d(a) || (a = [a]), p === void 0 && (p = {});
-        for (var f = p.startingTune ? parseInt(p.startingTune, 10) : 0, i = new r(s), n = new _(), t = 0; t < a.length; t++) {
+        for (var f = p.startingTune ? parseInt(p.startingTune, 10) : 0, i = new r(o), n = new k(), t = 0; t < a.length; t++) {
           var e = a[t];
           if (e === "*" || typeof e == "string" && (e = document.getElementById(e)), e)
             if (f >= 0 && f < i.tunes.length) {
@@ -7867,7 +7867,7 @@ X:`), s = a.length;
               p.tablature && (c.tablatures = g.preparePlugins(c, f, p));
               var v = n.getWarnings();
               v && (c.warnings = v);
-              var h = o(e, c, t, i.tunes[f].abc);
+              var h = s(e, c, t, i.tunes[f].abc);
               u.push(h || c);
             } else
               e.innerHTML && (e.innerHTML = "");
@@ -7875,9 +7875,9 @@ X:`), s = a.length;
         }
         return u;
       }
-    }, l.extractMeasures = function(o) {
-      for (var a = [], s = new r(o), p = 0; p < s.tunes.length; p++) {
-        for (var u = s.tunes[p], d = u.abc.split("K:"), f = d[1].split(`
+    }, l.extractMeasures = function(s) {
+      for (var a = [], o = new r(s), p = 0; p < o.tunes.length; p++) {
+        for (var u = o.tunes[p], d = u.abc.split("K:"), f = d[1].split(`
 `), i = d[0] + "K:" + f[0] + `
 `, n = null, t = null, e = null, c = [], v = !1, h = l.parseOnly(u.abc)[0], y = h.getPickupLength() > 0, w = 0; w < h.lines.length; w++) {
           var A = h.lines[w];
@@ -7904,21 +7904,21 @@ X:`), s = a.length;
     };
   })(), Dt = l, Dt;
 }
-var Rt, Xa;
-function Vs() {
-  if (Xa) return Rt;
-  Xa = 1;
-  var _ = Ki(), { relativeMajor: m, transposeKey: g, relativeMode: l, isLegalMode: r } = Vi(), o = $i(), a;
+var Rt, ja;
+function Qs() {
+  if (ja) return Rt;
+  ja = 1;
+  var k = Qi(), { relativeMajor: m, transposeKey: g, relativeMode: l, isLegalMode: r } = Ki(), s = Vi(), a;
   return (function() {
     a = function(T, q, I) {
       if (q === "TEST")
-        return { keyAccidentals: _, relativeMajor: m, transposeKey: g, relativeMode: l, transposeChordName: o };
+        return { keyAccidentals: k, relativeMajor: m, transposeKey: g, relativeMode: l, transposeChordName: s };
       I = parseInt(I, 10);
       var C = [], B;
       for (B = 0; B < q.length; B++)
-        C = C.concat(s(T, q[B], I));
-      C = C.sort(function(k, M) {
-        return M.start - k.start;
+        C = C.concat(o(T, q[B], I));
+      C = C.sort(function(_, M) {
+        return M.start - _.start;
       });
       var R = T.split("");
       for (B = 0; B < C.length; B++) {
@@ -7927,7 +7927,7 @@ function Vs() {
       }
       return R.join("");
     };
-    function s(T, q, I) {
+    function o(T, q, I) {
       var C = [], B = q.getKeySignature();
       if (B.root === "Hp" || B.root === "HP")
         return C;
@@ -7935,8 +7935,8 @@ function Vs() {
       for (var R = 0; R < q.lines.length; R++) {
         var S = q.lines[R].staff;
         if (S)
-          for (var k = 0; k < S.length; k++) {
-            var M = S[k];
+          for (var _ = 0; _ < S.length; _++) {
+            var M = S[_];
             M.clef.type !== "perc" && (C = C.concat(u(T, M.voices, M.key, I)));
           }
       }
@@ -7944,9 +7944,9 @@ function Vs() {
     }
     function p(T, q) {
       for (var I = [], C = T.split("K:"), B = C[0].length, R = 1; R < C.length; R++) {
-        var S = C[R], k = S.match(/^( *)([A-G])([#b]?)( ?)(\w*)/);
-        if (k) {
-          var M = B + 2 + k[1].length, F = r(k[5]) ? k[5] : "", L = k[2] + k[3] + k[4] + F, b = e({ root: k[2], acc: k[3], mode: F }, q), x = b.root + b.acc + k[4] + b.mode;
+        var S = C[R], _ = S.match(/^( *)([A-G])([#b]?)( ?)(\w*)/);
+        if (_) {
+          var M = B + 2 + _[1].length, F = r(_[5]) ? _[5] : "", L = _[2] + _[3] + _[4] + F, b = e({ root: _[2], acc: _[3], mode: F }, q), x = b.root + b.acc + _[4] + b.mode;
           I.push({ start: M, end: M + L.length, note: x });
         }
         B += S.length + 2;
@@ -7970,13 +7970,13 @@ function Vs() {
       return q === "none" && (C = n.indexOf(T.root)), C === 0 ? I > 2 ? C += 7 : I === -12 && (C -= 7) : I > 0 && C < 0 ? C += 7 : I < 0 && C > 0 && (C -= 7), I > 12 ? C += 7 : I < -12 && (C -= 7), C;
     }
     function i(T, q, I, C, B, R) {
-      for (var S = [], k = f(B, I, R), M = {}, F = {}, L = 0; L < q.length; L++) {
+      for (var S = [], _ = f(B, I, R), M = {}, F = {}, L = 0; L < q.length; L++) {
         var b = q[L];
         if (b.chord)
           for (var x = 0; x < b.chord.length; x++) {
             var E = b.chord[x];
             if (E.position === "default") {
-              var D = B.accidentals.length && B.accidentals[0].acc === "flat", O = o(E.name, R, D, !0);
+              var D = B.accidentals.length && B.accidentals[0].acc === "flat", O = s(E.name, R, D, !0);
               O = O.replace(/♭/g, "b").replace(/♯/g, "#"), O !== E.name && S.push(P(T, b.startChar, b.endChar, O));
             }
           }
@@ -7984,17 +7984,17 @@ function Vs() {
           for (var z = w(T, b.startChar, b.endChar), H = 0; H < z.length; H++) {
             var $ = y(z[H].note, I, C, M);
             $.acc && (M[$.name.toUpperCase()] = $.acc);
-            var Q = c($, B, k, F);
+            var Q = c($, B, _, F);
             Q.acc && (F[Q.upper] = Q.acc), S.push({ note: Q.acc + Q.name, start: z[H].index, end: z[H].index + z[H].note.length });
           }
           if (b.gracenotes)
             for (var W = 0; W < b.gracenotes.length; W++) {
               var ne = y(b.gracenotes[W].name, I, C, M);
               ne.acc && (M[ne.name.toUpperCase()] = ne.acc);
-              var J = c(ne, B, k, M);
+              var J = c(ne, B, _, M);
               J.acc && (F[J.upper] = J.acc), S.push(A(T, b.startChar, b.endChar, J.acc + J.name, W));
             }
-        } else b.el_type === "bar" ? (M = {}, F = {}) : b.el_type === "keySignature" && (I = b.root, C = d(b), B = e(b, R), k = f(B, I, R));
+        } else b.el_type === "bar" ? (M = {}, F = {}) : b.el_type === "keySignature" && (I = b.root, C = d(b), B = e(b, R), _ = f(B, I, R));
       }
       return S;
     }
@@ -8002,15 +8002,15 @@ function Vs() {
     function e(T, q) {
       if (T.root === "none")
         return { root: g("C", q), mode: "", acc: "", accidentals: [] };
-      var I = m(T.root + T.acc + T.mode), C = g(I, q), B = l(C, T.mode), R = _(C);
+      var I = m(T.root + T.acc + T.mode), C = g(I, q), B = l(C, T.mode), R = k(C);
       return { root: B[0], mode: T.mode, acc: B.length > 1 ? B[1] : "", accidentals: R };
     }
     function c(T, q, I, C) {
-      for (var B = T.pitch, R = n.indexOf(T.name), S = n.indexOf(q.root), k = (S + B) % 7, M = R + I, F = T.oct; M > 6; )
+      for (var B = T.pitch, R = n.indexOf(T.name), S = n.indexOf(q.root), _ = (S + B) % 7, M = R + I, F = T.oct; M > 6; )
         F++, M -= 7;
       for (; M < 0; )
         F--, M += 7;
-      for (var L = n[k], b = "", x = T.adj, E = "=", D = 0; D < q.accidentals.length; D++)
+      for (var L = n[_], b = "", x = T.adj, E = "=", D = 0; D < q.accidentals.length; D++)
         if (q.accidentals[D].note.toLowerCase() === L.toLowerCase()) {
           x = x + (q.accidentals[D].acc === "flat" ? -1 : 1), E = q.accidentals[D].acc === "flat" ? "_" : "^";
           break;
@@ -8068,18 +8068,18 @@ function Vs() {
     }
     var v = /([_^=]*)([A-Ga-g])([,']*)/, h = /([_^=]*[A-Ga-g][,']*)?(\d*\/*\d*)?([\>\<\-\)]*)?/;
     function y(T, q, I, C) {
-      var B = q === "none" ? 0 : n.indexOf(q), R = T.match(v), S = R[2].toUpperCase(), k = n.indexOf(S) - B;
-      k < 0 && (k += 7);
+      var B = q === "none" ? 0 : n.indexOf(q), R = T.match(v), S = R[2].toUpperCase(), _ = n.indexOf(S) - B;
+      _ < 0 && (_ += 7);
       var M = t.indexOf(R[3]);
       S === R[2] && M--;
       var F = C[S] || I[S] || "=";
-      return { acc: R[1], name: S, pitch: k, oct: M, adj: N(R[1], I[S], C[S]), courtesy: R[1] === F };
+      return { acc: R[1], name: S, pitch: _, oct: M, adj: N(R[1], I[S], C[S]), courtesy: R[1] === F };
     }
     function w(T, q, I) {
       for (var C = T.substring(q, I), B, R = [], S = /("[^"]+")+/g; (B = S.exec(C)) !== null; )
         R.push({ start: S.lastIndex - B[0].length, end: S.lastIndex });
-      for (var k = /(![^!]+!)+/g; (B = k.exec(C)) !== null; )
-        R.push({ start: k.lastIndex - B[0].length, end: k.lastIndex });
+      for (var _ = /(![^!]+!)+/g; (B = _.exec(C)) !== null; )
+        R.push({ start: _.lastIndex - B[0].length, end: _.lastIndex });
       for (var M = [], F = /([_^=]*)([A-Ga-g])([,']*)/g; (B = F.exec(C)) !== null; ) {
         for (var L = !1, b = 0; b < R.length; b++)
           F.lastIndex >= R[b].start && F.lastIndex <= R[b].end && (L = !0);
@@ -8088,7 +8088,7 @@ function Vs() {
       return M;
     }
     function A(T, q, I, C, B) {
-      var R = T.substring(q, I), S = /\{/, k = /\}/, M = /([^\{]*)/, F = /(\/*)/, L = R.match(new RegExp(M.source + S.source + F.source + h.source + F.source + h.source + F.source + h.source + F.source + h.source + F.source + h.source + F.source + h.source + F.source + h.source + F.source + h.source + k.source));
+      var R = T.substring(q, I), S = /\{/, _ = /\}/, M = /([^\{]*)/, F = /(\/*)/, L = R.match(new RegExp(M.source + S.source + F.source + h.source + F.source + h.source + F.source + h.source + F.source + h.source + F.source + h.source + F.source + h.source + F.source + h.source + F.source + h.source + _.source));
       if (L) {
         for (var b = 1 + L[1].length, x = 0; x < B; x++)
           L[x * 3 + 2] && (b += L[x * 3 + 2].length), L[x * 3 + 3] && (b += L[x * 3 + 3].length), L[x * 3 + 4] && (b += L[x * 3 + 4].length), L[x * 3 + 5] && (b += L[x * 3 + 5].length);
@@ -8156,24 +8156,24 @@ function Vs() {
     }
   })(), Rt = a, Rt;
 }
-var It, ja;
-function Ks() {
-  if (ja) return It;
-  ja = 1;
-  var _ = function(l, r, o, a) {
-    this.type = "BeamElem", this.isflat = !!o, this.isgrace = !!(r && r === "grace"), this.forceup = !!(this.isgrace || r && r === "up"), this.forcedown = !!(r && r === "down"), this.elems = [], this.total = 0, this.average = 6, this.allrests = !0, this.stemHeight = l, this.beams = [], a && a.duration ? (this.duration = a.duration, a.startTriplet && (this.duration *= a.tripletMultiplier), this.duration = Math.round(this.duration * 1e3) / 1e3) : this.duration = 0;
+var It, $a;
+function Js() {
+  if ($a) return It;
+  $a = 1;
+  var k = function(l, r, s, a) {
+    this.type = "BeamElem", this.isflat = !!s, this.isgrace = !!(r && r === "grace"), this.forceup = !!(this.isgrace || r && r === "up"), this.forcedown = !!(r && r === "down"), this.elems = [], this.total = 0, this.average = 6, this.allrests = !0, this.stemHeight = l, this.beams = [], a && a.duration ? (this.duration = a.duration, a.startTriplet && (this.duration *= a.tripletMultiplier), this.duration = Math.round(this.duration * 1e3) / 1e3) : this.duration = 0;
   };
-  _.prototype.setHint = function() {
+  k.prototype.setHint = function() {
     this.hint = !0;
-  }, _.prototype.runningDirection = function(g) {
+  }, k.prototype.runningDirection = function(g) {
     var l = g.averagepitch;
     l !== void 0 && (this.total = Math.round(this.total + l), this.count || (this.count = 0), this.count++);
-  }, _.prototype.add = function(g) {
+  }, k.prototype.add = function(g) {
     var l = g.abcelem.averagepitch;
     l !== void 0 && (g.abcelem.rest || (this.allrests = !1), g.beam = this, this.elems.push(g), this.total = Math.round(this.total + l), (this.min === void 0 || g.abcelem.minpitch < this.min) && (this.min = g.abcelem.minpitch), (this.max === void 0 || g.abcelem.maxpitch > this.max) && (this.max = g.abcelem.maxpitch));
-  }, _.prototype.addBeam = function(g) {
+  }, k.prototype.addBeam = function(g) {
     this.beams.push(g);
-  }, _.prototype.setStemDirection = function() {
+  }, k.prototype.setStemDirection = function() {
     if (this.average = m(this.total, this.count), this.forceup)
       this.stemsUp = !0;
     else if (this.forcedown)
@@ -8183,7 +8183,7 @@ function Ks() {
       this.stemsUp = this.average < g;
     }
     delete this.count, this.total = 0;
-  }, _.prototype.calcDir = function() {
+  }, k.prototype.calcDir = function() {
     if (this.average = m(this.total, this.elems.length), this.forceup)
       this.stemsUp = !0;
     else if (this.forcedown)
@@ -8193,36 +8193,36 @@ function Ks() {
       this.stemsUp = this.average < g;
     }
     for (var l = this.stemsUp ? "up" : "down", r = 0; r < this.elems.length; r++)
-      for (var o = 0; o < this.elems[r].heads.length; o++)
-        this.elems[r].heads[o].stemDir = l;
+      for (var s = 0; s < this.elems[r].heads.length; s++)
+        this.elems[r].heads[s].stemDir = l;
   };
   function m(g, l) {
     return l ? g / l : 0;
   }
-  return It = _, It;
+  return It = k, It;
 }
-var Ft, $a;
-function Qs() {
-  if ($a) return Ft;
-  $a = 1;
-  var _ = function(g, l) {
+var Ft, Va;
+function Zs() {
+  if (Va) return Ft;
+  Va = 1;
+  var k = function(g, l) {
     this.startVoice = g, this.type = l;
   };
-  return _.prototype.setBottomStaff = function(m) {
+  return k.prototype.setBottomStaff = function(m) {
     this.endVoice = m, this.startVoice.header && !this.endVoice.header && (this.header = this.startVoice.header, delete this.startVoice.header);
-  }, _.prototype.continuing = function(m) {
+  }, k.prototype.continuing = function(m) {
     this.lastContinuedVoice = m;
-  }, _.prototype.getWidth = function() {
+  }, k.prototype.getWidth = function() {
     return 10;
-  }, _.prototype.isStartVoice = function(m) {
+  }, k.prototype.isStartVoice = function(m) {
     return !!(this.startVoice && this.startVoice.staff && this.startVoice.staff.voices.length > 0 && this.startVoice.staff.voices[0] === m);
-  }, Ft = _, Ft;
+  }, Ft = k, Ft;
 }
-var Ot, Va;
+var Ot, Ka;
 function Ne() {
-  if (Va) return Ot;
-  Va = 1;
-  var _ = Ce(), m = {
+  if (Ka) return Ot;
+  Ka = 1;
+  var k = Ce(), m = {
     0: { d: [["M", 4.83, -14.97], ["c", 0.33, -0.03, 1.11, 0, 1.47, 0.06], ["c", 1.68, 0.36, 2.97, 1.59, 3.78, 3.6], ["c", 1.2, 2.97, 0.81, 6.96, -0.9, 9.27], ["c", -0.78, 1.08, -1.71, 1.71, -2.91, 1.95], ["c", -0.45, 0.09, -1.32, 0.09, -1.77, 0], ["c", -0.81, -0.18, -1.47, -0.51, -2.07, -1.02], ["c", -2.34, -2.07, -3.15, -6.72, -1.74, -10.2], ["c", 0.87, -2.16, 2.28, -3.42, 4.14, -3.66], ["z"], ["m", 1.11, 0.87], ["c", -0.21, -0.06, -0.69, -0.09, -0.87, -0.06], ["c", -0.54, 0.12, -0.87, 0.42, -1.17, 0.99], ["c", -0.36, 0.66, -0.51, 1.56, -0.6, 3], ["c", -0.03, 0.75, -0.03, 4.59, 0, 5.31], ["c", 0.09, 1.5, 0.27, 2.4, 0.6, 3.06], ["c", 0.24, 0.48, 0.57, 0.78, 0.96, 0.9], ["c", 0.27, 0.09, 0.78, 0.09, 1.05, 0], ["c", 0.39, -0.12, 0.72, -0.42, 0.96, -0.9], ["c", 0.33, -0.66, 0.51, -1.56, 0.6, -3.06], ["c", 0.03, -0.72, 0.03, -4.56, 0, -5.31], ["c", -0.09, -1.47, -0.27, -2.37, -0.6, -3.03], ["c", -0.24, -0.48, -0.54, -0.78, -0.93, -0.9], ["z"]], w: 10.78, h: 14.959 },
     1: { d: [["M", 3.3, -15.06], ["c", 0.06, -0.06, 0.21, -0.03, 0.66, 0.15], ["c", 0.81, 0.39, 1.08, 0.39, 1.83, 0.03], ["c", 0.21, -0.09, 0.39, -0.15, 0.42, -0.15], ["c", 0.12, 0, 0.21, 0.09, 0.27, 0.21], ["c", 0.06, 0.12, 0.06, 0.33, 0.06, 5.94], ["c", 0, 3.93, 0, 5.85, 0.03, 6.03], ["c", 0.06, 0.36, 0.15, 0.69, 0.27, 0.96], ["c", 0.36, 0.75, 0.93, 1.17, 1.68, 1.26], ["c", 0.3, 0.03, 0.39, 0.09, 0.39, 0.3], ["c", 0, 0.15, -0.03, 0.18, -0.09, 0.24], ["c", -0.06, 0.06, -0.09, 0.06, -0.48, 0.06], ["c", -0.42, 0, -0.69, -0.03, -2.1, -0.24], ["c", -0.9, -0.15, -1.77, -0.15, -2.67, 0], ["c", -1.41, 0.21, -1.68, 0.24, -2.1, 0.24], ["c", -0.39, 0, -0.42, 0, -0.48, -0.06], ["c", -0.06, -0.06, -0.06, -0.09, -0.06, -0.24], ["c", 0, -0.21, 0.06, -0.27, 0.36, -0.3], ["c", 0.75, -0.09, 1.32, -0.51, 1.68, -1.26], ["c", 0.12, -0.27, 0.21, -0.6, 0.27, -0.96], ["c", 0.03, -0.18, 0.03, -1.59, 0.03, -4.29], ["c", 0, -3.87, 0, -4.05, -0.06, -4.14], ["c", -0.09, -0.15, -0.18, -0.24, -0.39, -0.24], ["c", -0.12, 0, -0.15, 0.03, -0.21, 0.06], ["c", -0.03, 0.06, -0.45, 0.99, -0.96, 2.13], ["c", -0.48, 1.14, -0.9, 2.1, -0.93, 2.16], ["c", -0.06, 0.15, -0.21, 0.24, -0.33, 0.24], ["c", -0.24, 0, -0.42, -0.18, -0.42, -0.39], ["c", 0, -0.06, 3.27, -7.62, 3.33, -7.74], ["z"]], w: 8.94, h: 15.058 },
     2: { d: [["M", 4.23, -14.97], ["c", 0.57, -0.06, 1.68, 0, 2.34, 0.18], ["c", 0.69, 0.18, 1.5, 0.54, 2.01, 0.9], ["c", 1.35, 0.96, 1.95, 2.25, 1.77, 3.81], ["c", -0.15, 1.35, -0.66, 2.34, -1.68, 3.15], ["c", -0.6, 0.48, -1.44, 0.93, -3.12, 1.65], ["c", -1.32, 0.57, -1.8, 0.81, -2.37, 1.14], ["c", -0.57, 0.33, -0.57, 0.33, -0.24, 0.27], ["c", 0.39, -0.09, 1.26, -0.09, 1.68, 0], ["c", 0.72, 0.15, 1.41, 0.45, 2.1, 0.9], ["c", 0.99, 0.63, 1.86, 0.87, 2.55, 0.75], ["c", 0.24, -0.06, 0.42, -0.15, 0.57, -0.3], ["c", 0.12, -0.09, 0.3, -0.42, 0.3, -0.51], ["c", 0, -0.09, 0.12, -0.21, 0.24, -0.24], ["c", 0.18, -0.03, 0.39, 0.12, 0.39, 0.3], ["c", 0, 0.12, -0.15, 0.57, -0.3, 0.87], ["c", -0.54, 1.02, -1.56, 1.74, -2.79, 2.01], ["c", -0.42, 0.09, -1.23, 0.09, -1.62, 0.03], ["c", -0.81, -0.18, -1.32, -0.45, -2.01, -1.11], ["c", -0.45, -0.45, -0.63, -0.57, -0.96, -0.69], ["c", -0.84, -0.27, -1.89, 0.12, -2.25, 0.9], ["c", -0.12, 0.21, -0.21, 0.54, -0.21, 0.72], ["c", 0, 0.12, -0.12, 0.21, -0.27, 0.24], ["c", -0.15, 0, -0.27, -0.03, -0.33, -0.15], ["c", -0.09, -0.21, 0.09, -1.08, 0.33, -1.71], ["c", 0.24, -0.66, 0.66, -1.26, 1.29, -1.89], ["c", 0.45, -0.45, 0.9, -0.81, 1.92, -1.56], ["c", 1.29, -0.93, 1.89, -1.44, 2.34, -1.98], ["c", 0.87, -1.05, 1.26, -2.19, 1.2, -3.63], ["c", -0.06, -1.29, -0.39, -2.31, -0.96, -2.91], ["c", -0.36, -0.33, -0.72, -0.51, -1.17, -0.54], ["c", -0.84, -0.03, -1.53, 0.42, -1.59, 1.05], ["c", -0.03, 0.33, 0.12, 0.6, 0.57, 1.14], ["c", 0.45, 0.54, 0.54, 0.87, 0.42, 1.41], ["c", -0.15, 0.63, -0.54, 1.11, -1.08, 1.38], ["c", -0.63, 0.33, -1.2, 0.33, -1.83, 0], ["c", -0.24, -0.12, -0.33, -0.18, -0.54, -0.39], ["c", -0.18, -0.18, -0.27, -0.3, -0.36, -0.51], ["c", -0.24, -0.45, -0.27, -0.84, -0.21, -1.38], ["c", 0.12, -0.75, 0.45, -1.41, 1.02, -1.98], ["c", 0.72, -0.72, 1.74, -1.17, 2.85, -1.32], ["z"]], w: 10.764, h: 14.97 },
@@ -8316,45 +8316,45 @@ function Ne() {
     "scripts.snap": { d: [["M", 4.5, -3.39], ["c", 0.36, -0.03, 0.96, -0.03, 1.35, 0], ["c", 1.56, 0.15, 3.15, 0.9, 4.2, 2.01], ["c", 0.24, 0.27, 0.33, 0.42, 0.33, 0.6], ["c", 0, 0.27, 0.03, 0.24, -2.46, 2.22], ["c", -1.29, 1.02, -2.4, 1.86, -2.49, 1.92], ["c", -0.18, 0.09, -0.3, 0.09, -0.48, 0], ["c", -0.09, -0.06, -1.2, -0.9, -2.49, -1.92], ["c", -2.49, -1.98, -2.46, -1.95, -2.46, -2.22], ["c", 0, -0.18, 0.09, -0.33, 0.33, -0.6], ["c", 1.05, -1.08, 2.64, -1.86, 4.17, -2.01], ["z"], ["m", 1.29, 1.17], ["c", -1.47, -0.15, -2.97, 0.3, -4.14, 1.2], ["l", -0.18, 0.15], ["l", 0.06, 0.09], ["c", 0.15, 0.12, 3.63, 2.85, 3.66, 2.85], ["c", 0.03, 0, 3.51, -2.73, 3.66, -2.85], ["l", 0.06, -0.09], ["l", -0.18, -0.15], ["c", -0.84, -0.66, -1.89, -1.08, -2.94, -1.2], ["z"]], w: 10.38, h: 6.84 }
   };
   m["noteheads.slash.whole"] = { d: [["M", 5, -5], ["l", 1, 1], ["l", -5, 5], ["l", -1, -1], ["z"], ["m", 4, 6], ["l", -5, -5], ["l", 2, -2], ["l", 5, 5], ["z"], ["m", 0, -2], ["l", 1, 1], ["l", -5, 5], ["l", -1, -1], ["z"], ["m", -4, 6], ["l", -5, -5], ["l", 2, -2], ["l", 5, 5], ["z"]], w: 10.81, h: 15.63 }, m["noteheads.slash.quarter"] = { d: [["M", 9, -6], ["l", 0, 4], ["l", -9, 9], ["l", 0, -4], ["z"]], w: 9, h: 9 }, m["noteheads.harmonic.quarter"] = { d: [["M", 3.63, -4.02], ["c", 0.09, -0.06, 0.18, -0.09, 0.24, -0.03], ["c", 0.03, 0.03, 0.87, 0.93, 1.83, 2.01], ["c", 1.5, 1.65, 1.8, 1.98, 1.8, 2.04], ["c", 0, 0.06, -0.3, 0.39, -1.8, 2.04], ["c", -0.96, 1.08, -1.8, 1.98, -1.83, 2.01], ["c", -0.06, 0.06, -0.15, 0.03, -0.24, -0.03], ["c", -0.12, -0.09, -3.54, -3.84, -3.6, -3.93], ["c", -0.03, -0.03, -0.03, -0.09, -0.03, -0.15], ["c", 0.03, -0.06, 3.45, -3.84, 3.63, -3.96], ["z"]], w: 7.5, h: 8.165 }, m["noteheads.triangle.quarter"] = { d: [["M", 0, 4], ["l", 9, 0], ["l", -4.5, -9], ["z"]], w: 9, h: 9 };
-  var g = function(o) {
-    for (var a = [], s = 0, p = o.length; s < p; s++) {
-      a[s] = [];
-      for (var u = 0, d = o[s].length; u < d; u++)
-        a[s][u] = o[s][u];
+  var g = function(s) {
+    for (var a = [], o = 0, p = s.length; o < p; o++) {
+      a[o] = [];
+      for (var u = 0, d = s[o].length; u < d; u++)
+        a[o][u] = s[o][u];
     }
     return a;
-  }, l = function(o, a, s) {
-    for (var p = 0, u = o.length; p < u; p++) {
-      var d = o[p], f, i;
+  }, l = function(s, a, o) {
+    for (var p = 0, u = s.length; p < u; p++) {
+      var d = s[p], f, i;
       for (f = 1, i = d.length; f < i; f++)
-        d[f] *= f % 2 ? a : s;
+        d[f] *= f % 2 ? a : o;
     }
   }, r = {
-    printSymbol: function(o, a, s, p, u) {
-      if (!m[s]) return null;
-      var d = g(m[s].d);
-      d[0][1] += o, d[0][2] += a;
+    printSymbol: function(s, a, o, p, u) {
+      if (!m[o]) return null;
+      var d = g(m[o].d);
+      d[0][1] += s, d[0][2] += a;
       for (var f = "", i = 0; i < d.length; i++)
         f += d[i].join(" ");
       return u.path = f, p.path(u);
     },
-    getPathForSymbol: function(o, a, s, p, u) {
-      if (p = p || 1, u = u || 1, !m[s]) return null;
-      var d = g(m[s].d);
-      return (p !== 1 || u !== 1) && l(d, p, u), d[0][1] += o, d[0][2] += a, d;
+    getPathForSymbol: function(s, a, o, p, u) {
+      if (p = p || 1, u = u || 1, !m[o]) return null;
+      var d = g(m[o].d);
+      return (p !== 1 || u !== 1) && l(d, p, u), d[0][1] += s, d[0][2] += a, d;
     },
-    getSymbolWidth: function(o) {
-      return m[o] ? m[o].w : 0;
+    getSymbolWidth: function(s) {
+      return m[s] ? m[s].w : 0;
     },
-    symbolHeightInPitches: function(o) {
-      var a = m[o] ? m[o].h : 0;
-      return a / _.STEP;
+    symbolHeightInPitches: function(s) {
+      var a = m[s] ? m[s].h : 0;
+      return a / k.STEP;
     },
-    getSymbolAlign: function(o) {
-      return o.substring(0, 7) === "scripts" && o !== "scripts.roll" ? "center" : "left";
+    getSymbolAlign: function(s) {
+      return s.substring(0, 7) === "scripts" && s !== "scripts.roll" ? "center" : "left";
     },
-    getYCorr: function(o) {
-      switch (o) {
+    getYCorr: function(s) {
+      switch (s) {
         case "0":
         case "1":
         case "2":
@@ -8414,71 +8414,71 @@ function Ne() {
           return 0;
       }
     },
-    setSymbol: function(o, a) {
-      m[o] = a;
+    setSymbol: function(s, a) {
+      m[s] = a;
     }
   };
   return Ot = r, Ot;
 }
-var Ht, Ka;
-function Js() {
-  if (Ka) return Ht;
-  Ka = 1;
-  var _ = De(), m = Ne(), g = Te(), l = function(o, a) {
-    var s, p = 0;
-    o.el_type = "clef";
-    var u = new _(o, 0, 10, "staff-extra clef", a);
-    switch (u.isClef = !0, o.type) {
+var Ht, Qa;
+function eo() {
+  if (Qa) return Ht;
+  Qa = 1;
+  var k = De(), m = Ne(), g = Te(), l = function(s, a) {
+    var o, p = 0;
+    s.el_type = "clef";
+    var u = new k(s, 0, 10, "staff-extra clef", a);
+    switch (u.isClef = !0, s.type) {
       case "treble":
-        s = "clefs.G";
+        o = "clefs.G";
         break;
       case "tenor":
-        s = "clefs.C";
+        o = "clefs.C";
         break;
       case "alto":
-        s = "clefs.C";
+        o = "clefs.C";
         break;
       case "bass":
-        s = "clefs.F";
+        o = "clefs.F";
         break;
       case "treble+8":
-        s = "clefs.G", p = 1;
+        o = "clefs.G", p = 1;
         break;
       case "tenor+8":
-        s = "clefs.C", p = 1;
+        o = "clefs.C", p = 1;
         break;
       case "bass+8":
-        s = "clefs.F", p = 1;
+        o = "clefs.F", p = 1;
         break;
       case "alto+8":
-        s = "clefs.C", p = 1;
+        o = "clefs.C", p = 1;
         break;
       case "treble-8":
-        s = "clefs.G", p = -1;
+        o = "clefs.G", p = -1;
         break;
       case "tenor-8":
-        s = "clefs.C", p = -1;
+        o = "clefs.C", p = -1;
         break;
       case "bass-8":
-        s = "clefs.F", p = -1;
+        o = "clefs.F", p = -1;
         break;
       case "alto-8":
-        s = "clefs.C", p = -1;
+        o = "clefs.C", p = -1;
         break;
       case "none":
         return null;
       case "perc":
-        s = "clefs.perc";
+        o = "clefs.perc";
         break;
       default:
-        u.addFixed(new g("clef=" + o.type, 0, 0, void 0, { type: "debug" }));
+        u.addFixed(new g("clef=" + s.type, 0, 0, void 0, { type: "debug" }));
     }
     var d = 5;
-    if (s) {
-      var f = m.symbolHeightInPitches(s), i = r(s);
-      if (u.addRight(new g(s, d, m.getSymbolWidth(s), o.clefPos, { top: f + o.clefPos + i, bottom: o.clefPos + i })), p !== 0) {
-        var n = 0.6666666666666666, t = (m.getSymbolWidth(s) - m.getSymbolWidth("8") * n) / 2, e = p > 0 ? u.top + 3 : u.bottom - 1, c = p > 0 ? u.top + 3 : u.bottom - 3, v = c - 2;
-        o.type === "bass-8" && (e = 3, t = 0), u.addRight(new g("8", d + t, m.getSymbolWidth("8") * n, e, {
+    if (o) {
+      var f = m.symbolHeightInPitches(o), i = r(o);
+      if (u.addRight(new g(o, d, m.getSymbolWidth(o), s.clefPos, { top: f + s.clefPos + i, bottom: s.clefPos + i })), p !== 0) {
+        var n = 0.6666666666666666, t = (m.getSymbolWidth(o) - m.getSymbolWidth("8") * n) / 2, e = p > 0 ? u.top + 3 : u.bottom - 1, c = p > 0 ? u.top + 3 : u.bottom - 3, v = c - 2;
+        s.type === "bass-8" && (e = 3, t = 0), u.addRight(new g("8", d + t, m.getSymbolWidth("8") * n, e, {
           scalex: n,
           scaley: n,
           top: c,
@@ -8488,8 +8488,8 @@ function Js() {
     }
     return u;
   };
-  function r(o) {
-    switch (o) {
+  function r(s) {
+    switch (s) {
       case "clefs.G":
         return -5;
       case "clefs.C":
@@ -8504,16 +8504,16 @@ function Js() {
   }
   return Ht = l, Ht;
 }
-var zt, Qa;
-function Zs() {
-  if (Qa) return zt;
-  Qa = 1;
-  var _ = De(), m = Ne(), g = Te(), l = function(r, o) {
+var zt, Ja;
+function to() {
+  if (Ja) return zt;
+  Ja = 1;
+  var k = De(), m = Ne(), g = Te(), l = function(r, s) {
     if (r.el_type = "keySignature", !r.accidentals || r.accidentals.length === 0)
       return null;
-    var a = new _(r, 0, 10, "staff-extra key-signature", o);
+    var a = new k(r, 0, 10, "staff-extra key-signature", s);
     a.isKeySig = !0;
-    var s = 0;
+    var o = 0;
     return r.accidentals.forEach(function(p) {
       var u, d = 0;
       switch (p.acc) {
@@ -8535,43 +8535,43 @@ function Zs() {
         default:
           u = "accidentals.flat";
       }
-      a.addRight(new g(u, s, m.getSymbolWidth(u), p.verticalPos, { thickness: m.symbolHeightInPitches(u), top: p.verticalPos + m.symbolHeightInPitches(u) + d, bottom: p.verticalPos + d })), s += m.getSymbolWidth(u) + 2;
+      a.addRight(new g(u, o, m.getSymbolWidth(u), p.verticalPos, { thickness: m.symbolHeightInPitches(u), top: p.verticalPos + m.symbolHeightInPitches(u) + d, bottom: p.verticalPos + d })), o += m.getSymbolWidth(u) + 2;
     }, this), a;
   };
   return zt = l, zt;
 }
-var Gt, Ja;
-function eo() {
-  if (Ja) return Gt;
-  Ja = 1;
-  var _ = Ne(), m = Te(), g = function(l, r, o, a) {
+var Gt, Za;
+function ro() {
+  if (Za) return Gt;
+  Za = 1;
+  var k = Ne(), m = Te(), g = function(l, r, s, a) {
     a || (a = {});
-    var s = a.dir !== void 0 ? a.dir : null, p = a.headx !== void 0 ? a.headx : 0, u = a.extrax !== void 0 ? a.extrax : 0, d = a.flag !== void 0 ? a.flag : null, f = a.dot !== void 0 ? a.dot : 0, i = a.dotshiftx !== void 0 ? a.dotshiftx : 0, n = a.scale !== void 0 ? a.scale : 1, t = a.accidentalSlot !== void 0 ? a.accidentalSlot : [], e = a.shouldExtendStem !== void 0 ? a.shouldExtendStem : !1, c = a.printAccidentals !== void 0 ? a.printAccidentals : !0, v = a.chordPos, h = o.verticalPos, y, w = 0, A = 0, P = 0;
+    var o = a.dir !== void 0 ? a.dir : null, p = a.headx !== void 0 ? a.headx : 0, u = a.extrax !== void 0 ? a.extrax : 0, d = a.flag !== void 0 ? a.flag : null, f = a.dot !== void 0 ? a.dot : 0, i = a.dotshiftx !== void 0 ? a.dotshiftx : 0, n = a.scale !== void 0 ? a.scale : 1, t = a.accidentalSlot !== void 0 ? a.accidentalSlot : [], e = a.shouldExtendStem !== void 0 ? a.shouldExtendStem : !1, c = a.printAccidentals !== void 0 ? a.printAccidentals : !0, v = a.chordPos, h = s.verticalPos, y, w = 0, A = 0, P = 0;
     if (r === void 0)
       l.addFixed(new m("pitch is undefined", 0, 0, 0, { type: "debug" }));
     else if (r === "")
       y = new m(null, 0, 0, h, { chordPos: v });
     else {
       var N = p;
-      if (o.printer_shift) {
-        var T = o.printer_shift === "same" ? 1 : 0;
-        N = s === "down" ? -_.getSymbolWidth(r) * n + T : _.getSymbolWidth(r) * n - T;
+      if (s.printer_shift) {
+        var T = s.printer_shift === "same" ? 1 : 0;
+        N = o === "down" ? -k.getSymbolWidth(r) * n + T : k.getSymbolWidth(r) * n - T;
       }
-      var q = { scalex: n, scaley: n, thickness: _.symbolHeightInPitches(r) * n, name: o.name, chordPos: v };
-      if (y = new m(r, N, _.getSymbolWidth(r) * n, h, q), y.stemDir = s, d) {
-        var I = h + (s === "down" ? -7 : 7) * n;
-        e && (s === "down" && I > 6 && (I = 6), s === "up" && I < 6 && (I = 6));
-        var C = s === "down" ? p : p + y.w - 0.6;
-        l.addRight(new m(d, C, _.getSymbolWidth(d) * n, I, { scalex: n, scaley: n, chordPos: v }));
+      var q = { scalex: n, scaley: n, thickness: k.symbolHeightInPitches(r) * n, name: s.name, chordPos: v };
+      if (y = new m(r, N, k.getSymbolWidth(r) * n, h, q), y.stemDir = o, d) {
+        var I = h + (o === "down" ? -7 : 7) * n;
+        e && (o === "down" && I > 6 && (I = 6), o === "up" && I < 6 && (I = 6));
+        var C = o === "down" ? p : p + y.w - 0.6;
+        l.addRight(new m(d, C, k.getSymbolWidth(d) * n, I, { scalex: n, scaley: n, chordPos: v }));
       }
       for (A = y.w + i - 2 + 5 * f; f > 0; f--) {
         var B = 1 - Math.abs(h) % 2;
-        l.addRight(new m("dots.dot", y.w + i - 2 + 5 * f, _.getSymbolWidth("dots.dot"), h + B, { chordPos: v }));
+        l.addRight(new m("dots.dot", y.w + i - 2 + 5 * f, k.getSymbolWidth("dots.dot"), h + B, { chordPos: v }));
       }
     }
-    if (y && (y.highestVert = o.highestVert), c && o.accidental) {
+    if (y && (y.highestVert = s.highestVert), c && s.accidental) {
       var R;
-      switch (o.accidental) {
+      switch (s.accidental) {
         case "quartersharp":
           R = "accidentals.halfsharp";
           break;
@@ -8593,91 +8593,91 @@ function eo() {
         case "natural":
           R = "accidentals.nat";
       }
-      for (var S = !1, k = u, M = 0; M < t.length; M++)
+      for (var S = !1, _ = u, M = 0; M < t.length; M++)
         if (h - t[M][0] >= 6) {
-          t[M][0] = h, k = t[M][1], S = !0;
+          t[M][0] = h, _ = t[M][1], S = !0;
           break;
         }
-      S === !1 && (k -= _.getSymbolWidth(R) * n + 2, t.push([h, k]), w = _.getSymbolWidth(R) * n + 2);
-      var F = _.symbolHeightInPitches(R);
-      l.addExtra(new m(R, k, _.getSymbolWidth(R), h, { scalex: n, scaley: n, top: h + F / 2, bottom: h - F / 2, chordPos: v })), P = _.getSymbolWidth(R) / 2;
+      S === !1 && (_ -= k.getSymbolWidth(R) * n + 2, t.push([h, _]), w = k.getSymbolWidth(R) * n + 2);
+      var F = k.symbolHeightInPitches(R);
+      l.addExtra(new m(R, _, k.getSymbolWidth(R), h, { scalex: n, scaley: n, top: h + F / 2, bottom: h - F / 2, chordPos: v })), P = k.getSymbolWidth(R) / 2;
     }
     return { notehead: y, accidentalshiftx: w, dotshiftx: A, extraLeft: P };
   };
   return Gt = g, Gt;
 }
-var Yt, Za;
-function to() {
-  if (Za) return Yt;
-  Za = 1;
-  var _ = De(), m = Ne(), g = Te(), l = function(r, o) {
+var Yt, en;
+function ao() {
+  if (en) return Yt;
+  en = 1;
+  var k = De(), m = Ne(), g = Te(), l = function(r, s) {
     r.el_type = "timeSignature";
-    var a = new _(r, 0, 10, "staff-extra time-signature", o);
+    var a = new k(r, 0, 10, "staff-extra time-signature", s);
     if (r.type === "specified")
-      for (var s = 0, p = 0; p < r.value.length; p++)
-        if (p !== 0 && (a.addRight(new g("+", s + 1, m.getSymbolWidth("+"), 6, { thickness: m.symbolHeightInPitches("+") })), s += m.getSymbolWidth("+") + 2), r.value[p].den) {
+      for (var o = 0, p = 0; p < r.value.length; p++)
+        if (p !== 0 && (a.addRight(new g("+", o + 1, m.getSymbolWidth("+"), 6, { thickness: m.symbolHeightInPitches("+") })), o += m.getSymbolWidth("+") + 2), r.value[p].den) {
           for (var u = 0, d = 0; d < r.value[p].num.length; d++)
             u += m.getSymbolWidth(r.value[p].num[d]);
           var f = 0;
           for (d = 0; d < r.value[p].num.length; d++)
             f += m.getSymbolWidth(r.value[p].den[d]);
           var i = Math.max(u, f);
-          a.addRight(new g(r.value[p].num, s + (i - u) / 2, u, 8, { thickness: m.symbolHeightInPitches(r.value[p].num[0]) })), a.addRight(new g(r.value[p].den, s + (i - f) / 2, f, 4, { thickness: m.symbolHeightInPitches(r.value[p].den[0]) })), s += i;
+          a.addRight(new g(r.value[p].num, o + (i - u) / 2, u, 8, { thickness: m.symbolHeightInPitches(r.value[p].num[0]) })), a.addRight(new g(r.value[p].den, o + (i - f) / 2, f, 4, { thickness: m.symbolHeightInPitches(r.value[p].den[0]) })), o += i;
         } else {
           for (var n = 0, t = 0; t < r.value[p].num.length; t++)
             n += m.getSymbolWidth(r.value[p].num[t]);
-          a.addRight(new g(r.value[p].num, s, n, 6, { thickness: m.symbolHeightInPitches(r.value[p].num[0]) })), s += n;
+          a.addRight(new g(r.value[p].num, o, n, 6, { thickness: m.symbolHeightInPitches(r.value[p].num[0]) })), o += n;
         }
     else r.type === "common_time" ? a.addRight(new g("timesig.common", 0, m.getSymbolWidth("timesig.common"), 6, { thickness: m.symbolHeightInPitches("timesig.common") })) : r.type === "cut_time" ? a.addRight(new g("timesig.cut", 0, m.getSymbolWidth("timesig.cut"), 6, { thickness: m.symbolHeightInPitches("timesig.cut") })) : r.type === "tempus_imperfectum" ? a.addRight(new g("timesig.imperfectum", 0, m.getSymbolWidth("timesig.imperfectum"), 6, { thickness: m.symbolHeightInPitches("timesig.imperfectum") })) : r.type === "tempus_imperfectum_prolatio" ? a.addRight(new g("timesig.imperfectum2", 0, m.getSymbolWidth("timesig.imperfectum2"), 6, { thickness: m.symbolHeightInPitches("timesig.imperfectum2") })) : r.type === "tempus_perfectum" ? a.addRight(new g("timesig.perfectum", 0, m.getSymbolWidth("timesig.perfectum"), 6, { thickness: m.symbolHeightInPitches("timesig.perfectum") })) : r.type === "tempus_perfectum_prolatio" ? a.addRight(new g("timesig.perfectum2", 0, m.getSymbolWidth("timesig.perfectum2"), 6, { thickness: m.symbolHeightInPitches("timesig.perfectum2") })) : console.log("time signature:", r);
     return a;
   };
   return Yt = l, Yt;
 }
-var Wt, en;
-function ro() {
-  if (en) return Wt;
-  en = 1;
-  var _ = function(g, l, r) {
+var Wt, tn;
+function no() {
+  if (tn) return Wt;
+  tn = 1;
+  var k = function(g, l, r) {
     this.type = "DynamicDecoration", this.anchor = g, this.dec = l, r === "below" ? this.volumeHeightBelow = 6 : this.volumeHeightAbove = 6, this.pitch = void 0;
   };
-  return Wt = _, Wt;
+  return Wt = k, Wt;
 }
-var Ut, tn;
-function ao() {
-  if (tn) return Ut;
-  tn = 1;
-  var _ = function(g, l, r, o) {
-    this.type = "CrescendoElem", this.anchor1 = g, this.anchor2 = l, this.dir = r, o === "above" ? this.dynamicHeightAbove = 6 : this.dynamicHeightBelow = 6, this.pitch = void 0;
-  };
-  return Ut = _, Ut;
-}
-var Xt, rn;
-function no() {
-  if (rn) return Xt;
+var Ut, rn;
+function io() {
+  if (rn) return Ut;
   rn = 1;
-  var _ = function(g, l) {
+  var k = function(g, l, r, s) {
+    this.type = "CrescendoElem", this.anchor1 = g, this.anchor2 = l, this.dir = r, s === "above" ? this.dynamicHeightAbove = 6 : this.dynamicHeightBelow = 6, this.pitch = void 0;
+  };
+  return Ut = k, Ut;
+}
+var Xt, an;
+function so() {
+  if (an) return Xt;
+  an = 1;
+  var k = function(g, l) {
     this.type = "GlissandoElem", this.anchor1 = g, this.anchor2 = l;
   };
-  return Xt = _, Xt;
+  return Xt = k, Xt;
 }
-var jt, an;
-function cs() {
-  if (an) return jt;
-  an = 1;
-  var _ = function(g) {
+var jt, nn;
+function ls() {
+  if (nn) return jt;
+  nn = 1;
+  var k = function(g) {
     this.type = "TieElem", this.anchor1 = g.anchor1, this.anchor2 = g.anchor2, g.isGrace && (this.isGrace = !0), g.fixedY && (this.fixedY = !0), g.stemDir && (this.stemDir = g.stemDir), g.voiceNumber !== void 0 && (this.voiceNumber = g.voiceNumber), g.style !== void 0 && (this.dotted = !0), this.internalNotes = [];
   };
-  return _.prototype.addInternalNote = function(m) {
+  return k.prototype.addInternalNote = function(m) {
     this.internalNotes.push(m);
-  }, _.prototype.setEndAnchor = function(m) {
+  }, k.prototype.setEndAnchor = function(m) {
     this.anchor2 = m, this.anchor1 ? (this.top = Math.max(this.anchor1.pitch, this.anchor2.pitch) + 4, this.bottom = Math.min(this.anchor1.pitch, this.anchor2.pitch) - 4) : (this.top = this.anchor2.pitch + 4, this.bottom = this.anchor2.pitch - 4);
-  }, _.prototype.setStartX = function(m) {
+  }, k.prototype.setStartX = function(m) {
     this.startLimitX = m;
-  }, _.prototype.setEndX = function(m) {
+  }, k.prototype.setEndX = function(m) {
     this.endLimitX = m;
-  }, _.prototype.setHint = function() {
+  }, k.prototype.setHint = function() {
     this.hint = !0;
-  }, _.prototype.calcTieDirection = function() {
+  }, k.prototype.calcTieDirection = function() {
     if (this.isGrace)
       this.above = !1;
     else if (this.voiceNumber === 0)
@@ -8688,7 +8688,7 @@ function cs() {
       var m;
       this.anchor1 ? m = this.anchor1.pitch : this.anchor2 ? m = this.anchor2.pitch : m = 14, this.anchor1 && this.anchor1.stemDir === "down" && this.anchor2 && this.anchor2.stemDir === "down" ? this.above = !0 : this.anchor1 && this.anchor1.stemDir === "up" && this.anchor2 && this.anchor2.stemDir === "up" ? this.above = !1 : this.anchor1 && this.anchor2 ? this.above = m >= 6 : this.anchor1 ? this.above = this.anchor1.stemDir === "down" : this.anchor2 ? this.above = this.anchor2.stemDir === "down" : this.above = m >= 6;
     }
-  }, _.prototype.calcSlurDirection = function() {
+  }, k.prototype.calcSlurDirection = function() {
     if (this.isGrace)
       this.above = !1;
     else if (this.voiceNumber === 0)
@@ -8704,19 +8704,19 @@ function cs() {
       }
       this.above = m;
     }
-  }, _.prototype.calcX = function(m, g) {
+  }, k.prototype.calcX = function(m, g) {
     this.anchor1 ? (this.startX = this.anchor1.x, this.anchor1.scalex < 1 && (this.startX -= 3)) : this.startLimitX ? this.startX = this.startLimitX.x + this.startLimitX.w : this.anchor2 ? this.startX = this.anchor2.x - 20 : this.startX = m, !this.anchor1 && this.dotted && (this.startX -= 3), this.anchor2 ? this.endX = this.anchor2.x : this.endLimitX ? this.endX = this.endLimitX.x : this.endX = g;
-  }, _.prototype.calcTieY = function() {
+  }, k.prototype.calcTieY = function() {
     this.anchor1 ? this.startY = this.anchor1.pitch : this.anchor2 ? this.startY = this.anchor2.pitch : this.startY = this.above ? 14 : 0, this.anchor2 ? this.endY = this.anchor2.pitch : this.anchor1 ? this.endY = this.anchor1.pitch : this.endY = this.above ? 14 : 0;
-  }, _.prototype.calcSlurY = function() {
+  }, k.prototype.calcSlurY = function() {
     if (this.anchor1 && this.anchor2) {
       this.above && this.anchor1.stemDir === "up" && !this.fixedY ? (this.startY = (this.anchor1.highestVert + this.anchor1.pitch) / 2, this.startX += this.anchor1.w / 2) : this.startY = this.anchor1.pitch;
       var m = this.anchor2.parent.beam && this.anchor2.parent.beam.stemsUp && this.anchor2.parent.beam.elems[0] !== this.anchor2.parent, g = (this.anchor2.highestVert + this.anchor2.pitch) / 2;
       if (this.above && this.anchor2.stemDir === "up" && !this.fixedY && !m && g < this.startY ? (this.endY = g, this.endX += Math.round(this.anchor2.w / 2)) : this.endY = this.above && m ? this.anchor2.highestVert : this.anchor2.pitch, this.anchor1.scalex === 1) {
         var l = !!this.anchor1.parent.beam, r = !!this.anchor2.parent.beam;
         if (l) {
-          var o = this.anchor1.parent === this.anchor1.parent.beam.elems[this.anchor1.parent.beam.elems.length - 1];
-          o || (this.above ? this.startY = this.anchor1.parent.fixed.t : this.startY = this.anchor1.parent.fixed.b);
+          var s = this.anchor1.parent === this.anchor1.parent.beam.elems[this.anchor1.parent.beam.elems.length - 1];
+          s || (this.above ? this.startY = this.anchor1.parent.fixed.t : this.startY = this.anchor1.parent.fixed.b);
         }
         if (r) {
           var a = this.anchor2.parent === this.anchor2.parent.beam.elems[0];
@@ -8724,26 +8724,26 @@ function cs() {
         }
       }
     } else this.anchor1 ? this.startY = this.endY = this.anchor1.pitch : this.anchor2 ? this.startY = this.endY = this.anchor2.pitch : (this.startY = this.above ? 14 : 0, this.endY = this.above ? 14 : 0);
-  }, _.prototype.avoidCollisionAbove = function() {
+  }, k.prototype.avoidCollisionAbove = function() {
     if (this.above) {
       for (var m = -50, g = 0; g < this.internalNotes.length; g++)
         this.internalNotes[g].highestVert > m && (m = this.internalNotes[g].highestVert);
       m > this.startY && m > this.endY && (this.startY = this.endY = m - 1);
     }
-  }, _.prototype.getYBounds = function() {
+  }, k.prototype.getYBounds = function() {
     var m = 10, g = 1e3;
     this.isTie ? (this.calcTieDirection(), this.calcX(m, g), this.calcTieY()) : (this.calcSlurDirection(), this.calcX(m, g), this.calcSlurY());
     var l, r;
     return this.above ? (r = Math.min(this.startY, this.endY), l = r + 3) : (l = Math.min(this.startY, this.endY), r = l - 3), [l, r];
-  }, jt = _, jt;
+  }, jt = k, jt;
 }
-var $t, nn;
-function io() {
-  if (nn) return $t;
-  nn = 1;
-  var _ = ro(), m = ao(), g = no(), l = Ne(), r = Te(), o = cs(), a = function() {
+var $t, sn;
+function oo() {
+  if (sn) return $t;
+  sn = 1;
+  var k = no(), m = io(), g = so(), l = Ne(), r = Te(), s = ls(), a = function() {
     this.startDiminuendoX = void 0, this.startCrescendoX = void 0, this.minTop = 12, this.minBottom = 0;
-  }, s = function(t, e, c, v, h, y, w, A, P) {
+  }, o = function(t, e, c, v, h, y, w, A, P) {
     for (var N, T = 0; T < e.length; T++) {
       if (e[T] === "staccato" || e[T] === "tenuto" || e[T] === "accent" && !P) {
         var q = "scripts." + e[T];
@@ -8767,7 +8767,7 @@ function io() {
         var C = h.heads[0].pitch;
         C -= 2;
         var B = new r("", -y - 15, 0, C - 1), R = new r("", -y - 5, 0, C + 1);
-        h.addFixedX(B), h.addFixedX(R), t.addOther(new o({ anchor1: B, anchor2: R, fixedY: !0 }));
+        h.addFixedX(B), h.addFixedX(R), t.addOther(new s({ anchor1: B, anchor2: R, fixedY: !0 }));
       }
     }
     return N === void 0 && (N = c), { above: N, below: h.bottom };
@@ -8785,7 +8785,7 @@ function io() {
         case "ffff":
         case "sfz":
         case "mf":
-          var y = new _(c, e[h], v);
+          var y = new k(c, e[h], v);
           t.addOther(y);
       }
   }, u = function(t, e, c, v, h) {
@@ -8834,15 +8834,15 @@ function io() {
       var S;
       return R === "above" ? (S = v.above, S < y && (S = y)) : (S = v.below, S > w && (S = w)), S;
     }
-    function T(R, S, k) {
+    function T(R, S, _) {
       var M = N(S), F = 2, L = 5;
-      c.addFixedX(new r(R, e / 2, 0, M + F, { type: "decoration", klass: "ornament", thickness: 3, anchor: k })), P(S, L);
+      c.addFixedX(new r(R, e / 2, 0, M + F, { type: "decoration", klass: "ornament", thickness: 3, anchor: _ })), P(S, L);
     }
     function q(R, S) {
-      var k = e / 2;
-      l.getSymbolAlign(R) !== "center" && (k -= l.getSymbolWidth(R) / 2);
+      var _ = e / 2;
+      l.getSymbolAlign(R) !== "center" && (_ -= l.getSymbolWidth(R) / 2);
       var M = l.symbolHeightInPitches(R) + 1, F = N(S);
-      F = S === "above" ? F + M / 2 : F - M / 2, c.addFixedX(new r(R, k, l.getSymbolWidth(R), F, { klass: "ornament", thickness: l.symbolHeightInPitches(R), position: S })), P(S, M);
+      F = S === "above" ? F + M / 2 : F - M / 2, c.addFixedX(new r(R, _, l.getSymbolWidth(R), F, { klass: "ornament", thickness: l.symbolHeightInPitches(R), position: S })), P(S, M);
     }
     for (var I = {
       "+": "scripts.stopped",
@@ -8995,48 +8995,48 @@ function io() {
   }
   return a.prototype.createDecoration = function(t, e, c, v, h, y, w, A, P, N, T) {
     P || (P = { ornamentPosition: "above", volumePosition: N ? "above" : "below", dynamicPosition: N ? "above" : "below" }), p(t, e, h, P.volumePosition), this.dynamicDecoration(t, e, h, P.dynamicPosition), u(e, c, v, h, w);
-    var q = s(t, e, c, v, h, y, w, A, T);
+    var q = o(t, e, c, v, h, y, w, A, T);
     q.above = Math.max(q.above, this.minTop), q.below = Math.min(q.below, A), d(e, v, h, q, P.ornamentPosition, this.minTop, A, T), f(e, h, y);
   }, $t = a, $t;
 }
-var Vt, sn;
-function so() {
-  if (sn) return Vt;
-  sn = 1;
-  var _ = function(g, l, r) {
+var Vt, on;
+function co() {
+  if (on) return Vt;
+  on = 1;
+  var k = function(g, l, r) {
     this.type = "EndingElem", this.text = g, this.anchor1 = l, this.anchor2 = r, this.endingHeightAbove = 5, this.pitch = void 0;
   };
-  return Vt = _, Vt;
+  return Vt = k, Vt;
 }
-var Kt, on;
-function oo() {
-  if (on) return Kt;
-  on = 1;
-  var _ = function(m) {
+var Kt, cn;
+function lo() {
+  if (cn) return Kt;
+  cn = 1;
+  var k = function(m) {
     for (var g = 0, l = 0; l < m.voices.length; l++) {
       var r = m.voices[l].staff;
       m.voices[l].duplicate || (g += r.top, g += -r.bottom);
     }
     return g;
   };
-  return Kt = _, Kt;
+  return Kt = k, Kt;
 }
-var Qt, cn;
-function co() {
-  if (cn) return Qt;
-  cn = 1;
-  var _ = oo(), m = function(g) {
+var Qt, ln;
+function fo() {
+  if (ln) return Qt;
+  ln = 1;
+  var k = lo(), m = function(g) {
     this.getTextSize = g, this.voices = [], this.staffs = [], this.brace = void 0, this.bracket = void 0;
   };
   return m.prototype.setLimit = function(g, l) {
     l.specialY[g] && (l.staff.specialY[g] ? l.staff.specialY[g] = Math.max(l.staff.specialY[g], l.specialY[g]) : l.staff.specialY[g] = l.specialY[g]);
   }, m.prototype.addVoice = function(g, l, r) {
-    var o = this.voices.length;
-    this.voices[o] = g, this.staffs[l] ? this.staffs[l].voices.push(o) : this.staffs[this.staffs.length] = {
+    var s = this.voices.length;
+    this.voices[s] = g, this.staffs[l] ? this.staffs[l].voices.push(s) : this.staffs[this.staffs.length] = {
       top: 10,
       bottom: 2,
       lines: r,
-      voices: [o],
+      voices: [s],
       specialY: {
         tempoHeightAbove: 0,
         partHeightAbove: 0,
@@ -9052,7 +9052,7 @@ function co() {
       }
     }, g.staff = this.staffs[l];
   }, m.prototype.setHeight = function() {
-    this.height = _(this);
+    this.height = k(this);
   }, m.prototype.setWidth = function(g) {
     this.w = g;
     for (var l = 0; l < this.voices.length; l++)
@@ -9061,18 +9061,18 @@ function co() {
     g.staff.top = Math.max(g.staff.top, g.top), g.staff.bottom = Math.min(g.staff.bottom, g.bottom), this.setLimit("tempoHeightAbove", g), this.setLimit("partHeightAbove", g), this.setLimit("volumeHeightAbove", g), this.setLimit("dynamicHeightAbove", g), this.setLimit("endingHeightAbove", g), this.setLimit("chordHeightAbove", g), this.setLimit("lyricHeightAbove", g), this.setLimit("lyricHeightBelow", g), this.setLimit("chordHeightBelow", g), this.setLimit("volumeHeightBelow", g), this.setLimit("dynamicHeightBelow", g);
   }, Qt = m, Qt;
 }
-var Jt, ln;
-function lo() {
-  if (ln) return Jt;
-  ln = 1;
-  var _ = De(), m = Te(), g = function(r, o, a) {
-    this.type = "TempoElement", this.tempo = r, this.tempo.type = "tempo", this.tuneNumber = o, this.totalHeightInPitches = 6, this.tempoHeightAbove = this.totalHeightInPitches, this.pitch = void 0, this.tempo.duration && !this.tempo.suppressBpm && (this.note = this.createNote(a, r, o));
+var Jt, fn;
+function ho() {
+  if (fn) return Jt;
+  fn = 1;
+  var k = De(), m = Te(), g = function(r, s, a) {
+    this.type = "TempoElement", this.tempo = r, this.tempo.type = "tempo", this.tuneNumber = s, this.totalHeightInPitches = 6, this.tempoHeightAbove = this.totalHeightInPitches, this.pitch = void 0, this.tempo.duration && !this.tempo.suppressBpm && (this.note = this.createNote(a, r, s));
   };
   return g.prototype.setX = function(l) {
     this.x = l;
-  }, g.prototype.createNote = function(l, r, o) {
-    var a = 0.75, s = r.duration[0], p = new _(r, s, 1, "tempo", o), u, d, f;
-    s <= 1 / 32 ? (f = "noteheads.quarter", d = "flags.u32nd", u = 0) : s <= 1 / 16 ? (f = "noteheads.quarter", d = "flags.u16th", u = 0) : s <= 3 / 32 ? (f = "noteheads.quarter", d = "flags.u16nd", u = 1) : s <= 1 / 8 ? (f = "noteheads.quarter", d = "flags.u8th", u = 0) : s <= 3 / 16 ? (f = "noteheads.quarter", d = "flags.u8th", u = 1) : s <= 1 / 4 ? (f = "noteheads.quarter", u = 0) : s <= 3 / 8 ? (f = "noteheads.quarter", u = 1) : s <= 1 / 2 ? (f = "noteheads.half", u = 0) : s <= 3 / 4 ? (f = "noteheads.half", u = 1) : s <= 1 ? (f = "noteheads.whole", u = 0) : s <= 1.5 ? (f = "noteheads.whole", u = 1) : s <= 2 ? (f = "noteheads.dbl", u = 0) : (f = "noteheads.dbl", u = 1);
+  }, g.prototype.createNote = function(l, r, s) {
+    var a = 0.75, o = r.duration[0], p = new k(r, o, 1, "tempo", s), u, d, f;
+    o <= 1 / 32 ? (f = "noteheads.quarter", d = "flags.u32nd", u = 0) : o <= 1 / 16 ? (f = "noteheads.quarter", d = "flags.u16th", u = 0) : o <= 3 / 32 ? (f = "noteheads.quarter", d = "flags.u16nd", u = 1) : o <= 1 / 8 ? (f = "noteheads.quarter", d = "flags.u8th", u = 0) : o <= 3 / 16 ? (f = "noteheads.quarter", d = "flags.u8th", u = 1) : o <= 1 / 4 ? (f = "noteheads.quarter", u = 0) : o <= 3 / 8 ? (f = "noteheads.quarter", u = 1) : o <= 1 / 2 ? (f = "noteheads.half", u = 0) : o <= 3 / 4 ? (f = "noteheads.half", u = 1) : o <= 1 ? (f = "noteheads.whole", u = 0) : o <= 1.5 ? (f = "noteheads.whole", u = 1) : o <= 2 ? (f = "noteheads.dbl", u = 0) : (f = "noteheads.dbl", u = 1);
     var i = l(
       p,
       f,
@@ -9089,26 +9089,26 @@ function lo() {
     return p;
   }, Jt = g, Jt;
 }
-var Zt, fn;
-function fo() {
-  if (fn) return Zt;
-  fn = 1;
-  var _ = function(g, l, r) {
+var Zt, hn;
+function uo() {
+  if (hn) return Zt;
+  hn = 1;
+  var k = function(g, l, r) {
     this.type = "TripletElem", this.anchor1 = l, this.number = g, this.durationClass = ("d" + Math.round(l.parent.durationClass * 1e3) / 1e3).replace(/\./, "-"), this.middleElems = [], this.flatBeams = r.flatBeams;
   };
-  return _.prototype.isClosed = function() {
+  return k.prototype.isClosed = function() {
     return !!this.anchor2;
-  }, _.prototype.middleNote = function(m) {
+  }, k.prototype.middleNote = function(m) {
     this.middleElems.push(m);
-  }, _.prototype.setCloseAnchor = function(m) {
+  }, k.prototype.setCloseAnchor = function(m) {
     this.anchor2 = m, (!this.anchor1.parent.beam || this.anchor1.stemDir === "up") && (this.endingHeightAbove = 4);
-  }, Zt = _, Zt;
+  }, Zt = k, Zt;
 }
-var e0, hn;
-function ho() {
-  if (hn) return e0;
-  hn = 1;
-  function _(g) {
+var e0, un;
+function po() {
+  if (un) return e0;
+  un = 1;
+  function k(g) {
     switch (g) {
       case "B#":
         return "H#";
@@ -9124,50 +9124,50 @@ function ho() {
     return g;
   }
   function m(g, l, r) {
-    var o = g.split(`
+    var s = g.split(`
 `);
-    for (let a = 0; a < o.length; a++) {
-      let p = o[a].match(/^([ABCDEFG][♯♭]?)?([^\/]+)?(\/([ABCDEFG][#b♯♭]?))?/);
+    for (let a = 0; a < s.length; a++) {
+      let p = s[a].match(/^([ABCDEFG][♯♭]?)?([^\/]+)?(\/([ABCDEFG][#b♯♭]?))?/);
       if (!p)
         continue;
       let u = p[1] || "", d = p[2] || "", f = p[4] || "";
-      r && (u = _(u), f = _(f));
+      r && (u = k(u), f = k(f));
       const i = l ? "" : "", n = f ? "/" + f : "";
-      o[a] = [u, d, n].join(i);
+      s[a] = [u, d, n].join(i);
     }
-    return o.join(`
+    return s.join(`
 `);
   }
   return e0 = m, e0;
 }
-var t0, un;
-function uo() {
-  if (un) return t0;
-  un = 1;
-  var _ = Te(), m = Ce();
-  const g = ho();
-  var l = function(o, a, s, p, u, d, f, i) {
-    for (var n = 0; n < s.chord.length; n++) {
-      var t = s.chord[n].position, e = s.chord[n].rel_position, c = t === "left" || t === "right" || t === "below" || t === "above" || !!e, v, h;
+var t0, dn;
+function vo() {
+  if (dn) return t0;
+  dn = 1;
+  var k = Te(), m = Ce();
+  const g = po();
+  var l = function(s, a, o, p, u, d, f, i) {
+    for (var n = 0; n < o.chord.length; n++) {
+      var t = o.chord[n].position, e = o.chord[n].rel_position, c = t === "left" || t === "right" || t === "below" || t === "above" || !!e, v, h;
       c ? (v = "annotationfont", h = "abcjs-annotation") : (v = "gchordfont", h = "abcjs-chord");
-      var y = o.attr(v, h), w = s.chord[n].name, A;
+      var y = s.attr(v, h), w = o.chord[n].name, A;
       if (typeof w == "string")
-        A = r(w, t, e, c, v, h, y, o, a, s, p, u, d, f, i), p = A.roomTaken, u = A.roomTakenRight;
+        A = r(w, t, e, c, v, h, y, s, a, o, p, u, d, f, i), p = A.roomTaken, u = A.roomTakenRight;
       else
         for (var P = 0; P < w.length; P++)
-          A = r(w[P].text, t, e, c, v, h, y, o, a, s, p, u, d, f, i), p = A.roomTaken, u = A.roomTakenRight;
+          A = r(w[P].text, t, e, c, v, h, y, s, a, o, p, u, d, f, i), p = A.roomTaken, u = A.roomTakenRight;
     }
     return { roomTaken: p, roomTakenRight: u };
   };
-  function r(o, a, s, p, u, d, f, i, n, t, e, c, v, h, y) {
-    for (var w = o.split(`
+  function r(s, a, o, p, u, d, f, i, n, t, e, c, v, h, y) {
+    for (var w = s.split(`
 `), A = w.length - 1; A >= 0; A--) {
       var P = w[A], N = 0, T;
       p || (P = g(P, h, y));
       var q = i.calc(P, u, d), I = q.width, C = q.height / m.STEP;
       switch (a) {
         case "left":
-          e += I + 7, N = -e, T = t.averagepitch, n.addExtra(new _(P, N, I + 4, T, {
+          e += I + 7, N = -e, T = t.averagepitch, n.addExtra(new k(P, N, I + 4, T, {
             type: "text",
             height: C,
             dim: f,
@@ -9175,7 +9175,7 @@ function uo() {
           }));
           break;
         case "right":
-          c += 4, N = c, T = t.averagepitch, n.addRight(new _(P, N, I + 4, T, {
+          c += 4, N = c, T = t.averagepitch, n.addRight(new k(P, N, I + 4, T, {
             type: "text",
             height: C,
             dim: f,
@@ -9183,7 +9183,7 @@ function uo() {
           }));
           break;
         case "below":
-          n.addRight(new _(P, 0, 0, void 0, {
+          n.addRight(new k(P, 0, 0, void 0, {
             type: "text",
             position: "below",
             height: C,
@@ -9192,7 +9192,7 @@ function uo() {
           }));
           break;
         case "above":
-          n.addRight(new _(P, 0, 0, void 0, {
+          n.addRight(new k(P, 0, 0, void 0, {
             type: "text",
             position: "above",
             height: C,
@@ -9201,9 +9201,9 @@ function uo() {
           }));
           break;
         default:
-          if (s) {
-            var B = s.y + 3 * m.STEP;
-            n.addRight(new _(P, N + s.x, 0, t.minpitch + B / m.STEP, {
+          if (o) {
+            var B = o.y + 3 * m.STEP;
+            n.addRight(new k(P, N + o.x, 0, t.minpitch + B / m.STEP, {
               position: "relative",
               type: "text",
               height: C,
@@ -9211,7 +9211,7 @@ function uo() {
             }));
           } else {
             var R = "above";
-            t.positioning && t.positioning.chordPosition && (R = t.positioning.chordPosition), R !== "hidden" && n.addCentered(new _(P, v / 2, I, void 0, {
+            t.positioning && t.positioning.chordPosition && (R = t.positioning.chordPosition), R !== "hidden" && n.addCentered(new k(P, v / 2, I, void 0, {
               type: "chord",
               position: R,
               height: C,
@@ -9225,13 +9225,13 @@ function uo() {
   }
   return t0 = l, t0;
 }
-var r0, dn;
-function po() {
-  if (dn) return r0;
-  dn = 1;
-  var _ = De(), m = Ks(), g = Qs(), l = Js(), r = Zs(), o = eo(), a = to(), s = io(), p = so(), u = Ne(), d = Te(), f = Ce(), i = co(), n = lo(), t = cs(), e = fo(), c = rs(), v = uo(), h = es(), y = _e(), w = function(S) {
-    var k = 0;
-    return S.duration && (k = S.duration), k;
+var r0, pn;
+function go() {
+  if (pn) return r0;
+  pn = 1;
+  var k = De(), m = Js(), g = Zs(), l = eo(), r = to(), s = ro(), a = ao(), o = oo(), p = co(), u = Ne(), d = Te(), f = Ce(), i = fo(), n = ho(), t = ls(), e = uo(), c = as(), v = vo(), h = ts(), y = _e(), w = function(S) {
+    var _ = 0;
+    return S.duration && (_ = S.duration), _;
   }, A = !1, P = {
     rest: { 0: "rests.whole", 1: "rests.half", 2: "rests.quarter", 3: "rests.8th", 4: "rests.16th", 5: "rests.32nd", 6: "rests.64th", 7: "rests.128th", multi: "rests.multimeasure" },
     note: { "-1": "noteheads.dbl", 0: "noteheads.whole", 1: "noteheads.half", 2: "noteheads.quarter", 3: "noteheads.quarter", 4: "noteheads.quarter", 5: "noteheads.quarter", 6: "noteheads.quarter", 7: "noteheads.quarter", nostem: "noteheads.quarter" },
@@ -9241,66 +9241,66 @@ function po() {
     triangle: { "-1": "noteheads.triangle.quarter", 0: "noteheads.triangle.quarter", 1: "noteheads.triangle.quarter", 2: "noteheads.triangle.quarter", 3: "noteheads.triangle.quarter", 4: "noteheads.triangle.quarter", 5: "noteheads.triangle.quarter", 6: "noteheads.triangle.quarter", 7: "noteheads.triangle.quarter", nostem: "noteheads.triangle.quarter" },
     uflags: { 3: "flags.u8th", 4: "flags.u16th", 5: "flags.u32nd", 6: "flags.u64th" },
     dflags: { 3: "flags.d8th", 4: "flags.d16th", 5: "flags.d32nd", 6: "flags.d64th" }
-  }, N = function(S, k, M) {
-    this.decoration = new s(), this.getTextSize = S, this.tuneNumber = k, this.isBagpipes = M.bagpipes, this.flatBeams = M.flatbeams, this.graceSlurs = M.graceSlurs, this.percmap = M.percmap, this.initialClef = M.initialClef, this.jazzchords = !!M.jazzchords, this.accentAbove = !!M.accentAbove, this.germanAlphabet = !!M.germanAlphabet, this.reset();
+  }, N = function(S, _, M) {
+    this.decoration = new o(), this.getTextSize = S, this.tuneNumber = _, this.isBagpipes = M.bagpipes, this.flatBeams = M.flatbeams, this.graceSlurs = M.graceSlurs, this.percmap = M.percmap, this.initialClef = M.initialClef, this.jazzchords = !!M.jazzchords, this.accentAbove = !!M.accentAbove, this.germanAlphabet = !!M.germanAlphabet, this.reset();
   };
   N.prototype.reset = function() {
     this.slurs = {}, this.ties = [], this.voiceScale = 1, this.voiceColor = void 0, this.slursbyvoice = {}, this.tiesbyvoice = {}, this.endingsbyvoice = {}, this.scaleByVoice = {}, this.colorByVoice = {}, this.tripletmultiplier = 1, this.abcline = void 0, this.accidentalSlot = void 0, this.accidentalshiftx = void 0, this.dotshiftx = void 0, this.hasVocals = !1, this.minY = void 0, this.partstartelem = void 0, this.startlimitelem = void 0, this.stemdir = void 0;
   }, N.prototype.setStemHeight = function(S) {
     this.stemHeight = Math.round(S * 10 / f.STEP) / 10;
-  }, N.prototype.getCurrentVoiceId = function(S, k) {
-    return "s" + S + "v" + k;
-  }, N.prototype.pushCrossLineElems = function(S, k) {
-    this.slursbyvoice[this.getCurrentVoiceId(S, k)] = this.slurs, this.tiesbyvoice[this.getCurrentVoiceId(S, k)] = this.ties, this.endingsbyvoice[this.getCurrentVoiceId(S, k)] = this.partstartelem, this.scaleByVoice[this.getCurrentVoiceId(S, k)] = this.voiceScale, this.voiceColor && (this.colorByVoice[this.getCurrentVoiceId(S, k)] = this.voiceColor);
-  }, N.prototype.popCrossLineElems = function(S, k) {
-    this.slurs = this.slursbyvoice[this.getCurrentVoiceId(S, k)] || {}, this.ties = this.tiesbyvoice[this.getCurrentVoiceId(S, k)] || [], this.partstartelem = this.endingsbyvoice[this.getCurrentVoiceId(S, k)], this.voiceScale = this.scaleByVoice[this.getCurrentVoiceId(S, k)], this.voiceScale === void 0 && (this.voiceScale = 1), this.voiceColor = this.colorByVoice[this.getCurrentVoiceId(S, k)];
+  }, N.prototype.getCurrentVoiceId = function(S, _) {
+    return "s" + S + "v" + _;
+  }, N.prototype.pushCrossLineElems = function(S, _) {
+    this.slursbyvoice[this.getCurrentVoiceId(S, _)] = this.slurs, this.tiesbyvoice[this.getCurrentVoiceId(S, _)] = this.ties, this.endingsbyvoice[this.getCurrentVoiceId(S, _)] = this.partstartelem, this.scaleByVoice[this.getCurrentVoiceId(S, _)] = this.voiceScale, this.voiceColor && (this.colorByVoice[this.getCurrentVoiceId(S, _)] = this.voiceColor);
+  }, N.prototype.popCrossLineElems = function(S, _) {
+    this.slurs = this.slursbyvoice[this.getCurrentVoiceId(S, _)] || {}, this.ties = this.tiesbyvoice[this.getCurrentVoiceId(S, _)] || [], this.partstartelem = this.endingsbyvoice[this.getCurrentVoiceId(S, _)], this.voiceScale = this.scaleByVoice[this.getCurrentVoiceId(S, _)], this.voiceScale === void 0 && (this.voiceScale = 1), this.voiceColor = this.colorByVoice[this.getCurrentVoiceId(S, _)];
   }, N.prototype.containsLyrics = function(S) {
-    for (var k = 0; k < S.length; k++)
-      for (var M = 0; M < S[k].voices.length; M++)
-        for (var F = 0; F < S[k].voices[M].length; F++) {
-          var L = S[k].voices[M][F];
+    for (var _ = 0; _ < S.length; _++)
+      for (var M = 0; M < S[_].voices.length; M++)
+        for (var F = 0; F < S[_].voices[M].length; F++) {
+          var L = S[_].voices[M][F];
           if (L.lyric) {
             (!L.positioning || L.positioning.vocalPosition === "below") && (this.hasVocals = !0);
             return;
           }
         }
-  }, N.prototype.createABCLine = function(S, k, M) {
+  }, N.prototype.createABCLine = function(S, _, M) {
     this.minY = 2, this.containsLyrics(S);
     var F = new i(this.getTextSize);
     this.tempoSet = !1;
     for (var L = 0; L < S.length; L++)
-      A && this.restoreState(), A = !1, this.createABCStaff(F, S[L], k, L, M);
+      A && this.restoreState(), A = !1, this.createABCStaff(F, S[L], _, L, M);
     return F;
-  }, N.prototype.createABCStaff = function(S, k, M, F, L) {
-    S.getTextSize.updateFonts(k);
-    for (var b = 0; b < k.voices.length; b++) {
-      var x = new c(b, k.voices.length);
-      b === 0 ? (x.barfrom = k.connectBarLines === "start" || k.connectBarLines === "continue", x.barto = k.connectBarLines === "continue" || k.connectBarLines === "end") : x.duplicate = !0, k.title && k.title[b] && (x.header = k.title[b].replace(/\\n/g, `
-`), x.headerPosition = 6 + S.getTextSize.baselineToCenter(x.header, "voicefont", "staff-extra voice-name", b, k.voices.length) / f.STEP), k.clef && k.clef.type === "perc" && (x.isPercussion = !0);
-      var E = (!this.initialClef || L === 0) && l(k.clef, this.tuneNumber);
-      E && (b === 0 && k.barNumber && this.addMeasureNumber(k.barNumber, E), x.addChild(E), this.startlimitelem = E);
-      var D = r(k.key, this.tuneNumber);
-      if (D && (x.addChild(D), this.startlimitelem = D), k.meter) {
-        k.meter.type === "specified" ? this.measureLength = k.meter.value[0].num / k.meter.value[0].den : this.measureLength = 1;
-        var O = a(k.meter, this.tuneNumber);
+  }, N.prototype.createABCStaff = function(S, _, M, F, L) {
+    S.getTextSize.updateFonts(_);
+    for (var b = 0; b < _.voices.length; b++) {
+      var x = new c(b, _.voices.length);
+      b === 0 ? (x.barfrom = _.connectBarLines === "start" || _.connectBarLines === "continue", x.barto = _.connectBarLines === "continue" || _.connectBarLines === "end") : x.duplicate = !0, _.title && _.title[b] && (x.header = _.title[b].replace(/\\n/g, `
+`), x.headerPosition = 6 + S.getTextSize.baselineToCenter(x.header, "voicefont", "staff-extra voice-name", b, _.voices.length) / f.STEP), _.clef && _.clef.type === "perc" && (x.isPercussion = !0);
+      var E = (!this.initialClef || L === 0) && l(_.clef, this.tuneNumber);
+      E && (b === 0 && _.barNumber && this.addMeasureNumber(_.barNumber, E), x.addChild(E), this.startlimitelem = E);
+      var D = r(_.key, this.tuneNumber);
+      if (D && (x.addChild(D), this.startlimitelem = D), _.meter) {
+        _.meter.type === "specified" ? this.measureLength = _.meter.value[0].num / _.meter.value[0].den : this.measureLength = 1;
+        var O = a(_.meter, this.tuneNumber);
         x.addChild(O), this.startlimitelem = O;
       }
       x.duplicate && (x.children = []);
-      var z = k.clef.stafflines || k.clef.stafflines === 0 ? k.clef.stafflines : 5;
+      var z = _.clef.stafflines || _.clef.stafflines === 0 ? _.clef.stafflines : 5;
       S.addVoice(x, F, z);
       var H = z === 1;
-      this.createABCVoice(k.voices[b], M, F, b, H, x), S.setStaffLimits(x), b === 0 && (k.brace === "start" || !S.brace && k.brace ? (S.brace || (S.brace = []), S.brace.push(new g(x, "brace"))) : k.brace === "end" && S.brace ? S.brace[S.brace.length - 1].setBottomStaff(x) : k.brace === "continue" && S.brace && S.brace[S.brace.length - 1].continuing(x), k.bracket === "start" || !S.bracket && k.bracket ? (S.bracket || (S.bracket = []), S.bracket.push(new g(x, "bracket"))) : k.bracket === "end" && S.bracket ? S.bracket[S.bracket.length - 1].setBottomStaff(x) : k.bracket === "continue" && S.bracket && S.bracket[S.bracket.length - 1].continuing(x));
+      this.createABCVoice(_.voices[b], M, F, b, H, x), S.setStaffLimits(x), b === 0 && (_.brace === "start" || !S.brace && _.brace ? (S.brace || (S.brace = []), S.brace.push(new g(x, "brace"))) : _.brace === "end" && S.brace ? S.brace[S.brace.length - 1].setBottomStaff(x) : _.brace === "continue" && S.brace && S.brace[S.brace.length - 1].continuing(x), _.bracket === "start" || !S.bracket && _.bracket ? (S.bracket || (S.bracket = []), S.bracket.push(new g(x, "bracket"))) : _.bracket === "end" && S.bracket ? S.bracket[S.bracket.length - 1].setBottomStaff(x) : _.bracket === "continue" && S.bracket && S.bracket[S.bracket.length - 1].continuing(x));
     }
   };
-  function T(S, k) {
-    var M = S[k];
+  function T(S, _) {
+    var M = S[_];
     if (M.el_type !== "note" || !M.startBeam || M.endBeam)
       return { count: 1, elem: M };
-    for (var F = []; k < S.length && S[k].el_type === "note" && (F.push(S[k]), !S[k].endBeam); )
-      k++;
+    for (var F = []; _ < S.length && S[_].el_type === "note" && (F.push(S[_]), !S[_].endBeam); )
+      _++;
     return { count: F.length, elem: F };
   }
-  N.prototype.createABCVoice = function(S, k, M, F, L, b) {
+  N.prototype.createABCVoice = function(S, _, M, F, L, b) {
     this.popCrossLineElems(M, F), this.stemdir = this.isBagpipes ? "down" : null, this.abcline = S, this.partstartelem && (this.partstartelem = new p("", null, null), b.addOther(this.partstartelem));
     var x = b.voicetotal < 2 ? -1 : b.voicenumber;
     for (var E in this.slurs)
@@ -9313,10 +9313,10 @@ function po() {
       var $ = T(this.abcline, H), Q = this.createABCElement(z, L, b, $.elem);
       if (Q)
         for (D = 0; D < Q.length; D++) {
-          if (!this.tempoSet && k && !k.suppress) {
+          if (!this.tempoSet && _ && !_.suppress) {
             this.tempoSet = !0;
-            var W = new _(k, 0, 0, "tempo", this.tuneNumber, {});
-            W.addFixedX(new n(k, this.tuneNumber, o)), b.addChild(W);
+            var W = new k(_, 0, 0, "tempo", this.tuneNumber, {});
+            W.addFixedX(new n(_, this.tuneNumber, s)), b.addChild(W);
           }
           b.addChild(Q[D]);
         }
@@ -9327,14 +9327,14 @@ function po() {
     this.tiesSave = y.cloneArray(this.ties), this.slursSave = y.cloneHashOfHash(this.slurs), this.slursbyvoiceSave = y.cloneHashOfHash(this.slursbyvoice), this.tiesbyvoiceSave = y.cloneHashOfArrayOfHash(this.tiesbyvoice);
   }, N.prototype.restoreState = function() {
     this.ties = y.cloneArray(this.tiesSave), this.slurs = y.cloneHashOfHash(this.slursSave), this.slursbyvoice = y.cloneHashOfHash(this.slursbyvoiceSave), this.tiesbyvoice = y.cloneHashOfArrayOfHash(this.tiesbyvoiceSave);
-  }, N.prototype.createABCElement = function(S, k, M, F) {
+  }, N.prototype.createABCElement = function(S, _, M, F) {
     var L = [];
     switch (F.el_type) {
       case void 0:
-        L = this.createBeam(k, M, F);
+        L = this.createBeam(_, M, F);
         break;
       case "note":
-        L[0] = this.createNote(F, !1, k, M), this.triplet && this.triplet.isClosed() && (M.addOther(this.triplet), this.triplet = null, this.tripletmultiplier = 1);
+        L[0] = this.createNote(F, !1, _, M), this.triplet && this.triplet.isClosed() && (M.addOther(this.triplet), this.triplet = null, this.tripletmultiplier = 1);
         break;
       case "bar":
         L[0] = this.createBarLine(M, F, S), M.duplicate && L.length > 0 && (L[0].invisible = !0);
@@ -9354,12 +9354,12 @@ function po() {
         this.stemdir = F.direction === "auto" ? void 0 : F.direction;
         break;
       case "part":
-        var x = new _(F, 0, 0, "part", this.tuneNumber), E = this.getTextSize.calc(F.title, "partsfont", "part");
+        var x = new k(F, 0, 0, "part", this.tuneNumber), E = this.getTextSize.calc(F.title, "partsfont", "part");
         x.addFixedX(new d(F.title, 0, 0, void 0, { type: "part", height: E.height / f.STEP })), L[0] = x;
         break;
       case "tempo":
-        var D = new _(F, 0, 0, "tempo", this.tuneNumber);
-        F.suppress || D.addFixedX(new n(F, this.tuneNumber, o)), L[0] = D;
+        var D = new k(F, 0, 0, "tempo", this.tuneNumber);
+        F.suppress || D.addFixedX(new n(F, this.tuneNumber, s)), L[0] = D;
         break;
       case "style":
         F.head === "normal" ? delete this.style : this.style = F.head;
@@ -9376,7 +9376,7 @@ function po() {
         this.voiceColor = F.color, M.color = this.voiceColor;
         break;
       default:
-        var O = new _(F, 0, 0, "unsupported", this.tuneNumber);
+        var O = new k(F, 0, 0, "unsupported", this.tuneNumber);
         O.addFixed(new d("element type " + F.el_type, 0, 0, void 0, { type: "debug" })), L[0] = O;
     }
     return L;
@@ -9384,12 +9384,12 @@ function po() {
   function q(S) {
     if (S.pitches) {
       I(S);
-      for (var k = 0, M = 0; M < S.pitches.length; M++)
-        k += S.pitches[M].verticalPos;
-      S.averagepitch = k / S.pitches.length, S.minpitch = S.pitches[0].verticalPos, S.maxpitch = S.pitches[S.pitches.length - 1].verticalPos;
+      for (var _ = 0, M = 0; M < S.pitches.length; M++)
+        _ += S.pitches[M].verticalPos;
+      S.averagepitch = _ / S.pitches.length, S.minpitch = S.pitches[0].verticalPos, S.maxpitch = S.pitches[S.pitches.length - 1].verticalPos;
     }
   }
-  N.prototype.createBeam = function(S, k, M) {
+  N.prototype.createBeam = function(S, _, M) {
     var F = [], L = new m(this.stemHeight * this.voiceScale, this.stemdir, this.flatBeams, M[0]);
     A && L.setHint();
     for (var b = 0; b < M.length; b++)
@@ -9397,33 +9397,33 @@ function po() {
     L.setStemDirection();
     var x = this.stemdir;
     for (this.stemdir = L.stemsUp ? "up" : "down", b = 0; b < M.length; b++) {
-      var E = M[b], D = this.createNote(E, !0, S, k);
-      F.push(D), L.add(D), this.triplet && this.triplet.isClosed() && (k.addOther(this.triplet), this.triplet = null, this.tripletmultiplier = 1);
+      var E = M[b], D = this.createNote(E, !0, S, _);
+      F.push(D), L.add(D), this.triplet && this.triplet.isClosed() && (_.addOther(this.triplet), this.triplet = null, this.tripletmultiplier = 1);
     }
-    return L.calcDir(), k.addBeam(L), this.stemdir = x, F;
+    return L.calcDir(), _.addBeam(L), this.stemdir = x, F;
   };
   var I = function(S) {
-    var k;
+    var _;
     do {
-      k = !0;
+      _ = !0;
       for (var M = 0; M < S.pitches.length - 1; M++)
         if (S.pitches[M].pitch > S.pitches[M + 1].pitch) {
-          k = !1;
+          _ = !1;
           var F = S.pitches[M];
           S.pitches[M] = S.pitches[M + 1], S.pitches[M + 1] = F;
         }
-    } while (!k);
-  }, C = function(S, k, M, F, L, b, x, E, D) {
+    } while (!_);
+  }, C = function(S, _, M, F, L, b, x, E, D) {
     for (var O = M; O > 11; O--)
       O % 2 === 0 && !F && S.addFixed(new d(null, E, (L + 4) * D, O, { type: "ledger" }));
-    for (O = k; O < 1; O++)
+    for (O = _; O < 1; O++)
       O % 2 === 0 && !F && S.addFixed(new d(null, E, (L + 4) * D, O, { type: "ledger" }));
     for (O = 0; O < b.length; O++) {
       var z = L;
       x === "down" && (z = -z), S.addFixed(new d(null, z + E, (L + 4) * D, b[O], { type: "ledger" }));
     }
   };
-  N.prototype.addGraceNotes = function(S, k, M, F, L, b, x) {
+  N.prototype.addGraceNotes = function(S, _, M, F, L, b, x) {
     var E = 0.6, D = 3.5 / 5;
     L = Math.round(L * D);
     var O = null, z;
@@ -9434,7 +9434,7 @@ function po() {
     for (H = 0; H < S.gracenotes.length; H++) {
       var Q = S.gracenotes[H].verticalPos;
       z = O ? null : P.uflags[b ? 5 : 3];
-      var W = [], ne = o(
+      var W = [], ne = s(
         M,
         "noteheads.quarter",
         S.gracenotes[H],
@@ -9442,7 +9442,7 @@ function po() {
       );
       ne.notehead.highestVert = ne.notehead.pitch + L;
       var J = ne.notehead;
-      if (this.addSlursAndTies(M, S.gracenotes[H], J, k, "up", !0), M.addExtra(J), S.gracenotes[H].acciaccatura) {
+      if (this.addSlursAndTies(M, S.gracenotes[H], J, _, "up", !0), M.addExtra(J), S.gracenotes[H].acciaccatura) {
         var te = S.gracenotes[H].verticalPos + 7 * E, U = O ? 5 : 6;
         M.addRight(new d("flags.ugrace", -$[H] + U, 0, te, { scalex: E, scaley: E }));
       }
@@ -9460,33 +9460,33 @@ function po() {
       }
       C(M, Q, Q, !1, u.getSymbolWidth("noteheads.quarter"), [], !0, J.dx - 1, 0.6);
       var be = S.rest && (S.rest.type === "spacer" || S.rest.type === "invisible");
-      H === 0 && !b && this.graceSlurs && !be && k.addOther(new t({ anchor1: J, anchor2: F, isGrace: !0 }));
+      H === 0 && !b && this.graceSlurs && !be && _.addOther(new t({ anchor1: J, anchor2: F, isGrace: !0 }));
     }
-    return O && (O.calcDir(), k.addBeam(O)), x;
+    return O && (O.calcDir(), _.addBeam(O)), x;
   };
-  function B(S, k, M, F, L, b, x, E, D) {
+  function B(S, _, M, F, L, b, x, E, D) {
     var O, z = 7, H, $, Q;
-    switch (L && (b === "down" && (z = 3), b === "up" && (z = 11)), x && (M < 0.5 || M < 1 ? z = 7 : z = 5), k.rest.type) {
+    switch (L && (b === "down" && (z = 3), b === "up" && (z = 11)), x && (M < 0.5 || M < 1 ? z = 7 : z = 5), _.rest.type) {
       case "whole":
-        O = P.rest[0], k.averagepitch = z, k.minpitch = z, k.maxpitch = z, F = 0;
+        O = P.rest[0], _.averagepitch = z, _.minpitch = z, _.maxpitch = z, F = 0;
         break;
       case "rest":
-        k.style === "rhythm" ? O = P.rhythm[-E] : O = P.rest[-E], k.averagepitch = z, k.minpitch = z, k.maxpitch = z;
+        _.style === "rhythm" ? O = P.rhythm[-E] : O = P.rest[-E], _.averagepitch = z, _.minpitch = z, _.maxpitch = z;
         break;
       case "invisible":
       case "invisible-multimeasure":
       case "spacer":
-        O = "", k.averagepitch = z, k.minpitch = z, k.maxpitch = z;
+        O = "", _.averagepitch = z, _.minpitch = z, _.maxpitch = z;
         break;
       case "multimeasure":
-        O = P.rest.multi, k.averagepitch = z, k.minpitch = z, k.maxpitch = z, F = 0;
+        O = P.rest.multi, _.averagepitch = z, _.minpitch = z, _.maxpitch = z, F = 0;
         var W = u.getSymbolWidth(O);
         S.addHead(new d(O, W, W * 2, 7));
-        var ne = new d("" + k.rest.text, W, W, 16, { type: "multimeasure-text" });
+        var ne = new d("" + _.rest.text, W, W, 16, { type: "multimeasure-text" });
         S.addExtra(ne);
     }
-    if (k.rest.type.indexOf("multimeasure") < 0 && k.rest.type !== "invisible") {
-      var J = o(
+    if (_.rest.type.indexOf("multimeasure") < 0 && _.rest.type !== "invisible") {
+      var J = s(
         S,
         O,
         { verticalPos: z },
@@ -9496,91 +9496,91 @@ function po() {
     }
     return { noteHead: H, roomTaken: $, roomTakenRight: Q };
   }
-  function R(S, k) {
+  function R(S, _) {
     for (var M = 0; M < S.length; M++)
-      if (JSON.stringify(S[M]) === JSON.stringify(k))
+      if (JSON.stringify(S[M]) === JSON.stringify(_))
         return;
-    S.push(k);
+    S.push(_);
   }
-  return N.prototype.addNoteToAbcElement = function(S, k, M, F, L, b, x, E, D) {
-    var O = 0, z, H = 0, $ = 0, Q, W, ne = [], J = [], te = 0, U = k.averagepitch >= 6 ? "down" : "up";
-    F && (U = F), L = k.style ? k.style : L, (!L || L === "normal") && (L = "note");
+  return N.prototype.addNoteToAbcElement = function(S, _, M, F, L, b, x, E, D) {
+    var O = 0, z, H = 0, $ = 0, Q, W, ne = [], J = [], te = 0, U = _.averagepitch >= 6 ? "down" : "up";
+    F && (U = F), L = _.style ? _.style : L, (!L || L === "normal") && (L = "note");
     var re;
     b ? re = P[L].nostem : re = P[L][-x], re || console.log("noteSymbol:", L, x, b);
     var V;
-    for (V = U === "down" ? k.pitches.length - 2 : 1; U === "down" ? V >= 0 : V < k.pitches.length; V = U === "down" ? V - 1 : V + 1) {
-      var oe = k.pitches[U === "down" ? V + 1 : V - 1], ce = k.pitches[V], ue = U === "down" ? oe.pitch - ce.pitch : ce.pitch - oe.pitch;
+    for (V = U === "down" ? _.pitches.length - 2 : 1; U === "down" ? V >= 0 : V < _.pitches.length; V = U === "down" ? V - 1 : V + 1) {
+      var oe = _.pitches[U === "down" ? V + 1 : V - 1], ce = _.pitches[V], ue = U === "down" ? oe.pitch - ce.pitch : ce.pitch - oe.pitch;
       ue <= 1 && !oe.printer_shift && (ce.printer_shift = ue ? "different" : "same", (ce.verticalPos > 11 || ce.verticalPos < 1) && ne.push(ce.verticalPos - ce.verticalPos % 2), U === "down" ? H = u.getSymbolWidth(re) + 2 : O = u.getSymbolWidth(re) + 2);
     }
-    var fe = k.pitches.length;
-    for (V = 0; V < k.pitches.length; V++) {
+    var fe = _.pitches.length;
+    for (V = 0; V < _.pitches.length; V++) {
       if (!E) {
         var be;
         U === "down" && V !== 0 || U === "up" && V !== fe - 1 ? be = null : be = P[U === "down" ? "dflags" : "uflags"][-x];
       }
       var ge;
-      if (k.pitches[V].style)
-        ge = P[k.pitches[V].style][-x];
+      if (_.pitches[V].style)
+        ge = P[_.pitches[V].style][-x];
       else if (D.isPercussion && this.percmap) {
         ge = re;
-        var ye = this.percmap[h(k.pitches[V])];
+        var ye = this.percmap[h(_.pitches[V])];
         ye && ye.noteHead && P[ye.noteHead] && (ge = P[ye.noteHead][-x]);
       } else
         ge = re;
-      k.pitches[V].highestVert = k.pitches[V].verticalPos;
+      _.pitches[V].highestVert = _.pitches[V].verticalPos;
       var Y = (F === "up" || U === "up") && V === 0, j = (F === "down" || U === "down") && V === fe - 1;
       if (Y || j) {
-        if ((k.startSlur || fe === 1) && (k.pitches[V].highestVert = k.pitches[fe - 1].verticalPos, w(k) < 1 && (F === "up" || U === "up") && (k.pitches[V].highestVert += 6)), k.startSlur)
-          for (k.pitches[V].startSlur || (k.pitches[V].startSlur = []), W = 0; W < k.startSlur.length; W++)
-            R(k.pitches[V].startSlur, k.startSlur[W]);
-        if (k.endSlur)
-          for (k.pitches[V].highestVert = k.pitches[fe - 1].verticalPos, w(k) < 1 && (F === "up" || U === "up") && (k.pitches[V].highestVert += 6), k.pitches[V].endSlur || (k.pitches[V].endSlur = []), W = 0; W < k.endSlur.length; W++)
-            R(k.pitches[V].endSlur, k.endSlur[W]);
+        if ((_.startSlur || fe === 1) && (_.pitches[V].highestVert = _.pitches[fe - 1].verticalPos, w(_) < 1 && (F === "up" || U === "up") && (_.pitches[V].highestVert += 6)), _.startSlur)
+          for (_.pitches[V].startSlur || (_.pitches[V].startSlur = []), W = 0; W < _.startSlur.length; W++)
+            R(_.pitches[V].startSlur, _.startSlur[W]);
+        if (_.endSlur)
+          for (_.pitches[V].highestVert = _.pitches[fe - 1].verticalPos, w(_) < 1 && (F === "up" || U === "up") && (_.pitches[V].highestVert += 6), _.pitches[V].endSlur || (_.pitches[V].endSlur = []), W = 0; W < _.endSlur.length; W++)
+            R(_.pitches[V].endSlur, _.endSlur[W]);
       }
-      var G = !E && x <= -1, X = fe > 1 ? V + 1 : null, K = o(
+      var G = !E && x <= -1, X = fe > 1 ? V + 1 : null, K = s(
         S,
         ge,
-        k.pitches[V],
+        _.pitches[V],
         { dir: U, extrax: -H, flag: be, dot: M, dotshiftx: O, scale: this.voiceScale, accidentalSlot: J, shouldExtendStem: !F, printAccidentals: !D.isPercussion, chordPos: X }
       );
-      te = Math.max(u.getSymbolWidth(ge), te), S.extraw -= K.extraLeft, z = K.notehead, z && (this.addSlursAndTies(S, k.pitches[V], z, D, G ? U : null, !1), k.gracenotes && k.gracenotes.length > 0 && (z.bottom = z.bottom - 1), S.addHead(z)), H += K.accidentalshiftx, $ = Math.max($, K.dotshiftx);
+      te = Math.max(u.getSymbolWidth(ge), te), S.extraw -= K.extraLeft, z = K.notehead, z && (this.addSlursAndTies(S, _.pitches[V], z, D, G ? U : null, !1), _.gracenotes && _.gracenotes.length > 0 && (z.bottom = z.bottom - 1), S.addHead(z)), H += K.accidentalshiftx, $ = Math.max($, K.dotshiftx);
     }
     if (G) {
-      var Z = Math.round(70 * this.voiceScale) / 10, ae = U === "down" ? k.minpitch - Z : k.minpitch + 1 / 3;
+      var Z = Math.round(70 * this.voiceScale) / 10, ae = U === "down" ? _.minpitch - Z : _.minpitch + 1 / 3;
       ae > 6 && !F && (ae = 6);
-      var le = U === "down" ? k.maxpitch - 1 / 3 : k.maxpitch + Z;
+      var le = U === "down" ? _.maxpitch - 1 / 3 : _.maxpitch + Z;
       le < 6 && !F && (le = 6);
       var ee = U === "down" || S.heads.length === 0 ? 0 : S.heads[0].w, se = U === "down" ? 1 : -1;
       z && z.c === "noteheads.slash.quarter" && (U === "down" ? le -= 1 : ae += 1), z && z.c === "noteheads.triangle.quarter" && (U === "down" ? le -= 0.7 : ae -= 1.2), S.addRight(new d(null, ee, 0, ae, { type: "stem", pitch2: le, linewidth: se, bottom: ae - 1 })), Q = Math.min(ae, le);
     }
     return { noteHead: z, roomTaken: H, roomTakenRight: $, min: Q, additionalLedgers: ne, dir: U, symbolWidth: te };
-  }, N.prototype.addLyric = function(S, k, M) {
+  }, N.prototype.addLyric = function(S, _, M) {
     var F = "";
-    k.lyric.forEach(function(x) {
+    _.lyric.forEach(function(x) {
       var E = x.divider === " " ? "" : x.divider;
       F += x.syllable + E + `
 `;
     });
-    var L = this.getTextSize.calc(F, "vocalfont", "lyric"), b = k.positioning ? k.positioning.vocalPosition : "below";
+    var L = this.getTextSize.calc(F, "vocalfont", "lyric"), b = _.positioning ? _.positioning.vocalPosition : "below";
     S.addCentered(new d(F, 0, L.width, void 0, { type: "lyric", position: b, height: L.height / f.STEP, dim: this.getTextSize.attr("vocalfont", "lyric"), voiceNumber: M }));
-  }, N.prototype.createNote = function(S, k, M, F) {
+  }, N.prototype.createNote = function(S, _, M, F) {
     var L = null, b = 0, x = 0, E = 0, D = [], O, z = w(S), H = !1;
-    z === 0 && (H = !0, z = 0.25, k = !0);
+    z === 0 && (H = !0, z = 0.25, _ = !0);
     for (var $ = Math.floor(Math.log(z) / Math.log(2)), Q = 0, W = Math.pow(2, $), ne = W / 2; W < z; Q++, W += ne, ne /= 2) ;
     S.startTriplet && (this.tripletmultiplier = S.tripletMultiplier);
     var J = z * this.tripletmultiplier;
     S.rest && S.rest.type === "multimeasure" && (J = 1), S.rest && S.rest.type === "invisible-multimeasure" && (J = this.measureLength * S.rest.text);
-    var te = S.rest ? "rest" : "note", U = new _(S, J, 1, te, this.tuneNumber, { durationClassOveride: S.duration * this.tripletmultiplier });
+    var te = S.rest ? "rest" : "note", U = new k(S, J, 1, te, this.tuneNumber, { durationClassOveride: S.duration * this.tripletmultiplier });
     if (A && U.setHint(), S.rest) {
       this.measureLength === z && S.rest.type !== "invisible" && S.rest.type !== "spacer" && S.rest.type.indexOf("multimeasure") < 0 && (S.rest.type = "whole");
       var re = B(U, S, z, Q, F.voicetotal > 1, this.stemdir, M, $, this.voiceScale);
       L = re.noteHead, b = re.roomTaken, x = re.roomTakenRight;
     } else {
-      var V = this.addNoteToAbcElement(U, S, Q, this.stemdir, this.style, H, $, k, F);
+      var V = this.addNoteToAbcElement(U, S, Q, this.stemdir, this.style, H, $, _, F);
       V.min !== void 0 && (this.minY = Math.min(V.min, this.minY)), L = V.noteHead, b = V.roomTaken, x = V.roomTakenRight, D = V.additionalLedgers, O = V.dir, E = V.symbolWidth;
     }
     if (S.lyric !== void 0 && this.addLyric(U, S, F.voicenumber), S.gracenotes !== void 0 && (b += this.addGraceNotes(S, F, U, L, this.stemHeight * this.voiceScale, this.isBagpipes, b)), S.decoration) {
-      var oe = k && O !== "up" ? Math.min(-3, U.bottom - 6) : U.bottom;
+      var oe = _ && O !== "up" ? Math.min(-3, U.bottom - 6) : U.bottom;
       this.decoration.createDecoration(F, S.decoration, U.top, L ? L.w : 0, U, b, O, oe, S.positioning, this.hasVocals, this.accentAbove);
     }
     if (S.barNumber && U.addFixed(new d(S.barNumber, -10, 0, 0, { type: "barNumber" })), C(U, S.minpitch, S.maxpitch, S.rest, E, D, O, -2, 1), S.chord !== void 0) {
@@ -9588,8 +9588,8 @@ function po() {
       b = ce.roomTaken, x = ce.roomTakenRight;
     }
     return S.startTriplet && (this.triplet = new e(S.startTriplet, L, { flatBeams: this.flatBeams })), S.endTriplet && this.triplet && this.triplet.setCloseAnchor(L), this.triplet && !S.startTriplet && !S.endTriplet && !(S.rest && S.rest.type === "spacer") && this.triplet.middleNote(L), U;
-  }, N.prototype.addSlursAndTies = function(S, k, M, F, L, b) {
-    if (k.endTie && this.ties.length > 0) {
+  }, N.prototype.addSlursAndTies = function(S, _, M, F, L, b) {
+    if (_.endTie && this.ties.length > 0) {
       for (var x = !1, E = 0; E < this.ties.length; E++)
         if (this.ties[E].anchor1 && this.ties[E].anchor1.pitch === M.pitch) {
           this.ties[E].setEndAnchor(M), F.setRange(this.ties[E]), this.ties.splice(E, 1), x = !0;
@@ -9598,118 +9598,118 @@ function po() {
       x || (this.ties[0].setEndAnchor(M), F.setRange(this.ties[0]), this.ties.splice(0, 1));
     }
     var D = F.voicetotal < 2 ? -1 : F.voicenumber;
-    if (k.startTie) {
-      var O = new t({ anchor1: M, force: this.stemdir === "down" || this.stemdir === "up", stemDir: this.stemdir, isGrace: b, voiceNumber: D, style: k.startTie.style });
+    if (_.startTie) {
+      var O = new t({ anchor1: M, force: this.stemdir === "down" || this.stemdir === "up", stemDir: this.stemdir, isGrace: b, voiceNumber: D, style: _.startTie.style });
       A && O.setHint(), this.ties[this.ties.length] = O, F.addOther(O), S.startTie = !0;
     }
     var z, H;
-    if (k.endSlur)
-      for (var $ = 0; $ < k.endSlur.length; $++)
-        H = k.endSlur[$], this.slurs[H] ? (z = this.slurs[H], z.setEndAnchor(M), F.setRange(z), delete this.slurs[H]) : (z = new t({ anchor2: M, stemDir: this.stemdir, voiceNumber: D }), A && z.setHint(), F.addOther(z)), this.startlimitelem && z.setStartX(this.startlimitelem);
+    if (_.endSlur)
+      for (var $ = 0; $ < _.endSlur.length; $++)
+        H = _.endSlur[$], this.slurs[H] ? (z = this.slurs[H], z.setEndAnchor(M), F.setRange(z), delete this.slurs[H]) : (z = new t({ anchor2: M, stemDir: this.stemdir, voiceNumber: D }), A && z.setHint(), F.addOther(z)), this.startlimitelem && z.setStartX(this.startlimitelem);
     else if (!b)
       for (var Q in this.slurs)
         this.slurs.hasOwnProperty(Q) && this.slurs[Q].addInternalNote(M);
-    if (k.startSlur)
-      for ($ = 0; $ < k.startSlur.length; $++)
-        H = k.startSlur[$].label, z = new t({ anchor1: M, stemDir: this.stemdir, voiceNumber: D, style: k.startSlur[$].style }), A && z.setHint(), this.slurs[H] = z, F.addOther(z);
-  }, N.prototype.addMeasureNumber = function(S, k) {
+    if (_.startSlur)
+      for ($ = 0; $ < _.startSlur.length; $++)
+        H = _.startSlur[$].label, z = new t({ anchor1: M, stemDir: this.stemdir, voiceNumber: D, style: _.startSlur[$].style }), A && z.setHint(), this.slurs[H] = z, F.addOther(z);
+  }, N.prototype.addMeasureNumber = function(S, _) {
     var M = this.getTextSize.calc(S, "measurefont", "bar-number"), F = 0;
-    k.isClef && (F += M.width / 2);
-    var L = M.width > 10 && k.abcelem.type === "treble" ? 13.5 : 11;
-    k.addFixed(new d(S, F, M.width, L + M.height / f.STEP, { type: "barNumber", dim: this.getTextSize.attr("measurefont", "bar-number") }));
-  }, N.prototype.createBarLine = function(S, k, M) {
-    var F = new _(k, 0, 10, "bar", this.tuneNumber), L = null, b = 0;
-    k.barNumber && this.addMeasureNumber(k.barNumber, F);
-    var x = k.type === "bar_right_repeat" || k.type === "bar_dbl_repeat", E = k.type !== "bar_left_repeat" && k.type !== "bar_thick_thin" && k.type !== "bar_invisible", D = k.type === "bar_right_repeat" || k.type === "bar_dbl_repeat" || k.type === "bar_left_repeat" || k.type === "bar_thin_thick" || k.type === "bar_thick_thin", O = k.type === "bar_left_repeat" || k.type === "bar_thick_thin" || k.type === "bar_thin_thin" || k.type === "bar_dbl_repeat", z = k.type === "bar_left_repeat" || k.type === "bar_dbl_repeat";
+    _.isClef && (F += M.width / 2);
+    var L = M.width > 10 && _.abcelem.type === "treble" ? 13.5 : 11;
+    _.addFixed(new d(S, F, M.width, L + M.height / f.STEP, { type: "barNumber", dim: this.getTextSize.attr("measurefont", "bar-number") }));
+  }, N.prototype.createBarLine = function(S, _, M) {
+    var F = new k(_, 0, 10, "bar", this.tuneNumber), L = null, b = 0;
+    _.barNumber && this.addMeasureNumber(_.barNumber, F);
+    var x = _.type === "bar_right_repeat" || _.type === "bar_dbl_repeat", E = _.type !== "bar_left_repeat" && _.type !== "bar_thick_thin" && _.type !== "bar_invisible", D = _.type === "bar_right_repeat" || _.type === "bar_dbl_repeat" || _.type === "bar_left_repeat" || _.type === "bar_thin_thick" || _.type === "bar_thick_thin", O = _.type === "bar_left_repeat" || _.type === "bar_thick_thin" || _.type === "bar_thin_thin" || _.type === "bar_dbl_repeat", z = _.type === "bar_left_repeat" || _.type === "bar_dbl_repeat";
     if (x || z) {
       for (var H in this.slurs)
         this.slurs.hasOwnProperty(H) && this.slurs[H].setEndX(F);
       this.startlimitelem = F;
     }
-    if (x && (F.addRight(new d("dots.dot", b, 1, 7)), F.addRight(new d("dots.dot", b, 1, 5)), b += 6), E && (L = new d(null, b, 1, 2, { type: "bar", pitch2: 10, linewidth: 0.6 }), F.addRight(L)), k.type === "bar_invisible" && (L = new d(null, b, 1, 2, { type: "none", pitch2: 10, linewidth: 0.6 }), F.addRight(L)), k.decoration && this.decoration.createDecoration(S, k.decoration, 12, D ? 3 : 1, F, 0, "down", 2, k.positioning, this.hasVocals, this.accentAbove), D && (b += 4, L = new d(null, b, 4, 2, { type: "bar", pitch2: 10, linewidth: 4 }), F.addRight(L), b += 5), this.partstartelem && k.endEnding && (this.partstartelem.anchor2 = L, this.partstartelem = null), O && (b += 3, L = new d(null, b, 1, 2, { type: "bar", pitch2: 10, linewidth: 0.6 }), F.addRight(L)), z && (b += 3, F.addRight(new d("dots.dot", b, 1, 7)), F.addRight(new d("dots.dot", b, 1, 5))), k.startEnding && M && S.voicenumber === 0) {
-      var $ = this.getTextSize.calc(k.startEnding, "repeatfont", "").width;
-      F.minspacing += $ + 10, this.partstartelem = new p(k.startEnding, L, null), S.addOther(this.partstartelem);
+    if (x && (F.addRight(new d("dots.dot", b, 1, 7)), F.addRight(new d("dots.dot", b, 1, 5)), b += 6), E && (L = new d(null, b, 1, 2, { type: "bar", pitch2: 10, linewidth: 0.6 }), F.addRight(L)), _.type === "bar_invisible" && (L = new d(null, b, 1, 2, { type: "none", pitch2: 10, linewidth: 0.6 }), F.addRight(L)), _.decoration && this.decoration.createDecoration(S, _.decoration, 12, D ? 3 : 1, F, 0, "down", 2, _.positioning, this.hasVocals, this.accentAbove), D && (b += 4, L = new d(null, b, 4, 2, { type: "bar", pitch2: 10, linewidth: 4 }), F.addRight(L), b += 5), this.partstartelem && _.endEnding && (this.partstartelem.anchor2 = L, this.partstartelem = null), O && (b += 3, L = new d(null, b, 1, 2, { type: "bar", pitch2: 10, linewidth: 0.6 }), F.addRight(L)), z && (b += 3, F.addRight(new d("dots.dot", b, 1, 7)), F.addRight(new d("dots.dot", b, 1, 5))), _.startEnding && M && S.voicenumber === 0) {
+      var $ = this.getTextSize.calc(_.startEnding, "repeatfont", "").width;
+      F.minspacing += $ + 10, this.partstartelem = new p(_.startEnding, L, null), S.addOther(this.partstartelem);
     }
-    return F.extraw -= 5, k.chord !== void 0 && v(this.getTextSize, F, k, 0, 0, 0, !1, this.germanAlphabet), F;
+    return F.extraw -= 5, _.chord !== void 0 && v(this.getTextSize, F, _, 0, 0, 0, !1, this.germanAlphabet), F;
   }, r0 = N, r0;
 }
-var a0, pn;
-function vo() {
-  if (pn) return a0;
-  pn = 1;
-  var _ = "http://www.w3.org/2000/svg";
+var a0, vn;
+function bo() {
+  if (vn) return a0;
+  vn = 1;
+  var k = "http://www.w3.org/2000/svg";
   function m(a) {
-    this.svg = o(), this.currentGroup = [], a.appendChild(this.svg);
+    this.svg = s(), this.currentGroup = [], a.appendChild(this.svg);
   }
   m.prototype.clear = function() {
     if (this.svg) {
       var a = this.svg.parentNode;
-      this.svg = o(), this.currentGroup = [], a && (a.innerHTML = "", a.appendChild(this.svg));
+      this.svg = s(), this.currentGroup = [], a && (a.innerHTML = "", a.appendChild(this.svg));
     }
   }, m.prototype.setTitle = function(a) {
-    var s = document.createElement("title"), p = document.createTextNode(a);
-    s.appendChild(p), this.svg.insertBefore(s, this.svg.firstChild);
-  }, m.prototype.setResponsiveWidth = function(a, s) {
-    if (this.svg.setAttribute("viewBox", "0 0 " + a + " " + s), this.svg.setAttribute("preserveAspectRatio", "xMinYMin meet"), this.svg.removeAttribute("height"), this.svg.removeAttribute("width"), this.svg.style.display = "inline-block", this.svg.style.position = "absolute", this.svg.style.top = "0", this.svg.style.left = "0", this.svg.parentNode) {
+    var o = document.createElement("title"), p = document.createTextNode(a);
+    o.appendChild(p), this.svg.insertBefore(o, this.svg.firstChild);
+  }, m.prototype.setResponsiveWidth = function(a, o) {
+    if (this.svg.setAttribute("viewBox", "0 0 " + a + " " + o), this.svg.setAttribute("preserveAspectRatio", "xMinYMin meet"), this.svg.removeAttribute("height"), this.svg.removeAttribute("width"), this.svg.style.display = "inline-block", this.svg.style.position = "absolute", this.svg.style.top = "0", this.svg.style.left = "0", this.svg.parentNode) {
       var p = this.svg.parentNode.getAttribute("class");
       p ? p.indexOf("abcjs-container") < 0 && this.svg.parentNode.setAttribute("class", p + " abcjs-container") : this.svg.parentNode.setAttribute("class", "abcjs-container"), this.svg.parentNode.style.display = "inline-block", this.svg.parentNode.style.position = "relative", this.svg.parentNode.style.width = "100%";
-      var u = s / a * 100;
+      var u = o / a * 100;
       this.svg.parentNode.style["padding-bottom"] = u + "%", this.svg.parentNode.style["vertical-align"] = "middle", this.svg.parentNode.style.overflow = "hidden";
     }
-  }, m.prototype.setSize = function(a, s) {
-    this.svg.setAttribute("width", a), this.svg.setAttribute("height", s);
-  }, m.prototype.setAttribute = function(a, s) {
-    this.svg.setAttribute(a, s);
+  }, m.prototype.setSize = function(a, o) {
+    this.svg.setAttribute("width", a), this.svg.setAttribute("height", o);
+  }, m.prototype.setAttribute = function(a, o) {
+    this.svg.setAttribute(a, o);
   }, m.prototype.setScale = function(a) {
     a !== 1 ? (this.svg.style.transform = "scale(" + a + "," + a + ")", this.svg.style["-ms-transform"] = "scale(" + a + "," + a + ")", this.svg.style["-webkit-transform"] = "scale(" + a + "," + a + ")", this.svg.style["transform-origin"] = "0 0", this.svg.style["-ms-transform-origin-x"] = "0", this.svg.style["-ms-transform-origin-y"] = "0", this.svg.style["-webkit-transform-origin-x"] = "0", this.svg.style["-webkit-transform-origin-y"] = "0") : (this.svg.style.transform = "", this.svg.style["-ms-transform"] = "", this.svg.style["-webkit-transform"] = "");
   }, m.prototype.insertStyles = function(a) {
-    var s = document.createElementNS(_, "style");
-    s.textContent = a, this.svg.insertBefore(s, this.svg.firstChild);
+    var o = document.createElementNS(k, "style");
+    o.textContent = a, this.svg.insertBefore(o, this.svg.firstChild);
   }, m.prototype.setParentStyles = function(a) {
-    for (var s in a)
-      a.hasOwnProperty(s) && this.svg.parentNode && (this.svg.parentNode.style[s] = a[s]);
+    for (var o in a)
+      a.hasOwnProperty(o) && this.svg.parentNode && (this.svg.parentNode.style[o] = a[o]);
     if (this.dummySvg) {
       var p = document.querySelector("body");
       p.removeChild(this.dummySvg), this.dummySvg = null;
     }
   };
-  function g(a, s, p) {
+  function g(a, o, p) {
     var u = p - a;
-    return "M " + a + " " + s + " l " + u + " 0 l 0 1  l " + -u + " 0  z ";
+    return "M " + a + " " + o + " l " + u + " 0 l 0 1  l " + -u + " 0  z ";
   }
-  function l(a, s, p) {
-    var u = p - s;
-    return "M " + a + " " + s + " l 0 " + u + " l 1 0  l 0 " + -u + "  z ";
+  function l(a, o, p) {
+    var u = p - o;
+    return "M " + a + " " + o + " l 0 " + u + " l 1 0  l 0 " + -u + "  z ";
   }
   m.prototype.rect = function(a) {
-    var s = [], p = a.x, u = a.y, d = a.x + a.width, f = a.y + a.height;
-    return s.push(g(p, u, d)), s.push(g(p, f, d)), s.push(l(d, u, f)), s.push(l(p, f, u)), this.path({ path: s.join(" "), stroke: "none", "data-name": a["data-name"] });
+    var o = [], p = a.x, u = a.y, d = a.x + a.width, f = a.y + a.height;
+    return o.push(g(p, u, d)), o.push(g(p, f, d)), o.push(l(d, u, f)), o.push(l(p, f, u)), this.path({ path: o.join(" "), stroke: "none", "data-name": a["data-name"] });
   }, m.prototype.dottedLine = function(a) {
-    var s = document.createElementNS(_, "line");
-    s.setAttribute("x1", a.x1), s.setAttribute("x2", a.x2), s.setAttribute("y1", a.y1), s.setAttribute("y2", a.y2), s.setAttribute("stroke", a.stroke), s.setAttribute("stroke-dasharray", "5,5"), this.svg.insertBefore(s, this.svg.firstChild);
+    var o = document.createElementNS(k, "line");
+    o.setAttribute("x1", a.x1), o.setAttribute("x2", a.x2), o.setAttribute("y1", a.y1), o.setAttribute("y2", a.y2), o.setAttribute("stroke", a.stroke), o.setAttribute("stroke-dasharray", "5,5"), this.svg.insertBefore(o, this.svg.firstChild);
   }, m.prototype.rectBeneath = function(a) {
-    var s = document.createElementNS(_, "rect");
-    s.setAttribute("x", a.x), s.setAttribute("width", a.width), s.setAttribute("y", a.y), s.setAttribute("height", a.height), a.stroke && s.setAttribute("stroke", a.stroke), a["stroke-opacity"] && s.setAttribute("stroke-opacity", a["stroke-opacity"]), a.fill && s.setAttribute("fill", a.fill), a["fill-opacity"] && s.setAttribute("fill-opacity", a["fill-opacity"]), this.svg.insertBefore(s, this.svg.firstChild);
-  }, m.prototype.text = function(a, s, p, u) {
-    var d = document.createElementNS(_, "text");
+    var o = document.createElementNS(k, "rect");
+    o.setAttribute("x", a.x), o.setAttribute("width", a.width), o.setAttribute("y", a.y), o.setAttribute("height", a.height), a.stroke && o.setAttribute("stroke", a.stroke), a["stroke-opacity"] && o.setAttribute("stroke-opacity", a["stroke-opacity"]), a.fill && o.setAttribute("fill", a.fill), a["fill-opacity"] && o.setAttribute("fill-opacity", a["fill-opacity"]), this.svg.insertBefore(o, this.svg.firstChild);
+  }, m.prototype.text = function(a, o, p, u) {
+    var d = document.createElementNS(k, "text");
     d.setAttribute("stroke", "none");
-    for (var f in s)
-      s.hasOwnProperty(f) && d.setAttribute(f, s[f]);
-    for (var i = s["data-name"] == "free-text", n = ("" + a).split(`
+    for (var f in o)
+      o.hasOwnProperty(f) && d.setAttribute(f, o[f]);
+    for (var i = o["data-name"] == "free-text", n = ("" + a).split(`
 `), t = 0; t < n.length; t++)
       if (!(i && n[t] == "")) {
-        var e = document.createElementNS(_, "tspan");
+        var e = document.createElementNS(k, "tspan");
         if (u)
           for (var c in u)
             u.hasOwnProperty(c) && e.setAttribute(c, u[c]);
-        if (e.setAttribute("x", s.x ? s.x : 0), t !== 0 && e.setAttribute("dy", "1.2em"), n[t].indexOf("") !== -1) {
+        if (e.setAttribute("x", o.x ? o.x : 0), t !== 0 && e.setAttribute("dy", "1.2em"), n[t].indexOf("") !== -1) {
           var v = n[t].split("");
           if (e.textContent = v[0], v[1]) {
-            var h = document.createElementNS(_, "tspan");
+            var h = document.createElementNS(k, "tspan");
             h.setAttribute("dy", "-0.3em"), h.setAttribute("style", "font-size:0.7em"), h.textContent = v[1], e.appendChild(h);
           }
           if (v[2]) {
-            var y = v[1] ? "0.4em" : "0.1em", w = document.createElementNS(_, "tspan");
+            var y = v[1] ? "0.4em" : "0.1em", w = document.createElementNS(k, "tspan");
             w.setAttribute("dy", y), w.setAttribute("style", "font-size:0.7em"), w.textContent = v[2], e.appendChild(w);
           }
         } else
@@ -9717,28 +9717,28 @@ function vo() {
         d.appendChild(e);
       }
     return p ? p.appendChild(d) : this.append(d), d;
-  }, m.prototype.richTextLine = function(a, s, p, u, d, f) {
-    var i = document.createElementNS(_, "text");
-    i.setAttribute("stroke", "none"), i.setAttribute("class", u), i.setAttribute("x", s), i.setAttribute("y", p), i.setAttribute("text-anchor", d), i.setAttribute("dominant-baseline", "middle");
+  }, m.prototype.richTextLine = function(a, o, p, u, d, f) {
+    var i = document.createElementNS(k, "text");
+    i.setAttribute("stroke", "none"), i.setAttribute("class", u), i.setAttribute("x", o), i.setAttribute("y", p), i.setAttribute("text-anchor", d), i.setAttribute("dominant-baseline", "middle");
     for (var n = 0; n < a.length; n++) {
-      for (var t = a[n], e = document.createElementNS(_, "tspan"), c = Object.keys(t.attrs), v = 0; v < c.length; v++) {
+      for (var t = a[n], e = document.createElementNS(k, "tspan"), c = Object.keys(t.attrs), v = 0; v < c.length; v++) {
         var h = t.attrs[c[v]];
         h !== "" && e.setAttribute(c[v], h);
       }
       e.textContent = t.content, i.appendChild(e);
     }
     return f ? f.appendChild(i) : this.append(i), i;
-  }, m.prototype.guessWidth = function(a, s) {
-    var p = this.createDummySvg(), u = this.text(a, s, p), d;
+  }, m.prototype.guessWidth = function(a, o) {
+    var p = this.createDummySvg(), u = this.text(a, o, p), d;
     try {
-      d = u.getBBox(), isNaN(d.height) || !d.height ? d = { width: s["font-size"] / 2, height: s["font-size"] + 2 } : d = { width: d.width, height: d.height };
+      d = u.getBBox(), isNaN(d.height) || !d.height ? d = { width: o["font-size"] / 2, height: o["font-size"] + 2 } : d = { width: d.width, height: d.height };
     } catch {
-      d = { width: s["font-size"] / 2, height: s["font-size"] + 2 };
+      d = { width: o["font-size"] / 2, height: o["font-size"] + 2 };
     }
     return p.removeChild(u), d;
   }, m.prototype.createDummySvg = function() {
     if (!this.dummySvg) {
-      this.dummySvg = o();
+      this.dummySvg = s();
       var a = [
         "display: block !important;",
         "height: 1px;",
@@ -9746,70 +9746,70 @@ function vo() {
         "position: absolute;"
       ];
       this.dummySvg.setAttribute("style", a.join(""));
-      var s = document.querySelector("body");
-      s.appendChild(this.dummySvg);
+      var o = document.querySelector("body");
+      o.appendChild(this.dummySvg);
     }
     return this.dummySvg;
   };
   var r = {};
-  m.prototype.getTextSize = function(a, s, p) {
+  m.prototype.getTextSize = function(a, o, p) {
     if (typeof a == "number" && (a = "" + a), !a || a.match(/^\s+$/))
       return { width: 0, height: 0 };
     var u;
-    if (a.length < 20 && (u = a + JSON.stringify(s), r[u]))
+    if (a.length < 20 && (u = a + JSON.stringify(o), r[u]))
       return r[u];
     var d = !p;
-    p || (p = this.text(a, s));
+    p || (p = this.text(a, o));
     var f;
     try {
-      f = p.getBBox(), isNaN(f.height) || !f.height ? f = this.guessWidth(a, s) : f = { width: f.width, height: f.height };
+      f = p.getBBox(), isNaN(f.height) || !f.height ? f = this.guessWidth(a, o) : f = { width: f.width, height: f.height };
     } catch {
-      f = this.guessWidth(a, s);
+      f = this.guessWidth(a, o);
     }
     return d && (this.currentGroup.length > 0 ? this.currentGroup[0].removeChild(p) : this.svg.removeChild(p)), u && (r[u] = f), f;
   }, m.prototype.openGroup = function(a) {
     a = a || {};
-    var s = document.createElementNS(_, "g");
-    return a.klass && s.setAttribute("class", a.klass), a.fill && s.setAttribute("fill", a.fill), a.stroke && s.setAttribute("stroke", a.stroke), a["data-name"] && s.setAttribute("data-name", a["data-name"]), a.prepend ? this.prepend(s) : this.append(s), this.currentGroup.unshift(s), s;
+    var o = document.createElementNS(k, "g");
+    return a.klass && o.setAttribute("class", a.klass), a.fill && o.setAttribute("fill", a.fill), a.stroke && o.setAttribute("stroke", a.stroke), a["data-name"] && o.setAttribute("data-name", a["data-name"]), a.prepend ? this.prepend(o) : this.append(o), this.currentGroup.unshift(o), o;
   }, m.prototype.closeGroup = function() {
     var a = this.currentGroup.shift();
     return a && a.children.length === 0 ? (a.parentElement.removeChild(a), null) : a;
   }, m.prototype.path = function(a) {
-    var s = document.createElementNS(_, "path");
+    var o = document.createElementNS(k, "path");
     for (var p in a)
-      a.hasOwnProperty(p) && (p === "path" ? s.setAttributeNS(null, "d", a.path) : p === "klass" ? s.setAttributeNS(null, "class", a[p]) : a[p] !== void 0 && s.setAttributeNS(null, p, a[p]));
-    return this.append(s), s;
+      a.hasOwnProperty(p) && (p === "path" ? o.setAttributeNS(null, "d", a.path) : p === "klass" ? o.setAttributeNS(null, "class", a[p]) : a[p] !== void 0 && o.setAttributeNS(null, p, a[p]));
+    return this.append(o), o;
   }, m.prototype.pathToBack = function(a) {
-    var s = document.createElementNS(_, "path");
+    var o = document.createElementNS(k, "path");
     for (var p in a)
-      a.hasOwnProperty(p) && (p === "path" ? s.setAttributeNS(null, "d", a.path) : p === "klass" ? s.setAttributeNS(null, "class", a[p]) : s.setAttributeNS(null, p, a[p]));
-    return this.prepend(s), s;
+      a.hasOwnProperty(p) && (p === "path" ? o.setAttributeNS(null, "d", a.path) : p === "klass" ? o.setAttributeNS(null, "class", a[p]) : o.setAttributeNS(null, p, a[p]));
+    return this.prepend(o), o;
   }, m.prototype.lineToBack = function(a) {
-    for (var s = document.createElementNS(_, "line"), p = Object.keys(a), u = 0; u < p.length; u++)
-      s.setAttribute(p[u], a[p[u]]);
-    return this.prepend(s), s;
+    for (var o = document.createElementNS(k, "line"), p = Object.keys(a), u = 0; u < p.length; u++)
+      o.setAttribute(p[u], a[p[u]]);
+    return this.prepend(o), o;
   }, m.prototype.append = function(a) {
     this.currentGroup.length > 0 ? this.currentGroup[0].appendChild(a) : this.svg.appendChild(a);
   }, m.prototype.prepend = function(a) {
     this.currentGroup.length > 0 ? this.currentGroup[0].appendChild(a) : this.svg.insertBefore(a, this.svg.firstChild);
-  }, m.prototype.setAttributeOnElement = function(a, s) {
-    for (var p in s)
-      s.hasOwnProperty(p) && a.setAttributeNS(null, p, s[p]);
-  }, m.prototype.moveElementToChild = function(a, s) {
-    a.appendChild(s);
+  }, m.prototype.setAttributeOnElement = function(a, o) {
+    for (var p in o)
+      o.hasOwnProperty(p) && a.setAttributeNS(null, p, o[p]);
+  }, m.prototype.moveElementToChild = function(a, o) {
+    a.appendChild(o);
   };
-  function o() {
-    var a = document.createElementNS(_, "svg");
+  function s() {
+    var a = document.createElementNS(k, "svg");
     return a.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink"), a.setAttribute("role", "img"), a.setAttribute("fill", "currentColor"), a.setAttribute("stroke", "currentColor"), a;
   }
   return a0 = m, a0;
 }
-var n0, vn;
-function go() {
-  if (vn) return n0;
-  vn = 1;
-  var _ = Ce(), m = vo(), g = function(l) {
-    this.paper = new m(l), this.controller = null, this.space = 3 * _.SPACE, this.padding = {}, this.reset(), this.firefox = navigator.userAgent.indexOf("Firefox/") >= 0;
+var n0, gn;
+function mo() {
+  if (gn) return n0;
+  gn = 1;
+  var k = Ce(), m = bo(), g = function(l) {
+    this.paper = new m(l), this.controller = null, this.space = 3 * k.SPACE, this.padding = {}, this.reset(), this.firefox = navigator.userAgent.indexOf("Firefox/") >= 0;
   };
   return g.prototype.reset = function() {
     this.paper.clear(), this.y = 0, this.abctune = null, this.path = null, this.isPrint = !1, this.lineThickness = 0, this.initVerticalSpace();
@@ -9825,8 +9825,8 @@ function go() {
       left: l.paddingleft
     };
   }, g.prototype.setPadding = function(l) {
-    function r(o, a, s, p, u) {
-      l.formatting[s] !== void 0 ? o.padding[a] = l.formatting[s] : o.paddingOverride[a] !== void 0 ? o.padding[a] = o.paddingOverride[a] : o.isPrint ? o.padding[a] = p : o.padding[a] = u;
+    function r(s, a, o, p, u) {
+      l.formatting[o] !== void 0 ? s.padding[a] = l.formatting[o] : s.paddingOverride[a] !== void 0 ? s.padding[a] = s.paddingOverride[a] : s.isPrint ? s.padding[a] = p : s.padding[a] = u;
     }
     r(this, "top", "topmargin", 38, 15), r(this, "bottom", "botmargin", 38, 15), r(this, "left", "leftmargin", 68, 15), r(this, "right", "rightmargin", 68, 15);
   }, g.prototype.adjustNonScaledItems = function(l) {
@@ -9874,111 +9874,111 @@ function go() {
   }, g.prototype.setVerticalSpace = function(l) {
     l.staffsep !== void 0 && (this.spacing.staffSeparation = l.staffsep * 4 / 3), l.composerspace !== void 0 && (this.spacing.composer = l.composerspace * 4 / 3), l.partsspace !== void 0 && (this.spacing.parts = l.partsspace * 4 / 3), l.textspace !== void 0 && (this.spacing.text = l.textspace * 4 / 3), l.musicspace !== void 0 && (this.spacing.music = l.musicspace * 4 / 3), l.titlespace !== void 0 && (this.spacing.title = l.titlespace * 4 / 3), l.sysstaffsep !== void 0 && (this.spacing.systemStaffSeparation = l.sysstaffsep * 4 / 3), l.stafftopmargin !== void 0 && (this.spacing.staffTopMargin = l.stafftopmargin * 4 / 3), l.subtitlespace !== void 0 && (this.spacing.subtitle = l.subtitlespace * 4 / 3), l.topspace !== void 0 && (this.spacing.top = l.topspace * 4 / 3), l.vocalspace !== void 0 && (this.spacing.vocal = l.vocalspace * 4 / 3), l.wordsspace !== void 0 && (this.spacing.words = l.wordsspace * 4 / 3);
   }, g.prototype.calcY = function(l) {
-    return this.y - l * _.STEP;
+    return this.y - l * k.STEP;
   }, g.prototype.yToPitch = function(l) {
-    return l / _.STEP;
+    return l / k.STEP;
   }, g.prototype.moveY = function(l, r) {
     r === void 0 && (r = 1), this.y += l * r;
   }, g.prototype.absolutemoveY = function(l) {
     this.y = l;
   }, n0 = g, n0;
 }
-var i0, gn;
-function bo() {
-  if (gn) return i0;
-  gn = 1;
-  function _(m, g, l, r, o, a) {
-    var s = m.text;
+var i0, bn;
+function yo() {
+  if (bn) return i0;
+  bn = 1;
+  function k(m, g, l, r, s, a) {
+    var o = m.text;
     this.rows = [];
     var p;
     g && this.rows.push({ move: g });
     var u = l.calc("textfont", "defined-text");
-    if (s === "")
+    if (o === "")
       this.rows.push({ move: u.attr["font-size"] * 2 });
-    else if (typeof s == "string") {
+    else if (typeof o == "string") {
       let c = function(v) {
         return v.replace(/^[ \t]*\n/gm, `X
 `);
       };
-      this.rows.push({ move: u.attr["font-size"] / 2 }), this.rows.push({ left: r, text: s, font: "textfont", klass: "defined-text", anchor: "start", startChar: m.startChar, endChar: m.endChar, absElemType: "freeText", name: "free-text" });
-      var d = c(s);
+      this.rows.push({ move: u.attr["font-size"] / 2 }), this.rows.push({ left: r, text: o, font: "textfont", klass: "defined-text", anchor: "start", startChar: m.startChar, endChar: m.endChar, absElemType: "freeText", name: "free-text" });
+      var d = c(o);
       p = a.calc(d, "textfont", "defined-text"), this.rows.push({ move: p.height });
-    } else if (s) {
-      for (var f = 0, i = r, n = "textfont", t = 0; t < s.length; t++)
-        s[t].font ? n = s[t].font : n = "textfont", this.rows.push({ left: i, text: s[t].text, font: n, klass: "defined-text", anchor: "start", startChar: m.startChar, endChar: m.endChar, absElemType: "freeText", name: "free-text" }), p = a.calc(s[t].text, l.calc(n, "defined-text").font, "defined-text"), i += p.width + p.height / 2, f = Math.max(f, p.height);
+    } else if (o) {
+      for (var f = 0, i = r, n = "textfont", t = 0; t < o.length; t++)
+        o[t].font ? n = o[t].font : n = "textfont", this.rows.push({ left: i, text: o[t].text, font: n, klass: "defined-text", anchor: "start", startChar: m.startChar, endChar: m.endChar, absElemType: "freeText", name: "free-text" }), p = a.calc(o[t].text, l.calc(n, "defined-text").font, "defined-text"), i += p.width + p.height / 2, f = Math.max(f, p.height);
       this.rows.push({ move: f });
     } else if (m.length === 1) {
-      var e = o / 2;
+      var e = s / 2;
       this.rows.push({ left: e, text: m[0].text, font: "textfont", klass: "defined-text", anchor: "middle", startChar: m.startChar, endChar: m.endChar, absElemType: "freeText", name: "free-text" }), p = a.calc(m[0].text, "textfont", "defined-text"), this.rows.push({ move: p.height });
     }
   }
-  return i0 = _, i0;
+  return i0 = k, i0;
 }
-var s0, bn;
-function mo() {
-  if (bn) return s0;
-  bn = 1;
-  function _(m, g, l) {
+var s0, mn;
+function wo() {
+  if (mn) return s0;
+  mn = 1;
+  function k(m, g, l) {
     this.rows = [], m && this.rows.push({ move: m }), this.rows.push({ separator: g, absElemType: "separator" }), l && this.rows.push({ move: l });
   }
-  return s0 = _, s0;
+  return s0 = k, s0;
 }
-var o0, mn;
-function yo() {
-  if (mn) return o0;
-  mn = 1;
-  function _(m, g, l, r, o, a) {
+var o0, yn;
+function xo() {
+  if (yn) return o0;
+  yn = 1;
+  function k(m, g, l, r, s, a) {
     this.rows = [], m && this.rows.push({ move: m });
-    var s = g.titleleft ? "start" : "middle", p = g.titleleft ? o : r;
-    this.rows.push({ left: p, text: l.text, font: "subtitlefont", klass: "text subtitle", anchor: s, startChar: l.startChar, endChar: l.endChar, absElemType: "subtitle", name: "subtitle" });
+    var o = g.titleleft ? "start" : "middle", p = g.titleleft ? s : r;
+    this.rows.push({ left: p, text: l.text, font: "subtitlefont", klass: "text subtitle", anchor: o, startChar: l.startChar, endChar: l.endChar, absElemType: "subtitle", name: "subtitle" });
     var u = a.calc(l.text, "subtitlefont", "text subtitle");
     this.rows.push({ move: u.height });
   }
-  return o0 = _, o0;
+  return o0 = k, o0;
 }
-var c0, yn;
+var c0, wn;
 function zr() {
-  if (yn) return c0;
-  yn = 1;
-  function _(m, g, l) {
+  if (wn) return c0;
+  wn = 1;
+  function k(m, g, l) {
     if (g.text) {
       g.marginLeft || (g.marginLeft = 0), g.klass || (g.klass = ""), g.anchor || (g.anchor = "start"), g.info || (g.info = { startChar: -2, endChar: -2 }), g.marginTop && m.push({ move: g.marginTop });
       var r = { left: g.marginLeft, text: g.text, font: g.font, anchor: g.anchor, startChar: g.info.startChar, endChar: g.info.endChar, "dominant-baseline": g["dominant-baseline"] };
       g.absElemType && (r.absElemType = g.absElemType), !g.inGroup && g.klass && (r.klass = g.klass), g.name && (r.name = g.name), m.push(r);
-      var o = l.calc("A", g.font, g.klass), a = g.text.split(`
+      var s = l.calc("A", g.font, g.klass), a = g.text.split(`
 `).length;
       if (g.text[g.text.length - 1] === `
 ` && a--, !g.noMove) {
-        var s = o.height * 1.1 * a;
-        m.push({ move: Math.round(s) }), g.marginBottom && m.push({ move: g.marginBottom });
+        var o = s.height * 1.1 * a;
+        m.push({ move: Math.round(o) }), g.marginBottom && m.push({ move: g.marginBottom });
       }
     }
   }
-  return c0 = _, c0;
+  return c0 = k, c0;
 }
-var l0, wn;
-function ls() {
-  if (wn) return l0;
-  wn = 1;
-  const _ = zr();
-  function m(g, l, r, o, a, s, p, u) {
-    var d = u.calc("i", r, o);
+var l0, xn;
+function fs() {
+  if (xn) return l0;
+  xn = 1;
+  const k = zr();
+  function m(g, l, r, s, a, o, p, u) {
+    var d = u.calc("i", r, s);
     if (l === "")
       g.push({ move: d.height });
     else {
       if (typeof l == "string") {
-        _(g, { marginLeft: s, text: l, font: r, klass: o, marginTop: p.marginTop, anchor: p.anchor, absElemType: p.absElemType, info: p.info, name: a }, u);
+        k(g, { marginLeft: o, text: l, font: r, klass: s, marginTop: p.marginTop, anchor: p.anchor, absElemType: p.absElemType, info: p.info, name: a }, u);
         return;
       }
       p.marginTop && g.push({ move: p.marginTop });
       var f = 0, i = {
-        left: s,
+        left: o,
         anchor: p.anchor,
         phrases: []
       };
-      o && (i.klass = o), g.push(i);
+      s && (i.klass = s), g.push(i);
       for (var n = 0; n < l.length; n++) {
-        var t = l[n], e = t.font ? t.font : u.attr(r, o).font, c = {
+        var t = l[n], e = t.font ? t.font : u.attr(r, s).font, c = {
           content: t.text
         };
         e && (c.attrs = {
@@ -9988,7 +9988,7 @@ function ls() {
           "font-style": e.style,
           "font-decoration": e.decoration
         }), i.phrases.push(c);
-        var v = u.calc(t.text, e, o);
+        var v = u.calc(t.text, e, s);
         f = Math.max(f, v.height), t.text[t.text.length - 1] === " " && d.width;
       }
       g.push({ move: f });
@@ -9996,18 +9996,18 @@ function ls() {
   }
   return l0 = m, l0;
 }
-var f0, xn;
-function wo() {
-  if (xn) return f0;
-  xn = 1;
-  const _ = zr(), m = ls();
-  function g(l, r, o, a, s, p, u, d, f, i) {
+var f0, Cn;
+function Co() {
+  if (Cn) return f0;
+  Cn = 1;
+  const k = zr(), m = fs();
+  function g(l, r, s, a, o, p, u, d, f, i) {
     if (this.rows = [], l.header && p) {
       var n = i.calc("X", "headerfont", "abcjs-header abcjs-meta-top").height;
-      _(this.rows, { marginLeft: u, text: l.header.left, font: "headerfont", klass: "header meta-top", marginTop: -n, info: r.header, name: "header" }, i), _(this.rows, { marginLeft: u + s / 2, text: l.header.center, font: "headerfont", klass: "header meta-top", marginTop: -n, anchor: "middle", info: r.header, name: "header" }, i), _(this.rows, { marginLeft: u + s, text: l.header.right, font: "headerfont", klass: "header meta-top", marginTop: -n, anchor: "end", info: r.header, name: "header" }, i);
+      k(this.rows, { marginLeft: u, text: l.header.left, font: "headerfont", klass: "header meta-top", marginTop: -n, info: r.header, name: "header" }, i), k(this.rows, { marginLeft: u + o / 2, text: l.header.center, font: "headerfont", klass: "header meta-top", marginTop: -n, anchor: "middle", info: r.header, name: "header" }, i), k(this.rows, { marginLeft: u + o, text: l.header.right, font: "headerfont", klass: "header meta-top", marginTop: -n, anchor: "end", info: r.header, name: "header" }, i);
     }
     p && this.rows.push({ move: d.top });
-    var t = o.titleleft ? "start" : "middle", e = o.titleleft ? u : u + s / 2;
+    var t = s.titleleft ? "start" : "middle", e = s.titleleft ? u : u + o / 2;
     if (l.title) {
       var c = f ? "abcjs-title" : "";
       m(this.rows, l.title, "titlefont", c, "title", e, { marginTop: d.title, anchor: t, absElemType: "title", info: r.title }, i);
@@ -10020,18 +10020,18 @@ function wo() {
     if (l.rhythm || l.origin || l.composer) {
       if (this.rows.push({ move: d.composer }), l.rhythm && l.rhythm.length > 0) {
         var h = !!(l.composer || l.origin), c = f ? "abcjs-rhythm" : "";
-        _(this.rows, { marginLeft: u, text: l.rhythm, font: "infofont", klass: c, absElemType: "rhythm", noMove: h, info: r.rhythm, name: "rhythm" }, i);
+        k(this.rows, { marginLeft: u, text: l.rhythm, font: "infofont", klass: c, absElemType: "rhythm", noMove: h, info: r.rhythm, name: "rhythm" }, i);
       }
       l.composer && l.composer, l.origin && l.origin;
       var y = l.composer ? l.composer : "";
       if (l.origin && (typeof y == "string" && typeof l.origin == "string" ? y += " (" + l.origin + ")" : typeof y == "string" && typeof l.origin != "string" ? (y = [{ text: y }], y.push({ text: " (" }), y = y.concat(l.origin), y.push({ text: ")" })) : (y.push({ text: " (" }), y = y.concat(l.origin), y.push({ text: ")" }))), y) {
         var c = f ? "abcjs-composer" : "";
-        m(this.rows, y, "composerfont", c, "composer", u + s, { anchor: "end", absElemType: "composer", info: r.composer, ingroup: !0 }, i);
+        m(this.rows, y, "composerfont", c, "composer", u + o, { anchor: "end", absElemType: "composer", info: r.composer, ingroup: !0 }, i);
       }
     }
     if (l.author && l.author.length > 0) {
       var c = f ? "abcjs-author" : "";
-      m(this.rows, l.author, "composerfont", c, "author", u + s, { anchor: "end", absElemType: "author", info: r.author }, i);
+      m(this.rows, l.author, "composerfont", c, "author", u + o, { anchor: "end", absElemType: "author", info: r.author }, i);
     }
     if (l.partOrder && l.partOrder.length > 0) {
       var c = f ? "abcjs-part-order" : "";
@@ -10040,67 +10040,67 @@ function wo() {
   }
   return f0 = g, f0;
 }
-var h0, Cn;
-function xo() {
-  if (Cn) return h0;
-  Cn = 1;
-  const _ = zr(), m = ls();
-  function g(o, a, s, p, u, d, f) {
-    this.rows = [], o.unalignedWords && o.unalignedWords.length > 0 && this.unalignedWords(o.unalignedWords, p, u, d, f), this.extraText(o, p, u, d, f), o.footer && s && this.footer(o.footer, a, p, f);
+var h0, kn;
+function ko() {
+  if (kn) return h0;
+  kn = 1;
+  const k = zr(), m = fs();
+  function g(s, a, o, p, u, d, f) {
+    this.rows = [], s.unalignedWords && s.unalignedWords.length > 0 && this.unalignedWords(s.unalignedWords, p, u, d, f), this.extraText(s, p, u, d, f), s.footer && o && this.footer(s.footer, a, p, f);
   }
-  g.prototype.unalignedWords = function(o, a, s, p, u) {
+  g.prototype.unalignedWords = function(s, a, o, p, u) {
     var d = p ? "abcjs-unaligned-words" : "", f = "wordsfont", i = u.calc("i", f, d);
-    this.rows.push({ move: s.words }), r(this.rows, "", o, a, f, "unalignedWords", "unalignedWords", d, "unalignedWords", s, p, u), this.rows.push({ move: i.height });
+    this.rows.push({ move: o.words }), r(this.rows, "", s, a, f, "unalignedWords", "unalignedWords", d, "unalignedWords", o, p, u), this.rows.push({ move: i.height });
   };
-  function l(o, a, s, p, u, d, f) {
-    s && (a && (typeof s == "string" ? s = a + s : s = [{ text: a }].concat(s)), u = d ? "abcjs-extra-text " + u : "", m(o, s, "historyfont", u, "description", p, { absElemType: "extraText", anchor: "start" }, f));
+  function l(s, a, o, p, u, d, f) {
+    o && (a && (typeof o == "string" ? o = a + o : o = [{ text: a }].concat(o)), u = d ? "abcjs-extra-text " + u : "", m(s, o, "historyfont", u, "description", p, { absElemType: "extraText", anchor: "start" }, f));
   }
-  function r(o, a, s, p, u, d, f, i, n, t, e, c) {
-    if (s) {
+  function r(s, a, o, p, u, d, f, i, n, t, e, c) {
+    if (o) {
       i = e ? "abcjs-extra-text " + i : "";
       var v = c.calc("A", u, i);
-      if (typeof s == "string")
-        a && (s = a + `
-` + s), _(o, { marginLeft: p, text: s, font: u, absElemType: "extraText", name: n, "dominant-baseline": "middle", klass: i }, c);
+      if (typeof o == "string")
+        a && (o = a + `
+` + o), k(s, { marginLeft: p, text: o, font: u, absElemType: "extraText", name: n, "dominant-baseline": "middle", klass: i }, c);
       else {
-        o.push({ startGroup: f, klass: i, name: n }), o.push({ move: t.info }), a && (_(o, { marginLeft: p, text: a, font: u, absElemType: "extraText", name: n, "dominant-baseline": "middle" }, c), o.push({ move: v.height * 3 / 4 }));
-        for (var h = 0; h < s.length; h++)
-          m(o, s[h], u, "", n, p, { anchor: "start" }, c), h < s.length - 1 && typeof s[h] == "string" && typeof s[h + 1] != "string" && o.push({ move: v.height * 3 / 4 });
-        o.push({ endGroup: f, absElemType: d, startChar: -1, endChar: -1, name: n }), o.push({ move: v.height });
+        s.push({ startGroup: f, klass: i, name: n }), s.push({ move: t.info }), a && (k(s, { marginLeft: p, text: a, font: u, absElemType: "extraText", name: n, "dominant-baseline": "middle" }, c), s.push({ move: v.height * 3 / 4 }));
+        for (var h = 0; h < o.length; h++)
+          m(s, o[h], u, "", n, p, { anchor: "start" }, c), h < o.length - 1 && typeof o[h] == "string" && typeof o[h + 1] != "string" && s.push({ move: v.height * 3 / 4 });
+        s.push({ endGroup: f, absElemType: d, startChar: -1, endChar: -1, name: n }), s.push({ move: v.height });
       }
     }
   }
-  return g.prototype.extraText = function(o, a, s, p, u) {
-    l(this.rows, "Book: ", o.book, a, "abcjs-book", p, u), l(this.rows, "Source: ", o.source, a, "abcjs-source", p, u), l(this.rows, "Discography: ", o.discography, a, "abcjs-discography", p, u), r(this.rows, "Notes:", o.notes, a, "historyfont", "extraText", "notes", "abcjs-notes", "description", s, p, u), l(this.rows, "Transcription: ", o.transcription, a, "abcjs-transcription", p, u), r(this.rows, "History:", o.history, a, "historyfont", "extraText", "history", "abcjs-history", "description", s, p, u), l(this.rows, "Copyright: ", o["abc-copyright"], a, "abcjs-copyright", p, u), l(this.rows, "Creator: ", o["abc-creator"], a, "abcjs-creator", p, u), l(this.rows, "Edited By: ", o["abc-edited-by"], a, "abcjs-edited-by", p, u);
-  }, g.prototype.footer = function(o, a, s, p) {
+  return g.prototype.extraText = function(s, a, o, p, u) {
+    l(this.rows, "Book: ", s.book, a, "abcjs-book", p, u), l(this.rows, "Source: ", s.source, a, "abcjs-source", p, u), l(this.rows, "Discography: ", s.discography, a, "abcjs-discography", p, u), r(this.rows, "Notes:", s.notes, a, "historyfont", "extraText", "notes", "abcjs-notes", "description", o, p, u), l(this.rows, "Transcription: ", s.transcription, a, "abcjs-transcription", p, u), r(this.rows, "History:", s.history, a, "historyfont", "extraText", "history", "abcjs-history", "description", o, p, u), l(this.rows, "Copyright: ", s["abc-copyright"], a, "abcjs-copyright", p, u), l(this.rows, "Creator: ", s["abc-creator"], a, "abcjs-creator", p, u), l(this.rows, "Edited By: ", s["abc-edited-by"], a, "abcjs-edited-by", p, u);
+  }, g.prototype.footer = function(s, a, o, p) {
     var u = "header meta-bottom", d = "footerfont";
-    this.rows.push({ startGroup: "footer", klass: u }), _(this.rows, { marginLeft: s, text: o.left, font: d, klass: u, name: "footer" }, p), _(this.rows, { marginLeft: s + a / 2, text: o.center, font: d, klass: u, anchor: "middle", name: "footer" }, p), _(this.rows, { marginLeft: s + a, text: o.right, font: d, klass: u, anchor: "end", name: "footer" }, p);
+    this.rows.push({ startGroup: "footer", klass: u }), k(this.rows, { marginLeft: o, text: s.left, font: d, klass: u, name: "footer" }, p), k(this.rows, { marginLeft: o + a / 2, text: s.center, font: d, klass: u, anchor: "middle", name: "footer" }, p), k(this.rows, { marginLeft: o + a, text: s.right, font: d, klass: u, anchor: "end", name: "footer" }, p);
   }, h0 = g, h0;
 }
-var u0, kn;
-function fs() {
-  if (kn) return u0;
-  kn = 1;
-  function _(g, l, r, o) {
+var u0, _n;
+function hs() {
+  if (_n) return u0;
+  _n = 1;
+  function k(g, l, r, s) {
     if (g.indexOf(l) === 0) {
-      var a = g.replace(l, ""), s = parseInt(a, 10);
-      "" + s === a && (r[o] = s);
+      var a = g.replace(l, ""), o = parseInt(a, 10);
+      "" + o === a && (r[s] = o);
     }
   }
   function m(g, l) {
     var r = [];
     if (g.absEl.elemset) {
-      for (var o = {}, a = 0; a < g.absEl.elemset.length; a++) {
-        var s = g.absEl.elemset[a];
-        if (s)
-          for (var p = s.getAttribute("class").split(" "), u = 0; u < p.length; u++)
-            o[p[u]] = !0;
+      for (var s = {}, a = 0; a < g.absEl.elemset.length; a++) {
+        var o = g.absEl.elemset[a];
+        if (o)
+          for (var p = o.getAttribute("class").split(" "), u = 0; u < p.length; u++)
+            s[p[u]] = !0;
       }
-      for (var d = 0; d < Object.keys(o).length; d++)
-        r.push(Object.keys(o)[d]);
+      for (var d = 0; d < Object.keys(s).length; d++)
+        r.push(Object.keys(s)[d]);
     }
     for (var f = {}, i = 0; i < r.length; i++)
-      _(r[i], "abcjs-v", f, "voice"), _(r[i], "abcjs-l", f, "line"), _(r[i], "abcjs-m", f, "measure");
+      k(r[i], "abcjs-v", f, "voice"), k(r[i], "abcjs-l", f, "line"), k(r[i], "abcjs-m", f, "measure");
     g.staffPos && (f.staffPos = g.staffPos);
     for (var n = l.target; n && n.dataset && !n.dataset.name && n.tagName.toLowerCase() !== "svg"; )
       n = n.parentNode;
@@ -10110,16 +10110,16 @@ function fs() {
   }
   return u0 = m, u0;
 }
-var d0, _n;
-function Co() {
-  if (_n) return d0;
-  _n = 1;
-  var _ = Ce(), m = fs();
+var d0, Tn;
+function _o() {
+  if (Tn) return d0;
+  Tn = 1;
+  var k = Ce(), m = hs();
   function g(T, q) {
     if (T.rangeHighlight = y, T.dragging)
       for (var I = 0; I < T.selectables.length; I++) {
         var C = T.selectables[I];
-        C.svgEl.getAttribute("selectable") === "true" && (C.svgEl.setAttribute("tabindex", 0), C.svgEl.setAttribute("data-index", I), C.svgEl.addEventListener("keydown", o.bind(T)), C.svgEl.addEventListener("keyup", a.bind(T)), C.svgEl.addEventListener("focus", r.bind(T)));
+        C.svgEl.getAttribute("selectable") === "true" && (C.svgEl.setAttribute("tabindex", 0), C.svgEl.setAttribute("data-index", I), C.svgEl.addEventListener("keydown", s.bind(T)), C.svgEl.addEventListener("keyup", a.bind(T)), C.svgEl.addEventListener("focus", r.bind(T)));
       }
     for (var B = 0; B < q.length; B++)
       q[B].addEventListener("touchstart", n.bind(T), { passive: !0 }), q[B].addEventListener("touchmove", t.bind(T), { passive: !0 }), q[B].addEventListener("touchend", e.bind(T), { passive: !0 }), q[B].addEventListener("mousedown", n.bind(T)), q[B].addEventListener("mousemove", t.bind(T)), q[B].addEventListener("mouseup", e.bind(T));
@@ -10127,13 +10127,13 @@ function Co() {
   function l(T) {
     var q = 1, I = 1, C = T.target.closest("svg"), B = 0;
     C && C.viewBox && C.viewBox.baseVal && (C.viewBox.baseVal.width !== 0 && (q = C.viewBox.baseVal.width / C.clientWidth), C.viewBox.baseVal.height !== 0 && (I = C.viewBox.baseVal.height / C.clientHeight), B = C.viewBox.baseVal.y);
-    var R = T.target && T.target.tagName === "svg", S, k;
-    return R ? (S = T.offsetX, k = T.offsetY) : (S = T.layerX, k = T.layerY), S = S * q, k = k * I, [S, k + B];
+    var R = T.target && T.target.tagName === "svg", S, _;
+    return R ? (S = T.offsetX, _ = T.offsetY) : (S = T.layerX, _ = T.layerY), S = S * q, _ = _ * I, [S, _ + B];
   }
   function r(T) {
     this.dragMechanism === "keyboard" && this.dragYStep !== 0 && this.dragTarget && v.bind(this)(this.dragTarget, this.dragYStep, this.selectables.length, this.dragIndex, T), this.dragYStep = 0;
   }
-  function o(T) {
+  function s(T) {
     switch (T.keyCode) {
       case 38:
       case 40:
@@ -10148,10 +10148,10 @@ function Co() {
         q = !0, this.dragTarget = this.selectables[I], this.dragIndex = I, this.dragMechanism = "keyboard", e.bind(this)(T);
         break;
       case 38:
-        q = !0, this.dragTarget = this.selectables[I], this.dragIndex = I, this.dragTarget && this.dragTarget.isDraggable && (this.dragging && this.dragTarget.isDraggable && this.dragTarget.absEl.highlight(void 0, this.dragColor), this.dragYStep--, this.dragTarget.svgEl.setAttribute("transform", "translate(0," + this.dragYStep * _.STEP + ")"));
+        q = !0, this.dragTarget = this.selectables[I], this.dragIndex = I, this.dragTarget && this.dragTarget.isDraggable && (this.dragging && this.dragTarget.isDraggable && this.dragTarget.absEl.highlight(void 0, this.dragColor), this.dragYStep--, this.dragTarget.svgEl.setAttribute("transform", "translate(0," + this.dragYStep * k.STEP + ")"));
         break;
       case 40:
-        q = !0, this.dragTarget = this.selectables[I], this.dragIndex = I, this.dragMechanism = "keyboard", this.dragTarget && this.dragTarget.isDraggable && (this.dragging && this.dragTarget.isDraggable && this.dragTarget.absEl.highlight(void 0, this.dragColor), this.dragYStep++, this.dragTarget.svgEl.setAttribute("transform", "translate(0," + this.dragYStep * _.STEP + ")"));
+        q = !0, this.dragTarget = this.selectables[I], this.dragIndex = I, this.dragMechanism = "keyboard", this.dragTarget && this.dragTarget.isDraggable && (this.dragging && this.dragTarget.isDraggable && this.dragTarget.absEl.highlight(void 0, this.dragColor), this.dragYStep++, this.dragTarget.svgEl.setAttribute("transform", "translate(0," + this.dragYStep * k.STEP + ")"));
         break;
       case 9:
         this.dragYStep !== 0 && e.bind(this)(T);
@@ -10159,7 +10159,7 @@ function Co() {
     }
     q && T.preventDefault();
   }
-  function s(T, q) {
+  function o(T, q) {
     if (!q)
       return -1;
     var I = q.dataset;
@@ -10178,8 +10178,8 @@ function Co() {
       if (T.getDim(S), S.dim.left < q && S.dim.right > q && S.dim.top < I && S.dim.bottom > I)
         B = R, C = 0;
       else if (S.dim.top < I && S.dim.bottom > I) {
-        var k = Math.min(Math.abs(S.dim.left - q), Math.abs(S.dim.right - q));
-        k < C && (C = k, B = R);
+        var _ = Math.min(Math.abs(S.dim.left - q), Math.abs(S.dim.right - q));
+        _ < C && (C = _, B = R);
       } else if (S.dim.left < q && S.dim.right > q) {
         var M = Math.min(Math.abs(S.dim.top - I), Math.abs(S.dim.bottom - I));
         M < C && (C = M, B = R);
@@ -10208,7 +10208,7 @@ function Co() {
     return T;
   }
   function f(T, q) {
-    var I, C, B, R = s(T.selectables, d(q.target));
+    var I, C, B, R = o(T.selectables, d(q.target));
     return R >= 0 ? (B = u(T.selectables[R].svgEl.getBBox(), q, T.scale), I = B[0], C = B[1]) : (B = l(q), I = B[0], C = B[1], R = p(T, I, C)), { x: I, y: C, clickedOn: R };
   }
   function i(T) {
@@ -10226,8 +10226,8 @@ function Co() {
   function t(T) {
     var q = T;
     if (T.type === "touchmove" && (i(T), T.touches.length > 0 && (q = T.touches[0])), this.lastTouchMove = T, !(!this.dragTarget || !this.dragging || !this.dragTarget.isDraggable || this.dragMechanism !== "mouse" || !this.dragMouseStart)) {
-      var I = f(this, q), C = Math.round((I.y - this.dragMouseStart.y) / _.STEP);
-      C !== this.dragYStep && (this.dragYStep = C, this.dragTarget.svgEl.setAttribute("transform", "translate(0," + C * _.STEP + ")"));
+      var I = f(this, q), C = Math.round((I.y - this.dragMouseStart.y) / k.STEP);
+      C !== this.dragYStep && (this.dragYStep = C, this.dragTarget.svgEl.setAttribute("transform", "translate(0," + C * k.STEP + ")"));
     }
   }
   function e(T) {
@@ -10238,8 +10238,8 @@ function Co() {
     T >= 0 && T < this.selectables.length && (this.dragTarget = this.selectables[T], this.dragIndex = T, this.dragMechanism = "keyboard", e.bind(this)({ target: this.dragTarget.svgEl }));
   }
   function v(T, q, I, C, B) {
-    for (var R = m(T, B), S = R.classes, k = R.analysis, M = 0; M < this.listeners.length; M++)
-      this.listeners[M](T.absEl.abcelem, T.absEl.tuneNumber, S.join(" "), k, { step: q, max: I, index: C, setSelection: c.bind(this) }, B);
+    for (var R = m(T, B), S = R.classes, _ = R.analysis, M = 0; M < this.listeners.length; M++)
+      this.listeners[M](T.absEl.abcelem, T.absEl.tuneNumber, S.join(" "), _, { step: q, max: I, index: C, setSelection: c.bind(this) }, B);
   }
   function h() {
     for (var T = 0; T < this.selected.length; T++)
@@ -10251,8 +10251,8 @@ function Co() {
     for (var I = 0; I < this.staffgroups.length; I++)
       for (var C = this.staffgroups[I].voices, B = 0; B < C.length; B++)
         for (var R = C[B].children, S = 0; S < R.length; S++) {
-          var k = R[S].abcelem.startChar, M = R[S].abcelem.endChar;
-          (q > k && T < M || q === T && q === M) && (this.selected[this.selected.length] = R[S], R[S].highlight(void 0, this.selectionColor));
+          var _ = R[S].abcelem.startChar, M = R[S].abcelem.endChar;
+          (q > _ && T < M || q === T && q === M) && (this.selected[this.selected.length] = R[S], R[S].highlight(void 0, this.selectionColor));
         }
   }
   function w(T) {
@@ -10282,23 +10282,23 @@ function Co() {
   }
   return d0 = g, d0;
 }
-var p0, Tn;
+var p0, Sn;
 function Gr() {
-  if (Tn) return p0;
-  Tn = 1;
-  function _(m, g, l, r, o) {
-    return g + (r - g) / (l - m) * (o - m);
-  }
-  return p0 = _, p0;
-}
-var v0, Sn;
-function ko() {
-  if (Sn) return v0;
+  if (Sn) return p0;
   Sn = 1;
-  var _ = Te(), m = Ce(), g = Gr(), l = function(t) {
+  function k(m, g, l, r, s) {
+    return g + (r - g) / (l - m) * (s - m);
+  }
+  return p0 = k, p0;
+}
+var v0, En;
+function To() {
+  if (En) return v0;
+  En = 1;
+  var k = Te(), m = Ce(), g = Gr(), l = function(t) {
     if (!(t.elems.length === 0 || t.allrests)) {
-      var e = s(t.stemsUp, t.isgrace), c = t.elems[0], v = t.elems[t.elems.length - 1], h = 0, y = t.stemsUp ? c.abcelem.maxpitch : c.abcelem.minpitch;
-      h = o(c, t.stemsUp, y, h), h = o(v, t.stemsUp, y, h), h = Math.max(t.stemHeight, h + 3);
+      var e = o(t.stemsUp, t.isgrace), c = t.elems[0], v = t.elems[t.elems.length - 1], h = 0, y = t.stemsUp ? c.abcelem.maxpitch : c.abcelem.minpitch;
+      h = s(c, t.stemsUp, y, h), h = s(v, t.stemsUp, y, h), h = Math.max(t.stemHeight, h + 3);
       var w = u(t.average, t.elems.length, h, t.stemsUp, c.abcelem.averagepitch, v.abcelem.averagepitch, t.isflat, t.min, t.max, t.isgrace), A = p(t.stemsUp, c, v);
       t.addBeam({ startX: A[0], endX: A[1], startY: w[0], endY: w[1], dy: e });
       for (var P = n(t.elems, t.stemsUp, t.beams[0], t.isgrace, e), N = 0; N < P.length; N++)
@@ -10308,7 +10308,7 @@ function ko() {
   }, r = function(t) {
     return t === void 0 ? 0 : Math.floor(Math.log(t) / Math.log(2));
   };
-  function o(t, e, c, v) {
+  function s(t, e, c, v) {
     if (!t.children)
       return v;
     for (var h = 0; h < t.children.length; h++) {
@@ -10323,7 +10323,7 @@ function ko() {
     var h = t - e, y = c / 2;
     return h > y && (h = y), h < -y && (h = -y), h;
   }
-  function s(t, e) {
+  function o(t, e) {
     var c = t ? m.STEP : -m.STEP;
     return e && (c = c * 0.4), c;
   }
@@ -10345,7 +10345,7 @@ function ko() {
         A || (I += N.dx);
         var C = N.x + I, B = g(c.startX, c.startY, c.endX, c.endY, C), R = e ? -0.6 : 0.6;
         e || (B -= v / 2 / m.STEP), A && (I += w.heads[0].dx), N.c === "noteheads.slash.quarter" && (e ? q += 1 : q -= 1);
-        var S = new _(null, I, 0, q, {
+        var S = new k(null, I, 0, q, {
           type: "stem",
           pitch2: B,
           linewidth: R
@@ -10387,11 +10387,11 @@ function ko() {
             w[R].split[w[R].split.length - 1] >= S[0] && (S[0] += P.w), w[R].split.push(S[0]), w[R].split.push(S[1]);
           }
         }
-        for (var k = w.length - 1; k >= 0; k--) {
-          var M = f(t, A), F = M === -1 || M < t.length && r(t[M].abcelem.duration) > -k - 4;
+        for (var _ = w.length - 1; _ >= 0; _--) {
+          var M = f(t, A), F = M === -1 || M < t.length && r(t[M].abcelem.duration) > -_ - 4;
           if (F) {
-            var L = T, b = q + I * (k + 1);
-            if (w[k].single) {
+            var L = T, b = q + I * (_ + 1);
+            if (w[_].single) {
               var x = i(t, A), E = x === -1, D = M === -1;
               if (E)
                 L = T + 5;
@@ -10401,14 +10401,14 @@ function ko() {
                 var O = t[x].abcelem.duration, z = t[M].abcelem.duration;
                 O === z ? L = A % 2 === 0 ? T + 5 : T - 5 : L = O < z ? T + 5 : T - 5;
               }
-              b = g(c.startX, c.startY, c.endX, c.endY, L) + I * (k + 1);
+              b = g(c.startX, c.startY, c.endX, c.endY, L) + I * (_ + 1);
             }
-            var H = { startX: w[k].x, endX: L, startY: w[k].y, endY: b, dy: h };
-            if (w[k].split !== void 0) {
-              var $ = w[k].split;
-              H.endX <= $[$.length - 1] && ($[$.length - 1] -= P.w), $.push(H.endX), H.split = w[k].split;
+            var H = { startX: w[_].x, endX: L, startY: w[_].y, endY: b, dy: h };
+            if (w[_].split !== void 0) {
+              var $ = w[_].split;
+              H.endX <= $[$.length - 1] && ($[$.length - 1] -= P.w), $.push(H.endX), H.split = w[_].split;
             }
-            y.push(H), w = w.slice(0, k);
+            y.push(H), w = w.slice(0, _);
           }
         }
       }
@@ -10417,18 +10417,18 @@ function ko() {
   }
   return v0 = l, v0;
 }
-var g0, En;
-function _o() {
-  if (En) return g0;
-  En = 1;
-  var _ = Gr();
+var g0, An;
+function So() {
+  if (An) return g0;
+  An = 1;
+  var k = Gr();
   function m(a) {
     if (a.anchor1 && a.anchor2) {
       a.hasBeam = !!a.anchor1.parent.beam && a.anchor1.parent.beam === a.anchor2.parent.beam;
-      var s = a.anchor1.parent.beam;
-      if (a.hasBeam && (s.elems[0] !== a.anchor1.parent || s.elems[s.elems.length - 1] !== a.anchor2.parent) && (a.hasBeam = !1), a.hasBeam) {
-        var p = g(s) ? a.anchor1.x + a.anchor1.w : a.anchor1.x;
-        a.yTextPos = r(p, a.anchor2.x, s), a.yTextPos += g(s) ? 3 : -2, a.xTextPos = o(p, a.anchor2.x), a.top = a.yTextPos + 1, a.bottom = a.yTextPos - 2, g(s) && (a.endingHeightAbove = 4);
+      var o = a.anchor1.parent.beam;
+      if (a.hasBeam && (o.elems[0] !== a.anchor1.parent || o.elems[o.elems.length - 1] !== a.anchor2.parent) && (a.hasBeam = !1), a.hasBeam) {
+        var p = g(o) ? a.anchor1.x + a.anchor1.w : a.anchor1.x;
+        a.yTextPos = r(p, a.anchor2.x, o), a.yTextPos += g(o) ? 3 : -2, a.xTextPos = s(p, a.anchor2.x), a.top = a.yTextPos + 1, a.bottom = a.yTextPos - 2, g(o) && (a.endingHeightAbove = 4);
       } else {
         var u = l(a);
         if (a.up = u, a.startNote = u ? Math.max(a.anchor1.parent.top, 9) + 4 : Math.min(a.anchor1.parent.bottom, 0) - 2, a.endNote = u ? Math.max(a.anchor2.parent.top, 9) + 4 : Math.min(a.anchor2.parent.bottom, 0) - 2, a.anchor1.parent.type === "rest" && a.anchor2.parent.type !== "rest" ? a.startNote = a.endNote : a.anchor2.parent.type === "rest" && a.anchor1.parent.type !== "rest" && (a.endNote = a.startNote), u) {
@@ -10449,34 +10449,34 @@ function _o() {
     return a.stemsUp;
   }
   function l(a) {
-    var s = 0, p = 0;
-    if (a.anchor1 && (a.anchor1.stemDir === "up" && s++, a.anchor1.stemDir === "down" && p++), a.anchor2 && (a.anchor2.stemDir === "up" && s++, a.anchor2.stemDir === "down" && p++), a.middleElems)
+    var o = 0, p = 0;
+    if (a.anchor1 && (a.anchor1.stemDir === "up" && o++, a.anchor1.stemDir === "down" && p++), a.anchor2 && (a.anchor2.stemDir === "up" && o++, a.anchor2.stemDir === "down" && p++), a.middleElems)
       for (var u = 0; u < a.middleElems.length; u++) {
         var d = a.middleElems[u];
-        d.stemDir === "up" && s++, d.stemDir === "down" && p++;
+        d.stemDir === "up" && o++, d.stemDir === "down" && p++;
       }
-    return s >= p;
+    return o >= p;
   }
-  function r(a, s, p) {
+  function r(a, o, p) {
     if (p.beams.length === 0)
       return 0;
     p = p.beams[0];
-    var u = a + (s - a) / 2;
-    return _(p.startX, p.startY, p.endX, p.endY, u);
+    var u = a + (o - a) / 2;
+    return k(p.startX, p.startY, p.endX, p.endY, u);
   }
-  function o(a, s) {
-    return a + (s - a) / 2;
+  function s(a, o) {
+    return a + (o - a) / 2;
   }
   return g0 = m, g0;
 }
-var b0, An;
-function To() {
-  if (An) return b0;
-  An = 1;
-  var _ = ko(), m = Gr(), g = _o(), l = function(d) {
+var b0, Mn;
+function Eo() {
+  if (Mn) return b0;
+  Mn = 1;
+  var k = To(), m = Gr(), g = So(), l = function(d) {
     for (var f = 0; f < d.beams.length; f++)
       if (d.beams[f].type === "BeamElem") {
-        _(d.beams[f]), r(d.beams[f]);
+        k(d.beams[f]), r(d.beams[f]);
         for (var i = 0; i < d.beams[f].elems.length; i++)
           d.adjustRange(d.beams[f].elems[i]);
       }
@@ -10499,7 +10499,7 @@ function To() {
         }
     }
   }
-  function o(d, f) {
+  function s(d, f) {
     var i = f.getChordDim();
     if (i) {
       for (var n = 0; n < d.length; n++) {
@@ -10516,13 +10516,13 @@ function To() {
     var f = [0], i = [0], n, t, e;
     for (n = 0; n < d.length; n++) {
       for (t = 0; t < d[n].children.length; t++)
-        e = d[n].children[t], e.chordHeightAbove && o(f, e);
+        e = d[n].children[t], e.chordHeightAbove && s(f, e);
       for (t = d[n].children.length - 1; t >= 0; t--)
-        e = d[n].children[t], e.chordHeightBelow && o(i, e);
+        e = d[n].children[t], e.chordHeightBelow && s(i, e);
     }
     return (f.length > 1 || i.length > 1) && p(d, f.length, i.length), { above: f.length, below: i.length };
   }
-  function s(d) {
+  function o(d) {
     for (var f = 0, i = 0; i < d.children.length; i++) {
       var n = d.children[i];
       n.chordHeightBelow && f++;
@@ -10531,7 +10531,7 @@ function To() {
   }
   function p(d, f, i) {
     for (var n = 0; n < d.length; n++) {
-      s(d[n]);
+      o(d[n]);
       for (var t = 0; t < d[n].children.length; t++) {
         var e = d[n].children[t];
         e.chordHeightAbove && e.invertLane(f);
@@ -10543,11 +10543,11 @@ function To() {
   }
   return b0 = l, b0;
 }
-var m0, Mn;
-function So() {
-  if (Mn) return m0;
-  Mn = 1;
-  var _ = Ce(), m = function(f, i) {
+var m0, Bn;
+function Ao() {
+  if (Bn) return m0;
+  Bn = 1;
+  var k = Ce(), m = function(f, i) {
     for (var n, t = 0; t < i.staffs.length; t++) {
       var e = i.staffs[t], c = {
         tempoHeightAbove: 0,
@@ -10562,7 +10562,7 @@ function So() {
         volumeHeightBelow: 0,
         dynamicHeightBelow: 0
       };
-      if (f.showDebug && f.showDebug.indexOf("box") >= 0 && (e.originalTop = e.top, e.originalBottom = e.bottom), l(e, c, "lyricHeightAbove"), l(e, c, "chordHeightAbove", e.specialY.chordLines.above), e.specialY.endingHeightAbove && (e.specialY.chordHeightAbove ? e.top += 2 : e.top += e.specialY.endingHeightAbove + g, c.endingHeightAbove = e.top), e.specialY.dynamicHeightAbove && e.specialY.volumeHeightAbove ? (e.top += Math.max(e.specialY.dynamicHeightAbove, e.specialY.volumeHeightAbove) + g, c.dynamicHeightAbove = e.top, c.volumeHeightAbove = e.top) : (l(e, c, "dynamicHeightAbove"), l(e, c, "volumeHeightAbove")), l(e, c, "partHeightAbove"), l(e, c, "tempoHeightAbove"), e.specialY.lyricHeightBelow && (e.specialY.lyricHeightBelow += f.spacing.vocal / _.STEP, c.lyricHeightBelow = e.bottom, e.bottom -= e.specialY.lyricHeightBelow + g), e.specialY.chordHeightBelow) {
+      if (f.showDebug && f.showDebug.indexOf("box") >= 0 && (e.originalTop = e.top, e.originalBottom = e.bottom), l(e, c, "lyricHeightAbove"), l(e, c, "chordHeightAbove", e.specialY.chordLines.above), e.specialY.endingHeightAbove && (e.specialY.chordHeightAbove ? e.top += 2 : e.top += e.specialY.endingHeightAbove + g, c.endingHeightAbove = e.top), e.specialY.dynamicHeightAbove && e.specialY.volumeHeightAbove ? (e.top += Math.max(e.specialY.dynamicHeightAbove, e.specialY.volumeHeightAbove) + g, c.dynamicHeightAbove = e.top, c.volumeHeightAbove = e.top) : (l(e, c, "dynamicHeightAbove"), l(e, c, "volumeHeightAbove")), l(e, c, "partHeightAbove"), l(e, c, "tempoHeightAbove"), e.specialY.lyricHeightBelow && (e.specialY.lyricHeightBelow += f.spacing.vocal / k.STEP, c.lyricHeightBelow = e.bottom, e.bottom -= e.specialY.lyricHeightBelow + g), e.specialY.chordHeightBelow) {
         c.chordHeightBelow = e.bottom;
         var v = e.specialY.chordHeightBelow;
         e.specialY.chordLines.below && (v *= e.specialY.chordLines.below), e.bottom -= v + g;
@@ -10573,10 +10573,10 @@ function So() {
         e.bottom -= w;
       }
       if (n !== void 0) {
-        var A = e.top - 10, P = n + A, N = f.spacing.systemStaffSeparation / _.STEP, T = N - P;
+        var A = e.top - 10, P = n + A, N = f.spacing.systemStaffSeparation / k.STEP, T = N - P;
         T > 0 && (e.top += T);
       }
-      e.top += f.spacing.staffTopMargin / _.STEP, n = 2 - e.bottom;
+      e.top += f.spacing.staffTopMargin / k.STEP, n = 2 - e.bottom;
     }
   }, g = 1;
   function l(f, i, n, t) {
@@ -10589,7 +10589,7 @@ function So() {
     var t, e, c = 0;
     for (t = 0; t < i.children.length; t++) {
       e = i.children[t];
-      var v = o(f, e, n);
+      var v = s(f, e, n);
       v < e.bottom && (c = e.bottom - v, e.bottom = v, i.bottom = v);
     }
     for (t = 0; t < i.otherchildren.length; t++)
@@ -10598,7 +10598,7 @@ function So() {
           a(f, e);
           break;
         case "DynamicDecoration":
-          s(f, e);
+          o(f, e);
           break;
         case "EndingElem":
           p(f, e);
@@ -10610,7 +10610,7 @@ function So() {
       }
     return c;
   }
-  function o(f, i, n) {
+  function s(f, i, n) {
     for (var t = i.bottom, e = 0; e < i.children.length; e++) {
       var c = i.children[e];
       for (var v in i.specialY)
@@ -10621,7 +10621,7 @@ function So() {
   function a(f, i) {
     i.dynamicHeightAbove ? i.pitch = f.dynamicHeightAbove : i.pitch = f.dynamicHeightBelow;
   }
-  function s(f, i) {
+  function o(f, i) {
     i.volumeHeightAbove ? i.pitch = f.volumeHeightAbove : i.pitch = f.volumeHeightBelow;
   }
   function p(f, i) {
@@ -10647,7 +10647,7 @@ function So() {
         i.chordHeightAbove ? (i.top = f.chordHeightAbove, i.bottom = f.chordHeightAbove) : (i.top = f.chordHeightBelow, i.bottom = f.chordHeightBelow);
         break;
       case "lyric":
-        i.lyricHeightAbove ? (i.top = f.lyricHeightAbove, i.bottom = f.lyricHeightAbove) : (i.top = f.lyricHeightBelow + n.vocal / _.STEP, i.bottom = f.lyricHeightBelow + n.vocal / _.STEP, i.pitch -= n.vocal / _.STEP);
+        i.lyricHeightAbove ? (i.top = f.lyricHeightAbove, i.bottom = f.lyricHeightAbove) : (i.top = f.lyricHeightBelow + n.vocal / k.STEP, i.bottom = f.lyricHeightBelow + n.vocal / k.STEP, i.pitch -= n.vocal / k.STEP);
         break;
       case "debug":
         i.top = f.chordHeightAbove, i.bottom = f.chordHeightAbove;
@@ -10657,26 +10657,26 @@ function So() {
   }
   return m0 = m, m0;
 }
-var y0, Bn;
-function Eo() {
-  if (Bn) return y0;
-  Bn = 1;
-  var _ = function() {
+var y0, Nn;
+function Mo() {
+  if (Nn) return y0;
+  Nn = 1;
+  var k = function() {
   };
-  _.beginLayout = function(l, r) {
+  k.beginLayout = function(l, r) {
     r.i = 0, r.durationindex = 0, r.startx = l, r.minx = l, r.nextx = l, r.spacingduration = 0;
-  }, _.layoutEnded = function(l) {
+  }, k.layoutEnded = function(l) {
     return l.i >= l.children.length;
-  }, _.getNextX = function(l) {
+  }, k.getNextX = function(l) {
     return Math.max(l.minx, l.nextx);
-  }, _.getSpacingUnits = function(l) {
+  }, k.getSpacingUnits = function(l) {
     return Math.sqrt(l.spacingduration * 8);
-  }, _.layoutOneItem = function(l, r, o, a, s) {
-    var p = o.children[o.i];
+  }, k.layoutOneItem = function(l, r, s, a, o) {
+    var p = s.children[s.i];
     if (!p) return 0;
-    var u = l - o.minx, d = o.durationindex + p.duration > 0 ? a : 0;
-    if (p.abcelem.el_type === "note" && !p.abcelem.rest && o.voicenumber !== 0 && s) {
-      var f = s.children[s.i], i = f && (p.abcelem.maxpitch <= f.abcelem.maxpitch + 1 && p.abcelem.maxpitch >= f.abcelem.minpitch - 1 || p.abcelem.minpitch <= f.abcelem.maxpitch + 1 && p.abcelem.minpitch >= f.abcelem.minpitch - 1);
+    var u = l - s.minx, d = s.durationindex + p.duration > 0 ? a : 0;
+    if (p.abcelem.el_type === "note" && !p.abcelem.rest && s.voicenumber !== 0 && o) {
+      var f = o.children[o.i], i = f && (p.abcelem.maxpitch <= f.abcelem.maxpitch + 1 && p.abcelem.maxpitch >= f.abcelem.minpitch - 1 || p.abcelem.minpitch <= f.abcelem.maxpitch + 1 && p.abcelem.minpitch >= f.abcelem.minpitch - 1);
       if (i && p.abcelem.minpitch === f.abcelem.minpitch && p.abcelem.maxpitch === f.abcelem.maxpitch && f.heads && f.heads.length > 0 && p.heads && p.heads.length > 0 && f.heads[0].c === p.heads[0].c && (i = !1), i) {
         var n = f.heads && f.heads.length > 0 ? f.heads[0].realWidth : f.fixed.w;
         p.adjustedWidth || (p.adjustedWidth = n + p.w), p.w = p.adjustedWidth;
@@ -10687,50 +10687,50 @@ function Eo() {
       }
     }
     var c = m(p, d);
-    return u < c && (o.i === 0 || p.type !== "bar" || o.children[o.i - 1].type !== "part" && o.children[o.i - 1].type !== "tempo") && (l += c - u), p.setX(l), o.spacingduration = p.duration, o.minx = l + g(p), o.i !== o.children.length - 1 && (o.minx += p.minspacing), this.updateNextX(l, r, o), l;
-  }, _.shiftRight = function(l, r) {
-    var o = r.children[r.i];
-    o && (o.setX(o.x + l), r.minx += l, r.nextx += l);
-  }, _.updateNextX = function(l, r, o) {
-    o.nextx = l + r * this.getSpacingUnits(o);
-  }, _.updateIndices = function(l) {
+    return u < c && (s.i === 0 || p.type !== "bar" || s.children[s.i - 1].type !== "part" && s.children[s.i - 1].type !== "tempo") && (l += c - u), p.setX(l), s.spacingduration = p.duration, s.minx = l + g(p), s.i !== s.children.length - 1 && (s.minx += p.minspacing), this.updateNextX(l, r, s), l;
+  }, k.shiftRight = function(l, r) {
+    var s = r.children[r.i];
+    s && (s.setX(s.x + l), r.minx += l, r.nextx += l);
+  }, k.updateNextX = function(l, r, s) {
+    s.nextx = l + r * this.getSpacingUnits(s);
+  }, k.updateIndices = function(l) {
     this.layoutEnded(l) || (l.durationindex += l.children[l.i].duration, l.children[l.i].type === "bar" && (l.durationindex = Math.round(l.durationindex * 64) / 64), l.i++);
   };
   function m(l, r) {
-    var o = 0;
-    return (l.type === "note" || l.type === "bar") && (o = r), -l.extraw + o;
+    var s = 0;
+    return (l.type === "note" || l.type === "bar") && (s = r), -l.extraw + s;
   }
   function g(l) {
     return l.w;
   }
-  return y0 = _, y0;
+  return y0 = k, y0;
 }
-var w0, Nn;
-function Ao() {
-  if (Nn) return w0;
-  Nn = 1;
-  var _ = Eo();
+var w0, Pn;
+function Bo() {
+  if (Pn) return w0;
+  Pn = 1;
+  var k = Mo();
   function m(a) {
-    for (var s = 0, p = 0; p < a.length; p++) {
+    for (var o = 0, p = 0; p < a.length; p++) {
       var u = a[p];
       if (u.children.length > 0) {
         var d = u.children.length - 1, f = u.children[d];
         if (f.abcelem.el_type === "bar") {
           var i = f.children[0].x;
-          i > s ? s = i : f.children[0].x = s;
+          i > o ? o = i : f.children[0].x = o;
         }
       }
     }
   }
-  var g = function(a, s, p, u, d) {
+  var g = function(a, o, p, u, d) {
     var f = 1e-7, i = 0, n = 1e3, t = d;
     u.startx = t;
     var e, c = 0;
     for (p && console.log("init layout", a), e = 0; e < u.voices.length; e++)
-      _.beginLayout(t, u.voices[e]);
+      k.beginLayout(t, u.voices[e]);
     for (var v = 0; !l(u.voices); ) {
       for (c = null, e = 0; e < u.voices.length; e++)
-        !_.layoutEnded(u.voices[e]) && (!c || r(u.voices[e]) < c) && (c = r(u.voices[e]));
+        !k.layoutEnded(u.voices[e]) && (!c || r(u.voices[e]) < c) && (c = r(u.voices[e]));
       var h = [], y = [];
       for (e = 0; e < u.voices.length; e++) {
         var w = r(u.voices[e]);
@@ -10739,98 +10739,98 @@ function Ao() {
       v = 0;
       var A = 0;
       for (e = 0; e < h.length; e++)
-        _.getNextX(h[e]) > t && (t = _.getNextX(h[e]), v = _.getSpacingUnits(h[e]), A = h[e].spacingduration);
+        k.getNextX(h[e]) > t && (t = k.getNextX(h[e]), v = k.getSpacingUnits(h[e]), A = h[e].spacingduration);
       i += v, n = Math.min(n, v), p && console.log("currentduration: ", c, i, n);
       var P = void 0;
       for (e = 0; e < h.length; e++) {
         var N = h[e];
         N.voicenumber === 0 && (P = e);
         var T = P !== void 0 && h[P].voicenumber !== N.voicenumber ? h[P] : void 0;
-        o(N, T) || (T = void 0);
-        var q = _.layoutOneItem(t, a, N, s, T), I = q - t;
+        s(N, T) || (T = void 0);
+        var q = k.layoutOneItem(t, a, N, o, T), I = q - t;
         if (I > 0) {
           t = q;
           for (var C = 0; C < e; C++)
-            _.shiftRight(I, h[C]);
+            k.shiftRight(I, h[C]);
         }
       }
       for (e = 0; e < y.length; e++)
-        y[e].spacingduration -= A, _.updateNextX(t, a, y[e]);
+        y[e].spacingduration -= A, k.updateNextX(t, a, y[e]);
       for (e = 0; e < h.length; e++) {
         var B = h[e];
-        _.updateIndices(B);
+        k.updateIndices(B);
       }
     }
     for (e = 0; e < u.voices.length; e++)
-      _.getNextX(u.voices[e]) > t && (t = _.getNextX(u.voices[e]), v = _.getSpacingUnits(u.voices[e]));
+      k.getNextX(u.voices[e]) > t && (t = k.getNextX(u.voices[e]), v = k.getSpacingUnits(u.voices[e]));
     return m(u.voices), i += v, u.setWidth(t), { spacingUnits: i, minSpace: n };
   };
   function l(a) {
-    for (var s = 0; s < a.length; s++)
-      if (!_.layoutEnded(a[s])) return !1;
+    for (var o = 0; o < a.length; o++)
+      if (!k.layoutEnded(a[o])) return !1;
     return !0;
   }
   function r(a) {
     return a.durationindex - (a.children[a.i] && a.children[a.i].duration > 0 ? 0 : 5e-7);
   }
-  function o(a, s) {
-    return !a || !a.staff || !a.staff.voices || a.staff.voices.length === 0 || !s || !s.staff || !s.staff.voices || s.staff.voices.length === 0 ? !1 : a.staff.voices[0] === s.staff.voices[0];
+  function s(a, o) {
+    return !a || !a.staff || !a.staff.voices || a.staff.voices.length === 0 || !o || !o.staff || !o.staff.voices || o.staff.voices.length === 0 ? !1 : a.staff.voices[0] === o.staff.voices[0];
   }
   return w0 = g, w0;
 }
-var x0, Pn;
-function hs() {
-  if (Pn) return x0;
-  Pn = 1;
-  function _(r, o, a, s, p) {
+var x0, Ln;
+function us() {
+  if (Ln) return x0;
+  Ln = 1;
+  function k(r, s, a, o, p) {
     var u = r.padding.left, d = 0, f, i;
     for (f = 0; f < a.length; f++)
-      a[f].header && (i = o.calc(a[f].header, "voicefont", ""), d = Math.max(d, i.width));
-    if (d = m(d, s, o), d = m(d, p, o), d) {
-      var n = o.calc("A", "voicefont", "");
+      a[f].header && (i = s.calc(a[f].header, "voicefont", ""), d = Math.max(d, i.width));
+    if (d = m(d, o, s), d = m(d, p, s), d) {
+      var n = s.calc("A", "voicefont", "");
       d += n.width;
     }
     u += d;
     var t = 0;
-    return t = g(s, u, t), t = g(p, u, t), u + t;
+    return t = g(o, u, t), t = g(p, u, t), u + t;
   }
-  function m(r, o, a) {
-    if (o) {
-      for (var s = 0; s < o.length; s++)
-        if (o[s].header) {
-          var p = a.calc(o[s].header, "voicefont", "");
+  function m(r, s, a) {
+    if (s) {
+      for (var o = 0; o < s.length; o++)
+        if (s[o].header) {
+          var p = a.calc(s[o].header, "voicefont", "");
           r = Math.max(r, p.width);
         }
     }
     return r;
   }
-  function g(r, o, a) {
+  function g(r, s, a) {
     if (r)
-      for (var s = 0; s < r.length; s++)
-        l(o, r[s]), a = Math.max(a, r[s].getWidth());
+      for (var o = 0; o < r.length; o++)
+        l(s, r[o]), a = Math.max(a, r[o].getWidth());
     return a;
   }
-  function l(r, o) {
-    o.x = r;
+  function l(r, s) {
+    s.x = r;
   }
-  return x0 = _, x0;
+  return x0 = k, x0;
 }
-var C0, Ln;
-function Mo() {
-  if (Ln) return C0;
-  Ln = 1;
-  var _ = hs();
-  function m(l, r, o) {
-    var a = _(l, r.getTextSize, r.voices, r.brace, r.bracket), s = g(r, o.minPadding), p = s.totalDuration, u = s.minSpacing, d = u * p;
-    o.minWidth && (d = Math.max(d, o.minWidth));
-    var f = o.minPadding ? o.minPadding / 2 : 2;
+var C0, qn;
+function No() {
+  if (qn) return C0;
+  qn = 1;
+  var k = us();
+  function m(l, r, s) {
+    var a = k(l, r.getTextSize, r.voices, r.brace, r.bracket), o = g(r, s.minPadding), p = o.totalDuration, u = o.minSpacing, d = u * p;
+    s.minWidth && (d = Math.max(d, s.minWidth));
+    var f = s.minPadding ? s.minPadding / 2 : 2;
     r.startx = a, r.w = d + a;
     for (var i = 0; i < r.voices.length; i++) {
       var n = r.voices[i];
       n.startx = a, n.w = d + a;
       for (var t = a, e = !1, c = 0, v = 0; v < n.children.length; v++) {
         var h = n.children[v];
-        e || (h.duration !== 0 ? (e = !0, c = (d + a - t) / p, r.gridStart = t) : (h.x = t, t += h.w + h.minspacing)), e && (o.align === "center" ? h.x = t + h.duration * c / 2 - h.w / 2 : h.duration === 0 ? h.x = t + 1 - h.w : h.x = t + f - h.extraw, t += h.duration * c);
+        e || (h.duration !== 0 ? (e = !0, c = (d + a - t) / p, r.gridStart = t) : (h.x = t, t += h.w + h.minspacing)), e && (s.align === "center" ? h.x = t + h.duration * c / 2 - h.w / 2 : h.duration === 0 ? h.x = t + 1 - h.w : h.x = t + f - h.extraw, t += h.duration * c);
         for (var y = 0; y < h.children.length; y++) {
           var w = h.children[y], A = w.dx ? w.dx : 0;
           w.x = h.x + A;
@@ -10841,31 +10841,31 @@ function Mo() {
     return d;
   }
   function g(l, r) {
-    for (var o = 0, a = 0, s = 0; s < l.voices.length; s++) {
-      for (var p = 0, u = l.voices[s], d = 0; d < u.children.length; d++) {
+    for (var s = 0, a = 0, o = 0; o < l.voices.length; o++) {
+      for (var p = 0, u = l.voices[o], d = 0; d < u.children.length; d++) {
         var f = u.children[d];
         if (p += f.duration, f.duration) {
           var i = (f.w + r) / f.duration;
-          o = Math.max(o, i);
+          s = Math.max(s, i);
         }
       }
       a = Math.max(a, p);
     }
-    return { totalDuration: a, minSpacing: o };
+    return { totalDuration: a, minSpacing: s };
   }
   return C0 = m, C0;
 }
-var k0, qn;
-function Bo() {
-  if (qn) return k0;
-  qn = 1;
-  function _(m) {
+var k0, Dn;
+function Po() {
+  if (Dn) return k0;
+  Dn = 1;
+  function k(m) {
     for (var g = [], l = 0; l < m.length; l++) {
-      var r = m[l], o = r.staffGroup, a = [];
-      if (o && o && o.staffs)
-        for (var s = 0; s < o.staffs.length; s++) {
-          for (var p = o.staffs[s], u = {}, d = 0; d < p.voices.length; d++)
-            for (var f = o.voices[p.voices[d]], i = 0, n = 0; n < f.children.length; n++) {
+      var r = m[l], s = r.staffGroup, a = [];
+      if (s && s && s.staffs)
+        for (var o = 0; o < s.staffs.length; o++) {
+          for (var p = s.staffs[o], u = {}, d = 0; d < p.voices.length; d++)
+            for (var f = s.voices[p.voices[d]], i = 0, n = 0; n < f.children.length; n++) {
               var t = "T" + Math.round(i * 1e3);
               u[t] || (u[t] = []), f.children[n].abcelem.el_type === "note" && (u[t].push(f.children[n]), i += f.children[n].duration);
             }
@@ -10875,32 +10875,32 @@ function Bo() {
     }
     return g;
   }
-  return k0 = _, k0;
+  return k0 = k, k0;
 }
-var _0, Dn;
-function No() {
-  if (Dn) return _0;
-  Dn = 1;
-  var _ = To(), m = So(), g = Ao(), l = hs(), r = Mo(), o = Bo(), a = function(n, t, e, c, v, h) {
+var _0, Rn;
+function Lo() {
+  if (Rn) return _0;
+  Rn = 1;
+  var k = Eo(), m = Ao(), g = Bo(), l = us(), r = No(), s = Po(), a = function(n, t, e, c, v, h) {
     var y, w, A = e;
     for (y = 0; y < t.lines.length; y++)
       if (w = t.lines[y], w.staff) {
         var P;
-        h !== void 0 ? P = r(n, w.staffGroup, h) : P = s(n, A, c, w.staffGroup, t.formatting, y === t.lines.length - 1, !1), Math.round(P) > Math.round(A) && (A = P, v && (y = -1));
+        h !== void 0 ? P = r(n, w.staffGroup, h) : P = o(n, A, c, w.staffGroup, t.formatting, y === t.lines.length - 1, !1), Math.round(P) > Math.round(A) && (A = P, v && (y = -1));
       }
     for (y = 0; y < t.lines.length; y++)
       if (w = t.lines[y], w.staffGroup && w.staffGroup.voices) {
         for (var N = 0; N < w.staffGroup.voices.length; N++)
-          _(w.staffGroup.voices[N]);
+          k(w.staffGroup.voices[N]);
         m(n, w.staffGroup);
       }
-    var T = o(t.lines);
+    var T = s(t.lines);
     for (y = 0; y < t.lines.length; y++)
       w = t.lines[y], w.staffGroup && d(T[y]);
     for (y = 0; y < t.lines.length; y++)
       w = t.lines[y], w.staffGroup && w.staffGroup.setHeight();
     return A;
-  }, s = function(n, t, e, c, v, h, y) {
+  }, o = function(n, t, e, c, v, h, y) {
     for (var w = l(n, c.getTextSize, c.voices, c.brace, c.bracket), A = e, P = 0; P < 8; P++) {
       var N = g(A, n.minPadding, y, c, w);
       if (A = p(h, v.stretchlast, t + n.padding.left, c.w, A, N.spacingUnits, N.minSpace, n.padding.left + n.padding.right), A === null) break;
@@ -10979,34 +10979,34 @@ function No() {
   }
   return _0 = a, _0;
 }
-var T0, Rn;
-function Po() {
-  if (Rn) return T0;
-  Rn = 1;
-  var _ = function(g) {
+var T0, In;
+function qo() {
+  if (In) return T0;
+  In = 1;
+  var k = function(g) {
     this.shouldAddClasses = g.shouldAddClasses, this.reset();
   };
-  return _.prototype.reset = function() {
+  return k.prototype.reset = function() {
     this.lineNumber = null, this.voiceNumber = null, this.measureNumber = null, this.measureTotalPerLine = [], this.noteNumber = null;
-  }, _.prototype.incrLine = function() {
+  }, k.prototype.incrLine = function() {
     this.lineNumber === null ? this.lineNumber = 0 : this.lineNumber++, this.voiceNumber = null, this.measureNumber = null, this.noteNumber = null;
-  }, _.prototype.incrVoice = function() {
+  }, k.prototype.incrVoice = function() {
     this.voiceNumber === null ? this.voiceNumber = 0 : this.voiceNumber++, this.measureNumber = null, this.noteNumber = null;
-  }, _.prototype.isInMeasure = function() {
+  }, k.prototype.isInMeasure = function() {
     return this.measureNumber !== null;
-  }, _.prototype.newMeasure = function() {
+  }, k.prototype.newMeasure = function() {
     this.measureNumber && (this.measureTotalPerLine[this.lineNumber] = this.measureNumber), this.measureNumber = null, this.noteNumber = null;
-  }, _.prototype.startMeasure = function() {
+  }, k.prototype.startMeasure = function() {
     this.measureNumber = 0, this.noteNumber = 0;
-  }, _.prototype.incrMeasure = function() {
+  }, k.prototype.incrMeasure = function() {
     this.measureNumber++, this.noteNumber = 0;
-  }, _.prototype.incrNote = function() {
+  }, k.prototype.incrNote = function() {
     this.noteNumber++;
-  }, _.prototype.measureTotal = function() {
+  }, k.prototype.measureTotal = function() {
     for (var m = 0, g = 0; g < this.lineNumber; g++)
       m += this.measureTotalPerLine[g] ? this.measureTotalPerLine[g] : 0;
     return this.measureNumber && (m += this.measureNumber), m;
-  }, _.prototype.getCurrent = function(m) {
+  }, k.prototype.getCurrent = function(m) {
     return {
       line: this.lineNumber,
       measure: this.measureNumber,
@@ -11014,7 +11014,7 @@ function Po() {
       voice: this.voiceNumber,
       note: this.noteNumber
     };
-  }, _.prototype.generate = function(m) {
+  }, k.prototype.generate = function(m) {
     if (!this.shouldAddClasses)
       return "";
     var g = [];
@@ -11028,25 +11028,25 @@ function Po() {
         g[l].indexOf("abcjs-") !== 0 && g[l].length > 0 && (g[l] = "abcjs-" + g[l]);
     }
     return g.join(" ");
-  }, T0 = _, T0;
+  }, T0 = k, T0;
 }
-var S0, In;
-function Lo() {
-  if (In) return S0;
-  In = 1;
-  var _ = function(g, l) {
+var S0, Fn;
+function Do() {
+  if (Fn) return S0;
+  Fn = 1;
+  var k = function(g, l) {
     this.formatting = g, this.classes = l;
   };
-  return _.prototype.updateFonts = function(m) {
+  return k.prototype.updateFonts = function(m) {
     m.gchordfont && (this.formatting.gchordfont = m.gchordfont), m.tripletfont && (this.formatting.tripletfont = m.tripletfont), m.annotationfont && (this.formatting.annotationfont = m.annotationfont), m.vocalfont && (this.formatting.vocalfont = m.vocalfont);
-  }, _.prototype.getFamily = function(m) {
+  }, k.prototype.getFamily = function(m) {
     return m[0] === '"' && m[m.length - 1] === '"' ? m.substring(1, m.length - 1) : m;
-  }, _.prototype.calc = function(m, g) {
+  }, k.prototype.calc = function(m, g) {
     var l;
     typeof m == "string" ? (l = this.formatting[m], l ? l = { face: l.face, size: Math.round(l.size * 4 / 3), decoration: l.decoration, style: l.style, weight: l.weight, box: l.box } : l = { face: "Arial", size: Math.round(48 / 3), decoration: "underline", style: "normal", weight: "normal" }) : l = { face: m.face, size: Math.round(m.size * 4 / 3), decoration: m.decoration, style: m.style, weight: m.weight, box: m.box };
     var r = this.formatting.fontboxpadding ? this.formatting.fontboxpadding : 0.1;
     l.padding = l.size * r;
-    var o = {
+    var s = {
       "font-size": l.size,
       "font-style": l.style,
       "font-family": this.getFamily(l.face),
@@ -11054,25 +11054,25 @@ function Lo() {
       "text-decoration": l.decoration,
       class: this.classes.generate(g)
     };
-    return { font: l, attr: o };
-  }, S0 = _, S0;
+    return { font: l, attr: s };
+  }, S0 = k, S0;
 }
-var E0, Fn;
-function qo() {
-  if (Fn) return E0;
-  Fn = 1;
-  var _ = function(g, l) {
+var E0, On;
+function Ro() {
+  if (On) return E0;
+  On = 1;
+  var k = function(g, l) {
     this.getFontAndAttr = g, this.svg = l;
   };
-  return _.prototype.updateFonts = function(m) {
+  return k.prototype.updateFonts = function(m) {
     this.getFontAndAttr.updateFonts(m);
-  }, _.prototype.attr = function(m, g) {
+  }, k.prototype.attr = function(m, g) {
     return this.getFontAndAttr.calc(m, g);
-  }, _.prototype.getFamily = function(m) {
+  }, k.prototype.getFamily = function(m) {
     return m[0] === '"' && m[m.length - 1] === '"' ? m.substring(1, m.length - 1) : m;
-  }, _.prototype.calc = function(m, g, l, r) {
-    var o;
-    typeof g == "string" ? o = this.attr(g, l) : o = {
+  }, k.prototype.calc = function(m, g, l, r) {
+    var s;
+    typeof g == "string" ? s = this.attr(g, l) : s = {
       font: {
         face: g.face,
         size: g.size,
@@ -11089,26 +11089,26 @@ function qo() {
         class: this.getFontAndAttr.classes.generate(l)
       }
     };
-    var a = this.svg.getTextSize(m, o.attr, r);
-    return o.font.box ? { height: a.height + o.font.padding * 4, width: a.width + o.font.padding * 4 } : a;
-  }, _.prototype.baselineToCenter = function(m, g, l, r, o) {
-    var a = this.calc(m, g, l).height, s = this.attr(g, l).font.size;
-    return a * 0.5 + (o - r - 2) * s;
-  }, E0 = _, E0;
+    var a = this.svg.getTextSize(m, s.attr, r);
+    return s.font.box ? { height: a.height + s.font.padding * 4, width: a.width + s.font.padding * 4 } : a;
+  }, k.prototype.baselineToCenter = function(m, g, l, r, s) {
+    var a = this.calc(m, g, l).height, o = this.attr(g, l).font.size;
+    return a * 0.5 + (s - r - 2) * o;
+  }, E0 = k, E0;
 }
-var A0, On;
+var A0, Hn;
 function qe() {
-  if (On) return A0;
-  On = 1;
-  var _ = function() {
-    for (var m = 0, g, l = arguments[m++], r = [], o, a, s, p; l; ) {
-      if (o = /^[^\x25]+/.exec(l)) r.push(o[0]);
-      else if (o = /^\x25{2}/.exec(l)) r.push("%");
-      else if (o = /^\x25(?:(\d+)\$)?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-fosuxX])/.exec(l)) {
-        if ((g = arguments[o[1] || m++]) == null || g == null) throw "Too few arguments.";
-        if (/[^s]/.test(o[7]) && typeof g != "number")
+  if (Hn) return A0;
+  Hn = 1;
+  var k = function() {
+    for (var m = 0, g, l = arguments[m++], r = [], s, a, o, p; l; ) {
+      if (s = /^[^\x25]+/.exec(l)) r.push(s[0]);
+      else if (s = /^\x25{2}/.exec(l)) r.push("%");
+      else if (s = /^\x25(?:(\d+)\$)?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-fosuxX])/.exec(l)) {
+        if ((g = arguments[s[1] || m++]) == null || g == null) throw "Too few arguments.";
+        if (/[^s]/.test(s[7]) && typeof g != "number")
           throw "Expecting number but found " + typeof g;
-        switch (o[7]) {
+        switch (s[7]) {
           case "b":
             g = g.toString(2);
             break;
@@ -11119,16 +11119,16 @@ function qe() {
             g = parseInt(g);
             break;
           case "e":
-            g = o[6] ? g.toExponential(o[6]) : g.toExponential();
+            g = s[6] ? g.toExponential(s[6]) : g.toExponential();
             break;
           case "f":
-            g = o[6] ? parseFloat(g).toFixed(o[6]) : parseFloat(g);
+            g = s[6] ? parseFloat(g).toFixed(s[6]) : parseFloat(g);
             break;
           case "o":
             g = g.toString(8);
             break;
           case "s":
-            g = (g = String(g)) && o[6] ? g.substring(0, o[6]) : g;
+            g = (g = String(g)) && s[6] ? g.substring(0, s[6]) : g;
             break;
           case "u":
             g = Math.abs(g);
@@ -11140,69 +11140,69 @@ function qe() {
             g = g.toString(16).toUpperCase();
             break;
         }
-        g = /[def]/.test(o[7]) && o[2] && g > 0 ? "+" + g : g, s = o[3] ? o[3] == "0" ? "0" : o[3][1] : " ", p = o[5] - String(g).length, a = o[5] ? str_repeat(s, p) : "", r.push(o[4] ? g + a : a + g);
+        g = /[def]/.test(s[7]) && s[2] && g > 0 ? "+" + g : g, o = s[3] ? s[3] == "0" ? "0" : s[3][1] : " ", p = s[5] - String(g).length, a = s[5] ? str_repeat(o, p) : "", r.push(s[4] ? g + a : a + g);
       } else throw "Huh ?!";
-      l = l.substring(o[0].length);
+      l = l.substring(s[0].length);
     }
     return r.join("");
   };
-  return A0 = _, A0;
+  return A0 = k, A0;
 }
-var M0, Hn;
+var M0, zn;
 function Se() {
-  if (Hn) return M0;
-  Hn = 1;
-  function _(m) {
+  if (zn) return M0;
+  zn = 1;
+  function k(m) {
     return parseFloat(m.toFixed(2));
   }
-  return M0 = _, M0;
+  return M0 = k, M0;
 }
-var B0, zn;
+var B0, Gn;
 function Pe() {
-  if (zn) return B0;
-  zn = 1;
-  var _ = Se();
+  if (Gn) return B0;
+  Gn = 1;
+  var k = Se();
   function m(g, l, r) {
-    var o = l.y;
+    var s = l.y;
     if (l.phrases) {
       var u = g.paper.richTextLine(l.phrases, l.x, l.y, l.klass, l.anchor);
       return u;
     }
     if (l.lane) {
       var a = l.dim.font.size * 0.25;
-      o += (l.dim.font.size + a) * l.lane;
+      s += (l.dim.font.size + a) * l.lane;
     }
-    var s;
-    l.dim ? (s = l.dim, s.attr.class = l.klass) : s = g.controller.getFontAndAttr.calc(l.type, l.klass), l.anchor && (s.attr["text-anchor"] = l.anchor), l["dominant-baseline"] && (s.attr["dominant-baseline"] = l["dominant-baseline"]), s.attr.x = l.x, s.attr.y = o, l.centerVertically || (s.attr.y += s.font.size), l.type === "debugfont" && (console.log("Debug msg: " + l.text), s.attr.stroke = "#ff0000"), l.cursor && (s.attr.cursor = l.cursor);
+    var o;
+    l.dim ? (o = l.dim, o.attr.class = l.klass) : o = g.controller.getFontAndAttr.calc(l.type, l.klass), l.anchor && (o.attr["text-anchor"] = l.anchor), l["dominant-baseline"] && (o.attr["dominant-baseline"] = l["dominant-baseline"]), o.attr.x = l.x, o.attr.y = s, l.centerVertically || (o.attr.y += o.font.size), l.type === "debugfont" && (console.log("Debug msg: " + l.text), o.attr.stroke = "#ff0000"), l.cursor && (o.attr.cursor = l.cursor);
     var p;
     l.name === "free-text" ? p = l.text.replace(/^[ \t]*\n/gm, ` 
 `) : p = l.text.replace(/\n\n/g, `
  
 `), p = p.replace(/^\n/, ` 
-`), s.font.box && (r || g.paper.openGroup({ klass: s.attr.class, fill: g.foregroundColor, "data-name": l.name }), s.attr["text-anchor"] === "end" ? s.attr.x -= s.font.padding : s.attr["text-anchor"] === "start" && (s.attr.x += s.font.padding), s.attr.y += s.font.padding, delete s.attr.class), l.noClass && delete s.attr.class, s.attr.x = _(s.attr.x), s.attr.y = _(s.attr.y), l.name && (s.attr["data-name"] = l.name);
-    var u = g.paper.text(p, s.attr);
-    if (s.font.box) {
+`), o.font.box && (r || g.paper.openGroup({ klass: o.attr.class, fill: g.foregroundColor, "data-name": l.name }), o.attr["text-anchor"] === "end" ? o.attr.x -= o.font.padding : o.attr["text-anchor"] === "start" && (o.attr.x += o.font.padding), o.attr.y += o.font.padding, delete o.attr.class), l.noClass && delete o.attr.class, o.attr.x = k(o.attr.x), o.attr.y = k(o.attr.y), l.name && (o.attr["data-name"] = l.name);
+    var u = g.paper.text(p, o.attr);
+    if (o.font.box) {
       var d = u.getBBox(), f = 0;
-      s.attr["text-anchor"] === "middle" ? f = d.width / 2 + s.font.padding : s.attr["text-anchor"] === "end" && (f = d.width + s.font.padding * 2);
+      o.attr["text-anchor"] === "middle" ? f = d.width / 2 + o.font.padding : o.attr["text-anchor"] === "end" && (f = d.width + o.font.padding * 2);
       var i = 0;
-      l.centerVertically && (i = d.height - s.font.padding), g.paper.rect({ "data-name": "box", x: Math.round(l.x - f), y: Math.round(o - i), width: Math.round(d.width + s.font.padding * 2), height: Math.round(d.height + s.font.padding * 2) }), r || (u = g.paper.closeGroup());
+      l.centerVertically && (i = d.height - o.font.padding), g.paper.rect({ "data-name": "box", x: Math.round(l.x - f), y: Math.round(s - i), width: Math.round(d.width + o.font.padding * 2), height: Math.round(d.height + o.font.padding * 2) }), r || (u = g.paper.closeGroup());
     }
     return u;
   }
   return B0 = m, B0;
 }
-var N0, Gn;
-function Do() {
-  if (Gn) return N0;
-  Gn = 1;
-  var _ = qe(), m = Ce(), g = Pe();
+var N0, Yn;
+function Io() {
+  if (Yn) return N0;
+  Yn = 1;
+  var k = qe(), m = Ce(), g = Pe();
   function l(p, u, d) {
     var f = u.startVoice.staff.absoluteY - m.STEP * 10;
-    return u.endVoice && u.endVoice.staff ? u.endY = u.endVoice.staff.absoluteY - m.STEP * 2 : u.lastContinuedVoice && u.lastContinuedVoice.staff ? u.endY = u.lastContinuedVoice.staff.absoluteY - m.STEP * 2 : u.endY = u.startVoice.staff.absoluteY - m.STEP * 2, s(p, u.x, f, u.endY, u.type, u.header, d);
+    return u.endVoice && u.endVoice.staff ? u.endY = u.endVoice.staff.absoluteY - m.STEP * 2 : u.lastContinuedVoice && u.lastContinuedVoice.staff ? u.endY = u.lastContinuedVoice.staff.absoluteY - m.STEP * 2 : u.endY = u.startVoice.staff.absoluteY - m.STEP * 2, o(p, u.x, f, u.endY, u.type, u.header, d);
   }
   function r(p, u, d, f, i) {
     u += m.STEP;
-    var n = m.STEP * 0.75, t = m.STEP * 0.75, e = f - d, c = _(
+    var n = m.STEP * 0.75, t = m.STEP * 0.75, e = f - d, c = k(
       "M %f %f l %f %f l %f %f l %f %f z",
       u,
       d - t,
@@ -11217,7 +11217,7 @@ function Do() {
       -(e + t * 2)
       // top right line
     ), v = m.STEP * 2, h = m.STEP;
-    return c += _(
+    return c += k(
       "M %f %f q %f %f %f %f q %f %f %f %f z",
       u + n,
       d - t,
@@ -11232,7 +11232,7 @@ function Do() {
       -v,
       h + m.STEP
       // left bottom
-    ), c += _(
+    ), c += k(
       "M %f %f q %f %f %f %f q %f %f %f %f z",
       u + n,
       d + t + e,
@@ -11249,7 +11249,7 @@ function Do() {
       // left bottom
     ), p.paper.path({ path: c, stroke: p.foregroundColor, fill: p.foregroundColor, class: p.controller.classes.generate(i), "data-name": i });
   }
-  function o(p, u, d, f, i) {
+  function s(p, u, d, f, i) {
     var n = f - d, t = a(
       u,
       d,
@@ -11264,7 +11264,7 @@ function Do() {
     ), p.paper.path({ path: t, stroke: p.foregroundColor, fill: p.foregroundColor, class: p.controller.classes.generate(i), "data-name": i });
   }
   function a(p, u, d, f) {
-    return _(
+    return k(
       "M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z",
       p + d[0],
       u + f[0],
@@ -11282,7 +11282,7 @@ function Do() {
       u + f[6]
     );
   }
-  var s = function(p, u, d, f, i, n, t) {
+  var o = function(p, u, d, f, i, n, t) {
     var e;
     if (n) {
       p.paper.openGroup({ klass: p.controller.classes.generate("staff-extra voice-name"), "data-name": i });
@@ -11297,43 +11297,43 @@ function Do() {
         centerVertically: !0
       });
     }
-    return i === "brace" ? e = o(p, u, d, f, i) : i === "bracket" && (e = r(p, u, d, f, i)), n && (e = p.paper.closeGroup()), t.wrapSvgEl({ el_type: i, startChar: -1, endChar: -1 }, e), e;
+    return i === "brace" ? e = s(p, u, d, f, i) : i === "bracket" && (e = r(p, u, d, f, i)), n && (e = p.paper.closeGroup()), t.wrapSvgEl({ el_type: i, startChar: -1, endChar: -1 }, e), e;
   };
   return N0 = l, N0;
 }
-var P0, Yn;
+var P0, Wn;
 function ze() {
-  if (Yn) return P0;
-  Yn = 1;
-  function _(m, g, l) {
+  if (Wn) return P0;
+  Wn = 1;
+  function k(m, g, l) {
     var r = m.paper.path(g);
     return r;
   }
-  return P0 = _, P0;
+  return P0 = k, P0;
 }
-var L0, Wn;
-function Ro() {
-  if (Wn) return L0;
-  Wn = 1;
-  var _ = qe(), m = ze(), g = Se();
+var L0, Un;
+function Fo() {
+  if (Un) return L0;
+  Un = 1;
+  var k = qe(), m = ze(), g = Se();
   function l(e, c, v) {
     (!c.anchor1 || !c.anchor2 || !c.anchor1.heads || !c.anchor2.heads || c.anchor1.heads.length === 0 || c.anchor2.heads.length === 0) && window.console.error("Glissando Element not set.");
-    var h = 4, y = e.calcY(c.anchor1.heads[0].pitch), w = e.calcY(c.anchor2.heads[0].pitch), A = c.anchor1.x + c.anchor1.w / 2, P = c.anchor2.x + c.anchor2.w / 2, N = r(A, y, P, w), T = c.anchor1.w / 2 + h, q = c.anchor2.w / 2 + h, I = o(A, y, P, w), C = a(y, I, T);
+    var h = 4, y = e.calcY(c.anchor1.heads[0].pitch), w = e.calcY(c.anchor2.heads[0].pitch), A = c.anchor1.x + c.anchor1.w / 2, P = c.anchor2.x + c.anchor2.w / 2, N = r(A, y, P, w), T = c.anchor1.w / 2 + h, q = c.anchor2.w / 2 + h, I = s(A, y, P, w), C = a(y, I, T);
     a(w, I, -q);
-    var B = s(N - T - q), R = t(e, A + T, C, B, I);
+    var B = o(N - T - q), R = t(e, A + T, C, B, I);
     return v.wrapSvgEl({ el_type: "glissando", startChar: -1, endChar: -1 }, R), [R];
   }
   function r(e, c, v, h) {
     var y = v - e, w = h - c;
     return Math.sqrt(y * y + w * w);
   }
-  function o(e, c, v, h) {
+  function s(e, c, v, h) {
     return (h - c) / (v - e);
   }
   function a(e, c, v) {
     return g(e + v * c);
   }
-  function s(e) {
+  function o(e) {
     var c = 5;
     return Math.max(2, Math.floor((e - c * 2) / 6));
   }
@@ -11344,7 +11344,7 @@ function Ro() {
     return v;
   }
   var t = function(e, c, v, h, y) {
-    var w = _("M %f %f", c, v);
+    var w = k("M %f %f", c, v);
     w += n(p, y);
     var A;
     for (A = 0; A < h; A++)
@@ -11355,38 +11355,38 @@ function Ro() {
   };
   return L0 = l, L0;
 }
-var q0, Un;
-function Io() {
-  if (Un) return q0;
-  Un = 1;
-  var _ = qe(), m = ze(), g = Se();
-  function l(o, a, s) {
+var q0, Xn;
+function Oo() {
+  if (Xn) return q0;
+  Xn = 1;
+  var k = qe(), m = ze(), g = Se();
+  function l(s, a, o) {
     a.pitch === void 0 && window.console.error("Crescendo Element y-coordinate not set.");
-    var p = o.calcY(a.pitch) + 4, u = 8, d = a.anchor1 ? a.anchor1.x : 0, f = a.anchor2 ? a.anchor2.x : 800, i;
-    return a.dir === "<" ? i = r(o, p + u / 2, p, p + u / 2, p + u, d, f) : i = r(o, p, p + u / 2, p + u, p + u / 2, d, f), s.wrapSvgEl({ el_type: "dynamicDecoration", startChar: -1, endChar: -1 }, i), [i];
+    var p = s.calcY(a.pitch) + 4, u = 8, d = a.anchor1 ? a.anchor1.x : 0, f = a.anchor2 ? a.anchor2.x : 800, i;
+    return a.dir === "<" ? i = r(s, p + u / 2, p, p + u / 2, p + u, d, f) : i = r(s, p, p + u / 2, p + u, p + u / 2, d, f), o.wrapSvgEl({ el_type: "dynamicDecoration", startChar: -1, endChar: -1 }, i), [i];
   }
-  var r = function(o, a, s, p, u, d, f) {
-    a = g(a), s = g(s), p = g(p), u = g(u), d = g(d), f = g(f);
-    var i = _(
+  var r = function(s, a, o, p, u, d, f) {
+    a = g(a), o = g(o), p = g(p), u = g(u), d = g(d), f = g(f);
+    var i = k(
       "M %f %f L %f %f M %f %f L %f %f",
       d,
       a,
       f,
-      s,
+      o,
       d,
       p,
       f,
       u
     );
-    return m(o, { path: i, highlight: "stroke", stroke: o.foregroundColor, class: o.controller.classes.generate("dynamics decoration"), "data-name": "dynamics" });
+    return m(s, { path: i, highlight: "stroke", stroke: s.foregroundColor, class: s.controller.classes.generate("dynamics decoration"), "data-name": "dynamics" });
   };
   return q0 = l, q0;
 }
-var D0, Xn;
+var D0, jn;
 function Yr() {
-  if (Xn) return D0;
-  Xn = 1;
-  var _ = Se();
+  if (jn) return D0;
+  jn = 1;
+  var k = Se();
   function m() {
     this.ingroup = !1;
   }
@@ -11396,133 +11396,133 @@ function Yr() {
     return this.ingroup;
   }, m.prototype.addPath = function(l) {
     if (l = l || [], l.length !== 0) {
-      l[0][0] = "m", l[0][1] = _(l[0][1] - this.lastM[0]), l[0][2] = _(l[0][2] - this.lastM[1]), this.lastM[0] += l[0][1], this.lastM[1] += l[0][2], this.path.push(l[0]);
-      for (var r = 1, o = l.length; r < o; r++)
+      l[0][0] = "m", l[0][1] = k(l[0][1] - this.lastM[0]), l[0][2] = k(l[0][2] - this.lastM[1]), this.lastM[0] += l[0][1], this.lastM[1] += l[0][2], this.path.push(l[0]);
+      for (var r = 1, s = l.length; r < s; r++)
         l[r][0] === "m" && (this.lastM[0] += l[r][1], this.lastM[1] += l[r][2]), this.path.push(l[r]);
     }
-  }, m.prototype.endGroup = function(l, r, o) {
+  }, m.prototype.endGroup = function(l, r, s) {
     this.ingroup = !1;
-    for (var a = "", s = 0; s < this.path.length; s++)
-      a += this.path[s].join(" ");
+    for (var a = "", o = 0; o < this.path.length; o++)
+      a += this.path[o].join(" ");
     this.path = [];
     var p = this.paper.closeGroup();
     if (p) {
       var u = this.controller.classes.generate(l);
-      u && (o && (u += " " + o), p.setAttribute("class", u)), p.setAttribute("fill", this.controller.renderer.foregroundColor), p.setAttribute("stroke", "none"), p.setAttribute("data-name", r);
+      u && (s && (u += " " + s), p.setAttribute("class", u)), p.setAttribute("fill", this.controller.renderer.foregroundColor), p.setAttribute("stroke", "none"), p.setAttribute("data-name", r);
     }
     return p;
   };
   var g = new m();
   return D0 = g, D0;
 }
-var R0, jn;
+var R0, $n;
 function Wr() {
-  if (jn) return R0;
-  jn = 1;
-  var _ = Pe(), m = Ne(), g = Yr();
-  function l(o, a, s, p, u) {
+  if ($n) return R0;
+  $n = 1;
+  var k = Pe(), m = Ne(), g = Yr();
+  function l(s, a, o, p, u) {
     var d, f;
     if (!p) return null;
     if (p.length > 1 && p.indexOf(".") < 0) {
       var i = g.isInGroup() ? "" : u.klass;
-      o.paper.openGroup({ "data-name": u.name, klass: i });
+      s.paper.openGroup({ "data-name": u.name, klass: i });
       for (var n = 0, t = 0; t < p.length; t++) {
         var e = p[t];
-        f = m.getYCorr(e), d = m.printSymbol(a + n, o.calcY(s + f), e, o.paper, { stroke: u.stroke, fill: u.fill }), d ? t < p.length - 1 && (n += r(e, p[t + 1], m.getSymbolWidth(e))) : _(o, { x: a, y: o.y, text: "no symbol:" + p, type: "debugfont", klass: "debug-msg", anchor: "start" }, !1);
+        f = m.getYCorr(e), d = m.printSymbol(a + n, s.calcY(o + f), e, s.paper, { stroke: u.stroke, fill: u.fill }), d ? t < p.length - 1 && (n += r(e, p[t + 1], m.getSymbolWidth(e))) : k(s, { x: a, y: s.y, text: "no symbol:" + p, type: "debugfont", klass: "debug-msg", anchor: "start" }, !1);
       }
-      var c = o.paper.closeGroup();
+      var c = s.paper.closeGroup();
       return c;
     } else
-      return f = m.getYCorr(p), g.isInGroup() ? d = m.printSymbol(a, o.calcY(s + f), p, o.paper, { "data-name": u.name }) : d = m.printSymbol(a, o.calcY(s + f), p, o.paper, { klass: u.klass, stroke: u.stroke, fill: u.fill, "data-name": u.name }), d || (_(o, { x: a, y: o.y, text: "no symbol:" + p, type: "debugfont", klass: "debug-msg", anchor: "start" }, !1), null);
+      return f = m.getYCorr(p), g.isInGroup() ? d = m.printSymbol(a, s.calcY(o + f), p, s.paper, { "data-name": u.name }) : d = m.printSymbol(a, s.calcY(o + f), p, s.paper, { klass: u.klass, stroke: u.stroke, fill: u.fill, "data-name": u.name }), d || (k(s, { x: a, y: s.y, text: "no symbol:" + p, type: "debugfont", klass: "debug-msg", anchor: "start" }, !1), null);
   }
-  function r(o, a, s) {
-    var p = s;
-    return o === "f" && a === "f" && (p = p * 2 / 3), o === "p" && a === "p" && (p = p * 5 / 6), o === "f" && a === "z" && (p = p * 5 / 8), p;
+  function r(s, a, o) {
+    var p = o;
+    return s === "f" && a === "f" && (p = p * 2 / 3), s === "p" && a === "p" && (p = p * 5 / 6), s === "f" && a === "z" && (p = p * 5 / 8), p;
   }
   return R0 = l, R0;
 }
-var I0, $n;
-function Fo() {
-  if ($n) return I0;
-  $n = 1;
-  var _ = Wr();
+var I0, Vn;
+function Ho() {
+  if (Vn) return I0;
+  Vn = 1;
+  var k = Wr();
   function m(g, l, r) {
     l.pitch === void 0 && window.console.error("Dynamic Element y-coordinate not set.");
-    var o = 1, a = 1, s = _(g, l.anchor.x, l.pitch, l.dec, {
-      scalex: o,
+    var s = 1, a = 1, o = k(g, l.anchor.x, l.pitch, l.dec, {
+      scalex: s,
       scaley: a,
       klass: g.controller.classes.generate("decoration dynamics"),
       fill: g.foregroundColor,
       stroke: "none",
       name: "dynamics"
     });
-    return r.wrapSvgEl({ el_type: "dynamicDecoration", startChar: -1, endChar: -1, decoration: l.dec }, s), [s];
+    return r.wrapSvgEl({ el_type: "dynamicDecoration", startChar: -1, endChar: -1, decoration: l.dec }, o), [o];
   }
   return I0 = m, I0;
 }
-var F0, Vn;
-function Oo() {
-  if (Vn) return F0;
-  Vn = 1;
-  var _ = qe(), m = Pe(), g = ze(), l = Se();
-  function r(s, p, u) {
-    s.paper.openGroup({ klass: s.controller.classes.generate("triplet " + p.durationClass), "data-name": "triplet" }), p.hasBeam || a(s, p.anchor1.x, p.startNote, p.anchor2.x + p.anchor2.w, p.endNote, p.up), m(s, { x: p.xTextPos, y: s.calcY(p.yTextPos - 1), text: "" + p.number, type: "tripletfont", anchor: "middle", centerVertically: !0, noClass: !0, name: "" + p.number }, !0);
-    var d = s.paper.closeGroup();
+var F0, Kn;
+function zo() {
+  if (Kn) return F0;
+  Kn = 1;
+  var k = qe(), m = Pe(), g = ze(), l = Se();
+  function r(o, p, u) {
+    o.paper.openGroup({ klass: o.controller.classes.generate("triplet " + p.durationClass), "data-name": "triplet" }), p.hasBeam || a(o, p.anchor1.x, p.startNote, p.anchor2.x + p.anchor2.w, p.endNote, p.up), m(o, { x: p.xTextPos, y: o.calcY(p.yTextPos - 1), text: "" + p.number, type: "tripletfont", anchor: "middle", centerVertically: !0, noClass: !0, name: "" + p.number }, !0);
+    var d = o.paper.closeGroup();
     return u.wrapSvgEl({ el_type: "triplet", startChar: -1, endChar: -1 }, d), d;
   }
-  function o(s, p, u, d) {
-    return _("M %f %f L %f %f", l(s), l(p), l(u), l(d));
+  function s(o, p, u, d) {
+    return k("M %f %f L %f %f", l(o), l(p), l(u), l(d));
   }
-  function a(s, p, u, d, f, i) {
-    u = s.calcY(u), f = s.calcY(f);
+  function a(o, p, u, d, f, i) {
+    u = o.calcY(u), f = o.calcY(f);
     var n = i ? 5 : -5, t = "";
-    t += o(p, u, p, u + n), t += o(d, f, d, f + n);
+    t += s(p, u, p, u + n), t += s(d, f, d, f + n);
     var e = p + (d - p) / 2, c = 8, v = (f - u) / (d - p), h = e - c, y = u + (h - p) * v;
-    t += o(p, u, h, y);
+    t += s(p, u, h, y);
     var w = e + c, A = u + (w - p) * v;
-    t += o(w, A, d, f), g(s, { path: t, stroke: s.foregroundColor, "data-name": "triplet-bracket" });
+    t += s(w, A, d, f), g(o, { path: t, stroke: o.foregroundColor, "data-name": "triplet-bracket" });
   }
   return F0 = r, F0;
 }
-var O0, Kn;
-function Ho() {
-  if (Kn) return O0;
-  Kn = 1;
-  var _ = qe(), m = Pe(), g = ze(), l = Se();
-  function r(o, a, s, p, u) {
+var O0, Qn;
+function Go() {
+  if (Qn) return O0;
+  Qn = 1;
+  var k = qe(), m = Pe(), g = ze(), l = Se();
+  function r(s, a, o, p, u) {
     a.pitch === void 0 && window.console.error("Ending Element y-coordinate not set.");
-    var d = l(o.calcY(a.pitch)), f = 20, i = "";
-    a.anchor1 && (s = l(a.anchor1.x + a.anchor1.w), i += _(
+    var d = l(s.calcY(a.pitch)), f = 20, i = "";
+    a.anchor1 && (o = l(a.anchor1.x + a.anchor1.w), i += k(
       "M %f %f L %f %f ",
-      s,
+      o,
       d,
-      s,
+      o,
       l(d + f)
-    )), a.anchor2 && (p = l(a.anchor2.x), i += _(
+    )), a.anchor2 && (p = l(a.anchor2.x), i += k(
       "M %f %f L %f %f ",
       p,
       d,
       p,
       l(d + f)
-    )), i += _(
+    )), i += k(
       "M %f %f L %f %f ",
-      s,
+      o,
       d,
       p,
       d
-    ), o.paper.openGroup({
-      klass: o.controller.classes.generate("ending"),
+    ), s.paper.openGroup({
+      klass: s.controller.classes.generate("ending"),
       // MAE 17 May 2025 - Ending numbers not being drawn in correct color
-      fill: o.foregroundColor,
+      fill: s.foregroundColor,
       "data-name": "ending"
-    }), g(o, {
+    }), g(s, {
       path: i,
-      stroke: o.foregroundColor,
-      fill: o.foregroundColor,
+      stroke: s.foregroundColor,
+      fill: s.foregroundColor,
       "data-name": "line"
-    }), a.anchor1 && m(o, {
-      x: l(s + 5),
-      y: l(o.calcY(a.pitch - 0.5)),
+    }), a.anchor1 && m(s, {
+      x: l(o + 5),
+      y: l(s.calcY(a.pitch - 0.5)),
       text: a.text,
       type: "repeatfont",
       klass: "ending",
@@ -11530,36 +11530,36 @@ function Ho() {
       noClass: !0,
       name: a.text
     });
-    var n = o.paper.closeGroup();
+    var n = s.paper.closeGroup();
     return u.wrapSvgEl({ el_type: "ending", startChar: -1, endChar: -1 }, n), [n];
   }
   return O0 = r, O0;
 }
-var H0, Qn;
-function zo() {
-  if (Qn) return H0;
-  Qn = 1;
-  var _ = qe(), m = Se();
-  function g(o, a, s, p, u) {
-    l(a, s, p);
+var H0, Jn;
+function Yo() {
+  if (Jn) return H0;
+  Jn = 1;
+  var k = qe(), m = Se();
+  function g(s, a, o, p, u) {
+    l(a, o, p);
     var d = "";
     a.anchor1 ? d += "abcjs-start-m" + a.anchor1.parent.counters.measure + "-n" + a.anchor1.parent.counters.note : d += "abcjs-start-edge", a.anchor2 ? d += " abcjs-end-m" + a.anchor2.parent.counters.measure + "-n" + a.anchor2.parent.counters.note : d += " abcjs-end-edge", a.hint && (d = "abcjs-hint");
-    var f = a.fixedY ? 1.5 : 0, i = r(o, a.startX, a.endX, a.startY + f, a.endY + f, a.above, d, a.isTie, a.dotted), n = -1;
+    var f = a.fixedY ? 1.5 : 0, i = r(s, a.startX, a.endX, a.startY + f, a.endY + f, a.above, d, a.isTie, a.dotted), n = -1;
     a.anchor1 && !a.isTie && (n = a.anchor1.parent.abcelem.startChar - 1);
     var t = -1;
     return a.anchor2 && !a.isTie && (t = a.anchor2.parent.abcelem.endChar + 1), u.wrapSvgEl({ el_type: "slur", startChar: n, endChar: t }, i), [i];
   }
-  var l = function(o, a, s) {
-    !o.anchor1 || !o.anchor2 || o.anchor1.pitch === o.anchor2.pitch && o.internalNotes.length === 0 ? o.isTie = !0 : o.isTie = !1, o.isTie ? (o.calcTieDirection(), o.calcX(a, s), o.calcTieY()) : (o.calcSlurDirection(), o.calcX(a, s), o.calcSlurY()), o.avoidCollisionAbove();
-  }, r = function(o, a, s, p, u, d, f, i, n) {
+  var l = function(s, a, o) {
+    !s.anchor1 || !s.anchor2 || s.anchor1.pitch === s.anchor2.pitch && s.internalNotes.length === 0 ? s.isTie = !0 : s.isTie = !1, s.isTie ? (s.calcTieDirection(), s.calcX(a, o), s.calcTieY()) : (s.calcSlurDirection(), s.calcX(a, o), s.calcSlurY()), s.avoidCollisionAbove();
+  }, r = function(s, a, o, p, u, d, f, i, n) {
     var t = i ? 1.2 : 1.5;
-    a = m(a + 6), s = m(s + 4), p = p + (d ? t : -t), u = u + (d ? t : -t);
-    var e = m(o.calcY(p)), c = m(o.calcY(u)), v = s - a, h = c - e, y = Math.sqrt(v * v + h * h), w = v / y, A = h / y, P = y / 3.5, N = i ? 10 : 25, T = (d ? -1 : 1) * Math.min(N, Math.max(4, P)), q = m(a + P * w - T * A), I = m(e + P * A + T * w), C = m(s - P * w - T * A), B = m(c - P * A + T * w), R = 2;
+    a = m(a + 6), o = m(o + 4), p = p + (d ? t : -t), u = u + (d ? t : -t);
+    var e = m(s.calcY(p)), c = m(s.calcY(u)), v = o - a, h = c - e, y = Math.sqrt(v * v + h * h), w = v / y, A = h / y, P = y / 3.5, N = i ? 10 : 25, T = (d ? -1 : 1) * Math.min(N, Math.max(4, P)), q = m(a + P * w - T * A), I = m(e + P * A + T * w), C = m(o - P * w - T * A), B = m(c - P * A + T * w), R = 2;
     f ? f += " slur" : f = "slur", f += i ? " tie" : " legato";
     var S;
     if (n) {
       f += " dotted";
-      var k = _(
+      var _ = k(
         "M %f %f C %f %f %f %f %f %f",
         a,
         e,
@@ -11567,12 +11567,12 @@ function zo() {
         I,
         C,
         B,
-        s,
+        o,
         c
       );
-      S = o.paper.path({ path: k, stroke: o.foregroundColor, fill: "none", "stroke-dasharray": "5 5", class: o.controller.classes.generate(f), "data-name": i ? "tie" : "slur" });
+      S = s.paper.path({ path: _, stroke: s.foregroundColor, fill: "none", "stroke-dasharray": "5 5", class: s.controller.classes.generate(f), "data-name": i ? "tie" : "slur" });
     } else {
-      var M = _(
+      var M = k(
         "M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z",
         a,
         e,
@@ -11580,7 +11580,7 @@ function zo() {
         I,
         C,
         B,
-        s,
+        o,
         c,
         m(C - R * A),
         m(B + R * w),
@@ -11589,32 +11589,32 @@ function zo() {
         a,
         e
       );
-      S = o.paper.path({ path: M, stroke: "none", fill: o.foregroundColor, class: o.controller.classes.generate(f), "data-name": i ? "tie" : "slur" });
+      S = s.paper.path({ path: M, stroke: "none", fill: s.foregroundColor, class: s.controller.classes.generate(f), "data-name": i ? "tie" : "slur" });
     }
     return S;
   };
   return H0 = g, H0;
 }
-var z0, Jn;
-function Go() {
-  if (Jn) return z0;
-  Jn = 1;
-  var _ = ze(), m = Se();
-  function g(a, s) {
-    if (s.beams.length !== 0) {
-      for (var p = "", u = 0; u < s.beams.length; u++) {
-        var d = s.beams[u];
+var z0, Zn;
+function Wo() {
+  if (Zn) return z0;
+  Zn = 1;
+  var k = ze(), m = Se();
+  function g(a, o) {
+    if (o.beams.length !== 0) {
+      for (var p = "", u = 0; u < o.beams.length; u++) {
+        var d = o.beams[u];
         if (d.split) {
           for (var f = r(a, d.startX, d.startY, d.endX, d.endY), i = [], n = 0; n < d.split.length; n += 2)
             i.push([d.split[n], d.split[n + 1]]);
           for (n = 0; n < i.length; n++) {
-            var t = o(d.startX, d.startY, f, i[n][0]), e = o(d.startX, d.startY, f, i[n][1]);
+            var t = s(d.startX, d.startY, f, i[n][0]), e = s(d.startX, d.startY, f, i[n][1]);
             p += l(a, i[n][0], t, i[n][1], e, d.dy);
           }
         } else
           p += l(a, d.startX, d.startY, d.endX, d.endY, d.dy);
       }
-      var c = ("abcjs-d" + s.duration).replace(/\./g, "-"), v = a.controller.classes.generate("beam-elem " + c), h = _(a, {
+      var c = ("abcjs-d" + o.duration).replace(/\./g, "-"), v = a.controller.classes.generate("beam-elem " + c), h = k(a, {
         path: p,
         stroke: "none",
         fill: a.foregroundColor,
@@ -11623,212 +11623,212 @@ function Go() {
       return [h];
     }
   }
-  function l(a, s, p, u, d, f) {
-    p = m(a.calcY(p)), d = m(a.calcY(d)), s = m(s), u = m(u);
+  function l(a, o, p, u, d, f) {
+    p = m(a.calcY(p)), d = m(a.calcY(d)), o = m(o), u = m(u);
     var i = m(p + f), n = m(d + f);
-    return "M" + s + " " + p + " L" + u + " " + d + "L" + u + " " + n + " L" + s + " " + i + "z";
+    return "M" + o + " " + p + " L" + u + " " + d + "L" + u + " " + n + " L" + o + " " + i + "z";
   }
-  function r(a, s, p, u, d) {
-    return (d - p) / (u - s);
+  function r(a, o, p, u, d) {
+    return (d - p) / (u - o);
   }
-  function o(a, s, p, u) {
+  function s(a, o, p, u) {
     var d = u - a;
-    return s + d * p;
+    return o + d * p;
   }
   return z0 = g, z0;
 }
-var G0, Zn;
+var G0, ei;
 function Ur() {
-  if (Zn) return G0;
-  Zn = 1;
-  var _ = Yr(), m = Se();
-  function g(l, r, o, a, s, p, u) {
-    if (o < 0 || a < s) {
-      var d = m(s);
-      s = m(a), a = d;
+  if (ei) return G0;
+  ei = 1;
+  var k = Yr(), m = Se();
+  function g(l, r, s, a, o, p, u) {
+    if (s < 0 || a < o) {
+      var d = m(o);
+      o = m(a), a = d;
     } else
-      a = m(a), s = m(s);
+      a = m(a), o = m(o);
     r = m(r);
-    var f = m(r + o);
+    var f = m(r + s);
     if (l.firefox) {
-      r += o / 2;
+      r += s / 2;
       var n = {
         x1: r,
         x2: r,
         y1: a,
-        y2: s,
+        y2: o,
         stroke: l.foregroundColor,
-        "stroke-width": Math.abs(o)
+        "stroke-width": Math.abs(s)
       };
       return p && (n.class = p), u && (n["data-name"] = u), l.paper.lineToBack(n);
     }
-    for (var i = [["M", r, a], ["L", r, s], ["L", f, s], ["L", f, a], ["z"]], n = { path: "" }, t = 0; t < i.length; t++)
+    for (var i = [["M", r, a], ["L", r, o], ["L", f, o], ["L", f, a], ["z"]], n = { path: "" }, t = 0; t < i.length; t++)
       n.path += i[t].join(" ");
-    return p && (n.class = p), u && (n["data-name"] = u), _.isInGroup() || (n.stroke = "none", n.fill = l.foregroundColor), l.paper.pathToBack(n);
+    return p && (n.class = p), u && (n["data-name"] = u), k.isInGroup() || (n.stroke = "none", n.fill = l.foregroundColor), l.paper.pathToBack(n);
   }
   return G0 = g, G0;
 }
-var Y0, ei;
-function Yo() {
-  if (ei) return Y0;
-  ei = 1;
-  var _ = qe(), m = Se();
-  function g(l, r, o, a, s, p, u) {
+var Y0, ti;
+function Uo() {
+  if (ti) return Y0;
+  ti = 1;
+  var k = qe(), m = Se();
+  function g(l, r, s, a, o, p, u) {
     var d = l.foregroundColor;
-    r = m(r), o = m(o);
+    r = m(r), s = m(s);
     var f = m(a - u), i = m(a + u);
     if (l.firefox) {
       a += u / 2;
       var n = {
         x1: r,
-        x2: o,
+        x2: s,
         y1: a,
         y2: a,
         stroke: l.foregroundColor,
         "stroke-width": Math.abs(u * 2)
       };
-      return s && (n.class = s), p && (n["data-name"] = p), l.paper.lineToBack(n);
+      return o && (n.class = o), p && (n["data-name"] = p), l.paper.lineToBack(n);
     }
-    var t = _(
+    var t = k(
       "M %f %f L %f %f L %f %f L %f %f z",
       r,
       f,
-      o,
+      s,
       f,
-      o,
+      s,
       i,
       r,
       i
     ), e = { path: t, stroke: "none", fill: d };
-    p && (e["data-name"] = p), s && (e.class = s);
+    p && (e["data-name"] = p), o && (e.class = o);
     var c = l.paper.pathToBack(e);
     return c;
   }
   return Y0 = g, Y0;
 }
-var W0, ti;
-function us() {
-  if (ti) return W0;
-  ti = 1;
-  var _ = Yo();
-  function m(g, l, r, o, a, s, p) {
-    var u = g.calcY(o);
-    return _(g, l, r, u, a, s, p);
+var W0, ri;
+function ds() {
+  if (ri) return W0;
+  ri = 1;
+  var k = Uo();
+  function m(g, l, r, s, a, o, p) {
+    var u = g.calcY(s);
+    return k(g, l, r, u, a, o, p);
   }
   return W0 = m, W0;
 }
-var U0, ri;
-function ds() {
-  if (ri) return U0;
-  ri = 1;
-  var _ = Pe(), m = Ur(), g = us(), l = Wr();
-  function r(a, s, p) {
-    s.pitch === void 0 && window.console.error(s.type + " Relative Element y-coordinate not set.");
-    var u = a.calcY(s.pitch);
-    switch (s.type) {
+var U0, ai;
+function ps() {
+  if (ai) return U0;
+  ai = 1;
+  var k = Pe(), m = Ur(), g = ds(), l = Wr();
+  function r(a, o, p) {
+    o.pitch === void 0 && window.console.error(o.type + " Relative Element y-coordinate not set.");
+    var u = a.calcY(o.pitch);
+    switch (o.type) {
       case "symbol":
-        if (s.c === null) return null;
+        if (o.c === null) return null;
         var d = "symbol";
-        s.klass && (d += " " + s.klass), s.graphelem = l(a, s.x, s.pitch, s.c, {
-          scalex: s.scalex,
-          scaley: s.scaley,
+        o.klass && (d += " " + o.klass), o.graphelem = l(a, o.x, o.pitch, o.c, {
+          scalex: o.scalex,
+          scaley: o.scaley,
           klass: a.controller.classes.generate(d),
           //				fill:"none",
           //				stroke: renderer.foregroundColor,
-          name: s.name
+          name: o.name
         });
         break;
       case "debug":
-        s.graphelem = _(a, { x: s.x, y: a.calcY(15), text: "" + s.c, type: "debugfont", klass: a.controller.classes.generate("debug-msg"), anchor: "start", centerVertically: !1, dim: s.dim }, !1);
+        o.graphelem = k(a, { x: o.x, y: a.calcY(15), text: "" + o.c, type: "debugfont", klass: a.controller.classes.generate("debug-msg"), anchor: "start", centerVertically: !1, dim: o.dim }, !1);
         break;
       case "tabNumber":
         var f = "middle", i = "tabnumberfont", n = "abcjs-tab-number";
-        s.isGrace && (i = "tabgracefont", u += 2.5, n = "tab-grace"), s.graphelem = _(a, { x: s.x, y: u, text: "" + s.c, type: i, klass: a.controller.classes.generate(n), anchor: f, centerVertically: !1, dim: s.dim, cursor: "default" }, !1);
+        o.isGrace && (i = "tabgracefont", u += 2.5, n = "tab-grace"), o.graphelem = k(a, { x: o.x, y: u, text: "" + o.c, type: i, klass: a.controller.classes.generate(n), anchor: f, centerVertically: !1, dim: o.dim, cursor: "default" }, !1);
         break;
       case "barNumber":
-        s.graphelem = _(a, { x: s.x, y: u, text: "" + s.c, type: "measurefont", klass: a.controller.classes.generate("bar-number"), anchor: "middle", dim: s.dim, name: "bar-number" }, !0);
+        o.graphelem = k(a, { x: o.x, y: u, text: "" + o.c, type: "measurefont", klass: a.controller.classes.generate("bar-number"), anchor: "middle", dim: o.dim, name: "bar-number" }, !0);
         break;
       case "lyric":
-        s.graphelem = _(a, { x: s.x, y: u, text: s.c, type: "vocalfont", klass: a.controller.classes.generate("lyric"), anchor: "middle", dim: s.dim, name: "lyric" }, !1);
+        o.graphelem = k(a, { x: o.x, y: u, text: o.c, type: "vocalfont", klass: a.controller.classes.generate("lyric"), anchor: "middle", dim: o.dim, name: "lyric" }, !1);
         break;
       case "chord":
-        s.graphelem = _(a, { x: s.x, y: u, text: s.c, type: "gchordfont", klass: a.controller.classes.generate("chord"), anchor: "middle", dim: s.dim, lane: s.getLane(), name: "chord" }, !1);
+        o.graphelem = k(a, { x: o.x, y: u, text: o.c, type: "gchordfont", klass: a.controller.classes.generate("chord"), anchor: "middle", dim: o.dim, lane: o.getLane(), name: "chord" }, !1);
         break;
       case "decoration":
-        s.graphelem = _(a, { x: s.x, y: u + 6, text: s.c, type: "annotationfont", klass: a.controller.classes.generate("annotation"), anchor: s.anchor, centerVertically: !0, dim: s.dim }, !1);
+        o.graphelem = k(a, { x: o.x, y: u + 6, text: o.c, type: "annotationfont", klass: a.controller.classes.generate("annotation"), anchor: o.anchor, centerVertically: !0, dim: o.dim }, !1);
         break;
       case "text":
-        s.graphelem = _(a, { x: s.x, y: u, text: s.c, type: "annotationfont", klass: a.controller.classes.generate("annotation"), anchor: "start", centerVertically: s.centerVertically, dim: s.dim, lane: s.getLane(), name: "annotation" }, !1);
+        o.graphelem = k(a, { x: o.x, y: u, text: o.c, type: "annotationfont", klass: a.controller.classes.generate("annotation"), anchor: "start", centerVertically: o.centerVertically, dim: o.dim, lane: o.getLane(), name: "annotation" }, !1);
         break;
       case "multimeasure-text":
-        s.graphelem = _(a, { x: s.x + s.w / 2, y: u, text: s.c, type: "tempofont", klass: a.controller.classes.generate("rest"), anchor: "middle", centerVertically: !1, dim: s.dim }, !1);
+        o.graphelem = k(a, { x: o.x + o.w / 2, y: u, text: o.c, type: "tempofont", klass: a.controller.classes.generate("rest"), anchor: "middle", centerVertically: !1, dim: o.dim }, !1);
         break;
       case "part":
-        s.graphelem = _(a, { x: s.x, y: u, text: s.c, type: "partsfont", klass: a.controller.classes.generate("part"), anchor: "start", dim: s.dim, name: s.c }, !0);
+        o.graphelem = k(a, { x: o.x, y: u, text: o.c, type: "partsfont", klass: a.controller.classes.generate("part"), anchor: "start", dim: o.dim, name: o.c }, !0);
         break;
       case "bar":
-        s.graphelem = m(a, s.x, s.linewidth + a.lineThickness, u, p || a.calcY(s.pitch2), null, "bar");
+        o.graphelem = m(a, o.x, o.linewidth + a.lineThickness, u, p || a.calcY(o.pitch2), null, "bar");
         break;
       // bartop can't be 0
       case "stem":
-        var t = s.linewidth > 0 ? s.linewidth + a.lineThickness : s.linewidth - a.lineThickness;
-        s.graphelem = m(a, s.x, t, u, a.calcY(s.pitch2), "abcjs-stem", "stem");
+        var t = o.linewidth > 0 ? o.linewidth + a.lineThickness : o.linewidth - a.lineThickness;
+        o.graphelem = m(a, o.x, t, u, a.calcY(o.pitch2), "abcjs-stem", "stem");
         break;
       case "ledger":
-        s.graphelem = g(a, s.x, s.x + s.w, s.pitch, "abcjs-ledger", "ledger", 0.35 + a.lineThickness);
+        o.graphelem = g(a, o.x, o.x + o.w, o.pitch, "abcjs-ledger", "ledger", 0.35 + a.lineThickness);
         break;
     }
-    return s.scalex !== 1 && s.graphelem && o(a.paper, s.graphelem, s.scalex, s.scaley, s.x, u), s.graphelem;
+    return o.scalex !== 1 && o.graphelem && s(a.paper, o.graphelem, o.scalex, o.scaley, o.x, u), o.graphelem;
   }
-  function o(a, s, p, u, d, f) {
-    a.setAttributeOnElement(s, {
+  function s(a, o, p, u, d, f) {
+    a.setAttributeOnElement(o, {
       transform: "translate(" + d + " " + f + ") scale(" + p + "," + u + ") translate(-" + d + " -" + f + ")"
     });
   }
   return U0 = r, U0;
 }
-var X0, ai;
-function Wo() {
-  if (ai) return X0;
-  ai = 1;
-  var _ = ds(), m = Pe();
+var X0, ni;
+function Xo() {
+  if (ni) return X0;
+  ni = 1;
+  var k = ps(), m = Pe();
   function g(l, r) {
-    var o = r.x;
+    var s = r.x;
     r.pitch === void 0 && window.console.error("Tempo Element y-coordinate not set."), r.tempo.el_type = "tempo";
-    var a = l.calcY(r.pitch) + 2, s, p;
+    var a = l.calcY(r.pitch) + 2, o, p;
     if (r.tempo.preString) {
-      s = m(l, { x: o, y: a, text: r.tempo.preString, type: "tempofont", klass: "abcjs-tempo", anchor: "start", noClass: !0, name: "pre" }, !0), p = l.controller.getTextSize.calc(r.tempo.preString, "tempofont", "tempo", s);
+      o = m(l, { x: s, y: a, text: r.tempo.preString, type: "tempofont", klass: "abcjs-tempo", anchor: "start", noClass: !0, name: "pre" }, !0), p = l.controller.getTextSize.calc(r.tempo.preString, "tempofont", "tempo", o);
       var u = p.width, d = u / r.tempo.preString.length;
-      o += u + d;
+      s += u + d;
     }
     if (r.note) {
-      r.note.setX(o);
+      r.note.setX(s);
       for (var f = 0; f < r.note.children.length; f++)
-        _(l, r.note.children[f], o);
-      o += r.note.w + 5;
+        k(l, r.note.children[f], s);
+      s += r.note.w + 5;
       var i = "= " + r.tempo.bpm;
-      s = m(l, { x: o, y: a, text: i, type: "tempofont", klass: "abcjs-tempo", anchor: "start", noClass: !0, name: "beats" }), p = l.controller.getTextSize.calc(i, "tempofont", "tempo", s);
+      o = m(l, { x: s, y: a, text: i, type: "tempofont", klass: "abcjs-tempo", anchor: "start", noClass: !0, name: "beats" }), p = l.controller.getTextSize.calc(i, "tempofont", "tempo", o);
       var n = p.width, t = n / i.length;
-      o += n + t;
+      s += n + t;
     }
-    r.tempo.postString && m(l, { x: o, y: a, text: r.tempo.postString, type: "tempofont", klass: "abcjs-tempo", anchor: "start", noClass: !0, name: "post" }, !0);
+    r.tempo.postString && m(l, { x: s, y: a, text: r.tempo.postString, type: "tempofont", klass: "abcjs-tempo", anchor: "start", noClass: !0, name: "post" }, !0);
   }
   return X0 = g, X0;
 }
-var j0, ni;
-function Uo() {
-  if (ni) return j0;
-  ni = 1;
-  var _ = Wo(), m = ds(), g = Ce(), l = Hr(), r = Yr();
-  function o(a, s, p, u, d) {
-    if (!s.invisible) {
-      var f = s.children.length > 0 && s.children[0].type === "TempoElement";
-      s.elemset = [], r.beginGroup(a.paper, a.controller);
-      for (var i = 0; i < s.children.length; i++) {
-        var n = s.children[i];
+var j0, ii;
+function jo() {
+  if (ii) return j0;
+  ii = 1;
+  var k = Xo(), m = ps(), g = Ce(), l = Hr(), r = Yr();
+  function s(a, o, p, u, d) {
+    if (!o.invisible) {
+      var f = o.children.length > 0 && o.children[0].type === "TempoElement";
+      o.elemset = [], r.beginGroup(a.paper, a.controller);
+      for (var i = 0; i < o.children.length; i++) {
+        var n = o.children[i];
         switch (n.type) {
           case "TempoElement":
-            _(a, n);
+            k(a, n);
             break;
           default:
             var t = m(a, n, p);
@@ -11838,47 +11838,47 @@ function Uo() {
             }
         }
       }
-      var e = s.type;
-      if ((s.type === "note" || s.type === "rest") && (s.counters = a.controller.classes.getCurrent(), e += " d" + Math.round(s.durationClass * 1e3) / 1e3, e = e.replace(/\./g, "-"), s.abcelem.pitches))
-        for (var c = 0; c < s.abcelem.pitches.length; c++)
-          e += " p" + s.abcelem.pitches[c].pitch;
-      var v = r.endGroup(e, s.type, s.extraClass);
+      var e = o.type;
+      if ((o.type === "note" || o.type === "rest") && (o.counters = a.controller.classes.getCurrent(), e += " d" + Math.round(o.durationClass * 1e3) / 1e3, e = e.replace(/\./g, "-"), o.abcelem.pitches))
+        for (var c = 0; c < o.abcelem.pitches.length; c++)
+          e += " p" + o.abcelem.pitches[c].pitch;
+      var v = r.endGroup(e, o.type, o.extraClass);
       if (v) {
-        if (s.cloned && (s.cloned.overrideClasses = v.className.baseVal), s.overrideClasses) {
+        if (o.cloned && (o.cloned.overrideClasses = v.className.baseVal), o.overrideClasses) {
           var h = v.classList && v.classList.length > 0 ? v.classList[0] + " " : "";
-          v.setAttribute("class", h + s.overrideClasses);
+          v.setAttribute("class", h + o.overrideClasses);
         }
         if (f)
-          s.startChar = s.abcelem.startChar, s.endChar = s.abcelem.endChar, u.add(s, v, !1, d);
+          o.startChar = o.abcelem.startChar, o.endChar = o.abcelem.endChar, u.add(o, v, !1, d);
         else {
-          s.elemset.push(v);
+          o.elemset.push(v);
           var y = !1;
-          (s.type === "note" || s.type === "tabNumber") && (y = !0), u.add(s, v, y, d);
+          (o.type === "note" || o.type === "tabNumber") && (y = !0), u.add(o, v, y, d);
         }
-      } else s.elemset.length > 0 && u.add(s, s.elemset[0], s.type === "note", d);
-      if (s.klass && l(s.elemset, "mark", "", "#00ff00"), s.hint && l(s.elemset, "abcjs-hint", "", null), s.abcelem.abselem = s, s.heads && s.heads.length > 0) {
-        s.notePositions = [];
-        for (var w = 0; w < s.heads.length; w++)
-          s.notePositions.push({
-            x: s.heads[w].x + s.heads[w].w / 2,
-            y: d.zero - s.heads[w].pitch * g.STEP
+      } else o.elemset.length > 0 && u.add(o, o.elemset[0], o.type === "note", d);
+      if (o.klass && l(o.elemset, "mark", "", "#00ff00"), o.hint && l(o.elemset, "abcjs-hint", "", null), o.abcelem.abselem = o, o.heads && o.heads.length > 0) {
+        o.notePositions = [];
+        for (var w = 0; w < o.heads.length; w++)
+          o.notePositions.push({
+            x: o.heads[w].x + o.heads[w].w / 2,
+            y: d.zero - o.heads[w].pitch * g.STEP
           });
       }
     }
   }
-  return j0 = o, j0;
+  return j0 = s, j0;
 }
-var $0, ii;
-function Xo() {
-  if (ii) return $0;
-  ii = 1;
-  var _ = Ro(), m = Io(), g = Fo(), l = Oo(), r = Ho(), o = zo(), a = Go(), s = Pe(), p = Uo();
+var $0, si;
+function $o() {
+  if (si) return $0;
+  si = 1;
+  var k = Fo(), m = Oo(), g = Ho(), l = zo(), r = Go(), s = Yo(), a = Wo(), o = Pe(), p = jo();
   function u(f, i, n, t, e) {
     var c = i.w - 1;
     f.staffbottom = i.staff.bottom;
     var v = f.foregroundColor;
     if (i.color && (f.foregroundColor = i.color), i.header) {
-      var h = s(f, { x: f.padding.left, y: f.calcY(i.headerPosition), text: i.header, type: "voicefont", klass: "staff-extra voice-name", anchor: "start", centerVertically: !0, name: "voice-name" }, !0);
+      var h = o(f, { x: f.padding.left, y: f.calcY(i.headerPosition), text: i.header, type: "voicefont", klass: "staff-extra voice-name", anchor: "start", centerVertically: !0, name: "voice-name" }, !0);
       t.wrapSvgEl({ el_type: "voiceName", startChar: -1, endChar: -1, text: i.header }, h);
     }
     var y, w, A = !1;
@@ -11897,7 +11897,7 @@ function Xo() {
       else
         switch (w.type) {
           case "GlissandoElem":
-            w.elemset = _(f, w, t);
+            w.elemset = k(f, w, t);
             break;
           case "CrescendoElem":
             w.elemset = m(f, w, t);
@@ -11912,7 +11912,7 @@ function Xo() {
             w.elemset = r(f, w, i.startx + 10, c, t);
             break;
           case "TieElem":
-            w.elemset = o(f, w, i.startx + 10, c, t);
+            w.elemset = s(f, w, i.startx + 10, c, t);
             break;
           default:
             console.log(w), p(f, w, i.startx + 10, c, t, e);
@@ -11924,88 +11924,88 @@ function Xo() {
   }
   return $0 = u, $0;
 }
-var V0, si;
-function jo() {
-  if (si) return V0;
-  si = 1;
-  var _ = us();
-  function m(g, l, r, o, a, s) {
+var V0, oi;
+function Vo() {
+  if (oi) return V0;
+  oi = 1;
+  var k = ds();
+  function m(g, l, r, s, a, o) {
     var p = "abcjs-top-line", u = 2;
     a && (u = a), g.paper.openGroup({ prepend: !0, klass: g.controller.classes.generate("abcjs-staff") });
     var d = 0, f = 0;
-    if (o === 1)
-      _(g, l, r, 6, p, null, s + g.lineThickness), d = g.calcY(10), f = g.calcY(2);
+    if (s === 1)
+      k(g, l, r, 6, p, null, o + g.lineThickness), d = g.calcY(10), f = g.calcY(2);
     else
-      for (var i = o - 1; i >= 0; i--) {
+      for (var i = s - 1; i >= 0; i--) {
         var n = (i + 1) * u;
-        f = g.calcY(n), d === 0 && (d = f), _(g, l, r, n, p, null, s + g.lineThickness), p = void 0;
+        f = g.calcY(n), d === 0 && (d = f), k(g, l, r, n, p, null, o + g.lineThickness), p = void 0;
       }
     return g.paper.closeGroup(), [d, f];
   }
   return V0 = m, V0;
 }
-var K0, oi;
-function $o() {
-  if (oi) return K0;
-  oi = 1;
-  function _(m, g, l) {
+var K0, ci;
+function Ko() {
+  if (ci) return K0;
+  ci = 1;
+  function k(m, g, l) {
     var r = m.paper.rectBeneath(g);
     return l && m.paper.text(l, { x: 0, y: g.y + 7, "text-anchor": "start", "font-size": "14px", fill: "rgba(0,0,255,.4)", stroke: "rgba(0,0,255,.4)" }), r;
   }
-  return K0 = _, K0;
+  return K0 = k, K0;
 }
-var Q0, ci;
-function Vo() {
-  if (ci) return Q0;
-  ci = 1;
-  function _(m, g) {
-    var l = "rgba(0,0,0,255)", r = "rgba(0,0,0,0)", o = Math.round(m.y), a = m.controller.width, s = (a - g) / 2, p = s + g, u = "M " + s + " " + o + " L " + p + " " + o + " L " + p + " " + (o + 1) + " L " + s + " " + (o + 1) + " L " + s + " " + o + " z";
+var Q0, li;
+function Qo() {
+  if (li) return Q0;
+  li = 1;
+  function k(m, g) {
+    var l = "rgba(0,0,0,255)", r = "rgba(0,0,0,0)", s = Math.round(m.y), a = m.controller.width, o = (a - g) / 2, p = o + g, u = "M " + o + " " + s + " L " + p + " " + s + " L " + p + " " + (s + 1) + " L " + o + " " + (s + 1) + " L " + o + " " + s + " z";
     m.paper.pathToBack({ path: u, stroke: r, fill: l, class: m.controller.classes.generate("defined-text") });
   }
-  return Q0 = _, Q0;
+  return Q0 = k, Q0;
 }
-var J0, li;
-function ps() {
-  if (li) return J0;
-  li = 1;
-  var _ = Vo(), m = Pe();
-  function g(l, r, o) {
+var J0, fi;
+function vs() {
+  if (fi) return J0;
+  fi = 1;
+  var k = Qo(), m = Pe();
+  function g(l, r, s) {
     for (var a = 0; a < r.rows.length; a++) {
-      var s = r.rows[a];
-      if (s.absmove)
-        l.absolutemoveY(s.absmove);
-      else if (s.move)
-        l.moveY(s.move);
-      else if (s.text || s.phrases) {
-        var p = s.left ? s.left : 0, u = m(l, {
+      var o = r.rows[a];
+      if (o.absmove)
+        l.absolutemoveY(o.absmove);
+      else if (o.move)
+        l.moveY(o.move);
+      else if (o.text || o.phrases) {
+        var p = o.left ? o.left : 0, u = m(l, {
           x: p,
           y: l.y,
-          text: s.text,
-          phrases: s.phrases,
-          "dominant-baseline": s["dominant-baseline"],
-          type: s.font,
-          klass: s.klass,
-          name: s.name,
-          anchor: s.anchor
+          text: o.text,
+          phrases: o.phrases,
+          "dominant-baseline": o["dominant-baseline"],
+          type: o.font,
+          klass: o.klass,
+          name: o.name,
+          anchor: o.anchor
         });
-        s.absElemType && o.wrapSvgEl({
-          el_type: s.absElemType,
-          name: s.name,
-          startChar: s.startChar,
-          endChar: s.endChar,
-          text: s.text
+        o.absElemType && s.wrapSvgEl({
+          el_type: o.absElemType,
+          name: o.name,
+          startChar: o.startChar,
+          endChar: o.endChar,
+          text: o.text
         }, u);
-      } else if (s.separator)
-        _(l, s.separator);
-      else if (s.startGroup)
-        l.paper.openGroup({ klass: s.klass, "data-name": s.name });
-      else if (s.endGroup) {
+      } else if (o.separator)
+        k(l, o.separator);
+      else if (o.startGroup)
+        l.paper.openGroup({ klass: o.klass, "data-name": o.name });
+      else if (o.endGroup) {
         var d = l.paper.closeGroup();
-        s.absElemType && o.wrapSvgEl({
-          el_type: s.absElemType,
-          name: s.name,
-          startChar: s.startChar,
-          endChar: s.endChar,
+        o.absElemType && s.wrapSvgEl({
+          el_type: o.absElemType,
+          name: o.name,
+          startChar: o.startChar,
+          endChar: o.endChar,
           text: ""
         }, d);
       }
@@ -12013,15 +12013,15 @@ function ps() {
   }
   return J0 = g, J0;
 }
-var Z0, fi;
-function Ko() {
-  if (fi) return Z0;
-  fi = 1;
-  var _ = Ce(), m = Do(), g = Xo(), l = jo(), r = $o(), o = Ur(), a = ps();
-  function s(d, f, i, n) {
+var Z0, hi;
+function Jo() {
+  if (hi) return Z0;
+  hi = 1;
+  var k = Ce(), m = Io(), g = $o(), l = Vo(), r = Ko(), s = Ur(), a = vs();
+  function o(d, f, i, n) {
     for (var t, e = d.y, c = 0; c < f.staffs.length; c++) {
       var v = f.staffs[c];
-      d.moveY(_.STEP, v.top), v.absoluteY = d.y, d.showDebug && (d.showDebug.indexOf("box") >= 0 && v.voices && u(d, f.voices, v.voices), d.showDebug.indexOf("grid") >= 0 && (d.paper.dottedLine({ x1: d.padding.left, x2: d.padding.left + d.controller.width, y1: e, y2: e, stroke: "#0000ff" }), r(
+      d.moveY(k.STEP, v.top), v.absoluteY = d.y, d.showDebug && (d.showDebug.indexOf("box") >= 0 && v.voices && u(d, f.voices, v.voices), d.showDebug.indexOf("grid") >= 0 && (d.paper.dottedLine({ x1: d.padding.left, x2: d.padding.left + d.controller.width, y1: e, y2: e, stroke: "#0000ff" }), r(
         d,
         {
           x: d.padding.left,
@@ -12033,7 +12033,7 @@ function Ko() {
           "fill-opacity": 0.1,
           "stroke-opacity": 0.1
         }
-      ), t = 0, S(v, "chordHeightAbove"), S(v, "chordHeightBelow"), S(v, "dynamicHeightAbove"), S(v, "dynamicHeightBelow"), S(v, "endingHeightAbove"), S(v, "lyricHeightAbove"), S(v, "lyricHeightBelow"), S(v, "partHeightAbove"), S(v, "tempoHeightAbove"), S(v, "volumeHeightAbove"), S(v, "volumeHeightBelow"))), d.moveY(_.STEP, -v.bottom), d.showDebug && d.showDebug.indexOf("grid") >= 0 && d.paper.dottedLine({
+      ), t = 0, S(v, "chordHeightAbove"), S(v, "chordHeightBelow"), S(v, "dynamicHeightAbove"), S(v, "dynamicHeightBelow"), S(v, "endingHeightAbove"), S(v, "lyricHeightAbove"), S(v, "lyricHeightBelow"), S(v, "partHeightAbove"), S(v, "tempoHeightAbove"), S(v, "volumeHeightAbove"), S(v, "volumeHeightBelow"))), d.moveY(k.STEP, -v.bottom), d.showDebug && d.showDebug.indexOf("grid") >= 0 && d.paper.dottedLine({
         x1: d.padding.left,
         x2: d.padding.left + d.controller.width,
         y1: d.y,
@@ -12054,7 +12054,7 @@ function Ko() {
       g(d, f.voices[P], A, i, {
         top: e,
         zero: d.y,
-        height: f.height * _.STEP
+        height: f.height * k.STEP
       });
       var I = 0;
       if (T) {
@@ -12067,8 +12067,8 @@ function Ko() {
     }
     d.controller.classes.newMeasure();
     var R = f.staffs.length;
-    R > 1 && (h = f.staffs[0].topLine, y = f.staffs[R - 1].bottomLine, o(d, f.startx, 0.6, h, y, null)), d.y = e;
-    function S(k, M) {
+    R > 1 && (h = f.staffs[0].topLine, y = f.staffs[R - 1].bottomLine, s(d, f.startx, 0.6, h, y, null)), d.y = e;
+    function S(_, M) {
       var F = [
         "rgb(207,27,36)",
         "rgb(168,214,80)",
@@ -12078,13 +12078,13 @@ function Ko() {
         "rgb(31,170,177)",
         "rgb(220,166,142)"
       ];
-      if (k.positionY && k.positionY[M]) {
-        var L = k.specialY[M] * _.STEP;
-        M === "chordHeightAbove" && k.specialY.chordLines && k.specialY.chordLines.above && (L *= k.specialY.chordLines.above), M === "chordHeightBelow" && k.specialY.chordLines && k.specialY.chordLines.below && (L *= k.specialY.chordLines.below), r(
+      if (_.positionY && _.positionY[M]) {
+        var L = _.specialY[M] * k.STEP;
+        M === "chordHeightAbove" && _.specialY.chordLines && _.specialY.chordLines.above && (L *= _.specialY.chordLines.above), M === "chordHeightBelow" && _.specialY.chordLines && _.specialY.chordLines.below && (L *= _.specialY.chordLines.below), r(
           d,
           {
             x: d.padding.left,
-            y: d.calcY(k.positionY[M]),
+            y: d.calcY(_.positionY[M]),
             width: d.controller.width,
             height: L,
             fill: F[t],
@@ -12100,14 +12100,14 @@ function Ko() {
   function p(d, f, i, n, t) {
     if (i)
       for (var e = 0; e < i.length; e++)
-        i[e].isStartVoice(n) && (i[e].startY = f - _.STEP * 10, i[e].elemset = m(d, i[e], t));
+        i[e].isStartVoice(n) && (i[e].startY = f - k.STEP * 10, i[e].elemset = m(d, i[e], t));
   }
   function u(d, f, i) {
     for (var n = 0; n < i.length; n++)
       for (var t = f[i[n]].children, e = 0; e < t.length; e++) {
         var c = t[e], v = c.getFixedCoords();
         if (!(c.invisible || v.t === void 0 || v.b === void 0)) {
-          var h = (v.t - v.b) * _.STEP;
+          var h = (v.t - v.b) * k.STEP;
           r(
             d,
             {
@@ -12142,18 +12142,18 @@ function Ko() {
         }
       }
   }
-  return Z0 = s, Z0;
+  return Z0 = o, Z0;
 }
-var er, hi;
-function Qo() {
-  if (hi) return er;
-  hi = 1;
-  function _(m, g, l, r) {
-    var o = (g + m.padding.left + m.padding.right) * l, a = (m.y + m.padding.bottom) * l;
+var er, ui;
+function Zo() {
+  if (ui) return er;
+  ui = 1;
+  function k(m, g, l, r) {
+    var s = (g + m.padding.left + m.padding.right) * l, a = (m.y + m.padding.bottom) * l;
     if (m.isPrint && (a = Math.max(a, 1056)), m.ariaLabel !== "") {
-      var s = "Sheet Music";
-      m.abctune && m.abctune.metaText && m.abctune.metaText.title && (s += ' for "' + m.abctune.metaText.title + '"'), m.paper.setTitle(s);
-      var p = m.ariaLabel ? m.ariaLabel : s;
+      var o = "Sheet Music";
+      m.abctune && m.abctune.metaText && m.abctune.metaText.title && (o += ' for "' + m.abctune.metaText.title + '"'), m.paper.setTitle(o);
+      var p = m.ariaLabel ? m.ariaLabel : o;
       m.paper.setAttribute("aria-label", p);
     }
     var u = [
@@ -12166,60 +12166,60 @@ function Qo() {
     ];
     m.paper.insertStyles(".abcjs-dragging-in-progress text, .abcjs-dragging-in-progress tspan {" + u.join(" ") + "}");
     var d = { overflow: "hidden" };
-    r === "resize" ? m.paper.setResponsiveWidth(o, a) : (d.width = "", d.height = a + "px", l < 1 ? (d.width = o + "px", m.paper.setSize(o / l, a / l)) : m.paper.setSize(o, a)), m.paper.setScale(l), m.paper.setParentStyles(d);
+    r === "resize" ? m.paper.setResponsiveWidth(s, a) : (d.width = "", d.height = a + "px", l < 1 ? (d.width = s + "px", m.paper.setSize(s / l, a / l)) : m.paper.setSize(s, a)), m.paper.setScale(l), m.paper.setParentStyles(d);
   }
-  return er = _, er;
+  return er = k, er;
 }
-var tr, ui;
-function Jo() {
-  if (ui) return tr;
-  ui = 1;
-  var _ = as(), m = ns();
-  function g(l, r, o) {
-    this.elements = [], this.paper = l, this.tuneNumber = o, this.selectTypes = r;
+var tr, di;
+function ec() {
+  if (di) return tr;
+  di = 1;
+  var k = ns(), m = is();
+  function g(l, r, s) {
+    this.elements = [], this.paper = l, this.tuneNumber = s, this.selectTypes = r;
   }
   return g.prototype.getElements = function() {
     return this.elements;
-  }, g.prototype.add = function(l, r, o, a) {
+  }, g.prototype.add = function(l, r, s, a) {
     if (this.canSelect(l)) {
-      var s;
-      this.selectTypes === void 0 ? s = { selectable: !1, "data-index": this.elements.length } : s = { selectable: !0, tabindex: 0, "data-index": this.elements.length }, this.paper.setAttributeOnElement(r, s);
-      var p = { absEl: l, svgEl: r, isDraggable: o };
+      var o;
+      this.selectTypes === void 0 ? o = { selectable: !1, "data-index": this.elements.length } : o = { selectable: !0, tabindex: 0, "data-index": this.elements.length }, this.paper.setAttributeOnElement(r, o);
+      var p = { absEl: l, svgEl: r, isDraggable: s };
       a !== void 0 && (p.staffPos = a), this.elements.push(p);
     }
   }, g.prototype.canSelect = function(l) {
     return this.selectTypes === !1 || !l || !l.abcelem ? !1 : this.selectTypes === !0 ? !0 : this.selectTypes === void 0 ? l.abcelem.el_type === "note" || l.abcelem.el_type === "tabNumber" : this.selectTypes.indexOf(l.abcelem.el_type) >= 0;
   }, g.prototype.wrapSvgEl = function(l, r) {
-    var o = {
+    var s = {
       tuneNumber: this.tuneNumber,
       abcelem: l,
       elemset: [r],
-      highlight: _,
+      highlight: k,
       unhighlight: m
     };
-    this.add(o, r, !1);
+    this.add(s, r, !1);
   }, tr = g, tr;
 }
-var rr, di;
-function Zo() {
-  if (di) return rr;
-  di = 1;
-  const _ = Wr(), m = Ur();
+var rr, pi;
+function tc() {
+  if (pi) return rr;
+  pi = 1;
+  const k = Wr(), m = Ur();
   function g(h, y, w, A, P) {
     const N = P.gchordfont;
     P.partsfont;
-    const T = P.annotationfont, q = P.repeatfont, I = P.textfont, C = P.subtitlefont, B = 50, R = 10, S = 14, k = 10, M = 20, F = 16;
+    const T = P.annotationfont, q = P.repeatfont, I = P.textfont, C = P.subtitlefont, B = 50, R = 10, S = 14, _ = 10, M = 20, F = 16;
     h.paper.openGroup({ klass: "abcjs-chord-grid" }), y.forEach((L) => {
       switch (L.type) {
         case "text":
           v(h, L.text, w, h.y, 16, I, null, null, !1), h.moveY(F);
           break;
         case "subtitle":
-          v(h, L.subtitle, w, h.y + k, 20, C, null, "abcjs-subtitle", !1), h.moveY(M);
+          v(h, L.subtitle, w, h.y + _, 20, C, null, "abcjs-subtitle", !1), h.moveY(M);
           break;
         case "part":
           if (L.lines.length > 0) {
-            v(h, L.name, w, h.y + k, 20, C, L.name, "abcjs-part", !1), h.moveY(M);
+            v(h, L.name, w, h.y + _, 20, C, L.name, "abcjs-part", !1), h.moveY(M);
             const b = L.lines[0].length, x = A / b;
             L.lines.forEach((E, D) => {
               let O = !1, z = !1;
@@ -12234,7 +12234,7 @@ function Zo() {
                   const te = h.y, U = w + x * Q;
                   $.hasStartRepeat && (r(h, U, te, te + B + H, !0, H), ne = 12), $.hasEndRepeat && (r(h, U + x, te, te + B + H, !1, H), J = 12);
                   let re = 0;
-                  $.ending && (re = v(h, $.ending, w + Q * x + 4, te + 10, 12, q, null, null, !1).getBBox().width + 4), s(h, te, w + ne, x, D, Q, $.chord, N, ne + J, B, H), $.annotations && $.annotations.length > 0 && a(h, te, w + Q * x + re, $.annotations, T), H && h.paper.rectBeneath({ x: w + Q * x, y: h.y, width: x, height: H, fill: "#e8e8e8", stroke: "none" });
+                  $.ending && (re = v(h, $.ending, w + Q * x + 4, te + 10, 12, q, null, null, !1).getBBox().width + 4), o(h, te, w + ne, x, D, Q, $.chord, N, ne + J, B, H), $.annotations && $.annotations.length > 0 && a(h, te, w + Q * x + re, $.annotations, T), H && h.paper.rectBeneath({ x: w + Q * x, y: h.y, width: x, height: H, fill: "#e8e8e8", stroke: "none" });
                 }
               }), h.moveY(H + B);
             }), h.moveY(M);
@@ -12245,12 +12245,12 @@ function Zo() {
   }
   function l(h, y, w, A) {
     var P = y - 10, N = y + 10, T = w + 10, q = w - 10, I = y - 10, C = -h.yToPitch(A) + 2, B = y + 6.5, R = -h.yToPitch(A) - 2.3;
-    h.paper.lineToBack({ x1: P, x2: N, y1: T, y2: q, "stroke-width": "3px", "stroke-linecap": "round" }), _(h, I, C, "dots.dot", {
+    h.paper.lineToBack({ x1: P, x2: N, y1: T, y2: q, "stroke-width": "3px", "stroke-linecap": "round" }), k(h, I, C, "dots.dot", {
       scalex: 1,
       scaley: 1,
       klass: "",
       name: "dot"
-    }), _(h, B, R, "dots.dot", {
+    }), k(h, B, R, "dots.dot", {
       scalex: 1,
       scaley: 1,
       klass: "",
@@ -12259,19 +12259,19 @@ function Zo() {
   }
   function r(h, y, w, A, P, N) {
     const T = P ? y + 2 : y - 4, q = P ? y + 9 : y - 11;
-    h.paper.openGroup({ klass: "abcjs-repeat" }), m(h, T, 3 + h.lineThickness, w, A, null, "bar"), _(h, q, -h.yToPitch(N) - 4, "dots.dot", {
+    h.paper.openGroup({ klass: "abcjs-repeat" }), m(h, T, 3 + h.lineThickness, w, A, null, "bar"), k(h, q, -h.yToPitch(N) - 4, "dots.dot", {
       scalex: 1,
       scaley: 1,
       klass: "",
       name: "dot"
-    }), _(h, q, -h.yToPitch(N) - 8, "dots.dot", {
+    }), k(h, q, -h.yToPitch(N) - 8, "dots.dot", {
       scalex: 1,
       scaley: 1,
       klass: "",
       name: "dot"
     }), h.paper.closeGroup();
   }
-  const o = {
+  const s = {
     segno: "scripts.segno",
     coda: "scripts.coda",
     fermata: "scripts.ufermata"
@@ -12285,11 +12285,11 @@ function Zo() {
         case "coda":
         case "fermata":
           {
-            w += 12, N = _(h, w, -3, o[A[T]], {
+            w += 12, N = k(h, w, -3, s[A[T]], {
               scalex: 1,
               scaley: 1,
               //klass: renderer.controller.classes.generate(klass),
-              name: o[A[T]]
+              name: s[A[T]]
             });
             const q = N.getBBox();
             w += q.width;
@@ -12299,7 +12299,7 @@ function Zo() {
           v(h, A[T], w, y + 12, 12, P, null, null, !1);
       }
   }
-  function s(h, y, w, A, P, N, T, q, I, C, B) {
+  function o(h, y, w, A, P, N, T, q, I, C, B) {
     const R = w + A * N;
     !T[1] && !T[2] && !T[3] ? n(h, R, y + B, A - I, C, T[0], q, B) : !T[1] && !T[3] ? t(h, R, y, A - I, C, T[0], T[2], q, B) : e(h, R, y, A - I, C, T, q, B);
   }
@@ -12337,16 +12337,16 @@ function Zo() {
   }
   return rr = g, rr;
 }
-var ar, pi;
-function ec() {
-  if (pi) return ar;
-  pi = 1;
-  var _ = Ko(), m = Qo(), g = ps(), l = Ce(), r = Jo(), o = Zo();
+var ar, vi;
+function rc() {
+  if (vi) return ar;
+  vi = 1;
+  var k = Jo(), m = Zo(), g = vs(), l = Ce(), r = ec(), s = tc();
   function a(u, d, f, i, n, t, e, c, v, h, y) {
     var w = new r(u.paper, c, v), A = {};
     d.shouldAddClasses && (A.klass = "abcjs-meta-top"), u.paper.openGroup(A), u.moveY(u.padding.top), g(u, f.topText, w), u.paper.closeGroup(), u.moveY(u.spacing.music);
     let P = !1;
-    y && f.chordGrid && (o(u, f.chordGrid, u.padding.left, i, f.formatting), y === "noMusic" && (P = !0));
+    y && f.chordGrid && (s(u, f.chordGrid, u.padding.left, i, f.formatting), y === "noMusic" && (P = !0));
     var N = [], T = 0;
     if (!P)
       for (var q = 0; q < f.lines.length; q++) {
@@ -12356,14 +12356,14 @@ function ec() {
           if (T++, f.formatting.maxStaves && T > f.formatting.maxStaves)
             break;
           d.shouldAddClasses && (A.klass = "abcjs-staff-wrapper abcjs-l" + d.lineNumber), u.paper.openGroup(A), I.vskip && u.moveY(I.vskip), N.length >= 1 ? p(u, u.spacing.staffSeparation, N[N.length - 1], I.staffGroup) : q > 0 && u.moveY(u.spacing.staffSeparation);
-          var C = s(u, I.staffGroup, w, q);
+          var C = o(u, I.staffGroup, w, q);
           C.line = h + q, N.push(C), u.paper.closeGroup();
         } else I.nonMusic && (d.shouldAddClasses && (A.klass = "abcjs-non-music"), u.paper.openGroup(A), g(u, I.nonMusic, w), u.paper.closeGroup());
       }
     return d.reset(), P || f.bottomText && f.bottomText.rows && f.bottomText.rows.length > 0 && (d.shouldAddClasses && (A.klass = "abcjs-meta-bottom"), u.paper.openGroup(A), u.moveY(24), g(u, f.bottomText, w), u.paper.closeGroup()), m(u, n, e, t), { staffgroups: N, selectables: w.getElements() };
   }
-  function s(u, d, f, i) {
-    _(u, d, f, i);
+  function o(u, d, f, i) {
+    k(u, d, f, i);
     var n = d.height * l.STEP;
     return u.moveY(n), d;
   }
@@ -12373,31 +12373,31 @@ function ec() {
   }
   return ar = a, ar;
 }
-var nr, vi;
-function tc() {
-  if (vi) return nr;
-  vi = 1;
-  var _ = fs();
+var nr, gi;
+function ac() {
+  if (gi) return nr;
+  gi = 1;
+  var k = hs();
   function m(g) {
     for (var l = g; l && l.attributes && l.tagName.toLowerCase() !== "svg" && !l.attributes.selectable; )
       l = l.parentNode;
     if (l && l.attributes && l.attributes.selectable) {
       var r = l.attributes["data-index"].nodeValue;
       if (r && (r = parseInt(r, 10), r >= 0 && r < this.selectables.length)) {
-        var o = this.selectables[r], a = _(o, g);
-        return a.index = r, a.element = o, a;
+        var s = this.selectables[r], a = k(s, g);
+        return a.index = r, a.element = s, a;
       }
     }
     return null;
   }
   return nr = m, nr;
 }
-var ir, gi;
+var ir, bi;
 function Xr() {
-  if (gi) return ir;
-  gi = 1;
-  var _ = Ce(), m = po(), g = go(), l = bo(), r = mo(), o = yo(), a = wo(), s = xo(), p = Co(), u = No(), d = Po(), f = Lo(), i = qo(), n = ec(), t = os(), e = tc(), c = function(y, w) {
-    w = w || {}, this.findSelectableElement = e, this.oneSvgPerLine = w.oneSvgPerLine, this.selectionColor = w.selectionColor, this.dragColor = w.dragColor ? w.dragColor : w.selectionColor, this.dragging = !!w.dragging, this.selectTypes = w.selectTypes, this.responsive = w.responsive, this.space = 3 * _.SPACE, this.initialClef = w.initialClef, this.timeBasedLayout = w.timeBasedLayout, this.expandToWidest = !!w.expandToWidest, this.scale = w.scale ? parseFloat(w.scale) : 0, this.classes = new d({ shouldAddClasses: w.add_classes }), this.scale > 0.1 || (this.scale = void 0), w.staffwidth ? (this.staffwidthScreen = w.staffwidth, this.staffwidthPrint = w.staffwidth) : (this.staffwidthScreen = 740, this.staffwidthPrint = 680), this.listeners = [], w.clickListener && this.addSelectListener(w.clickListener), this.renderer = new g(y), this.renderer.setPaddingOverride(w), w.showDebug && (this.renderer.showDebug = w.showDebug), w.jazzchords && (this.jazzchords = w.jazzchords), w.accentAbove && (this.accentAbove = w.accentAbove), w.germanAlphabet && (this.germanAlphabet = w.germanAlphabet), w.lineThickness && (this.lineThickness = w.lineThickness), w.chordGrid && (this.chordGrid = w.chordGrid), this.renderer.controller = this, this.renderer.foregroundColor = w.foregroundColor ? w.foregroundColor : "currentColor", w.ariaLabel !== void 0 && (this.renderer.ariaLabel = w.ariaLabel), this.renderer.minPadding = w.minPadding ? w.minPadding : 0, this.reset();
+  if (bi) return ir;
+  bi = 1;
+  var k = Ce(), m = go(), g = mo(), l = yo(), r = wo(), s = xo(), a = Co(), o = ko(), p = _o(), u = Lo(), d = qo(), f = Do(), i = Ro(), n = rc(), t = cs(), e = ac(), c = function(y, w) {
+    w = w || {}, this.findSelectableElement = e, this.oneSvgPerLine = w.oneSvgPerLine, this.selectionColor = w.selectionColor, this.dragColor = w.dragColor ? w.dragColor : w.selectionColor, this.dragging = !!w.dragging, this.selectTypes = w.selectTypes, this.responsive = w.responsive, this.space = 3 * k.SPACE, this.initialClef = w.initialClef, this.timeBasedLayout = w.timeBasedLayout, this.expandToWidest = !!w.expandToWidest, this.scale = w.scale ? parseFloat(w.scale) : 0, this.classes = new d({ shouldAddClasses: w.add_classes }), this.scale > 0.1 || (this.scale = void 0), w.staffwidth ? (this.staffwidthScreen = w.staffwidth, this.staffwidthPrint = w.staffwidth) : (this.staffwidthScreen = 740, this.staffwidthPrint = 680), this.listeners = [], w.clickListener && this.addSelectListener(w.clickListener), this.renderer = new g(y), this.renderer.setPaddingOverride(w), w.showDebug && (this.renderer.showDebug = w.showDebug), w.jazzchords && (this.jazzchords = w.jazzchords), w.accentAbove && (this.accentAbove = w.accentAbove), w.germanAlphabet && (this.germanAlphabet = w.germanAlphabet), w.lineThickness && (this.lineThickness = w.lineThickness), w.chordGrid && (this.chordGrid = w.chordGrid), this.renderer.controller = this, this.renderer.foregroundColor = w.foregroundColor ? w.foregroundColor : "currentColor", w.ariaLabel !== void 0 && (this.renderer.ariaLabel = w.ariaLabel), this.renderer.minPadding = w.minPadding ? w.minPadding : 0, this.reset();
   };
   c.prototype.reset = function() {
     this.selected = [], this.staffgroups = [], this.engraver && this.engraver.reset(), this.engraver = null, this.renderer.reset(), this.dragTarget = null, this.dragIndex = -1, this.dragMouseStart = { x: -1, y: -1 }, this.dragYStep = 0, this.lineThickness && this.renderer.setLineThickness(this.lineThickness);
@@ -12452,10 +12452,10 @@ function Xr() {
       else if (A.subtitle) {
         if (N) {
           var T = this.width / 2 + this.renderer.padding.left;
-          A.nonMusic = new o(this.renderer.spacing.subtitle, y.formatting, A.subtitle, T, this.renderer.padding.left, this.getTextSize);
+          A.nonMusic = new s(this.renderer.spacing.subtitle, y.formatting, A.subtitle, T, this.renderer.padding.left, this.getTextSize);
         }
       } else A.text !== void 0 ? (N = !0, A.nonMusic = new l(A.text, A.vskip, this.getFontAndAttr, this.renderer.padding.left, this.width, this.getTextSize)) : A.separator !== void 0 && A.separator.lineLength && (N = !0, A.nonMusic = new r(A.separator.spaceAbove, A.separator.lineLength, A.separator.spaceBelow));
-    y.bottomText = new s(y.metaText, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.classes.shouldAddClasses, this.getTextSize);
+    y.bottomText = new o(y.metaText, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.classes.shouldAddClasses, this.getTextSize);
   }, c.prototype.engraveTune = function(y, w, A) {
     var P = this.jazzchords, N = this.setupTune(y, w);
     this.constructTuneElements(y);
@@ -12470,8 +12470,8 @@ function Xr() {
           }
       }
     y.tablatures && t.layoutTablatures(this.renderer, y);
-    var k = n(this.renderer, this.classes, y, this.width, T, this.responsive, N, this.selectTypes, w, A, this.chordGrid);
-    if (this.staffgroups = k.staffgroups, this.selectables = k.selectables, this.oneSvgPerLine) {
+    var _ = n(this.renderer, this.classes, y, this.width, T, this.responsive, N, this.selectTypes, w, A, this.chordGrid);
+    if (this.staffgroups = _.staffgroups, this.selectables = _.selectables, this.oneSvgPerLine) {
       var M = this.renderer.paper.svg.parentNode;
       this.svgs = v(this.renderer, M, y.metaText.title, this.responsive, N);
     } else
@@ -12483,14 +12483,14 @@ function Xr() {
     var T = w.querySelector("svg");
     P === "resize" && (w.style.paddingBottom = "");
     for (var q = T.querySelector("style"), I = P === "resize" ? T.viewBox.baseVal.width : T.getAttribute("width"), C = w.querySelectorAll("svg > g"), B = 0, R = [], S = 0; S < C.length; S++) {
-      var k = C[S], M = k.getBBox(), F = M.y - B, L = M.height + F, b = document.createElement("div"), x = "overflow: hidden;";
+      var _ = C[S], M = _.getBBox(), F = M.y - B, L = M.height + F, b = document.createElement("div"), x = "overflow: hidden;";
       P !== "resize" && (x += "height:" + L * N + "px;"), b.setAttribute("style", x);
       var E = h(T), D = 'Sheet Music for "' + A + '" section ' + (S + 1);
       E.setAttribute("aria-label", D), P !== "resize" && E.setAttribute("height", L), P === "resize" && (E.style.position = "");
       var O = y.firefox ? L + 1 : L;
       E.setAttribute("viewBox", "0 " + B + " " + I + " " + O), E.appendChild(q.cloneNode(!0));
       var z = document.createElement("title");
-      z.innerText = D, E.appendChild(z), E.appendChild(k), b.appendChild(E), R.push(E), w.appendChild(b), B = M.y + M.height;
+      z.innerText = D, E.appendChild(z), E.appendChild(_), b.appendChild(E), R.push(E), w.appendChild(b), B = M.y + M.height;
     }
     return w.removeChild(T), R;
   }
@@ -12511,14 +12511,14 @@ function Xr() {
     this.listeners[this.listeners.length] = y;
   }, ir = c, ir;
 }
-var sr, bi;
-function vs() {
-  if (bi) return sr;
-  bi = 1;
-  var _ = Ye();
-  ts();
-  var m = Xr(), g = Or(), l = Ji(), r = {};
-  function o() {
+var sr, mi;
+function gs() {
+  if (mi) return sr;
+  mi = 1;
+  var k = Ye();
+  rs();
+  var m = Xr(), g = Or(), l = Zi(), r = {};
+  function s() {
     var u = window.innerWidth;
     for (var d in r)
       if (r.hasOwnProperty(d)) {
@@ -12527,7 +12527,7 @@ function vs() {
       }
   }
   try {
-    window.addEventListener("resize", o), window.addEventListener("orientationChange", o);
+    window.addEventListener("resize", s), window.addEventListener("orientationChange", s);
   } catch {
   }
   function a(u, d, f, i, n) {
@@ -12538,7 +12538,7 @@ function vs() {
       e.style.width = u.style.width;
     }
   }
-  var s = function(u, d, f, i, n) {
+  var o = function(u, d, f, i, n) {
     var t = {}, e;
     if (f) {
       for (e in f)
@@ -12555,7 +12555,7 @@ function vs() {
       var A = !1;
       return v === "*" && (A = !0, v = document.createElement("div"), v.setAttribute("style", "visibility: hidden;"), document.body.appendChild(v)), !A && t.wrap && t.staffwidth ? (h = p(v, h, y, w, t), h) : (t.afterParsing && t.afterParsing(h, y, w), a(v, h, t, y, 0), A && v.parentNode.removeChild(v), null);
     }
-    return _.renderEngine(c, u, d, t);
+    return k.renderEngine(c, u, d, t);
   };
   function p(u, d, f, i, n) {
     var t = new m(u, n), e = t.getMeasureWidths(d), c = l.calcLineWraps(d, e, n);
@@ -12567,37 +12567,37 @@ function vs() {
     }
     return n.afterParsing && n.afterParsing(d, f, i), a(u, d, c.revisedParams, f, 0), d.explanation = c.explanation, d;
   }
-  return sr = s, sr;
+  return sr = o, sr;
 }
-var or, mi;
-function rc() {
-  if (mi) return or;
-  mi = 1;
-  var _ = Ye(), m = Xr(), g = function(l, r) {
-    function o(a, s, p, u) {
+var or, yi;
+function nc() {
+  if (yi) return or;
+  yi = 1;
+  var k = Ye(), m = Xr(), g = function(l, r) {
+    function s(a, o, p, u) {
       a = document.createElement("div"), a.setAttribute("style", "visibility: hidden;"), document.body.appendChild(a);
-      var d = new m(a, r), f = d.getMeasureWidths(s);
+      var d = new m(a, r), f = d.getMeasureWidths(o);
       return a.parentNode.removeChild(a), { sections: f };
     }
-    return _.renderEngine(o, "*", l, r);
+    return k.renderEngine(s, "*", l, r);
   };
   return or = g, or;
 }
-var cr, yi;
+var cr, wi;
 function jr() {
-  if (yi) return cr;
-  yi = 1;
-  var _ = {};
-  return cr = _, cr;
-}
-var lr, wi;
-function ac() {
-  if (wi) return lr;
+  if (wi) return cr;
   wi = 1;
-  var _ = jr(), m = function(g, l, r, o) {
-    _[l] || (_[l] = {});
-    var a = _[l];
-    return a[r] || (a[r] = new Promise(function(s, p) {
+  var k = {};
+  return cr = k, cr;
+}
+var lr, xi;
+function ic() {
+  if (xi) return lr;
+  xi = 1;
+  var k = jr(), m = function(g, l, r, s) {
+    k[l] || (k[l] = {});
+    var a = k[l];
+    return a[r] || (a[r] = new Promise(function(o, p) {
       var u = new XMLHttpRequest();
       let d = g + l + "-mp3/" + r + ".mp3";
       u.open("GET", d, !0), u.responseType = "arraybuffer", u.onload = function() {
@@ -12606,25 +12606,25 @@ function ac() {
           return;
         }
         var f = function(n) {
-          s({ instrument: l, name: r, status: "loaded", audioBuffer: n });
-        }, i = o.decodeAudioData(u.response, f, function() {
+          o({ instrument: l, name: r, status: "loaded", audioBuffer: n });
+        }, i = s.decodeAudioData(u.response, f, function() {
           p(Error("Can't decode sound at " + d));
         });
         i && typeof i.catch == "function" && i.catch(p);
       }, u.onerror = function() {
         p(Error("Can't load sound at " + d));
       }, u.send();
-    }).catch((s) => {
-      throw console.error("Didn't load note", l, r, ":", s.message), s;
+    }).catch((o) => {
+      throw console.error("Didn't load note", l, r, ":", o.message), o;
     })), a[r];
   };
   return lr = m, lr;
 }
-var fr, xi;
+var fr, Ci;
 function $r() {
-  if (xi) return fr;
-  xi = 1;
-  var _ = [
+  if (Ci) return fr;
+  Ci = 1;
+  var k = [
     "acoustic_grand_piano",
     "bright_acoustic_piano",
     "electric_grand_piano",
@@ -12755,21 +12755,21 @@ function $r() {
     "gunshot",
     "percussion"
   ];
-  return fr = _, fr;
+  return fr = k, fr;
 }
-var hr, Ci;
-function nc() {
-  if (Ci) return hr;
-  Ci = 1;
-  var _ = $r(), m = function(g) {
+var hr, ki;
+function sc() {
+  if (ki) return hr;
+  ki = 1;
+  var k = $r(), m = function(g) {
     for (var l = [], r = 0; r < g.tracks.length; r++)
       l.push([]);
-    var o = _[0];
-    return g.tracks.forEach(function(a, s) {
+    var s = k[0];
+    return g.tracks.forEach(function(a, o) {
       a.forEach(function(p) {
         switch (p.cmd) {
           case "note":
-            var u = p.instrument !== void 0 ? _[p.instrument] : o;
+            var u = p.instrument !== void 0 ? k[p.instrument] : s;
             if (p.duration > 0) {
               var d = p.gap ? p.gap : 0, f = p.duration;
               d = Math.min(d, f * 2 / 3);
@@ -12780,11 +12780,11 @@ function nc() {
                 end: Math.round((p.start + f - d) * 1e6) / 1e6,
                 volume: p.volume
               };
-              p.startChar && (i.startChar = p.startChar), p.endChar && (i.endChar = p.endChar), p.style && (i.style = p.style), p.cents && (i.cents = p.cents), l[s].push(i);
+              p.startChar && (i.startChar = p.startChar), p.endChar && (i.endChar = p.endChar), p.style && (i.style = p.style), p.cents && (i.cents = p.cents), l[o].push(i);
             }
             break;
           case "program":
-            o = _[p.instrument];
+            s = k[p.instrument];
             break;
           case "text":
             break;
@@ -12796,11 +12796,11 @@ function nc() {
   };
   return hr = m, hr;
 }
-var ur, ki;
+var ur, _i;
 function We() {
-  if (ki) return ur;
-  ki = 1;
-  function _(m) {
+  if (_i) return ur;
+  _i = 1;
+  function k(m) {
     if (m)
       window.abcjsAudioContext = m;
     else if (!window.abcjsAudioContext) {
@@ -12812,37 +12812,37 @@ function We() {
     }
     return window.abcjsAudioContext.state !== "suspended";
   }
-  return ur = _, ur;
+  return ur = k, ur;
 }
-var dr, _i;
+var dr, Ti;
 function Re() {
-  if (_i) return dr;
-  _i = 1;
-  var _ = We();
+  if (Ti) return dr;
+  Ti = 1;
+  var k = We();
   function m() {
-    return window.abcjsAudioContext || _(), window.abcjsAudioContext;
+    return window.abcjsAudioContext || k(), window.abcjsAudioContext;
   }
   return dr = m, dr;
 }
-var pr, Ti;
+var pr, Si;
 function Ue() {
-  if (Ti) return pr;
-  Ti = 1;
-  var _ = Re();
+  if (Si) return pr;
+  Si = 1;
+  var k = Re();
   function m() {
     if (!window.Promise || !window.AudioContext && !window.webkitAudioContext && !navigator.mozAudioContext && !navigator.msAudioContext)
       return !1;
-    var g = _();
+    var g = k();
     if (g)
       return g.resume !== void 0;
   }
   return pr = m, pr;
 }
-var vr, Si;
+var vr, Ei;
 function Vr() {
-  if (Si) return vr;
-  Si = 1;
-  var _ = {
+  if (Ei) return vr;
+  Ei = 1;
+  var k = {
     21: "A0",
     22: "Bb0",
     23: "B0",
@@ -12945,87 +12945,87 @@ function Vr() {
     120: "C9",
     121: "Db9"
   };
-  return vr = _, vr;
+  return vr = k, vr;
 }
-var gr, Ei;
-function ic() {
-  if (Ei) return gr;
-  Ei = 1;
-  var _ = function(g) {
+var gr, Ai;
+function oc() {
+  if (Ai) return gr;
+  Ai = 1;
+  var k = function(g) {
     return window.URL.createObjectURL(m(g.audioBuffers));
   };
   function m(g) {
-    var l = g[0], r = l.numberOfChannels, o = l.length * r * 2 + 44, a = new ArrayBuffer(o), s = new DataView(a), p = [], u, d, f = 0, i = 0;
-    for (t(1179011410), t(o - 8), t(1163280727), t(544501094), t(16), n(1), n(r), t(l.sampleRate), t(l.sampleRate * 2 * r), n(r * 2), n(16), t(1635017060), t(o - i - 4), u = 0; u < r; u++)
+    var l = g[0], r = l.numberOfChannels, s = l.length * r * 2 + 44, a = new ArrayBuffer(s), o = new DataView(a), p = [], u, d, f = 0, i = 0;
+    for (t(1179011410), t(s - 8), t(1163280727), t(544501094), t(16), n(1), n(r), t(l.sampleRate), t(l.sampleRate * 2 * r), n(r * 2), n(16), t(1635017060), t(s - i - 4), u = 0; u < r; u++)
       p.push(l.getChannelData(u));
-    for (; i < o; ) {
+    for (; i < s; ) {
       for (u = 0; u < p.length; u++)
-        d = Math.max(-1, Math.min(1, p[u][f])), d = (0.5 + d < 0 ? d * 32768 : d * 32767) | 0, s.setInt16(i, d, !0), i += 2;
+        d = Math.max(-1, Math.min(1, p[u][f])), d = (0.5 + d < 0 ? d * 32768 : d * 32767) | 0, o.setInt16(i, d, !0), i += 2;
       f++;
     }
     return new Blob([a], { type: "audio/wav" });
     function n(e) {
-      s.setUint16(i, e, !0), i += 2;
+      o.setUint16(i, e, !0), i += 2;
     }
     function t(e) {
-      s.setUint32(i, e, !0), i += 4;
+      o.setUint32(i, e, !0), i += 4;
     }
   }
-  return gr = _, gr;
+  return gr = k, gr;
 }
-var br, Ai;
-function gs() {
-  if (Ai) return br;
-  Ai = 1;
-  function _(m) {
+var br, Mi;
+function bs() {
+  if (Mi) return br;
+  Mi = 1;
+  function k(m) {
     return Math.pow(2, m / 1200);
   }
-  return br = _, br;
+  return br = k, br;
 }
-var mr, Mi;
-function sc() {
-  if (Mi) return mr;
-  Mi = 1;
-  var _ = jr(), m = Vr(), g = gs();
-  function l(o, a, s, p, u, d, f, i, n) {
-    var t = window.OfflineAudioContext || window.webkitOfflineAudioContext, e = s.len * s.tempoMultiplier;
+var mr, Bi;
+function cc() {
+  if (Bi) return mr;
+  Bi = 1;
+  var k = jr(), m = Vr(), g = bs();
+  function l(s, a, o, p, u, d, f, i, n) {
+    var t = window.OfflineAudioContext || window.webkitOfflineAudioContext, e = o.len * o.tempoMultiplier;
     d && (e += d / 1e3), e -= i, e < 0 && (e = 5e-3);
-    var c = new t(2, Math.floor((e + f) * a), a), v = m[s.pitch];
-    if (!_[s.instrument])
-      return n && n("placeNote skipped (instrument empty): " + s.instrument + ":" + v), Promise.resolve();
-    var h = _[s.instrument][v];
+    var c = new t(2, Math.floor((e + f) * a), a), v = m[o.pitch];
+    if (!k[o.instrument])
+      return n && n("placeNote skipped (instrument empty): " + o.instrument + ":" + v), Promise.resolve();
+    var h = k[o.instrument][v];
     return h ? h.then(function(y) {
       var w = c.createBufferSource();
       w.buffer = y.audioBuffer;
-      var A = s.volume / 96 * u;
-      w.gainNode = c.createGain(), s.pan && c.createStereoPanner && (w.panNode = c.createStereoPanner(), w.panNode.pan.setValueAtTime(s.pan, 0)), w.gainNode.gain.value = A, w.gainNode.gain.linearRampToValueAtTime(w.gainNode.gain.value, e), w.gainNode.gain.linearRampToValueAtTime(0, e + f), s.cents && (w.playbackRate.value = g(s.cents)), w.panNode ? (w.panNode.connect(c.destination), w.gainNode.connect(w.panNode)) : w.gainNode.connect(c.destination), w.connect(w.gainNode), w.start(0), w.noteOff ? w.noteOff(e + f) : w.stop(e + f);
+      var A = o.volume / 96 * u;
+      w.gainNode = c.createGain(), o.pan && c.createStereoPanner && (w.panNode = c.createStereoPanner(), w.panNode.pan.setValueAtTime(o.pan, 0)), w.gainNode.gain.value = A, w.gainNode.gain.linearRampToValueAtTime(w.gainNode.gain.value, e), w.gainNode.gain.linearRampToValueAtTime(0, e + f), o.cents && (w.playbackRate.value = g(o.cents)), w.panNode ? (w.panNode.connect(c.destination), w.gainNode.connect(w.panNode)) : w.gainNode.connect(c.destination), w.connect(w.gainNode), w.start(0), w.noteOff ? w.noteOff(e + f) : w.stop(e + f);
       var P;
       return c.oncomplete = function(N) {
         if (N.renderedBuffer && N.renderedBuffer.getChannelData)
           for (var T = 0; T < p.length; T++) {
-            var q = p[T] * s.tempoMultiplier;
-            d && (q -= d / 1e3), q < 0 && (q = 0), q = Math.floor(q * a), r(o, N.renderedBuffer, q);
+            var q = p[T] * o.tempoMultiplier;
+            d && (q -= d / 1e3), q < 0 && (q = 0), q = Math.floor(q * a), r(s, N.renderedBuffer, q);
           }
-        n && n("placeNote: " + s.instrument + ":" + v), P();
+        n && n("placeNote: " + o.instrument + ":" + v), P();
       }, c.startRendering(), new Promise(function(N) {
         P = N;
       });
     }).catch(function(y) {
       return n && n("placeNote catch: " + y.message), Promise.reject(y);
-    }) : (n && n("placeNote skipped: " + s.instrument + ":" + v), Promise.resolve());
+    }) : (n && n("placeNote skipped: " + o.instrument + ":" + v), Promise.resolve());
   }
-  var r = function(o, a, s) {
+  var r = function(s, a, o) {
     for (var p = 0; p < 2; p++)
-      for (var u = a.getChannelData(p), d = o.getChannelData(p), f = 0; f < u.length; f++)
-        d[f + s] += u[f];
+      for (var u = a.getChannelData(p), d = s.getChannelData(p), f = 0; f < u.length; f++)
+        d[f + o] += u[f];
   };
   return mr = l, mr;
 }
-var yr, Bi;
+var yr, Ni;
 function Kr() {
-  if (Bi) return yr;
-  Bi = 1;
-  var _ = ac(), m = nc(), g = We(), l = Re(), r = Ue(), o = Vr(), a = $r(), s = ic(), p = sc(), u = jr(), d = "MIDI is not supported in this browser.", f = "https://paulrosen.github.io/midi-js-soundfonts/abcjs/", i = "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/", n = "https://paulrosen.github.io/midi-js-soundfonts/MusyngKite/";
+  if (Ni) return yr;
+  Ni = 1;
+  var k = ic(), m = sc(), g = We(), l = Re(), r = Ue(), s = Vr(), a = $r(), o = oc(), p = cc(), u = jr(), d = "MIDI is not supported in this browser.", f = "https://paulrosen.github.io/midi-js-soundfonts/abcjs/", i = "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/", n = "https://paulrosen.github.io/midi-js-soundfonts/MusyngKite/";
   function t() {
     var e = this;
     e.audioBufferPossible = void 0, e.directSource = [], e.startTimeSec = void 0, e.pausedTimeSec = void 0, e.audioBuffers = [], e.duration = void 0, e.isRunning = !1, e.options = {}, e.pickupLength = 0, e.init = function(h) {
@@ -13090,10 +13090,10 @@ function Kr() {
         return Promise.reject(new Error("Must pass in either a visualObj or a sequence"));
       e.millisecondsPerMeasure = h.millisecondsPerMeasure ? h.millisecondsPerMeasure : h.visualObj ? h.visualObj.millisecondsPerMeasure(e.flattened.tempo) : 1e3, e.beatsPerMeasure = h.visualObj ? h.visualObj.getBeatsPerMeasure() : 4, e.sequenceCallback = w.sequenceCallback, e.callbackContext = w.callbackContext, e.onEnded = w.onEnded, e.meterFraction = h.visualObj ? h.visualObj.getMeterFraction() : { den: 1 };
       var N = {}, T = [], q = [], I = a[0];
-      e.flattened.tracks.forEach(function(k) {
-        k.forEach(function(M) {
+      e.flattened.tracks.forEach(function(_) {
+        _.forEach(function(M) {
           if (M.cmd === "program" && a[M.instrument] && (I = a[M.instrument]), M.pitch !== void 0) {
-            var F = M.pitch, L = o[F], b = M.instrument !== void 0 ? a[M.instrument] : I;
+            var F = M.pitch, L = s[F], b = M.instrument !== void 0 ? a[M.instrument] : I;
             if (L)
               if (N[b] || (N[b] = {}), !u[b] || !u[b][L])
                 N[b][L] = !0;
@@ -13109,14 +13109,14 @@ function Kr() {
         });
       }), e.debugCallback && e.debugCallback("note gathering time = " + Math.floor((l().currentTime - y) * 1e3) + "ms"), y = l().currentTime;
       var C = [];
-      Object.keys(N).forEach(function(k) {
-        Object.keys(N[k]).forEach(function(M) {
-          C.push({ instrument: k, note: M });
+      Object.keys(N).forEach(function(_) {
+        Object.keys(N[_]).forEach(function(M) {
+          C.push({ instrument: _, note: M });
         });
       }), e.debugCallback && e.debugCallback("notes " + JSON.stringify(C));
       for (var B = [], R = 256, S = 0; S < C.length; S += R)
         B.push(C.slice(S, S + R));
-      return new Promise(function(k, M) {
+      return new Promise(function(_, M) {
         var F = {
           cached: T,
           error: q,
@@ -13124,14 +13124,14 @@ function Kr() {
         }, L = 0, b = function() {
           e.debugCallback && e.debugCallback("loadBatch idx=" + L + " len=" + B.length), L < B.length ? e._loadBatch(B[L], e.soundFontUrl, y).then(function(x) {
             e.debugCallback && e.debugCallback("loadBatch then"), y = l().currentTime, x && (x.error && (F.error = F.error.concat(x.error)), x.loaded && (F.loaded = F.loaded.concat(x.loaded))), L++, b();
-          }, M) : (e.debugCallback && e.debugCallback("resolve init"), k(F));
+          }, M) : (e.debugCallback && e.debugCallback("resolve init"), _(F));
         };
         b();
       });
     }, e._loadBatch = (function(h, y, w, A) {
       var P = [];
       return h.forEach(function(N) {
-        e.debugCallback && e.debugCallback("getNote " + N.instrument + ":" + N.note), P.push(_(y, N.instrument, N.note, l()));
+        e.debugCallback && e.debugCallback("getNote " + N.instrument + ":" + N.note), P.push(k(y, N.instrument, N.note, l()));
       }), Promise.all(P).then(function(N) {
         e.debugCallback && e.debugCallback("mp3 load time = " + Math.floor((l().currentTime - w) * 1e3) + "ms");
         for (var T = [], q = [], I = [], C = [], B = 0; B < N.length; B++) {
@@ -13152,9 +13152,9 @@ function Kr() {
                 });
               }, A);
             });
-          for (var k = [], M = 0; M < h.length; M++)
-            k.push(h[M].instrument + "/" + h[M].note);
-          return e.debugCallback && e.debugCallback("loadBatch timeout"), Promise.reject(new Error("timeout attempting to load: " + k.join(", ")));
+          for (var _ = [], M = 0; M < h.length; M++)
+            _.push(h[M].instrument + "/" + h[M].note);
+          return e.debugCallback && e.debugCallback("loadBatch timeout"), Promise.reject(new Error("timeout attempting to load: " + _.join(", ")));
         } else
           return e.debugCallback && e.debugCallback("loadBatch resolve"), Promise.resolve({ loaded: T, cached: q, error: C });
       }).catch(function(N) {
@@ -13189,8 +13189,8 @@ function Kr() {
             });
           });
           for (var B = [], R = l().createBuffer(2, N, l().sampleRate), S = 0; S < Object.keys(C).length; S++) {
-            var k = Object.keys(C)[S], M = k.split(":"), F = M[6] !== void 0 ? parseFloat(M[6]) : 0;
-            M = { instrument: M[0], pitch: parseInt(M[1], 10), volume: parseInt(M[2], 10), len: parseFloat(M[3]), pan: parseFloat(M[4]), tempoMultiplier: parseFloat(M[5]), cents: F }, B.push(p(R, l().sampleRate, M, C[k], e.soundFontVolumeMultiplier, e.programOffsets[M.instrument], h, e.noteEnd / 1e3, e.debugCallback));
+            var _ = Object.keys(C)[S], M = _.split(":"), F = M[6] !== void 0 ? parseFloat(M[6]) : 0;
+            M = { instrument: M[0], pitch: parseInt(M[1], 10), volume: parseInt(M[2], 10), len: parseFloat(M[3]), pan: parseFloat(M[4]), tempoMultiplier: parseFloat(M[5]), cents: F }, B.push(p(R, l().sampleRate, M, C[_], e.soundFontVolumeMultiplier, e.programOffsets[M.instrument], h, e.noteEnd / 1e3, e.debugCallback));
           }
           e.audioBuffers = [R], e.debugCallback && (e.debugCallback("sampleRate = " + l().sampleRate), e.debugCallback("totalSamples = " + N), e.debugCallback("creationTime = " + Math.floor((l().currentTime - A) * 1e3) + "ms")), Promise.all(B).then(function() {
             l().state === "suspended" ? l().resume().then(function() {
@@ -13270,7 +13270,7 @@ function Kr() {
     }, e.finished = function() {
       e.startTimeSec = void 0, e.pausedTimeSec = void 0, e.isRunning = !1;
     }, e.download = function() {
-      return s(e);
+      return o(e);
     }, e.getAudioBuffer = function() {
       return e.audioBuffers[0];
     }, e.getIsRunning = function() {
@@ -13309,11 +13309,11 @@ function Kr() {
   }
   return yr = t, yr;
 }
-var wr, Ni;
-function bs() {
-  if (Ni) return wr;
-  Ni = 1;
-  var _ = function() {
+var wr, Pi;
+function ms() {
+  if (Pi) return wr;
+  Pi = 1;
+  var k = function() {
     var m = this;
     m.tracks = [], m.totalDuration = 0, m.currentInstrument = [], m.starts = [], m.addTrack = function() {
       return m.tracks.push([]), m.currentInstrument.push(0), m.starts.push(0), m.tracks.length - 1;
@@ -13323,26 +13323,26 @@ function bs() {
         cmd: "program",
         instrument: l
       }), m.currentInstrument[g] = l;
-    }, m.appendNote = function(g, l, r, o, a) {
-      var s = {
+    }, m.appendNote = function(g, l, r, s, a) {
+      var o = {
         cmd: "note",
         duration: r,
         gap: 0,
         instrument: m.currentInstrument[g],
         pitch: l,
         start: m.starts[g],
-        volume: o
+        volume: s
       };
-      a && (s.cents = a), m.tracks[g].push(s), m.starts[g] += r, m.totalDuration = Math.max(m.totalDuration, m.starts[g]);
+      a && (o.cents = a), m.tracks[g].push(o), m.starts[g] += r, m.totalDuration = Math.max(m.totalDuration, m.starts[g]);
     };
   };
-  return wr = _, wr;
+  return wr = k, wr;
 }
-var xr, Pi;
-function oc() {
-  if (Pi) return xr;
-  Pi = 1;
-  var _ = `
+var xr, Li;
+function lc() {
+  if (Li) return xr;
+  Li = 1;
+  var k = `
 <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 700" preserveAspectRatio="xMidYMid meet">
 	<g transform="translate(0,700) scale(0.1,-0.1)" >
 	<path d="M3111 6981 c-20 -37 -90 -55 -364 -96 -120 -18 -190 -33 -244 -55
@@ -13405,26 +13405,26 @@ function oc() {
 	</g>
 </svg>
 `;
-  return xr = _, xr;
+  return xr = k, xr;
 }
-var Cr, Li;
-function cc() {
-  if (Li) return Cr;
-  Li = 1;
-  var _ = `
+var Cr, qi;
+function fc() {
+  if (qi) return Cr;
+  qi = 1;
+  var k = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25" class="abcjs-play-svg">
     <g>
     <polygon points="4 0 23 12.5 4 25"/>
     </g>
 </svg>
 `;
-  return Cr = _, Cr;
+  return Cr = k, Cr;
 }
-var kr, qi;
-function lc() {
-  if (qi) return kr;
-  qi = 1;
-  var _ = `
+var kr, Di;
+function hc() {
+  if (Di) return kr;
+  Di = 1;
+  var k = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25" class="abcjs-pause-svg">
   <g>
     <rect width="8.23" height="25"/>
@@ -13432,24 +13432,24 @@ function lc() {
   </g>
 </svg>
 `;
-  return kr = _, kr;
+  return kr = k, kr;
 }
-var _r, Di;
-function fc() {
-  if (Di) return _r;
-  Di = 1;
-  var _ = `
+var _r, Ri;
+function uc() {
+  if (Ri) return _r;
+  Ri = 1;
+  var k = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="abcjs-loading-svg">
     <circle cx="50" cy="50" fill="none" stroke-width="20" r="35" stroke-dasharray="160 55"></circle>
 </svg>
 `;
-  return _r = _, _r;
+  return _r = k, _r;
 }
-var Tr, Ri;
-function hc() {
-  if (Ri) return Tr;
-  Ri = 1;
-  var _ = `
+var Tr, Ii;
+function dc() {
+  if (Ii) return Tr;
+  Ii = 1;
+  var k = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25">
   <g>
     <polygon points="5 12.5 24 0 24 25"/>
@@ -13457,13 +13457,13 @@ function hc() {
   </g>
 </svg>
 `;
-  return Tr = _, Tr;
+  return Tr = k, Tr;
 }
-var Sr, Ii;
-function ms() {
-  if (Ii) return Sr;
-  Ii = 1;
-  var _ = Ue(), m = We(), g = Re(), l = oc(), r = cc(), o = lc(), a = fc(), s = hc();
+var Sr, Fi;
+function ys() {
+  if (Fi) return Sr;
+  Fi = 1;
+  var k = Ue(), m = We(), g = Re(), l = lc(), r = fc(), s = hc(), a = uc(), o = dc();
   function p(n, t) {
     var e = this;
     if (typeof n == "string") {
@@ -13518,12 +13518,12 @@ function ms() {
     }
     if (c) {
       var T = t.restartTitle ? t.restartTitle : "Click to go to beginning.", q = t.restartAria ? t.restartAria : T;
-      A += '<button type="button" class="abcjs-midi-reset abcjs-btn" title="' + T + '" aria-label="' + q + '">' + s + `</button>
+      A += '<button type="button" class="abcjs-midi-reset abcjs-btn" title="' + T + '" aria-label="' + q + '">' + o + `</button>
 `;
     }
     if (v) {
       var I = t.playTitle ? t.playTitle : "Click to play/pause.", C = t.playAria ? t.playAria : I;
-      A += '<button type="button" class="abcjs-midi-start abcjs-btn" title="' + I + '" aria-label="' + C + '">' + r + o + a + `</button>
+      A += '<button type="button" class="abcjs-midi-start abcjs-btn" title="' + I + '" aria-label="' + C + '">' + r + s + a + `</button>
 `;
     }
     if (h) {
@@ -13533,8 +13533,8 @@ function ms() {
     }
     if (w && (A += `<span class="abcjs-midi-clock"></span>
 `), y) {
-      var S = t.warpTitle ? t.warpTitle : "Change the playback speed.", k = t.warpAria ? t.warpAria : S, M = t.bpm ? t.bpm : "BPM";
-      A += '<span class="abcjs-tempo-wrapper"><label><input class="abcjs-midi-tempo" type="number" min="1" max="300" value="100" title="' + S + '" aria-label="' + k + '">%</label><span>&nbsp;(<span class="abcjs-midi-current-tempo"></span> ' + M + `)</span></span>
+      var S = t.warpTitle ? t.warpTitle : "Change the playback speed.", _ = t.warpAria ? t.warpAria : S, M = t.bpm ? t.bpm : "BPM";
+      A += '<span class="abcjs-tempo-wrapper"><label><input class="abcjs-midi-tempo" type="number" min="1" max="300" value="100" title="' + S + '" aria-label="' + _ + '">%</label><span>&nbsp;(<span class="abcjs-midi-current-tempo"></span> ' + M + `)</span></span>
 `;
     }
     A += '<div class="abcjs-css-warning" style="font-size: 12px;color:red;border: 1px solid red;text-align: center;width: 300px;margin-top: 4px;font-weight: bold;border-radius: 4px;">CSS required: load abcjs-audio.css</div>', A += `</div>
@@ -13542,7 +13542,7 @@ function ms() {
   }
   function d(n, t, e, c, v) {
     var h = !0;
-    if (g() ? h = g().state === "suspended" : m(), !_())
+    if (g() ? h = g().state === "suspended" : m(), !k())
       throw { status: "NotSupported", message: "This browser does not support audio." };
     (h || v) && e && e.classList.add("abcjs-loading"), h ? g().resume().then(function() {
       c ? c().then(function(y) {
@@ -13577,14 +13577,14 @@ function ms() {
   }
   return Sr = p, Sr;
 }
-var Er, Fi;
-function uc() {
-  if (Fi) return Er;
-  Fi = 1;
-  var _ = bs(), m = Kr(), g = Re();
-  function l(o, a, s, p, u) {
-    for (var d = new _(), f = 0; f < o.length; f++) {
-      var i = o[f], n = d.addTrack();
+var Er, Oi;
+function pc() {
+  if (Oi) return Er;
+  Oi = 1;
+  var k = ms(), m = Kr(), g = Re();
+  function l(s, a, o, p, u) {
+    for (var d = new k(), f = 0; f < s.length; f++) {
+      var i = s[f], n = d.addTrack();
       if (d.setInstrument(n, i.instrument), f === 0 && a)
         for (var t = 0; t < a.length; t++) {
           var e = a[t];
@@ -13594,15 +13594,15 @@ function uc() {
     }
     var c = g();
     return c.state === "suspended" ? c.resume().then(function() {
-      return r(d, s, p, u);
-    }) : r(d, s, p, u);
+      return r(d, o, p, u);
+    }) : r(d, o, p, u);
   }
-  function r(o, a, s, p) {
+  function r(s, a, o, p) {
     var u = new m();
     return u.init({
-      sequence: o,
+      sequence: s,
       millisecondsPerMeasure: a,
-      options: { soundFontUrl: s },
+      options: { soundFontUrl: o },
       debugCallback: p
     }).then(function() {
       return u.prime();
@@ -13612,128 +13612,128 @@ function uc() {
   }
   return Er = l, Er;
 }
-var Ar, Oi;
-function ys() {
-  if (Oi) return Ar;
-  Oi = 1;
-  var _ = ms(), m = Kr(), g = Rr(), l = Re();
+var Ar, Hi;
+function ws() {
+  if (Hi) return Ar;
+  Hi = 1;
+  var k = ys(), m = Kr(), g = Rr(), l = Re();
   function r() {
-    var o = this;
-    o.warp = 100, o.cursorControl = null, o.visualObj = null, o.timer = null, o.midiBuffer = null, o.options = null, o.currentTempo = null, o.control = null, o.isLooping = !1, o.isStarted = !1, o.isLoaded = !1, o.isLoading = !1, o.load = function(s, p, u) {
-      u || (u = {}), u.displayPlay === void 0 && (u.displayPlay = !0), u.displayProgress === void 0 && (u.displayProgress = !0), o.control = new _(s, {
-        loopHandler: u.displayLoop ? o.toggleLoop : void 0,
-        restartHandler: u.displayRestart ? o.restart : void 0,
-        playPromiseHandler: u.displayPlay ? o.play : void 0,
-        progressHandler: u.displayProgress ? o.randomAccess : void 0,
-        warpHandler: u.displayWarp ? o.onWarp : void 0,
-        afterResume: o.init
-      }), o.cursorControl = p, o.disable(!0);
-    }, o.disable = function(s) {
-      o.control && o.control.disable(s);
-    }, o.setTune = function(s, p, u) {
-      return o.visualObj = s, o.disable(!1), o.options = u || {}, o.control && (o.pause(), o.setProgress(0, 1), o.control.resetAll(), o.restart(), o.isStarted = !1), o.isLooping = !1, p ? o.go() : Promise.resolve({ status: "no-audio-context" });
-    }, o.go = function() {
-      o.isLoading = !0;
-      var s = o.visualObj.millisecondsPerMeasure() * 100 / o.warp;
-      o.currentTempo = Math.round(o.visualObj.getBeatsPerMeasure() / s * 6e4), o.control && o.control.setTempo(o.currentTempo), o.percent = 0;
+    var s = this;
+    s.warp = 100, s.cursorControl = null, s.visualObj = null, s.timer = null, s.midiBuffer = null, s.options = null, s.currentTempo = null, s.control = null, s.isLooping = !1, s.isStarted = !1, s.isLoaded = !1, s.isLoading = !1, s.load = function(o, p, u) {
+      u || (u = {}), u.displayPlay === void 0 && (u.displayPlay = !0), u.displayProgress === void 0 && (u.displayProgress = !0), s.control = new k(o, {
+        loopHandler: u.displayLoop ? s.toggleLoop : void 0,
+        restartHandler: u.displayRestart ? s.restart : void 0,
+        playPromiseHandler: u.displayPlay ? s.play : void 0,
+        progressHandler: u.displayProgress ? s.randomAccess : void 0,
+        warpHandler: u.displayWarp ? s.onWarp : void 0,
+        afterResume: s.init
+      }), s.cursorControl = p, s.disable(!0);
+    }, s.disable = function(o) {
+      s.control && s.control.disable(o);
+    }, s.setTune = function(o, p, u) {
+      return s.visualObj = o, s.disable(!1), s.options = u || {}, s.control && (s.pause(), s.setProgress(0, 1), s.control.resetAll(), s.restart(), s.isStarted = !1), s.isLooping = !1, p ? s.go() : Promise.resolve({ status: "no-audio-context" });
+    }, s.go = function() {
+      s.isLoading = !0;
+      var o = s.visualObj.millisecondsPerMeasure() * 100 / s.warp;
+      s.currentTempo = Math.round(s.visualObj.getBeatsPerMeasure() / o * 6e4), s.control && s.control.setTempo(s.currentTempo), s.percent = 0;
       var p;
-      return o.midiBuffer || (o.midiBuffer = new m()), l().resume().then(function(u) {
-        return o.midiBuffer.init({
-          visualObj: o.visualObj,
-          options: o.options,
-          millisecondsPerMeasure: s
+      return s.midiBuffer || (s.midiBuffer = new m()), l().resume().then(function(u) {
+        return s.midiBuffer.init({
+          visualObj: s.visualObj,
+          options: s.options,
+          millisecondsPerMeasure: o
         });
       }).then(function(u) {
-        return p = u, o.midiBuffer.prime();
+        return p = u, s.midiBuffer.prime();
       }).then(function() {
         var u = 16;
-        return o.cursorControl && o.cursorControl.beatSubdivisions !== void 0 && parseInt(o.cursorControl.beatSubdivisions, 10) >= 1 && parseInt(o.cursorControl.beatSubdivisions, 10) <= 64 && (u = parseInt(o.cursorControl.beatSubdivisions, 10)), o.timer = new g(o.visualObj, {
-          beatCallback: o.beatCallback,
-          eventCallback: o.eventCallback,
-          lineEndCallback: o.lineEndCallback,
-          qpm: o.currentTempo,
-          extraMeasuresAtBeginning: o.cursorControl ? o.cursorControl.extraMeasuresAtBeginning : void 0,
-          lineEndAnticipation: o.cursorControl ? o.cursorControl.lineEndAnticipation : 0,
+        return s.cursorControl && s.cursorControl.beatSubdivisions !== void 0 && parseInt(s.cursorControl.beatSubdivisions, 10) >= 1 && parseInt(s.cursorControl.beatSubdivisions, 10) <= 64 && (u = parseInt(s.cursorControl.beatSubdivisions, 10)), s.timer = new g(s.visualObj, {
+          beatCallback: s.beatCallback,
+          eventCallback: s.eventCallback,
+          lineEndCallback: s.lineEndCallback,
+          qpm: s.currentTempo,
+          extraMeasuresAtBeginning: s.cursorControl ? s.cursorControl.extraMeasuresAtBeginning : void 0,
+          lineEndAnticipation: s.cursorControl ? s.cursorControl.lineEndAnticipation : 0,
           beatSubdivisions: u
-        }), o.cursorControl && o.cursorControl.onReady && typeof o.cursorControl.onReady == "function" && o.cursorControl.onReady(o), o.isLoaded = !0, o.isLoading = !1, Promise.resolve({ status: "created", notesStatus: p });
+        }), s.cursorControl && s.cursorControl.onReady && typeof s.cursorControl.onReady == "function" && s.cursorControl.onReady(s), s.isLoaded = !0, s.isLoading = !1, Promise.resolve({ status: "created", notesStatus: p });
       });
-    }, o.destroy = function() {
-      o.timer && (o.timer.reset(), o.timer.stop(), o.timer = null), o.midiBuffer && (o.midiBuffer.stop(), o.midiBuffer = null), o.setProgress(0, 1), o.control && o.control.resetAll();
-    }, o.play = function() {
-      return o.runWhenReady(o._play, void 0);
+    }, s.destroy = function() {
+      s.timer && (s.timer.reset(), s.timer.stop(), s.timer = null), s.midiBuffer && (s.midiBuffer.stop(), s.midiBuffer = null), s.setProgress(0, 1), s.control && s.control.resetAll();
+    }, s.play = function() {
+      return s.runWhenReady(s._play, void 0);
     };
-    function a(s) {
+    function a(o) {
       return new Promise(function(p) {
-        setTimeout(p, s);
+        setTimeout(p, o);
       });
     }
-    o.runWhenReady = function(s, p) {
-      return o.visualObj ? o.isLoading ? a(500).then(function() {
-        return o.isLoading ? o.runWhenReady(s, p) : s(p);
-      }) : o.isLoaded ? s(p) : o.go().then(function() {
-        return s(p);
+    s.runWhenReady = function(o, p) {
+      return s.visualObj ? s.isLoading ? a(500).then(function() {
+        return s.isLoading ? s.runWhenReady(o, p) : o(p);
+      }) : s.isLoaded ? o(p) : s.go().then(function() {
+        return o(p);
       }) : Promise.resolve({ status: "loading" });
-    }, o._play = function() {
+    }, s._play = function() {
       return l().resume().then(function() {
-        return o.isStarted = !o.isStarted, o.isStarted ? (o.cursorControl && o.cursorControl.onStart && typeof o.cursorControl.onStart == "function" && o.cursorControl.onStart(), o.midiBuffer.start(), o.timer.start(o.percent), o.control && o.control.pushPlay(!0)) : o.pause(), Promise.resolve({ status: "ok" });
+        return s.isStarted = !s.isStarted, s.isStarted ? (s.cursorControl && s.cursorControl.onStart && typeof s.cursorControl.onStart == "function" && s.cursorControl.onStart(), s.midiBuffer.start(), s.timer.start(s.percent), s.control && s.control.pushPlay(!0)) : s.pause(), Promise.resolve({ status: "ok" });
       });
-    }, o.pause = function() {
-      o.timer && (o.timer.pause(), o.midiBuffer.pause(), o.control && o.control.pushPlay(!1));
-    }, o.toggleLoop = function() {
-      o.isLooping = !o.isLooping, o.control && o.control.pushLoop(o.isLooping);
-    }, o.restart = function() {
-      o.timer && (o.timer.setProgress(0), o.midiBuffer.seek(0));
-    }, o.randomAccess = function(s) {
-      return o.runWhenReady(o._randomAccess, s);
-    }, o._randomAccess = function(s) {
-      var p = s.target.classList.contains("abcjs-midi-progress-indicator") ? s.target.parentNode : s.target, u = (s.x - p.getBoundingClientRect().left) / p.offsetWidth;
-      return u < 0 && (u = 0), u > 1 && (u = 1), o.seek(u), Promise.resolve({ status: "ok" });
-    }, o.seek = function(s, p) {
-      o.timer && o.midiBuffer && (o.timer.setProgress(s, p), o.midiBuffer.seek(s, p));
-    }, o.setWarp = function(s) {
-      if (parseInt(s, 10) > 0) {
-        o.warp = parseInt(s, 10);
-        var p = o.isStarted, u = o.percent;
-        return o.destroy(), o.isStarted = !1, o.go().then(function() {
-          return o.setProgress(u, o.midiBuffer.duration * 1e3), o.control && o.control.setWarp(o.currentTempo, o.warp), p ? o.play().then(function() {
-            return o.seek(u), Promise.resolve();
-          }) : (o.seek(u), Promise.resolve());
+    }, s.pause = function() {
+      s.timer && (s.timer.pause(), s.midiBuffer.pause(), s.control && s.control.pushPlay(!1));
+    }, s.toggleLoop = function() {
+      s.isLooping = !s.isLooping, s.control && s.control.pushLoop(s.isLooping);
+    }, s.restart = function() {
+      s.timer && (s.timer.setProgress(0), s.midiBuffer.seek(0));
+    }, s.randomAccess = function(o) {
+      return s.runWhenReady(s._randomAccess, o);
+    }, s._randomAccess = function(o) {
+      var p = o.target.classList.contains("abcjs-midi-progress-indicator") ? o.target.parentNode : o.target, u = (o.x - p.getBoundingClientRect().left) / p.offsetWidth;
+      return u < 0 && (u = 0), u > 1 && (u = 1), s.seek(u), Promise.resolve({ status: "ok" });
+    }, s.seek = function(o, p) {
+      s.timer && s.midiBuffer && (s.timer.setProgress(o, p), s.midiBuffer.seek(o, p));
+    }, s.setWarp = function(o) {
+      if (parseInt(o, 10) > 0) {
+        s.warp = parseInt(o, 10);
+        var p = s.isStarted, u = s.percent;
+        return s.destroy(), s.isStarted = !1, s.go().then(function() {
+          return s.setProgress(u, s.midiBuffer.duration * 1e3), s.control && s.control.setWarp(s.currentTempo, s.warp), p ? s.play().then(function() {
+            return s.seek(u), Promise.resolve();
+          }) : (s.seek(u), Promise.resolve());
         });
       }
       return Promise.resolve();
-    }, o.onWarp = function(s) {
-      var p = s.target.value;
-      return o.setWarp(p);
-    }, o.setProgress = function(s, p) {
-      o.percent = s, o.control && o.control.setProgress(s, p);
-    }, o.finished = function() {
-      if (o.timer.reset(), o.isLooping)
-        return o.timer.start(0), o.midiBuffer.finished(), o.midiBuffer.start(), "continue";
-      o.timer.stop(), o.isStarted && (o.control && o.control.pushPlay(!1), o.isStarted = !1, o.midiBuffer.finished(), o.cursorControl && o.cursorControl.onFinished && typeof o.cursorControl.onFinished == "function" && o.cursorControl.onFinished(), o.setProgress(0, 1));
-    }, o.beatCallback = function(s, p, u, d) {
-      var f = s / p;
-      o.setProgress(f, u), o.cursorControl && o.cursorControl.onBeat && typeof o.cursorControl.onBeat == "function" && o.cursorControl.onBeat(s, p, u, d);
-    }, o.eventCallback = function(s) {
-      if (s)
-        o.cursorControl && o.cursorControl.onEvent && typeof o.cursorControl.onEvent == "function" && o.cursorControl.onEvent(s);
+    }, s.onWarp = function(o) {
+      var p = o.target.value;
+      return s.setWarp(p);
+    }, s.setProgress = function(o, p) {
+      s.percent = o, s.control && s.control.setProgress(o, p);
+    }, s.finished = function() {
+      if (s.timer.reset(), s.isLooping)
+        return s.timer.start(0), s.midiBuffer.finished(), s.midiBuffer.start(), "continue";
+      s.timer.stop(), s.isStarted && (s.control && s.control.pushPlay(!1), s.isStarted = !1, s.midiBuffer.finished(), s.cursorControl && s.cursorControl.onFinished && typeof s.cursorControl.onFinished == "function" && s.cursorControl.onFinished(), s.setProgress(0, 1));
+    }, s.beatCallback = function(o, p, u, d) {
+      var f = o / p;
+      s.setProgress(f, u), s.cursorControl && s.cursorControl.onBeat && typeof s.cursorControl.onBeat == "function" && s.cursorControl.onBeat(o, p, u, d);
+    }, s.eventCallback = function(o) {
+      if (o)
+        s.cursorControl && s.cursorControl.onEvent && typeof s.cursorControl.onEvent == "function" && s.cursorControl.onEvent(o);
       else
-        return o.finished();
-    }, o.lineEndCallback = function(s, p) {
-      o.cursorControl && o.cursorControl.onLineEnd && typeof o.cursorControl.onLineEnd == "function" && o.cursorControl.onLineEnd(s, p);
-    }, o.getUrl = function() {
-      return o.midiBuffer.download();
-    }, o.download = function(s) {
-      var p = o.getUrl(), u = document.createElement("a");
-      document.body.appendChild(u), u.setAttribute("style", "display: none;"), u.href = p, u.download = s || "output.wav", u.click(), window.URL.revokeObjectURL(p), document.body.removeChild(u);
+        return s.finished();
+    }, s.lineEndCallback = function(o, p) {
+      s.cursorControl && s.cursorControl.onLineEnd && typeof s.cursorControl.onLineEnd == "function" && s.cursorControl.onLineEnd(o, p);
+    }, s.getUrl = function() {
+      return s.midiBuffer.download();
+    }, s.download = function(o) {
+      var p = s.getUrl(), u = document.createElement("a");
+      document.body.appendChild(u), u.setAttribute("style", "display: none;"), u.href = p, u.download = o || "output.wav", u.click(), window.URL.revokeObjectURL(p), document.body.removeChild(u);
     };
   }
   return Ar = r, Ar;
 }
-var Mr, Hi;
-function ws() {
-  if (Hi) return Mr;
-  Hi = 1;
-  var _ = gs(), m;
+var Mr, zi;
+function xs() {
+  if (zi) return Mr;
+  zi = 1;
+  var k = bs(), m;
   return (function() {
     function g(i, n) {
       for (var t in n)
@@ -13749,7 +13749,7 @@ function ws() {
       if (this.trackcount === 0) {
         this.startTrack();
         var c = Math.round(6e7 / i);
-        this.track += "%00%FF%51%03" + u(c, 6), t && (this.track += a(t)), e && (this.track += s(e)), n && (this.track += o(n, "%01")), this.endTrack();
+        this.track += "%00%FF%51%03" + u(c, 6), t && (this.track += a(t)), e && (this.track += o(e)), n && (this.track += s(n, "%01")), this.endTrack();
       }
     }, l.prototype.startTrack = function() {
       this.noteWarped = {}, this.track = "", this.trackName = "", this.trackInstrument = "", this.silencelength = 0, this.trackcount++, this.instrument && this.setInstrument(this.instrument);
@@ -13759,7 +13759,7 @@ function ws() {
       this.track = "MTrk" + i + // track header
       this.track + "%00%FF%2F%00", this.trackstrings += this.track;
     }, l.prototype.setText = function(i, n) {
-      i === "name" && (this.trackName = o(n, "%03"));
+      i === "name" && (this.trackName = s(n, "%03"));
     }, l.prototype.setInstrument = function(i) {
       this.trackInstrument = "%00%C0" + u(i, 2), this.instrument = i;
     }, l.prototype.setChannel = function(i, n) {
@@ -13771,7 +13771,7 @@ function ws() {
     l.prototype.startNote = function(i, n, t) {
       if (this.track += f(this.silencelength), this.silencelength = 0, t) {
         this.track += "%e" + this.channel.toString(16);
-        var e = Math.round(_(t) * r);
+        var e = Math.round(k(t) * r);
         this.track += d(8192 + e), this.track += f(0), this.noteWarped[i] = !0;
       }
       this.track += this.noteOnAndChannel, this.track += "%" + i.toString(16) + u(n, 2);
@@ -13799,7 +13799,7 @@ function ws() {
         i.insertBefore(c, i.firstChild);
       }
     };
-    function o(i, n) {
+    function s(i, n) {
       for (var t = "", e = 0; e < i.length; e++)
         t += u(i.charCodeAt(e), 2);
       return "%00%FF" + n + u(t.length / 3, 2) + t;
@@ -13812,7 +13812,7 @@ function ws() {
       var v = u(e !== 256 ? e : t, 2), h = i.mode === "m" ? "%01" : "%00";
       return n + v + h;
     }
-    function s(i) {
+    function o(i) {
       var n = "%00%FF%58%04" + u(i.num, 2), t = { 1: 0, 2: 1, 4: 2, 8: 3, 16: 4, 32: 5 }, e = t[i.den];
       if (!e)
         return "";
@@ -13875,27 +13875,27 @@ function ws() {
     };
   })(), Mr = m, Mr;
 }
-var Br, zi;
-function dc() {
-  if (zi) return Br;
-  zi = 1;
-  var _ = ws(), m;
+var Br, Gi;
+function vc() {
+  if (Gi) return Br;
+  Gi = 1;
+  var k = xs(), m;
   return (function() {
     var g = 1920;
-    m = function(o, a) {
+    m = function(s, a) {
       a === void 0 && (a = {});
-      var s = o.setUpAudio(a), p = _(), u = o.metaText ? o.metaText.title : void 0;
+      var o = s.setUpAudio(a), p = k(), u = s.metaText ? s.metaText.title : void 0;
       u && u.length > 128 && (u = u.substring(0, 124) + "...");
-      var d = o.getKeySignature(), f = o.getMeterFraction(), i = s.tempo, n = i / 60;
+      var d = s.getKeySignature(), f = s.getMeterFraction(), i = o.tempo, n = i / 60;
       if (f.den === 8 && f.num !== 5 && f.num !== 7) {
-        var t = o.millisecondsPerMeasure();
+        var t = s.millisecondsPerMeasure();
         i = 6e4 / (t / f.num) / 2, n = i / 60;
       }
       p.setGlobalInfo(i, u, d, f);
-      for (var e = 0; e < s.tracks.length; e++) {
+      for (var e = 0; e < o.tracks.length; e++) {
         p.startTrack();
-        for (var c = {}, v = 0; v < s.tracks[e].length; v++) {
-          var h = s.tracks[e][v];
+        for (var c = {}, v = 0; v < o.tracks[e].length; v++) {
+          var h = o.tracks[e][v];
           switch (h.cmd) {
             case "text":
               p.setText(h.type, h.text);
@@ -13916,17 +13916,17 @@ function dc() {
       }
       return p.getData();
     };
-    function l(r, o, a) {
-      for (var s = Object.keys(o), p = 0; p < s.length; p++)
-        s[p] = parseFloat(s[p]);
-      s.sort(function(e, c) {
+    function l(r, s, a) {
+      for (var o = Object.keys(s), p = 0; p < o.length; p++)
+        o[p] = parseFloat(o[p]);
+      o.sort(function(e, c) {
         return e - c;
       });
-      for (var u = 0, d = 0; d < s.length; d++) {
-        var f = o[s[d]];
-        if (s[d] > u) {
-          var i = (s[d] - u) * a;
-          r.addRest(i), u = s[d];
+      for (var u = 0, d = 0; d < o.length; d++) {
+        var f = s[o[d]];
+        if (o[d] > u) {
+          var i = (o[d] - u) * a;
+          r.addRest(i), u = o[d];
         }
         for (var n = 0; n < f.length; n++) {
           var t = f[n];
@@ -13936,19 +13936,19 @@ function dc() {
     }
   })(), Br = m, Br;
 }
-var Nr, Gi;
-function pc() {
-  if (Gi) return Nr;
-  Gi = 1;
-  var _ = Ye(), m = dc(), g = function(o, a) {
-    var s = {};
+var Nr, Yi;
+function gc() {
+  if (Yi) return Nr;
+  Yi = 1;
+  var k = Ye(), m = vc(), g = function(s, a) {
+    var o = {};
     if (a)
       for (var p in a)
-        a.hasOwnProperty(p) && (s[p] = a[p]);
-    s.generateInline = !1;
+        a.hasOwnProperty(p) && (o[p] = a[p]);
+    o.generateInline = !1;
     function u(d, f, i) {
-      var n = m(f, s);
-      switch (s.midiOutputType) {
+      var n = m(f, o);
+      switch (o.midiOutputType) {
         case "encoded":
           return n;
         case "binary":
@@ -13960,39 +13960,39 @@ function pc() {
           }
           return c;
         default:
-          return r(f, s, n, i);
+          return r(f, o, n, i);
       }
     }
-    return typeof o == "string" ? _.renderEngine(u, "*", o, s) : u(null, o, 0);
+    return typeof s == "string" ? k.renderEngine(u, "*", s, o) : u(null, s, 0);
   };
-  function l(o) {
+  function l(s) {
     var a = {};
-    return o && a.toString.call(o) === "[object Function]";
+    return s && a.toString.call(s) === "[object Function]";
   }
-  var r = function(o, a, s, p) {
+  var r = function(s, a, o, p) {
     var u = ["abcjs-download-midi", "abcjs-midi-" + p];
     a.downloadClass && u.push(a.downloadClass);
     var d = '<div class="' + u.join(" ") + '">';
     a.preTextDownload && (d += a.preTextDownload);
-    var f = o.metaText && o.metaText.title ? o.metaText.title : "Untitled", i;
-    a.downloadLabel && l(a.downloadLabel) ? i = a.downloadLabel(o, p) : a.downloadLabel ? i = a.downloadLabel.replace(/%T/, f) : i = 'Download MIDI for "' + f + '"', f = f.toLowerCase().replace(/'/g, "").replace(/\W/g, "_").replace(/__/g, "_");
+    var f = s.metaText && s.metaText.title ? s.metaText.title : "Untitled", i;
+    a.downloadLabel && l(a.downloadLabel) ? i = a.downloadLabel(s, p) : a.downloadLabel ? i = a.downloadLabel.replace(/%T/, f) : i = 'Download MIDI for "' + f + '"', f = f.toLowerCase().replace(/'/g, "").replace(/\W/g, "_").replace(/__/g, "_");
     var n = a.fileName ? a.fileName : f + ".midi";
-    return d += '<a download="' + n + '" href="' + s + '">' + i + "</a>", a.postTextDownload && (d += a.postTextDownload), d + "</div>";
+    return d += '<a download="' + n + '" href="' + o + '">' + i + "</a>", a.postTextDownload && (d += a.postTextDownload), d + "</div>";
   };
   return Nr = g, Nr;
 }
-var Pr, Yi;
-function xs() {
-  if (Yi) return Pr;
-  Yi = 1;
+var Pr, Wi;
+function Cs() {
+  if (Wi) return Pr;
+  Wi = 1;
   try {
     if (typeof window.CustomEvent != "function") {
-      var _ = function(g, l) {
+      var k = function(g, l) {
         l = l || { bubbles: !1, cancelable: !1, detail: void 0 };
         var r = document.createEvent("CustomEvent");
         return r.initCustomEvent(g, l.bubbles, l.cancelable, l.detail), r;
       };
-      _.prototype = window.Event.prototype, window.CustomEvent = _;
+      k.prototype = window.Event.prototype, window.CustomEvent = k;
     }
   } catch {
   }
@@ -14031,29 +14031,29 @@ function xs() {
     return this.textarea;
   }, Pr = m, Pr;
 }
-var Lr, Wi;
-function vc() {
-  if (Wi) return Lr;
-  Wi = 1;
-  var _ = _e(), m = ys(), g = Ue(), l = vs(), r = xs();
-  function o(s) {
+var Lr, Ui;
+function bc() {
+  if (Ui) return Lr;
+  Ui = 1;
+  var k = _e(), m = ws(), g = Ue(), l = gs(), r = Cs();
+  function s(o) {
     var p = {}, u;
-    if (s.abcjsParams)
-      for (u in s.abcjsParams)
-        s.abcjsParams.hasOwnProperty(u) && (p[u] = s.abcjsParams[u]);
-    if (s.midi_options)
-      for (u in s.midi_options)
-        s.midi_options.hasOwnProperty(u) && (p[u] = s.midi_options[u]);
-    if (s.parser_options)
-      for (u in s.parser_options)
-        s.parser_options.hasOwnProperty(u) && (p[u] = s.parser_options[u]);
-    if (s.render_options)
-      for (u in s.render_options)
-        s.render_options.hasOwnProperty(u) && (p[u] = s.render_options[u]);
-    return p.tablature && s.warnings_id && (p.tablature.warnings_id = s.warnings_id), p;
+    if (o.abcjsParams)
+      for (u in o.abcjsParams)
+        o.abcjsParams.hasOwnProperty(u) && (p[u] = o.abcjsParams[u]);
+    if (o.midi_options)
+      for (u in o.midi_options)
+        o.midi_options.hasOwnProperty(u) && (p[u] = o.midi_options[u]);
+    if (o.parser_options)
+      for (u in o.parser_options)
+        o.parser_options.hasOwnProperty(u) && (p[u] = o.parser_options[u]);
+    if (o.render_options)
+      for (u in o.render_options)
+        o.render_options.hasOwnProperty(u) && (p[u] = o.render_options[u]);
+    return p.tablature && o.warnings_id && (p.tablature.warnings_id = o.warnings_id), p;
   }
-  var a = function(s, p) {
-    this.abcjsParams = o(p), p.indicate_changed && (this.indicate_changed = !0), typeof s == "string" ? this.editarea = new r(s) : s.isEditArea ? this.editarea = s : this.editarea = new r(s), this.editarea.addSelectionListener(this), this.editarea.addChangeListener(this), p.canvas_id ? this.div = p.canvas_id : p.paper_id ? this.div = p.paper_id : (this.div = document.createElement("DIV"), this.editarea.getElem().parentNode.insertBefore(this.div, this.editarea.getElem())), typeof this.div == "string" && (this.div = document.getElementById(this.div)), p.selectionChangeCallback && (this.selectionChangeCallback = p.selectionChangeCallback), this.clientClickListener = this.abcjsParams.clickListener, this.abcjsParams.clickListener = this.highlight.bind(this), p.synth && g() && (this.synth = {
+  var a = function(o, p) {
+    this.abcjsParams = s(p), p.indicate_changed && (this.indicate_changed = !0), typeof o == "string" ? this.editarea = new r(o) : o.isEditArea ? this.editarea = o : this.editarea = new r(o), this.editarea.addSelectionListener(this), this.editarea.addChangeListener(this), p.canvas_id ? this.div = p.canvas_id : p.paper_id ? this.div = p.paper_id : (this.div = document.createElement("DIV"), this.editarea.getElem().parentNode.insertBefore(this.div, this.editarea.getElem())), typeof this.div == "string" && (this.div = document.getElementById(this.div)), p.selectionChangeCallback && (this.selectionChangeCallback = p.selectionChangeCallback), this.clientClickListener = this.abcjsParams.clickListener, this.abcjsParams.clickListener = this.highlight.bind(this), p.synth && g() && (this.synth = {
       el: p.synth.el,
       cursorControl: p.synth.cursorControl,
       options: p.synth.options
@@ -14064,7 +14064,7 @@ function vc() {
       };
       return f(u, d) || (u.className += (u.className ? " " : "") + d), u;
     }, this.removeClassName = function(u, d) {
-      return u.className = _.strip(u.className.replace(
+      return u.className = k.strip(u.className.replace(
         new RegExp("(^|\\s+)" + d + "(\\s+|$)"),
         " "
       )), u;
@@ -14075,7 +14075,7 @@ function vc() {
   };
   return a.prototype.redrawMidi = function() {
     if (this.generate_midi && !this.midiPause) {
-      var s = new window.CustomEvent("generateMidi", {
+      var o = new window.CustomEvent("generateMidi", {
         detail: {
           tunes: this.tunes,
           abcjsParams: this.abcjsParams,
@@ -14084,7 +14084,7 @@ function vc() {
           engravingEl: this.div
         }
       });
-      window.dispatchEvent(s);
+      window.dispatchEvent(o);
     }
     if (this.synth) {
       var p = this.synth.synthControl;
@@ -14095,38 +14095,38 @@ function vc() {
       this.bReentry = !0;
       try {
         this.timerId = null, this.redrawCallback && this.redrawCallback(!0), this.synth && this.synth.synthControl && this.synth.synthControl.disable(!0), this.tunes = l(this.div, this.currentAbc, this.abcjsParams), this.tunes.length > 0 && (this.warnings = this.tunes[0].warnings), this.redrawMidi(), this.redrawCallback && this.redrawCallback(!1);
-      } catch (s) {
-        console.error("ABCJS error: ", s), this.warnings || (this.warnings = []), this.warnings.push(s.message);
+      } catch (o) {
+        console.error("ABCJS error: ", o), this.warnings || (this.warnings = []), this.warnings.push(o.message);
       }
       this.warningsdiv && (this.warningsdiv.innerHTML = this.warnings ? this.warnings.join("<br />") : "No errors"), this.updateSelection(), this.bReentry = !1;
     }
-  }, a.prototype.paramChanged = function(s) {
-    if (s)
-      for (var p in s)
-        s.hasOwnProperty(p) && (this.abcjsParams[p] = s[p]);
+  }, a.prototype.paramChanged = function(o) {
+    if (o)
+      for (var p in o)
+        o.hasOwnProperty(p) && (this.abcjsParams[p] = o[p]);
     this.currentAbc = "", this.fireChanged();
   }, a.prototype.getTunes = function() {
     return this.tunes;
-  }, a.prototype.synthParamChanged = function(s) {
+  }, a.prototype.synthParamChanged = function(o) {
     if (this.synth) {
-      if (this.synth.options = {}, s)
-        for (var p in s)
-          s.hasOwnProperty(p) && (this.synth.options[p] = s[p]);
+      if (this.synth.options = {}, o)
+        for (var p in o)
+          o.hasOwnProperty(p) && (this.synth.options[p] = o[p]);
       this.currentAbc = "", this.fireChanged();
     }
   }, a.prototype.parseABC = function() {
-    var s = this.editarea.getString();
-    return s === this.currentAbc ? (this.updateSelection(), !1) : (this.currentAbc = s, !0);
+    var o = this.editarea.getString();
+    return o === this.currentAbc ? (this.updateSelection(), !1) : (this.currentAbc = o, !0);
   }, a.prototype.updateSelection = function() {
-    var s = this.editarea.getSelection();
+    var o = this.editarea.getSelection();
     try {
-      this.tunes.length > 0 && this.tunes[0].engraver && this.tunes[0].engraver.rangeHighlight(s.start, s.end);
+      this.tunes.length > 0 && this.tunes[0].engraver && this.tunes[0].engraver.rangeHighlight(o.start, o.end);
     } catch {
     }
-    this.selectionChangeCallback && this.selectionChangeCallback(s.start, s.end);
+    this.selectionChangeCallback && this.selectionChangeCallback(o.start, o.end);
   }, a.prototype.fireSelectionChanged = function() {
     this.updateSelection();
-  }, a.prototype.setDirtyStyle = function(s) {
+  }, a.prototype.setDirtyStyle = function(o) {
     if (this.indicate_changed !== void 0) {
       var p = function(i, n) {
         var t = function(e, c) {
@@ -14135,18 +14135,18 @@ function vc() {
         };
         return t(i, n) || (i.className += (i.className ? " " : "") + n), i;
       }, u = function(i, n) {
-        return i.className = _.strip(i.className.replace(
+        return i.className = k.strip(i.className.replace(
           new RegExp("(^|\\s+)" + n + "(\\s+|$)"),
           " "
         )), i;
       }, d = "abc_textarea_dirty", f = this.editarea.getElem();
-      s ? p(f, d) : u(f, d);
+      o ? p(f, d) : u(f, d);
     }
   }, a.prototype.fireChanged = function() {
     if (!this.bIsPaused && this.parseABC()) {
-      var s = this;
+      var o = this;
       this.timerId && clearTimeout(this.timerId), this.timerId = setTimeout(function() {
-        s.modelChanged();
+        o.modelChanged();
       }, 300);
       var p = this.isDirty();
       this.wasDirty !== p && (this.wasDirty = p, this.setDirtyStyle(p)), this.onchangeCallback && this.onchangeCallback(this);
@@ -14155,31 +14155,31 @@ function vc() {
     this.editarea.initialText = this.editarea.getString(), this.wasDirty = !1, this.setDirtyStyle(!1);
   }, a.prototype.isDirty = function() {
     return this.indicate_changed === void 0 ? !1 : this.editarea.initialText !== this.editarea.getString();
-  }, a.prototype.highlight = function(s, p, u, d, f, i) {
-    this.editarea.setSelection(s.startChar, s.endChar), this.selectionChangeCallback && this.selectionChangeCallback(s.startChar, s.endChar), this.clientClickListener && this.clientClickListener(s, p, u, d, f, i);
-  }, a.prototype.pause = function(s) {
-    this.bIsPaused = s, s || this.fireChanged();
+  }, a.prototype.highlight = function(o, p, u, d, f, i) {
+    this.editarea.setSelection(o.startChar, o.endChar), this.selectionChangeCallback && this.selectionChangeCallback(o.startChar, o.endChar), this.clientClickListener && this.clientClickListener(o, p, u, d, f, i);
+  }, a.prototype.pause = function(o) {
+    this.bIsPaused = o, o || this.fireChanged();
   }, a.prototype.millisecondsPerMeasure = function() {
     return !this.synth || !this.synth.synthControl || !this.synth.synthControl.visualObj ? 0 : this.synth.synthControl.visualObj.millisecondsPerMeasure();
-  }, a.prototype.pauseMidi = function(s) {
-    this.midiPause = s, s || this.redrawMidi();
+  }, a.prototype.pauseMidi = function(o) {
+    this.midiPause = o, o || this.redrawMidi();
   }, Lr = a, Lr;
 }
-var qr, Ui;
-function gc() {
-  if (Ui) return qr;
-  Ui = 1;
-  var _ = Ms(), m = Bs(), g = Ye(), l = Zi(), r = Vs(), o = {};
-  o.signature = "abcjs-basic v" + _, Object.keys(m).forEach(function(y) {
-    o[y] = m[y];
+var qr, Xi;
+function mc() {
+  if (Xi) return qr;
+  Xi = 1;
+  var k = Ns(), m = Ps(), g = Ye(), l = es(), r = Qs(), s = {};
+  s.signature = "abcjs-basic v" + k, Object.keys(m).forEach(function(y) {
+    s[y] = m[y];
   }), Object.keys(g).forEach(function(y) {
-    o[y] = g[y];
-  }), o.renderAbc = vs(), o.tuneMetrics = rc(), o.TimingCallbacks = Rr();
+    s[y] = g[y];
+  }), s.renderAbc = gs(), s.tuneMetrics = nc(), s.TimingCallbacks = Rr();
   var a = Ne();
-  o.setGlyph = a.setSymbol, o.strTranspose = r;
-  var s = Kr(), p = $r(), u = Vr(), d = bs(), f = ms(), i = We(), n = Re(), t = Ue(), e = uc(), c = ys(), v = pc(), h = ws();
-  return o.synth = {
-    CreateSynth: s,
+  s.setGlyph = a.setSymbol, s.strTranspose = r;
+  var o = Kr(), p = $r(), u = Vr(), d = ms(), f = ys(), i = We(), n = Re(), t = Ue(), e = pc(), c = ws(), v = gc(), h = xs();
+  return s.synth = {
+    CreateSynth: o,
     instrumentIndexToName: p,
     pitchToNoteName: u,
     SynthController: c,
@@ -14192,50 +14192,50 @@ function gc() {
     getMidiFile: v,
     sequence: l,
     midiRenderer: h
-  }, o.Editor = vc(), o.EditArea = xs(), o.test = {
+  }, s.Editor = bc(), s.EditArea = Cs(), s.test = {
     Parse: Or(),
     EngraverController: Xr()
-  }, qr = o, qr;
+  }, qr = s, qr;
 }
-var bc = gc();
-const mc = /* @__PURE__ */ As(bc);
-async function yc(_) {
-  const m = new Uint8Array(new ArrayBuffer(_.length));
-  m.set(_);
+var yc = mc();
+const wc = /* @__PURE__ */ Bs(yc);
+async function xc(k) {
+  const m = new Uint8Array(new ArrayBuffer(k.length));
+  m.set(k);
   const g = new Blob([m]).stream().pipeThrough(new CompressionStream("deflate"));
   return new Uint8Array(await new Response(g).arrayBuffer());
 }
-const Xi = new TextEncoder();
-function ji(_) {
-  if (/^[\x20-\x7e]*$/.test(_)) return `(${_.replace(/[\\()]/g, (g) => `\\${g}`)})`;
+const ji = new TextEncoder();
+function $i(k) {
+  if (/^[\x20-\x7e]*$/.test(k)) return `(${k.replace(/[\\()]/g, (g) => `\\${g}`)})`;
   let m = "FEFF";
-  for (let g = 0; g < _.length; g++) m += _.charCodeAt(g).toString(16).padStart(4, "0").toUpperCase();
+  for (let g = 0; g < k.length; g++) m += k.charCodeAt(g).toString(16).padStart(4, "0").toUpperCase();
   return `<${m}>`;
 }
-const Ge = (_) => (Math.round(_ * 100) / 100).toString();
-function wc(_, m = {}) {
+const Ge = (k) => (Math.round(k * 100) / 100).toString();
+function Cc(k, m = {}) {
   const g = [];
   let l = 0;
-  const r = [], o = (e) => {
-    const c = typeof e == "string" ? Xi.encode(e) : e;
+  const r = [], s = (e) => {
+    const c = typeof e == "string" ? ji.encode(e) : e;
     g.push(c), l += c.length;
   }, a = (e, c, v) => {
-    r[e] = l, v ? (o(`${e} 0 obj
+    r[e] = l, v ? (s(`${e} 0 obj
 ${c}
 stream
-`), o(v), o(`
+`), s(v), s(`
 endstream
 endobj
-`)) : o(`${e} 0 obj
+`)) : s(`${e} 0 obj
 ${c}
 endobj
 `);
-  }, s = 4, p = (e) => s + e * 3;
-  o(`%PDF-1.4
-`), o(new Uint8Array([37, 226, 227, 207, 211, 10])), a(1, "<< /Type /Catalog /Pages 2 0 R >>"), a(2, `<< /Type /Pages /Kids [${_.map((e, c) => `${p(c)} 0 R`).join(" ")}] /Count ${_.length} >>`);
-  const u = [m.title ? `/Title ${ji(m.title)}` : "", `/Producer ${ji(m.producer ?? "Plenio")}`].filter(Boolean);
-  a(3, `<< ${u.join(" ")} >>`), _.forEach((e, c) => {
-    const v = p(c), h = Xi.encode(`q
+  }, o = 4, p = (e) => o + e * 3;
+  s(`%PDF-1.4
+`), s(new Uint8Array([37, 226, 227, 207, 211, 10])), a(1, "<< /Type /Catalog /Pages 2 0 R >>"), a(2, `<< /Type /Pages /Kids [${k.map((e, c) => `${p(c)} 0 R`).join(" ")}] /Count ${k.length} >>`);
+  const u = [m.title ? `/Title ${$i(m.title)}` : "", `/Producer ${$i(m.producer ?? "Plenio")}`].filter(Boolean);
+  a(3, `<< ${u.join(" ")} >>`), k.forEach((e, c) => {
+    const v = p(c), h = ji.encode(`q
 ${Ge(e.width)} 0 0 ${Ge(e.height)} 0 0 cm
 /Im0 Do
 Q
@@ -14251,14 +14251,14 @@ Q
       A
     );
   });
-  const d = s + _.length * 3, f = l;
+  const d = o + k.length * 3, f = l;
   let i = `xref
 0 ${d}
 0000000000 65535 f 
 `;
   for (let e = 1; e < d; e++) i += `${String(r[e]).padStart(10, "0")} 00000 n 
 `;
-  o(i), o(`trailer
+  s(i), s(`trailer
 << /Size ${d} /Root 1 0 R /Info 3 0 R >>
 startxref
 ${f}
@@ -14270,67 +14270,91 @@ ${f}
     n.set(e, t), t += e.length;
   return n;
 }
-const Qr = { a4: [210, 297], letter: [215.9, 279.4] }, He = 15, Oe = 96 / 25.4, Dr = 300, xc = 18;
-function Cs(_, m) {
+const Qr = { a4: [210, 297], letter: [215.9, 279.4] }, He = 15, Oe = 96 / 25.4, Dr = 300, kc = 18, Jr = {
+  large: { scale: 1, text: 1, wrap: { minSpacing: 1.8, maxSpacing: 2.7, preferredMeasuresPerLine: 4 } },
+  standard: { scale: 0.6, text: 1, wrap: { minSpacing: 1.5, maxSpacing: 2.4, preferredMeasuresPerLine: 4 } },
+  smaller: { scale: 0.5, text: 1.1, wrap: { minSpacing: 1.5, maxSpacing: 2.4, preferredMeasuresPerLine: 5 } },
+  compact: { scale: 0.4, text: 1.2, wrap: { minSpacing: 1.5, maxSpacing: 2.3, preferredMeasuresPerLine: 6 } }
+}, _c = {
+  titlefont: ["Times New Roman", 20, ""],
+  tempofont: ["Times New Roman", 15, "bold"],
+  voicefont: ["Times New Roman", 13, "bold"],
+  gchordfont: ["Helvetica", 12, ""],
+  annotationfont: ["Helvetica", 12, ""],
+  // plain, not bold: bold lyrics push the notes apart (fewer bars a line)
+  vocalfont: ["Times New Roman", 13, ""]
+};
+function ks(k) {
+  if (k === "large") return;
+  const { text: m } = Jr[k];
+  return Object.fromEntries(
+    Object.entries(_c).map(([g, [l, r, s]]) => [g, `${l} ${Math.round(r * m)} ${s}`.trim()])
+  );
+}
+function _s(k, m) {
   const g = m.replace(/[\r\n%]+/g, " ").replace(/\s+/g, " ").trim();
-  return /^T:.*$/m.test(_) ? _.replace(/^T:.*$/m, `T:${g}`) : _.replace(/^(X:.*)$/m, `$1
+  return /^T:.*$/m.test(k) ? k.replace(/^T:.*$/m, `T:${g}`) : k.replace(/^(X:.*)$/m, `$1
 T:${g}`);
 }
-function Xe(_) {
-  const [m, g] = Qr[_];
-  return { width: (m - 2 * He) * Oe, height: (g - 2 * He) * Oe - xc };
+function Xe(k) {
+  const [m, g] = Qr[k];
+  return { width: (m - 2 * He) * Oe, height: (g - 2 * He) * Oe - kc };
 }
-function Jr(_, m) {
+function Zr(k, m) {
   const g = [];
   let l = [], r = 0;
-  for (const o of _)
-    l.length && r + o.height > m && (g.push(l), l = [], r = 0), l.push(o), r += o.height;
+  for (const s of k)
+    l.length && r + s.height > m && (g.push(l), l = [], r = 0), l.push(s), r += s.height;
   return l.length && g.push(l), g;
 }
-function Cc(_, m) {
-  return `${Array.from((_ ?? "").trim(), (l) => /[\p{L}\p{N} \-_()]/u.test(l) ? l : "_").join("").slice(0, 80).trim() || "score"}.${m}`;
+function Tc(k, m) {
+  return `${Array.from((k ?? "").trim(), (l) => /[\p{L}\p{N} \-_()]/u.test(l) ? l : "_").join("").slice(0, 80).trim() || "score"}.${m}`;
 }
-function kc(_, m, g) {
-  const l = Xe(g), r = document.createElement("div");
-  r.style.cssText = `position:fixed;left:-30000px;top:0;width:${Math.ceil(l.width)}px;visibility:hidden;background:#fff;color:#000`, document.body.appendChild(r);
+function Sc(k, m, g, l = "standard") {
+  const r = Xe(g), s = Jr[l], a = ks(l), o = document.createElement("div");
+  o.style.cssText = `position:fixed;left:-30000px;top:0;width:${Math.ceil(r.width)}px;visibility:hidden;background:#fff;color:#000`, document.body.appendChild(o);
   try {
-    mc.renderAbc(r, Cs(_, m), {
+    wc.renderAbc(o, _s(k, m), {
       oneSvgPerLine: !0,
-      staffwidth: Math.floor(l.width) - 8,
-      scale: 1,
+      // the width on paper: abcjs lays a scaled line out on staffwidth / scale
+      staffwidth: Math.floor(r.width) - 8,
+      scale: s.scale,
       foregroundColor: "#000000",
       paddingleft: 0,
       paddingright: 0,
       paddingtop: 4,
       paddingbottom: 6,
-      wrap: { minSpacing: 1.8, maxSpacing: 2.7, preferredMeasuresPerLine: 4 }
+      wrap: { ...s.wrap },
+      ...a ? { format: a } : {}
     });
-  } catch (a) {
-    throw r.remove(), a;
+  } catch (u) {
+    throw o.remove(), u;
   }
-  return { lines: [...r.querySelectorAll("svg")].map((a) => {
-    const s = a.getBoundingClientRect(), p = Number.parseFloat(a.getAttribute("width") ?? "") || s.width, u = Number.parseFloat(a.getAttribute("height") ?? "") || s.height;
-    return { svg: a, width: p, height: u };
-  }), dispose: () => r.remove() };
+  return { lines: [...o.querySelectorAll("svg")].map((u) => {
+    const d = u.getBoundingClientRect(), f = Number.parseFloat(u.getAttribute("width") ?? "") || d.width / s.scale, i = Number.parseFloat(u.getAttribute("height") ?? "") || d.height / s.scale;
+    s.scale !== 1 && (u.getAttribute("viewBox") || u.setAttribute("viewBox", `0 0 ${f} ${i}`), u.removeAttribute("style"));
+    const n = f * s.scale, t = i * s.scale;
+    return u.setAttribute("width", String(n)), u.setAttribute("height", String(t)), { svg: u, width: n, height: t };
+  }), dispose: () => o.remove() };
 }
-const ks = "http://www.w3.org/2000/svg";
-function Zr(_) {
-  const m = _.svg.cloneNode(!0);
-  return m.setAttribute("xmlns", ks), m.setAttribute("width", String(_.width)), m.setAttribute("height", String(_.height)), new XMLSerializer().serializeToString(m);
+const Ts = "http://www.w3.org/2000/svg";
+function ea(k) {
+  const m = k.svg.cloneNode(!0);
+  return m.setAttribute("xmlns", Ts), m.setAttribute("width", String(k.width)), m.setAttribute("height", String(k.height)), new XMLSerializer().serializeToString(m);
 }
-function _c(_, m = 24) {
-  const g = Math.ceil(Math.max(0, ..._.map((a) => a.width)) + 2 * m), l = Math.ceil(_.reduce((a, s) => a + s.height, 0) + 2 * m);
+function Ec(k, m = 24) {
+  const g = Math.ceil(Math.max(0, ...k.map((a) => a.width)) + 2 * m), l = Math.ceil(k.reduce((a, o) => a + o.height, 0) + 2 * m);
   let r = m;
-  const o = _.map((a) => {
-    const s = Zr(a).replace(/^<svg\b/, `<svg x="${m}" y="${r.toFixed(2)}"`);
-    return r += a.height, s;
+  const s = k.map((a) => {
+    const o = ea(a).replace(/^<svg\b/, `<svg x="${m}" y="${r.toFixed(2)}"`);
+    return r += a.height, o;
   });
   return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="${ks}" width="${g}" height="${l}" viewBox="0 0 ${g} ${l}"><rect width="100%" height="100%" fill="#ffffff"/>${o.join("")}</svg>
+<svg xmlns="${Ts}" width="${g}" height="${l}" viewBox="0 0 ${g} ${l}"><rect width="100%" height="100%" fill="#ffffff"/>${s.join("")}</svg>
 `;
 }
-async function _s(_) {
-  const m = URL.createObjectURL(new Blob([Zr(_)], { type: "image/svg+xml;charset=utf-8" }));
+async function Ss(k) {
+  const m = URL.createObjectURL(new Blob([ea(k)], { type: "image/svg+xml;charset=utf-8" }));
   try {
     const g = new Image();
     return g.src = m, await g.decode(), g;
@@ -14338,72 +14362,74 @@ async function _s(_) {
     URL.revokeObjectURL(m);
   }
 }
-function Ts(_, m) {
+function Es(k, m) {
   const g = document.createElement("canvas");
-  g.width = _, g.height = m;
+  g.width = k, g.height = m;
   const l = g.getContext("2d");
   if (!l) throw new Error("This browser cannot draw pictures (no canvas).");
-  return l.fillStyle = "#ffffff", l.fillRect(0, 0, _, m), { canvas: g, ctx: l };
+  return l.fillStyle = "#ffffff", l.fillRect(0, 0, k, m), { canvas: g, ctx: l };
 }
-async function Tc(_, m = 2, g = 24) {
-  const l = Math.max(0, ..._.map((d) => d.width)) + 2 * g, r = _.reduce((d, f) => d + f.height, 0) + 2 * g, o = Math.max(0.5, Math.min(m, 32e3 / r, 32e3 / l)), { canvas: a, ctx: s } = Ts(Math.ceil(l * o), Math.ceil(r * o));
-  s.scale(o, o);
+async function Ac(k, m = 2, g = 24) {
+  const l = Math.max(0, ...k.map((d) => d.width)) + 2 * g, r = k.reduce((d, f) => d + f.height, 0) + 2 * g, s = Math.max(0.5, Math.min(m, 32e3 / r, 32e3 / l)), { canvas: a, ctx: o } = Es(Math.ceil(l * s), Math.ceil(r * s));
+  o.scale(s, s);
   let p = g;
-  for (const d of _)
-    s.drawImage(await _s(d), g, p, d.width, d.height), p += d.height;
+  for (const d of k)
+    o.drawImage(await Ss(d), g, p, d.width, d.height), p += d.height;
   const u = await new Promise((d) => a.toBlob(d, "image/png"));
   if (!u) throw new Error("The picture could not be made.");
   return new Uint8Array(await u.arrayBuffer());
 }
-async function Sc(_, m, g) {
-  const [l, r] = Qr[m], o = Xe(m), a = Jr(_, o.height), s = Dr / 96, p = Math.round(l / 25.4 * Dr), u = Math.round(r / 25.4 * Dr), d = He * Oe, f = [];
+async function Mc(k, m, g) {
+  const [l, r] = Qr[m], s = Xe(m), a = Zr(k, s.height), o = Dr / 96, p = Math.round(l / 25.4 * Dr), u = Math.round(r / 25.4 * Dr), d = He * Oe, f = [];
   for (const [i, n] of a.entries()) {
-    const { ctx: t } = Ts(p, u);
-    t.scale(s, s);
+    const { ctx: t } = Es(p, u);
+    t.scale(o, o);
     let e = d;
     for (const h of n)
-      t.drawImage(await _s(h), d, e, h.width, h.height), e += h.height;
+      t.drawImage(await Ss(h), d, e, h.width, h.height), e += h.height;
     a.length > 1 && (t.fillStyle = "#555555", t.font = "11px serif", t.textAlign = "center", t.fillText(`${i + 1} / ${a.length}`, l * Oe / 2, r * Oe - d / 2));
     const c = t.getImageData(0, 0, p, u).data, v = new Uint8Array(p * u);
     for (let h = 0, y = 0; y < v.length; h += 4, y++) v[y] = Math.round(0.299 * c[h] + 0.587 * c[h + 1] + 0.114 * c[h + 2]);
-    f.push({ width: l / 25.4 * 72, height: r / 25.4 * 72, image: { width: p, height: u, deflated: await yc(v) } });
+    f.push({ width: l / 25.4 * 72, height: r / 25.4 * 72, image: { width: p, height: u, deflated: await xc(v) } });
   }
-  return wc(f, { title: g.trim() || "Score", producer: "Plenio Music Production System" });
+  return Cc(f, { title: g.trim() || "Score", producer: "Plenio Music Production System" });
 }
-function Ec(_, m, g) {
-  const l = Xe(m), r = Jr(_, l.height), o = document.createElement("iframe");
-  o.setAttribute("aria-hidden", "true"), o.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden", document.body.appendChild(o);
-  const a = o.contentDocument, s = o.contentWindow;
-  if (!a || !s)
-    throw o.remove(), new Error("The browser did not allow printing from the editor.");
+function Bc(k, m, g) {
+  const l = Xe(m), r = Zr(k, l.height), s = document.createElement("iframe");
+  s.setAttribute("aria-hidden", "true"), s.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden", document.body.appendChild(s);
+  const a = s.contentDocument, o = s.contentWindow;
+  if (!a || !o)
+    throw s.remove(), new Error("The browser did not allow printing from the editor.");
   const p = m === "a4" ? "A4" : "letter", u = (i) => i.replace(/[&<>"]/g, (n) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[n]), d = r.map(
-    (i, n) => `<section class="page">${i.map(Zr).join("")}${r.length > 1 ? `<footer>${n + 1} / ${r.length}</footer>` : ""}</section>`
+    (i, n) => `<section class="page">${i.map(ea).join("")}${r.length > 1 ? `<footer>${n + 1} / ${r.length}</footer>` : ""}</section>`
   ).join("");
   a.open(), a.write(
     `<!doctype html><html><head><meta charset="utf-8"><title>${u(g.trim() || "Score")}</title><style>@page{size:${p} portrait;margin:${He}mm}html,body{margin:0;background:#fff}.page{break-after:page;position:relative;height:${(Qr[m][1] - 2 * He).toFixed(1)}mm}.page:last-child{break-after:auto}svg{display:block}footer{position:absolute;bottom:0;left:0;right:0;text-align:center;font:9pt serif;color:#555}</style></head><body>${d}</body></html>`
   ), a.close();
-  const f = () => setTimeout(() => o.remove(), 1e3);
-  s.addEventListener("afterprint", f, { once: !0 }), setTimeout(() => o.isConnected && o.remove(), 6e4), s.focus(), s.print();
+  const f = () => setTimeout(() => s.remove(), 1e3);
+  o.addEventListener("afterprint", f, { once: !0 }), setTimeout(() => s.isConnected && s.remove(), 6e4), o.focus(), o.print();
 }
-const Ac = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Nc = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  exportName: Cc,
-  notationPdf: Sc,
-  notationPng: Tc,
-  paginate: Jr,
-  printNotation: Ec,
-  renderLines: kc,
-  stackedSvg: _c,
+  NOTATION_SIZES: Jr,
+  exportName: Tc,
+  notationPdf: Mc,
+  notationPng: Ac,
+  paginate: Zr,
+  printNotation: Bc,
+  renderLines: Sc,
+  sizeFormat: ks,
+  stackedSvg: Ec,
   textBlock: Xe,
-  withTitle: Cs
+  withTitle: _s
 }, Symbol.toStringTag, { value: "Module" }));
 export {
-  mc as a,
-  Tc as b,
-  Ac as c,
-  Cc as e,
-  Sc as n,
-  Ec as p,
-  kc as r,
-  _c as s
+  wc as a,
+  Ac as b,
+  Nc as c,
+  Tc as e,
+  Mc as n,
+  Bc as p,
+  Sc as r,
+  Ec as s
 };

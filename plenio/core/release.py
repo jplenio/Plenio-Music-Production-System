@@ -555,7 +555,7 @@ class RecordInput:
     title: str
     licences: Sequence[str]
     sheet_music: Mapping[str, Any] | None = field(default=None)
-    """The sheet music PDF the export asked for (``file``, ``paper``, ``status``); ``None``: none."""
+    """The sheet music PDF the export asked for (``file``, ``paper``, ``size``, ``status``); ``None``: none."""
 
 
 def record_fingerprint(record: Mapping[str, Any]) -> str:

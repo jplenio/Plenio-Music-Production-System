@@ -512,7 +512,7 @@
    ],
    "size": [
     380,
-    500
+    524
    ],
    "flags": {},
    "order": 8,
@@ -664,6 +664,15 @@
       "name": "sheet_music"
      },
      "link": null
+    },
+    {
+     "localized_name": "sheet_music_size",
+     "name": "sheet_music_size",
+     "type": "COMBO",
+     "widget": {
+      "name": "sheet_music_size"
+     },
+     "link": null
     }
    ],
    "outputs": [
@@ -691,7 +700,8 @@
     true,
     false,
     "copy from loaded file",
-    "off"
+    "off",
+    "standard"
    ]
   }
  ],
@@ -861,7 +871,7 @@
     2460,
     -70,
     440,
-    780
+    804
    ],
    "color": "#3f789e",
    "font_size": 24,

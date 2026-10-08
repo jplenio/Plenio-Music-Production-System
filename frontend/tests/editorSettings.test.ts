@@ -27,7 +27,7 @@ describe('the settings', () => {
   it('are taken from the preferences and given back, a partial set changing only what it names', () => {
     const prefs = { ...defaultPrefs(), metronome: true, wave: false }
     const settings = settingsOf(prefs)
-    expect(settings).toMatchObject({ metronome: true, wave: false, sung: true, hear: 'both', paper: 'a4' })
+    expect(settings).toMatchObject({ metronome: true, wave: false, sung: true, hear: 'both', paper: 'a4', notationSize: 'standard' })
     const next = withSettings(prefs, { sounds: { ...prefs.sounds, Vocal: 'voice' }, hear: 'notes' })
     expect(next.sounds.Vocal).toBe('voice')
     expect(next.hear).toBe('notes')
@@ -38,14 +38,15 @@ describe('the settings', () => {
   it('reads only the valid fields of a file (any version)', () => {
     expect(parseSettings(null)).toEqual({})
     expect(
-      parseSettings({ sounds: { Vocal: 'piano', Ins: 'harp' }, metronome: 'yes', hear: 'loud', sourceLevel: 7, wave: false, paper: 'a3', layout: 'text' })
+      parseSettings({ sounds: { Vocal: 'piano', Ins: 'harp' }, metronome: 'yes', hear: 'loud', sourceLevel: 7, wave: false, paper: 'a3', notationSize: 'huge', layout: 'text' })
     ).toEqual({ sounds: { Vocal: 'piano', Ins: 'plain', chord: 'plain', guide: 'plain' }, sourceLevel: 1, wave: false })
+    expect(parseSettings({ notationSize: 'compact' })).toEqual({ notationSize: 'compact' })
     expect(parseSettings({ sounds: { Vocal: 'harp' } })).toEqual({}) // no known sound at all: no sounds
     expect(parseSettings({ record: { countIn: 2, quantize: 5 } }).record).toMatchObject({ countIn: 2, quantize: 16 })
   })
 
   it('go into the project file and come back; a file without them opens as before', () => {
-    const settings = settingsOf({ ...defaultPrefs(), paper: 'letter', sung: false })
+    const settings = settingsOf({ ...defaultPrefs(), paper: 'letter', notationSize: 'smaller', sung: false })
     const project = buildProject({ score: 'X:1\n', settings })
     const again = parseProject(JSON.stringify(project))
     expect(typeof again === 'string' ? again : again.settings).toEqual(settings)

@@ -1,7 +1,7 @@
 /**
  * The score editor's basic settings as one unit (owner's request 2026-10-03): the tracks' sounds, the
- * metronome, what a cover shows and plays of its source, the MIDI recording and the paper of the
- * notation export. A project file carries them (``settings``), and presets set them by kind of song -
+ * metronome, what a cover shows and plays of its source, the MIDI recording and the paper and size of
+ * the notation export. A project file carries them (``settings``), and presets set them by kind of song -
  * built in, or saved by the user.
  *
  * User presets live in ComfyUI's user data (``plenio/score-editor-presets.json`` of the ComfyUI user, the
@@ -11,9 +11,11 @@
 import type { Fetcher } from '../../api/client'
 import { type InstrumentId, type Sounds, isInstrument, soundsOf } from './instruments'
 import type { RecordSettings } from './midiRecording'
-import { type EditorPrefs, defaultRecord, recordOf } from './prefs'
+import { type EditorPrefs, defaultRecord, isNotationSize, recordOf } from './prefs'
 
 export type Paper = 'a4' | 'letter'
+/** How large the notation export draws the music (``notationExport.ts``). */
+export type NotationSize = 'large' | 'standard' | 'smaller' | 'compact'
 
 export interface EditorSettings {
   sounds: Sounds
@@ -26,6 +28,8 @@ export interface EditorSettings {
   record: RecordSettings
   /** The paper of the notation's PDF and print. */
   paper: Paper
+  /** How large the notation export draws the music. */
+  notationSize: NotationSize
 }
 
 export function settingsOf(prefs: EditorPrefs): EditorSettings {
@@ -37,7 +41,8 @@ export function settingsOf(prefs: EditorPrefs): EditorSettings {
     wave: prefs.wave,
     sung: prefs.sung,
     record: { ...prefs.record },
-    paper: prefs.paper
+    paper: prefs.paper,
+    notationSize: prefs.notationSize
   }
 }
 
@@ -70,6 +75,7 @@ export function parseSettings(value: unknown): Partial<EditorSettings> {
   if (typeof data.sung === 'boolean') out.sung = data.sung
   if (typeof data.record === 'object' && data.record !== null) out.record = recordOf(data.record)
   if (data.paper === 'a4' || data.paper === 'letter') out.paper = data.paper
+  if (isNotationSize(data.notationSize)) out.notationSize = data.notationSize
   return out
 }
 

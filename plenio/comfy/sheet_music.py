@@ -28,6 +28,9 @@ MAX_BYTES = 128 * 1024 * 1024
 PAPERS = {"PDF (A4)": "a4", "PDF (Letter)": "letter"}
 OFF = "off"
 SHEET_MUSIC_OPTIONS = (OFF, *PAPERS)
+SIZES = ("standard", "smaller", "compact", "large")
+"""How large the music is drawn (the score editor's notation sizes, ``notationExport.ts``)."""
+DEFAULT_SIZE = "standard"
 
 
 @dataclass(frozen=True)

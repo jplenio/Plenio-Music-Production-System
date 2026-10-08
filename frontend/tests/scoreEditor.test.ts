@@ -302,16 +302,19 @@ describe('editor preferences', () => {
       wave: true,
       sounds: { Vocal: 'soft', Ins: 'plain', chord: 'plain', guide: 'plain' },
       paper: 'a4',
+      notationSize: 'standard',
       record: { countIn: 1, quantize: 16, mode: 'replace', mute: true, thru: true, stepLength: 8 },
       midiInput: 'all'
     })
     // the sounds: valid instruments stay, unknown ones fall back to the classic sound
-    const sounds = JSON.stringify({ sounds: { Vocal: 'voice', Ins: 'theremin', chord: 'pad' }, paper: 'letter', wave: false })
+    const sounds = JSON.stringify({ sounds: { Vocal: 'voice', Ins: 'theremin', chord: 'pad' }, paper: 'letter', notationSize: 'compact', wave: false })
     expect(loadPrefs({ getItem: () => sounds })).toMatchObject({
       sounds: { Vocal: 'voice', Ins: 'plain', chord: 'pad', guide: 'plain' },
       paper: 'letter',
+      notationSize: 'compact',
       wave: false
     })
+    expect(loadPrefs({ getItem: () => JSON.stringify({ notationSize: 'tiny' }) }).notationSize).toBe('standard')
     const roll = JSON.stringify({ roll: false, rollZoom: 96, metronome: true, advanced: true })
     expect(loadPrefs({ getItem: () => roll })).toMatchObject({ roll: false, rollZoom: 96, metronome: true, advanced: true })
     const wrong = JSON.stringify({ layout: 'huge', zoom: 9, voices: 'all', speed: '1', rollZoom: 5000, metronome: 'yes' })

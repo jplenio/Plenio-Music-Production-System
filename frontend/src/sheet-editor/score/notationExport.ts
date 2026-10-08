@@ -5,7 +5,9 @@
  *
  * abcjs draws the backend's display ABC once more, off screen, black on white and as wide as the paper's
  * text block, one SVG per line of music (``oneSvgPerLine``); the lines are then laid out on pages (a
- * line never splits). From there:
+ * line never splits). The *size* sets how large the music is drawn and so how many bars fit a line
+ * (owner's request 2026-10-08: the editor's own scale left 1-2 bars a line and 13 pages a song).
+ * From there:
  *
  * - **SVG**: the lines in one vector drawing (the whole score, no pages);
  * - **PNG**: the same, as a picture at twice the screen resolution (for messages and documents);
@@ -17,7 +19,7 @@
  */
 import abcjs from 'abcjs'
 
-import type { Paper } from './editorSettings'
+import type { NotationSize, Paper } from './editorSettings'
 import { deflate, pdfDocument } from './pdf'
 
 const PAPER_MM: Record<Paper, [number, number]> = { a4: [210, 297], letter: [215.9, 279.4] }
@@ -26,6 +28,49 @@ const PX_PER_MM = 96 / 25.4
 const PDF_DPI = 300
 /** Room under the last line of a page for the page number (CSS px). */
 const FOOTER_PX = 18
+
+interface SizeSpec {
+  /** abcjs's scale (1: the editor's own size). */
+  scale: number
+  /** The text grows back by this much (it would be too small to read at the music's scale). */
+  text: number
+  /** abcjs's line breaking: note spacing and the bars it prefers on a line. */
+  wrap: { minSpacing: number; maxSpacing: number; preferredMeasuresPerLine: number }
+}
+
+/**
+ * The notation sizes. Measured on ten sung songs, A4: *large* (the size before 0.4.6) about 1.5 bars a
+ * line and 13 pages a song, *standard* 3 bars and 4 pages, *smaller* 3.3 bars and 3 pages, *compact* 3.8
+ * bars and 2-3 pages; the lyrics 9.8, 5.9, 5.4 and 4.7 pt high on paper. The sung lines set the width:
+ * a run of short notes needs the room of its syllables, so a closer spacing (``minSpacing`` below 1.5)
+ * gave a few more bars a line but more syllables touching their neighbours than before (7 %).
+ */
+export const NOTATION_SIZES: Record<NotationSize, SizeSpec> = {
+  large: { scale: 1, text: 1, wrap: { minSpacing: 1.8, maxSpacing: 2.7, preferredMeasuresPerLine: 4 } },
+  standard: { scale: 0.6, text: 1, wrap: { minSpacing: 1.5, maxSpacing: 2.4, preferredMeasuresPerLine: 4 } },
+  smaller: { scale: 0.5, text: 1.1, wrap: { minSpacing: 1.5, maxSpacing: 2.4, preferredMeasuresPerLine: 5 } },
+  compact: { scale: 0.4, text: 1.2, wrap: { minSpacing: 1.5, maxSpacing: 2.3, preferredMeasuresPerLine: 6 } }
+}
+
+/** abcjs's text fonts (face, size, weight), grown by the size's ``text``. */
+const FONTS: Record<string, [string, number, string]> = {
+  titlefont: ['Times New Roman', 20, ''],
+  tempofont: ['Times New Roman', 15, 'bold'],
+  voicefont: ['Times New Roman', 13, 'bold'],
+  gchordfont: ['Helvetica', 12, ''],
+  annotationfont: ['Helvetica', 12, ''],
+  // plain, not bold: bold lyrics push the notes apart (fewer bars a line)
+  vocalfont: ['Times New Roman', 13, '']
+}
+
+/** abcjs's ``format`` for a size (none for *large*: the editor's own fonts). */
+export function sizeFormat(size: NotationSize): Record<string, string> | undefined {
+  if (size === 'large') return undefined
+  const { text } = NOTATION_SIZES[size]
+  return Object.fromEntries(
+    Object.entries(FONTS).map(([name, [face, points, weight]]) => [name, `${face} ${Math.round(points * text)} ${weight}`.trim()])
+  )
+}
 
 export interface NotationLine {
   svg: SVGSVGElement
@@ -74,11 +119,18 @@ export function exportName(title: string | null | undefined, extension: string):
 }
 
 /**
- * Draw ``abc`` off screen for ``paper``: the lines of music, black on white. ``dispose()`` removes the
- * drawing again (call it when done).
+ * Draw ``abc`` off screen for ``paper`` at ``size``: the lines of music, black on white. ``dispose()``
+ * removes the drawing again (call it when done).
  */
-export function renderLines(abc: string, title: string, paper: Paper): { lines: NotationLine[]; dispose: () => void } {
+export function renderLines(
+  abc: string,
+  title: string,
+  paper: Paper,
+  size: NotationSize = 'standard'
+): { lines: NotationLine[]; dispose: () => void } {
   const block = textBlock(paper)
+  const spec = NOTATION_SIZES[size]
+  const format = sizeFormat(size)
   const host = document.createElement('div')
   // laid out (abcjs measures its text) but never seen
   host.style.cssText = `position:fixed;left:-30000px;top:0;width:${Math.ceil(block.width)}px;visibility:hidden;background:#fff;color:#000`
@@ -86,14 +138,16 @@ export function renderLines(abc: string, title: string, paper: Paper): { lines: 
   try {
     abcjs.renderAbc(host, withTitle(abc, title), {
       oneSvgPerLine: true,
+      // the width on paper: abcjs lays a scaled line out on staffwidth / scale
       staffwidth: Math.floor(block.width) - 8,
-      scale: 1,
+      scale: spec.scale,
       foregroundColor: '#000000',
       paddingleft: 0,
       paddingright: 0,
       paddingtop: 4,
       paddingbottom: 6,
-      wrap: { minSpacing: 1.8, maxSpacing: 2.7, preferredMeasuresPerLine: 4 }
+      wrap: { ...spec.wrap },
+      ...(format ? { format } : {})
     })
   } catch (error) {
     host.remove()
@@ -101,8 +155,19 @@ export function renderLines(abc: string, title: string, paper: Paper): { lines: 
   }
   const lines = [...host.querySelectorAll('svg')].map((svg) => {
     const box = svg.getBoundingClientRect()
-    const width = Number.parseFloat(svg.getAttribute('width') ?? '') || box.width
-    const height = Number.parseFloat(svg.getAttribute('height') ?? '') || box.height
+    const drawnWidth = Number.parseFloat(svg.getAttribute('width') ?? '') || box.width / spec.scale
+    const drawnHeight = Number.parseFloat(svg.getAttribute('height') ?? '') || box.height / spec.scale
+    if (spec.scale !== 1) {
+      // abcjs scales a line by a CSS transform, which a standalone copy (file, picture, print) loses:
+      // the line gets its size on paper instead, its viewBox (abcjs's: the lines share one coordinate
+      // system) maps the drawing onto it
+      if (!svg.getAttribute('viewBox')) svg.setAttribute('viewBox', `0 0 ${drawnWidth} ${drawnHeight}`)
+      svg.removeAttribute('style')
+    }
+    const width = drawnWidth * spec.scale
+    const height = drawnHeight * spec.scale
+    svg.setAttribute('width', String(width))
+    svg.setAttribute('height', String(height))
     return { svg: svg as SVGSVGElement, width, height }
   })
   return { lines, dispose: () => host.remove() }

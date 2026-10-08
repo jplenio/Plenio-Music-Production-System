@@ -31,7 +31,7 @@ from ...core.release import (
 )
 from ...core.reports import Report, Status
 from .. import host
-from ..sheet_music import JOBS, OFF, PAPERS, SHEET_MUSIC_OPTIONS
+from ..sheet_music import DEFAULT_SIZE, JOBS, OFF, PAPERS, SHEET_MUSIC_OPTIONS, SIZES
 from ..types import ReportType
 
 COLLISIONS = ("number", "overwrite", "error")
@@ -47,6 +47,11 @@ SHEET_TOOLTIP = (
     "'<name>.pdf' next to the audio, on A4 or Letter pages. The browser that runs the workflow draws it right "
     "after the export (as Export notation… in the Song Sheet does) and Plenio saves it; a run without an open "
     "ComfyUI page gets no PDF. Needs a score (YuE2)."
+)
+SIZE_TOOLTIP = (
+    "How large the sheet music draws the music: standard about 3 bars a line (4 pages for a song of 3-4 "
+    "minutes), smaller 3-4 (3 pages), compact about 4 (2-3 pages), large 1-2 bars a line (as before 0.4.6). "
+    "The same sizes as Export notation… in the Song Sheet."
 )
 
 
@@ -162,6 +167,14 @@ class PlenioExportRelease(io.ComfyNode):
                     optional=True,
                     tooltip=SHEET_TOOLTIP,
                 ),
+                io.Combo.Input(
+                    "sheet_music_size",
+                    display_name="sheet music size",
+                    options=list(SIZES),
+                    default=DEFAULT_SIZE,
+                    optional=True,
+                    tooltip=SIZE_TOOLTIP,
+                ),
             ],
             outputs=[
                 io.String.Output(display_name="files", tooltip="Written files, one per line."),
@@ -188,11 +201,14 @@ class PlenioExportRelease(io.ComfyNode):
         cover: Any = None,
         reports: dict[str, Any] | None = None,
         sheet_music: str = OFF,
+        sheet_music_size: str = DEFAULT_SIZE,
     ) -> io.NodeOutput:
         if sheet_music not in SHEET_MUSIC_OPTIONS:
             raise PlenioUserError(
                 f"Unknown sheet music option {sheet_music!r}; use one of {list(SHEET_MUSIC_OPTIONS)}."
             )
+        if sheet_music_size not in SIZES:
+            raise PlenioUserError(f"Unknown sheet music size {sheet_music_size!r}; use one of {list(SIZES)}.")
         kinds = [kind for kind, wanted in (("flac", flac), ("mp3", mp3), ("wav", wav)) if wanted]
         if not kinds:
             raise PlenioUserError("Choose at least one format (flac, mp3 or wav).")
@@ -285,6 +301,7 @@ class PlenioExportRelease(io.ComfyNode):
                     {
                         "file": file(SHEET_SUFFIX).name,
                         "paper": sheet_music.removeprefix("PDF (").removesuffix(")"),
+                        "size": sheet_music_size,
                         "status": "drawn by the browser after the export",
                     }
                     if display
@@ -304,6 +321,7 @@ class PlenioExportRelease(io.ComfyNode):
                     "file": pdf_path.name,
                     "title": song_title,
                     "paper": PAPERS[sheet_music],
+                    "size": sheet_music_size,
                     "abc": sheet["score"],
                     "lyrics": sheet["lyrics"],
                     "display_abc": display,

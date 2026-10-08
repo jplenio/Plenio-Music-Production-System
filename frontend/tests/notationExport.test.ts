@@ -5,7 +5,7 @@
  */
 import { describe, expect, it } from 'vitest'
 
-import { exportName, paginate, textBlock, withTitle } from '../src/sheet-editor/score/notationExport'
+import { NOTATION_SIZES, exportName, paginate, sizeFormat, textBlock, withTitle } from '../src/sheet-editor/score/notationExport'
 import { deflate, pdfDocument, pdfString } from '../src/sheet-editor/score/pdf'
 
 async function inflate(bytes: Uint8Array): Promise<Uint8Array> {
@@ -31,6 +31,22 @@ describe('the notation export', () => {
     expect(textBlock('a4').width).toBeCloseTo(680.3, 0)
     expect(textBlock('letter').width).toBeGreaterThan(textBlock('a4').width)
     expect(textBlock('letter').height).toBeLessThan(textBlock('a4').height)
+  })
+
+  it('draws smaller sizes with more bars a line, the text shrinking less than the notes', () => {
+    const order = ['large', 'standard', 'smaller', 'compact'] as const
+    const specs = order.map((size) => NOTATION_SIZES[size])
+    for (const [index, spec] of specs.entries()) {
+      if (!index) continue
+      expect(spec.scale).toBeLessThan(specs[index - 1].scale)
+      expect(spec.wrap.preferredMeasuresPerLine).toBeGreaterThanOrEqual(specs[index - 1].wrap.preferredMeasuresPerLine)
+      // the text shrinks less than the notes
+      expect(spec.text).toBeGreaterThanOrEqual(specs[index - 1].text)
+    }
+    expect(sizeFormat('large')).toBeUndefined() // the editor's own fonts, as before
+    // plain lyrics: bold ones push the notes apart
+    expect(sizeFormat('standard')).toMatchObject({ vocalfont: 'Times New Roman 13', gchordfont: 'Helvetica 12', voicefont: 'Times New Roman 13 bold' })
+    expect(sizeFormat('compact')).toMatchObject({ vocalfont: 'Times New Roman 16', titlefont: 'Times New Roman 24' })
   })
 
   it('names the files after the song', () => {

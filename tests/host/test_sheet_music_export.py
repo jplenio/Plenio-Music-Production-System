@@ -108,6 +108,7 @@ def test_the_export_reserves_the_pdf_and_the_browser_saves_it(server: ComfyServe
     outputs, folder = export(server, {"title": "Slow Morning", "lyrics": LYRICS, "score": SCORE})
     job = outputs["plenio_notation"][0]
     assert job["file"] == "Slow Morning.pdf" and job["paper"] == "a4" and job["title"] == "Slow Morning"
+    assert job["size"] == "standard"  # a workflow saved before the size existed
     assert job["score_sheet"] == "1" == job["lyrics_sheet"]  # the sheet holding hand-placed lyrics lines
     assert (
         "\nw:" in job["display_abc"] and job["abc"].strip() == SCORE.strip()
@@ -121,6 +122,7 @@ def test_the_export_reserves_the_pdf_and_the_browser_saves_it(server: ComfyServe
     assert record["sheet_music"] == {
         "file": "Slow Morning.pdf",
         "paper": "A4",
+        "size": "standard",
         "status": "drawn by the browser after the export",
     }
     assert not (folder / "Slow Morning.pdf").exists()
@@ -163,12 +165,13 @@ def test_a_second_export_of_the_title_numbers_the_pdf_with_its_audio(server: Com
                     "tags": "title only",
                     "reports.report_0": ["1", 7],
                     "sheet_music": "PDF (Letter)",
+                    "sheet_music_size": "compact",
                 },
             },
         }
     )["outputs"]["3"]
     job = second["plenio_notation"][0]
-    assert job["file"] == "Twice (2).pdf" and job["paper"] == "letter"
+    assert job["file"] == "Twice (2).pdf" and job["paper"] == "letter" and job["size"] == "compact"
     assert (folder / "Twice (2).flac").exists()
 
 

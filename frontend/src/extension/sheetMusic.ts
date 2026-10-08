@@ -8,7 +8,9 @@
  * release record. A batch draws its PDFs one after another.
  */
 import { type Fetcher, PlenioApiError, analyzeScore } from '../api/client'
+import type { NotationSize } from '../sheet-editor/score/editorSettings'
 import { type LyricSpan, parseSpans } from '../sheet-editor/score/lyricPlacement'
+import { isNotationSize } from '../sheet-editor/score/prefs'
 
 export type SheetPaper = 'a4' | 'letter'
 
@@ -18,6 +20,8 @@ export interface SheetMusicJob {
   file: string
   title: string
   paper: SheetPaper
+  /** How large the music is drawn (Export Release's *sheet music size*; ``standard`` before 0.4.6). */
+  size: NotationSize
   /** The final score and lyrics (for the lines placed by hand). */
   abc: string
   lyrics: string
@@ -41,6 +45,7 @@ export function sheetMusicJobs(output: Record<string, unknown> | undefined): She
       file: text(item.file),
       title: text(item.title),
       paper: item.paper === 'letter' ? ('letter' as const) : ('a4' as const),
+      size: isNotationSize(item.size) ? item.size : ('standard' as const),
       abc: text(item.abc),
       lyrics: text(item.lyrics),
       display_abc: text(item.display_abc),
@@ -55,8 +60,8 @@ export interface SheetMusicHost {
   fetcher: Fetcher
   /** The ``plenio_lyric_spans`` property of a node of the open graph (``undefined``: not there). */
   property(nodeId: string): unknown
-  /** The notation of ``abc`` on pages of ``paper`` as a PDF (``notationExport.ts``). */
-  draw(abc: string, title: string, paper: SheetPaper): Promise<Uint8Array>
+  /** The notation of ``abc`` on pages of ``paper`` at ``size`` as a PDF (``notationExport.ts``). */
+  draw(abc: string, title: string, paper: SheetPaper, size: NotationSize): Promise<Uint8Array>
 }
 
 /** The lyrics lines placed by hand: on the score's sheet, else on the lyrics' sheet. */
@@ -79,7 +84,7 @@ export async function notationOf(job: SheetMusicJob, host: SheetMusicHost): Prom
 
 /** Draw the job's PDF and save it next to the audio; returns the saved file's name and size. */
 export async function saveSheetMusic(job: SheetMusicJob, host: SheetMusicHost): Promise<{ file: string; bytes: number }> {
-  const pdf = await host.draw(await notationOf(job, host), job.title, job.paper)
+  const pdf = await host.draw(await notationOf(job, host), job.title, job.paper, job.size)
   const buffer = new ArrayBuffer(pdf.length) // a body needs a plain ArrayBuffer behind the bytes
   new Uint8Array(buffer).set(pdf)
   const response = await host.fetcher.fetchApi(`/plenio/export/sheet-music?token=${encodeURIComponent(job.token)}`, {

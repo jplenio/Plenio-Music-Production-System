@@ -2390,6 +2390,21 @@
         "PDF (Letter)"
        ]
       }
+     ],
+     "sheet_music_size": [
+      "COMBO",
+      {
+       "display_name": "sheet music size",
+       "tooltip": "How large the sheet music draws the music: standard about 3 bars a line (4 pages for a song of 3-4 minutes), smaller 3-4 (3 pages), compact about 4 (2-3 pages), large 1-2 bars a line (as before 0.4.6). The same sizes as Export notation… in the Song Sheet.",
+       "default": "standard",
+       "multiselect": false,
+       "options": [
+        "standard",
+        "smaller",
+        "compact",
+        "large"
+       ]
+      }
      ]
     },
     "hidden": {
@@ -2417,7 +2432,8 @@
      "mp3",
      "wav",
      "tags",
-     "sheet_music"
+     "sheet_music",
+     "sheet_music_size"
     ],
     "hidden": [
      "prompt",

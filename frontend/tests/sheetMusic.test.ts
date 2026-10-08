@@ -20,6 +20,7 @@ const job: SheetMusicJob = {
   file: '2026-10-08 Slow Morning.pdf',
   title: 'Slow Morning',
   paper: 'a4',
+  size: 'standard',
   abc: 'X:1\nK:C\nC4|',
   lyrics: '[verse]\nmorning light',
   display_abc: 'X:1\nK:C\nC4|\nw: morn-',
@@ -35,6 +36,7 @@ interface Call {
 function host(properties: Record<string, unknown> = {}, reply = { status: 200, body: { file: job.file, bytes: 2048 } as unknown }) {
   const calls: Call[] = []
   const drawn: string[] = []
+  const sizes: string[] = []
   const value: SheetMusicHost = {
     fetcher: {
       async fetchApi(route: string, init?: RequestInit) {
@@ -46,26 +48,31 @@ function host(properties: Record<string, unknown> = {}, reply = { status: 200, b
       }
     },
     property: (id) => properties[id],
-    async draw(abc) {
+    async draw(abc, _title, _paper, size) {
       drawn.push(abc)
+      sizes.push(size)
       return new TextEncoder().encode('%PDF-1.4 fake')
     }
   }
-  return { value, calls, drawn }
+  return { value, calls, drawn, sizes }
 }
 
 describe('sheet music of an export', () => {
   it('reads the jobs of an executed Export Release and drops broken ones', () => {
     const output = {
       plenio_notation: [
-        { ...job, paper: 'letter', score_sheet: 12 },
+        { ...job, paper: 'letter', size: 'compact', score_sheet: 12 },
         { token: '', file: 'x.pdf', display_abc: 'X:1' },
-        'nonsense'
+        'nonsense',
+        { ...job, token: 'tok-2', size: undefined },
+        { ...job, token: 'tok-3', size: 'tiny' }
       ]
     }
     const jobs = sheetMusicJobs(output)
-    expect(jobs).toHaveLength(1)
-    expect(jobs[0]).toMatchObject({ token: 'tok-1', paper: 'letter', score_sheet: '12', lyrics_sheet: '7' })
+    expect(jobs).toHaveLength(3)
+    expect(jobs[0]).toMatchObject({ token: 'tok-1', paper: 'letter', size: 'compact', score_sheet: '12', lyrics_sheet: '7' })
+    // an export from before the size, or an unknown size: the standard size
+    expect(jobs.slice(1).map((one) => one.size)).toEqual(['standard', 'standard'])
     expect(sheetMusicJobs({ plenio_summary: [] })).toEqual([])
     expect(sheetMusicJobs(undefined)).toEqual([])
   })
@@ -88,9 +95,10 @@ describe('sheet music of an export', () => {
 
   it('posts the PDF with the export token and reports the saved file', async () => {
     const fake = host()
-    const saved = await saveSheetMusic(job, fake.value)
+    const saved = await saveSheetMusic({ ...job, size: 'smaller' }, fake.value)
     expect(saved).toEqual({ file: job.file, bytes: 2048 })
     expect(fake.drawn).toEqual([job.display_abc])
+    expect(fake.sizes).toEqual(['smaller'])
     const upload = fake.calls[0]
     expect(upload.route).toBe('/plenio/export/sheet-music?token=tok-1')
     expect(upload.init?.method).toBe('POST')

@@ -304,6 +304,7 @@ function describeSettings(settings: Partial<EditorSettings>): string {
   if (settings.wave !== undefined || settings.sung !== undefined) parts.push('the source view')
   if (settings.record) parts.push('recording')
   if (settings.paper) parts.push(`paper ${settings.paper === 'a4' ? 'A4' : 'Letter'}`)
+  if (settings.notationSize) parts.push(`notation ${settings.notationSize}`)
   return parts.length ? `${parts.join(', ')} set` : 'nothing to set'
 }
 /** The draw-into track's sound: drawn notes and the MIDI keys are heard in it. */
@@ -1030,6 +1031,10 @@ const paper = computed({
   get: () => prefs.value.paper,
   set: (value) => (prefs.value = { ...prefs.value, paper: value })
 })
+const notationSize = computed({
+  get: () => prefs.value.notationSize,
+  set: (value) => (prefs.value = { ...prefs.value, notationSize: value })
+})
 function notationExported(message: string): void {
   midiError.value = null
   session.notes = [message]
@@ -1154,7 +1159,7 @@ function openProject(project: ScoreProject, name: string): void {
     setSpans(project.lyric_spans)
   } else if (project.lyrics) left.push('the lyrics (this sheet cannot change them here)')
   Object.assign(after, lyricsState())
-  // the project's sounds, metronome, cover view, recording and paper (a file before 0.4.4 has none)
+  // the project's sounds, metronome, cover view, recording, paper and notation size (a file before 0.4.4 has none)
   if (Object.keys(project.settings).length) {
     prefs.value = withSettings(prefs.value, project.settings)
     opened.push('settings')
@@ -1415,6 +1420,7 @@ function onKey(event: KeyboardEvent): void {
         </button>
         <NotationExport
           v-model:paper="paper"
+          v-model:size="notationSize"
           :abc="notationBlock ? null : (shown?.display_abc ?? null)"
           :title="title ?? ''"
           :blocked="notationBlock"
