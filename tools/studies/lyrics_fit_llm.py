@@ -130,7 +130,9 @@ def _kept(before: str, after: str, asked: Sequence[tuple[int, int]]) -> list[flo
     return shares
 
 
-def run_one(endpoint: str, model: str, sample: Sample, seed: int, free: bool = False) -> dict[str, Any]:
+def run_one(
+    endpoint: str, model: str, sample: Sample, seed: int, free: bool = False, tag: str = ""
+) -> dict[str, Any]:
     theme = THEMES[(seed + int(sample.id[1:])) % len(THEMES)]
     brief = build_cover_brief({"genre": "pop", "vocals": "new", "language": "English", "theme": theme})
     prompt, request = compose(
@@ -142,12 +144,14 @@ def run_one(endpoint: str, model: str, sample: Sample, seed: int, free: bool = F
     )
     record: dict[str, Any] = {
         "model": model,
-        "variant": "free" if free else "schema",
+        "variant": ("free" if free else "schema") + (f" {tag}" if tag else ""),
         "sample": sample.id,
         "seed": seed,
         "phrases": sample.lines,
     }
-    settings = llm.Settings(max_tokens=3072, temperature=TEMPERATURE, seed=seed, context=CONTEXT)
+    settings = llm.Settings(
+        max_tokens=6144, temperature=TEMPERATURE, seed=seed, context=CONTEXT
+    )  # as Write Song
     try:
         answer = llm.chat(endpoint, model, prompt, settings)
         draft = parse_draft(answer.text, request)
@@ -211,7 +215,7 @@ def run_one(endpoint: str, model: str, sample: Sample, seed: int, free: bool = F
 
 
 def run_model(
-    path: Path, samples: Sequence[Sample], out: Path, runtime: llm.Runtime, free: bool = False
+    path: Path, samples: Sequence[Sample], out: Path, runtime: llm.Runtime, free: bool = False, tag: str = ""
 ) -> None:
     server = LocalServer(runtime, path, context=CONTEXT)
     try:
@@ -224,7 +228,7 @@ def run_model(
         for sample in samples:
             for seed in SEEDS:
                 started = time.monotonic()
-                record = run_one(endpoint, path.name, sample, seed, free)
+                record = run_one(endpoint, path.name, sample, seed, free, tag)
                 record["wall_seconds"] = round(time.monotonic() - started, 1)
                 with out.open("a", encoding="utf-8") as sink:
                     sink.write(json.dumps(record, ensure_ascii=False) + "\n")
@@ -294,6 +298,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--free", action="store_true", help="repairs without the schema (as the native writer)"
     )
+    parser.add_argument(
+        "--tag", default="", help="a name for this variant of the prompts (results are grouped by it)"
+    )
     args = parser.parse_args(argv)
     args.out.mkdir(parents=True, exist_ok=True)
     results = args.out / "results.jsonl"
@@ -305,7 +312,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if not runtimes:
             raise SystemExit("no llama.cpp runtime found")
         for model_path in args.models:
-            run_model(model_path, samples, results, runtimes[0], args.free)
+            run_model(model_path, samples, results, runtimes[0], args.free, args.tag)
     if results.exists():
         text = summary(results)
         (args.out / "summary.md").write_text(text + "\n", encoding="utf-8")

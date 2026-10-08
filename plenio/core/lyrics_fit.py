@@ -380,10 +380,9 @@ def _fix(section: SectionFit, line: LineFit) -> str:
     )
     rhyme = _rhymes_with(section, line)
     keep = f' It rhymes with line {rhyme.line} ("{rhyme.text}") - keep the rhyme.' if rhyme else ""
-    count = f"{low}" if low == high else f"{low} to {high}"
     return (
         f'- "{_key_of(section.number, line.line)}": {_label(section)} line {line.line}, "{line.text}" - '
-        f"{line.syllables} syllables, {where}: write {count} syllables.{keep}"
+        f"{line.syllables} syllables, {where}: write {high} syllables.{keep}"
     )
 
 
@@ -449,7 +448,7 @@ def request(
                 low, high = window(notes)
                 high = min(high, notes)
                 slots[_key_of(section.number, index)] = _slot(low, high)
-                targets.append(f'"{_key_of(section.number, index)}" {low}-{high}')
+                targets.append(f'"{_key_of(section.number, index)}" {high}')
             fixes.append(
                 f"- {_label(section)} is missing: write it with exactly {len(section.phrases)} lines that carry the "
                 f"story on from the section before - syllables per line: {', '.join(targets)}."
@@ -484,9 +483,9 @@ def request(
         "RULES",
         "- Keep each line's meaning and its place in the story; keep the rhymes named; keep the language"
         f"{f' ({language})' if language else ''} and the voice of the other lines. Change no other line.",
-        '- Build each line syllable by syllable: "syllables" lists the syllables of the new line in order, one '
-        'per item ("to-night" is "to", "night"; "every" is "ev", "er", "y") - exactly as many as asked for. '
-        '"text" is the same line written normally.',
+        '- Build each line syllable by syllable and count as you go: "syllables" lists the syllables of the new '
+        'line in order, one per item, each with its number ("1 to", "2 night"; "every" is "ev", "er", "y") - stop '
+        'at the number asked for. "text" is the same line written normally.',
         "- Only words to be sung: no stage directions, no section tags, no line numbers in a line.",
     ]
     if closeness_text:
@@ -497,7 +496,10 @@ def request(
         parts += ["", "THE SOURCE'S LYRICS (for meaning only)", reference.strip()[:1500]]
     first = next(iter(slots))
     example = {
-        first: {"syllables": ["I", "walk", "a", "long", "the", "riv", "er"], "text": "I walk along the river"}
+        first: {
+            "syllables": ["1 I", "2 walk", "3 a", "4 long", "5 the", "6 riv", "7 er"],
+            "text": "I walk along the river",
+        }
     }
     parts += [
         "",

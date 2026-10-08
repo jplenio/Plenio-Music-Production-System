@@ -90,7 +90,7 @@ def test_the_request_asks_for_failing_lines_only_with_targets_and_rhymes() -> No
     request = lyrics_fit.request(text, fit, language="English", theme="a long walk home")
     assert request is not None and request.asked == ((1, 3),)
     assert '"1-3": section 1 [Verse] line 3, "I keep on walking' in request.prompt
-    assert "16 syllables, its phrase has 9 notes: write 6 to 9 syllables" in request.prompt
+    assert "16 syllables, its phrase has 9 notes: write 9 syllables" in request.prompt
     assert 'rhymes with line 1 ("I walk along the river tonight")' in request.prompt
     assert "Theme: a long walk home" in request.prompt and "in English" in request.prompt
     # the schema holds the line's syllables to the target: 6 to 9 items
