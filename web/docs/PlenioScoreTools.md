@@ -4,6 +4,7 @@ Deterministic operations on a score in the native two-voice ABC dialect (Vocal a
 
 - **prepare from brief** - what the brief asks for:
   - sung songs and covers: unchanged (a cover with *new accompaniment* loses its chords);
+  - sung covers: a rest of 4 bars or more inside a verse, chorus, pre-chorus or bridge becomes an **interlude** section of its own, and the section goes on after it under its name. YuE2 takes such a rest for the end of the section and sang the next lyrics there (a verse lost, the chorus too early); with the interlude it sings the section on. The bar after the last sung note and the bar before the singing starts again stay with the section - a last word or a pickup the transcription missed is often sung there. The lyrics follow the new sections; the report says which bars became an interlude;
   - instrumentals: a silent Vocal voice (the melody moves to Ins, or accompaniment only);
   - instrumental songs whose plan is more than 1.2 times or less than 0.8 times the brief's length: *fit length* is applied;
   - a plan that ends in the middle of a bar group is repaired (the incomplete last group is removed).

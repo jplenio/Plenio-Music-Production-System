@@ -24,6 +24,8 @@ Source -> (Excerpt) -> Transcribe Score -> Score Tools -> Arrange -> Song Sheet 
 ## One cover or a series: the mode
 
 - **one cover, stop to review** (default): the two review stops above. For a transcription you have not checked this is the safe way - the lyrics follow the score's sections.
+
+**Long rests inside a verse or chorus** (4 bars or more without singing) become an *interlude* section of their own when the cover is prepared - Song Sheet · Score shows it and Score Tools' summary names the bars. YuE2 took such a rest for the end of the section and sang the next lyrics there (a verse lost, the chorus twice); with the interlude it sings on.
 - **new cover every run**: no stops. Every run writes a **new version** from the brief - a new title and style, and with *new lyrics* new lyrics on the same melody - and renders it; the batch count next to **Run** (App mode: *Number of runs*) makes a series with one click. The source is transcribed once and reused. With *original lyrics* the words stay the source's; with *instrumental* each version gets a new style.
 
 The **Draft seed** (node in *4 · LYRICS*, also in App mode) is *fixed* by default; *randomize* lets the writer draw a new title, style and new lyrics every run even with an unchanged brief. The two sheets' *review* is *as the brief says*. A useful mix: review the score once (set *Song Sheet · Score* to *stop for review* and approve it), then let *new cover every run* write versions on the checked score.
@@ -35,7 +37,7 @@ Measured on an RTX 5060 Ti 16 GB for an 83-second source: transcription under 20
 | Mode | Lyrics come from | What you check in Song Sheet · Text |
 |---|---|---|
 | *instrumental* | the score's section tags (`[Verse]`, `[Chorus]` ...) | nothing to write; the style has no voice or language |
-| *original lyrics* | **Transcribe Lyrics** (faster-whisper large-v3) on the sung parts of the source, placed into the score's sections | unsure words are highlighted; correct misheard words and line breaks |
+| *original lyrics* | **Transcribe Lyrics** (faster-whisper large-v3) on the sung parts of the source, placed into the score's sections; sentences Whisper invents in music ("Untertitelung des ZDF ...") are left out | unsure words are highlighted; correct misheard words and line breaks |
 | *new lyrics* | the writer model, written against the score's sections and phrasing | the syllable check: each section needs about one syllable per melody note |
 
 **Which lyrics are used - the order of precedence:**

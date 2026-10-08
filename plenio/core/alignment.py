@@ -30,6 +30,13 @@ INVENTION_WINDOW_S = 6.0
 INVENTION_MAX_WORDS = 8
 """Sign-off inventions such as "I'll see you next time." are short; a longer passage is kept even off the melody."""
 LOW_CONFIDENCE = 0.5
+KNOWN_INVENTIONS = re.compile(
+    r"untertitel|amara\.org|zuschauen|abonnier|copyright wdr|thanks? (you )?for watching|subtitles? by"
+    r"|please subscribe",
+    re.IGNORECASE,
+)
+"""Sentences Whisper writes into silence or music, learnt from subtitled video (owner's report 2026-10-08:
+"Untertitelung des ZDF für funk, 2017" stood in a cover's lyrics, sung under the last chorus's notes)."""
 
 _APOSTROPHES = str.maketrans({"’": "'", "‘": "'", "`": "'", "´": "'"})
 _NON_WORD = re.compile(r"[^\w' ]+")
@@ -174,6 +181,37 @@ def drop_inventions(
     return kept, [w for i, w in enumerate(words) if i in dropped]
 
 
+def drop_known_inventions(words: Sequence[AsrWord]) -> tuple[list[AsrWord], list[AsrWord]]:
+    """Leave out the ASR segments that are a known Whisper invention (``KNOWN_INVENTIONS``) - and a year
+    standing alone right after one, the invention's date line (kept, dropped)."""
+    segments: dict[int, list[int]] = {}
+    for index, word in enumerate(words):
+        segments.setdefault(word.segment, []).append(index)
+    dropped: set[int] = set()
+    previous_dropped = False
+    for segment in sorted(segments):
+        indices = segments[segment]
+        text = join_tokens([words[i].word for i in indices])
+        if KNOWN_INVENTIONS.search(text) or (previous_dropped and re.fullmatch(r"\W*\d{4}\W*", text.strip())):
+            dropped.update(indices)
+            previous_dropped = True
+        else:
+            previous_dropped = False
+    # an invention inside a longer segment: its words from the invention's first word to the end of the sentence
+    for index, word in enumerate(words):
+        if index not in dropped and KNOWN_INVENTIONS.search(word.word):
+            end = index
+            while (
+                end + 1 < len(words)
+                and words[end + 1].segment == word.segment
+                and not words[end].word.rstrip().endswith((".", "!", "?"))
+            ):
+                end += 1
+            dropped.update(range(index, end + 1))
+    kept = [w for i, w in enumerate(words) if i not in dropped]
+    return kept, [w for i, w in enumerate(words) if i in dropped]
+
+
 def join_tokens(tokens: Sequence[str]) -> str:
     """Join ASR tokens into a line; tokens starting with '-' or an apostrophe attach to the previous word."""
     out = ""
@@ -247,12 +285,19 @@ def align(
     and the final score is arranged (sections copied, moved, deleted), the words follow their bars.
     """
     warnings: list[str] = []
-    kept, dropped = drop_inventions(words, timeline)
-    if dropped:
+    words, invented = drop_known_inventions(words)
+    if invented:
         warnings.append(
-            f"{len(dropped)} word(s) outside the vocal melody were left out as ASR inventions: "
-            + repr(join_tokens([w.word for w in dropped]))
+            f"{len(invented)} word(s) of a sentence Whisper invents in music were left out: "
+            + repr(join_tokens([w.word for w in invented]))
         )
+    kept, outside = drop_inventions(words, timeline)
+    if outside:
+        warnings.append(
+            f"{len(outside)} word(s) outside the vocal melody were left out as ASR inventions: "
+            + repr(join_tokens([w.word for w in outside]))
+        )
+    dropped = [*invented, *outside]
     low = tuple(w for w in kept if w.p < LOW_CONFIDENCE)
     method: str
     placed: list[int]

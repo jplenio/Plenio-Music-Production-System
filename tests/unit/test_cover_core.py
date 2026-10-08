@@ -25,7 +25,7 @@ from plenio.core.asr import (
 from plenio.core.brief import TemplateLibrary, build_cover_brief, build_song_brief, source_cover_title
 from plenio.core.engines import EngineInfo, yue2
 from plenio.core.errors import PlenioUserError
-from plenio.core.preparation import prepare_for_brief
+from plenio.core.preparation import LONG_REST_BARS, prepare_for_brief, split_long_rests
 from plenio.core.score.timeline import Timeline, TimelineBar, merge_intervals, timeline_from_dict
 from plenio.core.vocals import VocalReading, ending, judge
 from plenio.core.writing import compose, draft_findings, parse_draft
@@ -579,3 +579,87 @@ def test_a_cover_is_named_after_its_source_recording() -> None:
     assert linked_file(prompt, 2, "source") == "song.flac [input]"
     assert linked_file(prompt, "4", "source") is None  # not a Load Audio node
     assert linked_file(prompt, "1", "source") is None and linked_file(None, "2", "source") is None
+
+
+# --- long rests inside sung sections (study 2026-10-09) -------------------------------------------
+
+REST_HEAD = """X:1
+T:
+M:4/4
+L:1/8
+Q:1/4=100
+V: Vocal clef=treble name="Vocal Melody" snm="Vocal"
+V: Ins clef=treble name="Ins Melody" snm="Inst."
+K:C
+"""
+
+
+def rest_score(rest_bars: int, label: str = "verse") -> str:
+    """A section sung in bars 1-2, silent for ``rest_bars`` bars, sung again in the bar after, then a chorus."""
+    vocal = ["CDEF GABc", "CDEF G4", *(["z8"] * rest_bars), "CDEF GABc"]
+    groups = [vocal[i : i + 4] for i in range(0, len(vocal), 4)]
+    body = "".join(
+        ("" if i else f"% {label}\n") + "V: Vocal\n" + "|".join(group) + "|\nV: Ins\n" + f"Z{len(group)}|\n"
+        if len(group) > 1
+        else ("" if i else f"% {label}\n") + "V: Vocal\n" + group[0] + "|\nV: Ins\nZ|\n"
+        for i, group in enumerate(groups)
+    )
+    return REST_HEAD + body + "% chorus\nV: Vocal\nCDEF GABc|\nV: Ins\nZ|\n"
+
+
+def labels(abc: str) -> list[tuple[str, int]]:
+    from plenio.core.score import canonical, ops
+
+    return [(s.label, s.measure + 1) for s in ops._section_starts(canonical.from_abc(abc))]
+
+
+def test_a_long_rest_inside_a_verse_becomes_an_interlude() -> None:
+    # owner's cover: YuE2 sang the chorus after a 5-bar rest inside the first verse and lost the verse
+    split = split_long_rests(rest_score(5))
+    assert labels(split.abc) == [("verse", 1), ("interlude", 4), ("verse", 7), ("chorus", 9)]
+    assert "bars 4-6 are an interlude" in split.changes[0]
+    # the bar after the last sung one and the bar before the singing stay with the verse
+    assert score_rules.analyze(split.abc).ok
+    assert LONG_REST_BARS == 4
+    assert split_long_rests(rest_score(3)).changes == ()  # a short rest stays
+    assert split_long_rests(rest_score(5, "intro")).changes == ()  # intros, outros, interludes keep theirs
+
+
+def test_only_sung_covers_split_their_long_rests() -> None:
+    abc = rest_score(5)
+    sung = prepare_for_brief(
+        abc,
+        build_cover_brief({"genre": "folk", "vocals": "original lyrics", "harmony": "keep original chords"}),
+    )
+    assert ("interlude", 4) in labels(sung.abc)
+    instrumental = prepare_for_brief(abc, build_cover_brief({"genre": "folk"}))
+    assert all(label != "interlude" for label, _ in labels(instrumental.abc))
+    song = prepare_for_brief(abc, build_song_brief({"genre": "folk"}))
+    assert song.abc == abc  # a song keeps YuE2's own plan
+
+
+def test_known_whisper_inventions_leave_the_lyrics() -> None:
+    # owner's report 2026-10-08: "Untertitelung des ZDF für funk, 2017" stood in a cover's last chorus
+    words = [
+        al.AsrWord(10.0, 10.4, "Ruf", segment=0),
+        al.AsrWord(10.4, 10.8, "der", segment=0),
+        al.AsrWord(10.8, 11.2, "Engel", segment=0),
+        al.AsrWord(20.0, 20.5, "Untertitelung", segment=1),
+        al.AsrWord(20.5, 20.7, "des", segment=1),
+        al.AsrWord(20.7, 21.0, "ZDF", segment=1),
+        al.AsrWord(21.0, 21.2, "für", segment=1),
+        al.AsrWord(21.2, 21.5, "funk,", segment=1),
+        al.AsrWord(22.0, 22.5, "2017", segment=2),
+        al.AsrWord(30.0, 30.4, "Mein", segment=3),
+        al.AsrWord(30.4, 30.8, "himmlischer", segment=3),
+        al.AsrWord(30.8, 31.2, "Spion.", segment=3),
+    ]
+    kept, dropped = al.drop_known_inventions(words)
+    assert [w.word for w in kept] == ["Ruf", "der", "Engel", "Mein", "himmlischer", "Spion."]
+    assert [w.word for w in dropped] == ["Untertitelung", "des", "ZDF", "für", "funk,", "2017"]
+    result = al.align(words, [], timeline=None)
+    assert "Untertitelung" not in result.lyrics and "2017" not in result.lyrics
+    assert any("Whisper invents" in w for w in result.warnings)
+    # a lyric about watching, or a year in a line of its own without an invention before it, stays
+    plain = [al.AsrWord(0.0, 0.5, "1999,", segment=0), al.AsrWord(1.0, 1.5, "watching", segment=1)]
+    assert al.drop_known_inventions(plain) == (plain, [])
