@@ -90,7 +90,7 @@ def server(tmp_path_factory: pytest.TempPathFactory, comfy_path: Path) -> Iterat
     app.server_close()
 
 
-def song_brief(arrangement: str, closeness: int = 60) -> dict[str, Any]:
+def song_brief(arrangement: str, closeness: int = 60, under: bool = False) -> dict[str, Any]:
     return {
         "class_type": "PlenioSongBrief",
         "inputs": {
@@ -109,6 +109,7 @@ def song_brief(arrangement: str, closeness: int = 60) -> dict[str, Any]:
             "meter": "",
             "arrangement": arrangement,
             "genre_closeness": closeness,
+            "lines_under_singing": under,
         },
     }
 
@@ -216,7 +217,8 @@ def test_a_cover_kept_at_its_song_flow_does_not_ask_the_writer(server: ComfyServ
 def test_a_plan_is_written_into_the_score(server: ComfyServer) -> None:
     ASKED.clear()
     ANSWER["text"] = f"Sure!\n```json\n{GOOD_PLAN}\n```"
-    entry = server.run(graph(song_brief("varied"), seed=11, sheet=True))
+    # the fixture is sung throughout: lines need room under the singing (a fill has none here)
+    entry = server.run(graph(song_brief("varied", under=True), seed=11, sheet=True))
     arranged = entry["outputs"]["7"]["received"][0]
     assert arranged != SCORE and "K:D" in arranged  # the chorus lifted a whole tone
     request = ASKED[-1]
@@ -227,13 +229,17 @@ def test_a_plan_is_written_into_the_score(server: ComfyServer) -> None:
     sheet = entry["outputs"]["8"]["plenio_sheet"][0]
     assert sheet["arrangement"]["status"] == "applied" and sheet["arrangement"]["mode"] == "varied"
     assert "arrangement: varied: 2 of 2 sections arranged" in summary(entry, "8")
+    assert "harmony check:" in summary(entry, "6") and "0 clash(es) between voice and line" in summary(
+        entry, "6"
+    )
+    assert sheet["arrangement"]["harmony"]["after"]["clashes"] == 0
     # the brief changed, so ComfyUI runs the writer node again - but the request is the same (the slider
     # stayed in its band): Plenio's answer cache answers, the app is not asked
     asked = len(ASKED)
-    nudged = server.run(graph(song_brief("varied", closeness=61), seed=11))
+    nudged = server.run(graph(song_brief("varied", closeness=61, under=True), seed=11))
     assert len(ASKED) == asked and "from Plenio's answer cache" in summary(nudged, "5")
     assert nudged["outputs"]["7"]["received"] == [arranged]
-    server.run(graph(song_brief("varied", closeness=61), seed=13))
+    server.run(graph(song_brief("varied", closeness=61, under=True), seed=13))
     assert len(ASKED) == asked + 1  # a new seed: a new answer
 
 

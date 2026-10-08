@@ -24,6 +24,7 @@ from ..types import Brief
 from .brief import (
     EXPERIMENTAL,
     SONG_SEED_TOOLTIP,
+    UNDER_SINGING_TOOLTIP,
     arrangement_line,
     check_arrangement,
     mode_line,
@@ -211,6 +212,13 @@ class PlenioCoverBrief(io.ComfyNode):
                     display_mode=io.NumberDisplay.slider,
                     tooltip=LYRICS_CLOSENESS_TOOLTIP,
                 ),
+                io.Boolean.Input(
+                    "lines_under_singing",
+                    display_name="lines under the singing (experimental)",
+                    default=False,
+                    optional=True,
+                    tooltip=UNDER_SINGING_TOOLTIP,
+                ),
             ],
             outputs=[
                 Brief.Output(display_name="brief", tooltip="The cover brief."),
@@ -261,6 +269,7 @@ class PlenioCoverBrief(io.ComfyNode):
         arrangement: str = ARRANGEMENT_DEFAULT,
         song_flow_closeness: int = CLOSENESS_DEFAULT,
         lyrics_closeness: int = LYRICS_CLOSENESS_DEFAULT,
+        lines_under_singing: bool = False,
     ) -> io.NodeOutput:
         chosen = None if template == "none" else template_library().get(template)
         # an unknown mode stops here, with the list to choose from; 0.4.5's "simple" is read as "off"
@@ -282,6 +291,7 @@ class PlenioCoverBrief(io.ComfyNode):
             "arrangement": arrangement,
             "closeness": song_flow_closeness,
             "lyrics_closeness": lyrics_closeness,
+            "lines_under_singing": bool(lines_under_singing),
         }
         inputs = dict(
             zip(COVER_INPUTS, (mode, template, description, genre, mood, vocals, harmony, title), strict=True)

@@ -165,6 +165,8 @@ class SongBrief:
     """The creative mode (``core.arrangement``): ``off`` or the name of a mode file."""
     closeness: int = CLOSENESS_DEFAULT
     """How close the song stays to its genre (creative modes only): 0 free ... 100 strictly typical."""
+    lines_under_singing: bool = False
+    """Creative modes: instrument lines may also sound while the voice sings (default: only in its rests)."""
     template: str = ""
     from_template: tuple[str, ...] = field(default=(), compare=False)
     notes: tuple[str, ...] = field(default=(), compare=False)
@@ -285,6 +287,8 @@ class CoverBrief:
     """Song flow closeness (creative modes only): 0 only a hint of the original ... 100 exactly the original."""
     lyrics_closeness: int = LYRICS_CLOSENESS_DEFAULT
     """New lyrics only: 0 without the source's text, 1 only a hint of it ... 100 its meaning line by line."""
+    lines_under_singing: bool = False
+    """Creative modes: instrument lines may also sound while the voice sings (default: only in its rests)."""
     template: str = ""
     from_template: tuple[str, ...] = field(default=(), compare=False)
     notes: tuple[str, ...] = field(default=(), compare=False)
@@ -537,6 +541,7 @@ def build_cover_brief(
         title=str(values.get("title", "") or "").strip(),
         arrangement=str(values.get("arrangement", "") or ARRANGEMENT_DEFAULT).strip(),
         closeness=closeness_value(values.get("closeness")),
+        lines_under_singing=bool(values.get("lines_under_singing", False)),
         lyrics_closeness=(
             closeness_value(values.get("lyrics_closeness"), LYRICS_CLOSENESS_DEFAULT)
             if vocals == "new"
@@ -599,6 +604,7 @@ def build_song_brief(
         melody=melody,
         arrangement=str(values.get("arrangement", "") or ARRANGEMENT_DEFAULT).strip(),
         closeness=closeness_value(values.get("closeness")),
+        lines_under_singing=bool(values.get("lines_under_singing", False)),
         template=template.id if template else "",
         from_template=tuple(from_template),
         notes=tuple(notes),

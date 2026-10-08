@@ -1,7 +1,10 @@
 """Apply a section plan to a score - or fall back to the score as it was, and say why.
 
-The order per section: chords (each bar's new chord must fit the melody, otherwise the planned chord
-stays), then the instrument line (written from the bar chords), then the key shift; at the end the tempo.
+The order per section: chords (``harmony.repair``: the writer's chord where it belongs to the key and the
+genre and carries the whole bar's melody, else the nearest chord that does), then the instrument line
+(written from the chords sounding, fitted to the voice: only in its rests, or below it with *lines under
+the singing*), a gate (a section that clashes more than before goes back to how it was), then the key
+shift; at the end the tempo.
 Every step goes through the score model's validation; a step that fails is left out and noted. The result
 is checked like a document the editor opens: the YuE2 parser accepts it, it reads back to the same model,
 the score editor can show it note by note - and, with an engine, it fits YuE2's context. Anything else
@@ -19,7 +22,7 @@ from ..errors import PlenioError, PlenioValidationError
 from ..score import canonical as c
 from ..score import native, ops
 from ..score.operations import editor_view
-from . import lines
+from . import harmony, lines
 from .plan import (
     NEEDS_CHORDS,
     Plan,
@@ -27,10 +30,10 @@ from .plan import (
     Policy,
     SectionPlan,
     chord_at,
+    for_score,
     melody_voice,
     read_plan,
     section_ranges,
-    strong_positions,
 )
 
 STATUSES = ("applied", "partial", "unchanged", "fallback", "skipped")
@@ -70,6 +73,8 @@ class Arrangement:
     plan: Plan | None = None
     idea: str = ""
     changes: tuple[str, ...] = field(default=())
+    harmony: dict[str, Any] = field(default_factory=dict)
+    """``before`` and ``after``: ``harmony.Measures`` of the score as planned and as arranged."""
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -81,6 +86,7 @@ class Arrangement:
             "sections": [s.to_dict() for s in self.sections],
             "notes": list(self.notes),
             "plan": self.plan.to_dict() if self.plan else None,
+            "harmony": self.harmony,
         }
 
 
@@ -93,28 +99,17 @@ def _bars(first: int, end: int) -> str:
     return f"{first + 1}" if end - first == 1 else f"{first + 1}-{end}"
 
 
-def _fits(chord: str, pitches: Sequence[int], tensions: str) -> bool:
-    classes = set(lines.chord_classes(chord))
-    root = lines.chord_root(chord.partition("/")[0])
-    for pitch in pitches:
-        pc = pitch % 12
-        if pc in classes:
-            continue
-        if tensions == "strict":
-            return False
-        if tensions == "colour" and (pc - root) % 12 in (2, 9):
-            continue
-        if tensions == "free" and not any((pc - tone) % 12 == 1 for tone in classes):
-            continue
-        return False
-    return True
-
-
-def _sounding(notes: Sequence[c.Note], onset: int) -> int | None:
-    for note in notes:
-        if note.onset <= onset < note.end:
-            return note.pitch
-    return None
+def section_vocabulary(score: c.Score, first: int, end: int, policy: Policy) -> harmony.Vocabulary:
+    """The chords a section may use: its key, the genre family of the brief's genre and style, the mode's
+    qualities narrowed by the closeness."""
+    return harmony.vocabulary(
+        harmony.section_key(score, first, end),
+        harmony.genre_of(policy.genre),
+        policy.qualities,
+        closeness=policy.closeness,
+        slash=policy.slash,
+        tensions=policy.tensions,
+    )
 
 
 def _apply_chords(
@@ -125,37 +120,36 @@ def _apply_chords(
     policy: Policy,
     melody: Sequence[c.Note],
 ) -> tuple[c.Score, list[str], list[str]]:
+    """The section's chords after ``harmony.repair``; a bar that keeps its chord gets it written out when the
+    bar before it changed (so a held chord does not silently become the new one)."""
+    vocab = section_vocabulary(score, first, end, policy)
+    repaired = harmony.repair(score, first, end, progression, melody, vocab)
     applied: list[str] = []
-    kept: list[str] = []
+    kept = [bar.note for bar in repaired if bar.note]
     chords = list(score.chords)
     names: list[str] = []
-    for i, measure in enumerate(range(first, end)):
-        name = progression[i % len(progression)]
-        start, length = score.starts[measure], score.lengths[measure]
-        if name is None:  # the plan keeps this bar's chord
-            names.append(chord_at(score, start) or "-")
-            continue
-        strong = [
-            p
-            for p in (
-                _sounding(melody, pos) for pos in strong_positions(start, length, score.meters[measure])
-            )
-            if p is not None
-        ]
-        old = chord_at(score, start)
-        if name == old:  # the planned chord again: nothing to change, nothing to report
-            names.append(name)
-            continue
-        if not _fits(name, strong, policy.tensions):
-            kept.append(f"bar {measure + 1}: {name} clashes with the melody; {old or 'no chord'} stays")
-            names.append(old or "-")
+    changed = False
+    for bar in repaired:
+        start, length = score.starts[bar.measure], score.lengths[bar.measure]
+        inside = [ch for ch in score.chords if start <= ch.onset < start + length]
+        if bar.chords is None:
+            sounding = chord_at(score, start)
+            if changed and sounding and not any(ch.onset == start for ch in inside):
+                chords.append(c.ChordSymbol(start, sounding))  # the old chord again after a changed bar
+            names.append(sounding or "-")
+            changed = False
             continue
         chords = [ch for ch in chords if not start <= ch.onset < start + length]
-        chords.append(c.ChordSymbol(start, name))
-        names.append(name)
-    new = replace(score, chords=tuple(sorted(chords, key=lambda ch: ch.onset)))
-    new = c.validate(new)
-    if names and any(n != "-" for n in names):
+        chords += [c.ChordSymbol(onset, name) for onset, name in bar.chords]
+        names.append(bar.chords[0][1])
+        changed = True
+    if changed and end < score.measure_count:
+        after = score.starts[end]
+        sounding = chord_at(score, after)
+        if sounding and not any(ch.onset == after for ch in score.chords):
+            chords.append(c.ChordSymbol(after, sounding))  # the next section starts with its own chord
+    new = c.validate(replace(score, chords=tuple(sorted(chords, key=lambda ch: ch.onset))))
+    if new.chords != score.chords:
         applied.append("chords " + " | ".join(names))
     return new, applied, kept
 
@@ -168,8 +162,59 @@ def _line(
     *,
     seed: int,
     melody: Sequence[c.Note],
+    policy: Policy | None = None,
 ) -> list[lines.LineNote] | None:
-    """The notes of the plan's lead role in the section; ``None`` keeps the line as it is."""
+    """The notes of the plan's lead role in the section, fitted to the chords and to the voice; ``None``
+    keeps the line as it is.
+
+    With a sung melody the line plays only where the voice rests (fills and answers - YuE2's own scores
+    never sound the Ins voice under the singing); with ``policy.under_singing`` the rests keep the planned
+    energy and the line under the voice is the calm one (energy at most 2), below the voice and without a
+    minor second or major seventh against it."""
+    notes = _raw_line(score, first, end, plan, seed=seed, melody=melody)
+    if notes is None or not notes:
+        return notes
+    chord_names = [chord_at(score, score.starts[m]) for m in range(first, end)]
+    bars = lines.bars_of(score, first, end, chord_names)
+    quarter = max(1, score.units_per_quarter)
+    notes = lines.settle(notes, bars, quarter)
+    if policy is None or policy.melody != "vocal" or not score.vocal:
+        return notes
+    start, stop = score.starts[first], score.starts[end] if end < score.measure_count else score.total
+    gaps = lines.rests_of(score.vocal, start, stop, quarter)
+    fills = lines.in_rests(notes, gaps)
+    if not policy.under_singing:
+        return fills
+    calm_plan = replace(plan, energy=min(2, plan.energy))
+    calm = _raw_line(score, first, end, calm_plan, seed=seed, melody=melody) or []
+    singing = _complement(gaps, start, stop)
+    under = lines.below_voice(lines.in_rests(lines.settle(calm, bars, quarter), singing), score.vocal, bars)
+    return sorted([*fills, *under])
+
+
+def _complement(gaps: Sequence[tuple[int, int]], start: int, stop: int) -> list[tuple[int, int]]:
+    """The spans of ``[start, stop)`` outside ``gaps``."""
+    spans: list[tuple[int, int]] = []
+    cursor = start
+    for a, b in gaps:
+        if a > cursor:
+            spans.append((cursor, a))
+        cursor = max(cursor, b)
+    if cursor < stop:
+        spans.append((cursor, stop))
+    return spans
+
+
+def _raw_line(
+    score: c.Score,
+    first: int,
+    end: int,
+    plan: SectionPlan,
+    *,
+    seed: int,
+    melody: Sequence[c.Note],
+) -> list[lines.LineNote] | None:
+    """The notes the lead role's generator writes for the section."""
     if plan.lead == "keep":
         return None
     if plan.lead == "none":
@@ -205,6 +250,67 @@ def _apply_line(score: c.Score, first: int, end: int, notes: list[lines.LineNote
     ]
     result = ops.place_notes(score, "ins", inside, clear=[start, stop], label=label)
     return result.score
+
+
+def _span(score: c.Score, first: int, end: int) -> tuple[int, int]:
+    return score.starts[first], score.starts[end] if end < score.measure_count else score.total
+
+
+def _trouble(score: c.Score, first: int, end: int, melody: str) -> tuple[int, int]:
+    """A section's clashes: melody notes a half step above their chord's tone on a strong beat or held for a
+    beat, and moments of an eighth or more with the voice and the line a minor second / major seventh apart."""
+    start, stop = _span(score, first, end)
+    voice = melody_voice(score, melody)
+    accented = 0
+    chords = list(score.chords)
+    for piece in harmony.pieces(score, voice, start, stop):
+        name = None
+        for ch in chords:
+            if ch.onset > piece.onset:
+                break
+            name = ch.name
+        if name is None or not piece.accented:
+            continue
+        try:
+            if harmony.is_avoid(piece.pitch % 12, harmony.tones(name)):
+                accented += 1
+        except ValueError:
+            continue
+    sung = sorted((n for n in score.vocal if n.onset < stop and n.end > start), key=lambda n: n.onset)
+    line = sorted((n for n in score.ins if n.onset < stop and n.end > start), key=lambda n: n.onset)
+    return accented, harmony.clashes(score, sung, line)
+
+
+def _restore(working: c.Score, original: c.Score, first: int, end: int) -> c.Score:
+    """The section's chords and instrument line as they were in ``original``."""
+    start, stop = _span(working, first, end)
+    chords = [ch for ch in working.chords if not start <= ch.onset < stop]
+    chords += [ch for ch in original.chords if start <= ch.onset < stop]
+    sounding = chord_at(original, start)
+    if sounding and not any(ch.onset == start for ch in original.chords):
+        chords.append(c.ChordSymbol(start, sounding))
+    if stop < working.total and not any(ch.onset == stop for ch in chords):
+        after = chord_at(working, stop)
+        if after:
+            chords.append(c.ChordSymbol(stop, after))
+    restored = c.validate(replace(working, chords=tuple(sorted(chords, key=lambda ch: ch.onset))))
+    notes = [
+        {"onset": n.onset, "duration": min(n.duration, stop - n.onset), "pitch": n.pitch}
+        for n in original.ins
+        if start <= n.onset < stop
+    ]
+    return ops.place_notes(restored, "ins", notes, clear=[start, stop], label="arrangement: kept").score
+
+
+def _measures(before: c.Score, after: c.Score, policy: Policy) -> dict[str, Any]:
+    """The harmony of the score as planned and as arranged (``harmony.Measures``), for the report."""
+    genre = harmony.genre_of(policy.genre)
+    tensions = genre.tensions | harmony.TENSIONS.get(policy.tensions, frozenset())
+    return {
+        "genre": genre.family,
+        "before": harmony.measure(before, melody_voice(before, policy.melody), tensions=tensions).to_dict(),
+        "after": harmony.measure(after, melody_voice(after, policy.melody), tensions=tensions).to_dict(),
+    }
 
 
 def _split_at(notes: Sequence[c.Note], point: int) -> list[c.Note]:
@@ -358,6 +464,7 @@ def arrange(
         score = c.from_abc(text)
     except PlenioValidationError as error:
         return fallback(f"the planned score cannot be edited note by note ({error.message})")
+    policy = for_score(policy, has_chords=bool(score.chords))  # no chords: YuE2 harmonises, none are added
     ranges = section_ranges(score)
     try:
         plan = read_plan(answer, policy, len(ranges))
@@ -399,15 +506,35 @@ def arrange(
                 if lead != "keep":
                     try:
                         line = _line(
-                            working, first, end, replace(section, lead=lead), seed=seed, melody=melody
+                            working,
+                            first,
+                            end,
+                            replace(section, lead=lead),
+                            seed=seed,
+                            melody=melody,
+                            policy=policy,
                         )
-                        if line is not None:
+                        if line is not None and not line and lead != "none":
+                            kept.append(
+                                f'lead "{lead}" left out: the voice sings through the section, no room for a line'
+                            )
+                        elif line is not None:
                             working = _apply_line(working, first, end, line, f"arrangement: {lead}")
                             applied.append(
                                 f"line {lead} (energy {section.energy})" if lead != "none" else "line silent"
                             )
                     except (PlenioValidationError, ValueError, KeyError, IndexError) as error:
                         kept.append(f'lead "{lead}" left out ({error})')
+            trouble_before = _trouble(score, first, end, policy.melody)
+            trouble_after = _trouble(working, first, end, policy.melody)
+            if applied and any(a > b for a, b in zip(trouble_after, trouble_before, strict=True)):
+                working = _restore(working, score, first, end)
+                kept.append(
+                    "the arranged section clashed more than before (melody against chords "
+                    f"{trouble_before[0]} -> {trouble_after[0]}, voice against line {trouble_before[1]} -> "
+                    f"{trouble_after[1]}); it stays as it was"
+                )
+                applied = []
             shifts.append(section.key_shift)
             results.append(
                 SectionResult(len(results) + 1, label, _bars(first, end), tuple(applied), tuple(kept))
@@ -473,7 +600,16 @@ def arrange(
                 " (some parts kept, see the notes)" if status == "partial" else ""
             )
             return Arrangement(
-                arranged, status, summary, mode, closeness, tuple(results), tuple(notes), plan, plan.idea
+                arranged,
+                status,
+                summary,
+                mode,
+                closeness,
+                tuple(results),
+                tuple(notes),
+                plan,
+                plan.idea,
+                harmony=_measures(score, c.from_abc(arranged), policy),
             )
         if attempt == "without lines":
             return fallback(f"the arranged score does not fit the music model ({too_big})", plan, notes)

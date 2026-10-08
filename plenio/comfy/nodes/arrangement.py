@@ -32,8 +32,9 @@ RECOMMENDATION = (
 )
 
 
-def rules_for(brief: Any) -> arrangement.Policy:
-    """The section plan's limits for this brief (its creative mode and closeness)."""
+def rules_for(brief: Any, style: str = "") -> arrangement.Policy:
+    """The section plan's limits for this brief (its creative mode and closeness); the brief's genre and the
+    style choose the harmony guard's chord vocabulary."""
     if brief is None or not hasattr(brief, "arrangement"):
         raise PlenioUserError("Arrangement needs a Song Brief or a Cover Brief.", hint="Connect the brief.")
     mode = mode_library().by_name(brief.arrangement)
@@ -42,6 +43,20 @@ def rules_for(brief: Any) -> arrangement.Policy:
         kind="cover" if isinstance(brief, CoverBrief) else "song",
         closeness=brief.closeness,
         melody=arrangement.melody_of(instrumental=brief.instrumental, melody=brief.melody),
+        genre=f"{brief.genre} {style}".strip(),
+        under_singing=bool(getattr(brief, "lines_under_singing", False)),
+    )
+
+
+def harmony_text(measures: dict[str, Any]) -> str:
+    """The harmony check of an arrangement in words (``harmony.Measures`` after it; the melody's fit before)."""
+    after, before = measures.get("after") or {}, measures.get("before") or {}
+    if not after:
+        return ""
+    return (
+        f"melody {after['melody_on_chord']:.0%} on chord tones (before {before.get('melody_on_chord', 0):.0%}), "
+        f"{after['accented_avoid']} accented clash(es) with a chord, {after['clashes']} clash(es) between voice "
+        f"and line, chords {after['chords_in_key']:.0%} in the key ({measures.get('genre', 'pop')})"
     )
 
 
@@ -110,7 +125,7 @@ class PlenioComposeArrangement(io.ComfyNode):
         style: str | None = None,
         lyrics: str | None = None,
     ) -> io.NodeOutput:
-        rules = rules_for(brief)
+        rules = rules_for(brief, style or "")
         if rules.skip or not (score or "").strip():
             reason = rules.skip_reason or "no score (planning is off)"
             markdown = f"**No arrangement prompt** - {reason}"
@@ -124,6 +139,7 @@ class PlenioComposeArrangement(io.ComfyNode):
             )
             return io.NodeOutput("", "", ui={"plenio_summary": [{"status": "warning", "markdown": markdown}]})
         summary = arrangement.summarize(model, melody=rules.melody)
+        rules = arrangement.for_score(rules, has_chords=summary.has_chords)  # YuE2 harmonises it
         text = arrangement.prompt(
             summary,
             rules,
@@ -195,6 +211,8 @@ def _markdown(result: arrangement.Arrangement, rules: arrangement.Policy) -> str
             lines.append(f"- {RECOMMENDATION}")
         return "\n".join(lines)
     lines = [f"**Arrangement {rules.mode.name}** (experimental, {_closeness(rules)}) - {result.summary}"]
+    if result.harmony:
+        lines.append(f"- harmony check: {harmony_text(result.harmony)}")
     if result.idea:
         lines.append(f"- idea: {result.idea}")
     for section in result.sections:
@@ -295,7 +313,7 @@ class PlenioApplyArrangement(io.ComfyNode):
         style: str | None = None,
         lyrics: str | None = None,
     ) -> io.NodeOutput:
-        rules = rules_for(brief)
+        rules = rules_for(brief, style or "")
         text = score or ""
         if not text.strip():
             report = Report(

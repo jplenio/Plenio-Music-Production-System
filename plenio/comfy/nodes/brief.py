@@ -70,6 +70,12 @@ GENRE_CLOSENESS_TOOLTIP = (
     "typical, 70 typical with personal touches, 40 free within the genre, 0 borrow from any style. It shapes the "
     "style words and the section plan."
 )
+UNDER_SINGING_TOOLTIP = (
+    "Creative modes only (experimental): off (default) - the instrument line plays where the voice rests "
+    "(intros, interludes, gaps between phrases), as in YuE2's own scores, where the second voice is the "
+    "instrumental melody. On - it also sounds under the singing: calm, below the voice and never a minor second "
+    "against it. More accompaniment, but further from what YuE2 knows."
+)
 TEXT = {
     "description": "What the song is about and how it should sound. Sent to the writing model.",
     "genre": "Genre and sub-genre, e.g. 'indie pop'.",
@@ -84,12 +90,13 @@ def arrangement_line(brief: Any) -> str:
     """The summary line of the creative mode (Song Brief and Cover Brief)."""
     if brief.arrangement == ARRANGEMENT_DEFAULT:
         return "Arrangement: off (the music model plans the music by itself)"
+    under = ", lines also under the singing" if getattr(brief, "lines_under_singing", False) else ""
     if brief.kind == "song":
-        return f"Arrangement: **{brief.arrangement}** (experimental), genre closeness {brief.closeness}"
+        return (
+            f"Arrangement: **{brief.arrangement}** (experimental), genre closeness {brief.closeness}{under}"
+        )
     lyrics = f", lyrics closeness {brief.lyrics_closeness}" if brief.writes_lyrics else ""
-    return (
-        f"Arrangement: **{brief.arrangement}** (experimental), song flow closeness {brief.closeness}{lyrics}"
-    )
+    return f"Arrangement: **{brief.arrangement}** (experimental), song flow closeness {brief.closeness}{lyrics}{under}"
 
 
 def check_arrangement(name: Any) -> str | None:
@@ -224,6 +231,13 @@ class PlenioSongBrief(io.ComfyNode):
                     display_mode=io.NumberDisplay.slider,
                     tooltip=GENRE_CLOSENESS_TOOLTIP,
                 ),
+                io.Boolean.Input(
+                    "lines_under_singing",
+                    display_name="lines under the singing (experimental)",
+                    default=False,
+                    optional=True,
+                    tooltip=UNDER_SINGING_TOOLTIP,
+                ),
             ],
             outputs=[
                 Brief.Output(
@@ -278,6 +292,7 @@ class PlenioSongBrief(io.ComfyNode):
         meter: str = "",
         arrangement: str = ARRANGEMENT_DEFAULT,
         genre_closeness: int = CLOSENESS_DEFAULT,
+        lines_under_singing: bool = False,
     ) -> io.NodeOutput:
         chosen = None if template == "none" else template_library().get(template)
         # an unknown mode stops here, with the list to choose from; 0.4.5's "simple" is read as "off"
@@ -300,6 +315,7 @@ class PlenioSongBrief(io.ComfyNode):
             "lead_instrument": vocals.get("lead_instrument", ""),
             "arrangement": arrangement,
             "closeness": genre_closeness,
+            "lines_under_singing": bool(lines_under_singing),
         }
         inputs = dict(
             zip(

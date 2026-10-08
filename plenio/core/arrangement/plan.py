@@ -13,12 +13,13 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from fractions import Fraction
 from typing import Any
 
 from ...third_party import yue2_abc_tools as upstream
 from ..score import canonical as c
+from . import harmony
 from .modes import CHORD_COLORS, LEAD_ROLES, CreativeMode
 
 ENERGY = (1, 5)
@@ -30,8 +31,9 @@ SKIP_FROM = 95
 MELODY = ("vocal", "instrument", "none")
 """Where the melody is: sung (the Vocal voice), played by the instrument line (an instrumental with a lead:
 the Ins voice carries it) or nowhere (accompaniment only)."""
-NEEDS_CHORDS = ("pad", "arpeggio", "riff", "countermelody", "solo", "motif")
-"""Lead roles built on the section's chords (a section without chords keeps its line)."""
+NEEDS_CHORDS = ("pad", "arpeggio", "riff", "countermelody", "motif")
+"""Lead roles built on the section's chords (a section without chords keeps its line). A solo needs only
+the key (its pentatonic scale), so it also fits a score that YuE2 harmonises itself."""
 _CHORD = r"[A-G](#|b)?(m\(maj7\)|maj7|m7b5|7sus4|dim7|sus2|sus4|dim|aug|m7|m6|m|7|6)?(/[A-G](#|b)?)?"
 CHORD_PATTERN = f"^{_CHORD}$"
 CHORD_PATTERN_OR_KEEP = f"^(keep|{_CHORD})$"
@@ -62,6 +64,8 @@ class SectionInfo:
     """The melody's notes on the strong beats of every bar (``-`` where it rests)."""
     line: str
     """What the instrument line plays now: ``rests``, ``melody`` (it carries the song's melody) or ``line``."""
+    key: str = ""
+    """The section's key (``harmony.section_key``: the score's, unless the notes clearly say otherwise)."""
 
 
 @dataclass(frozen=True)
@@ -171,7 +175,8 @@ def summarize(score: c.Score, *, melody: str) -> ScoreSummary:
         notes = tuple(_strong_notes(score, voice, m) for m in range(first, end))
         plays = any(start <= n.onset < stop for n in score.ins)
         line = "rests" if not plays else "melody" if melody == "instrument" else "line"
-        sections.append(SectionInfo(index, label, first + 1, end - first, chords, notes, line))
+        key = harmony.section_key(score, first, end).name
+        sections.append(SectionInfo(index, label, first + 1, end - first, chords, notes, line, key))
     meters = {f"{n}/{d}" for n, d in score.meters}
     vocal = [n.pitch for n in score.vocal]
     return ScoreSummary(
@@ -209,6 +214,11 @@ class Policy:
     """How strictly chords must fit the melody: ``strict``, ``colour`` (seconds and sixths) or ``free``."""
     qualities: tuple[str, ...]
     slash: bool
+    genre: str = ""
+    """The genre and style words (``harmony.genre_of``: the chord vocabulary of the family)."""
+    under_singing: bool = False
+    """Whether instrument lines may sound while the voice sings (default: only in its rests, as YuE2's own
+    scores - the Ins voice is the instrumental melody there)."""
 
     @property
     def skip(self) -> bool:
@@ -228,9 +238,18 @@ def _narrow(span: tuple[int, int], low: int, high: int) -> tuple[int, int]:
     return max(span[0], low), min(span[1], high)
 
 
-def policy(mode: CreativeMode, *, kind: str, closeness: int, melody: str) -> Policy:
+def policy(
+    mode: CreativeMode,
+    *,
+    kind: str,
+    closeness: int,
+    melody: str,
+    genre: str = "",
+    under_singing: bool = False,
+) -> Policy:
     """The limits of a section plan: the mode's choices narrowed by the closeness slider, and the melody kept
-    (an instrument line that carries it is never replaced)."""
+    (an instrument line that carries it is never replaced). Doubling the voice (*octave*) needs lines under
+    the singing."""
     closeness = max(0, min(100, int(closeness)))
     chords, replace_lines, tensions = True, True, "strict"
     key_shift, tempo = mode.key_shift, mode.tempo_change
@@ -259,6 +278,8 @@ def policy(mode: CreativeMode, *, kind: str, closeness: int, melody: str) -> Pol
         lead = tuple(r for r in lead if r not in ("countermelody", "octave"))
     elif melody == "none":
         lead = tuple(r for r in lead if r not in ("solo", "countermelody", "octave"))  # no lead is wanted
+    if melody == "vocal" and not under_singing:
+        lead = tuple(r for r in lead if r != "octave")  # it only sounds while the voice sings
     return Policy(
         mode=mode,
         kind=kind,
@@ -272,7 +293,23 @@ def policy(mode: CreativeMode, *, kind: str, closeness: int, melody: str) -> Pol
         tensions=tensions,
         qualities=CHORD_COLORS[mode.chord_colors],
         slash=mode.chord_colors >= 3,
+        genre=genre,
+        under_singing=under_singing,
     )
+
+
+CHORD_FREE = ("keep", "none", "solo")
+"""Lead roles for a score without chords (YuE2 harmonises it; *octave* too when lines may sound under the
+singing)."""
+
+
+def for_score(rules: Policy, *, has_chords: bool) -> Policy:
+    """``rules`` for a score: one without chords keeps none - YuE2 harmonises it itself (a cover on
+    *new accompaniment*, owner's decision D2) - so the plan adds no chords and only lines that need none."""
+    if has_chords or not rules.chords and all(r in CHORD_FREE or r == "octave" for r in rules.lead):
+        return rules
+    lead = tuple(r for r in rules.lead if r in CHORD_FREE or (r == "octave" and rules.under_singing))
+    return replace(rules, chords=False, lead=lead or ("keep",))
 
 
 def closeness_text(kind: str, closeness: int, genre: str = "") -> str:
@@ -393,20 +430,55 @@ def schema(policy: Policy, sections: int) -> dict[str, Any]:
 
 
 _FIT_TEXT = {
-    "strict": "- A new chord must contain the melody notes on its bar's strong beats (shown per bar above); where it "
-    "does not, Plenio keeps the planned chord.",
-    "colour": "- A new chord must contain the melody notes on its bar's strong beats (shown per bar above) or have "
-    "them as its 2nd/9th or 6th; where it does not, Plenio keeps the planned chord.",
-    "free": "- A new chord may colour the melody freely, but no melody note on a strong beat (shown per bar above) "
-    "may lie a half step above a chord note; where one does, Plenio keeps the planned chord.",
+    "strict": "- Choose chords from the list above that contain the melody notes of their bar (the strong beats are "
+    "shown per bar).",
+    "colour": "- Choose chords from the list above that contain the melody notes of their bar (the strong beats "
+    "are shown per bar) or have them as their 2nd/9th or 6th.",
+    "free": "- You may colour the melody freely, but no melody note may lie a half step above a chord note.",
 }
+_CHECK_TEXT = (
+    "- Plenio checks every melody note of a bar against its chord, and the chord against the key and the genre: "
+    "a chord that clashes or does not belong is replaced by the nearest one that fits (and reported)."
+)
+
+
+def palettes(summary: ScoreSummary, policy: Policy) -> list[str]:
+    """The chords that fit, per run of sections in one key - offered to the writer."""
+    lines: list[str] = []
+    genre = harmony.genre_of(policy.genre)
+    runs: list[tuple[str, list[int]]] = []
+    for s in summary.sections:
+        key = s.key or summary.key
+        if runs and runs[-1][0] == key:
+            runs[-1][1].append(s.index)
+        else:
+            runs.append((key, [s.index]))
+    for key, indices in runs:
+        try:
+            vocab = harmony.vocabulary(
+                harmony.key_of(key),
+                genre,
+                policy.qualities,
+                closeness=policy.closeness,
+                slash=policy.slash,
+                tensions=policy.tensions,
+            )
+        except (KeyError, ValueError):
+            continue
+        where = f"section {indices[0]}" if len(indices) == 1 else f"sections {indices[0]}-{indices[-1]}"
+        mode_name = "minor" if vocab.key.minor else "major"
+        tonic = key[:-1] if vocab.key.minor else key
+        lines.append(f"- {where} ({tonic} {mode_name}): {vocab.palette()}")
+    return lines
+
+
 _ROLE_TEXT = {
     "keep": "keep - the line YuE2 planned stays",
     "none": "none - the instrument line is silent",
     "pad": "pad - long held chord notes",
     "arpeggio": "arpeggio - broken chords",
     "riff": "riff - a short rhythmic figure on every chord",
-    "countermelody": "countermelody - a second melody that moves against the sung one",
+    "countermelody": "countermelody - a second melody that answers the sung one",
     "solo": "solo - an improvised instrumental solo",
     "octave": "octave - doubles the sung melody an octave away",
     "motif": 'motif - your own short figure, given in "motif" (see below), repeated on every chord',
@@ -423,7 +495,9 @@ def prompt(
     lyrics: str = "",
     engine_name: str = "YuE2",
 ) -> str:
-    """The arrangement prompt: the score as a table, the mode, the closeness and the exact answer format."""
+    """The arrangement prompt: the score as a table, the chords that fit, the mode, the closeness and the exact
+    answer format."""
+    policy = for_score(policy, has_chords=summary.has_chords)
     qualities = ", ".join(f"C{q}" for q in policy.qualities)  # shown on C: "C" is major, nothing is added
     roles = "\n".join(f"  - {_ROLE_TEXT[r]}" for r in policy.lead)
     n = len(summary.sections)
@@ -464,6 +538,11 @@ def prompt(
         "SCORE",
         summary.describe(),
         "",
+        *(
+            ["CHORDS THAT FIT (by key; choose from these)", *palettes(summary, policy), ""]
+            if policy.chords
+            else []
+        ),
         f"MODE: {policy.mode.name} - {policy.mode.description}",
         policy.mode.arranger.strip(),
         "",
@@ -480,10 +559,19 @@ def prompt(
         )
     elif not policy.replace_lines:
         parts.append('Sections whose instrument line already plays keep it ("keep").')
-    if policy.chords and not summary.has_chords:
+    if policy.melody == "vocal":
         parts.append(
-            "The score has no chords yet: give chords to every section that should get an instrument line - "
-            "lines are built on the chords, a section without chords keeps its line."
+            "The instrument line is calm and stays below the voice while it sings, and plays freely where the voice "
+            "rests."
+            if policy.under_singing
+            else "The instrument line plays where the voice rests - intros, interludes, the outro and the gaps "
+            "between sung phrases (fills and answers); under the singing the chords and the style carry the "
+            "accompaniment. A section the voice sings through has little room for a line."
+        )
+    if not summary.has_chords:
+        parts.append(
+            f"The score has no chords: {engine_name} harmonises the song itself, so the chords stay as they are; "
+            "plan the lines that need no chords, the energy and the key."
         )
     parts += [
         "",
@@ -499,6 +587,7 @@ def prompt(
             else '- "chords": always "keep" (the chords stay as they are).'
         ),
         *([_FIT_TEXT[policy.tensions]] if policy.chords and policy.melody != "none" else []),
+        *([_CHECK_TEXT] if policy.chords else []),
         '- "lead": what the instrument line plays:',
         roles,
         '- "energy": 1 (calm) to 5 (full): how busy the instrument line is.',

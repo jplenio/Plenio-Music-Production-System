@@ -57,20 +57,24 @@ Above 0 the source's lyrics are transcribed for the writer (the lyrics ASR runs)
 
 ## How a section plan becomes music
 
-1. **Compose Arrangement** shows the writer the score as a table: every section with its bars and chords, the melody notes on the strong beats, what the instrument line plays now - plus the mode's rules, the closeness in words and the exact answer format.
+1. **Compose Arrangement** shows the writer the score as a table: every section with its bars and chords, the melody notes on the strong beats, what the instrument line plays now - the **chords that fit** each section's key in the genre (for example *B, C#m, D#m, E, F#, G#m; borrowed, typical in pop: A, Em, G*) - plus the mode's rules, the closeness in words and the exact answer format.
 2. The writer answers with a small **JSON plan** - per section the chords (one per bar), the *lead* role of the instrument line, an energy from 1 to 5, a key shift - never notes or ABC. With a Local LLM model (GGUF files, LM Studio, Ollama) the answer is held to the plan's format while it is written; other writers answer freely and Plenio reads leniently (code fences, a missing last brace, chord aliases such as *Cmaj9* -> *Cmaj7* are repaired and reported).
 3. **Apply Arrangement** writes the notes itself, with the same checked operations as *Score Tools*:
-   - **chords** bar by bar - a chord must fit the melody on the strong beats, otherwise the planned chord stays;
-   - **the instrument line** (YuE2's second voice, *Ins*): *pad*, *arpeggio*, *riff*, *countermelody*, *solo*, *octave* (the sung melody an octave away), *motif* (the writer's figure in note names, moved onto every chord), *none*, *keep*. A line that carries the melody - an instrumental with a lead - is never replaced, and lines are built on chords;
+   - **chords**, guarded (the *harmony guard*, 0.4.6): the writer's chord stands where it belongs to the section's key or to the genre's usual borrowings (a dominant only when it resolves) and carries the melody of its **whole bar** - every note, weighed by its length and beat; a note a half step above a chord tone on a strong beat or held for a beat is not allowed. Where the writer's chord does not stand, Plenio chooses per section the nearest chord that does - the original chord, the same root in another colour, or an in-key chord sharing two of its tones - and says so (*bar 3: Db is not a chord of C in pop; F instead*). A score **without chords** (a cover on *new accompaniment*) gets none: YuE2 harmonises it itself, as you chose;
+   - **the instrument line** (YuE2's second voice, *Ins*): *pad*, *arpeggio*, *riff*, *countermelody*, *solo*, *octave* (the sung melody an octave away; only with lines under the singing), *motif* (the writer's figure in note names, moved onto every chord), *none*, *keep*. Every note follows the chord sounding at it. In YuE2's own scores the *Ins* voice never plays while the voice sings - it is the instrumental melody - so **by default a line plays where the voice rests**: intros, interludes, the outro and the gaps between sung phrases (fills and answers). With the brief's **lines under the singing (experimental)** it also sounds under the voice: calm (energy at most 2), below the voice and never a minor second or major seventh against it. A line that carries the melody - an instrumental with a lead - is never replaced;
    - **key lifts** - only while the voice stays in its range (at most two semitones above the song's highest note);
    - the **tempo** change.
-4. The result must pass YuE2's parser, read back unchanged, open note by note in the score editor and fit YuE2's context. Otherwise the score **stays as it was**, and *Song Sheet · Score* shows a warning with the reason (*Arrangement not applied - ...*).
+4. A **gate** per section: a section that clashes more after the arrangement than before - melody against its chords, or the voice against the line - goes back to how it was.
+5. The result must pass YuE2's parser, read back unchanged, open note by note in the score editor and fit YuE2's context. Otherwise the score **stays as it was**, and *Song Sheet · Score* shows a warning with the reason (*Arrangement not applied - ...*).
+
+Measured on the 120 writer plans of study A1 (October 2026): with 0.4.5 the line sounded under 85 % of the singing with 5.8 clashes a minute against the voice; with the guard there are none, every chord belongs to the key or the genre, and still 87 % of the sections are arranged ([proposal](../../design/harmony-and-lyrics-fit.md)).
 
 The plan cannot break the score: in the tests random scores and random, partly broken plans always gave either a valid arranged score or the old one unchanged.
 
 ## Where you see it
 
-- **Song Sheet · Score**: the summary names the result (*varied: 5 of 7 sections arranged*). In the editor, the **Arrangement** line above the findings opens the details: the writer's idea and per section what was applied and what stayed (for example *bar 3: C# clashes with the melody; C stays*). A fallback is shown there in amber and is a warning of the sheet.
+- **Song Sheet · Score**: the summary names the result (*varied: 5 of 7 sections arranged*). In the editor, the **Arrangement** line above the findings opens the details: the writer's idea, the **harmony check** (*melody 87 % on chord tones · 0 accented clashes with a chord · 0 between voice and line · chords 100 % in the key*) and per section what was applied and what stayed (for example *bar 3: C# is not a chord of C in pop; the bar keeps its chord*). A fallback is shown there in amber and is a warning of the sheet.
+- **Apply Arrangement**'s summary has the same harmony check.
 - The **release record** keeps the arrangement with the sheet's report.
 
 Edit the arranged score in the sheet like any other: your edit wins (it is the sheet's rule).
@@ -93,7 +97,7 @@ The plan is written by the template's **Writer model** (one list for every writi
 | Gemma 4 12B | 12/12 | 12/12 | a quarter to a third | 43-50 % |
 | Qwen 3.8 27B | 12/12 | 12/12 | one in seven | 31 % |
 
-**Recommendation:** any instruction-tuned model from about 2 B parameters plans usable arrangements - the default writer is enough. A GGUF file in `models/LLM`, an LM Studio or an Ollama model is held to the plan's format exactly; the native writer answers freely and Plenio repairs what it can (in the study with the same result). Bigger is not more correct here: the models differ in **character** - small Gemma models re-harmonise every section, the Qwen models change little - and Plenio's melody check keeps the harmony right either way. Writing the notes directly in ABC is not offered: in the same study no model up to 12 B wrote one valid section, and the 27 B model 3 of 12.
+**Recommendation:** any instruction-tuned model from about 2 B parameters plans usable arrangements - the default writer is enough. A GGUF file in `models/LLM`, an LM Studio or an Ollama model is held to the plan's format exactly; the native writer answers freely and Plenio repairs what it can (in the study with the same result). Bigger is not more correct here: the models differ in **character** - small Gemma models re-harmonise every section, the Qwen models change little - and Plenio's harmony guard keeps the harmony right either way. Writing the notes directly in ABC is not offered: in the same study no model up to 12 B wrote one valid section, and the 27 B model 3 of 12.
 
 ## Limits
 

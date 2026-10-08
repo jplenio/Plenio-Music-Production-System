@@ -3,6 +3,12 @@
 Every generator returns notes ``(onset, duration, pitch)`` in the score's ``L`` units that lie inside the
 section; ``apply`` puts them into the Ins voice with the score operations, which validate the result.
 The lines are deterministic: the same chords, energy and seed give the same notes.
+
+Every note follows the chord sounding at its onset (a bar with two chords gets both), and ``fit_to_voice``
+fits a finished line to the singing: YuE2's own scores never let the Ins voice sound while the voice sings
+(it is the instrumental melody), so by default a line plays only where the voice rests - fills and
+answers; with *lines under the singing* it stays below the voice, without a minor second or major
+seventh against it (``docs/design/harmony-and-lyrics-fit.md``).
 """
 
 from __future__ import annotations
@@ -30,6 +36,14 @@ RIFFS_4 = (
     (1, 0, 0, 1, 1, 0, 1, 0),
 )
 """One-bar rhythms on eighths (4/4); other meters stretch or cut them."""
+RIFF_FIGURES = (
+    ("root", "root", "fifth", "octave"),
+    ("root", "fifth", "root", "seventh"),
+    ("root", "octave", "fifth", "root"),
+    ("root", "third", "fourth", "fifth"),
+)
+"""Riff figures by chord function: the third is the chord's own (minor or major), the seventh the chord's
+seventh or else the octave, a fourth that would clash with a major third becomes the fifth."""
 REGISTER = {
     "pad": (55, 69),
     "arpeggio": (57, 79),
@@ -38,6 +52,10 @@ REGISTER = {
     "solo": (64, 86),
     "motif": (55, 79),
 }
+HARSH = (1, 11)
+"""Pitch-class distances heard as a clash against the voice: a minor second / major seventh (any octave)."""
+BELOW_VOICE = 3
+"""Under the singing a line stays at least a minor third below the sung note (no unison, no crossing)."""
 
 
 def chord_root(name: str) -> int:
@@ -76,6 +94,11 @@ def nearest(target: int, candidates: Sequence[int]) -> int:
     return min(candidates, key=lambda p: (abs(p - target), p))
 
 
+def is_avoid(pc: int, classes: Sequence[int]) -> bool:
+    """A half step above a chord tone (and not a chord tone itself)."""
+    return pc not in classes and any((pc - t) % 12 == 1 for t in classes)
+
+
 @dataclass(frozen=True)
 class Bar:
     """One bar of the section as the generators need it."""
@@ -85,13 +108,42 @@ class Bar:
     meter: tuple[int, int]
     chord: str | None
     key: str
+    changes: tuple[tuple[int, str], ...] = ()
+    """Chord symbols that start inside the bar after its first chord: ``(onset, name)``."""
+
+    def chord_at(self, onset: int) -> str | None:
+        name = self.chord
+        for at, other in self.changes:
+            if at <= onset:
+                name = other
+        return name
+
+    def segments(self) -> list[tuple[int, int, str | None]]:
+        """``(start, length, chord)`` of the bar's chords in order."""
+        points = [
+            (self.start, self.chord),
+            *[(at, n) for at, n in self.changes if self.start < at < self.end],
+        ]
+        result = []
+        for i, (at, name) in enumerate(points):
+            stop = points[i + 1][0] if i + 1 < len(points) else self.end
+            result.append((at, stop - at, name))
+        return result
+
+    @property
+    def end(self) -> int:
+        return self.start + self.length
 
 
 def bars_of(score: c.Score, first: int, end: int, chord_at: Sequence[str | None]) -> list[Bar]:
-    return [
-        Bar(score.starts[m], score.lengths[m], score.meters[m], chord_at[i], score.key_at(score.starts[m]))
-        for i, m in enumerate(range(first, end))
-    ]
+    """The section's bars; ``chord_at`` is the chord each bar starts with, the score's chord symbols inside
+    a bar become its ``changes``."""
+    bars = []
+    for i, m in enumerate(range(first, end)):
+        start, length = score.starts[m], score.lengths[m]
+        changes = tuple((ch.onset, ch.name) for ch in score.chords if start < ch.onset < start + length)
+        bars.append(Bar(start, length, score.meters[m], chord_at[i], score.key_at(start), changes))
+    return bars
 
 
 def step_units(score: c.Score, energy: int) -> int:
@@ -104,56 +156,88 @@ def step_units(score: c.Score, energy: int) -> int:
     return max(1, int(units))
 
 
-def _chord_classes_or_key(bar: Bar) -> tuple[int, ...]:
-    if bar.chord:
-        return chord_classes(bar.chord)
-    tonic, minor = _key_tonic(bar.key)
+def _classes(chord: str | None, key: str) -> tuple[int, ...]:
+    if chord:
+        return chord_classes(chord)
+    tonic, minor = _key_tonic(key)
     return tuple((tonic + i) % 12 for i in ((0, 3, 7) if minor else (0, 4, 7)))
 
 
+def _chord_classes_or_key(bar: Bar, onset: int | None = None) -> tuple[int, ...]:
+    return _classes(bar.chord_at(bar.start if onset is None else onset), bar.key)
+
+
 def pad(bars: Sequence[Bar], energy: int, rng: random.Random) -> list[LineNote]:
+    """Held chord notes - one per chord (two per chord from energy 3: the root, then the third)."""
     notes: list[LineNote] = []
     low, high = REGISTER["pad"]
     previous = (low + high) // 2
     for bar in bars:
-        classes = _chord_classes_or_key(bar)
-        pool = in_register(classes, low, high)
-        if not pool:
-            continue
-        third = [p for p in pool if p % 12 == classes[min(1, len(classes) - 1)]]
-        first = nearest(previous, third or pool)
-        if energy <= 2 or bar.length < 2:
-            notes.append((bar.start, bar.length, first))
-            previous = first
-            continue
-        half = bar.length // 2
-        root = nearest(first, [p for p in pool if p % 12 == classes[0]] or pool)
-        notes += [(bar.start, half, root), (bar.start + half, bar.length - half, first)]
-        previous = first
+        for start, length, chord in bar.segments():
+            classes = _classes(chord, bar.key)
+            pool = in_register(classes, low, high)
+            if not pool:
+                continue
+            third = [p for p in pool if p % 12 == classes[min(1, len(classes) - 1)]]
+            upper = nearest(previous, third or pool)
+            if energy <= 2 or length < 2:
+                notes.append((start, length, upper))
+                previous = upper
+                continue
+            half = length // 2
+            root = nearest(upper, [p for p in pool if p % 12 == classes[0]] or pool)
+            notes += [(start, half, root), (start + half, length - half, upper)]
+            previous = upper
     return notes
 
 
 def arpeggio(bars: Sequence[Bar], energy: int, rng: random.Random, step: int) -> list[LineNote]:
-    """Broken chords over four chord tones near the previous bar (small steps, no jumps across the
+    """Broken chords over four chord tones near the previous ones (small steps, no jumps across the
     register); up and down from energy 3."""
     notes: list[LineNote] = []
     low, high = REGISTER["arpeggio"]
     previous = (low + high) // 2 - 4
     for bar in bars:
-        pool = in_register(_chord_classes_or_key(bar), low, high)
-        if len(pool) < 2:
-            continue
-        start = pool.index(nearest(previous, pool))
-        start = max(0, min(start, len(pool) - 4))
-        span = pool[start : start + 4]
-        order = span + span[-2:0:-1] if energy >= 3 and len(span) > 2 else span
-        position = 0
-        while position < bar.length:
-            length = min(step, bar.length - position)
-            notes.append((bar.start + position, length, order[(position // step) % len(order)]))
-            position += length
-        previous = span[0]
+        for start, length, chord in bar.segments():
+            pool = in_register(_classes(chord, bar.key), low, high)
+            if len(pool) < 2:
+                continue
+            first = pool.index(nearest(previous, pool))
+            first = max(0, min(first, len(pool) - 4))
+            span = pool[first : first + 4]
+            order = span + span[-2:0:-1] if energy >= 3 and len(span) > 2 else span
+            position = 0
+            while position < length:
+                size = min(step, length - position)
+                notes.append((start + position, size, order[(position // step) % len(order)]))
+                position += size
+            previous = span[0]
     return notes
+
+
+def _figure_pitch(root: int, part: str, classes: Sequence[int], key: str) -> int:
+    """A riff figure's degree on the chord: its own third and seventh (or the octave without one)."""
+    root_pc = root % 12
+
+    def above(interval_options: Sequence[int], fallback: int) -> int:
+        for interval in interval_options:
+            if (root_pc + interval) % 12 in classes:
+                return root + interval
+        return root + fallback
+
+    if part == "root":
+        return root
+    if part == "fifth":
+        return above((7, 6, 8), 7)
+    if part == "octave":
+        return root + 12
+    if part == "third":
+        return above((3, 4, 2, 5), 7)
+    if part == "seventh":
+        return above((10, 11, 9), 12)
+    # the fourth: a passing note on the beat's off part, unless it clashes with the chord's third
+    fourth = root + 5
+    return root + 7 if is_avoid(fourth % 12, classes) else fourth
 
 
 def riff(bars: Sequence[Bar], energy: int, rng: random.Random, quarter: int) -> list[LineNote]:
@@ -164,18 +248,18 @@ def riff(bars: Sequence[Bar], energy: int, rng: random.Random, quarter: int) -> 
     pattern = list(rng.choice(RIFFS_4))
     if energy <= 2:
         pattern = [on if i % 2 == 0 else 0 for i, on in enumerate(pattern)]
-    figure = rng.choice(((0, 0, 7, 12), (0, 7, 0, 10), (0, 12, 7, 0), (0, 3, 5, 7)))
+    figure = rng.choice(RIFF_FIGURES)
     eighth = max(1, quarter // 2)
     for bar in bars:
-        classes = _chord_classes_or_key(bar)
-        roots = [p for p in range(low, high + 1) if p % 12 == classes[0]]
-        if not roots:
-            continue
-        root = roots[0]
         hits = [i * eighth for i, on in enumerate(pattern) if on and i * eighth < bar.length]
         for count, onset in enumerate(hits):
+            chord = bar.chord_at(bar.start + onset)
+            classes = _classes(chord, bar.key)
+            roots = [p for p in range(low, high + 1) if p % 12 == classes[0]]
+            if not roots:
+                continue
             following = hits[count + 1] if count + 1 < len(hits) else bar.length
-            pitch = root + figure[count % len(figure)]
+            pitch = _figure_pitch(roots[0], figure[count % len(figure)], classes, bar.key)
             if pitch > high:
                 pitch -= 12
             notes.append((bar.start + onset, max(1, min(following - onset, eighth * 2)), pitch))
@@ -194,7 +278,8 @@ def _vocal_pitch_at(vocal: Sequence[c.Note], onset: int) -> int | None:
 def countermelody(
     bars: Sequence[Bar], energy: int, rng: random.Random, step: int, vocal: Sequence[c.Note]
 ) -> list[LineNote]:
-    """A second line that moves against the sung melody: long notes while the voice sings, motion in its rests."""
+    """A second line that moves against the sung melody: long notes while the voice sings, motion in its
+    rests (where it answers the voice)."""
     notes: list[LineNote] = []
     sung = [n.pitch for n in vocal]
     centre = sum(sung) / len(sung) if sung else 67
@@ -204,15 +289,15 @@ def countermelody(
     previous: int | None = None
     previous_sung: int | None = None
     for bar in bars:
-        classes = _chord_classes_or_key(bar)
-        chord_pool = in_register(classes, low, high)
         key_pool = in_register(scale(bar.key), low, high)
-        if not chord_pool:
-            continue
         position = 0
         while position < bar.length:
             length = min(beat, bar.length - position)
             onset = bar.start + position
+            chord_pool = in_register(_chord_classes_or_key(bar, onset), low, high)
+            if not chord_pool:
+                position += length
+                continue
             sung_now = _vocal_pitch_at(vocal, onset)
             strong = position == 0 or position * 2 == bar.length
             pool = chord_pool if strong or sung_now is not None else key_pool or chord_pool
@@ -240,7 +325,8 @@ SOLO_RHYTHMS = {
 
 def solo(bars: Sequence[Bar], energy: int, rng: random.Random, quarter: int) -> list[LineNote]:
     """Two-bar phrases on the key's pentatonic scale: chord tones on the strong beats, a held chord tone
-    at the end of every phrase; busier with more energy."""
+    at the end of every phrase, no pentatonic note that clashes with the chord sounding; busier with more
+    energy."""
     notes: list[LineNote] = []
     if not bars:
         return notes
@@ -251,10 +337,6 @@ def solo(bars: Sequence[Bar], energy: int, rng: random.Random, quarter: int) -> 
     for index, bar in enumerate(bars):
         tonic, minor = _key_tonic(bar.key)
         penta = tuple((tonic + i) % 12 for i in (PENTATONIC_MINOR if minor else PENTATONIC_MAJOR))
-        key_pool = in_register(penta, low, high)
-        chord_pool = in_register(_chord_classes_or_key(bar), low, high)
-        if not key_pool or not chord_pool:
-            continue
         rhythm = rng.choice(SOLO_RHYTHMS[level])
         last_bar_of_phrase = index % 2 == 1 or index == len(bars) - 1
         position = 0
@@ -264,10 +346,16 @@ def solo(bars: Sequence[Bar], energy: int, rng: random.Random, quarter: int) -> 
             length = min(eighths * eighth, bar.length - position)
             if count == len(rhythm) - 1:
                 length = bar.length - position
+            classes = _chord_classes_or_key(bar, bar.start + position)
+            chord_pool = in_register(classes, low, high)
+            key_pool = [p for p in in_register(penta, low, high) if not is_avoid(p % 12, classes)]
+            if not chord_pool:
+                position += length
+                continue
             strong = position == 0 or position * 2 == bar.length
             if last_bar_of_phrase and count == len(rhythm) - 1:
                 pitch = nearest(previous, chord_pool)
-            elif strong:
+            elif strong or not key_pool:
                 pitch = nearest(previous + rng.choice((-3, -2, 2, 3)), chord_pool)
             else:
                 pitch = nearest(previous + rng.choice((-2, -1, 1, 2, 4)), key_pool)
@@ -304,9 +392,9 @@ def motif(
     bars: Sequence[Bar], figure: Sequence[tuple[int | None, Fraction]], units_per_quarter: int
 ) -> list[LineNote]:
     """The writer's figure, moved onto every bar's chord root and restarted on the downbeat of every bar (or
-    of every pair of bars for a longer figure). A note on a strong beat that is not in the bar's chord takes
-    the nearest chord note; the notes between keep the writer's line (study A1: a quarter to a half of the
-    writers' strong-beat notes missed the chord)."""
+    of every pair of bars for a longer figure). A note on a strong beat that is not in the chord sounding
+    takes the nearest chord note; the notes between keep the writer's line (study A1: a quarter to a half
+    of the writers' strong-beat notes missed the chord)."""
     if not bars or not figure or units_per_quarter < 1:
         return []
     low, high = REGISTER["motif"]
@@ -336,7 +424,8 @@ def motif(
                 if pitch is None:
                     continue
                 bar = next((b for b in group if b.start <= onset < b.start + b.length), group[-1])
-                root = chord_root(bar.chord) if bar.chord else reference
+                chord = bar.chord_at(onset)
+                root = chord_root(chord) if chord else reference
                 shift = (root - reference) % 12
                 if shift > 6:
                     shift -= 12
@@ -346,9 +435,86 @@ def motif(
                 while moved > high:
                     moved -= 12
                 if _strong(bar, onset):
-                    tones = in_register(_chord_classes_or_key(bar), low, high)
+                    tones = in_register(_chord_classes_or_key(bar, onset), low, high)
                     if tones and moved % 12 not in {p % 12 for p in tones}:
                         moved = nearest(moved, tones)
                 notes.append((onset, min(length, tile_end - onset), moved))
             tile += span
     return notes
+
+
+# --- fitting a line to the chords and the voice ----------------------------------------------------
+
+
+def settle(notes: Sequence[LineNote], bars: Sequence[Bar], quarter: int) -> list[LineNote]:
+    """A note on a strong beat or held for a beat that clashes with its chord (a half step above a chord
+    tone) moves to the nearest chord tone."""
+    result: list[LineNote] = []
+    for onset, length, pitch in notes:
+        bar = next((b for b in bars if b.start <= onset < b.end), None)
+        if bar is None:
+            result.append((onset, length, pitch))
+            continue
+        classes = _chord_classes_or_key(bar, onset)
+        if (_strong(bar, onset) or length >= quarter) and is_avoid(pitch % 12, classes):
+            pool = in_register(classes, pitch - 7, pitch + 7)
+            pitch = nearest(pitch, pool) if pool else pitch
+        result.append((onset, length, pitch))
+    return result
+
+
+def rests_of(vocal: Sequence[c.Note], start: int, stop: int, minimum: int) -> list[tuple[int, int]]:
+    """Where the voice rests inside ``[start, stop)``: gaps of at least ``minimum`` units."""
+    gaps: list[tuple[int, int]] = []
+    cursor = start
+    for note in sorted(vocal, key=lambda n: n.onset):
+        if note.end <= start or note.onset >= stop:
+            continue
+        if note.onset - cursor >= minimum:
+            gaps.append((cursor, note.onset))
+        cursor = max(cursor, note.end)
+    if stop - cursor >= minimum:
+        gaps.append((cursor, stop))
+    return gaps
+
+
+def in_rests(notes: Sequence[LineNote], gaps: Sequence[tuple[int, int]]) -> list[LineNote]:
+    """The parts of the notes that lie in the voice's rests (notes are cut at the gap's ends)."""
+    result: list[LineNote] = []
+    for onset, length, pitch in notes:
+        for a, b in gaps:
+            start, stop = max(onset, a), min(onset + length, b)
+            if stop > start:
+                result.append((start, stop - start, pitch))
+    return result
+
+
+def below_voice(
+    notes: Sequence[LineNote], vocal: Sequence[c.Note], bars: Sequence[Bar], *, low: int = 36
+) -> list[LineNote]:
+    """Notes that sound with the voice keep below it - at least a minor third, never a minor second or
+    major seventh against any sung note they overlap; a note that cannot be placed so is left out."""
+    sung = sorted(vocal, key=lambda n: n.onset)
+    result: list[LineNote] = []
+    for onset, length, pitch in notes:
+        over = [v.pitch for v in sung if v.onset < onset + length and v.end > onset]
+        if not over:
+            result.append((onset, length, pitch))
+            continue
+
+        def fine(p: int, over: Sequence[int] = over) -> bool:
+            return all(p <= v - BELOW_VOICE and (v - p) % 12 not in HARSH for v in over)
+
+        if fine(pitch):
+            result.append((onset, length, pitch))
+            continue
+        bar = next((b for b in bars if b.start <= onset < b.end), None)
+        classes = _chord_classes_or_key(bar, onset) if bar else (pitch % 12,)
+        candidates = [
+            p
+            for p in range(max(low, pitch - 14), min(over) - BELOW_VOICE + 1)
+            if p % 12 in classes and fine(p)
+        ]
+        if candidates:
+            result.append((onset, length, nearest(pitch, candidates)))
+    return result

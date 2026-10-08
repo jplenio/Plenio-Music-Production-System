@@ -24,6 +24,7 @@ from plenio.core.arrangement import (
     ModeLibrary,
     PlanError,
     arrange,
+    harmony,
     lines,
     melody_of,
     parse_mode,
@@ -35,7 +36,7 @@ from plenio.core.arrangement import (
     summarize,
     writer_lines,
 )
-from plenio.core.arrangement.plan import CHORD_PATTERN, closeness_text, normalize_chord
+from plenio.core.arrangement.plan import CHORD_PATTERN, closeness_text, melody_voice, normalize_chord
 from plenio.core.errors import PlenioUserError
 from plenio.core.score import canonical as c
 from plenio.core.score import native
@@ -48,8 +49,26 @@ FIXTURE = (ROOT / "tests" / "fixtures" / "abc" / "upstream-score.abc").read_text
 LIBRARY = ModeLibrary(PACKAGE)
 
 
-def rules(name: str = "varied", *, kind: str = "song", closeness: int = 60, melody: str = "vocal") -> Any:
-    return policy(LIBRARY.by_name(name), kind=kind, closeness=closeness, melody=melody)
+def rules(
+    name: str = "varied",
+    *,
+    kind: str = "song",
+    closeness: int = 60,
+    melody: str = "vocal",
+    under: bool = False,
+    genre: str = "",
+) -> Any:
+    return policy(
+        LIBRARY.by_name(name), kind=kind, closeness=closeness, melody=melody, under_singing=under, genre=genre
+    )
+
+
+def with_rests(text: str, bars: tuple[int, ...]) -> str:
+    """The score with the voice silent in ``bars`` (0-based): room for fills."""
+    model = c.from_abc(text)
+    spans = [(model.starts[b], model.starts[b + 1]) for b in bars]
+    vocal = tuple(n for n in model.vocal if not any(a <= n.onset < b for a, b in spans))
+    return c.to_abc(c.validate(replace(model, vocal=vocal)))
 
 
 def plan(*sections: dict[str, Any], tempo: int = 0) -> str:
@@ -337,8 +356,8 @@ def test_a_plan_becomes_a_valid_score() -> None:
         entry(2, chords=["Cmaj9", "F", "G7", "C"], lead="countermelody", energy=4, key_shift=2),
         tempo=3,
     )
-    result = arrange(FIXTURE, answer, rules(), seed=1)
-    assert result.status == "applied", result.notes
+    result = arrange(FIXTURE, answer, rules(under=True), seed=1)
+    assert result.status == "applied", (result.notes, [s.kept for s in result.sections])
     assert readable(result.abc)
     model = c.from_abc(result.abc)
     assert model.tempo == 91 and model.ins  # tempo +3 %, an instrument line where there was none
@@ -351,13 +370,16 @@ def test_a_plan_becomes_a_valid_score() -> None:
     assert [n.pitch for n in model.vocal if n.onset >= chorus_start] == [
         n.pitch + 2 for n in original.vocal if n.onset >= chorus_start
     ]
-    assert arrange(FIXTURE, answer, rules(), seed=1).abc == result.abc  # the same seed, the same notes
+    assert (
+        arrange(FIXTURE, answer, rules(under=True), seed=1).abc == result.abc
+    )  # the same seed, the same notes
+    assert result.harmony["after"]["clashes"] == 0 and result.harmony["after"]["accented_avoid"] == 0
 
 
 def test_a_chord_that_clashes_with_the_melody_is_not_used() -> None:
     result = arrange(FIXTURE, plan(entry(1, chords=["C#", "G", "Am", "Fmaj7"]), entry(2)), rules("standard"))
     assert result.status == "partial"
-    assert any("C# clashes with the melody; C stays" in kept for kept in result.sections[0].kept)
+    assert any("bar 1: C# is not a chord of C" in kept for kept in result.sections[0].kept)
     assert [ch.name for ch in c.from_abc(result.abc).chords][:4] == ["C", "G", "Am", "Fmaj7"]
     alone = arrange(FIXTURE, plan(entry(1, chords=["C#", "G", "Am", "F"]), entry(2)), rules("standard"))
     assert (
@@ -392,11 +414,11 @@ def test_arrangement_off_and_a_kept_cover_skip_the_writer() -> None:
 def test_the_context_check_drops_the_lines_first_then_falls_back() -> None:
     answer = plan(entry(1, chords=["C", "G", "Am", "Fmaj7"], lead="arpeggio"), entry(2, lead="riff"))
     without_lines = arrange(
-        FIXTURE, answer, rules(), fits=lambda abc: "too long" if "V: Ins\nZ" not in abc else None
+        FIXTURE, answer, rules(under=True), fits=lambda abc: "too long" if "V: Ins\nZ" not in abc else None
     )
     assert without_lines.status == "partial"
     assert any("instrument lines were left out" in note for note in without_lines.notes)
-    never = arrange(FIXTURE, answer, rules(), fits=lambda abc: "too long")
+    never = arrange(FIXTURE, answer, rules(under=True), fits=lambda abc: "too long")
     assert (
         never.status == "fallback"
         and never.abc == FIXTURE
@@ -412,11 +434,20 @@ def test_an_instrument_line_that_carries_the_melody_stays() -> None:
     assert all("carries the melody" in kept[0] for kept in (s.kept for s in result.sections))
 
 
-def test_lines_need_chords() -> None:
+def test_a_score_without_chords_gets_none() -> None:
+    """Owner's decision D2: a score without chords (a cover on *new accompaniment*) is harmonised by YuE2
+    itself - the plan adds no chords and only lines that need none (a solo on the key's pentatonic)."""
     model = c.from_abc(FIXTURE)
     bare = c.to_abc(c.validate(replace(model, chords=())))
-    result = arrange(bare, plan(entry(1, lead="arpeggio"), entry(2, lead="none")), rules())
-    assert any("no chords to build it on" in kept for kept in result.sections[0].kept)
+    result = arrange(
+        bare, plan(entry(1, chords=["C", "G", "Am", "F"], lead="arpeggio"), entry(2, lead="none")), rules()
+    )
+    after = c.from_abc(result.abc)
+    assert not after.chords
+    assert not any(a.startswith("line arpeggio") for s in result.sections for a in s.applied)
+    roomy = with_rests(bare, (1, 2))
+    solo = arrange(roomy, plan(entry(1, lead="solo"), entry(2)), rules("many instruments"))
+    assert c.from_abc(solo.abc).ins and not c.from_abc(solo.abc).chords
 
 
 def test_a_key_lift_that_leaves_the_voice_range_is_not_made() -> None:
@@ -444,7 +475,7 @@ def test_a_key_lift_that_leaves_the_midi_range_is_not_reported_as_made() -> None
 
 def test_motifs_follow_the_chords() -> None:
     figure = [{"note": "C4", "beats": 1}, {"note": "E4", "beats": 1}, {"note": "G4", "beats": 2}]
-    result = arrange(FIXTURE, plan(entry(1, lead="motif", motif=figure), entry(2)), rules())
+    result = arrange(with_rests(FIXTURE, (1,)), plan(entry(1, lead="motif", motif=figure), entry(2)), rules())
     assert result.status == "applied" and readable(result.abc)
     model = c.from_abc(result.abc)
     bar2 = [n.pitch % 12 for n in model.ins if model.starts[1] <= n.onset < model.starts[2]]
@@ -467,14 +498,70 @@ def test_a_motif_starts_on_every_downbeat_and_lands_on_chord_notes() -> None:
 @pytest.mark.parametrize("energy", [1, 3, 5])
 def test_every_role_writes_a_readable_line(role: str, energy: int) -> None:
     result = arrange(
-        FIXTURE, plan(entry(1, lead=role, energy=energy), entry(2, lead=role, energy=energy)), rules("varied")
+        FIXTURE,
+        plan(entry(1, lead=role, energy=energy), entry(2, lead=role, energy=energy)),
+        rules("varied", under=True),
     )
     assert result.status in ("applied", "partial") and readable(result.abc), result.notes
     model = c.from_abc(result.abc)
     assert model.ins and all(0 <= n.pitch <= 127 for n in model.ins)
     low, high = lines.REGISTER.get(role, (36, 96))
     if role in lines.REGISTER and role != "countermelody":
-        assert all(low <= n.pitch <= high for n in model.ins), role
+        assert all(low - 14 <= n.pitch <= high for n in model.ins), role  # below the voice it may go lower
+    assert harmony.clashes(model, model.vocal, model.ins) == 0  # never a minor second against the voice
+    assert all(
+        i.pitch <= v.pitch - lines.BELOW_VOICE
+        for i in model.ins
+        for v in model.vocal
+        if i.onset < v.end and v.onset < i.end
+    )
+
+
+# --- lines that fit the voice and the chords (owner's decision D1) ----------------------------------------
+
+
+@pytest.mark.parametrize("role", ["pad", "arpeggio", "riff", "countermelody", "solo"])
+def test_lines_play_where_the_voice_rests(role: str) -> None:
+    roomy = with_rests(FIXTURE, (2, 3))
+    result = arrange(roomy, plan(entry(1, lead=role), entry(2, lead=role)), rules("varied"))
+    model = c.from_abc(result.abc)
+    assert model.ins, (result.sections, result.notes)
+    assert not any(i.onset < v.end and v.onset < i.end for i in model.ins for v in model.vocal)
+    sung_through = [s for s in result.sections if s.label == "chorus"][0]
+    assert any("no room for a line" in kept for kept in sung_through.kept)
+
+
+def test_octave_doubling_needs_lines_under_the_singing() -> None:
+    assert "octave" not in rules("varied").lead
+    assert "octave" in rules("varied", under=True).lead
+
+
+def test_a_line_follows_every_chord_of_its_bar() -> None:
+    model = c.from_abc(FIXTURE)
+    half = model.starts[0] + model.lengths[0] // 2
+    chords = sorted((*model.chords, c.ChordSymbol(half, "Am")), key=lambda ch: ch.onset)
+    two = c.validate(replace(model, chords=tuple(chords)))
+    bars = lines.bars_of(two, 0, 1, ["C"])
+    notes = lines.pad(bars, 1, __import__("random").Random(1))
+    assert [(onset, pitch % 12 in (9, 0, 4)) for onset, _length, pitch in notes][-1] == (half, True)
+    assert len(notes) == 2
+
+
+def test_riff_figures_take_the_chords_own_third() -> None:
+    model = c.from_abc(FIXTURE)
+    bars = lines.bars_of(model, 0, 1, ["C"])
+    for seed in range(12):
+        notes = lines.riff(bars, 4, __import__("random").Random(seed), model.units_per_quarter)
+        assert all(pitch % 12 != 3 for _onset, _length, pitch in notes)  # never E-flat over C major
+
+
+def test_genre_words_choose_the_vocabulary() -> None:
+    answer = plan(entry(1, chords=["C", "G", "Am", "Bb"]), entry(2))
+    pop = arrange(FIXTURE, answer, rules("standard", genre="indie pop"))
+    assert c.from_abc(pop.abc).chords[3].name in (
+        "Bb",
+        "F",
+    )  # bVII is borrowed in pop - if it fits the melody
 
 
 # --- whatever the writer answers: a readable score or the score as it was -------------------------------
@@ -537,12 +624,19 @@ def test_any_answer_gives_a_readable_score_or_the_old_one(
 ) -> None:
     text = c.to_abc(score)
     answer = data.draw(answers(len(section_ranges(score))))
-    result = arrange(text, answer, rules(mode, kind=kind, closeness=closeness, melody=melody), seed=seed)
+    under = data.draw(st.booleans())
+    rules_ = rules(mode, kind=kind, closeness=closeness, melody=melody, under=under)
+    result = arrange(text, answer, rules_, seed=seed)
     if result.status in ("fallback", "unchanged", "skipped"):
         assert result.abc == text
         return
     assert readable(result.abc), (result.notes, result.abc)
     after = c.from_abc(result.abc)
+    # the harmony guard: never more clashes than the score had - with the chords, and between the voices
+    before_m = harmony.measure(score, melody_voice(score, melody))
+    after_m = harmony.measure(after, melody_voice(after, melody))
+    assert after_m.accented_avoid <= before_m.accented_avoid, result.sections
+    assert after_m.clashes <= before_m.clashes, result.sections
     assert after.measure_count == score.measure_count and after.sections == score.sections
     shifted = {
         r.index: next((int(a.split()[1]) for a in r.applied if a.startswith("key ")), 0)

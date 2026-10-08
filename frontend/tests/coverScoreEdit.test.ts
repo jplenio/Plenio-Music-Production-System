@@ -224,7 +224,9 @@ describe('SheetDialog: a cover text sheet edits the score it shows', () => {
 
   it('marks a creative arrangement as experimental', async () => {
     const notes = ['section 2: Bb/D -> Bb (bass note dropped)', 'section 2: Bb/D -> Bb (bass note dropped)', 'tempo 84 -> 88 BPM']
-    const plan = { status: 'applied', summary: '2 of 3 sections changed', mode: 'fantasy', closeness: 50, kind: 'cover', sections: [], notes }
+    const after = { melody_on_chord: 0.874, accented_avoid: 0, clashes: 0, overlap: 0, chords_in_key: 1 }
+    const harmony = { genre: 'pop', after }
+    const plan = { status: 'applied', summary: '2 of 3 sections changed', mode: 'fantasy', closeness: 50, kind: 'cover', sections: [], notes, harmony }
     const { host } = await mountText(null, plan)
     expect(host.querySelector('.arrangement .experimental')?.textContent).toBe('experimental')
     // a repeated note is said once, with how often
@@ -234,6 +236,9 @@ describe('SheetDialog: a cover text sheet edits the score it shows', () => {
     ])
     expect(host.querySelector('.arrangement summary')?.textContent).toContain('fantasy (song flow closeness 50)')
     expect(host.querySelector('.arrangement')?.textContent).toContain('Creative modes are experimental')
+    expect(host.querySelector('.arrangement')?.textContent).toContain(
+      'Harmony check (pop): melody 87 % on chord tones · 0 accented clashes with a chord · 0 between voice and line · chords 100 % in the key'
+    )
     app?.unmount()
     document.body.innerHTML = ''
     const { host: fallback } = await mountText(null, { ...plan, status: 'fallback', summary: 'not applied: no usable plan' })

@@ -1915,6 +1915,14 @@
        "step": 1,
        "display": "slider"
       }
+     ],
+     "lines_under_singing": [
+      "BOOLEAN",
+      {
+       "display_name": "lines under the singing (experimental)",
+       "tooltip": "Creative modes only (experimental): off (default) - the instrument line plays where the voice rests (intros, interludes, gaps between phrases), as in YuE2's own scores, where the second voice is the instrumental melody. On - it also sounds under the singing: calm, below the voice and never a minor second against it. More accompaniment, but further from what YuE2 knows.",
+       "default": false
+      }
      ]
     }
    },
@@ -1932,7 +1940,8 @@
     "optional": [
      "arrangement",
      "song_flow_closeness",
-     "lyrics_closeness"
+     "lyrics_closeness",
+     "lines_under_singing"
     ]
    },
    "output": [
@@ -3642,6 +3651,14 @@
        "step": 1,
        "display": "slider"
       }
+     ],
+     "lines_under_singing": [
+      "BOOLEAN",
+      {
+       "display_name": "lines under the singing (experimental)",
+       "tooltip": "Creative modes only (experimental): off (default) - the instrument line plays where the voice rests (intros, interludes, gaps between phrases), as in YuE2's own scores, where the second voice is the instrumental melody. On - it also sounds under the singing: calm, below the voice and never a minor second against it. More accompaniment, but further from what YuE2 knows.",
+       "default": false
+      }
      ]
     }
    },
@@ -3660,7 +3677,8 @@
     ],
     "optional": [
      "arrangement",
-     "genre_closeness"
+     "genre_closeness",
+     "lines_under_singing"
     ]
    },
    "output": [

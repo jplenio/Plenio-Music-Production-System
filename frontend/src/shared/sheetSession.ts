@@ -77,6 +77,31 @@ export interface ArrangementPayload {
   idea?: string
   sections?: ArrangementSection[]
   notes?: string[]
+  /** The harmony check (0.4.6): the score's measures before and after the arrangement. */
+  harmony?: { genre?: string; before?: HarmonyMeasures; after?: HarmonyMeasures }
+}
+
+/** ``harmony.Measures`` of a score. */
+export interface HarmonyMeasures {
+  melody_on_chord: number
+  accented_avoid: number
+  clashes: number
+  overlap: number
+  chords_in_key: number
+}
+
+/** The harmony check of an arrangement in one line (empty without one). */
+export function harmonyLabel(arrangement: ArrangementPayload): string {
+  const after = arrangement.harmony?.after
+  if (!after) return ''
+  const percent = (value: number) => `${Math.round(value * 100)} %`
+  const parts = [
+    `melody ${percent(after.melody_on_chord)} on chord tones`,
+    `${after.accented_avoid} accented clash${after.accented_avoid === 1 ? '' : 'es'} with a chord`,
+    `${after.clashes} between voice and line`,
+    `chords ${percent(after.chords_in_key)} in the key`
+  ]
+  return `Harmony check (${arrangement.harmony?.genre ?? 'pop'}): ${parts.join(' · ')}`
 }
 
 /** What the sheet says about creative modes (0.4.5: experimental, they invite trying rather than relying). */

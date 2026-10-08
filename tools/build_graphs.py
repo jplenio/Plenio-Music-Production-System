@@ -1194,7 +1194,9 @@ CREATIVE_TEXT = (
     "- adds its hints to the writing and lets the writer model plan every section of the score in **Arrange**: "
     "chords, what the instrument line plays, energy, a key lift. {closeness} The writer answers with a small "
     "plan, never notes: Plenio writes every note itself and checks the result, so the score stays valid - a plan "
-    "it cannot use leaves the score as it was, and Song Sheet · Score says so. **Arrangement seed:** another "
+    "it cannot use leaves the score as it was, and Song Sheet · Score says so. A **harmony guard** keeps every "
+    "chord in the key and the genre and on the melody, and the instrument line plays where the voice rests "
+    "(*lines under the singing* in the brief lets it sound under the voice, calmly). **Arrangement seed:** another "
     "arrangement of the same song. Changing the mode or a slider writes the text again (the brief changed); a "
     "Local LLM answers from its cache when the request is the same."
 )
@@ -1252,7 +1254,7 @@ ABOUT_YUE2 = f"""# 1 · YuE2 · Song
 
 def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g = Graph()
-    about_note(g, ABOUT_YUE2, height=1100)
+    about_note(g, ABOUT_YUE2, height=1150)
     brief = g.add(
         "PlenioSongBrief",
         (0, 0),
@@ -1421,7 +1423,7 @@ ABOUT_COVER = f"""# 2 · YuE2 · Cover
 
 def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g = Graph()
-    about_note(g, ABOUT_COVER, height=1240)
+    about_note(g, ABOUT_COVER, height=1290)
     source = g.add("LoadAudio", (0, 0), size=(360, 140), title="Source recording")
     excerpt = g.add(
         "TrimAudioDuration",

@@ -177,6 +177,15 @@
       "name": "genre_closeness"
      },
      "link": null
+    },
+    {
+     "localized_name": "lines_under_singing",
+     "name": "lines_under_singing",
+     "type": "BOOLEAN",
+     "widget": {
+      "name": "lines_under_singing"
+     },
+     "link": null
     }
    ],
    "outputs": [
@@ -234,7 +243,8 @@
     "",
     "",
     "off",
-    70
+    70,
+    false
    ]
   },
   {

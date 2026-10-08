@@ -13,6 +13,7 @@ import {
   ARRANGEMENT_EXPERIMENTAL,
   arrangementLabel,
   countedNotes,
+  harmonyLabel,
   type ScoreChange,
   type ScoreTarget,
   type SheetPayload,
@@ -674,6 +675,7 @@ onBeforeUnmount(() => {
               {{ arrangementLabel(arrangement) }}: {{ arrangement.summary }}
             </summary>
             <p class="idea">{{ ARRANGEMENT_EXPERIMENTAL }}</p>
+            <p v-if="harmonyLabel(arrangement)" class="idea">{{ harmonyLabel(arrangement) }}</p>
             <p v-if="arrangement.idea" class="idea">{{ arrangement.idea }}</p>
             <ul>
               <li v-for="section in arrangement.sections ?? []" :key="section.index">

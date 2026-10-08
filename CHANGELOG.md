@@ -4,7 +4,15 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 ## Unreleased
 
+### Added
+
+- **Harmony guard** for the creative modes (owner's request 2026-10-08, [proposal](docs/design/harmony-and-lyrics-fit.md)): the writer's chords stand only where they belong to the section's key (detected from its notes when the transcribed key is clearly wrong) or to the genre's usual borrowings - eleven genre families with their chord colours, borrowed chords and secondary dominants that must resolve - and carry the melody of the whole bar (every note weighed by length and beat; no accented note a half step above a chord tone, no blue third outside blues and rock). Where a chord does not stand, a small dynamic programme per section chooses the nearest one that does (the original, the same root in another colour, an in-key chord sharing two tones) and the sheet says why. A gate per section puts back a section that clashes more than before. The prompt offers the writer the chords that fit, per key.
+- **Instrument lines that fit the voice**: by default a line plays only where the voice rests - fills and answers, as in YuE2's own scores, whose second voice never sounds under the singing (measured: 0 % in 230 of the owner's scores, 85-100 % after the 0.4.5 arrangements). New brief option **lines under the singing (experimental)**: the line also sounds under the voice - calm, below it, never a minor second or major seventh against it. Every line note follows the chord sounding at it (two chords in a bar), riff figures take the chord's own third and seventh, a solo avoids notes that clash with the chord.
+- **Harmony check** in Apply Arrangement's summary, the Song Sheet's arrangement details and the release record: the melody on chord tones, accented clashes with a chord, clashes between voice and line, chords in the key - before and after. Replayed on the 120 writer plans of study A1: 5.8 clashes a minute against the voice with 0.4.5, none now; all chords in the key or the genre's vocabulary.
+
 ### Changed
+
+- A score **without chords** (a cover on *new accompaniment*) gets none from a creative mode: YuE2 harmonises it itself, as chosen (owner's decision D2); the plan keeps to lines that need no chords (*solo*) and to energy, key and tempo.
 
 - **arrangement: *off*** instead of *simple* (Song Brief and Cover Brief): the default is no arrangement, not a mode of its own - the music model plans the music by itself, as before. Saved workflows and API prompts with *simple* still run (read as *off*); the editor shows *off* when it loads them.
 

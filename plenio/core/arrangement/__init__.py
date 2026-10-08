@@ -5,8 +5,10 @@ rules = policy(mode, kind="song", closeness=60, melody="vocal")
 summary = summarize(score_model, melody="vocal")
 text = prompt(summary, rules, brief_text=..., genre=...)      # -> the writer (any LLM)
 result = arrange(abc, answer, rules, seed=...)                 # -> a valid score, or the old one
+                                                               #    (harmony: the guard of its chords)
 """
 
+from . import harmony
 from .apply import STATUSES, Arrangement, SectionResult, arrange, skipped
 from .modes import (
     LEAD_ROLES,
@@ -28,6 +30,7 @@ from .plan import (
     ScoreSummary,
     SectionPlan,
     closeness_text,
+    for_score,
     melody_of,
     melody_voice,
     policy,
@@ -60,6 +63,8 @@ __all__ = [
     "arrange",
     "canonical_name",
     "closeness_text",
+    "for_score",
+    "harmony",
     "melody_of",
     "melody_voice",
     "parse_mode",
