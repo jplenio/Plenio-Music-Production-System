@@ -210,6 +210,11 @@ def editor_view(
         result["model"] = model_view(score, _segments(abc)) if score is not None else None
         if placed is not None:
             result["lyrics"] = placed.to_dict()
+            if placed.unsung:  # no line is lost: what no note sings follows the music as text
+                shown = str(result["display_abc"])
+                result["display_abc"] = (
+                    shown + ("" if shown.endswith("\n") else "\n") + lyric_layout.unsung_words(placed.unsung)
+                )
     return result
 
 

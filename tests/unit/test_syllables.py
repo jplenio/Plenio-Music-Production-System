@@ -76,6 +76,20 @@ def test_english_words(word: str, count: int) -> None:
         ("Freude", ["Freu", "de"]),
         ("waschen", ["wa", "schen"]),
         ("Haus", ["Haus"]),
+        # every e is sung (owner's report 2026-10-08: "beide" was one syllable by the English rules)
+        ("beide", ["bei", "de"]),
+        ("gehen", ["ge", "hen"]),
+        # one consonant, or the longest start a German syllable can have, goes to the next syllable
+        ("verschossen", ["ver", "schos", "sen"]),
+        ("Zucker", ["Zu", "cker"]),
+        ("Mädchen", ["Mäd", "chen"]),
+        ("Fenster", ["Fens", "ter"]),
+        ("Apfel", ["Ap", "fel"]),
+        ("Kopfhörer", ["Kopf", "hö", "rer"]),
+        ("Wannsee", ["Wann", "see"]),
+        ("Sommersprossen", ["Som", "mer", "spros", "sen"]),
+        ("Badestrande", ["Ba", "de", "stran", "de"]),
+        ("hochgeschlossen", ["hoch", "ge", "schlos", "sen"]),
     ],
 )
 def test_german_words(word: str, parts: list[str]) -> None:

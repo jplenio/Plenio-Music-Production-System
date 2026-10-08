@@ -14,6 +14,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from . import lyrics as lyrics_rules
+from . import syllables
 from .arrangement import CreativeMode, writer_lines
 from .brief import CoverBrief, SongBrief
 from .engines import EngineInfo, rules_for
@@ -272,6 +273,7 @@ def reference_lines(reference_lyrics: str, sections: Sequence[str]) -> list[str]
     Empty when the reference is not sectioned like the score (then the phrase map is used).
     """
     parsed = lyrics_rules.parse_lyrics(reference_lyrics)
+    language = syllables.guess_language(reference_lyrics)
     by_tag = {section.tag.lower(): section for section in parsed.sections}
     if not parsed.sections or not all(s.lower() in by_tag for s in sections):
         return []
@@ -283,7 +285,7 @@ def reference_lines(reference_lyrics: str, sections: Sequence[str]) -> list[str]
             continue
         lines.append(f"[{tag}]: {len(section.lines)} line(s)")
         for line in section.lines:
-            lines.append(f"    {lyrics_rules.estimate_syllables(line)} syllables, like: {line}")
+            lines.append(f"    {lyrics_rules.estimate_syllables(line, language)} syllables, like: {line}")
     return lines
 
 

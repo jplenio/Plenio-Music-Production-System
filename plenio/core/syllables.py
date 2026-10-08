@@ -4,8 +4,11 @@ The owner's decision D4 (2026-10-08): no hyphenation package; rules and a short 
 words. The count is an estimate - the lyrics fit (``lyrics_fit``) allows a syllable or two either way -
 but it is far closer than plain vowel groups for English: a silent final *e*, *-ed* and *-es* endings,
 *-ing* after a vowel, *y* between vowels, two vowels that are two syllables (*li-on*, *vi-o-lin*, but not
-*na-tion*), suffixes after a silent *e* (*love-ly*, *home-less*) and compounds (*some-where*).
-``split`` gives the pieces, ``count`` their number; the score editor's lyrics layout uses the same split.
+*na-tion*), suffixes after a silent *e* (*love-ly*, *home-less*) and compounds (*some-where*). German has
+no silent *e* (*bei-de*), its diphthongs are one syllable and its consonants split by ``GERMAN_ONSETS``.
+``split`` gives the pieces, ``count`` their number; the score editor's lyrics layout uses the same split,
+in the language ``guess_language`` finds in the lyrics (owner's report 2026-10-08: German lyrics were split
+by the English rules - *beide* one syllable, *vers-chos-sen* - and slid against the notes).
 """
 
 from __future__ import annotations
@@ -127,6 +130,16 @@ ONSETS = ("ch", "sh", "th", "ph", "wh", "sch")
 SILENT_TAILS = ("s", "m", "re", "ll", "t", "ve", "d", "n", "all")
 """What follows the apostrophe of a contraction without a syllable of its own (I'm, you're, y'all)."""
 GERMAN_PAIRS = ("ie", "ei", "ai", "au", "äu", "eu", "aa", "ee", "oo")
+GERMAN_ONSETS = frozenset(
+    (
+        *("sch", "ch", "ck", "ph", "th", "qu"),
+        *("str", "spr", "schl", "schm", "schn", "schr", "schw"),
+        *("bl", "br", "dr", "fl", "fr", "gl", "gr", "kl", "kn", "kr", "pl", "pr", "tr", "zw"),
+    )
+)
+"""Consonants that start a German syllable together. Between two vowels the longest of them (else the last
+consonant) goes to the next syllable: ver-schos-sen, Zu-cker, Mäd-chen, Kopf-hö-rer, Fens-ter, and a
+compound's second part keeps its start: Ba-de-stran-de, Som-mer-spros-sen, ge-schlos-sen."""
 
 
 def _language(language: str) -> str:
@@ -258,12 +271,23 @@ def _groups(word: str, language: str) -> list[tuple[int, int]]:
     return result
 
 
-def _cuts(word: str, groups: list[tuple[int, int]]) -> list[str]:
+def _german_onset(cluster: str) -> int:
+    """How many of the consonants ``cluster`` between two vowels start the next syllable (German)."""
+    for size in range(len(cluster), 1, -1):
+        if cluster[-size:] in GERMAN_ONSETS:
+            return size
+    return min(1, len(cluster))
+
+
+def _cuts(word: str, groups: list[tuple[int, int]], language: str = "en") -> list[str]:
     if len(groups) <= 1:
         return [word]
     cuts = []
     for (_, left_end), (right_start, _) in zip(groups, groups[1:], strict=False):
         consonants = right_start - left_end
+        if language == "de":
+            cuts.append(right_start - _german_onset(word[left_end:right_start].lower()))
+            continue
         onset = word[left_end:right_start].lower() in ONSETS  # ma-chine, fa-ther, ele-phant
         cuts.append(left_end + (consonants // 2 if consonants > 1 and not onset else 0))
     pieces = [word[a:b] for a, b in zip([0, *cuts], [*cuts, len(word)], strict=True)]
@@ -326,7 +350,7 @@ def _split(clean: str, lang: str) -> list[str]:
             if tail.lower() in SILENT_TAILS or not _GROUP.search(tail):
                 return [*pieces[:-1], pieces[-1] + apostrophe + tail]
             return [*pieces, apostrophe + tail]
-    return _cuts(clean, _groups(clean, lang))
+    return _cuts(clean, _groups(clean, lang), lang)
 
 
 def count_word(word: str, language: str = "") -> int:

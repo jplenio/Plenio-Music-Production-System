@@ -468,6 +468,7 @@ def test_syllable_fit_flags_lyrics_that_do_not_fit_the_melody() -> None:
     flagged = lyrics_rules.syllable_fit(GEMMA_NEW_LYRICS, phrasing)
     assert {f.data["tag"] for f in flagged} == {"[Verse]", "[Pre-Chorus]", "[Chorus]"}
     assert all("too few" in f.message for f in flagged)
+    assert all(isinstance(f.data["syllables"], int) and f.data["syllables"] > 0 for f in flagged)
     assert lyrics_rules.syllable_fit(fixture("minimax-excerpt")["reference"], phrasing) == []
 
 

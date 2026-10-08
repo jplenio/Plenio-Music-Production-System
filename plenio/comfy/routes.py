@@ -17,6 +17,7 @@ from aiohttp import web
 
 from ..core import lyrics as lyrics_rules
 from ..core import score as score_rules
+from ..core import syllables
 from ..core.engines import rules_for
 from ..core.errors import PlenioError, PlenioUserError
 from ..core.sheet import DOCUMENT_KINDS, REVIEW_MODES, evaluate_sheet, parse_sheet_state
@@ -218,12 +219,13 @@ async def lyrics_analyze(request: web.Request) -> web.StreamResponse:
         else lyrics_rules.check_lyrics(text, instrumental=instrumental)
     )
     parsed = lyrics_rules.parse_lyrics(text)
+    language = syllables.guess_language(text)
     sections = [
         {
             "tag": s.tag,
             "lines": len(s.lines),
             "words": s.words,
-            "syllables": sum(lyrics_rules.estimate_syllables(line) for line in s.lines),
+            "syllables": sum(lyrics_rules.estimate_syllables(line, language) for line in s.lines),
         }
         for s in parsed.sections
     ]

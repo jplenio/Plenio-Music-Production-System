@@ -57,14 +57,17 @@ def test_lines_share_a_phrase_and_syllables_take_notes() -> None:
     assert placed.unplaced == ()
 
 
-def test_a_short_line_holds_its_last_syllable_and_a_long_one_crowds_the_last_note() -> None:
+def test_a_short_line_holds_its_last_syllable_and_a_long_one_shares_notes() -> None:
     score = c.from_abc(TRICKY)
     held = lyric_layout.layout(score, "[Intro]\n\n[Verse]\nla\n\n[Chorus]\nfar too many words here")
     verse_line = held.sections[1].lines[0]
     assert [s.text for s in verse_line.syllables] == ["la"]
     assert len(verse_line.holds) == 8 and verse_line.end == 160  # the whole phrase
+    # six syllables on two notes: a word's syllables together first, then neighbours, spread over the notes
+    # (owner's report 2026-10-08: the rest of a line piled up on its last note)
     crowded = held.sections[2].lines[0].syllables
-    assert [s.text for s in crowded] == ["far", "too many words here"]
+    assert [s.text for s in crowded] == ["far too many", "words here"]
+    assert [lyric_layout.w_token(s) for s in crowded] == ["far~too~many", "words~here"]
 
 
 def test_directions_take_no_notes_and_unknown_blocks_are_reported() -> None:
@@ -197,7 +200,17 @@ def test_a_long_line_runs_on_over_the_next_phrase_instead_of_crowding_a_short_on
     )
     first, second = placed.sections[0].lines
     assert [s.onset for s in first.syllables] == [0, 1, 2, 3, *range(8, 16)]  # both phrases, a note each
-    assert first.syllables[-1].text == "meets the light"  # only the two syllables too many share a note
+    # the two syllables too many share a note with the other syllable of their word
+    assert [s.text for s in first.syllables if " " not in s.text][-8:] == [
+        "the",
+        "river",
+        "where",
+        "the",
+        "water",
+        "meets",
+        "the",
+        "light",
+    ]
     assert [s.text for s in second.syllables] == ["hold", "me", "now"] and second.holds == (23,)
     assert second.start == 20  # the last phrase is sung, not left empty
 
@@ -208,3 +221,58 @@ def test_fewer_lines_than_phrases_spread_over_them() -> None:
     lines = placed.sections[0].lines
     assert [len(line.syllables) for line in lines] == [8, 8] and all(not line.holds for line in lines)
     assert len(placed.syllables()) == 16  # every sung note has its syllable
+
+
+def test_a_line_over_two_phrases_breaks_after_its_comma() -> None:
+    # owner's report 2026-10-08: "... Sommersprossen, von / Kopf bis zu den Flossen" - the next words
+    # started on the last note of a phrase
+    score = c.from_abc(HEAD + "% verse\nV: Vocal\nCDEF z4|CDEF z4|\nV: Ins\nZ2|\n")
+    line = lyric_layout.layout(score, "[Verse]\nhold me close, my dear one").sections[0].lines[0]
+    assert [s.text for s in line.syllables] == ["hold", "me", "close,", "my", "dear", "one"]
+    assert [s.onset for s in line.syllables] == [0, 1, 2, 8, 9, 10]  # "my" starts the second phrase
+    assert line.holds == (3, 11)
+    # never inside a word when a word boundary will do
+    word = lyric_layout.layout(score, "[Verse]\nla la beautiful la la").sections[0].lines[0]
+    onsets = [s.onset for s in word.syllables if s.text.replace("la", "").strip()]
+    assert onsets and (max(onsets) < 4 or min(onsets) >= 8)  # "beautiful" in one phrase
+
+
+def test_german_lyrics_are_split_by_the_german_rules() -> None:
+    # owner's report 2026-10-08: "beide" and "deine" were one syllable, "vers-chos-sen" split as English
+    score = c.from_abc(HEAD + "% verse\nV: Vocal\nCDEFGABc|d z z2 z4|\nV: Ins\nZ2|\n")
+    line = lyric_layout.layout(score, "[Verse]\nIch und du, wir beide verschossen").sections[0].lines[0]
+    assert [s.text for s in line.syllables] == [
+        "Ich",
+        "und",
+        "du,",
+        "wir",
+        "bei",
+        "de",
+        "ver",
+        "schos",
+        "sen",
+    ]
+    english = lyric_layout.layout(score, "[Verse]\nthe stone and the time you make").sections[0].lines[0]
+    assert "stone" in [s.text for s in english.syllables]  # an English silent e stays silent
+
+
+def test_no_line_is_lost_what_no_note_sings_follows_the_music() -> None:
+    # owner's report 2026-10-08: YuE2 planned four sung sections for seven of the lyrics; the bridge, the
+    # last chorus and the outro were missing from the sheet music
+    score = c.from_abc(TRICKY)
+    text = "[Intro]\nnobody sings this\n\n[Verse]\nbeautiful\n\n[Bridge]\nnowhere 100% here\n(softly)\n\n[Chorus]\nhold on\n\n[Outro]\nend"
+    placed = lyric_layout.layout(score, text)
+    assert placed.unsung == (
+        ("Intro", ("nobody sings this",)),  # the intro has no Vocal notes
+        ("Bridge", ("nowhere 100% here",)),  # the score has no bridge; the direction is left out
+        ("Outro", ("end",)),
+    )
+    view = operations.editor_view(TRICKY, text)
+    assert view["display_abc"].endswith(
+        "W:\nW: Lyrics without notes in this score:\nW:\nW: [Intro]\nW: nobody sings this\n"
+        "W:\nW: [Bridge]\nW: nowhere 100％ here\nW:\nW: [Outro]\nW: end\n"
+    )
+    assert view["lyrics"]["unsung"][1] == {"tag": "Bridge", "lines": ["nowhere 100% here"]}
+    # every sung line on notes: nothing follows the music
+    assert lyric_layout.layout(score, LYRICS).unsung == ()
+    assert "W:" not in operations.editor_view(TRICKY, LYRICS)["display_abc"]

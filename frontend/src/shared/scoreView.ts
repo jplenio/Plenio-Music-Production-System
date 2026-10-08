@@ -164,6 +164,8 @@ export interface LyricLayoutView {
   sections: LyricSection[]
   /** Lyrics blocks that found no section of the score. */
   unplaced: number[]
+  /** The lines no note sings, by block (the notation shows them as text after the music). */
+  unsung?: { tag: string; lines: string[] }[]
 }
 
 export interface ScoreView {

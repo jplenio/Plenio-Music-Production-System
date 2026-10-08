@@ -148,25 +148,26 @@ def syllable_fit(lyrics_text: str, phrasing: Sequence[Mapping[str, Any]]) -> lis
     this is a warning, not an error.
     """
     by_tag = {section.tag.lower(): section for section in parse_lyrics(lyrics_text).sections}
+    language = syllables.guess_language(lyrics_text)
     findings: list[Finding] = []
     for part in phrasing:
         notes = sum(int(n) for n in part.get("phrases", []))
         section = by_tag.get(str(part["tag"]).strip("[]").lower())
         if not notes or section is None or not section.lines:
             continue
-        syllables = sum(estimate_syllables(line) for line in section.lines)
-        ratio = syllables / notes
+        count = sum(estimate_syllables(line, language) for line in section.lines)
+        ratio = count / notes
         if SYLLABLE_FIT_LOW <= ratio <= SYLLABLE_FIT_HIGH:
             continue
         direction = "too few" if ratio < SYLLABLE_FIT_LOW else "too many"
         findings.append(
             warning(
-                f"{part['tag']} has about {syllables} syllables for {notes} melody notes ({direction}); YuE2 may "
+                f"{part['tag']} has about {count} syllables for {notes} melody notes ({direction}); YuE2 may "
                 f"not sing the words clearly. Write about one syllable per note (lines of about "
                 f"{', '.join(str(n) for n in part['phrases'])} syllables).",
                 "lyrics",
                 tag=part["tag"],
-                syllables=syllables,
+                syllables=count,
                 notes=notes,
                 ratio=round(ratio, 2),
             )
