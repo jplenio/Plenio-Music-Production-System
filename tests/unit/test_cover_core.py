@@ -470,6 +470,14 @@ def test_syllable_fit_flags_lyrics_that_do_not_fit_the_melody() -> None:
     assert {f.data["tag"] for f in flagged} == {"[Verse]", "[Pre-Chorus]", "[Chorus]"}
     assert all("too few" in f.message for f in flagged)
     assert all(isinstance(f.data["syllables"], int) and f.data["syllables"] > 0 for f in flagged)
+    # owner's report 2026-10-08: each verse is compared with its own [Verse] block, not the last one
+    two_verses = [{"tag": "[Verse]", "phrases": [4]}, {"tag": "[Verse]", "phrases": [8]}]
+    assert (
+        lyrics_rules.syllable_fit("[Verse]\nla la la la\n\n[Verse]\nla la la la la la la la", two_verses)
+        == []
+    )
+    short_second = lyrics_rules.syllable_fit("[Verse]\nla la la la\n\n[Verse]\nla la", two_verses)
+    assert [f.data["notes"] for f in short_second] == [8]
     assert lyrics_rules.syllable_fit(fixture("minimax-excerpt")["reference"], phrasing) == []
 
 

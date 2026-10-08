@@ -145,15 +145,23 @@ def syllable_fit(lyrics_text: str, phrasing: Sequence[Mapping[str, Any]]) -> lis
     """Warn when a section's lyrics have far fewer or more syllables than its melody has notes.
 
     ``phrasing`` is ``score.phrasing(abc)`` of the final score. The syllables are an estimate, so
-    this is a warning, not an error.
+    this is a warning, not an error. The score's sections take the lyrics' blocks in order, by tag:
+    the second verse of the score is compared with the second [Verse] block (owner's report 2026-10-08:
+    every verse was compared with the last [Verse] block - 72 syllables for the first verse's 34 notes).
     """
-    by_tag = {section.tag.lower(): section for section in parse_lyrics(lyrics_text).sections}
+    blocks = parse_lyrics(lyrics_text).sections
     language = syllables.guess_language(lyrics_text)
     findings: list[Finding] = []
+    cursor = 0
     for part in phrasing:
         notes = sum(int(n) for n in part.get("phrases", []))
-        section = by_tag.get(str(part["tag"]).strip("[]").lower())
-        if not notes or section is None or not section.lines:
+        key = str(part["tag"]).strip("[]").lower()
+        found = next((i for i in range(cursor, len(blocks)) if blocks[i].tag.lower() == key), None)
+        if found is None:
+            continue
+        cursor = found + 1
+        section = blocks[found]
+        if not notes or not section.lines:
             continue
         count = sum(estimate_syllables(line, language) for line in section.lines)
         ratio = count / notes
