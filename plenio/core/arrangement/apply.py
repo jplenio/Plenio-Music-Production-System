@@ -393,11 +393,23 @@ def _apply_shifts(
             continue
         placement = "header" if onset == 0 else "field" if onset in groups else "inline"
         keys.append(c.KeyChange(onset, key, placement))
+    # a chord held across a boundary where the shift changes is written again there, so it moves only
+    # inside the shifted section (otherwise the next section would sound it moved, under its own notes)
+    held = list(score.chords)
+    for first, _end in ranges:
+        point = score.starts[first]
+        if point == 0 or any(ch.onset == point for ch in held):
+            continue
+        if shift_of(point) != shift_of(point - 1):
+            sounding = chord_at(score, point)
+            if sounding:
+                held.append(c.ChordSymbol(point, sounding))
+    held.sort(key=lambda ch: ch.onset)
     chords = [
         c.ChordSymbol(ch.onset, native._chord_name(ch.name, shift_of(ch.onset), _key_at(keys, ch.onset)))
         if shift_of(ch.onset)
         else ch
-        for ch in score.chords
+        for ch in held
     ]
     new = replace(
         score, keys=tuple(keys), vocal=tuple(moved_vocal), ins=tuple(moved_ins), chords=tuple(chords)

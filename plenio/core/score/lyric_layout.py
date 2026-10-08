@@ -28,6 +28,7 @@ from dataclasses import dataclass, field, replace
 from typing import Any
 
 from .. import lyrics as lyrics_rules
+from .. import syllables
 from . import canonical, ops
 
 _VOWELS = re.compile(r"[aeiouyäöüàáâèéêìíîòóôùúûæøå]+", re.IGNORECASE)
@@ -109,25 +110,8 @@ class LyricLayout:
 
 
 def split_word(word: str) -> list[str]:
-    """A word in syllables, at the vowel groups (the count of ``lyrics.estimate_syllables``)."""
-    groups = list(_VOWELS.finditer(word))
-    lower = word.lower().rstrip(".,;:!?\"')")
-    if (
-        len(groups) > 1
-        and lower.endswith("e")
-        and not lower.endswith(("le", "ee", "ie"))
-        and groups[-1].group().lower() == "e"
-        and groups[-1].end() == len(lower)
-    ):
-        groups = groups[:-1]  # a silent final e: "make", "stone"
-    if len(groups) <= 1:
-        return [word]
-    cuts = []
-    for left, right in zip(groups, groups[1:], strict=False):
-        consonants = right.start() - left.end()
-        cuts.append(left.end() + (consonants // 2 if consonants > 1 else 0))
-    pieces = [word[a:b] for a, b in zip([0, *cuts], [*cuts, len(word)], strict=True)]
-    return [p for p in pieces if p]
+    """A word in syllables (``syllables.split``, the count of ``lyrics.estimate_syllables``)."""
+    return syllables.split(word) or [word]
 
 
 def syllables_of(line: str) -> list[tuple[str, bool]]:

@@ -2424,6 +2424,104 @@
    "category": "Plenio/Release",
    "display_name": "Export Release"
   },
+  "PlenioFitLyrics": {
+   "input": {
+    "required": {
+     "lyrics": [
+      "STRING",
+      {
+       "tooltip": "The lyrics: Parse Song Draft's, or the previous Fit Lyrics'.",
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "brief": [
+      "PLENIO_BRIEF",
+      {
+       "tooltip": "Song Brief or Cover Brief: only new cover lyrics are fitted."
+      }
+     ],
+     "last": [
+      "BOOLEAN",
+      {
+       "tooltip": "The last round: asks the writer nothing more; shortens lines one or two syllables too long.",
+       "default": false
+      }
+     ]
+    },
+    "optional": {
+     "score": [
+      "STRING",
+      {
+       "tooltip": "The final score: its Vocal phrases are the targets.",
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "reference_lyrics": [
+      "STRING",
+      {
+       "tooltip": "The source's lyrics (Transcribe Lyrics), for the meaning when the brief keeps close to them; requested only then.",
+       "lazy": true,
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "state": [
+      "PLENIO_LYRICS_FIT",
+      {
+       "tooltip": "The previous Fit Lyrics' state: what it asked the writer."
+      }
+     ],
+     "answer": [
+      "STRING",
+      {
+       "tooltip": "The writer's answer to the previous Fit Lyrics' prompt; requested only when it asked.",
+       "lazy": true,
+       "forceInput": true,
+       "multiline": false
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "lyrics",
+     "brief",
+     "last"
+    ],
+    "optional": [
+     "score",
+     "reference_lyrics",
+     "state",
+     "answer"
+    ]
+   },
+   "output": [
+    "STRING",
+    "STRING",
+    "STRING",
+    "PLENIO_LYRICS_FIT",
+    "PLENIO_REPORT"
+   ],
+   "output_name": [
+    "lyrics",
+    "prompt",
+    "schema",
+    "state",
+    "report"
+   ],
+   "output_is_list": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Writing",
+   "display_name": "Fit Lyrics"
+  },
   "PlenioLocalLLM": {
    "input": {
     "required": {

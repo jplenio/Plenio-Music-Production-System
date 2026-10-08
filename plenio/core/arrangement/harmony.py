@@ -584,6 +584,8 @@ def repair(
             tuple((ch.onset, ch.name) for ch in score.chords if start <= ch.onset < start + length)
         )
         name = planned[i % len(planned)] if planned else None
+        if _entering(score, start) is None and not original_chords[-1]:
+            name = None  # a bar without a chord keeps none: a new one would sound on into the bars after it
         options = [BarChoice(None, "original", INTENT_ORIGINAL if name else 0.0)]
         if name is not None:
             options.append(BarChoice(((start, name),), name, 0.0))
@@ -731,9 +733,13 @@ class Measures:
     """Share of the singing with the instrument line sounding too."""
     chords_in_key: float
     """Share of the chords' duration that belongs to the key (diatonic)."""
+    clash_share: float = 0.0
+    """Share of the melody's duration on a pitch that clashes with its chord (accented or not) - unlike the
+    counts, it does not change when a held note is split."""
 
     def to_dict(self) -> dict[str, float | int]:
         return {
+            "clash_share": round(self.clash_share, 3),
             "melody_on_chord": round(self.melody_on_chord, 3),
             "accented_avoid": self.accented_avoid,
             "clashes": self.clashes,
@@ -774,7 +780,7 @@ def measure(
     score: c.Score, melody: Sequence[c.Note], *, tensions: frozenset[int] = frozenset({2, 9})
 ) -> Measures:
     """The harmony of a score (or of a part: pass the notes of the part as ``melody``)."""
-    total = good = 0
+    total = good = bad = 0
     accented = 0
     chords = list(score.chords)
     for i, ch in enumerate(chords):
@@ -789,8 +795,9 @@ def measure(
             pc = piece.pitch % 12
             if pc in chord_tones or (pc - root) % 12 in tensions:
                 good += piece.duration
-            if clashing(pc, chord_tones, root, tensions) and piece.accented:
-                accented += 1
+            if clashing(pc, chord_tones, root, tensions):
+                bad += piece.duration
+                accented += 1 if piece.accented else 0
     sung = sorted(score.vocal, key=lambda n: n.onset)
     line = sorted(score.ins, key=lambda n: n.onset)
     both = sum(max(0, min(n.end, m.end) - max(n.onset, m.onset)) for n in sung for m in line)
@@ -814,4 +821,5 @@ def measure(
         clashes=clashes(score, sung, line),
         overlap=both / max(1, sum(n.duration for n in sung)) if sung else 0.0,
         chords_in_key=in_key / all_chords if all_chords else 1.0,
+        clash_share=bad / total if total else 0.0,
     )

@@ -10,6 +10,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
+from . import syllables
 from .diagnostics import Finding, error, info, warning
 
 _TAG = re.compile(r"^\[([^\[\]\n]{1,40})\]$")
@@ -85,15 +86,10 @@ def tags_only(tags: Sequence[str]) -> str:
     return "\n\n".join(f"[{tag}]" for tag in tags)
 
 
-def estimate_syllables(line: str) -> int:
-    """Rough syllable estimate (vowel groups per word); a hint, not a measurement."""
-    count = 0
-    for word in _WORD.findall(line):
-        groups = len(_VOWELS.findall(word))
-        if groups > 1 and word.lower().endswith("e") and not word.lower().endswith(("le", "ee", "ie")):
-            groups -= 1
-        count += max(groups, 1)
-    return count
+def estimate_syllables(line: str, language: str = "") -> int:
+    """A syllable estimate of a sung line (``syllables.count``: rules for English and German); a hint, not a
+    measurement."""
+    return syllables.count(line, language)
 
 
 def check_lyrics(text: str, *, instrumental: bool, vocabulary: Sequence[str] = ()) -> list[Finding]:

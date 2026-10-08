@@ -481,7 +481,7 @@ def test_new_lyrics_prompt_gives_line_targets_from_the_sectioned_source_lyrics()
     draft = "[Verse]\nBlue light pooling on the sidewalk, your shadow stretched out long\n\n[Pre-Chorus]\nFeel the bass\n\n[Chorus]\nNeon bleeding through the dark\n\n[Outro]"
     prompt, _request = compose(brief, engine, score_sections=tags, reference_lyrics=draft, score_tempo=121)
     assert "SAME number of syllables" in prompt
-    assert "16 syllables, like: Blue light pooling on the sidewalk" in prompt  # the estimate, not a count
+    assert "14 syllables, like: Blue light pooling on the sidewalk" in prompt  # the estimate, not a count
     assert "[Outro]: no singing" in prompt
     # an unsectioned reference falls back to the phrase map
     prompt, _request = compose(

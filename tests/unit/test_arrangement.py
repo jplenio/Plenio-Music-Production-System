@@ -635,7 +635,8 @@ def test_any_answer_gives_a_readable_score_or_the_old_one(
     # the harmony guard: never more clashes than the score had - with the chords, and between the voices
     before_m = harmony.measure(score, melody_voice(score, melody))
     after_m = harmony.measure(after, melody_voice(after, melody))
-    assert after_m.accented_avoid <= before_m.accented_avoid, result.sections
+    # (as time: a key lift splits a note held across a section's boundary into two attacks)
+    assert after_m.clash_share <= before_m.clash_share + 1e-9, result.sections
     assert after_m.clashes <= before_m.clashes, result.sections
     assert after.measure_count == score.measure_count and after.sections == score.sections
     shifted = {

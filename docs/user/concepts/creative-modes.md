@@ -55,6 +55,8 @@ Your own modes are Markdown files in `<ComfyUI user directory>/plenio/arrangemen
 
 Above 0 the source's lyrics are transcribed for the writer (the lyrics ASR runs), so the source needs clear singing; a source without it stops with a message that names this slider.
 
+**New lyrics fit the melody** (every cover with *new lyrics*, also with arrangement *off*): *Write Song* counts the syllables of every line against the notes of its phrase in the final score (about one syllable per note; one or two fewer are sung as a melisma; a line may span two short phrases). Lines that do not fit go back to the same writer - only those lines, with their targets and the rhyme to keep, at most twice; a new line further off than the old one is not taken. What is then still one or two syllables too long is shortened the way a singer would sing it (*I am* -> *I'm*, *going to* -> *gonna*; English). When the draft fits, the writer is not asked again. The node is **Fit Lyrics** inside the *Write Song* block.
+
 ## How a section plan becomes music
 
 1. **Compose Arrangement** shows the writer the score as a table: every section with its bars and chords, the melody notes on the strong beats, what the instrument line plays now - the **chords that fit** each section's key in the genre (for example *B, C#m, D#m, E, F#, G#m; borrowed, typical in pop: A, Em, G*) - plus the mode's rules, the closeness in words and the exact answer format.

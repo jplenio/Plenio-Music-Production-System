@@ -53,6 +53,7 @@ WRITER_CONTEXT = 12288  # Local LLM: a detailed prompt, WRITER_MAX_TOKENS and a 
 ARRANGE_MAX_TOKENS = 2048  # a JSON section plan: 300-900 tokens for up to 12 sections (study A1)
 ARRANGE_CONTEXT = 8192  # the arrangement prompt (1 500-3 000 tokens) and the answer
 ARRANGE_TEMPERATURE = 0.7
+REPAIR_TEMPERATURE = 0.7  # Fit Lyrics' repair rounds: a few lines rewritten to a syllable count
 MINIMAX_DIT = "minimax_music3_dit_fp16.safetensors"
 MINIMAX_TE = "minimax_music3_text_encoder_pruned_int8_convrot.safetensors"
 MINIMAX_VAE = "minimax_music3_dav.safetensors"
@@ -461,11 +462,73 @@ def stems() -> Blueprint:
     )
 
 
+def _repair_writer(
+    g: Graph, x: int, choice: Node, loader: Node, seed: Node, fit: Node
+) -> tuple[Node, Node, Node]:
+    """One repair round's writer: Generate Text and Local LLM on the previous Fit Lyrics' prompt, with the
+    draft's writer choice, loader and seed; the next Fit Lyrics reads the switch lazily, only when lines went
+    back to the writer."""
+    generate = g.add(
+        "TextGenerate",
+        (x, 300),
+        size=(340, 420),
+        title="Repair (ComfyUI)",
+        widgets={
+            "prompt": "",
+            "max_length": WRITER_MAX_TOKENS,
+            "sampling_mode": "on",
+            "sampling_mode.temperature": REPAIR_TEMPERATURE,
+            "sampling_mode.top_k": 64,
+            "sampling_mode.top_p": 0.95,
+            "sampling_mode.min_p": 0.05,
+            "sampling_mode.repetition_penalty": 1.05,
+            "sampling_mode.seed": 0,
+            "sampling_mode.presence_penalty": 0.0,
+            "thinking": False,
+            "use_default_template": True,
+            "mtp": "auto",
+        },
+    )
+    local_llm = g.add(
+        "PlenioLocalLLM",
+        (x, 780),
+        size=(340, 360),
+        title="Repair (Local LLM)",
+        widgets={
+            "prompt": "",
+            "model": CHOOSE,
+            "seed": 0,
+            "seed.control": "fixed",
+            "max_tokens": WRITER_MAX_TOKENS,
+            "temperature": REPAIR_TEMPERATURE,
+            "thinking": False,
+            "context": WRITER_CONTEXT,
+            "keep_loaded": False,
+            "system_prompt": "",
+            "reuse_answers": True,
+        },
+    )
+    switch = g.add("ComfySwitchNode", (x + 400, 300), size=(260, 90), title="Repair: ComfyUI or Local LLM")
+    g.link(fit, "prompt", generate, "prompt")
+    g.link(fit, "prompt", local_llm, "prompt")
+    g.link(fit, "schema", local_llm, "schema")
+    g.link(seed, "INT", generate, "sampling_mode.seed")
+    g.link(seed, "INT", local_llm, "seed")
+    g.link(loader, "CLIP", generate, "clip")
+    g.link(choice, "local_model", local_llm, "model")
+    g.link(choice, "use_local", switch, "switch")
+    g.link(generate, "generated_text", switch, "on_false")
+    g.link(local_llm, "text", switch, "on_true")
+    return generate, local_llm, switch
+
+
 def write_song() -> Blueprint:
-    """Compose -> writer -> Parse. One *writer model* list (Writer Choice) holds ComfyUI's text models and
-    every Local LLM model (ADR-0010); a lazy switch takes the answer of the chosen branch only, so the
-    other model is never loaded. The model names reach the loaders by link, so ComfyUI does not require the
-    default writer's file when a Local LLM model is chosen."""
+    """Compose -> writer -> Parse -> Fit Lyrics with two repair rounds. One *writer model* list (Writer
+    Choice) holds ComfyUI's text models and every Local LLM model (ADR-0010); a lazy switch takes the answer
+    of the chosen branch only, so the other model is never loaded. The model names reach the loaders by
+    link, so ComfyUI does not require the default writer's file when a Local LLM model is chosen. A repair
+    round (new cover lyrics against the melody) runs only when lines do not fit: each Fit Lyrics reads the
+    next writer's answer lazily."""
     g = Graph(first_id=501)
     compose = g.add("PlenioComposePrompt", (0, 0), size=(300, 100))
     choice = g.add(
@@ -552,6 +615,27 @@ def write_song() -> Blueprint:
     g.link(local_llm, "text", switch, "on_true")
     g.link(switch, "output", parse, "text")
     g.link(compose, "request", parse, "request")
+    fits = [
+        g.add(
+            "PlenioFitLyrics",
+            (1460 + 700 * index, 0),
+            size=(340, 220),
+            title=f"Fit Lyrics ({name})",
+            widgets={"last": index == 2},
+        )
+        for index, name in enumerate(("draft", "round 1", "round 2"))
+    ]
+    g.link(parse, "lyrics", fits[0], "lyrics")
+    repairs: list[tuple[Node, Node]] = []
+    for index in (1, 2):
+        previous, fit = fits[index - 1], fits[index]
+        generate_n, local_n, switch_n = _repair_writer(
+            g, 1460 + 700 * (index - 1), choice, loader, seed, previous
+        )
+        g.link(previous, "lyrics", fit, "lyrics")
+        g.link(previous, "state", fit, "state")
+        g.link(switch_n, "output", fit, "answer")
+        repairs.append((generate_n, local_n))
     return Blueprint(
         "Plenio · Write Song",
         "Plenio/Writing",
@@ -559,14 +643,20 @@ def write_song() -> Blueprint:
         "writer model is one list: ComfyUI's own text models (native Generate Text, the default) and every "
         "local LLM - GGUF files from models/LLM, LM Studio or the Hugging Face cache, or the models of a "
         "running LM Studio, Ollama, llama.cpp ... Only the chosen one is loaded. The brief's song seed is "
-        "added to the draft seed: every song of a 'new song every run' series gets its own.",
+        "added to the draft seed: every song of a 'new song every run' series gets its own. New cover lyrics "
+        "are fitted to the melody: lines that do not fit their phrase go back to the same writer, only those "
+        "lines and at most twice (Fit Lyrics); when the draft fits, no second writer call is made.",
         g,
         [
-            BlueprintInput("brief", "PLENIO_BRIEF", [(compose, "brief")]),
+            BlueprintInput("brief", "PLENIO_BRIEF", [(compose, "brief"), *[(fit, "brief") for fit in fits]]),
             BlueprintInput("engine", "PLENIO_ENGINE", [(compose, "engine")]),
-            BlueprintInput("score", "STRING", [(compose, "score")]),
+            BlueprintInput("score", "STRING", [(compose, "score"), *[(fit, "score") for fit in fits]]),
             BlueprintInput("language", "STRING", [(compose, "language")]),
-            BlueprintInput("reference_lyrics", "STRING", [(compose, "reference_lyrics")]),
+            BlueprintInput(
+                "reference_lyrics",
+                "STRING",
+                [(compose, "reference_lyrics"), *[(fit, "reference_lyrics") for fit in fits]],
+            ),
             BlueprintInput(
                 "model", "COMBO", [(choice, "model")], widget=True, default=WRITER, label="writer model"
             ),
@@ -577,7 +667,11 @@ def write_song() -> Blueprint:
             BlueprintInput(
                 "thinking",
                 "BOOLEAN",
-                [(generate, "thinking"), (local_llm, "thinking")],
+                [
+                    (generate, "thinking"),
+                    (local_llm, "thinking"),
+                    *[(n, "thinking") for pair in repairs for n in pair],
+                ],
                 widget=True,
                 default=False,
             ),
@@ -585,9 +679,10 @@ def write_song() -> Blueprint:
         [
             BlueprintOutput("title", "STRING", (parse, "title")),
             BlueprintOutput("style", "STRING", (parse, "style")),
-            BlueprintOutput("lyrics", "STRING", (parse, "lyrics")),
+            BlueprintOutput("lyrics", "STRING", (fits[2], "lyrics")),
             BlueprintOutput("artwork_prompt", "STRING", (parse, "artwork_prompt")),
             BlueprintOutput("report", "PLENIO_REPORT", (parse, "report")),
+            BlueprintOutput("lyrics_fit_report", "PLENIO_REPORT", (fits[2], "report")),
         ],
     )
 
