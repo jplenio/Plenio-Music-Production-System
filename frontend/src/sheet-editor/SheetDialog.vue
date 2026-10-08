@@ -12,6 +12,7 @@ import {
   type Finding,
   ARRANGEMENT_EXPERIMENTAL,
   arrangementLabel,
+  countedNotes,
   type ScoreChange,
   type ScoreTarget,
   type SheetPayload,
@@ -284,6 +285,8 @@ const arrangement = computed(() => {
   const value = props.payload?.arrangement
   return value && value.status !== 'skipped' ? value : null
 })
+/** The arrangement's notes, each once (a dropped bass note repeats for every bar it was in). */
+const arrangementNotes = computed(() => countedNotes(arrangement.value?.notes ?? []))
 const findings = computed<Finding[]>(() => (result.value?.findings ?? []).filter((f) => f.severity !== 'info'))
 const infos = computed<Finding[]>(() => (result.value?.findings ?? []).filter((f) => f.severity === 'info'))
 const hasErrors = computed(() => findings.value.some((f) => f.severity === 'error'))
@@ -679,7 +682,7 @@ onBeforeUnmount(() => {
                 {{ section.applied.length ? section.applied.join('; ') : 'unchanged' }}
                 <span v-if="section.kept.length" class="kept"> - kept: {{ section.kept.join('; ') }}</span>
               </li>
-              <li v-for="(note, index) in arrangement.notes ?? []" :key="'note' + index" data-severity="info">
+              <li v-for="(note, index) in arrangementNotes" :key="'note' + index" data-severity="info">
                 {{ note }}
               </li>
             </ul>

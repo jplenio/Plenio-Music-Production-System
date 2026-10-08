@@ -1218,6 +1218,11 @@ function ri(e) {
 }
 const as = "Creative modes are experimental: the writer’s plan can surprise - listen, change the score here, or run again with another arrangement seed; simple keeps the music model’s own plan.";
 function ls(e) {
+  const t = /* @__PURE__ */ new Map();
+  for (const n of e) t.set(n, (t.get(n) ?? 0) + 1);
+  return [...t].map(([n, r]) => r > 1 ? `${n} (${r} times)` : n);
+}
+function cs(e) {
   const t = e.kind === "cover" ? "song flow closeness" : "genre closeness";
   return `${e.mode} (${t} ${e.closeness})`;
 }
@@ -1225,7 +1230,7 @@ function jt(e) {
   const t = Math.max(0, e), n = Math.floor(t / 60), r = Math.round(t - n * 60);
   return `${n}:${String(r).padStart(2, "0")}`;
 }
-function cs(e) {
+function us(e) {
   return e?.bars?.length ? (e.sections ?? []).map(([t, n, r]) => {
     const i = e.bars[Math.max(0, n - 1)], s = e.bars[Math.min(e.bars.length - 1, n - 1 + r - 1)];
     return { label: t, bars: r, start: jt(i?.[0] ?? 0), end: jt(s?.[1] ?? e.duration_s) };
@@ -1245,7 +1250,7 @@ function ii(e, t, n) {
   const r = e.docs[n];
   return r ? r.text : t?.docs[n]?.upstream ?? "";
 }
-function us(e, t, n) {
+function ds(e, t, n) {
   return n.map((r) => ({ kind: r, text: ii(e, t, r), intent: "keep" }));
 }
 function mn(e, t, n) {
@@ -1416,7 +1421,7 @@ const yi = (e, t, n) => {
   async function x() {
     const _ = Ee(r);
     _ === null && (s.textContent = "The stored state is unreadable; it will be replaced when you apply.");
-    const A = be(String(e.id)), l = (e.inputs ?? []).filter((q) => q.link != null).map((q) => q.name), I = _ ?? { schema: "plenio.sheet_state/1", docs: {} }, $ = A?.owned ?? oi(l, I), g = String(e.widgets?.find((q) => q.name === "review")?.value ?? "continue"), m = g === "as the brief says" ? A?.review ?? "continue" : g, { openSheetDialog: b } = await import("./open-B8HUZ7ho.mjs"), { parseGuide: y, serializeGuide: L } = await import("./tracks-DxmZeggM.mjs"), { parseShift: E, parseSpans: G } = await Promise.resolve().then(() => Kr);
+    const A = be(String(e.id)), l = (e.inputs ?? []).filter((q) => q.link != null).map((q) => q.name), I = _ ?? { schema: "plenio.sheet_state/1", docs: {} }, $ = A?.owned ?? oi(l, I), g = String(e.widgets?.find((q) => q.name === "review")?.value ?? "continue"), m = g === "as the brief says" ? A?.review ?? "continue" : g, { openSheetDialog: b } = await import("./open-Z8E88oQ4.mjs"), { parseGuide: y, serializeGuide: L } = await import("./tracks-DxmZeggM.mjs"), { parseShift: E, parseSpans: G } = await Promise.resolve().then(() => Kr);
     if (!je) throw new Error("Plenio: API not initialised");
     let N = null;
     try {
@@ -2048,6 +2053,7 @@ export {
   as as A,
   mn as B,
   Xe as C,
+  ls as D,
   Yi as E,
   Qe as P,
   ss as a,
@@ -2062,11 +2068,11 @@ export {
   Xr as j,
   Fr as k,
   Wr as l,
-  us as m,
+  ds as m,
   me as n,
   es as o,
   Ue as p,
-  ls as q,
+  cs as q,
   Qr as r,
   Gr as s,
   ts as t,
@@ -2075,5 +2081,5 @@ export {
   Yr as w,
   ai as x,
   si as y,
-  cs as z
+  us as z
 };

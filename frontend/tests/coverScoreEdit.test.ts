@@ -223,9 +223,15 @@ describe('SheetDialog: a cover text sheet edits the score it shows', () => {
   })
 
   it('marks a creative arrangement as experimental', async () => {
-    const plan = { status: 'applied', summary: '2 of 3 sections changed', mode: 'fantasy', closeness: 50, kind: 'cover', sections: [] }
+    const notes = ['section 2: Bb/D -> Bb (bass note dropped)', 'section 2: Bb/D -> Bb (bass note dropped)', 'tempo 84 -> 88 BPM']
+    const plan = { status: 'applied', summary: '2 of 3 sections changed', mode: 'fantasy', closeness: 50, kind: 'cover', sections: [], notes }
     const { host } = await mountText(null, plan)
     expect(host.querySelector('.arrangement .experimental')?.textContent).toBe('experimental')
+    // a repeated note is said once, with how often
+    expect([...host.querySelectorAll('.arrangement li')].map((li) => li.textContent?.trim())).toEqual([
+      'section 2: Bb/D -> Bb (bass note dropped) (2 times)',
+      'tempo 84 -> 88 BPM'
+    ])
     expect(host.querySelector('.arrangement summary')?.textContent).toContain('fantasy (song flow closeness 50)')
     expect(host.querySelector('.arrangement')?.textContent).toContain('Creative modes are experimental')
     app?.unmount()

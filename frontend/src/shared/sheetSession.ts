@@ -84,6 +84,13 @@ export const ARRANGEMENT_EXPERIMENTAL =
   'Creative modes are experimental: the writer’s plan can surprise - listen, change the score here, or run ' +
   'again with another arrangement seed; simple keeps the music model’s own plan.'
 
+/** Notes said once, a repeated one with how often (``... (5 times)``), in the order they first came. */
+export function countedNotes(notes: readonly string[]): string[] {
+  const counts = new Map<string, number>()
+  for (const note of notes) counts.set(note, (counts.get(note) ?? 0) + 1)
+  return [...counts].map(([note, count]) => (count > 1 ? `${note} (${count} times)` : note))
+}
+
 /** The arrangement's headline: mode and closeness in words. */
 export function arrangementLabel(arrangement: ArrangementPayload): string {
   const closeness = arrangement.kind === 'cover' ? 'song flow closeness' : 'genre closeness'
