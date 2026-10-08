@@ -84,7 +84,13 @@
     {
      "localized_name": "score",
      "name": "score",
-     "type": "*",
+     "type": "STRING",
+     "links": null
+    },
+    {
+     "localized_name": "form_report",
+     "name": "form_report",
+     "type": "PLENIO_REPORT",
      "links": null
     }
    ],
@@ -108,8 +114,8 @@
     "version": 1,
     "state": {
      "lastGroupId": 0,
-     "lastNodeId": 705,
-     "lastLinkId": 12,
+     "lastNodeId": 708,
+     "lastLinkId": 22,
      "lastRerouteId": 0
     },
     "revision": 0,
@@ -127,10 +133,10 @@
     "outputNode": {
      "id": -20,
      "bounding": [
-      760,
+      1160,
       0,
       160,
-      60
+      80
      ]
     },
     "inputs": [
@@ -139,7 +145,8 @@
       "name": "clip",
       "type": "CLIP",
       "linkIds": [
-       5
+       9,
+       10
       ],
       "pos": [
        0,
@@ -151,7 +158,8 @@
       "name": "style",
       "type": "STRING",
       "linkIds": [
-       6
+       11,
+       12
       ],
       "pos": [
        0,
@@ -163,7 +171,9 @@
       "name": "lyrics",
       "type": "STRING",
       "linkIds": [
-       7
+       13,
+       14,
+       15
       ],
       "pos": [
        0,
@@ -175,7 +185,7 @@
       "name": "seed",
       "type": "INT",
       "linkIds": [
-       8
+       16
       ],
       "pos": [
        0,
@@ -188,7 +198,7 @@
       "name": "song_seed",
       "type": "INT",
       "linkIds": [
-       9
+       17
       ],
       "pos": [
        0,
@@ -201,7 +211,7 @@
       "name": "switch",
       "type": "BOOLEAN",
       "linkIds": [
-       10
+       18
       ],
       "pos": [
        0,
@@ -214,7 +224,8 @@
       "name": "mode",
       "type": "COMBO",
       "linkIds": [
-       11
+       19,
+       20
       ],
       "pos": [
        0,
@@ -227,13 +238,25 @@
      {
       "id": "25fa03e4-ddc0-5861-b55f-81cd313d787e",
       "name": "score",
-      "type": "*",
+      "type": "STRING",
       "linkIds": [
-       12
+       21
       ],
       "pos": [
        0,
        0
+      ]
+     },
+     {
+      "id": "dee65157-8aab-5362-8dcd-771c306d5447",
+      "name": "form_report",
+      "type": "PLENIO_REPORT",
+      "linkIds": [
+       22
+      ],
+      "pos": [
+       0,
+       20
       ]
      }
     ],
@@ -258,7 +281,7 @@
         "localized_name": "clip",
         "name": "clip",
         "type": "CLIP",
-        "link": 5
+        "link": 9
        },
        {
         "localized_name": "style",
@@ -267,7 +290,7 @@
         "widget": {
          "name": "style"
         },
-        "link": 6
+        "link": 11
        },
        {
         "localized_name": "lyrics",
@@ -276,7 +299,7 @@
         "widget": {
          "name": "lyrics"
         },
-        "link": 7
+        "link": 13
        },
        {
         "localized_name": "seed",
@@ -294,7 +317,7 @@
         "widget": {
          "name": "mode"
         },
-        "link": 11
+        "link": 19
        },
        {
         "localized_name": "max_abc_tokens",
@@ -457,7 +480,7 @@
         "widget": {
          "name": "switch"
         },
-        "link": 10
+        "link": 18
        }
       ],
       "outputs": [
@@ -466,7 +489,7 @@
         "name": "output",
         "type": "COMFY_MATCHTYPE_V3",
         "links": [
-         12
+         7
         ]
        }
       ],
@@ -499,7 +522,7 @@
         "widget": {
          "name": "value"
         },
-        "link": 8
+        "link": 16
        }
       ],
       "outputs": [
@@ -550,7 +573,7 @@
         "label": "b",
         "shape": 7,
         "type": "FLOAT,INT,BOOLEAN",
-        "link": 9
+        "link": 17
        },
        {
         "localized_name": "expression",
@@ -574,7 +597,8 @@
         "name": "INT",
         "type": "INT",
         "links": [
-         4
+         4,
+         5
         ]
        },
        {
@@ -591,6 +615,275 @@
       "widgets_values": [
        "sum(values)"
       ]
+     },
+     {
+      "id": 706,
+      "type": "YuE2GenerateABC",
+      "pos": [
+       0,
+       820
+      ],
+      "size": [
+       340,
+       330
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "clip",
+        "name": "clip",
+        "type": "CLIP",
+        "link": 10
+       },
+       {
+        "localized_name": "style",
+        "name": "style",
+        "type": "STRING",
+        "widget": {
+         "name": "style"
+        },
+        "link": 12
+       },
+       {
+        "localized_name": "lyrics",
+        "name": "lyrics",
+        "type": "STRING",
+        "widget": {
+         "name": "lyrics"
+        },
+        "link": 14
+       },
+       {
+        "localized_name": "seed",
+        "name": "seed",
+        "type": "INT",
+        "widget": {
+         "name": "seed"
+        },
+        "link": 6
+       },
+       {
+        "localized_name": "mode",
+        "name": "mode",
+        "type": "COMBO",
+        "widget": {
+         "name": "mode"
+        },
+        "link": 20
+       },
+       {
+        "localized_name": "max_abc_tokens",
+        "name": "max_abc_tokens",
+        "type": "INT",
+        "widget": {
+         "name": "max_abc_tokens"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "temperature",
+        "name": "temperature",
+        "type": "FLOAT",
+        "widget": {
+         "name": "temperature"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "top_p",
+        "name": "top_p",
+        "type": "FLOAT",
+        "widget": {
+         "name": "top_p"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "top_k",
+        "name": "top_k",
+        "type": "INT",
+        "widget": {
+         "name": "top_k"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "repetition_penalty",
+        "name": "repetition_penalty",
+        "type": "FLOAT",
+        "widget": {
+         "name": "repetition_penalty"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "penalty_window",
+        "name": "penalty_window",
+        "type": "INT",
+        "widget": {
+         "name": "penalty_window"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "abc",
+        "name": "abc",
+        "type": "STRING",
+        "links": [
+         8
+        ]
+       }
+      ],
+      "title": "Second plan (only when the form differs)",
+      "properties": {
+       "Node name for S&R": "YuE2GenerateABC"
+      },
+      "widgets_values": [
+       null,
+       null,
+       0,
+       "fixed",
+       "full",
+       8192,
+       0.7,
+       0.9,
+       30,
+       1.005,
+       100
+      ]
+     },
+     {
+      "id": 707,
+      "type": "ComfyMathExpression",
+      "pos": [
+       400,
+       820
+      ],
+      "size": [
+       300,
+       150
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "values.a",
+        "name": "values.a",
+        "label": "a",
+        "shape": 7,
+        "type": "FLOAT,INT,BOOLEAN",
+        "link": 5
+       },
+       {
+        "localized_name": "values.b",
+        "name": "values.b",
+        "label": "b",
+        "shape": 7,
+        "type": "FLOAT,INT,BOOLEAN",
+        "link": null
+       },
+       {
+        "localized_name": "expression",
+        "name": "expression",
+        "type": "STRING",
+        "widget": {
+         "name": "expression"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "FLOAT",
+        "name": "FLOAT",
+        "type": "FLOAT",
+        "links": null
+       },
+       {
+        "localized_name": "INT",
+        "name": "INT",
+        "type": "INT",
+        "links": [
+         6
+        ]
+       },
+       {
+        "localized_name": "BOOL",
+        "name": "BOOL",
+        "type": "BOOLEAN",
+        "links": null
+       }
+      ],
+      "title": "seed + 1",
+      "properties": {
+       "Node name for S&R": "ComfyMathExpression"
+      },
+      "widgets_values": [
+       "sum(values) + 1"
+      ]
+     },
+     {
+      "id": 708,
+      "type": "PlenioMatchSongForm",
+      "pos": [
+       720,
+       0
+      ],
+      "size": [
+       340,
+       260
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "score",
+        "name": "score",
+        "type": "STRING",
+        "link": 7
+       },
+       {
+        "localized_name": "lyrics",
+        "name": "lyrics",
+        "type": "STRING",
+        "link": 15
+       },
+       {
+        "localized_name": "alternative",
+        "name": "alternative",
+        "shape": 7,
+        "type": "STRING",
+        "link": 8
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "score",
+        "name": "score",
+        "type": "STRING",
+        "links": [
+         21
+        ]
+       },
+       {
+        "localized_name": "report",
+        "name": "report",
+        "type": "PLENIO_REPORT",
+        "links": [
+         22
+        ]
+       }
+      ],
+      "properties": {
+       "Node name for S&R": "PlenioMatchSongForm"
+      },
+      "widgets_values": []
      }
     ],
     "groups": [],
@@ -629,6 +922,38 @@
      },
      {
       "id": 5,
+      "origin_id": 705,
+      "origin_slot": 1,
+      "target_id": 707,
+      "target_slot": 0,
+      "type": "INT"
+     },
+     {
+      "id": 6,
+      "origin_id": 707,
+      "origin_slot": 1,
+      "target_id": 706,
+      "target_slot": 3,
+      "type": "INT"
+     },
+     {
+      "id": 7,
+      "origin_id": 703,
+      "origin_slot": 0,
+      "target_id": 708,
+      "target_slot": 0,
+      "type": "COMFY_MATCHTYPE_V3"
+     },
+     {
+      "id": 8,
+      "origin_id": 706,
+      "origin_slot": 0,
+      "target_id": 708,
+      "target_slot": 2,
+      "type": "STRING"
+     },
+     {
+      "id": 9,
       "origin_id": -10,
       "origin_slot": 0,
       "target_id": 701,
@@ -636,7 +961,15 @@
       "type": "CLIP"
      },
      {
-      "id": 6,
+      "id": 10,
+      "origin_id": -10,
+      "origin_slot": 0,
+      "target_id": 706,
+      "target_slot": 0,
+      "type": "CLIP"
+     },
+     {
+      "id": 11,
       "origin_id": -10,
       "origin_slot": 1,
       "target_id": 701,
@@ -644,7 +977,15 @@
       "type": "STRING"
      },
      {
-      "id": 7,
+      "id": 12,
+      "origin_id": -10,
+      "origin_slot": 1,
+      "target_id": 706,
+      "target_slot": 1,
+      "type": "STRING"
+     },
+     {
+      "id": 13,
       "origin_id": -10,
       "origin_slot": 2,
       "target_id": 701,
@@ -652,7 +993,23 @@
       "type": "STRING"
      },
      {
-      "id": 8,
+      "id": 14,
+      "origin_id": -10,
+      "origin_slot": 2,
+      "target_id": 706,
+      "target_slot": 2,
+      "type": "STRING"
+     },
+     {
+      "id": 15,
+      "origin_id": -10,
+      "origin_slot": 2,
+      "target_id": 708,
+      "target_slot": 1,
+      "type": "STRING"
+     },
+     {
+      "id": 16,
       "origin_id": -10,
       "origin_slot": 3,
       "target_id": 704,
@@ -660,7 +1017,7 @@
       "type": "INT"
      },
      {
-      "id": 9,
+      "id": 17,
       "origin_id": -10,
       "origin_slot": 4,
       "target_id": 705,
@@ -668,7 +1025,7 @@
       "type": "INT"
      },
      {
-      "id": 10,
+      "id": 18,
       "origin_id": -10,
       "origin_slot": 5,
       "target_id": 703,
@@ -676,7 +1033,7 @@
       "type": "BOOLEAN"
      },
      {
-      "id": 11,
+      "id": 19,
       "origin_id": -10,
       "origin_slot": 6,
       "target_id": 701,
@@ -684,17 +1041,33 @@
       "type": "COMBO"
      },
      {
-      "id": 12,
-      "origin_id": 703,
+      "id": 20,
+      "origin_id": -10,
+      "origin_slot": 6,
+      "target_id": 706,
+      "target_slot": 4,
+      "type": "COMBO"
+     },
+     {
+      "id": 21,
+      "origin_id": 708,
       "origin_slot": 0,
       "target_id": -20,
       "target_slot": 0,
-      "type": "*"
+      "type": "STRING"
+     },
+     {
+      "id": 22,
+      "origin_id": 708,
+      "origin_slot": 1,
+      "target_id": -20,
+      "target_slot": 1,
+      "type": "PLENIO_REPORT"
      }
     ],
     "extra": {},
     "category": "Plenio/YuE2",
-    "description": "Plans the song's score (ABC) from style and lyrics with YuE2. With planning off, no score is made and YuE2 renders without a plan. The brief's song seed is added to the plan seed: every song of a 'new song every run' series gets its own plan."
+    "description": "Plans the song's score (ABC) from style and lyrics with YuE2. With planning off, no score is made and YuE2 renders without a plan. The brief's song seed is added to the plan seed: every song of a 'new song every run' series gets its own plan. Match Song Form makes the plan fit the lyrics' song form (sections in the lyrics' order or named after them); when the plan cannot be made to fit, YuE2 plans once more with the next seed and the better plan wins."
    }
   ]
  },

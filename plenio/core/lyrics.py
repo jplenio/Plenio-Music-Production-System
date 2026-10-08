@@ -174,9 +174,27 @@ def syllable_fit(lyrics_text: str, phrasing: Sequence[Mapping[str, Any]]) -> lis
     return findings
 
 
-def compare_sections(lyrics_text: str, score_tags: Sequence[str]) -> list[Finding]:
-    """Warn when the lyrics' section order differs from the score's sections."""
-    tags = [re.sub(r"\s*\d+$", "", t).lower() for t in parse_lyrics(lyrics_text).tags]
+def compare_sections(
+    lyrics_text: str, score_tags: Sequence[str], sung: Sequence[bool] | None = None
+) -> list[Finding]:
+    """Warn when the lyrics' section order differs from the score's sections. With ``sung`` (per score
+    section: has it Vocal notes?) only the sung sections are compared - where the words land; an
+    instrumental intro the lyrics do not name is no mismatch."""
+    parsed = parse_lyrics(lyrics_text)
+    if sung is not None and len(sung) == len(score_tags):
+        words = [re.sub(r"\s*\d+$", "", s.tag).lower() for s in parsed.sections if s.lines]
+        melody = [t.strip("[]").lower() for t, has in zip(score_tags, sung, strict=True) if has]
+        if not words or not melody or words == melody:
+            return []
+        return [
+            warning(
+                f"The lyrics sing in the sections {words} but the score's sung sections are {melody}; words may "
+                "land on melodies planned for other words. Plan again (another plan seed), or arrange the sections "
+                "in the score editor.",
+                "lyrics",
+            )
+        ]
+    tags = [re.sub(r"\s*\d+$", "", t).lower() for t in parsed.tags]
     expected = [t.strip("[]").lower() for t in score_tags]
     if not tags or not expected or tags == expected or tags == ["instrumental"]:
         return []  # the bare [instrumental] tag lets the plan choose its own form

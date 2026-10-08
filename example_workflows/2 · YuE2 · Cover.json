@@ -806,6 +806,13 @@
      "link": 14
     },
     {
+     "localized_name": "song_form",
+     "name": "song_form",
+     "shape": 7,
+     "type": "PLENIO_REPORT",
+     "link": null
+    },
+    {
      "localized_name": "review",
      "name": "review",
      "type": "COMBO",
@@ -1645,6 +1652,13 @@
     {
      "localized_name": "arrangement",
      "name": "arrangement",
+     "shape": 7,
+     "type": "PLENIO_REPORT",
+     "link": null
+    },
+    {
+     "localized_name": "song_form",
+     "name": "song_form",
      "shape": 7,
      "type": "PLENIO_REPORT",
      "link": null

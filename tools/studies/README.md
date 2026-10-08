@@ -16,6 +16,7 @@ All scripts run with ComfyUI's Python and `PLENIO_COMFYUI_ROOT` set; GPU scripts
 | `instrumental_form.py` | E6 | instrumental form and length on the Song path: planner-only lyrics forms x styles (plan length, sections, variety: pitches, chords, distinct bars), then render-lyrics and style variants with Check Vocals |
 | `evaluate_takes.py` | E3/E5 | detector metrics, cover identity, sung-lyrics WER and ending check per rendered take |
 | `listening_pack.py` | — | numbered copies of the takes plus a verdict sheet for the owner |
+| `song_form.py` | G1 | the song form of the lyrics against YuE2's plan in release records (match, assemble, rename, differs; with the last resort), aggregates only |
 | `export_summary.py` | — | compact results (no audio, no word lists) for `docs/test-reports/data/` |
 
 Typical order: `dev_server.py --gpu` → `render_matrix.py` → free the server → `sheetsage_timeline.py` and `asr_whisper.py` on the takes → `evaluate_takes.py`.

@@ -868,29 +868,62 @@ def yue2_plan() -> Blueprint:
         title="plan seed + song seed",
         widgets={"expression": SEED_SUM},
     )
+    # a second plan with the next seed, planned only when Match Song Form asks for it (the first plan's
+    # sung sections cannot be made to fit the lyrics')
+    alternative = g.add(
+        "YuE2GenerateABC",
+        (0, 820),
+        size=(340, 330),
+        title="Second plan (only when the form differs)",
+        widgets={"seed": 0, "seed.control": "fixed", "mode": "full"},
+    )
+    next_seed = g.add(
+        "ComfyMathExpression",
+        (400, 820),
+        size=(300, 150),
+        title="seed + 1",
+        widgets={"expression": "sum(values) + 1"},
+    )
+    form = g.add("PlenioMatchSongForm", (720, 0), size=(340, 160 + SUMMARY_ROOM))
     g.link(empty, "STRING", switch, "on_false")
     g.link(plan, "abc", switch, "on_true")
     g.link(plan_seed, "INT", seed, "values.a")
     g.link(seed, "INT", plan, "seed")
+    g.link(seed, "INT", next_seed, "values.a")
+    g.link(next_seed, "INT", alternative, "seed")
+    g.link(switch, "output", form, "score")
+    g.link(alternative, "abc", form, "alternative")
     return Blueprint(
         "Plenio · YuE2 Plan",
         "Plenio/YuE2",
         "Plans the song's score (ABC) from style and lyrics with YuE2. With planning off, no score is made and "
         "YuE2 renders without a plan. The brief's song seed is added to the plan seed: every song of a 'new "
-        "song every run' series gets its own plan.",
+        "song every run' series gets its own plan. Match Song Form makes the plan fit the lyrics' song form "
+        "(sections in the lyrics' order or named after them); when the plan cannot be made to fit, YuE2 plans "
+        "once more with the next seed and the better plan wins.",
         g,
         [
-            BlueprintInput("clip", "CLIP", [(plan, "clip")]),
-            BlueprintInput("style", "STRING", [(plan, "style")]),
-            BlueprintInput("lyrics", "STRING", [(plan, "lyrics")]),
+            BlueprintInput("clip", "CLIP", [(plan, "clip"), (alternative, "clip")]),
+            BlueprintInput("style", "STRING", [(plan, "style"), (alternative, "style")]),
+            BlueprintInput("lyrics", "STRING", [(plan, "lyrics"), (alternative, "lyrics"), (form, "lyrics")]),
             BlueprintInput("seed", "INT", [(plan_seed, "value")], widget=True, default=0, label="plan seed"),
             BlueprintInput("song_seed", "INT", [(seed, "values.b")], label="song seed"),
             BlueprintInput(
                 "switch", "BOOLEAN", [(switch, "switch")], widget=True, default=True, label="planning"
             ),
-            BlueprintInput("mode", "COMBO", [(plan, "mode")], widget=True, default="full", label="plan type"),
+            BlueprintInput(
+                "mode",
+                "COMBO",
+                [(plan, "mode"), (alternative, "mode")],
+                widget=True,
+                default="full",
+                label="plan type",
+            ),
         ],
-        [BlueprintOutput("score", "*", (switch, "output"))],
+        [
+            BlueprintOutput("score", "STRING", (form, "score")),
+            BlueprintOutput("form_report", "PLENIO_REPORT", (form, "report")),
+        ],
     )
 
 
@@ -1403,6 +1436,7 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g.link(text_sheet, "lyrics", arrange_node, "lyrics")
     g.link(arrange_node, "score", score_sheet, "score")
     g.link(arrange_node, "report", score_sheet, "arrangement")
+    g.link(plan, "form_report", score_sheet, "song_form")
     g.link(text_sheet, "style", score_sheet, "context_style")
     g.link(text_sheet, "lyrics", score_sheet, "context_lyrics")
     g.link(brief, "brief", score_sheet, "brief")

@@ -28,4 +28,6 @@ The cover's text sheet can still **edit the score** it shows: Apply writes it in
 
 **arrangement** (optional): the report of *Apply Arrangement* (the brief's creative mode). The sheet's summary names the result (*varied: 5 of 7 sections arranged*); a plan that could not be used - the score is the planned one as it was - is a **warning**. The editor shows it above the findings: the mode, the closeness, the writer's idea and per section what was applied and what stayed. The release record keeps it. It is requested only while the score comes from upstream.
 
+**song_form** (optional): the report of *Match Song Form* inside *YuE2 Plan* - how the plan was made to fit the lyrics' song form (sections put in the lyrics' order, named after them, or a second plan). Shown as an info in the findings and kept in the release record; requested only while the score comes from upstream. The sections check of the lyrics compares the **sung** sections only: an instrumental intro the lyrics do not name is no mismatch.
+
 **reference_audio** (optional, display only): a recording to listen to in the editor, usually the cover's source. The sheet saves a temporary copy for the editor's player; it is not a document, does not change the fingerprint, and the recording is not stored in the release record.

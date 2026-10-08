@@ -356,7 +356,11 @@ def check_score(
             )
         )
     if lyrics.strip():
-        findings.extend(lyrics_rules.compare_sections(lyrics, [s.tag for s in analysis.sections]))
+        findings.extend(
+            lyrics_rules.compare_sections(
+                lyrics, [s.tag for s in analysis.sections], [s.vocal_notes > 0 for s in analysis.sections]
+            )
+        )
     # instrumental plans are fitted to 0.8-1.2 x the target by 'prepare from brief' (study E6); sung plans
     # follow their lyrics
     low, high = (0.75, 1.25) if instrumental else (0.6, 1.5)
@@ -420,7 +424,9 @@ def validate_documents(
         analysis = score_rules.analyze(score)
         duration = analysis.duration_s if analysis.ok else None
         if analysis.ok and "lyrics" in check and lyrics.strip() and not instrumental:
-            findings += lyrics_rules.compare_sections(lyrics, [s.tag for s in analysis.sections])
+            findings += lyrics_rules.compare_sections(
+                lyrics, [s.tag for s in analysis.sections], [s.vocal_notes > 0 for s in analysis.sections]
+            )
             # lyrics written for an existing melody (covers): do they fit its notes?
             findings += lyrics_rules.syllable_fit(lyrics, score_rules.phrasing(score))
         if analysis.ok and "style" in check and style.strip() and not instrumental:

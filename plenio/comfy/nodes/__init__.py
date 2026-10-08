@@ -15,6 +15,7 @@ from .parse import PlenioParseDraft
 from .refine import PlenioRefine
 from .score_tools import PlenioScoreTools
 from .sheet import PlenioSongSheet
+from .song_form import PlenioMatchSongForm
 from .stems import PlenioSeparateStems, PlenioStemMixer
 from .sung_pitch import PlenioSungPitch
 from .system_check import PlenioSystemCheck
@@ -36,6 +37,7 @@ NODES = (
     PlenioScoreTools,
     PlenioComposeArrangement,
     PlenioApplyArrangement,
+    PlenioMatchSongForm,
     PlenioTranscribeScore,
     PlenioTranscribeLyrics,
     PlenioSungPitch,

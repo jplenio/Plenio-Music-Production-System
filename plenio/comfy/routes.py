@@ -231,7 +231,9 @@ async def lyrics_analyze(request: web.Request) -> web.StreamResponse:
     if isinstance(abc, str) and abc.strip():
         analysis = score_rules.analyze(abc)
         if analysis.ok:
-            findings += lyrics_rules.compare_sections(text, [s.tag for s in analysis.sections])
+            findings += lyrics_rules.compare_sections(
+                text, [s.tag for s in analysis.sections], [s.vocal_notes > 0 for s in analysis.sections]
+            )
             for item, section in zip(sections, analysis.sections, strict=False):
                 item["score_section"] = section.label
                 item["vocal_notes"] = section.vocal_notes

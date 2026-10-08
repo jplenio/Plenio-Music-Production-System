@@ -27,6 +27,8 @@ Measured on an RTX 5060 Ti 16 GB: about 3 minutes for a 3-minute song, including
 
 **Many songs with one click:** in the mode *new song every run*, set the batch count next to **Run** (App mode: *Number of runs*) to 10 and press Run once - ComfyUI queues ten runs, and each one is a new song, exported under its own title (a repeated title gets ` (2)`). The brief, the length and the vocals stay the same for the whole series.
 
+**The song form follows the lyrics:** YuE2 plans the melody from the lyrics, but its plan does not always have the lyrics' sections (a bridge left out, a sung intro without words). *Match Song Form* inside **YuE2 Plan** puts the plan's own sections in the lyrics' order (chorus words on the chorus melody) or names them after the lyrics; only when that cannot work, YuE2 plans once more with the next seed and the better plan wins. *Song Sheet · Score* says what was done.
+
 **One song, carefully:** in the mode *one song, stop to review*, nothing is rendered before you approved the text and the score. Afterwards, new takes: to get new text, change the **Draft seed**; for a new score, change the *plan seed* in **YuE2 Plan** (both mean reviewing again).
 
 **Draft seed:** the writer's seed is its own node in *2 · WRITE* (and in App mode), like the take seed. *fixed* (default) keeps the draft - and your approval - from run to run; *randomize* lets the writer draw a new draft every run. Use *randomize* in *new song every run* for even more varied series; keep it *fixed* in *one song, stop to review*, otherwise every run brings a new text to approve.

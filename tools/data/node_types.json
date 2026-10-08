@@ -2941,6 +2941,63 @@
    "category": "Plenio/Mastering",
    "display_name": "Loudness & Dynamics"
   },
+  "PlenioMatchSongForm": {
+   "input": {
+    "required": {
+     "score": [
+      "STRING",
+      {
+       "tooltip": "YuE2's plan (empty when planning is off).",
+       "forceInput": true,
+       "multiline": false
+      }
+     ],
+     "lyrics": [
+      "STRING",
+      {
+       "tooltip": "The lyrics the plan was made from (Song Sheet · Text's plan_lyrics).",
+       "forceInput": true,
+       "multiline": false
+      }
+     ]
+    },
+    "optional": {
+     "alternative": [
+      "STRING",
+      {
+       "tooltip": "A second plan with the next seed; requested only when the first does not fit.",
+       "lazy": true,
+       "forceInput": true,
+       "multiline": false
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "score",
+     "lyrics"
+    ],
+    "optional": [
+     "alternative"
+    ]
+   },
+   "output": [
+    "STRING",
+    "PLENIO_REPORT"
+   ],
+   "output_name": [
+    "score",
+    "report"
+   ],
+   "output_is_list": [
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Score",
+   "display_name": "Match Song Form"
+  },
   "PlenioParseDraft": {
    "input": {
     "required": {
@@ -3935,6 +3992,13 @@
        "tooltip": "From Apply Arrangement: what the creative mode changed in the score - or why the score stayed as planned. Shown here and in the editor; requested only while the score comes from upstream.",
        "lazy": true
       }
+     ],
+     "song_form": [
+      "PLENIO_REPORT",
+      {
+       "tooltip": "From YuE2 Plan (Match Song Form): how the plan was made to fit the lyrics' song form. Shown here and kept in the release record; requested only while the score comes from upstream.",
+       "lazy": true
+      }
      ]
     },
     "hidden": {
@@ -3968,7 +4032,8 @@
      "sung_pitch",
      "brief",
      "engine",
-     "arrangement"
+     "arrangement",
+     "song_form"
     ],
     "hidden": [
      "unique_id",

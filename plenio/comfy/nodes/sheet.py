@@ -12,7 +12,7 @@ from ...core.brief import CoverBrief
 from ...core.diagnostics import has_errors, info, warning
 from ...core.engines import rules_for
 from ...core.errors import PlenioConflictError, PlenioValidationError
-from ...core.reports import Report
+from ...core.reports import Report, Status
 from ...core.sheet import (
     BRIEF_REVIEW,
     DOCUMENT_KINDS,
@@ -104,6 +104,13 @@ class PlenioSongSheet(io.ComfyNode):
                 tooltip="From Apply Arrangement: what the creative mode changed in the score - or why the score "
                 "stayed as planned. Shown here and in the editor; requested only while the score comes from upstream.",
             ),
+            ReportType.Input(
+                "song_form",
+                optional=True,
+                lazy=True,
+                tooltip="From YuE2 Plan (Match Song Form): how the plan was made to fit the lyrics' song form. "
+                "Shown here and kept in the release record; requested only while the score comes from upstream.",
+            ),
         ]
         return io.Schema(
             node_id="PlenioSongSheet",
@@ -155,8 +162,9 @@ class PlenioSongSheet(io.ComfyNode):
             if kind in kwargs and kwargs[kind] is None and needs_upstream(state, kind)
         ]
         # the arrangement report belongs to the score's draft: needed while that draft is
-        if "arrangement" in kwargs and kwargs["arrangement"] is None and "score" in wanted:
-            wanted.append("arrangement")
+        for report in ("arrangement", "song_form"):
+            if report in kwargs and kwargs[report] is None and "score" in wanted:
+                wanted.append(report)
         return wanted
 
     @classmethod
@@ -171,6 +179,8 @@ class PlenioSongSheet(io.ComfyNode):
         timeline = kwargs.get("timeline")
         report_in = kwargs.get("arrangement")
         arrangement = report_in if isinstance(report_in, Report) and "score" in owned else None
+        form_in = kwargs.get("song_form")
+        song_form = form_in if isinstance(form_in, Report) and "score" in owned else None
         context = {
             key.removeprefix("context_"): kwargs[key] for key in CONTEXT if kwargs.get(key) is not None
         }
@@ -187,7 +197,11 @@ class PlenioSongSheet(io.ComfyNode):
             max_seconds=brief.max_seconds if brief is not None else None,
             target_seconds=brief.target_seconds if brief is not None else None,
             context=context,
-            extra_findings=[*_cover_findings(brief, upstream, state), *_arrangement_findings(arrangement)],
+            extra_findings=[
+                *_cover_findings(brief, upstream, state),
+                *_form_findings(song_form),
+                *_arrangement_findings(arrangement),
+            ],
         )
         payload = {**evaluation.payload(), "node_id": str(cls.hidden.unique_id)}
         if engine is not None:
@@ -233,6 +247,8 @@ class PlenioSongSheet(io.ComfyNode):
         extra: dict[str, Any] = {"node_id": str(cls.hidden.unique_id)}
         if arrangement is not None:
             extra["arrangement"] = dict(arrangement.data)
+        if song_form is not None:
+            extra["song_form"] = dict(song_form.data)
         report = Report(
             report.kind,
             report.status,
@@ -293,6 +309,14 @@ def _cover_findings(brief: Any, upstream: dict[str, Any], state: Any) -> list[An
                 )
             )
     return findings
+
+
+def _form_findings(song_form: Report | None) -> list[Any]:
+    """What Match Song Form did to the plan, as an info (a plan that still differs is warned about by the
+    sections check of the lyrics)."""
+    if song_form is None or song_form.status == Status.SKIPPED:
+        return []
+    return [info(song_form.summary.rstrip("."), "score")]
 
 
 def _arrangement_findings(arrangement: Report | None) -> list[Any]:
