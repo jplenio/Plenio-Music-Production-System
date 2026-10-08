@@ -676,13 +676,12 @@ def test_a_key_lift_holds_to_the_end_and_is_prepared() -> None:
     model = c.from_abc(result.abc)
     assert [k.key for k in model.keys] == ["C", "D"]
     assert "the key lift holds to the end of the song" in " ".join(result.notes)
-    # the bar before the lift ends on a chord leading into D, which clashes with nothing sung there
+    # the last bar leads into D with chords that clash with nothing sung there: the melody ends on C, so the
+    # dominant A7 does not fit - the new key's lowered sixth and seventh steps rise to it (Bb - C -> D)
     lift = model.starts[4]
-    leading = [ch.name for ch in model.chords if model.starts[3] < ch.onset < lift]
-    assert (
-        leading and leading[-1] == "C"
-    )  # the melody ends on C: C -> D (bVII - I), the dominant A7 would clash
-    assert f"bar 4: {leading[-1]} prepares the key change to D" in result.notes
+    leading = [ch.name for ch in model.chords if model.starts[3] <= ch.onset < lift]
+    assert leading == ["Bb", "C"]
+    assert any(n.startswith("bar 4: Bb - C lead into D") for n in result.notes)
     assert result.harmony["after"]["accented_avoid"] == 0
 
 
@@ -694,3 +693,13 @@ def test_a_lift_that_cannot_be_made_everywhere_stays_out_everywhere() -> None:
     result = arrange(high, plan(entry(1), entry(2, key_shift=1), entry(3, key_shift=1)), rules(), seed=0)
     assert [k.key for k in c.from_abc(result.abc).keys] == ["C"]  # no lift that falls back in the last chorus
     assert any("stays out with section 3's" in kept for kept in result.sections[1].kept)
+
+
+def test_a_modulation_takes_a_chord_of_both_keys_and_the_new_dominant_first() -> None:
+    from plenio.core.arrangement.apply import _modulations
+
+    up_minor = _modulations(harmony.key_of("Fm"), harmony.key_of("Gm"))
+    assert up_minor[0][1] == [(0, "m"), (2, "7")]  # Cm (iv of Gm, v of Fm) - D7 -> Gm
+    up_major = _modulations(harmony.key_of("C"), harmony.key_of("D"))
+    assert up_major[0][1] == [(4, "m"), (9, "7")]  # Em (ii of D, iii of C) - A7 -> D
+    assert ("the new key's lowered sixth and seventh steps rising to it", [(10, ""), (0, "")]) in up_major
