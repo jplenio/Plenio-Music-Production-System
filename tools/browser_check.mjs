@@ -312,7 +312,7 @@ for (const name of names) {
 
 // 7. sheet music (Export Release, owner's request 2026-10-08): a run started from this page exports a song
 // with *sheet music* on; this page draws the PDF the export reserved, Plenio saves it next to the audio
-// and the release record lists it
+// and the release record lists it - at the chosen *sheet music size* (compact here)
 {
   const check = 'export: the sheet music PDF is saved next to the audio'
   const folder = `browser-check/sheet-music-${Date.now()}`
@@ -344,6 +344,7 @@ for (const name of names) {
     set(exporter, 'folder', folder)
     set(exporter, 'naming', '{title}')
     set(exporter, 'sheet_music', 'PDF (A4)')
+    set(exporter, 'sheet_music_size', 'compact')
     const out = (node, name) => node.outputs.findIndex((o) => o.name === name)
     const inp = (node, name) => node.inputs.findIndex((i) => i.name === name)
     audio.connect(out(audio, 'AUDIO'), exporter, inp(exporter, 'audio'))
@@ -363,18 +364,25 @@ for (const name of names) {
         if (record.sheet_music?.status === 'saved') {
           const pdf = new Uint8Array(await (await view(`${title}.pdf`)).arrayBuffer())
           const head = new TextDecoder().decode(pdf.slice(0, 5))
+          const pages = (new TextDecoder('latin1').decode(pdf).match(/\/Type \/Page\b/g) ?? []).length
           const listed = (record.files ?? []).some((f) => f.name === `${title}.pdf` && f.role === 'sheet_music')
           const node = window.app.graph.getNodeById(exporterId)
           const summary = String(node?.properties?.plenio_summary?.markdown ?? '')
-          return { head, bytes: pdf.length, listed, summary: summary.split('\n').find((l) => l.startsWith('- sheet music')) ?? '' }
+          return { head, bytes: pdf.length, pages, size: record.sheet_music.size, listed, summary: summary.split('\n').find((l) => l.startsWith('- sheet music')) ?? '' }
         }
       }
       await new Promise((r) => setTimeout(r, 1000))
     }
     return { timeout: true }
   }, [folder, title, queued])
-  const ok = !outcome.timeout && outcome.head === '%PDF-' && outcome.bytes > 10000 && outcome.listed && /saved/.test(outcome.summary)
-  record('Export Release', check, ok, ok ? `${outcome.bytes} bytes; ${outcome.summary}` : JSON.stringify(outcome) + ' ' + plenioErrors().join(' | '))
+  const ok =
+    !outcome.timeout && outcome.head === '%PDF-' && outcome.bytes > 10000 && outcome.pages >= 1 && outcome.size === 'compact' && outcome.listed && /saved/.test(outcome.summary)
+  record(
+    'Export Release',
+    check,
+    ok,
+    ok ? `${outcome.bytes} bytes, ${outcome.pages} page(s), ${outcome.size}; ${outcome.summary}` : JSON.stringify(outcome) + ' ' + plenioErrors().join(' | ')
+  )
 }
 
 fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify(results, null, 1) + '\n')
