@@ -166,6 +166,9 @@ class PlenioFitLyrics(io.ComfyNode):
         language = brief.language or syllables.guess_language(lyrics)
         notes: list[str] = list(previous.get("notes", []))
         text = lyrics
+        if not previous:  # the draft: first into the score's song form (a writer may have left sections out)
+            text, conformed = lyrics_fit.conform(text, phrasing)
+            notes += conformed
         asked = [(int(item[0]), int(item[1])) for item in previous.get("asked", [])]
         if asked:
             before = lyrics_fit.check(text, phrasing, language=language)

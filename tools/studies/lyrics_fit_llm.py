@@ -155,7 +155,8 @@ def run_one(endpoint: str, model: str, sample: Sample, seed: int, free: bool = F
         record["error"] = str(error).splitlines()[0][:200]
         return record
     seconds = [answer.seconds]
-    text = draft.lyrics
+    text, conformed = lyrics_fit.conform(draft.lyrics, sample.phrasing)
+    record["form_conformed"] = bool(conformed)
     fit = lyrics_fit.check(text, sample.phrasing, language="English")
     stages = {"draft": fit}
     asked_total, fixed_total, kept_shares = 0, 0, []

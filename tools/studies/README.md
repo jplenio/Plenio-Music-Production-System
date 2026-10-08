@@ -16,6 +16,8 @@ All scripts run with ComfyUI's Python and `PLENIO_COMFYUI_ROOT` set; GPU scripts
 | `instrumental_form.py` | E6 | instrumental form and length on the Song path: planner-only lyrics forms x styles (plan length, sections, variety: pitches, chords, distinct bars), then render-lyrics and style variants with Check Vocals |
 | `evaluate_takes.py` | E3/E5 | detector metrics, cover identity, sung-lyrics WER and ending check per rendered take |
 | `listening_pack.py` | — | numbered copies of the takes plus a verdict sheet for the owner |
+| `lyrics_fit_llm.py` | A2 | new cover lyrics with local LLMs (llama.cpp): the draft, Fit Lyrics' two repair rounds (held to the schema, or free as the native writer) and the last step - lines fitting, deviation, lines fixed, words kept |
+| `arrangement_renders.py` | E7 | the plan, 0.4.5's arrangement, the guard with fills and under the singing rendered with YuE2 (`prepare`, `render`, `evaluate` with SheetSage2, `pack`: a blind listening pack) |
 | `song_form.py` | G1 | the song form of the lyrics against YuE2's plan in release records (match, assemble, rename, differs; with the last resort), aggregates only |
 | `export_summary.py` | — | compact results (no audio, no word lists) for `docs/test-reports/data/` |
 

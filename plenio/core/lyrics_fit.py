@@ -117,7 +117,11 @@ class Fit:
     @property
     def counts(self) -> tuple[int, int]:
         """Lines that fit, lines checked (sections with phrases; a section written anew fits none)."""
-        checked = sum(max(len(s.texts), len(s.lines)) for s in self.sections if s.phrases)
+        checked = sum(
+            max(len(s.texts), len(s.phrases)) if s.rewrite else len(s.lines)
+            for s in self.sections
+            if s.phrases
+        )
         good = sum(1 for s in self.sections if not s.rewrite for line in s.lines if line.fits)
         return good, checked
 
@@ -254,6 +258,59 @@ def _section(
                 )
             )
     return SectionFit(number, section.tag, phrases, tuple(lines), False, texts)
+
+
+def _kind(tag: str) -> str:
+    return re.sub(r"\s*\d+$", "", _key(tag))
+
+
+def conform(text: str, phrasing: Sequence[Mapping[str, Any]]) -> tuple[str, list[str]]:
+    """The lyrics in the score's song form: its sections, in its order and with its names. The n-th section of
+    a kind takes the lyrics' n-th section of that kind; a sung section the lyrics lack stays empty (the repair
+    round writes it), a section of the lyrics the score does not have is left out, and so are words in a section
+    the score sings nothing in. Lyrics that already have the score's form come back unchanged."""
+    parsed = lyrics_rules.parse_lyrics(text)
+    score = [(str(part["tag"]).strip().strip("[]").strip(), bool(part.get("phrases"))) for part in phrasing]
+    if not score:
+        return text, []
+    same_form = [_kind(s.tag) for s in parsed.sections] == [_kind(tag) for tag, _ in score]
+    notes: list[str] = []
+    sections: list[lyrics_rules.LyricsSection] = []
+    if same_form:
+        for section, (_tag, sung) in zip(parsed.sections, score, strict=True):
+            if section.lines and not sung:
+                notes.append(
+                    f"[{section.tag}]: {len(section.lines)} line(s) left out - the score sings nothing there"
+                )
+                section = lyrics_rules.LyricsSection(section.tag, ())
+            sections.append(section)
+        if not notes:
+            return text, []
+        return lyrics_rules.Lyrics(parsed.preamble, tuple(sections)).format(), notes
+    by_kind: dict[str, list[int]] = {}
+    for index, section in enumerate(parsed.sections):
+        by_kind.setdefault(_kind(section.tag), []).append(index)
+    used: set[int] = set()
+    for tag, sung in score:
+        queue = by_kind.get(_kind(tag), [])
+        lines: tuple[str, ...] = ()
+        if queue:
+            index = queue.pop(0)
+            used.add(index)
+            lines = parsed.sections[index].lines
+            if lines and not sung:
+                notes.append(f"[{tag}]: {len(lines)} line(s) left out - the score sings nothing there")
+                lines = ()
+        elif sung:
+            notes.append(f"[{tag}] was missing: it is written in the repair round")
+        sections.append(lyrics_rules.LyricsSection(tag, lines))
+    for index, section in enumerate(parsed.sections):
+        if index not in used and section.lines:
+            notes.append(
+                f"[{section.tag}] ({len(section.lines)} line(s)) left out: the score has no such section"
+            )
+    notes.insert(0, "the lyrics put in the score's song form (" + " - ".join(tag for tag, _ in score) + ")")
+    return lyrics_rules.Lyrics(parsed.preamble, tuple(sections)).format(), notes
 
 
 def check(text: str, phrasing: Sequence[Mapping[str, Any]], *, language: str = "") -> Fit:
@@ -394,9 +451,12 @@ def request(
                 slots[_key_of(section.number, index)] = _slot(low, high)
                 targets.append(f'"{_key_of(section.number, index)}" {low}-{high}')
             fixes.append(
-                f"- {_label(section)} has {len(section.texts)} line(s) for {len(section.phrases)} phrase(s): write the "
-                f"section again with exactly {len(section.phrases)} lines, telling what it tells now - syllables per "
-                f"line: {', '.join(targets)}."
+                f"- {_label(section)} is missing: write it with exactly {len(section.phrases)} lines that carry the "
+                f"story on from the section before - syllables per line: {', '.join(targets)}."
+                if not section.texts
+                else f"- {_label(section)} has {len(section.texts)} line(s) for {len(section.phrases)} phrase(s): write "
+                f"the section again with exactly {len(section.phrases)} lines, telling what it tells now - syllables "
+                f"per line: {', '.join(targets)}."
             )
             asked.append((section.number, 0))
             continue
@@ -532,6 +592,7 @@ def merge(
     targets = (
         {(fitted.section, fitted.line): fitted for s in fit.sections for fitted in s.lines} if fit else {}
     )
+    expected = {s.number: len(s.phrases) for s in fit.sections if s.rewrite} if fit else {}
     language = fit.language if fit else ""
     notes: list[str] = []
     sections = []
@@ -539,7 +600,8 @@ def merge(
         new = found.get(number, {})
         if number in whole:
             numbers = sorted(new)
-            if numbers and numbers == list(range(1, len(numbers) + 1)):
+            wanted_lines = expected.get(number, len(numbers))  # a line per phrase, when the fit is known
+            if numbers and numbers == list(range(1, wanted_lines + 1)):
                 sections.append(lyrics_rules.LyricsSection(section.tag, tuple(new[n] for n in numbers)))
                 notes.append(f"[{section.tag}] (section {number}) written anew: {len(numbers)} lines")
                 continue

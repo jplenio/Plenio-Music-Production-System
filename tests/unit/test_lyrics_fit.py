@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from plenio.core import lyrics_fit
+from plenio.core import lyrics, lyrics_fit
 from plenio.core.score import native
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
@@ -186,3 +186,46 @@ def test_a_round_asks_for_the_lines_furthest_off_first_and_at_most_max_lines() -
     assert request is not None and len(request.asked) == lyrics_fit.MAX_LINES
     asked = {line for _section, line in request.asked}
     assert all(n + 1 in asked for n in range(30) if n % 5 == 0)  # every one-syllable line is among them
+
+
+def test_a_section_written_anew_needs_a_line_for_every_phrase() -> None:
+    text = "[Verse]\nOne line only"
+    fit = lyrics_fit.check(text, phrasing(("Verse", [6, 6, 6])), language="English")
+    one = json.dumps(
+        {"1-1": {"syllables": ["I", "walk", "a", "long", "the", "road"], "text": "I walk along the road"}}
+    )
+    kept, notes = lyrics_fit.merge(text, one, [(1, 0)], fit)
+    assert kept == text and "did not give the whole section" in notes[0]
+
+
+def test_lyrics_in_another_song_form_are_put_in_the_scores() -> None:
+    # the writer left out the verses and wrote a sung intro the score does not have
+    text = "[Intro]\nLa la la\n\n[Chorus]\nHold on to the night\n\n[Chorus]\nHold on again"
+    parts = phrasing(("Intro", []), ("Verse", [7, 6]), ("Chorus", [5]), ("Verse", [7]), ("Chorus", [5]))
+    conformed, notes = lyrics_fit.conform(text, parts)
+    assert [s.tag for s in lyrics.parse_lyrics(conformed).sections] == [
+        "Intro",
+        "Verse",
+        "Chorus",
+        "Verse",
+        "Chorus",
+    ]
+    assert lyrics.parse_lyrics(conformed).sections[1].lines == ()
+    assert "[Verse] was missing: it is written in the repair round" in notes
+    fit = lyrics_fit.check(conformed, parts, language="English")
+    assert fit.sections[1].rewrite and fit.counts[1] == 2 + 1 + 1 + 1  # the missing verse counts its phrases
+    request = lyrics_fit.request(conformed, fit)
+    assert (
+        request is not None
+        and "section 2 [Verse] is missing: write it with exactly 2 lines" in request.prompt
+    )
+    # lyrics in the score's form stay as they are
+    same = "[Intro]\n\n[Verse 1]\nI walk\nalong\n\n[Chorus]\nHold on\n\n[Verse 2]\nAgain\n\n[Chorus]\nHold on"
+    assert lyrics_fit.conform(same, parts) == (same, [])
+
+
+def test_words_where_the_score_sings_nothing_are_left_out() -> None:
+    parts = phrasing(("Intro", []), ("Verse", [4]))
+    conformed, notes = lyrics_fit.conform("[Intro]\nOoh yeah\n\n[Verse]\nHold on to me", parts)
+    assert conformed == "[Intro]\n\n[Verse]\nHold on to me"
+    assert notes == ["[Intro]: 1 line(s) left out - the score sings nothing there"]
