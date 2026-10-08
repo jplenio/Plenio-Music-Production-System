@@ -8,7 +8,7 @@ result = arrange(abc, answer, rules, seed=...)                 # -> a valid scor
                                                                #    (harmony: the guard of its chords)
 """
 
-from . import harmony
+from . import harmony, reask
 from .apply import STATUSES, Arrangement, SectionResult, arrange, skipped
 from .modes import (
     LEAD_ROLES,
@@ -65,6 +65,7 @@ __all__ = [
     "closeness_text",
     "for_score",
     "harmony",
+    "reask",
     "melody_of",
     "melody_voice",
     "parse_mode",

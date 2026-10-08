@@ -27,6 +27,8 @@ HERE = Path(__file__).resolve().parent
 SCORE = (HERE.parents[0] / "fixtures" / "abc" / "upstream-score.abc").read_text(encoding="utf-8")
 ASKED: list[dict[str, Any]] = []
 ANSWER: dict[str, str] = {"text": ""}
+QUEUE: list[str] = []
+"""Answers in order (the re-ask round's tests); empty: every request gets ``ANSWER``."""
 MODEL = "Fake app · served-model"
 
 
@@ -48,7 +50,8 @@ class _App(BaseHTTPRequestHandler):
     def do_POST(self) -> None:  # noqa: N802
         body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
         ASKED.append(body)
-        self._send({"choices": [{"finish_reason": "stop", "message": {"content": ANSWER["text"]}}]})
+        text = QUEUE.pop(0) if QUEUE else ANSWER["text"]
+        self._send({"choices": [{"finish_reason": "stop", "message": {"content": text}}]})
 
 
 GOOD_PLAN = json.dumps(
@@ -257,3 +260,79 @@ def test_garbage_keeps_the_score_and_the_sheet_says_so(server: ComfyServer) -> N
 def test_an_unknown_mode_is_named_before_the_run(server: ComfyServer) -> None:
     status, data = server.request("POST", "/prompt", {"prompt": graph(song_brief("baroque"))})
     assert status == 400 and "Unknown creative mode 'baroque'" in json.dumps(data)
+
+
+def reask_graph(brief: dict[str, Any], seed: int) -> dict[str, Any]:
+    """As in the Arrange block: Apply Arrangement -> a second writer on its re-ask -> Apply Arrangement (re-ask)."""
+    prompt = graph(brief, seed=seed)
+    prompt["9"] = writer_node(["6", 2], ["6", 3], seed)
+    prompt["10"] = {
+        "class_type": "PlenioApplyArrangement",
+        "inputs": {
+            "score": ["2", 0],
+            "brief": ["1", 0],
+            "answer": ["9", 0],
+            "engine": ["3", 0],
+            "seed": seed,
+            "first": ["6", 4],
+        },
+    }
+    prompt["7"]["inputs"]["value"] = ["10", 0]
+    return prompt
+
+
+def writer_node(prompt: list[Any], schema: list[Any], seed: int) -> dict[str, Any]:
+    return {
+        "class_type": "PlenioLocalLLM",
+        "inputs": {
+            "prompt": prompt,
+            "schema": schema,
+            "model": MODEL,
+            "seed": seed,
+            "max_tokens": 512,
+            "temperature": 0.7,
+            "thinking": False,
+            "context": 4096,
+            "keep_loaded": False,
+            "system_prompt": "",
+            "reuse_answers": False,
+        },
+    }
+
+
+def section_plan(chords: list[str]) -> str:
+    return json.dumps(
+        {
+            "idea": "new colours",
+            "tempo_change": 0,
+            "sections": [
+                {"section": 1, "chords": chords, "lead": "keep", "energy": 3, "key_shift": 0},
+                {"section": 2, "chords": "keep", "lead": "keep", "energy": 3, "key_shift": 0},
+            ],
+        }
+    )
+
+
+def test_sections_the_guard_repaired_much_go_back_to_the_writer_once(server: ComfyServer) -> None:
+    ASKED.clear()
+    second = {
+        "sections": [
+            {"section": 1, "chords": ["Am", "G", "Am", "F"], "lead": "keep", "energy": 3, "key_shift": 0}
+        ]
+    }
+    QUEUE[:] = [section_plan(["Db", "Gb", "Ab", "Eb"]), json.dumps(second)]
+    entry = server.run(reask_graph(song_brief("varied"), seed=21))
+    assert len(ASKED) == 2
+    content = ASKED[1]["messages"][-1]["content"]
+    assert "bar 1: Db is not a chord of C" in content and "chords that fit (C major" in content
+    assert ASKED[1]["response_format"]["type"] == "json_schema"
+    assert entry["outputs"]["7"]["received"] != [SCORE]  # the first plan changed nothing, the second does
+    assert "asked again about section(s) 1: the second plan needs fewer repairs" in summary(entry, "10")
+
+
+def test_a_plan_the_guard_accepts_asks_nothing_more(server: ComfyServer) -> None:
+    ASKED.clear()
+    QUEUE[:] = [section_plan(["C", "G", "Am", "Dm"])]
+    entry = server.run(reask_graph(song_brief("varied"), seed=22))
+    assert len(ASKED) == 1 and "9" not in entry["outputs"]
+    assert "asked again" not in summary(entry, "10")

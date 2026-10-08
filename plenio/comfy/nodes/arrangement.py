@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Callable
+from dataclasses import replace
 from typing import Any
 
 from comfy_api.latest import io
@@ -23,6 +24,9 @@ from ...core.score import canonical as c
 from ...core.score import native
 from ..shared import mode_library
 from ..types import Brief, Engine, ReportType
+
+ArrangementState = io.Custom("PLENIO_ARRANGEMENT")
+"""The first Apply Arrangement's result for the re-ask round: ``{"result", "text", "sections", "report"}``."""
 
 BUDGET_MARGIN_S = 5.0
 """Seconds of music the context must hold beyond the arranged score's length."""
@@ -280,12 +284,30 @@ class PlenioApplyArrangement(io.ComfyNode):
                     control_after_generate=io.ControlAfterGenerate.fixed,
                     tooltip="Varies the notes of the instrument lines Plenio writes (the same seed, the same notes).",
                 ),
+                # appended: the inputs of saved workflows stay where they were
+                ArrangementState.Input(
+                    "first",
+                    optional=True,
+                    tooltip="The first Apply Arrangement's state: this node is then the re-ask round - it reads the "
+                    "writer's second answer (only when sections were asked again) and keeps the better arrangement.",
+                ),
             ],
             outputs=[
                 io.String.Output(display_name="score", tooltip="The arranged score, or the score as it was."),
                 ReportType.Output(
                     display_name="report",
                     tooltip="What was arranged and kept, or why the score stayed as it was (for the Song Sheet).",
+                ),
+                io.String.Output(
+                    display_name="reask_prompt",
+                    tooltip="The re-ask for the writer: the sections whose chords the harmony guard had to repair "
+                    "(empty when there are none, and in the re-ask round).",
+                ),
+                io.String.Output(
+                    display_name="reask_schema", tooltip="The re-ask's JSON schema, for Local LLM."
+                ),
+                ArrangementState.Output(
+                    display_name="state", tooltip="For the re-ask round's Apply Arrangement."
                 ),
             ],
         )
@@ -294,6 +316,9 @@ class PlenioApplyArrangement(io.ComfyNode):
     def check_lazy_status(cls, score: str | None = None, brief: Any = None, **kwargs: Any) -> list[str]:
         if kwargs.get("answer") is not None or not (score or "").strip():
             return []
+        first = kwargs.get("first")
+        if isinstance(first, dict):  # the re-ask round: an answer only when sections were asked again
+            return ["answer"] if first.get("sections") else []
         try:
             if rules_for(brief).skip:
                 return []
@@ -312,9 +337,11 @@ class PlenioApplyArrangement(io.ComfyNode):
         engine: Any = None,
         style: str | None = None,
         lyrics: str | None = None,
+        first: Any = None,
     ) -> io.NodeOutput:
         rules = rules_for(brief, style or "")
         text = score or ""
+        reask_round = isinstance(first, dict)
         if not text.strip():
             report = Report(
                 "arrangement",
@@ -325,12 +352,33 @@ class PlenioApplyArrangement(io.ComfyNode):
             )
             markdown = "**Arrangement: skipped** - no score (planning is off)"
             return io.NodeOutput(
-                "", report, ui={"plenio_summary": [{"status": "skipped", "markdown": markdown}]}
+                "",
+                report,
+                "",
+                "",
+                {"result": None, "text": "", "sections": []},
+                ui={"plenio_summary": [{"status": "skipped", "markdown": markdown}]},
             )
-        if rules.skip:
+        fits = None if rules.skip else budget_check(engine, brief, text, style, lyrics)
+        if reask_round:
+            result = _reask_round(first, text, answer, rules, seed, fits)
+            if result is None:  # nothing was asked again: the first round's result passes through
+                previous = first["result"]
+                return io.NodeOutput(
+                    previous.abc if previous is not None else text,
+                    first["report"],
+                    "",
+                    "",
+                    first,
+                    ui={
+                        "plenio_summary": [
+                            {"status": first["report"].status.value, "markdown": first["markdown"]}
+                        ]
+                    },
+                )
+        elif rules.skip:
             result = arrangement.skipped(text, rules)
         else:
-            fits = budget_check(engine, brief, text, style, lyrics)
             result = arrangement.arrange(text, answer or "", rules, seed=seed, fits=fits)
         status = {
             "skipped": Status.SKIPPED,
@@ -339,8 +387,57 @@ class PlenioApplyArrangement(io.ComfyNode):
         messages = (result.summary,) if result.status == "fallback" else ()
         data = {**result.to_dict(), "kind": rules.kind, "melody": rules.melody}
         report = Report("arrangement", status, f"arrangement: {result.summary}", messages, data)
+        markdown = _markdown(result, rules)
+        reask = None if reask_round or rules.skip else arrangement.reask.request(text, result, rules)
+        if reask is not None:
+            markdown += (
+                f"\n- the harmony check repaired much in section(s) {', '.join(map(str, reask.sections))}: the "
+                "writer is asked once more"
+            )
+        state = {
+            "result": result,
+            "text": text,
+            "sections": list(reask.sections) if reask else [],
+            "report": report,
+            "markdown": markdown,
+        }
         return io.NodeOutput(
             result.abc,
             report,
-            ui={"plenio_summary": [{"status": status.value, "markdown": _markdown(result, rules)}]},
+            reask.prompt if reask else "",
+            json.dumps(reask.schema, ensure_ascii=False) if reask else "",
+            state,
+            ui={"plenio_summary": [{"status": status.value, "markdown": markdown}]},
         )
+
+
+def _reask_round(
+    first: dict[str, Any],
+    text: str,
+    answer: str | None,
+    rules: arrangement.Policy,
+    seed: int,
+    fits: Callable[[str], str | None] | None,
+) -> arrangement.Arrangement | None:
+    """The re-ask round: the first plan with the asked sections from the writer's second answer, arranged
+    again; the better of the two arrangements (``None``: nothing was asked)."""
+    previous = first.get("result")
+    sections = first.get("sections") or []
+    if previous is None or not sections:
+        return None
+    merged = arrangement.reask.merged_answer(previous, answer or "", sections)
+    if merged is None:
+        note = (
+            "asked again about section(s) "
+            + ", ".join(map(str, sections))
+            + ": no usable answer; the first plan stands"
+        )
+        return replace(previous, notes=(*previous.notes, note))
+    second = arrangement.arrange(text, merged, rules, seed=seed, fits=fits)
+    asked = ", ".join(map(str, sections))
+    if arrangement.reask.better(previous, second):
+        before, after = arrangement.reask.repairs(previous), arrangement.reask.repairs(second)
+        note = f"asked again about section(s) {asked}: the second plan needs fewer repairs ({before} -> {after}) and is used"
+        return replace(second, notes=(*second.notes, note))
+    note = f"asked again about section(s) {asked}: the second plan was not better; the first stands"
+    return replace(previous, notes=(*previous.notes, note))

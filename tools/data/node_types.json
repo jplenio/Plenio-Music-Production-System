@@ -1216,6 +1216,12 @@
        "forceInput": true,
        "multiline": false
       }
+     ],
+     "first": [
+      "PLENIO_ARRANGEMENT",
+      {
+       "tooltip": "The first Apply Arrangement's state: this node is then the re-ask round - it reads the writer's second answer (only when sections were asked again) and keeps the better arrangement."
+      }
      ]
     }
    },
@@ -1229,18 +1235,28 @@
      "answer",
      "engine",
      "style",
-     "lyrics"
+     "lyrics",
+     "first"
     ]
    },
    "output": [
     "STRING",
-    "PLENIO_REPORT"
+    "PLENIO_REPORT",
+    "STRING",
+    "STRING",
+    "PLENIO_ARRANGEMENT"
    ],
    "output_name": [
     "score",
-    "report"
+    "report",
+    "reask_prompt",
+    "reask_schema",
+    "state"
    ],
    "output_is_list": [
+    false,
+    false,
+    false,
     false,
     false
    ],

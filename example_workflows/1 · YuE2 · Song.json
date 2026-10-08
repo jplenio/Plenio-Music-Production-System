@@ -6835,8 +6835,8 @@
     "version": 1,
     "state": {
      "lastGroupId": 0,
-     "lastNodeId": 1309,
-     "lastLinkId": 29,
+     "lastNodeId": 1313,
+     "lastLinkId": 47,
      "lastRerouteId": 0
     },
     "revision": 0,
@@ -6854,7 +6854,7 @@
     "outputNode": {
      "id": -20,
      "bounding": [
-      1540,
+      2240,
       0,
       160,
       80
@@ -6866,8 +6866,9 @@
       "name": "score",
       "type": "STRING",
       "linkIds": [
-       15,
-       16
+       28,
+       29,
+       30
       ],
       "pos": [
        0,
@@ -6879,8 +6880,9 @@
       "name": "brief",
       "type": "PLENIO_BRIEF",
       "linkIds": [
-       17,
-       18
+       31,
+       32,
+       33
       ],
       "pos": [
        0,
@@ -6892,8 +6894,9 @@
       "name": "engine",
       "type": "PLENIO_ENGINE",
       "linkIds": [
-       19,
-       20
+       34,
+       35,
+       36
       ],
       "pos": [
        0,
@@ -6905,8 +6908,9 @@
       "name": "style",
       "type": "STRING",
       "linkIds": [
-       21,
-       22
+       37,
+       38,
+       39
       ],
       "pos": [
        0,
@@ -6918,8 +6922,9 @@
       "name": "lyrics",
       "type": "STRING",
       "linkIds": [
-       23,
-       24
+       40,
+       41,
+       42
       ],
       "pos": [
        0,
@@ -6931,7 +6936,7 @@
       "name": "model",
       "type": "COMBO",
       "linkIds": [
-       25
+       43
       ],
       "pos": [
        0,
@@ -6944,7 +6949,7 @@
       "name": "seed",
       "type": "INT",
       "linkIds": [
-       26
+       44
       ],
       "pos": [
        0,
@@ -6957,7 +6962,7 @@
       "name": "song_seed",
       "type": "INT",
       "linkIds": [
-       27
+       45
       ],
       "pos": [
        0,
@@ -6972,7 +6977,7 @@
       "name": "score",
       "type": "STRING",
       "linkIds": [
-       28
+       46
       ],
       "pos": [
        0,
@@ -6984,7 +6989,7 @@
       "name": "report",
       "type": "PLENIO_REPORT",
       "linkIds": [
-       29
+       47
       ],
       "pos": [
        0,
@@ -7013,34 +7018,34 @@
         "localized_name": "score",
         "name": "score",
         "type": "STRING",
-        "link": 15
+        "link": 28
        },
        {
         "localized_name": "brief",
         "name": "brief",
         "type": "PLENIO_BRIEF",
-        "link": 17
+        "link": 31
        },
        {
         "localized_name": "engine",
         "name": "engine",
         "shape": 7,
         "type": "PLENIO_ENGINE",
-        "link": 19
+        "link": 34
        },
        {
         "localized_name": "style",
         "name": "style",
         "shape": 7,
         "type": "STRING",
-        "link": 21
+        "link": 37
        },
        {
         "localized_name": "lyrics",
         "name": "lyrics",
         "shape": 7,
         "type": "STRING",
-        "link": 23
+        "link": 40
        }
       ],
       "outputs": [
@@ -7089,7 +7094,7 @@
         "widget": {
          "name": "model"
         },
-        "link": 25
+        "link": 43
        }
       ],
       "outputs": [
@@ -7106,7 +7111,8 @@
         "name": "local_model",
         "type": "*",
         "links": [
-         10
+         10,
+         21
         ]
        },
        {
@@ -7114,7 +7120,8 @@
         "name": "use_local",
         "type": "BOOLEAN",
         "links": [
-         11
+         11,
+         22
         ]
        },
        {
@@ -7188,7 +7195,8 @@
         "name": "CLIP",
         "type": "CLIP",
         "links": [
-         9
+         9,
+         20
         ]
        }
       ],
@@ -7621,13 +7629,13 @@
         "localized_name": "score",
         "name": "score",
         "type": "STRING",
-        "link": 16
+        "link": 29
        },
        {
         "localized_name": "brief",
         "name": "brief",
         "type": "PLENIO_BRIEF",
-        "link": 18
+        "link": 32
        },
        {
         "localized_name": "answer",
@@ -7641,21 +7649,28 @@
         "name": "engine",
         "shape": 7,
         "type": "PLENIO_ENGINE",
-        "link": 20
+        "link": 35
        },
        {
         "localized_name": "style",
         "name": "style",
         "shape": 7,
         "type": "STRING",
-        "link": 22
+        "link": 38
        },
        {
         "localized_name": "lyrics",
         "name": "lyrics",
         "shape": 7,
         "type": "STRING",
-        "link": 24
+        "link": 41
+       },
+       {
+        "localized_name": "first",
+        "name": "first",
+        "shape": 7,
+        "type": "PLENIO_ARRANGEMENT",
+        "link": null
        },
        {
         "localized_name": "seed",
@@ -7672,16 +7687,37 @@
         "localized_name": "score",
         "name": "score",
         "type": "STRING",
-        "links": [
-         28
-        ]
+        "links": null
        },
        {
         "localized_name": "report",
         "name": "report",
         "type": "PLENIO_REPORT",
+        "links": null
+       },
+       {
+        "localized_name": "reask_prompt",
+        "name": "reask_prompt",
+        "type": "STRING",
         "links": [
-         29
+         15,
+         16
+        ]
+       },
+       {
+        "localized_name": "reask_schema",
+        "name": "reask_schema",
+        "type": "STRING",
+        "links": [
+         17
+        ]
+       },
+       {
+        "localized_name": "state",
+        "name": "state",
+        "type": "PLENIO_ARRANGEMENT",
+        "links": [
+         26
         ]
        }
       ],
@@ -7715,7 +7751,7 @@
         "widget": {
          "name": "value"
         },
-        "link": 26
+        "link": 44
        }
       ],
       "outputs": [
@@ -7766,7 +7802,7 @@
         "label": "b",
         "shape": 7,
         "type": "FLOAT,INT,BOOLEAN",
-        "link": 27
+        "link": 45
        },
        {
         "localized_name": "expression",
@@ -7792,7 +7828,10 @@
         "links": [
          2,
          3,
-         4
+         4,
+         18,
+         19,
+         25
         ]
        },
        {
@@ -7808,6 +7847,517 @@
       },
       "widgets_values": [
        "sum(values)"
+      ]
+     },
+     {
+      "id": 1310,
+      "type": "TextGenerate",
+      "pos": [
+       1100,
+       330
+      ],
+      "size": [
+       340,
+       420
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "clip",
+        "name": "clip",
+        "type": "CLIP",
+        "link": 20
+       },
+       {
+        "localized_name": "image",
+        "name": "image",
+        "shape": 7,
+        "type": "IMAGE",
+        "link": null
+       },
+       {
+        "localized_name": "video",
+        "name": "video",
+        "shape": 7,
+        "type": "IMAGE",
+        "link": null
+       },
+       {
+        "localized_name": "audio",
+        "name": "audio",
+        "shape": 7,
+        "type": "AUDIO",
+        "link": null
+       },
+       {
+        "localized_name": "prompt",
+        "name": "prompt",
+        "type": "STRING",
+        "widget": {
+         "name": "prompt"
+        },
+        "link": 15
+       },
+       {
+        "localized_name": "max_length",
+        "name": "max_length",
+        "type": "INT",
+        "widget": {
+         "name": "max_length"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "sampling_mode",
+        "name": "sampling_mode",
+        "type": "COMFY_DYNAMICCOMBO_V3",
+        "widget": {
+         "name": "sampling_mode"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "sampling_mode.temperature",
+        "name": "sampling_mode.temperature",
+        "type": "FLOAT",
+        "widget": {
+         "name": "sampling_mode.temperature"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "sampling_mode.top_k",
+        "name": "sampling_mode.top_k",
+        "type": "INT",
+        "widget": {
+         "name": "sampling_mode.top_k"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "sampling_mode.top_p",
+        "name": "sampling_mode.top_p",
+        "type": "FLOAT",
+        "widget": {
+         "name": "sampling_mode.top_p"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "sampling_mode.min_p",
+        "name": "sampling_mode.min_p",
+        "type": "FLOAT",
+        "widget": {
+         "name": "sampling_mode.min_p"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "sampling_mode.repetition_penalty",
+        "name": "sampling_mode.repetition_penalty",
+        "type": "FLOAT",
+        "widget": {
+         "name": "sampling_mode.repetition_penalty"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "sampling_mode.seed",
+        "name": "sampling_mode.seed",
+        "type": "INT",
+        "widget": {
+         "name": "sampling_mode.seed"
+        },
+        "link": 18
+       },
+       {
+        "localized_name": "sampling_mode.presence_penalty",
+        "name": "sampling_mode.presence_penalty",
+        "type": "FLOAT",
+        "widget": {
+         "name": "sampling_mode.presence_penalty"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "thinking",
+        "name": "thinking",
+        "type": "BOOLEAN",
+        "widget": {
+         "name": "thinking"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "use_default_template",
+        "name": "use_default_template",
+        "type": "BOOLEAN",
+        "widget": {
+         "name": "use_default_template"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "mtp",
+        "name": "mtp",
+        "type": "COMBO",
+        "widget": {
+         "name": "mtp"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "generated_text",
+        "name": "generated_text",
+        "type": "STRING",
+        "links": [
+         23
+        ]
+       }
+      ],
+      "title": "Re-ask (ComfyUI)",
+      "properties": {
+       "Node name for S&R": "TextGenerate"
+      },
+      "widgets_values": [
+       "",
+       2048,
+       "on",
+       0.7,
+       64,
+       0.95,
+       0.05,
+       1.05,
+       0,
+       0.0,
+       false,
+       true,
+       "auto"
+      ]
+     },
+     {
+      "id": 1311,
+      "type": "PlenioLocalLLM",
+      "pos": [
+       1100,
+       810
+      ],
+      "size": [
+       340,
+       360
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "schema",
+        "name": "schema",
+        "shape": 7,
+        "type": "STRING",
+        "link": 17
+       },
+       {
+        "localized_name": "prompt",
+        "name": "prompt",
+        "type": "STRING",
+        "widget": {
+         "name": "prompt"
+        },
+        "link": 16
+       },
+       {
+        "localized_name": "model",
+        "name": "model",
+        "type": "COMBO",
+        "widget": {
+         "name": "model"
+        },
+        "link": 21
+       },
+       {
+        "localized_name": "seed",
+        "name": "seed",
+        "type": "INT",
+        "widget": {
+         "name": "seed"
+        },
+        "link": 19
+       },
+       {
+        "localized_name": "max_tokens",
+        "name": "max_tokens",
+        "type": "INT",
+        "widget": {
+         "name": "max_tokens"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "temperature",
+        "name": "temperature",
+        "type": "FLOAT",
+        "widget": {
+         "name": "temperature"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "thinking",
+        "name": "thinking",
+        "type": "BOOLEAN",
+        "widget": {
+         "name": "thinking"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "context",
+        "name": "context",
+        "type": "INT",
+        "widget": {
+         "name": "context"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "keep_loaded",
+        "name": "keep_loaded",
+        "type": "BOOLEAN",
+        "widget": {
+         "name": "keep_loaded"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "system_prompt",
+        "name": "system_prompt",
+        "type": "STRING",
+        "widget": {
+         "name": "system_prompt"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "reuse_answers",
+        "name": "reuse_answers",
+        "type": "BOOLEAN",
+        "widget": {
+         "name": "reuse_answers"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "text",
+        "name": "text",
+        "type": "STRING",
+        "links": [
+         24
+        ]
+       },
+       {
+        "localized_name": "thinking",
+        "name": "thinking",
+        "type": "STRING",
+        "links": null
+       }
+      ],
+      "title": "Re-ask (Local LLM)",
+      "properties": {
+       "Node name for S&R": "PlenioLocalLLM"
+      },
+      "widgets_values": [
+       "",
+       "(choose a model)",
+       0,
+       "fixed",
+       2048,
+       0.7,
+       false,
+       8192,
+       false,
+       "",
+       true
+      ]
+     },
+     {
+      "id": 1312,
+      "type": "ComfySwitchNode",
+      "pos": [
+       1500,
+       330
+      ],
+      "size": [
+       260,
+       90
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "on_false",
+        "name": "on_false",
+        "shape": 7,
+        "type": "COMFY_MATCHTYPE_V3",
+        "link": 23
+       },
+       {
+        "localized_name": "on_true",
+        "name": "on_true",
+        "shape": 7,
+        "type": "COMFY_MATCHTYPE_V3",
+        "link": 24
+       },
+       {
+        "localized_name": "switch",
+        "name": "switch",
+        "type": "BOOLEAN",
+        "widget": {
+         "name": "switch"
+        },
+        "link": 22
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "output",
+        "name": "output",
+        "type": "COMFY_MATCHTYPE_V3",
+        "links": [
+         27
+        ]
+       }
+      ],
+      "title": "Re-ask: ComfyUI or Local LLM",
+      "properties": {
+       "Node name for S&R": "ComfySwitchNode"
+      },
+      "widgets_values": [
+       null
+      ]
+     },
+     {
+      "id": 1313,
+      "type": "PlenioApplyArrangement",
+      "pos": [
+       1800,
+       0
+      ],
+      "size": [
+       340,
+       260
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "score",
+        "name": "score",
+        "type": "STRING",
+        "link": 30
+       },
+       {
+        "localized_name": "brief",
+        "name": "brief",
+        "type": "PLENIO_BRIEF",
+        "link": 33
+       },
+       {
+        "localized_name": "answer",
+        "name": "answer",
+        "shape": 7,
+        "type": "STRING",
+        "link": 27
+       },
+       {
+        "localized_name": "engine",
+        "name": "engine",
+        "shape": 7,
+        "type": "PLENIO_ENGINE",
+        "link": 36
+       },
+       {
+        "localized_name": "style",
+        "name": "style",
+        "shape": 7,
+        "type": "STRING",
+        "link": 39
+       },
+       {
+        "localized_name": "lyrics",
+        "name": "lyrics",
+        "shape": 7,
+        "type": "STRING",
+        "link": 42
+       },
+       {
+        "localized_name": "first",
+        "name": "first",
+        "shape": 7,
+        "type": "PLENIO_ARRANGEMENT",
+        "link": 26
+       },
+       {
+        "localized_name": "seed",
+        "name": "seed",
+        "type": "INT",
+        "widget": {
+         "name": "seed"
+        },
+        "link": 25
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "score",
+        "name": "score",
+        "type": "STRING",
+        "links": [
+         46
+        ]
+       },
+       {
+        "localized_name": "report",
+        "name": "report",
+        "type": "PLENIO_REPORT",
+        "links": [
+         47
+        ]
+       },
+       {
+        "localized_name": "reask_prompt",
+        "name": "reask_prompt",
+        "type": "STRING",
+        "links": null
+       },
+       {
+        "localized_name": "reask_schema",
+        "name": "reask_schema",
+        "type": "STRING",
+        "links": null
+       },
+       {
+        "localized_name": "state",
+        "name": "state",
+        "type": "PLENIO_ARRANGEMENT",
+        "links": null
+       }
+      ],
+      "title": "Apply Arrangement (re-ask)",
+      "properties": {
+       "Node name for S&R": "PlenioApplyArrangement"
+      },
+      "widgets_values": [
+       0,
+       "fixed"
       ]
      }
     ],
@@ -7842,7 +8392,7 @@
       "origin_id": 1309,
       "origin_slot": 1,
       "target_id": 1307,
-      "target_slot": 6,
+      "target_slot": 7,
       "type": "INT"
      },
      {
@@ -7927,14 +8477,118 @@
      },
      {
       "id": 15,
-      "origin_id": -10,
-      "origin_slot": 0,
-      "target_id": 1301,
-      "target_slot": 0,
+      "origin_id": 1307,
+      "origin_slot": 2,
+      "target_id": 1310,
+      "target_slot": 4,
       "type": "STRING"
      },
      {
       "id": 16,
+      "origin_id": 1307,
+      "origin_slot": 2,
+      "target_id": 1311,
+      "target_slot": 1,
+      "type": "STRING"
+     },
+     {
+      "id": 17,
+      "origin_id": 1307,
+      "origin_slot": 3,
+      "target_id": 1311,
+      "target_slot": 0,
+      "type": "STRING"
+     },
+     {
+      "id": 18,
+      "origin_id": 1309,
+      "origin_slot": 1,
+      "target_id": 1310,
+      "target_slot": 12,
+      "type": "INT"
+     },
+     {
+      "id": 19,
+      "origin_id": 1309,
+      "origin_slot": 1,
+      "target_id": 1311,
+      "target_slot": 3,
+      "type": "INT"
+     },
+     {
+      "id": 20,
+      "origin_id": 1303,
+      "origin_slot": 0,
+      "target_id": 1310,
+      "target_slot": 0,
+      "type": "CLIP"
+     },
+     {
+      "id": 21,
+      "origin_id": 1302,
+      "origin_slot": 1,
+      "target_id": 1311,
+      "target_slot": 2,
+      "type": "*"
+     },
+     {
+      "id": 22,
+      "origin_id": 1302,
+      "origin_slot": 2,
+      "target_id": 1312,
+      "target_slot": 2,
+      "type": "BOOLEAN"
+     },
+     {
+      "id": 23,
+      "origin_id": 1310,
+      "origin_slot": 0,
+      "target_id": 1312,
+      "target_slot": 0,
+      "type": "STRING"
+     },
+     {
+      "id": 24,
+      "origin_id": 1311,
+      "origin_slot": 0,
+      "target_id": 1312,
+      "target_slot": 1,
+      "type": "STRING"
+     },
+     {
+      "id": 25,
+      "origin_id": 1309,
+      "origin_slot": 1,
+      "target_id": 1313,
+      "target_slot": 7,
+      "type": "INT"
+     },
+     {
+      "id": 26,
+      "origin_id": 1307,
+      "origin_slot": 4,
+      "target_id": 1313,
+      "target_slot": 6,
+      "type": "PLENIO_ARRANGEMENT"
+     },
+     {
+      "id": 27,
+      "origin_id": 1312,
+      "origin_slot": 0,
+      "target_id": 1313,
+      "target_slot": 2,
+      "type": "COMFY_MATCHTYPE_V3"
+     },
+     {
+      "id": 28,
+      "origin_id": -10,
+      "origin_slot": 0,
+      "target_id": 1301,
+      "target_slot": 0,
+      "type": "STRING"
+     },
+     {
+      "id": 29,
       "origin_id": -10,
       "origin_slot": 0,
       "target_id": 1307,
@@ -7942,7 +8596,15 @@
       "type": "STRING"
      },
      {
-      "id": 17,
+      "id": 30,
+      "origin_id": -10,
+      "origin_slot": 0,
+      "target_id": 1313,
+      "target_slot": 0,
+      "type": "STRING"
+     },
+     {
+      "id": 31,
       "origin_id": -10,
       "origin_slot": 1,
       "target_id": 1301,
@@ -7950,7 +8612,7 @@
       "type": "PLENIO_BRIEF"
      },
      {
-      "id": 18,
+      "id": 32,
       "origin_id": -10,
       "origin_slot": 1,
       "target_id": 1307,
@@ -7958,7 +8620,15 @@
       "type": "PLENIO_BRIEF"
      },
      {
-      "id": 19,
+      "id": 33,
+      "origin_id": -10,
+      "origin_slot": 1,
+      "target_id": 1313,
+      "target_slot": 1,
+      "type": "PLENIO_BRIEF"
+     },
+     {
+      "id": 34,
       "origin_id": -10,
       "origin_slot": 2,
       "target_id": 1301,
@@ -7966,7 +8636,7 @@
       "type": "PLENIO_ENGINE"
      },
      {
-      "id": 20,
+      "id": 35,
       "origin_id": -10,
       "origin_slot": 2,
       "target_id": 1307,
@@ -7974,7 +8644,15 @@
       "type": "PLENIO_ENGINE"
      },
      {
-      "id": 21,
+      "id": 36,
+      "origin_id": -10,
+      "origin_slot": 2,
+      "target_id": 1313,
+      "target_slot": 3,
+      "type": "PLENIO_ENGINE"
+     },
+     {
+      "id": 37,
       "origin_id": -10,
       "origin_slot": 3,
       "target_id": 1301,
@@ -7982,7 +8660,7 @@
       "type": "STRING"
      },
      {
-      "id": 22,
+      "id": 38,
       "origin_id": -10,
       "origin_slot": 3,
       "target_id": 1307,
@@ -7990,7 +8668,15 @@
       "type": "STRING"
      },
      {
-      "id": 23,
+      "id": 39,
+      "origin_id": -10,
+      "origin_slot": 3,
+      "target_id": 1313,
+      "target_slot": 4,
+      "type": "STRING"
+     },
+     {
+      "id": 40,
       "origin_id": -10,
       "origin_slot": 4,
       "target_id": 1301,
@@ -7998,7 +8684,7 @@
       "type": "STRING"
      },
      {
-      "id": 24,
+      "id": 41,
       "origin_id": -10,
       "origin_slot": 4,
       "target_id": 1307,
@@ -8006,7 +8692,15 @@
       "type": "STRING"
      },
      {
-      "id": 25,
+      "id": 42,
+      "origin_id": -10,
+      "origin_slot": 4,
+      "target_id": 1313,
+      "target_slot": 5,
+      "type": "STRING"
+     },
+     {
+      "id": 43,
       "origin_id": -10,
       "origin_slot": 5,
       "target_id": 1302,
@@ -8014,7 +8708,7 @@
       "type": "COMBO"
      },
      {
-      "id": 26,
+      "id": 44,
       "origin_id": -10,
       "origin_slot": 6,
       "target_id": 1308,
@@ -8022,7 +8716,7 @@
       "type": "INT"
      },
      {
-      "id": 27,
+      "id": 45,
       "origin_id": -10,
       "origin_slot": 7,
       "target_id": 1309,
@@ -8030,16 +8724,16 @@
       "type": "INT"
      },
      {
-      "id": 28,
-      "origin_id": 1307,
+      "id": 46,
+      "origin_id": 1313,
       "origin_slot": 0,
       "target_id": -20,
       "target_slot": 0,
       "type": "STRING"
      },
      {
-      "id": 29,
-      "origin_id": 1307,
+      "id": 47,
+      "origin_id": 1313,
       "origin_slot": 1,
       "target_id": -20,
       "target_slot": 1,
@@ -8048,7 +8742,7 @@
     ],
     "extra": {},
     "category": "Plenio/Score",
-    "description": "The creative modes' section plan: the writer model plans every section of the score (chords, what the instrument line plays, energy, a key lift) as a small JSON plan, and Plenio writes the notes and checks the result - or keeps the score as it was and says why (in the report and the Song Sheet). In the brief's arrangement off nothing runs here. The writer model is the same list as Write Song's; GGUF files, LM Studio and Ollama keep to the plan's format exactly. The arrangement seed gives another arrangement of the same song."
+    "description": "The creative modes' section plan: the writer model plans every section of the score (chords, what the instrument line plays, energy, a key lift) as a small JSON plan, and Plenio writes the notes and checks the result - or keeps the score as it was and says why (in the report and the Song Sheet). In the brief's arrangement off nothing runs here. The writer model is the same list as Write Song's; GGUF files, LM Studio and Ollama keep to the plan's format exactly. The arrangement seed gives another arrangement of the same song. Sections whose chords the harmony check had to repair much go back to the writer once (the re-ask); the better arrangement is used."
    },
    {
     "id": "601f9d71-b118-51b3-a1fb-fa2a8d2c5ede",

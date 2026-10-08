@@ -67,6 +67,7 @@ Above 0 the source's lyrics are transcribed for the writer (the lyrics ASR runs)
    - **key lifts** - only while the voice stays in its range (at most two semitones above the song's highest note);
    - the **tempo** change.
 4. A **gate** per section: a section that clashes more after the arrangement than before - melody against its chords, or the voice against the line - goes back to how it was.
+   **Asked once more:** where the guard had to replace more than a third of a section's chords, or the gate put a section back, the writer is asked once more about those sections - with what did not fit, the melody on the strong beats and the chords that fit their key. The second plan is used when it needs fewer repairs and clashes no more; otherwise the first stands.
 5. The result must pass YuE2's parser, read back unchanged, open note by note in the score editor and fit YuE2's context. Otherwise the score **stays as it was**, and *Song Sheet · Score* shows a warning with the reason (*Arrangement not applied - ...*).
 
 Measured on the 120 writer plans of study A1 (October 2026): with 0.4.5 the line sounded under 85 % of the singing with 5.8 clashes a minute against the voice; with the guard there are none, every chord belongs to the key or the genre, and still 87 % of the sections are arranged ([proposal](../../design/harmony-and-lyrics-fit.md)).

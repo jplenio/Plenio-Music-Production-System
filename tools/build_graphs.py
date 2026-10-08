@@ -463,21 +463,33 @@ def stems() -> Blueprint:
 
 
 def _repair_writer(
-    g: Graph, x: int, choice: Node, loader: Node, seed: Node, fit: Node
+    g: Graph,
+    x: int,
+    choice: Node,
+    loader: Node,
+    seed: Node,
+    fit: Node,
+    *,
+    outputs: tuple[str, str] = ("prompt", "schema"),
+    y: int = 300,
+    title: str = "Repair",
+    max_tokens: int = WRITER_MAX_TOKENS,
+    temperature: float = REPAIR_TEMPERATURE,
+    context: int = WRITER_CONTEXT,
 ) -> tuple[Node, Node, Node]:
-    """One repair round's writer: Generate Text and Local LLM on the previous Fit Lyrics' prompt, with the
-    draft's writer choice, loader and seed; the next Fit Lyrics reads the switch lazily, only when lines went
-    back to the writer."""
+    """One repair round's writer: Generate Text and Local LLM on the previous node's request (``outputs``:
+    its prompt and schema), with the first writer's choice, loader and seed; the next node reads the switch
+    lazily, only when something went back to the writer (Fit Lyrics' lines, Apply Arrangement's re-ask)."""
     generate = g.add(
         "TextGenerate",
-        (x, 300),
+        (x, y),
         size=(340, 420),
-        title="Repair (ComfyUI)",
+        title=f"{title} (ComfyUI)",
         widgets={
             "prompt": "",
-            "max_length": WRITER_MAX_TOKENS,
+            "max_length": max_tokens,
             "sampling_mode": "on",
-            "sampling_mode.temperature": REPAIR_TEMPERATURE,
+            "sampling_mode.temperature": temperature,
             "sampling_mode.top_k": 64,
             "sampling_mode.top_p": 0.95,
             "sampling_mode.min_p": 0.05,
@@ -491,27 +503,27 @@ def _repair_writer(
     )
     local_llm = g.add(
         "PlenioLocalLLM",
-        (x, 780),
+        (x, y + 480),
         size=(340, 360),
-        title="Repair (Local LLM)",
+        title=f"{title} (Local LLM)",
         widgets={
             "prompt": "",
             "model": CHOOSE,
             "seed": 0,
             "seed.control": "fixed",
-            "max_tokens": WRITER_MAX_TOKENS,
-            "temperature": REPAIR_TEMPERATURE,
+            "max_tokens": max_tokens,
+            "temperature": temperature,
             "thinking": False,
-            "context": WRITER_CONTEXT,
+            "context": context,
             "keep_loaded": False,
             "system_prompt": "",
             "reuse_answers": True,
         },
     )
-    switch = g.add("ComfySwitchNode", (x + 400, 300), size=(260, 90), title="Repair: ComfyUI or Local LLM")
-    g.link(fit, "prompt", generate, "prompt")
-    g.link(fit, "prompt", local_llm, "prompt")
-    g.link(fit, "schema", local_llm, "schema")
+    switch = g.add("ComfySwitchNode", (x + 400, y), size=(260, 90), title=f"{title}: ComfyUI or Local LLM")
+    g.link(fit, outputs[0], generate, "prompt")
+    g.link(fit, outputs[0], local_llm, "prompt")
+    g.link(fit, outputs[1], local_llm, "schema")
     g.link(seed, "INT", generate, "sampling_mode.seed")
     g.link(seed, "INT", local_llm, "seed")
     g.link(loader, "CLIP", generate, "clip")
@@ -784,6 +796,31 @@ def arrange() -> Blueprint:
     g.link(generate, "generated_text", switch, "on_false")
     g.link(local_llm, "text", switch, "on_true")
     g.link(switch, "output", apply, "answer")
+    # the re-ask: sections whose chords the harmony guard had to repair go back to the writer once
+    _generate2, _local2, switch2 = _repair_writer(
+        g,
+        1100,
+        choice,
+        loader,
+        seed,
+        apply,
+        outputs=("reask_prompt", "reask_schema"),
+        y=330,
+        title="Re-ask",
+        max_tokens=ARRANGE_MAX_TOKENS,
+        temperature=ARRANGE_TEMPERATURE,
+        context=ARRANGE_CONTEXT,
+    )
+    second = g.add(
+        "PlenioApplyArrangement",
+        (1800, 0),
+        size=(340, 260),
+        title="Apply Arrangement (re-ask)",
+        widgets={"seed": 0, "seed.control": "fixed"},
+    )
+    g.link(seed, "INT", second, "seed")
+    g.link(apply, "state", second, "first")
+    g.link(switch2, "output", second, "answer")
     return Blueprint(
         "Plenio · Arrange",
         "Plenio/Score",
@@ -792,14 +829,19 @@ def arrange() -> Blueprint:
         "the result - or keeps the score as it was and says why (in the report and the Song Sheet). In the "
         "brief's arrangement off nothing runs here. The writer model is the same list as Write Song's; GGUF files, "
         "LM Studio and Ollama keep to the plan's format exactly. The arrangement seed gives another arrangement "
-        "of the same song.",
+        "of the same song. Sections whose chords the harmony check had to repair much go back to the writer once "
+        "(the re-ask); the better arrangement is used.",
         g,
         [
-            BlueprintInput("score", "STRING", [(compose, "score"), (apply, "score")]),
-            BlueprintInput("brief", "PLENIO_BRIEF", [(compose, "brief"), (apply, "brief")]),
-            BlueprintInput("engine", "PLENIO_ENGINE", [(compose, "engine"), (apply, "engine")]),
-            BlueprintInput("style", "STRING", [(compose, "style"), (apply, "style")]),
-            BlueprintInput("lyrics", "STRING", [(compose, "lyrics"), (apply, "lyrics")]),
+            BlueprintInput("score", "STRING", [(compose, "score"), (apply, "score"), (second, "score")]),
+            BlueprintInput(
+                "brief", "PLENIO_BRIEF", [(compose, "brief"), (apply, "brief"), (second, "brief")]
+            ),
+            BlueprintInput(
+                "engine", "PLENIO_ENGINE", [(compose, "engine"), (apply, "engine"), (second, "engine")]
+            ),
+            BlueprintInput("style", "STRING", [(compose, "style"), (apply, "style"), (second, "style")]),
+            BlueprintInput("lyrics", "STRING", [(compose, "lyrics"), (apply, "lyrics"), (second, "lyrics")]),
             BlueprintInput(
                 "model", "COMBO", [(choice, "model")], widget=True, default=WRITER, label="writer model"
             ),
@@ -809,8 +851,8 @@ def arrange() -> Blueprint:
             BlueprintInput("song_seed", "INT", [(seed, "values.b")], label="song seed"),
         ],
         [
-            BlueprintOutput("score", "STRING", (apply, "score")),
-            BlueprintOutput("report", "PLENIO_REPORT", (apply, "report")),
+            BlueprintOutput("score", "STRING", (second, "score")),
+            BlueprintOutput("report", "PLENIO_REPORT", (second, "report")),
         ],
     )
 
