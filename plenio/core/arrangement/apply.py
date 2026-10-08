@@ -349,6 +349,16 @@ def _holding(shifts: Sequence[int]) -> tuple[list[int], bool]:
     return held, held != list(shifts)
 
 
+def _spelled(root: int, quality: str, *keys: str) -> str:
+    """A chord spelled for the first of ``keys`` Plenio knows (``Dbm`` is not a key; ``Db`` is)."""
+    for key in keys:
+        try:
+            return harmony.chord_name(root, quality, key)
+        except (KeyError, ValueError, PlenioValidationError):
+            continue
+    return harmony.chord_name(root, quality, "C")
+
+
 def _triad(key: harmony.Key, degree: int) -> tuple[int, str] | None:
     """The diatonic triad on ``degree`` (0-based) of ``key``: root and quality (major, minor; ``None`` else)."""
     scale = key.scale
@@ -389,16 +399,56 @@ def _modulations(old: harmony.Key, new: harmony.Key) -> list[tuple[str, list[tup
     return sequences
 
 
-def _prepare_lifts(score: c.Score, original: c.Score, melody: Sequence[c.Note]) -> tuple[c.Score, list[str]]:
-    """Every key change the arrangement made, led into by chords (the owner's listening in study E7: a single
-    chord on half a bar still sounded sudden). In this order, the first whose every chord clashes with nothing
-    that sounds under it - the melody and the instrument line:
+def _fit_line(score: c.Score, spans: Sequence[tuple[int, int, str]]) -> tuple[c.Score, int]:
+    """The instrument line's notes under the leading chords moved onto the nearest tone of their chord that
+    clashes neither with the chord nor with the voice; a note with no such tone rests. Returns the score and how
+    many notes moved or rest."""
+    vocal = score.vocal
+    kept: list[c.Note] = []
+    changed = 0
+    for note in score.ins:
+        span = next(((a, b, name) for a, b, name in spans if a <= note.onset < b), None)
+        if span is None:
+            kept.append(note)
+            continue
+        chord_tones = harmony.tones(span[2])
+        root = harmony.parse_chord(span[2])[0]
+        sung = [n.pitch for n in vocal if n.onset < note.end and n.end > note.onset]
 
-    - a chord of both keys (the new key's ii/IV, or iv/VI in minor) and the new key's dominant, a bar each over
-      the last two bars, else half a bar each in the last bar (Cm - D7 -> Gm, Em - A7 -> D);
-    - the new key's bVI and bVII rising to it, likewise (Eb - F -> Gm, Bb - C -> D);
-    - its dominant over the last bar, its second half or its last beat;
-    - the subdominant or the chord on its lowered seventh step, on the last bar's second half or last beat.
+        def clean(
+            pitch: int, sung: list[int] = sung, chord_tones: frozenset[int] = chord_tones, root: int = root
+        ) -> bool:
+            if harmony.clashing(pitch % 12, chord_tones, root, frozenset({2, 9})):
+                return False
+            return not any((s - pitch) % 12 in harmony.HARSH for s in sung)
+
+        if clean(note.pitch):
+            kept.append(note)
+            continue
+        changed += 1
+        options = sorted(
+            (p for p in range(note.pitch - 7, note.pitch + 8) if 0 <= p <= 127 and p % 12 in chord_tones),
+            key=lambda p: (abs(p - note.pitch), p),
+        )
+        pitch = next((p for p in options if clean(p)), None)
+        if pitch is not None:
+            kept.append(c.Note(note.onset, note.duration, pitch))
+    return c.validate(replace(score, ins=tuple(kept))), changed
+
+
+def _prepare_lifts(
+    score: c.Score, original: c.Score, melody: Sequence[c.Note], *, adjust_line: bool = True
+) -> tuple[c.Score, list[str]]:
+    """Every key change the arrangement made, led into by chords (the owner's listening in study E7: a single
+    chord on half a bar still sounded sudden; two chords over one and a half bars "perfect"). The most room
+    first - two chords over the last two bars, over the last one and a half, in halves of the last bar; then one
+    chord over the last bar, its second half or last beat - and in each the clearest sequence whose every chord
+    clashes with nothing that sounds under it (the melody and the instrument line):
+
+    - a chord of both keys (the new key's ii/IV, or iv/VI in minor) and the new key's dominant (Cm - D7 -> Gm,
+      Em - A7 -> D);
+    - the new key's bVI and bVII rising to it (Eb - F -> Gm, Bb - C -> D);
+    - its dominant alone; at last the subdominant or the chord on its lowered seventh step alone.
 
     A change that none of them fits comes unprepared and is reported. A score without chords stays as it is
     (YuE2 harmonises it)."""
@@ -408,7 +458,10 @@ def _prepare_lifts(score: c.Score, original: c.Score, melody: Sequence[c.Note]) 
     chords = list(score.chords)
     notes: list[str] = []
     beat = max(1, score.units_per_quarter)
-    sounding_notes = (*melody, *score.ins)
+    # the voice's melody must fit the leading chords; Plenio's line follows them (moved below), except where the
+    # line is the melody itself (an instrumental with a lead)
+    sounding_notes = tuple(melody) if adjust_line else (*melody, *score.ins)
+    spans: list[tuple[int, int, str]] = []
 
     def fits(name: str, start: int, stop: int) -> bool:
         try:
@@ -427,28 +480,38 @@ def _prepare_lifts(score: c.Score, original: c.Score, melody: Sequence[c.Note]) 
             old_key, new_key = harmony.key_of(old_key_name), harmony.key_of(change.key)
         except (KeyError, ValueError):
             continue
+        if not any(ch.onset <= change.onset for ch in chords):
+            # the lifted section starts before the first chord: a leading chord would sound on into it
+            notes.append(
+                f"the key change to {change.key} at bar {last + 2} comes unprepared: no chord sounds there"
+            )
+            continue
         earlier = [k.onset for k in score.keys if k.onset < change.onset]
         floor = max(earlier) if earlier else 0  # never reach back over an earlier key change
         half = last_start + (change.onset - last_start) // 2
         minor_name = change.key if new_key.minor else f"{change.key}m"
         two_bars = last - 1 >= 0 and score.starts[last - 1] >= floor
         found: tuple[str, list[tuple[int, str]]] | None = None
-        for why, sequence in _modulations(old_key, new_key):
-            # spelled in the new key; its lowered steps in its minor (Bb - C -> D, not A# - C)
-            spelling = minor_name if "lowered" in why else change.key
-            names = [harmony.chord_name(root, quality, spelling) for root, quality in sequence]
-            if len(names) == 2:
-                layouts = []
-                if two_bars:
-                    before_start = score.starts[last - 1]
-                    before_half = before_start + (last_start - before_start) // 2
-                    layouts.append([(before_start, last_start), (last_start, change.onset)])
-                    layouts.append([(before_half, last_start), (last_start, change.onset)])
-                if last_start < half < change.onset:
-                    layouts.append([(last_start, half), (half, change.onset)])
-            else:
-                layouts = [[(start, change.onset)] for start in (last_start, half, change.onset - beat)]
-            for layout in layouts:
+        # the most room first (the owner's listening, second follow-up: a sequence over one and a half bars was
+        # "perfect", the same kind of sequence squeezed into one bar "not really good yet"); within the same
+        # room the clearest sequence
+        two: list[list[tuple[int, int]]] = []
+        if two_bars:
+            before_start = score.starts[last - 1]
+            before_half = before_start + (last_start - before_start) // 2
+            two += [[(before_start, last_start), (last_start, change.onset)]]
+            two += [[(before_half, last_start), (last_start, change.onset)]]
+        if last_start < half < change.onset:
+            two += [[(last_start, half), (half, change.onset)]]
+        one = [[(start, change.onset)] for start in (last_start, half, change.onset - beat)]
+        sequences = _modulations(old_key, new_key)
+        for layout in [*two, *one]:
+            for why, sequence in sequences:
+                if len(sequence) != len(layout):
+                    continue
+                # spelled in the new key; its lowered steps in its minor (Bb - C -> D, not A# - C)
+                spelling = minor_name if "lowered" in why else change.key
+                names = [_spelled(root, quality, spelling, change.key) for root, quality in sequence]
                 if all(start < stop and start >= floor for start, stop in layout) and all(
                     fits(name, start, stop) for name, (start, stop) in zip(names, layout, strict=True)
                 ):
@@ -458,7 +521,7 @@ def _prepare_lifts(score: c.Score, original: c.Score, melody: Sequence[c.Note]) 
                 break
         if found is None:
             for interval, quality in ((5, "m" if new_key.minor else ""), (10, "")):
-                name = harmony.chord_name((new_key.tonic + interval) % 12, quality, minor_name)
+                name = _spelled((new_key.tonic + interval) % 12, quality, minor_name, change.key)
                 for start in (half, change.onset - beat):
                     if last_start <= start < change.onset and fits(name, start, change.onset):
                         found = ("a chord leading into it", [(start, name)])
@@ -476,6 +539,8 @@ def _prepare_lifts(score: c.Score, original: c.Score, melody: Sequence[c.Note]) 
         after = before[-1].name if before else None
         chords = [ch for ch in chords if not first <= ch.onset < change.onset]
         chords += [c.ChordSymbol(start, name) for start, name in placed]
+        ends = [start for start, _ in placed[1:]] + [change.onset]
+        spans += [(start, end, name) for (start, name), end in zip(placed, ends, strict=True)]
         if after and not any(ch.onset == change.onset for ch in chords):
             chords.append(c.ChordSymbol(change.onset, after))  # the lifted section starts on its own chord
         bars = (
@@ -486,7 +551,12 @@ def _prepare_lifts(score: c.Score, original: c.Score, melody: Sequence[c.Note]) 
         notes.append(f"{bars}: {' - '.join(name for _, name in placed)} lead into {change.key} ({why})")
     if not notes or all("comes unprepared" in n for n in notes):
         return score, notes
-    return c.validate(replace(score, chords=tuple(sorted(chords, key=lambda ch: ch.onset)))), notes
+    led = c.validate(replace(score, chords=tuple(sorted(chords, key=lambda ch: ch.onset))))
+    if adjust_line and spans:
+        led, moved = _fit_line(led, spans)
+        if moved:
+            notes.append(f"the instrument line follows the leading chords ({moved} note(s) moved or rest)")
+    return led, notes
 
 
 def _same_run(shifts: Sequence[int], i: int, j: int) -> bool:
@@ -746,9 +816,15 @@ def arrange(
             before_shift = working
             working, stayed = _apply_shifts(working, [(f, e) for _, f, e in ranges], shifts, highest)
             if working is not before_shift:
-                working, prepared = _prepare_lifts(
-                    working, before_shift, melody_voice(working, policy.melody)
-                )
+                try:
+                    working, prepared = _prepare_lifts(
+                        working,
+                        before_shift,
+                        melody_voice(working, policy.melody),
+                        adjust_line=policy.melody != "instrument",
+                    )
+                except (PlenioValidationError, ValueError, KeyError) as error:
+                    prepared = [f"the key change is not led in ({error})"]  # the lift itself stands
                 notes += prepared
             for i, shift in enumerate(shifts):
                 if not shift:
