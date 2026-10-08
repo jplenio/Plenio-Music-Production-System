@@ -2,9 +2,13 @@
 
 All notable changes are listed here. Versions follow semantic versioning; published Registry versions are immutable.
 
-## Unreleased
+## 0.4.5 - 2026-10-08
+
+The writer model can plan the arrangement: creative modes and closeness sliders for songs and covers - **experimental**, made for trying out - one writer model for every writing step (ComfyUI's text models or your own local LLMs), and the sheet music of every export as a PDF. Two new tutorials show the creative modes; all other tutorials are recorded again.
 
 ### Added
+
+- **Tutorials 6 and 7** (`tools/tutorials/yue2-song-creative.mjs`, `yue2-cover-creative.mjs`): *YuE2 · Song · Creative modes* (a *dramatic* song, its arranged score, another arrangement from the arrangement seed) and *YuE2 · Cover · Creative modes* (a cover re-arranged for a full ensemble with new lyrics that keep the original's story). Tutorials 0-5 are recorded again with the 0.4.5 templates (Writer model, Arrange, the sheet music PDF) and mention the new possibilities.
 
 - **Sheet music with every export** (Export Release, new option *sheet music*: off, PDF (A4), PDF (Letter); A4 in the YuE2 templates): the final score's notation - both voices, chord symbols, sections and the lyrics under the notes, with lyrics lines placed by hand - is saved as `<name>.pdf` next to the audio, under the export's name (numbered with it). The browser that runs the workflow draws it with the score editor's *Export notation…* code and Plenio saves it (`/plenio/export/sheet-music`, a one-time token per export); the release record lists the file, and the node's summary says *saved*. A run without an open ComfyUI page gets no PDF.
 - **Creative modes - experimental** (Song Brief and Cover Brief, new *arrangement (experimental)* choice; they can give unexpected results and are meant for experimenting first, *simple* stays the dependable choice): *simple* (default) works as before; *standard*, *varied*, *fantasy*, *sterile*, *many instruments* and *dramatic* add their hints to the writing prompt and - in *1 · YuE2 · Song* and *2 · YuE2 · Cover* - let the writer model plan every section of YuE2's score: chords, what the instrument line plays (*pad, arpeggio, riff, countermelody, solo, octave, motif, none*), energy, key lifts and the tempo. The writer answers a small JSON plan, never notes: Plenio writes every note with the checked score operations, keeps the melody and the form, and checks the result (YuE2's parser, read back, the score editor, YuE2's context). A plan it cannot use leaves the score as it was - *Song Sheet · Score* warns and says why. Own modes are Markdown files in `user/plenio/arrangement` ([guide](docs/user/concepts/creative-modes.md), ADR-0011).
@@ -21,6 +25,8 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 ### Fixed
 
+- **Score editor: a selection frame that scrolled the roll lost its notes.** A frame pulled to the roll's bottom edge scrolls the pane along; its start then lay under the pinned lanes, so the frame dropped the notes it had framed and took the chord symbols instead (the arrow keys then moved two chords, and the notes were out of view - seen in tutorial 2). The frame now keeps its start where the pane was when it began; only a frame that starts in, or is pulled into, the chord lane takes chord symbols.
+- **Apply Arrangement** reported a key lift as made when it would have pushed a note out of the MIDI range (the key stayed); the section now says that the key stays.
 - **A review stop in a series never ended.** With *new song every run* and a Song Sheet on *stop for review*, every run wrote a new song, so *Approve* was always for the previous one and the run stopped again and again. Now a song that waits for review is kept: running again without approving shows the same song, the run after *Approve* renders that song, and the run after it writes the next one. *new cover every run* behaves the same.
 - **Every song of a series gets its own seeds.** The briefs have a new output *song seed* (a new value for every song of a series, kept while it waits for review, 0 for one song); *Write Song* adds it to the draft seed and *YuE2 Plan* to the plan seed, so a series no longer draws every song with the same seeds. The Draft seed and plan seed stay *fixed* by default.
 - **An edit in a series belongs to its song.** The next song takes its own draft (the sheet notes *your edit was for an earlier song*) instead of stopping with a conflict; *manual* text still stays for the whole series, and outside a series an outdated edit still stops with a conflict. The editor resolves with the brief's mode, as the node does.
@@ -28,6 +34,8 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 ### Changed
 
+- The arrangement in Song Sheet · Score: an *experimental* badge with a short note, the section names spaced from their bars, and a note that repeats (a bass note dropped in every bar) listed once with how often.
+- README: the template screenshots, the App mode of *1 · YuE2 · Song*, the System Check and the tutorial thumbnails taken again for 0.4.5 (`assets/branding/0.4.5`); the tutorial table lists the two new videos.
 - App mode of the song templates: the creative mode with its sliders, the writer model and (YuE2 Song and Cover) the arrangement seed.
 - Transcribe Lyrics: when there is no clear singing for new lyrics, the message says that *lyrics closeness* 0 and the phrasing reference off write them without the source's text.
 - README and user guides: the tutorials are one link to the playlist (the README with a short summary of every video) - no links to single videos, which change with every new upload.

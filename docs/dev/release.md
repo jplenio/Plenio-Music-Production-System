@@ -7,7 +7,7 @@ Published Registry versions are immutable: every fix is a new version.
 1. Version in `pyproject.toml` (`[project].version`), `plenio/__init__.py` and `frontend/package.json` (+ `package-lock.json`); a `CHANGELOG.md` section with the date.
 2. All suites green: the CI on GitHub (Ubuntu + Windows, ComfyUI host job, frontend with the build check) and, on the owner's machine, the full suite with the real models (`PLENIO_SMOKE=1`, `docs/dev/testing.md`).
 3. `tools/build_graphs.py` and `tools/build_thumbnails.py` leave no diff; `tools/workflow_validation.py` passes.
-4. Package check: `comfy node validate` and `comfy node pack` (comfy-cli), then look into `node.zip`: the 6 templates, 12 blueprints, `plenio/`, `web/`, `resources/` and `docs/user/` must be there, `tests/`, `tools/`, `frontend/`, `assets/` and the rest of `docs/` must not (`.comfyignore`). Delete `node.zip` afterwards.
+4. Package check: `comfy node validate` and `comfy node pack` (comfy-cli), then look into `node.zip`: the 6 templates, 13 blueprints, `plenio/`, `web/`, `resources/` and `docs/user/` must be there, `tests/`, `tools/`, `frontend/`, `assets/` and the rest of `docs/` must not (`.comfyignore`). Delete `node.zip` afterwards.
 5. No local paths, private addresses, personal prompt text or credentials in shipped files (`tests/unit/test_import_boundary.py`).
 
 ## Publishing
