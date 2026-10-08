@@ -309,6 +309,31 @@
     "accented_clashes_per_min": 0.0,
     "key_clarity": 0.739
    }
+  },
+  "owner_listening": {
+   "scale": "harmony 1 (clashing) to 5 (clean, fitting the genre), blind",
+   "plan": {
+    "takes": 8,
+    "mean": 4.88
+   },
+   "0.4.5": {
+    "takes": 8,
+    "mean": 3.31
+   },
+   "guard": {
+    "takes": 6,
+    "mean": 4.83
+   },
+   "guard-under": {
+    "takes": 6,
+    "mean": 4.0
+   },
+   "most_frequent_remark": "key lifts sudden; a lift and the fall back the most abrupt"
+  },
+  "after_the_verdict": {
+   "lifts_in_A1_plans": 79,
+   "prepared": 74,
+   "unprepared": 5
   }
  }
 }

@@ -7,7 +7,7 @@
 | Machine | owner's RTX 5060 Ti 16 GB, **GPU 0 only** (`CUDA_VISIBLE_DEVICES=0`; a first A2 run that let llama-server spread Qwen 3.8 27B over both cards lost the second card and was discarded); llama-server of Unsloth Studio, thinking off |
 | Inputs | the owner's release records, read only: 195 sung songs with YuE2's plan (G1), six cover scores (A2), two songs and two covers from study A1 with one writer plan each (E7) |
 | Data | `data/2026-10-08-harmony-lyrics.json` (counts and means only; no lyrics, scores or answers) |
-| Level | V3 (real models, every result measured by Plenio's own checks and SheetSage2); the listening verdict is the owner's (pack below) |
+| Level | V3 (real models, every result measured by Plenio's own checks and SheetSage2) plus the owner's blind listening verdict on all 28 takes |
 
 ## G1 - the song form of lyrics and plan
 
@@ -71,6 +71,20 @@ Two songs and two covers from study A1, each with one writer plan (Qwen 3.5 9B, 
 - **Not yet better than YuE2's own plan:** in the songs the takes' sung notes sit on the chord tones slightly less often with the writer's (guarded) chords than with YuE2's own (77-80 % against 84 %). The guard keeps the clashes out; whether the writer's colours are an improvement in the ear is the owner's verdict.
 
 **Listening pack:** `D:/Daten2/ComfyUI/output/plenio-study-e7/` - 28 takes in random order (`01.flac` ...), `sheet.md` for the verdicts (harmony 1-5, clashing notes and where), `key.json` (which take is which; open it after listening).
+
+### The owner's verdict (blind, 2026-10-08)
+
+| Condition | takes | harmony, mean (1-5) | lowest |
+|---|---|---|---|
+| YuE2's plan | 8 | **4.88** | 4 |
+| 0.4.5's arrangement | 8 | **3.31** | 2 (*"dissonances in the chorus from the middle on, unusable"*) |
+| guard, fills (default) | 6 | **4.83** | 4 |
+| guard, lines under the singing | 6 | **4.00** | 3 (*"it clashes at the very end"*) |
+
+- The guard brings the arranged songs back to the level of YuE2's own plan; 0.4.5's arrangements were the clearly worse ones - the measured picture (note F1, chord adherence) holds in the ear. Lines under the singing stay the experimental option (D1).
+- **The key lifts** were the remark on most takes: good in themselves, but sudden ("not quite smooth"), and in one song lifted for the last chorus and back down for the outro. In 0.4.5's takes the melody did not fit after the lift. Changed after the verdict: a lift holds to the end of the song and is prepared in the bar before by a chord leading into the new key (the dominant; its subdominant or the lowered seventh step where the dominant would clash with the melody) - replayed on study A1's plans, 74 of 79 lifts are prepared, 5 come unprepared (every leading chord would clash; reported).
+- Abrupt endings: two of 0.4.5's takes ran past the end of the score to the render ceiling (YuE2 lost its place); one plan take of a cover ends without an outro because the transcribed source does; every guard take ends with its score.
+- Unclear words in some takes (YuE2's singing; the instrumental cover hummed); not a matter of the arrangement.
 
 ## Also changed on the way
 

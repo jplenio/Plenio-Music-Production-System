@@ -305,25 +305,11 @@ def _trouble(score: c.Score, first: int, end: int, melody: str) -> Trouble:
     return Trouble(accented, harmony.clashes(score, sung, line), share)
 
 
-def _restore(working: c.Score, original: c.Score, first: int, end: int) -> c.Score:
-    """The section's chords and instrument line as they were in ``original``."""
-    start, stop = _span(working, first, end)
-    chords = [ch for ch in working.chords if not start <= ch.onset < stop]
-    chords += [ch for ch in original.chords if start <= ch.onset < stop]
-    sounding = chord_at(original, start)
-    if sounding and not any(ch.onset == start for ch in original.chords):
-        chords.append(c.ChordSymbol(start, sounding))
-    if stop < working.total and not any(ch.onset == stop for ch in chords):
-        after = chord_at(working, stop)
-        if after:
-            chords.append(c.ChordSymbol(stop, after))
-    restored = c.validate(replace(working, chords=tuple(sorted(chords, key=lambda ch: ch.onset))))
-    notes = [
-        {"onset": n.onset, "duration": min(n.duration, stop - n.onset), "pitch": n.pitch}
-        for n in original.ins
-        if start <= n.onset < stop
-    ]
-    return ops.place_notes(restored, "ins", notes, clear=[start, stop], label="arrangement: kept").score
+def _voice_clashes(score: c.Score) -> int:
+    """Clashes between the voice and the line in the whole score (``harmony.clashes``)."""
+    return harmony.clashes(
+        score, sorted(score.vocal, key=lambda n: n.onset), sorted(score.ins, key=lambda n: n.onset)
+    )
 
 
 def _measures(before: c.Score, after: c.Score, policy: Policy) -> dict[str, Any]:
@@ -348,6 +334,89 @@ def _split_at(notes: Sequence[c.Note], point: int) -> list[c.Note]:
         else:
             result.append(note)
     return result
+
+
+def _holding(shifts: Sequence[int]) -> tuple[list[int], bool]:
+    """The planned key shifts with every lift held to the end: a section after a lift keeps it unless it lifts
+    further (the owner's listening in study E7: a last chorus lifted and the outro back down was the most
+    abrupt moment of the takes)."""
+    held: list[int] = []
+    running = 0
+    for shift in shifts:
+        if shift and (not running or ((shift > 0) == (running > 0) and abs(shift) >= abs(running))):
+            running = shift
+        held.append(running)
+    return held, held != list(shifts)
+
+
+def _prepare_lifts(score: c.Score, original: c.Score, melody: Sequence[c.Note]) -> tuple[c.Score, list[str]]:
+    """Every key change the arrangement made, prepared in the bar before it by a chord leading into the new key
+    (its dominant, or its subdominant or lowered seventh step when the dominant would clash): on the
+    second half of that bar, or its last beat, where it clashes with neither the melody nor the instrument
+    line. A score without chords stays as it is (YuE2 harmonises it)."""
+    if not score.chords:
+        return score, []
+    made = [k for k in score.keys if k.onset > 0 and k.onset not in {o.onset for o in original.keys}]
+    chords = list(score.chords)
+    notes: list[str] = []
+    beat = max(1, score.units_per_quarter)
+    for change in made:
+        measure = score.measure_at(change.onset - 1)
+        bar_start = score.starts[measure]
+        old_key = score.key_at(change.onset - 1)
+        try:
+            new_key = harmony.key_of(change.key)
+        except (KeyError, ValueError):
+            continue
+        tonic = new_key.tonic
+        # the dominant first; then the dominant without its seventh, the new key's subdominant (and in major its
+        # second step), and the major chord on its lowered seventh step (F -> Gm, C -> D): the first that clashes
+        # with nothing that sounds there
+        options = [
+            (7, "7"),
+            (7, ""),
+            (5, "m" if new_key.minor else ""),
+            *([] if new_key.minor else [(2, "m")]),
+            (10, ""),
+        ]
+        found = None
+        for interval, quality in options:
+            root = (tonic + interval) % 12
+            name = harmony.chord_name(root, quality, old_key)
+            chord_tones = harmony.tones(name)
+            for start in (bar_start + (change.onset - bar_start) // 2, change.onset - beat):
+                if not bar_start <= start < change.onset:
+                    continue
+                parts = harmony.pieces(score, (*melody, *score.ins), start, change.onset)
+                if not any(
+                    harmony.clashing(q.pitch % 12, chord_tones, root, frozenset({2, 9})) for q in parts
+                ):
+                    found = (start, name)
+                    break
+            if found:
+                break
+        if found is None:
+            notes.append(
+                f"the key change to {change.key} at bar {measure + 2} comes unprepared: every leading chord would clash"
+            )
+            continue
+        where, dominant = found
+        sounding = [ch for ch in sorted(chords, key=lambda ch: ch.onset) if ch.onset <= change.onset]
+        after = sounding[-1].name if sounding else None
+        chords = [ch for ch in chords if not where <= ch.onset < change.onset]
+        chords.append(c.ChordSymbol(where, dominant))
+        if after and not any(ch.onset == change.onset for ch in chords):
+            chords.append(c.ChordSymbol(change.onset, after))  # the lifted section starts on its own chord
+        notes.append(f"bar {measure + 1}: {dominant} prepares the key change to {change.key}")
+    if not notes or all("comes unprepared" in n for n in notes):
+        return score, notes
+    return c.validate(replace(score, chords=tuple(sorted(chords, key=lambda ch: ch.onset)))), notes
+
+
+def _same_run(shifts: Sequence[int], i: int, j: int) -> bool:
+    """Whether sections ``i`` and ``j`` belong to one run of the same shift."""
+    low, high = min(i, j), max(i, j)
+    return all(shifts[k] == shifts[i] for k in range(low, high + 1))
 
 
 def _apply_shifts(
@@ -380,6 +449,16 @@ def _apply_shifts(
                 f"section {i + 1}: the key shift {final[i]:+d} would leave the MIDI range; the key stays"
             )
             final[i] = 0
+    # a lift that cannot be made in one of its sections stays out in all of them: falling back to the old key
+    # in the middle of a held lift is the abrupt moment the hold avoids
+    for i, planned in enumerate(shifts):
+        if planned and not final[i]:
+            for j, other in enumerate(shifts):
+                if other == planned and final[j] and _same_run(shifts, i, j):
+                    final[j] = 0
+                    kept.append(
+                        f"section {j + 1}: the key shift {planned:+d} stays out with section {i + 1}'s"
+                    )
     if not any(final):
         return score, kept
     vocal, ins = list(score.vocal), list(score.ins)
@@ -516,6 +595,7 @@ def arrange(
         for (label, first, end), section in zip(ranges, plan.sections, strict=True):
             applied: list[str] = []
             kept: list[str] = []
+            section_start = working
             melody = melody_voice(working, policy.melody)
             if section.chords is not None:
                 try:
@@ -563,8 +643,13 @@ def arrange(
                         kept.append(f'lead "{lead}" left out ({error})')
             trouble_before = _trouble(score, first, end, policy.melody)
             trouble_after = _trouble(working, first, end, policy.melody)
-            if applied and trouble_after.worse_than(trouble_before):
-                working = _restore(working, score, first, end)
+            # the voice against the line counted in the whole score as well: a clash held across the section's
+            # boundary can fall apart into two when the line inside changes (found by the fuzz test)
+            if applied and (
+                trouble_after.worse_than(trouble_before)
+                or _voice_clashes(working) > _voice_clashes(section_start)
+            ):
+                working = section_start
                 kept.append(
                     "the arranged section clashed more than before (melody against chords "
                     f"{trouble_before.accented} -> {trouble_after.accented} accented, "
@@ -577,7 +662,18 @@ def arrange(
                 SectionResult(len(results) + 1, label, _bars(first, end), tuple(applied), tuple(kept))
             )
         try:
+            shifts, held_on = _holding(shifts)
+            if held_on:
+                notes.append(
+                    "the key lift holds to the end of the song (a lift that falls back again sounds abrupt)"
+                )
+            before_shift = working
             working, stayed = _apply_shifts(working, [(f, e) for _, f, e in ranges], shifts, highest)
+            if working is not before_shift:
+                working, prepared = _prepare_lifts(
+                    working, before_shift, melody_voice(working, policy.melody)
+                )
+                notes += prepared
             for i, shift in enumerate(shifts):
                 if not shift:
                     continue

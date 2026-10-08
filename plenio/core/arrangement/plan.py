@@ -593,7 +593,8 @@ def prompt(
         '- "energy": 1 (calm) to 5 (full): how busy the instrument line is.',
         (
             f'- "key_shift": semitones the section moves, {policy.key_shift[0]} to {policy.key_shift[1]} '
-            "(0 keeps the key; a last chorus often goes up 1 or 2)."
+            "(0 keeps the key; a last chorus often goes up 1 or 2 - a lift holds to the end of the song, and Plenio "
+            "prepares it with the new key's dominant)."
             if policy.key_shift != (0, 0)
             else '- "key_shift": always 0.'
         ),

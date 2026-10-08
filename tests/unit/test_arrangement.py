@@ -40,7 +40,7 @@ from plenio.core.arrangement.apply import SHARE_TOLERANCE
 from plenio.core.arrangement.plan import CHORD_PATTERN, closeness_text, melody_voice, normalize_chord
 from plenio.core.errors import PlenioUserError
 from plenio.core.score import canonical as c
-from plenio.core.score import native
+from plenio.core.score import native, ops
 from plenio.core.score.operations import editor_view
 from score_strategies import scores
 
@@ -665,3 +665,32 @@ def test_any_answer_gives_a_readable_score_or_the_old_one(
             t: p + shift_at(t) for t, p in before_ins.items()
         }
     assert Fraction(after.tempo, score.tempo) <= Fraction(140, 100)
+
+
+def test_a_key_lift_holds_to_the_end_and_is_prepared() -> None:
+    # verse - chorus - chorus; the plan lifts the first chorus and lets the second fall back: the owner's
+    # listening (study E7) found the fall back the most abrupt moment, so the lift holds
+    three = c.to_abc(ops.arrange_sections(c.from_abc(FIXTURE), [1, 2, 2]).score)
+    result = arrange(three, plan(entry(1), entry(2, key_shift=2), entry(3, key_shift=0)), rules(), seed=0)
+    assert readable(result.abc)
+    model = c.from_abc(result.abc)
+    assert [k.key for k in model.keys] == ["C", "D"]
+    assert "the key lift holds to the end of the song" in " ".join(result.notes)
+    # the bar before the lift ends on a chord leading into D, which clashes with nothing sung there
+    lift = model.starts[4]
+    leading = [ch.name for ch in model.chords if model.starts[3] < ch.onset < lift]
+    assert (
+        leading and leading[-1] == "C"
+    )  # the melody ends on C: C -> D (bVII - I), the dominant A7 would clash
+    assert f"bar 4: {leading[-1]} prepares the key change to D" in result.notes
+    assert result.harmony["after"]["accented_avoid"] == 0
+
+
+def test_a_lift_that_cannot_be_made_everywhere_stays_out_everywhere() -> None:
+    three = c.to_abc(ops.arrange_sections(c.from_abc(FIXTURE), [1, 2, 2]).score)
+    model = c.from_abc(three)
+    last = model.starts[section_ranges(model)[2][1]]
+    high = c.to_abc(c.validate(replace(model, ins=(*model.ins, c.Note(last, 1, 127)))))  # bar 9 cannot go up
+    result = arrange(high, plan(entry(1), entry(2, key_shift=1), entry(3, key_shift=1)), rules(), seed=0)
+    assert [k.key for k in c.from_abc(result.abc).keys] == ["C"]  # no lift that falls back in the last chorus
+    assert any("stays out with section 3's" in kept for kept in result.sections[1].kept)
