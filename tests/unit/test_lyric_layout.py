@@ -175,3 +175,36 @@ def test_the_view_places_the_lyrics_by_the_spans() -> None:
     view = operations.editor_view(TRICKY, LYRICS, [[32, 72], [80, 160]])
     lines = view["lyrics"]["sections"][1]["lines"]
     assert [(line["start"], line["end"]) for line in lines] == [(32, 72), (80, 160)]
+
+
+HEAD = """X:1
+T:
+M:4/4
+L:1/8
+Q:1/4=100
+V: Vocal clef=treble name="Vocal Melody" snm="Vocal"
+V: Ins clef=treble name="Ins Melody" snm="Inst."
+K:C
+"""
+
+
+def test_a_long_line_runs_on_over_the_next_phrase_instead_of_crowding_a_short_one() -> None:
+    # owner's report 2026-10-08: lines crammed onto two or three notes while other phrases stayed empty.
+    # Phrases of 4, 8 and 4 notes; a line of 14 syllables and one of 3.
+    score = c.from_abc(HEAD + "% verse\nV: Vocal\nCDEF z4|CDEFGABc|z4 CDEF|\nV: Ins\nZ3|\n")
+    placed = lyric_layout.layout(
+        score, "[Verse]\nwalking along the river where the water meets the light\nhold me now"
+    )
+    first, second = placed.sections[0].lines
+    assert [s.onset for s in first.syllables] == [0, 1, 2, 3, *range(8, 16)]  # both phrases, a note each
+    assert first.syllables[-1].text == "meets the light"  # only the two syllables too many share a note
+    assert [s.text for s in second.syllables] == ["hold", "me", "now"] and second.holds == (23,)
+    assert second.start == 20  # the last phrase is sung, not left empty
+
+
+def test_fewer_lines_than_phrases_spread_over_them() -> None:
+    score = c.from_abc(HEAD + "% verse\nV: Vocal\nCDEF z4|CDEF z4|CDEF z4|CDEF z4|\nV: Ins\nZ4|\n")
+    placed = lyric_layout.layout(score, "[Verse]\nla la la la la la la la\nlo lo lo lo lo lo lo lo")
+    lines = placed.sections[0].lines
+    assert [len(line.syllables) for line in lines] == [8, 8] and all(not line.holds for line in lines)
+    assert len(placed.syllables()) == 16  # every sung note has its syllable

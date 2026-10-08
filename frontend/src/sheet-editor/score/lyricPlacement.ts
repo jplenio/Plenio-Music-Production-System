@@ -2,7 +2,7 @@
  * Lyrics lines placed by hand in the piano roll's lyrics lane (owner's request 2026-10-03): moved,
  * made longer or shorter, deleted, copied and pasted like notes.
  *
- * Where a line is sung is worked out by the backend (``lyric_layout``: a line per Vocal phrase). A line
+ * Where a line is sung is worked out by the backend (``lyric_layout``: the lines on the Vocal notes by their syllables). A line
  * placed by hand has a **span** - ``[start, end)`` in units of L - kept in the node's properties
  * (``plenio_lyric_spans``, like the Guide notes) and sent with the lyrics. A section with spans is placed
  * by them: its lines take its spans in order. So an edit in the lane pins the whole section: every line

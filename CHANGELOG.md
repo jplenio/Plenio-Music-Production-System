@@ -19,6 +19,7 @@ All notable changes are listed here. Versions follow semantic versioning; publis
 
 ### Changed
 
+- **Lyrics where they are sung** (piano roll, notation, MusicXML; owner's report 2026-10-08: words crammed onto two or three notes while other notes stayed empty): the lines take the section's notes as their syllables ask for - starting where a phrase starts wherever they can, running on over the next phrase when needed, every sung note in a line - instead of one line per phrase. In the owner's songs: crammed lines 18 % -> 5 %, sung notes without a line 15 % -> 6 %, notes with their own syllable 65 % -> 72 %. Lines placed by hand keep their place.
 - A score **without chords** (a cover on *new accompaniment*) gets none from a creative mode: YuE2 harmonises it itself, as chosen (owner's decision D2); the plan keeps to lines that need no chords (*solo*) and to energy, key and tempo.
 
 - **arrangement: *off*** instead of *simple* (Song Brief and Cover Brief): the default is no arrangement, not a mode of its own - the music model plans the music by itself, as before. Saved workflows and API prompts with *simple* still run (read as *off*); the editor shows *off* when it loads them.

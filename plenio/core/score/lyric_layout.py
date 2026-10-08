@@ -6,9 +6,14 @@ Vocal phrase, about one syllable per note; ``native.phrasing``):
 
 - a lyrics block belongs to a labelled section of the score (in order; by tag when the numbers differ);
 - the section's Vocal notes form phrases, split at rests of at least a beat;
-- each line takes a phrase; with more lines than phrases, lines share a phrase in order;
-- each syllable takes a note; a line with fewer syllables holds its last syllable over the remaining
-  notes of its phrase (a melisma), one with more puts the rest on its last note.
+- the lines take the section's notes in order, as many as their syllables ask for: a line starts where a
+  phrase starts wherever it can, may run on over the next phrase when its syllables need it, and every
+  sung note belongs to a line (owner's report 2026-10-08: with a line per phrase, lines that did not match
+  the phrases were crammed onto two or three notes while other phrases stayed empty - 18 % of the lines,
+  15 % of the sung notes in the owner's songs);
+- each syllable takes a note; a line with fewer syllables spreads them over its phrases and holds each
+  phrase's last syllable over the rest of it (a melisma), one with more puts the rest on its last note;
+- with more lines than notes, lines share a phrase in order.
 
 A line placed by hand (the piano roll's lyrics lane: moved, made longer or shorter, pasted) has a
 **span** - ``[start, end)`` in units of L, kept with the sheet. A section with spans is placed by them:
@@ -183,13 +188,122 @@ def _placed(
     return Line(block_index, j, line, region[0].onset, region[-1].end, tuple(placed), holds)
 
 
+CROWD_COST = 1.0
+"""The layout's cost of a syllable more than its line has notes (several syllables joined on one note)."""
+HOLD_COST = 0.4
+"""Of a note more than its line has syllables (a syllable held over it): a melisma is natural, a crowd is not."""
+MID_PHRASE_COST = 1.5
+"""Of a line that starts inside a phrase (not after a rest)."""
+CROSS_COST = 0.5
+"""Of every phrase a line runs on into (one line per phrase is the plan's own picture)."""
+
+
+def _spread(
+    block_index: int,
+    j: int,
+    line: str,
+    pieces: Sequence[tuple[str, bool]],
+    groups: Sequence[Sequence[canonical.Note]],
+) -> Line:
+    """``line`` on the notes of one or more phrases: with no more syllables than notes, each phrase gets its
+    share of the syllables (at least one) and holds its last one; with more, ``_placed``."""
+    region = [n for group in groups for n in group]
+    if len(groups) == 1 or len(pieces) > len(region) or len(pieces) < len(groups):
+        return _placed(block_index, j, line, pieces, region)
+    shares = [1] * len(groups)
+    rest = len(pieces) - len(groups)
+    room = [len(g) - 1 for g in groups]
+    while rest > 0:  # the next syllable to the phrase with the most notes per syllable that still has room
+        best = max(
+            (i for i in range(len(groups)) if room[i] > 0),
+            key=lambda i: (len(groups[i]) / shares[i], -i),
+        )
+        shares[best] += 1
+        room[best] -= 1
+        rest -= 1
+    placed: list[Syllable] = []
+    holds: list[int] = []
+    cursor = 0
+    for group, share in zip(groups, shares, strict=True):
+        part = pieces[cursor : cursor + share]
+        cursor += share
+        placed += [Syllable(n.onset, text, end) for n, (text, end) in zip(group, part, strict=False)]
+        holds += [n.onset for n in group[len(part) :]]
+    return Line(block_index, j, line, region[0].onset, region[-1].end, tuple(placed), tuple(holds))
+
+
 def _auto(
     block_index: int,
     sung: Sequence[tuple[int, str]],
     phrases: Sequence[Sequence[canonical.Note]],
     cursor: int,
 ) -> list[Line]:
-    """The lines ``sung`` (``(index in the block, text)``) on ``phrases`` by the rule of the module."""
+    """The lines ``sung`` (``(index in the block, text)``) on ``phrases`` by the rule of the module: the
+    cheapest split of the section's notes into one run per line (``CROWD_COST`` ... ``CROSS_COST``)."""
+    words = [(j, line, [] if _DIRECTION.match(line) else syllables_of(line)) for j, line in sung]
+    lyric = [w for w in words if w[2]]
+    notes = [n for phrase in phrases for n in phrase]
+    if not lyric or len(lyric) > len(notes):
+        return _sequential(block_index, sung, phrases, cursor)
+    phrase_of = [i for i, phrase in enumerate(phrases) for _ in phrase]
+    starts = {sum(len(p) for p in phrases[:i]) for i in range(len(phrases))}
+    count, total = len(lyric), len(notes)
+    inf = float("inf")
+    best = [[inf] * (total + 1) for _ in range(count + 1)]
+    step: list[list[int]] = [[-1] * (total + 1) for _ in range(count + 1)]
+    best[0][0] = 0.0
+    for i in range(count):
+        size = len(lyric[i][2])
+        longest = max(4 * size, size + 12)
+        for j in range(total):
+            if best[i][j] == inf:
+                continue
+            start_cost = 0.0 if j in starts else MID_PHRASE_COST
+            last = total - (count - i - 1)  # the lines after this one need a note each
+            for k in range(j + 1, min(last, j + longest) + 1):
+                n = k - j
+                cost = best[i][j] + start_cost
+                cost += CROWD_COST * (size - n) if size > n else HOLD_COST * (n - size)
+                cost += CROSS_COST * (phrase_of[k - 1] - phrase_of[j])
+                if cost < best[i + 1][k]:
+                    best[i + 1][k], step[i + 1][k] = cost, j
+    if best[count][total] == inf:
+        return _sequential(block_index, sung, phrases, cursor)
+    runs: list[tuple[int, int]] = []
+    k = total
+    for i in range(count, 0, -1):
+        j = step[i][k]
+        runs.append((j, k))
+        k = j
+    runs.reverse()
+    placed = {id(entry): (a, b) for entry, (a, b) in zip(lyric, runs, strict=True)}
+    lines: list[Line] = []
+    for entry in words:
+        j, line, pieces = entry
+        run = placed.get(id(entry))
+        if run is None:  # a direction ("(guitar solo)"): shown where the words stopped
+            lines.append(Line(block_index, j, line, cursor, cursor, ()))
+            continue
+        a, b = run
+        groups: list[list[canonical.Note]] = []
+        for index in range(a, b):
+            if not groups or phrase_of[index] != phrase_of[index - 1]:
+                groups.append([])
+            groups[-1].append(notes[index])
+        made = _spread(block_index, j, line, pieces, groups)
+        lines.append(made)
+        cursor = made.end
+    return lines
+
+
+def _sequential(
+    block_index: int,
+    sung: Sequence[tuple[int, str]],
+    phrases: Sequence[Sequence[canonical.Note]],
+    cursor: int,
+) -> list[Line]:
+    """A line per phrase, lines sharing a phrase in order when there are more of them (more lines than
+    notes: the fallback of ``_auto``)."""
     lines: list[Line] = []
     phrase, offset = 0, 0
     for order, (j, line) in enumerate(sung):
