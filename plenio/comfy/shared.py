@@ -93,12 +93,16 @@ def llm_facts() -> dict[str, Any]:
         config = host.load_config()
     except PlenioError:
         config = PlenioConfig()  # the System Check reports the configuration error itself
-    found = llm.discovery(config, fresh=True)
+    try:
+        found = llm.discovery(config, fresh=True)
+        runtimes = [runtime.name for runtime in llm.runtimes(config)]
+    except Exception as error:  # noqa: BLE001 - a broken model folder must not take the System Check down
+        return {"runtimes": [], "models": {}, "files": 0, "notes": [f"listing the models failed: {error}"]}
     counts: dict[str, int] = {}
     for model in found.models:
         counts[model.source] = counts.get(model.source, 0) + 1
     return {
-        "runtimes": [runtime.name for runtime in llm.runtimes(config)],
+        "runtimes": runtimes,
         "models": counts,
         "files": sum(1 for model in found.models if model.path is not None),
         "notes": list(found.notes),

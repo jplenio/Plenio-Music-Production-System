@@ -17,6 +17,7 @@ from __future__ import annotations
 import importlib.util
 import sys
 import types
+import typing
 from typing import Any
 
 __all__ = ["ensure_dependencies", "BeartypeDecorator", "RotaryEmbedding"]
@@ -49,8 +50,10 @@ class RotaryEmbedding:
     @staticmethod
     def _rotate_half(x: Any) -> Any:
         half = x.shape[-1] // 2
+        import torch
+
         first, second = x[..., :half], x[..., half:]
-        return __import__("torch").cat([-second, first], dim=-1)
+        return torch.cat([-second, first], dim=-1)
 
     def rotate_queries_or_keys(self, x: Any) -> Any:
         import torch
@@ -81,9 +84,9 @@ def _install_beartype() -> None:
     package = types.ModuleType("beartype")
     package.beartype = BeartypeDecorator  # type: ignore[attr-defined]
     typing_shim = types.ModuleType("beartype.typing")
-    for name in dir(__import__("typing")):
+    for name in dir(typing):
         if not name.startswith("_"):
-            setattr(typing_shim, name, getattr(__import__("typing"), name))
+            setattr(typing_shim, name, getattr(typing, name))
     package.typing = typing_shim  # type: ignore[attr-defined]
     sys.modules["beartype"] = package
     sys.modules["beartype.typing"] = typing_shim

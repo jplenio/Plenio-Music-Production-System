@@ -9,6 +9,7 @@ arrangement off, for a cover kept at its original song flow and without a score,
 from __future__ import annotations
 
 import json
+import logging
 from collections.abc import Callable
 from dataclasses import replace
 from typing import Any
@@ -24,6 +25,8 @@ from ...core.score import canonical as c
 from ...core.score import native
 from ..shared import mode_library
 from ..types import Brief, Engine, ReportType
+
+LOG = logging.getLogger(__name__)
 
 ArrangementState = io.Custom("PLENIO_ARRANGEMENT")
 """The first Apply Arrangement's result for the re-ask round: ``{"result", "text", "sections", "report"}``."""
@@ -179,14 +182,18 @@ def budget_check(
     engine: Any, brief: Any, original: str, style: str | None, lyrics: str | None
 ) -> Callable[[str], str | None] | None:
     """Why an arranged score does not fit YuE2's context (``None``: it fits) - or no check without YuE2's
-    tokenizer. A cover's style and lyrics are written later, so they are estimated."""
+    tokenizer, or for a score Plenio cannot edit note by note (the arrangement leaves it as it is). A cover's
+    style and lyrics are written later, so they are estimated."""
     if engine is None or engine.tokenizer is None or engine.engine_id != yue2.ENGINE_ID:
         return None
     style_text = (style or "").strip() or ", ".join(
         part for part in (brief.genre, getattr(brief, "mood", ""), brief.description[:200]) if part
     )
-    lyrics_text = (lyrics or "").strip() or _estimated_lyrics(original, brief)
-    before = yue2.budget(engine.tokenizer, style_text, lyrics_text, original)
+    try:
+        lyrics_text = (lyrics or "").strip() or _estimated_lyrics(original, brief)
+        before = yue2.budget(engine.tokenizer, style_text, lyrics_text, original)
+    except PlenioError:
+        return None
 
     def check(abc: str) -> str | None:
         analysis = native.analyze(abc)
@@ -204,6 +211,21 @@ def budget_check(
         )
 
     return check
+
+
+def _failed(text: str, rules: arrangement.Policy, error: Exception) -> arrangement.Arrangement:
+    """The score as it was after an unexpected error in the arrangement code (experimental: it must not stop
+    the run); the traceback goes to the console for a bug report."""
+    LOG.exception("Plenio Apply Arrangement: the arrangement failed; the score is used as it was")
+    reason = f"an internal error ({type(error).__name__}: {error})"
+    return arrangement.Arrangement(
+        text,
+        "fallback",
+        f"not applied: {reason} - the score is used as it was",
+        rules.mode.name,
+        rules.closeness,
+        notes=(reason,),
+    )
 
 
 def _markdown(result: arrangement.Arrangement, rules: arrangement.Policy) -> str:
@@ -359,27 +381,34 @@ class PlenioApplyArrangement(io.ComfyNode):
                 {"result": None, "text": "", "sections": []},
                 ui={"plenio_summary": [{"status": "skipped", "markdown": markdown}]},
             )
-        fits = None if rules.skip else budget_check(engine, brief, text, style, lyrics)
-        if reask_round:
-            result = _reask_round(first, text, answer, rules, seed, fits)
-            if result is None:  # nothing was asked again: the first round's result passes through
-                previous = first["result"]
-                return io.NodeOutput(
-                    previous.abc if previous is not None else text,
-                    first["report"],
-                    "",
-                    "",
-                    first,
-                    ui={
-                        "plenio_summary": [
-                            {"status": first["report"].status.value, "markdown": first["markdown"]}
-                        ]
-                    },
-                )
-        elif rules.skip:
-            result = arrangement.skipped(text, rules)
-        else:
-            result = arrangement.arrange(text, answer or "", rules, seed=seed, fits=fits)
+        outcome: arrangement.Arrangement | None
+        try:
+            fits = None if rules.skip else budget_check(engine, brief, text, style, lyrics)
+            if reask_round:
+                outcome = _reask_round(first, text, answer, rules, seed, fits)
+            elif rules.skip:
+                outcome = arrangement.skipped(text, rules)
+            else:
+                outcome = arrangement.arrange(text, answer or "", rules, seed=seed, fits=fits)
+        except Exception as error:  # noqa: BLE001 - experimental: the score as it was beats a stopped run
+            outcome = _failed(text, rules, error)
+        if (
+            outcome is None
+        ):  # the re-ask round, nothing was asked again: the first round's result passes through
+            previous = first["result"]
+            return io.NodeOutput(
+                previous.abc if previous is not None else text,
+                first["report"],
+                "",
+                "",
+                first,
+                ui={
+                    "plenio_summary": [
+                        {"status": first["report"].status.value, "markdown": first["markdown"]}
+                    ]
+                },
+            )
+        result = outcome
         status = {
             "skipped": Status.SKIPPED,
             "fallback": Status.WARNING,
@@ -388,7 +417,11 @@ class PlenioApplyArrangement(io.ComfyNode):
         data = {**result.to_dict(), "kind": rules.kind, "melody": rules.melody}
         report = Report("arrangement", status, f"arrangement: {result.summary}", messages, data)
         markdown = _markdown(result, rules)
-        reask = None if reask_round or rules.skip else arrangement.reask.request(text, result, rules)
+        try:
+            reask = None if reask_round or rules.skip else arrangement.reask.request(text, result, rules)
+        except Exception:  # noqa: BLE001 - no second question rather than a stopped run
+            LOG.exception("Plenio Apply Arrangement: the re-ask could not be written; nothing is asked again")
+            reask = None
         if reask is not None:
             markdown += (
                 f"\n- the harmony check repaired much in section(s) {', '.join(map(str, reask.sections))}: the "

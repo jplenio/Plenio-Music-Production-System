@@ -10,6 +10,7 @@ fit, no writer runs. Everything but a new-lyrics cover with a score passes throu
 from __future__ import annotations
 
 import json
+import logging
 from typing import Any
 
 from comfy_api.latest import io
@@ -21,6 +22,8 @@ from ...core.reports import Report, Status
 from ...core.score import native
 from ...core.writing import lyrics_closeness_text
 from ..types import Brief, ReportType
+
+LOG = logging.getLogger(__name__)
 
 FitState = io.Custom("PLENIO_LYRICS_FIT")
 """The previous round: ``{"round", "asked", "notes", "draft"}`` (``draft``: the draft's fitting lines)."""
@@ -43,6 +46,25 @@ def _phrasing(score: str) -> list[dict[str, Any]] | None:
 
 def _needs_reference(brief: Any) -> bool:
     return isinstance(brief, CoverBrief) and brief.writes_lyrics and brief.lyrics_closeness > 0
+
+
+def _unfitted(lyrics: str, previous: dict[str, Any], round_number: int, error: Exception) -> io.NodeOutput:
+    """The lyrics as they are after an unexpected error in the fitting (they are sung as written: a melisma
+    or a squeeze where a line does not fit); the traceback goes to the console for a bug report."""
+    LOG.exception("Plenio Fit Lyrics: the fitting failed; the lyrics are used as they are")
+    reason = f"{type(error).__name__}: {error}"
+    notes = [*previous.get("notes", []), f"round {round_number}: not fitted (an internal error, {reason})"]
+    out = {"round": round_number, "asked": [], "notes": notes, "draft": previous.get("draft")}
+    summary = f"Lyrics fit: not checked (an internal error, {reason}); the lyrics are used as they are"
+    report = Report("lyrics_fit", Status.WARNING, summary + ".", tuple(notes), {"error": reason})
+    return io.NodeOutput(
+        lyrics,
+        "",
+        "",
+        out,
+        report,
+        ui={"plenio_summary": [{"status": "warning", "markdown": f"**{summary}**"}]},
+    )
 
 
 class PlenioFitLyrics(io.ComfyNode):
@@ -144,6 +166,23 @@ class PlenioFitLyrics(io.ComfyNode):
     ) -> io.NodeOutput:
         previous = state if isinstance(state, dict) else {}
         round_number = int(previous.get("round", -1)) + 1
+        try:
+            return cls._fit(lyrics, brief, score, reference_lyrics, previous, round_number, answer, last)
+        except Exception as error:  # noqa: BLE001 - lyrics as written beat a stopped run
+            return _unfitted(lyrics, previous, round_number, error)
+
+    @classmethod
+    def _fit(
+        cls,
+        lyrics: str,
+        brief: Any,
+        score: str | None,
+        reference_lyrics: str | None,
+        previous: dict[str, Any],
+        round_number: int,
+        answer: str | None,
+        last: bool,
+    ) -> io.NodeOutput:
         reason = _skip_reason(brief, score)
         phrasing = None if reason else _phrasing(score or "")
         if phrasing is None and not reason:

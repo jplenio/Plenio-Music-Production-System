@@ -9,6 +9,7 @@ related section's melody. Instrumentals, a score without singing and planning of
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from comfy_api.latest import io
@@ -17,9 +18,24 @@ from ...core import song_form
 from ...core.reports import Report, Status
 from ..types import ReportType
 
+LOG = logging.getLogger(__name__)
+
 
 def _first(score: str | None, lyrics: str | None) -> song_form.Form:
     return song_form.match(lyrics or "", score or "")
+
+
+def _unchecked(score: str, error: Exception) -> io.NodeOutput:
+    """The plan as it is after an unexpected error (every sung YuE2 song passes here: it must not stop the run);
+    the traceback goes to the console for a bug report."""
+    LOG.exception("Plenio Match Song Form: the check failed; the plan is used as it is")
+    reason = f"{type(error).__name__}: {error}"
+    summary = f"Song form: not checked (an internal error, {reason}); the plan is used as it is"
+    data = {"category": "error", "lyrics": [], "plan": [], "changes": [], "notes": [reason]}
+    report = Report("song_form", Status.WARNING, summary + ".", (), data)
+    return io.NodeOutput(
+        score, report, ui={"plenio_summary": [{"status": "warning", "markdown": f"**{summary}**"}]}
+    )
 
 
 class PlenioMatchSongForm(io.ComfyNode):
@@ -67,7 +83,10 @@ class PlenioMatchSongForm(io.ComfyNode):
     ) -> list[str]:
         if kwargs.get("alternative") is not None:
             return []
-        first = _first(score, lyrics)
+        try:
+            first = _first(score, lyrics)
+        except Exception:  # noqa: BLE001 - execute passes the plan through and says why
+            return []
         return (
             ["alternative"]
             if first.category != song_form.SKIP and first.quality < song_form.REPLAN_BELOW
@@ -76,6 +95,13 @@ class PlenioMatchSongForm(io.ComfyNode):
 
     @classmethod
     def execute(cls, score: str, lyrics: str, alternative: str | None = None) -> io.NodeOutput:
+        try:
+            return cls._match(score, lyrics, alternative)
+        except Exception as error:  # noqa: BLE001 - the plan as it is beats a stopped run
+            return _unchecked(score, error)
+
+    @classmethod
+    def _match(cls, score: str, lyrics: str, alternative: str | None) -> io.NodeOutput:
         first = _first(score, lyrics)
         chosen, second_used, tried = first, False, False
         if (

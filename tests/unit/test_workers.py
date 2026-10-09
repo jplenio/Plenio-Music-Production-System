@@ -11,6 +11,7 @@ import pytest
 
 from plenio.core.errors import PlenioCancelledError, PlenioWorkerError
 from plenio.core.workers import WorkerEnv, WorkerLimits, run_worker
+from plenio.core.workers.protocol import _remove_job
 
 ROOT = Path(__file__).resolve().parents[2]
 ENV = WorkerEnv(python=Path(sys.executable), pythonpath=(ROOT, ROOT / "tests" / "fixtures" / "workers"))
@@ -69,6 +70,17 @@ def test_cancel_stops_the_worker(tmp_path: Path) -> None:
     with pytest.raises(PlenioCancelledError):
         run("busy", tmp_path, is_cancelled=flag.is_set)
     assert list(tmp_path.iterdir()) == []
+
+
+def test_job_folder_goes_once_a_late_process_lets_go(tmp_path: Path) -> None:
+    # a venv's python.exe is a launcher on Windows: the real interpreter ends a moment after it and holds
+    # stderr.log until then (an open file cannot be deleted there; elsewhere this passes at once)
+    job = tmp_path / "plenio-job-x"
+    job.mkdir()
+    handle = (job / "stderr.log").open("wb")
+    threading.Timer(0.3, handle.close).start()
+    _remove_job(job)
+    assert not job.exists()
 
 
 def test_no_sticky_state_between_calls(tmp_path: Path) -> None:

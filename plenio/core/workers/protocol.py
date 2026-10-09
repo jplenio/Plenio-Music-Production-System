@@ -126,7 +126,25 @@ def run_worker(
                     process.wait()
         return _collect(process.returncode, job, module)
     finally:
-        shutil.rmtree(job, ignore_errors=True)
+        _remove_job(job)
+
+
+def _remove_job(job: Path, attempts: int = 40, pause_s: float = 0.05) -> None:
+    """Remove the job folder, retrying while a file in it is still open.
+
+    In a Windows venv ``python.exe`` is a launcher: killing it ends the real
+    interpreter only a moment later, and until then its ``stderr.log`` cannot
+    be deleted.
+    """
+    for _ in range(attempts):
+        try:
+            shutil.rmtree(job)
+            return
+        except OSError:
+            if not job.exists():
+                return
+            time.sleep(pause_s)
+    shutil.rmtree(job, ignore_errors=True)
 
 
 def _supervise(

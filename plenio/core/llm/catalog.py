@@ -228,9 +228,9 @@ def _snapshot(repo: Path) -> Path | None:
         return snapshots / revision
     try:
         folders = [p for p in snapshots.iterdir() if p.is_dir()]
-    except OSError:
+        return max(folders, key=lambda p: p.stat().st_mtime) if folders else None
+    except OSError:  # a snapshot removed while the cache is read
         return None
-    return max(folders, key=lambda p: p.stat().st_mtime) if folders else None
 
 
 def _hf_repo_folder(name: str) -> tuple[str, str] | None:
