@@ -10,10 +10,10 @@ Everything runs on your own machine, inside ComfyUI's own nodes: no cloud servic
 
 ## Watch the tutorials
 
-**▶ [Plenio in 75 seconds](https://youtu.be/D6WUSzRbWWA)** - the promo: what Plenio does, from the first idea to the mastered song.
+**▶ [Plenio in 75 seconds](https://youtu.be/q_dMH834E1o)** - the promo: what Plenio does, from the first idea to the mastered song.
 
 <p align="center">
-  <a href="https://youtu.be/D6WUSzRbWWA"><img src="assets/branding/0.4.5/promo.jpg" alt="Plenio - Music production in ComfyUI: the promo video on YouTube" width="70%" /></a>
+  <a href="https://youtu.be/q_dMH834E1o"><img src="assets/branding/0.4.5/promo.jpg" alt="Plenio - Music production in ComfyUI: the promo video on YouTube" width="70%" /></a>
 </p>
 
 **▶ [All tutorials as a YouTube playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE)** - one narrated video for every template and two for the creative modes (English, 2 to 15 minutes, with chapters; all re-recorded for 0.4.5), recorded in ComfyUI with the real models: every song you hear in them was made right there. Watch them in order, or jump to the template you need.
@@ -268,7 +268,7 @@ Plenio is the successor of the [Music Production Toolkit](https://github.com/jpl
 
 - Users: [Getting started](docs/user/getting-started.md) · [YuE2 Song](docs/user/paths/yue2-song.md) · [YuE2 Cover](docs/user/paths/yue2-cover.md) · [YuE2 DAW](docs/user/paths/yue2-daw.md) · [MiniMax Song](docs/user/paths/minimax-song.md) · [Enhance & Master](docs/user/paths/enhance-master.md) · [Song Sheet](docs/user/concepts/song-sheet.md) · [Brief templates](docs/user/concepts/brief-templates.md) · [Score editor](docs/user/concepts/score-editor.md) · [Stems](docs/user/concepts/stems.md) · [Refine (48 kHz)](docs/user/concepts/refine.md) · [Instrumental](docs/user/concepts/instrumental.md) · [Mastering](docs/user/concepts/mastering.md) · [App mode](docs/user/concepts/app-mode.md) · [Local LLMs](docs/user/concepts/local-llm.md) · [Models](docs/user/models.md) · [Configuration](docs/user/configuration.md) · [Licensing](docs/user/licensing.md) · [Troubleshooting](docs/user/troubleshooting.md)
 - Contributors: [Architecture](docs/dev/architecture.md) · [Extending Plenio](docs/dev/extending.md) · [Testing](docs/dev/testing.md) · [Design documents](docs/design/README.md) · [Decisions](docs/adr/README.md) · [Acceptance review](docs/audit/2026-09-25-phase-10-acceptance.md)
-- Videos: [all tutorials (playlist)](https://www.youtube.com/playlist?list=PLAFqTtP59fgE) · [Promo](https://youtu.be/D6WUSzRbWWA)
+- Videos: [all tutorials (playlist)](https://www.youtube.com/playlist?list=PLAFqTtP59fgE) · [Promo](https://youtu.be/q_dMH834E1o)
 - [Changelog](CHANGELOG.md)
 
 ## A few honest limits
