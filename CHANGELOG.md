@@ -1,6 +1,18 @@
 # Changelog
 
-All notable changes of the current version. Versions follow semantic versioning; published Registry versions are immutable. Earlier versions (0.2.0 to 0.4.4): the [changelog of 0.4.4](https://github.com/jplenio/Plenio-Music-Production-System/blob/v0.4.4/CHANGELOG.md) and the [GitHub releases](https://github.com/jplenio/Plenio-Music-Production-System/releases).
+All notable changes of the current version and the one before. Versions follow semantic versioning; published Registry versions are immutable. Earlier versions (0.2.0 to 0.4.4): the [changelog of 0.4.4](https://github.com/jplenio/Plenio-Music-Production-System/blob/v0.4.4/CHANGELOG.md) and the [GitHub releases](https://github.com/jplenio/Plenio-Music-Production-System/releases).
+
+## 0.5.1 - 2026-10-09
+
+The stems you save in the Stem Mixer now stay with their song.
+
+### Changed
+
+- **Stems next to the song** (owner's request): the strips marked *save* in the **Stem Mixer** are written by **Export Release** next to the song, into a folder named after it with `-stems` - for `output/plenio/My Song.flac` the stems are `output/plenio/My Song-stems/drums.flac`, `vocals.flac` ... (a batch of takes: `drums take 1.flac` ...), 24-bit FLAC with the song's tags and the title *My Song (drums)*. The folder takes the song's number with it (`My Song (2)-stems`), so nothing is overwritten, and the release record lists every stem file. The templates need no change: the Stem Mixer's report already goes into the export. In a workflow without an Export Release that takes the mixer's report the stems go to `output/plenio/stems` as before.
+
+### Fixed
+
+- The release record's schema (`resources/schemas/record-1.schema.json`) knows the sheet music (its `sheet_music` entry, the PDF among the files) and the stems (`role`: `sheet_music`, `stem`): a record with sheet music did not pass it. All 408 records of the owner's songs pass it now.
 
 ## 0.5.0 - 2026-10-09
 
