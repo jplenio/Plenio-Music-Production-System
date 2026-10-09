@@ -4,7 +4,7 @@ All notable changes of the current version. Versions follow semantic versioning;
 
 ## 0.5.0 - 2026-10-09
 
-The writer model can plan the arrangement: **creative modes** for songs and covers - experimental, made for trying out - with closeness sliders, chords that carry the melody, instrument lines that leave room for the voice and key lifts that are led in. **Your own local LLMs** write songs and arrangements. New cover lyrics **fit the melody** line by line, covers keep their verses over long rests and are named after their source, and YuE2's song form follows the lyrics. Every export can bring its **sheet music as a PDF** - in four sizes, with no lyrics lost. Every field in the templates explains itself in a tooltip. Two new tutorials show the creative modes; the others were recorded again.
+The writer model can plan the arrangement: **creative modes** for songs and covers - experimental, made for trying out - with closeness sliders, chords that carry the melody, instrument lines that leave room for the voice and key lifts that are led in. **Your own local LLMs** write songs and arrangements. New cover lyrics **fit the melody** line by line, covers keep their verses over long rests and are named after their source, and YuE2's song form follows the lyrics. Every export can bring its **sheet music as a PDF** - in four sizes, with the words where YuE2 sings them and no lyrics lost. Every field in the templates explains itself in a tooltip. Two new tutorials show the creative modes; the others were recorded again.
 
 ### Added
 
