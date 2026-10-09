@@ -26,11 +26,11 @@ from ..shared import SERIES
 from ..types import Brief, Engine, PitchType, ReportType, SheetState, TimelineType
 
 DOC_TOOLTIPS = {
-    "title": "Song title draft.",
+    "title": "The title draft (Parse Song Draft); shown and editable in the sheet.",
     "style": "Style / caption draft for the music model.",
     "lyrics": "Lyrics draft with [Tag] sections.",
     "score": "Score draft (native two-voice ABC).",
-    "artwork_prompt": "Cover image prompt draft.",
+    "artwork_prompt": "The cover art prompt draft (for the optional Cover Art block); shown and editable in the sheet.",
 }
 CONTEXT = ("context_style", "context_lyrics", "context_score")
 EVENT = "plenio.sheet"

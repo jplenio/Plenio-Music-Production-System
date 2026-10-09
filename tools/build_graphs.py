@@ -5,7 +5,8 @@ Run after changing a blueprint or template definition here:
     <python> tools/build_graphs.py
 
 The output is deterministic; the workflow tests check that every template
-embeds the current blueprint definitions.
+embeds the current blueprint definitions. It also writes the tooltips of the
+blueprints' inputs and outputs to ``locales/en/nodeDefs.json``.
 """
 
 from __future__ import annotations
@@ -13,6 +14,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT / "tools"))
@@ -32,6 +34,9 @@ sys.path.insert(0, str(PROJECT))
 
 from plenio.core.llm import CHOOSE  # noqa: E402
 from plenio.core.models import ModelFile, by_file, load_catalogue  # noqa: E402
+from workflow_validation import load_snapshot  # noqa: E402
+
+SNAPSHOT = load_snapshot()
 
 CATALOGUE = by_file(load_catalogue(PROJECT / "resources" / "models.toml"))
 
@@ -60,6 +65,30 @@ MINIMAX_VAE = "minimax_music3_dav.safetensors"
 FLUX = "flux-2-klein-4b.safetensors"
 FLUX_TE = "qwen_3_4b.safetensors"
 FLUX_VAE = "flux2-vae.safetensors"
+
+
+FROM_MODEL_BLOCK = "From the music model block."
+ENGINE_OUT = "The music model's rules and exact tokenizer, for Write Song and the Song Sheets."
+TAKE_SEED = (
+    "The take seed: another seed, another take of the same documents. It drives both the token and the audio "
+    "sampling."
+)
+MAX_SECONDS = (
+    "The longest the take may run (the Song Sheet derives it from the score's length); YuE2 may end earlier."
+)
+WRITER_MODEL = (
+    "The writer: a text model of ComfyUI (a bare file name, written by Generate Text; Gemma 4 E4B by default) or "
+    "a Local LLM model (GGUF files, LM Studio, Ollama ...). Only the chosen one is loaded; the templates link it to "
+    "the Writer model node. Press R to refresh the list."
+)
+NATIVE_TOOLTIPS = {
+    "SeedNode": {
+        "seed": "The seed this node passes on. control after generate decides what happens to it after each run: "
+        "fixed keeps it, increment and decrement step it, randomize draws a new one."
+    },
+    "LoadAudio": {"audio": "The audio file: one from ComfyUI's input folder, or upload one."},
+}
+"""Native widgets that the templates show at the top level and that ComfyUI ships without a tooltip."""
 
 
 def model(name: str) -> dict[str, list[dict[str, str]]]:
@@ -103,13 +132,25 @@ def yue2_model() -> Blueprint:
                 widget=True,
                 default=YUE2_CHECKPOINT,
                 label="checkpoint",
+                tooltip="The YuE2 checkpoint in models/checkpoints: yue2_3b_int8_convrot (default, for 8-16 GB GPUs) "
+                "or yue2_3b_bf16 (24 GB and more). ComfyUI offers the download when the file is missing.",
             )
         ],
         [
-            BlueprintOutput("MODEL", "MODEL", (lora, "MODEL")),
-            BlueprintOutput("CLIP", "CLIP", (lora, "CLIP")),
-            BlueprintOutput("VAE", "VAE", (loader, "VAE")),
-            BlueprintOutput("engine", "PLENIO_ENGINE", (engine, "engine")),
+            BlueprintOutput(
+                "MODEL",
+                "MODEL",
+                (lora, "MODEL"),
+                tooltip="YuE2 for the render (through the instrumental adapter, bypassed unless switched on).",
+            ),
+            BlueprintOutput(
+                "CLIP",
+                "CLIP",
+                (lora, "CLIP"),
+                tooltip="YuE2's language side: planning, rendering, token counts.",
+            ),
+            BlueprintOutput("VAE", "VAE", (loader, "VAE"), tooltip="YuE2's audio decoder."),
+            BlueprintOutput("engine", "PLENIO_ENGINE", (engine, "engine"), tooltip=ENGINE_OUT),
         ],
     )
 
@@ -147,7 +188,14 @@ def minimax_model() -> Blueprint:
         g,
         [
             BlueprintInput(
-                "unet_name", "COMBO", [(unet, "unet_name")], widget=True, default=MINIMAX_DIT, label="model"
+                "unet_name",
+                "COMBO",
+                [(unet, "unet_name")],
+                widget=True,
+                default=MINIMAX_DIT,
+                label="model",
+                tooltip="MiniMax Music 3's diffusion model in models/diffusion_models: the fp16 file (default) or "
+                "minimax_music3_dit_int8_convrot (2.5 GB, for 8-12 GB GPUs).",
             ),
             BlueprintInput(
                 "clip_name",
@@ -156,16 +204,26 @@ def minimax_model() -> Blueprint:
                 widget=True,
                 default=MINIMAX_TE,
                 label="text encoder",
+                tooltip="MiniMax Music 3's text encoder in models/text_encoders (int8 by default); the Song Sheet "
+                "counts the 5,000-token prompt budget with it, exactly.",
             ),
             BlueprintInput(
-                "vae_name", "COMBO", [(vae, "vae_name")], widget=True, default=MINIMAX_VAE, label="vae"
+                "vae_name",
+                "COMBO",
+                [(vae, "vae_name")],
+                widget=True,
+                default=MINIMAX_VAE,
+                label="vae",
+                tooltip="MiniMax Music 3's audio decoder in models/vae.",
             ),
         ],
         [
-            BlueprintOutput("MODEL", "MODEL", (unet, "MODEL")),
-            BlueprintOutput("CLIP", "CLIP", (clip, "CLIP")),
-            BlueprintOutput("VAE", "VAE", (vae, "VAE")),
-            BlueprintOutput("engine", "PLENIO_ENGINE", (engine, "engine")),
+            BlueprintOutput("MODEL", "MODEL", (unet, "MODEL"), tooltip="MiniMax Music 3 for the render."),
+            BlueprintOutput(
+                "CLIP", "CLIP", (clip, "CLIP"), tooltip="The text encoder: the render and the token counts."
+            ),
+            BlueprintOutput("VAE", "VAE", (vae, "VAE"), tooltip="MiniMax Music 3's audio decoder."),
+            BlueprintOutput("engine", "PLENIO_ENGINE", (engine, "engine"), tooltip=ENGINE_OUT),
         ],
     )
 
@@ -226,20 +284,48 @@ def minimax_render() -> Blueprint:
         "earlier. Turn on tiled decode if decoding runs out of memory.",
         g,
         [
-            BlueprintInput("model", "MODEL", [(sampler, "model")]),
-            BlueprintInput("clip", "CLIP", [(encode, "clip")]),
-            BlueprintInput("vae", "VAE", [(decode, "vae"), (tiled, "vae")]),
-            BlueprintInput("caption", "STRING", [(encode, "caption")]),
-            BlueprintInput("lyrics", "STRING", [(encode, "lyrics")]),
-            BlueprintInput("seed", "INT", [(encode, "seed"), (sampler, "seed")], label="take seed"),
-            BlueprintInput("max_duration", "FLOAT", [(encode, "max_duration")], label="max seconds"),
+            BlueprintInput("model", "MODEL", [(sampler, "model")], tooltip=FROM_MODEL_BLOCK),
+            BlueprintInput("clip", "CLIP", [(encode, "clip")], tooltip=FROM_MODEL_BLOCK),
+            BlueprintInput("vae", "VAE", [(decode, "vae"), (tiled, "vae")], tooltip=FROM_MODEL_BLOCK),
             BlueprintInput(
-                "switch", "BOOLEAN", [(switch, "switch")], widget=True, default=False, label="tiled decode"
+                "caption",
+                "STRING",
+                [(encode, "caption")],
+                tooltip="The final caption (Song Sheet): rendered exactly as given.",
+            ),
+            BlueprintInput(
+                "lyrics",
+                "STRING",
+                [(encode, "lyrics")],
+                tooltip="The final lyrics (Song Sheet): rendered exactly as given.",
+            ),
+            BlueprintInput(
+                "seed", "INT", [(encode, "seed"), (sampler, "seed")], label="take seed", tooltip=TAKE_SEED
+            ),
+            BlueprintInput(
+                "max_duration",
+                "FLOAT",
+                [(encode, "max_duration")],
+                label="max seconds",
+                tooltip="The longest the song may run (from the brief's length, at most 6:00); the model may end "
+                "earlier.",
+            ),
+            BlueprintInput(
+                "switch",
+                "BOOLEAN",
+                [(switch, "switch")],
+                widget=True,
+                default=False,
+                label="tiled decode",
+                tooltip="Decode the audio in tiles: turn it on when decoding runs out of GPU memory (8-12 GB "
+                "cards).",
             ),
         ],
         [
-            BlueprintOutput("AUDIO", "AUDIO", (switch, "output")),
-            BlueprintOutput("seconds", "FLOAT", (encode, "seconds")),
+            BlueprintOutput("AUDIO", "AUDIO", (switch, "output"), tooltip="The rendered song."),
+            BlueprintOutput(
+                "seconds", "FLOAT", (encode, "seconds"), tooltip="The render's length in seconds."
+            ),
         ],
     )
 
@@ -275,8 +361,13 @@ def master() -> Blueprint:
         "gentle compression. Open the block to change the EQ curve or the compression style.",
         g,
         [
-            BlueprintInput("audio", "AUDIO", [(eq, "audio")]),
-            BlueprintInput("reference", "AUDIO", [(eq, "reference")]),
+            BlueprintInput("audio", "AUDIO", [(eq, "audio")], tooltip="The song to master."),
+            BlueprintInput(
+                "reference",
+                "AUDIO",
+                [(eq, "reference")],
+                tooltip="Optional: a recording whose tone the EQ matches (with a reference recipe in the block).",
+            ),
             BlueprintInput(
                 "sample_rate",
                 "COMBO",
@@ -284,12 +375,25 @@ def master() -> Blueprint:
                 widget=True,
                 default="keep",
                 label="sample rate",
+                tooltip="keep, 44100 or 48000 Hz; converted before the limiter, so the true-peak ceiling holds.",
             ),
         ],
         [
-            BlueprintOutput("audio", "AUDIO", (loudness, "audio")),
-            BlueprintOutput("eq_report", "PLENIO_REPORT", (eq, "report")),
-            BlueprintOutput("loudness_report", "PLENIO_REPORT", (loudness, "report")),
+            BlueprintOutput(
+                "audio",
+                "AUDIO",
+                (loudness, "audio"),
+                tooltip="The mastered song (-14 LUFS, -1 dBTP true peak in the templates).",
+            ),
+            BlueprintOutput(
+                "eq_report", "PLENIO_REPORT", (eq, "report"), tooltip="The EQ's bands and the tone match."
+            ),
+            BlueprintOutput(
+                "loudness_report",
+                "PLENIO_REPORT",
+                (loudness, "report"),
+                tooltip="Loudness and true peak before and after.",
+            ),
         ],
     )
 
@@ -328,7 +432,9 @@ def refine() -> Blueprint:
         "already reaches 20 kHz.",
         g,
         [
-            BlueprintInput("audio", "AUDIO", [(stage, "audio")]),
+            BlueprintInput(
+                "audio", "AUDIO", [(stage, "audio")], tooltip="The rendered song (any sample rate)."
+            ),
             # promoted widgets: every template sets its own stages on the wrapper node
             BlueprintInput("preset", "COMBO", [(stage, "preset")], label="stage template"),
             BlueprintInput("pre_hz", "FLOAT", [(stage, "pre_hz")], label="pre (model input)"),
@@ -336,8 +442,13 @@ def refine() -> Blueprint:
             BlueprintInput("crossover_hz", "FLOAT", [(stage, "crossover_hz")], label="crossover"),
         ],
         [
-            BlueprintOutput("audio", "AUDIO", (stage, "audio")),
-            BlueprintOutput("report", "PLENIO_REPORT", (stage, "report")),
+            BlueprintOutput("audio", "AUDIO", (stage, "audio"), tooltip="48 kHz, same duration."),
+            BlueprintOutput(
+                "report",
+                "PLENIO_REPORT",
+                (stage, "report"),
+                tooltip="Engine, parameters, bandwidth before/after.",
+            ),
         ],
     )
 
@@ -453,11 +564,30 @@ def stems() -> Blueprint:
         "(what the separator missed) is one more strip, so a neutral mix returns the render unchanged. "
         "Bypassed by default in every template - select the block and press Ctrl+B to use it.",
         g,
-        [BlueprintInput("audio", "AUDIO", [(separate, "audio")])],
         [
-            BlueprintOutput("audio", "AUDIO", (mixer, "audio")),
-            BlueprintOutput("report", "PLENIO_REPORT", (mixer, "report")),
-            BlueprintOutput("separation_report", "PLENIO_REPORT", (separate, "report")),
+            BlueprintInput(
+                "audio", "AUDIO", [(separate, "audio")], tooltip="The song to split, before mastering."
+            )
+        ],
+        [
+            BlueprintOutput(
+                "audio",
+                "AUDIO",
+                (mixer, "audio"),
+                tooltip="The mixdown; a neutral mix returns the input unchanged.",
+            ),
+            BlueprintOutput(
+                "report",
+                "PLENIO_REPORT",
+                (mixer, "report"),
+                tooltip="Per strip: audible, gain, gain reduction, muted time, saved files.",
+            ),
+            BlueprintOutput(
+                "separation_report",
+                "PLENIO_REPORT",
+                (separate, "report"),
+                tooltip="Stem names and how much the residual holds.",
+            ),
         ],
     )
 
@@ -660,22 +790,65 @@ def write_song() -> Blueprint:
         "lines and at most twice (Fit Lyrics); when the draft fits, no second writer call is made.",
         g,
         [
-            BlueprintInput("brief", "PLENIO_BRIEF", [(compose, "brief"), *[(fit, "brief") for fit in fits]]),
-            BlueprintInput("engine", "PLENIO_ENGINE", [(compose, "engine")]),
-            BlueprintInput("score", "STRING", [(compose, "score"), *[(fit, "score") for fit in fits]]),
-            BlueprintInput("language", "STRING", [(compose, "language")]),
+            BlueprintInput(
+                "brief",
+                "PLENIO_BRIEF",
+                [(compose, "brief"), *[(fit, "brief") for fit in fits]],
+                tooltip="The Song Brief or Cover Brief: what to write.",
+            ),
+            BlueprintInput(
+                "engine",
+                "PLENIO_ENGINE",
+                [(compose, "engine")],
+                tooltip="From the music model block: the rules the writing follows.",
+            ),
+            BlueprintInput(
+                "score",
+                "STRING",
+                [(compose, "score"), *[(fit, "score") for fit in fits]],
+                tooltip="The final score (covers): the lyrics follow its sections, and new cover lyrics are "
+                "fitted to its phrases line by line.",
+            ),
+            BlueprintInput(
+                "language",
+                "STRING",
+                [(compose, "language")],
+                tooltip="The language Transcribe Lyrics heard (an original-lyrics cover whose brief says auto).",
+            ),
             BlueprintInput(
                 "reference_lyrics",
                 "STRING",
                 [(compose, "reference_lyrics"), *[(fit, "reference_lyrics") for fit in fits]],
+                tooltip="The source's transcribed lyrics (new cover lyrics with the phrasing reference or a lyrics "
+                "closeness above 0); requested only then.",
             ),
             BlueprintInput(
-                "model", "COMBO", [(choice, "model")], widget=True, default=WRITER, label="writer model"
+                "model",
+                "COMBO",
+                [(choice, "model")],
+                widget=True,
+                default=WRITER,
+                label="writer model",
+                tooltip=WRITER_MODEL,
             ),
             BlueprintInput(
-                "sampling_mode.seed", "INT", [(draft, "value")], widget=True, default=0, label="draft seed"
+                "sampling_mode.seed",
+                "INT",
+                [(draft, "value")],
+                widget=True,
+                default=0,
+                label="draft seed",
+                tooltip="The draft seed: the same seed and brief give the same draft; another seed, another draft. "
+                "The brief's song seed is added, so every song of a series gets its own.",
             ),
-            BlueprintInput("song_seed", "INT", [(seed, "values.b")], label="song seed"),
+            BlueprintInput(
+                "song_seed",
+                "INT",
+                [(seed, "values.b")],
+                label="song seed",
+                tooltip="From the brief: a new value for every song of a series, 0 for one song (added to the "
+                "draft seed).",
+            ),
             BlueprintInput(
                 "thinking",
                 "BOOLEAN",
@@ -686,15 +859,36 @@ def write_song() -> Blueprint:
                 ],
                 widget=True,
                 default=False,
+                tooltip="Let a reasoning writer think before it answers (Qwen, Gemma ...): slower, the thoughts are "
+                "not used. Needs more tokens.",
             ),
         ],
         [
-            BlueprintOutput("title", "STRING", (parse, "title")),
-            BlueprintOutput("style", "STRING", (parse, "style")),
-            BlueprintOutput("lyrics", "STRING", (fits[2], "lyrics")),
-            BlueprintOutput("artwork_prompt", "STRING", (parse, "artwork_prompt")),
-            BlueprintOutput("report", "PLENIO_REPORT", (parse, "report")),
-            BlueprintOutput("lyrics_fit_report", "PLENIO_REPORT", (fits[2], "report")),
+            BlueprintOutput("title", "STRING", (parse, "title"), tooltip="The title draft."),
+            BlueprintOutput(
+                "style", "STRING", (parse, "style"), tooltip="The style draft (MiniMax Music 3: the caption)."
+            ),
+            BlueprintOutput(
+                "lyrics",
+                "STRING",
+                (fits[2], "lyrics"),
+                tooltip="The lyrics draft (new cover lyrics: fitted to the melody).",
+            ),
+            BlueprintOutput(
+                "artwork_prompt", "STRING", (parse, "artwork_prompt"), tooltip="The cover art prompt draft."
+            ),
+            BlueprintOutput(
+                "report",
+                "PLENIO_REPORT",
+                (parse, "report"),
+                tooltip="What Parse Song Draft read and enforced.",
+            ),
+            BlueprintOutput(
+                "lyrics_fit_report",
+                "PLENIO_REPORT",
+                (fits[2], "report"),
+                tooltip="How the lyrics fit the melody (new cover lyrics; Fit Lyrics).",
+            ),
         ],
     )
 
@@ -833,26 +1027,77 @@ def arrange() -> Blueprint:
         "(the re-ask); the better arrangement is used.",
         g,
         [
-            BlueprintInput("score", "STRING", [(compose, "score"), (apply, "score"), (second, "score")]),
             BlueprintInput(
-                "brief", "PLENIO_BRIEF", [(compose, "brief"), (apply, "brief"), (second, "brief")]
+                "score",
+                "STRING",
+                [(compose, "score"), (apply, "score"), (second, "score")],
+                tooltip="The score to arrange: YuE2's plan, or a cover's transcription.",
             ),
             BlueprintInput(
-                "engine", "PLENIO_ENGINE", [(compose, "engine"), (apply, "engine"), (second, "engine")]
-            ),
-            BlueprintInput("style", "STRING", [(compose, "style"), (apply, "style"), (second, "style")]),
-            BlueprintInput("lyrics", "STRING", [(compose, "lyrics"), (apply, "lyrics"), (second, "lyrics")]),
-            BlueprintInput(
-                "model", "COMBO", [(choice, "model")], widget=True, default=WRITER, label="writer model"
+                "brief",
+                "PLENIO_BRIEF",
+                [(compose, "brief"), (apply, "brief"), (second, "brief")],
+                tooltip="The brief: the creative mode and its closeness (arrangement off: nothing runs here).",
             ),
             BlueprintInput(
-                "seed", "INT", [(arrangement_seed, "value")], widget=True, default=0, label="arrangement seed"
+                "engine",
+                "PLENIO_ENGINE",
+                [(compose, "engine"), (apply, "engine"), (second, "engine")],
+                tooltip="The music model: YuE2's context budget is checked with it.",
             ),
-            BlueprintInput("song_seed", "INT", [(seed, "values.b")], label="song seed"),
+            BlueprintInput(
+                "style",
+                "STRING",
+                [(compose, "style"), (apply, "style"), (second, "style")],
+                tooltip="The song's style: the mood, and the exact context budget.",
+            ),
+            BlueprintInput(
+                "lyrics",
+                "STRING",
+                [(compose, "lyrics"), (apply, "lyrics"), (second, "lyrics")],
+                tooltip="The song's lyrics: the mood, and the exact context budget.",
+            ),
+            BlueprintInput(
+                "model",
+                "COMBO",
+                [(choice, "model")],
+                widget=True,
+                default=WRITER,
+                label="writer model",
+                tooltip=WRITER_MODEL,
+            ),
+            BlueprintInput(
+                "seed",
+                "INT",
+                [(arrangement_seed, "value")],
+                widget=True,
+                default=0,
+                label="arrangement seed",
+                tooltip="Another seed, another arrangement of the same song (the writer's plan and the notes "
+                "Plenio writes). The brief's song seed is added.",
+            ),
+            BlueprintInput(
+                "song_seed",
+                "INT",
+                [(seed, "values.b")],
+                label="song seed",
+                tooltip="From the brief: a new value for every song of a series, 0 for one song (added to the "
+                "arrangement seed).",
+            ),
         ],
         [
-            BlueprintOutput("score", "STRING", (second, "score")),
-            BlueprintOutput("report", "PLENIO_REPORT", (second, "report")),
+            BlueprintOutput(
+                "score",
+                "STRING",
+                (second, "score"),
+                tooltip="The arranged score, or the score as it was (the report says why).",
+            ),
+            BlueprintOutput(
+                "report",
+                "PLENIO_REPORT",
+                (second, "report"),
+                tooltip="What was arranged and kept, for Song Sheet · Score.",
+            ),
         ],
     )
 
@@ -878,10 +1123,27 @@ def transcribe_score() -> Blueprint:
         g,
         [BlueprintInput("audio", "AUDIO", [(node, "audio")])],
         [
-            BlueprintOutput("score", "STRING", (node, "score")),
-            BlueprintOutput("timeline", "PLENIO_TIMELINE", (node, "timeline")),
-            BlueprintOutput("report", "PLENIO_REPORT", (node, "report")),
-            BlueprintOutput("AUDIO_ENCODER", "AUDIO_ENCODER", (loader, "AUDIO_ENCODER")),
+            BlueprintOutput(
+                "score",
+                "STRING",
+                (node, "score"),
+                tooltip="The transcribed score (native two-voice ABC, chords).",
+            ),
+            BlueprintOutput(
+                "timeline",
+                "PLENIO_TIMELINE",
+                (node, "timeline"),
+                tooltip="Bar times and sung notes of the source, for the lyrics and the editor.",
+            ),
+            BlueprintOutput(
+                "report", "PLENIO_REPORT", (node, "report"), tooltip="Bars, tempo, key, sections and voices."
+            ),
+            BlueprintOutput(
+                "AUDIO_ENCODER",
+                "AUDIO_ENCODER",
+                (loader, "AUDIO_ENCODER"),
+                tooltip="The loaded SheetSage2, for Check Vocals.",
+            ),
         ],
     )
 
@@ -945,13 +1207,46 @@ def yue2_plan() -> Blueprint:
         "once more with the next seed and the better plan wins.",
         g,
         [
-            BlueprintInput("clip", "CLIP", [(plan, "clip"), (alternative, "clip")]),
-            BlueprintInput("style", "STRING", [(plan, "style"), (alternative, "style")]),
-            BlueprintInput("lyrics", "STRING", [(plan, "lyrics"), (alternative, "lyrics"), (form, "lyrics")]),
-            BlueprintInput("seed", "INT", [(plan_seed, "value")], widget=True, default=0, label="plan seed"),
-            BlueprintInput("song_seed", "INT", [(seed, "values.b")], label="song seed"),
+            BlueprintInput("clip", "CLIP", [(plan, "clip"), (alternative, "clip")], tooltip=FROM_MODEL_BLOCK),
             BlueprintInput(
-                "switch", "BOOLEAN", [(switch, "switch")], widget=True, default=True, label="planning"
+                "style",
+                "STRING",
+                [(plan, "style"), (alternative, "style")],
+                tooltip="The final style (Song Sheet · Text): what YuE2 plans for.",
+            ),
+            BlueprintInput(
+                "lyrics",
+                "STRING",
+                [(plan, "lyrics"), (alternative, "lyrics"), (form, "lyrics")],
+                tooltip="What the planner reads (Song Sheet · Text's plan_lyrics): the lyrics, or a section form "
+                "for an instrumental.",
+            ),
+            BlueprintInput(
+                "seed",
+                "INT",
+                [(plan_seed, "value")],
+                widget=True,
+                default=0,
+                label="plan seed",
+                tooltip="The plan seed: the same seed gives the same plan; another seed, another melody and form. "
+                "The brief's song seed is added.",
+            ),
+            BlueprintInput(
+                "song_seed",
+                "INT",
+                [(seed, "values.b")],
+                label="song seed",
+                tooltip="From the brief: added to the plan seed, so every song of a series gets its own plan.",
+            ),
+            BlueprintInput(
+                "switch",
+                "BOOLEAN",
+                [(switch, "switch")],
+                widget=True,
+                default=True,
+                label="planning",
+                tooltip="On: YuE2 plans a score (melody, chords, form) that the Song Sheet shows and you can edit. "
+                "Off: no score - YuE2 renders without a plan.",
             ),
             BlueprintInput(
                 "mode",
@@ -960,11 +1255,22 @@ def yue2_plan() -> Blueprint:
                 widget=True,
                 default="full",
                 label="plan type",
+                tooltip="full: melody and chords; melody: the melody only (YuE2 harmonises it when it renders).",
             ),
         ],
         [
-            BlueprintOutput("score", "STRING", (form, "score")),
-            BlueprintOutput("form_report", "PLENIO_REPORT", (form, "report")),
+            BlueprintOutput(
+                "score",
+                "STRING",
+                (form, "score"),
+                tooltip="The planned score in the lyrics' song form (empty with planning off).",
+            ),
+            BlueprintOutput(
+                "form_report",
+                "PLENIO_REPORT",
+                (form, "report"),
+                tooltip="How the plan was made to fit the lyrics' song form (for Song Sheet · Score).",
+            ),
         ],
     )
 
@@ -1002,21 +1308,54 @@ def yue2_render() -> Blueprint:
         "seed drives both the token and the audio sampling.",
         g,
         [
-            BlueprintInput("model", "MODEL", [(sampler, "model")]),
-            BlueprintInput("clip", "CLIP", [(music, "clip")]),
-            BlueprintInput("vae", "VAE", [(decode, "vae")]),
-            BlueprintInput("style", "STRING", [(music, "style")]),
-            BlueprintInput("lyrics", "STRING", [(music, "lyrics")]),
-            BlueprintInput("abc", "STRING", [(music, "abc")], label="score"),
-            BlueprintInput("mode", "COMBO", [(music, "mode")], label="planning mode"),
-            BlueprintInput("seed", "INT", [(music, "seed"), (sampler, "seed")], label="take seed"),
-            BlueprintInput("max_duration", "FLOAT", [(music, "max_duration")], label="max seconds"),
+            BlueprintInput("model", "MODEL", [(sampler, "model")], tooltip=FROM_MODEL_BLOCK),
+            BlueprintInput("clip", "CLIP", [(music, "clip")], tooltip=FROM_MODEL_BLOCK),
+            BlueprintInput("vae", "VAE", [(decode, "vae")], tooltip=FROM_MODEL_BLOCK),
+            *_render_documents(music),
+            BlueprintInput(
+                "seed", "INT", [(music, "seed"), (sampler, "seed")], label="take seed", tooltip=TAKE_SEED
+            ),
+            BlueprintInput(
+                "max_duration", "FLOAT", [(music, "max_duration")], label="max seconds", tooltip=MAX_SECONDS
+            ),
         ],
         [
-            BlueprintOutput("AUDIO", "AUDIO", (decode, "AUDIO")),
-            BlueprintOutput("seconds", "FLOAT", (music, "seconds")),
+            BlueprintOutput("AUDIO", "AUDIO", (decode, "AUDIO"), tooltip="The rendered take."),
+            BlueprintOutput("seconds", "FLOAT", (music, "seconds"), tooltip="The take's length in seconds."),
         ],
     )
+
+
+def _render_documents(music: Node, loop: Node | None = None) -> list[BlueprintInput]:
+    """The Song Sheet's final documents for YuE2 Generate Music (the takes' loop starts with the lyrics)."""
+    return [
+        BlueprintInput(
+            "style",
+            "STRING",
+            [(music, "style")],
+            tooltip="The final style (Song Sheet): rendered exactly as given.",
+        ),
+        BlueprintInput(
+            "lyrics",
+            "STRING",
+            [(music, "lyrics"), *([(loop, "initial_iteration_value")] if loop is not None else [])],
+            tooltip="The final lyrics (Song Sheet): rendered exactly as given.",
+        ),
+        BlueprintInput(
+            "abc",
+            "STRING",
+            [(music, "abc")],
+            label="score",
+            tooltip="The final score (Song Sheet); empty: YuE2 renders without a score.",
+        ),
+        BlueprintInput(
+            "mode",
+            "COMBO",
+            [(music, "mode")],
+            label="planning mode",
+            tooltip="From the Song Sheet: full when the score has chords, melody otherwise.",
+        ),
+    ]
 
 
 def yue2_takes() -> Blueprint:
@@ -1073,20 +1412,33 @@ def yue2_takes() -> Blueprint:
         "(native loop). Connect the takes to Check Vocals, which keeps the best one. N takes cost N renders.",
         g,
         [
-            BlueprintInput("model", "MODEL", [(sampler, "model")]),
-            BlueprintInput("clip", "CLIP", [(music, "clip")]),
-            BlueprintInput("vae", "VAE", [(decode, "vae")]),
-            BlueprintInput("style", "STRING", [(music, "style")]),
+            BlueprintInput("model", "MODEL", [(sampler, "model")], tooltip=FROM_MODEL_BLOCK),
+            BlueprintInput("clip", "CLIP", [(music, "clip")], tooltip=FROM_MODEL_BLOCK),
+            BlueprintInput("vae", "VAE", [(decode, "vae")], tooltip=FROM_MODEL_BLOCK),
             # The loop starts only with the final lyrics: a native loop whose body is blocked (a Song
             # Sheet waiting for review) never finishes in ComfyUI 0.37.0 (Phase 4B, measured).
-            BlueprintInput("lyrics", "STRING", [(music, "lyrics"), (start, "initial_iteration_value")]),
-            BlueprintInput("abc", "STRING", [(music, "abc")], label="score"),
-            BlueprintInput("mode", "COMBO", [(music, "mode")], label="planning mode"),
-            BlueprintInput("seed", "INT", [(seed, "values.b")], label="take seed"),
-            BlueprintInput("max_duration", "FLOAT", [(music, "max_duration")], label="max seconds"),
-            BlueprintInput("takes", "INT", [(start, "mode.num_iterations")], default=1),
+            *_render_documents(music, loop=start),
+            BlueprintInput(
+                "seed",
+                "INT",
+                [(seed, "values.b")],
+                label="take seed",
+                tooltip="The first take's seed; the next takes use the following seeds. Another seed, other takes "
+                "of the same documents.",
+            ),
+            BlueprintInput(
+                "max_duration", "FLOAT", [(music, "max_duration")], label="max seconds", tooltip=MAX_SECONDS
+            ),
+            BlueprintInput(
+                "takes",
+                "INT",
+                [(start, "mode.num_iterations")],
+                default=1,
+                tooltip="How many takes: take seed, take seed + 1, ...; Check Vocals keeps the best. N takes cost "
+                "N renders.",
+            ),
         ],
-        [BlueprintOutput("takes", "AUDIO", (end, "outputs"))],
+        [BlueprintOutput("takes", "AUDIO", (end, "outputs"), tooltip="All takes, for Check Vocals.")],
     )
 
 
@@ -1155,17 +1507,35 @@ def cover_art() -> Blueprint:
         "gives an image.",
         g,
         [
-            BlueprintInput("text", "STRING", [(encode, "text")], label="prompt"),
-            BlueprintInput("noise_seed", "INT", [(noise, "noise_seed")], default=0, label="cover seed"),
+            BlueprintInput(
+                "text",
+                "STRING",
+                [(encode, "text")],
+                label="prompt",
+                tooltip="The cover art prompt (the Song Sheet's artwork prompt).",
+            ),
+            BlueprintInput(
+                "noise_seed",
+                "INT",
+                [(noise, "noise_seed")],
+                default=0,
+                label="cover seed",
+                tooltip="The cover seed: fixed, so new takes keep the cover; another seed, another cover.",
+            ),
             BlueprintInput(
                 "size",
                 "INT",
                 [(scheduler, "width"), (scheduler, "height"), (latent, "width"), (latent, "height")],
                 default=COVER_SIZE,
                 label="size (square, px)",
+                tooltip="Width and height of the square cover in pixels.",
             ),
         ],
-        [BlueprintOutput("IMAGE", "IMAGE", (decode, "IMAGE"))],
+        [
+            BlueprintOutput(
+                "IMAGE", "IMAGE", (decode, "IMAGE"), tooltip="The cover image, for Export Release."
+            )
+        ],
     )
 
 
@@ -2133,7 +2503,42 @@ def system_check() -> tuple[Graph, App]:
 
 def write_json(path: Path, data: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    path.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
+
+
+def _target_tooltip(item: BlueprintInput) -> str:
+    """The tooltip of the node input a blueprint input feeds (the first target's, from the snapshot)."""
+    target, name = item.targets[0]
+    info = SNAPSHOT["nodes"].get(target.type, {})
+    for section in ("required", "optional"):
+        entry = (info.get("input") or {}).get(section, {}).get(name)
+        if entry is not None and len(entry) > 1 and isinstance(entry[1], dict):
+            return str(entry[1].get("tooltip") or "")
+    return ""
+
+
+def locale(bp: dict[str, Blueprint]) -> dict[str, Any]:
+    """``locales/en/nodeDefs.json``: the tooltips of the blueprints' inputs and outputs, keyed by the
+    blueprint's id (the type of its wrapper node), and of the native widgets the templates show that ComfyUI
+    ships without one. ComfyUI's frontend reads these for the wrapper nodes, which have no node definition
+    of their own (input names: dots become underscores, as the frontend's i18n keys)."""
+    defs: dict[str, Any] = {}
+    for blueprint in bp.values():
+        inputs = {}
+        for item in blueprint.inputs:
+            tooltip = item.tooltip or _target_tooltip(item)
+            if not tooltip:
+                raise ValueError(f"{blueprint.name}: the input {item.name!r} has no tooltip")
+            inputs[item.name.replace(".", "_")] = {"tooltip": tooltip}
+        outputs = {}
+        for index, out in enumerate(blueprint.outputs):
+            if not out.tooltip:
+                raise ValueError(f"{blueprint.name}: the output {out.name!r} has no tooltip")
+            outputs[str(index)] = {"tooltip": out.tooltip}
+        defs[blueprint.id] = {"inputs": inputs, "outputs": outputs}
+    for node_type, tips in NATIVE_TOOLTIPS.items():
+        defs[node_type] = {"inputs": {name: {"tooltip": text} for name, text in tips.items()}}
+    return defs
 
 
 def blueprints() -> dict[str, Blueprint]:
@@ -2206,7 +2611,8 @@ def main() -> int:
     shipped = templates(bp)
     for name, graph, used, app in shipped:
         write_json(PROJECT / "example_workflows" / f"{name}.json", workflow(graph, name, used, app))
-    print(f"wrote {len(bp)} blueprints and {len(shipped)} templates")
+    write_json(PROJECT / "locales" / "en" / "nodeDefs.json", locale(bp))
+    print(f"wrote {len(bp)} blueprints, {len(shipped)} templates and their tooltips")
     return 0
 
 

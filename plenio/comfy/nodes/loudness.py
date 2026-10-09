@@ -90,7 +90,13 @@ class PlenioLoudness(io.ComfyNode):
                                     tooltip="Compression ratio above the threshold.",
                                 ),
                                 io.Float.Input(
-                                    "knee_db", default=6.0, min=0.0, max=24.0, step=0.5, advanced=True
+                                    "knee_db",
+                                    default=6.0,
+                                    min=0.0,
+                                    max=24.0,
+                                    step=0.5,
+                                    advanced=True,
+                                    tooltip="Width of the soft knee around the threshold (dB); 0 is a hard knee.",
                                 ),
                                 io.Float.Input(
                                     "attack_ms",
@@ -109,10 +115,21 @@ class PlenioLoudness(io.ComfyNode):
                                     tooltip="How fast it lets go (ms).",
                                 ),
                                 io.Float.Input(
-                                    "sidechain_hz", default=80.0, min=0.0, max=500.0, step=5.0, advanced=True
+                                    "sidechain_hz",
+                                    default=80.0,
+                                    min=0.0,
+                                    max=500.0,
+                                    step=5.0,
+                                    advanced=True,
+                                    tooltip="High-pass on what the compressor listens to (Hz), so the bass does "
+                                    "not pump it; 0 is off.",
                                 ),
                                 io.Combo.Input(
-                                    "detector", options=["RMS", "Peak"], default="RMS", advanced=True
+                                    "detector",
+                                    options=["RMS", "Peak"],
+                                    default="RMS",
+                                    advanced=True,
+                                    tooltip="RMS follows the average level (smooth); Peak reacts to single peaks.",
                                 ),
                             ],
                         ),

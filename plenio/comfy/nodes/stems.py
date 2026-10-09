@@ -53,7 +53,10 @@ class PlenioSeparateStems(io.ComfyNode):
                 "(what the stems miss), so that a neutral Stem Mixer returns the input unchanged. Experimental."
             ),
             inputs=[
-                io.Audio.Input("audio", tooltip="The song before mastering."),
+                io.Audio.Input(
+                    "audio",
+                    tooltip="The song to split, before mastering (the residual keeps what the stems miss).",
+                ),
                 AudioModelType.Input("model", tooltip="Load Audio Model (separation)."),
             ],
             outputs=[
@@ -104,7 +107,7 @@ class PlenioStemMixer(io.ComfyNode):
                 "strip marked *save* is written as its own file to output/plenio/stems. Experimental."
             ),
             inputs=[
-                StemsType.Input("stems", tooltip="From Separate Stems."),
+                StemsType.Input("stems", tooltip="The stems and the residual 'rest' from Separate Stems."),
                 io.String.Input(
                     "mix",
                     default="",

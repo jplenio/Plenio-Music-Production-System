@@ -1,0 +1,406 @@
+{
+ "be8d0fd4-8ce7-561b-8778-c59f81c6c6b4": {
+  "inputs": {
+   "ckpt_name": {
+    "tooltip": "The YuE2 checkpoint in models/checkpoints: yue2_3b_int8_convrot (default, for 8-16 GB GPUs) or yue2_3b_bf16 (24 GB and more). ComfyUI offers the download when the file is missing."
+   }
+  },
+  "outputs": {
+   "0": {
+    "tooltip": "YuE2 for the render (through the instrumental adapter, bypassed unless switched on)."
+   },
+   "1": {
+    "tooltip": "YuE2's language side: planning, rendering, token counts."
+   },
+   "2": {
+    "tooltip": "YuE2's audio decoder."
+   },
+   "3": {
+    "tooltip": "The music model's rules and exact tokenizer, for Write Song and the Song Sheets."
+   }
+  }
+ },
+ "ec9ff305-6d52-5283-8543-6c063df4002b": {
+  "inputs": {
+   "brief": {
+    "tooltip": "The Song Brief or Cover Brief: what to write."
+   },
+   "engine": {
+    "tooltip": "From the music model block: the rules the writing follows."
+   },
+   "score": {
+    "tooltip": "The final score (covers): the lyrics follow its sections, and new cover lyrics are fitted to its phrases line by line."
+   },
+   "language": {
+    "tooltip": "The language Transcribe Lyrics heard (an original-lyrics cover whose brief says auto)."
+   },
+   "reference_lyrics": {
+    "tooltip": "The source's transcribed lyrics (new cover lyrics with the phrasing reference or a lyrics closeness above 0); requested only then."
+   },
+   "model": {
+    "tooltip": "The writer: a text model of ComfyUI (a bare file name, written by Generate Text; Gemma 4 E4B by default) or a Local LLM model (GGUF files, LM Studio, Ollama ...). Only the chosen one is loaded; the templates link it to the Writer model node. Press R to refresh the list."
+   },
+   "sampling_mode_seed": {
+    "tooltip": "The draft seed: the same seed and brief give the same draft; another seed, another draft. The brief's song seed is added, so every song of a series gets its own."
+   },
+   "song_seed": {
+    "tooltip": "From the brief: a new value for every song of a series, 0 for one song (added to the draft seed)."
+   },
+   "thinking": {
+    "tooltip": "Let a reasoning writer think before it answers (Qwen, Gemma ...): slower, the thoughts are not used. Needs more tokens."
+   }
+  },
+  "outputs": {
+   "0": {
+    "tooltip": "The title draft."
+   },
+   "1": {
+    "tooltip": "The style draft (MiniMax Music 3: the caption)."
+   },
+   "2": {
+    "tooltip": "The lyrics draft (new cover lyrics: fitted to the melody)."
+   },
+   "3": {
+    "tooltip": "The cover art prompt draft."
+   },
+   "4": {
+    "tooltip": "What Parse Song Draft read and enforced."
+   },
+   "5": {
+    "tooltip": "How the lyrics fit the melody (new cover lyrics; Fit Lyrics)."
+   }
+  }
+ },
+ "eecfe9be-e841-57a2-9b80-b30da8f055f0": {
+  "inputs": {
+   "score": {
+    "tooltip": "The score to arrange: YuE2's plan, or a cover's transcription."
+   },
+   "brief": {
+    "tooltip": "The brief: the creative mode and its closeness (arrangement off: nothing runs here)."
+   },
+   "engine": {
+    "tooltip": "The music model: YuE2's context budget is checked with it."
+   },
+   "style": {
+    "tooltip": "The song's style: the mood, and the exact context budget."
+   },
+   "lyrics": {
+    "tooltip": "The song's lyrics: the mood, and the exact context budget."
+   },
+   "model": {
+    "tooltip": "The writer: a text model of ComfyUI (a bare file name, written by Generate Text; Gemma 4 E4B by default) or a Local LLM model (GGUF files, LM Studio, Ollama ...). Only the chosen one is loaded; the templates link it to the Writer model node. Press R to refresh the list."
+   },
+   "seed": {
+    "tooltip": "Another seed, another arrangement of the same song (the writer's plan and the notes Plenio writes). The brief's song seed is added."
+   },
+   "song_seed": {
+    "tooltip": "From the brief: a new value for every song of a series, 0 for one song (added to the arrangement seed)."
+   }
+  },
+  "outputs": {
+   "0": {
+    "tooltip": "The arranged score, or the score as it was (the report says why)."
+   },
+   "1": {
+    "tooltip": "What was arranged and kept, for Song Sheet · Score."
+   }
+  }
+ },
+ "630d16a8-090b-5961-9853-4f71db8d2d06": {
+  "inputs": {
+   "clip": {
+    "tooltip": "From the music model block."
+   },
+   "style": {
+    "tooltip": "The final style (Song Sheet · Text): what YuE2 plans for."
+   },
+   "lyrics": {
+    "tooltip": "What the planner reads (Song Sheet · Text's plan_lyrics): the lyrics, or a section form for an instrumental."
+   },
+   "seed": {
+    "tooltip": "The plan seed: the same seed gives the same plan; another seed, another melody and form. The brief's song seed is added."
+   },
+   "song_seed": {
+    "tooltip": "From the brief: added to the plan seed, so every song of a series gets its own plan."
+   },
+   "switch": {
+    "tooltip": "On: YuE2 plans a score (melody, chords, form) that the Song Sheet shows and you can edit. Off: no score - YuE2 renders without a plan."
+   },
+   "mode": {
+    "tooltip": "full: melody and chords; melody: the melody only (YuE2 harmonises it when it renders)."
+   }
+  },
+  "outputs": {
+   "0": {
+    "tooltip": "The planned score in the lyrics' song form (empty with planning off)."
+   },
+   "1": {
+    "tooltip": "How the plan was made to fit the lyrics' song form (for Song Sheet · Score)."
+   }
+  }
+ },
+ "601f9d71-b118-51b3-a1fb-fa2a8d2c5ede": {
+  "inputs": {
+   "model": {
+    "tooltip": "From the music model block."
+   },
+   "clip": {
+    "tooltip": "From the music model block."
+   },
+   "vae": {
+    "tooltip": "From the music model block."
+   },
+   "style": {
+    "tooltip": "The final style (Song Sheet): rendered exactly as given."
+   },
+   "lyrics": {
+    "tooltip": "The final lyrics (Song Sheet): rendered exactly as given."
+   },
+   "abc": {
+    "tooltip": "The final score (Song Sheet); empty: YuE2 renders without a score."
+   },
+   "mode": {
+    "tooltip": "From the Song Sheet: full when the score has chords, melody otherwise."
+   },
+   "seed": {
+    "tooltip": "The take seed: another seed, another take of the same documents. It drives both the token and the audio sampling."
+   },
+   "max_duration": {
+    "tooltip": "The longest the take may run (the Song Sheet derives it from the score's length); YuE2 may end earlier."
+   }
+  },
+  "outputs": {
+   "0": {
+    "tooltip": "The rendered take."
+   },
+   "1": {
+    "tooltip": "The take's length in seconds."
+   }
+  }
+ },
+ "54cc5314-66fa-573b-8998-d1f85431a348": {
+  "inputs": {
+   "audio": {
+    "tooltip": "The source recording (trim it first for a part of the song)."
+   }
+  },
+  "outputs": {
+   "0": {
+    "tooltip": "The transcribed score (native two-voice ABC, chords)."
+   },
+   "1": {
+    "tooltip": "Bar times and sung notes of the source, for the lyrics and the editor."
+   },
+   "2": {
+    "tooltip": "Bars, tempo, key, sections and voices."
+   },
+   "3": {
+    "tooltip": "The loaded SheetSage2, for Check Vocals."
+   }
+  }
+ },
+ "869d4797-70fa-52d9-b9f6-120b2510d110": {
+  "inputs": {
+   "model": {
+    "tooltip": "From the music model block."
+   },
+   "clip": {
+    "tooltip": "From the music model block."
+   },
+   "vae": {
+    "tooltip": "From the music model block."
+   },
+   "style": {
+    "tooltip": "The final style (Song Sheet): rendered exactly as given."
+   },
+   "lyrics": {
+    "tooltip": "The final lyrics (Song Sheet): rendered exactly as given."
+   },
+   "abc": {
+    "tooltip": "The final score (Song Sheet); empty: YuE2 renders without a score."
+   },
+   "mode": {
+    "tooltip": "From the Song Sheet: full when the score has chords, melody otherwise."
+   },
+   "seed": {
+    "tooltip": "The first take's seed; the next takes use the following seeds. Another seed, other takes of the same documents."
+   },
+   "max_duration": {
+    "tooltip": "The longest the take may run (the Song Sheet derives it from the score's length); YuE2 may end earlier."
+   },
+   "takes": {
+    "tooltip": "How many takes: take seed, take seed + 1, ...; Check Vocals keeps the best. N takes cost N renders."
+   }
+  },
+  "outputs": {
+   "0": {
+    "tooltip": "All takes, for Check Vocals."
+   }
+  }
+ },
+ "a469aeef-bca2-5738-b40d-1130a141291b": {
+  "inputs": {
+   "unet_name": {
+    "tooltip": "MiniMax Music 3's diffusion model in models/diffusion_models: the fp16 file (default) or minimax_music3_dit_int8_convrot (2.5 GB, for 8-12 GB GPUs)."
+   },
+   "clip_name": {
+    "tooltip": "MiniMax Music 3's text encoder in models/text_encoders (int8 by default); the Song Sheet counts the 5,000-token prompt budget with it, exactly."
+   },
+   "vae_name": {
+    "tooltip": "MiniMax Music 3's audio decoder in models/vae."
+   }
+  },
+  "outputs": {
+   "0": {
+    "tooltip": "MiniMax Music 3 for the render."
+   },
+   "1": {
+    "tooltip": "The text encoder: the render and the token counts."
+   },
+   "2": {
+    "tooltip": "MiniMax Music 3's audio decoder."
+   },
+   "3": {
+    "tooltip": "The music model's rules and exact tokenizer, for Write Song and the Song Sheets."
+   }
+  }
+ },
+ "3e8cc93d-dba7-57fc-9584-25d46a862896": {
+  "inputs": {
+   "model": {
+    "tooltip": "From the music model block."
+   },
+   "clip": {
+    "tooltip": "From the music model block."
+   },
+   "vae": {
+    "tooltip": "From the music model block."
+   },
+   "caption": {
+    "tooltip": "The final caption (Song Sheet): rendered exactly as given."
+   },
+   "lyrics": {
+    "tooltip": "The final lyrics (Song Sheet): rendered exactly as given."
+   },
+   "seed": {
+    "tooltip": "The take seed: another seed, another take of the same documents. It drives both the token and the audio sampling."
+   },
+   "max_duration": {
+    "tooltip": "The longest the song may run (from the brief's length, at most 6:00); the model may end earlier."
+   },
+   "switch": {
+    "tooltip": "Decode the audio in tiles: turn it on when decoding runs out of GPU memory (8-12 GB cards)."
+   }
+  },
+  "outputs": {
+   "0": {
+    "tooltip": "The rendered song."
+   },
+   "1": {
+    "tooltip": "The render's length in seconds."
+   }
+  }
+ },
+ "259b88ba-7c57-57fb-b73e-58f691fe4b56": {
+  "inputs": {
+   "audio": {
+    "tooltip": "The song to master."
+   },
+   "reference": {
+    "tooltip": "Optional: a recording whose tone the EQ matches (with a reference recipe in the block)."
+   },
+   "sample_rate": {
+    "tooltip": "keep, 44100 or 48000 Hz; converted before the limiter, so the true-peak ceiling holds."
+   }
+  },
+  "outputs": {
+   "0": {
+    "tooltip": "The mastered song (-14 LUFS, -1 dBTP true peak in the templates)."
+   },
+   "1": {
+    "tooltip": "The EQ's bands and the tone match."
+   },
+   "2": {
+    "tooltip": "Loudness and true peak before and after."
+   }
+  }
+ },
+ "9dbb5617-ccf9-5537-b674-405adb29958c": {
+  "inputs": {
+   "text": {
+    "tooltip": "The cover art prompt (the Song Sheet's artwork prompt)."
+   },
+   "noise_seed": {
+    "tooltip": "The cover seed: fixed, so new takes keep the cover; another seed, another cover."
+   },
+   "size": {
+    "tooltip": "Width and height of the square cover in pixels."
+   }
+  },
+  "outputs": {
+   "0": {
+    "tooltip": "The cover image, for Export Release."
+   }
+  }
+ },
+ "d0897a69-045d-5c2a-95eb-7a0481b8318b": {
+  "inputs": {
+   "audio": {
+    "tooltip": "The rendered song (any sample rate)."
+   },
+   "preset": {
+    "tooltip": "A prepared stage template: one choice sets PRE, POST and the crossover (500 Hz below PRE). *custom* uses the three fields below, which stay editable - the MiniMax template ships template 3 and the matching numbers."
+   },
+   "pre_hz": {
+    "tooltip": "Low-pass before the model (it shapes only what the model sees): 0 = the model's training condition, -1 = no PRE, else Hz (6000, 8000, 10000, 12000, 14000)."
+   },
+   "post_hz": {
+    "tooltip": "Linear-phase roll-off of the result: 0 = off, else Hz (16000, 19000, 21000 tame added air that sounds harsh)."
+   },
+   "crossover_hz": {
+    "tooltip": "Where the model takes over; 0: 500 Hz below the measured bandwidth."
+   }
+  },
+  "outputs": {
+   "0": {
+    "tooltip": "48 kHz, same duration."
+   },
+   "1": {
+    "tooltip": "Engine, parameters, bandwidth before/after."
+   }
+  }
+ },
+ "b15b93f5-aa6c-53d1-a081-d23166dcc913": {
+  "inputs": {
+   "audio": {
+    "tooltip": "The song to split, before mastering."
+   }
+  },
+  "outputs": {
+   "0": {
+    "tooltip": "The mixdown; a neutral mix returns the input unchanged."
+   },
+   "1": {
+    "tooltip": "Per strip: audible, gain, gain reduction, muted time, saved files."
+   },
+   "2": {
+    "tooltip": "Stem names and how much the residual holds."
+   }
+  }
+ },
+ "SeedNode": {
+  "inputs": {
+   "seed": {
+    "tooltip": "The seed this node passes on. control after generate decides what happens to it after each run: fixed keeps it, increment and decrement step it, randomize draws a new one."
+   }
+  }
+ },
+ "LoadAudio": {
+  "inputs": {
+   "audio": {
+    "tooltip": "The audio file: one from ComfyUI's input folder, or upload one."
+   }
+  }
+ }
+}

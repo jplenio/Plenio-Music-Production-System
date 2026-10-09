@@ -515,9 +515,66 @@ def test_the_committed_graphs_are_the_generators_output() -> None:
         for path in (PROJECT / folder).glob("*.json")
     }
     assert shipped == set(expected), "every shipped graph is generated, and every generated graph is shipped"
+    expected["locales/en/nodeDefs.json"] = build_graphs.locale(bp)
     stale = [
         path
         for path, data in expected.items()
         if json.loads((PROJECT / path).read_text(encoding="utf-8")) != json.loads(json.dumps(data))
     ]
     assert stale == [], f"run tools/build_graphs.py, or move the hand edit into it: {stale}"
+
+
+def _input_spec(inputs: dict[str, Any], name: str) -> dict[str, Any] | None:
+    """The options of input ``name`` (``parent.child``: a DynamicCombo option's input)."""
+    parent, _, child = name.partition(".")
+    for section in ("required", "optional"):
+        spec = (inputs.get(section) or {}).get(parent)
+        if spec is None:
+            continue
+        options = spec[1] if len(spec) > 1 and isinstance(spec[1], dict) else {}
+        if not child:
+            return options
+        for option in options.get("options", []):
+            found = _input_spec(option.get("inputs", {}), child) if isinstance(option, dict) else None
+            if found is not None:
+                return found
+    return None
+
+
+def _tooltip_of(node_type: str, name: str, locale: dict[str, Any]) -> str:
+    entry = locale.get(node_type, {}).get("inputs", {}).get(name.replace(".", "_"), {})
+    if entry.get("tooltip"):
+        return str(entry["tooltip"])
+    spec = _input_spec(SNAPSHOT["nodes"].get(node_type, {}).get("input", {}), name)
+    return str((spec or {}).get("tooltip") or "")
+
+
+@pytest.mark.parametrize("path", sorted((PROJECT / "example_workflows").glob("*.json")), ids=lambda p: p.name)
+def test_every_field_a_template_shows_has_a_tooltip(path: Path) -> None:
+    """The owner's request (2026-10-09): every input field in the workflows explains itself. A blueprint's
+    wrapper node has no node definition of its own, so its tooltips ship in ``locales/en/nodeDefs.json``
+    (built by ``tools/build_graphs.py``), as do those of the two native widgets the templates show that
+    ComfyUI ships without one."""
+    locale = json.loads((PROJECT / "locales" / "en" / "nodeDefs.json").read_text(encoding="utf-8"))
+    graph = json.loads(path.read_text(encoding="utf-8"))
+    missing = []
+    for node in graph["nodes"]:
+        if node["type"] in ("MarkdownNote", "Note"):
+            continue
+        for slot in node.get("inputs", []):
+            # a field: a widget nothing is linked to (a linked one is driven by another node, as the switches
+            # the Cover Brief sets in 2 · YuE2 · Cover)
+            field = "widget" in slot and slot.get("link") is None
+            if field and not _tooltip_of(node["type"], slot["name"], locale):
+                missing.append(f"{node.get('title') or node['type']}.{slot['name']}")
+    assert missing == []
+
+
+def test_every_blueprint_input_and_output_has_a_tooltip() -> None:
+    locale = json.loads((PROJECT / "locales" / "en" / "nodeDefs.json").read_text(encoding="utf-8"))
+    for path in sorted((PROJECT / "subgraphs").glob("*.json")):
+        definition = json.loads(path.read_text(encoding="utf-8"))["definitions"]["subgraphs"][0]
+        entry = locale[definition["id"]]
+        assert set(entry["inputs"]) == {i["name"].replace(".", "_") for i in definition["inputs"]}, path.name
+        assert set(entry["outputs"]) == {str(index) for index in range(len(definition["outputs"]))}, path.name
+        assert all(v["tooltip"].strip() for v in [*entry["inputs"].values(), *entry["outputs"].values()])

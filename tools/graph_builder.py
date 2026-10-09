@@ -383,6 +383,8 @@ class BlueprintInput:
     widget: bool = False
     default: Any = None
     label: str | None = None
+    tooltip: str | None = None
+    """Shown on the wrapper node (``locales/en/nodeDefs.json``); ``None``: the first target's own tooltip."""
 
 
 @dataclass
@@ -390,6 +392,7 @@ class BlueprintOutput:
     name: str
     type: str
     source: tuple[Node, str | int]
+    tooltip: str | None = None
 
 
 @dataclass

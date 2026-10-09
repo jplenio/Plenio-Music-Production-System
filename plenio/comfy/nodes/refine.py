@@ -71,7 +71,8 @@ class PlenioRefine(io.ComfyNode):
                     max=2.0,
                     step=0.05,
                     advanced=True,
-                    tooltip="Level of the added band.",
+                    tooltip="Level of what the model adds above the crossover: 1 as the model made it, 0 none "
+                    "(the original only), up to 2.",
                 ),
                 # preset, pre_hz, post_hz and seed are optional: an API prompt written before the preset
                 # existed (it has no 'preset') stays valid, and the widget order the frontend builds

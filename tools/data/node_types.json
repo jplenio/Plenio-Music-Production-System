@@ -1750,7 +1750,7 @@
      "description": [
       "STRING",
       {
-       "tooltip": "How the cover should sound.",
+       "tooltip": "How the cover should sound - instruments, feel, production. Sent to the writing model; a genre or a description is needed.",
        "default": "",
        "multiline": true
       }
@@ -1774,7 +1774,7 @@
      "vocals": [
       "COMFY_DYNAMICCOMBO_V3",
       {
-       "tooltip": "Instrumental (default), the original lyrics of the source, or new lyrics on its melody.",
+       "tooltip": "instrumental (the node's default): an instrument plays the vocal melody, or accompaniment only. original lyrics: the source's words, transcribed (the 2 · YuE2 · Cover template starts with these). new lyrics: new words on the source's melody.",
        "options": [
         {
          "key": "instrumental",
@@ -1841,7 +1841,7 @@
            "voice": [
             "STRING",
             {
-             "tooltip": "Vocal character.",
+             "tooltip": "Vocal character, e.g. 'soft female voice' - one that fits the melody's range (YuE2 sings it as written).",
              "default": "",
              "multiline": false
             }
@@ -1849,7 +1849,7 @@
            "theme": [
             "STRING",
             {
-             "tooltip": "What the new lyrics are about.",
+             "tooltip": "What the new lyrics are about, e.g. 'leaving home'.",
              "default": "",
              "multiline": false
             }
@@ -1870,7 +1870,7 @@
      "harmony": [
       "COMBO",
       {
-       "tooltip": "new accompaniment: the source's chords are removed and YuE2 re-harmonises (melody mode). keep original chords: the chords stay (full mode).",
+       "tooltip": "new accompaniment: the source's chords are removed and YuE2 re-harmonises (melody mode). keep original chords: the chords stay (full mode; the 2 · YuE2 · Cover template starts with it).",
        "default": "new accompaniment",
        "multiselect": false,
        "options": [
@@ -1894,7 +1894,7 @@
       "COMBO",
       {
        "display_name": "arrangement (experimental)",
-       "tooltip": "off: no arrangement - the transcribed score stays as it is (as before). A creative mode (standard, varied, fantasy, sterile, many instruments, dramatic - or your own file in user/plenio/arrangement) adds its hints to the writing prompt and lets the writer model re-arrange the score's sections within the song flow closeness: chords, what the instrument line plays, energy, key. The melody and the form always stay. Plenio writes the notes itself and checks the result; a plan it cannot use leaves the transcription as it was (the score's Song Sheet says so). Experimental: creative modes can give unexpected results - they are meant for experimenting: try a mode, listen, keep what you like or run again with another arrangement seed. off is the dependable choice.",
+       "tooltip": "off: no arrangement - the transcribed score stays as it is. A creative mode (standard, varied, fantasy, sterile, many instruments, dramatic - or your own file in user/plenio/arrangement) adds its hints to the writing prompt and lets the writer model re-arrange the score's sections within the song flow closeness: chords, what the instrument line plays, energy, key. The melody and the form always stay. Plenio writes the notes itself and checks the result; a plan it cannot use leaves the transcription as it was (the score's Song Sheet says so). Experimental: creative modes can give unexpected results - they are meant for experimenting: try a mode, listen, keep what you like or run again with another arrangement seed. off is the dependable choice.",
        "default": "off",
        "multiselect": false,
        "options": [
@@ -1924,7 +1924,7 @@
       "INT",
       {
        "display_name": "lyrics closeness",
-       "tooltip": "New lyrics only (experimental): how close they stay to the source's lyrics - 0 written without the source's text (as before), 1-29 only a hint of it, 30-59 its theme and mood, 60-89 its story in new words, 90-100 its meaning line by line (a singable translation when the language differs). Above 0 the source's lyrics are transcribed for the writer (lyrics ASR); the source must have clear singing.",
+       "tooltip": "New lyrics only (experimental): how close they stay to the source's lyrics - 0 written without the source's text (default), 1-29 only a hint of it, 30-59 its theme and mood, 60-89 its story in new words, 90-100 its meaning line by line (a singable translation when the language differs). Above 0 the source's lyrics are transcribed for the writer (lyrics ASR); the source must have clear singing.",
        "default": 0,
        "min": 0,
        "max": 100,
@@ -2115,6 +2115,7 @@
            "min_hz": [
             "FLOAT",
             {
+             "tooltip": "Lowest frequency the match measures and may place a band at (Hz).",
              "advanced": true,
              "default": 40.0,
              "min": 20.0,
@@ -2125,6 +2126,7 @@
            "max_hz": [
             "FLOAT",
             {
+             "tooltip": "Highest frequency the match measures and may place a band at (Hz; at most 45 % of the sample rate).",
              "advanced": true,
              "default": 16000.0,
              "min": 1000.0,
@@ -2323,7 +2325,7 @@
            "artist": [
             "STRING",
             {
-             "tooltip": "Artist",
+             "tooltip": "The artist, written into the files' tags.",
              "default": "",
              "multiline": false
             }
@@ -2331,7 +2333,7 @@
            "album": [
             "STRING",
             {
-             "tooltip": "Album",
+             "tooltip": "The album, written into the files' tags.",
              "default": "",
              "multiline": false
             }
@@ -2339,7 +2341,7 @@
            "date": [
             "STRING",
             {
-             "tooltip": "Year or date",
+             "tooltip": "Year or date, e.g. 2026 or 2026-10-09.",
              "default": "",
              "multiline": false
             }
@@ -2347,7 +2349,7 @@
            "track": [
             "STRING",
             {
-             "tooltip": "Track number (for example 3 or 3/12)",
+             "tooltip": "Track number, e.g. 3 or 3/12.",
              "default": "",
              "multiline": false
             }
@@ -2355,7 +2357,7 @@
            "genre": [
             "STRING",
             {
-             "tooltip": "Genre",
+             "tooltip": "The genre, written into the files' tags.",
              "default": "",
              "multiline": false
             }
@@ -2363,7 +2365,7 @@
            "comment": [
             "STRING",
             {
-             "tooltip": "Comment",
+             "tooltip": "The comment tag; empty: none.",
              "default": "Powered by Plenio Music Production System / ComfyUI",
              "multiline": false
             }
@@ -2371,7 +2373,7 @@
            "album_artist": [
             "STRING",
             {
-             "tooltip": "Album artist",
+             "tooltip": "The album artist, written into the files' tags.",
              "default": "",
              "multiline": false
             }
@@ -2379,7 +2381,7 @@
            "composer": [
             "STRING",
             {
-             "tooltip": "Composer",
+             "tooltip": "The composer, written into the files' tags.",
              "default": "",
              "multiline": false
             }
@@ -2414,7 +2416,7 @@
       "COMBO",
       {
        "display_name": "sheet music size",
-       "tooltip": "How large the sheet music draws the music: standard about 3 bars a line (4 pages for a song of 3-4 minutes), smaller 3-4 (3 pages), compact about 4 (2-3 pages), large 1-2 bars a line (as before 0.4.6). The same sizes as Export notation… in the Song Sheet.",
+       "tooltip": "How large the sheet music draws the music: standard about 3 bars a line (4 pages for a song of 3-4 minutes), smaller 3-4 (3 pages), compact about 4 (2-3 pages), large 1-2 bars a line (the biggest notes). The same sizes as Export notation… in the Song Sheet.",
        "default": "standard",
        "multiselect": false,
        "options": [
@@ -2898,6 +2900,7 @@
            "knee_db": [
             "FLOAT",
             {
+             "tooltip": "Width of the soft knee around the threshold (dB); 0 is a hard knee.",
              "advanced": true,
              "default": 6.0,
              "min": 0.0,
@@ -2928,6 +2931,7 @@
            "sidechain_hz": [
             "FLOAT",
             {
+             "tooltip": "High-pass on what the compressor listens to (Hz), so the bass does not pump it; 0 is off.",
              "advanced": true,
              "default": 80.0,
              "min": 0.0,
@@ -2938,6 +2942,7 @@
            "detector": [
             "COMBO",
             {
+             "tooltip": "RMS follows the average level (smooth); Peak reacts to single peaks.",
              "advanced": true,
              "default": "RMS",
              "multiselect": false,
@@ -3055,7 +3060,7 @@
      "text": [
       "STRING",
       {
-       "tooltip": "The writing model's answer.",
+       "tooltip": "The writing model's answer (Generate Text or Local LLM).",
        "forceInput": true,
        "multiline": false
       }
@@ -3063,7 +3068,7 @@
      "request": [
       "PLENIO_REQUEST",
       {
-       "tooltip": "From Compose Writing Prompt."
+       "tooltip": "From Compose Writing Prompt: what was asked, so the answer is checked against it."
       }
      ]
     }
@@ -3134,7 +3139,7 @@
      "sr_gain": [
       "FLOAT",
       {
-       "tooltip": "Level of the added band.",
+       "tooltip": "Level of what the model adds above the crossover: 1 as the model made it, 0 none (the original only), up to 2.",
        "advanced": true,
        "default": 1.0,
        "min": 0.0,
@@ -3238,7 +3243,7 @@
      "operation": [
       "COMFY_DYNAMICCOMBO_V3",
       {
-       "tooltip": "prepare from brief: sung songs unchanged; instrumental songs get a silent Vocal voice (lead melody moved to Ins, or accompaniment only). new score from brief: an all-rest score built from the brief (the DAW workflow).",
+       "tooltip": "prepare from brief: what the brief asks for - sung songs unchanged; in a sung cover a rest of 4 bars or more inside a sung section becomes an interlude section (YuE2 would end the section there); instrumentals get a silent Vocal voice (the melody moved to Ins, or accompaniment only). new score from brief: an all-rest score to compose in (the DAW template). strip chords: all chord symbols removed. fit length: close to the given seconds. voices: keep, silence or move the Vocal voice. transpose: by semitones. tempo: a new tempo, the notes stay.",
        "options": [
         {
          "key": "prepare from brief",
@@ -3394,7 +3399,7 @@
      "audio": [
       "AUDIO",
       {
-       "tooltip": "The song before mastering."
+       "tooltip": "The song to split, before mastering (the residual keeps what the stems miss)."
       }
      ],
      "model": [
@@ -3813,7 +3818,7 @@
      "key": [
       "STRING",
       {
-       "tooltip": "Optional key, e.g. 'G major'. Music models that use a score take the key from the score.",
+       "tooltip": "Optional key, e.g. 'G major'. Music models that use a score take the key from the score; the DAW template's empty score is built in it.",
        "default": "",
        "multiline": false
       }
@@ -3821,7 +3826,7 @@
      "meter": [
       "STRING",
       {
-       "tooltip": "Optional meter, e.g. '3/4'.",
+       "tooltip": "Optional meter, e.g. '3/4' or '6/8'. Music models that use a score take the meter from the score; the DAW template's empty score is built in it.",
        "default": "",
        "multiline": false
       }
@@ -3832,7 +3837,7 @@
       "COMBO",
       {
        "display_name": "arrangement (experimental)",
-       "tooltip": "off: no arrangement - the music model plans melody, chords and instruments by itself (as before). A creative mode (standard, varied, fantasy, sterile, many instruments, dramatic - or your own file in user/plenio/arrangement) adds its hints to the writing prompt and, in YuE2 Song, lets the writer model plan every section of YuE2's score: chords, what the instrument line plays, energy, a key lift. Plenio writes the notes itself and checks the result; a plan it cannot use leaves YuE2's score as it was (the Song Sheet says so). Planning works with every writer model - GGUF files, LM Studio and Ollama keep to the format exactly. Experimental: creative modes can give unexpected results - they are meant for experimenting: try a mode, listen, keep what you like or run again with another arrangement seed. off is the dependable choice.",
+       "tooltip": "off: no arrangement - the music model plans melody, chords and instruments by itself. A creative mode (standard, varied, fantasy, sterile, many instruments, dramatic - or your own file in user/plenio/arrangement) adds its hints to the writing prompt and, in YuE2 Song, lets the writer model plan every section of YuE2's score: chords, what the instrument line plays, energy, a key lift. Plenio writes the notes itself and checks the result; a plan it cannot use leaves YuE2's score as it was (the Song Sheet says so). Planning works with every writer model - GGUF files, LM Studio and Ollama keep to the format exactly. Experimental: creative modes can give unexpected results - they are meant for experimenting: try a mode, listen, keep what you like or run again with another arrangement seed. off is the dependable choice.",
        "default": "off",
        "multiselect": false,
        "options": [
@@ -3941,7 +3946,7 @@
      "title": [
       "STRING",
       {
-       "tooltip": "Song title draft.",
+       "tooltip": "The title draft (Parse Song Draft); shown and editable in the sheet.",
        "lazy": true,
        "forceInput": true,
        "multiline": false
@@ -3977,7 +3982,7 @@
      "artwork_prompt": [
       "STRING",
       {
-       "tooltip": "Cover image prompt draft.",
+       "tooltip": "The cover art prompt draft (for the optional Cover Art block); shown and editable in the sheet.",
        "lazy": true,
        "forceInput": true,
        "multiline": false
@@ -4138,7 +4143,7 @@
      "stems": [
       "PLENIO_STEMS",
       {
-       "tooltip": "From Separate Stems."
+       "tooltip": "The stems and the residual 'rest' from Separate Stems."
       }
      ],
      "mix": [
@@ -4443,7 +4448,7 @@
      "brief": [
       "PLENIO_BRIEF",
       {
-       "tooltip": "Sung songs are not checked."
+       "tooltip": "Song Brief or Cover Brief: only instrumental takes are checked; for a sung song the first take passes unchecked."
       }
      ]
     }

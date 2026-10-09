@@ -55,7 +55,11 @@ class PlenioVocalCheck(io.ComfyNode):
                 io.AudioEncoder.Input(
                     "audio_encoder", tooltip="SheetSage2 (the cover path's loader can be reused)."
                 ),
-                Brief.Input("brief", optional=True, tooltip="Sung songs are not checked."),
+                Brief.Input(
+                    "brief",
+                    optional=True,
+                    tooltip="Song Brief or Cover Brief: only instrumental takes are checked; for a sung song the first take passes unchecked.",
+                ),
                 io.Float.Input(
                     "tolerance_seconds",
                     default=DEFAULT_TOLERANCE_S,

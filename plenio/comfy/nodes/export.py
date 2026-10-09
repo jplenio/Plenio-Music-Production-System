@@ -50,7 +50,7 @@ SHEET_TOOLTIP = (
 )
 SIZE_TOOLTIP = (
     "How large the sheet music draws the music: standard about 3 bars a line (4 pages for a song of 3-4 "
-    "minutes), smaller 3-4 (3 pages), compact about 4 (2-3 pages), large 1-2 bars a line (as before 0.4.6). "
+    "minutes), smaller 3-4 (3 pages), compact about 4 (2-3 pages), large 1-2 bars a line (the biggest notes). "
     "The same sizes as Export notation… in the Song Sheet."
 )
 
@@ -71,14 +71,14 @@ def sheet_documents(reports: list[dict[str, Any]]) -> dict[str, Any]:
 
 def _tag_inputs() -> list[Any]:
     tips = {
-        "artist": "Artist",
-        "album": "Album",
-        "date": "Year or date",
-        "track": "Track number (for example 3 or 3/12)",
-        "genre": "Genre",
-        "comment": "Comment",
-        "album_artist": "Album artist",
-        "composer": "Composer",
+        "artist": "The artist, written into the files' tags.",
+        "album": "The album, written into the files' tags.",
+        "date": "Year or date, e.g. 2026 or 2026-10-09.",
+        "track": "Track number, e.g. 3 or 3/12.",
+        "genre": "The genre, written into the files' tags.",
+        "comment": "The comment tag; empty: none.",
+        "album_artist": "The album artist, written into the files' tags.",
+        "composer": "The composer, written into the files' tags.",
     }
     defaults = {"comment": DEFAULT_COMMENT}
     return [

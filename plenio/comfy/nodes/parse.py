@@ -26,8 +26,15 @@ class PlenioParseDraft(io.ComfyNode):
                 "format (one-line style, [Tag] sections, tags only for instrumentals). Every change is reported."
             ),
             inputs=[
-                io.String.Input("text", force_input=True, tooltip="The writing model's answer."),
-                Request.Input("request", tooltip="From Compose Writing Prompt."),
+                io.String.Input(
+                    "text",
+                    force_input=True,
+                    tooltip="The writing model's answer (Generate Text or Local LLM).",
+                ),
+                Request.Input(
+                    "request",
+                    tooltip="From Compose Writing Prompt: what was asked, so the answer is checked against it.",
+                ),
             ],
             outputs=[
                 io.String.Output(display_name="title", tooltip="Song title draft."),

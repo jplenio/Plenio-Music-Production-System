@@ -87,7 +87,7 @@ jobs:
           import subprocess, zipfile
           names = set(zipfile.ZipFile("node.zip").namelist())
           tracked = subprocess.check_output(["git", "ls-files", "-z"], text=True).split("\0")
-          runtime = ("plenio/", "web/", "subgraphs/", "example_workflows/", "resources/")
+          runtime = ("plenio/", "web/", "subgraphs/", "example_workflows/", "resources/", "locales/")
           missing = [f for f in tracked if f.startswith(runtime) or f in ("__init__.py", "pyproject.toml", "LICENSE")]
           missing = [f for f in missing if f not in names]
           leaked = sorted({n.split("/")[0] for n in names} & {"tests", "tools", "frontend", "assets", ".github"})

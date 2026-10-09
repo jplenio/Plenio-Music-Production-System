@@ -44,8 +44,25 @@ def _match_inputs() -> list[Any]:
             tooltip="Largest boost or cut of the curve.",
         ),
         io.Int.Input("max_bands", default=4, min=1, max=6, tooltip="Most peak bands the match may use."),
-        io.Float.Input("min_hz", default=40.0, min=20.0, max=1000.0, step=1.0, advanced=True),
-        io.Float.Input("max_hz", default=16000.0, min=1000.0, max=20000.0, step=100.0, advanced=True),
+        io.Float.Input(
+            "min_hz",
+            default=40.0,
+            min=20.0,
+            max=1000.0,
+            step=1.0,
+            advanced=True,
+            tooltip="Lowest frequency the match measures and may place a band at (Hz).",
+        ),
+        io.Float.Input(
+            "max_hz",
+            default=16000.0,
+            min=1000.0,
+            max=20000.0,
+            step=100.0,
+            advanced=True,
+            tooltip="Highest frequency the match measures and may place a band at (Hz; at most 45 % of the "
+            "sample rate).",
+        ),
     ]
 
 

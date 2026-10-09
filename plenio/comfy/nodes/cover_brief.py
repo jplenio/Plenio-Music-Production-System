@@ -44,8 +44,7 @@ MODE_TOOLTIP = (
 )
 COVER_INPUTS = ("mode", "template", "description", "genre", "mood", "vocals", "harmony", "title")
 ARRANGEMENT_TOOLTIP = (
-    "off: no arrangement - the transcribed score stays as it is (as before). A creative mode (standard, "
-    "varied, fantasy, "
+    "off: no arrangement - the transcribed score stays as it is. A creative mode (standard, varied, fantasy, "
     "sterile, many instruments, dramatic - or your own file in user/plenio/arrangement) adds its hints to the "
     "writing prompt and lets the writer model re-arrange the score's sections within the song flow closeness: "
     "chords, what the instrument line plays, energy, key. The melody and the form always stay. Plenio writes the "
@@ -59,8 +58,8 @@ SONG_FLOW_TOOLTIP = (
     "chords and lines, another tempo), 0 only a hint of the original. The melody and the form always remain."
 )
 LYRICS_CLOSENESS_TOOLTIP = (
-    "New lyrics only (experimental): how close they stay to the source's lyrics - 0 written without the source's text (as "
-    "before), 1-29 only a hint of it, 30-59 its theme and mood, 60-89 its story in new words, 90-100 its meaning "
+    "New lyrics only (experimental): how close they stay to the source's lyrics - 0 written without the source's text "
+    "(default), 1-29 only a hint of it, 30-59 its theme and mood, 60-89 its story in new words, 90-100 its meaning "
     "line by line (a singable translation when the language differs). Above 0 the source's lyrics are "
     "transcribed for the writer (lyrics ASR); the source must have clear singing."
 )
@@ -140,7 +139,11 @@ class PlenioCoverBrief(io.ComfyNode):
                     tooltip="Optional target style. Style fields you leave empty are taken from the template.",
                 ),
                 io.String.Input(
-                    "description", multiline=True, default="", tooltip="How the cover should sound."
+                    "description",
+                    multiline=True,
+                    default="",
+                    tooltip="How the cover should sound - instruments, feel, production. Sent to the writing model; "
+                    "a genre or a description is needed.",
                 ),
                 io.String.Input("genre", default="", tooltip="Target genre, e.g. 'acoustic folk'."),
                 io.String.Input("mood", default="", tooltip="Mood words, e.g. 'warm, intimate'."),
@@ -182,9 +185,16 @@ class PlenioCoverBrief(io.ComfyNode):
                                 io.String.Input(
                                     "language", default="English", tooltip="Language of the new lyrics."
                                 ),
-                                io.String.Input("voice", default="", tooltip="Vocal character."),
                                 io.String.Input(
-                                    "theme", default="", tooltip="What the new lyrics are about."
+                                    "voice",
+                                    default="",
+                                    tooltip="Vocal character, e.g. 'soft female voice' - one that fits the melody's "
+                                    "range (YuE2 sings it as written).",
+                                ),
+                                io.String.Input(
+                                    "theme",
+                                    default="",
+                                    tooltip="What the new lyrics are about, e.g. 'leaving home'.",
                                 ),
                                 io.Boolean.Input(
                                     "phrasing_reference",
@@ -195,14 +205,17 @@ class PlenioCoverBrief(io.ComfyNode):
                             ],
                         ),
                     ],
-                    tooltip="Instrumental (default), the original lyrics of the source, or new lyrics on its melody.",
+                    tooltip="instrumental (the node's default): an instrument plays the vocal melody, or "
+                    "accompaniment only. original lyrics: the source's words, transcribed (the 2 · YuE2 · Cover "
+                    "template starts with these). new lyrics: new words on the source's melody.",
                 ),
                 io.Combo.Input(
                     "harmony",
                     options=list(HARMONY_OPTIONS),
                     default="new accompaniment",
                     tooltip="new accompaniment: the source's chords are removed and YuE2 re-harmonises (melody mode). "
-                    "keep original chords: the chords stay (full mode).",
+                    "keep original chords: the chords stay (full mode; the 2 · YuE2 · Cover template starts with "
+                    "it).",
                 ),
                 io.String.Input(
                     "title",

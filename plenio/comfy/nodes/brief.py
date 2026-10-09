@@ -56,8 +56,7 @@ EXPERIMENTAL = (
     "listen, keep what you like or run again with another arrangement seed. off is the dependable choice."
 )
 ARRANGEMENT_TOOLTIP = (
-    "off: no arrangement - the music model plans melody, chords and instruments by itself (as before). A "
-    "creative mode "
+    "off: no arrangement - the music model plans melody, chords and instruments by itself. A creative mode "
     "(standard, varied, fantasy, sterile, many instruments, dramatic - or your own file in "
     "user/plenio/arrangement) adds its hints to the writing prompt and, in YuE2 Song, lets the writer model plan "
     "every section of YuE2's score: chords, what the instrument line plays, energy, a key lift. Plenio writes the "
@@ -81,8 +80,10 @@ TEXT = {
     "genre": "Genre and sub-genre, e.g. 'indie pop'.",
     "mood": "Mood words, e.g. 'warm, hopeful'.",
     "tempo": "Tempo, e.g. '88 BPM' or 'midtempo'.",
-    "key": "Optional key, e.g. 'G major'. Music models that use a score take the key from the score.",
-    "meter": "Optional meter, e.g. '3/4'.",
+    "key": "Optional key, e.g. 'G major'. Music models that use a score take the key from the score; the DAW "
+    "template's empty score is built in it.",
+    "meter": "Optional meter, e.g. '3/4' or '6/8'. Music models that use a score take the meter from the score; the "
+    "DAW template's empty score is built in it.",
 }
 
 
