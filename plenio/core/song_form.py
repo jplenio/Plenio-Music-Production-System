@@ -6,7 +6,9 @@ lyrics' in three of four of the owner's sung songs (most often a bridge or a sun
 have, or a sung intro the lyrics do not). The words then land on melodies planned for other words. In this
 order (``QUALITY``):
 
-- **match**: the sung sections have the same kinds in the same order - nothing to do;
+- **match**: the sung sections have the same kinds in the same order, or a section of the plan sings the
+  lyrics blocks after its own up to the next section's kind and has the notes for them (the planner wrote
+  one melody for a chorus and an outro; YuE2 sings the lines in their order) - nothing to do;
 - **assemble**: every kind of sung section of the lyrics is in the plan - the score is put together from
   the plan's own sections in the lyrics' order (a chorus repeated, a sung intro without words left out),
   instrumental sections kept at the start and the end: chorus words on the chorus melody;
@@ -19,19 +21,21 @@ order (``QUALITY``):
 - **differs**: none of it works - the plan stays, and the sheet says the words may land elsewhere.
 
 Sections are compared by kind: the name without a number (``Verse 2`` -> ``verse``). A section is sung when
-it has lyric lines (lyrics) or Vocal notes (plan). Pure: no ComfyUI.
+it has lyric lines (lyrics) or Vocal notes besides a pickup into the next section (plan). Pure: no ComfyUI.
 """
 
 from __future__ import annotations
 
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
 from . import lyrics as lyrics_rules
+from . import syllables
 from .errors import PlenioError
 from .score import canonical as c
-from .score import ops
+from .score import lyric_layout, ops
 from .score.edit import _label as section_label
 
 MATCH, ASSEMBLE, RENAME, SUBSTITUTE, DIFFERS, SKIP = (
@@ -84,14 +88,87 @@ class PlanSection:
 
 
 def plan_sections(score: c.Score) -> list[PlanSection]:
+    """The plan's sections; one is sung when it has Vocal notes besides a pickup into the next section (a
+    plan's intro often ends with the verse's first word: counted as sung, it was left out of an assembled
+    score or shifted every name of a renamed one - owner's report 2026-10-09)."""
     starts = ops._section_starts(score)
     bounds = [s.measure for s in starts] + [score.measure_count]
+    lead = lyric_layout.pickups(score)
     result = []
     for index, section in enumerate(starts):
         first, end = score.starts[bounds[index]], score.starts[bounds[index + 1]]
-        sung = any(first <= note.onset < end for note in score.vocal)
+        sung = any(first <= note.onset < end and note.onset not in lead for note in score.vocal)
         result.append(PlanSection(index, section.label, section.measure, sung))
     return result
+
+
+def sung_flags(score: str, sections: Sequence[Any]) -> list[bool]:
+    """Whether each of ``sections`` (``score.analyze``'s: ``start_bar``, ``vocal_notes``) is sung, as
+    ``plan_sections`` counts it - for the sections check of the lyrics (a pickup into the verse makes no sung
+    intro there either)."""
+    flags = [section.vocal_notes > 0 for section in sections]
+    try:
+        plan = {p.measure + 1: p.sung for p in plan_sections(c.from_abc(score))}
+    except PlenioError:
+        return flags
+    return [plan.get(section.start_bar, flag) for section, flag in zip(sections, flags, strict=True)]
+
+
+MERGED_NOTES = 0.8
+"""A section of the plan sings several lyrics blocks when it has at least this many Vocal notes per syllable."""
+
+
+def _merged(model: c.Score, plan: list[PlanSection], text: str) -> list[str] | None:
+    """How the plan sings the lyrics in fewer sections, or ``None``: in order, every sung section of the plan
+    starts with the next lyrics block of its kind and also sings the blocks after it up to one of the next
+    section's kind, when it has notes for their syllables (``MERGED_NOTES``). The planner wrote one melody for
+    them, and YuE2 sings the lines in their order (owner's report 2026-10-09: the chorus and the outro in one
+    section - renamed, every section of the plan had the next one's name)."""
+    language = syllables.guess_language(text)
+    blocks = [
+        (
+            kind(block.tag),
+            block.tag,
+            sum(len(lyric_layout.syllables_of(line, language)) for line in block.lines),
+        )
+        for block in lyrics_rules.parse_lyrics(text).sections
+        if block.lines
+    ]
+    sung = [p for p in plan if p.sung]
+    if not sung or len(sung) >= len(blocks):
+        return None
+    groups: list[list[int]] = []
+    i = 0
+    for position, section in enumerate(sung):
+        if i >= len(blocks) or blocks[i][0] != kind(section.label):
+            return None
+        group = [i]
+        i += 1
+        following = kind(sung[position + 1].label) if position + 1 < len(sung) else None
+        while i < len(blocks) and blocks[i][0] != following:
+            group.append(i)
+            i += 1
+        groups.append(group)
+    if i != len(blocks):
+        return None
+    # the notes of every section, a pickup with the section it leads into
+    lead = lyric_layout.pickups(model)
+    starts = [model.starts[p.measure] for p in plan]
+    owned = [0] * len(plan)
+    for note in model.vocal:
+        index = max(k for k, start in enumerate(starts) if start <= note.onset)
+        if note.onset in lead and index + 1 < len(plan):
+            index += 1
+        owned[index] += 1
+    notes: list[str] = []
+    for section, group in zip(sung, groups, strict=True):
+        if len(group) < 2:
+            continue
+        if owned[section.index] < MERGED_NOTES * sum(blocks[b][2] for b in group):
+            return None
+        tags = " and ".join(f"[{blocks[b][1]}]" for b in group)
+        notes.append(f"its {kind(section.label)} section sings {tags}")
+    return notes
 
 
 def lyric_sections(text: str) -> list[tuple[str, bool]]:
@@ -127,6 +204,10 @@ class Form:
     @property
     def text(self) -> str:
         lyrics, plan = " - ".join(self.lyrics_form), " - ".join(self.plan_form)
+        if self.category == MATCH and self.notes:
+            return (
+                f"the plan sings the lyrics' sections ({lyrics}) in its own ({plan}): {'; '.join(self.notes)}"
+            )
         if self.category == MATCH:
             return f"the plan's sung sections are the lyrics' ({lyrics})"
         if self.category == ASSEMBLE:
@@ -245,6 +326,9 @@ def match(lyrics: str, score: str, *, substitute: bool = False) -> Form:
         return Form(SKIP, score, notes=("the plan has no sung section",))
     if lyrics_form == plan_form:
         return Form(MATCH, score, (), lyrics_form, plan_form)
+    merged = _merged(model, plan, lyrics or "")
+    if merged is not None:
+        return Form(MATCH, score, (), lyrics_form, plan_form, tuple(merged))
     notes: list[str] = []
     assembled = _assemble(model, plan, sections, tags, substitute=False)
     if isinstance(assembled, tuple):

@@ -161,7 +161,6 @@ const props = withDefaults(
 )
 /** A line of the lyrics changed in the lane (``text`` empty: the line goes). */
 export interface LyricEdit {
-  section: number
   block: number
   line: number
   text: string
@@ -169,7 +168,7 @@ export interface LyricEdit {
   at?: number
 }
 
-/** A lyrics line placed anew in the lane: its key (``section:line``) and its span in units of L. */
+/** A lyrics line placed anew in the lane: its key (``block:line``) and its span in units of L. */
 export interface LyricPlace {
   key: string
   start: number
@@ -183,7 +182,7 @@ const emit = defineEmits<{
   lyricPlace: [moves: LyricPlace[]]
   lyricDelete: [keys: string[]]
 }>()
-/** The lyrics lines selected in the lane (``section:line``; the Score tab copies and pastes them). */
+/** The lyrics lines selected in the lane (``block:line``; the Score tab copies and pastes them). */
 const lyricSelection = defineModel<string[]>('lyricSelection', { default: () => [] })
 /** Pixels per quarter note (the roll's horizontal zoom). */
 const zoom = defineModel<number>('zoom', { default: 48 })
@@ -338,14 +337,14 @@ const lyricLines = computed(() => {
   const g = geo.value
   const layout = props.lyrics
   if (!g || !layout) return []
-  const all = layout.sections
-    .flatMap((s) =>
-      s.lines
+  const all = layout.parts
+    .flatMap((p) =>
+      p.lines
         .filter((l) => l.text)
         .map((l) => {
-          const key = lineKey(s.section, l.line)
+          const key = lineKey(l.block, l.line)
           const [start, end] = draggedSpan(key, l.start, l.end)
-          return { ...l, start, end, section: s.section, key }
+          return { ...l, start, end, key }
         })
     )
     .sort((a, b) => a.start - b.start || a.line - b.line)
@@ -375,7 +374,7 @@ function lyricAt(x: number): { key: string; start: number; end: number; part: Ly
 /** The new spans of the dragged (or nudged) lines. */
 function lyricMoves(current: LyricDrag): LyricPlace[] {
   const moves: LyricPlace[] = []
-  for (const line of props.lyrics?.sections.flatMap((s) => s.lines.map((l) => ({ ...l, key: lineKey(s.section, l.line) }))) ?? []) {
+  for (const line of props.lyrics?.parts.flatMap((p) => p.lines.map((l) => ({ ...l, key: lineKey(l.block, l.line) }))) ?? []) {
     const moved = current.kind === 'move' ? current.keys.includes(line.key) : line.key === current.key
     if (!moved) continue
     const end = Math.max(line.end, line.start + 1)
@@ -390,8 +389,8 @@ function lyricMoves(current: LyricDrag): LyricPlace[] {
 /** The syllable of every Vocal note that has one (``-``: the word goes on). */
 const syllables = computed(() => {
   const map = new Map<number, string>()
-  for (const section of props.lyrics?.sections ?? [])
-    for (const line of section.lines) for (const s of line.syllables) map.set(s.onset, s.end_of_word ? s.text : `${s.text}-`)
+  for (const part of props.lyrics?.parts ?? [])
+    for (const line of part.lines) for (const s of line.syllables) map.set(s.onset, s.end_of_word ? s.text : `${s.text}-`)
   return map
 })
 /** The pitch in every note wide enough to hold it (Cubase's key editor shows note names). */
@@ -417,34 +416,25 @@ const visibleSyllables = computed(() => {
 
 /** The line to edit at ``unit``: the one sung there, a new one for a phrase without words, or the one before. */
 function lyricTargetAt(unit: number): (LyricEdit & { original: string; start: number }) | null {
-  const m = model.value
   const layout = props.lyrics
-  if (!m || !layout) return null
-  for (const s of layout.sections) {
-    const section = m.sections[s.section]
-    if (!section) continue
-    const first = m.measures[section.first_bar - 1]?.onset ?? 0
-    const after = m.measures[section.first_bar - 1 + section.bars]?.onset ?? m.total
-    if (unit < first || unit >= after || s.block === null) continue
-    const count = s.lines.length ? Math.max(...s.lines.map((l) => l.line)) + 1 : 0
-    const at = s.lines.find((l) => l.text && unit >= l.start && unit < Math.max(l.end, l.start + 1))
-    const target = (line: { line: number; text: string; start: number }) => ({
-      section: s.section,
-      block: s.block as number,
-      line: line.line,
-      text: line.text,
-      original: line.text,
-      start: line.start
-    })
-    if (at) return target(at)
-    const phrase = s.phrases.find(([a, b]) => unit >= a && unit < b)
-    if (phrase && !s.lines.some((l) => l.syllables.length && l.start < phrase[1] && l.end > phrase[0])) {
-      return target({ line: count, text: '', start: phrase[0] }) // words for a phrase that has none
-    }
-    const before = [...s.lines].reverse().find((l) => l.text && l.start <= unit)
-    return target(before ?? { line: count, text: '', start: first })
+  const part = layout?.parts.find((p) => unit >= p.start && unit < p.end)
+  if (!part) return null
+  const count = part.lines.length ? Math.max(...part.lines.map((l) => l.line)) + 1 : 0
+  const at = part.lines.find((l) => l.text && unit >= l.start && unit < Math.max(l.end, l.start + 1))
+  const target = (line: { line: number; text: string; start: number }) => ({
+    block: part.block,
+    line: line.line,
+    text: line.text,
+    original: line.text,
+    start: line.start
+  })
+  if (at) return target(at)
+  const phrase = part.phrases.find(([a, b]) => unit >= a && unit < b)
+  if (phrase && !part.lines.some((l) => l.syllables.length && l.start < phrase[1] && l.end > phrase[0])) {
+    return target({ line: count, text: '', start: phrase[0] }) // words for a phrase that has none
   }
-  return null
+  const before = [...part.lines].reverse().find((l) => l.text && l.start <= unit)
+  return target(before ?? { line: count, text: '', start: part.start })
 }
 
 function startLyricEdit(unit: number): void {
@@ -467,7 +457,7 @@ function commitLyric(): void {
   }
   root.value?.focus({ preventScroll: true })
   if (edit.text.trim() === edit.original.trim()) return
-  emit('lyricEdit', { section: edit.section, block: edit.block, line: edit.line, text: edit.text.trim(), at: edit.start })
+  emit('lyricEdit', { block: edit.block, line: edit.line, text: edit.text.trim(), at: edit.start })
 }
 
 function cancelLyric(): void {

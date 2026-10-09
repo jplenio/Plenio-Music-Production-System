@@ -140,7 +140,7 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
         node.properties = {
           ...(node.properties ?? {}),
           plenio_guide: serializeGuide(guide),
-          plenio_lyric_spans: (extras?.lyricSpans ?? []).map(([start, end]) => [start, end]),
+          plenio_lyric_spans: (extras?.lyricSpans ?? []).map((span) => [...span]),
           plenio_source_shift: extras?.sourceShift ?? 0
         }
         // the node says it at once: Approve released the sheet (no need to wait for the next run), and

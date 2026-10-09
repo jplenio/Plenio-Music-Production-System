@@ -213,8 +213,14 @@ def _english_groups(word: str) -> list[tuple[int, int]]:
         for i in range(start + 1, end):
             pair = lower[i - 1 : i + 1]
             after = lower[i + 1 :]
-            # y between vowels starts a syllable (play-er, be-yond) - not in -yed, -yes, -ye (played, eyes)
-            if lower[i] == "y" and i + 1 < end and lower[i + 1 :].lstrip(VOWELS) not in ("d", "s", ""):
+            # y between vowels starts a syllable (play-er, be-yond) - not in -yed, -yes, -ye (played, eyes) and
+            # not before -ing: say-ing, play-ing, en-joy-ing (the -ing rule below splits them)
+            if (
+                lower[i] == "y"
+                and i + 1 < end
+                and lower[i + 1 :].lstrip(VOWELS) not in ("d", "s", "")
+                and lower[i + 1 :] != "ing"
+            ):
                 pieces.append((cut, i))
                 cut = i
                 continue

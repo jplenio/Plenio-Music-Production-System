@@ -22,6 +22,8 @@ A song's lyrics come first and YuE2 plans the melody from them. Compared by kind
 
 Without a second plan, the last resort (a missing kind takes a related section's melody: a bridge a verse's) fits 64 of the 78; **14 (7 %) still differ**. Put together, the scores are 0.89 times as long as the plan in the median (at most 1.08). Every changed score passed YuE2's parser and Plenio's checks. Shipped as **Match Song Form** inside *YuE2 Plan*: match, assemble or rename at once; a second plan (the next seed) only when none of them works, the better plan wins; the last resort after that.
 
+**Addendum 2026-10-09** ([lyrics placement](../design/lyrics-placement.md)): the counts above took a section whose only notes lead into the next one - an intro ending with the verse's first word, 90 sections of the owner's plans - as a sung section, and a plan that sings the chorus and the outro in one chorus section as a mismatch. Counted without them (pickups are not sung; a section may sing the blocks after its own when it has the notes for them), on the 200 sung songs of the records now: the plan itself matches in **52 %** (assemble 5 %, rename 22 %, differs 22 %), and with the last resort **4 %** still differ (Match Song Form: 96 % fit, before 93 %).
+
 ## A2 - new cover lyrics with local LLMs
 
 Six real cover scores (14-30 sung phrases, 4-11 sections), two seeds, English, a theme per song; the draft with Write Song's cover prompt, then what *Fit Lyrics* does: the song form, two repair rounds, the last step. Lines fitting their phrase (Plenio's count, the window of `lyrics_fit.window`):

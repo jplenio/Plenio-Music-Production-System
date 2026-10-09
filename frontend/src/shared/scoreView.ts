@@ -138,7 +138,7 @@ export interface LyricSyllable {
   end_of_word: boolean
 }
 
-/** A lyrics line on its Vocal phrase (backend ``lyric_layout``; ``block`` and ``line`` index the text). */
+/** A lyrics line on its Vocal notes (backend ``lyric_layout``; ``block`` and ``line`` index the text). */
 export interface LyricLine {
   block: number
   line: number
@@ -148,21 +148,28 @@ export interface LyricLine {
   syllables: LyricSyllable[]
   /** Notes over which the line's last syllable is held. */
   holds: number[]
+  /** The line stands on a span placed by hand (``start``, ``end``). */
+  pinned: boolean
 }
 
-export interface LyricSection {
-  /** Index in ``model.sections``. */
-  section: number
-  block: number | null
-  tag: string | null
+/**
+ * A lyrics block where it is sung: every line of the block, and the stretch of the score it covers - from
+ * its first line to the next part (the first part from the start of the score).
+ */
+export interface LyricPart {
+  block: number
+  tag: string
+  start: number
+  end: number
+  /** The Vocal phrases in the part (a phrase over two parts: each its piece). */
   phrases: [number, number][]
   lines: LyricLine[]
 }
 
-/** Where the lyrics are sung (sent with the score): lines on phrases, syllables on notes. */
+/** Where the lyrics are sung (sent with the score): lines on the Vocal notes, syllables on notes. */
 export interface LyricLayoutView {
-  sections: LyricSection[]
-  /** Lyrics blocks that found no section of the score. */
+  parts: LyricPart[]
+  /** Lyrics blocks with words of which no note sings any. */
   unplaced: number[]
   /** The lines no note sings, by block (the notation shows them as text after the music). */
   unsung?: { tag: string; lines: string[] }[]

@@ -532,7 +532,7 @@ def test_arranger_lyrics_and_musicxml_routes(server: ComfyServer) -> None:
     assert arranged["time_map"] == [[0, 464, 0], [272, 1088, 464]]
     assert "lyrics" in arranged["analysis"]  # the view of the new score says where the words fall
     status, view = server.request("POST", "/plenio/score/analyze", {"abc": plan, "lyrics": lyrics})
-    assert status == 200 and [s["block"] for s in view["lyrics"]["sections"]] == [0, 1, 2, 3, 4, 5]
+    assert status == 200 and [p["block"] for p in view["lyrics"]["parts"]] == [0, 1, 2, 3, 4, 5]
     assert "\nw: " in view["display_abc"]
     status, plain = server.request("POST", "/plenio/score/analyze", {"abc": plan, "lyrics": None})
     assert status == 200 and "lyrics" not in plain and "\nw: " not in plain["display_abc"]

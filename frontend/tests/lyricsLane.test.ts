@@ -93,7 +93,7 @@ describe('PianoRoll: the lyrics lane', () => {
     expect(svg.querySelector('.lyrics-lane')).toBeNull()
   })
 
-  it('edits the line sung where it is double-clicked, and adds one for a section without words', async () => {
+  it('edits the line sung where it is double-clicked, and adds one for a block without words', async () => {
     const { host, svg, edits } = mountRoll()
     dblclick(svg, 100) // in "sing it again" (bars 4-5)
     await nextTick()
@@ -103,7 +103,7 @@ describe('PianoRoll: the lyrics lane', () => {
     input.dispatchEvent(new Event('input'))
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
     await nextTick()
-    expect(edits).toEqual([{ section: 1, block: 1, line: 1, text: 'sing it once more', at: 96 }])
+    expect(edits).toEqual([{ block: 1, line: 1, text: 'sing it once more', at: 96 }])
     expect(host.querySelector('input.lyric-edit')).toBeNull()
     dblclick(svg, 10) // the intro: no Vocal notes, no words yet
     await nextTick()

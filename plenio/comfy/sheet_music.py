@@ -135,19 +135,20 @@ def _workflow_node(workflow: Mapping[str, Any], node_id: str) -> Mapping[str, An
 
 
 def _spans(value: Any) -> list[list[int]]:
-    """Valid ``[start, end]`` pairs of a node property (anything else is ignored, as the editor does)."""
+    """Valid spans of a node property - ``[start, end, block, line]``, or ``[start, end]`` as Plenio 0.4.4 and
+    0.4.5 kept them (anything else is ignored, as the editor does)."""
     if not isinstance(value, list):
         return []
-    pairs = []
+    spans = []
     for item in value:
         if (
             isinstance(item, list | tuple)
-            and len(item) == 2
+            and len(item) in (2, 4)
             and all(isinstance(x, int) and not isinstance(x, bool) and x >= 0 for x in item)
             and item[1] > item[0]
         ):
-            pairs.append([int(item[0]), int(item[1])])
-    return pairs
+            spans.append([int(x) for x in item])
+    return spans
 
 
 def hand_placed(extra_pnginfo: Any, sheets: Sequence[str | None]) -> list[list[int]]:

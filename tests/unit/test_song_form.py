@@ -115,3 +115,31 @@ def test_the_sections_check_compares_sung_sections_only() -> None:
     assert lyrics.compare_sections(lyric("Verse 1", "Chorus"), tags, sung) == []
     assert lyrics.compare_sections(lyric("Verse 1", "Chorus"), tags)  # all sections: the intro differs
     assert "sung sections" in lyrics.compare_sections(lyric("Chorus", "Verse"), tags, sung)[0].message
+
+
+def test_a_pickup_into_the_verse_makes_no_sung_intro() -> None:
+    # owner's report 2026-10-09: the plan's intro ends with the verse's first word; counted as a sung intro
+    # it shifted every name of a renamed plan (and an assembled one left the intro out)
+    abc = plan("intro-", "verse", "chorus").replace('"C"z16|', '"C"z12G4|', 1)
+    assert form_of(abc)[0] == ("intro", False)
+    form = song_form.match(lyric("Verse", "Chorus"), abc)
+    assert form.category == song_form.MATCH and form.score == abc
+    analysis = score_rules.analyze(abc)
+    assert analysis.sections[0].vocal_notes == 1
+    flags = song_form.sung_flags(abc, analysis.sections)
+    assert flags == [False, True, True]  # the sections check of the lyrics agrees
+    assert lyrics.compare_sections(lyric("Verse", "Chorus"), [s.tag for s in analysis.sections], flags) == []
+
+
+def test_a_section_of_the_plan_may_sing_the_blocks_after_its_own() -> None:
+    # owner's report 2026-10-09: the planner wrote the chorus and the outro as one chorus section; renamed
+    # to the lyrics' three sections, every section had the next one's name
+    long_chorus = '% chorus\nV: Vocal\n"C"c4B4A4G4|"C"c4B4A4G4|\nV: Ins\nC16|C16|\n'
+    abc = plan("verse") + long_chorus
+    text = lyric("Verse", "Chorus", "Outro")  # four syllables each: eight notes for the chorus and the outro
+    form = song_form.match(text, abc)
+    assert form.category == song_form.MATCH and form.score == abc and not form.changes
+    assert form.notes == ("its chorus section sings [Chorus] and [Outro]",)
+    assert "in its own (verse - chorus)" in form.text
+    # a chorus section with notes for the chorus only does not sing the outro as well
+    assert song_form.match(text, plan("verse", "chorus")).category == song_form.DIFFERS

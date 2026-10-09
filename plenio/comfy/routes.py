@@ -17,7 +17,7 @@ from aiohttp import web
 
 from ..core import lyrics as lyrics_rules
 from ..core import score as score_rules
-from ..core import syllables
+from ..core import song_form, syllables
 from ..core.engines import rules_for
 from ..core.errors import PlenioError, PlenioUserError
 from ..core.sheet import DOCUMENT_KINDS, REVIEW_MODES, evaluate_sheet, parse_sheet_state
@@ -105,22 +105,25 @@ def _lyrics(data: dict[str, Any]) -> str | None:
 _MAX_SPANS = 4096
 
 
-def _spans(data: dict[str, Any]) -> list[tuple[int, int]] | None:
-    """The lyrics lines placed by hand (``lyric_spans``: ``[[start, end], ...]`` in units of L), optional."""
+def _spans(data: dict[str, Any]) -> list[tuple[int, ...]] | None:
+    """The lyrics lines placed by hand (``lyric_spans``: ``[[start, end, block, line], ...]`` in units of L,
+    ``[start, end]`` as Plenio 0.4.4 and 0.4.5 kept them; see ``lyric_layout``), optional."""
     value = data.get("lyric_spans")
     if value is None:
         return None
     if not isinstance(value, list) or len(value) > _MAX_SPANS:
-        raise PlenioUserError(f"'lyric_spans' must be a list of at most {_MAX_SPANS} [start, end] pairs.")
+        raise PlenioUserError(f"'lyric_spans' must be a list of at most {_MAX_SPANS} lyrics spans.")
     spans = []
     for item in value:
         if (
             not isinstance(item, list)
-            or len(item) != 2
+            or len(item) not in (2, 4)
             or not all(isinstance(x, int) and not isinstance(x, bool) and x >= 0 for x in item)
         ):
-            raise PlenioUserError("Every lyrics span must be [start, end] in whole units (not negative).")
-        spans.append((item[0], item[1]))
+            raise PlenioUserError(
+                "Every lyrics span must be [start, end, block, line] in whole numbers (not negative)."
+            )
+        spans.append(tuple(item))
     return spans
 
 
@@ -234,7 +237,7 @@ async def lyrics_analyze(request: web.Request) -> web.StreamResponse:
         analysis = score_rules.analyze(abc)
         if analysis.ok:
             findings += lyrics_rules.compare_sections(
-                text, [s.tag for s in analysis.sections], [s.vocal_notes > 0 for s in analysis.sections]
+                text, [s.tag for s in analysis.sections], song_form.sung_flags(abc, analysis.sections)
             )
             for item, section in zip(sections, analysis.sections, strict=False):
                 item["score_section"] = section.label

@@ -35,10 +35,14 @@ from plenio.core import lyrics, syllables
         ("nation", 2),
         ("vision", 2),
         ("blue", 1),
-        # -ing after a vowel
+        # -ing after a vowel, a y before it with the vowel (owner's report 2026-10-09: "la-y-ing")
         ("being", 2),
         ("going", 2),
         ("seeing", 2),
+        ("saying", 2),
+        ("playing", 2),
+        ("enjoying", 3),
+        ("crying", 2),
         # suffixes and compounds after a silent e
         ("lovely", 2),
         ("homeless", 2),
@@ -94,6 +98,11 @@ def test_english_words(word: str, count: int) -> None:
 )
 def test_german_words(word: str, parts: list[str]) -> None:
     assert syllables.split(word, "German") == parts
+
+
+def test_a_y_before_ing_stays_with_its_vowel() -> None:
+    assert syllables.split("laying", "English") == ["lay", "ing"]
+    assert syllables.split("annoying", "English") == ["an", "noy", "ing"]
 
 
 def test_pieces_keep_punctuation_and_digraphs() -> None:

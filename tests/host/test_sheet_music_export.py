@@ -156,14 +156,16 @@ def test_the_lines_placed_by_hand_come_from_the_workflow_the_run_was_queued_with
     docs = {"title": "By Hand", "lyrics": LYRICS, "score": SCORE}
     plain, _ = export(server, docs)
     workflow = {
-        "nodes": [{"id": 1, "type": "PlenioSongSheet", "properties": {"plenio_lyric_spans": [[0, 64]]}}]
+        "nodes": [{"id": 1, "type": "PlenioSongSheet", "properties": {"plenio_lyric_spans": [[0, 64, 0, 0]]}}]
     }
     placed, _ = export(server, docs, workflow=workflow)
     by_hand = placed["plenio_notation"][0]["display_abc"]
     status, view = server.request(
-        "POST", "/plenio/score/analyze", {"abc": SCORE, "lyrics": LYRICS, "lyric_spans": [[0, 64]]}
+        "POST", "/plenio/score/analyze", {"abc": SCORE, "lyrics": LYRICS, "lyric_spans": [[0, 64, 0, 0]]}
     )
-    assert status == 200 and view["display_abc"] == by_hand != plain["plenio_notation"][0]["display_abc"]
+    # (the sheet keeps the score without its last line break)
+    assert status == 200 and view["display_abc"].rstrip("\n") == by_hand.rstrip("\n")
+    assert by_hand != plain["plenio_notation"][0]["display_abc"]
 
 
 def test_a_second_export_of_the_title_numbers_the_pdf_with_its_audio(server: ComfyServer) -> None:

@@ -50,6 +50,7 @@ import type { VoiceSwitches } from '../../shared/playback'
 import {
   type ModelChord,
   type ModelNote,
+  type ScoreModelView,
   describe,
   elementAtSource,
   elementById,
@@ -92,15 +93,17 @@ import {
   type LyricSpan,
   type PlacedLine,
   clipOfLines,
+  editRange,
+  followSpans,
   lineKey,
   parseLineKey,
+  partAt,
+  partOf,
   placedLines,
   remapSpans,
   sameSpans,
-  sectionAt,
-  sectionRange,
   settle,
-  withSectionSpans
+  withBlockSpans
 } from './lyricPlacement'
 import {
   type LyricBlock,
@@ -108,6 +111,7 @@ import {
   type LyricsTarget,
   followEdit,
   followOf,
+  followSources,
   followReplace,
   followSetLines,
   followText,
@@ -239,17 +243,21 @@ const session = useScoreSession(props.doc, {
       }
     }
     const spans = spansNow()
-    if (spans.length && result.time_map?.length) {
-      const moved = remapSpans(spans, result.time_map)
-      if (!sameSpans(moved, spans)) {
-        setSpans(moved)
-        before.spans = [...spans]
-        after.spans = moved
-      }
-    }
     const lyrics = follow.value
     const from = shown.value?.model
     const to = result.analysis.model
+    let moved = spans.length && result.time_map?.length ? remapSpans(spans, result.time_map) : spans
+    if (moved.length && lyrics && from && to) {
+      // the lyrics follow the sections: a span goes to the block of the section that took its words
+      const labelled = (m: ScoreModelView) => m.sections.flatMap((s, i) => (s.implicit ? [] : [i]))
+      const starts = to.sections.map((s) => to.measures[s.first_bar - 1]?.onset ?? 0)
+      moved = followSpans(moved, followSources(from, to, result.time_map), labelled(from), labelled(to), starts)
+    }
+    if (!sameSpans(moved, spans)) {
+      setSpans(moved)
+      before.spans = [...spans]
+      after.spans = moved
+    }
     if (lyrics && from && to) {
       const next = followEdit(lyrics, from, to, result.time_map, insertedLyrics(operation))
       follow.value = next
@@ -498,66 +506,76 @@ watch(
   }
 )
 
-/** The section has lines placed by hand (its lines take its spans in order). */
-function pinned(section: number): boolean {
-  const m = model.value
-  if (!m) return false
-  const [start, end] = sectionRange(m, section)
-  return spansNow().some(([at]) => at >= start && at < end)
+/** The block has lines placed by hand (every line of an edited block gets its span). */
+function pinned(block: number): boolean {
+  const layout = shown.value?.lyrics
+  return !!layout && !!partOf(layout, block)?.lines.some((l) => l.pinned)
 }
 
-/** The words of a section's lyric block as they are now (``null``: the section has none to edit). */
-function blockLines(section: number): string[] | null {
-  const laid = shown.value?.lyrics?.sections.find((s) => s.section === section)
-  if (follow.value) return [...(follow.value.blocks[section]?.lines ?? [])]
-  if (loose.value === null || !laid || laid.block === null) return null
-  return [...(parseLyrics(loose.value).blocks[laid.block]?.lines ?? [])]
+/** The model section of lyrics block ``block`` while the lyrics follow the sections (a block per labelled section). */
+function sectionOfBlock(block: number): number {
+  const m = model.value
+  if (!m) return -1
+  let count = -1
+  return m.sections.findIndex((s) => !s.implicit && ++count === block)
+}
+
+/** The words of a lyrics block as they are now (``null``: there is no such block to edit). */
+function blockLines(block: number): string[] | null {
+  if (follow.value) {
+    const section = sectionOfBlock(block)
+    return section < 0 ? null : [...(follow.value.blocks[section]?.lines ?? [])]
+  }
+  if (loose.value === null) return null
+  const found = parseLyrics(loose.value).blocks[block]
+  return found ? [...found.lines] : null
+}
+
+/** One beat in units of L (the width of a line no note sings). */
+function beatUnits(): number {
+  return Math.max(1, Math.round(model.value?.grid.units_per_quarter ?? 1))
 }
 
 /**
- * Edit the placed lines of some sections in one undo step: each section is pinned (every line gets
- * the span it has now), ``edit`` changes its lines, and they settle in the order of their spans.
- * Returns the keys of the lines ``edit`` marked with an id starting with ``*`` (to select them).
+ * Edit the placed lines of some blocks in one undo step: each block is pinned (every line gets the span it
+ * has now), ``edit`` changes its lines, and they settle in the order of their spans - between the lines of
+ * the blocks before and after it. Returns the keys of the lines ``edit`` marked with an id starting with
+ * ``*`` (to select them).
  */
-function editPlaced(sections: number[], edit: (section: number, lines: PlacedLine[]) => PlacedLine[], label: string): string[] {
+function editPlaced(blocks: number[], edit: (block: number, lines: PlacedLine[]) => PlacedLine[], label: string): string[] {
   const m = model.value
   const layout = shown.value?.lyrics
   if (!m || !layout || !lyricsEditable.value) return []
   const before = lyricsState()
-  let spans = spansNow()
   const marked: string[] = []
-  let changed = false
-  for (const section of [...new Set(sections)].sort((a, b) => a - b)) {
-    const lines = blockLines(section)
+  const edited = new Map<number, PlacedLine[]>()
+  for (const block of [...new Set(blocks)].sort((a, b) => a - b)) {
+    const lines = blockLines(block)
     if (lines === null) continue
-    const range = sectionRange(m, section)
-    const next = settle(edit(section, placedLines(m, layout, section, lines)), range)
+    const range = editRange(layout, block, m.total)
+    const next = settle(edit(block, placedLines(layout, block, lines, range, beatUnits())), range)
     const words = next.map((line) => line.text)
-    if (follow.value) follow.value = followSetLines(follow.value, m, section, words)
-    else if (loose.value !== null) {
-      const block = layout.sections.find((s) => s.section === section)?.block
-      if (block === null || block === undefined) continue
-      loose.value = setBlockLines(loose.value, block, words)
-    } else continue
+    if (follow.value) follow.value = followSetLines(follow.value, m, sectionOfBlock(block), words)
+    else if (loose.value !== null) loose.value = setBlockLines(loose.value, block, words)
+    else continue
     next.forEach((line, index) => {
-      if (line.id.startsWith('*')) marked.push(lineKey(section, index))
+      if (line.id.startsWith('*')) marked.push(lineKey(block, index))
     })
-    spans = withSectionSpans(spans, range, next)
-    changed = true
+    edited.set(block, next)
   }
-  if (!changed) return []
-  setSpans(spans)
+  if (!edited.size) return []
+  setSpans(withBlockSpans(spansNow(), layout, edited))
   session.recordSide(label, before, lyricsState())
   return marked
 }
 
-function bySection(keys: readonly string[]): Map<number, Set<number>> {
+function byBlock(keys: readonly string[]): Map<number, Set<number>> {
   const map = new Map<number, Set<number>>()
   for (const key of keys) {
     const parsed = parseLineKey(key)
     if (!parsed) continue
-    if (!map.has(parsed.section)) map.set(parsed.section, new Set())
-    map.get(parsed.section)?.add(parsed.line)
+    if (!map.has(parsed.block)) map.set(parsed.block, new Set())
+    map.get(parsed.block)?.add(parsed.line)
   }
   return map
 }
@@ -567,10 +585,10 @@ function onLyricPlace(moves: LyricPlace[]): void {
   const wanted = new Map(moves.map((move) => [move.key, move]))
   const count = moves.length
   lyricSelection.value = editPlaced(
-    [...bySection(moves.map((m) => m.key)).keys()],
-    (section, lines) =>
+    [...byBlock(moves.map((m) => m.key)).keys()],
+    (block, lines) =>
       lines.map((line, index) => {
-        const move = wanted.get(lineKey(section, index))
+        const move = wanted.get(lineKey(block, index))
         return move ? { ...line, id: `*${line.id}`, start: move.start, end: move.end } : line
       }),
     `lyrics: ${count === 1 ? 'line' : `${count} lines`} placed`
@@ -579,11 +597,11 @@ function onLyricPlace(moves: LyricPlace[]): void {
 
 /** The selected lines go (with their words); the others stay where they are sung. */
 function deleteLyricLines(keys: readonly string[]): void {
-  const picked = bySection(keys)
+  const picked = byBlock(keys)
   if (!picked.size) return
   editPlaced(
     [...picked.keys()],
-    (section, lines) => lines.filter((_, index) => !picked.get(section)?.has(index)),
+    (block, lines) => lines.filter((_, index) => !picked.get(block)?.has(index)),
     `lyrics: ${keys.length === 1 ? 'line' : `${keys.length} lines`} deleted`
   )
   lyricSelection.value = []
@@ -595,10 +613,10 @@ function selectedLyricLines(): PlacedLine[] {
   const layout = shown.value?.lyrics
   if (!m || !layout) return []
   const result: PlacedLine[] = []
-  for (const [section, indices] of bySection(lyricSelection.value)) {
-    const lines = blockLines(section)
+  for (const [block, indices] of byBlock(lyricSelection.value)) {
+    const lines = blockLines(block)
     if (!lines) continue
-    placedLines(m, layout, section, lines).forEach((line, index) => {
+    placedLines(layout, block, lines, editRange(layout, block, m.total), beatUnits()).forEach((line, index) => {
       if (indices.has(index)) result.push(line)
     })
   }
@@ -614,20 +632,21 @@ function copyLyrics(): boolean {
   return true
 }
 
-/** The clip's lines into the section at ``at``, from there on (lines past the section's end stay out). */
+/** The clip's lines into the block sung at ``at``, from there on (lines past the next block's first line stay out). */
 function pasteLyrics(lines: readonly LyricClipLine[], at: number, label: string): void {
   const m = model.value
-  if (!m) return
-  const section = sectionAt(m, at)
-  if (section < 0 || blockLines(section) === null) {
-    session.error = 'The cursor is in a section without lyrics: set it into a section that has a lyrics block.'
+  const layout = shown.value?.lyrics
+  if (!m || !layout) return
+  const part = partAt(layout, at)
+  if (!part || blockLines(part.block) === null) {
+    session.error = 'The cursor is where no lyrics block is sung: set it where the lyrics lane shows lines.'
     return
   }
-  const [, end] = sectionRange(m, section)
+  const [, end] = editRange(layout, part.block, m.total)
   const fitting = lines.filter((line) => at + line.offset < end)
   if (!fitting.length) return
   lyricSelection.value = editPlaced(
-    [section],
+    [part.block],
     (_, current) => [
       ...current,
       ...fitting.map((line, index) => ({
@@ -640,7 +659,7 @@ function pasteLyrics(lines: readonly LyricClipLine[], at: number, label: string)
     label
   )
   session.error = null
-  if (fitting.length < lines.length) session.notes = [`${lines.length - fitting.length} line(s) did not fit before the section's end`]
+  if (fitting.length < lines.length) session.notes = [`${lines.length - fitting.length} line(s) did not fit before the next block's first line`]
 }
 
 /** The clipboard commands on lyrics lines (``false``: not about lyrics - the notes handle it). */
@@ -672,16 +691,17 @@ function onLyricClipboard(action: ClipAction): boolean {
 /** A line edited in the roll's lyrics lane: one undo step of its own. */
 function onLyricEdit(edit: LyricEdit): void {
   const current = model.value
-  if (current && pinned(edit.section)) {
-    // a section placed by hand: the other lines keep their spans, a new line stands where it was typed
-    const beat = Math.max(1, Math.round(current.grid.units_per_quarter))
+  const layout = shown.value?.lyrics
+  if (current && layout && pinned(edit.block)) {
+    // a block placed by hand: the other lines keep their spans, a new line stands where it was typed
+    const beat = beatUnits()
     editPlaced(
-      [edit.section],
+      [edit.block],
       (_, lines) => {
         if (edit.line < lines.length) {
           return edit.text ? lines.map((line, index) => (index === edit.line ? { ...line, text: edit.text } : line)) : lines.filter((_, index) => index !== edit.line)
         }
-        const at = edit.at ?? lines[lines.length - 1]?.end ?? sectionRange(current, edit.section)[0]
+        const at = edit.at ?? lines[lines.length - 1]?.end ?? editRange(layout, edit.block, current.total)[0]
         return edit.text ? [...lines, { id: '*typed', text: edit.text, start: at, end: at + beat }] : lines
       },
       `lyrics: ${edit.text || 'line removed'}`
@@ -689,7 +709,7 @@ function onLyricEdit(edit: LyricEdit): void {
     return
   }
   const before = lyricsState()
-  if (follow.value && current) follow.value = followReplace(follow.value, current, edit.section, edit.line, edit.text)
+  if (follow.value && current) follow.value = followReplace(follow.value, current, sectionOfBlock(edit.block), edit.line, edit.text)
   else if (loose.value !== null) loose.value = replaceLine(loose.value, edit.block, edit.line, edit.text)
   else return
   if (!props.readonly) session.recordSide(`lyrics: ${edit.text || 'line removed'}`, before, lyricsState())

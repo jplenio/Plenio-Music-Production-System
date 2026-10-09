@@ -101,7 +101,11 @@ def test_the_oldest_reservations_go_first_when_too_many_wait(tmp_path: Path) -> 
 def test_the_lines_placed_by_hand_come_from_the_queued_workflow() -> None:
     workflow = {
         "nodes": [
-            {"id": 7, "type": "PlenioSongSheet", "properties": {"plenio_lyric_spans": [[0, 8], [8, 16]]}},
+            {
+                "id": 7,
+                "type": "PlenioSongSheet",
+                "properties": {"plenio_lyric_spans": [[0, 8, 1, 0], [8, 16]]},
+            },
             {"id": 12, "type": "PlenioSongSheet", "properties": {"plenio_lyric_spans": "broken"}},
             {"id": 5, "type": "uuid-of-a-blueprint", "properties": {}},
         ],
@@ -116,10 +120,10 @@ def test_the_lines_placed_by_hand_come_from_the_queued_workflow() -> None:
     }
     extra = {"workflow": workflow}
     assert hand_placed(extra, ("12", "7")) == [
-        [0, 8],
+        [0, 8, 1, 0],
         [8, 16],
-    ]  # the score sheet has none: the lyrics sheet's
-    assert hand_placed(extra, ("7", "12")) == [[0, 8], [8, 16]]
+    ]  # the score sheet has none: the lyrics sheet's (a span with its line, and one kept by 0.4.4 without)
+    assert hand_placed(extra, ("7", "12")) == [[0, 8, 1, 0], [8, 16]]
     assert hand_placed(extra, ("5:3",)) == [[2, 6]]  # a sheet inside a blueprint; a reversed span is left out
     assert hand_placed(extra, ("99", None)) == []
     assert hand_placed(None, ("7",)) == [] and hand_placed({"workflow": "nonsense"}, ("7",)) == []

@@ -13,6 +13,7 @@ from typing import Any, Protocol
 
 from .. import lyrics as lyrics_rules
 from .. import score as score_rules
+from .. import song_form
 from ..diagnostics import Finding, error, info, warning
 from ..timefmt import clock as _clock
 
@@ -358,7 +359,7 @@ def check_score(
     if lyrics.strip():
         findings.extend(
             lyrics_rules.compare_sections(
-                lyrics, [s.tag for s in analysis.sections], [s.vocal_notes > 0 for s in analysis.sections]
+                lyrics, [s.tag for s in analysis.sections], song_form.sung_flags(score, analysis.sections)
             )
         )
     # instrumental plans are fitted to 0.8-1.2 x the target by 'prepare from brief' (study E6); sung plans
@@ -425,7 +426,7 @@ def validate_documents(
         duration = analysis.duration_s if analysis.ok else None
         if analysis.ok and "lyrics" in check and lyrics.strip() and not instrumental:
             findings += lyrics_rules.compare_sections(
-                lyrics, [s.tag for s in analysis.sections], [s.vocal_notes > 0 for s in analysis.sections]
+                lyrics, [s.tag for s in analysis.sections], song_form.sung_flags(score, analysis.sections)
             )
             # lyrics written for an existing melody (covers): do they fit its notes?
             findings += lyrics_rules.syllable_fit(lyrics, score_rules.phrasing(score))

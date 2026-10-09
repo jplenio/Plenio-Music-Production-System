@@ -102,20 +102,23 @@ export function followText(follow: LyricsFollow, model: ScoreModelView): string 
   return parts.join('\n\n')
 }
 
+function timeMapOf(before: ScoreModelView, timeMap: readonly (readonly number[])[] | null | undefined): readonly (readonly number[])[] {
+  return timeMap?.length ? timeMap : [[0, before.total, 0]]
+}
+
 /**
- * The blocks after an edit: ``timeMap`` is the backend's (``[old_start, old_end, new_start]``; none: the
- * time stayed where it was), ``inserted`` gives the lyrics of a section that starts in inserted time.
+ * For every section after an edit, the section before it whose words it takes (``-1``: none - inserted, or
+ * a part split off a section): ``timeMap`` is the backend's (``[old_start, old_end, new_start]``; none: the
+ * time stayed where it was). A moved or copied section takes its own words, as does what is left of a
+ * section after its first bars were deleted.
  */
-export function followEdit(
-  follow: LyricsFollow,
+export function followSources(
   before: ScoreModelView,
   after: ScoreModelView,
-  timeMap: readonly (readonly number[])[] | null | undefined,
-  inserted: (unit: number) => LyricBlock | null = () => null
-): LyricsFollow {
-  const map = timeMap?.length ? timeMap : [[0, before.total, 0]]
+  timeMap: readonly (readonly number[])[] | null | undefined
+): number[] {
+  const map = timeMapOf(before, timeMap)
   const oldStarts = starts(before)
-  const newStarts = starts(after)
   const oldAt = (unit: number): number => {
     let found = -1
     oldStarts.forEach((start, i) => {
@@ -129,21 +132,44 @@ export function followEdit(
     }
     return null
   }
-  const copy = (block: LyricBlock | null): LyricBlock | null => (block ? { tag: block.tag, lines: [...block.lines] } : null)
-  const blocks: (LyricBlock | null)[] = []
   const sources: number[] = []
-  const used = new Set<number>()
-  newStarts.forEach((start, j) => {
+  const within: number[] = []
+  starts(after).forEach((start, j) => {
     const old = back(start)
     const source = old === null ? -1 : oldAt(old)
-    sources.push(source)
-    if (old === null) blocks.push(inserted(start))
-    else if (source < 0) blocks.push(null)
-    else if (old === oldStarts[source] || sources[j - 1] !== source) {
-      // the section itself (moved or copied), or what is left of it after its first bars were deleted
-      blocks.push(copy(follow.blocks[source] ?? null))
-      used.add(source)
-    } else blocks.push(null) // a part split off a section: no words of its own
+    within.push(source)
+    // the section itself (moved or copied), or what is left of it after its first bars were deleted
+    sources.push(source >= 0 && old !== null && (old === oldStarts[source] || within[j - 1] !== source) ? source : -1)
+  })
+  return sources
+}
+
+/**
+ * The blocks after an edit: ``timeMap`` is the backend's (``[old_start, old_end, new_start]``; none: the
+ * time stayed where it was), ``inserted`` gives the lyrics of a section that starts in inserted time.
+ */
+export function followEdit(
+  follow: LyricsFollow,
+  before: ScoreModelView,
+  after: ScoreModelView,
+  timeMap: readonly (readonly number[])[] | null | undefined,
+  inserted: (unit: number) => LyricBlock | null = () => null
+): LyricsFollow {
+  const map = timeMapOf(before, timeMap)
+  const oldStarts = starts(before)
+  const newStarts = starts(after)
+  const back = (unit: number): number | null => {
+    for (const [oldStart, oldEnd, newStart] of map) {
+      if (unit >= newStart && unit < newStart + oldEnd - oldStart) return oldStart + unit - newStart
+    }
+    return null
+  }
+  const copy = (block: LyricBlock | null): LyricBlock | null => (block ? { tag: block.tag, lines: [...block.lines] } : null)
+  const sources = followSources(before, after, timeMap)
+  const used = new Set(sources.filter((s) => s >= 0))
+  const blocks: (LyricBlock | null)[] = newStarts.map((start, j) => {
+    if (back(start) === null) return inserted(start)
+    return sources[j] >= 0 ? copy(follow.blocks[sources[j]] ?? null) : null // a part split off a section: no words of its own
   })
   // a section that is gone but whose start still sounds inside another one was joined to it
   oldStarts.forEach((start, i) => {

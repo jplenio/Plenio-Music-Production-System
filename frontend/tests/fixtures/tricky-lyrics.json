@@ -1405,18 +1405,20 @@
    }
   },
   "lyrics": {
-   "sections": [
+   "parts": [
     {
-     "section": 0,
      "block": 0,
      "tag": "Intro",
+     "start": 0,
+     "end": 32,
      "phrases": [],
      "lines": []
     },
     {
-     "section": 1,
      "block": 1,
      "tag": "Verse",
+     "start": 32,
+     "end": 160,
      "phrases": [
       [
        32,
@@ -1457,7 +1459,8 @@
          "end_of_word": true
         }
        ],
-       "holds": []
+       "holds": [],
+       "pinned": false
       },
       {
        "block": 1,
@@ -1487,14 +1490,16 @@
          "end_of_word": true
         }
        ],
-       "holds": []
+       "holds": [],
+       "pinned": false
       }
      ]
     },
     {
-     "section": 2,
      "block": 2,
      "tag": "Chorus",
+     "start": 160,
+     "end": 224,
      "phrases": [
       [
        160,
@@ -1520,7 +1525,8 @@
          "end_of_word": true
         }
        ],
-       "holds": []
+       "holds": [],
+       "pinned": false
       }
      ]
     }

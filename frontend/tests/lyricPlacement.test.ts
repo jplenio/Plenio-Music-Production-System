@@ -2,8 +2,9 @@
  * Lyrics lines placed by hand (owner's request 2026-10-03): in the roll's lyrics lane a line is
  * selected, moved, made longer or shorter, deleted, copied and pasted like a note; its span is kept with
  * the sheet and sent with the lyrics, and the Score tab makes each edit one undo step.
- * The view comes from the backend (fixtures/tricky-lyrics.json): intro (bar 1), verse (bars 2-5:
- * "beautiful morning" 32-96, "sing it again" 96-160), chorus (bars 6-7: "hold on" 160-224); L:1/32.
+ * The view comes from the backend (fixtures/tricky-lyrics.json): a part per lyrics block - the empty
+ * [Intro] 0-32, the verse 32-160 ("beautiful morning" 32-96, "sing it again" 96-160), the chorus 160-224
+ * ("hold on"); L:1/32.
  */
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { type App, createApp, h, nextTick } from 'vue'
@@ -17,15 +18,17 @@ import { clipboard } from '../src/sheet-editor/score/clipboard'
 import {
   type LyricSpan,
   clipOfLines,
+  editRange,
+  followSpans,
   parseSpans,
+  partAt,
   placedLines,
   remapSpans,
-  sectionAt,
-  sectionRange,
+  sameSpans,
   settle,
-  withSectionSpans
+  withBlockSpans
 } from '../src/sheet-editor/score/lyricPlacement'
-import { followOf, followSetLines, followText, setBlockLines } from '../src/sheet-editor/score/lyricsFollow'
+import { followOf, followSetLines, followSources, followText, setBlockLines } from '../src/sheet-editor/score/lyricsFollow'
 import { LYRICS_LANE, TOP, geometry, xOf } from '../src/sheet-editor/score/pianoRoll'
 import { defaultPrefs, savePrefs } from '../src/sheet-editor/score/prefs'
 import plain from './fixtures/tricky-score.json'
@@ -53,15 +56,18 @@ async function idle(times = 4): Promise<void> {
 }
 
 describe('lyricPlacement', () => {
-  it('reads where the lines of a section are sung, and the sections', () => {
-    expect(placedLines(MODEL, LAYOUT, 1, VERSE)).toEqual([
+  it('reads where the lines of a block are sung, and where a block may stand', () => {
+    // the verse's lines may stand anywhere before the chorus's first line (the intro has no lines)
+    const range = editRange(LAYOUT, 1, MODEL.total)
+    expect(range).toEqual([0, 160])
+    expect(editRange(LAYOUT, 2, MODEL.total)).toEqual([160, 224])
+    expect(placedLines(LAYOUT, 1, VERSE, range, 8)).toEqual([
       { id: '0', text: 'beautiful morning', start: 32, end: 96 },
       { id: '1', text: 'sing it again', start: 96, end: 160 }
     ])
     // a line the layout does not know (typed after the last one): a beat after the line before
-    expect(placedLines(MODEL, LAYOUT, 1, [...VERSE, 'and again']).at(-1)).toEqual({ id: '2', text: 'and again', start: 159, end: 160 })
-    expect(sectionRange(MODEL, 1)).toEqual([32, 160])
-    expect([sectionAt(MODEL, 0), sectionAt(MODEL, 100), sectionAt(MODEL, 223), sectionAt(MODEL, 224)]).toEqual([0, 1, 2, -1])
+    expect(placedLines(LAYOUT, 1, [...VERSE, 'and again'], range, 8).at(-1)).toEqual({ id: '2', text: 'and again', start: 159, end: 160 })
+    expect([0, 100, 223, 224].map((unit) => partAt(LAYOUT, unit)?.block ?? -1)).toEqual([0, 1, 2, -1])
   })
 
   it('settles the lines in the order of their spans, inside the section and without overlaps', () => {
@@ -126,18 +132,51 @@ describe('lyricPlacement', () => {
     ])
   })
 
-  it('keeps the spans per section, moves them with the bars and reads a property', () => {
-    const verse: LyricSpan[] = withSectionSpans([[160, 200], [40, 60]], [32, 160], [
+  it('keeps a span with its line, moves it with the bars and reads a property', () => {
+    const lines = [
       { id: '0', text: 'a', start: 32, end: 64 },
       { id: '1', text: 'b', start: 64, end: 96 }
-    ])
-    expect(verse).toEqual([[32, 64], [64, 96], [160, 200]])
+    ]
+    const verse: LyricSpan[] = withBlockSpans([[160, 200, 2, 0], [40, 60, 1, 0]], LAYOUT, new Map([[1, lines]]))
+    expect(verse).toEqual([[32, 64, 1, 0], [64, 96, 1, 1], [160, 200, 2, 0]])
+    // spans kept by 0.4.4 without their line: those the view placed become the spans of their lines
+    const pinned = { ...LAYOUT, parts: LAYOUT.parts.map((p) => (p.block === 2 ? { ...p, lines: p.lines.map((l) => ({ ...l, pinned: true })) } : p)) }
+    expect(withBlockSpans([[160, 224], [40, 60]], pinned, new Map([[1, lines]]))).toEqual([[32, 64, 1, 0], [64, 96, 1, 1], [160, 224, 2, 0]])
     // the verse copied after itself (bars 2-5 again at 160), the chorus moved behind it
-    expect(remapSpans(verse, [[0, 160, 0], [32, 160, 160], [160, 224, 288]])).toEqual([[32, 64], [64, 96], [160, 192], [192, 224], [288, 328]])
-    expect(parseSpans([[5, 9], [1, 2], 'x', [3, 3], [-1, 4], [2.5, 6]])).toEqual([[1, 2], [5, 9]])
+    expect(remapSpans(verse, [[0, 160, 0], [32, 160, 160], [160, 224, 288]])).toEqual([
+      [32, 64, 1, 0],
+      [64, 96, 1, 1],
+      [160, 192, 1, 0],
+      [192, 224, 1, 1],
+      [288, 328, 2, 0]
+    ])
+    expect(parseSpans([[5, 9], [1, 2, 0, 1], 'x', [3, 3], [-1, 4], [2.5, 6], [1, 2, 3]])).toEqual([[1, 2, 0, 1], [5, 9]])
+    expect(sameSpans([[1, 2, 0, 1]], [[1, 2, 0, 2]])).toBe(false)
     expect(clipOfLines([{ id: '1', text: 'b', start: 64, end: 96 }, { id: '0', text: 'a', start: 32, end: 48 }])).toEqual([
       { text: 'a', offset: 0, length: 16 },
       { text: 'b', offset: 32, length: 32 }
+    ])
+  })
+
+  it('gives a span the block of the section that took its words when the lyrics follow the sections', () => {
+    // the verse (section 1) copied after itself: the sections are intro, verse, verse, chorus
+    const after: ScoreModelView = {
+      ...MODEL,
+      total: MODEL.total + 128,
+      measures: [...MODEL.measures, ...[0, 1, 2, 3].map((i) => ({ ...MODEL.measures[0], onset: MODEL.total + 32 * i }))],
+      sections: [MODEL.sections[0], MODEL.sections[1], { ...MODEL.sections[1], first_bar: 6 }, { ...MODEL.sections[2], first_bar: 10 }]
+    }
+    const map = [[0, 160, 0], [32, 160, 160], [160, 224, 288]]
+    const sources = followSources(MODEL, after, map)
+    expect(sources).toEqual([0, 1, 1, 2])
+    const moved = remapSpans([[32, 64, 1, 0], [160, 200, 2, 0]], map)
+    const starts = after.sections.map((s) => after.measures[s.first_bar - 1]?.onset ?? 0)
+    const labelled = (m: ScoreModelView) => m.sections.flatMap((s, i) => (s.implicit ? [] : [i]))
+    // each copy of the verse's span goes to its own verse block, the chorus's to the chorus, now block 3
+    expect(followSpans(moved, sources, labelled(MODEL), labelled(after), starts)).toEqual([
+      [32, 64, 1, 0],
+      [160, 192, 2, 0],
+      [288, 328, 3, 0]
     ])
   })
 
@@ -298,7 +337,7 @@ describe('ScoreTab: lines placed by hand', () => {
     return { asked, reported, spans, pointer, key, svg, tab }
   }
 
-  it('moves a line past the next one: the section is pinned, the words change their order, undo brings it back', async () => {
+  it('moves a line past the next one: the block is pinned, the words change their order, undo brings it back', async () => {
     const { asked, reported, spans, pointer, key } = mountTab()
     await idle(6)
     pointer('pointerdown', 60)
@@ -307,9 +346,9 @@ describe('ScoreTab: lines placed by hand', () => {
     pointer('pointerup', 60 + 96)
     await idle()
     // "beautiful morning" moved 96 units later: it starts at 128, inside "sing it again" (96-160)
-    expect(spans.at(-1)).toEqual([[96, 128], [128, 160]])
+    expect(spans.at(-1)).toEqual([[96, 128, 1, 0], [128, 160, 1, 1]])
     expect(reported.at(-1)).toBe(LYRICS.replace('beautiful morning\nsing it again', 'sing it again\nbeautiful morning'))
-    expect(asked.at(-1)?.spans).toEqual([[96, 128], [128, 160]])
+    expect(asked.at(-1)?.spans).toEqual([[96, 128, 1, 0], [128, 160, 1, 1]])
     key('z', { ctrlKey: true })
     await idle()
     expect(reported.at(-1)).toBe(LYRICS)
@@ -327,7 +366,7 @@ describe('ScoreTab: lines placed by hand', () => {
     key('Delete')
     await idle()
     expect(reported.at(-1)).toBe(LYRICS.replace('\nhold on', ''))
-    // the cursor to bar 4 (unit 96, in the verse): the line is pasted there and the verse is pinned
+    // the cursor to bar 4 (unit 96, where the verse is sung): the line is pasted there and the verse is pinned
     pointer('pointerdown', 96, { clientY: 6 }) // in the ruler
     pointer('pointerup', 96, { clientY: 6 })
     await nextTick()
