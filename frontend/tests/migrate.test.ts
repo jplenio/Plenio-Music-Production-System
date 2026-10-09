@@ -31,7 +31,7 @@ describe('widget values of older workflows', () => {
     expect(info.widgets_values).toHaveLength(3) // the saved data itself is not changed
   })
 
-  it('renames the arrangement "simple" of 0.4.5 to "off"', () => {
+  it('renames the pre-release arrangement "simple" to "off"', () => {
     const widgets = [
       { name: 'arrangement', value: 'simple' },
       { name: 'description', value: 'simple' } // a text that happens to be the word stays

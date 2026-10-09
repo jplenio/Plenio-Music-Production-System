@@ -7,7 +7,7 @@ A parametric EQ for finished audio (up to 8 bands: peak, low/high shelf, high/lo
 - **flat** - no change (the audio passes through bit-identical).
 - **manual** - your bands. Edit them on the curve under the node: drag a handle to change frequency and gain, use the wheel for the width (Q), double-click the curve to add a band; the preset menu fills in one of the shipped recipes (for example *YuE2 - Smooth highs*). The bands are stored as JSON (`plenio.eq/1`), so you can also paste them.
 - **match preset** - a shipped tone-match recipe: Plenio measures the audio and proposes gentle peak bands that move it towards a **warm** or **bright** tilt, or towards the **reference** recording (connect *reference*).
-- **custom match** - the same with your own strength, largest gain and number of bands.
+- **custom match** - the same with your own **target** (*warm*, *bright* or *reference*), **strength** (how far towards it), **max gain** (the largest boost or cut), **max bands** and - advanced - the range it measures and may place bands in (**min_hz** to **max_hz**).
 
 The match never boosts or cuts by more than *max gain* on the summed curve, and removes the loudness difference first (it changes tone, not level). The curve and the bands that were applied are shown on the node and stored in the report.
 

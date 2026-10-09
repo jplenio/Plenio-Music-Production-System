@@ -111,7 +111,7 @@ def resolve_mode(value: str | None, modes: Mapping[str, str] = SONG_MODES) -> st
 MELODY_OPTIONS = {"instrument plays the lead": "lead", "accompaniment only": "accompaniment"}
 ARRANGEMENT_DEFAULT = "off"
 """The creative mode of a new brief: no arrangement, the music model plans the music by itself
-(``core.arrangement``; ``simple`` until 0.4.5)."""
+(``core.arrangement``; ``simple`` in a pre-release)."""
 CLOSENESS_DEFAULT = 70
 """Genre closeness of a song, song flow closeness of a cover (0 free ... 100 strict / the original)."""
 LYRICS_CLOSENESS_DEFAULT = 0

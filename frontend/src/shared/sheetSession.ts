@@ -77,7 +77,7 @@ export interface ArrangementPayload {
   idea?: string
   sections?: ArrangementSection[]
   notes?: string[]
-  /** The harmony check (0.4.6): the score's measures before and after the arrangement. */
+  /** The harmony check: the score's measures before and after the arrangement. */
   harmony?: { genre?: string; before?: HarmonyMeasures; after?: HarmonyMeasures }
 }
 
@@ -104,7 +104,7 @@ export function harmonyLabel(arrangement: ArrangementPayload): string {
   return `Harmony check (${arrangement.harmony?.genre ?? 'pop'}): ${parts.join(' · ')}`
 }
 
-/** What the sheet says about creative modes (0.4.5: experimental, they invite trying rather than relying). */
+/** What the sheet says about creative modes (experimental: they invite trying rather than relying). */
 export const ARRANGEMENT_EXPERIMENTAL =
   'Creative modes are experimental: the writer’s plan can surprise - listen, change the score here, or run ' +
   'again with another arrangement seed; arrangement off keeps the music model’s own plan.'

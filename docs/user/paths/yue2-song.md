@@ -54,7 +54,7 @@ Two sheets are needed because the score is planned from the final text: **Song S
 
 ## Creative modes: a planned arrangement
 
-> **Experimental (0.4.5).** Creative modes and the closeness sliders can give unexpected results - a chord that surprises, an instrument line that does not fit every song, a plan that is not applied. They are meant for experimenting first: try a mode, listen, change the score in the Song Sheet or run again with another *arrangement seed*, and keep what you like. *simple* is the dependable choice. ▶ *Tutorial 6 · YuE2 · Song · Creative modes* shows it.
+> **Experimental.** Creative modes and the closeness sliders can give unexpected results - a chord that surprises, an instrument line that does not fit every song, a plan that is not applied. They are meant for experimenting first: try a mode, listen, change the score in the Song Sheet or run again with another *arrangement seed*, and keep what you like. *off* is the dependable choice. ▶ *Tutorial 6 · YuE2 · Song · Creative modes* shows it.
 
 The brief's **arrangement** is *off* by default: YuE2 plans melody, chords and instruments by itself, and **Arrange** passes its score through untouched (nothing runs there). Choose a creative mode - *standard*, *varied*, *fantasy*, *sterile*, *many instruments*, *dramatic* or your own - and set the **genre closeness** (100 strictly typical, 70 typical with personal touches, 40 free within the genre, 0 any style):
 

@@ -22,7 +22,7 @@ A mode is a Markdown file with a front matter block (``resources/arrangement/*.m
     Lines added to the arrangement prompt (the section plan).
 
 ``off`` is built in and has no file: no arrangement - the music model plans the music by itself, as
-before. Until 0.4.5 it was called ``simple``; that name is still read (``LEGACY_NAMES``).
+before. A pre-release called it ``simple``; that name is still read (``LEGACY_NAMES``).
 """
 
 from __future__ import annotations
@@ -110,7 +110,7 @@ OFF_MODE = CreativeMode(
 
 
 def canonical_name(name: str) -> str:
-    """The current name of a mode name (``simple`` of 0.4.5 is ``off``)."""
+    """The current name of a mode name (the pre-release ``simple`` is ``off``)."""
     return LEGACY_NAMES.get(name, name)
 
 

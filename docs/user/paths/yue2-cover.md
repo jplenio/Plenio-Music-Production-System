@@ -59,7 +59,7 @@ Enable **Check sung lyrics** (bypassed by default) to measure what was sung: wor
 
 ## Creative modes: how close to the original
 
-> **Experimental (0.4.5).** Creative modes and the closeness sliders can give unexpected results - a chord that surprises, an instrument line that does not fit every song, a plan that is not applied. They are meant for experimenting first: try a mode, listen, change the score in the Song Sheet or run again with another *arrangement seed*, and keep what you like. *simple* is the dependable choice. ▶ *Tutorial 7 · YuE2 · Cover · Creative modes* shows it.
+> **Experimental.** Creative modes and the closeness sliders can give unexpected results - a chord that surprises, an instrument line that does not fit every song, a plan that is not applied. They are meant for experimenting first: try a mode, listen, change the score in the Song Sheet or run again with another *arrangement seed*, and keep what you like. *off* is the dependable choice. ▶ *Tutorial 7 · YuE2 · Cover · Creative modes* shows it.
 
 The Cover Brief's **arrangement** is *off* by default: the transcribed score goes to the sheet as it is. With a creative mode **Arrange** lets the writer model re-arrange the score's sections within the **song flow closeness**:
 
@@ -73,7 +73,7 @@ The Cover Brief's **arrangement** is *off* by default: the transcribed score goe
 
 The **melody and the form always remain** - an instrument line that carries the melody (an instrumental cover) is never replaced. *harmony: new accompaniment* removes the source's chords first; a creative mode may then plan new ones (without chords a section keeps its line). **Song Sheet · Score** shows the arranged score and what was changed; a plan Plenio cannot use leaves the transcription as it was, with a warning. **Arrangement seed**: another arrangement of the same cover. See [Creative modes](../concepts/creative-modes.md).
 
-**Lyrics closeness** (*new lyrics*): 0 (default) writes the new lyrics without the source's text, as before; 1-29 keeps only a hint of it, 30-59 its theme and mood, 60-89 its story in new words, 90-100 its meaning line by line (a singable translation when the language differs). Above 0 *Transcribe Lyrics* runs on the source so the writer sees the original words - it needs clear singing.
+**Lyrics closeness** (*new lyrics*): 0 (default) writes the new lyrics without the source's text; 1-29 keeps only a hint of it, 30-59 its theme and mood, 60-89 its story in new words, 90-100 its meaning line by line (a singable translation when the language differs). Above 0 *Transcribe Lyrics* runs on the source so the writer sees the original words - it needs clear singing.
 
 ## Instrumental covers and vocal checks
 

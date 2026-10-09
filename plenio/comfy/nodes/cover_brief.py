@@ -320,7 +320,7 @@ class PlenioCoverBrief(io.ComfyNode):
         source: Any = None,
     ) -> io.NodeOutput:
         chosen = None if template == "none" else template_library().get(template)
-        # an unknown mode stops here, with the list to choose from; 0.4.5's "simple" is read as "off"
+        # an unknown mode stops here, with the list to choose from; the pre-release name "simple" is read as "off"
         arrangement = mode_library().by_name(arrangement).name
         vocal_mode = vocals.get("vocals", "instrumental")
         values = {

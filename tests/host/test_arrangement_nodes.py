@@ -201,7 +201,7 @@ def test_the_mode_list_holds_the_users_modes(server: ComfyServer) -> None:
     assert options[:4] == ["off", "standard", "calm", "varied"]
 
 
-@pytest.mark.parametrize("name", ["off", "simple"])  # "simple": the name until 0.4.5, still accepted
+@pytest.mark.parametrize("name", ["off", "simple"])  # "simple": the pre-release name, still accepted
 def test_arrangement_off_does_not_ask_the_writer(server: ComfyServer, name: str) -> None:
     ASKED.clear()
     entry = server.run(graph(song_brief(name)))

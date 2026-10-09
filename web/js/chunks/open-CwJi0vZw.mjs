@@ -1,4 +1,4 @@
-import { a as Zv, P as Jd, b as Qv, t as ey, i as ty, T as el, d as ny, s as pl, f as iy, l as gl, p as sy, c as oy, e as ry, g as ly, h as ay, j as uy, k as cy, m as ph, n as hy, o as fy, I as Zd, q as ml, r as dy, u as py, v as gy, w as my, x as vy, y as Qd, z as yy, R as by, A as xy, S as wy, B as ky, N as Sy, C as Cy, D as tl, E as gh, F as My, G as mh, H as Ay, J as Ty, K as nl, L as vh, M as $y, O as Cr, Q as yh, U as Dy, V as Oy, W as Ly, X as Ey, Y as By, Z as bn, _ as Iy, $ as Ry, a0 as bh, a1 as Py, a2 as _y, a3 as Ma, a4 as xh, a5 as wh, a6 as Ny, a7 as Vy, a8 as kh, a9 as Sh, aa as Aa, ab as Hy, ac as Fy, ad as Ch, ae as zy, af as Mh } from "./main-DAEj3WWl.mjs";
+import { a as Zv, P as Jd, b as Qv, t as ey, i as ty, T as el, d as ny, s as pl, f as iy, l as gl, p as sy, c as oy, e as ry, g as ly, h as ay, j as uy, k as cy, m as ph, n as hy, o as fy, I as Zd, q as ml, r as dy, u as py, v as gy, w as my, x as vy, y as Qd, z as yy, R as by, A as xy, S as wy, B as ky, N as Sy, C as Cy, D as tl, E as gh, F as My, G as mh, H as Ay, J as Ty, K as nl, L as vh, M as $y, O as Cr, Q as yh, U as Dy, V as Oy, W as Ly, X as Ey, Y as By, Z as bn, _ as Iy, $ as Ry, a0 as bh, a1 as Py, a2 as _y, a3 as Ma, a4 as xh, a5 as wh, a6 as Ny, a7 as Vy, a8 as kh, a9 as Sh, aa as Aa, ab as Hy, ac as Fy, ad as Ch, ae as zy, af as Mh } from "./main-3gUbJ4yL.mjs";
 import { a as Wy, r as Ky, n as Uy, e as Ta, b as jy, s as Gy, p as qy } from "./notationExport-D-CL96aB.mjs";
 import { notesLabel as Yy, trackRows as Xy, parseGuide as Jy, sameGuide as Co, remapGuide as Zy, guideNotes as Qy } from "./tracks-DxmZeggM.mjs";
 // @__NO_SIDE_EFFECTS__
@@ -22728,7 +22728,7 @@ function OD(n, e) {
   if (e?.bars?.length)
     return !n || !e.bar_prints?.length ? n ? n.measures.map((t, i) => e.bars[i] ?? null) : e.bars : DD(TD(n), e.bar_prints).map((t) => t === null ? null : e.bars[t] ?? null);
 }
-const LD = "0.4.5";
+const LD = "0.5.0";
 function ED(n) {
   return {
     sounds: { ...n.sounds },
@@ -23063,7 +23063,7 @@ const zD = {
       ])
     ]));
   }
-}), hO = { class: "notation-export" }, fO = ["disabled", "aria-expanded", "title"], dO = ["onKeydown"], pO = { title: "The paper of the PDF and the print" }, gO = { title: "How large the music is drawn: standard about 3 bars a line (4 pages for a song of 3-4 minutes), smaller 3-4 (3 pages), compact about 4 (2-3 pages), large 1-2 bars a line (as before 0.4.6)" }, mO = { class: "formats" }, vO = ["disabled"], yO = ["disabled"], bO = ["disabled"], xO = ["disabled"], wO = { class: "facts" }, kO = /* @__PURE__ */ Qt({
+}), hO = { class: "notation-export" }, fO = ["disabled", "aria-expanded", "title"], dO = ["onKeydown"], pO = { title: "The paper of the PDF and the print" }, gO = { title: "How large the music is drawn: standard about 3 bars a line (4 pages for a song of 3-4 minutes), smaller 3-4 (3 pages), compact about 4 (2-3 pages), large 1-2 bars a line (the biggest notes)" }, mO = { class: "formats" }, vO = ["disabled"], yO = ["disabled"], bO = ["disabled"], xO = ["disabled"], wO = { class: "facts" }, kO = /* @__PURE__ */ Qt({
   __name: "NotationExport",
   props: /* @__PURE__ */ $n({
     abc: {},

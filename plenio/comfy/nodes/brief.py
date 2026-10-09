@@ -296,7 +296,7 @@ class PlenioSongBrief(io.ComfyNode):
         lines_under_singing: bool = False,
     ) -> io.NodeOutput:
         chosen = None if template == "none" else template_library().get(template)
-        # an unknown mode stops here, with the list to choose from; 0.4.5's "simple" is read as "off"
+        # an unknown mode stops here, with the list to choose from; the pre-release name "simple" is read as "off"
         arrangement = mode_library().by_name(arrangement).name
         length_input = length
         length, length_note = resolve_length(length)

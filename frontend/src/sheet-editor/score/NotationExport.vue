@@ -84,7 +84,7 @@ async function run(kind: 'pdf' | 'png' | 'svg' | 'print'): Promise<void> {
           <option value="letter">Letter</option>
         </select>
       </label>
-      <label title="How large the music is drawn: standard about 3 bars a line (4 pages for a song of 3-4 minutes), smaller 3-4 (3 pages), compact about 4 (2-3 pages), large 1-2 bars a line (as before 0.4.6)">
+      <label title="How large the music is drawn: standard about 3 bars a line (4 pages for a song of 3-4 minutes), smaller 3-4 (3 pages), compact about 4 (2-3 pages), large 1-2 bars a line (the biggest notes)">
         size
         <select v-model="size" aria-label="Notation size">
           <option value="large">large</option>

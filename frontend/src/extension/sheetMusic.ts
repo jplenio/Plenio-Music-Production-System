@@ -20,7 +20,7 @@ export interface SheetMusicJob {
   file: string
   title: string
   paper: SheetPaper
-  /** How large the music is drawn (Export Release's *sheet music size*; ``standard`` before 0.4.6). */
+  /** How large the music is drawn (Export Release's *sheet music size*; ``standard`` when the job names none). */
   size: NotationSize
   /** The final score and lyrics (for the lines placed by hand). */
   abc: string

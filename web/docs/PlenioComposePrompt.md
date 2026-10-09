@@ -2,6 +2,7 @@
 
 Builds the writing prompt from the brief and the rules of the loaded music model: style conventions, lyrics format, section order and roughly how many lines fit the target length. Connect **prompt** to any text-generation node (the templates use the native *Generate Text*) and **request** to *Parse Song Draft*.
 
+- **brief** - the Song Brief or Cover Brief; **engine** - the loaded music model (*Engine Profile* in the model block), whose rules shape the prompt.
 - **score** (optional) - when a score is connected, the lyrics must follow its sections.
 - **detail** (advanced) - concise, standard or rich lyrics.
 
@@ -13,4 +14,4 @@ For a **Cover Brief** the prompt is written against the final score:
 
 The prompt also names the source's tempo and, when the melody lies clearly high or low, which voice fits it.
 
-**Creative modes:** when the brief's *arrangement* is not *off*, the mode's writer hints are added to the rules (for example *many instruments*: a large ensemble in the style), and for a song the *genre closeness* in words. *simple* adds nothing - the prompt is the same as before.
+**Creative modes:** when the brief's *arrangement* is not *off*, the mode's writer hints are added to the rules (for example *many instruments*: a large ensemble in the style), and for a song the *genre closeness* in words. *off* adds nothing.

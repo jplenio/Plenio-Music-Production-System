@@ -1,6 +1,6 @@
 # Creative modes
 
-The *arrangement* choice of the Song Brief and the Cover Brief. Each file is one mode; `off` is built in (no file; *simple* until 0.4.5): the music model plans the music by itself, as before.
+The *arrangement* choice of the Song Brief and the Cover Brief. Each file is one mode; `off` is built in (no file): the music model plans the music by itself.
 
 ```text
 ---

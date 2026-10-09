@@ -108,7 +108,7 @@ def test_the_shipped_modes() -> None:
         assert mode.arranges and mode.description and mode.arranger and mode.writer, name
         assert set(mode.lead) <= set(LEAD_ROLES)
     assert not LIBRARY.by_name(OFF).arranges
-    # 0.4.5 called it "simple": saved workflows and API prompts with that name still mean "off"
+    # a pre-release called it "simple": saved workflows and API prompts with that name still mean "off"
     assert LIBRARY.by_name("simple") is LIBRARY.by_name(OFF)
 
 

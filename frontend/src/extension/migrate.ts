@@ -10,8 +10,8 @@
  * *Reuse parameters* of old jobs) is cleared from the text fields here as well: the backend treats
  * it as empty with a note, and the widget should not show a word the writer never sees (plan §8.3).
  *
- * Renamed combo values are set to their new name once the node is configured (0.4.6: the briefs'
- * *arrangement* "simple" is "off"; the backend still reads the old name).
+ * Renamed combo values are set to their new name once the node is configured (0.5.0: the briefs'
+ * *arrangement* "simple" of the pre-release is "off"; the backend still reads the old name).
  */
 import type { ComfyNodeDef } from '../shared/comfy'
 import { TEXT_FIELDS, isLegacyPlaceholder, WIDGET_OF } from './briefTemplate'

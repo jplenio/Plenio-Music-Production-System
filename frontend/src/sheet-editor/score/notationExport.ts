@@ -39,7 +39,7 @@ interface SizeSpec {
 }
 
 /**
- * The notation sizes. Measured on ten sung songs, A4: *large* (the size before 0.4.6) about 1.5 bars a
+ * The notation sizes. Measured on ten sung songs, A4: *large* (the first export's size) about 1.5 bars a
  * line and 13 pages a song, *standard* 3 bars and 4 pages, *smaller* 3.3 bars and 3 pages, *compact* 3.8
  * bars and 2-3 pages; the lyrics 9.8, 5.9, 5.4 and 4.7 pt high on paper. The sung lines set the width:
  * a run of short notes needs the room of its syllables, so a closer spacing (``minSpacing`` below 1.5)

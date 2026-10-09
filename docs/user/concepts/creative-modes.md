@@ -1,12 +1,12 @@
 # Creative modes
 
-> **Experimental (0.4.5).** Creative modes and the closeness sliders can give unexpected results - a chord that surprises, an instrument line that does not fit every song, a plan that is not applied. They are meant for experimenting first: try a mode, listen, change the score in the Song Sheet or run again with another *arrangement seed*, and keep what you like. *simple* is the dependable choice.
+> **Experimental.** Creative modes and the closeness sliders can give unexpected results - a chord that surprises, an instrument line that does not fit every song, a plan that is not applied. They are meant for experimenting first: try a mode, listen, change the score in the Song Sheet or run again with another *arrangement seed*, and keep what you like. *off* is the dependable choice.
 
 ▶ **Videos:** *Tutorial 6 · YuE2 · Song · Creative modes* and *Tutorial 7 · YuE2 · Cover · Creative modes* in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE).
 
 How freely a song is written and arranged. Song Brief and Cover Brief have an **arrangement** choice:
 
-- **off** (default; called *simple* until 0.4.5 - saved workflows are read as *off*) - no arrangement, as before: the writer drafts title, style and lyrics, and the music model plans melody, chords and instruments by itself.
+- **off** (default) - no arrangement: the writer drafts title, style and lyrics, and the music model plans melody, chords and instruments by itself.
 - **a creative mode** - the mode's hints go into the writing prompt (for example *many instruments*: a large ensemble in the style), and in *YuE2 Song* and *YuE2 Cover* the writer model also plans **every section of YuE2's score**: which chords, what the instrument line plays, how busy it is, whether a section lifts its key. Plenio turns that plan into notes, checks the result and shows it in *Song Sheet · Score*.
 
 ## The modes
@@ -47,7 +47,7 @@ Your own modes are Markdown files in `<ComfyUI user directory>/plenio/arrangemen
 
 | Value | The new lyrics |
 |---|---|
-| 0 (default) | are written without the source's text, as before |
+| 0 (default) | are written without the source's text |
 | 1-29 | keep only a hint of it: one image or phrase may echo the original |
 | 30-59 | keep its theme and mood, with their own story and images |
 | 60-89 | retell its story and keep its central images, in new words |
@@ -62,7 +62,7 @@ Above 0 the source's lyrics are transcribed for the writer (the lyrics ASR runs)
 1. **Compose Arrangement** shows the writer the score as a table: every section with its bars and chords, the melody notes on the strong beats, what the instrument line plays now - the **chords that fit** each section's key in the genre (for example *B, C#m, D#m, E, F#, G#m; borrowed, typical in pop: A, Em, G*) - plus the mode's rules, the closeness in words and the exact answer format.
 2. The writer answers with a small **JSON plan** - per section the chords (one per bar), the *lead* role of the instrument line, an energy from 1 to 5, a key shift - never notes or ABC. With a Local LLM model (GGUF files, LM Studio, Ollama) the answer is held to the plan's format while it is written; other writers answer freely and Plenio reads leniently (code fences, a missing last brace, chord aliases such as *Cmaj9* -> *Cmaj7* are repaired and reported).
 3. **Apply Arrangement** writes the notes itself, with the same checked operations as *Score Tools*:
-   - **chords**, guarded (the *harmony guard*, 0.4.6): the writer's chord stands where it belongs to the section's key or to the genre's usual borrowings (a dominant only when it resolves) and carries the melody of its **whole bar** - every note, weighed by its length and beat; a note a half step above a chord tone on a strong beat or held for a beat is not allowed. Where the writer's chord does not stand, Plenio chooses per section the nearest chord that does - the original chord, the same root in another colour, or an in-key chord sharing two of its tones - and says so (*bar 3: Db is not a chord of C in pop; F instead*). A score **without chords** (a cover on *new accompaniment*) gets none: YuE2 harmonises it itself, as you chose;
+   - **chords**, guarded (the *harmony guard*): the writer's chord stands where it belongs to the section's key or to the genre's usual borrowings (a dominant only when it resolves) and carries the melody of its **whole bar** - every note, weighed by its length and beat; a note a half step above a chord tone on a strong beat or held for a beat is not allowed. Where the writer's chord does not stand, Plenio chooses per section the nearest chord that does - the original chord, the same root in another colour, or an in-key chord sharing two of its tones - and says so (*bar 3: Db is not a chord of C in pop; F instead*). A score **without chords** (a cover on *new accompaniment*) gets none: YuE2 harmonises it itself, as you chose;
    - **the instrument line** (YuE2's second voice, *Ins*): *pad*, *arpeggio*, *riff*, *countermelody*, *solo*, *octave* (the sung melody an octave away; only with lines under the singing), *motif* (the writer's figure in note names, moved onto every chord), *none*, *keep*. Every note follows the chord sounding at it. In YuE2's own scores the *Ins* voice never plays while the voice sings - it is the instrumental melody - so **by default a line plays where the voice rests**: intros, interludes, the outro and the gaps between sung phrases (fills and answers). With the brief's **lines under the singing (experimental)** it also sounds under the voice: calm (energy at most 2), below the voice and never a minor second or major seventh against it. A line that carries the melody - an instrumental with a lead - is never replaced;
    - **key lifts** - only while the voice stays in its range (at most two semitones above the song's highest note); a lift holds to the end of the song and is led in by chords - a chord of both keys and the new key's dominant (Cm - D7 -> Gm), or the new key's lowered sixth and seventh steps (Eb - F -> Gm), over the last one or two bars, as far as the melody allows;
    - the **tempo** change.
@@ -70,7 +70,7 @@ Above 0 the source's lyrics are transcribed for the writer (the lyrics ASR runs)
    **Asked once more:** where the guard had to replace more than a third of a section's chords, or the gate put a section back, the writer is asked once more about those sections - with what did not fit, the melody on the strong beats and the chords that fit their key. The second plan is used when it needs fewer repairs and clashes no more; otherwise the first stands.
 5. The result must pass YuE2's parser, read back unchanged, open note by note in the score editor and fit YuE2's context. Otherwise the score **stays as it was**, and *Song Sheet · Score* shows a warning with the reason (*Arrangement not applied - ...*).
 
-Measured on the 120 writer plans of study A1 (October 2026): with 0.4.5 the line sounded under 85 % of the singing with 5.8 clashes a minute against the voice; with the guard there are none, every chord belongs to the key or the genre, and still 87 % of the sections are arranged ([proposal](../../design/harmony-and-lyrics-fit.md)).
+Measured on the 120 writer plans of study A1 (October 2026): without the guard the line sounded under 85 % of the singing, with 5.8 clashes a minute against the voice; with it there are none, every chord belongs to the key or the genre, and still 87 % of the sections are arranged ([proposal](../../design/harmony-and-lyrics-fit.md)).
 
 The plan cannot break the score: in the tests random scores and random, partly broken plans always gave either a valid arranged score or the old one unchanged.
 

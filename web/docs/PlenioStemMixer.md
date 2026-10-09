@@ -20,6 +20,6 @@ Example:
             "rest": {"gain_db": -3}}}
 ```
 
-The mixdown is not normalised: **Plenio · Master** sets the loudness. The report lists, per strip, whether it was audible, its gain, the compressor's gain reduction, the muted time and the file written for a strip marked *save*.
+The mixdown (**audio**, at the input's rate and length) is not normalised: **Plenio · Master** sets the loudness. The report lists, per strip, whether it was audible, its gain, the compressor's gain reduction, the muted time and the file written for a strip marked *save*.
 
 On the node the value has a widget: a strip per stem plus *rest* (fader, **M**/**S**, compression, the two sends, **save**) with the **waveform of the last separation** underneath. The strips are there before the first run too (the documented stems, an empty waveform). A fader writes the value while you drag (the strip stays under the pointer); **Drag** on a waveform to mute that time range, **click** a range to remove it. Every control carries a tooltip. *Advanced* shows the raw JSON - it is the same value the widget writes.
