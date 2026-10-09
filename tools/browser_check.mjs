@@ -314,7 +314,8 @@ for (const name of names) {
 // with *sheet music* on; a page draws the PDF the export reserved, Plenio saves it next to the audio and the
 // release record lists it - at the chosen *sheet music size* (compact here). Also when another workflow is
 // open as the run ends (owner's report 2026-10-09: no PDF then), and when no page heard the run at all (a run
-// queued elsewhere): the next page that opens draws it from the list of PDFs still waiting.
+// queued elsewhere): the next page that opens draws it from the list of PDFs still waiting. A page that runs
+// older Plenio code than the server's files (updated while it was open) says to reload.
 const SHEET_SCORE = fs.readFileSync(path.join(PROJECT, 'tests', 'fixtures', 'abc', 'upstream-score.abc'), 'utf8')
 const SHEET_LYRICS = '[verse]\nMorning light on the window\nCoffee warm in my hand\n\n[chorus]\nSing it slow, let it go\nEvery road leads home'
 
@@ -431,6 +432,44 @@ const pdfOk = (outcome) => !outcome.timeout && outcome.head === '%PDF-' && outco
   const outcome = await sheetOutcome(folder, title, -1)
   const ok = !!waiting.waiting && pdfOk(outcome)
   record('Export Release', check, ok, ok ? `${outcome.bytes} bytes, ${outcome.pages} page(s)` : JSON.stringify({ waiting, outcome }) + ' ' + plenioErrors().join(' | '))
+}
+
+{
+  // owner's report 2026-10-09: Plenio was updated while the page was open - every export said "Failed to fetch
+  // dynamically imported module .../notationExport-....mjs". Here the server's entry imports another main chunk
+  // and the old notation chunk is gone: the page says to reload, and the reloaded page saves the PDF.
+  const check = "export: a page older than the server's Plenio says to reload, then saves the PDF"
+  const folder = `browser-check/sheet-music-stale-${Date.now()}`
+  const title = 'Browser Check Stale Page'
+  consoleErrors = []
+  await page.reload({ waitUntil: 'networkidle' })
+  await page.waitForFunction(() => window.app && window.app.graph, null, { timeout: 90000 })
+  const entry = '**/js/plenio.js'
+  const notation = '**/js/chunks/notationExport-*.mjs'
+  const newer = 'import { a as t } from "./chunks/main-NewerThanThisPage.mjs";\nexport { t as EXTENSION_NAME };\n'
+  await page.route(entry, (route) => route.fulfill({ contentType: 'text/javascript', body: newer }))
+  await page.route(notation, (route) => route.fulfill({ status: 404, body: 'gone' }))
+  const queued = await queueSheetExport(folder, title)
+  const waiting = await sheetOutcome(folder, title, queued, 'drawn by the browser after the export')
+  const said = await page
+    .waitForFunction(() => document.body.innerText.includes('reload the page (F5)'), null, { timeout: 30000 })
+    .then(
+      () => true,
+      () => false
+    )
+  await page.screenshot({ path: path.join(OUT, 'Export Release - stale page.png') })
+  await page.unroute(entry)
+  await page.unroute(notation)
+  await page.reload({ waitUntil: 'networkidle' })
+  await page.waitForFunction(() => window.app && window.app.graph, null, { timeout: 90000 })
+  const outcome = await sheetOutcome(folder, title, -1)
+  const ok = !!waiting.waiting && said && pdfOk(outcome)
+  record(
+    'Export Release',
+    check,
+    ok,
+    ok ? `told to reload; then ${outcome.bytes} bytes, ${outcome.pages} page(s)` : JSON.stringify({ waiting, said, outcome }) + ' ' + plenioErrors().join(' | ')
+  )
 }
 
 fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify(results, null, 1) + '\n')

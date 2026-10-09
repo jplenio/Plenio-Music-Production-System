@@ -27,6 +27,7 @@ import {
 } from './runStatus'
 import { type SheetMusicHost, type SheetMusicOutcome, SheetMusicJobs, sheetMusicJobs } from './sheetMusic'
 import { SHEET_STATE_TYPE, setFetcher, sheetStateWidget } from './sheetStateWidget'
+import { RELOAD_HINT, codeIsStale, importOrReload, loadFresh } from './staleCode'
 import { addStemMixer } from './stemMixer'
 import { installStyles } from './style'
 import { addSummaryDisplay, setSummaryLine } from './summary'
@@ -60,11 +61,18 @@ const statusHost: StatusHost = {
   toast: (summary, detail) => comfyApp.extensionManager?.toast?.add({ severity: 'info', summary, detail, life: 12000 })
 }
 
+/** This page runs older Plenio code than the files ComfyUI serves now (updated while the page was open). */
+const stale = (): Promise<boolean> => codeIsStale(import.meta.url, loadFresh)
+
 /** Export Release's sheet music: drawn here with the score editor's notation code, saved by Plenio. */
 const sheetHost: SheetMusicHost = {
   fetcher: comfyApi,
   async draw(abc, title, paper, size) {
-    const { notationPdf, renderLines } = await import('../sheet-editor/score/notationExport')
+    const { notationPdf, renderLines } = await importOrReload(
+      () => import('../sheet-editor/score/notationExport'),
+      stale,
+      'The sheet music is drawn and saved then.'
+    )
     const drawing = renderLines(abc, title, paper, size)
     try {
       if (!drawing.lines.length) throw new Error('the score has no music to draw')
@@ -202,7 +210,18 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
       sheetJobs.take(jobs)
     })
     const recover = () => void sheetJobs.recover()
-    comfyApi.addEventListener('reconnected', recover)
+    // a server restarted with another Plenio: this page's code is old - it says so once and draws nothing
+    // (a reloaded page draws the sheet music still waiting)
+    let warned = false
+    comfyApi.addEventListener('reconnected', () => {
+      void stale().then((old) => {
+        if (!old) recover()
+        else if (!warned) {
+          warned = true
+          comfyApp.extensionManager?.toast?.add({ severity: 'warn', summary: 'Plenio was updated', detail: RELOAD_HINT })
+        }
+      })
+    })
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') recover()
     })

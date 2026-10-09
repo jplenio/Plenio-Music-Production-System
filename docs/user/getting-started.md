@@ -12,6 +12,7 @@
 - **ComfyUI Manager:** *Manager → Custom Nodes Manager*, search for **Plenio Music Production System**, install, restart ComfyUI.
 - **Comfy CLI:** `comfy node install comfyui-plenio-music`.
 - **By hand:** `git clone https://github.com/jplenio/Plenio-Music-Production-System` inside `ComfyUI/custom_nodes`, then restart ComfyUI.
+- **After an update** (any of the ways above): restart ComfyUI and reload every open ComfyUI page (F5) - a page that was open keeps the old Plenio code and says so.
 
 Plenio installs no Python packages. Optional: `python -m pip install faster-whisper` (covers with lyrics), in the Python that runs ComfyUI. Cover art is embedded in FLAC and MP3 without any extra package.
 

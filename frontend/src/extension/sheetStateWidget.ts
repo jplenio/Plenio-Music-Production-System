@@ -5,6 +5,7 @@ import { DOCUMENT_KINDS, parseState, serializeState, summarize } from '../shared
 import { lyricsTargetOf, scoreTargetOf, writeLyrics, writeScore } from './lyricsOwner'
 import { getAsrNote, getPayload, onPayload } from './payloads'
 import { displayState, onRunState, runState, setRunState, sheetLine } from './runStatus'
+import { codeIsStale, importOrReload, loadFresh } from './staleCode'
 
 export const SHEET_STATE_TYPE = 'PLENIO_SHEET_STATE'
 /** The widget's layout height: the button row (28 px), the status row (18 px) and the frontend's margins. */
@@ -96,9 +97,11 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
     // 'as the brief says' is resolved by the backend: the rule of the last run applies
     const setting = String(node.widgets?.find((w) => w.name === 'review')?.value ?? 'continue')
     const review = setting === 'as the brief says' ? (payload?.review ?? 'continue') : setting
-    const { openSheetDialog } = await import('../sheet-editor/open')
-    const { parseGuide, serializeGuide } = await import('../sheet-editor/score/tracks')
-    const { parseShift, parseSpans } = await import('../sheet-editor/score/lyricPlacement')
+    // chunks loaded on demand: when this page runs older code than the server's, the error says to reload
+    const stale = () => codeIsStale(import.meta.url, loadFresh)
+    const { openSheetDialog } = await importOrReload(() => import('../sheet-editor/open'), stale)
+    const { parseGuide, serializeGuide } = await importOrReload(() => import('../sheet-editor/score/tracks'), stale)
+    const { parseShift, parseSpans } = await importOrReload(() => import('../sheet-editor/score/lyricPlacement'), stale)
     if (!fetcher) throw new Error('Plenio: API not initialised')
     // the lyrics of Song Sheet · Text follow this score's sections (templates 1 and 5); when the graph
     // cannot say where they come from, the editor opens without that (the lyrics are then not written back)

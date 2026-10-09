@@ -65,3 +65,4 @@ The writer model can plan the arrangement: **creative modes** for songs and cove
 - **Score editor: a selection frame that scrolled the roll lost its notes** and took the chord symbols instead.
 - **Cancelling the lyrics ASR on Windows** left its job folder in the temp directory when ComfyUI runs in a venv (its `python.exe` is a launcher; the interpreter ends a moment later).
 - The steps that only improve a song - *Match Song Form*, *Apply Arrangement*, *Fit Lyrics* - pass their input on with a warning after an unexpected error instead of stopping the run.
+- **A ComfyUI page left open while Plenio was updated** keeps the old Plenio code, whose files are gone: every export said *Failed to fetch dynamically imported module* and the Song Sheet editor did not open. The page now finds out and says to reload it (F5); the sheet music still waiting is saved then.
