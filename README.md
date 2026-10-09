@@ -281,7 +281,6 @@ Plenio is the successor of the [Music Production Toolkit](https://github.com/jpl
 
 - YuE2 sometimes renders a take to the length ceiling and stops mid-phrase; render another take. *Instrumental* is a strong request, not a guarantee: the optional *Check Vocals* measures the take and keeps the cleanest one.
 - The ASR can mishear words. A cover shows unsure words highlighted so you can correct them before rendering.
-- SheetSage2 reads one 300-second window at a time; on 16 GB cards, trim longer sources.
 - Mastering is whole-song loudness with a gentle tone match. There is no restoration, no fades and no multiband processing.
 - **Stems** and **Refine** are experimental: their guarantees (a neutral mix returns the input, solo/mute rules, bandwidth before/after, no normalisation) are tested, but how the models *sound* is decided by the owner's listening checks (L1/L2), not yet done. On the two real takes measured so far, Refine's bandwidth rule counts both as full band: the model runs, but only the content above the crossover changes - see the [status](docs/design/CURRENT_STATUS.md) §5.
 

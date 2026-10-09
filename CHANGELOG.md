@@ -4,7 +4,7 @@ All notable changes of the current version and the one before. Versions follow s
 
 ## 0.5.1 - 2026-10-09
 
-The stems you save in the Stem Mixer now stay with their song.
+Covers of songs longer than 5:00 work on a 16 GB card, and the stems you save in the Stem Mixer stay with their song.
 
 ### Changed
 
@@ -12,6 +12,7 @@ The stems you save in the Stem Mixer now stay with their song.
 
 ### Fixed
 
+- **Covers of songs longer than 5:00** (owner's report): *Transcribe Score* refused a source of 5:15 on a 16 GB card ("needs a second pass, which does not fit this GPU"). That limit came from a measurement without inference mode; run as ComfyUI runs its nodes, SheetSage2 reads a 5:16 song - two 300-second windows - in under 40 s with about 2 GB of GPU memory, with the full beat grid for the lyrics. The node no longer refuses long sources.
 - The release record's schema (`resources/schemas/record-1.schema.json`) knows the sheet music (its `sheet_music` entry, the PDF among the files) and the stems (`role`: `sheet_music`, `stem`): a record with sheet music did not pass it. All 408 records of the owner's songs pass it now.
 
 ## 0.5.0 - 2026-10-09

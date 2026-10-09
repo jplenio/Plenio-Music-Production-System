@@ -50,7 +50,7 @@ Start with **0 · System Check**: it shows versions, GPUs, which model files of 
 | *Unknown creative mode 'x'* | a mode file was renamed, removed or has a mistake | Choose one from the list (press R after adding a file); a file with a mistake is named in the ComfyUI log |
 | *No reliable singing was found* with new cover lyrics | *lyrics closeness* above 0 (or the phrasing reference) needs the source's words | Set *lyrics closeness* to 0 and the phrasing reference off, or trim the source to its sung part |
 | **Out of memory** while rendering | the GPU is too small for the defaults | Follow the System Check's rule table (smaller files, [Models](models.md)); MiniMax: turn on *tiled decode* in MiniMax Render; keep songs short |
-| SheetSage2 runs out of memory on a long source | long sources need a lot of VRAM | Use the optional *Excerpt* node (up to 5:00 is supported) |
+| SheetSage2 runs out of memory | another program or model holds the GPU memory (SheetSage2 itself needs about 2 GB, also for songs longer than 5:00) | Free the GPU and run again, or cover a part with the optional *Excerpt* node |
 | The take ends early or stops mid-phrase | the model may stop before the ceiling, or run to it | Render another take (new take seed); for instrumental covers use several *takes* |
 | A voice appears in an instrumental | instrumental audio is measured, not guaranteed | See [Instrumental](concepts/instrumental.md); in covers *Check Vocals* keeps the best take |
 

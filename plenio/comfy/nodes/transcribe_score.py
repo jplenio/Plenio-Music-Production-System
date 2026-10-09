@@ -17,10 +17,6 @@ from ...core.timefmt import clock as _clock
 from .. import host
 from ..types import ReportType, TimelineType
 
-LONG_SOURCE_VRAM_BYTES = 24 * 2**30
-"""Sources longer than one native SheetSage2 window (300 s) need a second window; on the owner's
-16 GB card that ran out of memory (Phase 4A E3). Larger cards are allowed to try."""
-
 
 def _bar_prints(abc: str) -> tuple[tuple[str, str], ...]:
     """The content of every transcribed bar, so an arranged score finds its source bars (none outside the subset)."""
@@ -72,13 +68,8 @@ class PlenioTranscribeScore(io.ComfyNode):
         warnings: list[str] = []
         if host.audio_batch(audio) > 1:
             warnings.append(f"the audio has {host.audio_batch(audio)} items; only the first is transcribed")
-        total = host.gpu_total_bytes()
-        if seconds > host.SHEETSAGE_WINDOW_S and total is not None and total < LONG_SOURCE_VRAM_BYTES:
-            raise PlenioUserError(
-                f"The source is {_clock(seconds)} long. SheetSage2 transcribes up to 5:00 in one pass; longer audio "
-                f"needs a second pass, which does not fit this GPU ({total / 2**30:.0f} GB).",
-                hint="Trim the source with Trim Audio Duration (for example one cover per part of the song) and run again.",
-            )
+        # no length limit (owner's report 2026-10-09: a 5:15 source was refused on a 16 GB card): run as
+        # ComfyUI runs nodes, without autograd, SheetSage2 reads a 5:16 song - two 300-s windows - with 1.9 GiB
         try:
             result = host.sheetsage_transcribe(audio_encoder, audio)
         except Exception as error:

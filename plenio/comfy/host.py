@@ -487,17 +487,6 @@ def sheetsage_transcribe(encoder: Any, audio: Any) -> dict[str, Any]:
     }
 
 
-def gpu_total_bytes() -> int | None:
-    try:
-        import torch
-
-        if torch.cuda.is_available():
-            return int(torch.cuda.get_device_properties(torch.cuda.current_device()).total_memory)
-    except (ImportError, RuntimeError):
-        return None
-    return None
-
-
 def is_out_of_memory(error: BaseException) -> bool:
     try:
         import torch

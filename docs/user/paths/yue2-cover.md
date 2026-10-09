@@ -15,7 +15,7 @@ Source -> (Excerpt) -> Transcribe Score -> Score Tools -> Arrange -> Song Sheet 
 ## Quick start
 
 1. Open **2 · YuE2 · Cover** from the template browser.
-2. Upload the source in **Source recording**. Up to 5:00 is transcribed in one pass; for longer songs enable **Excerpt** (Trim Audio Duration) and cover one part at a time.
+2. Upload the source in **Source recording**. SheetSage2 reads it in windows of 5:00 (a 5:16 song takes about 20 s and 2 GB of GPU memory); with **Excerpt** (Trim Audio Duration) you cover one part of a song.
 3. In **Cover Brief** choose the **mode** (below; the default *one cover, stop to review* is described here), the target style and the **vocals**: *instrumental*, *original lyrics* or *new lyrics*. **harmony**: *new accompaniment* (YuE2 re-harmonises) or *keep original chords*. Both review stops show the **source recording** under the score - its waveform in the roll, the **sung pitch** of its vocals as a curve over the notes (node *Sung Pitch*, in group 3 · SCORE: it separates the vocals with the Stems model once per source, about half the song's length on a 16 GB card) and *hear: both* to play it together with the transcribed notes, bar by bar (A/B switches at once) - so you can check notes and words against the original. The template starts with the style template *pop/dance-pop-vocal* (genre and mood left empty, so they come from it), *original lyrics* with the language detected from the singing, and *keep original chords*.
 4. Press **Run**. SheetSage2 transcribes the source; the run **stops at Song Sheet · Score**. Open it, check the score - above all the section names and boundaries, because the lyrics follow them - and press **Approve**.
 5. Run again. The lyrics are drafted and the run **stops at Song Sheet · Text**. Check and correct the lyrics (your text always wins), then **Approve**. Its score tab shows the score with the lyrics over the notes, and you can still **edit the score there**. Apply or Approve writes it into Song Sheet · Score and keeps the lyrics as you see them (*manual*), so the two stay a pair. Approve also approves the changed score, so the next run renders without stopping again.
@@ -94,7 +94,6 @@ Switch **Graph / App** at the top left for a simple form: the source file, the m
 
 ## Limits
 
-- Sources longer than 5:00 need a second SheetSage2 pass that does not fit a 16 GB card: trim them.
 - The original-lyrics ASR is a draft. It can mishear words, merge lines, and invent short phrases at the end of a passage; Plenio removes the typical inventions and shows unsure words, but read the lyrics before approving.
 - A take can end while the music still plays; Check Vocals reports it (Master does not fade out yet).
 - The Song Sheet editor's section table shows the source's times; playing a section is not built in yet.
