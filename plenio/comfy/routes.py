@@ -401,6 +401,12 @@ async def export_sheet_music(request: web.Request) -> web.StreamResponse:
     return web.json_response({"file": facts["name"], "bytes": facts["bytes"]})
 
 
+async def export_sheet_music_pending(request: web.Request) -> web.StreamResponse:
+    """The sheet music PDFs still waiting for a page to draw them (a page asks when it opens, comes back to the
+    front or reconnects: the run may have ended while it was closed or showed another workflow)."""
+    return web.json_response({"jobs": JOBS.pending()})
+
+
 ROUTES: tuple[tuple[str, str, Handler], ...] = (
     ("GET", "/plenio/system", system),
     ("POST", "/plenio/score/analyze", score_analyze),
@@ -418,6 +424,7 @@ ROUTES: tuple[tuple[str, str, Handler], ...] = (
     ("GET", "/plenio/presets/{kind}", presets),
     ("POST", "/plenio/eq/response", eq_response),
     ("POST", "/plenio/export/sheet-music", export_sheet_music),
+    ("GET", "/plenio/export/sheet-music/pending", export_sheet_music_pending),
 )
 
 

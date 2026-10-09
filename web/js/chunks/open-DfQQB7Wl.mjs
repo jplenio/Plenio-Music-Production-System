@@ -1,5 +1,6 @@
-import { a as Zv, P as Jd, b as Qv, t as ey, i as ty, T as el, d as ny, s as pl, f as iy, l as gl, p as sy, c as oy, e as ry, g as ly, h as ay, j as uy, k as cy, m as ph, n as hy, o as fy, I as Zd, q as ml, r as dy, u as py, v as gy, w as my, x as vy, y as Qd, z as yy, R as by, A as xy, S as wy, B as ky, N as Sy, C as Cy, D as tl, E as gh, F as My, G as mh, H as Ay, J as Ty, K as nl, L as vh, M as $y, O as Cr, Q as yh, U as Dy, V as Oy, W as Ly, X as Ey, Y as By, Z as bn, _ as Iy, $ as Ry, a0 as bh, a1 as Py, a2 as _y, a3 as Ma, a4 as xh, a5 as wh, a6 as Ny, a7 as Vy, a8 as kh, a9 as Sh, aa as Aa, ab as Hy, ac as Fy, ad as Ch, ae as zy, af as Mh } from "./main-3gUbJ4yL.mjs";
-import { a as Wy, r as Ky, n as Uy, e as Ta, b as jy, s as Gy, p as qy } from "./notationExport-D-CL96aB.mjs";
+import { a as Zv, P as Jd, b as Qv, t as ey, i as ty, T as el, d as ny, s as pl, f as iy, p as sy, c as oy, e as ry, g as ly, h as ay, j as uy, k as cy, l as ph, m as hy, n as fy, I as Zd, o as gl, q as dy, r as py, u as gy, v as my, w as vy, x as yy, R as by, y as xy, S as wy, z as ky, N as Sy, A as Cy, B as tl, C as gh, D as My, E as mh, F as Ay, G as Ty, H as $y, J as bn, K as Dy, L as Oy, M as vh, O as Ly, Q as Ey, U as Ma, V as yh, W as bh, X as By, Y as Iy, Z as xh, _ as wh, $ as Aa, a0 as Ry, a1 as Py, a2 as kh, a3 as _y, a4 as Sh } from "./main-Bn0Z0Mwj.mjs";
+import { a as Ny, r as Vy, n as Hy, e as Ta, b as Fy, s as zy, p as Wy } from "./notationExport-DkCMgjck.mjs";
+import { lineKey as ml, parseSpans as Qd, sameSpans as nl, clipOfLines as Ch, sectionAt as Ky, sectionRange as Cr, placedLines as Mh, settle as Uy, withSectionSpans as jy, parseLineKey as Gy, remapSpans as qy } from "./lyricPlacement-lv7ThC8m.mjs";
 import { notesLabel as Yy, trackRows as Xy, parseGuide as Jy, sameGuide as Co, remapGuide as Zy, guideNotes as Qy } from "./tracks-DxmZeggM.mjs";
 // @__NO_SIDE_EFFECTS__
 function dc(n) {
@@ -20017,7 +20018,7 @@ const NM = {
       try {
         const E = getComputedStyle(O).color || "#dddddd";
         h = O.clientWidth;
-        const B = Wy.renderAbc(O, L, {
+        const B = Ny.renderAbc(O, L, {
           add_classes: !0,
           responsive: "resize",
           scale: i.zoom,
@@ -20492,7 +20493,7 @@ const kA = ["aria-label"], SA = {
       if (!k || !A) return [];
       const T = A.sections.flatMap(
         (q) => q.lines.filter((ve) => ve.text).map((ve) => {
-          const Ee = gl(q.section, ve.line), [je, ot] = I(Ee, ve.start, ve.end);
+          const Ee = ml(q.section, ve.line), [je, ot] = I(Ee, ve.start, ve.end);
           return { ...ve, start: je, end: ot, section: q.section, key: Ee };
         })
       ).sort((q, ve) => q.start - ve.start || q.line - ve.line), Q = new Set(o.value);
@@ -20509,7 +20510,7 @@ const kA = ["aria-label"], SA = {
     }
     function ie(k) {
       const A = [];
-      for (const T of i.lyrics?.sections.flatMap((Q) => Q.lines.map((q) => ({ ...q, key: gl(Q.section, q.line) }))) ?? []) {
+      for (const T of i.lyrics?.sections.flatMap((Q) => Q.lines.map((q) => ({ ...q, key: ml(Q.section, q.line) }))) ?? []) {
         if (!(k.kind === "move" ? k.keys.includes(T.key) : T.key === k.key)) continue;
         const q = Math.max(T.end, T.start + 1);
         let ve = [T.start, q];
@@ -22544,8 +22545,8 @@ const PT = {
             (w(!0), M(me, null, Be(V(Zd), (g) => (w(), M("option", {
               key: g,
               value: g,
-              title: V(ml)[g].hint
-            }, F(V(ml)[g].label), 9, hD))), 128))
+              title: V(gl)[g].hint
+            }, F(V(gl)[g].label), 9, hD))), 128))
           ], 40, cD)) : ee("", !0),
           p("label", {
             class: "play",
@@ -23086,14 +23087,14 @@ const zD = {
       l.value = !0, await new Promise((d) => setTimeout(d, 20));
       let f = null;
       try {
-        f = Ky(t.abc, t.title, i.value, s.value);
+        f = Vy(t.abc, t.title, i.value, s.value);
         const { lines: d } = f;
         if (!d.length) throw new Error("the score has no music to draw");
         const g = i.value === "a4" ? "A4" : "Letter";
         if (h === "pdf") {
-          const v = await Uy(d, i.value, t.title);
+          const v = await Hy(d, i.value, t.title);
           Ys(Ta(t.title, "pdf"), v, "application/pdf"), o("done", `exported the notation as PDF (${g})`);
-        } else h === "png" ? (Ys(Ta(t.title, "png"), await jy(d), "image/png"), o("done", "exported the notation as PNG")) : h === "svg" ? (Ys(Ta(t.title, "svg"), new TextEncoder().encode(Gy(d)), "image/svg+xml"), o("done", "exported the notation as SVG")) : (qy(d, i.value, t.title), o("done", `printing the notation (${g}) - the browser’s dialog also saves a vector PDF`));
+        } else h === "png" ? (Ys(Ta(t.title, "png"), await Fy(d), "image/png"), o("done", "exported the notation as PNG")) : h === "svg" ? (Ys(Ta(t.title, "svg"), new TextEncoder().encode(zy(d)), "image/svg+xml"), o("done", "exported the notation as SVG")) : (Wy(d, i.value, t.title), o("done", `printing the notation (${g}) - the browser’s dialog also saves a vector PDF`));
         u();
       } catch (d) {
         o("failed", `The notation could not be exported: ${d instanceof Error ? d.message : String(d)}`);
@@ -23344,8 +23345,8 @@ const zD = {
             (w(!0), M(me, null, Be(V(Zd), (j) => (w(), M("option", {
               key: j,
               value: j,
-              title: V(ml)[j].hint
-            }, F(V(ml)[j].label), 9, HO))), 128))
+              title: V(gl)[j].hint
+            }, F(V(gl)[j].label), 9, HO))), 128))
           ], 40, VO),
           p("button", {
             title: `Hear the ${re} track’s sound`,
@@ -23810,7 +23811,7 @@ const n4 = {
         }
         const Se = X();
         if (Se.length && y.time_map?.length) {
-          const bt = Ey(Se, y.time_map);
+          const bt = qy(Se, y.time_map);
           nl(bt, Se) || (Ae(bt), R.spans = [...Se], ue.spans = bt);
         }
         const Qe = o.value, Ue = ce.value?.model, tt = y.analysis.model;
@@ -23844,7 +23845,7 @@ const n4 = {
       return y.sounds && C.push("sounds"), y.metronome !== void 0 && C.push(`metronome ${y.metronome ? "on" : "off"}`), y.hear && C.push(`hear ${y.hear}`), (y.wave !== void 0 || y.sung !== void 0) && C.push("the source view"), y.record && C.push("recording"), y.paper && C.push(`paper ${y.paper === "a4" ? "A4" : "Letter"}`), y.notationSize && C.push(`notation ${y.notationSize}`), C.length ? `${C.join(", ")} set` : "nothing to set";
     }
     const K = N(() => c.value.sounds[E.value === "vocal" ? "Vocal" : "Ins"]);
-    Ge(c, (y) => By(y), { deep: !0 });
+    Ge(c, (y) => $y(y), { deep: !0 });
     const re = GO();
     re.selected.value = c.value.midiInput, Ge(re.selected, (y) => c.value = { ...c.value, midiInput: y });
     const j = N({
@@ -23967,7 +23968,7 @@ const n4 = {
       for (const bt of [...new Set(y)].sort((En, Sr) => En - Sr)) {
         const En = Te(bt);
         if (En === null) continue;
-        const Sr = Cr(ue, bt), Sa = Dy(C(bt, yh(ue, xe, bt, En)), Sr), dh = Sa.map((rs) => rs.text);
+        const Sr = Cr(ue, bt), Sa = Uy(C(bt, Mh(ue, xe, bt, En)), Sr), dh = Sa.map((rs) => rs.text);
         if (o.value) o.value = SD(o.value, ue, bt, dh);
         else if (r.value !== null) {
           const rs = xe.sections.find((Ca) => Ca.section === bt)?.block;
@@ -23975,15 +23976,15 @@ const n4 = {
           r.value = kD(r.value, rs, dh);
         } else continue;
         Sa.forEach((rs, Ca) => {
-          rs.id.startsWith("*") && Ue.push(gl(bt, Ca));
-        }), Qe = Oy(Qe, Sr, Sa), tt = !0;
+          rs.id.startsWith("*") && Ue.push(ml(bt, Ca));
+        }), Qe = jy(Qe, Sr, Sa), tt = !0;
       }
       return tt ? (Ae(Qe), u.recordSide(R, Se, ie()), Ue) : [];
     }
     function We(y) {
       const C = /* @__PURE__ */ new Map();
       for (const R of y) {
-        const ue = Ly(R);
+        const ue = Gy(R);
         ue && (C.has(ue.section) || C.set(ue.section, /* @__PURE__ */ new Set()), C.get(ue.section)?.add(ue.line));
       }
       return C;
@@ -23993,7 +23994,7 @@ const n4 = {
       fe.value = Fe(
         [...We(y.map((ue) => ue.key)).keys()],
         (ue, xe) => xe.map((Se, Qe) => {
-          const Ue = C.get(gl(ue, Qe));
+          const Ue = C.get(ml(ue, Qe));
           return Ue ? { ...Se, id: `*${Se.id}`, start: Ue.start, end: Ue.end } : Se;
         }),
         `lyrics: ${R === 1 ? "line" : `${R} lines`} placed`
@@ -24013,20 +24014,20 @@ const n4 = {
       const R = [];
       for (const [ue, xe] of We(fe.value)) {
         const Se = Te(ue);
-        Se && yh(y, C, ue, Se).forEach((Qe, Ue) => {
+        Se && Mh(y, C, ue, Se).forEach((Qe, Ue) => {
           xe.has(Ue) && R.push(Qe);
         });
       }
       return R;
     }
     function Pt() {
-      const y = ne.value ? RT(ne.value.unit, vh(pt())) : null;
+      const y = ne.value ? RT(ne.value.unit, Ch(pt())) : null;
       return y ? (_i.value = y, u.error = null, u.notes = [`copied ${y.label} - Ctrl+V pastes them at the cursor`], !0) : !1;
     }
     function st(y, C, R) {
       const ue = ne.value;
       if (!ue) return;
-      const xe = $y(ue, C);
+      const xe = Ky(ue, C);
       if (xe < 0 || Te(xe) === null) {
         u.error = "The cursor is in a section without lyrics: set it into a section that has a lyrics block.";
         return;
@@ -24058,7 +24059,7 @@ const n4 = {
         const R = pt();
         if (R.length) {
           const ue = Math.max(...R.map((xe) => xe.end));
-          st(vh(R), ue, `lyrics: ${R.length === 1 ? "line" : `${R.length} lines`} duplicated`);
+          st(Ch(R), ue, `lyrics: ${R.length === 1 ? "line" : `${R.length} lines`} duplicated`);
         }
       }
       return !0;
@@ -24102,7 +24103,7 @@ const n4 = {
     const _t = N({
       get: () => c.value.metronome,
       set: (y) => c.value = { ...c.value, metronome: y }
-    }), vn = N(() => t.payload?.reference_audio ? Iy(t.fetcher, t.payload.reference_audio) : null), Mt = /* @__PURE__ */ Fs(null), is = /* @__PURE__ */ G(null);
+    }), vn = N(() => t.payload?.reference_audio ? Dy(t.fetcher, t.payload.reference_audio) : null), Mt = /* @__PURE__ */ Fs(null), is = /* @__PURE__ */ G(null);
     Ge(
       vn,
       (y) => {
@@ -24276,7 +24277,7 @@ const n4 = {
     function je(y) {
       y.preventDefault();
       const C = c.value.notationShare, ue = y.currentTarget.parentElement?.clientHeight ?? 0;
-      tl(y, ({ dy: xe }) => c.value = { ...c.value, notationShare: Ry(C, xe, ue) });
+      tl(y, ({ dy: xe }) => c.value = { ...c.value, notationShare: Oy(C, xe, ue) });
     }
     function ot(y) {
       const C = y.key === "ArrowDown" ? 0.03 : y.key === "ArrowUp" ? -0.03 : 0;
@@ -25032,7 +25033,7 @@ const n4 = {
       lyrics: "Lyrics",
       score: "Score (ABC)",
       artwork_prompt: "Artwork prompt"
-    }, l = { title: 1, style: 3, lyrics: 16, score: 18, artwork_prompt: 3 }, a = N(() => t.payload?.style_label === "caption"), u = N(() => ({ ...r, style: a.value ? "Caption" : "Style" })), c = (W) => W === "style" && a.value ? "Caption" : o[W], h = (W) => W === "style" && a.value ? 14 : l[W], f = /* @__PURE__ */ ms(bh(t.state, t.payload, t.owned)), d = /* @__PURE__ */ G(t.payload), g = /* @__PURE__ */ G(null), v = /* @__PURE__ */ G(!1), m = /* @__PURE__ */ G(!1), b = /* @__PURE__ */ G(null), O = N(() => {
+    }, l = { title: 1, style: 3, lyrics: 16, score: 18, artwork_prompt: 3 }, a = N(() => t.payload?.style_label === "caption"), u = N(() => ({ ...r, style: a.value ? "Caption" : "Style" })), c = (W) => W === "style" && a.value ? "Caption" : o[W], h = (W) => W === "style" && a.value ? 14 : l[W], f = /* @__PURE__ */ ms(vh(t.state, t.payload, t.owned)), d = /* @__PURE__ */ G(t.payload), g = /* @__PURE__ */ G(null), v = /* @__PURE__ */ G(!1), m = /* @__PURE__ */ G(!1), b = /* @__PURE__ */ G(null), O = N(() => {
       const W = f.find((ae) => ae.kind === "score"), le = b.value;
       return W && le?.reason && le.text === W.text ? le.reason : null;
     }), L = /* @__PURE__ */ G(null), E = /* @__PURE__ */ G(0);
@@ -25059,7 +25060,7 @@ const n4 = {
       () => f.find((W) => W.kind === "lyrics")?.text ?? t.payload?.context?.lyrics ?? null
     ), ct = N(
       () => f.find((W) => W.kind === "title")?.text ?? t.payload?.context?.title ?? null
-    ), be = N(() => Hy(t.payload?.timeline)), Ie = N(() => {
+    ), be = N(() => Ry(t.payload?.timeline)), Ie = N(() => {
       const W = t.asrNote ?? L.value;
       return W && W.draft_sha256 === ce("lyrics")?.upstream_sha256 ? W : null;
     }), se = (W) => f1(pe(W.kind) ?? "", W.text);
@@ -25090,11 +25091,11 @@ const n4 = {
       W.intent === "auto" && (W.intent = "keep");
     }
     function $() {
-      bh(t.state, t.payload, t.owned).forEach((le, ae) => Object.assign(f[ae], le)), H.value = [...t.guide ?? []], ie.value = [...t.lyricSpans ?? []], X.value = t.sourceShift ?? 0, P.text = z.value ?? "", E.value++;
+      vh(t.state, t.payload, t.owned).forEach((le, ae) => Object.assign(f[ae], le)), H.value = [...t.guide ?? []], ie.value = [...t.lyricSpans ?? []], X.value = t.sourceShift ?? 0, P.text = z.value ?? "", E.value++;
     }
     const I = N(
       () => f.filter((W) => He(W.kind) && W.intent === "keep").map((W) => W.kind)
-    ), _ = N(() => Fy(t.state, t.payload, f)), H = /* @__PURE__ */ G([...t.guide ?? []]);
+    ), _ = N(() => Py(t.state, t.payload, f)), H = /* @__PURE__ */ G([...t.guide ?? []]);
     function he(W) {
       H.value = W;
     }
@@ -25123,11 +25124,11 @@ const n4 = {
       W && W.intent === "keep" && (W.intent = "manual");
     }
     const Pt = N(
-      () => Ch(_.value) !== Ch(t.state) || !Co(H.value, t.guide ?? []) || !nl(ie.value, t.lyricSpans ?? []) || X.value !== (t.sourceShift ?? 0) || Ke.value !== null || j.value !== null
+      () => kh(_.value) !== kh(t.state) || !Co(H.value, t.guide ?? []) || !nl(ie.value, t.lyricSpans ?? []) || X.value !== (t.sourceShift ?? 0) || Ke.value !== null || j.value !== null
     ), st = N(() => {
       const W = t.payload?.arrangement;
       return W && W.status !== "skipped" ? W : null;
-    }), mn = N(() => zy(st.value?.notes ?? [])), Un = N(() => (d.value?.findings ?? []).filter((W) => W.severity !== "info")), Ot = N(() => (d.value?.findings ?? []).filter((W) => W.severity === "info")), _t = N(() => Un.value.some((W) => W.severity === "error")), vn = N(
+    }), mn = N(() => _y(st.value?.notes ?? [])), Un = N(() => (d.value?.findings ?? []).filter((W) => W.severity !== "info")), Ot = N(() => (d.value?.findings ?? []).filter((W) => W.severity === "info")), _t = N(() => Un.value.some((W) => W.severity === "error")), vn = N(
       () => !v.value && !_t.value && !I.value.length && !O.value && !re.value && !!d.value?.fingerprint
     ), Mt = N(
       () => I.value.length ? "Resolve the conflicts first." : O.value ?? re.value
@@ -25136,9 +25137,9 @@ const n4 = {
       if (t.payload) {
         v.value = !0, g.value = null;
         try {
-          d.value = await Ny(t.fetcher, {
+          d.value = await By(t.fetcher, {
             sheet_state: _.value,
-            upstream: Vy(t.payload),
+            upstream: Iy(t.payload),
             owned: t.owned,
             review: t.review,
             engine: t.payload.engine,
@@ -25168,7 +25169,7 @@ const n4 = {
     function Ds() {
       Mt.value || (pt(), D(), i(
         "apply",
-        kh(_.value, t.state.review?.approved_fingerprint ?? null),
+        xh(_.value, t.state.review?.approved_fingerprint ?? null),
         H.value,
         Ke.value,
         ss(!1),
@@ -25179,7 +25180,7 @@ const n4 = {
     async function Ft() {
       pt(), D(), await Ln(), vn.value && i(
         "apply",
-        kh(_.value, d.value?.fingerprint ?? null),
+        xh(_.value, d.value?.fingerprint ?? null),
         H.value,
         Ke.value,
         ss(!0),
@@ -25190,17 +25191,17 @@ const n4 = {
     function Li() {
       Pt.value ? m.value = !0 : i("close");
     }
-    const Ze = /* @__PURE__ */ ms(Py()), jn = /* @__PURE__ */ ms({ width: window.innerWidth, height: window.innerHeight }), fo = N(() => {
-      const W = Ze.maximized ? jn.height - 2 * Mh : Ze.height;
+    const Ze = /* @__PURE__ */ ms(Ly()), jn = /* @__PURE__ */ ms({ width: window.innerWidth, height: window.innerHeight }), fo = N(() => {
+      const W = Ze.maximized ? jn.height - 2 * Sh : Ze.height;
       return Ze.maximized ? {
-        width: `${jn.width - 2 * Mh}px`,
+        width: `${jn.width - 2 * Sh}px`,
         height: `${W}px`,
         "--plenio-dialog-h": `${W}px`
       } : { width: `${Ze.width}px`, height: `${Ze.height}px`, "--plenio-dialog-h": `${W}px` };
     });
     function os() {
       jn.width = window.innerWidth, jn.height = window.innerHeight;
-      const W = Sh({ width: Ze.width, height: Ze.height }, jn);
+      const W = wh({ width: Ze.width, height: Ze.height }, jn);
       (W.width !== Ze.width || W.height !== Ze.height) && (Ze.width = W.width, Ze.height = W.height, Aa(Ze));
     }
     function di() {
@@ -25212,7 +25213,7 @@ const n4 = {
       tl(
         W,
         ({ dx: ae, dy: Me }) => {
-          const Gt = Sh(
+          const Gt = wh(
             { width: le.width + ae, height: le.height + Me },
             { width: window.innerWidth, height: window.innerHeight }
           );
@@ -25227,7 +25228,7 @@ const n4 = {
     return dr(() => {
       window.addEventListener("keydown", yn), window.addEventListener("resize", os), t.payload && Ln();
       const W = ce("lyrics")?.upstream_sha256;
-      !t.asrNote && W && _y(t.fetcher, W).then((le) => L.value = le).catch(() => {
+      !t.asrNote && W && Ey(t.fetcher, W).then((le) => L.value = le).catch(() => {
       });
     }), $i(() => {
       window.removeEventListener("keydown", yn), window.removeEventListener("resize", os), clearTimeout(B);
@@ -25483,7 +25484,7 @@ const n4 = {
                 class: "experimental",
                 title: V(Ma)
               }, "experimental", 8, OL),
-              ye(" - " + F(V(xh)(st.value)) + ": " + F(st.value.summary.replace(/^not applied: /, "")), 1)
+              ye(" - " + F(V(yh)(st.value)) + ": " + F(st.value.summary.replace(/^not applied: /, "")), 1)
             ])) : (w(), M("details", LL, [
               p("summary", null, [
                 le[19] || (le[19] = p("strong", null, "Arrangement", -1)),
@@ -25491,10 +25492,10 @@ const n4 = {
                   class: "experimental",
                   title: V(Ma)
                 }, "experimental", 8, EL),
-                ye(" " + F(V(xh)(st.value)) + ": " + F(st.value.summary), 1)
+                ye(" " + F(V(yh)(st.value)) + ": " + F(st.value.summary), 1)
               ]),
               p("p", BL, F(V(Ma)), 1),
-              V(wh)(st.value) ? (w(), M("p", IL, F(V(wh)(st.value)), 1)) : ee("", !0),
+              V(bh)(st.value) ? (w(), M("p", IL, F(V(bh)(st.value)), 1)) : ee("", !0),
               st.value.idea ? (w(), M("p", RL, F(st.value.idea), 1)) : ee("", !0),
               p("ul", null, [
                 (w(!0), M(me, null, Be(st.value.sections ?? [], (ae) => (w(), M("li", {
@@ -25572,7 +25573,7 @@ function XL() {
   const n = document.createElement("style");
   n.id = "plenio-dialog-styles", n.textContent = u1, document.head.append(n);
 }
-function nE(n) {
+function iE(n) {
   XL();
   const e = document.createElement("div");
   document.body.append(e);
@@ -25600,5 +25601,5 @@ function nE(n) {
   return i.mount(e), t;
 }
 export {
-  nE as openSheetDialog
+  iE as openSheetDialog
 };

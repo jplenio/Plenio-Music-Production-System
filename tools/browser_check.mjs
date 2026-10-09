@@ -311,16 +311,16 @@ for (const name of names) {
 }
 
 // 7. sheet music (Export Release, owner's request 2026-10-08): a run started from this page exports a song
-// with *sheet music* on; this page draws the PDF the export reserved, Plenio saves it next to the audio
-// and the release record lists it - at the chosen *sheet music size* (compact here)
-{
-  const check = 'export: the sheet music PDF is saved next to the audio'
-  const folder = `browser-check/sheet-music-${Date.now()}`
-  const score = fs.readFileSync(path.join(PROJECT, 'tests', 'fixtures', 'abc', 'upstream-score.abc'), 'utf8')
-  const lyrics = '[verse]\nMorning light on the window\nCoffee warm in my hand\n\n[chorus]\nSing it slow, let it go\nEvery road leads home'
-  const title = 'Browser Check Sheet'
-  consoleErrors = []
-  const queued = await page.evaluate(async ([folder, score, lyrics, title]) => {
+// with *sheet music* on; a page draws the PDF the export reserved, Plenio saves it next to the audio and the
+// release record lists it - at the chosen *sheet music size* (compact here). Also when another workflow is
+// open as the run ends (owner's report 2026-10-09: no PDF then), and when no page heard the run at all (a run
+// queued elsewhere): the next page that opens draws it from the list of PDFs still waiting.
+const SHEET_SCORE = fs.readFileSync(path.join(PROJECT, 'tests', 'fixtures', 'abc', 'upstream-score.abc'), 'utf8')
+const SHEET_LYRICS = '[verse]\nMorning light on the window\nCoffee warm in my hand\n\n[chorus]\nSing it slow, let it go\nEvery road leads home'
+
+/** Build the export graph in the open workflow; with ``elsewhere`` the prompt is queued for another client. */
+const queueSheetExport = (folder, title, elsewhere = false) =>
+  page.evaluate(async ([folder, score, lyrics, title, elsewhere]) => {
     const app = window.app
     app.graph.clear()
     const add = (type) => {
@@ -350,17 +350,27 @@ for (const name of names) {
     audio.connect(out(audio, 'AUDIO'), exporter, inp(exporter, 'audio'))
     sheet.connect(out(sheet, 'title'), exporter, inp(exporter, 'title'))
     sheet.connect(out(sheet, 'report'), exporter, inp(exporter, 'reports.report_0'))
-    await app.queuePrompt(0, 1)
+    if (elsewhere) {
+      // as a run queued by another page or over the API: this page hears nothing of it
+      const { output } = await app.graphToPrompt()
+      const response = await fetch('/api/prompt', { method: 'POST', body: JSON.stringify({ prompt: output, client_id: 'browser-check-elsewhere' }) })
+      if (!response.ok) throw new Error(`queueing failed: ${response.status}`)
+    } else {
+      await app.queuePrompt(0, 1)
+    }
     return exporter.id
-  }, [folder, score, lyrics, title])
-  // wait for the record to say the PDF is saved (the page draws it after the export ran)
-  const outcome = await page.evaluate(async ([folder, title, exporterId]) => {
+  }, [folder, SHEET_SCORE, SHEET_LYRICS, title, elsewhere])
+
+/** Wait for the release record to say ``status`` (``saved``: and read the PDF). */
+const sheetOutcome = (folder, title, exporterId, status = 'saved') =>
+  page.evaluate(async ([folder, title, exporterId, status]) => {
     const view = (name) => fetch(`/view?filename=${encodeURIComponent(name)}&type=output&subfolder=${encodeURIComponent(folder)}`)
     const deadline = Date.now() + 120000
     while (Date.now() < deadline) {
       const response = await view(`${title}.plenio.json`)
       if (response.ok) {
         const record = await response.json()
+        if (status !== 'saved' && record.sheet_music?.status === status) return { waiting: true }
         if (record.sheet_music?.status === 'saved') {
           const pdf = new Uint8Array(await (await view(`${title}.pdf`)).arrayBuffer())
           const head = new TextDecoder().decode(pdf.slice(0, 5))
@@ -374,15 +384,53 @@ for (const name of names) {
       await new Promise((r) => setTimeout(r, 1000))
     }
     return { timeout: true }
-  }, [folder, title, queued])
-  const ok =
-    !outcome.timeout && outcome.head === '%PDF-' && outcome.bytes > 10000 && outcome.pages >= 1 && outcome.size === 'compact' && outcome.listed && /saved/.test(outcome.summary)
+  }, [folder, title, exporterId, status])
+
+const pdfOk = (outcome) => !outcome.timeout && outcome.head === '%PDF-' && outcome.bytes > 10000 && outcome.pages >= 1 && outcome.size === 'compact' && outcome.listed
+{
+  const check = 'export: the sheet music PDF is saved next to the audio'
+  const folder = `browser-check/sheet-music-${Date.now()}`
+  const title = 'Browser Check Sheet'
+  consoleErrors = []
+  const queued = await queueSheetExport(folder, title)
+  // wait for the record to say the PDF is saved (the page draws it after the export ran)
+  const outcome = await sheetOutcome(folder, title, queued)
+  const ok = pdfOk(outcome) && /saved/.test(outcome.summary)
   record(
     'Export Release',
     check,
     ok,
     ok ? `${outcome.bytes} bytes, ${outcome.pages} page(s), ${outcome.size}; ${outcome.summary}` : JSON.stringify(outcome) + ' ' + plenioErrors().join(' | ')
   )
+}
+{
+  const check = 'export: the PDF is saved while another workflow is open'
+  const folder = `browser-check/sheet-music-other-${Date.now()}`
+  const title = 'Browser Check Other Workflow'
+  consoleErrors = []
+  const queued = await queueSheetExport(folder, title)
+  // another workflow opens at once: the export ends while it is shown (ComfyUI calls onExecuted only for a
+  // node of the open workflow)
+  await page.evaluate(async () => {
+    await window.app.loadGraphData({ last_node_id: 0, last_link_id: 0, nodes: [], links: [], groups: [], config: {}, extra: {}, version: 0.4 }, true, true, 'browser-check-other')
+  })
+  const outcome = await sheetOutcome(folder, title, queued)
+  const ok = pdfOk(outcome)
+  record('Export Release', check, ok, ok ? `${outcome.bytes} bytes, ${outcome.pages} page(s)` : JSON.stringify(outcome) + ' ' + plenioErrors().join(' | '))
+}
+{
+  const check = 'export: a page that opens later saves the PDF a run left waiting'
+  const folder = `browser-check/sheet-music-later-${Date.now()}`
+  const title = 'Browser Check Later'
+  consoleErrors = []
+  const queued = await queueSheetExport(folder, title, true)
+  const waiting = await sheetOutcome(folder, title, queued, 'drawn by the browser after the export')
+  // the page opens again (as a user coming back the next morning): it asks for the PDFs still waiting
+  await page.reload({ waitUntil: 'networkidle' })
+  await page.waitForFunction(() => window.app && window.app.graph, null, { timeout: 90000 })
+  const outcome = await sheetOutcome(folder, title, -1)
+  const ok = !!waiting.waiting && pdfOk(outcome)
+  record('Export Release', check, ok, ok ? `${outcome.bytes} bytes, ${outcome.pages} page(s)` : JSON.stringify({ waiting, outcome }) + ' ' + plenioErrors().join(' | '))
 }
 
 fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify(results, null, 1) + '\n')

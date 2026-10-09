@@ -63,7 +63,10 @@ def manual(**docs: str) -> str:
 
 
 def export(
-    server: ComfyServer, docs: dict[str, str], sheet_music: str = "PDF (A4)"
+    server: ComfyServer,
+    docs: dict[str, str],
+    sheet_music: str = "PDF (A4)",
+    workflow: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], Path]:
     folder = f"sheet-music/{uuid.uuid4().hex[:8]}"
     prompt = {
@@ -86,8 +89,14 @@ def export(
             },
         },
     }
-    outputs = server.run(prompt)["outputs"]["3"]
+    extra = {"workflow": workflow} if workflow is not None else None
+    outputs = server.run(prompt, extra_pnginfo=extra)["outputs"]["3"]
     return outputs, server.output_dir / folder
+
+
+def pending(server: ComfyServer) -> list[dict[str, Any]]:
+    jobs: list[dict[str, Any]] = server.get("/plenio/export/sheet-music/pending")["jobs"]
+    return jobs
 
 
 def post_pdf(server: ComfyServer, token: str, data: bytes) -> tuple[int, dict[str, Any]]:
@@ -109,14 +118,13 @@ def test_the_export_reserves_the_pdf_and_the_browser_saves_it(server: ComfyServe
     job = outputs["plenio_notation"][0]
     assert job["file"] == "Slow Morning.pdf" and job["paper"] == "a4" and job["title"] == "Slow Morning"
     assert job["size"] == "standard"  # a workflow saved before the size existed
-    assert job["score_sheet"] == "1" == job["lyrics_sheet"]  # the sheet holding hand-placed lyrics lines
+    assert "\nw:" in job["display_abc"]  # the notation carries the lyrics
     assert (
-        "\nw:" in job["display_abc"] and job["abc"].strip() == SCORE.strip()
-    )  # the notation carries the lyrics
-    assert (
-        "- sheet music: Slow Morning.pdf - this browser draws and saves it now"
+        "- sheet music: Slow Morning.pdf - an open ComfyUI page draws and saves it"
         in outputs["plenio_summary"][0]["markdown"]
     )
+    # every page asks for the PDFs still waiting: this one until it is saved
+    assert [j for j in pending(server) if j["token"] == job["token"]] == [job]
     record_path = folder / "Slow Morning.plenio.json"
     record = json.loads(record_path.read_text(encoding="utf-8"))
     assert record["sheet_music"] == {
@@ -139,6 +147,23 @@ def test_the_export_reserves_the_pdf_and_the_browser_saves_it(server: ComfyServe
     status, refused = post_pdf(server, job["token"], b"%PDF-1.4 again")  # once only
     assert status == 400 and "can no longer be saved" in refused["error"]["message"]
     assert post_pdf(server, "made-up", b"%PDF-1.4")[0] == 400
+    assert job["token"] not in {j["token"] for j in pending(server)}
+
+
+def test_the_lines_placed_by_hand_come_from_the_workflow_the_run_was_queued_with(server: ComfyServer) -> None:
+    # the page sends the workflow with the prompt; the Song Sheet keeps the lines placed by hand in its
+    # properties, so the export places them itself - the page that draws the PDF may show another workflow
+    docs = {"title": "By Hand", "lyrics": LYRICS, "score": SCORE}
+    plain, _ = export(server, docs)
+    workflow = {
+        "nodes": [{"id": 1, "type": "PlenioSongSheet", "properties": {"plenio_lyric_spans": [[0, 64]]}}]
+    }
+    placed, _ = export(server, docs, workflow=workflow)
+    by_hand = placed["plenio_notation"][0]["display_abc"]
+    status, view = server.request(
+        "POST", "/plenio/score/analyze", {"abc": SCORE, "lyrics": LYRICS, "lyric_spans": [[0, 64]]}
+    )
+    assert status == 200 and view["display_abc"] == by_hand != plain["plenio_notation"][0]["display_abc"]
 
 
 def test_a_second_export_of_the_title_numbers_the_pdf_with_its_audio(server: ComfyServer) -> None:

@@ -25,7 +25,7 @@ import {
   setRunState,
   sheetState
 } from './runStatus'
-import { type SheetMusicHost, enqueue, saveSheetMusic, sheetMusicJobs } from './sheetMusic'
+import { type SheetMusicHost, type SheetMusicOutcome, SheetMusicJobs, sheetMusicJobs } from './sheetMusic'
 import { SHEET_STATE_TYPE, setFetcher, sheetStateWidget } from './sheetStateWidget'
 import { addStemMixer } from './stemMixer'
 import { installStyles } from './style'
@@ -63,7 +63,6 @@ const statusHost: StatusHost = {
 /** Export Release's sheet music: drawn here with the score editor's notation code, saved by Plenio. */
 const sheetHost: SheetMusicHost = {
   fetcher: comfyApi,
-  property: (id) => nodeById(id)?.properties?.plenio_lyric_spans,
   async draw(abc, title, paper, size) {
     const { notationPdf, renderLines } = await import('../sheet-editor/score/notationExport')
     const drawing = renderLines(abc, title, paper, size)
@@ -76,22 +75,38 @@ const sheetHost: SheetMusicHost = {
   }
 }
 
-function saveSheets(node: ComfyNode, output: Record<string, unknown> | undefined): void {
-  for (const job of sheetMusicJobs(output)) {
-    const prefix = `- sheet music: ${job.file}`
-    enqueue(() => saveSheetMusic(job, sheetHost)).then(
-      (saved) => {
-        setSummaryLine(node, prefix, `${prefix} - saved (${Math.max(1, Math.round(saved.bytes / 1024))} KB)`)
-        comfyApp.extensionManager?.toast?.add({ severity: 'success', summary: 'Sheet music saved', detail: saved.file, life: 6000 })
-      },
-      (error: unknown) => {
-        const message = error instanceof PlenioApiError && error.hint ? `${error.message} ${error.hint}` : String(error instanceof Error ? error.message : error)
-        setSummaryLine(node, prefix, `${prefix} - not saved: ${message}`, 'warning')
-        comfyApp.extensionManager?.toast?.add({ severity: 'error', summary: 'Sheet music not saved', detail: message, life: 15000 })
-      }
-    )
-  }
+/** The Export Release node of the open workflow that announced ``file`` (none when another workflow is open). */
+function exportNodeOf(nodeId: unknown, file: string): ComfyNode | null {
+  const node = nodeById(nodeId)
+  const summary = node?.properties?.plenio_summary as { markdown?: string } | undefined
+  return node?.type === 'PlenioExportRelease' && summary?.markdown?.includes(`- sheet music: ${file}`) ? node : null
 }
+
+function sheetOutcome(outcome: SheetMusicOutcome, nodeId: unknown): void {
+  const prefix = `- sheet music: ${outcome.job.file}`
+  const node = exportNodeOf(nodeId, outcome.job.file)
+  if ('saved' in outcome) {
+    if (node) setSummaryLine(node, prefix, `${prefix} - saved (${Math.max(1, Math.round(outcome.saved.bytes / 1024))} KB)`)
+    comfyApp.extensionManager?.toast?.add({ severity: 'success', summary: 'Sheet music saved', detail: outcome.saved.file, life: 6000 })
+    return
+  }
+  const { error } = outcome
+  const message = error instanceof PlenioApiError && error.hint ? `${error.message} ${error.hint}` : String(error instanceof Error ? error.message : error)
+  if (outcome.quiet) {
+    console.info(`Plenio: ${outcome.job.file} was saved by another page`)
+    return
+  }
+  if (node) setSummaryLine(node, prefix, `${prefix} - not saved: ${message}`, 'warning')
+  comfyApp.extensionManager?.toast?.add({ severity: 'error', summary: 'Sheet music not saved', detail: `${outcome.job.file}: ${message}`, life: 15000 })
+}
+
+/** The Export Release node (execution id) each job came from; recovered jobs have none. */
+const jobNodes = new Map<string, unknown>()
+/** The sheet music jobs of this page: from every execution, and the ones still waiting on the server. */
+const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
+  sheetOutcome(outcome, jobNodes.get(outcome.job.token))
+  jobNodes.delete(outcome.job.token)
+})
 
 ;(app as ComfyApp).registerExtension({
   name: EXTENSION_NAME,
@@ -150,11 +165,6 @@ function saveSheets(node: ComfyNode, output: Record<string, unknown> | undefined
         mixers.get(this)?.showExecuted(output)
       })
     }
-    if (nodeData.name === 'PlenioExportRelease') {
-      nodeType.prototype.onExecuted = chain(nodeType.prototype.onExecuted, function (this: ComfyNode, output) {
-        saveSheets(this, output)
-      })
-    }
     if (nodeData.name === 'PlenioSongSheet') {
       nodeType.prototype.onExecuted = chain(nodeType.prototype.onExecuted, function (this: ComfyNode, output) {
         const items = output?.plenio_sheet as SheetPayload[] | undefined
@@ -181,5 +191,21 @@ function saveSheets(node: ComfyNode, output: Record<string, unknown> | undefined
       const node = nodeById((event.detail as { node_id?: unknown } | undefined)?.node_id)
       if (node && String(node.type).startsWith('Plenio')) setRunState(node, 'error')
     })
+    // Export Release's sheet music: from every execution this page hears of, whichever workflow it shows
+    // (ComfyUI calls onExecuted only for a node of the open workflow), and the jobs still waiting when the
+    // page opens, comes back to the front or reconnects (a run that ended while no page drew it)
+    comfyApi.addEventListener('executed', (event: CustomEvent) => {
+      const detail = event.detail as { node?: unknown; display_node?: unknown; output?: Record<string, unknown> } | undefined
+      const jobs = sheetMusicJobs(detail?.output)
+      const nodeId = detail?.display_node ?? detail?.node
+      for (const job of jobs) jobNodes.set(job.token, nodeId)
+      sheetJobs.take(jobs)
+    })
+    const recover = () => void sheetJobs.recover()
+    comfyApi.addEventListener('reconnected', recover)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') recover()
+    })
+    window.setTimeout(recover, 3000)
   }
 })

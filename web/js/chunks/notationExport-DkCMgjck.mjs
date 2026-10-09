@@ -14353,13 +14353,15 @@ function Ec(k, m = 24) {
 <svg xmlns="${Ts}" width="${g}" height="${l}" viewBox="0 0 ${g} ${l}"><rect width="100%" height="100%" fill="#ffffff"/>${s.join("")}</svg>
 `;
 }
-async function Ss(k) {
-  const m = URL.createObjectURL(new Blob([ea(k)], { type: "image/svg+xml;charset=utf-8" }));
+async function Ss(k, m, g, l) {
+  const r = URL.createObjectURL(new Blob([ea(m)], { type: "image/svg+xml;charset=utf-8" }));
   try {
-    const g = new Image();
-    return g.src = m, await g.decode(), g;
+    const s = new Image();
+    await new Promise((a, o) => {
+      s.onload = () => a(), s.onerror = () => o(new Error("A line of the notation could not be drawn.")), s.src = r;
+    }), k.drawImage(s, g, l, m.width, m.height);
   } finally {
-    URL.revokeObjectURL(m);
+    URL.revokeObjectURL(r);
   }
 }
 function Es(k, m) {
@@ -14374,7 +14376,7 @@ async function Ac(k, m = 2, g = 24) {
   o.scale(s, s);
   let p = g;
   for (const d of k)
-    o.drawImage(await Ss(d), g, p, d.width, d.height), p += d.height;
+    await Ss(o, d, g, p), p += d.height;
   const u = await new Promise((d) => a.toBlob(d, "image/png"));
   if (!u) throw new Error("The picture could not be made.");
   return new Uint8Array(await u.arrayBuffer());
@@ -14386,7 +14388,7 @@ async function Mc(k, m, g) {
     t.scale(o, o);
     let e = d;
     for (const h of n)
-      t.drawImage(await Ss(h), d, e, h.width, h.height), e += h.height;
+      await Ss(t, h, d, e), e += h.height;
     a.length > 1 && (t.fillStyle = "#555555", t.font = "11px serif", t.textAlign = "center", t.fillText(`${i + 1} / ${a.length}`, l * Oe / 2, r * Oe - d / 2));
     const c = t.getImageData(0, 0, p, u).data, v = new Uint8Array(p * u);
     for (let h = 0, y = 0; y < v.length; h += 4, y++) v[y] = Math.round(0.299 * c[h] + 0.587 * c[h + 1] + 0.114 * c[h + 2]);

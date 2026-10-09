@@ -2402,7 +2402,7 @@
       "COMBO",
       {
        "display_name": "sheet music",
-       "tooltip": "Also save the sheet music - both voices, chord symbols, sections and the lyrics under the notes - as '<name>.pdf' next to the audio, on A4 or Letter pages. The browser that runs the workflow draws it right after the export (as Export notation… in the Song Sheet does) and Plenio saves it; a run without an open ComfyUI page gets no PDF. Needs a score (YuE2).",
+       "tooltip": "Also save the sheet music - both voices, chord symbols, sections and the lyrics under the notes - as '<name>.pdf' next to the audio, on A4 or Letter pages. An open ComfyUI page draws it right after the export (as Export notation… in the Song Sheet does), whichever workflow it shows, and Plenio saves it; without an open page, the next page that opens draws it (within a day, while ComfyUI runs). Needs a score (YuE2).",
        "default": "off",
        "multiselect": false,
        "options": [

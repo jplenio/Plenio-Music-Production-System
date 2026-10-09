@@ -201,13 +201,21 @@ export function stackedSvg(lines: readonly NotationLine[], pad = 24): string {
 }
 
 /** A line as a picture (the browser draws its SVG). */
-async function lineImage(line: NotationLine): Promise<HTMLImageElement> {
+/**
+ * Draw a line onto ``ctx`` at ``x``, ``y``. Waits for the picture's ``load`` event, not ``decode()``: the
+ * browser may hold a decode back while the page is in the background (a run that ends while the user works in
+ * another tab), and drawing decodes the picture anyway; its URL lives until it is drawn.
+ */
+async function drawLine(ctx: CanvasRenderingContext2D, line: NotationLine, x: number, y: number): Promise<void> {
   const url = URL.createObjectURL(new Blob([lineMarkup(line)], { type: 'image/svg+xml;charset=utf-8' }))
   try {
     const image = new Image()
-    image.src = url
-    await image.decode()
-    return image
+    await new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve()
+      image.onerror = () => reject(new Error('A line of the notation could not be drawn.'))
+      image.src = url
+    })
+    ctx.drawImage(image, x, y, line.width, line.height)
   } finally {
     URL.revokeObjectURL(url)
   }
@@ -234,7 +242,7 @@ export async function notationPng(lines: readonly NotationLine[], scale = 2, pad
   ctx.scale(s, s)
   let y = pad
   for (const line of lines) {
-    ctx.drawImage(await lineImage(line), pad, y, line.width, line.height)
+    await drawLine(ctx, line, pad, y)
     y += line.height
   }
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'))
@@ -257,7 +265,7 @@ export async function notationPdf(lines: readonly NotationLine[], paper: Paper, 
     ctx.scale(scale, scale)
     let y = margin
     for (const line of page) {
-      ctx.drawImage(await lineImage(line), margin, y, line.width, line.height)
+      await drawLine(ctx, line, margin, y)
       y += line.height
     }
     if (pages.length > 1) {

@@ -223,8 +223,12 @@ class ComfyServer:
 
     # --- execution ----------------------------------------------------------
 
-    def queue(self, prompt: Mapping[str, Any]) -> str:
-        status, data = self.request("POST", "/prompt", {"prompt": prompt, "client_id": self.client_id})
+    def queue(self, prompt: Mapping[str, Any], extra_pnginfo: Mapping[str, Any] | None = None) -> str:
+        """Queue ``prompt``; ``extra_pnginfo`` as the page sends it (``{"workflow": ...}``)."""
+        body: dict[str, Any] = {"prompt": prompt, "client_id": self.client_id}
+        if extra_pnginfo is not None:
+            body["extra_data"] = {"extra_pnginfo": dict(extra_pnginfo)}
+        status, data = self.request("POST", "/prompt", body)
         if status != 200:
             raise ExecutionFailedError(f"prompt rejected ({status}): {json.dumps(data, indent=1)[:4000]}")
         return str(data["prompt_id"])
@@ -241,8 +245,13 @@ class ComfyServer:
             time.sleep(0.2)
         raise TimeoutError(f"prompt {prompt_id} did not finish:\n{self.log_tail()}")
 
-    def run(self, prompt: Mapping[str, Any], timeout: float = 600.0) -> dict[str, Any]:
-        entry = self.wait(self.queue(prompt), timeout)
+    def run(
+        self,
+        prompt: Mapping[str, Any],
+        timeout: float = 600.0,
+        extra_pnginfo: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        entry = self.wait(self.queue(prompt, extra_pnginfo), timeout)
         if entry["status"].get("status_str") != "success":
             raise ExecutionFailedError(json.dumps(entry["status"], indent=1)[:6000])
         return entry

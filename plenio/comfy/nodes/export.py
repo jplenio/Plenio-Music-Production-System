@@ -31,7 +31,7 @@ from ...core.release import (
 )
 from ...core.reports import Report, Status
 from .. import host
-from ..sheet_music import DEFAULT_SIZE, JOBS, OFF, PAPERS, SHEET_MUSIC_OPTIONS, SIZES
+from ..sheet_music import DEFAULT_SIZE, JOBS, OFF, PAPERS, SHEET_MUSIC_OPTIONS, SIZES, hand_placed
 from ..types import ReportType
 
 COLLISIONS = ("number", "overwrite", "error")
@@ -44,9 +44,9 @@ DEFAULT_COMMENT = "Powered by Plenio Music Production System / ComfyUI"
 SHEET_SUFFIX = ".pdf"
 SHEET_TOOLTIP = (
     "Also save the sheet music - both voices, chord symbols, sections and the lyrics under the notes - as "
-    "'<name>.pdf' next to the audio, on A4 or Letter pages. The browser that runs the workflow draws it right "
-    "after the export (as Export notation… in the Song Sheet does) and Plenio saves it; a run without an open "
-    "ComfyUI page gets no PDF. Needs a score (YuE2)."
+    "'<name>.pdf' next to the audio, on A4 or Letter pages. An open ComfyUI page draws it right after the export "
+    "(as Export notation… in the Song Sheet does), whichever workflow it shows, and Plenio saves it; without an "
+    "open page, the next page that opens draws it (within a day, while ComfyUI runs). Needs a score (YuE2)."
 )
 SIZE_TOOLTIP = (
     "How large the sheet music draws the music: standard about 3 bars a line (4 pages for a song of 3-4 "
@@ -231,7 +231,9 @@ class PlenioExportRelease(io.ComfyNode):
                     "sheet music: this release has no score (MiniMax Music 3, or planning was off) - no PDF"
                 )
             else:
-                view = score_rules.editor_view(sheet["score"], sheet["lyrics"] or None)
+                # the lyrics lines placed by hand on the Song Sheet, from the workflow the run was queued with
+                spans = hand_placed(cls.hidden.extra_pnginfo, (sheet["score_sheet"], sheet["lyrics_sheet"]))
+                view = score_rules.editor_view(sheet["score"], sheet["lyrics"] or None, spans or None)
                 display = str(view.get("display_abc") or "")
                 if not display:
                     notes.append("sheet music: the score cannot be drawn as notation - no PDF")
@@ -313,22 +315,16 @@ class PlenioExportRelease(io.ComfyNode):
         atomic_write_text(record_path, json.dumps(record, indent=2, ensure_ascii=False))
         notation: list[dict[str, Any]] = []
         if display:
-            # the browser that runs the workflow draws the PDF and posts it back (sheet_music.py)
+            # an open page draws the PDF and posts it back (sheet_music.py)
             pdf_path = file(SHEET_SUFFIX)
-            notation.append(
-                {
-                    "token": JOBS.reserve(pdf_path, record_path),
-                    "file": pdf_path.name,
-                    "title": song_title,
-                    "paper": PAPERS[sheet_music],
-                    "size": sheet_music_size,
-                    "abc": sheet["score"],
-                    "lyrics": sheet["lyrics"],
-                    "display_abc": display,
-                    "score_sheet": sheet["score_sheet"],
-                    "lyrics_sheet": sheet["lyrics_sheet"],
-                }
-            )
+            job = {
+                "file": pdf_path.name,
+                "title": song_title,
+                "paper": PAPERS[sheet_music],
+                "size": sheet_music_size,
+                "display_abc": display,
+            }
+            notation.append({**job, "token": JOBS.reserve(pdf_path, record_path, job)})
         relative_names = [str(Path(p).relative_to(base)) for p in written]
         # the released files: a clip there is a mistake (a limiter before the export avoids it)
         released = [f for f in facts if f.get("role") not in ("original", "cover")]
@@ -368,7 +364,7 @@ class PlenioExportRelease(io.ComfyNode):
                 *([f"- cover: {cover_path.name}"] if cover_path else []),
                 f"- record: {record_path.name}",
                 *(
-                    [f"- sheet music: {notation[0]['file']} - this browser draws and saves it now"]
+                    [f"- sheet music: {notation[0]['file']} - an open ComfyUI page draws and saves it"]
                     if notation
                     else []
                 ),
