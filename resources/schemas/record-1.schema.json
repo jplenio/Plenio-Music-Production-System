@@ -53,7 +53,8 @@
           "name": { "type": "string", "minLength": 1 },
           "bytes": { "type": "integer", "minimum": 0 },
           "sha256": { "$ref": "#/$defs/sha256" },
-          "role": { "enum": ["original", "cover"] },
+          "role": { "enum": ["original", "cover", "sheet_music", "stem"] },
+          "stem": { "type": "string", "minLength": 1 },
           "format": { "enum": ["flac", "mp3", "wav"] },
           "bits": { "type": ["integer", "null"] },
           "sample_rate": { "type": "integer", "minimum": 1 },
@@ -66,6 +67,17 @@
       }
     },
     "licences": { "type": "array", "items": { "type": "string" } },
+    "sheet_music": {
+      "type": "object",
+      "required": ["file", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "file": { "type": "string", "minLength": 1 },
+        "paper": { "type": "string" },
+        "size": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    },
     "prompt": {
       "type": ["object", "null"],
       "additionalProperties": {

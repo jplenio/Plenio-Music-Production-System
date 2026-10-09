@@ -2000,7 +2000,7 @@ const us = (e, t, n) => {
   async function y() {
     const S = $e(r);
     S === null && (s.textContent = "The stored state is unreadable; it will be replaced when you apply.");
-    const E = xe(String(e.id)), u = (e.inputs ?? []).filter((L) => L.link != null).map((L) => L.name), H = S ?? { schema: "plenio.sheet_state/1", docs: {} }, $ = E?.owned ?? Qo(u, H), g = String(e.widgets?.find((L) => L.name === "review")?.value ?? "continue"), m = g === "as the brief says" ? E?.review ?? "continue" : g, b = () => nr(import.meta.url, rr), { openSheetDialog: v } = await nt(() => import("./open-CqXCztSi.mjs"), b), { parseGuide: T, serializeGuide: M } = await nt(() => import("./tracks-DxmZeggM.mjs"), b), { parseShift: V, parseSpans: D } = await nt(() => import("./lyricPlacement-rAf-x_fn.mjs"), b);
+    const E = xe(String(e.id)), u = (e.inputs ?? []).filter((L) => L.link != null).map((L) => L.name), H = S ?? { schema: "plenio.sheet_state/1", docs: {} }, $ = E?.owned ?? Qo(u, H), g = String(e.widgets?.find((L) => L.name === "review")?.value ?? "continue"), m = g === "as the brief says" ? E?.review ?? "continue" : g, b = () => nr(import.meta.url, rr), { openSheetDialog: v } = await nt(() => import("./open-DIVHzTLd.mjs"), b), { parseGuide: T, serializeGuide: M } = await nt(() => import("./tracks-DxmZeggM.mjs"), b), { parseShift: V, parseSpans: D } = await nt(() => import("./lyricPlacement-rAf-x_fn.mjs"), b);
     if (!rt) throw new Error("Plenio: API not initialised");
     let R = null;
     try {
@@ -2228,7 +2228,7 @@ function $s(e) {
         const C = Je(0, 1, 0.05, b[N], `${m} ${N} send`);
         return C.title = `${N} send: how much of this stem goes to the shared ${N} bus`, C.addEventListener("input", () => y(m, N, Number(C.value), { draw: !1 })), C.addEventListener("change", () => y(m, N, Number(C.value))), C;
       }), L = I("button", b.save ? "toggle active" : "toggle", "save");
-      L.setAttribute("aria-label", `${m} save as its own file`), L.setAttribute("aria-pressed", String(b.save)), L.title = "Write this stem as its own 24-bit FLAC file (output/plenio/stems) on the next run; its gain, compression and muted ranges are applied, mute/solo and the buses are not", L.addEventListener("click", (N) => {
+      L.setAttribute("aria-label", `${m} save as its own file`), L.setAttribute("aria-pressed", String(b.save)), L.title = 'Save this stem as its own 24-bit FLAC file on the next run - next to the song, in the folder "<name>-stems" (without an Export Release: output/plenio/stems); its gain, compression and muted ranges are applied, mute/solo and the buses are not', L.addEventListener("click", (N) => {
         N.stopPropagation(), h(m, { save: !b.save });
       });
       const ue = ys(i.mix, m, g);

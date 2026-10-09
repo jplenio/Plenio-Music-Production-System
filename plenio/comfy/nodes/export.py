@@ -11,11 +11,13 @@ from comfy_api.latest import io
 from ... import __version__
 from ...core import score as score_rules
 from ...core.audio import measure
+from ...core.audio.stems import SavedStems
 from ...core.engines import ENGINES
 from ...core.errors import PlenioUserError
 from ...core.files import atomic_write_bytes, atomic_write_text
 from ...core.release import (
     FORMATS,
+    STEMS_SUFFIX,
     TAG_FIELDS,
     RecordInput,
     build_record,
@@ -33,6 +35,7 @@ from ...core.reports import Report, Status
 from .. import host
 from ..sheet_music import DEFAULT_SIZE, JOBS, OFF, PAPERS, SHEET_MUSIC_OPTIONS, SIZES, hand_placed
 from ..types import ReportType
+from .stems import write_saved_stems
 
 COLLISIONS = ("number", "overwrite", "error")
 ORIGINAL_SUFFIX = " (original).flac"
@@ -96,7 +99,8 @@ class PlenioExportRelease(io.ComfyNode):
             description=(
                 "Writes the song into the ComfyUI output folder as FLAC 24-bit, MP3 V0 and/or WAV 32-bit float, "
                 "with tags and cover art, plus a release record (JSON): documents with hashes, seeds and settings "
-                "of the executed graph, reports, loudness and model licences."
+                "of the executed graph, reports, loudness and model licences. The stems marked 'save' in a Stem "
+                "Mixer whose report comes in here go next to the song, into the folder '<name>-stems'."
             ),
             inputs=[
                 io.Audio.Input(
@@ -221,6 +225,10 @@ class PlenioExportRelease(io.ComfyNode):
         items, rate = host.audio_items(audio)
         received = [r for r in (reports or {}).values() if r is not None]
         report_dicts = [r.to_dict() if isinstance(r, Report) else dict(r) for r in received]
+        # the Stem Mixer's strips marked *save* ride on its report: they go next to the song
+        saved_stems = [
+            r.attachment for r in received if isinstance(r, Report) and isinstance(r.attachment, SavedStems)
+        ]
         relative = expand_pattern(naming, naming_values(song_title, None))
         takes = ["" if len(items) == 1 else f" take {index + 1}" for index in range(len(items))]
         sheet = sheet_documents(report_dicts) if sheet_music != OFF else {}
@@ -240,6 +248,7 @@ class PlenioExportRelease(io.ComfyNode):
         suffixes = [take + FORMATS[kind]["extension"] for take in takes for kind in kinds]
         suffixes += [ORIGINAL_SUFFIX] * (original is not None) + [".jpg"] * (picture is not None)
         suffixes += [SHEET_SUFFIX] * bool(display)
+        suffixes += [STEMS_SUFFIX] * bool(saved_stems)
         # one base name for every file of this export, record included (AUD-04)
         stem = plan_release(target_folder, relative, [*suffixes, RECORD_SUFFIX], collision=collision)
 
@@ -272,6 +281,26 @@ class PlenioExportRelease(io.ComfyNode):
             cover_path = file(".jpg")
             atomic_write_bytes(cover_path, picture)
             facts.append({**file_facts(cover_path), "role": "cover"})
+        stems_folder = file(STEMS_SUFFIX)
+        stem_names: list[str] = []
+        for saved in saved_stems:
+            for name, path, audio_facts in write_saved_stems(
+                stems_folder,
+                saved,
+                lambda strip: {**metadata, "title": f"{song_title} ({strip})"},
+                number=collision != "overwrite",
+            ):
+                facts.append(
+                    {
+                        **file_facts(path),
+                        "name": f"{stems_folder.name}/{path.name}",
+                        **audio_facts,
+                        "role": "stem",
+                        "stem": name,
+                    }
+                )
+                written.append(path)
+                stem_names.append(name)
         licences = sorted(
             {
                 ENGINES[r["data"]["engine"]].LICENCE
@@ -327,7 +356,7 @@ class PlenioExportRelease(io.ComfyNode):
             notation.append({**job, "token": JOBS.reserve(pdf_path, record_path, job)})
         relative_names = [str(Path(p).relative_to(base)) for p in written]
         # the released files: a clip there is a mistake (a limiter before the export avoids it)
-        released = [f for f in facts if f.get("role") not in ("original", "cover")]
+        released = [f for f in facts if f.get("role") not in ("original", "cover", "stem")]
         clipped = sum(int(f.get("clipped_samples", 0)) for f in released)
         if clipped:
             warnings.append(
@@ -340,6 +369,13 @@ class PlenioExportRelease(io.ComfyNode):
             notes.append(
                 f"the unmastered take peaks at {float(f.get('peak', 0)):.3f}: {int(f['clipped_samples'])} samples "
                 "above full scale were clipped in its FLAC (the mastered files are not affected)"
+            )
+        # the stems are taken before mastering: a peak above full scale is normal there, as in the take
+        clipped_stems = sum(int(f.get("clipped_samples", 0)) for f in facts if f.get("role") == "stem")
+        if clipped_stems:
+            notes.append(
+                f"{clipped_stems} samples of the stems above full scale were clipped in their FLAC files "
+                "(the stems are taken before mastering; the song's files are not affected)"
             )
         if wav and any(metadata.get(k) for k in ("album_artist", "composer")):
             warnings.append("WAV files cannot hold album artist and composer tags")
@@ -362,6 +398,11 @@ class PlenioExportRelease(io.ComfyNode):
                 "**Exported**",
                 *[f"- {name}" for name in relative_names],
                 *([f"- cover: {cover_path.name}"] if cover_path else []),
+                *(
+                    [f"- stems: {stems_folder.name}/ ({', '.join(dict.fromkeys(stem_names))})"]
+                    if stem_names
+                    else []
+                ),
                 f"- record: {record_path.name}",
                 *(
                     [f"- sheet music: {notation[0]['file']} - an open ComfyUI page draws and saves it"]

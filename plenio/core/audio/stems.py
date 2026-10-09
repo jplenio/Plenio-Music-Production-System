@@ -71,6 +71,20 @@ class Stems:
         return [*zip(self.names, self.stems, strict=True), (REST, self.residual)]
 
 
+@dataclass(frozen=True)
+class SavedStems:
+    """The strips marked *save* in the Stem Mixer, as their files hold them: per take (batch item) the
+    strip names and signals (float ``[channels, frames]``) at ``rate``. Export Release writes them next to
+    the song, into ``<name>-stems`` (they ride on the mixer's report, outside the record)."""
+
+    rate: int
+    takes: tuple[tuple[tuple[str, np.ndarray], ...], ...]
+
+    @property
+    def names(self) -> tuple[str, ...]:
+        return tuple(dict.fromkeys(name for take in self.takes for name, _signal in take))
+
+
 def make_stems(samples: Any, rate: int, separated: Mapping[str, Any], *, source: str = "") -> Stems:
     """Stems plus the residual that makes their sum the input again."""
     rate = check_rate(rate)
@@ -284,7 +298,7 @@ def mix(
     """The mixdown (float64 ``[channels, frames]``, the input's length) and the mixer report.
 
     ``signals``, when given, receives the processed signal (:func:`strip_signal`) of every audible
-    strip marked *save*, so the Stem Mixer node writes those files without processing them again.
+    strip marked *save*, so the files of those strips need not be processed again.
     """
     options = settings or Mix()
     rate = stems.rate

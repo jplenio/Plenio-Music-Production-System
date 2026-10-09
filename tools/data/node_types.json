@@ -4154,12 +4154,24 @@
        "multiline": true
       }
      ]
+    },
+    "hidden": {
+     "prompt": [
+      "PROMPT"
+     ],
+     "unique_id": [
+      "UNIQUE_ID"
+     ]
     }
    },
    "input_order": {
     "required": [
      "stems",
      "mix"
+    ],
+    "hidden": [
+     "prompt",
+     "unique_id"
     ]
    },
    "output": [

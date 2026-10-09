@@ -67,6 +67,16 @@ def test_report_round_trip() -> None:
     assert Report.from_dict(data) == report
 
 
+def test_an_attachment_rides_on_the_report_but_not_into_the_record() -> None:
+    # the Stem Mixer's stems marked save reach Export Release this way (owner's request 2026-10-09)
+    payload = [object()]
+    report = Report("stem_mix", Status.OK, "x", data={"save": ["drums"]}, attachment=payload)
+    moved = report.with_source("PlenioStemMixer", "4")
+    assert moved.attachment is payload
+    assert "attachment" not in moved.to_dict() and "payload" not in str(moved.to_dict())
+    assert Report.from_dict(moved.to_dict()) == moved  # the attachment is no part of the comparison
+
+
 def test_report_rejects_unknown_schema_and_non_json_data() -> None:
     with pytest.raises(PlenioUserError):
         Report.from_dict({"schema": "plenio.report/9", "kind": "x", "status": "ok"})

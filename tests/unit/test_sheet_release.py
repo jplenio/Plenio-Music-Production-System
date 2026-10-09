@@ -16,6 +16,7 @@ from plenio.core.release import (
     RecordInput,
     build_record,
     expand_pattern,
+    feeds,
     plan_release,
     prompt_for_record,
     redact,
@@ -176,6 +177,31 @@ def test_naming_pattern_and_collisions(tmp_path: Path) -> None:
     assert plan_release(tmp_path, "album/Song", [".flac"], collision="overwrite") == first
     with pytest.raises(PlenioUserError):
         plan_release(tmp_path, "album/Song", [".flac"], collision="error")
+
+
+def test_a_stems_folder_takes_part_in_the_collision_check(tmp_path: Path) -> None:
+    # a song's stems go into '<name>-stems' (owner's request 2026-10-09): a folder left from an earlier
+    # export numbers the next one, as its files do
+    (tmp_path / "Song-stems").mkdir()
+    assert plan_release(tmp_path, "Song", [".flac", "-stems"]).name == "Song (2)"
+    assert plan_release(tmp_path, "Song", [".flac"]).name == "Song"
+
+
+def test_feeds_finds_where_an_output_goes() -> None:
+    prompt = {
+        "4": {"class_type": "PlenioStemMixer", "inputs": {"stems": ["3", 0]}},
+        "9": {
+            "class_type": "PlenioExportRelease",
+            "inputs": {"audio": ["8", 0], "reports.report_0": ["4", 1]},
+        },
+        "12:5": {"class_type": "PlenioStemMixer", "inputs": {}},
+    }
+    assert feeds(prompt, "4", 1, "PlenioExportRelease")
+    assert not feeds(prompt, "4", 0, "PlenioExportRelease")  # the mixdown goes elsewhere
+    assert not feeds(prompt, "12:5", 1, "PlenioExportRelease")
+    assert not feeds(None, "4", 1, "PlenioExportRelease") and not feeds(
+        prompt, None, 1, "PlenioExportRelease"
+    )
 
 
 def test_flac_is_24_bit_and_lossless_to_24_bit(tmp_path: Path) -> None:

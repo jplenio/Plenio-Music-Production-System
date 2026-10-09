@@ -382,7 +382,7 @@
     "tooltip": "The mixdown; a neutral mix returns the input unchanged."
    },
    "1": {
-    "tooltip": "Per strip: audible, gain, gain reduction, muted time, saved files."
+    "tooltip": "Per strip: audible, gain, gain reduction, muted time - and the strips marked save, which Export Release writes next to the song ('<name>-stems')."
    },
    "2": {
     "tooltip": "Stem names and how much the residual holds."

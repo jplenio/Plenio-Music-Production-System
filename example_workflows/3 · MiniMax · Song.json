@@ -7512,7 +7512,7 @@
     ],
     "extra": {},
     "category": "Plenio/Audio",
-    "description": "Splits the song into up to four stems (vocals, drums, bass, other) and mixes them back: gain, mute/solo, compression, muted time ranges and one reverb and delay bus per mix. The residual (what the separator missed) is one more strip, so a neutral mix returns the render unchanged. Bypassed by default in every template - select the block and press Ctrl+B to use it."
+    "description": "Splits the song into up to four stems (vocals, drums, bass, other) and mixes them back: gain, mute/solo, compression, muted time ranges and one reverb and delay bus per mix. The residual (what the separator missed) is one more strip, so a neutral mix returns the render unchanged. A strip marked save is kept with the song: Export Release writes it into '<name>-stems' next to it. Bypassed by default in every template - select the block and press Ctrl+B to use it."
    }
   ]
  },

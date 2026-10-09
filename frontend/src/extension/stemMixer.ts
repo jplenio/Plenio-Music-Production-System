@@ -156,7 +156,8 @@ export function addStemMixer(node: ComfyNode): { showExecuted(output: Record<str
       save.setAttribute('aria-label', `${name} save as its own file`)
       save.setAttribute('aria-pressed', String(strip.save))
       save.title =
-        'Write this stem as its own 24-bit FLAC file (output/plenio/stems) on the next run; ' +
+        'Save this stem as its own 24-bit FLAC file on the next run - next to the song, in the folder ' +
+        '"<name>-stems" (without an Export Release: output/plenio/stems); ' +
         'its gain, compression and muted ranges are applied, mute/solo and the buses are not'
       save.addEventListener('click', (event) => {
         event.stopPropagation()

@@ -47,6 +47,9 @@ class Report:
     data: Mapping[str, Any] = field(default_factory=dict)
     source: str = ""
     source_id: str = ""
+    attachment: Any = field(default=None, compare=False, repr=False)
+    """Python objects a later node of the same run uses, never part of the record (the Stem Mixer's stems
+    marked *save*, which Export Release writes next to the song)."""
 
     def __post_init__(self) -> None:
         if not self.kind:
@@ -55,7 +58,9 @@ class Report:
         canonical_json(dict(self.data))
 
     def with_source(self, source: str, source_id: str) -> Report:
-        return Report(self.kind, self.status, self.summary, self.messages, self.data, source, source_id)
+        return Report(
+            self.kind, self.status, self.summary, self.messages, self.data, source, source_id, self.attachment
+        )
 
     def to_dict(self) -> dict[str, Any]:
         return {

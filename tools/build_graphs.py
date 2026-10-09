@@ -562,6 +562,7 @@ def stems() -> Blueprint:
         "Splits the song into up to four stems (vocals, drums, bass, other) and mixes them back: gain, "
         "mute/solo, compression, muted time ranges and one reverb and delay bus per mix. The residual "
         "(what the separator missed) is one more strip, so a neutral mix returns the render unchanged. "
+        "A strip marked save is kept with the song: Export Release writes it into '<name>-stems' next to it. "
         "Bypassed by default in every template - select the block and press Ctrl+B to use it.",
         g,
         [
@@ -580,7 +581,10 @@ def stems() -> Blueprint:
                 "report",
                 "PLENIO_REPORT",
                 (mixer, "report"),
-                tooltip="Per strip: audible, gain, gain reduction, muted time, saved files.",
+                tooltip=(
+                    "Per strip: audible, gain, gain reduction, muted time - and the strips marked save, which "
+                    "Export Release writes next to the song ('<name>-stems')."
+                ),
             ),
             BlueprintOutput(
                 "separation_report",

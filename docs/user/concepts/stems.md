@@ -61,7 +61,7 @@ The node has one widget: a **strip per stem** plus `rest`. Under *Advanced* you 
 | reverb send | 0 … 1 | to the one shared reverb bus |
 | delay send | 0 … 1 | to the one shared delay bus |
 | muted ranges | `[start_s, end_s]` | drawn on the strip's waveform: **drag** to mute a stretch, **click** a range to remove it |
-| save | on/off | writes this stem as its own 24-bit FLAC on the next run (default: off) |
+| save | on/off | saves this stem as its own 24-bit FLAC next to the song on the next run (default: off) |
 
 Every strip is there **before the first run** - vocals, drums, bass, other and the residual `rest` - so you can
 set the balance for the run you are about to start. Dragging a fader writes the value live (the strip stays under
@@ -69,10 +69,14 @@ your pointer) and the release updates the whole node; every control carries a to
 
 ### A stem as its own file
 
-A strip switched to **save** is written on the next run: 24-bit FLAC in `output/plenio/stems`, named after the stem
-(`drums.flac`). A later run that writes the same stem gets `drums (2).flac`, so nothing is overwritten. The file
-holds **that strip's own signal**: its gain, its compression and its muted ranges are applied; mute/solo and the
-shared buses belong to the mixdown, not to one stem. The summary and the report name every file that was written.
+A strip switched to **save** is saved on the next run, as a 24-bit FLAC named after the stem: **Export Release**
+writes it next to the song, into a folder named after the song with `-stems` - for `output/plenio/My Song.flac` the
+stems are `output/plenio/My Song-stems/drums.flac`, `vocals.flac` ... (a batch of takes: `drums take 1.flac` ...).
+The folder takes the song's number with it (`My Song (2)-stems`), so nothing is overwritten, and the release record
+lists every stem file. In the templates the Stem Mixer's report goes into the export; in a workflow of your own,
+connect it to one of Export Release's *reports* inputs - without that, the stems go to `output/plenio/stems`
+(`drums.flac`, then `drums (2).flac`). The file holds **that strip's own signal**: its gain, its compression and its
+muted ranges are applied; mute/solo and the shared buses belong to the mixdown, not to one stem.
 
 Muted ranges cut a stem's content in that window with a 10 ms fade and are merged and clipped to the song. The song
 keeps its length - cutting time out of the song would misalign the stems, so it is not offered.

@@ -44,6 +44,14 @@ def test_a_neutral_mix_returns_the_input(channels: int, count: int, seed: int) -
     assert np.max(np.abs(out - x)) < 1e-6
 
 
+def test_saved_stems_name_their_strips_once() -> None:
+    signal = np.zeros((2, 4))
+    saved = s.SavedStems(
+        24000, ((("drums", signal), ("rest", signal)), (("drums", signal), ("rest", signal)))
+    )
+    assert saved.names == ("drums", "rest")
+
+
 def test_stems_are_validated() -> None:
     x = song(0.1)
     with pytest.raises(PlenioUserError, match="1 to 4"):

@@ -143,7 +143,8 @@ def test_a_muted_range_silences_only_its_stretch(server: ComfyServer, log: Log) 
 
 
 def test_a_strip_marked_save_is_written_as_its_own_file(server: ComfyServer) -> None:
-    """Owner's request (2026-09-28): a switch per stem writes it as a file; default: off."""
+    """Owner's request (2026-09-28): a switch per stem writes it as a file; default: off. Without an Export
+    Release that takes the mixer's report the files go to output/plenio/stems."""
     folder = server.output_dir / "plenio" / "stems"
     entry = server.run(
         stems_prompt({"strips": {"drums": {"save": True}, "rest": {"save": True, "gain_db": -6.0}}})
@@ -163,6 +164,65 @@ def test_a_strip_marked_save_is_written_as_its_own_file(server: ComfyServer) -> 
     assert rms(rest_audio) == pytest.approx(10 ** (-6 / 20) * rms(drums_audio), rel=1e-3)
     tags, _cover = read_tags(folder / "drums.flac")
     assert tags["title"] == "drums (Plenio stems)"
+
+
+def test_with_an_export_the_stems_go_next_to_the_song(server: ComfyServer) -> None:
+    """Owner's request (2026-10-09): the stems marked save are kept in the song's folder, in a folder named
+    after the song with '-stems'; the release record lists them."""
+    import jsonschema
+
+    folder = f"stems-export/{uuid.uuid4().hex[:8]}"
+    # (other mixer settings than the tests before: ComfyUI would take that mixer's result from its cache)
+    prompt = stems_prompt(
+        {"strips": {"drums": {"save": True, "gain_db": 0.0}, "rest": {"save": True, "gain_db": -6.0}}}
+    )
+    prompt["7"] = {
+        "class_type": "PlenioExportRelease",
+        "inputs": {
+            "audio": ["4", 0],
+            "folder": folder,
+            "naming": "{title}",
+            "collision": "number",
+            "reports.report_0": ["4", 1],
+        },
+    }
+    before = sorted((server.output_dir / "plenio" / "stems").glob("*.flac"))
+    entry = server.run(prompt)
+    summary = entry["outputs"]["4"]["plenio_summary"][0]["markdown"]
+    assert "saved with the song: drums, rest - Export Release writes them into '<name>-stems'" in summary
+    assert sorted((server.output_dir / "plenio" / "stems").glob("*.flac")) == before  # nothing there
+    song = server.output_dir / folder
+    assert sorted(p.name for p in song.iterdir()) == [
+        "Untitled-stems",
+        "Untitled.flac",
+        "Untitled.plenio.json",
+    ]
+    stems = song / "Untitled-stems"
+    assert sorted(p.name for p in stems.iterdir()) == ["drums.flac", "rest.flac"]
+    drums_audio, rate = decode(stems / "drums.flac")
+    rest_audio, _rate = decode(stems / "rest.flac")
+    assert rate == 24000 and drums_audio.shape == (2, 48000)
+    assert rms(rest_audio) == pytest.approx(10 ** (-6 / 20) * rms(drums_audio), rel=1e-3)
+    assert read_tags(stems / "drums.flac")[0]["title"] == "Untitled (drums)"
+    record = json.loads((song / "Untitled.plenio.json").read_text(encoding="utf-8"))
+    listed = [(f["name"], f.get("role"), f.get("stem")) for f in record["files"] if f.get("role") == "stem"]
+    assert listed == [
+        ("Untitled-stems/drums.flac", "stem", "drums"),
+        ("Untitled-stems/rest.flac", "stem", "rest"),
+    ]
+    schema = json.loads(
+        (Path(__file__).resolve().parents[2] / "resources" / "schemas" / "record-1.schema.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    jsonschema.validate(record, schema)
+    export = entry["outputs"]["7"]["plenio_summary"][0]["markdown"]
+    assert "- stems: Untitled-stems/ (drums, rest)" in export
+    # the next export of the same title (the mixer's result from ComfyUI's cache, the export run again): the
+    # song and its stems folder take ' (2)' together
+    prompt["7"]["inputs"]["flac"] = True
+    server.run(prompt)
+    assert (song / "Untitled (2)-stems" / "drums.flac").is_file() and (song / "Untitled (2).flac").is_file()
 
 
 def test_saved_stems_never_overwrite_an_earlier_file(server: ComfyServer) -> None:

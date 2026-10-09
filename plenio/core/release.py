@@ -485,6 +485,25 @@ def _id3v23_pair(description: str, value: str) -> bytes:
         return b"\x01" + description.encode("utf-16") + b"\x00\x00" + value.encode("utf-16")
 
 
+STEMS_SUFFIX = "-stems"
+"""The folder next to a song that holds its stems marked *save* (``<name>-stems``)."""
+
+
+def feeds(prompt: Any, node_id: Any, output: int, class_type: str) -> bool:
+    """Whether output ``output`` of node ``node_id`` goes into a node of ``class_type`` in the executed
+    ``prompt`` (ComfyUI's API form: an input linked to it is ``[node_id, output]``)."""
+    if not isinstance(prompt, Mapping) or node_id is None:
+        return False
+    for node in prompt.values():
+        if not isinstance(node, Mapping) or node.get("class_type") != class_type:
+            continue
+        for value in (node.get("inputs") or {}).values():
+            if isinstance(value, list | tuple) and len(value) == 2 and str(value[0]) == str(node_id):
+                if value[1] == output:
+                    return True
+    return False
+
+
 def file_facts(path: Path) -> dict[str, Any]:
     import hashlib
 

@@ -18,7 +18,7 @@ Plenio installs no Python packages. When a feature needs one (faster-whisper), i
 
 ## Files Plenio writes
 
-- **ComfyUI's output folder** (`output/plenio` by default): the exported audio, cover art, sheet music PDF and release record; stems marked *save* in the Stem Mixer.
+- **ComfyUI's output folder** (`output/plenio` by default): the exported audio, cover art, sheet music PDF and release record; the stems marked *save* in the Stem Mixer, next to the song in `<name>-stems` (without an export in `output/plenio/stems`).
 - **ComfyUI's user folder** (`user/plenio`): your brief templates and creative modes, `config.toml`, and caches (lyrics ASR results, Local LLM answers) that make runs repeatable. The score editor keeps your sound presets in ComfyUI's own user data.
 - **The models folder**: the ASR model (`models/plenio/asr`).
 - **The temp folder**: a worker's job folder and a llama.cpp server's log while they run, removed afterwards.
