@@ -472,6 +472,34 @@ const pdfOk = (outcome) => !outcome.timeout && outcome.head === '%PDF-' && outco
   )
 }
 
+{
+  // GitHub issue #3: a manual document stayed manual for good (Use draft greyed out without a draft). With
+  // Nodes 2.0, as the reporter uses ComfyUI: the editor opens and Back to auto hands the lyrics back.
+  const check = 'Song Sheet: a manual document goes back to automatic (Nodes 2.0)'
+  consoleErrors = []
+  await page.evaluate(async () => {
+    await window.app.extensionManager.setting.set('Comfy.VueNodes.Enabled', true)
+    await window.app.loadGraphData({ last_node_id: 0, last_link_id: 0, nodes: [], links: [], groups: [], config: {}, extra: {}, version: 0.4 }, true, true, 'browser-check-back-to-auto')
+    const node = window.LiteGraph.createNode('PlenioSongSheet')
+    node.pos = [200, 150]
+    window.app.graph.add(node)
+    node.widgets.find((w) => w.name === 'sheet_state').value = JSON.stringify({ schema: 'plenio.sheet_state/1', docs: { lyrics: { state: 'manual', text: '[Verse]\nmy own words' } } })
+    window.app.graph.setDirtyCanvas(true, true)
+  })
+  await page.waitForTimeout(1500)
+  await page.locator('button.plenio-sheet-open').first().click()
+  const back = page.locator('button', { hasText: 'Back to auto' }).first()
+  await back.waitFor({ timeout: 15000 })
+  const enabled = await back.isEnabled()
+  await back.click()
+  await page.getByRole('button', { name: 'Apply', exact: true }).first().click()
+  await page.waitForTimeout(800)
+  const state = await page.evaluate(() => window.app.graph.nodes.find((n) => n.type === 'PlenioSongSheet').widgets.find((w) => w.name === 'sheet_state').value)
+  await page.evaluate(async () => { await window.app.extensionManager.setting.set('Comfy.VueNodes.Enabled', false) })
+  const ok = enabled && JSON.parse(state).docs.lyrics === undefined
+  record('Song Sheet', check, ok, ok ? 'manual -> auto on Apply' : `enabled ${enabled}, state ${state} ` + plenioErrors().join(' | '))
+}
+
 fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify(results, null, 1) + '\n')
 const failed = results.filter((r) => !r.ok)
 console.log(`\n${results.length - failed.length}/${results.length} checks passed; screenshots and results in ${OUT}`)

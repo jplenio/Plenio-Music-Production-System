@@ -42,7 +42,7 @@ Each **Song Sheet** shows the documents that go to YuE2, exactly as they will be
 | nothing | *auto* | the newest draft is used |
 | change the text | *edited* | your text is used while the draft stays the same; if the draft changes (new draft seed, new plan), the run **stops with a conflict** and asks you |
 | press *Make manual* | *manual* | your text is always used; the draft is not even computed |
-| press *Use draft* | *auto* | back to the draft |
+| press *Use draft* (*Back to auto* when no draft is known, as for a manual document) | *auto* | back to the draft; the next run computes it again |
 
 In a conflict you choose: keep your edit (manual), use the new draft, or merge by hand.
 

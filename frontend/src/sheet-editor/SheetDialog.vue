@@ -108,7 +108,8 @@ const scoreGate = ref<{ text: string; reason: string | null } | null>(null)
 const scoreBlock = computed(() => {
   const doc = working.find((d) => d.kind === 'score')
   const gate = scoreGate.value
-  return doc && gate?.reason && gate.text === doc.text ? gate.reason : null
+  // a score going back to automatic is not stored: its text does not block
+  return doc && doc.intent !== 'auto' && gate?.reason && gate.text === doc.text ? gate.reason : null
 })
 const fetchedNote = ref<AsrNote | null>(null)
 const revision = ref(0)
@@ -181,9 +182,20 @@ function badge(doc: WorkingDoc): string {
   return stored
 }
 
+/**
+ * *Use draft* - *Back to auto* while no draft is known (GitHub issue #3: a manual document stayed manual for
+ * good - the node computes no draft for a manual document, so *Use draft* never came back): the edit is
+ * discarded and the next run computes the document again (the writer, the plan or the transcription). The
+ * text stays in view until then.
+ */
 function useDraft(doc: WorkingDoc) {
   doc.intent = 'auto'
-  doc.text = draftOf(doc.kind) ?? ''
+  const draft = draftOf(doc.kind)
+  if (draft !== null) doc.text = draft
+}
+/** The document is the node's own text (not automatic): it can go back to the draft or to automatic. */
+function canGoBack(doc: WorkingDoc): boolean {
+  return draftOf(doc.kind) !== null || badge(doc) !== 'auto'
 }
 /**
  * *Make manual* - for the lyrics *Use my own lyrics* (plan §7): the writer is not consulted any more
@@ -501,7 +513,7 @@ onBeforeUnmount(() => {
       </header>
       <p v-if="!payload" class="hint">
         This sheet has not run yet, so there are no drafts to show. Run the workflow once, or enter text and use
-        <em>Make manual</em>.
+        <em>Make manual</em>; <em>Back to auto</em> hands a document back to the workflow.
       </p>
       <div v-if="confirmClose" class="confirm" role="alertdialog" aria-label="Unapplied changes">
         You have changes that are not applied yet.
@@ -517,8 +529,16 @@ onBeforeUnmount(() => {
             <h3>{{ LABELS[doc.kind] }}</h3>
             <span class="badge" :data-state="badge(doc)">{{ badge(doc) }}</span>
             <span class="spacer" />
-            <button :disabled="draftOf(doc.kind) === null" title="Discard your edit and use the draft" @click="useDraft(doc)">
-              Use draft
+            <button
+              :disabled="!canGoBack(doc)"
+              :title="
+                draftOf(doc.kind) !== null
+                  ? 'Discard your edit and use the draft'
+                  : 'Discard your text: the next run computes this document again (the writer, the plan or the transcription) and uses it'
+              "
+              @click="useDraft(doc)"
+            >
+              {{ draftOf(doc.kind) !== null ? 'Use draft' : 'Back to auto' }}
             </button>
             <button
               v-if="doc.kind === 'lyrics'"

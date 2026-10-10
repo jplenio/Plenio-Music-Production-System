@@ -12,6 +12,7 @@ Covers of songs longer than 5:00 work on a 16 GB card, and the stems you save in
 
 ### Fixed
 
+- **A manual document could not go back to automatic** (GitHub issue #3): *Use draft* in the Song Sheet editor stayed greyed out while no draft was known - and the node computes no draft for a manual document, nor before its first run - so a text once made manual (or edited before the first run) stayed for good. The button is now **Back to auto** then: the text is discarded on *Apply* and the next run computes the document again (the writer, the plan or the transcription).
 - **Covers of songs longer than 5:00** (owner's report): *Transcribe Score* refused a source of 5:15 on a 16 GB card ("needs a second pass, which does not fit this GPU"). That limit came from a measurement without inference mode; run as ComfyUI runs its nodes, SheetSage2 reads a 5:16 song - two 300-second windows - in under 40 s with about 2 GB of GPU memory, with the full beat grid for the lyrics. The node no longer refuses long sources.
 - The release record's schema (`resources/schemas/record-1.schema.json`) knows the sheet music (its `sheet_music` entry, the PDF among the files) and the stems (`role`: `sheet_music`, `stem`): a record with sheet music did not pass it. All 408 records of the owner's songs pass it now.
 

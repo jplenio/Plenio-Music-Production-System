@@ -12,6 +12,8 @@ The Song Sheet is the one place that decides which documents condition the music
 
 This is the precedence everywhere in Plenio: **manual > edited (while its draft is unchanged) > draft**. No model output ever replaces your text silently.
 
+**Back to automatic.** *Use draft* in the editor discards your text and takes the draft. A manual document has no draft to show (it is not computed), and neither has a sheet that has not run yet: then the button is **Back to auto** - press it and *Apply*, and the next run computes the document again (the writer, the plan or the transcription) and uses it.
+
 A draft that is not needed is not computed: with manual lyrics in a cover, Transcribe Lyrics does not run (unless another node still needs its language), and with a manual score SheetSage2 is not asked for a score.
 
 **Your own lyrics.** In the Lyrics tab, **Use my own lyrics** switches the document to *manual* in one click - the writer is not consulted any more, the text is yours, and the node's summary says so (`lyrics: yours (manual)`). Section tags (`[Verse]`, `[Chorus]`, …) can be inserted under the editor; see [Brief templates](brief-templates.md). In *new song every run*, a manual lyrics document is used for every song of the series (new titles and styles, the same words).
