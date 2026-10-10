@@ -86,6 +86,11 @@ def test_release_record_matches_schema(tmp_path: Path) -> None:
             },
             title="Neon",
             licences=[yue2.LICENCE],
+            # the workflow the run was queued with: opening the record continues the song in it
+            workflow={
+                "nodes": [{"id": 9, "type": "PlenioSongSheet", "widgets_values": ["continue", ""]}],
+                "links": [],
+            },
         )
     )
     data = json.loads(json.dumps(record, allow_nan=False))
@@ -95,6 +100,7 @@ def test_release_record_matches_schema(tmp_path: Path) -> None:
     assert (
         data["documents"]["lyrics"]["state"] == "manual" and data["files"][1]["converted_from_rate"] == 96000
     )
+    assert data["workflow"]["nodes"][0]["type"] == "PlenioSongSheet"
 
 
 def test_schema_ids_carry_the_code_versions() -> None:

@@ -2,6 +2,15 @@
 
 All notable changes of the current version and the one before. Versions follow semantic versioning; published Registry versions are immutable. Earlier versions (0.2.0 to 0.4.4): the [changelog of 0.4.4](https://github.com/jplenio/Plenio-Music-Production-System/blob/v0.4.4/CHANGELOG.md) and the [GitHub releases](https://github.com/jplenio/Plenio-Music-Production-System/releases).
 
+## Unreleased
+
+Go on with a song where you stopped: its release record opens it again.
+
+### Added
+
+- **Continue a song** (owner's request): **File > Continue a Plenio song…** lists the release records of the output folder, newest first, with cover, date, length and version (search, listen, *Open a record file…* for another folder); dropping a `<name>.plenio.json` onto ComfyUI does the same - ComfyUI alone took it for a workflow and loaded nothing. The song opens in a new workflow tab in the workflow it was made with, and its **title, style, lyrics and score go into the Song Sheets as manual**: the next run keeps them, a new take seed gives new takes of the same song, the score editor changes it, *Back to auto* hands a document back to the writer or the plan. An approval stays valid while the documents are the approved ones. Records made before this version open in **today's template** of their kind with the song's settings and seeds, found by what each node is (*Take seed*, *Song Sheet · Text* ...) although the templates' node ids changed between versions, a block's settings on the block's own fields, blocks the song ran turned on; nodes today's template no longer has are named. Checked on the owner's 420 records: 418 open in their template, with at most three nodes unplaced; a workflow of one's own from before gives its documents to the open workflow's Song Sheets ([guide](docs/user/concepts/continue-a-song.md)).
+- The **release record keeps the workflow** the run was queued with (`workflow`, secrets redacted like the prompt) - the lyrics lines placed by hand and the Guide notes included; the record schema knows it.
+
 ## 0.5.1 - 2026-10-10
 
 Covers of songs longer than 5:00 work on a 16 GB card, the stems you save in the Stem Mixer stay with their song, a Song Sheet document can always go back to automatic, and the section tags go where the cursor is.

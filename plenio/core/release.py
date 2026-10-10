@@ -529,6 +529,18 @@ def redact(value: Any) -> Any:
     return value
 
 
+def secret_inputs(prompt: Mapping[str, Any]) -> set[str]:
+    """The values of the prompt's inputs that :func:`redact` hides by their name (an API key in a node's
+    input): a copy of the workflow hides them too, where its widget values have no names."""
+    return {
+        value
+        for node in prompt.values()
+        if isinstance(node, Mapping) and isinstance(node.get("inputs"), Mapping)
+        for name, value in node["inputs"].items()
+        if isinstance(name, str) and isinstance(value, str) and value and _SECRET_KEY.search(name)
+    }
+
+
 MODEL_LICENCES = {
     "sheetsage2_bf16.safetensors": "CC BY-NC 4.0 (SheetSage2, Comfy-Org/YuE2 repackaging): non-commercial use only",
     "ar_lora_inst_v3abc_comfyui.safetensors": "CC BY-NC 4.0 (YuE2 instrumental adapter): non-commercial use only",
@@ -575,6 +587,9 @@ class RecordInput:
     licences: Sequence[str]
     sheet_music: Mapping[str, Any] | None = field(default=None)
     """The sheet music PDF the export asked for (``file``, ``paper``, ``size``, ``status``); ``None``: none."""
+    workflow: Mapping[str, Any] | None = field(default=None)
+    """The workflow the run was queued with, secrets redacted (``continuation.workflow_for_record``): opening
+    the record restores it exactly. ``None``: queued without one (the API)."""
 
 
 def record_fingerprint(record: Mapping[str, Any]) -> str:
@@ -614,5 +629,7 @@ def build_record(data: RecordInput) -> dict[str, Any]:
     }
     if data.sheet_music is not None:
         record["sheet_music"] = dict(data.sheet_music)
+    if data.workflow is not None:
+        record["workflow"] = dict(data.workflow)
     record["fingerprint"] = record_fingerprint(record)
     return record

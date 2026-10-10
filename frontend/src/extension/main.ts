@@ -1,8 +1,8 @@
 /**
  * Plenio frontend extension entry (built to web/js/plenio.js).
  *
- * Uses documented hooks only: registerExtension, getCustomWidgets,
- * beforeRegisterNodeDef, node callbacks and api events.
+ * Uses documented hooks only: registerExtension (with commands and menu commands), getCustomWidgets,
+ * beforeRegisterNodeDef, node callbacks, api events and app.loadGraphData.
  */
 // @ts-expect-error - provided by ComfyUI at runtime (scripts shim), kept external by the build
 import { api } from '../../../scripts/api.js'
@@ -13,6 +13,7 @@ import { type Fetcher, PlenioApiError } from '../api/client'
 import { chain, type ComfyApp, type ComfyNode } from '../shared/comfy'
 import type { AsrNote, SheetPayload } from '../shared/sheetSession'
 import { BRIEF_NODES, installBriefTemplatePanel } from './briefTemplate'
+import { CONTINUE_COMMAND, type ContinueHost, installRecordDrop, openContinueSong } from './continueSong'
 import { dynamicComboNames, restoreWidgetValues, savedWidgetValues } from './dynamicCombo'
 import { addEqCurve } from './eqWidget'
 import { MODE_BEFORE_0_2_2, migrateWidgetValues, renameWidgetValues } from './migrate'
@@ -41,6 +42,7 @@ interface ComfyApi extends Fetcher {
 const comfyApi = api as ComfyApi
 setFetcher(comfyApi)
 const comfyApp = app as ComfyApp
+const continueHost: ContinueHost = { app: comfyApp, fetcher: comfyApi }
 
 interface GraphNodes {
   nodes?: ComfyNode[]
@@ -119,6 +121,25 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
 ;(app as ComfyApp).registerExtension({
   name: EXTENSION_NAME,
   getCustomWidgets: () => ({ [SHEET_STATE_TYPE]: sheetStateWidget }),
+  // a song's release record opens its workflow again, its documents kept (continueSong.ts)
+  commands: [
+    {
+      id: CONTINUE_COMMAND,
+      label: 'Continue a Plenio song…',
+      icon: 'pi pi-history',
+      function: () =>
+        openContinueSong(continueHost).catch((error: unknown) => {
+          console.error('Plenio: the Continue a song dialog could not open', error)
+          comfyApp.extensionManager?.toast?.add({
+            severity: 'error',
+            summary: 'Continue a song',
+            detail: String(error instanceof Error ? error.message : error),
+            life: 15000
+          })
+        })
+    }
+  ],
+  menuCommands: [{ path: ['File'], commands: [CONTINUE_COMMAND] }],
   // the sheets' review stops depend on the linked brief's mode: known once the links are in place
   afterConfigureGraph: () => refreshRunStatus(),
   beforeRegisterNodeDef(nodeType, nodeData) {
@@ -183,6 +204,8 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
   },
   setup() {
     installStyles()
+    // a <name>.plenio.json dropped onto ComfyUI continues its song (instead of loading nothing)
+    installRecordDrop(continueHost)
     // Sent by the Song Sheet before it stops with a conflict or validation error.
     comfyApi.addEventListener('plenio.sheet', (event: CustomEvent) => {
       const payload = event.detail as SheetPayload

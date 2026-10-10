@@ -208,3 +208,43 @@ def test_without_a_score_there_is_no_sheet_music(server: ComfyServer) -> None:
     assert "sheet music: this release has no score" in outputs["plenio_summary"][0]["markdown"]
     off, _ = export(server, {"title": "Off", "lyrics": LYRICS, "score": SCORE}, sheet_music="off")
     assert off["plenio_notation"] == [] and "sheet music" not in off["plenio_summary"][0]["markdown"]
+
+
+def test_a_record_keeps_its_workflow_and_continues_the_song(server: ComfyServer) -> None:
+    # owner's request 2026-10-11: a song's release record opens its workflow again, the documents kept
+    workflow = {
+        "nodes": [
+            {"id": 1, "type": "PlenioSongSheet", "widgets_values": ["continue", ""], "properties": {}},
+            {"id": 3, "type": "PlenioExportRelease", "widgets_values": ["sheet-music", "{title}"]},
+        ],
+        "links": [],
+    }
+    docs = {"title": "Continue Me", "lyrics": LYRICS, "score": SCORE}
+    _outputs, folder = export(server, docs, sheet_music="off", workflow=workflow)
+    record = json.loads((folder / "Continue Me.plenio.json").read_text(encoding="utf-8"))
+    assert record["workflow"] == workflow and record["fingerprint"] == record_fingerprint(record)
+
+    relative = f"{folder.relative_to(server.output_dir).as_posix()}/Continue Me.plenio.json"
+    row = next(r for r in server.get("/plenio/records")["records"] if r["path"] == relative)
+    assert row["title"] == "Continue Me" and row["workflow"] is True
+    assert row["audio"] == relative.replace(".plenio.json", ".flac")
+
+    status, plan = server.request("POST", "/plenio/records/continue", {"path": relative})
+    assert status == 200 and plan["from"] == "record" and plan["workflow"] == workflow
+    state = json.loads(plan["sheets"]["1"])
+    assert state["docs"]["lyrics"] == {"state": "manual", "text": LYRICS}
+    assert set(state["docs"]) == {"title", "lyrics", "score"}
+
+    # a record dropped onto the page comes with the request; a path outside the output folder is refused
+    status, dropped = server.request(
+        "POST", "/plenio/records/continue", {"record": record, "name": "x.plenio.json"}
+    )
+    assert status == 200 and dropped["sheets"] == plan["sheets"]
+    status, refused = server.request(
+        "POST", "/plenio/records/continue", {"path": "../user/secret.plenio.json"}
+    )
+    assert status == 400 and "outside" in refused["error"]["message"]
+    status, refused = server.request(
+        "POST", "/plenio/records/continue", {"record": {"nodes": []}, "name": "w.json"}
+    )
+    assert status == 400 and "no Plenio release record" in refused["error"]["message"]

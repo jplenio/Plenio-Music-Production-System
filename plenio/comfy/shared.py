@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import secrets
 import threading
 import time
@@ -26,6 +27,22 @@ PACKAGE_ROOT = Path(__file__).resolve().parents[2]
 SERIES = Series(lambda: secrets.randbelow(9999) + 1)
 """The songs of the 'new song/cover every run' series of this server (``core.series``)."""
 RESOURCES = PACKAGE_ROOT / "resources"
+WORKFLOW_TEMPLATES = PACKAGE_ROOT / "example_workflows"
+
+
+@lru_cache(maxsize=1)
+def template_workflows() -> dict[str, dict[str, Any]]:
+    """The shipped templates by name (``1 · YuE2 · Song`` ...): a record made before records kept their
+    workflow is continued in the one its prompt matches (``core.continuation``)."""
+    workflows: dict[str, dict[str, Any]] = {}
+    for path in sorted(WORKFLOW_TEMPLATES.glob("*.json")):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(data, dict) and isinstance(data.get("nodes"), list):
+            workflows[path.stem] = data
+    return workflows
 
 
 @lru_cache(maxsize=1)

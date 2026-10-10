@@ -78,6 +78,12 @@
         "status": { "type": "string" }
       }
     },
+    "workflow": {
+      "description": "The workflow the run was queued with (secrets redacted): opening the record continues the song in it.",
+      "type": "object",
+      "required": ["nodes"],
+      "properties": { "nodes": { "type": "array" } }
+    },
     "prompt": {
       "type": ["object", "null"],
       "additionalProperties": {

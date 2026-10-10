@@ -72,7 +72,7 @@ Export writes into ComfyUI's output folder, `output/plenio/` (Enhance & Master: 
 - `<date> <title>.flac` (and MP3/WAV if chosen) - the mastered song, with tags
 - `<date> <title> (original).flac` - the unmastered take
 - `<date> <title>.jpg` - the cover, if Cover Art is on (it is also embedded in the FLAC and MP3 files)
-- `<date> <title>.plenio.json` - the release record: the documents, seeds and settings of the run, reports, measured loudness and model licences
+- `<date> <title>.plenio.json` - the release record: the documents, seeds and settings of the run, the workflow, reports, measured loudness and model licences. **File > Continue a Plenio song…** (or dropping the record onto ComfyUI) opens the song again where you stopped - see [Continue a song](concepts/continue-a-song.md)
 
 (Enhance & Master names the files after the title alone; change *naming* in Export as you like.)
 
