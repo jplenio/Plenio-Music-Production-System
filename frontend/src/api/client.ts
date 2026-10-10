@@ -232,3 +232,58 @@ export async function eqPresets(fetcher: Fetcher): Promise<{ manual: EqPreset[] 
   if (!response.ok) throw new PlenioApiError(`Request failed (${response.status})`)
   return (await response.json()) as { manual: EqPreset[] }
 }
+
+/** A release record of the output folder (*Continue a song*; ``core.continuation.summary``). */
+export interface RecordRow {
+  /** The record's path relative to the output folder (``/``-separated). */
+  path: string
+  title: string
+  created: string
+  plenio: string
+  seconds: number | null
+  /** The mastered audio and the cover, relative to the output folder. */
+  audio: string | null
+  cover: string | null
+  /** The record keeps the workflow it was made with (since this version). */
+  workflow: boolean
+}
+
+export async function listRecords(fetcher: Fetcher): Promise<RecordRow[]> {
+  const response = await fetcher.fetchApi('/plenio/records')
+  const data = await response.json()
+  if (!response.ok) {
+    const error = data?.error ?? {}
+    throw new PlenioApiError(error.message ?? `Request failed (${response.status})`, error.hint ?? null)
+  }
+  return (data?.records as RecordRow[] | undefined) ?? []
+}
+
+/** What opening a release record restores (``core.continuation.continuation``, ``plenio.continuation/1``). */
+export interface Continuation {
+  schema: string
+  title: string
+  created: string
+  plenio: string
+  source: string
+  documents: Record<string, string>
+  files: string[]
+  /** The graph to load; ``null``: none can be rebuilt (the documents go into the open workflow). */
+  workflow: Record<string, unknown> | null
+  from: 'record' | 'template' | 'none'
+  template: string | null
+  /** The Song Sheets' states by execution id. */
+  sheets: Record<string, string>
+  /** The settings by execution id and input name (a template only). */
+  values: Record<string, Record<string, unknown>>
+  /** The blocks to turn on (top-level node ids). */
+  activate: string[]
+  /** The record's nodes the template has no place for (their titles). */
+  unplaced: string[]
+}
+
+export function continueRecord(
+  fetcher: Fetcher,
+  request: { path: string } | { record: unknown; name: string }
+): Promise<Continuation> {
+  return post<Continuation>(fetcher, '/plenio/records/continue', request)
+}

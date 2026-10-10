@@ -79,6 +79,8 @@ const browser = await chromium.launch({
 })
 const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } })
 let consoleErrors = []
+/** The song the sheet music check exported (its record keeps the workflow): continued at the end. */
+let exported = null
 let renumbered = []
 page.on('console', (m) => {
   if (m.type() === 'error') consoleErrors.push(m.text())
@@ -394,6 +396,7 @@ const pdfOk = (outcome) => !outcome.timeout && outcome.head === '%PDF-' && outco
   const title = 'Browser Check Sheet'
   consoleErrors = []
   const queued = await queueSheetExport(folder, title)
+  exported = { folder, title }
   // wait for the record to say the PDF is saved (the page draws it after the export ran)
   const outcome = await sheetOutcome(folder, title, queued)
   const ok = pdfOk(outcome) && /saved/.test(outcome.summary)
@@ -526,6 +529,142 @@ const pdfOk = (outcome) => !outcome.timeout && outcome.head === '%PDF-' && outco
   await page.locator('.plenio-dialog button', { hasText: 'Discard' }).first().click({ timeout: 5000 }).catch(() => undefined)
   const ok = after.value === '[Verse]\nfirst line\n\n[Instrumental]\nsecond line\n' && after.rest === 'second line\n' && after.focused
   record('Song Sheet', check, ok, ok ? '[Instrumental] before the second line, the cursor after it' : JSON.stringify(after) + ' ' + plenioErrors().join(' | '))
+}
+
+// 8. continue a song (owner's request 2026-10-11): a release record opens the workflow the song was made
+// with, its documents kept in the Song Sheets - dropped onto ComfyUI, or picked in File > Continue a Plenio song….
+// An old record (no workflow inside) opens in today's template with the song's settings: the prompt the
+// restored workflow makes is the prompt the song was made with.
+{
+  const check = 'continue: a dropped record gives back the prompt the song was made with (template and own workflow)'
+  consoleErrors = []
+  const made = await page.evaluate(async () => {
+    const app = window.app
+    const name = '1 · YuE2 · Song'
+    const wf = await (await fetch(`/api/workflow_templates/Plenio-Music-Production-System/${encodeURIComponent(name)}.json`)).json()
+    await app.loadGraphData(wf, true, true, 'browser-check-continue-source')
+    const g = app.graph
+    const set = (node, name, value) => {
+      const widget = node.widgets.find((w) => w.name === name)
+      widget.value = value
+      widget.callback?.(value)
+    }
+    // settings at the top, a block's widget, a node inside a block, and a block turned on
+    set(g.nodes.find((n) => n.type === 'PlenioSongBrief'), 'description', 'a song to continue')
+    set(g.nodes.find((n) => n.title === 'Take seed'), 'seed', 4242)
+    set(g.getNodeById(4), 'thinking', true)
+    set(g.getNodeById(4).subgraph.getNodeById(505), 'max_tokens', 1234)
+    g.nodes.find((n) => String(n.title).startsWith('Stems')).mode = 0
+    const { output, workflow } = await app.graphToPrompt()
+    return { prompt: output, workflow }
+  })
+  const songRecord = (withWorkflow) => {
+    const texts = { title: 'Continued Song', style: 'pop, warm piano', lyrics: '[Verse]\nwe carry on', score: SHEET_SCORE }
+    const doc = (text) => ({ state: 'auto', status: 'auto', sha256: 'a'.repeat(64), text })
+    const reports = Object.entries(made.prompt)
+      .filter(([, n]) => n.class_type === 'PlenioSongSheet')
+      .map(([id, n]) => ({
+        schema: 'plenio.report/1',
+        kind: 'song_sheet',
+        status: 'ok',
+        data: { node_id: id, documents: Object.fromEntries(Object.keys(texts).filter((k) => Array.isArray(n.inputs[k])).map((k) => [k, doc(texts[k])])) }
+      }))
+    return {
+      schema: 'plenio.record/1', created: '2026-10-11T10:00:00+0200', title: 'Continued Song', versions: { plenio: '0.5.1' },
+      documents: Object.fromEntries(Object.entries(texts).map(([k, v]) => [k, doc(v)])), reports,
+      audio: { sample_rate: 44100, items: 1, seconds: 90, loudness: [], tags: {} }, files: [], licences: [],
+      prompt: made.prompt, fingerprint: 'f'.repeat(64), ...(withWorkflow ? { workflow: made.workflow } : {})
+    }
+  }
+  const outcomes = []
+  for (const withWorkflow of [false, true]) {
+    await page.evaluate(async () => {
+      await window.app.loadGraphData({ last_node_id: 0, last_link_id: 0, nodes: [], links: [], groups: [], config: {}, extra: {}, version: 0.4 }, true, true, 'browser-check-blank')
+    })
+    await page.evaluate((json) => {
+      const files = new DataTransfer()
+      files.items.add(new File([json], 'Continued Song.plenio.json', { type: 'application/json' }))
+      document.querySelector('canvas').dispatchEvent(new DragEvent('drop', { dataTransfer: files, bubbles: true, cancelable: true }))
+    }, JSON.stringify(songRecord(withWorkflow)))
+    // the plan is applied once the workflow is loaded: the sheets then hold the documents
+    await page
+      .waitForFunction(
+        () => {
+          const sheets = window.app.graph.nodes.filter((n) => n.type === 'PlenioSongSheet')
+          return sheets.length > 0 && sheets.every((n) => String(n.widgets.find((w) => w.name === 'sheet_state')?.value).includes('manual'))
+        },
+        null,
+        { timeout: 30000 }
+      )
+      .catch(() => undefined)
+    outcomes.push(
+      await page.evaluate(async (original) => {
+        const app = window.app
+        const now = (await app.graphToPrompt()).output
+        const diffs = []
+        for (const [id, node] of Object.entries(original)) {
+          if (!now[id]) diffs.push(`${id} ${node.class_type} missing`)
+          else
+            for (const [name, value] of Object.entries(node.inputs)) {
+              if (Array.isArray(value) || name === 'sheet_state') continue
+              if (JSON.stringify(now[id].inputs[name]) !== JSON.stringify(value)) diffs.push(`${id}.${name}`)
+            }
+        }
+        const extra = Object.keys(now).filter((id) => !original[id])
+        const states = app.graph.nodes.filter((n) => n.type === 'PlenioSongSheet').map((n) => JSON.parse(n.widgets.find((w) => w.name === 'sheet_state').value || '{"docs":{}}'))
+        const kept = states.flatMap((s) => Object.entries(s.docs).map(([k, d]) => `${k}:${d.state}`)).sort()
+        return { diffs, extra, kept, name: app.extensionManager?.workflow?.activeWorkflow?.filename }
+      }, made.prompt)
+    )
+  }
+  const want = ['lyrics:manual', 'score:manual', 'style:manual', 'title:manual']
+  const ok = outcomes.every((o) => !o.diffs.length && !o.extra.length && JSON.stringify(o.kept) === JSON.stringify(want) && String(o.name).startsWith('Continued Song'))
+  record('Continue a song', check, ok, ok ? 'same prompt both ways; title, style, lyrics and score kept (manual)' : JSON.stringify(outcomes) + ' ' + plenioErrors().join(' | '))
+}
+{
+  const check = 'continue: File > Continue a Plenio song… lists the exported song and opens it'
+  consoleErrors = []
+  await page.evaluate(async () => {
+    await window.app.loadGraphData({ last_node_id: 0, last_link_id: 0, nodes: [], links: [], groups: [], config: {}, extra: {}, version: 0.4 }, true, true, 'browser-check-blank')
+  })
+  await page.keyboard.press('Escape')
+  // the entry in the File menu
+  await page.locator('.comfy-menu-button-wrapper').first().click().catch(() => undefined)
+  const file = page.locator('[role=menuitem]', { hasText: /^File/ }).first()
+  if (await file.count()) await file.hover()
+  // a leaf entry: the File entry's own text holds its submenu's
+  const entry = page.locator('[role=menuitem]:not(:has([role=menuitem]))', { hasText: 'Continue a Plenio song' }).first()
+  const inMenu = (await entry.count()) > 0
+  if (inMenu) await entry.click()
+  else await page.evaluate(() => window.app.extensionManager.command.execute('Plenio.ContinueSong'))
+  const dialog = page.locator('.plenio-continue')
+  await dialog.waitFor({ timeout: 15000 })
+  const row = dialog.locator('.row', { hasText: exported?.title ?? 'Browser Check Sheet' }).first()
+  await row.waitFor({ timeout: 15000 })
+  await page.screenshot({ path: path.join(OUT, 'continue a song - dialog.png') })
+  // newest first: the rows' dates never rise
+  const dates = (await dialog.locator('.row .meta').allTextContents()).map((text) => text.trim().slice(0, 16))
+  const newestFirst = dates.length > 1 && dates.every((date, i) => i === 0 || date <= dates[i - 1])
+  await row.locator('button.primary').click()
+  await dialog.waitFor({ state: 'detached', timeout: 30000 }).catch(() => undefined)
+  await page
+    .waitForFunction(() => String(window.app.graph.nodes.find((n) => n.type === 'PlenioSongSheet')?.widgets.find((w) => w.name === 'sheet_state')?.value).includes('manual'), null, { timeout: 30000 })
+    .catch(() => undefined)
+  const restored = await page.evaluate(() => {
+    const app = window.app
+    const sheet = app.graph.nodes.find((n) => n.type === 'PlenioSongSheet')
+    const exporter = app.graph.nodes.find((n) => n.type === 'PlenioExportRelease')
+    const state = sheet ? JSON.parse(sheet.widgets.find((w) => w.name === 'sheet_state').value || '{}') : null
+    return { lyrics: state?.docs?.lyrics, folder: exporter?.widgets.find((w) => w.name === 'folder')?.value, name: app.extensionManager?.workflow?.activeWorkflow?.filename }
+  })
+  const ok =
+    inMenu &&
+    newestFirst &&
+    restored.lyrics?.state === 'manual' &&
+    restored.lyrics?.text === SHEET_LYRICS &&
+    restored.folder === exported?.folder &&
+    restored.name === exported?.title
+  record('Continue a song', check, ok, ok ? `newest first; opened "${restored.name}" with its lyrics (manual)` : JSON.stringify({ inMenu, newestFirst, dates: dates.slice(0, 5), restored, exported }) + ' ' + plenioErrors().join(' | '))
 }
 
 fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify(results, null, 1) + '\n')

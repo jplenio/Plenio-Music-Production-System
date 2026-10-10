@@ -22,8 +22,10 @@ Writes the finished song into the ComfyUI output folder with a **release record*
 
 **sheet music size** - how large the music is drawn: *standard* (default) about 3 bars a line - about 4 pages for a song of 3-4 minutes; *smaller* about 3-4 bars a line (3 pages), *compact* about 4 (2-3 pages), *large* 1-2 bars a line (about 13 pages, the biggest notes). The text shrinks less than the notes. The same sizes as *Export notation…* in the Song Sheet.
 
-**Release record** (`<name>.plenio.json`) - the documents with their hashes, the executed graph (secrets redacted), all connected reports, every written file with size and SHA-256 (the stems with their folder), the delivered audio's loudness (LUFS, true peak, loudness range), the tags, and the licences of the models used.
+**Release record** (`<name>.plenio.json`) - the documents with their hashes, the executed graph and the workflow it was queued with (secrets redacted), all connected reports, every written file with size and SHA-256 (the stems with their folder), the delivered audio's loudness (LUFS, true peak, loudness range), the tags, and the licences of the models used.
 
 With *sheet music* on the record also says which PDF belongs to the export, its paper and size, and whether it was saved.
+
+**Continue the song later**: *File > Continue a Plenio song…* lists the records of the output folder; dropping a record onto ComfyUI works too. The song opens in the workflow it was made with, its title, style, lyrics and score kept in the Song Sheets (*manual*) - new takes with another take seed, or edits from there.
 
 Samples above full scale are clipped in FLAC and MP3; the node warns. MP3 holds at most 48 kHz: hi-res audio (88.2/96/192 kHz) is converted for the MP3 only (to 44.1 or 48 kHz); FLAC and WAV keep the rate, and the node notes the conversion. Audio with NaN or infinite samples is refused. Put **Loudness & Dynamics** before the export.

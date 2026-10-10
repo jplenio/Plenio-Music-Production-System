@@ -15,13 +15,14 @@ from typing import Any
 
 from aiohttp import web
 
+from ..core import continuation, song_form, syllables
 from ..core import lyrics as lyrics_rules
 from ..core import score as score_rules
-from ..core import song_form, syllables
 from ..core.engines import rules_for
 from ..core.errors import PlenioError, PlenioUserError
 from ..core.sheet import DOCUMENT_KINDS, REVIEW_MODES, evaluate_sheet, parse_sheet_state
-from .shared import preset_library, system_report, template_library
+from . import host
+from .shared import preset_library, system_report, template_library, template_workflows
 from .sheet_music import JOBS, MAX_BYTES
 
 log = logging.getLogger("plenio")
@@ -410,6 +411,26 @@ async def export_sheet_music_pending(request: web.Request) -> web.StreamResponse
     return web.json_response({"jobs": JOBS.pending()})
 
 
+async def records_list(request: web.Request) -> web.StreamResponse:
+    """The release records in ComfyUI's output folder, newest first (*Continue a song*)."""
+    return web.json_response({"records": continuation.list_records(host.output_directory())})
+
+
+async def records_continue(request: web.Request) -> web.StreamResponse:
+    """What opening a release record restores (``core.continuation``): ``{"path": ...}`` - a record of the
+    output folder, as the list names it - or ``{"record": {...}, "name": ...}`` - a file opened or dropped."""
+    data = await read_json(request)
+    if isinstance(data.get("record"), dict):
+        record, source = data["record"], str(data.get("name") or "the dropped file")
+    else:
+        relative = _text(data, "path")
+        record, source = (
+            continuation.read_record(continuation.record_path(host.output_directory(), relative)),
+            relative,
+        )
+    return web.json_response(continuation.continuation(record, template_workflows(), source=source))
+
+
 ROUTES: tuple[tuple[str, str, Handler], ...] = (
     ("GET", "/plenio/system", system),
     ("POST", "/plenio/score/analyze", score_analyze),
@@ -428,6 +449,8 @@ ROUTES: tuple[tuple[str, str, Handler], ...] = (
     ("POST", "/plenio/eq/response", eq_response),
     ("POST", "/plenio/export/sheet-music", export_sheet_music),
     ("GET", "/plenio/export/sheet-music/pending", export_sheet_music_pending),
+    ("GET", "/plenio/records", records_list),
+    ("POST", "/plenio/records/continue", records_continue),
 )
 
 

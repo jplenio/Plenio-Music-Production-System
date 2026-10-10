@@ -85,6 +85,10 @@ export interface ComfyExtension {
   setup?: (app: ComfyApp) => void | Promise<void>
   /** After a workflow was loaded (nodes, links and widget values are in place). */
   afterConfigureGraph?: () => void | Promise<void>
+  /** Commands of the extension (the command palette, keybindings and ``menuCommands``). */
+  commands?: { id: string; label: string; icon?: string; function: () => void | Promise<void> }[]
+  /** Menu entries: the commands under a path of the top menu (``['Workflow']``). */
+  menuCommands?: { path: string[]; commands: string[] }[]
 }
 
 export interface ComfyApp {

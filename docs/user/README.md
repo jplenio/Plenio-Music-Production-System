@@ -14,6 +14,7 @@
 Concepts:
 
 - [Song Sheet](concepts/song-sheet.md) - which text and score reach the model, edits, conflicts, review
+- [Continue a song](concepts/continue-a-song.md) - open a song's release record again: its workflow, its documents kept, new takes or edits from there
 - [Brief templates](concepts/brief-templates.md) - what a template fills, the explicit actions, writing your own lyrics
 - [Refine (48 kHz)](concepts/refine.md) - the super-resolution stage: engines, settings, licence, limits
 - [Stems](concepts/stems.md) - split a song into vocals, drums, bass, other; the residual rule, the mixer, the buses

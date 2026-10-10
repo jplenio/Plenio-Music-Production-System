@@ -12,6 +12,7 @@ from ... import __version__
 from ...core import score as score_rules
 from ...core.audio import measure
 from ...core.audio.stems import SavedStems
+from ...core.continuation import workflow_for_record
 from ...core.engines import ENGINES
 from ...core.errors import PlenioUserError
 from ...core.files import atomic_write_bytes, atomic_write_text
@@ -317,6 +318,9 @@ class PlenioExportRelease(io.ComfyNode):
                     "frontend": host.frontend_version(),
                 },
                 prompt=cls.hidden.prompt,
+                workflow=workflow_for_record(
+                    (cls.hidden.extra_pnginfo or {}).get("workflow"), cls.hidden.prompt
+                ),
                 reports=report_dicts,
                 files=facts,
                 audio={

@@ -1,0 +1,111 @@
+/* Continue a song dialog. Scoped by .plenio-continue inside the shared .plenio-overlay (dialog.css). */
+.plenio-overlay .plenio-continue {
+  width: min(820px, 96vw);
+  height: min(720px, 90vh);
+}
+.plenio-continue header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 16px 8px;
+  border-bottom: 1px solid var(--border-color, #444);
+}
+.plenio-continue header .hint {
+  flex: 1;
+  color: var(--descrip-text, #999);
+  font-size: 12px;
+}
+.plenio-continue header .close {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 20px;
+  cursor: pointer;
+}
+.plenio-continue .toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px;
+}
+.plenio-continue .toolbar input[type='search'] {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, #555);
+  background: var(--comfy-input-bg, #1a1a1a);
+  color: inherit;
+}
+.plenio-continue button {
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, #555);
+  background: var(--comfy-input-bg, #2a2a2a);
+  color: inherit;
+  cursor: pointer;
+}
+.plenio-continue button.primary {
+  background: #2f6fb0;
+  border-color: #2f6fb0;
+  color: #fff;
+}
+.plenio-continue button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.plenio-continue .error {
+  margin: 0 16px 8px;
+  color: #f08080;
+}
+.plenio-continue .list {
+  flex: 1;
+  overflow: auto;
+  padding: 0 16px 16px;
+}
+.plenio-continue .empty {
+  color: var(--descrip-text, #999);
+}
+.plenio-continue .row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-color, #333);
+}
+.plenio-continue .cover {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 4px;
+  object-fit: cover;
+}
+.plenio-continue .cover.none {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--comfy-input-bg, #2a2a2a);
+  color: var(--descrip-text, #888);
+}
+.plenio-continue .facts {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.plenio-continue .title {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.plenio-continue .meta {
+  color: var(--descrip-text, #999);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.plenio-continue .play {
+  width: 32px;
+  padding: 4px 0;
+}

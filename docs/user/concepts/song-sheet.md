@@ -12,6 +12,8 @@ The Song Sheet is the one place that decides which documents condition the music
 
 This is the precedence everywhere in Plenio: **manual > edited (while its draft is unchanged) > draft**. No model output ever replaces your text silently.
 
+**A song continued later** ([Continue a song](continue-a-song.md)) comes back with its documents as *manual*: the next run keeps them; *Back to auto* gives one back to the workflow.
+
 **Back to automatic.** *Use draft* in the editor discards your text and takes the draft. A manual document has no draft to show (it is not computed), and neither has a sheet that has not run yet: then the button is **Back to auto** - press it and *Apply*, and the next run computes the document again (the writer, the plan or the transcription) and uses it.
 
 A draft that is not needed is not computed: with manual lyrics in a cover, Transcribe Lyrics does not run (unless another node still needs its language), and with a manual score SheetSage2 is not asked for a score.
