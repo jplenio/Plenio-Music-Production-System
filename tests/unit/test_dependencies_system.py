@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from plenio.core.dependencies import OptionalPackage, probe, require
@@ -127,6 +129,17 @@ def test_warnings_for_old_comfyui_cpu_only_and_missing_packages() -> None:
     assert "older than the supported 0.37.0" in text
     assert "'av' is not installed" in text
     assert "No GPU detected" in report.data["recommendations"][0]
+
+
+def test_a_model_in_a_folder_comfyui_does_not_search_is_named() -> None:
+    # a user's report 2026-10-10: models beside the folders of extra_model_paths.yaml were not found
+    path = str(Path("D:/AI/models/audio_encoders/sheetsage2_bf16.safetensors"))
+    report = check_system(facts(misplaced={"sheetsage2_bf16.safetensors": path}))
+    assert report.status is Status.WARNING
+    line = next(m for m in report.messages if "sheetsage2_bf16.safetensors" in m)
+    assert str(Path("D:/AI/models/audio_encoders")) in line
+    assert "extra_model_paths.yaml as 'audio_encoders: ...'" in line and "models/audio_encoders" in line
+    assert report.data["facts"]["misplaced"] == {"sheetsage2_bf16.safetensors": path}
 
 
 def test_parse_version() -> None:

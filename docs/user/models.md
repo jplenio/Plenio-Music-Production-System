@@ -51,7 +51,7 @@ The block stays bypassed there until you turn it on; the one file serves every t
 |---|---|---|---|
 | `model_bs_roformer_ep_17_sdr_9.6568.ckpt` | `audio_separation` | 527 MB | MIT (training code; vendored inference code in `plenio/third_party/msst`); the checkpoint was trained on MUSDB18-HQ, whose dataset terms are research-oriented |
 
-*Separate Stems* and *Stem Mixer* stay bypassed in every template until you turn them on. *2 · YuE2 · Cover* also uses the file for **Sung Pitch** (the source's vocal line in the score editor); without it the cover runs as before and the editor says that there is no sung pitch. Place the file in `ComfyUI/models/audio_separation` (create the folder if needed); the checkpoint is a plain `.ckpt` with its config inside, so no second file is required. Without it the template runs exactly as before.
+*Separate Stems* and *Stem Mixer* stay bypassed in every template until you turn them on. *2 · YuE2 · Cover* also uses the file for **Sung Pitch** (the source's vocal line in the score editor); without it the cover runs as before and the editor says that there is no sung pitch. Place the file in `ComfyUI/models/audio_separation` (create the folder if needed) - or in an `audio_separation` folder beside the model folders of your `extra_model_paths.yaml` (see [Existing model folders](#existing-model-folders)); the checkpoint is a plain `.ckpt` with its config inside, so no second file is required. Without it the template runs exactly as before.
 
 The block is **experimental** until its listening check (L2) is accepted: the separation itself is measured (MUSDB18-HQ SDR 9.66 reported by the authors), but how the stems are used here is not.
 
@@ -116,6 +116,17 @@ Some models are not ComfyUI model files but run in a separate Plenio worker. Ple
 ## Existing model folders
 
 If your models live outside `ComfyUI/models`, add the folders to ComfyUI's `extra_model_paths.yaml` (the standard ComfyUI way). Plenio's templates and the System Check find files there too.
+
+ComfyUI searches a folder of such a location only when the file names it - one line per folder, such as `checkpoints: checkpoints`. Plenio's own folders need no line: **`audio_separation`**, **`audio_sr`** and **`LLM`** are also searched beside every model folder ComfyUI knows. With
+
+```yaml
+shared:
+  base_path: D:/AI/models
+  checkpoints: checkpoints
+  text_encoders: text_encoders
+```
+
+the stem model can lie in `D:/AI/models/audio_separation` (a folder made while ComfyUI runs counts after pressing R). ComfyUI's own folders keep ComfyUI's rule: `audio_encoders` (SheetSage2), `diffusion_models`, `vae` ... need their line. When a model file the templates load lies in such a folder without its line, the **System Check** names the file and the folder, and says which line to add.
 
 ## Licences
 

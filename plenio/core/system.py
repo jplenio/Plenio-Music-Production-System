@@ -9,6 +9,7 @@ from __future__ import annotations
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 from .models import Inventory, ModelFile, readiness, size_text, template_names
@@ -45,6 +46,10 @@ class SystemFacts:
     config: Mapping[str, Any] = field(default_factory=dict)
     models: Mapping[str, int] = field(default_factory=dict)
     """Installed catalogue model files: file name -> size on disk."""
+    misplaced: Mapping[str, str] = field(default_factory=dict)
+    """Missing catalogue model files found in a folder ComfyUI does not search: file name -> its path (the
+    folder beside the known model folders, e.g. ``audio_encoders`` of an ``extra_model_paths.yaml``
+    location without its line)."""
     assets: Mapping[str, str] = field(default_factory=dict)
     """Plenio assets: id -> ``installed``, ``configured folder`` or ``not downloaded``."""
     llm: Mapping[str, Any] = field(default_factory=dict)
@@ -241,6 +246,14 @@ def check_system(facts: SystemFacts, catalogue: Mapping[str, ModelFile] | None =
                 messages.append(f"Optional package '{module}' is not installed.")
         else:
             messages.append(f"Package '{module}' {version}.")
+    for file, path in sorted(facts.misplaced.items()):
+        statuses.append(Status.WARNING)
+        folder = Path(path).parent
+        messages.append(
+            f"Model file '{file}' is in {folder}, but ComfyUI does not search that folder: list it in "
+            f"extra_model_paths.yaml as '{folder.name}: ...' beside your other model folders there, or move the "
+            f"file into ComfyUI's models/{folder.name}; then restart ComfyUI."
+        )
     for asset, state in sorted(facts.assets.items()):
         messages.append(f"Plenio asset '{asset}': {state}.")
     messages.extend(_llm_lines(facts.llm))
@@ -268,6 +281,7 @@ def check_system(facts: SystemFacts, catalogue: Mapping[str, ModelFile] | None =
             "packages": dict(facts.packages),
             "config": config,
             "models": dict(facts.models),
+            "misplaced": dict(facts.misplaced),
             "assets": dict(facts.assets),
             "llm": dict(facts.llm),
         },

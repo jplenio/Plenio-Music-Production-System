@@ -115,6 +115,7 @@ class ComfyServer:
         cpu: bool = True,
         models_dir: Path | None = None,
         extra_env: Mapping[str, str] | None = None,
+        extra_args: Iterable[str] = (),
     ):
         self.root = comfy_root
         self.base = base
@@ -122,6 +123,7 @@ class ComfyServer:
         self.cpu = cpu
         self.models_dir = models_dir
         self.extra_env = dict(extra_env or {})
+        self.extra_args = list(extra_args)
         self.port = free_port()
         self.url = f"http://127.0.0.1:{self.port}"
         self.process: subprocess.Popen[bytes] | None = None
@@ -157,6 +159,7 @@ class ComfyServer:
             command.append("--cpu")
         if self.models_dir is not None:
             command += ["--models-directory", str(self.models_dir)]
+        command += self.extra_args
         env = {k: v for k, v in os.environ.items() if k not in {"PYTHONPATH", "PYTHONHOME"}}
         # PLENIO_LLM_OTHER_APPS=0: Local LLM lists only the test server's own models/LLM, never the
         # models and servers of the user's other apps (the node-type snapshot stays machine-independent)

@@ -12,8 +12,11 @@ from plenio.core.models import (
     Inventory,
     by_file,
     load_catalogue,
+    misplaced_file,
+    model_roots,
     parse_catalogue,
     readiness,
+    sibling_folders,
     size_text,
     take_inventory,
     template_names,
@@ -166,3 +169,33 @@ def test_release_records_name_every_non_commercial_model_file() -> None:
     engine_checkpoints = {"yue2_3b_int8_convrot.safetensors", "yue2_3b_bf16.safetensors"}  # yue2.LICENCE
     non_commercial = {m.file for m in CATALOGUE.values() if m.non_commercial}
     assert non_commercial - engine_checkpoints == set(MODEL_LICENCES)
+
+
+def test_plenio_folders_beside_the_extra_model_folders(tmp_path: Path) -> None:
+    """A user's report 2026-10-10: an ``audio_separation`` folder beside the model folders of an
+    extra_model_paths.yaml location was not searched (ComfyUI reads only the folders the file names)."""
+    comfy, shared = tmp_path / "ComfyUI", tmp_path / "shared"
+    for folder in ("models/checkpoints", "models/audio_separation", "custom_nodes/LLM"):
+        (comfy / folder).mkdir(parents=True)
+    for folder in ("checkpoints", "loras", "audio_separation", "audio_encoders"):
+        (shared / folder).mkdir(parents=True)
+    (shared / "audio_encoders" / "sheetsage2_bf16.safetensors").write_bytes(b"")
+    registered = {
+        "checkpoints": [str(comfy / "models" / "checkpoints"), str(shared / "checkpoints")],
+        "loras": [str(shared / "loras")],
+        "audio_separation": [str(comfy / "models" / "audio_separation")],
+        "audio_encoders": [str(comfy / "models" / "audio_encoders")],
+        "custom_nodes": [str(comfy / "custom_nodes")],  # no model root: its parent is ComfyUI itself
+    }
+    assert model_roots(registered) == [comfy / "models", shared]
+    assert sibling_folders("audio_separation", registered) == [shared / "audio_separation"]
+    assert sibling_folders("audio_sr", registered) == []  # existing folders only
+    assert sibling_folders("LLM", registered) == []  # not beside custom_nodes
+    registered["audio_separation"].append(str(shared / "audio_separation"))
+    assert sibling_folders("audio_separation", registered) == []  # once registered, never twice
+    assert misplaced_file("audio_encoders", "sheetsage2_bf16.safetensors", registered) == (
+        shared / "audio_encoders" / "sheetsage2_bf16.safetensors"
+    )
+    assert misplaced_file("audio_encoders", "other.safetensors", registered) is None
+    registered["audio_encoders"].append(str(shared / "audio_encoders"))  # the yaml's line added
+    assert misplaced_file("audio_encoders", "sheetsage2_bf16.safetensors", registered) is None

@@ -8,6 +8,7 @@ inventory and the model guide.
 
 from __future__ import annotations
 
+import os
 import re
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
@@ -196,3 +197,56 @@ def size_text(size: int) -> str:
     if size >= 10**9:
         return f"{size / 10**9:.1f} GB"
     return f"{size / 10**6:.0f} MB"
+
+
+# --- model folders beside the ones ComfyUI knows -----------------------------------------
+
+NOT_MODEL_FOLDERS = frozenset({"custom_nodes", "datasets"})
+"""Keys of ComfyUI's ``folder_names_and_paths`` that hold no models (their parent is no model root)."""
+
+
+def _key(path: Path) -> str:
+    return os.path.normcase(os.path.abspath(str(path)))
+
+
+def model_roots(registered: Mapping[str, Iterable[str]]) -> list[Path]:
+    """The folders that hold ComfyUI's model folders: the parent of every registered model folder -
+    ``models`` itself and every location of ``extra_model_paths.yaml`` (``registered``: folder name ->
+    its paths, as ``folder_paths.folder_names_and_paths`` has them)."""
+    roots: list[Path] = []
+    seen: set[str] = set()
+    for name, paths in registered.items():
+        if name in NOT_MODEL_FOLDERS:
+            continue
+        for path in paths:
+            root = Path(path).parent
+            if _key(root) not in seen:
+                seen.add(_key(root))
+                roots.append(root)
+    return roots
+
+
+def sibling_folders(folder: str, registered: Mapping[str, Iterable[str]]) -> list[Path]:
+    """Existing folders named ``folder`` beside the model folders ComfyUI knows that it does not search for
+    ``folder`` - an ``audio_separation`` folder created next to the ``checkpoints`` of an
+    ``extra_model_paths.yaml`` location, which ComfyUI reads only with its own line in that file (a user's
+    report 2026-10-10: the stem model was found only in ComfyUI's own ``models`` folder)."""
+    known = {_key(Path(path)) for path in registered.get(folder, ())}
+    found: list[Path] = []
+    for root in model_roots(registered):
+        candidate = root / folder
+        if _key(candidate) not in known and candidate.is_dir():
+            known.add(_key(candidate))
+            found.append(candidate)
+    return found
+
+
+def misplaced_file(folder: str, file: str, registered: Mapping[str, Iterable[str]]) -> Path | None:
+    """A copy of ``file`` in a folder named ``folder`` beside the known model folders that ComfyUI does not
+    search for ``folder`` (``extra_model_paths.yaml`` lacks its line): where the System Check sends the user."""
+    known = {_key(Path(path)) for path in registered.get(folder, ())}
+    for root in model_roots(registered):
+        candidate = root / folder
+        if _key(candidate) not in known and (candidate / file).is_file():
+            return candidate / file
+    return None

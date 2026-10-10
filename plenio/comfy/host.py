@@ -22,7 +22,14 @@ from ..core.config import CONFIG_FILE_NAME, PlenioConfig
 from ..core.dependencies import probe
 from ..core.engines import EngineInfo, minimax, yue2
 from ..core.errors import PlenioError, PlenioModelError, PlenioUserError
-from ..core.models import ModelFile, size_text, take_inventory
+from ..core.models import (
+    AUDIO_MODEL_FOLDERS,
+    ModelFile,
+    misplaced_file,
+    sibling_folders,
+    size_text,
+    take_inventory,
+)
 from ..core.system import Device, SystemFacts
 
 log = logging.getLogger("plenio")
@@ -127,8 +134,6 @@ def register_model_folders() -> None:
     """Register ``models/plenio`` (assets), the audio model folders and ``models/LLM`` next to the other models."""
     import folder_paths
 
-    from ..core.models import AUDIO_MODEL_FOLDERS
-
     # also when extra_model_paths.yaml created the key first: models/LLM itself stays in the list
     folder_paths.add_model_folder_path(LLM_FOLDER, str(models_directory() / LLM_FOLDER))
 
@@ -143,12 +148,50 @@ def register_model_folders() -> None:
                 paths,
                 set(extensions) | set(folder_paths.supported_pt_extensions),
             )
+    add_sibling_folders()
+
+
+SIBLING_FOLDERS = (*AUDIO_MODEL_FOLDERS.values(), LLM_FOLDER)
+"""Plenio's own model folders, searched beside every model folder ComfyUI knows (not the asset folder:
+its downloads go to the first path only, ``asset_root``)."""
+
+
+def _registered() -> dict[str, list[str]]:
+    import folder_paths
+
+    return {name: list(entry[0]) for name, entry in folder_paths.folder_names_and_paths.items()}
+
+
+def add_sibling_folders() -> None:
+    """Search Plenio's own model folders also beside the model folders of ``extra_model_paths.yaml``.
+
+    ComfyUI reads a folder of such a location only when the file names it, and no user's file names
+    ``audio_separation``, ``audio_sr`` or ``LLM`` (a user's report 2026-10-10: the stem model in a new
+    ``audio_separation`` folder beside the other models was found only after copying it into ComfyUI's own
+    ``models`` folder). Existing folders only, after the default one (downloads still go there); run again
+    when the lists are read, so a folder made while ComfyUI runs counts after a refresh (R).
+    """
+    import folder_paths
+
+    registered = _registered()
+    for folder in SIBLING_FOLDERS:
+        for path in sibling_folders(folder, registered):
+            folder_paths.add_model_folder_path(folder, str(path))  # the folder keeps its file extensions
+            logging.info("Plenio: model folder %s also searched in %s", folder, path)
+
+
+def misplaced_model(folder: str, file: str) -> Path | None:
+    """A copy of a model file that ComfyUI does not find: in a folder named ``folder`` beside the known model
+    folders, for ComfyUI's own folders such as ``audio_encoders`` (Plenio leaves those to ComfyUI's rules)."""
+    return misplaced_file(folder, file, _registered())
 
 
 def model_files(folder: str) -> list[str]:
     """The files ComfyUI lists in a model folder (empty when the folder is unknown)."""
     import folder_paths
 
+    if folder in SIBLING_FOLDERS:
+        add_sibling_folders()
     try:
         return list(folder_paths.get_filename_list(folder))
     except KeyError:
@@ -552,6 +595,8 @@ def locate_model(folder: str, file: str) -> Path | None:
     """The installed path of a model file in one of ComfyUI's model folders (extra paths included)."""
     import folder_paths
 
+    if folder in SIBLING_FOLDERS:
+        add_sibling_folders()
     try:
         found = folder_paths.get_full_path(folder, file)
     except KeyError:  # a folder name this ComfyUI does not know
@@ -578,6 +623,7 @@ def system_facts(
 ) -> SystemFacts:
     import comfy.model_management
 
+    found = dict(take_inventory(models, locate_model).found) if models else {}
     try:
         import psutil
 
@@ -607,6 +653,11 @@ def system_facts(
         ram_total_bytes=ram,
         packages=probe(),
         config={**config.summary(), **({"error": config_error} if config_error else {})},
-        models=dict(take_inventory(models, locate_model).found) if models else {},
+        models=found,
+        misplaced={
+            model.file: str(path)
+            for model in (models or {}).values()
+            if model.file not in found and (path := misplaced_model(model.folder, model.file)) is not None
+        },
         assets=_asset_states(assets, config) if assets else {},
     )

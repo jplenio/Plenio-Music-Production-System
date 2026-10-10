@@ -18,7 +18,7 @@ Choose one and run - nothing else changes. Inside the block, a switch takes the 
 
 | In the list | Where it comes from |
 |---|---|
-| `models/LLM · …` | ComfyUI's `models/LLM` folder, and every `LLM:` folder of `extra_model_paths.yaml` |
+| `models/LLM · …` | ComfyUI's `models/LLM` folder, every `LLM:` folder of `extra_model_paths.yaml`, and an `LLM` folder beside the model folders of its locations |
 | `LM Studio files · …` | LM Studio's download folder (as set in LM Studio) |
 | `HF cache · …` | the Hugging Face cache - where Unsloth Studio and `llama-server -hf` download GGUFs |
 | `llama.cpp cache · …`, `GPT4All files · …` | those apps' model folders |
