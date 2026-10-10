@@ -244,7 +244,7 @@ export interface RecordRow {
   /** The mastered audio and the cover, relative to the output folder. */
   audio: string | null
   cover: string | null
-  /** The record keeps the workflow it was made with (since this version). */
+  /** The record keeps the workflow it was made with (since 0.6.0). */
   workflow: boolean
 }
 

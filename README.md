@@ -2,7 +2,7 @@
   <img src="assets/branding/banner.png" alt="Plenio Music Production System for ComfyUI - YuE2, YuE2 Cover and MiniMax Music 3" width="100%" />
 </p>
 
-# Plenio Music Production System 0.5 for ComfyUI
+# Plenio Music Production System 0.6 for ComfyUI
 
 <p align="center">
   <a href="https://youtu.be/XpNpks9ZCgE"><img src="assets/branding/0.5.0/spot.jpg" alt="Plenio - Your idea. Your song. Your control. Watch the spot on YouTube" width="80%" /></a>

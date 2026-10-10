@@ -1,7 +1,7 @@
 """Continue a song from its release record (``<name>.plenio.json``; owner's request 2026-10-11).
 
 Export Release writes a record next to every song: the documents it was made with (title, style, lyrics,
-score, artwork prompt), the reports and the API prompt it was queued with - and, from this version on, the
+score, artwork prompt), the reports and the API prompt it was queued with - and, since 0.6.0, the
 workflow itself. Opening a record again restores the workflow the song came from and puts the song's
 documents into its Song Sheets as *manual*: the next run keeps them instead of writing and planning anew, so
 work goes on where it stopped - new takes with another take seed, the score edited in the editor, the

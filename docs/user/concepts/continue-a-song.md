@@ -1,6 +1,6 @@
 # Continue a song
 
-Every export writes a **release record** next to the song: `<name>.plenio.json`. It holds what the song was made with - its title, style, lyrics and score, the settings and seeds of the run, the reports - and, from this version on, the **workflow** itself. Open the record again and you are back where you stopped: the workflow the song was made with, its documents in the Song Sheets.
+Every export writes a **release record** next to the song: `<name>.plenio.json`. It holds what the song was made with - its title, style, lyrics and score, the settings and seeds of the run, the reports - and, since 0.6.0, the **workflow** itself. Open the record again and you are back where you stopped: the workflow the song was made with, its documents in the Song Sheets.
 
 ## Opening a record
 
@@ -11,7 +11,7 @@ The song opens in a new workflow tab named after it. A message says what was res
 
 ## What comes back
 
-- **The workflow.** A record made with this version keeps the workflow it was queued with: every setting, every seed, the blocks you had on or off, the lyrics lines you placed by hand and the Guide notes. A record from an older version has the run's settings but not the workflow: it opens in **today's template** of that kind (*1 · YuE2 · Song*, *2 · YuE2 · Cover* ...) with the song's settings - found by what each node is (*Take seed*, *Song Sheet · Text* ...), so they land in the right place although the templates changed since. The few nodes today's template no longer has are named in the message.
+- **The workflow.** A record made with 0.6.0 or later keeps the workflow it was queued with: every setting, every seed, the blocks you had on or off, the lyrics lines you placed by hand and the Guide notes. A record from an earlier version has the run's settings but not the workflow: it opens in **today's template** of that kind (*1 · YuE2 · Song*, *2 · YuE2 · Cover* ...) with the song's settings - found by what each node is (*Take seed*, *Song Sheet · Text* ...), so they land in the right place although the templates changed since. The few nodes today's template no longer has are named in the message.
 - **The documents, kept.** Title, style, lyrics and score go into the Song Sheets as *manual*: the next run uses them as they are instead of writing and planning anew. An approval the sheet had stays valid as long as the documents are the ones approved.
 - Seeds stay as they were: run again unchanged and you get the same takes.
 
