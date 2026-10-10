@@ -4,7 +4,7 @@
  * Working copies are edited here and written to the node's sheet_state on Apply; the
  * backend resolves, validates and fingerprints them (the same function the node runs).
  */
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 
 import { type Fetcher, type GuideNote, PlenioApiError, getAsrNote, resolveSheet } from '../api/client'
 import {
@@ -26,7 +26,7 @@ import {
   withApproval
 } from '../shared/sheetSession'
 import { type DocumentKind, type SheetState, serializeState } from '../shared/sheetState'
-import { SECTION_TAGS, withTag } from '../shared/lyricsTags'
+import { SECTION_TAGS, insertTag as tagAt } from '../shared/lyricsTags'
 import { LINE_BREAK, changedWords, wordDiff } from '../shared/wordDiff'
 import {
   DIALOG_MARGIN,
@@ -206,10 +206,29 @@ function makeManual(doc: WorkingDoc) {
   doc.intent = 'manual'
 }
 
-/** Append a section tag as its own line (YuE2 sings section by section; see Score). */
+/** The text boxes of the documents, and those the user has been in (their cursor counts). */
+const boxes = new Map<DocumentKind, HTMLTextAreaElement>()
+const visited = new Set<DocumentKind>()
+function boxRef(kind: DocumentKind, el: unknown): void {
+  if (el instanceof HTMLTextAreaElement) boxes.set(kind, el)
+  else boxes.delete(kind)
+}
+
+/**
+ * Insert a section tag as its own line at the cursor (YuE2 sings section by section; see Score) - at the end
+ * while the user has not been in the text yet. The cursor then stands where the section's first line goes.
+ */
 function insertTag(doc: WorkingDoc, tag: string): void {
-  doc.text = withTag(doc.text, tag)
+  const box = boxes.get(doc.kind)
+  const at = box && visited.has(doc.kind) ? box.selectionStart : doc.text.length
+  const next = tagAt(doc.text, tag, at)
+  doc.text = next.text
   onInput(doc)
+  void nextTick(() => {
+    if (!box?.isConnected) return
+    box.focus()
+    box.setSelectionRange(next.caret, next.caret)
+  })
 }
 function keepEdit(doc: WorkingDoc) {
   doc.intent = 'manual'
@@ -581,15 +600,26 @@ onBeforeUnmount(() => {
           />
           <textarea
             v-else
+            :ref="(el) => boxRef(doc.kind, el)"
             v-model="doc.text"
             :rows="rowsOf(doc.kind)"
             spellcheck="false"
             :aria-label="LABELS[doc.kind]"
+            @focus="visited.add(doc.kind)"
             @input="onInput(doc)"
           />
           <p v-if="doc.kind === 'lyrics'" class="tag-helpers">
             <span>Section tags (the model sings section by section):</span>
-            <button v-for="tag in SECTION_TAGS" :key="tag" :title="`Add [${tag}]`" @click="insertTag(doc, tag)">
+            <button
+              v-for="tag in SECTION_TAGS"
+              :key="tag"
+              :title="
+                tag === 'Instrumental'
+                  ? 'Insert [Instrumental] at the cursor: a section without words (an interlude)'
+                  : `Insert [${tag}] at the cursor`
+              "
+              @click="insertTag(doc, tag)"
+            >
               [{{ tag }}]
             </button>
             <span v-if="doc.intent === 'manual'" class="facts">the writer is not consulted - these are your lyrics</span>

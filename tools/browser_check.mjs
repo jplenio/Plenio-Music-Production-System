@@ -500,6 +500,34 @@ const pdfOk = (outcome) => !outcome.timeout && outcome.head === '%PDF-' && outco
   record('Song Sheet', check, ok, ok ? 'manual -> auto on Apply' : `enabled ${enabled}, state ${state} ` + plenioErrors().join(' | '))
 }
 
+{
+  // GitHub issue #3 (follow-up): the section tag buttons insert where the cursor is, not at the end - with a real
+  // mouse click, which takes the focus from the text first - and [Instrumental] is one of them.
+  const check = 'Song Sheet: section tags go where the cursor is'
+  consoleErrors = []
+  await page.evaluate(async () => {
+    await window.app.loadGraphData({ last_node_id: 0, last_link_id: 0, nodes: [], links: [], groups: [], config: {}, extra: {}, version: 0.4 }, true, true, 'browser-check-tags')
+    const node = window.LiteGraph.createNode('PlenioSongSheet')
+    node.pos = [200, 150]
+    window.app.graph.add(node)
+    node.widgets.find((w) => w.name === 'sheet_state').value = JSON.stringify({ schema: 'plenio.sheet_state/1', docs: { lyrics: { state: 'manual', text: '[Verse]\nfirst line\nsecond line\n' } } })
+    window.app.graph.setDirtyCanvas(true, true)
+  })
+  await page.waitForTimeout(1000)
+  await page.locator('button.plenio-sheet-open').first().click()
+  const box = page.locator('.plenio-dialog textarea').first()
+  await box.waitFor({ timeout: 15000 })
+  await box.click()
+  await box.evaluate((el) => el.setSelectionRange(el.value.indexOf('second'), el.value.indexOf('second')))
+  await page.locator('button', { hasText: '[Instrumental]' }).first().click()
+  await page.waitForTimeout(300)
+  const after = await box.evaluate((el) => ({ value: el.value, rest: el.value.slice(el.selectionStart), focused: document.activeElement === el }))
+  await page.locator('.plenio-dialog footer button', { hasText: 'Close' }).first().click()
+  await page.locator('.plenio-dialog button', { hasText: 'Discard' }).first().click({ timeout: 5000 }).catch(() => undefined)
+  const ok = after.value === '[Verse]\nfirst line\n\n[Instrumental]\nsecond line\n' && after.rest === 'second line\n' && after.focused
+  record('Song Sheet', check, ok, ok ? '[Instrumental] before the second line, the cursor after it' : JSON.stringify(after) + ' ' + plenioErrors().join(' | '))
+}
+
 fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify(results, null, 1) + '\n')
 const failed = results.filter((r) => !r.ok)
 console.log(`\n${results.length - failed.length}/${results.length} checks passed; screenshots and results in ${OUT}`)

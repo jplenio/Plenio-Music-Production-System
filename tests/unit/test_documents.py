@@ -177,6 +177,19 @@ def test_style_rules() -> None:
     assert any("vocals" in e for e in errors) and any("language" in e for e in errors)
 
 
+def test_style_length_is_a_hint_up_to_120_words() -> None:
+    # GitHub issue #3: "errored at the 40 token limit" - 40 words is the target, never an error
+    eighty = ", ".join(["warm"] * 80)
+    findings = yue2.check_style(eighty, instrumental=False)
+    assert not severities(findings, "error")
+    assert any("not a limit" in w and "120" in w for w in severities(findings, "warning"))
+    assert not severities(yue2.check_style(", ".join(["warm"] * 60), instrumental=False), "warning")
+    assert any(
+        "at most 120" in e
+        for e in severities(yue2.check_style(", ".join(["warm"] * 121), instrumental=False), "error")
+    )
+
+
 def test_voice_types_count_as_vocal_character_but_their_instruments_do_not() -> None:
     sung = "English, acoustic folk, warm male baritone, fingerpicked guitar, 121 BPM"
     assert not severities(yue2.check_style(sung, instrumental=False), "info")  # the Phase 4B false info

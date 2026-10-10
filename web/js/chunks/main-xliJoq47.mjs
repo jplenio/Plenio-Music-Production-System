@@ -2000,7 +2000,7 @@ const us = (e, t, n) => {
   async function y() {
     const S = $e(r);
     S === null && (s.textContent = "The stored state is unreadable; it will be replaced when you apply.");
-    const E = xe(String(e.id)), u = (e.inputs ?? []).filter((L) => L.link != null).map((L) => L.name), H = S ?? { schema: "plenio.sheet_state/1", docs: {} }, $ = E?.owned ?? Qo(u, H), g = String(e.widgets?.find((L) => L.name === "review")?.value ?? "continue"), m = g === "as the brief says" ? E?.review ?? "continue" : g, b = () => nr(import.meta.url, rr), { openSheetDialog: v } = await nt(() => import("./open-BbKqtf0L.mjs"), b), { parseGuide: T, serializeGuide: M } = await nt(() => import("./tracks-DxmZeggM.mjs"), b), { parseShift: V, parseSpans: D } = await nt(() => import("./lyricPlacement-rAf-x_fn.mjs"), b);
+    const E = xe(String(e.id)), u = (e.inputs ?? []).filter((L) => L.link != null).map((L) => L.name), H = S ?? { schema: "plenio.sheet_state/1", docs: {} }, $ = E?.owned ?? Qo(u, H), g = String(e.widgets?.find((L) => L.name === "review")?.value ?? "continue"), m = g === "as the brief says" ? E?.review ?? "continue" : g, b = () => nr(import.meta.url, rr), { openSheetDialog: v } = await nt(() => import("./open-D_AQCBqY.mjs"), b), { parseGuide: T, serializeGuide: M } = await nt(() => import("./tracks-DxmZeggM.mjs"), b), { parseShift: V, parseSpans: D } = await nt(() => import("./lyricPlacement-rAf-x_fn.mjs"), b);
     if (!rt) throw new Error("Plenio: API not initialised");
     let R = null;
     try {

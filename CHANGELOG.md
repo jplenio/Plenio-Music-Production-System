@@ -2,13 +2,15 @@
 
 All notable changes of the current version and the one before. Versions follow semantic versioning; published Registry versions are immutable. Earlier versions (0.2.0 to 0.4.4): the [changelog of 0.4.4](https://github.com/jplenio/Plenio-Music-Production-System/blob/v0.4.4/CHANGELOG.md) and the [GitHub releases](https://github.com/jplenio/Plenio-Music-Production-System/releases).
 
-## 0.5.1 - 2026-10-09
+## 0.5.1 - 2026-10-10
 
-Covers of songs longer than 5:00 work on a 16 GB card, and the stems you save in the Stem Mixer stay with their song.
+Covers of songs longer than 5:00 work on a 16 GB card, the stems you save in the Stem Mixer stay with their song, a Song Sheet document can always go back to automatic, and the section tags go where the cursor is.
 
 ### Changed
 
 - **Stems next to the song** (owner's request): the strips marked *save* in the **Stem Mixer** are written by **Export Release** next to the song, into a folder named after it with `-stems` - for `output/plenio/My Song.flac` the stems are `output/plenio/My Song-stems/drums.flac`, `vocals.flac` ... (a batch of takes: `drums take 1.flac` ...), 24-bit FLAC with the song's tags and the title *My Song (drums)*. The folder takes the song's number with it (`My Song (2)-stems`), so nothing is overwritten, and the release record lists every stem file. The templates need no change: the Stem Mixer's report already goes into the export. In a workflow without an Export Release that takes the mixer's report the stems go to `output/plenio/stems` as before.
+- **Section tags at the cursor** (GitHub issue #3): the tag buttons under the lyrics editor insert the tag as its own line where the cursor is - after a blank line between sections; inside a line they break it there - and leave the cursor where the section's first line goes. Before you click into the text they append at the end, as before. A tag can be added more than once (a second *[Verse]*). New button **[Instrumental]**: a section without words between the sung ones.
+- **The style's length is a hint, not a limit** (GitHub issue #3): YuE2's style aims at about 40 words - the target the writer is given. A longer style is used: above 60 words the sheet warns, only above 120 words is it an error. The messages now say so (*a hint, not a limit: up to 120 are accepted*); the error read *keep it under 120 (target 40)*.
 
 ### Fixed
 

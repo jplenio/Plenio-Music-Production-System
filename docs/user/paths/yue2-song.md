@@ -74,7 +74,7 @@ The audio itself is not guaranteed free of voice-like sounds. To measure it, add
 
 ## What the checks mean
 
-- **Style**: one comma-separated line of about 40 words; no song structure, timing or negations.
+- **Style**: one comma-separated line of about 40 words; no song structure, timing or negations. The 40 words are a target, not a limit: above 60 words the sheet warns, above 120 it is an error.
 - **Lyrics**: `[Tag]` lines with sung lines beneath; no stage directions or repeat marks.
 - **Score length**: YuE2 plans roughly 8-10 seconds per sung line. If the plan is much longer or shorter than the brief's length, the score sheet warns.
 - **Budget**: style, lyrics and score share YuE2's context of 24 576 tokens with the music (25 tokens per second). The score sheet shows how many seconds of music fit.

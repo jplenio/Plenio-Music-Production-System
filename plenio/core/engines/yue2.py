@@ -250,13 +250,18 @@ def check_style(style: str, *, instrumental: bool) -> list[Finding]:
     if words > STYLE_MAX_WORDS:
         findings.append(
             error(
-                f"The style has {words} words; keep it under {STYLE_MAX_WORDS} (target {STYLE_TARGET_WORDS}).",
+                f"The style has {words} words; YuE2 takes at most {STYLE_MAX_WORDS} (about {STYLE_TARGET_WORDS} work best: "
+                "genre, instruments, mood, voice and tempo).",
                 "style",
             )
         )
     elif words > STYLE_WARN_WORDS:
         findings.append(
-            warning(f"The style has {words} words; YuE2 works best with about {STYLE_TARGET_WORDS}.", "style")
+            warning(
+                f"The style has {words} words; YuE2 works best with about {STYLE_TARGET_WORDS} (a hint, not a "
+                f"limit: up to {STYLE_MAX_WORDS} are accepted).",
+                "style",
+            )
         )
     if "\n" in text:
         findings.append(warning("The style spans several lines; use one comma-separated line.", "style"))

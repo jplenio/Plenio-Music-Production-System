@@ -42,7 +42,7 @@ The predecessor toolkit used the word `custom` in `key` and `meter` to mean "let
 The lyrics are a document of the Song Sheet like any other, and you can take them over completely:
 
 - **Use my own lyrics** (Lyrics tab) switches the document to *manual*: the writer is not consulted any more, and these words reach the model unchanged;
-- the **section tags** under the editor (`[Intro]`, `[Verse]`, `[Pre-Chorus]`, `[Chorus]`, `[Bridge]`, `[Outro]`) insert the tags YuE2 sings section by section;
+- the **section tags** under the editor (`[Intro]`, `[Verse]`, `[Pre-Chorus]`, `[Chorus]`, `[Bridge]`, `[Instrumental]`, `[Outro]`) insert the tags YuE2 sings section by section, as their own line where the cursor is (at the end before you click into the text); `[Instrumental]` is a section without words;
 - the node's summary and the App-mode sheet button show **lyrics: yours (manual)**;
 - an *edited* lyrics text is protected too: when the upstream draft changes, the run **stops with a conflict** instead of replacing your words.
 
