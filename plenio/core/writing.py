@@ -116,6 +116,9 @@ class Request:
     """The lyrics must have exactly ``sections`` (a cover's score defines them)."""
     sparse_lines: int = 0
     """Sparse vocals: the most sung lines the lyrics should have (``core.lyrics.sparse_line_limit``); 0 no limit."""
+    sound_words: tuple[str, ...] = ()
+    """Words of the brief's genre, mood and tempo: a proposed title with one of them describes the sound, not the
+    song, and is not picked while others are left (``pick_title``)."""
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -204,6 +207,7 @@ def compose(
         fixed_title.strip(),
         lyrics_mode="tags" if brief.instrumental else "write",
         sparse_lines=lyrics_rules.sparse_line_limit(brief.target_seconds) if brief.sparse else 0,
+        sound_words=sound_words(brief),
     )
     words = (
         "the brief's description and theme"
@@ -307,14 +311,17 @@ def sparse_example(sections: Sequence[str]) -> str:
 
 
 def title_rule(source: str) -> str:
-    """The writer's rule for the titles; ``source``: what the song's words are (``"the lyrics"`` ...)."""
+    """The writer's rule for the titles; ``source``: what the song's words are (``"the lyrics"`` ...). A title says
+    what the song is about, never how it sounds (owner's request 2026-10-31: titles had drifted towards the style -
+    "Smooth Jazz Late Night")."""
     return (
         f"- Titles: when the rest is written, think of {TITLE_CANDIDATES} truly different titles for the song "
-        "(TITLES below), each 1 to 6 words, no quotes. Take them, in this order, from (a) "
-        f"{source}: what it is about, its central image, a striking phrase, an object, a place or a feeling in it "
-        "- not only the hook of the chorus; (b) a title or theme the brief gives, as a starting point; (c) the "
-        "genre, the mood, the voice and the tempo. Mix them: concrete and poetic, short and long, a name, a "
-        "question, an image. Avoid the most obvious title and worn-out song words ("
+        f"(TITLES below), each 1 to 6 words, no quotes. Every title comes from {source}: what it is about, its "
+        "story, its central image, a striking phrase, a person, an object, a place or a moment in it - not only "
+        "the hook of the chorus. A title or theme the brief gives is a starting point. A title names what the "
+        "song is about, never how it sounds: no genre, style, instrument, tempo or mood words (not 'Smooth Jazz "
+        "Night', 'Lofi Dreams', 'Midnight Groove', 'Acoustic Ballad'). Mix them: concrete and poetic, short and "
+        "long, a name, a question, an image. Avoid the most obvious title and worn-out song words ("
         + ", ".join(WORN_TITLE_WORDS)
         + "). Plenio picks one of them at random."
     )
@@ -476,6 +483,7 @@ def _compose_cover(
         kind="cover",
         lyrics_mode=mode,
         enforce_sections=mode == "write",
+        sound_words=sound_words(brief),
     )
     tempo = (
         f" The source's tempo is {score_tempo} BPM: write exactly '{score_tempo} BPM'." if score_tempo else ""
@@ -761,20 +769,62 @@ def _title_key(title: str) -> str:
     return re.sub(r"[\W_]+", " ", title).strip().casefold()
 
 
+MUSIC_WORDS = frozenset(
+    """
+    music song songs tune tunes melody melodies rhythm rhythms beat beats groove grooves vibe vibes tempo bpm jam
+    ballad anthem lullaby serenade instrumental acoustic lofi lo-fi chill smooth jazz jazzy blues bluesy rock pop
+    funk funky soul disco techno house trance synth synthwave wave rap hiphop hip-hop metal punk reggae swing bossa
+    samba tango waltz polka folk country gospel orchestra orchestral symphony piano guitar guitars sax saxophone
+    drum drums bass strings violin cello trumpet choir remix mix
+    """.split()
+)
+"""Words that name a sound, a genre or an instrument: a title made of them describes how a song sounds."""
+_TITLE_WORD = re.compile(r"[^\W\d_]+(?:[-'][^\W\d_]+)*")
+
+
+def sound_words(brief: Any) -> tuple[str, ...]:
+    """The words of a brief's genre, mood and tempo (three letters at least): a title with one of them names the
+    sound."""
+    text = " ".join(str(getattr(brief, name, "") or "") for name in ("genre", "mood", "tempo"))
+    return tuple(sorted({w for w in (m.casefold() for m in _TITLE_WORD.findall(text)) if len(w) >= 3}))
+
+
+def _words(text: str) -> set[str]:
+    return {w.casefold() for w in _TITLE_WORD.findall(text) if len(w) >= 3}
+
+
 def pick_title(
-    candidates: Sequence[str], taken: Iterable[str] = (), *, seed_text: str = ""
+    candidates: Sequence[str],
+    taken: Iterable[str] = (),
+    *,
+    seed_text: str = "",
+    sound: Iterable[str] = (),
+    lyrics: str = "",
 ) -> tuple[str, str]:
     """One of the writer's titles at random - not one a song has already (``taken``) while others are left,
-    and seeded by the answer, so the same answer gives the same title. The title and a note why."""
+    and seeded by the answer, so the same answer gives the same title. The title and a note why.
+
+    A title that names the sound - a word of the brief's genre, mood or tempo (``sound``) or of ``MUSIC_WORDS``
+    that the ``lyrics`` do not sing - is left out while others are left (owner's request 2026-10-31: the title is
+    what the song is about; a song about a guitar may still be called so)."""
     if not candidates:
         return "", ""
     used = {_title_key(t) for t in taken}
     fresh = [t for t in candidates if _title_key(t) not in used]
     pool = fresh or list(candidates)
+    sung = _words(lyrics)
+    soundish = (set(sound) | MUSIC_WORDS) - sung
+    about = [t for t in pool if not _words(t) & soundish]
+    notes: list[str] = []
+    skipped = len(candidates) - len(fresh)
+    if skipped and fresh:
+        notes.append(f"{skipped} left out: a song has it already")
+    if about and len(about) < len(pool):
+        notes.append(f"{len(pool) - len(about)} left out: they name the sound, not the song")
+        pool = about
     seed = int(hashlib.sha256(seed_text.encode("utf-8")).hexdigest()[:16], 16)
     title = pool[random.Random(seed).randrange(len(pool))]
-    skipped = len(candidates) - len(fresh)
-    left_out = f" ({skipped} left out: a song has it already)" if skipped and fresh else ""
+    left_out = f" ({'; '.join(notes)})" if notes else ""
     return title, f"the title was picked at random from {len(candidates)} the writer proposed{left_out}"
 
 
@@ -814,7 +864,13 @@ def parse_draft(text: str, request: Request, taken: Iterable[str] = ()) -> Draft
         )
     title = request.fixed_title or blocks.get("TITLE", "").split("\n")[0].strip().strip("\"'“”*# ")
     if not request.fixed_title and blocks.get("TITLES"):
-        picked, why = pick_title(title_candidates(blocks["TITLES"]), taken, seed_text=body)
+        picked, why = pick_title(
+            title_candidates(blocks["TITLES"]),
+            taken,
+            seed_text=body,
+            sound=request.sound_words,
+            lyrics=blocks.get("LYRICS", ""),
+        )
         if picked:
             title = picked
             notes.append(why)
