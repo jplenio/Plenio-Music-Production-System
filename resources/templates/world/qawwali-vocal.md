@@ -8,6 +8,7 @@ vocals: sung
 language: Urdu
 voice: male choir
 theme: spirituality & inner peace
+lyrics: Devotional praise of the divine beloved, a refrain repeated with growing ecstasy.
 length: long (about 4:30)
 ---
 

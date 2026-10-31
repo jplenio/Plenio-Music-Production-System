@@ -8,7 +8,8 @@ vocals: sung
 language: English
 voice: male vocal
 theme: love & romance
+lyrics: About small-town summer nights, a pickup truck and falling for someone.
 length: standard (about 3:00)
 ---
 
-Bright modern country pop: acoustic strumming, clean electric guitar and slide licks, banjo accents, punchy programmed-plus-live drums, deep bass and a big polished singalong chorus with stacked harmonies. Warm, radio-ready Nashville production. Lyrics about small-town summer nights, a pickup truck and falling for someone.
+Bright modern country pop: acoustic strumming, clean electric guitar and slide licks, banjo accents, punchy programmed-plus-live drums, deep bass and a big polished singalong chorus with stacked harmonies. Warm, radio-ready Nashville production.

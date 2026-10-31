@@ -37,6 +37,7 @@ sys.path.insert(0, str(PROJECT))
 
 from plenio.core import variables  # noqa: E402
 from plenio.core.audio import hq  # noqa: E402
+from plenio.core.brief import TemplateLibrary, cover_text_fields  # noqa: E402
 from plenio.core.creativity import CREATIVITY_DEFAULT  # noqa: E402
 from plenio.core.llm import CHOOSE  # noqa: E402
 from plenio.core.models import ModelFile, by_file, load_catalogue  # noqa: E402
@@ -2257,6 +2258,33 @@ def models_note(g: Graph, template: str) -> Node:
     )
 
 
+STYLE_TEMPLATES = TemplateLibrary(PROJECT / "resources" / "templates")
+BRIEF_WIDGETS = {
+    "description": "description",
+    "genre": "genre",
+    "mood": "mood",
+    "tempo": "tempo",
+    "key": "key",
+    "meter": "meter",
+    "language": "vocals.language",
+    "voice": "vocals.voice",
+    "theme": "vocals.theme",
+    "lyrics": "vocals.lyrics",
+}
+"""A brief's text fields and the widgets they are in (a vocals choice's inputs are named ``vocals.<input>``)."""
+LYRICS_ROOM = 130
+"""The Song Brief's lyrics choice and its field (1.5.0)."""
+
+
+def template_widgets(template_id: str, cover_vocals: str = "") -> dict[str, str]:
+    """The brief's text fields as the style template fills them: the shipped workflows show them in the fields, as
+    choosing the template does (owner's request 2026-10-31). A cover's fields for its vocals choice (its language
+    never: the source's is detected)."""
+    fields = STYLE_TEMPLATES.get(template_id).fields
+    names = cover_text_fields(cover_vocals) if cover_vocals else tuple(BRIEF_WIDGETS)
+    return {BRIEF_WIDGETS[name]: fields[name] for name in names if name in BRIEF_WIDGETS and fields.get(name)}
+
+
 BRIEF_WIDTH = 520
 """The briefs' width (380 until 0.8.0): template names, typed genres and the creative mode's name fit
 (owner's report 2026-10-15: the inputs' text was cut)."""
@@ -2754,13 +2782,14 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         (0, COLUMN_ONE_Y),
         size=(
             BRIEF_WIDTH,
-            690 + CREATIVITY_ROW + SONG_FIELD_ROWS * SLOT_HEIGHT + SUMMARY_ROOM,
+            690 + CREATIVITY_ROW + LYRICS_ROOM + SONG_FIELD_ROWS * SLOT_HEIGHT + SUMMARY_ROOM,
         ),  # + field outputs
         widgets={
             "mode": "new song every run",
             "template": "pop/singer-songwriter-acoustic-vocal",
             "length": "short (about 1:30)",
             "vocals": "sung",
+            **template_widgets("pop/singer-songwriter-acoustic-vocal"),
         },
     )
     model_node = g.add_subgraph(bp["yue2_model"], (0, COLUMN_ONE_Y + 940), size=(380, 140), collapsed=True)
@@ -2844,7 +2873,7 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g.group("4 · SCORE", [plan, plan_seed_node, tools, arrange_node, arrangement, score_sheet])
     g.group("5 · RENDER", [seed, render, best])
     g.group("MUSIC MODEL", [model_node], color=MODEL_GROUP)
-    make_room(g, brief, CREATIVITY_ROW + SONG_FIELD_ROWS * SLOT_HEIGHT)
+    make_room(g, brief, CREATIVITY_ROW + LYRICS_ROOM + SONG_FIELD_ROWS * SLOT_HEIGHT)
     g.align()
     cover_over(g, "5 · RENDER")
     yue2_loras(g, model_node)
@@ -2894,6 +2923,8 @@ def song_app(
         "vocals.language",
         "vocals.voice",
         "vocals.theme",
+        "vocals.lyrics_from",
+        "vocals.lyrics",
         "arrangement",
         "genre_closeness",
         "creativity",
@@ -2981,11 +3012,10 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         widgets={
             "mode": "new cover every run",
             "template": "pop/dance-pop-vocal",
-            "genre": "",
-            "mood": "",
             "vocals": "original lyrics",
             "vocals.language": "",
             "harmony": "keep original chords",
+            **template_widgets("pop/dance-pop-vocal", "original lyrics"),
         },
     )
     # the music model under the row of sections
@@ -3184,7 +3214,7 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     # the sheets' editor buttons.
     controls = ["mode", "template", "description", "genre", "mood", "vocals"]
     controls += ["vocals.language", "vocals.voice", "harmony", "arrangement", "song_flow_closeness"]
-    controls += ["lyrics_closeness", "creativity", "lyrics_fidelity"]
+    controls += ["lyrics_closeness", "creativity", "lyrics_fidelity", "original_notes"]
     inputs = [
         (source, "audio"),
         (switch, "hq_mastering"),
@@ -3241,13 +3271,14 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         (0, COLUMN_ONE_Y),
         size=(
             BRIEF_WIDTH,
-            690 + CREATIVITY_ROW + SONG_FIELD_ROWS * SLOT_HEIGHT + SUMMARY_ROOM,
+            690 + CREATIVITY_ROW + LYRICS_ROOM + SONG_FIELD_ROWS * SLOT_HEIGHT + SUMMARY_ROOM,
         ),  # + field outputs
         widgets={
             "mode": "new song every run",
             "template": "pop/singer-songwriter-acoustic-vocal",
             "length": "short (about 1:30)",
             "vocals": "sung",
+            **template_widgets("pop/singer-songwriter-acoustic-vocal"),
         },
     )
     model_node = g.add_subgraph(bp["minimax_model"], (0, COLUMN_ONE_Y + 940), size=(380, 160), collapsed=True)
@@ -3293,7 +3324,7 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g.group("3 · SHEET", [sheet])
     g.group("4 · RENDER", [seed, render, best])
     g.group("MUSIC MODEL", [model_node], color=MODEL_GROUP)
-    make_room(g, brief, CREATIVITY_ROW + SONG_FIELD_ROWS * SLOT_HEIGHT)
+    make_room(g, brief, CREATIVITY_ROW + LYRICS_ROOM + SONG_FIELD_ROWS * SLOT_HEIGHT)
     g.align()
     cover_over(g, "4 · RENDER")
     return g, song_app(brief, seed, draft, [sheet], preview, export, writer=writer, hq_mastering=switch)
@@ -3353,13 +3384,14 @@ def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         (0, COLUMN_ONE_Y),
         size=(
             BRIEF_WIDTH,
-            690 + CREATIVITY_ROW + SONG_FIELD_ROWS * SLOT_HEIGHT + SUMMARY_ROOM,
+            690 + CREATIVITY_ROW + LYRICS_ROOM + SONG_FIELD_ROWS * SLOT_HEIGHT + SUMMARY_ROOM,
         ),  # + field outputs
         widgets={
             "mode": "one song, stop to review",
             "template": "pop/singer-songwriter-acoustic-vocal",
             "length": "short (about 1:30)",
             "vocals": "sung",
+            **template_widgets("pop/singer-songwriter-acoustic-vocal"),
         },
     )
     model_node = g.add_subgraph(bp["yue2_model"], (0, COLUMN_ONE_Y + 940), size=(380, 140), collapsed=True)
@@ -3437,7 +3469,7 @@ def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g.group("4 · DAW", [tools, score_sheet])
     g.group("5 · RENDER", [seed, render, best])
     g.group("MUSIC MODEL", [model_node], color=MODEL_GROUP)
-    make_room(g, brief, CREATIVITY_ROW + SONG_FIELD_ROWS * SLOT_HEIGHT)
+    make_room(g, brief, CREATIVITY_ROW + LYRICS_ROOM + SONG_FIELD_ROWS * SLOT_HEIGHT)
     g.align()
     cover_over(g, "5 · RENDER")
     yue2_loras(g, model_node)

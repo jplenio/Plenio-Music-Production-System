@@ -78,7 +78,7 @@ def test_syllable_estimate_is_rough_but_stable() -> None:
 def test_every_shipped_template_loads_and_builds_a_brief() -> None:
     library = TemplateLibrary(ROOT / "resources" / "templates")
     ids = library.ids()
-    assert len(ids) == 239
+    assert len(ids) == 250
     for template_id in ids:
         template = library.get(template_id)
         brief = build_song_brief(

@@ -21,6 +21,10 @@ export interface Brief {
   language?: string
   voice?: string
   theme?: string
+  /** The idea the writer wrote the lyrics from (1.5.0; empty: one's own lyrics, or none given). */
+  lyrics_idea?: string
+  /** The lyrics were one's own, sung as written (1.5.0). */
+  own_lyrics?: boolean
   lead_instrument?: string
   key?: string
   meter?: string

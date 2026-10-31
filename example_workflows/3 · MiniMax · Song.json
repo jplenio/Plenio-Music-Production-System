@@ -37,7 +37,7 @@
    ],
    "size": [
     520,
-    1120
+    1250
    ],
    "flags": {},
    "order": 1,
@@ -139,6 +139,24 @@
      "type": "STRING",
      "widget": {
       "name": "vocals.theme"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "vocals.lyrics_from",
+     "name": "vocals.lyrics_from",
+     "type": "COMBO",
+     "widget": {
+      "name": "vocals.lyrics_from"
+     },
+     "link": null
+    },
+    {
+     "localized_name": "vocals.lyrics",
+     "name": "vocals.lyrics",
+     "type": "STRING",
+     "widget": {
+      "name": "vocals.lyrics"
      },
      "link": null
     },
@@ -342,17 +360,19 @@
    "widgets_values": [
     "new song every run",
     "pop/singer-songwriter-acoustic-vocal",
+    "Honest acoustic singer-songwriter song: fingerpicked or gently strummed acoustic guitar, subtle piano, upright bass and brushed drums entering late, plus a close, unpolished vocal with audible breath. Conversational verses, one quietly devastating refrain, minimal production and lots of space.",
+    "singer-songwriter",
     "",
-    "",
-    "",
-    "",
+    "Laid-back (70-100 BPM)",
     "short (about 1:30)",
     "sung",
+    "English",
+    "whispered & intimate vocal",
+    "self-discovery & growth",
+    "written from the idea below",
+    "Plain-spoken and personal, about a conversation that never happened.",
     "",
-    "",
-    "",
-    "",
-    "",
+    "4/4",
     "off",
     70,
     false,
@@ -365,7 +385,7 @@
    "type": "a469aeef-bca2-5738-b40d-1130a141291b",
    "pos": [
     0.0,
-    1836.0
+    1966.0
    ],
    "size": [
     380,
@@ -2355,7 +2375,7 @@
     2050,
     -110.0,
     900,
-    1820.0
+    1950.0
    ],
    "color": "#9a6a2c",
    "font_size": 32,
@@ -2381,7 +2401,7 @@
     -30,
     -110.0,
     580,
-    1820.0
+    1950.0
    ],
    "color": "#3f789e",
    "font_size": 32,
@@ -2394,7 +2414,7 @@
     590,
     -110.0,
     460,
-    1820.0
+    1950.0
    ],
    "color": "#2f7d6d",
    "font_size": 32,
@@ -2407,7 +2427,7 @@
     1090,
     -110.0,
     480,
-    1820.0
+    1950.0
    ],
    "color": "#557a35",
    "font_size": 32,
@@ -2420,7 +2440,7 @@
     1610,
     -110.0,
     400,
-    1820.0
+    1950.0
    ],
    "color": "#6e4f9e",
    "font_size": 32,
@@ -2431,7 +2451,7 @@
    "title": "MUSIC MODEL",
    "bounding": [
     -30.0,
-    1750.0,
+    1880.0,
     320.0,
     116.0
    ],
@@ -10269,6 +10289,14 @@
     [
      2,
      "vocals.theme"
+    ],
+    [
+     2,
+     "vocals.lyrics_from"
+    ],
+    [
+     2,
+     "vocals.lyrics"
     ],
     [
      2,

@@ -8,7 +8,8 @@ vocals: sung
 language: English
 voice: male vocal, raspy & raw
 theme: heartbreak & loss
+lyrics: About a woman who left, whiskey and getting back up.
 length: standard (about 3:00)
 ---
 
-Electric Chicago blues shuffle: overdriven tube-amp guitar, wailing amplified harmonica, walking upright-style bass, barrelhouse piano and swinging drums with rim shots. Classic twelve-bar changes, trading solos between harp and guitar, a gritty confident vocal. Smoky bar-room energy. Lyrics about a woman who left, whiskey and getting back up.
+Electric Chicago blues shuffle: overdriven tube-amp guitar, wailing amplified harmonica, walking upright-style bass, barrelhouse piano and swinging drums with rim shots. Classic twelve-bar changes, trading solos between harp and guitar, a gritty confident vocal. Smoky bar-room energy.

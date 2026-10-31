@@ -8,6 +8,7 @@ vocals: sung
 language: English
 voice: falsetto vocal
 theme: love & romance
+lyrics: About a sweetheart, a first dance and a promise made under the streetlight.
 length: standard (about 3:00)
 ---
 

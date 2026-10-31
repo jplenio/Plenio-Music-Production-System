@@ -15,6 +15,8 @@ from ...core.brief import (
     COVER_MODES,
     DEFAULT_LENGTH,
     LENGTHS,
+    LYRICS_FROM,
+    LYRICS_IDEA,
     MELODY_OPTIONS,
     SONG_MODES,
     SPARSE,
@@ -92,8 +94,17 @@ UNDER_SINGING_TOOLTIP = (
     "Creative modes only (experimental): off - the instrument line plays where the voice rests, as in YuE2's "
     "own scores; on - it also sounds under the singing, calm and below the voice."
 )
+LYRICS_FROM_TOOLTIP = (
+    "written from the idea below: the writer writes the lyrics; the field says what they should be about (a "
+    "template gives an idea). my own: the field holds your lyrics, sung exactly as written."
+)
+LYRICS_TOOLTIP = (
+    "The idea for the lyrics - a story, an image, a message - or, with 'my own', the lyrics themselves: sections as "
+    "[Verse], [Chorus] ... (without them Plenio adds them)."
+)
 TEXT = {
-    "description": "What the song is about and how it should sound. Sent to the writing model.",
+    "description": "How the song should sound - its character, instruments and arrangement (the lyrics have a field "
+    "of their own). Sent to the writing model.",
     "genre": "Genre and sub-genre, e.g. 'indie pop'.",
     "mood": "Mood words, e.g. 'warm, hopeful'.",
     "tempo": "Tempo, e.g. '88 BPM' or 'midtempo'.",
@@ -231,7 +242,25 @@ def _sung_inputs() -> list[Any]:
     return [
         io.String.Input("language", default="", tooltip="Language of the lyrics, e.g. 'English'."),
         io.String.Input("voice", default="", tooltip="Vocal character, e.g. 'warm female voice'."),
-        io.String.Input("theme", default="", tooltip="What the lyrics are about."),
+        io.String.Input("theme", default="", tooltip="What the lyrics are about, in a few words."),
+        # 1.5.0: a workflow saved before has two values less here - the frontend puts these in (migrate.ts);
+        # optional, so that an older API prompt runs as before (the template's idea)
+        io.Combo.Input(
+            "lyrics_from",
+            display_name="lyrics",
+            options=list(LYRICS_FROM),
+            default=LYRICS_IDEA,
+            optional=True,
+            tooltip=LYRICS_FROM_TOOLTIP,
+        ),
+        io.String.Input(
+            "lyrics",
+            display_name="lyrics idea or text",
+            multiline=True,
+            default="",
+            optional=True,
+            tooltip=LYRICS_TOOLTIP,
+        ),
     ]
 
 
@@ -246,9 +275,9 @@ class PlenioSongBrief(io.ComfyNode):
             category="Plenio/Song",
             description=(
                 "The intent of a new song: the work mode (a new song every run, or one song with review stops), "
-                "description, genre, mood, tempo, length and vocals. A template fills only the fields you leave "
-                "empty. The only place where the work mode, the vocals (sung, sparse or instrumental) and the length "
-                "are set."
+                "description, genre, mood, tempo, length, vocals and lyrics (an idea, or your own). Choosing a "
+                "template fills the fields; a field left empty takes the template's value. The only place where the "
+                "work mode, the vocals (sung, sparse or instrumental) and the length are set."
             ),
             inputs=[
                 io.Combo.Input(
@@ -424,6 +453,8 @@ class PlenioSongBrief(io.ComfyNode):
             "language": vocals.get("language", ""),
             "voice": vocals.get("voice", ""),
             "theme": vocals.get("theme", ""),
+            "lyrics": vocals.get("lyrics", ""),
+            "lyrics_from": vocals.get("lyrics_from", LYRICS_IDEA),
             "melody": vocals.get("melody", ""),
             "lead_instrument": vocals.get("lead_instrument", ""),
             "arrangement": arrangement,

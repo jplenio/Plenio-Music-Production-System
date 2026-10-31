@@ -8,7 +8,8 @@ vocals: sung
 language: English
 voice: male vocal, raspy & raw
 theme: freedom & escape
+lyrics: Simple and snarling, about a girl and a bad night.
 length: standard (about 3:00)
 ---
 
-Raw garage rock: overdriven fuzzy guitar, simple pounding drums, growling bass and a shouted, distorted vocal recorded hot and close. Two-chord riff, handclaps, tambourine, sloppy energy and a short screaming solo. Deliberately lo-fi, live and loud. Lyrics simple and snarling, about a girl and a bad night.
+Raw garage rock: overdriven fuzzy guitar, simple pounding drums, growling bass and a shouted, distorted vocal recorded hot and close. Two-chord riff, handclaps, tambourine, sloppy energy and a short screaming solo. Deliberately lo-fi, live and loud.

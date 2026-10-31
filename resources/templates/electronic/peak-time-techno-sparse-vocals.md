@@ -6,6 +6,7 @@ tempo: Uptempo (130-145 BPM)
 meter: 4/4
 vocals: sung
 language: English
+lyrics: A few spoken commands or dark phrases - 'move', 'the night is ours' - as rhythmic hooks.
 length: long (about 4:30)
 ---
 

@@ -8,6 +8,7 @@ vocals: sung
 language: English
 voice: female vocal
 theme: celebration & party
+lyrics: A short, joyful hook about dancing together until the sun comes up.
 length: long (about 4:30)
 ---
 

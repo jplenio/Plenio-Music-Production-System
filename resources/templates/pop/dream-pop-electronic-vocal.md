@@ -8,7 +8,8 @@ vocals: sung
 language: English
 voice: female vocal, soft & airy
 theme: nostalgia & memories
+lyrics: About remembering a place and time that can never quite be experienced again.
 length: long (about 4:30)
 ---
 
-Dreamy electronic pop: warm intimate vocal, shimmering reverb-heavy guitars, soft analog synths, deep melodic bass and restrained electronic drums. Beautiful memorable chorus, bittersweet atmosphere and gradual emotional development with a washed-out bridge. Lyrics about remembering a place and time that can never quite be experienced again. Poetic, simple and understated.
+Dreamy electronic pop: warm intimate vocal, shimmering reverb-heavy guitars, soft analog synths, deep melodic bass and restrained electronic drums. Beautiful memorable chorus, bittersweet atmosphere and gradual emotional development with a washed-out bridge. Poetic, simple and understated.

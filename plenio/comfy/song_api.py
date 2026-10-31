@@ -29,7 +29,9 @@ from typing import Any
 from aiohttp import ClientError, ClientSession, ClientTimeout, web
 
 from .. import __version__
+from ..core import brief as brief_rules
 from ..core import song_api
+from ..core.errors import PlenioUserError
 from ..core.release import RECORD_SCHEMA
 from ..core.song_api import SongApiError
 from ..core.song_api_doc import openapi
@@ -123,6 +125,16 @@ def guarded(handler: Handler) -> Handler:
             )
 
     return wrapper
+
+
+def _style(template_id: str) -> brief_rules.Template | None:
+    """A style template by its id (``none`` and an unknown one: none)."""
+    if template_id in ("", "none"):
+        return None
+    try:
+        return template_library().get(template_id)
+    except PlenioUserError:
+        return None
 
 
 def _lookup() -> InfoLookup:
@@ -598,7 +610,7 @@ async def _create(data: dict[str, Any], key: str) -> web.StreamResponse:
     if not isinstance(client, dict):
         raise SongApiError("bad_request", "'client' is an object of texts.", field="client")
     client = {str(k)[:40]: str(v)[:200] for k, v in list(client.items())[:12]}
-    prepared = song_api.prepare(template, data, info, rng=random.Random())
+    prepared = song_api.prepare(template, data, info, rng=random.Random(), styles=_style)
     meta = {
         "api": song_api.API_VERSION,
         "template": template.id,

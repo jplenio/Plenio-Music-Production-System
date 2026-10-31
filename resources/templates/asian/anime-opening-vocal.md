@@ -8,7 +8,8 @@ vocals: sung
 language: Japanese
 voice: female vocal, young & bright
 theme: storytelling & adventure
+lyrics: About new beginnings, courage and chasing a dream.
 length: short (about 1:30)
 ---
 
-Uplifting, fast anime opening theme: driving rock drums, distorted rhythm guitar, soaring strings, bright synth leads and a heroic singalong chorus. Short punchy intro riff, rapid pre-chorus build, dramatic key change and a big final chorus. Polished J-Rock production. Lyrics about new beginnings, courage and chasing a dream.
+Uplifting, fast anime opening theme: driving rock drums, distorted rhythm guitar, soaring strings, bright synth leads and a heroic singalong chorus. Short punchy intro riff, rapid pre-chorus build, dramatic key change and a big final chorus. Polished J-Rock production.

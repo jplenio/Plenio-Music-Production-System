@@ -455,12 +455,12 @@
    "widgets_values": [
     "new cover every run",
     "pop/dance-pop-vocal",
-    "",
-    "",
+    "Modern dance-pop: four-on-the-floor kick, bright plucky synths, deep sidechained bass, claps, a tight pre-chorus build and an explosive chorus combining a sung hook with a post-chorus drop. Glossy radio production, huge and immediate.",
+    "dance-pop",
     "",
     "original lyrics",
     "",
-    "",
+    "female vocal",
     "keep original chords",
     "",
     "off",
@@ -15800,6 +15800,10 @@
     [
      4,
      "lyrics_fidelity"
+    ],
+    [
+     4,
+     "original_notes"
     ],
     [
      21,

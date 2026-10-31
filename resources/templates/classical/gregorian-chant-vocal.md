@@ -8,6 +8,7 @@ vocals: sung
 language: Latin
 voice: male choir
 theme: spirituality & inner peace
+lyrics: A Latin prayer or psalm verse, sung syllable by syllable.
 length: standard (about 3:00)
 ---
 

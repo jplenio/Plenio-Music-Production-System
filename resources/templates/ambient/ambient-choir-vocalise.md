@@ -6,6 +6,7 @@ tempo: Slow (40-70 BPM)
 meter: free time / rubato
 vocals: sung
 theme: wordless vocalise
+lyrics: No words: soft wordless 'aah' and 'ooh' carry the melody.
 voice: female choir
 length: long (about 4:30)
 ---

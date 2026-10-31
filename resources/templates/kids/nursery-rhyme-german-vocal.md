@@ -8,7 +8,8 @@ vocals: sung
 language: German
 voice: children's choir
 theme: nature & seasons
+lyrics: Very short, repetitive verses to sing along, about animals, the seasons or everyday life.
 length: short (about 1:30)
 ---
 
-Simple German children's song: cheerful major-key melody, acoustic guitar, recorder, glockenspiel, handclaps and light percussion, sung by a friendly voice with a children's choir in the chorus. Very short, repetitive verses to sing along, clear pronunciation, child-friendly lyrics about animals, the seasons or everyday life.
+Simple German children's song: cheerful major-key melody, acoustic guitar, recorder, glockenspiel, handclaps and light percussion, sung by a friendly voice with a children's choir in the chorus. Clear pronunciation.

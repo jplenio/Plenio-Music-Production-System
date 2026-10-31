@@ -6,6 +6,7 @@ tempo: Uptempo (130-145 BPM)
 meter: 4/4
 vocals: sung
 language: English
+lyrics: A few short hook phrases - a call to the crowd, a chant - never full verses.
 length: long (about 4:30)
 ---
 

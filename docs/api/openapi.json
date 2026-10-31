@@ -1502,6 +1502,7 @@
          "asian/enka-vocal",
          "asian/game-jrpg-orchestral",
          "asian/indian-classical-instrumental",
+         "asian/j-rock-vocal",
          "asian/kpop-vocal",
          "asian/mandopop-ballad-vocal",
          "blues/blues-ballad-vocal",
@@ -1580,8 +1581,11 @@
          "european/chanson-vocal",
          "european/fado-vocal",
          "european/flamenco-instrumental",
+         "european/carnival-song-vocal",
          "european/irish-pub-session-instrumental",
+         "european/italian-pop-vocal",
          "european/klezmer-instrumental",
+         "european/party-schlager-vocal",
          "european/polka-instrumental",
          "european/russian-folk-vocal",
          "european/schlager-vocal",
@@ -1590,6 +1594,7 @@
          "folk/celtic-folk-vocal",
          "folk/dark-fairytale-folk-vocal",
          "folk/folk-punk-vocal",
+         "folk/german-liedermacher-vocal",
          "folk/melancholic-folk-ballad-vocal",
          "folk/mystical-medieval-folk-vocal",
          "folk/nordic-folk-vocal",
@@ -1605,6 +1610,7 @@
          "hiphop/cloud-rap-vocal",
          "hiphop/drill-instrumental",
          "hiphop/german-rap-vocal",
+         "hiphop/melodic-trap-vocal",
          "hiphop/old-school-hiphop-vocal",
          "hiphop/phonk-instrumental",
          "hiphop/rnb-vocal",
@@ -1632,13 +1638,16 @@
          "jazz/smooth-jazz-vocal-positive-resolution",
          "jazz/swing-big-band-instrumental",
          "jazz/vocal-jazz-crooner",
+         "kids/birthday-song-vocal",
          "kids/children-song-vocal",
+         "kids/german-birthday-song-vocal",
          "kids/kids-adventure-song-vocal",
          "kids/lullaby-vocal",
          "kids/nursery-rhyme-german-vocal",
          "latin/bachata-vocal",
          "latin/bossa-nova-vocal",
          "latin/cumbia-instrumental",
+         "latin/latin-pop-vocal",
          "latin/merengue-instrumental",
          "latin/norteno-corrido-vocal",
          "latin/reggaeton-vocal",
@@ -1691,6 +1700,7 @@
          "rock/garage-rock-vocal",
          "rock/hard-rock-vocal",
          "rock/indie-rock-vocal",
+         "rock/pop-rock-vocal",
          "rock/post-rock-instrumental",
          "rock/progressive-rock-instrumental",
          "rock/psychedelic-rock-instrumental",
@@ -1703,6 +1713,7 @@
          "seasonal/christmas-pop-vocal",
          "seasonal/german-christmas-vocal",
          "seasonal/wedding-ceremony-instrumental",
+         "seasonal/wedding-first-dance-vocal",
          "soul/doo-wop-vocal",
          "soul/motown-soul-vocal",
          "soul/neo-soul-vocal",
@@ -1727,15 +1738,15 @@
         "type": "string",
         "maxLength": 4000,
         "title": "description",
-        "description": "What the song is about and how it should sound. Sent to the writing model.",
-        "default": ""
+        "description": "How the song should sound - its character, instruments and arrangement (the lyrics have a field of their own). Sent to the writing model.",
+        "default": "Honest acoustic singer-songwriter song: fingerpicked or gently strummed acoustic guitar, subtle piano, upright bass and brushed drums entering late, plus a close, unpolished vocal with audible breath. Conversational verses, one quietly devastating refrain, minimal production and lots of space."
        },
        "genre": {
         "type": "string",
         "maxLength": 400,
         "title": "genre",
         "description": "Genre and sub-genre, e.g. 'indie pop'.",
-        "default": ""
+        "default": "singer-songwriter"
        },
        "mood": {
         "type": "string",
@@ -1749,7 +1760,7 @@
         "maxLength": 400,
         "title": "tempo",
         "description": "Tempo, e.g. '88 BPM' or 'midtempo'.",
-        "default": ""
+        "default": "Laid-back (70-100 BPM)"
        },
        "length": {
         "oneOf": [
@@ -1793,21 +1804,38 @@
         "maxLength": 400,
         "title": "language",
         "description": "Language of the lyrics, e.g. 'English'. Only when vocals is sung, sparse vocals.",
-        "default": ""
+        "default": "English"
        },
        "voice": {
         "type": "string",
         "maxLength": 400,
         "title": "voice",
         "description": "Vocal character, e.g. 'warm female voice'. Only when vocals is sung, sparse vocals.",
-        "default": ""
+        "default": "whispered & intimate vocal"
        },
        "theme": {
         "type": "string",
         "maxLength": 400,
         "title": "theme",
-        "description": "What the lyrics are about. Only when vocals is sung, sparse vocals.",
-        "default": ""
+        "description": "What the lyrics are about, in a few words. Only when vocals is sung, sparse vocals.",
+        "default": "self-discovery & growth"
+       },
+       "lyrics_from": {
+        "type": "string",
+        "enum": [
+         "written from the idea below",
+         "my own, sung as written below"
+        ],
+        "title": "lyrics",
+        "description": "written from the idea below: the writer writes the lyrics; the field says what they should be about (a template gives an idea). my own: the field holds your lyrics, sung exactly as written. Only when vocals is sung, sparse vocals.",
+        "default": "written from the idea below"
+       },
+       "lyrics": {
+        "type": "string",
+        "maxLength": 4000,
+        "title": "lyrics idea or text",
+        "description": "The idea for the lyrics - a story, an image, a message - or, with 'my own', the lyrics themselves: sections as [Verse], [Chorus] ... (without them Plenio adds them). Only when vocals is sung, sparse vocals.",
+        "default": "Plain-spoken and personal, about a conversation that never happened."
        },
        "melody": {
         "type": "string",
@@ -1838,7 +1866,7 @@
         "maxLength": 400,
         "title": "meter",
         "description": "Optional meter, e.g. '3/4' or '6/8'. Music models that use a score take the meter from the score; the DAW template's empty score is built in it.",
-        "default": ""
+        "default": "4/4"
        },
        "arrangement": {
         "type": "string",
@@ -2219,6 +2247,7 @@
          "asian/enka-vocal",
          "asian/game-jrpg-orchestral",
          "asian/indian-classical-instrumental",
+         "asian/j-rock-vocal",
          "asian/kpop-vocal",
          "asian/mandopop-ballad-vocal",
          "blues/blues-ballad-vocal",
@@ -2297,8 +2326,11 @@
          "european/chanson-vocal",
          "european/fado-vocal",
          "european/flamenco-instrumental",
+         "european/carnival-song-vocal",
          "european/irish-pub-session-instrumental",
+         "european/italian-pop-vocal",
          "european/klezmer-instrumental",
+         "european/party-schlager-vocal",
          "european/polka-instrumental",
          "european/russian-folk-vocal",
          "european/schlager-vocal",
@@ -2307,6 +2339,7 @@
          "folk/celtic-folk-vocal",
          "folk/dark-fairytale-folk-vocal",
          "folk/folk-punk-vocal",
+         "folk/german-liedermacher-vocal",
          "folk/melancholic-folk-ballad-vocal",
          "folk/mystical-medieval-folk-vocal",
          "folk/nordic-folk-vocal",
@@ -2322,6 +2355,7 @@
          "hiphop/cloud-rap-vocal",
          "hiphop/drill-instrumental",
          "hiphop/german-rap-vocal",
+         "hiphop/melodic-trap-vocal",
          "hiphop/old-school-hiphop-vocal",
          "hiphop/phonk-instrumental",
          "hiphop/rnb-vocal",
@@ -2349,13 +2383,16 @@
          "jazz/smooth-jazz-vocal-positive-resolution",
          "jazz/swing-big-band-instrumental",
          "jazz/vocal-jazz-crooner",
+         "kids/birthday-song-vocal",
          "kids/children-song-vocal",
+         "kids/german-birthday-song-vocal",
          "kids/kids-adventure-song-vocal",
          "kids/lullaby-vocal",
          "kids/nursery-rhyme-german-vocal",
          "latin/bachata-vocal",
          "latin/bossa-nova-vocal",
          "latin/cumbia-instrumental",
+         "latin/latin-pop-vocal",
          "latin/merengue-instrumental",
          "latin/norteno-corrido-vocal",
          "latin/reggaeton-vocal",
@@ -2408,6 +2445,7 @@
          "rock/garage-rock-vocal",
          "rock/hard-rock-vocal",
          "rock/indie-rock-vocal",
+         "rock/pop-rock-vocal",
          "rock/post-rock-instrumental",
          "rock/progressive-rock-instrumental",
          "rock/psychedelic-rock-instrumental",
@@ -2420,6 +2458,7 @@
          "seasonal/christmas-pop-vocal",
          "seasonal/german-christmas-vocal",
          "seasonal/wedding-ceremony-instrumental",
+         "seasonal/wedding-first-dance-vocal",
          "soul/doo-wop-vocal",
          "soul/motown-soul-vocal",
          "soul/neo-soul-vocal",
@@ -2445,14 +2484,14 @@
         "maxLength": 4000,
         "title": "description",
         "description": "How the cover should sound - instruments, feel, production. Sent to the writing model; a genre or a description is needed.",
-        "default": ""
+        "default": "Modern dance-pop: four-on-the-floor kick, bright plucky synths, deep sidechained bass, claps, a tight pre-chorus build and an explosive chorus combining a sung hook with a post-chorus drop. Glossy radio production, huge and immediate."
        },
        "genre": {
         "type": "string",
         "maxLength": 400,
         "title": "genre",
         "description": "Target genre, e.g. 'acoustic folk'.",
-        "default": ""
+        "default": "dance-pop"
        },
        "mood": {
         "type": "string",
@@ -2501,7 +2540,7 @@
         "maxLength": 400,
         "title": "voice",
         "description": "Vocal character, e.g. 'soft female voice'. Only when vocals is original lyrics, new lyrics.",
-        "default": ""
+        "default": "female vocal"
        },
        "theme": {
         "type": "string",

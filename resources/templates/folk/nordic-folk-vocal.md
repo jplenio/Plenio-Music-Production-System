@@ -8,7 +8,8 @@ vocals: sung
 language: English
 voice: female vocal, soft & airy
 theme: melancholy & longing
+lyrics: About waiting for someone who never returned from a journey through the northern wilderness.
 length: long (about 4:30)
 ---
 
-Haunting, minimal Nordic folk: intimate vocal, acoustic guitar, bowed strings, wooden flute and subtle frame drum, with occasional wordless calling. Cold mystical landscape atmosphere, ancient-sounding modal melodies and very restrained production with lots of space. Lyrics about waiting for someone who never returned from a journey through the northern wilderness.
+Haunting, minimal Nordic folk: intimate vocal, acoustic guitar, bowed strings, wooden flute and subtle frame drum, with occasional wordless calling. Cold mystical landscape atmosphere, ancient-sounding modal melodies and very restrained production with lots of space.

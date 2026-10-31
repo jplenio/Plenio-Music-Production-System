@@ -8,7 +8,8 @@ vocals: sung
 language: Spanish
 voice: male vocal, powerful & belting
 theme: love & romance
+lyrics: About love, pride and heartbreak.
 length: standard (about 3:00)
 ---
 
-Traditional mariachi: trumpet duet in bright harmony, violin section, vihuela and guitarrón, with a powerful passionate vocal using long held notes and grito shouts. Alternating free-rubato opening and a lilting ranchera waltz feel, festive and proudly emotional. Lyrics about love, pride and heartbreak.
+Traditional mariachi: trumpet duet in bright harmony, violin section, vihuela and guitarrón, with a powerful passionate vocal using long held notes and grito shouts. Alternating free-rubato opening and a lilting ranchera waltz feel, festive and proudly emotional.

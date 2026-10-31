@@ -8,7 +8,8 @@ vocals: sung
 language: English
 voice: baritone vocal
 theme: love & romance
+lyrics: About a love remembered across the years.
 length: standard (about 3:00)
 ---
 
-Classic crooner jazz ballad: velvety baritone vocal with relaxed behind-the-beat phrasing, over lush strings, muted trumpet fills, piano, upright bass and brushed drums. Great-American-Songbook form, one chorus without vocals in the middle, warm vintage mono-flavoured recording. Lyrics about a love remembered across the years.
+Classic crooner jazz ballad: velvety baritone vocal with relaxed behind-the-beat phrasing, over lush strings, muted trumpet fills, piano, upright bass and brushed drums. Great-American-Songbook form, one chorus without vocals in the middle, warm vintage mono-flavoured recording.

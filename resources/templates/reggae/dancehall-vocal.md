@@ -8,7 +8,8 @@ vocals: sung
 language: English
 voice: male vocal
 theme: celebration & party
+lyrics: About dancing, style and celebration.
 length: standard (about 3:00)
 ---
 
-Energetic modern dancehall: digital riddim, punchy programmed drums, syncopated bass, bright synth stabs and a rapid-fire melodic vocal with plenty of ad-libs. Repetitive catchy hook, direct and bright production with a lot of attitude. Lyrics about dancing, style and celebration.
+Energetic modern dancehall: digital riddim, punchy programmed drums, syncopated bass, bright synth stabs and a rapid-fire melodic vocal with plenty of ad-libs. Repetitive catchy hook, direct and bright production with a lot of attitude.

@@ -1,6 +1,6 @@
 /**
- * The brief template panel (M3/D6): the values it reads, what each action writes, the lines it
- * shows, the legacy placeholder, and the migration of saved workflows.
+ * The brief template panel (M3/D6; visible since 1.5.0): the values it reads, what it fills and each action writes,
+ * the lines it shows, the legacy placeholder, and the migration of saved workflows.
  */
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -8,23 +8,25 @@ import type { BriefFields, Fetcher } from '../src/api/client'
 import type { ComfyNode, ComfyWidget } from '../src/shared/comfy'
 import {
   CHOICE_FIELDS,
+  OWN_LYRICS,
   TEXT_FIELDS,
   addBriefTemplatePanel,
   briefKind,
   briefValues,
   choicePlan,
   clearLegacyPlaceholders,
-  fillPlan,
-  fillsLine,
   choicesLine,
   isLegacyPlaceholder,
+  labelWidgets,
   modeLine,
   notesLine,
-  resetPlan,
+  originsLine,
+  refillPlan,
+  templatePlan,
   widgetOf,
   writeValues
 } from '../src/extension/briefTemplate'
-import { legacyPlaceholderFields } from '../src/extension/migrate'
+import { LYRICS_FROM, legacyPlaceholderFields, migrateSongLyrics } from '../src/extension/migrate'
 
 function widget(name: string, value: unknown): ComfyWidget {
   return { name, type: 'text', value, options: {}, callback: () => {} }
@@ -75,7 +77,7 @@ describe('values and fields', () => {
     expect(values.voice).toBe('warm female voice')
     expect(values.mood).toBe('warm')
     expect('vocals.voice' in values).toBe(false) // the route takes field names, not widget names
-    const fields: readonly string[] = [...TEXT_FIELDS, ...CHOICE_FIELDS]
+    const fields: readonly string[] = [...TEXT_FIELDS, ...CHOICE_FIELDS, 'lyrics_from']
     expect(Object.keys(values).every((key) => fields.includes(key))).toBe(true)
     expect(values.melody).toBeUndefined() // this node has no melody widget (sung, not instrumental)
   })
@@ -86,19 +88,48 @@ describe('values and fields', () => {
   })
 })
 
+describe('the fill', () => {
+  it('writes the template\'s values into the empty fields, never over a value of the user\'s', () => {
+    expect(templatePlan(node(), ANSWER)).toEqual([
+      { field: 'genre', value: 'indie folk' },
+      { field: 'tempo', value: '88 BPM' }
+    ])
+    expect(templatePlan(node({ genre: 'indie pop' }), ANSWER)).toEqual([{ field: 'tempo', value: '88 BPM' }])
+    expect(templatePlan(node({ genre: 'indie folk', tempo: '88 BPM' }), ANSWER)).toEqual([])
+  })
+
+  it('replaces what a template filled before, the user\'s values kept', () => {
+    const target = node({ genre: 'old genre', tempo: '100 BPM', description: 'The old template\'s text.' })
+    const shown = { genre: ['old genre'], tempo: ['120 BPM'], description: ['The old template\'s text.'] }
+    expect(templatePlan(target, ANSWER, shown)).toEqual([
+      { field: 'genre', value: 'indie folk' },
+      { field: 'description', value: '' } // the new template has none
+    ])
+  })
+
+  it('never fills one\'s own lyrics, and clears the template\'s idea when own lyrics are chosen', () => {
+    const answer = { ...ANSWER, fields: { ...ANSWER.fields, lyrics: 'About a letter never sent.' } }
+    const own = node({
+      genre: 'indie folk',
+      tempo: '88 BPM',
+      'vocals.lyrics_from': OWN_LYRICS,
+      'vocals.lyrics': 'About a letter never sent.'
+    })
+    expect(templatePlan(own, answer)).toEqual([{ field: 'lyrics', value: '' }])
+    const written = node({ genre: 'indie folk', tempo: '88 BPM', 'vocals.lyrics_from': OWN_LYRICS, 'vocals.lyrics': 'la la' })
+    expect(templatePlan(written, answer)).toEqual([])
+  })
+
+  it('refills every field that holds another value than the template\'s', () => {
+    expect(refillPlan(node({ genre: 'indie pop' }), ANSWER)).toEqual([
+      { field: 'genre', value: 'indie folk' },
+      { field: 'tempo', value: '88 BPM' }
+    ])
+    expect(refillPlan(node({ genre: 'indie folk', tempo: '88 BPM' }), ANSWER)).toEqual([])
+  })
+})
+
 describe('the actions', () => {
-  it('copies only the empty text fields the template defines', () => {
-    const target = node({ genre: 'indie pop' })
-    expect(fillPlan(target, ANSWER)).toEqual([{ field: 'tempo', value: '88 BPM' }])
-    expect(fillPlan(node(), { ...ANSWER, fills: [] })).toEqual([])
-  })
-
-  it('resets every text field that holds a typed value', () => {
-    const target = node({ genre: 'indie pop', mood: 'warm' })
-    expect(resetPlan(target).map((widget) => widget.name)).toEqual(['genre', 'mood'])
-    expect(resetPlan(node())).toEqual([])
-  })
-
   it('uses the template choices only where they differ', () => {
     expect(choicePlan(ANSWER)).toEqual([{ field: 'length', value: 'short (about 1:30)' }])
     expect(choicePlan({ ...ANSWER, choices: [{ field: 'vocals', suggested: 'sung', current: 'sung' }] })).toEqual([])
@@ -116,23 +147,28 @@ describe('the actions', () => {
 })
 
 describe('the lines', () => {
-  it('formats what the template fills and what it suggests', () => {
-    expect(fillsLine(ANSWER, true)).toBe('Template fills: tempo (88 BPM)')
-    expect(fillsLine(ANSWER, false)).toBeNull() // the answer is still on its way
-    expect(fillsLine({ ...ANSWER, template: 'none', fills: [] }, true)).toBeNull()
-    expect(fillsLine({ ...ANSWER, fills: [] }, true)).toBe(
-      'The template fills nothing: every text field has your value.'
-    )
+  it('says which fields show the template\'s value and which hold the user\'s, and what it suggests', () => {
+    const target = node({ genre: 'indie pop', tempo: '88 BPM' })
+    expect(originsLine(target, ANSWER, true)).toBe('From the template: tempo · your own: genre')
+    expect(originsLine(target, ANSWER, false)).toBeNull() // the answer is still on its way
+    expect(originsLine(target, { ...ANSWER, template: 'none' }, true)).toBeNull()
+    expect(originsLine(node(), ANSWER, true)).toBe('The template has no text for these fields.')
     expect(choicesLine(ANSWER)).toBe('The template suggests: length = short (about 1:30)')
     expect(choicesLine({ ...ANSWER, choices: [] })).toBeNull()
     expect(notesLine({ ...ANSWER, notes: ["'custom' is the predecessor toolkit's placeholder"] })).toContain('custom')
     expect(notesLine(ANSWER)).toBeNull()
-    // long texts are shortened for the one-line panel
-    const long = { ...ANSWER, fills: [{ field: 'description', value: 'x'.repeat(80), template: 'x'.repeat(80) }] }
-    const shown = fillsLine(long, true) ?? ''
-    expect(shown).toContain('description (x')
-    expect(shown).toContain('…')
-    expect(shown.length).toBeLessThan(80)
+  })
+})
+
+describe('the lyrics of a Song Brief saved before 1.5.0', () => {
+  it('get the idea choice and an empty field after the theme; a newer or an instrumental brief stays', () => {
+    const before = ['new song every run', 'none', '', 'pop', '', '', 'short (about 1:30)', 'sung', 'English', '', 'love', 'C major', '4/4']
+    const after = migrateSongLyrics(before)
+    expect(after.slice(10, 14)).toEqual(['love', LYRICS_FROM[0], '', 'C major'])
+    expect(after).toHaveLength(before.length + 2)
+    expect(migrateSongLyrics(after)).toBe(after)
+    const instrumental = ['new song every run', 'none', '', 'jazz', '', '', 'short (about 1:30)', 'instrumental', 'off', 'sax', '']
+    expect(migrateSongLyrics(instrumental)).toBe(instrumental)
   })
 })
 
@@ -201,6 +237,131 @@ describe('the panel', () => {
     await vi.advanceTimersByTimeAsync(500)
     expect(asked).toHaveLength(5)
     expect(asked[4].theme).toBe('the sea')
+  })
+
+  it('fills the fields from the template, and follows another template without touching the user\'s values', async () => {
+    vi.useFakeTimers()
+    const GENRES: Record<string, string> = { 'pop/a': 'genre A', 'pop/b': 'genre B' }
+    const fetcher: Fetcher = {
+      fetchApi: (_route, options) => {
+        const body = JSON.parse(String(options?.body)) as { template: string }
+        const answer: BriefFields = {
+          ...ANSWER,
+          template: body.template,
+          sources: { genre: 'template', mood: 'empty' },
+          fields: { genre: GENRES[body.template] ?? '' },
+          choices: []
+        }
+        return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(answer) } as Response)
+      }
+    }
+    const target = node({ template: 'pop/a' })
+    target.addDOMWidget = () => widget('plenio_brief_template', '')
+    addBriefTemplatePanel(target, fetcher)
+    await vi.advanceTimersByTimeAsync(1500)
+    const genre = widgetOf(target, 'genre')!
+    const template = target.widgets!.find((w) => w.name === 'template')!
+    expect(genre.value).toBe('genre A')
+    template.value = 'pop/b'
+    template.callback?.('pop/b')
+    await vi.advanceTimersByTimeAsync(1500)
+    expect(genre.value).toBe('genre B')
+    genre.value = 'my genre'
+    genre.callback?.('my genre')
+    template.value = 'pop/a'
+    template.callback?.('pop/a')
+    await vi.advanceTimersByTimeAsync(1500)
+    expect(genre.value).toBe('my genre')
+    expect(widgetOf(target, 'mood')!.value).toBe('')
+  })
+
+  it('gives fields a vocals choice brings back with an older template\'s values the template\'s now', async () => {
+    vi.useFakeTimers()
+    const LANGUAGES: Record<string, string> = { 'pop/a': 'English', 'pop/b': 'German', 'jazz/c': '' }
+    const fetcher: Fetcher = {
+      fetchApi: (_route, options) => {
+        const body = JSON.parse(String(options?.body)) as { template: string }
+        const sung = body.template !== 'jazz/c'
+        const answer: BriefFields = {
+          ...ANSWER,
+          template: body.template,
+          sources: sung ? { language: 'template' } : {},
+          fields: { language: LANGUAGES[body.template] ?? '' },
+          choices: []
+        }
+        return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(answer) } as Response)
+      }
+    }
+    const target = node({ template: 'pop/a' })
+    target.addDOMWidget = () => widget('plenio_brief_template', '')
+    addBriefTemplatePanel(target, fetcher)
+    const choose = async (id: string): Promise<void> => {
+      const template = target.widgets!.find((w) => w.name === 'template')!
+      template.value = id
+      template.callback?.(id)
+      await vi.advanceTimersByTimeAsync(1500)
+    }
+    await vi.advanceTimersByTimeAsync(1500)
+    expect(widgetOf(target, 'language')!.value).toBe('English')
+    await choose('pop/b')
+    expect(widgetOf(target, 'language')!.value).toBe('German')
+    // an instrumental hides the field; the frontend brings it back empty, the panel fills it, and then the
+    // frontend restores the value it had
+    const hidden = widgetOf(target, 'language')!
+    target.widgets = target.widgets!.filter((w) => w !== hidden)
+    await choose('jazz/c')
+    const back = widget('vocals.language', '')
+    target.widgets!.push(back)
+    await choose('pop/a')
+    expect(back.value).toBe('English')
+    back.value = 'German'
+    back.callback?.('German')
+    await vi.advanceTimersByTimeAsync(1500)
+    expect(back.value).toBe('English')
+  })
+})
+
+describe('the choices after another template', () => {
+  it('follow where they hold a template\'s value, and stay where the user chose them', async () => {
+    vi.useFakeTimers()
+    const LENGTHS: Record<string, string> = { 'pop/a': 'standard (about 3:00)', 'pop/b': 'long (about 4:30)' }
+    const fetcher: Fetcher = {
+      fetchApi: (_route, options) => {
+        const body = JSON.parse(String(options?.body)) as { template: string; fields: Record<string, string> }
+        const length = LENGTHS[body.template]
+        const answer: BriefFields = {
+          ...ANSWER,
+          template: body.template,
+          sources: {},
+          fields: { length, vocals: body.template === 'pop/b' ? 'instrumental' : 'sung' },
+          choices: [
+            { field: 'length', suggested: length, current: body.fields.length },
+            { field: 'vocals', suggested: body.template === 'pop/b' ? 'instrumental' : 'sung', current: body.fields.vocals }
+          ].filter((c) => c.suggested !== c.current)
+        }
+        return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(answer) } as Response)
+      }
+    }
+    // the workflow's length is not the template's (short test songs): it stays; the vocals are the template's
+    const target = node({ template: 'pop/a', length: 'short (about 1:30)', vocals: 'sung' })
+    target.addDOMWidget = () => widget('plenio_brief_template', '')
+    addBriefTemplatePanel(target, fetcher)
+    await vi.advanceTimersByTimeAsync(1500)
+    const template = target.widgets!.find((w) => w.name === 'template')!
+    template.value = 'pop/b'
+    template.callback?.('pop/b')
+    await vi.advanceTimersByTimeAsync(1500)
+    expect(widgetOf(target, 'length')!.value).toBe('short (about 1:30)')
+    expect(widgetOf(target, 'vocals')!.value).toBe('instrumental')
+  })
+})
+
+describe('the labels', () => {
+  it('name the lyrics inputs of a vocals choice', () => {
+    const target = node({ 'vocals.lyrics_from': 'written from the idea below', 'vocals.lyrics': '' })
+    labelWidgets(target)
+    expect((widgetOf(target, 'lyrics_from') as { label?: string }).label).toBe('lyrics')
+    expect((widgetOf(target, 'lyrics') as { label?: string }).label).toBe('lyrics idea or text')
   })
 })
 

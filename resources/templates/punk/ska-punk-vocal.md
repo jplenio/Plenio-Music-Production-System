@@ -8,7 +8,8 @@ vocals: sung
 language: English
 voice: group vocals / gang vocals
 theme: friendship & togetherness
+lyrics: About friends, bad jobs and not caring.
 length: standard (about 3:00)
 ---
 
-Energetic ska punk: upstroke offbeat guitar skanks in the verses exploding into distorted power chords in the chorus, punchy horn section riffs, walking bass, fast drums and an enthusiastic shouted vocal. Constant tempo and feel switches, playful and hyperactive. Lyrics about friends, bad jobs and not caring.
+Energetic ska punk: upstroke offbeat guitar skanks in the verses exploding into distorted power chords in the chorus, punchy horn section riffs, walking bass, fast drums and an enthusiastic shouted vocal. Constant tempo and feel switches, playful and hyperactive.

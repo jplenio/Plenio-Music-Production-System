@@ -8,7 +8,8 @@ vocals: sung
 language: Korean
 voice: group vocals / gang vocals
 theme: celebration & party
+lyrics: About confidence, attraction and having fun - mostly Korean, with a few English hook lines.
 length: standard (about 3:00)
 ---
 
-Polished, punchy K-Pop: tight beat switches, sparkling synth hooks, deep 808 bass, crisp trap-influenced hi-hats, a dynamic rap section, an airy pre-chorus and an explosive singalong chorus with a post-chorus synth hook. Stadium-ready modern production, mostly Korean lyrics with a few English hook lines. Lyrics about confidence, attraction and having fun.
+Polished, punchy K-Pop: tight beat switches, sparkling synth hooks, deep 808 bass, crisp trap-influenced hi-hats, a dynamic rap section, an airy pre-chorus and an explosive singalong chorus with a post-chorus synth hook. Stadium-ready modern production.

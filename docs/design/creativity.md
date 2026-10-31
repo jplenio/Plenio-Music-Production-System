@@ -8,6 +8,9 @@ series by Plenio's side - the owner listens, if at all.
 
 User guide: [Creativity](../user/concepts/creativity.md).
 
+> **Since 1.5.0 the scale moved** (§7): the default 50 is what 1.4 gave at 100, 25 is 1.4's reference (its 50),
+> and 51-100 go further, moderately. §1-§6 describe the slider as 1.0.2 introduced it, in 1.4's numbers.
+
 ## 1. What is known (research, 2026-10-19)
 
 | Fact | Source |
@@ -90,3 +93,16 @@ the brief's fingerprint at 50 is the one of before. `tests/unit/test_blocks.py`:
 is kept, nothing more to do afterwards. `tests/workflows`: the templates link the brief's
 creativity to every YuE2 block and the blocks' Creativity nodes to the native fields; the App mode shows the
 slider.
+
+## 7. 1.5.0: 1.4's 100 is the default (2026-10-31)
+
+The owner's request: 1.4's setting 100 gave the best songs; it should be the default at 50, and the range above it
+should go further toward experimental - not too far.
+
+| Question | Decision |
+|---|---|
+| The new scale | 0-50 is 1.4's scale at half the numbers: today's 25 is 1.4's 50 (the reference: no writer rules, YuE2's native sampling), today's 50 is 1.4's 100. 51-100 is new. Levels: *steady* 0-9, *restrained* 10-19, *balanced* 20-30, *varied* 31-40, *experimental* 41-75, *adventurous* 76-100. |
+| Above 50 | The writer: *adventurous* asks for a fresh blend with a clear touch of another genre, a signature instrument or sound, and a surprising perspective in the lyrics (an object that speaks, a letter, a dialogue, a story told from its end) - the chorus hook stays singable; the YuE2 style gets two unexpected colours instead of one, the MiniMax caption two surprising turns. The sampling at 100: writer 1.1, arrangement 1.0, plan 1.00 / 0.96 / 64, take 1.15 / 0.98 / 200. |
+| Why so moderate | There is no official guidance for YuE2's sampling beyond its defaults (ABC 0.7 / 0.9 / 30 with repetition penalty 1.005, music 1.0 / 0.95 / 100 with 1.2). Community reports (wrapper nodes' option ranges, the YuE issue tracker, the YuE demo app) agree that a plan temperature above 1.0 makes the ABC lose its form and a music temperature above about 1.15-1.2 its coherence, that a higher temperature works better with a narrower top-k, and that a lower repetition penalty buys variety at the cost of loops. So 100 stops at those edges, widens top-p and top-k a little and leaves the repetition penalties and the CFG alone. Sources: comfy.icu (SomoraYuE2GenerationOptions), YuE GitHub issue #45, docs.comfy.org (YuE2), the YuE demo `app.py` on Hugging Face. No listening series by Plenio's side; the owner listens. |
+| Old songs | A record made before 1.5.0 carries 1.4's number: the player and the song page show half of it (`core.creativity.scaled_for`, by the record's Plenio version), and the sampling it was made with is read from the record as before (`sampling_as_made`). The library cache version went up so the summaries are made again. |
+| Old workflows | A workflow saved with 1.4 keeps its number: its 100 now means *adventurous*, its 50 today's default. The brief's fingerprint counts the creativity always now (a brief at 50 is not the one of before). |

@@ -6,6 +6,7 @@ tempo: Uptempo (130-145 BPM)
 meter: 4/4
 vocals: sung
 theme: wordless vocalise
+lyrics: No verses: a wordless 'hey-oh' crowd hook and short shouted chants.
 voice: group vocals / gang vocals
 length: short (about 1:30)
 ---

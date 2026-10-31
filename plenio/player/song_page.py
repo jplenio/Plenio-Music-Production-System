@@ -177,6 +177,10 @@ def song_facts(song: Mapping[str, Any]) -> list[Fact]:
         field("Voice", "voice")
         if not cover or brief.get("vocals") == "new lyrics":
             field("Lyrics theme", "theme")
+        if brief.get("own_lyrics"):
+            out.append(("Lyrics", "own - sung as written", ""))
+        elif not cover:
+            field("Lyrics idea", "lyrics_idea")
     if cover:
         field("Harmony", "harmony")
     field("Arrangement", "arrangement", brief.get("arrangement") or song.get("arrangement") or "")

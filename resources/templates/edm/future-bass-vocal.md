@@ -8,7 +8,8 @@ vocals: sung
 language: English
 voice: female vocal, young & bright
 theme: dreams & fantasy
+lyrics: Short and dreamy, about missing someone and letting go.
 length: standard (about 3:00)
 ---
 
-Bright, emotional future bass: pitch-bending supersaw chord stacks, chopped and pitched vocal samples, trap-influenced hi-hats and 808s, soft piano intro and a euphoric detuned drop. Sweet, nostalgic and colourful, with a big singable pre-chorus. Lyrics short and dreamy, about missing someone and letting go.
+Bright, emotional future bass: pitch-bending supersaw chord stacks, chopped and pitched vocal samples, trap-influenced hi-hats and 808s, soft piano intro and a euphoric detuned drop. Sweet, nostalgic and colourful, with a big singable pre-chorus.

@@ -8,7 +8,8 @@ vocals: sung
 language: English
 voice: male vocal, raspy & raw
 theme: hope & resilience
+lyrics: About resilience, pressure and refusing to give up.
 length: long (about 4:30)
 ---
 
-Heavy, punchy hard rock: massive guitar riffs, tight bass, hard-hitting drums and a powerful rough vocal. Strong groove, memorable hooks, explosive chorus, a melodic guitar solo and a stomping half-time breakdown. Big, loud and confident. Lyrics about resilience, pressure and refusing to give up.
+Heavy, punchy hard rock: massive guitar riffs, tight bass, hard-hitting drums and a powerful rough vocal. Strong groove, memorable hooks, explosive chorus, a melodic guitar solo and a stomping half-time breakdown. Big, loud and confident.

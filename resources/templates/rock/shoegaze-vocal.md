@@ -8,7 +8,8 @@ vocals: sung
 language: English
 voice: whispered & intimate vocal
 theme: dreams & fantasy
+lyrics: Indistinct and impressionistic, about longing.
 length: long (about 4:30)
 ---
 
-Shoegaze wall of sound: heavily layered fuzz and reverb guitars with pitch-bending tremolo, buried melodic bass, steady live drums and a soft androgynous vocal mixed low inside the noise. Beautiful melody hidden under distortion, hazy dreamlike production. Lyrics indistinct and impressionistic, about longing.
+Shoegaze wall of sound: heavily layered fuzz and reverb guitars with pitch-bending tremolo, buried melodic bass, steady live drums and a soft androgynous vocal mixed low inside the noise. Beautiful melody hidden under distortion, hazy dreamlike production.

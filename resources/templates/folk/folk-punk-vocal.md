@@ -8,7 +8,8 @@ vocals: sung
 language: English
 voice: group vocals / gang vocals
 theme: friendship & togetherness
+lyrics: About broke friends, cheap nights and refusing to grow up.
 length: standard (about 3:00)
 ---
 
-Raucous folk punk: furiously strummed acoustic guitar, banjo, accordion, upright bass and a stomping snare, with a hoarse shouted lead and drunken gang-vocal chorus. Fast, ragged and joyous, getting faster toward the end. Lyrics about broke friends, cheap nights and refusing to grow up.
+Raucous folk punk: furiously strummed acoustic guitar, banjo, accordion, upright bass and a stomping snare, with a hoarse shouted lead and drunken gang-vocal chorus. Fast, ragged and joyous, getting faster toward the end.

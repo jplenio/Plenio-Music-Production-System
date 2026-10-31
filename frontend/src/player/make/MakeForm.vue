@@ -16,7 +16,7 @@ import ComboField from './ComboField.vue'
 import StudioPanel from './StudioPanel.vue'
 import type { MakeClient } from './client'
 import { applyPreset, BUILT_IN_PRESETS, formatOf, presetMatters, presetOf, type MakePreset } from './presets'
-import { AGAIN_TEXT, LABELS, LIST_FIELDS, VOCALS_TEXT, againStudio, applies, clock, fieldsOf, fromTemplate, grouped, missing, optionsFor, ownAllowed, requestOf, studioStart, summary, surprise, timeOfDay, untilText } from './form'
+import { AGAIN_TEXT, LABELS, LIST_FIELDS, LYRICS_IDEA, OWN_LYRICS, VOCALS_TEXT, againStudio, applies, clock, fieldsOf, fromTemplate, grouped, missing, optionsFor, ownAllowed, requestOf, studioStart, summary, surprise, timeOfDay, untilText } from './form'
 import type { Again, Draft, FormData, Kind, MakeJob, MakeStatus, Remake, SongDocuments, StudioSpec, StudioValues, StyleTemplate } from './form'
 
 const props = defineProps<{
@@ -57,6 +57,16 @@ const shownFields = computed(() => LIST_FIELDS.filter((name) => applies(name, dr
 const lacking = computed(() => missing(draft))
 const editingNow = computed(() => !!props.editing)
 const isTake = computed(() => draft.again === 'take')
+/** The song's lyrics are one's own (1.5.0): sung as written, the writer writes none. */
+const ownLyrics = computed(() => draft.fields.lyrics_from === OWN_LYRICS)
+/** The lyrics from an idea or one's own: switching to one's own clears the template's idea for them. */
+function setLyricsFrom(choice: string): void {
+  if (draft.fields.lyrics_from === choice) return
+  const idea = templates.value.find((t) => t.id === draft.fields.template)?.fields.lyrics ?? ''
+  if (choice === OWN_LYRICS && draft.fields.lyrics?.trim() === idea.trim()) draft.fields.lyrics = ''
+  if (choice === LYRICS_IDEA && !draft.fields.lyrics?.trim()) draft.fields.lyrics = idea
+  draft.fields.lyrics_from = choice
+}
 /** The whole studio: the admin, the player in your network - when ComfyUI describes its templates. */
 const full = computed(() => !!props.status?.me.full)
 const spec = computed<StudioSpec | null>(() => (full.value ? ((draft.kind === 'cover' ? props.form.studio?.cover : props.form.studio?.song) ?? null) : null))
@@ -384,16 +394,33 @@ onBeforeUnmount(() => {
     </section>
 
     <section v-if="!isTake" class="step">
-      <h3><i>{{ draft.kind === 'cover' && !draft.again ? 3 : 2 }}</i> {{ draft.kind === 'cover' ? 'How should your cover sound?' : 'What is your song about?' }}</h3>
+      <h3><i>{{ draft.kind === 'cover' && !draft.again ? 3 : 2 }}</i> {{ draft.kind === 'cover' ? 'How should your cover sound?' : 'How should it sound - and what is it about?' }}</h3>
       <div class="describe" :class="{ lit: lit.has('description') }">
         <textarea
           v-model="draft.fields.description"
           rows="4"
           :maxlength="form.limits.description"
-          :placeholder="draft.kind === 'cover' ? 'e.g. a slow acoustic version with warm guitar and soft brushes' : 'e.g. a summer night at the lake with friends - warm guitars, a big singalong chorus'"
+          :placeholder="draft.kind === 'cover' ? 'e.g. a slow acoustic version with warm guitar and soft brushes' : 'e.g. warm acoustic guitars, soft drums and a big singalong chorus'"
+          aria-label="How it should sound"
         />
         <small>{{ (draft.fields.description || '').length }} / {{ form.limits.description }}</small>
       </div>
+      <template v-if="applies('lyrics', draft)">
+        <div class="lyricsfrom" role="radiogroup" aria-label="The lyrics">
+          <button type="button" class="chip" role="radio" :aria-checked="!ownLyrics" :class="{ on: !ownLyrics }" @click="setLyricsFrom(LYRICS_IDEA)">The writer writes them from an idea</button>
+          <button type="button" class="chip" role="radio" :aria-checked="ownLyrics" :class="{ on: ownLyrics }" @click="setLyricsFrom(OWN_LYRICS)">My own lyrics, sung as written</button>
+        </div>
+        <div class="describe" :class="{ lit: lit.has('lyrics') }">
+          <textarea
+            v-model="draft.fields.lyrics"
+            :rows="ownLyrics ? 9 : 2"
+            :maxlength="form.limits.lyrics ?? 6000"
+            :placeholder="ownLyrics ? 'Your lyrics - one line per sung line, a blank line between verse and chorus ([Verse], [Chorus] tags are fine)' : 'e.g. about a summer night at the lake with friends'"
+            :aria-label="ownLyrics ? 'Your lyrics' : 'What the lyrics are about'"
+          />
+          <small>{{ (draft.fields.lyrics || '').length }} / {{ form.limits.lyrics ?? 6000 }}</small>
+        </div>
+      </template>
     </section>
 
     <section v-if="!isTake" class="step">
@@ -793,6 +820,12 @@ textarea:focus,
   bottom: 8px;
   color: rgba(255, 255, 255, 0.35);
   font-size: 11px;
+}
+.lyricsfrom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 8px;
 }
 .fields {
   display: grid;

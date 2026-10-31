@@ -8,7 +8,8 @@ vocals: sung
 language: German
 voice: male vocal
 theme: hope & resilience
+lyrics: About new beginnings, friendship and the courage to start something new.
 length: standard (about 3:00)
 ---
 
-Modern German pop: a clear piano or guitar motif, warm synth pads, programmed and live drums, a driving bass and a big, very catchy chorus with stacked voices. Clear pronunciation, simple vivid language, a calm bridge before the last chorus. Lyrics about new beginnings, friendship and the courage to start something new.
+Modern German pop: a clear piano or guitar motif, warm synth pads, programmed and live drums, a driving bass and a big, very catchy chorus with stacked voices. Clear pronunciation, simple vivid language, a calm bridge before the last chorus.

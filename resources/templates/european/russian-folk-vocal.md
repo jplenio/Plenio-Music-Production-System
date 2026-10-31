@@ -8,6 +8,7 @@ vocals: sung
 language: Russian
 voice: male choir
 theme: nostalgia & memories
+lyrics: About home, the old village and a love left behind, remembered with longing - then a defiant toast to life.
 length: standard (about 3:00)
 ---
 

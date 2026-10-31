@@ -8,7 +8,8 @@ vocals: sung
 language: English
 voice: angry & aggressive vocal
 theme: social commentary
+lyrics: About technology, control, identity and humans becoming part of the system.
 length: long (about 4:30)
 ---
 
-Mechanical, dark industrial metal: crushing detuned guitar riffs locked to rigid programmed drums, deep bass, electronic pulses, samples and cold synthetic textures. Aggressive half-shouted vocals, repetitive hook phrases and a relentless machine-like groove. Lyrics about technology, control, identity and humans becoming part of the system.
+Mechanical, dark industrial metal: crushing detuned guitar riffs locked to rigid programmed drums, deep bass, electronic pulses, samples and cold synthetic textures. Aggressive half-shouted vocals, repetitive hook phrases and a relentless machine-like groove.

@@ -16,6 +16,9 @@
  * 1.0.0 added the tag field *lyrics* at the end of Export Release's *tags* option: an export saved before
  * in that mode has one value less there, so an empty lyrics tag goes in after *composer* - otherwise every
  * value after it would move one widget on (the sheet music option landed in the lyrics).
+ *
+ * 1.5.0 gave a sung Song Brief (and one with sparse vocals) the choice *lyrics* and the field *lyrics idea or text*
+ * after its theme: a brief saved before has two values less there, so the idea choice and an empty field go in.
  */
 import type { ComfyNodeDef } from '../shared/comfy'
 import { TEXT_FIELDS, isLegacyPlaceholder, WIDGET_OF } from './briefTemplate'
@@ -34,6 +37,21 @@ export function legacyPlaceholderFields(name: string, values: unknown): string[]
   return Object.entries(values as Record<string, unknown>)
     .filter(([widget, value]) => TEXT_WIDGETS.has(widget) && isLegacyPlaceholder(value))
     .map(([widget]) => widget)
+}
+
+/** The Song Brief's *lyrics* choices (`core.brief.LYRICS_FROM`): the writer's from an idea, or one's own. */
+export const LYRICS_FROM = ['written from the idea below', 'my own, sung as written below'] as const
+/** The Song Brief's vocals widget: mode, template, description, genre, mood, tempo and length come first. */
+const SONG_VOCALS_INDEX = 7
+/** Where the lyrics choice is: after a sung song's language, voice and theme. */
+const LYRICS_INDEX = SONG_VOCALS_INDEX + 4
+
+/** A sung Song Brief (or one with sparse vocals) saved before 1.5.0: the lyrics choice and field go in after its
+ * theme (the writer writes the lyrics from the template's idea, as it did). */
+export function migrateSongLyrics(values: unknown[]): unknown[] {
+  if (!['sung', 'sparse vocals'].includes(String(values[SONG_VOCALS_INDEX]))) return values
+  if ((LYRICS_FROM as readonly unknown[]).includes(values[LYRICS_INDEX])) return values
+  return [...values.slice(0, LYRICS_INDEX), LYRICS_FROM[0], '', ...values.slice(LYRICS_INDEX)]
 }
 
 /** The options of a combo input of a node definition (V3 `["COMBO", {options}]` or the older list form). */
@@ -110,6 +128,10 @@ export function migrateWidgetValues(
     const named = { ...(migrated.widgets_values_named as Record<string, unknown>) }
     for (const widget of cleared) named[widget] = ''
     migrated = { ...migrated, widgets_values_named: named }
+  }
+  if (nodeData.name === 'PlenioSongBrief' && Array.isArray(migrated.widgets_values)) {
+    const lyrics = migrateSongLyrics(migrated.widgets_values)
+    if (lyrics !== migrated.widgets_values) migrated = { ...migrated, widgets_values: lyrics }
   }
   return migrated
 }

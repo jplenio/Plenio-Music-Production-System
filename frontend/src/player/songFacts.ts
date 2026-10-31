@@ -98,6 +98,8 @@ export function songFacts(s: SongSummary): Fact[] {
     field('Language', 'language', b.language || s.language)
     field('Voice', 'voice')
     if (!cover || b.vocals === 'new lyrics') field('Lyrics theme', 'theme')
+    if (b.own_lyrics) out.push({ label: 'Lyrics', value: 'own - sung as written' })
+    else if (!cover) field('Lyrics idea', 'lyrics_idea')
   }
   if (cover) field('Harmony', 'harmony')
   field('Arrangement', 'arrangement', b.arrangement || s.arrangement)

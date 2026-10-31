@@ -6,6 +6,7 @@ tempo: Laid-back (70-100 BPM)
 meter: 4/4
 vocals: sung
 theme: wordless vocalise
+lyrics: No words: overtone throat singing on held vowels.
 voice: throat singing
 length: standard (about 3:00)
 ---

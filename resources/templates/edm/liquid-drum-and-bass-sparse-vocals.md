@@ -7,6 +7,7 @@ meter: 4/4
 vocals: sung
 language: English
 voice: female vocal, soft & airy
+lyrics: A few airy phrases about distance and longing, used as hooks.
 length: long (about 4:30)
 ---
 

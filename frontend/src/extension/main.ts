@@ -13,6 +13,7 @@ import { type Fetcher, PlenioApiError } from '../api/client'
 import { chain, type ComfyApp, type ComfyNode } from '../shared/comfy'
 import type { AsrNote, SheetPayload } from '../shared/sheetSession'
 import { blocksMessages, bringBlocksUpToDate } from './blocks'
+import { installBriefLists } from './briefChoices'
 import { BRIEF_NODES, installBriefTemplatePanel } from './briefTemplate'
 import { CONTINUE_COMMAND, type ContinueHost, installRecordDrop, openContinueSong } from './continueSong'
 import { dynamicComboNames, restoreWidgetValues, savedWidgetValues } from './dynamicCombo'
@@ -64,6 +65,14 @@ function nodeById(id: unknown): ComfyNode | null {
   if (id === null || id === undefined) return null
   const text = String(id)
   return graph()?.getNodeById?.(text.includes(':') ? text : Number(text)) ?? null
+}
+
+/** A brief's own value for a list field: the frontend's prompt dialog (the browser's on an older frontend). */
+async function askOwnValue(field: string, current: string): Promise<string | null> {
+  const message = `Your own ${field.replace('_', ' ')} - any text; the list holds the style templates' values.`
+  const dialog = comfyApp.extensionManager?.dialog
+  if (dialog?.prompt) return dialog.prompt({ title: 'Plenio · your own value', message, defaultValue: current })
+  return window.prompt(message, current)
 }
 
 /** Runs that stop for review, queued in a series: a warning (reviewQueue.ts). */
@@ -189,8 +198,11 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
     // the Cover Art switch shows what the loaded workflow's cover nodes do
     refreshFinishSwitches()
   },
-  beforeRegisterNodeDef(nodeType, nodeData) {
+  async beforeRegisterNodeDef(nodeType, nodeData) {
     if (!nodeData.name.startsWith('Plenio')) return
+    // the briefs' text fields as lists of the templates' values, one's own value always possible (briefChoices.ts);
+    // before anything else: the frontend makes the widgets from the definition once this hook is done
+    if (BRIEF_NODES.has(nodeData.name)) await installBriefLists(nodeType, nodeData, comfyApi, askOwnValue)
     addSummaryDisplay(nodeType)
     // where the run stands: a status badge per node, a frame where it stopped or failed (runStatus.ts)
     installRunStatus(nodeType, statusHost)

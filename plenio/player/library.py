@@ -31,7 +31,7 @@ from ..core.errors import PlenioError
 from ..core.release import RECORD_SUFFIX, base_title, numbered_title_in
 from . import other as other_music
 
-CACHE_VERSION = 13
+CACHE_VERSION = 14
 REFRESH_S = 15.0
 """A reader's songs are read again (in the background) when they are older than this."""
 RETIRED_DIR = "_retired"
@@ -126,10 +126,11 @@ def brief_facts(prompt: Mapping[str, Any], version: tuple[int, ...] | None = Non
 
     def field_value(name: str, key: str | None = None, default: str = "") -> str:
         typed = _text(inputs.get(key or name))
-        if typed and typed != default:
-            sources[name] = "typed"
-            return typed
         from_template = _text(filled.get(name))
+        if typed and typed != default:
+            # since 1.5.0 the fields show the template's values: such a value is the template's
+            sources[name] = "template" if typed == from_template else "typed"
+            return typed
         if from_template and not typed:
             sources[name] = "template"
             return from_template
@@ -155,6 +156,9 @@ def brief_facts(prompt: Mapping[str, Any], version: tuple[int, ...] | None = Non
     vocals = _text(inputs.get("vocals")) or _text(filled.get("vocals")) or ("" if cover else "sung")
     sources["vocals"] = "typed" if _text(inputs.get("vocals")) else "default"
     language_default = COVER_LANGUAGE_DEFAULTS.get(vocals, "") if cover else ""
+    own_lyrics = (
+        not cover and vocals != "instrumental" and inputs.get("vocals.lyrics_from") == brief_rules.OWN_LYRICS
+    )
     facts: dict[str, Any] = {
         "kind": "cover" if cover else "song",
         "mode": choice("mode", COVER_MODE_DEFAULT if cover else SONG_MODE_DEFAULT),
@@ -168,6 +172,11 @@ def brief_facts(prompt: Mapping[str, Any], version: tuple[int, ...] | None = Non
         "language": field_value("language", "vocals.language", language_default),
         "voice": field_value("voice", "vocals.voice"),
         "theme": field_value("theme", "vocals.theme"),
+        # the lyrics (1.5.0): one's own, sung as written - or the idea the writer wrote them from
+        "own_lyrics": own_lyrics,
+        "lyrics_idea": ""
+        if own_lyrics or cover or vocals == "instrumental"
+        else field_value("lyrics", "vocals.lyrics"),
         "melody": choice("melody", next(iter(brief_rules.MELODY_OPTIONS)), "vocals.melody")
         if vocals == "instrumental"
         else "",

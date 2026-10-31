@@ -1,37 +1,45 @@
 # Brief templates: what a template fills, and what it never touches
 
-The **template** in Song Brief and Cover Brief is a starting point: it suggests a style and the settings that go with it (for example *pop/singer-songwriter-acoustic-vocal* or *cinematic/epic-orchestral-instrumental*). Everything you type yourself always wins.
+The **template** in Song Brief and Cover Brief is a starting point: it sets a style and the settings that go with it (for example *pop/singer-songwriter-acoustic-vocal* or *cinematic/epic-orchestral-instrumental*). Everything you change yourself always wins.
 
-## The rule
+## What you see
+
+Choose a template and its values **appear in the fields**: the description, genre, mood, tempo, key, meter, language, voice, theme, the lyrics idea and the lead instrument - and the template's vocals (sung, sparse vocals or instrumental), length and melody. Change any of them; the rest stays the template's.
+
+- **Another template** replaces every value a template put there - the fields you changed keep your value, so changing the template cannot destroy an edit. A choice follows the same way: a length you set yourself (for short test songs) stays.
+- **An empty field** is filled with the template's value again (an empty field always meant "the template's value" - the run reads it the same way).
+- **A workflow saved before 1.5.0** opens with its empty fields filled from its template; its typed values stay.
+- The summary after a run lists which fields came from the template (`from_template`).
 
 | Field class | Fields | Effective value |
 |---|---|---|
-| text | description, genre, mood, tempo, key, meter, language, voice, theme, lead instrument | **your text** if the field is not empty · else the **template's text** · else empty ("the writer decides") |
-| choice | length, vocals, melody | always the **widget value**; the template's different choice is only a suggestion |
+| text | description, genre, mood, tempo, key, meter, language, voice, theme, lyrics, lead instrument | **the field's text** · an empty field: the **template's text** · else empty ("the writer decides") |
+| choice | length, vocals, melody | always the **widget value**; choosing a template sets it to the template's |
 
-The rule is stateless and deterministic, and it never writes into a widget on its own:
+## Lists - and your own values
 
-- changing the template cannot destroy a value you typed;
-- clearing a field returns it to the template's value;
-- the summary after a run lists which fields came from the template (`from_template`).
+Genre, mood, tempo, key, meter, language, voice, theme and lead instrument are **lists**: every value the style templates have (and common keys, meters, languages and tempos), as the Plenio Player's form offers them. **✎ type your own …** at the top of a list asks for any text of your own; it then stays in the list. A value saved in a workflow shows even when no template has it. The description and the lyrics stay free text.
+
+## The lyrics field
+
+A sung song (and one with sparse vocals) has two inputs after the theme:
+
+- **lyrics** - *written from the idea below* (default) or *my own, sung as written below*;
+- **lyrics idea or text** - with *written from the idea*: what the words should be about (a story, an image, a message); the template's idea appears here and the writer writes the lyrics from it. With *my own*: your lyrics, sung exactly as written - the writer writes only the title, the style and the cover-art prompt for them, and the title comes from your words. Section tags (`[Verse]`, `[Chorus]` …) are kept; without them every block of lines becomes a verse and a block that comes back a chorus.
+
+Switching to *my own* empties the field if it still holds the template's idea. A template never fills your own lyrics.
+
+The template's **description** says how the song **sounds** - character, instruments, arrangement; what it is **about** is in its lyrics idea (since 1.5.0 the shipped templates keep the two apart).
 
 ## The panel under the template selector
 
-Pick a template and the panel below the selector says what it would fill:
+- **From the template: genre, tempo, … · your own: mood** - which fields show the template's value and which hold yours;
+- **The template suggests: length = short (about 1:30)** - choice fields where the template differs from the widget value;
+- **Use template choices** - sets length, vocals and melody to the template's values;
+- **Refill from template** - puts the template's value back into every text field you changed (with a confirmation);
+- **↻** asks again.
 
-- **Template fills: genre (indie pop), tempo (88 BPM), …** - the empty text fields the template covers;
-- **The template suggests: length = short (about 1:30)** - choice fields where the template differs from your widget value;
-- three actions, so nothing happens silently:
-  - **Copy template text** - writes the template's text into the fields that are still empty (turning them into your own, editable text);
-  - **Use template choices** - sets length, vocals and melody to the template's values;
-  - **Reset all to template** - clears every text field you typed into (with a confirmation), so the template applies again;
-- **↻** asks again after you changed something.
-
-The panel asks the backend for the answer (`/plenio/brief/fields`), so what it shows is exactly what the brief will resolve to - there is no second copy of the rule.
-
-## Ghost text
-
-Empty fields do **not** show the template's value as grey placeholder text: the ComfyUI frontend does not pass a placeholder to a single-line text widget, and a *dynamic* placeholder has no extension API (checked against frontend 1.53.6). The panel's *Template fills:* line is the readable equivalent; the App-mode form is unchanged.
+The panel asks the backend for the template's values (`/plenio/brief/fields`), so what it shows is exactly what the brief resolves to - there is no second copy of the rule.
 
 ## The legacy `custom` placeholder
 

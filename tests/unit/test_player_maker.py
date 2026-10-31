@@ -179,12 +179,26 @@ def test_a_song_waits_in_the_line_and_only_its_owner_and_the_admin_see_it(party:
         ({**SONG, "genre": "x" * 121}, "too long"),
         ({**SONG, "description": "x" * 1501}, "too long"),
         ({**SONG, "template": "../evil"}, "No such style"),
+        ({**SONG, "lyrics_from": "my own, sung as written below"}, "Write your lyrics"),
+        ({**SONG, "lyrics_from": "chanted"}, "Lyrics: one of"),
+        ({**SONG, "lyrics": "x" * 6001}, "too long"),
     ],
 )
 def test_a_form_that_is_not_right_is_refused(party: Any, fields: dict[str, Any], message: str) -> None:
     songs = party[0]
     with pytest.raises(MakerError, match=message):
         songs.create(ANNA, {"fields": fields})
+
+
+def test_ones_own_lyrics_keep_their_lines_and_an_instrumental_sends_none(party: Any) -> None:
+    songs, studio, _clock, _library = party
+    own = {**SONG, "lyrics_from": "my own, sung as written below", "lyrics": "Line one\r\n\n  Line   two  "}
+    made = songs.create(ANNA, {"fields": own})["fields"]
+    assert made["lyrics"] == "Line one\n\nLine two" and made["lyrics_from"] == "my own, sung as written below"
+    assert songs.create(ANNA, {"fields": SONG})["fields"]["lyrics_from"] == "written from the idea below"
+    songs.tick()
+    assert studio.sent[0]["fields"]["lyrics"] == "Line one\n\nLine two"
+    assert songs.form(ANNA)["limits"]["lyrics"] == maker_module.LYRICS_LIMIT
 
 
 def test_the_admin_may_make_longer_songs_and_a_length_in_minutes_is_one_of_the_choices(party: Any) -> None:

@@ -94,13 +94,21 @@ SONG_FIELDS = (
     "language",
     "voice",
     "theme",
+    "lyrics_from",
+    "lyrics",
     "key",
     "meter",
 )
 COVER_FIELDS = ("template", "description", "genre", "mood", "vocals", "language", "voice", "theme")
 """What the form asks. A cover keeps the original's tempo, length, key and meter."""
-SUNG_ONLY = ("language", "voice", "theme")
-BRIEF_INPUTS = {"language": "vocals.language", "voice": "vocals.voice", "theme": "vocals.theme"}
+SUNG_ONLY = ("language", "voice", "theme", "lyrics_from", "lyrics")
+BRIEF_INPUTS = {
+    "language": "vocals.language",
+    "voice": "vocals.voice",
+    "theme": "vocals.theme",
+    "lyrics_from": "vocals.lyrics_from",
+    "lyrics": "vocals.lyrics",
+}
 """The form's fields that are a DynamicCombo's inputs in the brief (``vocals.language``)."""
 AGAIN = ("take", "song", "cover")
 """What is made again from a song: a new take of it, a new song like it, a cover of it."""
@@ -109,6 +117,8 @@ DOCUMENT_LIMITS = {"title": 200, "style": 2000, "lyrics": 20000}
 STUDIO_VALUE_LIMIT = 4000
 RECORD_LIMIT = 32 * 2**20
 DESCRIPTION_LIMIT = 1500
+LYRICS_LIMIT = 6000
+"""A song's lyrics idea or one's own lyrics (1.5.0), in characters: a long song's words fit."""
 TEXT_LIMIT = 120
 SOURCE_LIMIT = 100 * 2**20
 SOURCE_SUFFIXES = (".mp3", ".flac", ".wav", ".ogg", ".m4a", ".opus", ".aac", ".aif", ".aiff")
@@ -580,6 +590,7 @@ class PartySongs:
         ]
         form["limits"] = {
             "description": DESCRIPTION_LIMIT,
+            "lyrics": LYRICS_LIMIT,
             "text": TEXT_LIMIT,
             "source_mb": SOURCE_LIMIT // 2**20,
             "max_length": self.settings["max_length"] if not self.full(who) else "",
@@ -688,6 +699,12 @@ class PartySongs:
                 if len(text) > DESCRIPTION_LIMIT:
                     raise MakerError(f"The description is too long ({DESCRIPTION_LIMIT} characters at most).")
                 fields[name] = re.sub(r"[^\S\n]+", " ", text)
+            elif name == "lyrics":
+                # one's own lyrics keep their lines and their blank lines (the sections)
+                text = str(given.get(name) or "").replace("\r\n", "\n").strip()
+                if len(text) > LYRICS_LIMIT:
+                    raise MakerError(f"The lyrics are too long ({LYRICS_LIMIT} characters at most).")
+                fields[name] = "\n".join(re.sub(r"[^\S\n]+", " ", line).strip() for line in text.split("\n"))
             else:
                 fields[name] = _line(given.get(name), TEXT_LIMIT, name)
         if kind == "song":
@@ -702,6 +719,12 @@ class PartySongs:
             fields["vocals"] = fields["vocals"] or "sung"
             if fields["vocals"] not in brief_rules.VOCALS:
                 raise MakerError(f"Vocals: one of {', '.join(brief_rules.VOCALS)}.")
+            fields["lyrics_from"] = fields["lyrics_from"] or brief_rules.LYRICS_IDEA
+            if fields["lyrics_from"] not in brief_rules.LYRICS_FROM:
+                raise MakerError(f"Lyrics: one of {', '.join(brief_rules.LYRICS_FROM)}.")
+            own = fields["lyrics_from"] == brief_rules.OWN_LYRICS
+            if own and fields["vocals"] != "instrumental" and not fields["lyrics"]:
+                raise MakerError("Write your lyrics - or let the writer write them from an idea.")
         else:
             fields["vocals"] = fields["vocals"] or "original lyrics"
             if fields["vocals"] not in brief_rules.COVER_VOCALS:

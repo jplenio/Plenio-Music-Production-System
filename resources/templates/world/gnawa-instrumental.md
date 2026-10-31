@@ -6,6 +6,7 @@ tempo: Midtempo (100-120 BPM)
 meter: 6/8
 vocals: sung
 theme: wordless vocalise
+lyrics: No words: call-and-response chanted syllables in a trance.
 voice: group vocals / gang vocals
 length: long (about 4:30)
 ---

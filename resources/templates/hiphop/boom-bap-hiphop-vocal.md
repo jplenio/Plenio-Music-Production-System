@@ -8,7 +8,8 @@ vocals: sung
 language: English
 voice: rap flow, male
 theme: social commentary
+lyrics: About street life, ambition and staying true to yourself.
 length: standard (about 3:00)
 ---
 
-Classic 1990s boom-bap: dusty hard-hitting drum break, chopped soul sample loop, warm vinyl crackle, deep upright bass and scratched hook. Laid-back but forceful flow, four-bar loop with subtle variations, gritty SP-1200 style sampling. Lyrics about street life, ambition and staying true to yourself.
+Classic 1990s boom-bap: dusty hard-hitting drum break, chopped soul sample loop, warm vinyl crackle, deep upright bass and scratched hook. Laid-back but forceful flow, four-bar loop with subtle variations, gritty SP-1200 style sampling.

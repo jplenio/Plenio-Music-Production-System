@@ -148,7 +148,12 @@ TEXT_FIELDS = (
     "voice",
     "theme",
     "lead_instrument",
+    "lyrics",
 )
+LYRICS_FROM = {"written from the idea below": "idea", "my own, sung as written below": "own"}
+"""What a Song Brief's *lyrics* field holds (owner's request 2026-10-31): an idea the writer writes the lyrics from
+(what a template gives), or the user's own lyrics, sung as written."""
+LYRICS_IDEA, OWN_LYRICS = LYRICS_FROM
 TEMPLATE_FIELDS = (*TEXT_FIELDS, "length", "vocals", "melody")
 _FRONT_MATTER = re.compile(r"\A---\s*\n(.*?)\n---\s*\n?(.*)\Z", re.DOTALL)
 _ID = re.compile(r"[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9-]*)?")
@@ -183,6 +188,10 @@ class SongBrief:
     theme: str = ""
     melody: str = "lead"
     lead_instrument: str = ""
+    lyrics: str = ""
+    """What the lyrics should say (an idea for the writer: a story, an image, a message) - or, with
+    ``own_lyrics``, the lyrics themselves, sung as written."""
+    own_lyrics: bool = False
     arrangement: str = ARRANGEMENT_DEFAULT
     """The creative mode (``core.arrangement``): ``off`` or the name of a mode file."""
     closeness: int = CLOSENESS_DEFAULT
@@ -282,6 +291,10 @@ class SongBrief:
             ):
                 if value:
                     lines.append(f"{label}: {value}")
+            if self.own_lyrics:
+                lines.append("Lyrics: given (below) - they are sung exactly as written")
+            elif self.lyrics:
+                lines.append(f"Lyrics idea: {' '.join(self.lyrics.split())}")
         return "\n".join(lines)
 
 
@@ -647,7 +660,16 @@ def build_song_brief(
     variation: int | None = None,
 ) -> SongBrief:
     """Create a brief; fields left empty take the template's value. Invalid choices raise."""
-    merged, from_template, notes = resolve_text_fields(values, template, TEMPLATE_FIELDS)
+    lyrics_from = str(values.get("lyrics_from", "") or LYRICS_IDEA)
+    own = LYRICS_FROM.get(lyrics_from, lyrics_from) == "own"
+    if LYRICS_FROM.get(lyrics_from, lyrics_from) not in LYRICS_FROM.values():
+        raise PlenioUserError(
+            f"Unknown lyrics choice {lyrics_from!r}.", hint=f"Choose one of {list(LYRICS_FROM)}."
+        )
+    # own lyrics are the user's: a template's idea never takes their place
+    merged, from_template, notes = resolve_text_fields(
+        values, template, TEMPLATE_FIELDS, no_template=("lyrics",) if own else ()
+    )
     length, _note = resolve_length(merged["length"])
     vocals = merged["vocals"] or "sung"
     if vocals not in VOCALS:
@@ -657,8 +679,16 @@ def build_song_brief(
         raise PlenioUserError(
             f"Unknown melody option {merged['melody']!r}.", hint=f"Choose one of {list(MELODY_OPTIONS)}."
         )
+    sung = vocals != "instrumental"
+    if own and sung and not merged["lyrics"].strip():
+        raise PlenioUserError(
+            "The brief says 'my own lyrics', but the lyrics field is empty.",
+            hint="Write the lyrics into the field, or choose 'written from the idea below'.",
+        )
     brief = SongBrief(
-        **{name: merged[name] for name in TEXT_FIELDS},
+        **{name: merged[name] for name in TEXT_FIELDS if name != "lyrics"},
+        lyrics=merged["lyrics"].strip() if sung else "",
+        own_lyrics=own and sung,
         length=length,
         vocals=vocals,
         melody=melody,

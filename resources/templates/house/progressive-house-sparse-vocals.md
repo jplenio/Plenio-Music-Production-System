@@ -7,6 +7,7 @@ meter: 4/4
 vocals: sung
 language: English
 voice: female vocal, soft & airy
+lyrics: A few short phrases about letting go and drifting into the night.
 length: long (about 4:30)
 ---
 

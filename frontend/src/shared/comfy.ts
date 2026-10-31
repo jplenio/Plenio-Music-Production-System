@@ -99,9 +99,14 @@ export interface ComfyApp {
   registerExtension(extension: ComfyExtension): void
   graph?: unknown
   canvas?: { ds?: { scale?: number } }
-  /** The frontend's services (1.2x+); only the toast is used. */
+  /** The frontend's services (1.2x+): the toast, and the dialog's prompt (asks for a text; ``null``: cancelled). */
   extensionManager?: {
     toast?: { add(message: { severity: string; summary: string; detail?: string; life?: number }): void }
+    dialog?: {
+      prompt?(options: { title: string; message: string; defaultValue?: string; placeholder?: string }): Promise<
+        string | null
+      >
+    }
   }
 }
 

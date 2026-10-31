@@ -119,6 +119,9 @@ class Request:
     sound_words: tuple[str, ...] = ()
     """Words of the brief's genre, mood and tempo: a proposed title with one of them describes the sound, not the
     song, and is not picked while others are left (``pick_title``)."""
+    given_lyrics: str = ""
+    """``lyrics_mode`` ``given``: the user's own lyrics (with section tags), sung as written - the writer writes
+    only the title, the style and the artwork for them."""
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -193,9 +196,12 @@ def compose(
     rules = rules_for(engine.engine_id).writing_rules(
         instrumental=brief.instrumental, target_seconds=brief.target_seconds, sparse=brief.sparse
     )
+    given = given_lyrics(brief.lyrics) if getattr(brief, "own_lyrics", False) else ""
     if brief.instrumental:
         # YuE2: the single tag [instrumental]; engines that need a section map (MiniMax) provide one.
         sections: tuple[str, ...] = tuple(rules.get("instrumental_sections") or (INSTRUMENTAL_TAG,))
+    elif given and not score_sections:
+        sections = tuple(lyrics_rules.parse_lyrics(given).tags)
     else:
         sections = tuple(s.strip("[]") for s in score_sections) or tuple(rules["sections"])
     request = Request(
@@ -205,10 +211,15 @@ def compose(
         brief.instrumental,
         sections,
         fixed_title.strip(),
-        lyrics_mode="tags" if brief.instrumental else "write",
-        sparse_lines=lyrics_rules.sparse_line_limit(brief.target_seconds) if brief.sparse else 0,
+        lyrics_mode="tags" if brief.instrumental else "given" if given else "write",
+        sparse_lines=lyrics_rules.sparse_line_limit(brief.target_seconds)
+        if brief.sparse and not given
+        else 0,
         sound_words=sound_words(brief),
+        given_lyrics=given,
     )
+    if given:
+        return _compose_given(brief, rules, request, detail=detail, mode=mode), request
     words = (
         "the brief's description and theme"
         if brief.instrumental
@@ -379,6 +390,62 @@ def _layout(lyrics_example: str, *, multiline: bool = False, titles: bool = Fals
         lyrics_example,
         "ARTWORK: <the cover prompt, 50 to 90 words>",
     ]
+
+
+def given_lyrics(text: str) -> str:
+    """The user's own lyrics as the song sings them: their section tags (a label line such as 'Chorus:' made one), or,
+    without any, ``[Verse]`` for every block of lines and ``[Chorus]`` for a block that comes back."""
+    cleaned = _clean_lyrics(text, [])
+    parsed = lyrics_rules.parse_lyrics(cleaned)
+    if parsed.sections:
+        if parsed.preamble:  # lines before the first tag: a verse of their own
+            return lyrics_rules.parse_lyrics("[Verse]\n" + cleaned).format()
+        return parsed.format()
+    blocks = [block.strip() for block in re.split(r"\n\s*\n", text.strip()) if block.strip()]
+    repeated = {block for block in blocks if blocks.count(block) > 1}
+    return "\n\n".join(f"[{'Chorus' if block in repeated else 'Verse'}]\n{block}" for block in blocks)
+
+
+def _compose_given(
+    brief: SongBrief, rules: Mapping[str, Any], request: Request, *, detail: str, mode: CreativeMode | None
+) -> str:
+    """The writing prompt of a song with the user's own lyrics: the writer writes the title from them, the style and
+    the artwork; the lyrics stay exactly as they are (owner's request 2026-10-31)."""
+    parts = [
+        f"You are a professional songwriter preparing a song for the AI music model {rules['engine']}.",
+        "The lyrics of the song are given below and are sung exactly as written. Write the rest of the song "
+        "described in the brief and follow the rules exactly.",
+        "",
+        "BRIEF",
+        brief.to_text(),
+        "",
+        "RULES",
+        title_rule("the given lyrics")
+        if not request.fixed_title
+        else f'- Title: use exactly "{request.fixed_title}".',
+        f"- {rules['style']}",
+        "- Lyrics: they are given; do not change, shorten or add to them. Write only the word none after LYRICS:.",
+        "- The given lyrics:",
+        *[f"  {line}" if line.strip() else "" for line in request.given_lyrics.splitlines()],
+        artwork_rule("the given lyrics"),
+    ]
+    parts += series_lines(brief)
+    if DETAIL.get(detail):
+        parts.append(f"- {DETAIL[detail]}")
+    if mode is not None:
+        parts += writer_lines(mode, kind="song", closeness=brief.closeness, genre=brief.genre)
+    parts += creativity_lines(
+        brief.creativity, engine_id=request.engine_id, instrumental=False, lyrics="none", fixed_sections=True
+    )
+    multiline = bool(rules.get("style_multiline"))
+    return "\n".join(
+        [
+            *parts,
+            *_example_style(rules),
+            "",
+            *_layout("none", multiline=multiline, titles=not request.fixed_title),
+        ]
+    )
 
 
 def melody_register_hint(vocal_range: tuple[int, int] | None) -> str:
@@ -894,6 +961,11 @@ def parse_draft(text: str, request: Request, taken: Iterable[str] = ()) -> Draft
     notes.extend(style_notes)
     if request.lyrics_mode == "none":
         lyrics = ""
+    elif request.lyrics_mode == "given":
+        lyrics = request.given_lyrics
+        answered = blocks.get("LYRICS", "").strip()
+        if answered and answered.lower().strip(" .") != "none":
+            notes.append("the given lyrics are sung as written (the model's lyrics were not used)")
     elif request.lyrics_mode == "tags":
         lyrics = lyrics_rules.tags_only(request.sections)
         written = lyrics_rules.parse_lyrics(_clean_lyrics(blocks.get("LYRICS", ""), []))

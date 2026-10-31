@@ -1845,6 +1845,7 @@
         "asian/enka-vocal",
         "asian/game-jrpg-orchestral",
         "asian/indian-classical-instrumental",
+        "asian/j-rock-vocal",
         "asian/kpop-vocal",
         "asian/mandopop-ballad-vocal",
         "blues/blues-ballad-vocal",
@@ -1923,8 +1924,11 @@
         "european/chanson-vocal",
         "european/fado-vocal",
         "european/flamenco-instrumental",
+        "european/carnival-song-vocal",
         "european/irish-pub-session-instrumental",
+        "european/italian-pop-vocal",
         "european/klezmer-instrumental",
+        "european/party-schlager-vocal",
         "european/polka-instrumental",
         "european/russian-folk-vocal",
         "european/schlager-vocal",
@@ -1933,6 +1937,7 @@
         "folk/celtic-folk-vocal",
         "folk/dark-fairytale-folk-vocal",
         "folk/folk-punk-vocal",
+        "folk/german-liedermacher-vocal",
         "folk/melancholic-folk-ballad-vocal",
         "folk/mystical-medieval-folk-vocal",
         "folk/nordic-folk-vocal",
@@ -1948,6 +1953,7 @@
         "hiphop/cloud-rap-vocal",
         "hiphop/drill-instrumental",
         "hiphop/german-rap-vocal",
+        "hiphop/melodic-trap-vocal",
         "hiphop/old-school-hiphop-vocal",
         "hiphop/phonk-instrumental",
         "hiphop/rnb-vocal",
@@ -1975,13 +1981,16 @@
         "jazz/smooth-jazz-vocal-positive-resolution",
         "jazz/swing-big-band-instrumental",
         "jazz/vocal-jazz-crooner",
+        "kids/birthday-song-vocal",
         "kids/children-song-vocal",
+        "kids/german-birthday-song-vocal",
         "kids/kids-adventure-song-vocal",
         "kids/lullaby-vocal",
         "kids/nursery-rhyme-german-vocal",
         "latin/bachata-vocal",
         "latin/bossa-nova-vocal",
         "latin/cumbia-instrumental",
+        "latin/latin-pop-vocal",
         "latin/merengue-instrumental",
         "latin/norteno-corrido-vocal",
         "latin/reggaeton-vocal",
@@ -2034,6 +2043,7 @@
         "rock/garage-rock-vocal",
         "rock/hard-rock-vocal",
         "rock/indie-rock-vocal",
+        "rock/pop-rock-vocal",
         "rock/post-rock-instrumental",
         "rock/progressive-rock-instrumental",
         "rock/psychedelic-rock-instrumental",
@@ -2046,6 +2056,7 @@
         "seasonal/christmas-pop-vocal",
         "seasonal/german-christmas-vocal",
         "seasonal/wedding-ceremony-instrumental",
+        "seasonal/wedding-first-dance-vocal",
         "soul/doo-wop-vocal",
         "soul/motown-soul-vocal",
         "soul/neo-soul-vocal",
@@ -4615,6 +4626,7 @@
         "asian/enka-vocal",
         "asian/game-jrpg-orchestral",
         "asian/indian-classical-instrumental",
+        "asian/j-rock-vocal",
         "asian/kpop-vocal",
         "asian/mandopop-ballad-vocal",
         "blues/blues-ballad-vocal",
@@ -4693,8 +4705,11 @@
         "european/chanson-vocal",
         "european/fado-vocal",
         "european/flamenco-instrumental",
+        "european/carnival-song-vocal",
         "european/irish-pub-session-instrumental",
+        "european/italian-pop-vocal",
         "european/klezmer-instrumental",
+        "european/party-schlager-vocal",
         "european/polka-instrumental",
         "european/russian-folk-vocal",
         "european/schlager-vocal",
@@ -4703,6 +4718,7 @@
         "folk/celtic-folk-vocal",
         "folk/dark-fairytale-folk-vocal",
         "folk/folk-punk-vocal",
+        "folk/german-liedermacher-vocal",
         "folk/melancholic-folk-ballad-vocal",
         "folk/mystical-medieval-folk-vocal",
         "folk/nordic-folk-vocal",
@@ -4718,6 +4734,7 @@
         "hiphop/cloud-rap-vocal",
         "hiphop/drill-instrumental",
         "hiphop/german-rap-vocal",
+        "hiphop/melodic-trap-vocal",
         "hiphop/old-school-hiphop-vocal",
         "hiphop/phonk-instrumental",
         "hiphop/rnb-vocal",
@@ -4745,13 +4762,16 @@
         "jazz/smooth-jazz-vocal-positive-resolution",
         "jazz/swing-big-band-instrumental",
         "jazz/vocal-jazz-crooner",
+        "kids/birthday-song-vocal",
         "kids/children-song-vocal",
+        "kids/german-birthday-song-vocal",
         "kids/kids-adventure-song-vocal",
         "kids/lullaby-vocal",
         "kids/nursery-rhyme-german-vocal",
         "latin/bachata-vocal",
         "latin/bossa-nova-vocal",
         "latin/cumbia-instrumental",
+        "latin/latin-pop-vocal",
         "latin/merengue-instrumental",
         "latin/norteno-corrido-vocal",
         "latin/reggaeton-vocal",
@@ -4804,6 +4824,7 @@
         "rock/garage-rock-vocal",
         "rock/hard-rock-vocal",
         "rock/indie-rock-vocal",
+        "rock/pop-rock-vocal",
         "rock/post-rock-instrumental",
         "rock/progressive-rock-instrumental",
         "rock/psychedelic-rock-instrumental",
@@ -4816,6 +4837,7 @@
         "seasonal/christmas-pop-vocal",
         "seasonal/german-christmas-vocal",
         "seasonal/wedding-ceremony-instrumental",
+        "seasonal/wedding-first-dance-vocal",
         "soul/doo-wop-vocal",
         "soul/motown-soul-vocal",
         "soul/neo-soul-vocal",
@@ -4837,7 +4859,7 @@
      "description": [
       "STRING",
       {
-       "tooltip": "What the song is about and how it should sound. Sent to the writing model.",
+       "tooltip": "How the song should sound - its character, instruments and arrangement (the lyrics have a field of their own). Sent to the writing model.",
        "default": "",
        "multiline": true
       }
@@ -4914,9 +4936,33 @@
            "theme": [
             "STRING",
             {
-             "tooltip": "What the lyrics are about.",
+             "tooltip": "What the lyrics are about, in a few words.",
              "default": "",
              "multiline": false
+            }
+           ]
+          },
+          "optional": {
+           "lyrics_from": [
+            "COMBO",
+            {
+             "display_name": "lyrics",
+             "tooltip": "written from the idea below: the writer writes the lyrics; the field says what they should be about (a template gives an idea). my own: the field holds your lyrics, sung exactly as written.",
+             "default": "written from the idea below",
+             "multiselect": false,
+             "options": [
+              "written from the idea below",
+              "my own, sung as written below"
+             ]
+            }
+           ],
+           "lyrics": [
+            "STRING",
+            {
+             "display_name": "lyrics idea or text",
+             "tooltip": "The idea for the lyrics - a story, an image, a message - or, with 'my own', the lyrics themselves: sections as [Verse], [Chorus] ... (without them Plenio adds them).",
+             "default": "",
+             "multiline": true
             }
            ]
           }
@@ -4945,9 +4991,33 @@
            "theme": [
             "STRING",
             {
-             "tooltip": "What the lyrics are about.",
+             "tooltip": "What the lyrics are about, in a few words.",
              "default": "",
              "multiline": false
+            }
+           ]
+          },
+          "optional": {
+           "lyrics_from": [
+            "COMBO",
+            {
+             "display_name": "lyrics",
+             "tooltip": "written from the idea below: the writer writes the lyrics; the field says what they should be about (a template gives an idea). my own: the field holds your lyrics, sung exactly as written.",
+             "default": "written from the idea below",
+             "multiselect": false,
+             "options": [
+              "written from the idea below",
+              "my own, sung as written below"
+             ]
+            }
+           ],
+           "lyrics": [
+            "STRING",
+            {
+             "display_name": "lyrics idea or text",
+             "tooltip": "The idea for the lyrics - a story, an image, a message - or, with 'my own', the lyrics themselves: sections as [Verse], [Chorus] ... (without them Plenio adds them).",
+             "default": "",
+             "multiline": true
             }
            ]
           }

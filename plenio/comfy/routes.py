@@ -365,6 +365,7 @@ async def brief_fields(request: web.Request) -> web.StreamResponse:
     """
     from ..core.brief import (
         DEFAULT_LENGTH,
+        OWN_LYRICS,
         TEXT_FIELDS,
         cover_choice_hints,
         cover_text_fields,
@@ -383,6 +384,9 @@ async def brief_fields(request: web.Request) -> web.StreamResponse:
     # a Cover Brief has its own fields and choices (no length, no tempo/key/meter, vocals in its words)
     cover = data.get("kind") == "cover"
     names = cover_text_fields(fields.get("vocals", "")) if cover else TEXT_FIELDS
+    # one's own lyrics are never the template's idea (1.5.0)
+    if not cover and fields.get("lyrics_from") == OWN_LYRICS:
+        names = tuple(name for name in names if name != "lyrics")
     merged, from_template, notes = resolve_text_fields(fields, template, names)
     choices = (cover_choice_hints if cover else template_choice_hints)(fields, template)
     return web.json_response(

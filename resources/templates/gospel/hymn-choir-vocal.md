@@ -8,6 +8,7 @@ vocals: sung
 language: English
 voice: mixed choir
 theme: spirituality & inner peace
+lyrics: Verses of praise and trust - a prayer for strength and peace, the last verse the most joyful.
 length: standard (about 3:00)
 ---
 

@@ -28,7 +28,8 @@ TEMPLATES = api_templates(WORKFLOWS)
 SONG_FIELDS = [
     ("mode", "choice"), ("template", "choice"), ("description", "text"), ("genre", "string"), ("mood", "string"),
     ("tempo", "string"), ("length", "choice"), ("vocals", "choice"), ("language", "string"), ("voice", "string"),
-    ("theme", "string"), ("melody", "choice"), ("lead_instrument", "string"), ("key", "string"), ("meter", "string"),
+    ("theme", "string"), ("lyrics_from", "choice"), ("lyrics", "text"), ("melody", "choice"),
+    ("lead_instrument", "string"), ("key", "string"), ("meter", "string"),
     ("arrangement", "choice"), ("genre_closeness", "integer"), ("lines_under_singing", "boolean"),
     ("creativity", "integer"), ("lyrics_fidelity", "choice"), ("finish.hq_mastering", "boolean"),
     ("finish.cover_art", "boolean"), ("writer.model", "choice"),

@@ -12,7 +12,7 @@ Song Brief -> Write Song -> Song Sheet · Text -> YuE2 Plan -> Score Tools -> Ar
 ## Quick start
 
 1. Open **1 · YuE2 · Song** from the template browser.
-2. In **Song Brief**, choose the **mode** (below), then pick a template or describe the song. *length* (1:00 to 6:00) and *vocals* (sung, sparse vocals or instrumental - [below](#sparse-vocals)) are set only here.
+2. In **Song Brief**, choose the **mode** (below), then pick a template or describe the song: the template's values appear in the fields, and each field is a list with **✎ type your own …** ([Brief templates](../concepts/brief-templates.md)). *length* (1:00 to 6:00) and *vocals* (sung, sparse vocals or instrumental - [below](#sparse-vocals)) are set only here. **lyrics**: the writer writes them from the idea in the field below (the template's, or yours), or *my own, sung as written below* - your lyrics, sung as written; the title then comes from your words.
 3. Press **Run**. The first run downloads missing models (YuE2 3B int8, Gemma 4 E4B writer), then takes a few minutes.
 4. The mastered song appears in the preview and in `output/plenio/` as `<date> <title>.flac`, with the unmastered take `<date> <title> (original).flac` and the record `<date> <title>.plenio.json`.
 

@@ -8,6 +8,7 @@ vocals: sung
 language: English
 voice: growled / screamed vocal
 theme: mystery & darkness
+lyrics: About ancient horror, decay and a darkness that cannot be escaped.
 length: standard (about 3:00)
 ---
 

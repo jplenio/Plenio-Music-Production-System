@@ -22,7 +22,7 @@ export interface FormData {
   values: Record<string, string[]>
   song: { fields: string[]; choices: { length: string[]; vocals: string[] }; defaults: { length?: string; vocals?: string } }
   cover: { fields: string[]; choices: { vocals: string[] }; defaults: { vocals?: string } }
-  limits: { description: number; text: number; source_mb: number; max_length: string; documents?: Record<string, number> }
+  limits: { description: number; lyrics?: number; text: number; source_mb: number; max_length: string; documents?: Record<string, number> }
   covers: boolean
   /** The whole studio (the admin, the player in your network): the Song API's fields of each template. */
   studio?: StudioForm
@@ -212,7 +212,7 @@ export interface MakeStatus {
   approvals?: MakeJob[]
 }
 
-export const SONG_FIELDS = ['template', 'description', 'genre', 'mood', 'tempo', 'length', 'vocals', 'language', 'voice', 'theme', 'key', 'meter'] as const
+export const SONG_FIELDS = ['template', 'description', 'genre', 'mood', 'tempo', 'length', 'vocals', 'language', 'voice', 'theme', 'lyrics_from', 'lyrics', 'key', 'meter'] as const
 export const COVER_FIELDS = ['template', 'description', 'genre', 'mood', 'vocals', 'language', 'voice', 'theme'] as const
 /** The fields shown as lists (all but the template, picked on its own, and the description, a text). */
 export const LIST_FIELDS = ['genre', 'mood', 'tempo', 'length', 'vocals', 'language', 'voice', 'theme', 'key', 'meter'] as const
@@ -241,6 +241,10 @@ export const VOCALS_TEXT: Record<string, string> = {
 
 const SUNG = new Set(['sung', 'sparse vocals', 'original lyrics', 'new lyrics'])
 
+/** A song's lyrics (1.5.0, ``core.brief.LYRICS_FROM``): written from an idea, or one's own, sung as written. */
+export const LYRICS_IDEA = 'written from the idea below'
+export const OWN_LYRICS = 'my own, sung as written below'
+
 /** Whether a field is asked: a cover keeps the original's tempo, length, key and meter; an instrumental has no
  * language, voice or theme; a cover's theme belongs to new lyrics, and its language is the original's unless the
  * lyrics are new. */
@@ -248,7 +252,7 @@ export function applies(name: string, draft: Draft): boolean {
   const list = draft.kind === 'cover' ? (COVER_FIELDS as readonly string[]) : (SONG_FIELDS as readonly string[])
   if (!list.includes(name)) return false
   const vocals = draft.fields.vocals || (draft.kind === 'cover' ? 'original lyrics' : 'sung')
-  if (['language', 'voice', 'theme'].includes(name) && !SUNG.has(vocals)) return false
+  if (['language', 'voice', 'theme', 'lyrics_from', 'lyrics'].includes(name) && !SUNG.has(vocals)) return false
   if (draft.kind === 'cover' && name === 'theme' && vocals !== 'new lyrics') return false
   if (draft.kind === 'cover' && name === 'language' && vocals !== 'new lyrics') return false
   return true
@@ -264,6 +268,9 @@ export function fromTemplate(template: StyleTemplate | null, kind: Kind, form: F
   // one line each, as the lists have them (the description keeps its lines)
   for (const name of names) if (name !== 'template') out[name] = name === 'description' ? (given[name] ?? '').trim() : (given[name] ?? '').split(/\s+/).join(' ').trim()
   if (kind === 'song') {
+    // one's own lyrics stay when another style is chosen; else the template's idea
+    if (keep.lyrics_from === OWN_LYRICS) Object.assign(out, { lyrics_from: OWN_LYRICS, lyrics: keep.lyrics ?? '' })
+    else out.lyrics_from = LYRICS_IDEA
     const lengths = form.song.choices.length
     if (!lengths.includes(out.length)) out.length = keep.length && lengths.includes(keep.length) ? keep.length : nearestLength(out.length || form.song.defaults.length || '', lengths)
     if (!form.song.choices.vocals.includes(out.vocals)) out.vocals = form.song.defaults.vocals || 'sung'
@@ -328,6 +335,7 @@ export function missing(draft: Draft): string[] {
   if (draft.kind === 'cover' && !draft.source && draft.again !== 'cover') out.push('the original recording')
   const template = draft.fields.template
   if ((!template || template === 'none') && !draft.fields.genre?.trim() && !draft.fields.description?.trim()) out.push('a style, a genre or a description')
+  if (draft.fields.lyrics_from === OWN_LYRICS && applies('lyrics', draft) && !draft.fields.lyrics?.trim()) out.push('your lyrics')
   return out
 }
 
@@ -377,7 +385,7 @@ export function retryRequest(job: MakeJob): MakeRequest {
 // --- the whole studio ------------------------------------------------------------------------------------------
 
 /** The fields the simple form asks itself (and the work mode, fixed): not again in the studio's. */
-const OWN = new Set<string>(['mode', 'template', 'description', 'genre', 'mood', 'tempo', 'length', 'vocals', 'language', 'voice', 'theme', 'key', 'meter', 'source.audio'])
+const OWN = new Set<string>(['mode', 'template', 'description', 'genre', 'mood', 'tempo', 'length', 'vocals', 'language', 'voice', 'theme', 'lyrics_from', 'lyrics', 'key', 'meter', 'source.audio'])
 const STUDIO_FIRST = ['writer.model', 'finish.hq_mastering', 'finish.cover_art']
 
 export interface StudioGroup {

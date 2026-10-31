@@ -31,7 +31,7 @@ import copy
 import json
 import random
 import re
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -835,6 +835,66 @@ def _set_widgets(workflow: dict[str, Any], node_id: int, info: NodeInfo, changes
     node["inputs"] = slots
 
 
+BRIEF_TEXT_INPUTS = {
+    "description": "description",
+    "genre": "genre",
+    "mood": "mood",
+    "tempo": "tempo",
+    "key": "key",
+    "meter": "meter",
+    "language": "vocals.language",
+    "voice": "vocals.voice",
+    "theme": "vocals.theme",
+    "lyrics": "vocals.lyrics",
+    "lead_instrument": "vocals.lead_instrument",
+}
+"""A brief's text fields and their widgets (a vocals choice's inputs are named ``vocals.<input>``)."""
+
+StyleLookup = Callable[[str], brief_rules.Template | None]
+
+
+def _fill_from_template(
+    workflow: dict[str, Any],
+    brief: Mapping[str, Any],
+    brief_info: NodeInfo,
+    before: Mapping[str, Any],
+    given: Mapping[str, Any],
+    styles: StyleLookup,
+) -> None:
+    """The brief's text fields as ComfyUI shows them (1.5.0, owner's request 2026-10-31): a field left empty holds the
+    style template's value, and another template (or none) replaces the values the old one had filled - a value the
+    request gives stays. The run reads the same either way (an empty field takes the template's value); the workflow kept
+    with the song shows what it was made of. Own lyrics are never filled."""
+    named = decode_widgets(brief_info, list(brief.get("widgets_values") or []))
+    style = styles(str(named.get("template") or "none"))
+    old = (
+        styles(str(before.get("template") or "none"))
+        if before.get("template") != named.get("template")
+        else None
+    )
+    if style is None and old is None:
+        return
+    cover = brief.get("type") == "PlenioCoverBrief"
+    names = (
+        brief_rules.cover_text_fields(str(named.get("vocals") or "")) if cover else tuple(BRIEF_TEXT_INPUTS)
+    )
+    fills: dict[str, Any] = {}
+    for name in names:
+        widget = BRIEF_TEXT_INPUTS.get(name)
+        if widget is None or widget not in named or str(given.get(widget) or "").strip():
+            continue
+        if name == "lyrics" and named.get("vocals.lyrics_from") == brief_rules.OWN_LYRICS:
+            continue
+        value = str(named[widget] or "")
+        if value.strip() and (old is None or value != old.fields.get(name)):
+            continue
+        filled = style.fields.get(name, "") if style is not None else ""
+        if filled != value:
+            fills[widget] = filled
+    if fills:
+        _set_widgets(workflow, int(brief.get("id", -1)), brief_info, fills)
+
+
 def _effective(field: Field, given: Mapping[str, Any]) -> Any:
     return given[field.id] if field.id in given else field.default
 
@@ -845,8 +905,10 @@ def prepare(
     info: InfoLookup,
     *,
     rng: random.Random | None = None,
+    styles: StyleLookup | None = None,
 ) -> Prepared:
-    """Check a job request (``fields``, ``release``, ``seeds``, ``strict``) and make the workflow and the prompt."""
+    """Check a job request (``fields``, ``release``, ``seeds``, ``strict``) and make the workflow and the prompt.
+    ``styles`` finds a style template by its id: the brief's empty text fields then show its values, as ComfyUI does."""
     rng = rng or random.Random()
     strict = request.get("strict", True) is not False
     warnings: list[str] = []
@@ -947,11 +1009,19 @@ def prepare(
     for found in template.release:
         if found.id in release:
             per_node.setdefault(found.node, {})[found.input] = release[found.id]
+    brief = brief_node(workflow)
+    brief_info = info(str(brief.get("type"))) if brief is not None else None
+    before = (
+        decode_widgets(brief_info, list(brief.get("widgets_values") or [])) if brief and brief_info else {}
+    )
     for node_id, changes in per_node.items():
         node = next(n for n in workflow["nodes"] if int(n.get("id", -1)) == node_id)
         node_info = info(str(node.get("type")))
         if node_info is not None:
             _set_widgets(workflow, node_id, node_info, changes)
+    if styles is not None and brief is not None and brief_info is not None:
+        given_brief = per_node.get(int(brief.get("id", -1))) or {}
+        _fill_from_template(workflow, brief, brief_info, before, given_brief, styles)
     # the documents given: manual in the sheets that keep them (the run keeps them instead of drafting anew)
     sheet_info = info(SHEET_TYPE) if documents else None
     for kind, node_id in template.sheets:

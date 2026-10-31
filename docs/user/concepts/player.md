@@ -165,7 +165,7 @@ fields - **as you type, the search suggests them**: `gen` offers `genre:`, `genr
 | `model:yue2` `model:minimax` `model:master` | the music model (*master*: recordings from Enhance & Master) |
 | `lang:german` `vocals:instrumental` | language, vocals |
 | `mode:dramatic` | the creative mode |
-| `creativity:>60` `creativity:40-60` `creativity:varied` | the brief's [creativity](creativity.md) (0-100) or its level: steady, restrained, balanced, varied, experimental |
+| `creativity:>50` `creativity:20-30` `creativity:adventurous` | the brief's [creativity](creativity.md) (0-100) or its level: steady, restrained, balanced, varied, experimental, adventurous |
 | `len:<3` | length in minutes |
 | `year:2026` `template:jazz` `writer:gemma` | year, brief template, the model that wrote the lyrics |
 | `tag:party` `#party` `tag:"road trip"` | your own tags |
@@ -178,8 +178,8 @@ fields - **as you type, the search suggests them**: `gen` offers `genre:`, `genr
 
 The **filters** under the search are rows of chips - your tags, genres, moods, what made the song (Plenio or
 other music) and the model; **More filters** opens vocals (sung, sparse vocals, instrumental), language, tempo (slow, 90-119, 120-139, fast), length
-(under 3, 3-5, over 5 minutes), key, creative mode, creativity (steady 0-19, restrained 20-39, balanced 40-60,
-varied 61-80, experimental 81-100), template, year, Plenio version, what a song has (timed
+(under 3, 3-5, over 5 minutes), key, creative mode, creativity (steady 0-9, restrained 10-19, balanced 20-30,
+varied 31-40, experimental 41-75, adventurous 76-100), template, year, Plenio version, what a song has (timed
 lyrics, sheet music, notation, an unmastered take, a cover picture) and listening (favourites, played, never
 played, no tags yet). A row shows its most common values first; **+ 113 more** opens it to every value - every
 genre a template gave, the rare ones too - with a field to find one in a long row.
@@ -196,7 +196,7 @@ genre a template gave, the rare ones too - with a field to find one in a long ro
 - **Plenio version** offers *from 1.0.0*, *from 0.8.0* … for an archive with songs of older versions: only the
   songs made with that version or a newer one. It is the one row with one choice at a time (a click on another
   replaces it): *from 0.8.0* already holds the newer versions. A song made before the creativity slider counts as *balanced*: it was
-  made as 50 makes it now.
+  made as 25 makes it now. A song made with 1.4 shows its creativity on today's scale (half its number then).
 
 You can sort by newest, oldest, title, length, tempo, loudness, most played or recently played, and switch
 between a grid and a list.
@@ -784,10 +784,12 @@ song*):
    key stay).
 2. **Pick a style**: a vibe (*Pop*, *Rock*, *Latin*, *EDM* … - each click another template of it), any of the style
    templates by name, or **Surprise me**. The style fills every field below - and the description.
-3. **What is it about**: the description, filled from the style - change it as you like.
+3. **How it should sound - and what it is about**: the description (how it sounds), filled from the style, and for a
+   sung song the lyrics: **The writer writes them from an idea** (the style's idea, or yours) or **My own lyrics, sung
+   as written** - one line per sung line, a blank line between verse and chorus; the title then comes from your words.
 4. **The details**: genre, mood, tempo, length, vocals, language, voice, theme, key and meter - each a list of every
    value the style templates have, or **✎ Your own …** to type one instead. Only what applies is asked: an
-   instrumental has no voice, a cover no tempo or length.
+   instrumental has no voice or lyrics, a cover no tempo or length.
 5. **Generate Song**.
 
 **Presets** - above the style: a click sets the form's fields and, with the whole studio, its settings and how
