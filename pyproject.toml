@@ -1,6 +1,6 @@
 [project]
 name = "comfyui-plenio-music"
-version = "1.4.1"
+version = "1.5.0"
 description = "Plenio Music Production System: song writing with local LLMs, YuE2 and MiniMax Music 3 generation, editable scores, covers, stems, mastering, release export and the Plenio Player for ComfyUI - free and local."
 readme = "README.md"
 requires-python = ">=3.10"

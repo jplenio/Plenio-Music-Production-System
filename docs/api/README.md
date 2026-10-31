@@ -14,7 +14,7 @@ open source like the rest of Plenio (Apache 2.0); the music models have licences
 |---|---|
 | **Base address** | `http://127.0.0.1:8188/plenio/api/v1` - ComfyUI's own address and port (ComfyUI Desktop: `8000`) |
 | **Format** | JSON in and out (`Content-Type: application/json`); times are seconds since 1970 (UTC) |
-| **Version** | 1.1 - the path carries the major version; a minor version only adds ([policy](#versions-and-compatibility)) |
+| **Version** | 1.3 - the path carries the major version; a minor version only adds ([policy](#versions-and-compatibility)) |
 | **Machine-readable** | `GET /plenio/api/v1/openapi.json` (OpenAPI 3.1) - a copy: [openapi.json](openapi.json), [browse it](https://jplenio.github.io/Plenio-Music-Production-System/api/) |
 | **Every field** | [fields.md](fields.md) - generated from the templates |
 | **Examples** | [examples/](examples/) - Python, JavaScript and shell, ready to run |
@@ -46,7 +46,7 @@ curl http://127.0.0.1:8188/plenio/api/v1
 ```
 
 ```json
-{"api": "plenio-song-api", "version": "1.2", "plenio": "1.4.1", "comfyui": "0.41.0",
+{"api": "plenio-song-api", "version": "1.3", "plenio": "1.5.0", "comfyui": "0.41.0",
  "templates": [{"id": "yue2-song", "title": "YuE2 · Song", "kind": "song", "needs": []},
                {"id": "yue2-cover", "title": "YuE2 · Cover", "kind": "cover", "needs": ["source.audio"]}],
  "paths": {"jobs": "/plenio/api/v1/jobs", "...": "..."}}
@@ -186,7 +186,7 @@ All paths are below the base address `/plenio/api/v1`.
 | Part | What it is |
 |---|---|
 | `template` | **Required.** `yue2-song` or `yue2-cover` (`GET /templates` lists them). |
-| `fields` | The song part of the template. The brief's fields by their name (`genre`, `mood`, `length`, `vocals`, `language`, `voice`, `theme`, `creativity`, `lyrics_fidelity` …), the other nodes' as `<node>.<input>`: `writer.model`, `finish.hq_mastering`, `finish.cover_art`, a cover's `source.audio` and `excerpt.*`. A field you leave out keeps the template's value. Every field: [fields.md](fields.md). |
+| `fields` | The song part of the template. The brief's fields by their name (`genre`, `mood`, `length`, `vocals`, `language`, `voice`, `theme`, `creativity`, `lyrics_fidelity` …), the other nodes' as `<node>.<input>`: `writer.model`, `finish.hq_mastering`, `finish.cover_art`, a cover's `source.audio` and `excerpt.*`. A field you leave out keeps the template's value; a brief's text field left out takes the chosen style template's (`template`) value. Every field: [fields.md](fields.md). |
 | `release` | Export Release's fields: `folder` (below ComfyUI's output folder; it is made when missing), `naming`, `collision`, `flac`, `mp3`, `wav`, `artist`, `album`, `date`, `genre`, `comment`, `sheet_music`, `lyrics_srt` … |
 | `seeds` | A seed per part (`draft`, `plan`, `arrangement`, `take`, `cover`; 0 … 4294967295). The same fields and seeds make the same song; a seed you leave out is drawn anew. The job's answer names the seeds it used. |
 | `documents` | The Song Sheets' documents (`title`, `style`, `lyrics`, `score`, `artwork_prompt`). A document you give is kept as *manual*: the run uses it instead of writing or planning it - your own lyrics, your own title. |
@@ -372,6 +372,7 @@ own, the release folder cannot leave ComfyUI's output folder, a job's files are 
 
 | API | Plenio | What changed |
 |---|---|---|
+| 1.3 | 1.5.0 | the Song Brief's `lyrics_from` and `lyrics` (an idea for the writer, or one's own lyrics, sung as written), the Cover Brief's `original_notes`; `creativity` up to 200; a brief's text fields you leave out take the chosen style template's values - another template replaces what the template had filled |
 | 1.2 | 1.4.0 | the release field `song_page`: the song's page (`<name>.html`) beside it - on unless set to `false` |
 | 1.1 | 1.3.1 | `GET /jobs/{id}/files/{name}` and a `url` per result file; `GET /jobs/{id}?wait=<s>`; `GET /jobs` filters (`status`, `client`, `template`, `limit`); one job per `Idempotency-Key` also for requests at the same time; an `operationId` per call and answer schemas in the OpenAPI document |
 | 1.0 | 1.3.0 | the first version: templates, briefs, uploads, jobs, from-record, queue |

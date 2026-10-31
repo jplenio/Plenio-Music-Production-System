@@ -1,5 +1,5 @@
 import { d as Dt, m as Re, a as zn, i as b, c as C, b as p, t as I, F as he, r as we, n as ze, j as ae, e as U, g as z, h as O, o as Xs, u as L, w as Oe, v as ft, p as ot, f as Ue, q as Nt, s as ri, x as ws, y as Gi, z as Cn, A as ct, B as ji, C as no, D as Zt, E as Jf, G as In, H as En, I as Zf, k as Qf, l as ep } from "./dialog-B4MUL7Ty.mjs";
-import { a as tp, P as Jc, b as np, t as ip, c as sp, T as Do, d as op, s as Wo, f as rp, e as lp, g as ap, h as up, j as cp, k as hp, m as dp, n as fp, o as Ua, q as pp, r as mp, I as Zc, u as Fo, w as gp, x as vp, y as yp, z as bp, A as kp, B as wp, R as xp, C as Sp, S as Cp, D as Mp, N as Ap, E as Tp, F as jt, v as $p, G as Lo, H as Ga, J as Dp, K as ja, L as Lp, M as Bp, O as Op, Q as Ep, U as Ip, V as qa, W as Rp, X as Pp, Y as Rr, Z as Ya, _ as Xa, $ as Np, a0 as Ja, a1 as Vp, a2 as Hp, a3 as zp, a4 as Za, a5 as Qa, a6 as eu, a7 as Pr, a8 as Wp } from "./main-BKYoTR7w.mjs";
+import { a as tp, P as Jc, b as np, t as ip, c as sp, T as Do, d as op, s as Wo, f as rp, e as lp, g as ap, h as up, j as cp, k as hp, m as dp, n as fp, o as Ua, q as pp, r as mp, I as Zc, u as Fo, w as gp, x as vp, y as yp, z as bp, A as kp, B as wp, R as xp, C as Sp, S as Cp, D as Mp, N as Ap, E as Tp, F as jt, v as $p, G as Lo, H as Ga, J as Dp, K as ja, L as Lp, M as Bp, O as Op, Q as Ep, U as Ip, V as qa, W as Rp, X as Pp, Y as Rr, Z as Ya, _ as Xa, $ as Np, a0 as Ja, a1 as Vp, a2 as Hp, a3 as zp, a4 as Za, a5 as Qa, a6 as eu, a7 as Pr, a8 as Wp } from "./main-DQuC4jVA.mjs";
 import { a as Fp, r as Kp, n as _p, e as Nr, b as Up, s as Gp, p as jp } from "./notationExport-DkCMgjck.mjs";
 import { lineKey as Ko, parseSpans as ia, editRange as io, sameSpans as Bo, partOf as qp, settle as Yp, placedLines as tu, withBlockSpans as Xp, parseLineKey as Jp, clipOfLines as nu, partAt as Zp, remapSpans as Qp, followSpans as em } from "./lyricPlacement-DGoRXeqW.mjs";
 import { SHIFTABLE as Jn, shiftBlock as xs, notesLabel as tm, trackRows as nm, parseGuide as im, sameGuide as Ss, guideNotes as sm, remapGuide as om } from "./tracks-ClAVjvds.mjs";
@@ -18813,7 +18813,7 @@ function OC(i, e) {
   if (e?.bars?.length)
     return !i || !e.bar_prints?.length ? i ? i.measures.map((t, n) => e.bars[n] ?? null) : e.bars : BC(DC(i), e.bar_prints).map((t) => t === null ? null : e.bars[t] ?? null);
 }
-const EC = "1.4.1";
+const EC = "1.5.0";
 function IC(i) {
   return {
     sounds: { ...i.sounds },

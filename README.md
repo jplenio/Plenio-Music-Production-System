@@ -4,7 +4,7 @@
 
 <h1 align="center">Plenio Music Production System</h1>
 
-<p align="center"><b>A complete music studio inside ComfyUI - from one sentence to a mastered release, and a player that puts your songs on every screen.<br />Local, free and open source.</b></p>
+<p align="center"><b>A one-of-a-kind song production suite for ComfyUI - from the idea to a mastered song with YuE2, every note under your control,<br />and a player that turns any party into a live music studio. Free, open source and completely local.</b></p>
 
 <p align="center">
   <a href="https://github.com/jplenio/Plenio-Music-Production-System/releases"><img src="https://img.shields.io/github/v/release/jplenio/Plenio-Music-Production-System?label=release&color=8b5cf6" alt="Latest release" /></a>
@@ -24,13 +24,19 @@
   <a href="#-what-plenio-does">What it does</a> ·
   <a href="#-in-comfyui">In ComfyUI</a> ·
   <a href="#-the-plenio-player">The player</a> ·
-  <a href="#-new-in-14">New in 1.4</a> ·
+  <a href="#-new-in-15">New in 1.5</a> ·
   <a href="#-under-the-hood">Under the hood</a> ·
   <a href="#installation">Install</a> ·
   <a href="#watch-the-tutorials">Tutorials</a>
 </p>
 
-**Make songs locally in ComfyUI - and see exactly what the music model is given.** Describe a song and a local language model writes it. YuE2 or MiniMax Music 3 performs it, Plenio masters it and exports it with tags, cover art and a record of how it was made. Turn an existing recording into a new version of itself, write the melody yourself in a real score editor, split a song into stems, or just master a file you already have. Then the **Plenio Player** takes over: your library with the lyrics lit up as they are sung, visuals that move with the music, a party mode where your guests order songs from their phones, and music videos made on your graphics card.
+**Plenio is a one-of-a-kind extension for ComfyUI - completely free and completely local - with three things that set it apart:**
+
+1. **Songs on autopilot.** Any song you can imagine - and any kind of cover - made with YuE2 from the first idea to a mastered, release-ready track, automatically. One brief can become a whole series of finished songs.
+2. **Every note under your control.** Or shape a song exactly the way you want it: the lyrics, the melody, every note and chord that is played - in a DAW-like editor with real notation.
+3. **A player made for these songs.** The **Plenio Player** is tuned to everything Plenio makes: the lyrics light up as they are sung, the sheet music follows the music, visuals move with it, and music videos are made on your graphics card.
+
+**And then there is the party - what makes Plenio unique.** At a party or any event, every guest opens the player on their own phone or tablet: they see the live playlist and, if you allow it, change it. And it doesn't stop there - every guest can make a song of their own on the fly, through your studio, and add it to the playlist. Huge fun at any get-together.
 
 Everything runs on your own machine, inside ComfyUI's own nodes: no cloud service, no account, no API key, no extra Python packages. Before a single note is rendered, the **Song Sheet** shows you the title, style, lyrics and score the model will receive - and you can change all of it. Plenio costs nothing and its code is Apache 2.0; saved workflows and release records keep working across every 1.x version.
 
@@ -48,12 +54,12 @@ Everything runs on your own machine, inside ComfyUI's own nodes: no cloud servic
 ## ✨ What Plenio does
 
 <p align="center">
-  <img src="assets/branding/readme/pipeline.png" alt="From one sentence to a finished song and everyone who hears it: 1 Brief - say what the song is about or start from one of 240 genre templates; 2 Write - a local LLM writes title, style and lyrics; 3 Song Sheet - see and edit exactly what the music model will get; 4 Score - melody and chords as real notation, edited like a DAW or played in; 5 Render - YuE2 or MiniMax Music 3 sings it, Best Take keeps the take that sings your words; 6 Master - Audio HQ, a tone match, -14 LUFS with a true-peak limiter, stems if you like; 7 Release - FLAC, MP3, tags, cover art, timed lyrics, sheet music and the whole project inside. And then: the Plenio Player, party mode, videos, the Song API, and back in ComfyUI by dropping the FLAC" width="100%" />
+  <img src="assets/branding/readme/pipeline.png" alt="From one sentence to a finished song and everyone who hears it: 1 Brief - start from one of 250 genre templates or bring your own lyrics; 2 Write - a local LLM writes title, style and lyrics; 3 Song Sheet - see and edit exactly what the music model will get; 4 Score - melody and chords as real notation, edited like a DAW or played in; 5 Render - YuE2 or MiniMax Music 3 sings it, Best Take keeps the take that sings your words; 6 Master - Audio HQ, a tone match, -14 LUFS with a true-peak limiter, stems if you like; 7 Release - FLAC, MP3, tags, cover art, timed lyrics, sheet music and the whole project inside. And then: the Plenio Player, party mode, videos, the Song API, and back in ComfyUI by dropping the FLAC" width="100%" />
 </p>
 
 | | |
 |---|---|
-| **Write** | A Song Brief or Cover Brief with **240 genre templates** in 30 families; a local language model writes title, style and lyrics - Gemma 4 natively, or any GGUF, LM Studio, Ollama, llama.cpp, vLLM or Jan. A creativity slider goes from steady to experimental. |
+| **Write** | A Song Brief or Cover Brief with **250 genre templates** in 30 families - choosing one fills every field, and every field is a list with room for your own value; a local language model writes title, style and lyrics - Gemma 4 natively, or any GGUF, LM Studio, Ollama, llama.cpp, vLLM or Jan - or you bring your own lyrics, sung as written. A creativity slider goes from steady to adventurous. |
 | **See and change everything** | The **Song Sheet** shows exactly what the music model gets - title, style, lyrics, score - with the exact token budget, counted by the model's own tokenizer. Your edits are never silently overwritten. |
 | **Compose** | A real **score editor**: notation, piano roll, chord lane, lyrics on their notes, a MIDI keyboard, arranging like in a DAW, MIDI and MusicXML in and out, sheet music as PDF - or write the whole melody yourself (*YuE2 · DAW*). |
 | **Perform** | **YuE2** for songs, covers and your own melody - with up to four **LoRAs** -, **MiniMax Music 3** for songs. *Lyrics fidelity* renders a second or third take and keeps the one that sings your words best. |
@@ -126,28 +132,20 @@ A program of its own: it runs without ComfyUI, opens at `http://127.0.0.1:8765/`
 
 Guide: [Plenio Player](docs/user/concepts/player.md).
 
-## 🆕 New in 1.4
+## 🆕 New in 1.5
 
 <table>
 <tr>
-<td width="50%"><img src="assets/branding/1.4.0/player-full-lyrics.jpg" alt="A song's page in the Plenio Player with Full lyrics chosen: the lyrics with their sections and the buttons Copy the lyrics, Without the section tags, Copy the style and The song's page" width="100%" /></td>
-<td width="50%"><img src="assets/branding/1.4.0/player-how-made.jpg" alt="A song's page with the guests' reactions under its title and How it was made: the date and time, Making took 4 min 19 s, the graphics card and the processor" width="100%" /></td>
-</tr>
-<tr>
-<td width="50%"><img src="assets/branding/1.4.0/player-nova.jpg" alt="Plenio Nova's black hole: a glowing accretion disk bent round the dark shadow, its light lensed over and under it, in a field of stars - worked out by the graphics card for every pixel and moving with the music" width="100%" /></td>
-<td width="50%"><img src="assets/branding/1.4.0/player-stars.jpg" alt="A song's page with 4.5 stars given by ear and 3.5 measured, faded, beside them; Details shows How it came out, measured - harmony, clashes, key, beat, ending, holes, length, clipping - each with a bar" width="100%" /></td>
+<td width="50%"><img src="assets/branding/1.5.0/brief-template.jpg" alt="The Song Brief in ComfyUI with its genre list open: type your own at the top, then every genre the 250 templates know - acid house, afro house, afrobeats, alpine folk, alternative rock and more; the other fields show the chosen template's values" width="100%" /></td>
+<td width="50%"><img src="assets/branding/1.5.0/brief-own-lyrics.jpg" alt="The Song Brief with lyrics set to my own, sung as written below, and a verse and a chorus typed into the lyrics field" width="100%" /></td>
 </tr>
 </table>
 
-- **Plenio Nova: 22 visuals worked out for every pixel** - a black hole, a galaxy, northern lights, the Mandelbulb, liquid chrome, an outrun valley - in a compact choice with a search and moods; only the visuals a device draws smoothly are offered.
-- **Stars for every song** - yours by ear, 0 to 5, and the measured ones as a faded pre-fill: the lyrics sung as written, the harmony, the beat, what went wrong.
-- **Who may do what** - users listen, make songs or help as admins; a new song can wait until its maker heard it or an admin approved it; the guests hear the party's songs again on their phones.
-- **Videos in more qualities** - seven steps from *Low* to *Best* or a bitrate of your own, 24 to 60 frames a second, AAC up to 320 kbit/s.
-- **The full lyrics to copy** on a song's page, and **a page per song** (`<name>.html`) beside every export - the lyrics with their sections, the prompts, every setting and the files, in any browser.
-- **LoRAs for YuE2** - up to four, on the plan or the sound, in ComfyUI's and m-a-p's layout.
-- **ComfyUI started the way you start it** - the player reuses your models folder and options; a missing model file is named, with what to do.
-- **How each song was made** - date and time, how long, on which graphics card or processor, with which lyrics fidelity.
-- **Party songs and reactions** - only the guests' songs are party songs, the big screen says which party, and every song keeps its reactions.
+- **Your own lyrics, sung as written** - choose *my own* in the Song Brief and YuE2 sings your words exactly; the writer adds only the style, the cover-art prompt and a title taken from your words. Or give an idea, and it writes the lyrics from it.
+- **Templates you can see** - choosing one of 250 templates fills the brief's fields; every field is a list of what the templates know, and *✎ type your own …* takes anything else. Another template replaces what a template put there and keeps what you changed.
+- **Creativity up to 200** - 100, the bold setting that sounded best, is the new default; above it the writer and YuE2 dare more. Up to 100 every value means what it always did.
+- **Freer covers** - *original notes* leaves out notes of the instrument line and the chords, down to about a quarter; nothing new is written, and a sung melody keeps every note, so its words stay sung.
+- **Titles from the lyrics**, not from the genre - and **11 new templates**: birthday songs, a wedding first dance, a carnival song, party Schlager, a Liedermacher song, pop rock, melodic trap, Latin pop, J-rock and Italian pop.
 
 Every change, in detail: [CHANGELOG](CHANGELOG.md).
 

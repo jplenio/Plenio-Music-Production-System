@@ -58,7 +58,7 @@ from .workflow_prompt import (
 )
 
 API_NAME = "plenio-song-api"
-API_VERSION = "1.2"
+API_VERSION = "1.3"
 """1.1 (2026-10-26) only adds: a finished job's files to download, waiting for a job's change, filters of the job
 list. A program written for 1.0 works unchanged."""
 """The API's version: a new minor version only adds (fields, paths, values); a new major one has its own path."""
