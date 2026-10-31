@@ -188,6 +188,8 @@ def song_facts(song: Mapping[str, Any]) -> list[Fact]:
     )
     if cover and brief.get("lyrics_closeness") is not None:
         field("Lyrics closeness", "lyrics_closeness", str(brief["lyrics_closeness"]))
+    if cover and brief.get("original_notes") is not None:
+        field("Original notes", "original_notes", str(brief["original_notes"]))
     field(
         "Lines under the singing", "lines_under_singing", "on" if brief.get("lines_under_singing") else "off"
     )

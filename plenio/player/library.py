@@ -186,6 +186,10 @@ def brief_facts(prompt: Mapping[str, Any], version: tuple[int, ...] | None = Non
         )
         if cover and vocals == "new lyrics"
         else None,
+        # how many of the source's notes the cover's score kept (1.5.0; every one before)
+        "original_notes": number("original_notes", "original_notes", brief_rules.ORIGINAL_NOTES_DEFAULT)
+        if cover
+        else None,
         "lines_under_singing": bool(inputs.get("lines_under_singing")),
         # a song made before the slider was made as 1.4's 50 made it; one made before 1.5.0 carries 1.4's number,
         # which is twice today's (owner's request 2026-10-31: 1.4's 100 is today's 50)

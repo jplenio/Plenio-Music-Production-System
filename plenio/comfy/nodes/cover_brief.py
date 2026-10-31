@@ -16,6 +16,7 @@ from ...core.brief import (
     HARMONY_OPTIONS,
     LYRICS_CLOSENESS_DEFAULT,
     MELODY_OPTIONS,
+    ORIGINAL_NOTES_DEFAULT,
     build_cover_brief,
     options,
     source_cover_title,
@@ -54,6 +55,10 @@ SONG_FLOW_TOOLTIP = (
     "Creative modes only (experimental): how close the cover stays to the original - 100 exactly, 80 chords "
     "and key stay, 50 recognisable, 20 a free version, 0 only a hint. The form always stays."
 )
+ORIGINAL_NOTES_TOOLTIP = (
+    "How many of the source's notes YuE2 gets: 100 every note of melody, instrument line and chords. Less leaves "
+    "out the least important (nothing new is added), so YuE2 interprets more freely; 0 keeps about a quarter."
+)
 LYRICS_CLOSENESS_TOOLTIP = (
     "New lyrics only (experimental): how close they stay to the source's lyrics - 0 without its text "
     "(default), 30 its theme, 60 its story, 90-100 its meaning line by line."
@@ -73,6 +78,7 @@ COVER_FIELD_OUTPUTS: tuple[tuple[str, str, str], ...] = (
     ("lyrics_closeness", "INT", "The lyrics closeness of new lyrics (0-100)."),
     ("lines_under_singing", "BOOLEAN", "Whether instrument lines also sound under the singing."),
     ("creativity", "INT", "The creativity (0-100, 50 the default): for the YuE2 Takes' sampling."),
+    ("original_notes", "INT", "How many of the source's notes the score keeps (0-100, 100 every one)."),
 )
 """The brief's fields as outputs, as the Song Brief has them (owner's request 2026-10-15)."""
 VOCAL_LABELS = {value: label for label, value in COVER_VOCALS.items()}
@@ -303,6 +309,18 @@ class PlenioCoverBrief(io.ComfyNode):
                     optional=True,
                     tooltip=FIDELITY_TOOLTIP,
                 ),
+                # appended last (1.5.0): a workflow saved without it, and an older API prompt, keep every note
+                io.Int.Input(
+                    "original_notes",
+                    display_name="original notes",
+                    default=ORIGINAL_NOTES_DEFAULT,
+                    optional=True,
+                    min=0,
+                    max=100,
+                    step=1,
+                    display_mode=io.NumberDisplay.slider,
+                    tooltip=ORIGINAL_NOTES_TOOLTIP,
+                ),
             ],
             outputs=[
                 Brief.Output(display_name="brief", tooltip="The cover brief."),
@@ -360,6 +378,7 @@ class PlenioCoverBrief(io.ComfyNode):
         creativity: int = CREATIVITY_DEFAULT,
         source: Any = None,
         lyrics_fidelity: str = FIDELITY_DEFAULT,
+        original_notes: int = ORIGINAL_NOTES_DEFAULT,
     ) -> io.NodeOutput:
         chosen = None if template == "none" else template_library().get(template)
         # an unknown mode stops here, with the list to choose from; the pre-release name "simple" is read as "off"
@@ -384,6 +403,7 @@ class PlenioCoverBrief(io.ComfyNode):
             "lines_under_singing": bool(lines_under_singing),
             "creativity": creativity,
             "fidelity": lyrics_fidelity,
+            "original_notes": original_notes,
         }
         # a typed title wins; else the source recording names the cover (the series key keeps the typed one)
         title_from = ""

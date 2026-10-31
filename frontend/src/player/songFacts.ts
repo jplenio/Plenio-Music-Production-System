@@ -103,6 +103,7 @@ export function songFacts(s: SongSummary): Fact[] {
   field('Arrangement', 'arrangement', b.arrangement || s.arrangement)
   field(cover ? 'Song flow closeness' : 'Genre closeness', 'closeness', b.closeness === null || b.closeness === undefined ? '' : String(b.closeness))
   if (cover && b.lyrics_closeness !== null && b.lyrics_closeness !== undefined) field('Lyrics closeness', 'lyrics_closeness', String(b.lyrics_closeness))
+  if (cover && b.original_notes !== null && b.original_notes !== undefined) field('Original notes', 'original_notes', String(b.original_notes))
   field('Lines under the singing', 'lines_under_singing', b.lines_under_singing ? 'on' : 'off')
   if (b.creativity !== null && b.creativity !== undefined) field('Creativity', 'creativity', describeCreativity(b.creativity))
   out.push(...samplingFacts(s))

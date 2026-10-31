@@ -29,6 +29,8 @@ export interface Brief {
   closeness?: number | null
   melody?: string
   lyrics_closeness?: number | null
+  /** A cover's share of the source's notes its score kept (0-100; 100 every one). */
+  original_notes?: number | null
   lines_under_singing?: boolean
   /** 0 steady ... 50 the reference ... 100 experimental (a song made before the slider: 50). */
   creativity?: number | null

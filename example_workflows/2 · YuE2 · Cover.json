@@ -300,6 +300,15 @@
       "name": "lyrics_fidelity"
      },
      "link": null
+    },
+    {
+     "localized_name": "original_notes",
+     "name": "original_notes",
+     "type": "INT",
+     "widget": {
+      "name": "original_notes"
+     },
+     "link": null
     }
    ],
    "outputs": [
@@ -432,6 +441,12 @@
      "links": [
       63
      ]
+    },
+    {
+     "localized_name": "original_notes",
+     "name": "original_notes",
+     "type": "INT",
+     "links": null
     }
    ],
    "properties": {
@@ -453,7 +468,8 @@
     0,
     false,
     50,
-    "standard"
+    "standard",
+    100
    ]
   },
   {

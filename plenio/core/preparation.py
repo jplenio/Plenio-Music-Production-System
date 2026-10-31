@@ -21,8 +21,9 @@ from __future__ import annotations
 from bisect import bisect_right
 
 from . import song_form
-from .brief import CoverBrief, SongBrief
+from .brief import ORIGINAL_NOTES_DEFAULT, CoverBrief, SongBrief
 from .score import canonical, native, ops
+from .score.thin import thin
 
 FIT_THRESHOLD = 1.2
 LONG_REST_BARS = 4
@@ -72,6 +73,11 @@ def prepare_for_brief(text: str, brief: SongBrief | CoverBrief | None) -> native
     text = step.abc
     changes += step.changes
     warnings += step.warnings
+    if isinstance(brief, CoverBrief) and brief.original_notes < ORIGINAL_NOTES_DEFAULT:
+        # fewer of the source's notes, so that YuE2 interprets more freely (owner's request 2026-10-31)
+        thinned = thin(text, brief.original_notes)
+        text = thinned.abc
+        changes += thinned.changes
     if isinstance(brief, SongBrief) and brief.instrumental:
         duration = native.validate(text).duration_s
         if not native.EXTEND_BELOW * brief.target_seconds <= duration <= FIT_THRESHOLD * brief.target_seconds:

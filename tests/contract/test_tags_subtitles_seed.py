@@ -65,8 +65,8 @@ def test_the_song_briefs_fields_come_out_one_by_one(comfy_path: Path) -> None:
     }
     # the summary says what the chosen creative mode does (its tooltip names no modes any more), and the creativity
     summary = output.ui["plenio_summary"][0]["markdown"]
-    assert "A steady repeating pattern" in summary and "Creativity: **75 (varied)**" in summary
-    assert song_brief().result[0].creativity == 50  # without the slider (an older workflow): the reference
+    assert "A steady repeating pattern" in summary and "Creativity: **75 (experimental)**" in summary
+    assert song_brief().result[0].creativity == 50  # without the slider (an older workflow): the default
     instrumental = song_brief(
         {"vocals": "instrumental", "melody": "accompaniment only", "lead_instrument": ""}
     )

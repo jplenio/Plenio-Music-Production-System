@@ -1881,7 +1881,7 @@
         "minimum": 0.0,
         "maximum": 100.0,
         "title": "creativity",
-        "description": "0 steady ... 50 the reference (as before) ... 100 experimental: how much the writer and YuE2 dare. More surprises also means more misses - try a few seeds.",
+        "description": "0 steady ... 25 balanced (1.4's 50) ... 50 experimental (the default, 1.4's 100) ... 100 adventurous: how much the writer and YuE2 dare. More surprises also means more misses - try a few seeds.",
         "default": 50
        },
        "lyrics_fidelity": {
@@ -2582,7 +2582,7 @@
         "minimum": 0.0,
         "maximum": 100.0,
         "title": "creativity",
-        "description": "0 steady ... 50 the reference (as before) ... 100 experimental: how much the writer and YuE2 dare. More surprises also means more misses - try a few seeds.",
+        "description": "0 steady ... 25 balanced (1.4's 50) ... 50 experimental (the default, 1.4's 100) ... 100 adventurous: how much the writer and YuE2 dare. More surprises also means more misses - try a few seeds.",
         "default": 50
        },
        "lyrics_fidelity": {
@@ -2595,6 +2595,14 @@
         "title": "lyrics fidelity",
         "description": "standard: one take. high: a second take when the first sang under 96 % of the words as written; the better is kept. highest: a third when neither reached 96 %. Takes longer (up to 2x or 3x).",
         "default": "standard"
+       },
+       "original_notes": {
+        "type": "integer",
+        "minimum": 0.0,
+        "maximum": 100.0,
+        "title": "original notes",
+        "description": "How many of the source's notes YuE2 gets: 100 every note of melody, instrument line and chords. Less leaves out the least important (nothing new is added), so YuE2 interprets more freely; 0 keeps about a quarter.",
+        "default": 100
        },
        "finish.hq_mastering": {
         "type": "boolean",

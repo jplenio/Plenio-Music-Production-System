@@ -31,6 +31,7 @@ from .errors import PlenioUserError
 from .fidelity import STANDARD, fidelity_level
 from .files import atomic_write_text
 from .hashing import sha256_json
+from .score.thin import kept_share
 
 log = logging.getLogger("plenio")
 
@@ -121,6 +122,8 @@ CLOSENESS_DEFAULT = 70
 """Genre closeness of a song, song flow closeness of a cover (0 free ... 100 strict / the original)."""
 LYRICS_CLOSENESS_DEFAULT = 0
 """A new-lyrics cover's closeness to the source's lyrics; 0 writes them without the source's text."""
+ORIGINAL_NOTES_DEFAULT = 100
+"""How many of the source's notes a cover's score keeps (``core.score.thin``): 100 every one, 0 about a quarter."""
 
 
 def closeness_value(value: Any, default: int = CLOSENESS_DEFAULT) -> int:
@@ -157,6 +160,9 @@ def _fingerprint(data: dict[str, Any]) -> str:
     1.4's 100 did, so a brief at 50 is not the one of before."""
     data.pop("from_template")
     data.pop("notes")
+    # a cover that keeps every note has the fingerprint it had before the slider (1.5.0)
+    if data.get("original_notes") == ORIGINAL_NOTES_DEFAULT:
+        data.pop("original_notes")
     if data.get("fidelity") == STANDARD:
         data.pop("fidelity")
     return sha256_json(data)
@@ -318,10 +324,14 @@ class CoverBrief:
     lines_under_singing: bool = False
     """Creative modes: instrument lines may also sound while the voice sings (default: only in its rests)."""
     creativity: int = CREATIVITY_DEFAULT
-    """0 steady ... 50 the reference ... 100 experimental: the writer's rules and YuE2's sampling
+    """0 steady ... 50 experimental (the default) ... 100 adventurous: the writer's rules and YuE2's sampling
     (``core.creativity``)."""
     fidelity: str = STANDARD
     """The lyrics fidelity (``core.fidelity``); standard for an instrumental cover."""
+    original_notes: int = ORIGINAL_NOTES_DEFAULT
+    """How many of the source's notes the score keeps for YuE2 (``core.score.thin``): 100 every one; less leaves
+    out the least important of the melody, the instrument line and the chords - nothing new is added - so that YuE2
+    interprets more freely; 0 keeps about a quarter (owner's request 2026-10-31)."""
     template: str = ""
     from_template: tuple[str, ...] = field(default=(), compare=False)
     notes: tuple[str, ...] = field(default=(), compare=False)
@@ -432,6 +442,11 @@ class CoverBrief:
         )
         if self.title:
             lines.append(f"Title: {self.title}")
+        if self.original_notes < ORIGINAL_NOTES_DEFAULT:
+            lines.append(
+                f"Original notes: {self.original_notes} - the score keeps about "
+                f"{round(kept_share(self.original_notes) * 100)} % of the source's notes; YuE2 interprets the rest"
+            )
         return "\n".join(lines)
 
 
@@ -591,6 +606,7 @@ def build_cover_brief(
             if vocals == "new"
             else 0
         ),
+        original_notes=closeness_value(values.get("original_notes"), ORIGINAL_NOTES_DEFAULT),
         template=template.id if template else "",
         from_template=tuple(from_template),
         notes=tuple(notes),

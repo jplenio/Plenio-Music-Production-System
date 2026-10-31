@@ -2267,7 +2267,7 @@
      "creativity": [
       "INT",
       {
-       "tooltip": "0 steady ... 50 the reference (as before) ... 100 experimental: how much the writer and YuE2 dare. More surprises also means more misses - try a few seeds.",
+       "tooltip": "0 steady ... 25 balanced (1.4's 50) ... 50 experimental (the default, 1.4's 100) ... 100 adventurous: how much the writer and YuE2 dare. More surprises also means more misses - try a few seeds.",
        "default": 50,
        "min": 0,
        "max": 100,
@@ -2293,6 +2293,18 @@
         "high - best of 2 takes",
         "highest - best of 3 takes"
        ]
+      }
+     ],
+     "original_notes": [
+      "INT",
+      {
+       "display_name": "original notes",
+       "tooltip": "How many of the source's notes YuE2 gets: 100 every note of melody, instrument line and chords. Less leaves out the least important (nothing new is added), so YuE2 interprets more freely; 0 keeps about a quarter.",
+       "default": 100,
+       "min": 0,
+       "max": 100,
+       "step": 1,
+       "display": "slider"
       }
      ]
     },
@@ -2323,7 +2335,8 @@
      "lines_under_singing",
      "creativity",
      "source",
-     "lyrics_fidelity"
+     "lyrics_fidelity",
+     "original_notes"
     ],
     "hidden": [
      "prompt",
@@ -2348,6 +2361,7 @@
     "INT",
     "INT",
     "BOOLEAN",
+    "INT",
     "INT"
    ],
    "output_name": [
@@ -2368,9 +2382,11 @@
     "song_flow_closeness",
     "lyrics_closeness",
     "lines_under_singing",
-    "creativity"
+    "creativity",
+    "original_notes"
    ],
    "output_is_list": [
+    false,
     false,
     false,
     false,
@@ -2414,7 +2430,7 @@
      "creativity": [
       "INT",
       {
-       "tooltip": "0 steady ... 50 the reference (the native defaults) ... 100 experimental. A connected brief's creativity takes its place.",
+       "tooltip": "0 steady ... 25 balanced (the native defaults) ... 50 experimental (the default) ... 100 adventurous. A connected brief's creativity takes its place.",
        "default": 50,
        "min": 0,
        "max": 100,
@@ -5033,7 +5049,7 @@
      "creativity": [
       "INT",
       {
-       "tooltip": "0 steady ... 50 the reference (as before) ... 100 experimental: how much the writer and YuE2 dare. More surprises also means more misses - try a few seeds.",
+       "tooltip": "0 steady ... 25 balanced (1.4's 50) ... 50 experimental (the default, 1.4's 100) ... 100 adventurous: how much the writer and YuE2 dare. More surprises also means more misses - try a few seeds.",
        "default": 50,
        "min": 0,
        "max": 100,

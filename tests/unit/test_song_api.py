@@ -39,7 +39,8 @@ COVER_FIELDS = [
     ("voice", "string"), ("theme", "string"), ("phrasing_reference", "boolean"), ("harmony", "choice"),
     ("title", "string"), ("arrangement", "choice"), ("song_flow_closeness", "integer"),
     ("lyrics_closeness", "integer"), ("lines_under_singing", "boolean"), ("creativity", "integer"),
-    ("lyrics_fidelity", "choice"), ("finish.hq_mastering", "boolean"), ("finish.cover_art", "boolean"),
+    ("lyrics_fidelity", "choice"), ("original_notes", "integer"), ("finish.hq_mastering", "boolean"),
+    ("finish.cover_art", "boolean"),
     ("writer.model", "choice"), ("source.audio", "upload"), ("excerpt.start_index", "number"),
     ("excerpt.duration", "number"), ("excerpt.enabled", "boolean"),
 ]  # fmt: skip
