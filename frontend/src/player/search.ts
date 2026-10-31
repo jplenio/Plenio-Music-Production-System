@@ -496,7 +496,7 @@ const FIELD_HELP: [string, string][] = [
   ['mode', 'a creative mode'], ['template', 'a brief template'], ['is', 'fav, unplayed, played, tagged, cover, other'],
   ['has', 'timing, pdf, score, original, cover'], ['year', '2026'], ['plenio', 'the Plenio version: >=1.0'], ['title', 'words in the title'],
   ['lyrics', 'words in the lyrics'], ['artist', 'other music: the artist'], ['album', 'other music: the album'], ['meter', '4/4, 3/4'],
-  ['writer', 'the model that wrote it'], ['style', 'words in the style'], ['creativity', '0-100: >60, 40-60, varied'],
+  ['writer', 'the model that wrote it'], ['style', 'words in the style'], ['creativity', '0-100: >50, 20-30, adventurous'],
   ['stars', 'your stars: >=4, 3-4, none'], ['measured', 'the measured stars: >=4, <2, none'],
 ] // prettier-ignore
 

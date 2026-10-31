@@ -152,12 +152,11 @@ _ID = re.compile(r"[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9-]*)?")
 
 
 def _fingerprint(data: dict[str, Any]) -> str:
-    """A brief's content as a hash. The creativity counts only away from the reference, so a brief at 50 has
-    the fingerprint it had before the slider existed - and the lyrics fidelity only away from standard."""
+    """A brief's content as a hash. The lyrics fidelity counts only away from standard, so a brief has the
+    fingerprint it had before that option. The creativity always counts: since 1.5.0 its 50 writes and samples as
+    1.4's 100 did, so a brief at 50 is not the one of before."""
     data.pop("from_template")
     data.pop("notes")
-    if data.get("creativity") == CREATIVITY_DEFAULT:
-        data.pop("creativity")
     if data.get("fidelity") == STANDARD:
         data.pop("fidelity")
     return sha256_json(data)

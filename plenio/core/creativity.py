@@ -1,18 +1,22 @@
-"""Creativity: one slider from steady (0) to experimental (100); 50 is the reference (owner's request 2026-10-19).
+"""Creativity: one slider from steady (0) to adventurous (100) (owner's requests 2026-10-19 and 2026-10-31).
+
+Since 1.5.0 the default, 50, is what 1.4 gave at 100 - its experimental writing and sampling sounded best to the
+owner - and 25 is 1.4's reference (its 50: the writer's prompt without creativity rules, YuE2's native sampling).
+Below 50 the slider is 1.4's scale halved; above it goes further, moderately. A song made before 1.5.0 carries 1.4's
+number: ``from_before_1_5`` gives it on this scale.
 
 The slider acts on three places, each kept within what is known to work:
 
-- **The writer's rules** (``writer_lines``): for the lyrics and the style, by level. 40-60 adds nothing - the
-  prompt is exactly the one of before, so a workflow without the slider (50) writes as it always did.
+- **The writer's rules** (``writer_lines``): for the lyrics and the style, by level. 20-30 (balanced) adds
+  nothing - the prompt of before the slider.
 - **The writer's and the arrangement's temperature** (``sampling``, stages ``writer`` and ``arrangement``): only
-  the first drafts; the repairs and re-asks keep their own (they fix a form and must stay reliable). 100 reaches
-  1.0, Gemma's own recommended temperature; the drafts are checked and enforced as before.
+  the first drafts; the repairs and re-asks keep their own (they fix a form and must stay reliable). The drafts are
+  checked and enforced as before.
 - **YuE2's sampling** (stages ``plan`` and ``take``): the plan's (ABC) and the take's (music tokens)
-  temperature, top-p and top-k. 50 gives exactly the native nodes' defaults - the reference upstream documents
-  and Plenio was tuned with. The ends move moderately: upstream warns that other sampling values may change
-  quality, and no study measured where it drops, so 100 stays below the ranges reported as risky (ABC
-  temperature above 1.0, music temperature above 1.15). The repetition penalty stays: music needs its
-  repetitions, and a penalty below 1 invites endless loops.
+  temperature, top-p and top-k. 25 gives exactly the native nodes' defaults. No study measured where quality drops
+  (2026-10-31: no official guidance; community reports only), so 100 stays at the edge of the ranges reported as
+  risky - ABC temperature above 1.0, music temperature above 1.15 - and widens top-p and top-k a little. The
+  repetition penalty stays: music needs its repetitions, and a penalty below 1 invites endless loops.
 
 Design notes: docs/design/creativity.md.
 """
@@ -26,23 +30,29 @@ from .engines.minimax import ENGINE_ID as MINIMAX
 from .errors import PlenioUserError
 
 CREATIVITY_DEFAULT = 50
-"""The reference: the writer's prompt and YuE2's sampling exactly as before the slider."""
+"""The default since 1.5.0: the writing and sampling 1.4 had at 100."""
+REFERENCE = 25
+"""1.4's reference (its 50): the writer's prompt without creativity rules and YuE2's native sampling."""
+SCALE_SINCE = (1, 5, 0)
+"""The Plenio version since which the slider has this scale (1.4's numbers are twice as large up to its 100)."""
 
-STEADY, RESTRAINED, BALANCED, VARIED, EXPERIMENTAL = (
+STEADY, RESTRAINED, BALANCED, VARIED, EXPERIMENTAL, ADVENTUROUS = (
     "steady",
     "restrained",
     "balanced",
     "varied",
     "experimental",
+    "adventurous",
 )
 LEVELS: tuple[tuple[int, str], ...] = (
-    (19, STEADY),
-    (39, RESTRAINED),
-    (60, BALANCED),
-    (80, VARIED),
-    (100, EXPERIMENTAL),
+    (9, STEADY),
+    (19, RESTRAINED),
+    (30, BALANCED),
+    (40, VARIED),
+    (75, EXPERIMENTAL),
+    (100, ADVENTUROUS),
 )
-"""The writer's levels by their highest value."""
+"""The writer's levels by their highest value (up to 50: 1.4's levels at half their numbers)."""
 
 STAGES = ("writer", "arrangement", "plan", "take")
 
@@ -65,10 +75,26 @@ def creativity_level(creativity: int) -> str:
 
 
 def describe(creativity: int) -> str:
-    """For summaries: ``50 (balanced, the reference)``, ``75 (varied)``."""
+    """For summaries: ``50 (experimental, the default)``, ``25 (balanced, 1.4's reference)``, ``80 (adventurous)``."""
     value = creativity_value(creativity)
     level = creativity_level(value)
-    return f"{value} ({level}{', the reference' if value == CREATIVITY_DEFAULT else ''})"
+    note = (
+        ", the default" if value == CREATIVITY_DEFAULT else ", 1.4's reference" if value == REFERENCE else ""
+    )
+    return f"{value} ({level}{note})"
+
+
+def from_before_1_5(creativity: Any) -> int:
+    """A creativity a song made before 1.5.0 was made with, on today's scale (half of 1.4's number)."""
+    return round(creativity_value(creativity) / 2)
+
+
+def scaled_for(creativity: Any, version: tuple[int, ...] | None) -> int:
+    """A record's creativity on today's scale: ``version`` is the Plenio version that made it (``None``: unknown -
+    taken as made before 1.5.0, as every record without a version is older)."""
+    if version is not None and tuple(version[:3]) >= SCALE_SINCE:
+        return creativity_value(creativity)
+    return from_before_1_5(creativity)
 
 
 # --- the sampling -----------------------------------------------------------------------------------------
@@ -85,38 +111,56 @@ SAMPLING: dict[str, dict[int, Sampling]] = {
     # the writer's first draft (title, style, lyrics); top-p and top-k as the templates set them
     "writer": {
         0: Sampling(0.60, 0.95, 64),
-        50: Sampling(0.80, 0.95, 64),  # the templates' value
-        100: Sampling(1.00, 0.95, 64),
+        25: Sampling(0.80, 0.95, 64),  # the templates' value
+        50: Sampling(1.00, 0.95, 64),  # 1.4's 100: Gemma's own recommended temperature
+        100: Sampling(1.10, 0.95, 64),
     },
     # a creative mode's arrangement plan
     "arrangement": {
         0: Sampling(0.55, 0.95, 64),
-        50: Sampling(0.70, 0.95, 64),  # the templates' value
-        100: Sampling(0.90, 0.95, 64),
+        25: Sampling(0.70, 0.95, 64),  # the templates' value
+        50: Sampling(0.90, 0.95, 64),  # 1.4's 100
+        100: Sampling(1.00, 0.95, 64),
     },
     # the plan (YuE2 Generate ABC): which notes, chords and rhythms the score gets
     "plan": {
         0: Sampling(0.55, 0.85, 20),
-        50: Sampling(0.70, 0.90, 30),  # the native node's defaults
-        100: Sampling(0.92, 0.95, 50),
+        25: Sampling(0.70, 0.90, 30),  # the native node's defaults
+        50: Sampling(0.92, 0.95, 50),  # 1.4's 100
+        100: Sampling(1.00, 0.96, 64),  # an ABC temperature above 1.0 is reported as risky
     },
     # the take (YuE2 Generate Music): how the score is performed - voice, instruments, sound
     "take": {
         0: Sampling(0.90, 0.92, 60),
-        50: Sampling(1.00, 0.95, 100),  # the native node's defaults
-        100: Sampling(1.10, 0.97, 150),
+        25: Sampling(1.00, 0.95, 100),  # the native node's defaults
+        50: Sampling(1.10, 0.97, 150),  # 1.4's 100
+        100: Sampling(1.15, 0.98, 200),  # a music temperature above 1.15 is reported as risky
     },
 }
-"""Anchors at 0, 50 and 100; between them the values move in a straight line."""
+"""Anchors at 0, 25, 50 and 100; between them the values move in a straight line."""
 
 
 def sampling(creativity: int, stage: str) -> Sampling:
-    """The sampling for ``stage`` at ``creativity``; 50 gives the templates' values (YuE2: the native defaults)."""
+    """The sampling for ``stage`` at ``creativity``; 25 gives the templates' values of before the slider (YuE2: the
+    native defaults), 50 those of 1.4's 100."""
+    return _sampling_at(creativity_value(creativity), stage)
+
+
+def sampling_as_made(creativity: Any, stage: str, version: tuple[int, ...] | None) -> Sampling:
+    """The sampling a Creativity node gave when a song was made by Plenio ``version`` (``None``: before versions,
+    so before 1.5.0): 1.4's number is twice today's, and its values lie exactly on today's line at half of it."""
+    if version is not None and tuple(version[:3]) >= SCALE_SINCE:
+        return sampling(creativity, stage)
+    return _sampling_at(creativity_value(creativity) / 2, stage)
+
+
+def _sampling_at(value: float, stage: str) -> Sampling:
     if stage not in SAMPLING:
         raise PlenioUserError(f"Unknown stage {stage!r}.", hint=f"Use one of {list(STAGES)}.")
-    value = creativity_value(creativity)
     anchors = SAMPLING[stage]
-    low, high = (0, 50) if value <= 50 else (50, 100)
+    points = sorted(anchors)
+    low = max(p for p in points[:-1] if p <= value)
+    high = points[points.index(low) + 1]
     share = (value - low) / (high - low)
     a, b = anchors[low], anchors[high]
 
@@ -138,6 +182,9 @@ _HEADS = {
     VARIED: "give the song more contrast and character than usual, while it stays clearly in its genre.",
     EXPERIMENTAL: "make bold, surprising choices that still hang together - the song may borrow from a "
     "neighbouring genre and use an unusual instrument, sound or rhythm feel.",
+    ADVENTUROUS: "go further than usual: a fresh blend of the song's genre with a clear touch of another, an "
+    "unusual instrument or sound as its signature, a rhythm feel or turn listeners do not expect - while it stays "
+    "one coherent, singable song.",
 }
 
 _DESCRIPTOR_STYLE = {
@@ -154,6 +201,11 @@ _DESCRIPTOR_STYLE[EXPERIMENTAL] = (
     _DESCRIPTOR_STYLE[VARIED] + " Add one unexpected but fitting colour: an unusual instrument, a touch of a "
     "neighbouring genre or an uncommon rhythm feel."
 )
+_DESCRIPTOR_STYLE[ADVENTUROUS] = (
+    _DESCRIPTOR_STYLE[VARIED]
+    + " Add two unexpected but fitting colours: an unusual instrument or sound, a touch "
+    "of a neighbouring genre, or an uncommon rhythm feel."
+)
 
 _CAPTION_STYLE = {
     STEADY: "Caption: one steady groove and the same instrumentation all the way through; the Arrangement part "
@@ -168,6 +220,11 @@ _CAPTION_STYLE[EXPERIMENTAL] = (
     _CAPTION_STYLE[VARIED] + " Allow one surprising turn: a key lift for the last chorus, a change of rhythm "
     "feel or an unusual instrument solo."
 )
+_CAPTION_STYLE[ADVENTUROUS] = (
+    _CAPTION_STYLE[VARIED]
+    + " Allow two surprising turns, such as a key lift for the last chorus, a change of "
+    "rhythm feel, a sudden sparse breakdown or an unusual instrument solo - the song still flows as one."
+)
 
 _LYRICS = {
     STEADY: "Lyrics: plain everyday words, short regular lines and simple rhymes; the chorus repeats the same "
@@ -177,12 +234,16 @@ _LYRICS = {
     "sections; keep the chorus hook memorable - its last repeat may change a few words to lift the ending.",
     EXPERIMENTAL: "Lyrics: an unexpected angle and imagery, inventive rhymes and rhythms; the hook stays "
     "recognisable.",
+    ADVENTUROUS: "Lyrics: a surprising perspective (an object that speaks, a letter, a dialogue, a story told from "
+    "its end), vivid unusual images, inventive rhymes and rhythms; the chorus hook stays simple enough to sing "
+    "along.",
 }
 _LYRICS_ON_A_MELODY = {
     STEADY: "Lyrics: plain everyday words and simple rhymes.",
     RESTRAINED: "Lyrics: familiar images.",
     VARIED: "Lyrics: fresh, concrete images instead of stock phrases.",
     EXPERIMENTAL: "Lyrics: an unexpected angle and imagery, inventive rhymes.",
+    ADVENTUROUS: "Lyrics: a surprising perspective and vivid unusual images, inventive rhymes.",
 }
 _EXTRA_SECTION = (
     " You may add one contrasting section - a [Bridge], or a [Break] before the last chorus - if the sections "
@@ -216,7 +277,7 @@ def writer_lines(
             + _DESCRIPTOR_STYLE[level].format(sung="" if instrumental else " or 'layered backing vocals'")
         )
     if not instrumental and lyrics == "write":
-        extra = _EXTRA_SECTION if level == EXPERIMENTAL and not fixed_sections else ""
+        extra = _EXTRA_SECTION if level in (EXPERIMENTAL, ADVENTUROUS) and not fixed_sections else ""
         lines.append("- " + _LYRICS[level] + extra)
     elif not instrumental and lyrics == "melody":
         lines.append("- " + _LYRICS_ON_A_MELODY[level] + " The syllable counts above still rule.")

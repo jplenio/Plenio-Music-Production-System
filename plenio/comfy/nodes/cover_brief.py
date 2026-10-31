@@ -72,7 +72,7 @@ COVER_FIELD_OUTPUTS: tuple[tuple[str, str, str], ...] = (
     ("song_flow_closeness", "INT", "The song flow closeness (0-100)."),
     ("lyrics_closeness", "INT", "The lyrics closeness of new lyrics (0-100)."),
     ("lines_under_singing", "BOOLEAN", "Whether instrument lines also sound under the singing."),
-    ("creativity", "INT", "The creativity (0-100, 50 the reference): for the YuE2 Takes' sampling."),
+    ("creativity", "INT", "The creativity (0-100, 50 the default): for the YuE2 Takes' sampling."),
 )
 """The brief's fields as outputs, as the Song Brief has them (owner's request 2026-10-15)."""
 VOCAL_LABELS = {value: label for label, value in COVER_VOCALS.items()}
@@ -281,7 +281,7 @@ class PlenioCoverBrief(io.ComfyNode):
                     optional=True,
                     tooltip=UNDER_SINGING_TOOLTIP,
                 ),
-                # appended last: a workflow saved without it gets the reference (50), as does an older API prompt
+                # appended last: a workflow saved without it gets the default (50), as does an older API prompt
                 io.Int.Input(
                     "creativity",
                     default=CREATIVITY_DEFAULT,

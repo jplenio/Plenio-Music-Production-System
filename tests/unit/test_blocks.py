@@ -101,8 +101,8 @@ def test_a_song_saved_with_1_0_1_gets_the_current_blocks_and_the_briefs_creativi
     assert b.outdated(workflow, BLOCKS) == [] and again.workflow == workflow and again.updated == ()
 
 
-def test_at_50_the_creativity_nodes_give_the_numbers_the_old_blocks_had():
-    # a block is only replaced where its sampling nodes are the current block's: at 50 they run as before
+def test_at_25_the_creativity_nodes_give_the_numbers_the_old_blocks_had():
+    # a block is only replaced where its sampling nodes are the current block's: at 25 they run as before
     found = b.upgrade(SAVED_SONG, BLOCKS, BRIEFS)
     stages = {"YuE2GenerateABC": "plan", "YuE2GenerateMusic": "take"}
     for name in (PLAN, RENDER):
@@ -110,7 +110,7 @@ def test_at_50_the_creativity_nodes_give_the_numbers_the_old_blocks_had():
         for node in definition(found.workflow, name)["nodes"]:
             # the retakes of the lyrics fidelity (1.2.1) are new: the old block had none
             if node["type"] in stages and node["id"] in old:
-                values = sampling(50, stages[node["type"]])
+                values = sampling(25, stages[node["type"]])
                 written = old[node["id"]]["widgets_values"]
                 triple = [values.temperature, values.top_p, values.top_k]
                 assert any(written[i : i + 3] == triple for i in range(len(written) - 2))

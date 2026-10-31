@@ -344,10 +344,10 @@ def test_the_song_page_knows_the_briefs_defaults() -> None:
 
 def test_the_creativity_and_the_sampling_it_gave() -> None:
     """Owner's request 2026-10-19: the song page shows the creativity and the sampling it gave. A song made
-    before the slider: 50 (the default) and the numbers written in its nodes; a song of today's templates: the
-    values its Creativity nodes gave."""
+    before the slider: 25 (1.4's 50, on today's scale) and the numbers written in its nodes; a song of today's
+    templates: the values its Creativity nodes gave."""
     old = brief_facts(PROMPT)
-    assert (old["creativity"], old["sources"]["creativity"]) == (50, "default")
+    assert (old["creativity"], old["sources"]["creativity"]) == (25, "default")
     written = {
         "1": {
             "class_type": "PlenioWriterChoice",
@@ -424,19 +424,25 @@ def test_the_creativity_and_the_sampling_it_gave() -> None:
             "inputs": {"temperature": ["15:806", 0], "top_p": ["15:806", 1], "top_k": ["15:806", 2]},
         },
     }
-    facts = brief_facts(linked)
+    facts = brief_facts(linked, (1, 5, 0))
     assert (facts["creativity"], facts["sources"]["creativity"]) == (75, "typed")
-    assert sampling_facts(linked, facts["creativity"]) == {
-        "writer": {"temperature": 0.9},  # the Local LLM branch: the writer model is an LM Studio model
-        "arrangement": {"temperature": 0.8},
-        "plan": {"temperature": 0.81, "top_p": 0.925, "top_k": 40},  # the second plan is not the plan
-        "take": {"temperature": 0.96, "top_p": 0.938, "top_k": 84},  # its own value where no brief is linked
+    # a song of 1.4 with the same numbers: its creativity is half on today's scale, its sampling the same as then
+    assert brief_facts(linked, (1, 4, 1))["creativity"] == 38
+    as_then = sampling_facts(linked, 75, (1, 4, 1))
+    assert as_then["plan"] == {"temperature": 0.81, "top_p": 0.925, "top_k": 40}
+    assert sampling_facts(linked, facts["creativity"], (1, 5, 0)) == {
+        # 75 lies half way between the anchors 50 and 100
+        "writer": {"temperature": 1.05},  # the Local LLM branch: the writer model is an LM Studio model
+        "arrangement": {"temperature": 0.95},
+        "plan": {"temperature": 0.96, "top_p": 0.955, "top_k": 57},  # the second plan is not the plan
+        # its own value where no brief is linked: 30, a fifth of the way from 25 to 50
+        "take": {"temperature": 1.02, "top_p": 0.954, "top_k": 110},
     }
     # a hand-edited record does not stop the library
     broken = brief_facts(
         {"2": {"class_type": "PlenioSongBrief", "inputs": {"genre": "pop", "creativity": "wild"}}}
     )
-    assert broken["creativity"] == 50
+    assert broken["creativity"] == 25  # 1.4's 50, on today's scale
     assert (
         sampling_facts({"9": {"class_type": "YuE2GenerateMusic", "inputs": {"temperature": ["7", 0]}}}) == {}
     )

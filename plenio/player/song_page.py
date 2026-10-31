@@ -104,8 +104,14 @@ def describe_creativity(value: Any) -> str:
         number = creativity_rules.creativity_value(value)
     except Exception:  # noqa: BLE001 - a record edited by hand
         return str(value)
-    reference = number == creativity_rules.CREATIVITY_DEFAULT
-    return f"{number} - {creativity_rules.creativity_level(number)}{', the reference' if reference else ''}"
+    note = (
+        ", the default"
+        if number == creativity_rules.CREATIVITY_DEFAULT
+        else ", 1.4's reference"
+        if number == creativity_rules.REFERENCE
+        else ""
+    )
+    return f"{number} - {creativity_rules.creativity_level(number)}{note}"
 
 
 def describe_sampling(values: Mapping[str, Any]) -> str:

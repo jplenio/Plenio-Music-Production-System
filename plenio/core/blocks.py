@@ -8,7 +8,8 @@ the creativity slider: the slider then changed the writer's rules and nothing el
 opens, the frontend (``frontend/src/extension/blocks.ts``) has it brought up to date here: each such block
 becomes the current one (the definition the package ships in ``subgraphs/``, under the id its instances use),
 its instances get the new inputs, and the YuE2 blocks' *creativity* is linked from the brief - in the graph,
-exactly as the current templates have it. At 50 the Creativity nodes give the numbers the blocks had.
+exactly as the current templates have it. At 25 the Creativity nodes give the numbers the blocks had (since
+1.5.0 the brief's default, 50, gives what 1.4 had at 100).
 
 A block is kept as it is, and named, when the current one does not fit in its place: other inputs or
 outputs (inputs and outputs it adds after the old ones are fine), or a node behind the sampling that differs from the current block's (a value set by hand inside

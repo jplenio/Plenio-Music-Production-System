@@ -110,7 +110,8 @@ def test_the_writer_gets_the_map_and_writes_only_a_few_lines(engine: EngineInfo)
 
 
 def test_a_sung_brief_is_written_as_before() -> None:
-    prompt, request = compose(build_song_brief({"genre": "pop", "language": "English"}), YUE2)
+    # at 25, the prompt of before the slider (from 50 the style may name a 'sparse-to-full contrast')
+    prompt, request = compose(build_song_brief({"genre": "pop", "language": "English", "creativity": 25}), YUE2)
     assert request.sparse_lines == 0 and "sparse" not in prompt.lower()
     assert request.sections == tuple(yue2.section_plan(180))
 
