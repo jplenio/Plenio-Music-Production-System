@@ -3,6 +3,12 @@
 @ card 2 · YuE2 · Cover
 Welcome back! This time, we turn an existing recording into a brand-new cover.
 
+@ card Plenio at a glance
+Plenio is a complete song production suite, right on your own PC. [pause:0.2s] Let it make a whole batch of finished songs on its own, [pause:0.2s] or take every word and every note into your own hands, DAW style. It's the perfect home for YuE2. [pause:0.3s] And it brings a player of its own, made for these songs, with a party mode where everyone makes songs from their own phone, straight into the playlist.
+
+@ card In this video
+In this video: a recording becomes a cover. First an instrumental in one run, then a cover with the original lyrics and two review stops.
+
 @ Open the template browser
 Open the template browser once more,
 
@@ -67,7 +73,7 @@ The Cover Brief describes the new version.
 With new cover every run, each run makes a different version, without any stops. A whole queue of covers runs through.
 
 @ template: the new style
-The template sets the new style: genre, mood and voice come from it, unless you type your own.
+The template sets the new style: its sound, genre and voice appear in the fields. Change any of them.
 
 @ vocals: “instrumental”
 For now, instrumental: an instrument plays the melody.
@@ -77,6 +83,9 @@ Harmony: the original chords, or new ones.
 
 @ arrangement: “off” keeps the transcription
 Arrangement stays off: the transcription stays as it is. The creative modes in this list are tutorial seven.
+
+@ original notes: 100
+Original notes: one hundred keeps every note of the original. [pause:0.2s] Lower values leave out notes of the instruments and the chords, so YuE2 plays more freely.
 
 @ Under the cards, the Writer model
 Up at the start sits the writer model: Gemma 4 by default, or a local LLM from your machine.
@@ -129,8 +138,8 @@ And the seeds follow the mode: the cover's seeds switch to same seed, so the dra
 @ vocals: “original lyrics”
 And set the vocals to original lyrics: YuE2 sings the words of the recording.
 
-@ voice: describe the singer
-Then describe the singer you'd like to hear.
+@ voice: pick one from the list
+For the voice, pick one from the list, or type your own.
 
 @ Press Run. The transcription
 Press Run. [pause:0.3s] The transcription from part one is simply reused.

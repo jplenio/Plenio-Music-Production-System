@@ -9,7 +9,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { afterRun, openTemplate, sectionTour, switchCards } from './lib/scenes.mjs'
+import { afterRun, intro, openTemplate, sectionTour, switchCards } from './lib/scenes.mjs'
 import { DIALOG, approve, openSheet, tab } from './lib/sheet.mjs'
 import { FOOT } from './lib/studio.mjs'
 
@@ -91,6 +91,14 @@ export default async function enhance(s, { project }) {
     subtitle: 'Finish any recording - Audio HQ, tone, loudness and a release export, without a music model',
     foot: FOOT,
   }, 5)
+  intro(s, {
+    tutorial: 'Tutorial 4 · Enhance & Master',
+    items: [
+      'Part 1 · Master a take: Audio HQ, tone match, loudness',
+      'Part 2 · Your own sound',
+      'Part 3 · The lyrics, corrected',
+    ],
+  })
 
   // --- open the template -------------------------------------------------------------------------
   s.chapter('Getting started')

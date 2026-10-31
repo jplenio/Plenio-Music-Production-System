@@ -20,6 +20,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { FOOT } from './lib/studio.mjs'
 import { parseNarration } from './lib/voice.mjs'
+import { intro } from './lib/scenes.mjs'
 
 export const meta = {
   name: 'Plenio tutorial 8 - Plenio Player',
@@ -130,6 +131,16 @@ export default async function player(s) {
     subtitle: 'Your songs in the browser: lyrics, sheet music and visuals in time with the music',
     foot: FOOT,
   }, 5)
+  intro(s, {
+    tutorial: 'Tutorial 8 · Plenio Player',
+    items: [
+      'Find and play your songs',
+      "The song's page and Now playing",
+      'Visuals: Plenio Nova and Plenio Drop',
+      'Lyrics as written or as sung, playlists, the queue',
+      'Live Play, guests, videos and sharing',
+    ],
+  })
 
   // --- in ComfyUI: one click ---
   s.chapter('Open the player')

@@ -23,6 +23,7 @@
 import { spawn, spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { effects, writeWav } from './sfx.mjs'
 import { loadPlaywright } from './studio.mjs'
 import { VOICE, anchorNarration, mixVoice, parseLexicon, parseNarration, speakable, synthesize } from './voice.mjs'
@@ -289,6 +290,28 @@ const CARD_CSS = `
   .lines { margin-top: 36px; font-size: 32px; color: #c9d2de; line-height: 1.7 }
   .lines div { animation: rise .8s cubic-bezier(.2,.8,.2,1) both }
   .lines b { color: #fff }
+  .show { position: absolute; inset: 0; background: #07080b }
+  .slide { position: absolute; inset: 0; overflow: hidden; opacity: 0 }
+  .slide img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover }
+  .slide .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7,8,11,0) 52%, rgba(7,8,11,.88) 100%) }
+  .slide .label { position: absolute; left: 90px; bottom: 120px; text-align: left }
+  .slide .label .k { font-size: 30px; letter-spacing: .2em; text-transform: uppercase; color: #8fb8ff; font-weight: 700 }
+  .slide .label .t { font-size: 58px; font-weight: 700; margin-top: 8px; text-shadow: 0 4px 30px rgba(0,0,0,.8) }
+  .slide .count { position: absolute; right: 90px; bottom: 128px; font-size: 26px; color: #b9c2d0; font-weight: 600 }
+  .final { position: absolute; inset: 0; opacity: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    background: radial-gradient(1200px 700px at 70% 20%, #1c2433 0%, #0e1014 60%) #0e1014 }
+  .final .logo { width: 190px; height: 190px; border-radius: 44px; box-shadow: 0 0 90px rgba(106,166,255,.45), 0 24px 60px rgba(0,0,0,.6) }
+  .final h1 { font-size: 110px; margin-top: 26px }
+  .final .tag { font-size: 44px; color: #dfe8f7; margin-top: 14px; font-weight: 600; max-width: 1500px; line-height: 1.3 }
+  .final .chips { display: flex; gap: 16px; margin-top: 40px; flex-wrap: wrap; justify-content: center }
+  .final .chips span { font-size: 26px; padding: 12px 24px; border: 1px solid #3a4a66; border-radius: 99px; background: rgba(40, 60, 95, .35); color: #dfe8f7 }
+  .items { margin-top: 44px; display: grid; gap: 18px; text-align: left; min-width: 1100px }
+  .items div { display: flex; align-items: center; gap: 26px; font-size: 38px; color: #eef1f6; animation: rise .7s cubic-bezier(.2,.8,.2,1) both }
+  .items i { font-style: normal; width: 62px; height: 62px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 30px; font-weight: 800;
+    color: #0e1014; background: linear-gradient(135deg, #8fb8ff, #6aa6ff); box-shadow: 0 0 26px rgba(106,166,255,.45) }
+  @keyframes slide { 0% { opacity: 0 } 9% { opacity: 1 } 91% { opacity: 1 } 100% { opacity: 0 } }
+  @keyframes kb { from { transform: scale(1.0) translate(0, 0) } to { transform: scale(1.09) translate(-1.5%, -1%) } }
+  @keyframes kb2 { from { transform: scale(1.09) translate(1.5%, 1%) } to { transform: scale(1.0) translate(0, 0) } }
   @keyframes rise { from { opacity: 0; transform: translateY(28px); filter: blur(6px) } to { opacity: 1; transform: none; filter: blur(0) } }
   @keyframes fade { from { opacity: 0 } to { opacity: 1 } }
   @keyframes zoomin { from { opacity: 0; transform: scale(1.07) } to { opacity: 1; transform: scale(1) } }
@@ -301,9 +324,43 @@ const CARD_CSS = `
   @keyframes drift2 { from { transform: translate(3%, 2%) scale(1.05) } to { transform: translate(-4%, -3%) scale(1) } }
 `
 
+// a picture of the tutorials' folder (or the repository's), inlined: the card page has no files of its own
+const TUTORIALS = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
+const inline = (file) => {
+  const full = path.resolve(TUTORIALS, file)
+  const type = full.endsWith('.png') ? 'image/png' : 'image/jpeg'
+  return `data:${type};base64,${fs.readFileSync(full).toString('base64')}`
+}
+
 function cardHtml(kind, data, banner) {
   const esc = (s) => String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c])
   const glow = '<div class="glow a"></div><div class="glow b"></div>'
+  // what Plenio is, in pictures: a slide each `step` seconds (slowly zooming, its label rising), then the name and the
+  // line that says what it is
+  if (kind === 'showcase') {
+    const step = data.step ?? 2.8
+    const slides = data.slides.map((sl, i) => {
+      const d = (i * step).toFixed(2), len = (step + 0.35).toFixed(2)
+      return `<div class="slide" style="animation: slide ${len}s linear ${d}s both">
+        <img src="${inline(sl.file)}" style="object-position:${sl.pos ?? 'center'}; animation: ${i % 2 ? 'kb2' : 'kb'} ${len}s linear ${d}s both">
+        <div class="shade"></div>
+        <div class="label" style="animation: rise .7s cubic-bezier(.2,.8,.2,1) ${(i * step + 0.3).toFixed(2)}s both"><div class="k">${esc(sl.kicker)}</div><div class="t">${esc(sl.title)}</div></div>
+        <div class="count">${i + 1} / ${data.slides.length}</div></div>`
+    }).join('')
+    const end = (data.slides.length * step).toFixed(2)
+    const chips = (data.chips ?? []).map((c, i) => `<span style="animation: chip .5s cubic-bezier(.2,1.3,.4,1) ${(data.slides.length * step + 1.2 + i * 0.12).toFixed(2)}s both">${esc(c)}</span>`).join('')
+    return `<div class="show">${slides}<div class="final" style="animation: fade .6s ease ${end}s both">${glow}
+      <img class="logo" src="${inline(data.logo)}" style="animation: pop .7s cubic-bezier(.2,1.2,.4,1) ${end}s both">
+      <h1 style="animation: rise .9s cubic-bezier(.2,.8,.2,1) ${(+end + 0.3).toFixed(2)}s both">${esc(data.name)}</h1>
+      <div class="tag" style="animation: rise .9s cubic-bezier(.2,.8,.2,1) ${(+end + 0.6).toFixed(2)}s both">${esc(data.tagline)}</div>
+      <div class="chips">${chips}</div></div></div>`
+  }
+  // what this video shows: its tutorial, then the points one after another
+  if (kind === 'overview') {
+    const items = data.items.map((it, i) => `<div style="animation-delay:${(0.9 + i * 0.45).toFixed(2)}s"><i>${i + 1}</i><span>${esc(it)}</span></div>`).join('')
+    return `${glow}<div class="wrap"><div class="kicker">${esc(data.kicker)}</div><h1>${esc(data.title)}</h1><div class="rule"></div>
+      <div class="items">${items}</div></div>`
+  }
   if (kind === 'title') {
     return `${glow}<div class="wrap"><div class="banner"><img src="${banner}"></div><div class="kicker">${esc(data.kicker)}</div>
       <h1>${data.title}</h1><div class="sub">${esc(data.subtitle)}</div></div><div class="foot">${esc(data.foot)}</div>`
@@ -318,7 +375,8 @@ function cardHtml(kind, data, banner) {
     <div class="lines">${lines}</div></div>`
 }
 
-const cardPage = (kind, data, banner) =>
+// (exported for previews of the cards)
+export const cardPage = (kind, data, banner) =>
   `<!doctype html><html><head><meta charset="utf-8"><style>${CARD_CSS}</style></head><body>${cardHtml(kind, data, banner)}</body></html>`
 
 // The cards as stills (their last frame) - for the promo.
@@ -448,7 +506,10 @@ function cues(markers, tl) {
     events.push({ ...e, t: tl.map(e.t), speed: p.speed })
   }
   for (const p of tl.pieces) {
-    if (p.type === 'card') events.push({ t: p.start, kind: `card-${p.card.kind}`, seconds: p.duration, steps: p.card.data?.steps?.length ?? 0 })
+    if (p.type === 'card') {
+      const data = p.card.data ?? {}
+      events.push({ t: p.start, kind: `card-${p.card.kind}`, seconds: p.duration, steps: (data.steps ?? data.slides ?? data.items ?? []).length, step: data.step })
+    }
     if (p.type === 'clip' && p.fast !== null && p.speed > 1.4) {
       const before = tl.pieces[tl.pieces.indexOf(p) - 1]
       if (!(before?.type === 'clip' && before.fast !== null && before.speed > 1.4)) events.push({ t: p.start, kind: 'ff' })

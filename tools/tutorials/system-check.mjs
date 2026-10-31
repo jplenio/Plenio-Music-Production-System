@@ -2,6 +2,7 @@
 // which templates are ready, the model files, the download policy and the hardware table.
 
 import { FOOT } from './lib/studio.mjs'
+import { intro } from './lib/scenes.mjs'
 
 export const meta = {
   name: 'Plenio tutorial 0 - System Check',
@@ -62,6 +63,14 @@ export default async function systemCheck(s) {
     subtitle: 'Is this ComfyUI ready for Plenio? One run tells you - and changes nothing',
     foot: FOOT,
   }, 5)
+  intro(s, {
+    tutorial: 'Tutorial 0 · System Check',
+    items: [
+      'One run checks this ComfyUI for Plenio - and changes nothing',
+      'The models: what is there, what is missing',
+      'The report - and what to do about it',
+    ],
+  })
 
   s.chapter('Getting started')
   await s.wait(600)

@@ -3,7 +3,7 @@
 // instrumental adapter of models/loras, trained on YuE2's planner), an instrumental song made with it, and what
 // the node says after the run; then what it leaves out and the original layout it reads.
 
-import { afterRun, openTemplate } from './lib/scenes.mjs'
+import { afterRun, intro, openTemplate } from './lib/scenes.mjs'
 import { FOOT } from './lib/studio.mjs'
 
 export const meta = {
@@ -38,6 +38,14 @@ export default async function loras(s) {
     subtitle: 'Up to four LoRAs on YuE2 - for the plan or the sound',
     foot: FOOT,
   }, 5)
+  intro(s, {
+    tutorial: 'Tutorial 11 · YuE2 LoRAs',
+    items: [
+      'The LoRA node in the template',
+      'Choose a LoRA and its strength',
+      'What it did to the song',
+    ],
+  })
 
   s.chapter('Getting started')
   await s.wait(600)

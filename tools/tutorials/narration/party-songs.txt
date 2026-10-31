@@ -3,6 +3,12 @@
 @ card 9 · Party songs
 Songs made at the party - from the player, and from your guests' phones.
 
+@ card Plenio at a glance
+Plenio is a complete song production suite, right on your own PC. [pause:0.2s] Let it make a whole batch of finished songs on its own, [pause:0.2s] or take every word and every note into your own hands, DAW style. It's the perfect home for YuE2. [pause:0.3s] And it brings a player of its own, made for these songs, with a party mode where everyone makes songs from their own phone, straight into the playlist.
+
+@ card In this video
+In this video: songs made from the player. Presets and takes, guests making songs on their phones, and the party reacting.
+
 @ The Plenio Player plays your songs on its own
 The Plenio Player plays your songs on its own. To make new ones, it needs the studio: ComfyUI, on the same computer.
 
@@ -49,7 +55,7 @@ Your own settings keep a name of their own.
 Pick a style: a vibe, any template by name, or Surprise me. It fills every field below.
 
 @ Say what it is about
-Say what it is about, in a few words.
+Say what it is about, in a few words. [pause:0.2s] Or write your own lyrics, sung as written.
 
 @ How many: two takes of one song
 How many: two takes of one song. The same words and notes, sung and played twice. Keep the one you like best.

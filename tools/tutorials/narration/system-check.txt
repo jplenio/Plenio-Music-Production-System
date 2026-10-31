@@ -3,6 +3,12 @@
 @ card 0 · System Check
 Welcome to Plenio! Before we make any music, let's make sure ComfyUI is ready for it.
 
+@ card Plenio at a glance
+Plenio is a complete song production suite, right on your own PC. [pause:0.2s] Let it make a whole batch of finished songs on its own, [pause:0.2s] or take every word and every note into your own hands, DAW style. It's the perfect home for YuE2. [pause:0.3s] And it brings a player of its own, made for these songs, with a party mode where everyone makes songs from their own phone, straight into the playlist.
+
+@ card In this video
+In this video: one run that checks your ComfyUI for Plenio, the models it finds and misses, and the report.
+
 @ Open the template browser
 First, open the template browser.
 

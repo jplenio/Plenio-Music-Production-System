@@ -7,31 +7,7 @@
 // kept - recording with a (simulated) MIDI keyboard and the files), the text sheet again with the lyrics
 // that followed the chorus, the song - and continuing it later.
 
-import {
-  afterRun,
-  arrangeDemo,
-  barsDemo,
-  clipboardDemo,
-  continueDemo,
-  coverArtShown,
-  cursorDemo,
-  editorTour,
-  exportExtras,
-  filesDemo,
-  lyricsDemo,
-  masterDemo,
-  openTemplate,
-  recordDemo,
-  sectionTour,
-  seedsDemo,
-  seedsFollowMode,
-  sheetMusicSaved,
-  showApproved,
-  simulateKeyboard,
-  soundsDemo,
-  switchCards,
-  writerDemo,
-} from './lib/scenes.mjs'
+import { afterRun, arrangeDemo, barsDemo, clipboardDemo, continueDemo, coverArtShown, cursorDemo, editorTour, exportExtras, filesDemo, intro, lyricsDemo, masterDemo, openTemplate, recordDemo, sectionTour, seedsDemo, seedsFollowMode, sheetMusicSaved, showApproved, simulateKeyboard, soundsDemo, switchCards, writerDemo } from './lib/scenes.mjs'
 import { alignSections, approve, fixSections, maximize, noteEditing, openSheet, tab } from './lib/sheet.mjs'
 import { FOOT } from './lib/studio.mjs'
 
@@ -59,7 +35,7 @@ const STAGES = {
   [COVER]: '',
   [MASTER]: 'Master and Export finish the song.',
 }
-const DESCRIPTION = 'A hopeful song about leaving a small town at sunrise, with the whole road still ahead.'
+const IDEA = 'A hopeful song about leaving a small town at sunrise, with the whole road still ahead.'
 
 export default async function song(s) {
   const page = s.page
@@ -70,6 +46,16 @@ export default async function song(s) {
     subtitle: 'Write, review and render a song with YuE2 - in one run, or with two review stops',
     foot: FOOT,
   }, 5)
+  intro(s, {
+    tutorial: 'Tutorial 1 · YuE2 · Song',
+    items: [
+      'The template, section by section',
+      'The Song Brief: template, lists, lyrics, creativity',
+      'Part 1 · A new song every run',
+      'Part 2 · One song, stop to review',
+      'Part 3 · The score editor',
+    ],
+  })
 
   // --- open the template -------------------------------------------------------------------------
   s.chapter('Getting started')
@@ -108,27 +94,37 @@ export default async function song(s) {
   s.caption('mode: “new song every run” - every run writes and renders a different song, without stops.')
   await s.chooseCombo(BRIEF, 'mode', 'new song every run', { read: 2600 })
   await s.wait(900)
-  s.caption('template: a starting point for the genre, the mood, the tempo and the voice. Fields you leave empty are taken from it.')
+  s.caption('template: a starting point - its sound, genre, tempo, voice and an idea for the lyrics appear in the fields below.')
   await s.showCombo(BRIEF, 'template', { read: 3000, browse: 6 })
   await s.wait(400)
-  s.caption('Describe the song in your own words.')
-  await s.click(await s.widgetBox(BRIEF, 'description'), { fx: 0.3, fy: 0.15 })
-  await s.type(DESCRIPTION, { delay: 38 })
-  await s.wait(1200)
+  const yours = 'Change any field: each list holds the values of all 250 templates - and “✎ type your own …” takes anything else.'
+  s.caption(yours)
+  await s.showCombo(BRIEF, 'genre', { read: 3200, browse: 4 })
+  await s.read(yours, 2400)
+  s.caption('description: how the song sounds - the template’s, yours to change.')
+  await s.spotlight(await s.widgetBox(BRIEF, 'description'), { ms: 3000, pad: 6 })
+  await s.wait(600)
   s.caption('length: from about 1:00 up to 6:00.')
   await s.chooseCombo(BRIEF, 'length', 'short (about 1:30)', { read: 2400, browse: 5 })
   await s.wait(700)
   s.caption('vocals: a sung song - or an instrumental.')
   await s.showCombo(BRIEF, 'vocals', { read: 2000, browse: 2 })
   await s.wait(500)
+  const lyricsFrom = 'lyrics: the writer writes them from the idea below - or “my own”: your lyrics, sung exactly as written.'
+  s.caption(lyricsFrom)
+  await s.showCombo(BRIEF, 'vocals.lyrics_from', { read: 3200, browse: 2 })
+  await s.read(lyricsFrom, 2000)
+  s.caption('Say what the song is about.')
+  await s.replaceText(BRIEF, 'vocals.lyrics', IDEA, { delay: 38 })
+  await s.wait(1200)
   s.caption('arrangement: “off” - YuE2 plans melody, chords and instruments itself. The experimental creative modes are tutorial 6.')
   await s.showCombo(BRIEF, 'arrangement', { read: 2600, browse: 6 })
   await s.read('arrangement: “off” - YuE2 plans melody, chords and instruments itself. The experimental creative modes are tutorial 6.', 2600)
-  const creativity = 'creativity: 50 is the dependable middle. Higher writes and plans more freely - more surprises, and more misses.'
+  const creativity = 'creativity: 100 is the default - bold, and dependable. Up to 200 dares more: more surprises, and more misses.'
   s.caption(creativity)
   const slider = await s.widgetBox(BRIEF, 'creativity')
   await s.spotlight(slider, { ms: 3000, pad: 6 })
-  await s.callout(slider, '50 · the reference', { ms: 3000 })
+  await s.callout(slider, '100 · the default', { ms: 3000 })
   await s.read(creativity, 5600)
   const fidelity = 'lyrics fidelity: standard renders one take; high a second, and Best Take keeps the one that sings more of the lyrics as written; highest a third, when neither sang 95 %. It takes longer.'
   s.caption(fidelity)

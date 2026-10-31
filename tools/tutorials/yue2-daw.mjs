@@ -6,24 +6,7 @@
 // assets/Open Window Sketch.abc is its score), or $PLENIO_TUTORIAL_MIDI.
 
 import path from 'node:path'
-import {
-  afterRun,
-  barsDemo,
-  coverArtShown,
-  cursorDemo,
-  editorTour,
-  exportExtras,
-  filesDemo,
-  openTemplate,
-  recordDemo,
-  sectionTour,
-  sheetMusicSaved,
-  showApproved,
-  simulateKeyboard,
-  soundsDemo,
-  switchCards,
-  writerDemo,
-} from './lib/scenes.mjs'
+import { afterRun, barsDemo, coverArtShown, cursorDemo, editorTour, exportExtras, filesDemo, intro, openTemplate, recordDemo, sectionTour, sheetMusicSaved, showApproved, simulateKeyboard, soundsDemo, switchCards, writerDemo } from './lib/scenes.mjs'
 import { DIALOG, approve, fixSections, maximize, openSheet, scrollToVoice, tab, trimSections } from './lib/sheet.mjs'
 import { FOOT } from './lib/studio.mjs'
 
@@ -49,7 +32,7 @@ const STAGES = {
   [COVER]: '',
   [MASTER]: 'Master and Export finish the song.',
 }
-const DESCRIPTION = 'A bright, hopeful pop song about opening the window on the first warm morning of spring.'
+const IDEA = 'A hopeful song about opening the window on the first warm morning of spring.'
 
 export default async function daw(s, { project }) {
   const page = s.page
@@ -61,6 +44,14 @@ export default async function daw(s, { project }) {
     subtitle: 'The writer drafts the words, you bring the music - YuE2 renders exactly your score',
     foot: FOOT,
   }, 5)
+  intro(s, {
+    tutorial: 'Tutorial 5 · YuE2 · DAW',
+    items: [
+      'Part 1 · The words: the brief, the writer, the first stop',
+      'Part 2 · The music: a sketch from your DAW',
+      'YuE2 renders exactly your score',
+    ],
+  })
 
   // --- open the template -------------------------------------------------------------------------
   s.chapter('Getting started')
@@ -94,9 +85,8 @@ export default async function daw(s, { project }) {
   s.caption('The brief: the mode is “one song, stop to review” here - the run stops at each sheet.')
   await s.showCombo(BRIEF, 'mode', { read: 2600, browse: 2 })
   await s.wait(600)
-  s.caption('Describe the song.')
-  await s.click(await s.widgetBox(BRIEF, 'description'), { fx: 0.3, fy: 0.15 })
-  await s.type(DESCRIPTION, { delay: 36 })
+  s.caption('lyrics idea: say what the song is about - the template gives its sound.')
+  await s.replaceText(BRIEF, 'vocals.lyrics', IDEA, { delay: 36 })
   await s.wait(1200)
   s.caption('length: short. Tempo, key and meter come from the brief - or later from your sketch.')
   await s.chooseCombo(BRIEF, 'length', 'short (about 1:30)', { read: 2400, browse: 5 })

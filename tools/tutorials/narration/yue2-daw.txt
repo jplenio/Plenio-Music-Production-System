@@ -3,6 +3,12 @@
 @ card 5 · YuE2 · DAW
 Welcome to the DAW template! The writer drafts the words. The music [pause:0.2s] is up to you.
 
+@ card Plenio at a glance
+Plenio is a complete song production suite, right on your own PC. [pause:0.2s] Let it make a whole batch of finished songs on its own, [pause:0.2s] or take every word and every note into your own hands, DAW style. It's the perfect home for YuE2. [pause:0.3s] And it brings a player of its own, made for these songs, with a party mode where everyone makes songs from their own phone, straight into the playlist.
+
+@ card In this video
+In this video: the writer drafts the words, you bring the music from your DAW, and YuE2 renders exactly your score.
+
 @ Open the template browser
 Open the template browser,
 
@@ -51,8 +57,8 @@ Part one: the words.
 @ The brief: the mode is
 The mode is one song, stop to review: the run waits at each sheet.
 
-@ Describe the song.
-Describe the song: [pause:0.2s] a bright, hopeful pop song about the first warm morning of spring.
+@ lyrics idea: say what the song is about
+Say what the song is about: [pause:0.2s] the first warm morning of spring. The template gives its sound.
 
 @ length: short
 Keep it short. Tempo, key and meter can come from the brief, or later from your sketch.

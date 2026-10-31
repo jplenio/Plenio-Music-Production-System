@@ -4,7 +4,7 @@
 // with the badge, the details, the instrument line in the roll) - the rendered song and its sheet music;
 // then another arrangement of the same song from the arrangement seed.
 
-import { afterRun, arrangementDemo, openTemplate, seedsFollowMode, sheetMusicSaved, showApproved, writerDemo } from './lib/scenes.mjs'
+import { afterRun, arrangementDemo, intro, openTemplate, seedsFollowMode, sheetMusicSaved, showApproved, writerDemo } from './lib/scenes.mjs'
 import { SECTION_WARNING, approve, maximize, openSheet, tab } from './lib/sheet.mjs'
 import { FOOT } from './lib/studio.mjs'
 
@@ -31,7 +31,7 @@ const STAGES = {
   [COVER]: '',
   [MASTER]: 'Master and Export finish the song.',
 }
-const DESCRIPTION = 'A night drive along the coast after a long goodbye, from quiet doubt to a chorus that opens up like the sea.'
+const IDEA = 'A night drive along the coast after a long goodbye, from quiet doubt to a chorus that opens up like the sea.'
 
 export default async function songCreative(s) {
   const page = s.page
@@ -41,6 +41,14 @@ export default async function songCreative(s) {
     subtitle: 'The writer model plans the arrangement, Plenio writes the notes - an experimental feature to play with',
     foot: FOOT,
   }, 5)
+  intro(s, {
+    tutorial: 'Tutorial 6 · YuE2 · Song · Creative modes',
+    items: [
+      'Creative modes - made for experimenting',
+      'Part 1 · A dramatic song',
+      'Part 2 · Another arrangement of the same melody',
+    ],
+  })
   s.card('chapter', {
     kicker: 'Before we start', part: 'Experimental', title: 'Made for experimenting',
     subtitle: 'Creative modes are experimental and can give unexpected results - try a mode, listen, keep what you like',
@@ -118,9 +126,8 @@ export default async function songCreative(s) {
   await s.wait(900)
   await seedsFollowMode(s)
   await s.flyNodes([BRIEF], 1100, 0.94)
-  s.caption('Describe the song.')
-  await s.click(await s.widgetBox(BRIEF, 'description'), { fx: 0.3, fy: 0.15 })
-  await s.type(DESCRIPTION, { delay: 36 })
+  s.caption('lyrics idea: say what the song is about.')
+  await s.replaceText(BRIEF, 'vocals.lyrics', IDEA, { delay: 36 })
   await s.wait(1200)
   s.caption('length: short - about 1:30.')
   await s.chooseCombo(BRIEF, 'length', 'short (about 1:30)', { read: 1800, browse: 4 })

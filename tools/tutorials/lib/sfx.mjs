@@ -336,6 +336,21 @@ export function effects(events, duration, { seed = 2026 } = {}) {
         for (let i = 0; i < (e.steps ?? 0); i++) out.place(s.click(0.6), t + 0.95 + i * 0.12, dB(-33), -0.4 + (0.8 * i) / Math.max(1, e.steps - 1))
         break
       }
+      case 'card-showcase': {
+        // a soft whoosh with every picture, then the name rises in
+        const step = e.step ?? 2.8
+        for (let i = 0; i < (e.steps ?? 0); i++) out.place(s.whoosh(0.6, 300, 2600, 1.0), t + i * step - 0.15, dB(-33), i % 2 ? 0.25 : -0.25)
+        const end = t + (e.steps ?? 0) * step
+        out.place(s.impact(), end + 0.02, dB(-27), 0)
+        out.place(s.shimmer(3), end + 0.4, dB(-41), 0)
+        out.place(s.sparkle(1.2, 22), end + 0.35, dB(-38), 0)
+        break
+      }
+      case 'card-overview': {
+        out.place(s.whoosh(0.5, 400, 3000, 1.2), t - 0.05, dB(-30), 0)
+        for (let i = 0; i < (e.steps ?? 0); i++) out.place(s.pop(), t + 0.9 + i * 0.45, dB(-32), -0.3 + (0.6 * i) / Math.max(1, e.steps - 1))
+        break
+      }
       case 'card-end':
         out.place(s.whoosh(0.6, 300, 2400, 1.1), t - 0.05, dB(-30), 0)
         ;[784, 1046.5, 1318.5, 1568].forEach((f, i) => out.place(reverb(s.bell(f, 1.4, 3.5), 1.4, 0.3), t + 0.35 + i * 0.14, dB(-31), -0.3 + i * 0.2))

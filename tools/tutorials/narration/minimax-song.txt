@@ -3,6 +3,12 @@
 @ card 3 · MiniMax · Song
 Welcome! This time, the music comes from a different model: MiniMax Music 3.
 
+@ card Plenio at a glance
+Plenio is a complete song production suite, right on your own PC. [pause:0.2s] Let it make a whole batch of finished songs on its own, [pause:0.2s] or take every word and every note into your own hands, DAW style. It's the perfect home for YuE2. [pause:0.3s] And it brings a player of its own, made for these songs, with a party mode where everyone makes songs from their own phone, straight into the playlist.
+
+@ card In this video
+In this video: a song with MiniMax Music 3, in one run, and with a review stop.
+
 @ Open the template browser
 Open the template browser,
 
@@ -49,10 +55,10 @@ Part one: a new song, every run.
 The Song Brief works just as in the YuE2 templates. Here, a new song every run.
 
 @ template: a starting point
-The template is a starting point: whatever you leave empty is taken from it.
+The template is a starting point: its values appear in the fields, and you can change any of them.
 
-@ Describe the song in your own words
-Describe the song in your own words. [pause:0.3s] Tonight: late-night jazz pop, with soft piano and brushed drums.
+@ lyrics idea: say what the song is about
+And say what the song is about: [pause:0.3s] tonight, a city that never quite sleeps.
 
 @ length: short
 Keep it short. MiniMax may end a song a little earlier than asked.

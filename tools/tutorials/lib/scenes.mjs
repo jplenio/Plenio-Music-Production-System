@@ -53,6 +53,34 @@ function inRoll(s, selector) {
 
 // A tour of the editor before the details: every area and what it is for. `cover`: the source lane and
 // the original under the notes; `daw`: the track headers with their sounds.
+// --- the opening of every tutorial (owner's request 2026-10-31) ---------------------------------------------------
+
+/** What Plenio is, in pictures - the same opening for every tutorial. */
+export const SHOWCASE = {
+  title: 'Plenio at a glance',
+  step: 2.8,
+  slides: [
+    { file: 'assets/showcase/1-write.jpg', kicker: 'Write', title: 'Lyrics, style and title - from a local LLM, or your own' },
+    { file: 'assets/showcase/2-brief.jpg', kicker: 'Shape', title: '250 genre templates - every field yours to change', pos: '0% 30%' },
+    { file: 'assets/showcase/3-compose.jpg', kicker: 'Compose', title: 'Every note under your control - DAW style' },
+    { file: 'assets/showcase/4-master.jpg', kicker: 'Master', title: 'Mastered and measured - ready to release' },
+    { file: 'assets/showcase/5-play.jpg', kicker: 'Play', title: 'A player made for these songs - 99 visuals' },
+    { file: 'assets/showcase/6-lyrics.jpg', kicker: 'Sing along', title: 'Lyrics that light up as they are sung' },
+    { file: 'assets/showcase/7-party.jpg', kicker: 'Party', title: 'Guests make songs from their phones - live in the playlist' },
+  ],
+  logo: '../../assets/branding/icon.png',
+  name: 'Plenio',
+  tagline: 'A complete song production suite - on your own PC',
+  chips: ['Free', '100 % local', 'Open source', 'for ComfyUI', 'the home for YuE2'],
+}
+
+/** The opening: the showcase, then what this video shows (``items``: its parts, in order). Cards only - they are cut in
+ * at the start of the edit, before the recording begins. */
+export function intro(s, { tutorial, items }) {
+  s.card('showcase', SHOWCASE, SHOWCASE.slides.length * SHOWCASE.step + 4.5)
+  s.card('overview', { kicker: tutorial, title: 'In this video', items }, 3 + items.length * 0.9)
+}
+
 export async function editorTour(s, { cover = false, daw = false } = {}) {
   const d = s.page.locator(DIALOG)
   const show = async (text, target, ms, read) => {
@@ -800,7 +828,8 @@ export async function continueDemo(s) {
   s.chapter('Continue a song')
   const intro = 'Later, go on where you stopped: File → Continue a Plenio song…'
   s.caption(intro)
-  await s.click(page.locator('.comfy-menu-button-wrapper').first(), { pause: 300 })
+  // the logo menu: data-testid since frontend 1.57.6, the wrapper's class before
+  await s.click(page.locator('[data-testid="comfy-menu-button"], .comfy-menu-button-wrapper').first(), { pause: 300 })
   const file = page.locator('[role=menuitem]', { hasText: /^File/ }).first()
   await file.waitFor({ timeout: 5000 })
   const at = await s.hover(file)

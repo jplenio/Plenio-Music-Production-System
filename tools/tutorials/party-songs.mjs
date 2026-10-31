@@ -14,6 +14,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { FOOT } from './lib/studio.mjs'
 import { parseNarration } from './lib/voice.mjs'
+import { intro } from './lib/scenes.mjs'
 
 export const meta = {
   name: 'Plenio tutorial 9 - Party songs',
@@ -116,6 +117,16 @@ export default async function partySongs(s) {
     subtitle: 'Songs made from the player - with presets and takes, and by your guests on their phones',
     foot: FOOT,
   }, 5)
+  intro(s, {
+    tutorial: 'Tutorial 9 · Party songs',
+    items: [
+      'The studio, started from the player',
+      'Party songs and Live Play',
+      'Make a song: styles, presets, takes',
+      'Guests make songs on their phones',
+      'Who made it - and the reactions',
+    ],
+  })
 
   // --- the studio: ComfyUI starts by itself when a song is ordered ---
   s.chapter('The studio')
@@ -186,10 +197,13 @@ export default async function partySongs(s) {
   await s.click(page.getByRole('button', { name: 'Latin', exact: true }).first())
   await s.wait(700)
   await talk(s, 'Pick a style: a vibe, any template by name, or Surprise me. It fills every field below.')
-  await s.click(page.locator('textarea').first())
+  const idea = page.locator('textarea[aria-label="What the lyrics are about"]').first()
+  await idea.scrollIntoViewIfNeeded()
+  await s.click(idea)
+  await s.keys('Control+a', { labels: ['Ctrl', 'A'] })
   await s.type('A garden party at dusk: lanterns in the trees, everyone dancing, a chorus to sing along.', { delay: 28 })
   await s.wait(500)
-  await talk(s, 'Say what it is about, in a few words.', 2600)
+  await talk(s, 'Say what it is about, in a few words - or write your own lyrics, sung as written.', 3000)
   const many = page.locator('.many')
   await many.scrollIntoViewIfNeeded()
   await s.wait(500)
@@ -254,7 +268,10 @@ export default async function partySongs(s) {
   await phone.waitForSelector('.preset, .chips', { timeout: 30000 })
   await s.wait(1000)
   await s.click(phone.getByRole('button', { name: 'Pop', exact: true }).first())
-  await s.click(phone.locator('textarea').first())
+  const phoneIdea = phone.locator('textarea[aria-label="What the lyrics are about"]').first()
+  await phoneIdea.scrollIntoViewIfNeeded()
+  await s.click(phoneIdea)
+  await phone.keyboard.press('Control+a')
   await s.type('My best friend turns thirty tonight - a happy song about getting older and staying young.', { delay: 28 })
   await s.wait(500)
   await talk(s, 'The same simple form: a style, a few words - the host decides how long a guest’s song may be.')

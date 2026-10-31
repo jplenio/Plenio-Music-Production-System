@@ -12,6 +12,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { FOOT } from './lib/studio.mjs'
 import { parseNarration } from './lib/voice.mjs'
+import { intro } from './lib/scenes.mjs'
 
 export const meta = {
   name: 'Plenio tutorial 10 - Song API',
@@ -78,6 +79,15 @@ export default async function songApi(s) {
     subtitle: 'Songs made by your own programs - one HTTP request',
     foot: FOOT,
   }, 5)
+  intro(s, {
+    tutorial: 'Tutorial 10 · Song API',
+    items: [
+      'The API reference',
+      'Make a song with one request',
+      'Follow it, download its files',
+      'Make it again - examples in your language',
+    ],
+  })
 
   // --- the reference ---
   s.chapter('The reference')

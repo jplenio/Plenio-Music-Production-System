@@ -12,9 +12,11 @@ import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import { TAP } from './tap.mjs'
 
-// the Plenio version the videos show on their title cards (pyproject.toml of this repository)
+// the Plenio version the videos show on their title cards (pyproject.toml of this repository; PLENIO_TUTORIAL_VERSION
+// for videos recorded before the release they belong to)
 const PYPROJECT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'pyproject.toml')
-export const PLENIO_VERSION = /^version\s*=\s*"([^"]+)"/m.exec(fs.readFileSync(PYPROJECT, 'utf8'))?.[1] ?? '?'
+export const PLENIO_VERSION =
+  process.env.PLENIO_TUTORIAL_VERSION || (/^version\s*=\s*"([^"]+)"/m.exec(fs.readFileSync(PYPROJECT, 'utf8'))?.[1] ?? '?')
 export const FOOT = `Plenio Music Production System ${PLENIO_VERSION} for ComfyUI`
 
 export function loadPlaywright() {
@@ -695,6 +697,29 @@ export async function openStudio({ url, out, width = 1920, height = 1000, scale 
     await idle(300)
   }
 
+  // A brief's list field set to a value of one's own (1.5.0): the list's first entry, "✎ type your own …", opens
+  // the frontend's prompt dialog, which takes the text.
+  async function ownValue(nodeId, name, text, { read: pauseMs = 900, delay = 55 } = {}) {
+    await chooseCombo(nodeId, name, '✎ type your own …', { read: pauseMs, browse: 2 })
+    const input = page.locator('[role="dialog"] input').first()
+    await input.waitFor({ state: 'visible', timeout: 8000 })
+    await idle(500)
+    await click(input, { fx: 0.4 })
+    await keys('Control+a', { labels: ['Ctrl', 'A'] })
+    await type(text, { delay })
+    await idle(400)
+    await keys('Enter')
+    await input.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {})
+    await idle(500)
+  }
+  // A text field of a node with new text: clicked, its text selected, typed over.
+  async function replaceText(nodeId, name, text, { delay = 36, fx = 0.3, fy = 0.15 } = {}) {
+    await click(() => widgetBox(nodeId, name), { fx, fy })
+    await idle(250)
+    await keys('Control+a', { labels: ['Ctrl', 'A'] })
+    await type(text, { delay })
+  }
+
   // A native <select> opened: a headless browser draws no popup, so its list is drawn in the page (owner's
   // request 2026-10-24: show what the lists hold). The pointer passes over a few entries and picks `choose` (an
   // option's value or text), or settles on the current one; `read`: how long the list stays open.
@@ -853,7 +878,7 @@ export async function openStudio({ url, out, width = 1920, height = 1000, scale 
     startCapture, stopCapture, saveMarkers,
     moveTo, rest, hover, click, drag, type, keys, spotlight, callout, pulse, badge, arrow, boxOf, centre,
     caption, say, read, chapter, card, fast, wait, sfx,
-    openComfy, openPage, fly, flyGroups, flyNodes, widgetBox, nodeButton, nodeBox, groupBox, audioBox, listen, chooseCombo, showCombo, openSelect, openBlock, closeBlock, slide, widgetValue, run, follow, resetRunState,
+    openComfy, openPage, fly, flyGroups, flyNodes, widgetBox, nodeButton, nodeBox, groupBox, audioBox, listen, chooseCombo, showCombo, ownValue, replaceText, openSelect, openBlock, closeBlock, slide, widgetValue, run, follow, resetRunState,
     get mouse() { return mouse },
   }
 }

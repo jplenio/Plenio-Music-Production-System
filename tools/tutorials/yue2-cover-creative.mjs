@@ -6,7 +6,7 @@
 // over the new melody - the rendered cover and its sheet music. The source is the repository's sample song.
 
 import path from 'node:path'
-import { abDemo, afterRun, arrangementDemo, openTemplate, seedsFollowMode, sheetMusicSaved, showApproved, writerDemo } from './lib/scenes.mjs'
+import { abDemo, afterRun, arrangementDemo, intro, openTemplate, seedsFollowMode, sheetMusicSaved, showApproved, writerDemo } from './lib/scenes.mjs'
 import { DIALOG, approve, maximize, openSheet, scrollToVoice, tab } from './lib/sheet.mjs'
 import { FOOT } from './lib/studio.mjs'
 
@@ -49,6 +49,14 @@ export default async function coverCreative(s, { project }) {
     subtitle: 'A new arrangement of a recording, with new lyrics that keep its story - an experimental feature to play with',
     foot: FOOT,
   }, 5)
+  intro(s, {
+    tutorial: 'Tutorial 7 · YuE2 · Cover · Creative modes',
+    items: [
+      'Creative modes for covers',
+      'Part 1 · An arranged cover with new lyrics',
+      'Make it yours',
+    ],
+  })
   s.card('chapter', {
     kicker: 'Before we start', part: 'Experimental', title: 'Made for experimenting',
     subtitle: 'Creative modes are experimental and can give unexpected results - try a mode, listen, keep what you like',
@@ -105,11 +113,8 @@ export default async function coverCreative(s, { project }) {
   s.caption('vocals: “new lyrics” - YuE2 sings new words on the cover’s melody.')
   await s.chooseCombo(BRIEF, 'vocals', 'new lyrics', { read: 2200, browse: 3 })
   await s.wait(900)
-  s.caption('voice: describe the singer.')
-  await s.click(await s.widgetBox(BRIEF, 'vocals.voice'), { fx: 0.5 })
-  await s.wait(500)
-  await s.type('warm male voice', { delay: 60 })
-  await s.keys('Enter', { labels: ['Enter'] })
+  s.caption('voice: pick one from the list - or “✎ type your own …”.')
+  await s.ownValue(BRIEF, 'vocals.voice', 'warm male voice', { read: 1600 })
   await s.wait(1200)
   s.caption('lyrics closeness: how close the new words stay to the original’s - 0 not at all, 30 its mood, 60 its story in new words, 90 its meaning line by line.')
   await s.slide(BRIEF, 'lyrics_closeness', 70)

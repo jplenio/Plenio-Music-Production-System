@@ -4,6 +4,12 @@
 @ card 6 · YuE2 · Song · Creative modes
 Welcome back! In this video, the writer model plans the arrangement of a YuE2 song, and Plenio writes the notes.
 
+@ card Plenio at a glance
+Plenio is a complete song production suite, right on your own PC. [pause:0.2s] Let it make a whole batch of finished songs on its own, [pause:0.2s] or take every word and every note into your own hands, DAW style. It's the perfect home for YuE2. [pause:0.3s] And it brings a player of its own, made for these songs, with a party mode where everyone makes songs from their own phone, straight into the playlist.
+
+@ card In this video
+In this video: the creative modes. A dramatic song, and another arrangement of the same melody.
+
 @ card Made for experimenting
 One thing first: creative modes are experimental. They can surprise you, in good ways and in odd ones. [pause:0.4s] So treat them as a playground: try a mode, listen, and keep what you like.
 
@@ -61,8 +67,8 @@ Set the mode to one song, stop to review, to see what the mode does first.
 @ The seeds follow the mode
 The seeds follow the mode: a note says the song's seeds switched to same seed, so the draft, the plan and the arrangement stay while you review.
 
-@ Describe the song.
-Describe the song. Here: a night drive along the coast, from quiet doubt to a chorus that opens up like the sea.
+@ lyrics idea: say what the song is about
+Say what the song is about. Here: a night drive along the coast, from quiet doubt to a chorus that opens up like the sea.
 
 @ length: short - about 1:30
 And keep it short: about a minute and a half.

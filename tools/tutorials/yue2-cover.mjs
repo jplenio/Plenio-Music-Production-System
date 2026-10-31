@@ -5,25 +5,7 @@
 // score still editable there) - and the finished cover. The source is the repository's sample song.
 
 import path from 'node:path'
-import {
-  afterRun,
-  arrangeDemo,
-  coverArtShown,
-  cursorDemo,
-  editorTour,
-  exportExtras,
-  fixMisheardWords,
-  filesDemo,
-  masterDemo,
-  openTemplate,
-  sectionTour,
-  seedsFollowMode,
-  sheetMusicSaved,
-  showApproved,
-  soundsDemo,
-  switchCards,
-  writerDemo,
-} from './lib/scenes.mjs'
+import { afterRun, arrangeDemo, coverArtShown, cursorDemo, editorTour, exportExtras, filesDemo, fixMisheardWords, intro, masterDemo, openTemplate, sectionTour, seedsFollowMode, sheetMusicSaved, showApproved, soundsDemo, switchCards, writerDemo } from './lib/scenes.mjs'
 import { DIALOG, approve, maximize, noteEditing, openSheet, scrollToVoice, tab } from './lib/sheet.mjs'
 import { FOOT } from './lib/studio.mjs'
 
@@ -64,6 +46,15 @@ export default async function cover(s, { project }) {
     subtitle: 'A new version of a recording - transcribed, reviewed and rendered by YuE2',
     foot: FOOT,
   }, 5)
+  intro(s, {
+    tutorial: 'Tutorial 2 · YuE2 · Cover',
+    items: [
+      'Load a recording you may use',
+      'The Cover Brief: style, vocals, harmony, original notes',
+      'Part 1 · A new cover every run - instrumental',
+      'Part 2 · One cover, stop to review - the original lyrics',
+    ],
+  })
 
   // --- open the template -------------------------------------------------------------------------
   s.chapter('Getting started')
@@ -126,7 +117,7 @@ export default async function cover(s, { project }) {
   s.caption('mode: “new cover every run” - every run makes a different version, without stops; a queue of covers runs through.')
   await s.chooseCombo(BRIEF, 'mode', 'new cover every run', { read: 2600 })
   await s.wait(900)
-  s.caption('template: the new style - genre, mood and voice come from it, unless you type your own.')
+  s.caption('template: the new style - its sound, genre and voice appear in the fields; change any of them.')
   await s.showCombo(BRIEF, 'template', { read: 2600, browse: 6 })
   s.caption('vocals: “instrumental” - an instrument plays the melody.')
   await s.chooseCombo(BRIEF, 'vocals', 'instrumental', { read: 2400, browse: 3 })
@@ -136,6 +127,12 @@ export default async function cover(s, { project }) {
   s.caption('arrangement: “off” keeps the transcription as it is. The experimental creative modes, with their sliders, are tutorial 7.')
   await s.showCombo(BRIEF, 'arrangement', { read: 2400, browse: 5 })
   await s.read('arrangement: “off” keeps the transcription as it is. The experimental creative modes, with their sliders, are tutorial 7.', 2400)
+  const notes = 'original notes: 100 keeps every note of the original. Lower leaves out notes of the instruments and chords - YuE2 plays more freely.'
+  s.caption(notes)
+  const notesSlider = await s.widgetBox(BRIEF, 'original_notes')
+  await s.spotlight(notesSlider, { ms: 3200, pad: 6 })
+  await s.callout(notesSlider, 'down to about a quarter at 0', { ms: 3000 })
+  await s.read(notes, 6200)
   await writerDemo(s, { uses: [WRITE, ARRANGE, FIX] })
 
   s.caption('Press Run.')
@@ -165,11 +162,8 @@ export default async function cover(s, { project }) {
   s.caption('vocals: “original lyrics” - YuE2 sings the words of the recording.')
   await s.chooseCombo(BRIEF, 'vocals', 'original lyrics', { read: 2400, browse: 3 })
   await s.wait(1400)
-  s.caption('voice: describe the singer.')
-  await s.click(await s.widgetBox(BRIEF, 'vocals.voice'), { fx: 0.5 })
-  await s.wait(500)
-  await s.type('warm female voice', { delay: 60 })
-  await s.keys('Enter', { labels: ['Enter'] })
+  s.caption('voice: pick one from the list - or “✎ type your own …”.')
+  await s.ownValue(BRIEF, 'vocals.voice', 'warm female voice', { read: 1600 })
   await s.wait(1400)
 
   s.caption('Press Run. The transcription from part 1 is reused.')

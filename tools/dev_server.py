@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shlex
 import shutil
 import sys
 import tempfile
@@ -36,6 +37,11 @@ def main() -> int:
     parser.add_argument(
         "--base", type=Path, help="reuse this base directory (outputs are kept, nodes re-copied)"
     )
+    parser.add_argument(
+        "--comfy-args",
+        default="",
+        help='more options for main.py of ComfyUI, as one string: --comfy-args="--disable-pinned-memory"',
+    )
     args = parser.parse_args()
     root = Path(os.environ["PLENIO_COMFYUI_ROOT"])
     base = args.base or Path(tempfile.mkdtemp(prefix="plenio-dev-"))
@@ -57,7 +63,14 @@ def main() -> int:
             ignore=shutil.ignore_patterns("__pycache__"),
         )
         packs.append("plenio_test_nodes")
-    server = ComfyServer(root, base, node_packs=packs, cpu=not args.gpu, models_dir=args.models)
+    server = ComfyServer(
+        root,
+        base,
+        node_packs=packs,
+        cpu=not args.gpu,
+        models_dir=args.models,
+        extra_args=shlex.split(args.comfy_args),
+    )
     if args.port:
         server.port = args.port
         server.url = f"http://127.0.0.1:{args.port}"

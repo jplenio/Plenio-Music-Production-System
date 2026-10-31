@@ -5,19 +5,7 @@
 // exact token budget, the title and the cover prompt, Approve) - and the finished song. MiniMax Music 3 takes
 // no score, so there is one sheet.
 
-import {
-  afterRun,
-  coverArtShown,
-  exportExtras,
-  masterDemo,
-  openTemplate,
-  sectionTour,
-  seedsDemo,
-  seedsFollowMode,
-  showApproved,
-  switchCards,
-  writerDemo,
-} from './lib/scenes.mjs'
+import { afterRun, coverArtShown, exportExtras, intro, masterDemo, openTemplate, sectionTour, seedsDemo, seedsFollowMode, showApproved, switchCards, writerDemo } from './lib/scenes.mjs'
 import { approve, maximize, openSheet, tab } from './lib/sheet.mjs'
 import { FOOT } from './lib/studio.mjs'
 
@@ -41,7 +29,7 @@ const STAGES = {
   [COVER]: '',
   [MASTER]: 'Master and Export finish the song.',
 }
-const DESCRIPTION = 'A warm late-night jazz-pop song about a city that never quite sleeps, with soft piano and brushed drums.'
+const IDEA = 'A warm late-night song about a city that never quite sleeps.'
 
 export default async function minimax(s) {
   const page = s.page
@@ -51,6 +39,14 @@ export default async function minimax(s) {
     subtitle: 'A new song with MiniMax Music 3 - in one run, or with a review stop',
     foot: FOOT,
   }, 5)
+  intro(s, {
+    tutorial: 'Tutorial 3 · MiniMax · Song',
+    items: [
+      'The MiniMax template',
+      'Part 1 · A new song every run',
+      'Part 2 · One song, stop to review',
+    ],
+  })
 
   // --- open the template -------------------------------------------------------------------------
   s.chapter('Getting started')
@@ -87,11 +83,10 @@ export default async function minimax(s) {
   s.caption('The Song Brief works as in the YuE2 templates. mode: “new song every run”.')
   await s.chooseCombo(BRIEF, 'mode', 'new song every run', { read: 2600 })
   await s.wait(900)
-  s.caption('template: a starting point - fields you leave empty are taken from it.')
+  s.caption('template: a starting point - its values appear in the fields; change any of them.')
   await s.showCombo(BRIEF, 'template', { read: 2400, browse: 5 })
-  s.caption('Describe the song in your own words.')
-  await s.click(await s.widgetBox(BRIEF, 'description'), { fx: 0.3, fy: 0.15 })
-  await s.type(DESCRIPTION, { delay: 36 })
+  s.caption('lyrics idea: say what the song is about.')
+  await s.replaceText(BRIEF, 'vocals.lyrics', IDEA, { delay: 36 })
   await s.wait(1200)
   s.caption('length: short. MiniMax may end a song a little earlier than asked.')
   await s.chooseCombo(BRIEF, 'length', 'short (about 1:30)', { read: 2400, browse: 5 })
