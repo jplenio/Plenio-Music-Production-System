@@ -29,6 +29,7 @@ from ...core.creativity import (
     ADVENTUROUS,
     BALANCED,
     CREATIVITY_DEFAULT,
+    CREATIVITY_MAX,
     EXPERIMENTAL,
     RESTRAINED,
     STEADY,
@@ -74,13 +75,13 @@ GENRE_CLOSENESS_TOOLTIP = (
     "typical with personal touches, 40 free within the genre, 0 any style."
 )
 CREATIVITY_TOOLTIP = (
-    "0 steady ... 25 balanced (1.4's 50) ... 50 experimental (the default, 1.4's 100) ... 100 adventurous: how "
-    "much the writer and YuE2 dare. More surprises also means more misses - try a few seeds."
+    "0 steady ... 50 the reference (as before the slider) ... 100 experimental (the default) ... 200 adventurous: "
+    "how much the writer and YuE2 dare. More surprises also means more misses - try a few seeds."
 )
 CREATIVITY_EFFECTS = {
     STEADY: "simple, steady writing; YuE2 plans and performs more predictably",
     RESTRAINED: "conventional writing; YuE2 a little more predictable",
-    BALANCED: "the writing of before the slider; YuE2 close to its native sampling",
+    BALANCED: "the writing of the reference; YuE2 close to its native sampling",
     VARIED: "writing with more contrast and character; YuE2 plans and performs a little more freely",
     EXPERIMENTAL: "bold writing; YuE2 plans and performs more freely - expect more misses, try a few seeds",
     ADVENTUROUS: "adventurous writing - blends, an unusual signature sound, surprising turns; YuE2 at its freest "
@@ -128,7 +129,7 @@ SONG_FIELD_OUTPUTS: tuple[tuple[str, str, str], ...] = (
     ("arrangement", "STRING", "The creative mode."),
     ("genre_closeness", "INT", "The genre closeness (0-100)."),
     ("lines_under_singing", "BOOLEAN", "Whether instrument lines also sound under the singing."),
-    ("creativity", "INT", "The creativity (0-100, 50 the default): for the YuE2 blocks' sampling."),
+    ("creativity", "INT", "The creativity (0-200, 100 the default): for the YuE2 blocks' sampling."),
 )
 """The brief's fields as outputs (owner's request 2026-10-15): name, type, tooltip."""
 FIELD_ATTRIBUTES = {"genre_closeness": "closeness", "song_flow_closeness": "closeness"}
@@ -355,13 +356,13 @@ class PlenioSongBrief(io.ComfyNode):
                     optional=True,
                     tooltip=UNDER_SINGING_TOOLTIP,
                 ),
-                # appended last: a workflow saved without it gets the default (50), as does an older API prompt
+                # appended last: a workflow saved without it gets the default (100), as does an older API prompt
                 io.Int.Input(
                     "creativity",
                     default=CREATIVITY_DEFAULT,
                     optional=True,
                     min=0,
-                    max=100,
+                    max=CREATIVITY_MAX,
                     step=1,
                     display_mode=io.NumberDisplay.slider,
                     tooltip=CREATIVITY_TOOLTIP,

@@ -158,7 +158,7 @@
     "tooltip": "full: melody and chords; melody: the melody only (YuE2 harmonises it when it renders)."
    },
    "creativity": {
-    "tooltip": "From the brief: 0 steady, 50 the reference (the native defaults), 100 experimental - the sampling of this block follows it. Here: the plan's temperature, top-p and top-k (how freely YuE2 picks notes, chords and rhythms)."
+    "tooltip": "From the brief: 0 steady, 50 the reference (the native defaults), 100 experimental (the default), 200 adventurous - the sampling of this block follows it. Here: the plan's temperature, top-p and top-k (how freely YuE2 picks notes, chords and rhythms)."
    }
   },
   "outputs": {
@@ -200,7 +200,7 @@
     "tooltip": "The longest the take may run (the Song Sheet derives it from the score's length); YuE2 may end earlier."
    },
    "creativity": {
-    "tooltip": "From the brief: 0 steady, 50 the reference (the native defaults), 100 experimental - the sampling of this block follows it. Here: the take's temperature, top-p and top-k (how freely YuE2 performs the score)."
+    "tooltip": "From the brief: 0 steady, 50 the reference (the native defaults), 100 experimental (the default), 200 adventurous - the sampling of this block follows it. Here: the take's temperature, top-p and top-k (how freely YuE2 performs the score)."
    }
   },
   "outputs": {
@@ -272,7 +272,7 @@
     "tooltip": "How many takes: take seed, take seed + 1, ...; Check Vocals keeps the best. N takes cost N renders."
    },
    "creativity": {
-    "tooltip": "From the brief: 0 steady, 50 the reference (the native defaults), 100 experimental - the sampling of this block follows it. Here: the take's temperature, top-p and top-k (how freely YuE2 performs the score)."
+    "tooltip": "From the brief: 0 steady, 50 the reference (the native defaults), 100 experimental (the default), 200 adventurous - the sampling of this block follows it. Here: the take's temperature, top-p and top-k (how freely YuE2 performs the score)."
    }
   },
   "outputs": {

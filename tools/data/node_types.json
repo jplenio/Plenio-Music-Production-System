@@ -2278,10 +2278,10 @@
      "creativity": [
       "INT",
       {
-       "tooltip": "0 steady ... 25 balanced (1.4's 50) ... 50 experimental (the default, 1.4's 100) ... 100 adventurous: how much the writer and YuE2 dare. More surprises also means more misses - try a few seeds.",
-       "default": 50,
+       "tooltip": "0 steady ... 50 the reference (as before the slider) ... 100 experimental (the default) ... 200 adventurous: how much the writer and YuE2 dare. More surprises also means more misses - try a few seeds.",
+       "default": 100,
        "min": 0,
-       "max": 100,
+       "max": 200,
        "step": 1,
        "display": "slider"
       }
@@ -2441,10 +2441,10 @@
      "creativity": [
       "INT",
       {
-       "tooltip": "0 steady ... 25 balanced (the native defaults) ... 50 experimental (the default) ... 100 adventurous. A connected brief's creativity takes its place.",
-       "default": 50,
+       "tooltip": "0 steady ... 50 the reference (the native defaults) ... 100 experimental (the default) ... 200 adventurous. A connected brief's creativity takes its place.",
+       "default": 100,
        "min": 0,
-       "max": 100,
+       "max": 200,
        "step": 1,
        "display": "slider"
       }
@@ -5119,10 +5119,10 @@
      "creativity": [
       "INT",
       {
-       "tooltip": "0 steady ... 25 balanced (1.4's 50) ... 50 experimental (the default, 1.4's 100) ... 100 adventurous: how much the writer and YuE2 dare. More surprises also means more misses - try a few seeds.",
-       "default": 50,
+       "tooltip": "0 steady ... 50 the reference (as before the slider) ... 100 experimental (the default) ... 200 adventurous: how much the writer and YuE2 dare. More surprises also means more misses - try a few seeds.",
+       "default": 100,
        "min": 0,
-       "max": 100,
+       "max": 200,
        "step": 1,
        "display": "slider"
       }

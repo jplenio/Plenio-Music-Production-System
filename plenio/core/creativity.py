@@ -1,20 +1,20 @@
-"""Creativity: one slider from steady (0) to adventurous (100) (owner's requests 2026-10-19 and 2026-10-31).
+"""Creativity: one slider from steady (0) to adventurous (200) (owner's requests 2026-10-19 and 2026-10-31).
 
-Since 1.5.0 the default, 50, is what 1.4 gave at 100 - its experimental writing and sampling sounded best to the
-owner - and 25 is 1.4's reference (its 50: the writer's prompt without creativity rules, YuE2's native sampling).
-Below 50 the slider is 1.4's scale halved; above it goes further, moderately. A song made before 1.5.0 carries 1.4's
-number: ``from_before_1_5`` gives it on this scale.
+0-100 is exactly the slider of 1.0.2-1.4: 50 is the reference (the writer's prompt without creativity rules,
+YuE2's native sampling), 100 experimental. Since 1.5.0 the slider goes on to 200 and its default is 100 - 1.4's
+experimental setting gave the best songs; 101-200 goes further, moderately. A value saved or recorded before means
+what it meant.
 
 The slider acts on three places, each kept within what is known to work:
 
-- **The writer's rules** (``writer_lines``): for the lyrics and the style, by level. 20-30 (balanced) adds
-  nothing - the prompt of before the slider.
+- **The writer's rules** (``writer_lines``): for the lyrics and the style, by level. 40-60 adds nothing - the
+  prompt of before the slider.
 - **The writer's and the arrangement's temperature** (``sampling``, stages ``writer`` and ``arrangement``): only
   the first drafts; the repairs and re-asks keep their own (they fix a form and must stay reliable). The drafts are
   checked and enforced as before.
 - **YuE2's sampling** (stages ``plan`` and ``take``): the plan's (ABC) and the take's (music tokens)
-  temperature, top-p and top-k. 25 gives exactly the native nodes' defaults. No study measured where quality drops
-  (2026-10-31: no official guidance; community reports only), so 100 stays at the edge of the ranges reported as
+  temperature, top-p and top-k. 50 gives exactly the native nodes' defaults. No study measured where quality drops
+  (2026-10-31: no official guidance; community reports only), so 200 stays at the edge of the ranges reported as
   risky - ABC temperature above 1.0, music temperature above 1.15 - and widens top-p and top-k a little. The
   repetition penalty stays: music needs its repetitions, and a penalty below 1 invites endless loops.
 
@@ -29,12 +29,12 @@ from typing import Any
 from .engines.minimax import ENGINE_ID as MINIMAX
 from .errors import PlenioUserError
 
-CREATIVITY_DEFAULT = 50
-"""The default since 1.5.0: the writing and sampling 1.4 had at 100."""
-REFERENCE = 25
-"""1.4's reference (its 50): the writer's prompt without creativity rules and YuE2's native sampling."""
-SCALE_SINCE = (1, 5, 0)
-"""The Plenio version since which the slider has this scale (1.4's numbers are twice as large up to its 100)."""
+CREATIVITY_MAX = 200
+"""The slider's top since 1.5.0 (100 before)."""
+CREATIVITY_DEFAULT = 100
+"""The default since 1.5.0: 1.4's experimental setting, whose songs sounded best to the owner."""
+REFERENCE = 50
+"""The reference: the writer's prompt without creativity rules and YuE2's native sampling (1.4's default)."""
 
 STEADY, RESTRAINED, BALANCED, VARIED, EXPERIMENTAL, ADVENTUROUS = (
     "steady",
@@ -45,56 +45,43 @@ STEADY, RESTRAINED, BALANCED, VARIED, EXPERIMENTAL, ADVENTUROUS = (
     "adventurous",
 )
 LEVELS: tuple[tuple[int, str], ...] = (
-    (9, STEADY),
-    (19, RESTRAINED),
-    (30, BALANCED),
-    (40, VARIED),
-    (75, EXPERIMENTAL),
-    (100, ADVENTUROUS),
+    (19, STEADY),
+    (39, RESTRAINED),
+    (60, BALANCED),
+    (80, VARIED),
+    (150, EXPERIMENTAL),
+    (200, ADVENTUROUS),
 )
-"""The writer's levels by their highest value (up to 50: 1.4's levels at half their numbers)."""
+"""The writer's levels by their highest value (up to 100 those of 1.4)."""
 
 STAGES = ("writer", "arrangement", "plan", "take")
 
 
 def creativity_value(value: Any, default: int = CREATIVITY_DEFAULT) -> int:
-    """The slider's value: a whole number from 0 to 100 (an empty value takes ``default``)."""
+    """The slider's value: a whole number from 0 to 200 (an empty value takes ``default``)."""
     if value is None or str(value).strip() == "":
         return default
     try:
         number = round(float(value))
     except (TypeError, ValueError):
-        raise PlenioUserError(f"Creativity {value!r} is not a number.", hint="Use 0 to 100.") from None
-    return max(0, min(100, number))
+        raise PlenioUserError(
+            f"Creativity {value!r} is not a number.", hint=f"Use 0 to {CREATIVITY_MAX}."
+        ) from None
+    return max(0, min(CREATIVITY_MAX, number))
 
 
 def creativity_level(creativity: int) -> str:
-    """``steady``, ``restrained``, ``balanced``, ``varied`` or ``experimental``."""
+    """``steady``, ``restrained``, ``balanced``, ``varied``, ``experimental`` or ``adventurous``."""
     value = creativity_value(creativity)
     return next(name for highest, name in LEVELS if value <= highest)
 
 
 def describe(creativity: int) -> str:
-    """For summaries: ``50 (experimental, the default)``, ``25 (balanced, 1.4's reference)``, ``80 (adventurous)``."""
+    """For summaries: ``100 (experimental, the default)``, ``50 (balanced, the reference)``, ``170 (adventurous)``."""
     value = creativity_value(creativity)
     level = creativity_level(value)
-    note = (
-        ", the default" if value == CREATIVITY_DEFAULT else ", 1.4's reference" if value == REFERENCE else ""
-    )
+    note = ", the default" if value == CREATIVITY_DEFAULT else ", the reference" if value == REFERENCE else ""
     return f"{value} ({level}{note})"
-
-
-def from_before_1_5(creativity: Any) -> int:
-    """A creativity a song made before 1.5.0 was made with, on today's scale (half of 1.4's number)."""
-    return round(creativity_value(creativity) / 2)
-
-
-def scaled_for(creativity: Any, version: tuple[int, ...] | None) -> int:
-    """A record's creativity on today's scale: ``version`` is the Plenio version that made it (``None``: unknown -
-    taken as made before 1.5.0, as every record without a version is older)."""
-    if version is not None and tuple(version[:3]) >= SCALE_SINCE:
-        return creativity_value(creativity)
-    return from_before_1_5(creativity)
 
 
 # --- the sampling -----------------------------------------------------------------------------------------
@@ -111,52 +98,41 @@ SAMPLING: dict[str, dict[int, Sampling]] = {
     # the writer's first draft (title, style, lyrics); top-p and top-k as the templates set them
     "writer": {
         0: Sampling(0.60, 0.95, 64),
-        25: Sampling(0.80, 0.95, 64),  # the templates' value
-        50: Sampling(1.00, 0.95, 64),  # 1.4's 100: Gemma's own recommended temperature
-        100: Sampling(1.10, 0.95, 64),
+        50: Sampling(0.80, 0.95, 64),  # the templates' value
+        100: Sampling(1.00, 0.95, 64),  # Gemma's own recommended temperature
+        200: Sampling(1.10, 0.95, 64),
     },
     # a creative mode's arrangement plan
     "arrangement": {
         0: Sampling(0.55, 0.95, 64),
-        25: Sampling(0.70, 0.95, 64),  # the templates' value
-        50: Sampling(0.90, 0.95, 64),  # 1.4's 100
-        100: Sampling(1.00, 0.95, 64),
+        50: Sampling(0.70, 0.95, 64),  # the templates' value
+        100: Sampling(0.90, 0.95, 64),
+        200: Sampling(1.00, 0.95, 64),
     },
     # the plan (YuE2 Generate ABC): which notes, chords and rhythms the score gets
     "plan": {
         0: Sampling(0.55, 0.85, 20),
-        25: Sampling(0.70, 0.90, 30),  # the native node's defaults
-        50: Sampling(0.92, 0.95, 50),  # 1.4's 100
-        100: Sampling(1.00, 0.96, 64),  # an ABC temperature above 1.0 is reported as risky
+        50: Sampling(0.70, 0.90, 30),  # the native node's defaults
+        100: Sampling(0.92, 0.95, 50),
+        200: Sampling(1.00, 0.96, 64),  # an ABC temperature above 1.0 is reported as risky
     },
     # the take (YuE2 Generate Music): how the score is performed - voice, instruments, sound
     "take": {
         0: Sampling(0.90, 0.92, 60),
-        25: Sampling(1.00, 0.95, 100),  # the native node's defaults
-        50: Sampling(1.10, 0.97, 150),  # 1.4's 100
-        100: Sampling(1.15, 0.98, 200),  # a music temperature above 1.15 is reported as risky
+        50: Sampling(1.00, 0.95, 100),  # the native node's defaults
+        100: Sampling(1.10, 0.97, 150),
+        200: Sampling(1.15, 0.98, 200),  # a music temperature above 1.15 is reported as risky
     },
 }
-"""Anchors at 0, 25, 50 and 100; between them the values move in a straight line."""
+"""Anchors at 0, 50, 100 and 200; between them the values move in a straight line (up to 100 as in 1.4)."""
 
 
 def sampling(creativity: int, stage: str) -> Sampling:
-    """The sampling for ``stage`` at ``creativity``; 25 gives the templates' values of before the slider (YuE2: the
-    native defaults), 50 those of 1.4's 100."""
-    return _sampling_at(creativity_value(creativity), stage)
-
-
-def sampling_as_made(creativity: Any, stage: str, version: tuple[int, ...] | None) -> Sampling:
-    """The sampling a Creativity node gave when a song was made by Plenio ``version`` (``None``: before versions,
-    so before 1.5.0): 1.4's number is twice today's, and its values lie exactly on today's line at half of it."""
-    if version is not None and tuple(version[:3]) >= SCALE_SINCE:
-        return sampling(creativity, stage)
-    return _sampling_at(creativity_value(creativity) / 2, stage)
-
-
-def _sampling_at(value: float, stage: str) -> Sampling:
+    """The sampling for ``stage`` at ``creativity``; 50 gives the templates' values of before the slider (YuE2: the
+    native defaults), 100 the experimental values of 1.4."""
     if stage not in SAMPLING:
         raise PlenioUserError(f"Unknown stage {stage!r}.", hint=f"Use one of {list(STAGES)}.")
+    value = creativity_value(creativity)
     anchors = SAMPLING[stage]
     points = sorted(anchors)
     low = max(p for p in points[:-1] if p <= value)
@@ -259,7 +235,7 @@ def writer_lines(
     lyrics: str,
     fixed_sections: bool,
 ) -> list[str]:
-    """The writer's rules for ``creativity`` (nothing for 40-60: the reference prompt).
+    """The writer's rules for ``creativity`` (nothing for 40-60: the reference prompt; up to 100 as in 1.4).
 
     ``engine_id``: MiniMax Music 3 writes a caption in three headed parts, every other engine one descriptor line
     (YuE2 sang longer style prose; yue2-design.md §3.1). ``lyrics``: ``write`` (the writer writes them),

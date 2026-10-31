@@ -33,7 +33,7 @@ const label = (field: ApiField): string => {
   const text = (PLAIN[field.id]?.label ?? field.label.replace(/_/g, ' ')).replace(/\b(flac|mp3|wav|srt)\b/gi, (name) => name.toUpperCase())
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
-/** A number with a range a slider covers (creativity 0-100), or a free one. */
+/** A number with a range a slider covers (creativity 0-200), or a free one. */
 const ranged = (field: ApiField): boolean => field.minimum !== undefined && field.maximum !== undefined && field.maximum - field.minimum <= 1000
 const step = (field: ApiField): number => field.step ?? (field.type === 'integer' ? 1 : 0.1)
 function number(group: StudioGroup, field: ApiField, text: string): void {

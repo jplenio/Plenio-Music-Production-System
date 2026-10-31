@@ -7,7 +7,14 @@ from typing import Any
 
 from comfy_api.latest import io
 
-from ...core.creativity import CREATIVITY_DEFAULT, STAGES, creativity_value, describe, sampling
+from ...core.creativity import (
+    CREATIVITY_DEFAULT,
+    CREATIVITY_MAX,
+    STAGES,
+    creativity_value,
+    describe,
+    sampling,
+)
 from ..types import Brief
 
 STAGE_TOOLTIP = (
@@ -15,9 +22,8 @@ STAGE_TOOLTIP = (
     "take: YuE2's performance (music tokens)."
 )
 CREATIVITY_TOOLTIP = (
-    "0 steady ... 25 balanced (the native defaults) ... 50 experimental (the default) ... 100 adventurous. A "
-    "connected brief's creativity "
-    "takes its place."
+    "0 steady ... 50 the reference (the native defaults) ... 100 experimental (the default) ... 200 adventurous. "
+    "A connected brief's creativity takes its place."
 )
 
 
@@ -31,10 +37,10 @@ class PlenioCreativity(io.ComfyNode):
             display_name="Creativity",
             category="Plenio/Song",
             description=(
-                "Turns the brief's creativity (0 steady, 25 balanced, 50 the default, 100 adventurous) into the "
-                "sampling of one stage: the writer's first draft, a creative mode's arrangement, YuE2's plan or YuE2's "
-                "take. At 25 it gives the values the templates had before the slider, at 50 those 1.4 had at 100; the "
-                "ends stay moderate. Used inside the template blocks - the slider is on Song Brief and Cover Brief."
+                "Turns the brief's creativity (0 steady, 50 the reference, 100 experimental - the default -, 200 "
+                "adventurous) into the sampling of one stage: the writer's first draft, a creative mode's arrangement, "
+                "YuE2's plan or YuE2's take. At 50 it gives the values the templates had before the slider; the ends "
+                "stay moderate. Used inside the template blocks - the slider is on Song Brief and Cover Brief."
             ),
             inputs=[
                 io.Combo.Input("stage", options=list(STAGES), default="take", tooltip=STAGE_TOOLTIP),
@@ -42,7 +48,7 @@ class PlenioCreativity(io.ComfyNode):
                     "creativity",
                     default=CREATIVITY_DEFAULT,
                     min=0,
-                    max=100,
+                    max=CREATIVITY_MAX,
                     step=1,
                     display_mode=io.NumberDisplay.slider,
                     tooltip=CREATIVITY_TOOLTIP,

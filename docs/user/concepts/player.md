@@ -165,7 +165,7 @@ fields - **as you type, the search suggests them**: `gen` offers `genre:`, `genr
 | `model:yue2` `model:minimax` `model:master` | the music model (*master*: recordings from Enhance & Master) |
 | `lang:german` `vocals:instrumental` | language, vocals |
 | `mode:dramatic` | the creative mode |
-| `creativity:>50` `creativity:20-30` `creativity:adventurous` | the brief's [creativity](creativity.md) (0-100) or its level: steady, restrained, balanced, varied, experimental, adventurous |
+| `creativity:>100` `creativity:40-60` `creativity:adventurous` | the brief's [creativity](creativity.md) (0-200) or its level: steady, restrained, balanced, varied, experimental, adventurous |
 | `len:<3` | length in minutes |
 | `year:2026` `template:jazz` `writer:gemma` | year, brief template, the model that wrote the lyrics |
 | `tag:party` `#party` `tag:"road trip"` | your own tags |
@@ -178,8 +178,8 @@ fields - **as you type, the search suggests them**: `gen` offers `genre:`, `genr
 
 The **filters** under the search are rows of chips - your tags, genres, moods, what made the song (Plenio or
 other music) and the model; **More filters** opens vocals (sung, sparse vocals, instrumental), language, tempo (slow, 90-119, 120-139, fast), length
-(under 3, 3-5, over 5 minutes), key, creative mode, creativity (steady 0-9, restrained 10-19, balanced 20-30,
-varied 31-40, experimental 41-75, adventurous 76-100), template, year, Plenio version, what a song has (timed
+(under 3, 3-5, over 5 minutes), key, creative mode, creativity (steady 0-19, restrained 20-39, balanced 40-60,
+varied 61-80, experimental 81-150, adventurous 151-200), template, year, Plenio version, what a song has (timed
 lyrics, sheet music, notation, an unmastered take, a cover picture) and listening (favourites, played, never
 played, no tags yet). A row shows its most common values first; **+ 113 more** opens it to every value - every
 genre a template gave, the rare ones too - with a field to find one in a long row.
@@ -196,7 +196,7 @@ genre a template gave, the rare ones too - with a field to find one in a long ro
 - **Plenio version** offers *from 1.0.0*, *from 0.8.0* … for an archive with songs of older versions: only the
   songs made with that version or a newer one. It is the one row with one choice at a time (a click on another
   replaces it): *from 0.8.0* already holds the newer versions. A song made before the creativity slider counts as *balanced*: it was
-  made as 25 makes it now. A song made with 1.4 shows its creativity on today's scale (half its number then).
+  made as 50 makes it now.
 
 You can sort by newest, oldest, title, length, tempo, loudness, most played or recently played, and switch
 between a grid and a list.

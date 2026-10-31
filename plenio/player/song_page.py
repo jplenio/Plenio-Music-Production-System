@@ -107,7 +107,7 @@ def describe_creativity(value: Any) -> str:
     note = (
         ", the default"
         if number == creativity_rules.CREATIVITY_DEFAULT
-        else ", 1.4's reference"
+        else ", the reference"
         if number == creativity_rules.REFERENCE
         else ""
     )

@@ -376,7 +376,7 @@
     "off",
     70,
     false,
-    50,
+    100,
     "standard"
    ]
   },
@@ -4009,7 +4009,7 @@
       },
       "widgets_values": [
        "writer",
-       50
+       100
       ]
      },
      {

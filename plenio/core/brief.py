@@ -27,6 +27,7 @@ from pathlib import Path
 from typing import Any
 
 from .creativity import CREATIVITY_DEFAULT, creativity_value
+from .creativity import REFERENCE as CREATIVITY_REFERENCE
 from .errors import PlenioUserError
 from .fidelity import STANDARD, fidelity_level
 from .files import atomic_write_text
@@ -160,11 +161,12 @@ _ID = re.compile(r"[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9-]*)?")
 
 
 def _fingerprint(data: dict[str, Any]) -> str:
-    """A brief's content as a hash. The lyrics fidelity counts only away from standard, so a brief has the
-    fingerprint it had before that option. The creativity always counts: since 1.5.0 its 50 writes and samples as
-    1.4's 100 did, so a brief at 50 is not the one of before."""
+    """A brief's content as a hash. The creativity counts only away from the reference, so a brief at 50 has
+    the fingerprint it had before the slider existed - and the lyrics fidelity only away from standard."""
     data.pop("from_template")
     data.pop("notes")
+    if data.get("creativity") == CREATIVITY_REFERENCE:
+        data.pop("creativity")
     # a cover that keeps every note has the fingerprint it had before the slider (1.5.0)
     if data.get("original_notes") == ORIGINAL_NOTES_DEFAULT:
         data.pop("original_notes")

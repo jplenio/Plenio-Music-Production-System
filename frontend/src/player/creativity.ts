@@ -1,47 +1,46 @@
 /**
- * The brief's creativity (owner's requests 2026-10-19 and 2026-10-31): 0 steady ... 25 balanced (1.4's reference)
- * ... 50 experimental (the default, 1.4's 100) ... 100 adventurous - its levels for the song page and the filters,
- * and the sampling values before the slider (as ``plenio/core/creativity.py``). The player gives songs made before
- * 1.5.0 on this scale (half of 1.4's number).
+ * The brief's creativity (owner's requests 2026-10-19 and 2026-10-31): 0 steady ... 50 the reference ... 100
+ * experimental (the default since 1.5.0) ... 200 adventurous - its levels for the song page and the filters, and the
+ * sampling values at 50 (as ``plenio/core/creativity.py``). Up to 100 the values mean what they meant in 1.4.
  */
 import type { SamplingStage, SamplingValues } from './api'
 
 /** The levels by their highest value, as the writer's rules know them. */
 export const CREATIVITY_LEVELS: [number, string][] = [
-  [9, 'steady'],
-  [19, 'restrained'],
-  [30, 'balanced'],
-  [40, 'varied'],
-  [75, 'experimental'],
-  [100, 'adventurous'],
+  [19, 'steady'],
+  [39, 'restrained'],
+  [60, 'balanced'],
+  [80, 'varied'],
+  [150, 'experimental'],
+  [200, 'adventurous'],
 ]
 
-/** The default since 1.5.0 (1.4's 100). */
-export const CREATIVITY_DEFAULT = 50
-/** 1.4's reference (its 50): the writing and sampling of before the slider. */
-export const CREATIVITY_REFERENCE = 25
+/** The default since 1.5.0 (1.4's experimental top). */
+export const CREATIVITY_DEFAULT = 100
+/** The reference: the writing and sampling of before the slider. */
+export const CREATIVITY_REFERENCE = 50
 
 export function creativityLevel(value: number): string {
   return CREATIVITY_LEVELS.find(([highest]) => value <= highest)?.[1] ?? 'adventurous'
 }
 
-/** ``35 - varied``, ``50 - experimental, the default``, ``25 - balanced, 1.4's reference``. */
+/** ``75 - varied``, ``100 - experimental, the default``, ``50 - balanced, the reference``. */
 export function describeCreativity(value: number): string {
-  const note = value === CREATIVITY_DEFAULT ? ', the default' : value === CREATIVITY_REFERENCE ? ", 1.4's reference" : ''
+  const note = value === CREATIVITY_DEFAULT ? ', the default' : value === CREATIVITY_REFERENCE ? ', the reference' : ''
   return `${value} - ${creativityLevel(value)}${note}`
 }
 
 /** The filter's ranges, with their labels: one level each. */
 export const CREATIVITY_RANGES: [string, string][] = [
-  ['0-9', 'steady, 0-9'],
-  ['10-19', 'restrained, 10-19'],
-  ['20-30', 'balanced, 20-30'],
-  ['31-40', 'varied, 31-40'],
-  ['41-75', 'experimental, 41-75'],
-  ['76-100', 'adventurous, 76-100'],
+  ['0-19', 'steady, 0-19'],
+  ['20-39', 'restrained, 20-39'],
+  ['40-60', 'balanced, 40-60'],
+  ['61-80', 'varied, 61-80'],
+  ['81-150', 'experimental, 81-150'],
+  ['151-200', 'adventurous, 151-200'],
 ]
 
-/** The values every stage had before the slider - the templates' at 25 (1.4's 50). */
+/** The values every stage had before the slider - the templates' at 50. */
 export const REFERENCE_SAMPLING: Record<SamplingStage, SamplingValues> = {
   writer: { temperature: 0.8 },
   arrangement: { temperature: 0.7 },

@@ -31,7 +31,7 @@ from ..core.errors import PlenioError
 from ..core.release import RECORD_SUFFIX, base_title, numbered_title_in
 from . import other as other_music
 
-CACHE_VERSION = 14
+CACHE_VERSION = 15
 REFRESH_S = 15.0
 """A reader's songs are read again (in the background) when they are older than this."""
 RETIRED_DIR = "_retired"
@@ -104,18 +104,11 @@ COVER_MODE_DEFAULT = "new cover every run"
 """The briefs' work mode by default (``comfy/nodes/brief.py``, ``cover_brief.py``)."""
 
 
-def plenio_version(record: Mapping[str, Any]) -> tuple[int, int, int] | None:
-    """The Plenio version that made a record (``None``: it names none)."""
-    found = re.match(r"(\d+)\.(\d+)(?:\.(\d+))?", _text((record.get("versions") or {}).get("plenio")))
-    return (int(found[1]), int(found[2]), int(found[3] or 0)) if found else None
-
-
-def brief_facts(prompt: Mapping[str, Any], version: tuple[int, ...] | None = None) -> dict[str, Any]:
+def brief_facts(prompt: Mapping[str, Any]) -> dict[str, Any]:
     """The brief as the song was made: typed values, the template's where a text field was empty, and the
     brief's default where neither was set. ``sources`` says which, per field: ``typed``, ``template`` or
     ``default`` (a text field left empty has no default value - the writer chose; owner's request
-    2026-10-17: the song page shows every field, a default marked as one). ``version``: the Plenio version that
-    made the song - its creativity is given on today's scale (``core.creativity.scaled_for``)."""
+    2026-10-17: the song page shows every field, a default marked as one)."""
     kind, inputs = _brief_node(prompt)
     if not kind:
         return {}
@@ -200,10 +193,11 @@ def brief_facts(prompt: Mapping[str, Any], version: tuple[int, ...] | None = Non
         if cover
         else None,
         "lines_under_singing": bool(inputs.get("lines_under_singing")),
-        # a song made before the slider was made as 1.4's 50 made it; one made before 1.5.0 carries 1.4's number,
-        # which is twice today's (owner's request 2026-10-31: 1.4's 100 is today's 50)
-        "creativity": creativity_rules.scaled_for(number("creativity", "creativity", 50), version),
+        # a song made before the slider was made as 50 makes it now (owner's request 2026-10-19); the value means
+        # what it meant when the song was made (since 1.5.0 the slider goes to 200)
+        "creativity": _creativity(inputs.get("creativity")),
     }
+    sources["creativity"] = "default" if facts["creativity"] == creativity_rules.REFERENCE else "typed"
     sources["lines_under_singing"] = "typed" if facts["lines_under_singing"] else "default"
     if template == "none" or not template:
         sources["template"] = "default"
@@ -222,11 +216,19 @@ def _node_order(node_id: str) -> tuple[int, ...]:
         return (1 << 30,)
 
 
-def _sampling_value(
-    prompt: Mapping[str, Any], value: Any, creativity: Any, version: tuple[int, ...] | None = None
-) -> float | int | None:
-    """A sampling field's value: the number written there, or what the Creativity node it is linked to gave
-    (from the brief's creativity, or its own - on the scale of the Plenio ``version`` that made the song)."""
+def _creativity(raw: Any) -> int:
+    """A brief's creativity as a record has it (none: made before the slider, as 50 makes it now)."""
+    if isinstance(raw, bool) or not isinstance(raw, (int, float, str)):
+        return creativity_rules.REFERENCE
+    try:
+        return creativity_rules.creativity_value(raw, creativity_rules.REFERENCE)
+    except PlenioError:  # a record edited by hand
+        return creativity_rules.REFERENCE
+
+
+def _sampling_value(prompt: Mapping[str, Any], value: Any, creativity: Any) -> float | int | None:
+    """A sampling field's value: the number written there, or what the Creativity node it is linked to gives
+    (from the brief's creativity, or its own)."""
     if isinstance(value, bool):
         return None
     if isinstance(value, float):
@@ -241,7 +243,7 @@ def _sampling_value(
         own = inputs.get("creativity")
         amount = creativity if "brief" in inputs or isinstance(own, list) else own
         try:
-            chosen = creativity_rules.sampling_as_made(amount, str(inputs.get("stage") or "take"), version)
+            chosen = creativity_rules.sampling(_creativity(amount), str(inputs.get("stage") or "take"))
         except PlenioError:
             return None
         return (chosen.temperature, chosen.top_p, chosen.top_k)[int(value[1])]
@@ -249,14 +251,13 @@ def _sampling_value(
 
 
 def sampling_facts(
-    prompt: Mapping[str, Any], creativity: Any = None, version: tuple[int, ...] | None = (9, 0, 0)
+    prompt: Mapping[str, Any], creativity: Any = None
 ) -> dict[str, dict[str, float | int | bool]]:
     """The sampling the song was made with (owner's request 2026-10-19: the creativity's values on the song's
     page): the writer's first draft and a creative mode's plan (their temperature, from the branch the chosen
     writer model ran), YuE2's plan and take (temperature, top-p, top-k). What a record does not have is left
     out. ``fixed``: the numbers were written in the workflow, not given by a Creativity node - a block saved
-    before it followed the brief's creativity, or a value set by hand (owner's report 2026-10-20). ``creativity``:
-    the brief's as written in the record, on the scale of the Plenio ``version`` that made it (default: today's)."""
+    before it followed the brief's creativity, or a value set by hand (owner's report 2026-10-20)."""
 
     def first(kind: str, prompt_from: str = "") -> Mapping[str, Any] | None:
         for node_id in sorted(prompt, key=_node_order):
@@ -291,7 +292,7 @@ def sampling_facts(
         if node is not None:
             key = "temperature" if local else "sampling_mode.temperature"
             raw = (node.get("inputs") or {}).get(key)
-            value = _sampling_value(prompt, raw, creativity, version)
+            value = _sampling_value(prompt, raw, creativity)
             if value is not None:
                 facts[stage] = {"temperature": value, **written(raw)}
     for stage, kind in (("plan", "YuE2GenerateABC"), ("take", "YuE2GenerateMusic")):
@@ -299,9 +300,7 @@ def sampling_facts(
         if node is None:
             continue
         inputs = node.get("inputs") or {}
-        values = {
-            name: _sampling_value(prompt, inputs.get(name), creativity, version) for name in SAMPLING_NAMES
-        }
+        values = {name: _sampling_value(prompt, inputs.get(name), creativity) for name in SAMPLING_NAMES}
         if all(value is not None for value in values.values()):
             facts[stage] = {name: value for name, value in values.items() if value is not None}
             facts[stage].update(written(*(inputs.get(name) for name in SAMPLING_NAMES)))
@@ -490,7 +489,7 @@ def summarize(record: Mapping[str, Any], path: Path, root: Path) -> Song:
     audio = record.get("audio") or {}
     loudness = (audio.get("loudness") or [{}])[0] or {}
     tags = dict(audio.get("tags") or {})
-    brief = brief_facts(prompt, plenio_version(record))
+    brief = brief_facts(prompt)
     files = _files(record, path)
     lyrics = doc("lyrics")
     created = _text(record.get("created"))
@@ -556,10 +555,7 @@ def summarize(record: Mapping[str, Any], path: Path, root: Path) -> Song:
         },
         **score_facts(doc("score")),
         **prompt_facts(prompt),
-        # the brief's creativity as the record has it, on the scale of the version that made it
-        "sampling": sampling_facts(
-            prompt, _brief_node(prompt)[1].get("creativity", 50), plenio_version(record)
-        ),
+        "sampling": sampling_facts(prompt, brief.get("creativity")),
     }
     song = Song(song_id(path, root), path, root, summary, files)
     summary["id"] = song.id

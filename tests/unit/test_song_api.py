@@ -193,7 +193,7 @@ def test_the_release_fields_set_the_party_folder_album_and_artist() -> None:
         ({"genre": 3}, "invalid_value", "genre"),
         ({"genre": "x" * 401}, "invalid_value", "genre"),
         ({"genre": "two\nlines"}, "invalid_value", "genre"),
-        ({"creativity": 101}, "invalid_value", "creativity"),
+        ({"creativity": 201}, "invalid_value", "creativity"),
         ({"creativity": 50.5}, "invalid_value", "creativity"),
         ({"finish.cover_art": "yes"}, "invalid_value", "finish.cover_art"),
         ({"mode": "one song, stop to review"}, "not_supported", "mode"),

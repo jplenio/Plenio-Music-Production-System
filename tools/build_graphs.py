@@ -76,8 +76,8 @@ FLUX_VAE = "flux2-vae.safetensors"
 
 FROM_MODEL_BLOCK = "From the music model block."
 CREATIVITY = (
-    "From the brief: 0 steady, 50 the reference (the native defaults), 100 experimental - the sampling of this "
-    "block follows it."
+    "From the brief: 0 steady, 50 the reference (the native defaults), 100 experimental (the default), 200 "
+    "adventurous - the sampling of this block follows it."
 )
 ENGINE_OUT = "The music model's rules and exact tokenizer, for Write Song and the Song Sheets."
 TAKE_SEED = (

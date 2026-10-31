@@ -125,7 +125,7 @@ const SAMPLING_LABELS: [SamplingStage, string][] = [
 /** Numbers written in the workflow while the brief asked for another creativity (owner's report 2026-10-20). */
 export const FIXED_NOTE = 'fixed in the workflow, not from the creativity'
 
-/** The sampling the song was made with (owner's request 2026-10-19), marked where it is the reference (25) -
+/** The sampling the song was made with (owner's request 2026-10-19), marked where it is the reference (50) -
  * or, away from 50, where the workflow had it fixed (a block saved before 1.0.2); a creative mode's plan only
  * when a mode was on. */
 export function samplingFacts(s: SongSummary): Fact[] {

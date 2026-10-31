@@ -53,7 +53,7 @@ VARIABLES: dict[str, dict[str, str]] = {
         "harmony": "a cover's harmony choice",
         "song_flow_closeness": "a cover's song flow closeness (0-100)",
         "lyrics_closeness": "a cover's lyrics closeness (0-100)",
-        "creativity": "the creativity (0-100, 50 the reference)",
+        "creativity": "the creativity (0-200, 50 the reference, 100 the default)",
     },
     "run": {
         "date": "the export's date, YYYY-MM-DD",

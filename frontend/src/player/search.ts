@@ -496,7 +496,7 @@ const FIELD_HELP: [string, string][] = [
   ['mode', 'a creative mode'], ['template', 'a brief template'], ['is', 'fav, unplayed, played, tagged, cover, other'],
   ['has', 'timing, pdf, score, original, cover'], ['year', '2026'], ['plenio', 'the Plenio version: >=1.0'], ['title', 'words in the title'],
   ['lyrics', 'words in the lyrics'], ['artist', 'other music: the artist'], ['album', 'other music: the album'], ['meter', '4/4, 3/4'],
-  ['writer', 'the model that wrote it'], ['style', 'words in the style'], ['creativity', '0-100: >50, 20-30, adventurous'],
+  ['writer', 'the model that wrote it'], ['style', 'words in the style'], ['creativity', '0-200: >100, 40-60, adventurous'],
   ['stars', 'your stars: >=4, 3-4, none'], ['measured', 'the measured stars: >=4, <2, none'],
 ] // prettier-ignore
 
@@ -546,7 +546,8 @@ export function suggest(query: string, songs: SongSummary[], context: Context, l
     if (!field) return []
     const key = field === 'language' ? 'lang' : field
     const fixed = FIXED_VALUES[key]
-    const list: [string, number][] = fixed ? fixed.map(([v]) => [v, 0]) : valuesOf(key, songs, context)
+    // a fixed list keeps its own order (the ranges low to high): its place ranks it
+    const list: [string, number][] = fixed ? fixed.map(([v], i) => [v, fixed.length - i]) : valuesOf(key, songs, context)
     return rank(list)
       .slice(0, limit)
       .map(([v, n]) => ({ label: `${key}:${v}`, hint: fixed ? (fixed.find(([x]) => x === v)?.[1] ?? '') : songsWord(n), query: `${head}${minus}${key}:${quote(v)} ` }))
