@@ -2310,7 +2310,7 @@
       "INT",
       {
        "display_name": "original notes",
-       "tooltip": "How many of the source's notes YuE2 gets: 100 every note of melody, instrument line and chords. Less leaves out the least important (nothing new is added), so YuE2 interprets more freely; 0 keeps about a quarter.",
+       "tooltip": "How many of the source's notes YuE2 gets: 100 all. Less leaves out the least important of the instrument line and chords (an instrumental's melody too; a sung one keeps all), nothing new; 0 about a quarter.",
        "default": 100,
        "min": 0,
        "max": 100,

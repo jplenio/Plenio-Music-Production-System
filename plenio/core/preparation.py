@@ -74,8 +74,9 @@ def prepare_for_brief(text: str, brief: SongBrief | CoverBrief | None) -> native
     changes += step.changes
     warnings += step.warnings
     if isinstance(brief, CoverBrief) and brief.original_notes < ORIGINAL_NOTES_DEFAULT:
-        # fewer of the source's notes, so that YuE2 interprets more freely (owner's request 2026-10-31)
-        thinned = thin(text, brief.original_notes)
+        # fewer of the source's notes, so that YuE2 interprets more freely (owner's request 2026-10-31); a sung
+        # cover's melody keeps every note - with it thinned YuE2 left the words out (measured, thin.py)
+        thinned = thin(text, brief.original_notes, keep_sung=not brief.instrumental)
         text = thinned.abc
         changes += thinned.changes
     if isinstance(brief, SongBrief) and brief.instrumental:

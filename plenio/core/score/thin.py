@@ -9,9 +9,13 @@ The Cover Brief's *original notes* (0-100) sets how many stay: 100 every note, 0
 - how long it sounds (against the beat);
 - whether it starts or ends a phrase, and whether it is a turning point of the line (a highest or lowest note).
 
-The sung melody keeps its line: a note left out lengthens the note before it, so the voice still sings through
-the phrase - only with fewer pitches - and the first note of every phrase stays. A note of the instrument line that
-is left out becomes a rest. A chord left out lets the one before it sound on; every section keeps its first chord.
+A sung cover keeps every note of its melody (owner's decision 2026-10-31): each carries a syllable, and with the
+melody thinned YuE2 left the words out - measured on one cover with the same seeds, 83 % of the written words were
+heard at 100, 14 % at 50 and 18 % at 0 with the melody thinned, 78 % at 0 with it kept. So there only the instrument
+line and the chords are thinned. An instrumental cover's melody is thinned too: it keeps its line - a note left out
+lengthens the note before it, so the line still runs through the phrase with fewer pitches - and the first note of
+every phrase stays. A note of the instrument line that is left out becomes a rest. A chord left out lets the one
+before it sound on; every section keeps its first chord.
 """
 
 from __future__ import annotations
@@ -41,9 +45,10 @@ class Thinned:
     changes: tuple[str, ...]
 
 
-def thin(text: str, original_notes: int) -> Thinned:
+def thin(text: str, original_notes: int, *, keep_sung: bool = False) -> Thinned:
     """``text`` (a native two-voice ABC score) with fewer notes; unchanged at 100 or when it is not a score the
-    model reads (the note says so)."""
+    model reads (the note says so). ``keep_sung``: a sung cover - its melody keeps every note (its words need them),
+    only the instrument line and the chords are thinned."""
     if original_notes >= FULL:
         return Thinned(text, ())
     try:
@@ -51,7 +56,7 @@ def thin(text: str, original_notes: int) -> Thinned:
     except (canonical.ScoreSyntaxError, canonical.ScoreModelError):
         return Thinned(text, ("original notes: the score is not in the editable form - every note stays",))
     share = kept_share(original_notes)
-    vocal = _thin_notes(score, score.vocal, share, sustain=True)
+    vocal = list(score.vocal) if keep_sung else _thin_notes(score, score.vocal, share, sustain=True)
     ins = _thin_notes(score, score.ins, share, sustain=False)
     chords = _thin_chords(score, share)
     result = replace(score, vocal=tuple(vocal), ins=tuple(ins), chords=tuple(chords))
@@ -64,7 +69,8 @@ def thin(text: str, original_notes: int) -> Thinned:
         abc,
         (
             f"original notes {original_notes}: about {round(share * 100)} % of the source's notes kept - "
-            f"melody {counted(score.vocal, vocal)} notes, instrument line {counted(score.ins, ins)}, "
+            f"melody {counted(score.vocal, vocal)} notes{' (sung: every note stays)' if keep_sung else ''}, "
+            f"instrument line {counted(score.ins, ins)}, "
             f"chords {counted(score.chords, chords)}",
         ),
     )

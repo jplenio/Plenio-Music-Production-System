@@ -56,8 +56,8 @@ SONG_FLOW_TOOLTIP = (
     "and key stay, 50 recognisable, 20 a free version, 0 only a hint. The form always stays."
 )
 ORIGINAL_NOTES_TOOLTIP = (
-    "How many of the source's notes YuE2 gets: 100 every note of melody, instrument line and chords. Less leaves "
-    "out the least important (nothing new is added), so YuE2 interprets more freely; 0 keeps about a quarter."
+    "How many of the source's notes YuE2 gets: 100 all. Less leaves out the least important of the instrument "
+    "line and chords (an instrumental's melody too; a sung one keeps all), nothing new; 0 about a quarter."
 )
 LYRICS_CLOSENESS_TOOLTIP = (
     "New lyrics only (experimental): how close they stay to the source's lyrics - 0 without its text "

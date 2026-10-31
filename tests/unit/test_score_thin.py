@@ -1,5 +1,6 @@
-"""A cover's *original notes* (owner's request 2026-10-31): fewer of the source's notes, none new - the melody keeps
-its line with fewer pitches, the instrument line gets rests, the harmony changes less often."""
+"""A cover's *original notes* (owner's request 2026-10-31): fewer of the source's notes, none new - an instrumental's
+melody keeps its line with fewer pitches, a sung melody every note, the instrument line gets rests, the harmony
+changes less often."""
 
 from __future__ import annotations
 
@@ -72,12 +73,28 @@ def test_the_instrument_line_gets_rests_and_the_chords_change_less_often() -> No
     assert all(a.name != b.name for a, b in zip(after.chords, after.chords[1:], strict=False))
 
 
+def test_a_sung_melody_keeps_every_note_and_the_rest_is_thinned() -> None:
+    before = canonical.from_abc(SCORE)
+    thinned = thin(SCORE, 0, keep_sung=True)
+    after = canonical.from_abc(thinned.abc)
+    assert after.vocal == before.vocal  # every syllable keeps its note
+    assert len(after.chords) < len(before.chords)
+    assert "sung: every note stays" in thinned.changes[0]
+
+
 def test_a_cover_brief_thins_its_score_when_it_is_prepared() -> None:
     brief = build_cover_brief({"genre": "jazz", "vocals": "original lyrics", "original_notes": 30})
     assert brief.original_notes == 30 and "Original notes: 30" in brief.to_text()
     change = prepare_for_brief(SCORE, replace(brief, harmony="keep"))
-    assert any("original notes 30" in c for c in change.changes)
-    assert len(canonical.from_abc(change.abc).vocal) < len(canonical.from_abc(SCORE).vocal)
+    assert any("original notes 30" in c and "sung: every note stays" in c for c in change.changes)
+    # a sung cover: the melody as transcribed; the chords fewer
+    assert (
+        canonical.from_abc(change.abc).vocal
+        == canonical.from_abc(
+            prepare_for_brief(SCORE, replace(brief, harmony="keep", original_notes=100)).abc
+        ).vocal
+    )
+    assert len(canonical.from_abc(change.abc).chords) < len(canonical.from_abc(SCORE).chords)
     # every note: as before the slider, also the brief's fingerprint
     every = build_cover_brief({"genre": "jazz", "vocals": "original lyrics"})
     assert every.original_notes == 100 and "Original notes" not in every.to_text()
