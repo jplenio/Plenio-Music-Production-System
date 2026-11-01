@@ -23,6 +23,10 @@ All notable changes of the current version and the one before. Versions follow s
 - **Song API 1.3**: the fields `lyrics_from` and `lyrics` of a song, `original_notes` of a cover, `creativity` up to 200; a brief's text fields a request leaves out take the chosen style template's values.
 - **Older workflows and API prompts keep working**: a Song Brief saved before opens with the lyrics choice set to the template's idea, and an API prompt made with 1.4 runs unchanged - the new inputs are optional.
 
+### Fixed
+
+- **The last song plays again**: when the Plenio Player's queue ends without repeat, its last song plays to its very end - a crossfade no longer stops it a few seconds early - and a click on it (its card, its row, its page or ▶) plays it again from the beginning; it stayed silent, or started only after several clicks. The same for a song after which Live Play waits for a new one or the sleep timer stops.
+
 ## 1.4.1 - 2026-10-30
 
 **Plenio Nova calm and sharp, any visual with one click, songs filtered by their stars, and a quicker export.** Plenio Nova's visuals no longer flicker at their edges and in their finest detail - most of all the Mandelbulb, Spectrum City and the Mandala -, their stars shine steadily, no strip of another picture shows at a picture's edge, and *Balanced* draws them at the screen's own size. In the visuals' settings a visual's name shows it at once, and *Fixed* lists every Nova visual, those this graphics card does not play smoothly greyed with why. The player shows a song's lyrics as sung only when you choose it, and filters the songs by your stars and by the measured ones. Export Release hears the lyrics on the song by default - the vocal stem is a choice that takes extra time - and says how long each of its steps took. A section the writer filled with what the band plays is no longer sung.

@@ -9,7 +9,7 @@ import { indexMarks } from '../src/player/listIndex'
 import type { Draft, FormData, StudioSpec } from '../src/player/make/form'
 import { applyPreset, BUILT_IN_PRESETS, formatOf, presetMatters, presetOf, presetsOf } from '../src/player/make/presets'
 import { cheerLine, cheers, flight, floating, MAX_FLOATING, receive, REACTION_EMOJI, spread } from '../src/player/reactions'
-import { nextIdOf } from '../src/player/store'
+import { nextIdOf, playsToItsEnd } from '../src/player/store'
 
 function song(title: string, created = '2026-10-01T10:00:00Z', seconds = 150, bpm?: number): SongSummary {
   return { id: title.toLowerCase().replace(/\W/g, '').padEnd(12, '0').slice(0, 12), title, created, year: created.slice(0, 4), seconds, bpm, model: 'YuE2', kind: 'song', brief: {}, genre: 'pop', mood: '', language: '', vocals: '', instrumental: false, arrangement: 'off', template: '', style: '', lyrics: '', loudness: { lufs: null, true_peak: null, range: null }, tags: {}, plenio: '1.4.0', folder: '', file: title, takes_key: '', has: { audio: true, original: false, cover: true, pdf: false, lines: false, notes: false, stems: false, timing: false, score: false }, seeds: {}, writer: '' } as SongSummary
@@ -223,5 +223,16 @@ describe('up next on the big screen', () => {
     expect(nextIdOf(list, 2, 'off', { on: true, atEnd: 'again' })).toBe('a')
     expect(nextIdOf(list, 2, 'off', { on: true, atEnd: 'wait' })).toBeNull() // waits for a new song
     expect(nextIdOf([], -1, 'all', off)).toBeNull()
+  })
+
+  it('lets the last song play to its very end - a crossfade only when a song follows', () => {
+    const list = ['a', 'b', 'c']
+    const off = { on: false, atEnd: 'again' }
+    expect(playsToItsEnd(list, 2, 'off', off, false)).toBe(true) // the end of the list: stops at its own end
+    expect(playsToItsEnd(list, 1, 'off', off, false)).toBe(false)
+    expect(playsToItsEnd(list, 2, 'all', off, false)).toBe(false) // the first one fades in
+    expect(playsToItsEnd(list, 2, 'one', off, false)).toBe(false) // starts again just before its end
+    expect(playsToItsEnd(list, 2, 'off', { on: true, atEnd: 'wait' }, false)).toBe(true) // Live Play waits
+    expect(playsToItsEnd(list, 0, 'all', off, true)).toBe(true) // the sleep timer stops after it
   })
 })

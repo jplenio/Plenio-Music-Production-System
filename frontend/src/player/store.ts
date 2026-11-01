@@ -842,6 +842,14 @@ export function nextIdOf(list: string[], at: number, repeat: Settings['repeat'],
   return repeat === 'all' ? list[0] : null
 }
 
+/** Whether the song at ``at`` plays to its very end and the music stops there: nothing follows it (the end of the
+ * list without repeat, Live Play waiting for a new song) or the sleep timer stops after it. No crossfade takes its
+ * last seconds then, and a click on it afterwards plays it again from the beginning (stopped a crossfade early, a
+ * click went on from there and the near end stopped it again at once). */
+export function playsToItsEnd(list: string[], at: number, repeat: Settings['repeat'], live: { on: boolean; atEnd: string }, sleepAfter: boolean): boolean {
+  return sleepAfter || (repeat !== 'one' && nextIdOf(list, at, repeat, live) === null)
+}
+
 /** The song that comes next, for *Up next* on the big screen. */
 export const upNext = computed<SongSummary | null>(() => {
   const id = nextIdOf(queue.value, index.value, settings.repeat, settings.live)
@@ -883,6 +891,8 @@ engine.on(() => {
 /** Near the end of a song: the next one (fading over), or this one again (repeat one, at its very end). */
 function nearEnd(): void {
   if (!current.value || !playing.value || fadingOut || engine.duration <= 0) return
+  // the last song: its own end stops the music (the engine's 'ended'), ▶ then starts it from the beginning
+  if (playsToItsEnd(queue.value, index.value, settings.repeat, settings.live, sleep.value === 'song')) return
   const left = engine.duration - engine.time
   const lead = settings.repeat === 'one' ? 0.05 : Math.max(0.05, settings.crossfade)
   if (left <= lead) toNext()
