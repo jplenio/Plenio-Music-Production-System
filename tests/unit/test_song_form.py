@@ -175,3 +175,76 @@ def test_a_sung_section_without_notes_for_its_words_is_sparse() -> None:
     # a second plan with notes for every verse wins over a filled one
     second = song_form.match(THIN_LYRICS, abc.replace('"C"E16|', '"C"' + "EFGA" * 4 + "|", 1))
     assert second.category == song_form.MATCH and song_form.better(filled, second) is second
+
+
+# --- section tags of one's own (a user's request of 2026-11-01: [Breakdown], [Violin Rise] ...) --------------
+
+
+def test_a_tag_of_ones_own_is_a_kind_as_a_score_writes_section_names() -> None:
+    assert song_form.kind("[Verse 2]") == "verse" and song_form.kind("Pre Chorus") == "pre-chorus"
+    assert song_form.kind("[Instrument: Violin Rise]") == "instrument violin rise"
+    assert song_form.kind("[Überleitung]") == "uberleitung"
+    assert song_form.kind("[サビ]") == "section" and song_form.kind("") == ""
+    assert len(song_form.kind("[" + "Violin " * 8 + "]")) <= 30
+
+
+def test_a_sung_section_of_ones_own_takes_the_plans_place_under_its_name() -> None:
+    # the name holds a colon a score's section names do not: the plan's bridge is renamed all the same
+    abc = plan("intro-", "verse", "chorus", "bridge", "chorus")
+    form = song_form.match(lyric("Verse", "Chorus", "Breakdown: Drums Only", "Chorus"), abc)
+    assert form.category == song_form.RENAME
+    assert [label for label, _sung in form_of(form.score)] == [
+        "intro",
+        "verse",
+        "chorus",
+        "breakdown drums only",
+        "chorus",
+    ]
+    assert score_rules.analyze(form.score).ok
+
+
+def test_a_breakdown_the_plan_has_not_sings_on_the_bridges_melody() -> None:
+    abc = plan("verse", "chorus", "bridge", "chorus")
+    lyrics_text = lyric("Verse", "Chorus", "Verse", "Chorus", "Breakdown", "Chorus")
+    form = song_form.match(lyrics_text, abc, substitute=True)
+    assert form.category == song_form.SUBSTITUTE and "breakdown on the bridge's melody" in form.changes
+    assert melodies(form.score)[4] == melodies(abc)[2]
+
+
+def test_a_part_without_words_of_ones_own_keeps_its_place_on_the_plans_interlude() -> None:
+    # the plan left out a chorus: put together in the lyrics' order, [Violin Rise] is the plan's interlude - it was
+    # left out before, and the plan's interlude with it
+    abc = plan("intro-", "verse", "chorus", "interlude-", "verse", "chorus")
+    lyrics_text = lyric("Verse", "Chorus", "Violin Rise-", "Verse", "Chorus", "Chorus")
+    form = song_form.match(lyrics_text, abc)
+    assert form.category == song_form.ASSEMBLE
+    assert form_of(form.score) == [
+        ("intro", False),
+        ("verse", True),
+        ("chorus", True),
+        ("interlude", False),
+        ("verse", True),
+        ("chorus", True),
+        ("chorus", True),
+    ]
+
+
+def test_without_a_part_without_words_the_plan_plays_its_intro_there_and_keeps_it_first() -> None:
+    abc = plan("intro-", "verse", "chorus", "verse", "chorus")
+    lyrics_text = lyric("Verse", "Chorus", "Violin Rise-", "Verse", "Chorus", "Chorus")
+    form = song_form.match(lyrics_text, abc)
+    assert form.category == song_form.ASSEMBLE
+    assert form_of(form.score) == [
+        ("intro", False),
+        ("verse", True),
+        ("chorus", True),
+        ("intro", False),
+        ("verse", True),
+        ("chorus", True),
+        ("chorus", True),
+    ]
+    assert melodies(form.score)[3] == melodies(abc)[0]
+    # at the start or the end such a tag is the plan's intro or outro, as before: nothing borrowed
+    plain = song_form.match(lyric("Strings-", "Verse", "Chorus", "Verse", "Chorus", "Chorus"), abc)
+    assert [label for label, _sung in form_of(plain.score)][0] == "intro"
+    assert [label for label, _sung in form_of(plain.score)].count("intro") == 1

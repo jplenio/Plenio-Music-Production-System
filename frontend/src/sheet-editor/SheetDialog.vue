@@ -6,7 +6,7 @@
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 
-import { type Fetcher, type GuideNote, PlenioApiError, getAsrNote, resolveSheet } from '../api/client'
+import { type Fetcher, type GuideNote, PlenioApiError, getAsrNote, getOwnTags, resolveSheet, saveOwnTags } from '../api/client'
 import {
   type AsrNote,
   type Finding,
@@ -26,7 +26,16 @@ import {
   withApproval
 } from '../shared/sheetSession'
 import { type DocumentKind, type SheetState, serializeState } from '../shared/sheetState'
-import { SECTION_TAGS, insertTag as tagAt } from '../shared/lyricsTags'
+import {
+  MAX_OWN_TAGS,
+  MORE_TAGS,
+  OWN_TAG_LENGTH,
+  SECTION_TAGS,
+  insertTag as tagAt,
+  ownTag,
+  ownTags,
+  tagTitle
+} from '../shared/lyricsTags'
 import { LINE_BREAK, changedWords, wordDiff } from '../shared/wordDiff'
 import {
   DIALOG_MARGIN,
@@ -232,6 +241,64 @@ function insertTag(doc: WorkingDoc, tag: string): void {
 }
 function keepEdit(doc: WorkingDoc) {
   doc.intent = 'manual'
+}
+
+// --- the section tags: the model's own, the others its engine knows, and one's own (kept with ComfyUI's
+// settings, for every song: a user's request of 2026-11-01 - [Breakdown], [Violin Rise] once, then a click)
+const modelTags = computed<string[]>(() =>
+  props.payload?.model_tags?.length ? props.payload.model_tags : [...SECTION_TAGS]
+)
+const moreTags = computed<string[]>(() =>
+  (props.payload?.section_tags ?? [...SECTION_TAGS, ...MORE_TAGS]).filter((tag) => !modelTags.value.includes(tag))
+)
+const myTags = ref<string[]>([])
+const showMoreTags = ref(false)
+const addingTag = ref(false)
+const newTag = ref('')
+const tagError = ref('')
+// the box sits in the documents' loop: a function ref keeps the element (a string ref there is a list)
+let tagInput: HTMLInputElement | null = null
+function tagBoxRef(el: unknown): void {
+  tagInput = el instanceof HTMLInputElement ? el : null
+}
+onMounted(async () => {
+  myTags.value = ownTags(await getOwnTags(props.fetcher), [...modelTags.value, ...moreTags.value])
+})
+async function keepTags(next: string[]): Promise<void> {
+  const before = myTags.value
+  myTags.value = next
+  try {
+    await saveOwnTags(props.fetcher, next)
+    tagError.value = ''
+  } catch (error) {
+    myTags.value = before
+    tagError.value = error instanceof Error ? error.message : String(error)
+  }
+}
+function startTag(): void {
+  addingTag.value = true
+  void nextTick(() => tagInput?.focus())
+}
+/** A tag of one's own: kept (when it is new) and inserted at the cursor. */
+function addTag(doc: WorkingDoc): void {
+  const tag = ownTag(newTag.value)
+  addingTag.value = false
+  newTag.value = ''
+  if (!tag) return
+  const known = [...modelTags.value, ...moreTags.value, ...myTags.value].find(
+    (other) => other.toLowerCase() === tag.toLowerCase()
+  )
+  if (!known) {
+    if (myTags.value.length >= MAX_OWN_TAGS) {
+      tagError.value = `At most ${MAX_OWN_TAGS} tags of your own - remove one first.`
+      return
+    }
+    void keepTags([...myTags.value, tag])
+  }
+  insertTag(doc, known ?? tag)
+}
+function dropTag(tag: string): void {
+  void keepTags(myTags.value.filter((other) => other !== tag))
 }
 function merge(doc: WorkingDoc) {
   doc.intent = 'rebase'
@@ -611,18 +678,59 @@ onBeforeUnmount(() => {
           />
           <p v-if="doc.kind === 'lyrics'" class="tag-helpers">
             <span>Section tags (the model sings section by section):</span>
-            <button
-              v-for="tag in SECTION_TAGS"
-              :key="tag"
-              :title="
-                tag === 'Instrumental'
-                  ? 'Insert [Instrumental] at the cursor: a section without words (an interlude)'
-                  : `Insert [${tag}] at the cursor`
-              "
-              @click="insertTag(doc, tag)"
-            >
+            <button v-for="tag in modelTags" :key="tag" :title="tagTitle(tag, true)" @click="insertTag(doc, tag)">
               [{{ tag }}]
             </button>
+            <template v-if="showMoreTags">
+              <button
+                v-for="tag in moreTags"
+                :key="'more-' + tag"
+                class="more"
+                :title="tagTitle(tag, false)"
+                @click="insertTag(doc, tag)"
+              >
+                [{{ tag }}]
+              </button>
+            </template>
+            <button
+              v-if="moreTags.length"
+              class="link"
+              :aria-expanded="showMoreTags"
+              title="Tags Plenio knows besides the model's own sections"
+              @click="showMoreTags = !showMoreTags"
+            >
+              {{ showMoreTags ? 'fewer' : `more (${moreTags.length})` }}
+            </button>
+            <span v-for="tag in myTags" :key="'own-' + tag" class="own">
+              <button :title="`${tagTitle(tag, false)} - a tag of your own`" @click="insertTag(doc, tag)">
+                [{{ tag }}]
+              </button>
+              <button class="drop" :title="`Remove [${tag}] from your tags (the lyrics keep it)`" @click="dropTag(tag)">
+                ×
+              </button>
+            </span>
+            <template v-if="addingTag">
+              <input
+                :ref="tagBoxRef"
+                v-model="newTag"
+                class="new-tag"
+                :maxlength="OWN_TAG_LENGTH"
+                placeholder="e.g. Violin Rise"
+                aria-label="Your section tag"
+                @keydown.enter.prevent.stop="addTag(doc)"
+                @keydown.esc.prevent.stop="addingTag = false"
+              />
+              <button @click="addTag(doc)">Add</button>
+            </template>
+            <button
+              v-else
+              class="link"
+              title="A section tag of your own - kept for your next songs, inserted with one click"
+              @click="startTag"
+            >
+              + your tag
+            </button>
+            <span v-if="tagError" class="error">{{ tagError }}</span>
             <span v-if="doc.intent === 'manual'" class="facts">the writer is not consulted - these are your lyrics</span>
           </p>
           <p v-if="doc.kind === 'lyrics' && asr" class="asr">

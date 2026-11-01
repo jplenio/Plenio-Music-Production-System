@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import math
 import re
+import unicodedata
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any
@@ -60,10 +61,16 @@ MAX_GROWTH = 1.5
 INSTRUMENTAL_KINDS = {
     "instrumental": "interlude",
     "break": "interlude",
+    "breakdown": "interlude",
     "solo": "interlude",
     "inst": "interlude",
+    "drop": "interlude",
+    "build": "interlude",
 }
 """Lyric tags of sections without words and the plan's name for them."""
+WORDLESS = ("interlude", "instrumental", "solo", "break")
+"""The plan's names of a section without singing between sung ones, best first: where a section without words of
+another name (a tag of one's own, ``[Violin Rise]``) finds its music when the plan has none of its name."""
 SUBSTITUTES = {
     "bridge": ("verse", "chorus"),
     "pre-chorus": ("verse", "chorus"),
@@ -73,14 +80,25 @@ SUBSTITUTES = {
     "outro": ("chorus", "verse"),
     "intro": ("verse", "chorus"),
     "interlude": ("verse", "chorus"),
+    "breakdown": ("bridge", "verse", "chorus"),
+    "drop": ("chorus", "verse"),
+    "build": ("pre-chorus", "verse", "chorus"),
 }
-"""The plan's section kinds whose melody a missing sung kind takes, best first (else verse, then chorus)."""
+"""The plan's section kinds whose melody a missing sung kind takes, best first (else verse, then chorus - also for a
+tag of one's own)."""
+_UNSAFE = re.compile(r"[^a-z0-9 \-]+")
 
 
 def kind(name: str) -> str:
-    """``[Verse 2]`` -> ``verse``; ``Pre Chorus`` -> ``pre-chorus``."""
+    """``[Verse 2]`` -> ``verse``; ``Pre Chorus`` -> ``pre-chorus``. As a score's section names are written - lower
+    case, letters, digits, spaces and hyphens, at most 30 characters - so a tag of one's own and the plan's section
+    named after it are one kind: ``[Instrument: Violin Rise]`` -> ``instrument violin rise``, ``[Überleitung]`` ->
+    ``uberleitung``, a name with nothing of these left (another script) -> ``section``."""
     cleaned = re.sub(r"\s*\d+\s*$", "", name.strip().strip("[]").strip().lower())
-    return re.sub(r"\s+", "-", cleaned) if cleaned in ("pre chorus", "post chorus") else cleaned
+    cleaned = re.sub(r"\s+", "-", cleaned) if cleaned in ("pre chorus", "post chorus") else cleaned
+    plain = "".join(ch for ch in unicodedata.normalize("NFKD", cleaned) if not unicodedata.combining(ch))
+    safe = " ".join(_UNSAFE.sub(" ", plain).split()).strip(" -")[:30].rstrip(" -")
+    return safe or ("section" if cleaned else "")
 
 
 @dataclass(frozen=True)
@@ -341,9 +359,23 @@ def _order(
     seen: dict[tuple[str, bool], int] = {}
     order: list[int] = []
     swaps: list[str] = []
-    for tag, sung in lyrics:
+    borrowed: set[int] = (
+        set()
+    )  # places in ``order`` where the intro's or outro's music plays between sung sections
+    sung_at = [i for i, (_, sung) in enumerate(lyrics) if sung]
+    for at, (tag, sung) in enumerate(lyrics):
         wanted = kind(tag) if sung else INSTRUMENTAL_KINDS.get(kind(tag), kind(tag))
         key = (wanted, sung)
+        if not sung and key not in by_kind and sung_at and sung_at[0] < at < sung_at[-1]:
+            # a part without words between sung ones, of a name the plan has not (a tag of one's own): the plan's
+            # own such part - or, when the plan has none, its intro's or outro's music once more
+            other = next((name for name in (*WORDLESS, "intro", "outro") if (name, False) in by_kind), None)
+            if other is not None:
+                key = (other, False)
+                if other in ("intro", "outro"):
+                    borrowed.add(len(order))
+                if other != wanted:
+                    swaps.append(f"{wanted} on the {other}'s music")
         if key not in by_kind and sung:
             if not substitute:
                 return None
@@ -365,7 +397,7 @@ def _order(
     last_sung = max(i for i, p in enumerate(plan) if p.sung)
     leading = [p.index for p in plan[:first_sung]]
     trailing = [p.index for p in plan[last_sung + 1 :]]
-    used = set(order)
+    used = {index for place, index in enumerate(order) if place not in borrowed}
     if leading and not used & set(leading):
         order = leading + order
     if trailing and not used & set(trailing):

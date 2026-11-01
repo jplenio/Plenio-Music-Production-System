@@ -12,8 +12,40 @@ import MakeQueue from '../player/make/MakeQueue.vue'
 import { makeClient } from '../player/make/client'
 import { retryRequest } from '../player/make/form'
 import type { FormData, MakeJob, MakeStatus, Remake } from '../player/make/form'
+import { type Remembered, rememberedOf } from '../player/make/remember'
+import { ownTags } from '../shared/lyricsTags'
 
 const client = makeClient('../api/make', { 'X-Plenio-Live': '1' })
+
+// what the song form opens with (the last song's values and configuration) and one's own section tags: kept on
+// this phone (owner's request 2026-11-01) - a private window keeps nothing, and the form starts as ever
+const LAST_KEY = 'plenio.make.last'
+const TAGS_KEY = 'plenio.make.tags'
+function kept(key: string): unknown {
+  try {
+    const raw = window.localStorage.getItem(key)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+function keep(key: string, value: unknown): void {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value))
+  } catch {
+    // not kept (a private window, storage turned off)
+  }
+}
+const remembered = shallowRef<Remembered | null>(rememberedOf(kept(LAST_KEY)))
+const myTags = shallowRef<string[]>(ownTags(kept(TAGS_KEY)))
+function remember(values: Remembered): void {
+  remembered.value = values
+  keep(LAST_KEY, values)
+}
+function keepTags(tags: string[]): void {
+  myTags.value = tags
+  keep(TAGS_KEY, tags)
+}
 const status = shallowRef<MakeStatus | null>(null)
 const form = shallowRef<FormData | null>(null)
 const editing = ref<MakeJob | null>(null)
@@ -163,6 +195,10 @@ onBeforeUnmount(() => {
           :editing="editing"
           :remake="remake"
           :cover-of="coverOf"
+          :remembered="remembered"
+          :my-tags="myTags"
+          @remember="remember"
+          @tags="keepTags"
           @made="made"
           @cancel="editing = null; remake = null"
         />

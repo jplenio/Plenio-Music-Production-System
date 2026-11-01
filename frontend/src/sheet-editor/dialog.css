@@ -335,6 +335,34 @@
   text-decoration: underline;
   cursor: pointer;
 }
+/* the lyrics' section tags: the model's own, the others Plenio knows, one's own (with a remove button) */
+.plenio-overlay .tag-helpers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  align-items: center;
+}
+.plenio-overlay .tag-helpers button.more {
+  border-style: dashed;
+}
+.plenio-overlay .tag-helpers .own {
+  display: inline-flex;
+}
+.plenio-overlay .tag-helpers .own button:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-color: #6fa8dc;
+}
+.plenio-overlay .tag-helpers .own button.drop {
+  padding: 4px 7px;
+  border-left: none;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-color: #6fa8dc;
+}
+.plenio-overlay .tag-helpers input.new-tag {
+  width: 13em;
+}
 .plenio-overlay .facts.ok {
   color: #6fbf73;
 }

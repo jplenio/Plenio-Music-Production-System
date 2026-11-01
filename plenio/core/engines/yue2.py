@@ -29,23 +29,35 @@ PLANNING_MODES = ("full", "melody")
 DOCUMENTS = ("title", "style", "lyrics", "score", "artwork_prompt")
 STYLE_LABEL = "style"
 STYLE_TARGET_WORDS, STYLE_WARN_WORDS, STYLE_MAX_WORDS = 40, 60, 120
-TAG_VOCABULARY = (
+MODEL_SECTIONS = (
     "Intro",
     "Verse",
     "Pre-Chorus",
     "Chorus",
-    "Post-Chorus",
-    "Hook",
-    "Refrain",
     "Bridge",
     "Interlude",
     "Instrumental",
-    "Solo",
-    "Break",
-    "Drop",
-    "Build",
     "Outro",
 )
+"""The sections YuE2 learned. Its lyrics' sections come from SongFormer (YuE2 report, arXiv 2609.33757 App. C:
+"section boundaries and functional labels"), whose labels are intro, verse, pre-chorus, chorus, bridge, inst,
+silence and outro (arXiv 2510.02797 §II-A); upstream's examples write them as tags in title case (``[Pre-Chorus]``)
+and add ``[Interlude]``, and its instrumental skill names ``% intro`` ... ``% outro`` and ``% instrumental`` in the
+score. Every other tag reaches YuE2 as plain text: it marks a section, its name is no more than a hint."""
+TAG_VOCABULARY = (
+    *MODEL_SECTIONS,
+    "Post-Chorus",
+    "Hook",
+    "Refrain",
+    "Solo",
+    "Break",
+    "Breakdown",
+    "Drop",
+    "Build",
+)
+"""The tags Plenio knows: YuE2's own sections, then those Plenio fits to a plan by a related section (a hook
+sings on a chorus's melody, a solo or a break without words is an instrumental part - ``core.song_form``). Tags
+of one's own work like these: words make a sung section, none an instrumental one."""
 LICENCE = "CC BY-NC 4.0 (YuE2-3B, YuE2 VAE): non-commercial use only"
 
 _WORD = re.compile(r"[^\W_][\w'’+#/-]*", re.UNICODE)
@@ -588,7 +600,10 @@ def writing_rules(*, instrumental: bool, target_seconds: float, sparse: bool = F
         else "Lyrics: each section starts with a tag on its own line (for example [Verse]), followed by the sung "
         "lines; a blank line between sections. Only words to be sung: no stage directions, no notes, no "
         "parentheses, no repeat marks like (x2) - write repeated lines out. Instrumental sections such as "
-        f"[Intro] stay empty, and so does a part the band plays without singing (a solo, a break): never describe the playing in the lyrics. The song lasts about {int(target_seconds // 60)}:{int(target_seconds % 60):02d}, "
+        f"[Intro] stay empty, and so does a part the band plays without singing (a solo, a break): never describe the playing in the lyrics. "
+        f"Section tags YuE2 knows: {' '.join(f'[{tag}]' for tag in MODEL_SECTIONS)}; also understood: "
+        f"{' '.join(f'[{tag}]' for tag in TAG_VOCABULARY if tag not in MODEL_SECTIONS)}. "
+        f"The song lasts about {int(target_seconds // 60)}:{int(target_seconds % 60):02d}, "
         f"so write about {lyric_lines(target_seconds)} sung lines in total (YuE2 sings roughly one line every "
         f"{SECONDS_PER_LYRIC_LINE:.0f} seconds)."
     )
@@ -609,4 +624,5 @@ def writing_rules(*, instrumental: bool, target_seconds: float, sparse: bool = F
         "sections": plan,
         "example_style": example_style,
         "tags": list(TAG_VOCABULARY),
+        "model_tags": list(MODEL_SECTIONS),
     }

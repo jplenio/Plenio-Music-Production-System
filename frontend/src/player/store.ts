@@ -13,6 +13,8 @@ import { type LyricsStyle, lyricsWithDefaults } from './lyricsStyle'
 import { choiceOf, choicesOf, type LyricsChoice, type LyricsVersion } from './lyricsVersion'
 import { type VisualSettings, withDefaults } from './visuals/chooser'
 import { type MakePreset, presetsOf } from './make/presets'
+import { type Remembered, rememberedOf } from './make/remember'
+import { ownTags } from '../shared/lyricsTags'
 import { withTransition } from './layout'
 
 export interface Settings {
@@ -61,6 +63,10 @@ export interface Settings {
   phoneView: 'grid' | 'list'
   /** Presets of one's own for making a song (make/presets.ts). */
   makePresets: MakePreset[]
+  /** What the song form opens with: the last song's values and configuration (make/remember.ts). */
+  makeLast: Remembered | null
+  /** Section tags of one's own for one's own lyrics. */
+  makeTags: string[]
 }
 
 export interface LibraryFilter {
@@ -101,6 +107,8 @@ const DEFAULT_SETTINGS: Settings = {
   welcomed: false,
   phoneView: 'list',
   makePresets: [],
+  makeLast: null,
+  makeTags: [],
 }
 
 /** Saved notation shifts, checked: numbers of at most a minute. */
@@ -294,7 +302,7 @@ window.addEventListener('pagehide', () => {
 
 /** The settings as saved, checked and filled with the defaults. */
 function applySettings(stored: Partial<Settings>): void {
-  Object.assign(settings, { ...DEFAULT_SETTINGS, ...stored, visuals: withDefaults(stored.visuals), filters: filtersOf(stored.filters), live: liveWithDefaults(stored.live), lyrics: lyricsWithDefaults(stored.lyrics), lyricsChoice: choiceOf(stored.lyricsChoice), lyricsFor: choicesOf(stored.lyricsFor), lyricsView: stored.lyricsView === 'text' ? 'text' : 'timed', mp3: !!stored.mp3, notationShift: shiftsOf(stored.notationShift), savedFilters: savedFiltersOf(stored.savedFilters), moreFilters: !!stored.moreFilters, welcomed: !!stored.welcomed, phoneView: stored.phoneView === 'grid' ? 'grid' : 'list', makePresets: presetsOf(stored.makePresets) })
+  Object.assign(settings, { ...DEFAULT_SETTINGS, ...stored, visuals: withDefaults(stored.visuals), filters: filtersOf(stored.filters), live: liveWithDefaults(stored.live), lyrics: lyricsWithDefaults(stored.lyrics), lyricsChoice: choiceOf(stored.lyricsChoice), lyricsFor: choicesOf(stored.lyricsFor), lyricsView: stored.lyricsView === 'text' ? 'text' : 'timed', mp3: !!stored.mp3, notationShift: shiftsOf(stored.notationShift), savedFilters: savedFiltersOf(stored.savedFilters), moreFilters: !!stored.moreFilters, welcomed: !!stored.welcomed, phoneView: stored.phoneView === 'grid' ? 'grid' : 'list', makePresets: presetsOf(stored.makePresets), makeLast: rememberedOf(stored.makeLast), makeTags: ownTags(stored.makeTags) })
 }
 
 /** The measured stars of the songs (song id -> stars; ``null``: measured, without stars) - for the library's filter

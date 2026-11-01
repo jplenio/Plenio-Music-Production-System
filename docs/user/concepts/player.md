@@ -814,6 +814,16 @@ fields and keeps the preset's length and vocals (*Party - fast* stays about 1:30
 head of the line: the same words and notes, sung and played anew; keep the one you like best) or **different
 songs** of this form, each with words and music of its own.
 
+**The form remembers**: once a song is ordered, *Make a song* opens with its values the next time - the style,
+the description, the lyrics, every field - and its configuration: the preset, the studio's settings, how many,
+*release at once*. They stay until you change them. The player keeps them with your settings (each account its
+own); a guest's phone keeps a guest's. What the form no longer offers falls back to its own: a style the templates
+do not have, a length longer than the host allows now, a cover where the host turned covers off. A song made again
+from another keeps only the configuration.
+
+**Your own lyrics** get the section tag buttons - YuE2's own sections and **+ your tag**, tags of your own kept for
+your next songs (see [Section tags](brief-templates.md#section-tags)).
+
 **The studio**: songs are made by the ComfyUI on this computer; the player plays without it. When it is not
 running, *Make a song* says so and offers **Start the studio** - see [The studio](#the-studio-comfyui-started-by-the-player).
 
@@ -832,10 +842,11 @@ of its description), and where it is:
 Live Play - as soon as it is ready (the default), or it waits:
 
 - **Its maker hears it first** - on their own device, in *Make a song* (a guest on their phone, on the party's
-  page): ▶ to hear it, then **Release it** or **Don't release**.
+  page): ▶ to hear it, then **Release it** or **Don't release**. Who wants it simpler ticks **Release at once -
+  without hearing it first** under the form: the song goes on as soon as it is ready (the form remembers the tick).
 - **An admin approves it** - you or a helper, in *Make a song* under **Waiting for your approval** (the sidebar
   counts them): hear each one on this device, then **Approve** or **Reject**. With both on, the maker releases it
-  first and an admin approves it after.
+  first and an admin approves it after; *release at once* skips the maker's hearing, not the approval.
 
 Songs of the admins (you and the helpers) are released at once. A waiting song is made into a folder of its own,
 `_waiting/<number>` beside its folder, which the library does not read - so nobody else sees or hears it, and Live

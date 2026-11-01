@@ -45,7 +45,7 @@ _THINKING = [
 _FENCE = re.compile(r"(?m)^```.*$")
 _BOLD_TAG = re.compile(r"^\**\s*\[([^\]]{1,40})\]\s*\**$")
 _LABEL_TAG = re.compile(
-    r"^\**\s*\(?(intro|verse(?: \d+)?|pre-chorus|chorus|post-chorus|bridge|outro|hook|refrain|interlude|instrumental|solo|break)\)?\s*:?\s*\**$",
+    r"^\**\s*\(?(intro|verse(?: \d+)?|pre-chorus|chorus|post-chorus|bridge|outro|hook|refrain|interlude|instrumental|solo|break|breakdown)\)?\s*:?\s*\**$",
     re.IGNORECASE,
 )
 
@@ -249,7 +249,8 @@ def compose(
             + (
                 " (these follow the score and must not change)."
                 if score_sections
-                else " (adapt only if the brief asks for it)."
+                else " (adapt only if the brief asks for it; a section tag the brief names in square brackets, "
+                "such as [Breakdown], is used as written)."
             )
         )
     parts.append(

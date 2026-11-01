@@ -44,6 +44,9 @@ export interface SheetPayload {
   engine: string | null
   /** What the engine calls the style document (``caption`` for MiniMax Music 3). */
   style_label?: string
+  /** The section tags the engine knows (the lyrics editor's buttons) and those of them the model learned. */
+  section_tags?: string[]
+  model_tags?: string[]
   instrumental: boolean
   target_seconds?: number | null
   /** The brief's work mode (``batch``: a new song every run, where an edit belongs to its song); the editor

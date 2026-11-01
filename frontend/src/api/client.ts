@@ -59,6 +59,32 @@ export async function getAsrNote(fetcher: Fetcher, draftSha256: string): Promise
   return (data?.note as AsrNote | null) ?? null
 }
 
+/** ComfyUI's setting of the section tags of one's own (the lyrics editor's buttons): kept per user, with ComfyUI's
+ * other settings (``user/<user>/comfy.settings.json``). */
+export const OWN_TAGS_SETTING = 'Plenio.SectionTags'
+
+/** The section tags of one's own (``[]`` when there are none, or ComfyUI does not answer). */
+export async function getOwnTags(fetcher: Fetcher): Promise<string[]> {
+  try {
+    const response = await fetcher.fetchApi(`/settings/${OWN_TAGS_SETTING}`)
+    if (!response.ok) return []
+    const data: unknown = await response.json()
+    return Array.isArray(data) ? data.filter((tag): tag is string => typeof tag === 'string') : []
+  } catch {
+    return []
+  }
+}
+
+/** Keep the section tags of one's own. */
+export async function saveOwnTags(fetcher: Fetcher, tags: readonly string[]): Promise<void> {
+  const response = await fetcher.fetchApi(`/settings/${OWN_TAGS_SETTING}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(tags)
+  })
+  if (!response.ok) throw new PlenioApiError(`Your section tags could not be kept (HTTP ${response.status}).`)
+}
+
 /** Analysis and element view of a score (valid or not: invalid scores come back with diagnostics). */
 /** The lyrics sent with a score: the text and the lines placed by hand (``[start, end]`` in units of L). */
 function withLyrics(body: Record<string, unknown>, lyrics?: string | null, spans?: readonly (readonly number[])[] | null): Record<string, unknown> {

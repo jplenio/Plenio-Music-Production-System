@@ -8,8 +8,12 @@
  * Made again from a song (owner's request 2026-10-26): a new take of it (its title, style and lyrics to change), a
  * new song like it (the form filled from its brief) or a cover of it - and for the admin and the player in your
  * network every setting of the studio besides (StudioPanel).
+ *
+ * It remembers what one chose (owner's request 2026-11-01, ``remember.ts``): a song ordered, the form opens with its
+ * values and configuration the next time. *Release at once* lets a maker skip hearing their song first; one's own
+ * lyrics get section tag buttons, tags of one's own among them (a user's request of the same day).
  */
-import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 
 import Icon from '../components/Icon.vue'
 import ComboField from './ComboField.vue'
@@ -18,6 +22,8 @@ import type { MakeClient } from './client'
 import { applyPreset, BUILT_IN_PRESETS, formatOf, presetMatters, presetOf, type MakePreset } from './presets'
 import { AGAIN_TEXT, LABELS, LIST_FIELDS, LYRICS_IDEA, OWN_LYRICS, VOCALS_TEXT, againStudio, applies, clock, fieldsOf, fromTemplate, grouped, missing, optionsFor, ownAllowed, requestOf, studioStart, summary, surprise, timeOfDay, untilText } from './form'
 import type { Again, Draft, FormData, Kind, MakeJob, MakeStatus, Remake, SongDocuments, StudioSpec, StudioValues, StyleTemplate } from './form'
+import { rememberOf, restoredFields, restoredKind, type Remembered } from './remember'
+import { MAX_OWN_TAGS, OWN_TAG_LENGTH, SECTION_TAGS, insertTag, ownTag } from '../../shared/lyricsTags'
 
 const props = defineProps<{
   client: MakeClient
@@ -30,8 +36,19 @@ const props = defineProps<{
   coverOf?: (songId: string) => string | null
   /** The presets of one's own (the player keeps them with the settings; the guests' page has none). */
   presets?: MakePreset[]
+  /** What the form opens with: the values and configuration of the last song ordered (``null``: the form's own). */
+  remembered?: Remembered | null
+  /** Section tags of one's own for one's own lyrics (``undefined``: none kept here). */
+  myTags?: string[]
 }>()
-const emit = defineEmits<{ made: [job: MakeJob, edited: boolean]; cancel: []; savePreset: [preset: MakePreset]; deletePreset: [id: string] }>()
+const emit = defineEmits<{
+  made: [job: MakeJob, edited: boolean]
+  cancel: []
+  savePreset: [preset: MakePreset]
+  deletePreset: [id: string]
+  remember: [values: Remembered]
+  tags: [tags: string[]]
+}>()
 
 const AGAIN: Again[] = ['take', 'song', 'cover']
 const AGAIN_ICON: Record<Again, 'refresh' | 'sparkles' | 'mic'> = { take: 'refresh', song: 'sparkles', cover: 'mic' }
@@ -81,6 +98,9 @@ const now = ref(Date.now() / 1000)
 const clockTimer = window.setInterval(() => (now.value = Date.now() / 1000), 15000)
 
 // --- presets, and several takes or songs at once (owner's request 2026-10-26) ----------------------------------
+/** Released at once: the maker does not hear it first (owner's request 2026-11-01). */
+const releaseNow = ref(false)
+const hearsFirst = computed(() => !!props.status?.settings.listen_first && props.status?.me.kind !== 'admin')
 /** How many: takes of one song, or songs of this form (the whole studio). */
 const count = ref(1)
 const several = ref<'takes' | 'songs'>('takes')
@@ -202,6 +222,7 @@ function start(): void {
     draft.base = job.from ? { id: job.from.song, title: job.from.title, seconds: job.from.seconds, genre: '', cover: false, other: false, model: '', kind: job.kind } : null
     draft.documents = { ...(props.remake?.documents ?? NO_DOCUMENTS), ...(job.documents ?? {}) }
     studioFor(job.kind, job.studio ?? null)
+    releaseNow.value = !!job.release_now
     return
   }
   if (props.remake?.start) {
@@ -211,8 +232,20 @@ function start(): void {
   draft.again = null
   draft.base = null
   draft.documents = { ...NO_DOCUMENTS }
-  draft.kind = draft.kind === 'cover' && props.form.covers ? 'cover' : 'song'
   draft.source = null
+  const kept = props.remembered ?? null
+  if (kept) {
+    // the values and the configuration of the last song ordered, as far as the form offers them now
+    draft.kind = restoredKind(kept, props.form)
+    draft.fields = restoredFields(kept, draft.kind, props.form)
+    studioFor(draft.kind, kept.studio ?? null)
+    chosenPreset.value = kept.preset && presets.value.some((p) => p.id === kept.preset) ? kept.preset : ''
+    count.value = full.value && kept.count ? kept.count : 1
+    several.value = kept.several ?? 'takes'
+    releaseNow.value = !!kept.releaseNow
+    return
+  }
+  draft.kind = draft.kind === 'cover' && props.form.covers ? 'cover' : 'song'
   draft.fields = fromTemplate(null, draft.kind, props.form)
   studioFor(draft.kind)
 }
@@ -256,14 +289,59 @@ async function generate(): Promise<void> {
   sending.value = true
   error.value = ''
   try {
+    draft.releaseNow = hearsFirst.value ? releaseNow.value : undefined
     const body = { ...requestOf(draft, spec.value, original.value), ...counts() }
     const job = props.editing ? await props.client.update(props.editing.id, body) : await props.client.create(body)
+    if (!props.editing) {
+      const choice = { preset: chosenPreset.value, count: count.value, several: several.value, releaseNow: releaseNow.value }
+      emit('remember', rememberOf(draft, choice, props.remembered ?? null))
+    }
     emit('made', job, !!props.editing)
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e)
   } finally {
     sending.value = false
   }
+}
+
+// --- section tags for one's own lyrics (a user's request of 2026-11-01: [Breakdown], [Violin Rise] once, then a
+// click) - YuE2's own sections, and tags of one's own the page keeps (the player with the settings, a guest's phone)
+const lyricsBox = ref<HTMLTextAreaElement | null>(null)
+const takeBox = ref<HTMLTextAreaElement | null>(null)
+const touched = new Set<string>()
+const tagging = ref(false)
+const newTag = ref('')
+const tagBox = ref<HTMLInputElement | null>(null)
+function addTag(where: 'fields' | 'take', tag: string): void {
+  const box = where === 'take' ? takeBox.value : lyricsBox.value
+  const text = (where === 'take' ? draft.documents?.lyrics : draft.fields.lyrics) ?? ''
+  // at the cursor once one has been in the box, else at the end
+  const next = insertTag(text, tag, box && touched.has(where) ? box.selectionStart : text.length)
+  if (where === 'take' && draft.documents) draft.documents.lyrics = next.text
+  else draft.fields.lyrics = next.text
+  touched.add(where)
+  void nextTick(() => {
+    box?.focus()
+    box?.setSelectionRange(next.caret, next.caret)
+  })
+}
+function startTag(): void {
+  tagging.value = true
+  void nextTick(() => tagBox.value?.focus())
+}
+/** A tag of one's own: kept (when it is new) and inserted. */
+function saveTag(where: 'fields' | 'take'): void {
+  const tag = ownTag(newTag.value)
+  tagging.value = false
+  newTag.value = ''
+  if (!tag) return
+  const mine = props.myTags ?? []
+  const known = [...SECTION_TAGS, ...mine].find((other) => other.toLowerCase() === tag.toLowerCase())
+  if (!known && mine.length < MAX_OWN_TAGS) emit('tags', [...mine, tag])
+  addTag(where, known ?? tag)
+}
+function dropTag(tag: string): void {
+  emit('tags', (props.myTags ?? []).filter((other) => other !== tag))
 }
 
 const seconds = (s: number): string => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`
@@ -318,8 +396,12 @@ onBeforeUnmount(() => {
       </label>
       <label v-if="draft.kind === 'song'" class="doc">
         <span>Lyrics <small v-if="changedLyrics" class="new">new words - the notes are made anew for them</small></span>
-        <textarea v-model="draft.documents.lyrics" rows="9" :maxlength="docLimit('lyrics')" />
+        <textarea ref="takeBox" v-model="draft.documents.lyrics" rows="9" :maxlength="docLimit('lyrics')" @focus="touched.add('take')" />
       </label>
+      <div v-if="draft.kind === 'song'" class="tags" aria-label="Section tags">
+        <button v-for="tag in SECTION_TAGS" :key="tag" type="button" class="chip tag" :title="`Insert [${tag}] - a section YuE2 learned`" @click="addTag('take', tag)">[{{ tag }}]</button>
+        <button v-for="tag in myTags ?? []" :key="'own-' + tag" type="button" class="chip tag own" :title="`Insert [${tag}] - a tag of your own`" @click="addTag('take', tag)">[{{ tag }}]</button>
+      </div>
       <p v-else class="note">A cover’s words follow the original’s melody - they stay as they are.</p>
       <button v-if="changedDocuments" type="button" class="link" @click="resetDocuments">Back to the song as it is</button>
     </section>
@@ -412,13 +494,27 @@ onBeforeUnmount(() => {
         </div>
         <div class="describe" :class="{ lit: lit.has('lyrics') }">
           <textarea
+            ref="lyricsBox"
             v-model="draft.fields.lyrics"
             :rows="ownLyrics ? 9 : 2"
             :maxlength="form.limits.lyrics ?? 6000"
             :placeholder="ownLyrics ? 'Your lyrics - one line per sung line, a blank line between verse and chorus ([Verse], [Chorus] tags are fine)' : 'e.g. about a summer night at the lake with friends'"
             :aria-label="ownLyrics ? 'Your lyrics' : 'What the lyrics are about'"
+            @focus="touched.add('fields')"
           />
           <small>{{ (draft.fields.lyrics || '').length }} / {{ form.limits.lyrics ?? 6000 }}</small>
+        </div>
+        <div v-if="ownLyrics" class="tags" aria-label="Section tags">
+          <button v-for="tag in SECTION_TAGS" :key="tag" type="button" class="chip tag" :title="`Insert [${tag}] - a section YuE2 learned`" @click="addTag('fields', tag)">[{{ tag }}]</button>
+          <span v-for="tag in myTags ?? []" :key="'own-' + tag" class="own">
+            <button type="button" class="chip tag own" :title="`Insert [${tag}] - a tag of your own: with words it is sung, without words an instrumental part`" @click="addTag('fields', tag)">[{{ tag }}]</button>
+            <button type="button" class="chip tag x" :title="`Forget [${tag}] (your lyrics keep it)`" @click="dropTag(tag)"><Icon name="close" :size="11" /></button>
+          </span>
+          <template v-if="tagging">
+            <input ref="tagBox" v-model="newTag" class="newtag" :maxlength="OWN_TAG_LENGTH" placeholder="e.g. Violin Rise" aria-label="Your section tag" @keydown.enter.prevent="saveTag('fields')" @keydown.esc.prevent="tagging = false" />
+            <button type="button" class="ghost small" @click="saveTag('fields')">Add</button>
+          </template>
+          <button v-else-if="myTags" type="button" class="link" title="A section tag of your own - kept for your next songs" @click="startTag">+ your tag</button>
         </div>
       </template>
     </section>
@@ -460,6 +556,13 @@ onBeforeUnmount(() => {
           <button type="button" :class="{ on: several === 'songs' }" title="Several songs of this form - each its own words and music" @click="several = 'songs'">different songs</button>
         </div>
       </div>
+      <label v-if="hearsFirst" class="now">
+        <input v-model="releaseNow" type="checkbox" />
+        <span>
+          <b>Release at once</b> - without hearing it first
+          <small>{{ status?.settings.approve ? 'an admin still approves it before everybody hears it' : 'it joins the songs - and the party - as soon as it is ready' }}</small>
+        </span>
+      </label>
       <p v-if="isTake" class="what"><Icon name="refresh" :size="15" /> {{ count > 1 ? `${count} new takes` : 'A new take' }} of {{ draft.base?.title }}{{ changedDocuments ? ' - as changed' : '' }}</p>
       <p v-else-if="summary(draft)" class="what"><Icon name="music" :size="15" /> {{ summary(draft) }}</p>
       <button type="submit" class="generate" :disabled="sending || uploading || lacking.length > 0 || (status !== null && !status.may)">
@@ -820,6 +923,53 @@ textarea:focus,
   bottom: 8px;
   color: rgba(255, 255, 255, 0.35);
   font-size: 11px;
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.tags .tag {
+  padding: 4px 9px;
+  font-size: 12px;
+}
+.tags .own {
+  display: inline-flex;
+}
+.tags .own .tag:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.tags .tag.own {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.tags .tag.x {
+  padding: 4px 7px;
+  border-left: none;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.tags .newtag {
+  width: 13em;
+}
+.now {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  max-width: 520px;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.now input {
+  margin-top: 3px;
+}
+.now small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
 }
 .lyricsfrom {
   display: flex;

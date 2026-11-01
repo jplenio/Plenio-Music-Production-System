@@ -205,7 +205,12 @@ class PlenioSongSheet(io.ComfyNode):
         )
         payload = {**evaluation.payload(), "node_id": str(cls.hidden.unique_id)}
         if engine is not None:
-            payload["style_label"] = getattr(rules_for(engine.engine_id), "STYLE_LABEL", "style")
+            rules = rules_for(engine.engine_id)
+            payload["style_label"] = getattr(rules, "STYLE_LABEL", "style")
+            # the lyrics editor's tag buttons: the model's own sections first, then the others the engine knows
+            tags = list(getattr(rules, "TAG_VOCABULARY", ()))
+            payload["section_tags"] = tags
+            payload["model_tags"] = list(getattr(rules, "MODEL_SECTIONS", tags))
         if timeline is not None:
             payload["timeline"] = timeline.to_dict()
         reference = kwargs.get("reference_audio")

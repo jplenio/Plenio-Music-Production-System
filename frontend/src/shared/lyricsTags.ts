@@ -4,9 +4,53 @@
  * insert-only convenience, nothing more (the checks live in the backend).
  */
 
-/** The tag buttons of the lyrics editor (all in both engines' tag vocabularies; ``Instrumental`` is a
- * section without words - the plan makes it an interlude). */
-export const SECTION_TAGS = ['Intro', 'Verse', 'Pre-Chorus', 'Chorus', 'Bridge', 'Instrumental', 'Outro'] as const
+/** The tag buttons of the lyrics editor when the sheet names no engine: the sections YuE2 learned
+ * (``plenio/core/engines/yue2.py`` ``MODEL_SECTIONS``; ``Interlude`` and ``Instrumental`` are sections without
+ * words). A sheet with an engine names the engine's own (``model_tags``, ``section_tags``). */
+export const SECTION_TAGS = ['Intro', 'Verse', 'Pre-Chorus', 'Chorus', 'Bridge', 'Interlude', 'Instrumental', 'Outro'] as const
+
+/** The other tags Plenio knows (YuE2 ``TAG_VOCABULARY`` beyond its own sections): sung on a related section's
+ * melody, or - without words - an instrumental part. */
+export const MORE_TAGS = ['Post-Chorus', 'Hook', 'Refrain', 'Solo', 'Break', 'Breakdown', 'Drop', 'Build'] as const
+
+/** Sections without words: the editor says so in their button's title. */
+const WORDLESS = new Set(['intro', 'interlude', 'instrumental', 'solo', 'break', 'outro'])
+
+/** At most this many tags of one's own, each at most ``OWN_TAG_LENGTH`` characters (a longer line is no tag). */
+export const MAX_OWN_TAGS = 30
+export const OWN_TAG_LENGTH = 40
+
+/** A tag of one's own as typed - ``[Violin Rise]``, ``Violin Rise`` - as it is kept: one line, no brackets, at most
+ * ``OWN_TAG_LENGTH`` characters (``null``: nothing left). */
+export function ownTag(text: string): string | null {
+  const tag = text.replace(/[[\]\r\n]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, OWN_TAG_LENGTH).trim()
+  return tag || null
+}
+
+/** The tags of one's own as kept, cleaned: each once (case does not count), none the editor offers anyway
+ * (``offered``), at most ``MAX_OWN_TAGS``. */
+export function ownTags(raw: unknown, offered: readonly string[] = []): string[] {
+  if (!Array.isArray(raw)) return []
+  const seen = new Set(offered.map((tag) => tag.toLowerCase()))
+  const out: string[] = []
+  for (const item of raw) {
+    const tag = typeof item === 'string' ? ownTag(item) : null
+    if (!tag || seen.has(tag.toLowerCase())) continue
+    seen.add(tag.toLowerCase())
+    out.push(tag)
+    if (out.length === MAX_OWN_TAGS) break
+  }
+  return out
+}
+
+/** A tag button's title. */
+export function tagTitle(tag: string, learned: boolean): string {
+  const wordless = WORDLESS.has(tag.toLowerCase())
+  const what = wordless ? 'usually without words - an instrumental part' : 'sung: its words beneath it'
+  return learned
+    ? `Insert [${tag}] at the cursor - a section YuE2 learned (${what})`
+    : `Insert [${tag}] at the cursor - ${wordless ? 'without words: an instrumental part' : 'with words it is sung on a related section\'s melody, without words it is an instrumental part'}`
+}
 
 /**
  * ``text`` with the section tag inserted as its own line at ``at`` (the cursor; GitHub issue #3: the tags

@@ -103,6 +103,8 @@ export interface Draft {
   documents?: SongDocuments
   /** The whole studio's values. */
   studio?: StudioValues
+  /** Released at once: its maker does not hear it first (only where the host has makers hear their songs first). */
+  releaseNow?: boolean
 }
 
 export interface Stage {
@@ -135,6 +137,8 @@ export interface MakeJob {
   /** Waiting to be released (owner's request 2026-10-29): for its maker to hear it first, for an admin to approve it;
    * or released, not released by its maker, not approved. */
   release?: Release | null
+  /** Released at once: its maker does not hear it first (owner's request 2026-11-01). */
+  release_now?: boolean
   can: { edit: boolean; up: boolean; down: boolean; delete: boolean; listen?: boolean; release?: boolean; discard?: boolean }
   fields?: Record<string, string>
   source?: Source | null
@@ -349,6 +353,8 @@ export interface MakeRequest {
   takes?: number
   /** Songs of this form (the whole studio: 1-5). */
   copies?: number
+  /** Released at once: its maker does not hear it first. */
+  release_now?: boolean
 }
 
 /** The request for the server: the fields that apply, the recording for a cover; made again from a song, the song
@@ -368,6 +374,7 @@ export function requestOf(draft: Draft, studio: StudioSpec | null = null, origin
     body.documents = changed
   }
   if (studio && draft.studio) body.studio = studioRequest(studio, draft.studio, draft)
+  if (draft.releaseNow !== undefined) body.release_now = draft.releaseNow
   return body
 }
 
@@ -379,6 +386,7 @@ export function retryRequest(job: MakeJob): MakeRequest {
   else if (job.source?.id) body.source = job.source.id
   if (job.documents && Object.keys(job.documents).length) body.documents = job.documents
   if (job.studio) body.studio = job.studio
+  if (job.release_now) body.release_now = true
   return body
 }
 

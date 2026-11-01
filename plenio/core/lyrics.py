@@ -252,7 +252,13 @@ def check_lyrics(text: str, *, instrumental: bool, vocabulary: Sequence[str] = (
     for section in lyrics.sections:
         base = re.sub(r"\s*\d+$", "", section.tag).lower()
         if known and base not in known:
-            findings.append(info(f"Unusual section tag [{section.tag}].", "lyrics"))
+            findings.append(
+                info(
+                    f"[{section.tag}] is a section tag of your own: the model reads its name as a hint only - with "
+                    "words it is sung like a verse or a chorus, without words it is an instrumental part.",
+                    "lyrics",
+                )
+            )
         played = set(without_playing_directions(section.lines)[1])
         for line in section.lines:
             if _REPEAT.search(line):

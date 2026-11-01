@@ -50,9 +50,31 @@ The predecessor toolkit used the word `custom` in `key` and `meter` to mean "let
 The lyrics are a document of the Song Sheet like any other, and you can take them over completely:
 
 - **Use my own lyrics** (Lyrics tab) switches the document to *manual*: the writer is not consulted any more, and these words reach the model unchanged;
-- the **section tags** under the editor (`[Intro]`, `[Verse]`, `[Pre-Chorus]`, `[Chorus]`, `[Bridge]`, `[Instrumental]`, `[Outro]`) insert the tags YuE2 sings section by section, as their own line where the cursor is (at the end before you click into the text); `[Instrumental]` is a section without words;
+- the **section tags** under the editor insert the tags YuE2 sings section by section, as their own line where the cursor is (at the end before you click into the text) - see [Section tags](#section-tags);
 - the node's summary and the App-mode sheet button show **lyrics: yours (manual)**;
 - an *edited* lyrics text is protected too: when the upstream draft changes, the run **stops with a conflict** instead of replacing your words.
+
+### Section tags
+
+YuE2 learned eight sections: **`[Intro]` `[Verse]` `[Pre-Chorus]` `[Chorus]` `[Bridge]` `[Interlude]` `[Instrumental]`
+`[Outro]`**. Its lyrics' sections came from a structure analysis whose labels are intro, verse, pre-chorus,
+chorus, bridge, instrumental, silence and outro (YuE2's technical report; SongFormer), and upstream writes them as
+these tags, `[Interlude]` among them. They are the buttons under the lyrics editor.
+
+**more** shows the tags Plenio fits to YuE2's plan as well: `[Post-Chorus]` `[Hook]` `[Refrain]` sing on a
+chorus's melody when the plan has none of their own, `[Breakdown]` on the bridge's, `[Build]` on the pre-chorus's,
+`[Drop]` on the chorus's; `[Solo]` and `[Break]` - and any of them without words - are instrumental parts.
+
+**+ your tag** keeps a tag of your own - `[Violin Rise]`, `[Choir]`, `[Breakdown 2]` - for every song after: one
+click inserts it, × forgets it (your lyrics keep it). They are kept with ComfyUI's settings, for your user. A tag
+of your own works like the others: with words beneath it, it is sung (on the plan's section of its name, else a
+related one, else a verse's or a chorus's melody); without words between sung sections, it is an instrumental
+part (the plan's interlude, else its intro's music once more). YuE2 reads the name only as a hint - it was not
+trained on it -, and an instrument belongs in the style, not in the tag: *a soaring violin line before the second
+verse* in the description, `[Violin Rise]` in the lyrics. The Song Sheet says so beside such a tag.
+
+The writer knows every tag too: it uses YuE2's own by default, and a tag the brief names in square brackets -
+*with a [Breakdown] before the last chorus* - as written.
 
 **Batch mode** (*new song every run*): a manual lyrics document is used for every song of the series - the titles, styles and takes change, the words stay yours. If you want new words per run, leave the document *automatic*.
 

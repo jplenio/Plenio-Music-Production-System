@@ -73,7 +73,8 @@ DEFAULTS: dict[str, Any] = {
 comes through *In your network* has the whole studio, at any time (``remote``; the admin always has). A song made
 here is released at once - or (owner's request 2026-10-29) after its maker heard it and released it
 (``listen_first``) and/or after an admin approved it (``approve``); the admin's and the helpers' songs are released
-at once."""
+at once. Its maker may let a song of theirs go without hearing it first (``release_now`` of the request, owner's
+request 2026-11-01); an admin's approval it still waits for."""
 RELEASE_STEPS = ("maker", "admin")
 """A song waiting to be released: for its maker to hear it first, or for an admin to approve it."""
 NOT_RELEASED = "not released"
@@ -767,6 +768,7 @@ class PartySongs:
         documents = self._edits(data, kind) if again == "take" else {}
         studio = self._studio_values(who, data, kind)
         takes, copies = self._counts(who, data)
+        release_now = bool(data.get("release_now"))
         with self.lock:
             open_jobs = [j for j in self.jobs if self._mine(who, j) and j["status"] not in FINISHED]
             if not self.full(who) and len(open_jobs) >= self.settings["per_person"]:
@@ -789,6 +791,7 @@ class PartySongs:
             made = []
             for number in range(count):
                 job = self._new_job(who, kind, again, base, documents, studio, fields, source)
+                job["release_now"] = release_now
                 if group:
                     job["group"] = group
                     job["of"] = count if again == "take" or copies > 1 else takes
@@ -898,6 +901,7 @@ class PartySongs:
             for number in range(left):
                 take = self._new_job(who, kind or "song", "take", base, {}, job.get("studio"), fields, None)
                 take["full"] = bool(job.get("full"))
+                take["release_now"] = bool(job.get("release_now"))
                 take.update(group=group, of=total, number=number + 2)
                 self.jobs.insert(first + number, take)
             self._save()
@@ -913,6 +917,8 @@ class PartySongs:
                 job["fields"] = self._clean(who, data, kind=job["kind"])
             if "studio" in data:
                 job["studio"] = self._studio_values(who, data, job["kind"])
+            if "release_now" in data:
+                job["release_now"] = bool(data.get("release_now"))
             if (
                 job["kind"] == "cover"
                 and job.get("again") is None
@@ -1391,6 +1397,7 @@ class PartySongs:
             # waiting to be released: for its maker to hear it first (``maker``), for an admin (``admin``); or
             # ``released``, ``discarded``, ``rejected`` (owner's request 2026-10-29)
             "release": job.get("release"),
+            "release_now": bool(job.get("release_now")),
             "can": {
                 "edit": waiting and (mine or admin),
                 "up": waiting and place > 0,
@@ -1635,7 +1642,7 @@ class PartySongs:
                 audio = str(self.studio.upload(path, name if Path(name).suffix else path.name)["name"])
             request = self.request_of(job, audio, base)
             # a song that waits to be released is made into a folder of its own, which the library does not read
-            job["hold"] = self._holds(job.get("owner") or {})
+            job["hold"] = self._holds(job)
             if job["hold"]:
                 job["final"] = str(request["release"].get("folder") or DEFAULT_FOLDER)
                 request["release"] = {
@@ -1753,11 +1760,13 @@ class PartySongs:
         self.rates[kind] = factor if kind not in self.rates else 0.5 * self.rates[kind] + 0.5 * factor
 
     # --- released, or not (owner's request 2026-10-29) ----------------------------------------------------
-    def _holds(self, owner: Mapping[str, Any]) -> bool:
-        """Whether a song waits to be released: one of a user or a guest while its maker hears it first or an admin
-        approves it (the admin's and the helpers' songs are released at once)."""
+    def _holds(self, job: Mapping[str, Any]) -> bool:
+        """Whether a song waits to be released: one of a user or a guest while its maker hears it first - unless they
+        let it go at once (``release_now``) - or an admin approves it (the admin's and the helpers' songs are released
+        at once)."""
+        owner = job.get("owner") or {}
         return owner.get("kind") != "admin" and bool(
-            self.settings["listen_first"] or self.settings["approve"]
+            (self.settings["listen_first"] and not job.get("release_now")) or self.settings["approve"]
         )
 
     def _next_step(self, job: Mapping[str, Any], heard: bool = False) -> str | None:
@@ -1765,7 +1774,7 @@ class PartySongs:
         owner = job.get("owner") or {}
         if owner.get("kind") == "admin":
             return None
-        if not heard and self.settings["listen_first"]:
+        if not heard and self.settings["listen_first"] and not job.get("release_now"):
             return "maker"
         return "admin" if self.settings["approve"] else None
 

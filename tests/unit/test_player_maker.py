@@ -1148,6 +1148,31 @@ def test_a_song_waits_for_its_maker_and_an_admin_before_everybody_hears_it(party
         songs.release(ADMIN, made["id"])  # not waiting any more
 
 
+def test_its_maker_may_let_a_song_go_at_once_but_an_admins_approval_stays(party: Any) -> None:
+    """Owner's request 2026-11-01: the release made simpler where it is wanted - the maker ticks *release at once* and
+    does not hear the song first; where the host wants an admin's approval, the song still waits for it."""
+    songs, studio, clock, library = party
+    songs.configure({"listen_first": True})
+    made = songs.create(ANNA, {"fields": SONG, "release_now": True})
+    assert made["release_now"] is True
+    songs.tick()
+    assert studio.sent[-1]["release"].get("folder") is None  # nothing to wait for: made into its folder
+    done = finish(songs, studio, clock, "Neon")
+    assert done.get("release") is None and titles(library) == ["Neon"]
+    # changed while it waits in the line: as the maker says last
+    later = songs.create(ANNA, {"fields": SONG})
+    assert later["release_now"] is False
+    assert songs.update(ANNA, later["id"], {"fields": SONG, "release_now": True})["release_now"] is True
+    songs.tick()
+    assert finish(songs, studio, clock, "Snow").get("release") is None
+    # with an admin's approval too: it skips the maker's hearing, not the admin's
+    songs.configure({"approve": True})
+    third = songs.create(BEN, {"fields": SONG, "release_now": True})
+    songs.tick()
+    done = finish(songs, studio, clock, "Rain")
+    assert done["id"] == third["id"] and done["release"] == "admin"
+
+
 def test_a_released_song_takes_a_number_where_its_name_is_taken(party: Any) -> None:
     songs, studio, clock, library = party
     songs.configure({"approve": True})
