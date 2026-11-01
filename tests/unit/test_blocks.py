@@ -139,6 +139,26 @@ def test_a_block_changed_inside_is_kept_and_named():
     assert set(found.updated) == {WRITE, PLAN, ARRANGE} and found.linked == (PLAN,)
 
 
+def test_the_llm_limits_an_earlier_version_shipped_are_not_set_by_hand():
+    # 1.0.1's writer answered in 6144 tokens with a 12 288 context; the current block has 1.5.0's 16 384 / 24 576
+    def llm(workflow: dict[str, Any], name: str) -> list[Any]:
+        return next(n for n in definition(workflow, name)["nodes"] if n["type"] == "PlenioLocalLLM")[
+            "widgets_values"
+        ]
+
+    assert (llm(SAVED_SONG, WRITE)[4], llm(SAVED_SONG, WRITE)[7]) == (6144, 12288)
+    found = b.upgrade(SAVED_SONG, BLOCKS, BRIEFS)
+    assert WRITE in found.updated and (llm(found.workflow, WRITE)[4], llm(found.workflow, WRITE)[7]) == (
+        16384,
+        24576,
+    )
+    # a length set by hand is the user's: the block stays as it is
+    changed = copy.deepcopy(SAVED_SONG)
+    llm(changed, WRITE)[4] = 9000
+    found = b.upgrade(changed, BLOCKS, BRIEFS)
+    assert (WRITE, "its node PlenioLocalLLM was changed inside the block") in found.kept
+
+
 @pytest.mark.parametrize(
     ("change", "why"),
     [

@@ -13,6 +13,7 @@ import { type Fetcher, PlenioApiError } from '../api/client'
 import { chain, type ComfyApp, type ComfyNode } from '../shared/comfy'
 import type { AsrNote, SheetPayload } from '../shared/sheetSession'
 import { blocksMessages, bringBlocksUpToDate } from './blocks'
+import { MAX_TOKENS, raiseLlmLimits } from './llmLimits'
 import { installBriefLists } from './briefChoices'
 import { BRIEF_NODES, installBriefTemplatePanel } from './briefTemplate'
 import { CONTINUE_COMMAND, type ContinueHost, installRecordDrop, openContinueSong } from './continueSong'
@@ -178,6 +179,9 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
   // a workflow saved before its blocks followed the brief's creativity: they are brought up to date before
   // the frontend configures it (blocks.ts); loading goes on as it was when that fails
   async beforeConfigureGraph(graphData) {
+    // the blocks' LLM nodes get 1.5.0's answer length where they have the one an earlier version shipped
+    const raised = raiseLlmLimits(graphData)
+    if (raised.length) console.info(`Plenio: longer LLM answers (${MAX_TOKENS} tokens) in ${raised.join(', ')}`)
     try {
       const answer = await bringBlocksUpToDate(graphData, comfyApi)
       for (const message of blocksMessages(answer)) comfyApp.extensionManager?.toast?.add({ ...message, life: 20000 })

@@ -33,7 +33,7 @@ Vision projectors (`mmproj`), embedding models and the later parts of split file
 ## Files or apps?
 
 - **A file** (`models/LLM · …`, `… files · …`, `HF cache · …`) runs in a llama.cpp server that Plenio starts for the draft and stops right after. Before it starts, ComfyUI frees enough GPU memory for the file and its context; afterwards all of it is free again for YuE2 or MiniMax. This is the best choice on a single 16 GB card. Loading takes a few seconds per draft (a fixed draft seed keeps the draft cached, so it is written once).
-- **An app's model** (`LM Studio · …`, `Ollama · …`) is answered by the running app. The app manages its own memory: Plenio asks Ollama, and LM Studio for models it loaded by itself, to unload after the answer (*keep loaded* off), but a model you loaded by hand in LM Studio stays. Set the context length in LM Studio to 12288 or more (a draft with thoughts needs it); Ollama gets it from the node.
+- **An app's model** (`LM Studio · …`, `Ollama · …`) is answered by the running app. The app manages its own memory: Plenio asks Ollama, and LM Studio for models it loaded by itself, to unload after the answer (*keep loaded* off), but a model you loaded by hand in LM Studio stays. Set the context length in LM Studio to 24576 or more (a draft with a thinking model's thoughts needs it); Ollama gets it from the node.
 
 ## Running GGUF files: the llama.cpp server
 
@@ -51,10 +51,10 @@ Without any of them, models of running apps still work. LM Studio's bundled llam
 | Setting | Default | Meaning |
 |---|---|---|
 | seed | 0, fixed | the same seed, prompt and settings give the same answer - from Plenio's answer cache, without asking the model again |
-| max tokens | 6144 | room for a long draft and a reasoning model's thoughts; a longer answer stops the run with a message instead of being cut |
+| max tokens | 16384 | room for a long draft and a reasoning model's thoughts, which can run to many thousand tokens; a longer answer stops the run with a message instead of being cut |
 | temperature | 0.8 | 0 = most likely words; higher = more varied |
 | thinking | off | let a reasoning model think first; slower and needs more max tokens; the thoughts come out on *thinking* |
-| context | 12288 | prompt + answer, for files and Ollama |
+| context | 24576 | prompt + answer, for files and Ollama |
 | keep loaded | off | on: the model stays loaded for the next run - faster, but it keeps its GPU memory next to ComfyUI's models |
 | system prompt | empty | standing instructions before the prompt |
 | reuse answers | on | keep every answer in `user/plenio/cache/llm` and answer the same request from there (see below) |

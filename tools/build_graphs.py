@@ -60,10 +60,16 @@ LORA = "ar_lora_inst_v3abc_comfyui.safetensors"
 SHEETSAGE = "sheetsage2_bf16.safetensors"
 WRITER = "gemma4_e4b_it_fp8_scaled.safetensors"
 SEED_SUM = "sum(values)"  # works with or without the song seed (a blueprint used without a brief)
-WRITER_MAX_TOKENS = 6144  # a long draft plus a reasoning model's thoughts (Qwen thinks 500-3000 tokens)
-WRITER_CONTEXT = 12288  # Local LLM: a detailed prompt, WRITER_MAX_TOKENS and a margin
-ARRANGE_MAX_TOKENS = 2048  # a JSON section plan: 300-900 tokens for up to 12 sections (study A1)
-ARRANGE_CONTEXT = 8192  # the arrangement prompt (1 500-3 000 tokens) and the answer
+# Every LLM call may answer at length: a thinking model's thoughts come first and can run to many thousand
+# tokens (6144 cut some off); the context holds the prompt, the answer and a margin.
+LLM_MAX_TOKENS = 16384
+LLM_CONTEXT = 24576
+WRITER_MAX_TOKENS = LLM_MAX_TOKENS  # a long draft plus a reasoning model's thoughts
+WRITER_CONTEXT = LLM_CONTEXT  # Local LLM: a detailed prompt, WRITER_MAX_TOKENS and a margin
+ARRANGE_MAX_TOKENS = (
+    LLM_MAX_TOKENS  # a JSON section plan: 300-900 tokens for up to 12 sections (study A1) + thoughts
+)
+ARRANGE_CONTEXT = LLM_CONTEXT  # the arrangement prompt (1 500-3 000 tokens) and the answer
 ARRANGE_TEMPERATURE = 0.7
 REPAIR_TEMPERATURE = 0.7  # Fit Lyrics' repair rounds: a few lines rewritten to a syllable count
 MINIMAX_DIT = "minimax_music3_dit_fp16.safetensors"
@@ -1299,8 +1305,8 @@ def arrange() -> Blueprint:
     )
 
 
-HEARD_CHECK_MAX_TOKENS = 1024  # a few corrections in JSON
-HEARD_CHECK_CONTEXT = 8192  # the lyrics as heard (1 000-3 000 tokens) and the answer
+HEARD_CHECK_MAX_TOKENS = LLM_MAX_TOKENS  # a few corrections in JSON + a reasoning model's thoughts
+HEARD_CHECK_CONTEXT = LLM_CONTEXT  # the lyrics as heard (1 000-3 000 tokens) and the answer
 HEARD_CHECK_TEMPERATURE = 0.2
 """A judgement, not a song: little sampling."""
 

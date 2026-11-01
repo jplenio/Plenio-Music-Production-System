@@ -12,7 +12,9 @@ exactly as the current templates have it. At 50 the Creativity nodes give the nu
 
 A block is kept as it is, and named, when the current one does not fit in its place: other inputs or
 outputs (inputs and outputs it adds after the old ones are fine), or a node behind the sampling that differs from the current block's (a value set by hand inside
-the block, which would be lost - or a block of a ComfyUI whose nodes have other fields).
+the block, which would be lost - or a block of a ComfyUI whose nodes have other fields). The writer's answer
+length and context are not set by hand when they are what an earlier version shipped (``OLD_LLM_LIMITS``): the
+current block takes their place with its own.
 """
 
 from __future__ import annotations
@@ -26,6 +28,15 @@ CREATIVITY_NODE = "PlenioCreativity"
 BRIEF_NODES = ("PlenioSongBrief", "PlenioCoverBrief")
 CREATIVITY = "creativity"
 """The brief's output and the YuE2 blocks' input that carry the creativity."""
+OLD_MAX_TOKENS = (1024, 2048, 6144)
+OLD_CONTEXTS = (8192, 12288)
+OLD_LLM_LIMITS: dict[str, dict[int, tuple[int, ...]]] = {
+    "TextGenerate": {1: OLD_MAX_TOKENS},
+    "PlenioLocalLLM": {4: OLD_MAX_TOKENS, 7: OLD_CONTEXTS},
+}
+"""The answer lengths and contexts the blocks' LLM nodes had before 1.5.0 (16 384 and 24 576 since), by the
+position in the node's ``widgets_values`` (max_length; max_tokens and context) - the frontend raises them in a
+saved workflow's blocks too (``frontend/src/extension/llmLimits.ts``)."""
 
 
 @dataclass(frozen=True)
@@ -159,9 +170,26 @@ def misfit(old: Mapping[str, Any], current: Mapping[str, Any]) -> str | None:
             continue  # a node the current block adds after the old ones (the render blocks' retakes)
         if before is None or before.get("type") != now.get("type"):
             return "its sampling nodes differ from the current block's"
-        if not _same(before.get("widgets_values"), now.get("widgets_values")):
+        if not _same(_shipped_limits(before, now), now.get("widgets_values")):
             return f"its node {now.get('title') or now.get('type')} was changed inside the block"
     return None
+
+
+def _shipped_limits(before: Mapping[str, Any], now: Mapping[str, Any]) -> Any:
+    """``before``'s values with an LLM limit an earlier version shipped taken as ``now``'s (not set by hand)."""
+    values, current = before.get("widgets_values"), now.get("widgets_values")
+    limits = OLD_LLM_LIMITS.get(str(before.get("type")))
+    if not limits or not isinstance(values, list) or not isinstance(current, list):
+        return values
+    values = list(values)
+    for index, old in limits.items():
+        if (
+            index < min(len(values), len(current))
+            and not isinstance(values[index], bool)
+            and values[index] in old
+        ):
+            values[index] = current[index]
+    return values
 
 
 def _next_link_id(workflow: dict[str, Any]) -> int:

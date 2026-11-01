@@ -13,9 +13,10 @@ from .. import llm as local
 
 SEED_RANGE = 2**32
 """llama.cpp takes a 32-bit seed; larger seeds (a linked Seed node) are wrapped into it."""
-MAX_TOKENS = 6144
-"""Room for a long answer and a reasoning model's thoughts (Qwen thinks 500-3000 tokens before it answers)."""
-CONTEXT = 12288
+MAX_TOKENS = 16384
+"""Room for a long answer and a reasoning model's thoughts (a thinking model may think for many thousand tokens
+before it answers; 6144 cut some of them off)."""
+CONTEXT = 24576
 """The prompt (a few thousand tokens for a detailed brief), MAX_TOKENS and a margin."""
 
 

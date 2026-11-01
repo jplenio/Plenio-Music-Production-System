@@ -3572,7 +3572,7 @@
       {
        "tooltip": "Longest answer in tokens; a cut-off answer stops the run with a message.",
        "advanced": true,
-       "default": 6144,
+       "default": 16384,
        "min": 16,
        "max": 131072
       }
@@ -3601,7 +3601,7 @@
       {
        "tooltip": "Context length in tokens (prompt + answer) for GGUF files and Ollama. Other apps use the length set in the app.",
        "advanced": true,
-       "default": 12288,
+       "default": 24576,
        "min": 1024,
        "max": 262144,
        "step": 1024
