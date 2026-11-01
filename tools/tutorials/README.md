@@ -106,7 +106,9 @@ pause runs much longer than two seconds. `| +6` after a cue leaves six quiet sec
 
 `promo.mjs` cuts about 80 seconds of shots from the recordings (the creative modes of 0.4.5 included) with a narrator, into
 `<out>/Plenio - Music production in ComfyUI (promo)/` (no music; `--music` lays a song of the DAW
-recording under the voice). `screenshots.mjs` makes the README's screenshots again, at twice the
+recording under the voice). Its video, *Plenio in 75 seconds*, is retired since 1.5.0: the spots *Your idea. Your
+song. Your party.* and *Your idea. Your song. Your control.* (motion graphics, made outside this repository) take its
+place in the README, the docs and the player's help. `screenshots.mjs` makes the README's screenshots again, at twice the
 screen resolution, into `assets/branding/<version>/`: the template graphs after real runs, App mode, the
 System Check report, the EQ panel and the Stem Mixer (`--only` for some of them; `--audio` the song for
 Enhance & Master). Every video's folder also has `youtube-chapters.txt` and `thumbnail.jpg` is cut from

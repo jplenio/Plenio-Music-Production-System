@@ -2,7 +2,7 @@
 
 > **Experimental.** Creative modes and the closeness sliders can give unexpected results - a chord that surprises, an instrument line that does not fit every song, a plan that is not applied. They are meant for experimenting first: try a mode, listen, change the score in the Song Sheet or run again with another *arrangement seed*, and keep what you like. *off* is the dependable choice.
 
-▶ **Videos:** [Tutorial 6 · YuE2 · Song · Creative modes](https://youtu.be/gB-mpQkk-z4) and [Tutorial 7 · YuE2 · Cover · Creative modes](https://youtu.be/jiF_e5CSjKM). All of them in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE).
+▶ **Videos:** [Tutorial 6 · YuE2 · Song · Creative modes](https://youtu.be/JTlRvyGssfo) and [Tutorial 7 · YuE2 · Cover · Creative modes](https://youtu.be/5bPU2-coElw). All of them in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE).
 
 How freely a song is written and arranged. Song Brief and Cover Brief have an **arrangement** choice:
 

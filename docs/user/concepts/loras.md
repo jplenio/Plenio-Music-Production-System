@@ -5,7 +5,7 @@ instrumentation. The YuE2 templates (*1 · YuE2 · Song*, *2 · YuE2 · Cover*, 
 **YuE2 LoRAs** node under the music model, in the *MUSIC MODEL* group: up to four LoRAs, each with its
 strength. With every slot on *none* - as the templates ship - YuE2 runs as loaded.
 
-▶ **Video:** [Tutorial 11 · YuE2 LoRAs](https://youtu.be/rMzZDr9HpvM) - the node, a LoRA chosen with its strength, an instrumental made with it and what the node says after the run. All of them in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE).
+▶ **Video:** [Tutorial 11 · YuE2 LoRAs](https://youtu.be/o7NtC3U2pEg) - the node, a LoRA chosen with its strength, an instrumental made with it and what the node says after the run. All of them in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE).
 
 ## Use one
 

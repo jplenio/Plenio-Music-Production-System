@@ -8,7 +8,7 @@ The API runs inside ComfyUI (Plenio is a ComfyUI extension), on the computer tha
 open source like the rest of Plenio (Apache 2.0); the music models have licences of their own (see
 [Licences of what you make](#licences-of-what-you-make)).
 
-▶ **Video:** [Tutorial 10 · Song API](https://youtu.be/MBfM8vOynT4) - a song ordered with one POST, followed with `?wait`, its files downloaded and played, and the examples, narrated.
+▶ **Video:** [Tutorial 10 · Song API](https://youtu.be/5vdi3ypvIuw) - a song ordered with one POST, followed with `?wait`, its files downloaded and played, and the examples, narrated.
 
 | | |
 |---|---|

@@ -18,20 +18,20 @@ export interface Tutorial {
 export const PLAYLIST = 'https://www.youtube.com/playlist?list=PLAFqTtP59fgE'
 
 export const TUTORIALS: Tutorial[] = [
-  { id: 'V7irEvnbKhU', number: '8', title: 'The Plenio Player', text: 'Live lyrics, the full lyrics to copy, a page per song with its stars and how it was made, the notation following the music, the visuals with Plenio Nova, playlists, Live Play with the guests’ reactions, lyric videos and a player in one file to share.', topic: 'start', where: 'player' },
-  { id: 'zlfVKXzPj_c', number: '9', title: 'Party songs', text: 'Make songs from the player: presets, takes, ComfyUI started the way you start it - and your guests ordering songs on their phones, who made which song at which party, their reactions kept.', topic: 'make', where: 'player' },
-  { id: 'XpNpks9ZCgE', number: '★', title: 'Your idea. Your song. Your control.', text: 'Plenio in 54 seconds.', topic: 'start', where: 'intro' },
-  { id: 'q_dMH834E1o', number: '★', title: 'Plenio in 75 seconds', text: 'What Plenio does, from the first idea to the mastered song.', topic: 'start', where: 'intro' },
-  { id: 'lEHF3W37e8c', number: '0', title: 'System Check', text: 'Is your ComfyUI ready? Versions, the GPU, which model files each template needs.', topic: 'make', where: 'comfyui' },
-  { id: 'RSwSbaR6VO8', number: '1', title: 'YuE2 · Song', text: 'From a brief to a finished song - and a tour of the score editor.', topic: 'make', where: 'comfyui' },
-  { id: 'Si4d-o8LpZ0', number: '2', title: 'YuE2 · Cover', text: 'A recording becomes a new version: transcribe, edit, sing it anew.', topic: 'make', where: 'comfyui' },
-  { id: 'nKSPEGlG0XI', number: '3', title: 'MiniMax · Song', text: 'Songs with MiniMax Music 3: the caption, the lyrics and the token budget.', topic: 'make', where: 'comfyui' },
-  { id: 'zVDg9RIUBxI', number: '4', title: 'Enhance & Master', text: 'Master any recording: Audio HQ, a tone match, -14 LUFS, the release export - and the lyrics of a sung recording corrected before the release.', topic: 'make', where: 'comfyui' },
-  { id: 'Ki2wbk9sGWQ', number: '5', title: 'YuE2 · DAW', text: 'Compose it yourself - draw the notes, import MIDI or play it in - and YuE2 sings your melody.', topic: 'make', where: 'comfyui' },
-  { id: 'gB-mpQkk-z4', number: '6', title: 'YuE2 · Song · Creative modes', text: 'The writer model plans the arrangement, Plenio writes the notes.', topic: 'make', where: 'comfyui' },
-  { id: 'jiF_e5CSjKM', number: '7', title: 'YuE2 · Cover · Creative modes', text: 'A recording re-arranged with new chords and lyrics that keep its story.', topic: 'make', where: 'comfyui' },
-  { id: 'MBfM8vOynT4', number: '10', title: 'Song API', text: 'Songs from your own programs: one POST, the job followed with ?wait, the files, examples in Python, JavaScript and the shell.', topic: 'make', where: 'comfyui' },
-  { id: 'rMzZDr9HpvM', number: '11', title: 'YuE2 LoRAs', text: 'Up to four LoRAs on YuE2, for the plan or the sound: the node, a LoRA chosen with its strength, an instrumental made with it and what the node says after the run.', topic: 'make', where: 'comfyui' },
+  { id: 'FkWj-3P99PM', number: '8', title: 'The Plenio Player', text: 'Live lyrics, the full lyrics to copy, a page per song with its stars and how it was made, the notation following the music, the visuals with Plenio Nova, playlists, Live Play with the guests’ reactions, lyric videos and a player in one file to share.', topic: 'start', where: 'player' },
+  { id: '2GBx2xUOnPw', number: '9', title: 'Party songs', text: 'Make songs from the player: presets, takes, ComfyUI started the way you start it - and your guests ordering songs on their phones, who made which song at which party, their reactions kept.', topic: 'make', where: 'player' },
+  { id: 'myiZawtsja4', number: '★', title: 'Your idea. Your song. Your party.', text: 'Plenio in 54 seconds: songs on autopilot, every note under your control, a player made for these songs - and the party that joins in from their phones.', topic: 'start', where: 'intro' },
+  { id: 'XpNpks9ZCgE', number: '★', title: 'Your idea. Your song. Your control.', text: 'The first spot, in 54 seconds: from the idea to the mastered song.', topic: 'start', where: 'intro' },
+  { id: 'v38t0bFqu5Q', number: '0', title: 'System Check', text: 'Is your ComfyUI ready? Versions, the GPU, which model files each template needs.', topic: 'make', where: 'comfyui' },
+  { id: 'PdL7mCKEE1k', number: '1', title: 'YuE2 · Song', text: 'From a brief to a finished song - and a tour of the score editor.', topic: 'make', where: 'comfyui' },
+  { id: 'XFkgFgvImzM', number: '2', title: 'YuE2 · Cover', text: 'A recording becomes a new version: transcribe, edit, sing it anew.', topic: 'make', where: 'comfyui' },
+  { id: 'rptsvP0yYio', number: '3', title: 'MiniMax · Song', text: 'Songs with MiniMax Music 3: the caption, the lyrics and the token budget.', topic: 'make', where: 'comfyui' },
+  { id: '3bBbOivHvzc', number: '4', title: 'Enhance & Master', text: 'Master any recording: Audio HQ, a tone match, -14 LUFS, the release export - and the lyrics of a sung recording corrected before the release.', topic: 'make', where: 'comfyui' },
+  { id: 'K1Jr_JpkCUg', number: '5', title: 'YuE2 · DAW', text: 'Compose it yourself - draw the notes, import MIDI or play it in - and YuE2 sings your melody.', topic: 'make', where: 'comfyui' },
+  { id: 'JTlRvyGssfo', number: '6', title: 'YuE2 · Song · Creative modes', text: 'The writer model plans the arrangement, Plenio writes the notes.', topic: 'make', where: 'comfyui' },
+  { id: '5bPU2-coElw', number: '7', title: 'YuE2 · Cover · Creative modes', text: 'A recording re-arranged with new chords and lyrics that keep its story.', topic: 'make', where: 'comfyui' },
+  { id: '5vdi3ypvIuw', number: '10', title: 'Song API', text: 'Songs from your own programs: one POST, the job followed with ?wait, the files, examples in Python, JavaScript and the shell.', topic: 'make', where: 'comfyui' },
+  { id: 'o7NtC3U2pEg', number: '11', title: 'YuE2 LoRAs', text: 'Up to four LoRAs on YuE2, for the plan or the sound: the node, a LoRA chosen with its strength, an instrumental made with it and what the node says after the run.', topic: 'make', where: 'comfyui' },
 ]
 
 export interface HelpTopic {

@@ -1,6 +1,6 @@
 # Getting started
 
-▶ **Videos:** [Your idea. Your song. Your control.](https://youtu.be/XpNpks9ZCgE) (the spot, 54 seconds), [Plenio in 75 seconds](https://youtu.be/q_dMH834E1o) - and one tutorial for every template, starting with [Tutorial 0 · System Check](https://youtu.be/lEHF3W37e8c), plus two on the experimental creative modes (*Tutorials 6 and 7*), three on the Plenio Player - listening, party songs, the Song API (*Tutorials 8 to 10*) - and one on LoRAs for YuE2 (*Tutorial 11*), in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE). **Songs made with Plenio**, as videos made by the Plenio Player: [the example playlist](https://www.youtube.com/playlist?list=PLBZzzh1IMZzk).
+▶ **Videos:** [Your idea. Your song. Your party.](https://youtu.be/myiZawtsja4) (the spot, 54 seconds), [Your idea. Your song. Your control.](https://youtu.be/XpNpks9ZCgE) (the first spot) - and one tutorial for every template, starting with [Tutorial 0 · System Check](https://youtu.be/v38t0bFqu5Q), plus two on the experimental creative modes (*Tutorials 6 and 7*), three on the Plenio Player - listening, party songs, the Song API (*Tutorials 8 to 10*) - and one on LoRAs for YuE2 (*Tutorial 11*), in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE). **Songs made with Plenio**, as videos made by the Plenio Player: [the example playlist](https://www.youtube.com/playlist?list=PLBZzzh1IMZzk).
 
 ## Requirements
 

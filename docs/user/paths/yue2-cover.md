@@ -2,7 +2,7 @@
 
 A new version of a recorded song: SheetSage2 transcribes the source into a score (melody, chords, sections, tempo), you decide what happens to the vocals and the harmony, and YuE2 renders the cover from the final score. Master finishes the best take, and Export writes a 24-bit FLAC with a release record.
 
-▶ **Video:** [Tutorial 2 · YuE2 · Cover](https://youtu.be/Si4d-o8LpZ0) - the whole path in ComfyUI, narrated, with chapters. All of them in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE).
+▶ **Video:** [Tutorial 2 · YuE2 · Cover](https://youtu.be/XFkgFgvImzM) - the whole path in ComfyUI, narrated, with chapters. All of them in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE).
 
 ```text
 Source -> (Excerpt) -> Transcribe Score -> Score Tools -> Arrange -> Song Sheet · Score

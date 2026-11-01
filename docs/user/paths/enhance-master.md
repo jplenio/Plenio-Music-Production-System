@@ -2,7 +2,7 @@
 
 Finishes an existing recording - a take you rendered earlier, or any song file - without a music model and without a GPU: a gentle EQ, loudness and dynamics, and a release export with tags and cover.
 
-▶ **Video:** [Tutorial 4 · Enhance & Master](https://youtu.be/zVDg9RIUBxI) - the whole path in ComfyUI, narrated, with chapters. All of them in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE).
+▶ **Video:** [Tutorial 4 · Enhance & Master](https://youtu.be/3bBbOivHvzc) - the whole path in ComfyUI, narrated, with chapters. All of them in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE).
 
 ```text
 Load Audio -> Audio HQ 1-3 -> EQ -> Loudness & Dynamics -> Preview
