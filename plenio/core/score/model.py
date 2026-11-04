@@ -508,6 +508,11 @@ def display(model: ScoreModel, words: Mapping[int, str] | None = None) -> Displa
 
 
 def _chord_pitches(name: str) -> list[int]:
+    """The pitches a chord symbol sounds (root C3-B3 with its quality's intervals, a slash bass an octave
+    lower); none for a symbol the YuE2 dialect does not support - it is never guessed as a major triad (the
+    playback and a clicked chord in the roll stay silent rather than play a wrong chord)."""
+    if upstream.CHORD.fullmatch(name) is None:
+        return []
     root_text, _, bass_text = name.partition("/")
     root_letter = root_text[0]
     rest = root_text[1:]
@@ -515,7 +520,9 @@ def _chord_pitches(name: str) -> list[int]:
     while rest[:1] in ("#", "b"):
         shift += 1 if rest[0] == "#" else -1
         rest = rest[1:]
-    intervals = CHORD_INTERVALS.get(rest, (0, 4, 7))
+    intervals = CHORD_INTERVALS.get(rest)
+    if intervals is None:
+        return []
     root = 48 + (upstream.NATURAL[root_letter] + shift) % 12  # C3 ... B3
     pitches = [root + i for i in intervals]
     if bass_text:

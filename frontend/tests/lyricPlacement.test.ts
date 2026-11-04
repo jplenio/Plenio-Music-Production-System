@@ -1,7 +1,10 @@
 /**
  * Lyrics lines placed by hand (owner's request 2026-10-03): in the roll's lyrics lane a line is
  * selected, moved, made longer or shorter, deleted, copied and pasted like a note; its span is kept with
- * the sheet and sent with the lyrics, and the Score tab makes each edit one undo step.
+ * the sheet and sent with the lyrics, and the Score tab makes each edit one undo step. GitHub issue #28
+ * (karaoke and translations, syllables matched to notes by hand): lines never overlap and never push one
+ * another - a gesture stops at the neighbouring line -, a new line is typed where the lane is free, and an
+ * edit pins every sung line, so that no other line moves.
  * The view comes from the backend (fixtures/tricky-lyrics.json): a part per lyrics block - the empty
  * [Intro] 0-32, the verse 32-160 ("beautiful morning" 32-96, "sing it again" 96-160), the chorus 160-224
  * ("hold on"); L:1/32.
@@ -19,7 +22,11 @@ import {
   type LyricSpan,
   clipOfLines,
   editRange,
+  fitLyricGesture,
   followSpans,
+  laneLines,
+  newLineAt,
+  overlap,
   parseSpans,
   partAt,
   placedLines,
@@ -39,6 +46,17 @@ const MODEL = VIEW.model as ScoreModelView
 const LAYOUT = VIEW.lyrics as LyricLayoutView
 const LYRICS = fixture.lyrics
 const VERSE = ['beautiful morning', 'sing it again']
+
+/** The fixture's view with the lines of ``spans`` where the spans put them (as the backend places them). */
+function viewWith(spans: readonly (readonly number[])[]): ScoreView {
+  const view = JSON.parse(JSON.stringify(VIEW)) as ScoreView
+  for (const part of view.lyrics?.parts ?? [])
+    for (const line of part.lines) {
+      const span = spans.find((s) => s.length >= 4 && s[2] === line.block && s[3] === line.line)
+      if (span) Object.assign(line, { start: span[0], end: span[1], pinned: true })
+    }
+  return view
+}
 
 let app: App | null = null
 afterEach(() => {
@@ -65,8 +83,9 @@ describe('lyricPlacement', () => {
       { id: '0', text: 'beautiful morning', start: 32, end: 96 },
       { id: '1', text: 'sing it again', start: 96, end: 160 }
     ])
-    // a line the layout does not know (typed after the last one): a beat after the line before
-    expect(placedLines(LAYOUT, 1, [...VERSE, 'and again'], range, 8).at(-1)).toEqual({ id: '2', text: 'and again', start: 159, end: 160 })
+    // a line no note sings (here one the layout does not know): where the line before ends, without room -
+    // it takes no notes from a line after it (before, it got a beat and pushed that line)
+    expect(placedLines(LAYOUT, 1, [...VERSE, 'and again'], range, 8).at(-1)).toEqual({ id: '2', text: 'and again', start: 160, end: 160 })
     expect([0, 100, 223, 224].map((unit) => partAt(LAYOUT, unit)?.block ?? -1)).toEqual([0, 1, 2, -1])
   })
 
@@ -86,50 +105,94 @@ describe('lyricPlacement', () => {
     expect(settle([{ id: '0', text: 'x', start: 10, end: 300 }], [32, 160])).toEqual([{ id: '0', text: 'x', start: 32, end: 160 }])
   })
 
-  it('keeps the lines an edit placed where they were put: the others make room', () => {
-    const pasted = settle(
+  it('pushes no line: every line keeps its span, a line without room stays without one', () => {
+    const lines = [
+      { id: '0', text: 'beautiful morning', start: 32, end: 80 },
+      { id: '1', text: '(guitar)', start: 80, end: 80 },
+      { id: '*typed', text: 'oh yeah', start: 84, end: 96 },
+      { id: '2', text: 'sing it again', start: 96, end: 160 }
+    ]
+    expect(settle(lines, [32, 160])).toEqual(lines)
+    // spans that overlap anyway (an older version kept them): the earlier line ends where the next one starts
+    const old = settle(
       [
-        { id: '0', text: 'beautiful morning', start: 32, end: 96 },
-        { id: '1', text: 'sing it again', start: 96, end: 160 },
-        { id: '*new0', text: 'hold on', start: 96, end: 128 }
+        { id: '0', text: 'a', start: 32, end: 120 },
+        { id: '1', text: 'b', start: 96, end: 160 }
       ],
       [32, 160]
     )
-    // pasted where "sing it again" started: that line moves behind it and keeps the rest of its span
-    expect(pasted.map((l) => [l.text, l.start, l.end])).toEqual([
-      ['beautiful morning', 32, 96],
-      ['hold on', 96, 128],
-      ['sing it again', 128, 160]
+    expect(old.map((l) => [l.text, l.start, l.end])).toEqual([
+      ['a', 32, 96],
+      ['b', 96, 160]
     ])
-    const longer = settle(
-      [
-        { id: '*0', text: 'beautiful morning', start: 32, end: 120 },
-        { id: '1', text: 'sing it again', start: 96, end: 160 }
-      ],
-      [32, 160]
-    )
-    expect(longer.map((l) => [l.start, l.end])).toEqual([
-      [32, 120],
-      [120, 160]
+  })
+
+  it('stops a line at its neighbour: longer, shorter, moved - never over another line', () => {
+    const total = MODEL.total
+    expect(laneLines(LAYOUT).map((l) => [l.key, l.start, l.end])).toEqual([
+      ['1:0', 32, 96],
+      ['1:1', 96, 160],
+      ['2:0', 160, 224]
     ])
-    // two lines pasted over three: the ones covered whole keep their length behind them
-    const over = settle(
-      [
-        { id: 'a', text: 'a', start: 40, end: 60 },
-        { id: 'b', text: 'b', start: 60, end: 80 },
-        { id: 'c', text: 'c', start: 80, end: 150 },
-        { id: '*p', text: 'p', start: 40, end: 70 },
-        { id: '*q', text: 'q', start: 70, end: 90 }
-      ],
-      [32, 160]
-    )
-    expect(over.map((l) => [l.text, l.start, l.end])).toEqual([
-      ['p', 40, 70],
-      ['q', 70, 90],
-      ['a', 90, 110],
-      ['b', 110, 130],
-      ['c', 130, 150]
+    // the end of "beautiful morning" into "sing it again": it stops where that line starts
+    const longer = fitLyricGesture(LAYOUT, { kind: 'end', key: '1:0', keys: [], delta: 40 }, total)
+    expect(longer.moves).toEqual([{ key: '1:0', start: 32, end: 96 }])
+    expect(longer.free).toBe(false)
+    expect(longer.stoppedAt?.text).toBe('sing it again')
+    // shorter: as asked, and one unit at least
+    expect(fitLyricGesture(LAYOUT, { kind: 'end', key: '1:0', keys: [], delta: -16 }, total).moves).toEqual([{ key: '1:0', start: 32, end: 80 }])
+    expect(fitLyricGesture(LAYOUT, { kind: 'end', key: '1:0', keys: [], delta: -400 }, total).moves).toEqual([{ key: '1:0', start: 32, end: 33 }])
+    // the start of "sing it again" back into "beautiful morning": it stops at its end
+    const start = fitLyricGesture(LAYOUT, { kind: 'start', key: '1:1', keys: [], delta: -20 }, total)
+    expect(start.moves).toEqual([{ key: '1:1', start: 96, end: 160 }])
+    expect(start.stoppedAt?.key).toBe('1:0')
+    // moved later into the next line: it stays where it is (no free room before the chorus)
+    const blocked = fitLyricGesture(LAYOUT, { kind: 'move', key: '1:0', keys: ['1:0'], delta: 8 }, total)
+    expect(blocked.moves).toEqual([])
+    expect(blocked.free).toBe(false)
+    expect(blocked.stoppedAt?.key).toBe('1:1')
+    // earlier into the empty intro: as asked, and not past the start of the score
+    expect(fitLyricGesture(LAYOUT, { kind: 'move', key: '1:0', keys: ['1:0'], delta: -8 }, total).moves).toEqual([{ key: '1:0', start: 24, end: 88 }])
+    expect(fitLyricGesture(LAYOUT, { kind: 'move', key: '1:0', keys: ['1:0'], delta: -64 }, total).moves).toEqual([{ key: '1:0', start: 0, end: 64 }])
+    // with room after a shortened line: it stops flush at the next line, and dragged far enough past it, it
+    // lands in the free room behind it (a line of its own block: the words change their order)
+    const roomy = viewWith([[32, 48, 1, 0], [96, 128, 1, 1]]).lyrics as LyricLayoutView
+    expect(fitLyricGesture(roomy, { kind: 'move', key: '1:0', keys: ['1:0'], delta: 60 }, total).moves).toEqual([{ key: '1:0', start: 80, end: 96 }])
+    expect(fitLyricGesture(roomy, { kind: 'move', key: '1:0', keys: ['1:0'], delta: 90 }, total).moves).toEqual([{ key: '1:0', start: 128, end: 144 }])
+    // never into another block's lines: the chorus stays where it is
+    expect(fitLyricGesture(roomy, { kind: 'move', key: '1:0', keys: ['1:0'], delta: 140 }, total).moves).toEqual([{ key: '1:0', start: 144, end: 160 }])
+    // lines moved together keep their distance
+    expect(fitLyricGesture(roomy, { kind: 'move', key: '1:0', keys: ['1:0', '1:1'], delta: 16 }, total).moves).toEqual([
+      { key: '1:0', start: 48, end: 64 },
+      { key: '1:1', start: 112, end: 144 }
     ])
+  })
+
+  it('finds the free room for a new line and tells what a span would overlap', () => {
+    const total = MODEL.total
+    // the intro: no Vocal note, no line - a new line from the click, never into the verse's first line
+    expect(newLineAt(LAYOUT, 8, 1, total)).toEqual({ block: 0, line: 0, start: 8, end: 12 })
+    // on a line there is no new one (a double-click there edits it)
+    expect(newLineAt(LAYOUT, 40, 1, total)).toBeNull()
+    // the room a shortened line left: from the click to the next line (the verse's phrase runs on)
+    const roomy = viewWith([[32, 80, 1, 0], [96, 160, 1, 1]]).lyrics as LyricLayoutView
+    expect(newLineAt(roomy, 84, 1, total)).toEqual({ block: 1, line: 2, start: 84, end: 96 })
+    expect(newLineAt(roomy, 86.5, 4, total)).toEqual({ block: 1, line: 2, start: 84, end: 96 }) // on the grid
+    expect(overlap(laneLines(LAYOUT), [{ start: 90, end: 100 }])?.key).toBe('1:0')
+    expect(overlap(laneLines(LAYOUT), [{ start: 0, end: 32 }])).toBeNull()
+    expect(overlap(laneLines(LAYOUT), [{ start: 90, end: 100 }], new Set(['1:0', '1:1']))).toBeNull()
+  })
+
+  it('pins every sung line when one block is edited: the other blocks keep their places', () => {
+    const verse = [
+      { id: '0', text: 'beautiful morning', start: 32, end: 80 },
+      { id: '1', text: 'sing it again', start: 96, end: 160 }
+    ]
+    // only the edited block (before GitHub issue #28: the chorus flowed anew after the verse's new end)
+    expect(withBlockSpans([], LAYOUT, new Map([[1, verse]]))).toEqual([[32, 80, 1, 0], [96, 160, 1, 1]])
+    expect(withBlockSpans([], LAYOUT, new Map([[1, verse]]), true)).toEqual([[32, 80, 1, 0], [96, 160, 1, 1], [160, 224, 2, 0]])
+    // a span kept already stays as it is
+    expect(withBlockSpans([[170, 200, 2, 0]], LAYOUT, new Map([[1, verse]]), true)).toEqual([[32, 80, 1, 0], [96, 160, 1, 1], [170, 200, 2, 0]])
   })
 
   it('keeps a span with its line, moves it with the bars and reads a property', () => {
@@ -220,6 +283,7 @@ describe('PianoRoll: lines placed by hand in the lyrics lane', () => {
     const host = document.createElement('div')
     document.body.appendChild(host)
     const placed: LyricPlace[][] = []
+    const notes: (string | undefined)[] = []
     const deleted: string[][] = []
     let selection: string[] = []
     app = createApp({
@@ -236,7 +300,10 @@ describe('PianoRoll: lines placed by hand in the lyrics lane', () => {
             this.picked = keys
             selection = keys
           },
-          onLyricPlace: (moves: LyricPlace[]) => placed.push(moves),
+          onLyricPlace: (moves: LyricPlace[], note?: string) => {
+            placed.push(moves)
+            notes.push(note)
+          },
           onLyricDelete: (keys: string[]) => deleted.push(keys)
         })
       }
@@ -247,6 +314,7 @@ describe('PianoRoll: lines placed by hand in the lyrics lane', () => {
       root: host.querySelector('.roll') as HTMLElement,
       svg: host.querySelector('svg.roll-svg') as SVGSVGElement,
       placed,
+      notes,
       deleted,
       selection: () => selection
     }
@@ -267,16 +335,28 @@ describe('PianoRoll: lines placed by hand in the lyrics lane', () => {
     expect([...svg.querySelectorAll('.lyric-line.selected text')].map((t) => t.textContent)).toEqual(['beautiful morning', 'hold on'])
   })
 
-  it('moves the selected lines with a drag, by the grid', async () => {
-    const { svg, placed } = mountRoll()
+  it('moves the selected lines with a drag, by the grid - and stops them at the next line', async () => {
+    const { svg, placed, notes } = mountRoll()
+    pointer(svg, 'pointerdown', xOf(60, GEO))
+    pointer(svg, 'pointermove', xOf(56, GEO))
+    pointer(svg, 'pointermove', xOf(52, GEO))
+    await nextTick()
+    expect(svg.querySelector('.lyric-line.dragged text')?.textContent).toBe('beautiful morning')
+    pointer(svg, 'pointerup', xOf(52, GEO))
+    await nextTick()
+    expect(placed).toEqual([[{ key: '1:0', start: 24, end: 88 }]])
+    expect(notes).toEqual([undefined])
+    // later: "sing it again" follows at once - the line stays, drawn as stopped while it is dragged, and says why
     pointer(svg, 'pointerdown', xOf(60, GEO))
     pointer(svg, 'pointermove', xOf(64, GEO))
     pointer(svg, 'pointermove', xOf(68, GEO))
     await nextTick()
-    expect(svg.querySelector('.lyric-line.dragged text')?.textContent).toBe('beautiful morning')
+    expect(svg.querySelector('.lyric-line.stopped text')?.textContent).toBe('beautiful morning')
+    expect(svg.querySelector('.lyric-line.dragged')).toBeNull() // it does not move over "sing it again"
     pointer(svg, 'pointerup', xOf(68, GEO))
     await nextTick()
-    expect(placed).toEqual([[{ key: '1:0', start: 40, end: 104 }]])
+    expect(placed.at(-1)).toEqual([])
+    expect(notes.at(-1)).toContain('stops at "sing it again"')
   })
 
   it('makes a line longer or shorter at its end or its start', async () => {
@@ -296,13 +376,19 @@ describe('PianoRoll: lines placed by hand in the lyrics lane', () => {
   })
 
   it('deletes the selected lines with Del and nudges them with the arrows; Esc lets them go', async () => {
-    const { root, svg, placed, deleted, selection } = mountRoll()
+    const { root, svg, placed, notes, deleted, selection } = mountRoll()
+    pointer(svg, 'pointerdown', xOf(60, GEO))
+    pointer(svg, 'pointerup', xOf(60, GEO))
+    await nextTick()
+    root.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }))
+    expect(placed.at(-1)).toEqual([{ key: '1:0', start: 31, end: 95 }]) // a grid step into the free intro
+    // the chorus's line cannot go left into the verse: nothing moves, and the roll says why
     pointer(svg, 'pointerdown', xOf(180, GEO))
     pointer(svg, 'pointerup', xOf(180, GEO))
     await nextTick()
     root.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }))
-    expect(placed.at(-1)?.[0].key).toBe('2:0')
-    expect(placed.at(-1)?.[0].start).toBeLessThan(160)
+    expect(placed.at(-1)).toEqual([])
+    expect(notes.at(-1)).toContain('stops at "sing it again"')
     root.dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete', bubbles: true }))
     expect(deleted).toEqual([['2:0']])
     root.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
@@ -317,13 +403,14 @@ describe('ScoreTab: lines placed by hand', () => {
     savePrefs({ ...defaultPrefs() })
   })
 
-  function mountTab() {
+  function mountTab(kept: LyricSpan[] = []) {
     const asked: { lyrics?: string; spans?: number[][] }[] = []
     const fetcher: Fetcher = {
       fetchApi: (route: string, init?: RequestInit) => {
         const body = JSON.parse(String(init?.body ?? '{}'))
         if (route.includes('/analyze')) asked.push({ lyrics: body.lyrics, spans: body.lyric_spans })
-        const answer = route.includes('/analyze') ? (body.lyrics ? VIEW : plain.view) : {}
+        // the lines stand where their spans put them, as the backend places them
+        const answer = route.includes('/analyze') ? (body.lyrics ? viewWith(body.lyric_spans ?? []) : plain.view) : {}
         return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(answer) } as Response)
       }
     }
@@ -342,7 +429,7 @@ describe('ScoreTab: lines placed by hand', () => {
           layoutDefault: 'review',
           lyrics: LYRICS,
           title: 'Song',
-          lyricSpans: [],
+          lyricSpans: kept,
           lyricsTarget: { title: 'Song Sheet · Text', blocked: null, replans: false },
           onLyricsChange: (text: string | null) => reported.push(text),
           onLyricSpansChange: (next: LyricSpan[]) => spans.push(next)
@@ -357,29 +444,99 @@ describe('ScoreTab: lines placed by hand', () => {
       svg().dispatchEvent(new PointerEvent(type, { clientX: xOf(unit, geo), clientY: TOP + LYRICS_LANE / 2, button: 0, bubbles: true, pointerId: 1, ...init }))
     const key = (k: string, init: KeyboardEventInit = {}) =>
       tab().dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true, ...init }))
-    return { asked, reported, spans, pointer, key, svg, tab }
+    const dblclick = (unit: number) =>
+      svg().dispatchEvent(new MouseEvent('dblclick', { clientX: xOf(unit, geo), clientY: TOP + LYRICS_LANE / 2, bubbles: true }))
+    const type = async (text: string) => {
+      await nextTick()
+      const input = host.querySelector('input.lyric-edit') as HTMLInputElement
+      input.value = text
+      input.dispatchEvent(new Event('input'))
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+      await idle()
+    }
+    const said = () => host.textContent ?? ''
+    return { asked, reported, spans, pointer, key, svg, tab, dblclick, type, said, host }
   }
 
-  it('moves a line past the next one: the block is pinned, the words change their order, undo brings it back', async () => {
+  it('makes a line shorter and every other line keeps its place - also those of the other blocks; undo, redo', async () => {
     const { asked, reported, spans, pointer, key } = mountTab()
     await idle(6)
-    pointer('pointerdown', 60)
-    pointer('pointermove', 70)
-    pointer('pointermove', 60 + 96)
-    pointer('pointerup', 60 + 96)
+    // the end of "beautiful morning" (32-96) back to 80
+    pointer('pointerdown', 96 - 0.3)
+    pointer('pointermove', 90)
+    pointer('pointermove', 80)
+    pointer('pointerup', 80)
     await idle()
-    // "beautiful morning" moved 96 units later: it starts at 128, inside "sing it again" (96-160)
-    expect(spans.at(-1)).toEqual([[96, 128, 1, 0], [128, 160, 1, 1]])
-    expect(reported.at(-1)).toBe(LYRICS.replace('beautiful morning\nsing it again', 'sing it again\nbeautiful morning'))
-    expect(asked.at(-1)?.spans).toEqual([[96, 128, 1, 0], [128, 160, 1, 1]])
+    // every sung line is pinned where it was: the chorus's line keeps its notes (GitHub issue #28)
+    expect(spans.at(-1)).toEqual([[32, 80, 1, 0], [96, 160, 1, 1], [160, 224, 2, 0]])
+    expect(asked.at(-1)?.spans).toEqual([[32, 80, 1, 0], [96, 160, 1, 1], [160, 224, 2, 0]])
+    expect(reported.at(-1)).toBe(LYRICS) // the words and their order stay
     key('z', { ctrlKey: true })
     await idle()
-    expect(reported.at(-1)).toBe(LYRICS)
     expect(spans.at(-1)).toEqual([])
+    key('y', { ctrlKey: true })
+    await idle()
+    expect(spans.at(-1)).toEqual([[32, 80, 1, 0], [96, 160, 1, 1], [160, 224, 2, 0]])
   })
 
-  it('deletes, copies and pastes lines at the cursor', async () => {
-    const { reported, spans, pointer, key } = mountTab()
+  it('stops a line made longer at the next line and says so; the next line keeps its start', async () => {
+    const { spans, pointer, said } = mountTab([[32, 80, 1, 0], [96, 160, 1, 1], [160, 224, 2, 0]])
+    await idle(6)
+    pointer('pointerdown', 80 - 0.3)
+    pointer('pointermove', 100)
+    pointer('pointermove', 120)
+    pointer('pointerup', 120)
+    await idle()
+    expect(spans.at(-1)).toEqual([[32, 96, 1, 0], [96, 160, 1, 1], [160, 224, 2, 0]])
+    expect(said()).toContain('stops at "sing it again"')
+  })
+
+  it('types a new line where the lane is free; the other lines keep their spans', async () => {
+    const { reported, spans, dblclick, type } = mountTab([[32, 80, 1, 0], [96, 160, 1, 1], [160, 224, 2, 0]])
+    await idle(6)
+    dblclick(84) // between "beautiful morning" (32-80) and "sing it again" (96-160)
+    await type('oh yeah')
+    expect(reported.at(-1)).toContain('[Verse]\nbeautiful morning\noh yeah\nsing it again')
+    // the new line from the click to the next line; "sing it again" is the verse's third line now
+    expect(spans.at(-1)).toEqual([[32, 80, 1, 0], [84, 96, 1, 1], [96, 160, 1, 2], [160, 224, 2, 0]])
+  })
+
+  it('changes the words of a line where it is sung: no line moves', async () => {
+    const { reported, spans, dblclick, type } = mountTab()
+    await idle(6)
+    dblclick(120) // "sing it again"
+    await type('sing it once more')
+    expect(reported.at(-1)).toBe(LYRICS.replace('sing it again', 'sing it once more'))
+    expect(spans.at(-1)).toEqual([[32, 96, 1, 0], [96, 160, 1, 1], [160, 224, 2, 0]])
+  })
+
+  it('lays the lyrics out anew with auto-place lyrics, in one undo step; the words stay', async () => {
+    const { reported, spans, key, host } = mountTab([[32, 80, 1, 0], [96, 160, 1, 1], [160, 224, 2, 0]])
+    await idle(6)
+    const button = () => [...host.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'auto-place lyrics') as HTMLButtonElement | undefined
+    expect(button()).toBeTruthy()
+    button()?.click()
+    await idle()
+    expect(spans.at(-1)).toEqual([])
+    expect(reported.at(-1)).toBe(LYRICS)
+    expect(button()).toBeUndefined() // nothing placed by hand any more
+    key('z', { ctrlKey: true })
+    await idle()
+    expect(spans.at(-1)).toEqual([[32, 80, 1, 0], [96, 160, 1, 1], [160, 224, 2, 0]])
+    expect(button()).toBeTruthy()
+  })
+
+  it('reopens with the spans kept in the sheet: they go to the backend and the lane shows them', async () => {
+    const { asked, svg } = mountTab([[32, 80, 1, 0], [96, 160, 1, 1], [160, 224, 2, 0]])
+    await idle(6)
+    expect(asked.at(-1)?.spans).toEqual([[32, 80, 1, 0], [96, 160, 1, 1], [160, 224, 2, 0]])
+    const geo = geometry(MODEL, { pxPerQuarter: 48, snap: 'auto', lyrics: true })
+    const box = svg().querySelector('.lyric-line rect') as SVGRectElement
+    expect(Number(box.getAttribute('width'))).toBeCloseTo(xOf(80, geo) - xOf(32, geo))
+  })
+
+  it('deletes, copies and pastes lines at the cursor - into free room only', async () => {
+    const { reported, spans, pointer, key, said } = mountTab()
     await idle(6)
     pointer('pointerdown', 180) // "hold on"
     pointer('pointerup', 180)
@@ -389,14 +546,21 @@ describe('ScoreTab: lines placed by hand', () => {
     key('Delete')
     await idle()
     expect(reported.at(-1)).toBe(LYRICS.replace('\nhold on', ''))
-    // the cursor to bar 4 (unit 96, where the verse is sung): the line is pasted there and the verse is pinned
+    const deleted = reported.length
+    // the cursor to bar 4 (unit 96, where "sing it again" is sung): a paste there is refused - nothing moves
     pointer('pointerdown', 96, { clientY: 6 }) // in the ruler
     pointer('pointerup', 96, { clientY: 6 })
     await nextTick()
     key('v', { ctrlKey: true })
     await idle()
-    // pasted where "sing it again" starts: "hold on" is sung there, "sing it again" right after it
-    expect(reported.at(-1)).toContain('[Verse]\nbeautiful morning\nhold on\nsing it again')
-    expect(spans.at(-1)?.some(([start]) => start >= 96 && start < 160)).toBe(true)
+    expect(reported).toHaveLength(deleted)
+    expect(said()).toContain('Not pasted: the lines would overlap "sing it again"')
+    // at the start (the intro is free): pasted there, up to the verse's first line
+    key('Home')
+    await nextTick()
+    key('v', { ctrlKey: true })
+    await idle()
+    expect(reported.at(-1)).toContain('[Intro]\nhold on\n')
+    expect(spans.at(-1)?.[0]).toEqual([0, 32, 0, 0])
   })
 })

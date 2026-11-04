@@ -28,8 +28,10 @@
  * ``lyricsChange`` reports them: the dialog writes them into their sheet on Apply (*Song Sheet · Text*)
  * or at once into its own Lyrics tab (``own``). Like the Guide notes, they are part of the undo steps.
  * In the lane, lines are also placed by hand like notes - selected, moved, made longer or shorter,
- * deleted, copied and pasted at the cursor (``lyricPlacement``): their spans are kept in the node's
- * properties (``lyricSpans``) and move with the bars like the Guide notes.
+ * deleted, copied and pasted at the cursor, typed anew where the lane is free (``lyricPlacement``): their
+ * spans are kept in the node's properties (``lyricSpans``) and move with the bars like the Guide notes. Every
+ * edit in the lane pins every sung line where it is (the other lines never move), and lines never overlap: a
+ * gesture stops at the neighbouring line, a paste into a line is refused - both say so.
  *
  * Files: *Export MIDI* and *Import MIDI…* (the score and the Guide notes), *Export MusicXML* (the sheet
  * music with the lyrics, for notation programs) and *Import MusicXML…* (such a file back - also after a
@@ -37,7 +39,7 @@
  * refused) and the project file - *Save project* writes the score, the Guide notes and the lyrics into one
  * file, *Open project…* brings them back (one undo step).
  */
-import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 
 import {
   type Fetcher,
@@ -58,8 +60,8 @@ import {
   elementAtSource,
   elementById,
   firstElementOfBar,
+  lengthOperation,
   neighbour,
-  nextDuration,
   otherVoice
 } from '../../shared/scoreView'
 import { type SheetPayload, type WorkingDoc, normalize } from '../../shared/sheetSession'
@@ -98,11 +100,12 @@ import {
   clipOfLines,
   editRange,
   followSpans,
+  laneLines,
   lineKey,
+  overlap,
   parseLineKey,
   partAt,
   parseSpans,
-  partOf,
   placedLines,
   remapSpans,
   sameSpans,
@@ -510,12 +513,6 @@ watch(
   }
 )
 
-/** The block has lines placed by hand (every line of an edited block gets its span). */
-function pinned(block: number): boolean {
-  const layout = shown.value?.lyrics
-  return !!layout && !!partOf(layout, block)?.lines.some((l) => l.pinned)
-}
-
 /** The model section of lyrics block ``block`` while the lyrics follow the sections (a block per labelled section). */
 function sectionOfBlock(block: number): number {
   const m = model.value
@@ -543,13 +540,14 @@ function beatUnits(): number {
 /**
  * Edit the placed lines of some blocks in one undo step: each block is pinned (every line gets the span it
  * has now), ``edit`` changes its lines, and they settle in the order of their spans - between the lines of
- * the blocks before and after it. Returns the keys of the lines ``edit`` marked with an id starting with
- * ``*`` (to select them).
+ * the blocks before and after it. Every other sung line is pinned where it is sung now, so that the edit
+ * moves no line of another block (GitHub issue #28). Returns the keys of the lines ``edit`` marked with an
+ * id starting with ``*`` (to select them).
  */
-function editPlaced(blocks: number[], edit: (block: number, lines: PlacedLine[]) => PlacedLine[], label: string): string[] {
+function editPlaced(blocks: number[], edit: (block: number, lines: PlacedLine[]) => PlacedLine[], label: string): string[] | null {
   const m = model.value
   const layout = shown.value?.lyrics
-  if (!m || !layout || !lyricsEditable.value) return []
+  if (!m || !layout || !lyricsEditable.value) return null
   const before = lyricsState()
   const marked: string[] = []
   const edited = new Map<number, PlacedLine[]>()
@@ -567,8 +565,8 @@ function editPlaced(blocks: number[], edit: (block: number, lines: PlacedLine[])
     })
     edited.set(block, next)
   }
-  if (!edited.size) return []
-  setSpans(withBlockSpans(spansNow(), layout, edited))
+  if (!edited.size) return null
+  setSpans(withBlockSpans(spansNow(), layout, edited, true))
   session.recordSide(label, before, lyricsState())
   return marked
 }
@@ -584,19 +582,33 @@ function byBlock(keys: readonly string[]): Map<number, Set<number>> {
   return map
 }
 
-/** Lines moved or made longer / shorter in the lane (new spans of some lines). */
-function onLyricPlace(moves: LyricPlace[]): void {
+/** Lines moved or made longer / shorter in the lane (new spans of some lines; ``note``: where they stopped). */
+function onLyricPlace(moves: LyricPlace[], note?: string): void {
   const wanted = new Map(moves.map((move) => [move.key, move]))
   const count = moves.length
-  lyricSelection.value = editPlaced(
-    [...byBlock(moves.map((m) => m.key)).keys()],
-    (block, lines) =>
-      lines.map((line, index) => {
-        const move = wanted.get(lineKey(block, index))
-        return move ? { ...line, id: `*${line.id}`, start: move.start, end: move.end } : line
-      }),
-    `lyrics: ${count === 1 ? 'line' : `${count} lines`} placed`
-  )
+  const marked = count
+    ? editPlaced(
+        [...byBlock(moves.map((m) => m.key)).keys()],
+        (block, lines) =>
+          lines.map((line, index) => {
+            const move = wanted.get(lineKey(block, index))
+            return move ? { ...line, id: `*${line.id}`, start: move.start, end: move.end } : line
+          }),
+        `lyrics: ${count === 1 ? 'line' : `${count} lines`} placed`
+      )
+    : null
+  if (marked) lyricSelection.value = marked
+  if (note) session.notes = [note]
+}
+
+/** Every line lets go of its span: the lyrics are laid out on the notes again, the words stay (one undo step). */
+function autoPlaceLyrics(): void {
+  if (!lyricsEditable.value || !spansNow().length) return
+  const before = lyricsState()
+  setSpans([])
+  session.recordSide('lyrics: placed automatically', before, lyricsState())
+  lyricSelection.value = []
+  session.notes = ['the lyrics are placed on the notes automatically again - Ctrl+Z brings the places back']
 }
 
 /** The selected lines go (with their words); the others stay where they are sung. */
@@ -649,6 +661,15 @@ function pasteLyrics(lines: readonly LyricClipLine[], at: number, label: string)
   const [, end] = editRange(layout, part.block, m.total)
   const fitting = lines.filter((line) => at + line.offset < end)
   if (!fitting.length) return
+  // lines never overlap: a paste into a line is refused, nothing is pushed away (GitHub issue #28)
+  const spans = fitting.map((line) => ({ start: at + line.offset, end: Math.min(at + line.offset + line.length, end) }))
+  const hit = overlap(laneLines(layout), spans)
+  if (hit) {
+    session.error =
+      `Not pasted: the lines would overlap "${hit.text}" - lyrics lines never overlap. Set the cursor where the ` +
+      'lyrics lane is free, or move, shorten or delete that line first.'
+    return
+  }
   lyricSelection.value = editPlaced(
     [part.block],
     (_, current) => [
@@ -661,7 +682,7 @@ function pasteLyrics(lines: readonly LyricClipLine[], at: number, label: string)
       }))
     ],
     label
-  )
+  ) ?? []
   session.error = null
   if (fitting.length < lines.length) session.notes = [`${lines.length - fitting.length} line(s) did not fit before the next block's first line`]
 }
@@ -692,26 +713,34 @@ function onLyricClipboard(action: ClipAction): boolean {
   return true
 }
 
-/** A line edited in the roll's lyrics lane: one undo step of its own. */
+/**
+ * A line edited in the roll's lyrics lane: one undo step of its own. Its words change where it is sung - it
+ * keeps its span, and every other line keeps its own (GitHub issue #28: an edit redistributed the lines of
+ * the other blocks); a new line stands where it was typed, in the free room it was started in.
+ */
 function onLyricEdit(edit: LyricEdit): void {
   const current = model.value
   const layout = shown.value?.lyrics
-  if (current && layout && pinned(edit.block)) {
-    // a block placed by hand: the other lines keep their spans, a new line stands where it was typed
+  if (current && layout) {
     const beat = beatUnits()
-    editPlaced(
+    const marked = editPlaced(
       [edit.block],
       (_, lines) => {
         if (edit.line < lines.length) {
           return edit.text ? lines.map((line, index) => (index === edit.line ? { ...line, text: edit.text } : line)) : lines.filter((_, index) => index !== edit.line)
         }
         const at = edit.at ?? lines[lines.length - 1]?.end ?? editRange(layout, edit.block, current.total)[0]
-        return edit.text ? [...lines, { id: '*typed', text: edit.text, start: at, end: at + beat }] : lines
+        const end = Math.max(at + 1, edit.end ?? at + beat)
+        return edit.text ? [...lines, { id: '*typed', text: edit.text, start: at, end }] : lines
       },
       `lyrics: ${edit.text || 'line removed'}`
     )
-    return
+    if (marked) {
+      if (marked.length) lyricSelection.value = marked
+      return
+    }
   }
+  // no layout yet (the score is being checked): the text alone
   const before = lyricsState()
   if (follow.value && current) follow.value = followReplace(follow.value, current, sectionOfBlock(edit.block), edit.line, edit.text)
   else if (loose.value !== null) loose.value = replaceLine(loose.value, edit.block, edit.line, edit.text)
@@ -885,6 +914,23 @@ function undo(): void {
 
 function redo(): void {
   if (!recordingBlocks()) session.redo()
+}
+
+/**
+ * A toolbar button is disabled while the backend works (or when nothing is left to undo), which takes the
+ * keyboard focus from it: the score gets it back, so that the next key - Ctrl+Z, [ - still reaches the score and
+ * not the graph behind the dialog.
+ */
+function keepFocus(): void {
+  void nextTick(() => {
+    const active = document.activeElement
+    if (!active || active === document.body) tabRoot.value?.querySelector<HTMLElement>('.roll')?.focus({ preventScroll: true })
+  })
+}
+
+async function operateFromToolbar(operation: ScoreOperation): Promise<void> {
+  await operate(operation)
+  keepFocus()
 }
 
 function selectFromRoll(ids: string[]): void {
@@ -1383,9 +1429,10 @@ function onKey(event: KeyboardEvent): void {
       }
       case '[':
       case ']': {
+        // the note as it sounds: one tied over a bar line is shortened or lengthened whole (GitHub issue #28)
         if (props.readonly || primary.kind !== 'note') return false
-        const units = nextDuration(primary.units, event.key === ']' ? 1 : -1)
-        if (units) void operate({ op: 'set_duration', id: primary.id, units })
+        const operation = lengthOperation(view, primary, event.key === ']' ? 1 : -1)
+        if (operation) void operate(operation)
         return true
       }
       case 'r':
@@ -1417,13 +1464,14 @@ function onKey(event: KeyboardEvent): void {
       :selection="session.selection"
       :primary="session.primary"
       :busy="session.busy"
+      :stale="invalid"
       :can-undo="session.canUndo"
       :can-redo="session.canRedo"
       :undo-label="session.undoLabel"
       :redo-label="session.redoLabel"
-      @operate="operate"
-      @undo="undo"
-      @redo="redo"
+      @operate="operateFromToolbar"
+      @undo="undo(), keepFocus()"
+      @redo="redo(), keepFocus()"
     />
     <div class="view-tools" role="group" aria-label="View">
       <span class="layouts" role="radiogroup" aria-label="Layout">
@@ -1573,6 +1621,7 @@ function onKey(event: KeyboardEvent): void {
       v-model:sung-visible="prefs.sung"
       v-model:wave-visible="prefs.wave"
       :sound="drawSound"
+      :chord-sound="prefs.sounds.chord"
       :sung="sungPitch"
       :height="prefs.rollHeight"
       :view="shown"
@@ -1597,6 +1646,8 @@ function onKey(event: KeyboardEvent): void {
       @lyric-edit="onLyricEdit"
       @lyric-place="onLyricPlace"
       @lyric-delete="deleteLyricLines"
+      @lyric-auto="autoPlaceLyrics"
+      @notice="(text: string) => (session.notes = [text])"
     />
     <div
       v-if="showRoll && shown?.model"

@@ -6,10 +6,15 @@
  * Vocal notes, a **part** per lyrics block). A line placed by hand has a **span** - ``[start, end, block,
  * line]`` in units of L - kept in the node's properties (``plenio_lyric_spans``, like the Guide notes) and
  * sent with the lyrics: that line is sung on the notes that start inside it, and the other lines take the
- * notes between the lines placed by hand. An edit in the lane pins the whole block: every line gets the span
- * it has now, the edit changes some, and the lines are put in the order of their spans (a line moved past
- * another is sung after it - the lyrics text changes its order too). A block's lines stay between the
- * lines of the blocks before and after it and do not overlap. Spans without their line (``[start, end]``,
+ * notes between the lines placed by hand. An edit in the lane pins every line that is sung (GitHub issue
+ * #28: editing one line moved the lines of the other blocks): every line keeps the span it has now, the edit
+ * changes some, and the lines are put in the order of their spans (a line moved past another is sung after
+ * it - the lyrics text changes its order too). A block's lines stay between the lines of the blocks before
+ * and after it.
+ *
+ * **Lines never overlap and never push one another** (``fitLyricGesture``): a line dragged, made longer or
+ * shorter stops at its neighbour - dragged far enough past it, it lands in the next free room -, and a new
+ * line or a pasted one goes into free room only (``overlap``). Spans without their line (``[start, end]``,
  * kept by Plenio 0.4.4 and 0.4.5) still place their section's lines; the first edit keeps them with their
  * lines.
  *
@@ -119,15 +124,16 @@ export function editRange(layout: LyricLayoutView, block: number, total: number)
 }
 
 /**
- * The lines of a block where they are sung now - every line of its text, in order (``lines``). A line the
- * backend could not place (no note left) gets ``beat`` units after the one before.
+ * The lines of a block where they are sung now - every line of its text, in order (``lines``). A line no
+ * note sings (a direction, a line after the last note) takes no room: it stands where the line before it
+ * ends, with no length, and gets no span - it never takes notes from the line after it.
  */
 export function placedLines(
   layout: LyricLayoutView,
   block: number,
   lines: readonly string[],
   range: [number, number],
-  beat: number
+  _beat?: number
 ): PlacedLine[] {
   const part = partOf(layout, block)
   const [start, end] = range
@@ -136,80 +142,226 @@ export function placedLines(
   let cursor = part ? Math.max(part.start, start) : start
   lines.forEach((text, index) => {
     const at = byLine.get(index)
-    const sung = at && placedHere(at)
-    let from = sung ? at.start : cursor
-    let to = sung ? Math.max(at.end, at.start + 1) : from + beat
-    from = Math.min(Math.max(from, start), end - 1)
-    to = Math.min(Math.max(to, from + 1), end)
-    placed.push({ id: String(index), text, start: from, end: to })
-    cursor = to
+    if (at && placedHere(at)) {
+      const from = Math.min(Math.max(at.start, start), end - 1)
+      const to = Math.min(Math.max(at.end, from + 1), end)
+      placed.push({ id: String(index), text, start: from, end: to })
+      cursor = to
+    } else {
+      const here = Math.min(Math.max(cursor, start), end)
+      placed.push({ id: String(index), text, start: here, end: here })
+    }
   })
   return placed
 }
 
 /**
- * The lines after an edit, in the order of their spans and inside ``range``. The lines the edit placed
- * (an ``id`` starting with ``*``: moved, made longer or shorter, pasted, typed) stand exactly where they
- * were put, and the others make room: a line they cover in part starts where they end, a line they cover
- * whole moves behind them with its length (and moves the lines after it only as far as it must). A line
- * that reaches into the next one ends where that one starts; a line moved past another is sung after it.
+ * The lines after an edit, in the order of their spans and inside ``range``. Nothing is pushed: every line
+ * keeps its span (the gestures and the paste never let lines overlap, ``fitLyricGesture``, ``overlap``), a
+ * line with no length stays without one, and a line moved past another is sung after it. Only spans that
+ * overlap anyway (kept by an older version) are cut: the earlier line ends where the next one starts.
  */
 export function settle(lines: readonly PlacedLine[], range: [number, number]): PlacedLine[] {
   const [low, high] = range
   const items = lines.map((line, index) => {
-    const length = Math.max(1, Math.min(line.end - line.start, high - low))
-    const start = Math.min(Math.max(line.start, low), high - 1)
-    return { line: { ...line, start, end: Math.min(start + length, high) }, index, placed: line.id.startsWith('*') }
+    const start = Math.min(Math.max(line.start, low), Math.max(low, high - 1))
+    const end = line.end > line.start ? Math.min(Math.max(line.end, start + 1), high) : start
+    return { line: { ...line, start, end }, index, placed: line.id.startsWith('*') }
   })
-  const placed = items.filter((item) => item.placed).sort((a, b) => a.line.start - b.line.start)
-  /** Past every placed line that ``unit`` falls in (one after the other). */
-  const pastPlaced = (unit: number): number => {
-    let at = unit
-    for (const other of placed) if (at >= other.line.start && at < other.line.end) at = other.line.end
-    return at
-  }
-  let previousEnd = low
-  for (const item of items.filter((i) => !i.placed).sort((a, b) => a.line.start - b.line.start || a.index - b.index)) {
-    const { start, end } = item.line
-    let from = pastPlaced(Math.max(start, previousEnd))
-    while (from !== pastPlaced(from)) from = pastPlaced(from)
-    // covered in part: the rest of it stays; covered whole: it keeps its length behind what covered it
-    const to = end > from ? end : from + (end - start)
-    item.line.start = Math.min(from, high - 1)
-    item.line.end = Math.min(Math.max(to, item.line.start + 1), high)
-    previousEnd = item.line.end
-  }
   const sorted = items
     .sort((a, b) => a.line.start - b.line.start || Number(b.placed) - Number(a.placed) || a.index - b.index)
     .map((item) => item.line)
-  for (let i = 0; i < sorted.length; i++) {
+  for (let i = 0; i + 1 < sorted.length; i++) {
     const next = sorted[i + 1]
-    if (next && next.start <= sorted[i].start) next.start = Math.min(sorted[i].start + 1, high - 1)
-    if (next && sorted[i].end > next.start) sorted[i].end = next.start
-    if (sorted[i].end <= sorted[i].start) sorted[i].end = Math.min(sorted[i].start + 1, high)
+    if (sorted[i].end > next.start) sorted[i].end = Math.max(next.start, sorted[i].start)
   }
   return sorted
 }
 
+/** A line that takes room in the lane: its key, its block and line, its span (``end > start``) and words. */
+export interface LaneLine {
+  key: string
+  block: number
+  line: number
+  start: number
+  end: number
+  text: string
+}
+
+/** Every line that takes room in the lane (sung, or placed by hand), in the order of the score. */
+export function laneLines(layout: LyricLayoutView | null | undefined): LaneLine[] {
+  return (layout?.parts ?? [])
+    .flatMap((p) =>
+      p.lines
+        .filter((l) => placedHere(l) && l.end > l.start)
+        .map((l) => ({ key: lineKey(l.block, l.line), block: l.block, line: l.line, start: l.start, end: l.end, text: l.text }))
+    )
+    .sort((a, b) => a.start - b.start || a.block - b.block || a.line - b.line)
+}
+
+/** The first line of ``lines`` (other than ``except``) that one of ``spans`` overlaps, or ``null``. */
+export function overlap(
+  lines: readonly LaneLine[],
+  spans: readonly { start: number; end: number }[],
+  except: ReadonlySet<string> = new Set()
+): LaneLine | null {
+  for (const span of spans) {
+    const hit = lines.find((l) => !except.has(l.key) && l.start < span.end && span.start < l.end)
+    if (hit) return hit
+  }
+  return null
+}
+
+/** A drag (or a nudge) of lines in the lane: moved together (``keys``), or one line at its start or end. */
+export interface LyricGesture {
+  kind: 'move' | 'start' | 'end'
+  key: string
+  keys: readonly string[]
+  /** How far the pointer went, in units of L (on the grid). */
+  delta: number
+}
+
+/** Where a gesture leaves the lines: their new spans, and the line it stopped at (``null``: none). */
+export interface FittedGesture {
+  moves: { key: string; start: number; end: number }[]
+  /** The gesture went as far as asked. */
+  free: boolean
+  /** The line it stopped at (a neighbour), when it stopped at one. */
+  stoppedAt: LaneLine | null
+}
+
+/**
+ * A gesture in the lane, fitted so that no line overlaps another (GitHub issue #28: a line made longer
+ * pushed the next lines away from their notes). A line made longer or shorter stops at its neighbour; lines
+ * moved together keep their distances and stop at the nearest line in their way - dragged far enough past
+ * it, they land in the free room behind it. A line stays between the lines of the blocks before and after
+ * its own (``total``: the end of the score). ``lines``: every line of the layout (a line without length gets
+ * ``beat`` units when it is dragged).
+ */
+export function fitLyricGesture(
+  layout: LyricLayoutView,
+  gesture: LyricGesture,
+  total: number,
+  beat = 1
+): FittedGesture {
+  const all = layout.parts.flatMap((p) => p.lines.map((l) => ({ ...l, key: lineKey(l.block, l.line) })))
+  const moving = gesture.kind === 'move' ? new Set(gesture.keys) : new Set([gesture.key])
+  const picked = all
+    .filter((l) => moving.has(l.key) && l.text)
+    .map((l) => ({ key: l.key, block: l.block, start: l.start, end: l.end > l.start ? l.end : Math.min(total, l.start + Math.max(1, beat)) }))
+  const others = laneLines(layout).filter((l) => !moving.has(l.key))
+  const none: FittedGesture = { moves: [], free: true, stoppedAt: null }
+  if (!picked.length) return none
+  /** Where a line of ``block`` may stand: after the other blocks' lines before it, before those after it. */
+  const range = (block: number): [number, number] => {
+    let low = 0
+    let high = total
+    for (const other of others) {
+      if (other.block < block) low = Math.max(low, other.end)
+      else if (other.block > block) high = Math.min(high, other.start)
+    }
+    return [low, Math.max(low, high)]
+  }
+  if (gesture.kind !== 'move') {
+    const line = picked[0]
+    const [low, high] = range(line.block)
+    if (gesture.kind === 'end') {
+      const next = others.filter((o) => o.start >= line.start).sort((a, b) => a.start - b.start)[0]
+      const limit = Math.min(high, next ? next.start : total)
+      const wanted = line.end + gesture.delta
+      const end = Math.max(line.start + 1, Math.min(wanted, limit))
+      return { moves: [{ key: line.key, start: line.start, end }], free: end === wanted, stoppedAt: wanted > limit && next && next.start === limit ? next : null }
+    }
+    const before = others.filter((o) => o.end <= line.end).sort((a, b) => b.end - a.end)[0]
+    const limit = Math.max(low, before ? before.end : 0)
+    const wanted = line.start + gesture.delta
+    const start = Math.min(line.end - 1, Math.max(wanted, limit))
+    return {
+      moves: [{ key: line.key, start, end: line.end }],
+      free: start === wanted,
+      stoppedAt: wanted < limit && before && before.end === limit ? before : null
+    }
+  }
+  // the deltas that keep every moved line inside its room: an interval, minus the ones that would overlap
+  let lowest = -Infinity
+  let highest = Infinity
+  for (const line of picked) {
+    const [low, high] = range(line.block)
+    lowest = Math.max(lowest, low - line.start)
+    highest = Math.min(highest, high - line.end)
+  }
+  const blocked = others.flatMap((other) => picked.map((line) => ({ other, from: other.start - line.end, to: other.end - line.start })))
+  const fits = (delta: number): boolean => delta >= lowest && delta <= highest && !blocked.some((b) => delta > b.from && delta < b.to)
+  const wanted = gesture.delta
+  const candidates = [wanted, 0, lowest, highest, ...blocked.flatMap((b) => [b.from, b.to])].filter((d) => Number.isFinite(d) && fits(d))
+  if (!candidates.length) return { moves: [], free: false, stoppedAt: null }
+  const delta = candidates.reduce((best, d) => {
+    const closer = Math.abs(d - wanted) - Math.abs(best - wanted)
+    return closer < 0 || (closer === 0 && Math.abs(d) < Math.abs(best)) ? d : best
+  })
+  const stoppedAt = delta === wanted ? null : (blocked.find((b) => wanted > b.from && wanted < b.to)?.other ?? null)
+  return {
+    moves: delta ? picked.map((line) => ({ key: line.key, start: line.start + delta, end: line.end + delta })) : [],
+    free: delta === wanted,
+    stoppedAt
+  }
+}
+
+/**
+ * Where a new line goes when the lane is double-clicked at ``unit`` where no line is (GitHub issue #28: lines
+ * could only be added by copying one): into the block sung there, from the click (on the grid; in a phrase no
+ * line sings, from the phrase's start) to the end of that phrase - or of the next one -, never past the next
+ * line (where no phrase is ahead: ``beat`` units). ``null`` where no block is sung or there is no room.
+ */
+export function newLineAt(
+  layout: LyricLayoutView,
+  unit: number,
+  snap: number,
+  total: number,
+  beat = 4 * Math.max(1, snap)
+): { block: number; line: number; start: number; end: number } | null {
+  const part = partAt(layout, Math.min(Math.max(0, unit), Math.max(0, total - 1)))
+  if (!part) return null
+  const lines = laneLines(layout)
+  if (lines.some((l) => unit >= l.start && unit < l.end)) return null
+  const room = [
+    Math.max(0, ...lines.filter((l) => l.end <= unit).map((l) => l.end)),
+    Math.min(total, ...lines.filter((l) => l.start > unit).map((l) => l.start))
+  ]
+  const [, high] = editRange(layout, part.block, total)
+  const step = Math.max(1, snap)
+  let start = Math.max(room[0], Math.floor(unit / step) * step)
+  const phrase = part.phrases.find(([a, b]) => unit >= a && unit < b)
+  if (phrase && !lines.some((l) => l.start < phrase[1] && l.end > phrase[0])) start = Math.max(room[0], phrase[0])
+  const ahead = part.phrases.find(([a, b]) => b > start && a <= start) ?? part.phrases.find(([a]) => a > start)
+  const end = Math.min(ahead ? ahead[1] : start + Math.max(1, beat), room[1], high, total)
+  if (end <= start) return null
+  const count = part.lines.length ? Math.max(...part.lines.map((l) => l.line)) + 1 : 0
+  return { block: part.block, line: count, start, end }
+}
+
 /**
  * The spans after an edit that pinned ``edited`` (block -> its lines, in their new order): those blocks'
- * lines get these spans; the lines of other blocks keep theirs. Spans kept without their line become the
- * spans of the lines they placed (``layout``: the view they gave).
+ * lines get these spans; the lines of other blocks keep theirs - with ``pinAll``, every other line that is
+ * sung gets the span it is sung on now, so that no edit moves the lines of another block. Spans kept without
+ * their line become the spans of the lines they placed (``layout``: the view they gave).
  */
 export function withBlockSpans(
   spans: readonly LyricSpan[],
   layout: LyricLayoutView,
-  edited: ReadonlyMap<number, readonly PlacedLine[]>
+  edited: ReadonlyMap<number, readonly PlacedLine[]>,
+  pinAll = false
 ): LyricSpan[] {
   const kept = spans.filter((s) => s.length >= 4 && !edited.has(s[2] as number))
   const known = new Set(kept.map((s) => lineKey(s[2] as number, s[3] as number)))
-  const migrated: LyricSpan[] = spans.some((s) => s.length === 2)
-    ? layout.parts.flatMap((p) =>
-        p.lines
-          .filter((l) => l.pinned && !edited.has(l.block) && !known.has(lineKey(l.block, l.line)))
-          .map((l): LyricSpan => [l.start, l.end, l.block, l.line])
-      )
-    : []
+  const migrated: LyricSpan[] =
+    pinAll || spans.some((s) => s.length === 2)
+      ? layout.parts.flatMap((p) =>
+          p.lines
+            .filter((l) => (pinAll ? placedHere(l) : l.pinned) && l.end > l.start && !edited.has(l.block) && !known.has(lineKey(l.block, l.line)))
+            .map((l): LyricSpan => [l.start, l.end, l.block, l.line])
+        )
+      : []
   // a line the edit left where it was keeps the onsets of its syllables (the MusicXML import's placement)
   const onsets = new Map(spans.filter((s) => s.length > 4).map((s) => [`${s[0]}:${s[1]}:${s[2]}`, s.slice(4)]))
   const added = [...edited].flatMap(([block, lines]) =>
@@ -275,5 +427,5 @@ export interface LyricClipLine {
 export function clipOfLines(lines: readonly PlacedLine[]): LyricClipLine[] {
   const sorted = [...lines].sort((a, b) => a.start - b.start)
   const first = sorted[0]?.start ?? 0
-  return sorted.map((line) => ({ text: line.text, offset: line.start - first, length: line.end - line.start }))
+  return sorted.map((line) => ({ text: line.text, offset: line.start - first, length: Math.max(1, line.end - line.start) }))
 }

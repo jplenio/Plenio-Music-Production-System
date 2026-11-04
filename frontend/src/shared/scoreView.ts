@@ -237,6 +237,35 @@ export function nextDuration(units: number, direction: 1 | -1): number | null {
   return next ?? null
 }
 
+/** The next native length below (``-1``) or above (``1``) ``units``, which need not be native itself. */
+export function steppedDuration(units: number, direction: 1 | -1): number | null {
+  const next = direction < 0 ? [...DURATIONS].reverse().find((d) => d < units) : DURATIONS.find((d) => d > units)
+  return next ?? null
+}
+
+/**
+ * *shorter* / *longer* (and ``[`` / ``]``) on the selected note (``element``: its first written segment).
+ * A note written as one segment changes that segment's length (``set_duration``, as always). A note tied over
+ * a bar line (or a chord's onset) is one sounding note: it becomes the next native length shorter or longer as
+ * a whole, from its start (``resize_note``) - the bars stay valid, a rest takes the time it gives up and the
+ * ties follow. Before (GitHub issue #28), *shorter* shortened its first segment only and cut the tie: the note
+ * fell apart into two attacks. ``null``: no such length.
+ */
+export function lengthOperation(
+  view: ScoreView | null,
+  element: ScoreElement | null,
+  direction: 1 | -1
+): { op: string; [parameter: string]: unknown } | null {
+  if (!element || element.kind !== 'note') return null
+  const note = modelNoteOfSegment(view, element.id)
+  if (note && note.segments.length > 1) {
+    const duration = steppedDuration(note.duration, direction)
+    return duration ? { op: 'resize_note', id: note.id, duration, mode: 'rests' } : null
+  }
+  const units = nextDuration(element.units, direction)
+  return units ? { op: 'set_duration', id: element.id, units } : null
+}
+
 /** The element a click on the rendered notation hit (abcjs reports character ranges of display_abc). */
 export function elementAtDisplay(view: ScoreView, start: number, end: number): ScoreElement | null {
   const elements = view.elements ?? []

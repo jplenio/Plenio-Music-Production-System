@@ -91,7 +91,8 @@ Clicking, moving and resizing notes, and all keys, work the same in both modes. 
 | drag on an empty place (**Select**) | a frame: select every note it touches (Shift: add them to the selection) |
 | Ctrl+A | select all notes of both voices and all chord symbols |
 | click an empty place / Esc | clear the selection (Esc during a frame cancels the frame; in the score, Esc never closes the editor) |
-| drag a chord symbol | move it; a chord already at that place is replaced |
+| click a chord symbol | select it and hear it once, in the chords' sound (with *hear* on): root and quality, a slash bass under them. The toolbar's chord field shows it: **set** renames it, **remove** removes it (several selected: all of them) |
+| drag a chord symbol | move it; a chord already at that place is replaced. The roll stays where it is |
 | double-click the chord lane | type a new chord symbol (Enter adds it, Esc cancels); double-click a chord to rename it, an empty name removes it |
 
 While you drag, a dashed **ghost** shows the result; nothing changes before you let go. Then the backend checks the edit and writes the text; if it refuses (for example a note that cannot grow because another note follows), the ghost disappears and the reason is shown.
@@ -104,7 +105,7 @@ The roll covers the whole piano range (A0 to C8, more for a note beyond it) and 
 
 When the song has lyrics, the roll shows a **lyrics lane** under the chord lane. Each line stands over the Vocal notes it is sung on, and each syllable stands small over its note (`beau-` `ti-` `ful`). The notation shows the same syllables under the Vocal notes; there they are read-only.
 
-**Double-click a line** in the lane to edit it there (Enter keeps it, Esc cancels, an empty line is removed). A double-click over a phrase without words adds a line for it. Each edit is one undo step. Where the edited lyrics go:
+**Double-click a line** in the lane to edit its words there (Enter keeps it, Esc cancels, an empty line is removed): the line keeps its span, and no other line moves. **Double-click where the lane is free** to type a new line there: it starts at the click (on the grid; in a phrase no line sings, at the phrase's start) and goes to the end of that phrase - or of the next one -, never past the next line. Each edit is one undo step. Where the edited lyrics go:
 
 | Sheet | The lyrics come from | An edit goes |
 |---|---|---|
@@ -117,12 +118,12 @@ When the song has lyrics, the roll shows a **lyrics lane** under the chord lane.
 |---|---|---|
 | select | click a line; **Ctrl+click** or **Shift+click** adds or removes one; a click on a note or the empty lane lets them go | Esc: none |
 | move | drag the selected lines (on the grid of *snap*) | ← / →: one grid step |
-| longer / shorter | drag a line's **end** (the light edge) or its **start** | |
+| longer / shorter | drag a line's **end** (the light edge) or its **start**; it stops at the next line | |
 | delete | | Del (the words go too) |
 | copy, cut, duplicate | the roll's **Copy** / **Cut** buttons | Ctrl+C, Ctrl+X, Ctrl+D (right after the last selected line) |
-| paste | set the cursor in the ruler, then the roll's **Paste** button | Ctrl+V: into the lyrics block sung at the cursor, from the cursor on |
+| paste | set the cursor in the ruler, then the roll's **Paste** button | Ctrl+V: into the lyrics block sung at the cursor, from the cursor on, where the lane is free |
 
-A lyrics block with a line placed by hand is placed by hand as a whole: every line of the block keeps the span it has (the box), and its syllables take the notes that start inside that span. What you moved or pasted stands exactly where you put it; a line it covers in part starts after it, a line it covers whole moves behind it with its length. A line moved past another is sung after it - the lyrics text changes its order too. A block's lines stay between the lines of the blocks before and after it - so a block's first line can be moved onto a pickup in the bar before its section, or a line on to where the next block starts. The lines of the other blocks take the notes between the lines placed by hand by the rule below. The spans are kept with the sheet (like the Guide notes), move with the bars when sections or bars are arranged, go into the project file, the MusicXML export and Export Release's sheet music, and every edit is one undo step. Lines placed by hand with Plenio 0.4.4 or 0.4.5 keep their place.
+**One edit in the lane places every sung line by hand:** each keeps the span it has (the box), and its syllables take the notes that start inside that span, shared over the phrases there. So an edit changes the line you edit and no other - also not the lines of other blocks. **Lines never overlap and never push one another:** a line made longer stops at the next line, one dragged stops at the nearest line in its way (drawn with an orange edge, and the status line says so) - dragged far enough past it, it lands in the free room behind it, and the lyrics text changes its order too. A paste into a line is refused: shorten, move or delete that line first. A block's lines stay between the lines of the blocks before and after it - so a block's first line can be moved onto a pickup in the bar before its section, or a line on to where the next block starts. A line with no note inside its span has no syllables (a dashed box) and is not counted as sung. **auto-place lyrics** (in the roll's tools, while lines are placed by hand) lays the lyrics out on the notes again by the rule below; the words stay, Ctrl+Z brings the places back. The spans are kept with the sheet (like the Guide notes), move with the bars when sections or bars are arranged, go into the project file, the MusicXML export and Export Release's sheet music, and every edit is one undo step. Lines placed by hand with Plenio 0.4.4 or 0.4.5 keep their place.
 
 How the words are placed follows what YuE2 does: it sings the lines **in their order over the Vocal melody**, about one syllable per note - whatever the sections are called. The lines take the Vocal notes in order, as many as their syllables ask for. The notes form **phrases**, split at rests of an eighth or more; a line starts where a phrase starts wherever it can and runs on over the next phrase when its syllables need it, so a long line is not crammed onto a short phrase while another phrase stays empty. A lyrics block starts where a section of its kind starts - on the section's pickup when its first phrase begins in the bar before - but it may also follow the block before inside a section (a plan that sings the chorus and the outro in one section) or start in a section of another kind (a second verse in the plan's bridge). Notes no line sings are left free: an intro's ad-libs, the end of a section after its block. Each syllable takes a note. A line over several phrases breaks between them at a word - after a comma or a full stop where it can, never inside a word unless it must. A phrase with fewer syllables than notes holds its last one (a melisma); one with more lets neighbouring syllables share a note - two of the same word first (`Ba-de-`), spread over the phrase, not piled up on its last note. **No line is lost:** lyrics no note sings - the notes ran out (YuE2 planned fewer notes than the lyrics need), an outro without Vocal notes - follow the music as text under *Lyrics without notes in this score*, with their section tags, in the notation, its PDF/PNG/SVG and Export Release's sheet music. YuE2 sings the words its own way; this is the editor's picture of where they fall - in the renders measured about three of four words within a beat of where they are sung ([the study](../../design/lyrics-placement.md)).
 
@@ -154,7 +155,7 @@ Select a note, then use the palette or the keyboard (in the notation):
 | Alt+↑ / Alt+↓ | the other voice at the same time |
 | ↑ / ↓ | one semitone up / down (a tied note moves as a whole) |
 | Shift+↑ / Shift+↓ | one octave up / down |
-| `[` / `]` | shorter / longer |
+| `[` / `]` | shorter / longer: a note tied over a bar line as the one note it is |
 | R or Delete | turn into a rest |
 | N | turn a rest into a note (the pitch of the nearest note) |
 | Space | play / stop (from the cursor) |
@@ -164,7 +165,7 @@ Select a note, then use the palette or the keyboard (in the notation):
 
 Rules the editor keeps for you:
 
-- **Bars stay exactly full.** *Longer* only grows into the rests after the note; *shorter* fills the freed time with a rest. An edit that would overfill a bar or cross a chord symbol is refused with the reason and a hint (for example: "Only 2 units of rest follow the note in bar 12 - turn the following note into a rest first").
+- **Bars stay exactly full.** *Longer* only grows into the rests after the note; *shorter* fills the freed time with a rest. An edit that would overfill a bar or cross a chord symbol is refused with the reason and a hint (for example: "Only 2 units of rest follow the note in bar 12 - turn the following note into a rest first"). A note **tied over a bar line** (or a chord symbol) is one note: *shorter* and *longer* give the whole note the next length from its start, and its ties follow - still over the bar line it stays tied, ending before it the tie goes, and there is no second attack.
 - **Only the edited bars change.** Every other character of the text stays exactly as it was. An edited bar is rewritten in the native spelling: accidentals only where the key and the bar need them. Native accidentals apply to the letter in every octave until the bar line, so raising one `F` can add a `=` to a later `f` in the same bar - that keeps the other notes where they were.
 - **Ties** are one note: a pitch change moves every tied part; shortening a tied note removes the tie (a warning says so).
 - **Chord symbols** belong to the Vocal voice and start at a Vocal note or rest; selecting a note of the Ins voice puts the chord at the Vocal onset at the same time.

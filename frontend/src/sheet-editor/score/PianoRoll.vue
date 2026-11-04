@@ -23,17 +23,20 @@
  * grid. Playback starts there; while it plays a second line follows the music and the pane pages along.
  *
  * With lyrics, a lyrics lane under the chord lane shows every line over the Vocal phrase it is sung on
- * and each syllable over its note (backend ``lyric_layout``); a double-click in the lane edits the line
- * there (``lyricEdit``: the Score tab changes the lyrics, the view follows). The lines are handled like
- * notes: a click selects one (Ctrl / Shift: more), a drag moves them, a drag at a line's start or end
- * makes it longer or shorter (``lyricPlace``), Del deletes them (``lyricDelete``), ← / → move them by the
- * grid; copy and paste go through the Score tab's clipboard (``lyricPlacement``).
+ * and each syllable over its note (backend ``lyric_layout``); a double-click on a line edits its words, a
+ * double-click where no line is starts a new line there (``lyricEdit``: the Score tab changes the lyrics,
+ * the view follows). The lines are handled like notes: a click selects one (Ctrl / Shift: more), a drag
+ * moves them, a drag at a line's start or end makes it longer or shorter (``lyricPlace``), Del deletes them
+ * (``lyricDelete``), ← / → move them by the grid; copy and paste go through the Score tab's clipboard
+ * (``lyricPlacement``). Lines never overlap: a gesture stops at the neighbouring line (``fitLyricGesture``)
+ * and says so.
  *
  * DAW habits (owner's request 2026-10-03): in draw mode a click on the empty grid inserts a note of the
  * last drawn length, Shift+drag pulls a frame; Alt+drag copies notes; a note's end stops at the next
  * note (Alt: over it); Ctrl+wheel zooms around the pointer, G / H zoom out / in; a click on the keyboard
- * plays its pitch, and a drawn, grabbed or moved note is heard (``audition``). A cover's source
- * recording (``source``) is drawn as a waveform lane, bar by bar where the transcription puts it.
+ * plays its pitch, a drawn, grabbed or moved note is heard and a clicked chord symbol sounds once in the
+ * chords' sound (``audition``, ``chordSound``). A cover's source recording (``source``) is drawn as a
+ * waveform lane, bar by bar where the transcription puts it.
  *
  * The clipboard buttons (Cubase: key editor - Copy, Cut, Paste, Paste Time) ask the Score tab, which
  * owns the clipboard and the cursor (``clipboard`` event); a frame that reaches into the chord lane
@@ -43,10 +46,10 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import type { ClipAction } from './clipboard'
 import { pitchName } from './inspector'
-import { lineKey } from './lyricPlacement'
+import { type FittedGesture, fitLyricGesture, lineKey, newLineAt } from './lyricPlacement'
 import { positionLabel, rulerUnit } from './locator'
 import type { InstrumentId } from './instruments'
-import { audition as hearPitch } from './player'
+import { auditionChord, audition as hearPitch } from './player'
 import { type SourceEnvelope, waveColumns } from './sourceAudio'
 import { type SungCurve, curveRuns } from './sungPitch'
 
@@ -139,6 +142,8 @@ const props = withDefaults(
     } | null
     /** The sound a drawn, grabbed or moved note is heard in (the draw-into track's). */
     sound?: InstrumentId
+    /** The sound a clicked chord symbol is heard in (the chords' track). */
+    chordSound?: InstrumentId
     /** A MIDI take while it is played: its notes so far (drawn red over the roll). */
     recorded?: { track: Track; notes: readonly { onset: number; duration: number; pitch: number }[] } | null
   }>(),
@@ -164,8 +169,10 @@ export interface LyricEdit {
   block: number
   line: number
   text: string
-  /** Where the line is (a new one: the start of its phrase), in units of L. */
+  /** Where the line is (a new one: where it was started), in units of L. */
   at?: number
+  /** A new line: where it ends (up to the end of its phrase, never past the next line). */
+  end?: number
 }
 
 /** A lyrics line placed anew in the lane: its key (``block:line``) and its span in units of L. */
@@ -179,8 +186,13 @@ const emit = defineEmits<{
   locate: [unit: number]
   clipboard: [action: ClipAction]
   lyricEdit: [edit: LyricEdit]
-  lyricPlace: [moves: LyricPlace[]]
+  /** New spans of some lines (none: the gesture moved nothing); ``note``: where it stopped and why. */
+  lyricPlace: [moves: LyricPlace[], note?: string]
   lyricDelete: [keys: string[]]
+  /** Every line placed by hand lets go of its span: the lyrics are laid out on the notes again. */
+  lyricAuto: []
+  /** Something to tell (a chord symbol that cannot be heard). */
+  notice: [text: string]
 }>()
 /** The lyrics lines selected in the lane (``block:line``; the Score tab copies and pastes them). */
 const lyricSelection = defineModel<string[]>('lyricSelection', { default: () => [] })
@@ -230,6 +242,8 @@ interface LyricDrag {
   keys: string[]
   origin: number
   delta: number
+  /** Where the lines go: the drag fitted between their neighbours (``fitLyricGesture``). */
+  fitted?: FittedGesture
 }
 const lyricDrag = ref<LyricDrag | null>(null)
 /** Pixels at a line's start or end that grab its edge instead of the whole line. */
@@ -274,6 +288,19 @@ const lastLength = ref<number | null>(null)
 function hear(pitch: number): void {
   if (audition.value) hearPitch(pitch, 0.35, props.sound)
 }
+/**
+ * A chord symbol's sound: its pitches as the backend reads the symbol (root and quality, a slash bass under
+ * them), briefly, in the chords' sound - with *hear* on. A symbol without pitches is not guessed: it stays
+ * silent and the roll says why.
+ */
+function hearChord(chord: ModelChord): void {
+  if (!audition.value) return
+  if (!chord.pitches?.length) {
+    emit('notice', `The chord symbol ${chord.name} has no pitches Plenio can play.`)
+    return
+  }
+  auditionChord(chord.pitches, 0.8, props.chordSound ?? 'plain')
+}
 const editable = computed(() => !props.readonly && !props.stale && !props.busy && !committing.value)
 const selectedNotes = computed(() => selectedNoteIds(props.view, props.selection))
 const selectedChords = computed(() => selectedChordIds(props.selection))
@@ -307,27 +334,26 @@ const hint = computed(() =>
 )
 const lyricsHint = computed(() =>
   props.lyrics && props.lyricsEditable
-    ? ' · lyrics lane: double-click: edit the words · drag a line: move · drag its start or end: longer / shorter · Del · Ctrl+C / Ctrl+V'
+    ? ' · lyrics lane: double-click a line: edit its words · double-click free room: a new line there · drag a line: move · ' +
+      'drag its start or end: longer / shorter (lines stop at their neighbours, the others stay) · Del · Ctrl+C / Ctrl+V'
     : ''
 )
 const position = computed(() => (model.value && props.locator !== null ? positionLabel(model.value, props.locator) : ''))
 
 // --- the lyrics lane ---
 const LETTER_PX = 6.2
-/** Where a line is while a drag is pulled (the line itself elsewhere). */
+/** Where a line is while a drag is pulled (the line itself elsewhere): as far as it can go. */
 function draggedSpan(key: string, start: number, end: number): [number, number] {
-  const current = lyricDrag.value
-  if (!current || !current.delta) return [start, end]
-  if (current.kind === 'move' && current.keys.includes(key)) return [start + current.delta, end + current.delta]
-  if (current.key !== key) return [start, end]
-  if (current.kind === 'start') return [Math.min(start + current.delta, end - 1), end]
-  if (current.kind === 'end') return [start, Math.max(end + current.delta, start + 1)]
-  return [start, end]
+  const move = lyricDrag.value?.fitted?.moves.find((m) => m.key === key)
+  return move ? [move.start, move.end] : [start, end]
 }
 function isDragged(key: string): boolean {
+  return !!lyricDrag.value?.fitted?.moves.some((m) => m.key === key)
+}
+/** The dragged line stopped at a neighbour (drawn so). */
+function isStopped(key: string): boolean {
   const current = lyricDrag.value
-  if (!current?.delta) return false
-  return current.kind === 'move' ? current.keys.includes(key) : current.key === key
+  return !!current?.fitted && !current.fitted.free && (current.kind === 'move' ? current.keys.includes(key) : current.key === key)
 }
 /**
  * The lines with words over their phrases: the box is the line's span (a drag at its ends changes it),
@@ -357,10 +383,18 @@ const lyricLines = computed(() => {
       const width = Math.max(16, xOf(line.end, g) - x)
       const chars = Math.max(1, Math.floor((Math.max(width, Math.min(room, line.text.length * LETTER_PX + 8)) - 8) / LETTER_PX))
       const shown = line.text.length > chars ? `${line.text.slice(0, Math.max(1, chars - 1))}…` : line.text
-      return { ...line, x, width, shown, selected: selected.has(line.key), dragged: isDragged(line.key) }
+      return { ...line, x, width, shown, selected: selected.has(line.key), dragged: isDragged(line.key), stopped: isStopped(line.key) }
     })
     .filter((line) => inWindow(line.start, Math.max(line.end, line.start + 64)))
 })
+
+/** Some line stands on a span placed by hand (one edit in the lane places them all). */
+const placedByHand = computed(() => !!props.lyrics?.parts.some((p) => p.lines.some((l) => l.pinned)))
+/** The button goes away with the placed lines: the roll takes the focus first, so that Ctrl+Z still reaches it. */
+function autoPlaceLyrics(): void {
+  root.value?.focus({ preventScroll: true })
+  emit('lyricAuto')
+}
 
 /** The lyrics line under ``x`` in the lane and which part of it was grabbed. */
 function lyricAt(x: number): { key: string; start: number; end: number; part: LyricDrag['kind'] } | null {
@@ -371,20 +405,27 @@ function lyricAt(x: number): { key: string; start: number; end: number; part: Ly
   return { key: line.key, start: line.start, end: line.end, part }
 }
 
-/** The new spans of the dragged (or nudged) lines. */
-function lyricMoves(current: LyricDrag): LyricPlace[] {
-  const moves: LyricPlace[] = []
-  for (const line of props.lyrics?.parts.flatMap((p) => p.lines.map((l) => ({ ...l, key: lineKey(l.block, l.line) }))) ?? []) {
-    const moved = current.kind === 'move' ? current.keys.includes(line.key) : line.key === current.key
-    if (!moved) continue
-    const end = Math.max(line.end, line.start + 1)
-    let span: [number, number] = [line.start, end]
-    if (current.kind === 'move') span = [line.start + current.delta, end + current.delta]
-    else if (current.kind === 'start') span = [Math.min(line.start + current.delta, end - 1), end]
-    else span = [line.start, Math.max(end + current.delta, line.start + 1)]
-    moves.push({ key: line.key, start: Math.max(0, span[0]), end: Math.max(1, span[1]) })
-  }
-  return moves
+/** A drag or a nudge of lines, fitted between their neighbours (lines never overlap). */
+function fitLyrics(current: Pick<LyricDrag, 'kind' | 'key' | 'keys' | 'delta'>): FittedGesture {
+  const g = geo.value
+  if (!props.lyrics || !g) return { moves: [], free: true, stoppedAt: null }
+  const beat = Math.max(1, Math.round(model.value?.grid.units_per_quarter ?? 1))
+  return fitLyricGesture(props.lyrics, current, g.total, beat)
+}
+
+/** The lines' new spans that changed, and what to tell when the gesture stopped at a neighbour. */
+function placeLyrics(fitted: FittedGesture): void {
+  const lines = props.lyrics?.parts.flatMap((p) => p.lines) ?? []
+  const moves = fitted.moves.filter((m) => {
+    const line = lines.find((l) => lineKey(l.block, l.line) === m.key)
+    return !line || line.start !== m.start || line.end !== m.end
+  })
+  const note = fitted.free
+    ? undefined
+    : fitted.stoppedAt
+      ? `The line stops at "${fitted.stoppedAt.text}": lyrics lines never overlap - shorten or move that line first.`
+      : "The line stays inside its lyrics block: it stops at the next block's lines (or at the end of the score)."
+  if (moves.length || note) emit('lyricPlace', moves, note)
 }
 /** The syllable of every Vocal note that has one (``-``: the word goes on). */
 const syllables = computed(() => {
@@ -414,31 +455,30 @@ const visibleSyllables = computed(() => {
     })
 })
 
-/** The line to edit at ``unit``: the one sung there, a new one for a phrase without words, or the one before. */
-function lyricTargetAt(unit: number): (LyricEdit & { original: string; start: number }) | null {
+/**
+ * The line to edit at ``x`` (``unit``): the line drawn there, else a new line in the free room there - from
+ * the click to the end of its phrase, never past the next line (``newLineAt``).
+ */
+function lyricTargetAt(x: number, unit: number): (LyricEdit & { original: string; start: number }) | null {
   const layout = props.lyrics
-  const part = layout?.parts.find((p) => unit >= p.start && unit < p.end)
-  if (!part) return null
-  const count = part.lines.length ? Math.max(...part.lines.map((l) => l.line)) + 1 : 0
-  const at = part.lines.find((l) => l.text && unit >= l.start && unit < Math.max(l.end, l.start + 1))
-  const target = (line: { line: number; text: string; start: number }) => ({
-    block: part.block,
-    line: line.line,
-    text: line.text,
-    original: line.text,
-    start: line.start
-  })
-  if (at) return target(at)
-  const phrase = part.phrases.find(([a, b]) => unit >= a && unit < b)
-  if (phrase && !part.lines.some((l) => l.syllables.length && l.start < phrase[1] && l.end > phrase[0])) {
-    return target({ line: count, text: '', start: phrase[0] }) // words for a phrase that has none
+  const g = geo.value
+  if (!layout || !g) return null
+  const hit = lyricAt(x)
+  if (hit && hit.part !== 'end') {
+    const line = layout.parts.flatMap((p) => p.lines).find((l) => lineKey(l.block, l.line) === hit.key)
+    if (line) return { block: line.block, line: line.line, text: line.text, original: line.text, start: line.start }
   }
-  const before = [...part.lines].reverse().find((l) => l.text && l.start <= unit)
-  return target(before ?? { line: count, text: '', start: part.start })
+  const fresh = newLineAt(layout, unit, g.snap, g.total, Math.max(1, Math.round(model.value?.grid.units_per_quarter ?? 1)))
+  if (!fresh) {
+    // no room here (on a line's edge): its words
+    const line = hit && layout.parts.flatMap((p) => p.lines).find((l) => lineKey(l.block, l.line) === hit.key)
+    return line ? { block: line.block, line: line.line, text: line.text, original: line.text, start: line.start } : null
+  }
+  return { block: fresh.block, line: fresh.line, text: '', original: '', start: fresh.start, at: fresh.start, end: fresh.end }
 }
 
-function startLyricEdit(unit: number): void {
-  const target = lyricTargetAt(unit)
+function startLyricEdit(x: number, unit: number): void {
+  const target = lyricTargetAt(x, unit)
   if (!target) return
   lyricCancelled = false
   lyricEdit.value = target
@@ -457,7 +497,13 @@ function commitLyric(): void {
   }
   root.value?.focus({ preventScroll: true })
   if (edit.text.trim() === edit.original.trim()) return
-  emit('lyricEdit', { block: edit.block, line: edit.line, text: edit.text.trim(), at: edit.start })
+  emit('lyricEdit', {
+    block: edit.block,
+    line: edit.line,
+    text: edit.text.trim(),
+    at: edit.start,
+    ...(edit.end !== undefined ? { end: edit.end } : {})
+  })
 }
 
 function cancelLyric(): void {
@@ -593,6 +639,8 @@ function onPointerDown(event: PointerEvent): void {
       select([...props.selection.filter((id) => !id.startsWith('chord:')), ...ids])
     } else if (!selectedChords.value.has(hit.chord.id)) select([hit.chord.id])
     if (editable.value) start = startChord(hit.chord, unitAt(x, g))
+    // heard once when it is clicked (GitHub issue #28), like a note - a drag does not sound it again
+    hearChord(hit.chord)
   } else if ((hit.area === 'grid' || hit.area === 'lane') && (mode.value === 'select' || event.shiftKey)) {
     // a frame selects - also while the score cannot be edited; started in the lane it takes chord symbols;
     // in draw mode Shift+drag pulls one too (and adds to the selection)
@@ -625,16 +673,26 @@ function capture(event: PointerEvent): void {
   }
 }
 
-/** While a gesture runs, the pane scrolls along when the pointer reaches its top or bottom edge. */
-function followEdge(event: PointerEvent): void {
+/**
+ * While a gesture on the rows runs (a note drawn, moved or resized, a frame), the pane scrolls along when the
+ * pointer reaches its top or bottom edge. A chord symbol is dragged along the bars only, in the chord lane -
+ * which lies inside the top edge: it never scrolls the rows (GitHub issue #28: every move of the pointer
+ * while a chord was dragged scrolled the roll a row up), nor does a frame pulled inside the lanes.
+ */
+function followEdge(event: PointerEvent, current: Press): void {
   const el = scroller.value
   const g = geo.value
   if (!el || !g) return
+  if (current.start?.kind === 'chord') return
   const box = el.getBoundingClientRect()
   if (!box.height) return
   const step = g.rowHeight
-  if (event.clientY < box.top + g.top + 12) el.scrollTop = Math.max(0, el.scrollTop - step)
-  else if (event.clientY > box.bottom - 16) el.scrollTop = el.scrollTop + step
+  // a frame started in the lanes (to take chord symbols) scrolls up only once it was pulled onto the rows
+  const fromLanes = !!current.keep && current.y - (current.from?.scrollTop ?? 0) < g.top
+  if (event.clientY < box.top + g.top + 12) {
+    if (fromLanes && event.clientY < box.top + g.top) return
+    el.scrollTop = Math.max(0, el.scrollTop - step)
+  } else if (event.clientY > box.bottom - 16) el.scrollTop = el.scrollTop + step
   else return
   onScroll()
 }
@@ -651,10 +709,11 @@ function onPointerMove(event: PointerEvent): void {
     if (!press.started && Math.abs(x - press.x) < MOVE_THRESHOLD_PX) return
     press.started = true
     const delta = Math.round((unitAt(x, g) - press.lyric.origin) / g.snap) * g.snap
-    lyricDrag.value = { ...press.lyric, delta }
+    const next = { ...press.lyric, delta }
+    lyricDrag.value = { ...next, fitted: fitLyrics(next) }
     return
   }
-  if (press.started) followEdge(event)
+  if (press.started) followEdge(event, press)
   if (!press.started && Math.hypot(x - press.x, y - press.y) < MOVE_THRESHOLD_PX) return
   press.started = true
   if (press.keep) {
@@ -693,7 +752,7 @@ function onPointerUp(): void {
   if (current.lyric) {
     const dragged = lyricDrag.value
     lyricDrag.value = null
-    if (current.started && dragged?.delta) emit('lyricPlace', lyricMoves(dragged))
+    if (current.started && dragged?.delta && dragged.fitted) placeLyrics(dragged.fitted)
     return
   }
   if (!current.started) {
@@ -740,7 +799,7 @@ function onDoubleClick(event: MouseEvent): void {
   const hit = hitTest(x, y, notes.value, chords.value, g, track.value, scrollTop.value, scrollLeft.value)
   if (hit.area === 'lyrics') {
     // the lyrics may be edited where the score may not (they can belong to this sheet)
-    if (props.lyricsEditable) startLyricEdit(hit.unit)
+    if (props.lyricsEditable) startLyricEdit(x, hit.unit)
     return
   }
   if (!editable.value) return
@@ -792,7 +851,7 @@ function onKey(event: KeyboardEvent): void {
       event.stopPropagation()
       if (event.key === 'Escape') lyricSelection.value = []
       else if (!props.lyricsEditable) return
-      else if (step) emit('lyricPlace', lyricMoves({ kind: 'move', key: '', keys: [...lyricSelection.value], origin: 0, delta: step }))
+      else if (step) placeLyrics(fitLyrics({ kind: 'move', key: '', keys: [...lyricSelection.value], delta: step }))
       else emit('lyricDelete', [...lyricSelection.value])
       return
     }
@@ -1204,6 +1263,13 @@ defineExpose({ zoomBy, zoomRows })
       <label title="The roll pages along with the playback line">
         <input v-model="follow" type="checkbox" aria-label="Follow the playback" /> follow
       </label>
+      <button
+        v-if="lyrics && lyricsEditable && placedByHand"
+        title="Lay the lyrics out on the notes again by the automatic rules: every line lets go of the place it has in the lyrics lane (the words stay; Ctrl+Z brings the places back)"
+        @click="autoPlaceLyrics"
+      >
+        auto-place lyrics
+      </button>
       <span class="hint">{{ hint }}{{ lyricsHint }}</span>
     </div>
     <p v-if="!model && view?.model_error" class="roll-note">{{ view.model_error.message }}</p>
@@ -1303,14 +1369,16 @@ defineExpose({ zoomBy, zoomRows })
               v-for="line in lyricLines"
               :key="line.key"
               class="lyric-line"
-              :class="{ unsung: !line.syllables.length, selected: line.selected, dragged: line.dragged }"
+              :class="{ unsung: !line.syllables.length, selected: line.selected, dragged: line.dragged, stopped: line.stopped }"
             >
               <rect :x="line.x" :y="TOP + 3" :width="line.width" :height="LYRICS_LANE - 6" rx="3" />
               <rect v-if="lyricsEditable" class="edge" :x="line.x + line.width - 3" :y="TOP + 5" :width="3" :height="LYRICS_LANE - 10" />
               <text :x="line.x + 4" :y="TOP + LYRICS_LANE / 2 + 4">{{ line.shown }}</text>
               <title>
                 {{ line.text }}{{
-                  lyricsEditable ? ' - click: select · drag: move · drag its start or end: longer / shorter · double-click: edit the words' : ''
+                  lyricsEditable
+                    ? ' - click: select · drag: move · drag its start or end: longer / shorter (it stops at the next line) · double-click: edit the words'
+                    : ''
                 }}
               </title>
             </g>
@@ -1341,7 +1409,7 @@ defineExpose({ zoomBy, zoomRows })
           >
             <rect :x="xOf(chord.onset, geo)" :y="HEADER + 3" :width="chordWidth(chord, next, geo)" :height="LANE - 6" rx="3" />
             <text :x="xOf(chord.onset, geo) + 4" :y="HEADER + LANE / 2 + 4">{{ chord.name }}</text>
-            <title>chord {{ chord.name }} - drag to move, double-click to rename, Delete to remove</title>
+            <title>chord {{ chord.name }} - click to hear it, drag to move, double-click to rename, Delete to remove</title>
           </g>
           <g v-if="drag?.kind === 'chord'" class="chord ghost">
             <rect :x="xOf(drag.to, geo)" :y="HEADER + 3" :width="chordWidth(drag.chord, undefined, geo)" :height="LANE - 6" rx="3" />

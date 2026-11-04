@@ -2,6 +2,27 @@
 
 All notable changes of the current version and the one before. Versions follow semantic versioning; published Registry versions are immutable. Earlier versions (0.2.0 to 1.4.0): the [changelog of 1.4.1](https://github.com/jplenio/Plenio-Music-Production-System/blob/v1.4.1/CHANGELOG.md) (1.4.0), the [changelog of 1.4.0](https://github.com/jplenio/Plenio-Music-Production-System/blob/v1.4.0/CHANGELOG.md) (1.3.2), the [changelog of 1.3.2](https://github.com/jplenio/Plenio-Music-Production-System/blob/v1.3.2/CHANGELOG.md) (1.3.1), the [changelog of 1.3.1](https://github.com/jplenio/Plenio-Music-Production-System/blob/v1.3.1/CHANGELOG.md) (1.3.0), the [changelog of 1.3.0](https://github.com/jplenio/Plenio-Music-Production-System/blob/v1.3.0/CHANGELOG.md) (1.2.1), the [changelog of 1.2.1](https://github.com/jplenio/Plenio-Music-Production-System/blob/v1.2.1/CHANGELOG.md) (1.2.0), the [changelog of 1.2.0](https://github.com/jplenio/Plenio-Music-Production-System/blob/v1.2.0/CHANGELOG.md) (1.1.0), the [changelog of 1.1.0](https://github.com/jplenio/Plenio-Music-Production-System/blob/v1.1.0/CHANGELOG.md) (1.0.2), the [changelog of 1.0.2](https://github.com/jplenio/Plenio-Music-Production-System/blob/v1.0.2/CHANGELOG.md) (1.0.1), the [changelog of 1.0.1](https://github.com/jplenio/Plenio-Music-Production-System/blob/v1.0.1/CHANGELOG.md) (1.0.0), the [changelog of 1.0.0](https://github.com/jplenio/Plenio-Music-Production-System/blob/v1.0.0/CHANGELOG.md) (0.8.0), the [changelog of 0.8.0](https://github.com/jplenio/Plenio-Music-Production-System/blob/v0.8.0/CHANGELOG.md) (0.7.0), the [changelog of 0.7.0](https://github.com/jplenio/Plenio-Music-Production-System/blob/v0.7.0/CHANGELOG.md) (0.6.1), the [changelog of 0.6.0](https://github.com/jplenio/Plenio-Music-Production-System/blob/v0.6.0/CHANGELOG.md) (0.5.0 and 0.6.0), the [changelog of 0.4.4](https://github.com/jplenio/Plenio-Music-Production-System/blob/v0.4.4/CHANGELOG.md) (0.2.0 to 0.4.4) and the [GitHub releases](https://github.com/jplenio/Plenio-Music-Production-System/releases).
 
+## Unreleased
+
+**Lyrics placed by hand that stay where they are, and chords you can hear.**
+
+### Added
+
+- **New lyrics lines where the lane is free**: a double-click on free room in the Score tab's lyrics lane starts a new line there, from the click to the end of its phrase and never past the next line. Before, a line could only be added by copying one.
+- **Hear a chord**: a click on a chord symbol in the roll selects it and sounds it once, in the chords' sound - root, quality and slash bass, with *hear* on. A drag does not sound it again, and a symbol without pitches stays silent and says so instead of playing a guessed triad.
+
+### Changed
+
+- **Lyrics lines never overlap and never push one another**: a line made longer stops at the next line, one dragged stops at the nearest line in its way (the status line says so) or, dragged far enough past it, lands in the free room behind it. A paste into a line is refused with the reason.
+- **One edit in the lane keeps every other line where it is**: every sung line gets the span it has now, also the lines of other blocks, and a changed line keeps its span. Before, resizing a line or changing its words could move the lines around it, up to the following blocks, away from their notes. A line placed by hand shares its syllables over its phrases as the automatic layout does, so placing it changes no syllable; **auto-place lyrics** in the roll's tools lays the lyrics out on the notes again.
+
+### Fixed
+
+- **Dragging a chord symbol scrolled the roll upward**, a row with every move of the pointer: the chord lane lies inside the edge where a drag on the rows scrolls along. Dragging notes and frames to the edge still scrolls.
+- **Set and remove stayed disabled for a selected chord symbol**: the toolbar's chord field now shows it, *set* renames it and *remove* removes it - several selected at once too -, with the same operations as the lane. The controls follow the score after the edit and stay disabled while it is busy or its text is invalid.
+- **Shorter split a note tied over a bar line** into a short fragment and a second attack in the next bar: *shorter*, *longer* and `[` / `]` now change the whole note from its start, in both voices. It stays tied while it still crosses the bar line, loses the tie when it ends before it, and a rest takes the time it gives up.
+- **Undo and the keys after a toolbar button**: a button disabled while the backend worked took the keyboard focus with it, so the next Ctrl+Z or `[` went to the graph behind the dialog.
+
 ## 1.5.0 - 2026-10-31
 
 **Briefs that show their template, your own lyrics, freer covers and bolder creativity.** Choosing a style template fills the brief's fields visibly, every field is a list of the templates' values with your own value always possible, and a sung song takes a lyrics idea or your own lyrics, sung as written. The templates say how a song sounds in their description and what it is about in a lyrics idea of its own. A cover's *original notes* slider leaves out the source's notes step by step, so YuE2 interprets more freely. Creativity goes to 200: its default is now 100, the experimental setting that gave the best songs, and 101-200 goes further. Titles name what a song is about, taken from its lyrics.

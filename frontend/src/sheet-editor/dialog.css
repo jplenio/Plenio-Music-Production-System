@@ -823,6 +823,11 @@
 .plenio-overlay .roll-svg .lyric-line.dragged rect {
   stroke-dasharray: 4 2;
 }
+/* a dragged line that stopped at its neighbour: lines never overlap */
+.plenio-overlay .roll-svg .lyric-line.stopped rect {
+  stroke: #e0a040;
+  stroke-width: 1.5;
+}
 .plenio-overlay .roll-svg .lyric-line rect.edge {
   fill: rgba(76, 154, 255, 0.55);
   stroke: none;

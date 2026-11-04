@@ -283,7 +283,7 @@ const pageGone = (): boolean => typeof document === 'undefined'
 // another page's changes come in every few seconds (when this one has none waiting to be saved)
 if (!isPortable) {
   const lookForChanges = window.setInterval(async () => {
-    if (pageGone()) return window.clearInterval(lookForChanges)
+    if (pageGone()) return clearInterval(lookForChanges) // no window any more either
     if (pending || baseRev === undefined || document.visibilityState !== 'visible') return
     try {
       const { rev } = await api.stateRev()
@@ -915,7 +915,7 @@ engine.onEnded(() => {
 })
 // in the background the page's frames stop, its timers do not (a page that plays sound is not held back)
 const backgroundTick = window.setInterval(() => {
-  if (pageGone()) return window.clearInterval(backgroundTick)
+  if (pageGone()) return clearInterval(backgroundTick) // no window any more either
   if (document.hidden) {
     sleepTick()
     nearEnd()

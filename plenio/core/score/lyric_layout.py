@@ -34,8 +34,10 @@ holds no other block's lines, when there is one: the lyrics lane can give it wor
 
 A line placed by hand (the piano roll's lyrics lane: moved, made longer or shorter, pasted) has a **span**
 - ``[start, end, block, line]`` in units of L, kept with the sheet: line ``line`` of block ``block`` is
-sung on the notes that start inside ``[start, end)``, and the lines between the lines placed by hand take
-the notes between them by the rules above. A span may name the notes its line's words or syllables are sung
+sung on the notes that start inside ``[start, end)``, its syllables shared out over the phrases there as
+the flow shares them (GitHub issue #28: a line pinned where the flow had put it keeps every syllable on its
+note), and the lines between the lines placed by hand take the notes between them by the rules above. A
+span may name the notes its line's words or syllables are sung
 on - ``[start, end, block, line, onset, onset, ...]``, one onset per syllable (``syllables_of``) or one per
 word (``words_of``), as the MusicXML import places them (feature request 2026-10-22: lyrics put on their
 notes by a script, brought back exactly): each syllable (word) then sings from its note up to the next one's,
@@ -630,7 +632,7 @@ def layout(score: canonical.Score, text: str, spans: Sequence[Sequence[int]] | N
                 _by_onsets(b, j, text_line, sung[key].pieces, on_region, word_onsets[key])
                 if key in word_onsets
                 else None
-            ) or _placed(b, j, text_line, sung[key].pieces, on_region)
+            ) or _spread(b, j, text_line, sung[key].pieces, _region_groups(notes, seen.phrase, region))
             placed[key] = replace(on_notes, start=start, end=end, pinned=True)
         else:
             placed[key] = Line(b, j, text_line, start, end, (), pinned=True)
@@ -698,11 +700,20 @@ def _groups(
     notes: Sequence[canonical.Note], phrase: Sequence[int], a: int, z: int
 ) -> list[list[canonical.Note]]:
     """The notes ``a`` ... ``z - 1`` by phrase."""
+    return _region_groups(notes, phrase, range(a, z))
+
+
+def _region_groups(
+    notes: Sequence[canonical.Note], phrase: Sequence[int], region: Sequence[int]
+) -> list[list[canonical.Note]]:
+    """The notes ``region`` (indices, in order) by phrase."""
     groups: list[list[canonical.Note]] = []
-    for k in range(a, z):
-        if not groups or phrase[k] != phrase[k - 1]:
+    previous: int | None = None
+    for k in region:
+        if previous is None or phrase[k] != phrase[previous]:
             groups.append([])
         groups[-1].append(notes[k])
+        previous = k
     return groups
 
 

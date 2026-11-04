@@ -301,3 +301,24 @@ export function audition(midi: number, seconds = 0.35, sound: InstrumentId = 'so
     // hearing a pitch is a convenience
   }
 }
+
+/**
+ * A chord symbol heard once (a click in the chord lane): its pitches together, briefly, in ``sound`` - each
+ * a little softer than a single note, so that four pitches are not four times as loud. Nothing plays without
+ * pitches.
+ */
+export function auditionChord(pitches: readonly number[], seconds = 0.8, sound: InstrumentId = 'plain'): void {
+  if (!pitches.length) return
+  const Context = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+  if (!Context) return
+  try {
+    auditionContext ??= new Context()
+    const context = auditionContext
+    void context.resume()
+    const start = context.currentTime + 0.01
+    const level = 0.2 / Math.sqrt(pitches.length)
+    for (const midi of pitches) startVoice(context, context.destination, sound, midi, start, { level }).release(start + seconds)
+  } catch {
+    // hearing a chord is a convenience
+  }
+}
