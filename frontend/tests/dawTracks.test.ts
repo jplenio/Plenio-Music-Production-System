@@ -153,7 +153,7 @@ describe('TrackPanel', () => {
 
   it('switches the playback voices, also for the Guide track', async () => {
     const { host, voices } = mount()
-    const switches = [...host.querySelectorAll('input[type="checkbox"]')] as HTMLInputElement[]
+    const switches = [...host.querySelectorAll('.play input[type="checkbox"]')] as HTMLInputElement[]
     expect(switches).toHaveLength(4)
     expect(switches.every((input) => input.checked)).toBe(true)
     switches[0].checked = false
@@ -163,6 +163,17 @@ describe('TrackPanel', () => {
     await nextTick()
     expect(voices.Vocal).toBe(false)
     expect(voices.guide).toBe(false)
+  })
+
+  it('locks the Vocal and the Instrument track: their octave buttons rest then', async () => {
+    const { host } = mount({ locks: { vocal: true, ins: false } })
+    await nextTick()
+    const locks = [...host.querySelectorAll('.lock input[type="checkbox"]')] as HTMLInputElement[]
+    expect(locks).toHaveLength(2)
+    expect(locks.map((input) => input.checked)).toEqual([true, false])
+    const octaves = [...host.querySelectorAll('.octave')].map((group) => [...group.querySelectorAll('button')].map((b) => b.disabled))
+    expect(octaves[0]).toEqual([true, true])
+    expect(octaves[1].some((disabled) => !disabled)).toBe(true)
   })
 
   it('moves a whole Vocal or Instrument track an octave down or up (feature request 2026-10-22)', () => {

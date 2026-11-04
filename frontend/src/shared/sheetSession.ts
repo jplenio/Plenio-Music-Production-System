@@ -129,6 +129,8 @@ export function arrangementLabel(arrangement: ArrangementPayload): string {
 
 /** Plenio timeline (plenio.timeline/1) as far as the editor uses it. */
 export interface TimelinePayload {
+  /** The transcription this timeline was made from: what the bar sources of a score belong to. */
+  score_sha256?: string
   duration_s: number
   bars: [number, number, string][]
   sections: [string, number, number][]

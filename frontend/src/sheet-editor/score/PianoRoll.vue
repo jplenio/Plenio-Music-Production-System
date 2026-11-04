@@ -52,6 +52,8 @@ import type { InstrumentId } from './instruments'
 import { auditionChord, audition as hearPitch } from './player'
 import { type SourceEnvelope, waveColumns } from './sourceAudio'
 import { type SungCurve, curveRuns } from './sungPitch'
+import { lineOff, offHint, offLabel } from './noteFit'
+import type { TrackLocks } from './trackLock'
 
 import type { ScoreOperation } from '../../api/client'
 import type { LyricLayoutView, ModelChord, ScoreView } from '../../shared/scoreView'
@@ -217,6 +219,8 @@ const svg = ref<SVGSVGElement | null>(null)
 const chordInput = ref<HTMLInputElement | null>(null)
 /** The voice new notes go into (drawn, recorded, entered step by step). */
 const track = defineModel<Track>('track', { default: 'vocal' })
+/** The melody tracks locked against editing: pale, and their notes cannot be picked. */
+const locks = defineModel<TrackLocks>('locks', { default: () => ({ vocal: false, ins: false }) })
 /** Draw or select: not a preference - the roll always opens in draw mode. */
 const mode = ref<RollMode>('draw')
 const snapChoice = ref<SnapChoice>('auto')
@@ -270,6 +274,8 @@ let observer: ResizeObserver | null = null
 
 const model = computed(() => props.view?.model ?? null)
 const notes = computed<RollNote[]>(() => (model.value ? notesOf(model.value) : []))
+/** The notes a click, a frame or Select all can take: a locked track's are only shown. */
+const pickable = computed<RollNote[]>(() => notes.value.filter((n) => !locks.value[n.track]))
 const chords = computed<ModelChord[]>(() => model.value?.tracks.chords ?? [])
 const geo = computed(() =>
   model.value
@@ -317,7 +323,7 @@ const banded = computed(() => {
   if (!g || !current) return null
   const rect = bandRect(current, g, scrollTop.value, scrollLeft.value)
   const ids = new Set(current.keep)
-  for (const note of notesInRect(notes.value, rect, g)) ids.add(note.id)
+  for (const note of notesInRect(pickable.value, rect, g)) ids.add(note.id)
   const chordIds = new Set(current.keepChords)
   for (const chord of chordsInBand(chords.value, current, g, scrollTop.value, scrollLeft.value)) chordIds.add(chord.id)
   const lane = bandInLane(current, scrollTop.value) // the chord lane (not the lyrics lane)
@@ -370,7 +376,7 @@ const lyricLines = computed(() => {
         .map((l) => {
           const key = lineKey(l.block, l.line)
           const [start, end] = draggedSpan(key, l.start, l.end)
-          return { ...l, start, end, key }
+          return { ...l, start, end, key, off: lineOff(l), hint: offHint(l) }
         })
     )
     .sort((a, b) => a.start - b.start || a.line - b.line)
@@ -551,7 +557,8 @@ function noteClasses(note: RollNote): Record<string, boolean> {
     [note.track]: true,
     selected: (banded.value?.ids ?? selectedNotes.value).has(note.id),
     playing: playingNotes.value.has(note.id),
-    dragged: dragged.value.has(note.id)
+    dragged: dragged.value.has(note.id),
+    locked: locks.value[note.track]
   }
 }
 
@@ -566,12 +573,21 @@ function select(ids: string[]): void {
   emit('select', ids)
 }
 
+const LOCK_ICON = {
+  closed: 'M4 6.5V4.5a3 3 0 0 1 6 0v2M3 6.5h8v5.5H3z',
+  open: 'M4 6.5V4.5a3 3 0 0 1 5.8-1M3 6.5h8v5.5H3z'
+}
+
+function toggleLock(which: 'vocal' | 'ins'): void {
+  locks.value = { ...locks.value, [which]: !locks.value[which] }
+}
+
 function onPointerDown(event: PointerEvent): void {
   const g = geo.value
   if (!g || event.button !== 0) return
   root.value?.focus({ preventScroll: true })
   const [x, y] = local(event)
-  const hit = hitTest(x, y, notes.value, chords.value, g, track.value, scrollTop.value, scrollLeft.value)
+  const hit = hitTest(x, y, pickable.value, chords.value, g, track.value, scrollTop.value, scrollLeft.value)
   if (hit.area === 'keys') {
     // the keyboard: hear the key's pitch (the selection stays)
     if (audition.value) hearPitch(hit.pitch, 0.35, props.sound)
@@ -650,12 +666,12 @@ function onPointerDown(event: PointerEvent): void {
     clear = !additive
   } else if (hit.area === 'grid') {
     const nothingSelected = !props.selection.length && !lyricSelection.value.length
-    if (editable.value && !additive) {
+    if (editable.value && !additive && !locks.value[track.value]) {
       start = startDraw(track.value, hit.unit, hit.pitch, g)
       hear(hit.pitch)
     }
     clear = !additive
-    press = { x, y, start, started: false, clear, keep, insert: editable.value && !additive && nothingSelected }
+    press = { x, y, start, started: false, clear, keep, insert: editable.value && !additive && nothingSelected && !locks.value[track.value] }
     capture(event)
     return
   } else {
@@ -884,7 +900,7 @@ function onKey(event: KeyboardEvent): void {
     // all notes of both voices and all chord symbols (Cubase: Select All)
     event.preventDefault()
     event.stopPropagation()
-    select(selectionFor(notes.value, chords.value))
+    select(selectionFor(pickable.value, chords.value))
     return
   }
   const selected = notes.value.filter((n) => selectedNotes.value.has(n.id))
@@ -1007,7 +1023,7 @@ function zoomRows(step: number, clientY?: number): void {
 function quantize(lengths: boolean): void {
   const g = geo.value
   if (!g || !editable.value) return
-  const picked = selectedNotes.value.size ? notes.value.filter((n) => selectedNotes.value.has(n.id)) : notes.value
+  const picked = selectedNotes.value.size ? notes.value.filter((n) => selectedNotes.value.has(n.id)) : pickable.value
   if (!picked.length) return
   void commit({ op: 'quantize', ids: picked.map((n) => n.id), grid: g.snap, lengths })
 }
@@ -1183,11 +1199,33 @@ defineExpose({ zoomBy, zoomRows })
       </span>
       <span class="group" role="group" aria-label="Draw into">
         draw into
-        <button :class="{ active: track === 'vocal' }" class="vocal" :aria-pressed="track === 'vocal'" @click="track = 'vocal'">
+        <button :class="{ active: track === 'vocal' }" class="vocal" :aria-pressed="track === 'vocal'" :disabled="locks.vocal" @click="track = 'vocal'">
           Vocal
         </button>
-        <button :class="{ active: track === 'ins' }" class="ins" :aria-pressed="track === 'ins'" @click="track = 'ins'">
+        <button
+          class="lock"
+          :class="{ on: locks.vocal }"
+          :aria-pressed="locks.vocal"
+          aria-label="Lock the Vocal track"
+          data-testid="lock-vocal"
+          :title="locks.vocal ? 'The Vocal notes are locked: click to edit them again' : 'Lock the Vocal notes: they stay as they are while the other track is edited (bars added or removed still apply to both)'"
+          @click="toggleLock('vocal')"
+        >
+          <svg class="icon" viewBox="0 0 14 14" aria-hidden="true"><path :d="LOCK_ICON[locks.vocal ? 'closed' : 'open']" /></svg>
+        </button>
+        <button :class="{ active: track === 'ins' }" class="ins" :aria-pressed="track === 'ins'" :disabled="locks.ins" @click="track = 'ins'">
           Ins
+        </button>
+        <button
+          class="lock"
+          :class="{ on: locks.ins }"
+          :aria-pressed="locks.ins"
+          aria-label="Lock the Instrument track"
+          data-testid="lock-ins"
+          :title="locks.ins ? 'The Instrument notes are locked: click to edit them again' : 'Lock the Instrument notes: they stay as they are while the other track is edited (bars added or removed still apply to both)'"
+          @click="toggleLock('ins')"
+        >
+          <svg class="icon" viewBox="0 0 14 14" aria-hidden="true"><path :d="LOCK_ICON[locks.ins ? 'closed' : 'open']" /></svg>
         </button>
       </span>
       <label title="Grid for drawing, moving and resizing">
@@ -1374,8 +1412,9 @@ defineExpose({ zoomBy, zoomRows })
               <rect :x="line.x" :y="TOP + 3" :width="line.width" :height="LYRICS_LANE - 6" rx="3" />
               <rect v-if="lyricsEditable" class="edge" :x="line.x + line.width - 3" :y="TOP + 5" :width="3" :height="LYRICS_LANE - 10" />
               <text :x="line.x + 4" :y="TOP + LYRICS_LANE / 2 + 4">{{ line.shown }}</text>
+              <text v-if="line.off" class="line-off" :x="line.x + line.width - 5" :y="TOP + LYRICS_LANE / 2 + 4" text-anchor="end">{{ offLabel(line.off) }}</text>
               <title>
-                {{ line.text }}{{
+                {{ line.text }}{{ line.hint ? ` (${line.hint})` : '' }}{{
                   lyricsEditable
                     ? ' - click: select · drag: move · drag its start or end: longer / shorter (it stops at the next line) · double-click: edit the words'
                     : ''

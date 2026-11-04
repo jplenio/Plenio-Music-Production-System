@@ -91,6 +91,8 @@ class Line:
     """Notes (onsets) over which the line's last syllable is held."""
     pinned: bool = False
     """The line stands on a span placed by hand (``start``, ``end``)."""
+    wanted: int = 0
+    """The notes it asks for: one per syllable of its text (0: a direction, no sung words)."""
 
 
 @dataclass(frozen=True)
@@ -150,6 +152,7 @@ class LyricLayout:
                             ],
                             "holds": list(line.holds),
                             "pinned": line.pinned,
+                            "wanted": line.wanted,
                         }
                         for line in p.lines
                     ],
@@ -668,6 +671,8 @@ def layout(score: canonical.Score, text: str, spans: Sequence[Sequence[int]] | N
             placed[(b, j)] = Line(b, j, parsed.sections[b].lines[j], cursor, cursor, ())
         elif found.syllables or found.pinned:
             cursor = found.end
+    for key, entry in sung.items():
+        placed[key] = replace(placed[key], wanted=len(entry.pieces))
     return _parts(score, parsed, placed, phrases)
 
 

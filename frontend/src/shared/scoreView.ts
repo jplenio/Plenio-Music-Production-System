@@ -150,6 +150,8 @@ export interface LyricLine {
   holds: number[]
   /** The line stands on a span placed by hand (``start``, ``end``). */
   pinned: boolean
+  /** The notes it asks for: one per syllable of its text. */
+  wanted?: number
 }
 
 /**

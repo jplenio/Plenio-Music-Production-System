@@ -20,6 +20,7 @@
  *
  * Pure functions; the Score tab makes each edit one undo step.
  */
+import type { BarSources } from './barSources'
 import type { LyricLayoutView, LyricLine, LyricPart } from '../../shared/scoreView'
 
 /**
@@ -38,6 +39,8 @@ export type LyricSpan = [number, number] | [number, number, number, number, ...n
 export interface SheetExtras {
   lyricSpans: LyricSpan[]
   sourceShift: number
+  /** Which source bar every bar is (``barSources``), with the score it describes. */
+  barSources?: BarSources | null
 }
 
 /** The source shift of a node property value (seconds within +-10, else 0). */

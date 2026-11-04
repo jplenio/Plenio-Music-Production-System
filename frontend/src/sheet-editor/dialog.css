@@ -737,6 +737,39 @@
 .plenio-overlay .roll-svg .note.ins {
   fill: #f0a35e;
 }
+/* a locked track: only shown, a click goes through it */
+.plenio-overlay .roll-svg .note.locked {
+  opacity: 0.28;
+  filter: saturate(0.45);
+}
+.plenio-overlay .roll-svg .note.locked.playing {
+  opacity: 0.6;
+}
+.plenio-overlay .notation.locked-v0 svg .abcjs-v0,
+.plenio-overlay .notation.locked-v1 svg .abcjs-v1 {
+  opacity: 0.32;
+}
+.plenio-overlay .roll button.lock {
+  padding: 1px 3px;
+  margin-right: 4px;
+}
+.plenio-overlay .roll button.lock .icon {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.3;
+}
+.plenio-overlay .roll button.lock.on {
+  background: #7a4f18;
+  color: #ffe2b8;
+}
+.plenio-overlay .track-panel .lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+}
 .plenio-overlay .roll-svg .note.selected {
   stroke: #fff;
   stroke-width: 2;
@@ -800,6 +833,19 @@
 .plenio-overlay .roll-svg .lyric-line rect {
   fill: rgba(76, 154, 255, 0.16);
   stroke: rgba(76, 154, 255, 0.45);
+}
+.plenio-overlay .roll-svg .lyric-line text.line-off {
+  fill: #ffb86b;
+  font-weight: 700;
+}
+.plenio-overlay .fit-notes .off-count {
+  display: inline-block;
+  margin-left: 5px;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: #8a5a1c;
+  color: #fff;
+  font-size: 11px;
 }
 .plenio-overlay .roll-svg .lyric-line.unsung rect {
   /* a direction, or a line that found no phrase */

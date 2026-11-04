@@ -13,6 +13,7 @@ import type { VoiceSwitches } from '../../shared/playback'
 import type { ScoreView } from '../../shared/scoreView'
 import { INSTRUMENTS, INSTRUMENT_IDS, type InstrumentId, type Sounds } from './instruments'
 import { SHIFTABLE, notesLabel, shiftBlock, trackRows } from './tracks'
+import type { TrackLocks } from './trackLock'
 
 const props = defineProps<{
   view: ScoreView | null
@@ -25,6 +26,8 @@ const props = defineProps<{
   guideActive?: boolean
 }>()
 const voices = defineModel<VoiceSwitches>('voices', { required: true })
+/** The melody tracks locked against editing. */
+const locks = defineModel<TrackLocks>('locks', { default: () => ({ vocal: false, ins: false }) })
 /** Each track's sound, as in a DAW's instrument slot. */
 const sounds = defineModel<Sounds>('sounds')
 const SOUND_OF: Record<string, keyof Sounds> = { Vocal: 'Vocal', Ins: 'Ins', chords: 'chord', guide: 'guide' }
@@ -80,10 +83,19 @@ function toggle(voice: string, on: boolean): void {
             @change="toggle(row.voice, ($event.target as HTMLInputElement).checked)"
           />
         </label>
+        <label v-if="SHIFTABLE[row.voice] && !readonly" class="lock" :title="`Lock the ${row.name} notes: they stay as they are (bars added or removed still apply to both tracks)`">
+          <input
+            type="checkbox"
+            :checked="locks[SHIFTABLE[row.voice].track]"
+            :aria-label="`Lock the ${row.name} track`"
+            @change="locks = { ...locks, [SHIFTABLE[row.voice].track]: ($event.target as HTMLInputElement).checked }"
+          />
+          lock
+        </label>
         <span v-if="SHIFTABLE[row.voice] && !readonly" class="octave" role="group" :aria-label="`${row.name} track octave`">
           <button
             class="shift"
-            :disabled="!!shiftBlock(view, SHIFTABLE[row.voice].track, -12)"
+            :disabled="locks[SHIFTABLE[row.voice].track] || !!shiftBlock(view, SHIFTABLE[row.voice].track, -12)"
             :title="shiftBlock(view, SHIFTABLE[row.voice].track, -12) ?? `Every ${row.name} note an octave down`"
             @click="emit('shiftTrack', SHIFTABLE[row.voice].track, -12)"
           >
@@ -91,7 +103,7 @@ function toggle(voice: string, on: boolean): void {
           </button>
           <button
             class="shift"
-            :disabled="!!shiftBlock(view, SHIFTABLE[row.voice].track, 12)"
+            :disabled="locks[SHIFTABLE[row.voice].track] || !!shiftBlock(view, SHIFTABLE[row.voice].track, 12)"
             :title="shiftBlock(view, SHIFTABLE[row.voice].track, 12) ?? `Every ${row.name} note an octave up`"
             @click="emit('shiftTrack', SHIFTABLE[row.voice].track, 12)"
           >

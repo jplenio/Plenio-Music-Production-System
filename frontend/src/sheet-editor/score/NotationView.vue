@@ -5,9 +5,10 @@
  * drawn with CSS classes on abcjs' SVG elements.
  */
 import abcjs from 'abcjs'
-import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import { type ScoreView, elementAtDisplay, elementById } from '../../shared/scoreView'
+import type { TrackLocks } from './trackLock'
 
 const props = defineProps<{
   view: ScoreView | null
@@ -15,10 +16,17 @@ const props = defineProps<{
   selection: string[]
   playing: string[]
   zoom: number
+  /** The melody tracks locked against editing: drawn pale. */
+  locks?: TrackLocks
 }>()
 const emit = defineEmits<{ select: [id: string, additive: boolean] }>()
 
 const host = ref<HTMLDivElement | null>(null)
+/** abcjs numbers the voices in the order of the text: ``locked-v0`` is whichever voice comes first there. */
+const lockedVoices = computed(() => {
+  const order = [...new Set([...(props.view?.display_abc ?? '').matchAll(/^V:\s*(\S+)/gm)].map((m) => m[1]))]
+  return order.flatMap((voice, index) => (props.locks?.[voice === 'Vocal' ? 'vocal' : 'ins'] ? [`locked-v${index}`] : []))
+})
 const renderError = ref<string | null>(null)
 let byEnd = new Map<number, SVGElement[]>()
 let marked: Record<'plenio-selected' | 'plenio-playing', SVGElement[]> = {
@@ -157,6 +165,7 @@ function onPointer(event: PointerEvent): void {
     <div
       ref="host"
       class="notation"
+      :class="lockedVoices"
       aria-label="Score notation - click a note to select it"
       @pointerdown.capture="onPointer"
     />

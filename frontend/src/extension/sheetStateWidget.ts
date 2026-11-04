@@ -122,6 +122,7 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
     const { openSheetDialog } = await importOrReload(() => import('../sheet-editor/open'), stale)
     const { parseGuide, serializeGuide } = await importOrReload(() => import('../sheet-editor/score/tracks'), stale)
     const { parseShift, parseSpans } = await importOrReload(() => import('../sheet-editor/score/lyricPlacement'), stale)
+    const { parseBarSources } = await importOrReload(() => import('../sheet-editor/score/barSources'), stale)
     if (!fetcher) throw new Error('Plenio: API not initialised')
     // the lyrics of Song Sheet · Text follow this score's sections (templates 1 and 5); when the graph
     // cannot say where they come from, the editor opens without that (the lyrics are then not written back)
@@ -139,6 +140,8 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
       console.warn('Plenio: the score sheet of these lyrics was not found', error)
     }
     const api = fetcher
+    // which source bar every bar is: kept by the sheet that owns the score, whichever sheet edits it
+    const scoreHolder = score?.owner ?? node
     openSheetDialog({
       title: node.title || 'Song Sheet',
       state: current,
@@ -155,6 +158,7 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
       lyricSpans: parseSpans(node.properties?.plenio_lyric_spans),
       // how far a cover's source recording is moved against the bars (the beat grid corrected by hand)
       sourceShift: parseShift(node.properties?.plenio_source_shift),
+      barSources: parseBarSources(scoreHolder.properties?.plenio_bar_sources),
       lyricsTarget: lyrics?.target ?? null,
       scoreTarget: score?.target ?? null,
       onApply: (next, guide, arranged, changedScore, approved, extras) => {
@@ -165,6 +169,9 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
           plenio_guide: serializeGuide(guide),
           plenio_lyric_spans: (extras?.lyricSpans ?? []).map((span) => [...span]),
           plenio_source_shift: extras?.sourceShift ?? 0
+        }
+        if (extras?.barSources && !score?.target.blocked) {
+          scoreHolder.properties = { ...(scoreHolder.properties ?? {}), plenio_bar_sources: extras.barSources }
         }
         // the node says it at once: Approve released the sheet (no need to wait for the next run), and
         // changed documents of a sheet that was approved need a new approval

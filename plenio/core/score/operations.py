@@ -61,6 +61,12 @@ def _pitch(abc: str, operation: Mapping[str, Any]) -> EditResult:
     return edit.set_pitch(abc, _ids(operation), semitones=_int(operation, "semitones"))
 
 
+def _fit_notes(abc: str, operation: Mapping[str, Any]) -> EditResult:
+    from . import note_repair  # on demand: it needs the harmony rules, which need this module
+
+    return note_repair.apply(abc, operation)
+
+
 OPERATIONS: dict[str, Operation] = {
     # notes
     "set_pitch": _pitch,
@@ -84,6 +90,7 @@ OPERATIONS: dict[str, Operation] = {
     "set_tempo": lambda abc, op: _from_change(native.set_tempo(abc, _int(op, "bpm"))),
     "strip_chords": lambda abc, op: _from_change(native.strip_chords(abc)),
     "silence_voice": lambda abc, op: _from_change(native.silence_voice(abc, str(op.get("voice", "Vocal")))),
+    "fit_notes": _fit_notes,
     "move_vocal_to_ins": lambda abc, op: _from_change(
         native.move_vocal_to_ins(abc, conflict=str(op.get("conflict", "replace")))
     ),

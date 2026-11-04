@@ -127,7 +127,10 @@ import {
   setBlockLines
 } from './lyricsFollow'
 import type { LyricEdit, LyricPlace } from './PianoRoll.vue'
-import { sourceBars } from './barMatch'
+import { type BarPrint, barPrints, contentSources, hasEvidence, sourceBars } from './barMatch'
+import { guardOperation, unlockedIds } from './trackLock'
+import { fitRange, linesOff } from './noteFit'
+import { type BarSources, followContent, keepBars, remapBars, validBars } from './barSources'
 import { barOfUnit, positionLabel, secondsOfUnit, unitOfBar, unitOfSeconds } from './locator'
 import { selectedChordIds, selectedNoteIds } from './pianoRoll'
 import { type ScoreProject, PROJECT_EXTENSION, buildProject, parseProject, projectFilename } from './projectFile'
@@ -161,6 +164,8 @@ const props = defineProps<{
   lyricSpans?: LyricSpan[]
   /** How far the source recording is moved against the bars (seconds, + later), kept with the sheet. */
   sourceShift?: number
+  /** Which source bar every bar is, as this score was last applied (``barSources``). */
+  barSources?: BarSources | null
   /** Where edited lyrics go (another sheet on Apply, or this sheet's Lyrics tab); ``null``: shown only. */
   lyricsTarget?: LyricsTarget | null
   /** The lyrics as they were when this tab was last closed (the dialog keeps them until Apply). */
@@ -178,6 +183,8 @@ const emit = defineEmits<{
   lyricSpansChange: [spans: LyricSpan[]]
   /** The source recording was moved against the bars (the beat grid corrected by hand). */
   sourceShiftChange: [seconds: number]
+  /** Which source bar every bar is, for the score as it is now. */
+  barSourcesChange: [sources: BarSources]
 }>()
 
 /**
@@ -225,6 +232,9 @@ const session = useScoreSession(props.doc, {
   onEdit: () => emit('edited'),
   lyrics: () => lyricsNow.value ?? props.lyrics ?? null,
   lyricSpans: () => spansNow(),
+  // a locked track stays as it is, whichever way an edit comes
+  guard: (operation) => guardOperation(operation, shown.value, prefs.value.locks),
+  selectable: (ids) => unlockedIds(shown.value, ids, prefs.value.locks),
   // an undo or redo brings the Guide notes and the lyrics of that step back with its text
   onRestore: (extra) => {
     if (!isSideState(extra)) return
@@ -253,6 +263,12 @@ const session = useScoreSession(props.doc, {
     const lyrics = follow.value
     const from = shown.value?.model
     const to = result.analysis.model
+    // the bars of the source go with the bars: nothing moves unless the edit says so (undo and redo find them by text)
+    if (barsNow.value && from && to && result.abc !== props.doc.text) {
+      const known = result.time_map?.length ? remapBars(barsNow.value, from, to, result.time_map) : keepBars(barsNow.value, to.measures.length)
+      sourcesOfText.set(result.abc, known)
+      octaveMoves = ['transpose', 'transpose_by', 'shift_track'].includes(operation.op)
+    }
     let moved = spans.length && result.time_map?.length ? remapSpans(spans, result.time_map) : spans
     if (moved.length && lyrics && from && to) {
       // the lyrics follow the sections: a span goes to the block of the section that took its words
@@ -379,6 +395,67 @@ onBeforeUnmount(() => {
 onBeforeUnmount(() => session.dispose())
 
 const shown = computed(() => session.lastValid)
+/**
+ * Which source bar every bar of the shown score is. Every text of this session keeps its own, so undo and redo
+ * bring them back with the text; a text reached without a word about its bars (typed, imported) is compared with
+ * the one before, and the score this session starts with takes what the node kept for it, or goes by content.
+ */
+const sourcesOfText = new Map<string, (number | null)[]>()
+const barsNow = shallowRef<(number | null)[] | null>(null)
+/** The bars whose place in the recording is an assumption: they share no notes with the source bar they got. */
+const assumedBars = ref(0)
+let printsNow: BarPrint[] | null = null
+/**
+ * The octave the sung pitch is drawn in: taken from the score as it opens and kept with every text, so an edit of the
+ * notes never moves the curve. Only notes moved by octaves (a transposition, a track's octave) take it along.
+ */
+const sungOctave = ref<number | null>(null)
+const octaveOfText = new Map<string, number>()
+let octaveMoves = false
+watch(
+  () => [session.lastValidText, props.payload?.timeline] as const,
+  ([text, timeline], previous) => {
+    const view = shown.value
+    const m = view?.model
+    if (timeline !== previous?.[1]) {
+      sourcesOfText.clear()
+      octaveOfText.clear()
+      barsNow.value = null
+      printsNow = null
+      sungOctave.value = null
+    }
+    if (text === null || !view || !m || !timeline?.bars?.length) return
+    const prints = barPrints(m)
+    let bars = sourcesOfText.get(text)
+    if (bars?.length !== prints.length) {
+      bars = (barsNow.value && printsNow && followContent(barsNow.value, printsNow, prints)) ?? undefined
+      if (!bars) {
+        bars = validBars(props.barSources, timeline.score_sha256, view.sha256, prints.length) ?? undefined
+        if (!bars) {
+          bars = contentSources(m, timeline)
+          const source = timeline.bar_prints
+          assumedBars.value = source?.length ? bars.filter((j, i) => j !== null && !hasEvidence(prints[i], source[j])).length : 0
+        }
+      }
+      sourcesOfText.set(text, bars)
+    }
+    barsNow.value = bars
+    printsNow = prints
+    const pitch = props.payload?.sung_pitch
+    const curve = pitch ? curveOf(pitch) : null
+    if (curve) {
+      let octave = octaveOfText.get(text)
+      if (octave === undefined) {
+        octave = !octaveMoves && sungOctave.value !== null ? sungOctave.value : octaveOffset(m, sourceBars(m, timeline, bars), curve)
+        octaveOfText.set(text, octave)
+      }
+      sungOctave.value = octave
+      octaveMoves = false
+    }
+    if (!props.readonly && timeline.score_sha256) emit('barSourcesChange', { timeline: timeline.score_sha256, score: view.sha256, bars })
+  },
+  { immediate: true }
+)
 const invalid = computed(() => !!session.view && !session.view.ok)
 const diagnostics = computed(() => session.view?.diagnostics ?? [])
 const errorBars = computed(() =>
@@ -623,6 +700,28 @@ function deleteLyricLines(keys: readonly string[]): void {
   lyricSelection.value = []
 }
 
+/** The notes against the lyrics: what the palette's fit says and works on. */
+const fitInfo = computed(() => ({
+  off: linesOff(shown.value?.lyrics).length,
+  lyrics: !!(lyricsNow.value ?? props.lyrics)?.trim(),
+  range: !!fitRange(shown.value, session.selection, lyricSelection.value),
+  vocalLocked: prefs.value.locks.vocal
+}))
+
+/** As many notes as syllables, in the whole song or in the lines of the selection - one undo step. */
+function fitNotes(whole: boolean): void {
+  const range = whole ? null : fitRange(shown.value, session.selection, lyricSelection.value)
+  if (!whole && !range) return
+  void operateFromToolbar({
+    op: 'fit_notes',
+    lyrics: lyricsNow.value ?? props.lyrics ?? '',
+    spans: spansNow(),
+    surplus: prefs.value.fitSurplus,
+    style: props.payload?.docs?.style?.upstream ?? props.payload?.context?.style ?? '',
+    ...(range ? { start: range[0], end: range[1] } : {})
+  })
+}
+
 /** The selected lines with their words and where they are sung. */
 function selectedLyricLines(): PlacedLine[] {
   const m = model.value
@@ -828,7 +927,7 @@ const loopRange = computed(() => {
  * off (the recording later: every bar takes earlier seconds of it).
  */
 const timelineBars = computed(() => {
-  const bars = sourceBars(shown.value?.model, props.payload?.timeline)
+  const bars = sourceBars(shown.value?.model, props.payload?.timeline, barsNow.value)
   const shift = props.sourceShift ?? 0
   if (!bars || !shift) return bars
   return bars.map((bar) => (bar ? ([bar[0] - shift, bar[1] - shift, bar[2]] as [number, number, string]) : null))
@@ -840,6 +939,16 @@ const sourceBeat = computed(() => {
   const beats = Number(bar[2].split('/')[0]) || 4
   return (bar[1] - bar[0]) / beats
 })
+/** Locking a track: its notes leave the selection, and new notes go into the track still open. */
+watch(
+  () => prefs.value.locks,
+  (locks) => {
+    session.select(session.selection)
+    if (locks[drawTrack.value] && !locks[drawTrack.value === 'vocal' ? 'ins' : 'vocal']) {
+      drawTrack.value = drawTrack.value === 'vocal' ? 'ins' : 'vocal'
+    }
+  }
+)
 /** A cover's sung pitch (node Sung Pitch), moved onto the notes' octave; or why there is none. */
 const sungPitch = computed(() => {
   const payload = props.payload?.sung_pitch
@@ -847,7 +956,7 @@ const sungPitch = computed(() => {
   const curve = curveOf(payload)
   const m = model.value
   if (!curve || !m) return { problem: 'problem' in payload ? payload.problem : 'the sung pitch could not be read', curve: null, offset: 0, bars: undefined }
-  return { problem: null, curve, offset: octaveOffset(m, timelineBars.value, curve), bars: timelineBars.value }
+  return { problem: null, curve, offset: sungOctave.value ?? octaveOffset(m, timelineBars.value, curve), bars: timelineBars.value }
 })
 const sourceShift = computed<number>({
   get: () => props.sourceShift ?? 0,
@@ -1166,6 +1275,13 @@ async function exportSheet(): Promise<void> {
 // --- the project file: the score, the Guide notes, the lyrics and the editor's settings, to go on later ---
 const projectFile = ref<HTMLInputElement | null>(null)
 
+/** Which source bar every bar is, for the project file (its text is the shown one: an invalid text has none). */
+function currentBarSources(): BarSources | null {
+  const id = props.payload?.timeline?.score_sha256
+  const view = shown.value
+  return id && view && barsNow.value && session.lastValidText === props.doc.text ? { timeline: id, score: view.sha256, bars: barsNow.value } : null
+}
+
 /** Everything this editor holds, as one file - also an unfinished score (its text is kept as it is). */
 function saveProject(): void {
   const project = buildProject({
@@ -1174,6 +1290,7 @@ function saveProject(): void {
     guide: props.guide ?? [],
     lyrics: lyricsNow.value ?? props.lyrics ?? null,
     lyricSpans: spansNow(),
+    barSources: currentBarSources(),
     settings: currentSettings.value
   })
   downloadBytes(projectFilename(props.title), new TextEncoder().encode(`${JSON.stringify(project, null, 1)}\n`), 'application/json')
@@ -1213,6 +1330,9 @@ function openProject(project: ScoreProject, name: string): void {
   }
   const opened = ['score']
   const left: string[] = []
+  // the bars of the source as they were saved, when the project belongs to this sheet's recording
+  const saved = project.bar_sources
+  if (saved && saved.timeline === props.payload?.timeline?.score_sha256) sourcesOfText.set(project.score, saved.bars)
   const before: SideState = lyricsState()
   const after: SideState = {}
   const guideBefore = props.guide
@@ -1459,6 +1579,9 @@ function onKey(event: KeyboardEvent): void {
 <template>
   <div ref="tabRoot" class="score-tab" @keydown="onKey" @keyup="onKeyUp">
     <ScorePalette
+      v-model:fit-surplus="prefs.fitSurplus"
+      :fit="fitInfo"
+      @fit-notes="fitNotes"
       v-if="!readonly"
       :view="shown"
       :selection="session.selection"
@@ -1610,6 +1733,10 @@ function onKey(event: KeyboardEvent): void {
       This score is valid for YuE2 but outside the editor's supported subset ({{ session.view.model_error.message }});
       edit it as ABC text.
     </p>
+    <p v-else-if="source && assumedBars" class="gate assumed" role="status" data-testid="assumed-source-bars">
+      {{ assumedBars === 1 ? '1 bar shares' : `${assumedBars} bars share` }} no notes with the source: placed in the
+      recording's order after the bars before, so that part of the alignment is an assumption.
+    </p>
     <PianoRoll
       v-if="showRoll"
       ref="pianoRoll"
@@ -1617,6 +1744,7 @@ function onKey(event: KeyboardEvent): void {
       v-model:row-height="prefs.rowHeight"
       v-model:follow="prefs.follow"
       v-model:track="drawTrack"
+      v-model:locks="prefs.locks"
       :recorded="midi.recording.value ? { track: drawTrack, notes: midi.live.value } : null"
       v-model:sung-visible="prefs.sung"
       v-model:wave-visible="prefs.wave"
@@ -1719,6 +1847,7 @@ function onKey(event: KeyboardEvent): void {
           :view="shown"
           :guide-count="guide.length"
           v-model:sounds="sounds"
+          v-model:locks="prefs.locks"
           :keeps-guide="keepsGuide"
           :readonly="readonly"
           @clear-guide="clearGuide"
@@ -1792,6 +1921,7 @@ function onKey(event: KeyboardEvent): void {
         />
         <NotationView
           :view="shown"
+          :locks="prefs.locks"
           :stale="invalid"
           :selection="session.selection"
           :playing="cursor"

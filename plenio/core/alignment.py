@@ -280,12 +280,14 @@ def align(
     timeline: Timeline | None,
     score_meters: Sequence[str] = (),
     score_prints: Sequence[bar_match.BarPrint] = (),
+    score_sources: Sequence[int | None] | None = None,
 ) -> Alignment:
     """The automatic lyrics draft: the final score's section tags with the sung words in them.
 
     ``sections``, ``score_meters`` and ``score_prints`` describe the **final** score (after the user's
     edits), the timeline the transcription it was made from. When the timeline knows its bars' content
     and the final score is arranged (sections copied, moved, deleted), the words follow their bars.
+    ``score_sources``: the source bar of every final bar as the editor kept it - then nothing has to be guessed.
     """
     warnings: list[str] = []
     words, invented = drop_known_inventions(words)
@@ -305,10 +307,22 @@ def align(
     method: str
     placed: list[int]
     mapping: list[int | None] | None = None
-    if timeline is not None and sections and timeline.bar_prints and score_prints:
+    if timeline is not None and sections and score_sources is not None:
+        mapping = list(score_sources)
+    elif timeline is not None and sections and timeline.bar_prints and score_prints:
         mapping = bar_match.match_bars(score_prints, timeline.bar_prints)
-        if bar_match.is_identity(mapping, len(timeline.bars)):
-            mapping = None  # the transcription's own bars: the beat grid
+        assumed = sum(
+            1
+            for bar, source in zip(score_prints, mapping, strict=True)
+            if source is not None and not bar_match.has_evidence(bar, timeline.bar_prints[source])
+        )
+        if assumed and not bar_match.is_identity(mapping, len(timeline.bars)):
+            warnings.append(
+                f"{assumed} bar(s) share no notes with the recording's bars: placed in order after the bars "
+                "before them, so their words are an assumption."
+            )
+    if mapping is not None and bar_match.is_identity(mapping, len(timeline.bars) if timeline else -1):
+        mapping = None  # the transcription's own bars: the beat grid
     if mapping is not None and timeline is not None:
         method = "matched bars"
         groups, lost = place_by_bars(kept, timeline, sections, mapping)

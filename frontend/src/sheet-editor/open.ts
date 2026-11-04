@@ -5,6 +5,7 @@ import type { Fetcher, GuideNote } from '../api/client'
 import type { AsrNote, ScoreChange, ScoreTarget, SheetPayload } from '../shared/sheetSession'
 import type { DocumentKind, SheetState } from '../shared/sheetState'
 import type { LyricsTarget } from './score/lyricsFollow'
+import type { BarSources } from './score/barSources'
 import type { LyricSpan, SheetExtras } from './score/lyricPlacement'
 import dialogCss from './dialog.css?inline'
 import SheetDialog from './SheetDialog.vue'
@@ -25,6 +26,8 @@ export interface OpenOptions {
   lyricSpans?: LyricSpan[]
   /** How far the source recording is moved against the bars (the node's ``plenio_source_shift``). */
   sourceShift?: number
+  /** Which source bar every bar is, as the score was last applied (``plenio_bar_sources``). */
+  barSources?: BarSources | null
   /** The sheet that owns the context lyrics, when they can follow the score's sections. */
   lyricsTarget?: LyricsTarget | null
   /** The sheet that owns the context score (a cover's score sheet), when this sheet may edit it. */
@@ -72,6 +75,7 @@ export function openSheetDialog(options: OpenOptions): () => void {
     guide: options.guide ?? [],
     lyricSpans: options.lyricSpans ?? [],
     sourceShift: options.sourceShift ?? 0,
+    barSources: options.barSources ?? null,
     lyricsTarget: options.lyricsTarget ?? null,
     scoreTarget: options.scoreTarget ?? null,
     onApply: (

@@ -40,6 +40,8 @@ SHEET_MUSIC_OPTIONS = (OFF, *PAPERS)
 SIZES = ("standard", "smaller", "compact", "large")
 """How large the music is drawn (the score editor's notation sizes, ``notationExport.ts``)."""
 DEFAULT_SIZE = "standard"
+BAR_SOURCES_PROPERTY = "plenio_bar_sources"
+"""Which source bar every bar of the score is, kept by the editor (``barSources.ts``) with the score it describes."""
 SPANS_PROPERTY = "plenio_lyric_spans"
 """The Song Sheet's lyrics lines placed by hand, kept in the node's properties with the workflow."""
 
@@ -154,6 +156,29 @@ def _spans(value: Any) -> list[list[int]]:
         ):
             spans.append([int(x) for x in item])
     return spans
+
+
+def bar_sources(extra_pnginfo: Any, timeline: str, score: str, bars: int) -> list[int | None] | None:
+    """The source bar of every bar the editor kept for this score of this transcription (``timeline``: its
+    ``score_sha256``; ``score``: the hash of the text) - read from the workflow the run was queued with, whichever
+    sheet edited it. ``None``: nothing fits (an older workflow, a score changed elsewhere): go by content."""
+    workflow = extra_pnginfo.get("workflow") if isinstance(extra_pnginfo, Mapping) else None
+    nodes = workflow.get("nodes") if isinstance(workflow, Mapping) else None
+    if not isinstance(nodes, Sequence):
+        return None
+    for node in nodes:
+        properties = node.get("properties") if isinstance(node, Mapping) else None
+        kept = properties.get(BAR_SOURCES_PROPERTY) if isinstance(properties, Mapping) else None
+        if (
+            isinstance(kept, Mapping)
+            and kept.get("timeline") == timeline
+            and kept.get("score") == score
+            and isinstance(kept.get("bars"), Sequence)
+            and len(kept["bars"]) == bars
+            and all(b is None or (type(b) is int and b >= 0) for b in kept["bars"])
+        ):
+            return list(kept["bars"])
+    return None
 
 
 def hand_placed(extra_pnginfo: Any, sheets: Sequence[str | None]) -> list[list[int]]:

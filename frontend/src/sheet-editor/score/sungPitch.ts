@@ -44,15 +44,20 @@ export function sourceSecondOfUnit(model: ScoreModelView, bars: SourceBars, unit
 
 /**
  * How many semitones (a multiple of 12) bring the curve onto the Vocal notes: the median difference
- * between every note and the singing in its middle, rounded to octaves (0 without enough of them).
+ * between every note and the singing in its middle, rounded to octaves. With too few Vocal notes (a melody on
+ * the Ins) the Instrument's notes count too; 0 without enough of them.
  */
 export function octaveOffset(model: ScoreModelView, bars: SourceBars, curve: SungCurve): number {
   const diffs: number[] = []
-  for (const note of model.tracks.vocal) {
-    const second = sourceSecondOfUnit(model, bars, note.onset + note.duration / 2)
-    const sung = second === null ? null : sungAt(curve, second)
-    if (sung !== null) diffs.push(note.pitch - sung)
+  const compare = (notes: readonly { onset: number; duration: number; pitch: number }[]): void => {
+    for (const note of notes) {
+      const second = sourceSecondOfUnit(model, bars, note.onset + note.duration / 2)
+      const sung = second === null ? null : sungAt(curve, second)
+      if (sung !== null) diffs.push(note.pitch - sung)
+    }
   }
+  compare(model.tracks.vocal)
+  if (diffs.length < 6) compare(model.tracks.ins)
   if (diffs.length < 6) return 0
   diffs.sort((a, b) => a - b)
   return 12 * Math.round(diffs[Math.floor(diffs.length / 2)] / 12)

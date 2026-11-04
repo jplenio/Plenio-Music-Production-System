@@ -1460,7 +1460,8 @@
         }
        ],
        "holds": [],
-       "pinned": false
+       "pinned": false,
+       "wanted": 5
       },
       {
        "block": 1,
@@ -1491,7 +1492,8 @@
         }
        ],
        "holds": [],
-       "pinned": false
+       "pinned": false,
+       "wanted": 4
       }
      ]
     },
@@ -1526,7 +1528,8 @@
         }
        ],
        "holds": [],
-       "pinned": false
+       "pinned": false,
+       "wanted": 2
       }
      ]
     }

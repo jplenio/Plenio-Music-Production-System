@@ -1034,6 +1034,7 @@ def test_apply_runs_each_registered_operation() -> None:
         "strip_chords": {},
         "silence_voice": {"voice": "Ins"},
         "move_vocal_to_ins": {"conflict": "keep_ins"},
+        "fit_notes": {"lyrics": "[verse]\nla la la", "surplus": "omit"},
     }
     assert set(cases) == set(operations.OPERATIONS)
     for name, parameters in cases.items():

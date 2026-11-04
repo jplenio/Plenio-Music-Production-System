@@ -6,6 +6,8 @@
 import type { VoiceSwitches } from '../../shared/playback'
 import type { NotationSize, Paper } from './editorSettings'
 import { type Sounds, defaultSounds, soundsOf } from './instruments'
+import { FIT_SURPLUS, type FitSurplus } from './noteFit'
+import { NO_LOCKS, type TrackLocks, parseLocks } from './trackLock'
 import type { RecordSettings } from './midiRecording'
 import { NOTATION_MAX, NOTATION_MIN, ROLL_MAX, ROLL_MIN, SIDE_MAX, SIDE_MIN } from '../paneSizes'
 
@@ -19,6 +21,10 @@ export interface EditorPrefs {
   advanced: boolean
   zoom: number
   voices: VoiceSwitches
+  /** The melody tracks locked against editing (``trackLock``). */
+  locks: TrackLocks
+  /** What becomes of notes the lyrics do not need when the notes are fitted to them. */
+  fitSurplus: FitSurplus
   speed: number
   /** Show the piano roll with its chord lane (review and daw layouts). */
   roll: boolean
@@ -88,6 +94,8 @@ export function defaultPrefs(): EditorPrefs {
     advanced: false,
     zoom: 1,
     voices: { Vocal: true, Ins: true, chords: true, guide: true },
+    locks: { ...NO_LOCKS },
+    fitSurplus: 'auto',
     speed: 1,
     roll: true,
     rollZoom: 48,
@@ -128,6 +136,8 @@ export function loadPrefs(storage: Pick<Storage, 'getItem'> | null = safeStorage
     return {
       ...layoutOf(data),
       zoom: typeof data.zoom === 'number' && data.zoom >= 0.6 && data.zoom <= 1.8 ? data.zoom : defaults.zoom,
+      locks: parseLocks(data.locks),
+      fitSurplus: FIT_SURPLUS.includes(data.fitSurplus as FitSurplus) ? (data.fitSurplus as FitSurplus) : defaults.fitSurplus,
       voices: {
         Vocal: data.voices?.Vocal !== false,
         Ins: data.voices?.Ins !== false,

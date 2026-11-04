@@ -13,6 +13,7 @@ import { computed, ref, watch } from 'vue'
 import type { ScoreOperation } from '../../api/client'
 import { type ModelChord, type ScoreElement, type ScoreView, lengthOperation } from '../../shared/scoreView'
 import { selectedChordIds, selectedNoteIds } from './pianoRoll'
+import type { FitSurplus } from './noteFit'
 import { SHIFTABLE, shiftBlock } from './tracks'
 
 const props = defineProps<{
@@ -26,8 +27,19 @@ const props = defineProps<{
   redoLabel: string | null
   /** The ABC text is not valid now: nothing can be edited until it is (or the last valid score is back). */
   stale?: boolean
+  /** The notes against the lyrics: lines off, and whether there are lyrics and something selected to fit. */
+  fit?: { off: number; lyrics: boolean; range: boolean; vocalLocked: boolean } | null
 }>()
-const emit = defineEmits<{ operate: [operation: ScoreOperation]; undo: []; redo: [] }>()
+/** What becomes of notes the lyrics do not need. */
+const fitSurplus = defineModel<FitSurplus>('fitSurplus', { default: 'auto' })
+const emit = defineEmits<{ operate: [operation: ScoreOperation]; undo: []; redo: []; fitNotes: [whole: boolean] }>()
+
+/** Why the notes cannot be fitted to the lyrics now (``null``: they can). */
+const fitBlock = computed(() => {
+  if (!props.fit?.lyrics) return 'This sheet has no lyrics here to fit the notes to.'
+  if (props.fit.vocalLocked) return 'The Vocal track is locked: unlock it to fit its notes.'
+  return null
+})
 
 const chordName = ref('')
 const tempo = ref<number | null>(null)
@@ -163,6 +175,29 @@ function shift(semitones: number): void {
       />
       <button :disabled="!chordTarget || !chordName.trim() || blocked" :title="setTitle" @click="setChord">set</button>
       <button :disabled="!removable || blocked" :title="removeTitle" @click="removeChord">remove</button>
+    </div>
+    <div v-if="fit" class="group fit-notes" role="group" aria-label="Notes and lyrics">
+      <button
+        data-testid="fit-song"
+        :disabled="blocked || !!fitBlock"
+        :title="fitBlock ?? 'As many notes as syllables in every line of the song: the song\'s own melody first, new notes on its chords, key and rhythm, or the notes that carry least left out. Ctrl+Z takes it back.'"
+        @click="emit('fitNotes', true)"
+      >
+        fit notes to lyrics<span v-if="fit.off" class="off-count" :title="`${fit.off} line(s) do not fit`">{{ fit.off }}</span>
+      </button>
+      <button
+        data-testid="fit-selection"
+        :disabled="blocked || !!fitBlock || !fit.range"
+        :title="fitBlock ?? (fit.range ? 'The same for the lines of the selected notes or lyrics lines' : 'Select notes or lyrics lines first')"
+        @click="emit('fitNotes', false)"
+      >
+        fit selection
+      </button>
+      <select v-model="fitSurplus" aria-label="Notes the lyrics do not need" title="What becomes of notes the lyrics do not need">
+        <option value="auto" title="A phrase no line sings and a long rest of a line move to the Ins, single notes are left out">spare notes: smart</option>
+        <option value="omit" title="Every note the lyrics do not need is left out">spare notes: leave out</option>
+        <option value="ins" title="Every note the lyrics do not need moves to the Ins, where it is silent">spare notes: to the Ins</option>
+      </select>
     </div>
     <details class="group whole">
       <summary title="Operations on the whole score">Whole score</summary>

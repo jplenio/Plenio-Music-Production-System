@@ -26,6 +26,7 @@ from ...core.sheet.resolve import normalize_document
 from .. import host
 from ..lyrics_asr import LANGUAGES, asr_notes, language_code
 from ..lyrics_asr import run_asr as _run_asr
+from ..sheet_music import bar_sources
 from ..types import Brief, ReportType, TimelineType
 
 MIN_RELIABLE_WORDS = 5
@@ -131,6 +132,7 @@ class PlenioTranscribeLyrics(io.ComfyNode):
                     display_name="report", tooltip="Words, confidence, placement or check result."
                 ),
             ],
+            hidden=[io.Hidden.extra_pnginfo],
         )
 
     @classmethod
@@ -256,6 +258,7 @@ class PlenioTranscribeLyrics(io.ComfyNode):
         sections: list[Any] = []
         meters: list[str] = []
         prints: tuple[tuple[str, str], ...] = ()
+        kept_bars: list[int | None] | None = None
         if score is not None and score.strip():
             analysis = score_rules.validate(score)
             sections, meters = list(analysis.sections), [bar.meter for bar in analysis.bars]
@@ -263,7 +266,18 @@ class PlenioTranscribeLyrics(io.ComfyNode):
                 prints = bar_match.bar_prints(canonical.from_abc(score))
             except canonical.ScoreSyntaxError:
                 prints = ()
-        alignment = align(words, sections, timeline=own_timeline, score_meters=meters, score_prints=prints)
+            if own_timeline is not None:  # the editor knows which bar is which: no guess by content
+                kept_bars = bar_sources(
+                    cls.hidden.extra_pnginfo, own_timeline.score_sha256, analysis.sha256, len(meters)
+                )
+        alignment = align(
+            words,
+            sections,
+            timeline=own_timeline,
+            score_meters=meters,
+            score_prints=prints,
+            score_sources=kept_bars,
+        )
         warnings.extend(alignment.warnings)
         data["alignment"] = alignment.to_dict()
         summary = (

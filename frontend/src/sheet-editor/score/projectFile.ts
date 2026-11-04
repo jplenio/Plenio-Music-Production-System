@@ -8,6 +8,7 @@
  */
 import { version } from '../../../package.json'
 import type { GuideNote } from '../../api/client'
+import { type BarSources, parseBarSources } from './barSources'
 import { type EditorSettings, parseSettings } from './editorSettings'
 import { type LyricSpan, parseSpans } from './lyricPlacement'
 import { parseGuide } from './tracks'
@@ -30,6 +31,8 @@ export interface ScoreProject {
   lyrics: string | null
   /** The lyrics lines placed by hand (``[start, end]`` in units of L; empty: placed by the phrases). */
   lyric_spans: LyricSpan[]
+  /** Which source bar every bar is (none: files before 1.5.1, a score without a source). */
+  bar_sources: BarSources | null
   /** The editor's settings (only the valid ones of a file; none in files before 0.4.4). */
   settings: Partial<EditorSettings>
 }
@@ -41,6 +44,7 @@ export function buildProject(
     guide?: GuideNote[] | null
     lyrics?: string | null
     lyricSpans?: LyricSpan[] | null
+    barSources?: BarSources | null
     settings?: EditorSettings | null
   },
   now: Date = new Date()
@@ -54,6 +58,7 @@ export function buildProject(
     guide: (parts.guide ?? []).map(([onset, duration, pitch]) => [onset, duration, pitch]),
     lyrics: parts.lyrics?.trim() ? parts.lyrics : null,
     lyric_spans: parts.lyrics?.trim() ? parseSpans(parts.lyricSpans ?? []) : [],
+    bar_sources: parts.barSources ?? null,
     settings: parts.settings ? parseSettings(parts.settings) : {}
   }
 }
@@ -89,6 +94,7 @@ export function parseProject(text: string): ScoreProject | string {
     guide: parseGuide(record.guide),
     lyrics: typeof record.lyrics === 'string' && record.lyrics.trim() ? record.lyrics : null,
     lyric_spans: parseSpans(record.lyric_spans),
+    bar_sources: parseBarSources(record.bar_sources),
     settings: parseSettings(record.settings)
   }
 }

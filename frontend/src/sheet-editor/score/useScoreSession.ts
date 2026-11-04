@@ -40,6 +40,10 @@ export interface ScoreSessionOptions {
    * like ``replaceText``'s ``state`` - so undo and redo move text and side state together.
    */
   onTransform?: (result: TransformResult, operation: ScoreOperation) => { before: unknown; after: unknown } | undefined
+  /** What may run of an edit, and what the user is told when it changed or stopped it (locked tracks). */
+  guard?: (operation: ScoreOperation) => { operation: ScoreOperation | null; note: string | null }
+  /** What of a selection can be selected (a locked track's notes cannot). */
+  selectable?: (ids: string[]) => string[]
   /** The song's lyrics, sent with every check: the view then says where they are sung. */
   lyrics?: () => string | null
   /** The lyrics lines placed by hand, sent with the lyrics (``lyricPlacement``). */
@@ -201,7 +205,13 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
     return true
   }
 
-  async function operate(operation: ScoreOperation): Promise<boolean> {
+  async function operate(requested_: ScoreOperation): Promise<boolean> {
+    const guarded = options.guard?.(requested_) ?? { operation: requested_, note: null }
+    if (!guarded.operation) {
+      notes.value = guarded.note ? [guarded.note] : []
+      return false
+    }
+    const operation = guarded.operation
     const text = doc.text
     if (view.value && !view.value.ok) {
       error.value = 'The ABC text is not valid; fix it or revert to the last valid score before editing the notation.'
@@ -225,9 +235,9 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
       pending.value = false
       requested = result.abc
       accept(result.analysis, result.abc)
-      notes.value = [...result.changes, ...result.warnings.map((w) => `warning: ${w}`)]
+      notes.value = [...result.changes, ...result.warnings.map((w) => `warning: ${w}`), ...(guarded.note ? [guarded.note] : [])]
       // canonical operations select notes by canonical id; the staff selects written segments
-      if (result.select.length) selection.value = elementSelection(result.analysis, result.select)
+      if (result.select.length) select(elementSelection(result.analysis, result.select))
       return true
     } catch (e) {
       error.value = describeError(e)
@@ -270,7 +280,7 @@ export function useScoreSession(doc: WorkingDoc, options: ScoreSessionOptions) {
   }
 
   function select(ids: string[]): void {
-    selection.value = ids
+    selection.value = options.selectable ? options.selectable(ids) : ids
   }
 
   /**

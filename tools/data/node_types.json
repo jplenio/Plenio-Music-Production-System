@@ -2946,8 +2946,8 @@
       "COMBO",
       {
        "display_name": "lyrics heard on",
-       "tooltip": "What the lyrics ASR hears for the subtitles and the player: the song (quicker) or the take's vocal stem - more exact times, but the separation takes extra time: half a minute per take, more while the GPU is busy.",
-       "default": "the song",
+       "tooltip": "What the lyrics ASR hears for the subtitles and the player: the take's vocal stem - more exact times, the model of Stems and Sung Pitch, about half a minute per take - or the song (quicker).",
+       "default": "vocal stem",
        "multiselect": false,
        "options": [
         "the song",
@@ -5676,6 +5676,11 @@
        "multiline": false
       }
      ]
+    },
+    "hidden": {
+     "extra_pnginfo": [
+      "EXTRA_PNGINFO"
+     ]
     }
    },
    "input_order": {
@@ -5691,6 +5696,9 @@
      "timeline",
      "brief",
      "expected_lyrics"
+    ],
+    "hidden": [
+     "extra_pnginfo"
     ]
    },
    "output": [

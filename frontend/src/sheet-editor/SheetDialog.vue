@@ -4,7 +4,7 @@
  * Working copies are edited here and written to the node's sheet_state on Apply; the
  * backend resolves, validates and fingerprints them (the same function the node runs).
  */
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowRef, watch } from 'vue'
 
 import { type Fetcher, type GuideNote, PlenioApiError, getAsrNote, getOwnTags, resolveSheet, saveOwnTags } from '../api/client'
 import {
@@ -49,6 +49,7 @@ import LyricsFit from './LyricsFit.vue'
 import ScoreTab from './score/ScoreTab.vue'
 import type { LyricsTarget } from './score/lyricsFollow'
 import { sameGuide } from './score/tracks'
+import type { BarSources } from './score/barSources'
 import { type LyricSpan, type SheetExtras, sameSpans } from './score/lyricPlacement'
 
 const props = defineProps<{
@@ -67,6 +68,8 @@ const props = defineProps<{
   lyricSpans?: LyricSpan[]
   /** How far the source recording is moved against the bars (the node's ``plenio_source_shift``). */
   sourceShift?: number
+  /** Which source bar every bar is, as the score was last applied (``plenio_bar_sources``). */
+  barSources?: BarSources | null
   /** The sheet that owns the context lyrics, when they can follow the score's sections. */
   lyricsTarget?: LyricsTarget | null
   /** The sheet that owns the context score (a cover's score sheet), when this sheet may edit it. */
@@ -314,6 +317,7 @@ function revert(): void {
   guide.value = [...(props.guide ?? [])]
   lyricSpans.value = [...(props.lyricSpans ?? [])]
   sourceShift.value = props.sourceShift ?? 0
+  barSources.value = props.barSources ?? null
   contextDoc.text = contextScore.value ?? ''
   revision.value++
 }
@@ -334,8 +338,13 @@ const sourceShift = ref<number>(props.sourceShift ?? 0)
 function setSourceShift(next: number): void {
   sourceShift.value = next
 }
+/** Goes with the score's text, so it makes no change of its own (Apply is not offered for it). */
+const barSources = shallowRef<BarSources | null>(props.barSources ?? null)
+function setBarSources(next: BarSources): void {
+  barSources.value = next
+}
 function extras(): SheetExtras {
-  return { lyricSpans: lyricSpans.value, sourceShift: sourceShift.value }
+  return { lyricSpans: lyricSpans.value, sourceShift: sourceShift.value, barSources: barSources.value }
 }
 // --- the lyrics in the score editor: this sheet's own (Lyrics tab) or another sheet's (written on Apply) ---
 const followText = ref<string | null>(null)
@@ -657,12 +666,14 @@ onBeforeUnmount(() => {
             :guide="guide"
             :lyric-spans="lyricSpans"
             :source-shift="sourceShift"
+            :bar-sources="barSources"
             :lyrics-target="lyricsTarget"
             :lyrics-pending="ownLyrics ? null : followText"
             @edited="onInput(doc)"
             @guide-change="setGuide"
             @lyric-spans-change="setLyricSpans"
             @source-shift-change="setSourceShift"
+            @bar-sources-change="setBarSources"
             @lyrics-change="onLyricsChange"
             @gate="(text: string, reason: string | null) => (scoreGate = { text, reason })"
           />
@@ -794,8 +805,10 @@ onBeforeUnmount(() => {
             :lyrics-target="ownLyrics ? lyricsTarget : null"
             :lyric-spans="lyricSpans"
             :source-shift="sourceShift"
+            :bar-sources="barSources"
             @lyric-spans-change="setLyricSpans"
             @source-shift-change="setSourceShift"
+            @bar-sources-change="setBarSources"
             @lyrics-change="onLyricsChange"
             @gate="(text: string, reason: string | null) => (contextGate = { text, reason })"
           />
