@@ -56,4 +56,4 @@ Unknown keys are reported as errors so that typos do not go unnoticed.
 
 ## Model files
 
-ComfyUI-format model weights (YuE2, SheetSage2, MiniMax, text models) are handled by ComfyUI: the templates declare the files, and ComfyUI offers to download missing ones. Plenio-owned assets (for example ASR models used by a worker) are pinned to an exact revision and downloaded only when a node needs them, under the policy above.
+ComfyUI-format model weights (YuE2, SheetSage2, MiniMax, text models) are handled by ComfyUI: the templates declare the files, and ComfyUI offers to download missing ones. Plenio-owned assets (ASR models used by a worker, the default writer's Gemma 4 12B GGUF) are pinned to an exact revision and downloaded only when a node needs them, under the policy above.

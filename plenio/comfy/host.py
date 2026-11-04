@@ -30,6 +30,7 @@ from ..core.models import (
     sibling_folders,
     size_text,
     take_inventory,
+    yue2_checkpoint_problem,
 )
 from ..core.system import Device, SystemFacts
 
@@ -381,6 +382,21 @@ def torch_device() -> str:
     return str(comfy.model_management.get_torch_device())
 
 
+def active_vram_gib() -> float | None:
+    """The VRAM of the GPU ComfyUI runs its models on, in GiB (``None``: no CUDA GPU, or outside ComfyUI) - what
+    the default writer's Gemma 4 12B file is chosen by."""
+    try:
+        import comfy.model_management
+        import torch
+
+        device = comfy.model_management.get_torch_device()
+        if getattr(device, "type", "") != "cuda":
+            return None
+        return float(torch.cuda.get_device_properties(device).total_memory) / 2**30
+    except Exception:  # noqa: BLE001 - no GPU facts: the smaller file is chosen
+        return None
+
+
 def soft_empty_cache() -> None:
     """Let ComfyUI decide what to free after a model ran (R9); silent outside a ComfyUI host."""
     try:
@@ -457,8 +473,10 @@ def detect_engine(clip: Any) -> EngineInfo:
     detected = f"{kind.__module__}.{kind.__name__}" if tokenizer is not None else "no tokenizer"
     raise PlenioModelError(
         f"The connected model is not a supported music model (text encoder tokenizer: {detected}).",
-        hint="Connect the CLIP output of a Plenio Model block: YuE2 (checkpoint yue2_3b_int8_convrot.safetensors) "
-        "or MiniMax Music 3 (text encoder minimax_music3_text_encoder_pruned_int8_convrot.safetensors, type minimax).",
+        hint="Connect the CLIP output of a Plenio Model block: YuE2 (checkpoint yue2_3b_int8_convrot.safetensors, or "
+        "a YuE2 finetune in ComfyUI's format - one file with the music model, its text side and the audio decoder) "
+        "or MiniMax Music 3 (text encoder minimax_music3_text_encoder_pruned_int8_convrot.safetensors, type minimax). "
+        "GGUF files and m-a-p's Transformers layout do not load as a ComfyUI checkpoint.",
     )
 
 
@@ -819,6 +837,15 @@ def _asset_states(assets: Mapping[str, Asset], config: PlenioConfig) -> dict[str
     states = {}
     for asset_id, asset in assets.items():
         configured = config.asset_paths.get(asset_id)
+        if asset.kind == "llm" and configured is None:
+            # the writer's GGUF: in ComfyUI's models/LLM (another Gemma 4 12B file may serve the writer instead)
+            here = any(not missing_files(asset, folder) for folder in llm_folders())
+            states[asset_id] = (
+                "installed (models/LLM)"
+                if here
+                else f"not downloaded (Write Song fetches it when the writer needs it, {size_text(asset.total_size)})"
+            )
+            continue
         if configured is not None:
             complete = not missing_files(asset, configured)
             states[asset_id] = f"configured folder ({'complete' if complete else 'files missing'})"
@@ -827,6 +854,19 @@ def _asset_states(assets: Mapping[str, Asset], config: PlenioConfig) -> dict[str
         else:
             states[asset_id] = "installed"
     return states
+
+
+def _yue2_checkpoints() -> dict[str, str]:
+    """The YuE2 ``.safetensors`` files of ``models/checkpoints`` (a finetune too, by its name): file -> what keeps it
+    from loading, ``""`` when nothing does."""
+    found: dict[str, str] = {}
+    for name in model_files("checkpoints"):
+        if "yue" not in name.lower() or not name.lower().endswith(".safetensors"):
+            continue
+        path = model_file("checkpoints", name)
+        if path is not None:
+            found[name] = yue2_checkpoint_problem(path) or ""
+    return found
 
 
 def system_facts(
@@ -871,6 +911,7 @@ def system_facts(
             if model.file not in found and (path := misplaced_model(model.folder, model.file)) is not None
         },
         assets=_asset_states(assets, config) if assets else {},
+        checkpoints=_yue2_checkpoints(),
         models_root=str(models_directory()),
         asset_root=str(asset_root(config)),
         asset_folders={asset_id: str(path) for asset_id, path in config.asset_paths.items()},

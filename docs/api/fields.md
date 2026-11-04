@@ -36,7 +36,7 @@ Kind: **song** · seeds: `draft`, `plan`, `arrangement`, `take`, `cover` · docu
 | `lyrics_fidelity` | choice | "standard" | `standard`, `high - best of 2 takes`, `highest - best of 3 takes` |  | standard: one take. high: a second take when the first sang under 96 % of the words as written; the better is kept. highest: a third when neither reached 96 %. Takes longer (up to 2x or 3x). |
 | `finish.hq_mastering` | boolean | false |  |  | Highest mastering quality: UniverSR (HQ 2) regenerates the highs - clearly fewer AI shimmer and artifacts, but the song takes about twice as long. Off (default; on in Enhance & Master): UniverSR is not needed. |
 | `finish.cover_art` | boolean | true |  |  | Paints the cover from the artwork prompt the writer wrote (embedded in the files); off: no cover and no image model. |
-| `writer.model` | choice | "gemma4_e4b_it_fp8_scaled.safetensors" | `(choose a model)` |  | A bare file name: a text model in models/text_encoders (ComfyUI's Generate Text). 'models/LLM · …', '… files · …', 'HF cache · …': a GGUF file. 'LM Studio · …', 'Ollama · …': a running app's model. |
+| `writer.model` | choice | "Gemma 4 12B (auto)" | `Gemma 4 12B (auto)` |  | Gemma 4 12B (auto): the one on this machine, else downloaded for its card. A bare file name: a text model for ComfyUI's Generate Text. '… · …': a GGUF file ('models/LLM', 'HF cache' ...) or a running app's model. |
 
 ### `release`
 
@@ -96,7 +96,7 @@ Kind: **cover** · seeds: `arrangement`, `draft`, `take`, `cover` · documents: 
 | `original_notes` | integer | 100 | 0.0 … 100.0 |  | How many of the source's notes YuE2 gets: 100 all. Less leaves out the least important of the instrument line and chords (an instrumental's melody too; a sung one keeps all), nothing new; 0 about a quarter. |
 | `finish.hq_mastering` | boolean | false |  |  | Highest mastering quality: UniverSR (HQ 2) regenerates the highs - clearly fewer AI shimmer and artifacts, but the song takes about twice as long. Off (default; on in Enhance & Master): UniverSR is not needed. |
 | `finish.cover_art` | boolean | true |  |  | Paints the cover from the artwork prompt the writer wrote (embedded in the files); off: no cover and no image model. |
-| `writer.model` | choice | "gemma4_e4b_it_fp8_scaled.safetensors" | `(choose a model)` |  | A bare file name: a text model in models/text_encoders (ComfyUI's Generate Text). 'models/LLM · …', '… files · …', 'HF cache · …': a GGUF file. 'LM Studio · …', 'Ollama · …': a running app's model. |
+| `writer.model` | choice | "Gemma 4 12B (auto)" | `Gemma 4 12B (auto)` |  | Gemma 4 12B (auto): the one on this machine, else downloaded for its card. A bare file name: a text model for ComfyUI's Generate Text. '… · …': a GGUF file ('models/LLM', 'HF cache' ...) or a running app's model. |
 | `source.audio` **required** | upload |  |  |  | A recording in ComfyUI's input folder: upload it with POST /uploads?name=<file> and give the answer's name here. |
 | `excerpt.start_index` | number | 0.0 | -1.8446744073709552e+19 … 1.8446744073709552e+19 |  | Start time in seconds, can be negative to count from the end (supports sub-seconds). |
 | `excerpt.duration` | number | 120.0 | 0.0 … |  | Duration in seconds |

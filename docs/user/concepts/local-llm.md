@@ -1,6 +1,6 @@
 # Local LLMs
 
-The song templates write their lyrics with ComfyUI's native **Generate Text** and the Gemma 4 writer, which ComfyUI downloads for you. If you already have language models - GGUF files in ComfyUI's `models/LLM` folder, or models in LM Studio, Ollama, llama.cpp, Unsloth Studio or another local app - you can write with them instead. Outside the song templates the **Local LLM** node is a general node: one prompt in, one answer out, usable in any workflow.
+The song templates write their lyrics with **Gemma 4 12B**, as a GGUF file run by llama.cpp: the one already on your computer, else the one for your graphics card, which Plenio downloads once ([The writer](../models.md#the-writer-gemma-4-12b)). If you have other language models - GGUF files in ComfyUI's `models/LLM` folder, or models in LM Studio, Ollama, llama.cpp, Unsloth Studio or another local app - you can write with them instead, or with ComfyUI's native **Generate Text** and its Gemma text models. Outside the song templates the **Local LLM** node is a general node: one prompt in, one answer out, usable in any workflow.
 
 ## Choose the song writer
 
@@ -8,11 +8,12 @@ The **writer model** field of the *Write Song* block lists every model:
 
 | In the list | Written by |
 |---|---|
-| `gemma4_e4b_it_fp8_scaled.safetensors` (the default) and the other ComfyUI text models - bare file names from `models/text_encoders`, as in every ComfyUI loader | ComfyUI's own **Generate Text**; ComfyUI manages the memory and offers the default's download |
+| `Gemma 4 12B (auto)` (the default) | the Gemma 4 12B on this computer, else the file for your graphics card, downloaded once - run by llama.cpp like any GGUF; without llama.cpp ComfyUI's own Gemma text model if you have one ([details](../models.md#the-writer-gemma-4-12b)) |
+| `gemma4_e4b_it_fp8_scaled.safetensors` and the other ComfyUI text models - bare file names from `models/text_encoders`, as in every ComfyUI loader | ComfyUI's own **Generate Text**; ComfyUI manages the memory (no llama.cpp needed) |
 | `models/LLM · …gguf`, `models/text_encoders · …gguf`, `LM Studio files · …`, `HF cache · …` - with where it comes from in front | a GGUF file, run by llama.cpp for the draft (see below) |
 | `LM Studio · …`, `Ollama · …`, `llama.cpp · …` … | a model of a running app |
 
-Choose one and run - nothing else changes. Inside the block, a switch takes the answer of the chosen writer only: the other one is never loaded, and a GGUF does not need the Gemma file at all. *draft seed* and *thinking* apply to whichever writer you chose. The ComfyUI list shows the text encoders of language-model families (Gemma, Qwen, Llama, Mistral) by name; CLIP and T5 encoders are left out.
+Choose one and run - nothing else changes. Inside the block, a switch takes the answer of the chosen writer only: the other one is never loaded, and a GGUF needs no text model of ComfyUI at all. *draft seed* and *thinking* apply to whichever writer you chose. The ComfyUI list shows the text encoders of language-model families (Gemma, Qwen, Llama, Mistral) by name; CLIP and T5 encoders are left out.
 
 ## Which models it finds
 
@@ -70,6 +71,7 @@ With a **schema** connected (the creative modes' *Arrange* does this), GGUF file
 
 ## Limits
 
-- Draft quality depends on the model. The writer prompts were tuned with Gemma 4 E4B (native); instruction-tuned models of 4-12 B parameters follow the layout best. Parse Song Draft reports every deviation it repaired.
+- Draft quality depends on the model. The writer prompts were tuned with Gemma 4 E4B (native) and write best with Gemma 4 12B; instruction-tuned models of 4-12 B parameters follow the layout best. Parse Song Draft reports every deviation it repaired.
+- An answer that stops before its end is never used: the run stops and says which limit it hit - *max tokens* or the full context (prompt and answer together) -, how much of it was thinking where the app counts it, and when a model thought although *thinking* was off (its chat template ignores the switch, so the node cannot turn it off).
 - Only text: images and audio inputs of multimodal models are not used.
 - Plenio keeps no API keys. An app that needs a key reads it from an environment variable (Unsloth Studio: `UNSLOTH_API_KEY`).

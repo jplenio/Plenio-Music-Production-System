@@ -65,7 +65,7 @@ Everything runs on your own machine, inside ComfyUI's own nodes: no cloud servic
 
 | | |
 |---|---|
-| **Write** | A Song Brief or Cover Brief with **250 genre templates** in 30 families - choosing one fills every field, and every field is a list with room for your own value; a local language model writes title, style and lyrics - Gemma 4 natively, or any GGUF, LM Studio, Ollama, llama.cpp, vLLM or Jan - or you bring your own lyrics, sung as written. A creativity slider goes from steady to adventurous. |
+| **Write** | A Song Brief or Cover Brief with **250 genre templates** in 30 families - choosing one fills every field, and every field is a list with room for your own value; a local language model writes title, style and lyrics - Gemma 4 12B, chosen for your graphics card, or any GGUF, ComfyUI's text models, LM Studio, Ollama, llama.cpp, vLLM or Jan - or you bring your own lyrics, sung as written. A creativity slider goes from steady to adventurous. |
 | **See and change everything** | The **Song Sheet** shows exactly what the music model gets - title, style, lyrics, score - with the exact token budget, counted by the model's own tokenizer. Your edits are never silently overwritten. |
 | **Compose** | A real **score editor**: notation, piano roll, chord lane, lyrics on their notes, a MIDI keyboard, arranging like in a DAW, MIDI and MusicXML in and out, sheet music as PDF - or write the whole melody yourself (*YuE2 · DAW*). |
 | **Perform** | **YuE2** for songs, covers and your own melody - with up to four **LoRAs** -, **MiniMax Music 3** for songs. *Lyrics fidelity* renders a second or third take and keeps the one that sings your words best. |
@@ -191,7 +191,7 @@ The **0 · System Check** template reads your GPU and marks your row. Nothing is
 | below 8 GB | only with heavy offloading (the int8 model alone is 4 GB): very slow, keep songs short | only with heavy offloading: very slow | not practical |
 | 8-12 GB | int8 checkpoint (template default); keep songs short | int8 DiT `minimax_music3_dit_int8_convrot` (2.5 GB) and *tiled decode* | `flux-2-klein-4b-fp8` with the text encoder `qwen_3_4b_fp4_flux2` |
 | 12-16 GB | int8 checkpoint (template default) | the defaults may offload; the int8 DiT is the safer choice | fp8 model and fp4 text encoder |
-| 16-24 GB | int8 checkpoint with the Gemma 4 E4B writer | template defaults (fp16 DiT, int8 text encoder) | template defaults (bf16) |
+| 16-24 GB | int8 checkpoint | template defaults (fp16 DiT, int8 text encoder) | template defaults (bf16) |
 | 24 GB and more | the bf16 checkpoint `yue2_3b_bf16` (7.8 GB) is possible; int8 stays the faster default | template defaults | template defaults |
 
 Measured on a 16 GB RTX 5060 Ti: a 1:44 instrumental - writer, plan, take, master and export, models loaded fresh - in 2½ minutes. The other rows come from model sizes and the predecessor toolkit's ratings. *4 · Enhance & Master* needs no GPU. See [Models and downloads](docs/user/models.md) for every file, folder and size.
@@ -215,7 +215,7 @@ cd ComfyUI/custom_nodes
 git clone https://github.com/jplenio/Plenio-Music-Production-System
 ```
 
-Restart ComfyUI, open **0 · System Check** from the template browser and run it. Plenio installs no Python packages. One feature is optional and tells you the command when you use it: `python -m pip install faster-whisper` for covers with lyrics. Model files come through ComfyUI's missing-model dialog when you open a template, or [by hand](docs/user/models.md).
+Restart ComfyUI, open **0 · System Check** from the template browser and run it. Plenio installs no Python packages. One feature is optional and tells you the command when you use it: `python -m pip install faster-whisper` for covers with lyrics. Model files come through ComfyUI's missing-model dialog when you open a template, or [by hand](docs/user/models.md). The writer, Gemma 4 12B, is a GGUF file run by llama.cpp: install llama.cpp (`winget install llama.cpp`, `brew install llama.cpp`), and the first song uses the one you have or downloads the one for your graphics card - Q6_K from 16 GB, a QAT Q4 below ([details](docs/user/models.md#the-writer-gemma-4-12b)). A [YuE2 finetune](docs/user/models.md#yue2-finetunes) in ComfyUI's format goes into `models/checkpoints` and is chosen under *checkpoint* in the model block.
 
 ## Watch the tutorials
 

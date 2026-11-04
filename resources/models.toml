@@ -90,17 +90,18 @@ templates = []
 optional_templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song", "4 · Enhance & Master", "5 · YuE2 · DAW"]
 
 # --- writer -------------------------------------------------------------------------------------
+# The templates' writer since 1.5.1 is Gemma 4 12B as a GGUF (Local LLM; resources/assets.toml, plenio/core/llm/gemma.py),
+# not a ComfyUI-format file. Gemma 4 E4B stays the lighter writer of ComfyUI's Generate Text: choose it as writer model.
 
 [[model]]
 id = "gemma4-e4b-writer"
 file = "gemma4_e4b_it_fp8_scaled.safetensors"
 folder = "text_encoders"
 url = "https://huggingface.co/Comfy-Org/gemma-4/resolve/main/text_encoders/gemma4_e4b_it_fp8_scaled.safetensors"
-bytes = 0
+bytes = 9057782194
 licence = "Apache-2.0"
-role = "Gemma 4 E4B writer (title, style or caption, lyrics, artwork prompt)"
-default = true
-templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song", "5 · YuE2 · DAW"]
+role = "Gemma 4 E4B, the lighter writer of ComfyUI's Generate Text (choose it as writer model; the default writer is Gemma 4 12B)"
+default = false
 
 # --- MiniMax Music 3 ------------------------------------------------------------------------------
 

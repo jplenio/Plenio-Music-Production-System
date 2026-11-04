@@ -3,13 +3,16 @@
 ComfyUI-format model files the templates load: where each file lives, where it comes from, its
 licence and which templates need it. Plenio never downloads these files (ComfyUI's missing-model
 dialog or the user does); the catalogue feeds the templates' download entries, the System Check
-inventory and the model guide.
+inventory and the model guide. ``yue2_checkpoint_problem`` reads a YuE2 file's own table of contents: a finetune
+loads as a ComfyUI checkpoint only in ComfyUI's format.
 """
 
 from __future__ import annotations
 
+import json
 import os
 import re
+import struct
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
@@ -188,6 +191,49 @@ def readiness(
             )
         )
     return result
+
+
+_MAX_HEADER = 64 * 1024 * 1024
+"""A safetensors header larger than this is no model's table of contents."""
+
+
+def yue2_checkpoint_problem(path: Path) -> str | None:
+    """What keeps a YuE2 ``.safetensors`` file from loading as a ComfyUI checkpoint, from its header alone - or
+    ``None`` when nothing does (one file with the music model, the text side with its tokenizer and the audio
+    decoder, as Comfy-Org's own files and the finetunes made for ComfyUI have them). An empty file (an interrupted
+    download) is the inventory's business."""
+    try:
+        with path.open("rb") as file:
+            prefix = file.read(8)
+            if not prefix:
+                return None
+            size = struct.unpack("<Q", prefix)[0] if len(prefix) == 8 else _MAX_HEADER + 1
+            if size > _MAX_HEADER:
+                return "not a safetensors file"
+            header = json.loads(file.read(size))
+    except (OSError, ValueError):
+        return "not readable as a safetensors file"
+    keys = [str(key) for key in header] if isinstance(header, dict) else []
+    music = any(key.startswith("model.diffusion_model.") for key in keys)
+    decoder = any(key.startswith("vae.") for key in keys)
+    tokenizer = any(key.endswith("yue2_tokenizer_json") for key in keys)
+    if music and decoder and tokenizer:
+        return None
+    if not music and any(key.startswith("model.layers.") or key == "lm_head.weight" for key in keys):
+        return (
+            "in m-a-p's Transformers layout, which ComfyUI does not load: take the file made for ComfyUI (a "
+            "repository's comfyui folder) or convert it"
+        )
+    missing = [
+        part
+        for part, there in (
+            ("the music model", music),
+            ("the audio decoder", decoder),
+            ("the tokenizer of the text side", tokenizer),
+        )
+        if not there
+    ]
+    return f"without {', '.join(missing)}: Load Checkpoint needs them all in one file"
 
 
 def size_text(size: int) -> str:

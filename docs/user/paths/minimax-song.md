@@ -13,7 +13,7 @@ Song Brief -> Write Song -> Song Sheet -> MiniMax Render -> Master -> Export Rel
 
 1. Open **3 · MiniMax · Song** from the template browser.
 2. In **Song Brief**, choose the **mode** - *new song every run* (the template default: a different song every run, no stops) or *one song, stop to review* (the run stops at the Song Sheet until you approve) - then pick a template or describe the song. *length* (1:00 to 6:00) and *vocals* (sung, sparse vocals or instrumental) are set only here.
-3. Press **Run**. The first run downloads missing models (MiniMax Music 3: diffusion model, int8 text encoder, VAE; the Gemma 4 E4B writer).
+3. Press **Run**. The first run downloads missing models (MiniMax Music 3: diffusion model, int8 text encoder, VAE) and, unless you have one, [the writer's Gemma 4 12B](../models.md#the-writer-gemma-4-12b).
 4. The mastered song appears in the preview and in `output/plenio/`, with the unmastered take as `(original).flac` and its release record.
 
 ## The caption

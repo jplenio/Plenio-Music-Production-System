@@ -15,7 +15,7 @@ Plenio never ships model weights; the templates point to the official downloads.
 | YuE2-3B, YuE2 VAE, SheetSage2 | CC BY-NC 4.0 | **non-commercial** use only, with attribution |
 | YuE2 instrumental LoRA (community) | CC BY-NC 4.0 | non-commercial |
 | MiniMax Music 3 | MiniMax-Music3 Community License | commercial use has conditions (see the licence) |
-| Gemma 4, Qwen 3.5 (Comfy-Org repackaging) | Apache-2.0 | permissive |
+| Gemma 4 (Comfy-Org repackaging; Unsloth's GGUFs of the default writer), Qwen 3.5 (Comfy-Org repackaging) | Apache-2.0 | permissive |
 | Qwen3-ASR 1.7B, Qwen3-ForcedAligner 0.6B (lyrics ASR: covers, subtitles) | Apache-2.0 | permissive |
 | faster-whisper large-v3 (the lyrics ASR's fallback) | MIT | permissive |
 | FLUX.2 Klein 4B, its Qwen3 4B text encoder and the FLUX.2 VAE (optional Cover Art) | Apache-2.0 | permissive (check the model cards of other FLUX.2 variants before switching: their licences may differ) |

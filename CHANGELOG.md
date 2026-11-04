@@ -4,15 +4,18 @@ All notable changes of the current version and the one before. Versions follow s
 
 ## Unreleased
 
-**Lyrics placed by hand that stay where they are, and chords you can hear.**
+**Lyrics placed by hand that stay where they are, chords you can hear, a better writer by default and YuE2 finetunes in plain sight.**
 
 ### Added
 
 - **New lyrics lines where the lane is free**: a double-click on free room in the Score tab's lyrics lane starts a new line there, from the click to the end of its phrase and never past the next line. Before, a line could only be added by copying one.
 - **Hear a chord**: a click on a chord symbol in the roll selects it and sounds it once, in the chords' sound - root, quality and slash bass, with *hear* on. A drag does not sound it again, and a symbol without pitches stays silent and says so instead of playing a guessed triad.
+- **YuE2 finetunes**: the guide says which files load, where they go and how the choice differs from a LoRA; **0 · System Check** says for every YuE2 file in `models/checkpoints` whether it loads and, if not, why (m-a-p's Transformers layout, a missing part). Tested with Plenio's own checkpoints; how a finetune sounds is not measured.
 
 ### Changed
 
+- **The default writer is Gemma 4 12B**, a clearly better writer of lyrics, titles and styles than Gemma 4 E4B. *Gemma 4 12B (auto)*, first in *Writer model*, takes a Gemma 4 12B GGUF already on the computer - in `models/LLM`, LM Studio's models or the Hugging Face cache, or of a running app -, else downloads the file for the graphics card once into `models/LLM`: Q6_K (9.8 GB) from 16 GB of VRAM, the QAT Q4 (6.7 GB) below, pinned by revision, size and SHA-256. A GGUF needs llama.cpp: without it nothing is downloaded, ComfyUI's own Gemma text model writes if one is installed and the node says so, else the run stops and says what to do. **0 · System Check** says what the writer takes on the computer, and its rule table has the writer's row per card. A workflow saved before keeps the writer it was saved with; Gemma 4 E4B stays in the list as the lighter writer that needs no llama.cpp, and no template asks to download it any more.
+- **The YuE2 model block is open in the templates**, with its *checkpoint* in sight: the original or a finetune is chosen there, and the music model, its text side, the audio decoder and the Engine Profile all follow from that one file. Saved workflows keep their block as they were.
 - **Lyrics lines never overlap and never push one another**: a line made longer stops at the next line, one dragged stops at the nearest line in its way (the status line says so) or, dragged far enough past it, lands in the free room behind it. A paste into a line is refused with the reason.
 - **One edit in the lane keeps every other line where it is**: every sung line gets the span it has now, also the lines of other blocks, and a changed line keeps its span. Before, resizing a line or changing its words could move the lines around it, up to the following blocks, away from their notes. A line placed by hand shares its syllables over its phrases as the automatic layout does, so placing it changes no syllable; **auto-place lyrics** in the roll's tools lays the lyrics out on the notes again.
 
@@ -22,6 +25,8 @@ All notable changes of the current version and the one before. Versions follow s
 - **Set and remove stayed disabled for a selected chord symbol**: the toolbar's chord field now shows it, *set* renames it and *remove* removes it - several selected at once too -, with the same operations as the lane. The controls follow the score after the edit and stay disabled while it is busy or its text is invalid.
 - **Shorter split a note tied over a bar line** into a short fragment and a second attack in the next bar: *shorter*, *longer* and `[` / `]` now change the whole note from its start, in both voices. It stays tied while it still crosses the bar line, loses the tie when it ends before it, and a rest takes the time it gives up.
 - **Undo and the keys after a toolbar button**: a button disabled while the backend worked took the keyboard focus with it, so the next Ctrl+Z or `[` went to the graph behind the dialog.
+- **A cut-off LLM answer says why**: the message tells the answer's limit from a full context, says how much was thinking where the app counts it, and names a model that thinks although thinking is off - its chat template ignores the switch -, with what helps in each case. A thought cut off before its closing tag counts as thought, not as an answer.
+- **A wrong checkpoint in the YuE2 block** gets a message that names what loads: a YuE2 file in ComfyUI's format, not a GGUF or the Transformers layout.
 
 ## 1.5.0 - 2026-10-31
 

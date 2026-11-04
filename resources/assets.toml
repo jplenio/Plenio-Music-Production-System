@@ -56,3 +56,31 @@ files = [
   { path = "tokenizer.json", size = 2480617 },
   { path = "vocabulary.json", size = 1068114 },
 ]
+
+# The default writer since 1.5.1: Gemma 4 12B as a GGUF (Local LLM), downloaded into ComfyUI's models/LLM when a run
+# uses the writer "Gemma 4 12B (auto)" and no Gemma 4 12B GGUF is on the machine yet (plenio/core/llm/gemma.py).
+# The file goes by the card: Q6_K from 15.5 GiB of VRAM, the QAT Q4 below.
+
+[[asset]]
+id = "gemma-4-12b-it-q6-k"
+kind = "llm"
+repo = "unsloth/gemma-4-12b-it-GGUF"
+revision = "fc034cfff751157913579611efad8462ac1be606"
+licence = "Apache-2.0"
+description = "Gemma 4 12B instruction model, GGUF Q6_K (Unsloth)"
+role = "the writer (title, style, lyrics, cover-art prompt, arrangement, misheard words) on cards from 16 GB"
+files = [
+  { path = "gemma-4-12b-it-Q6_K.gguf", size = 9786022720, sha256 = "6f394336500bb5409bd68c31aa9d75097b5e6104f6cf30c82a09a7b64df41faf" },
+]
+
+[[asset]]
+id = "gemma-4-12b-it-qat-ud-q4-k-xl"
+kind = "llm"
+repo = "unsloth/gemma-4-12B-it-qat-GGUF"
+revision = "980b060c40a8539ac159e0501a3e0f66a6365af3"
+licence = "Apache-2.0"
+description = "Gemma 4 12B instruction model, quantization-aware trained, GGUF UD-Q4_K_XL (Unsloth)"
+role = "the writer (title, style, lyrics, cover-art prompt, arrangement, misheard words) on cards below 16 GB"
+files = [
+  { path = "gemma-4-12B-it-qat-UD-Q4_K_XL.gguf", size = 6716356800, sha256 = "90fd44e29e0d7cffeb0fd00dc73cfdab9ed0b0e95306ecf7821ea634c940c370" },
+]

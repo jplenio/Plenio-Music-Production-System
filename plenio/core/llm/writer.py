@@ -3,7 +3,9 @@
 A text model is listed by its bare file name in ``models/text_encoders`` - as every ComfyUI loader lists it,
 so the frontend's missing-model dialog can offer its download - and is written by ComfyUI's native
 Generate Text (the file loaded by its CLIP loader, the memory managed by ComfyUI). Every other entry is a
-Local LLM reference ``"<source> · <name>"`` (``catalog.py``). ``route`` says which of the two an entry takes.
+Local LLM reference ``"<source> · <name>"`` (``catalog.py``), and the first entry, ``gemma.AUTO``, is the
+templates' default since 1.5.1: Gemma 4 12B as a GGUF, the file chosen for the machine when a run uses it
+(``gemma.py``) - a Local LLM model too. ``route`` says which of them an entry takes.
 """
 
 from __future__ import annotations
@@ -13,6 +15,7 @@ from dataclasses import dataclass
 
 from ..errors import PlenioUserError
 from .catalog import CHOOSE, SEPARATOR, split_ref
+from .gemma import AUTO
 
 NATIVE = "text_encoders"
 """ComfyUI's model folder of the text models (the writer list holds their bare file names)."""
@@ -49,9 +52,17 @@ class Route:
     def use_local(self) -> bool:
         return bool(self.local_model)
 
+    @property
+    def auto(self) -> bool:
+        """Gemma 4 12B, the file still to be chosen for this machine (``gemma.choose``)."""
+        return self.local_model == AUTO
+
 
 def route(ref: str) -> Route:
-    """A bare file name is a text model; a ``"<source> · <name>"`` reference is a Local LLM model."""
+    """A bare file name is a text model; a ``"<source> · <name>"`` reference - and ``gemma.AUTO`` - a Local LLM
+    model."""
+    if ref == AUTO:
+        return Route(local_model=AUTO)
     if SEPARATOR not in ref:
         if not ref.strip() or ref == CHOOSE:
             raise PlenioUserError(

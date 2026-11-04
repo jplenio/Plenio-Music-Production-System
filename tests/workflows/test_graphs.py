@@ -19,6 +19,7 @@ from workflow_validation import (
 )
 
 SNAPSHOT = load_snapshot()
+NATIVE_WRITER = "gemma4_e4b_it_fp8_scaled.safetensors"
 GRAPHS = sorted((PROJECT / "subgraphs").glob("*.json")) + sorted(
     (PROJECT / "example_workflows").glob("*.json")
 )
@@ -188,6 +189,11 @@ def model_files(template: dict[str, Any]) -> tuple[dict[str, dict[str, Any]], se
             if node["type"] in definitions:
                 walk(definitions[node["type"]]["nodes"], off)
             elif node["type"] in LOADER_WIDGETS:
+                if "models" not in (node.get("properties") or {}):
+                    # the Generate Text branch's loader stays on Gemma 4 E4B, an alternative since 1.5.1 (the default
+                    # writer is a GGUF): loaded only when that writer is chosen, so no download is offered for it
+                    assert node["type"] == "CLIPLoader" and node["widgets_values"][0] == NATIVE_WRITER, node
+                    continue
                 (entry,) = node["properties"]["models"]
                 # the file widget: the first value for ComfyUI's own loaders; Plenio's audio model
                 # loader puts its file after the dynamic combo's 'kind' value
@@ -813,3 +819,89 @@ def test_every_template_says_which_model_file_goes_where(name: str) -> None:
         assert "## Your graphics card" in text and "No graphics card" in text
     # the view opens with the note in sight
     assert template["extra"]["ds"]["offset"][0] + note["pos"][0] >= 0
+
+
+YUE2_TEMPLATES = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "5 · YuE2 · DAW"]
+ORIGINAL = "yue2_3b_int8_convrot.safetensors"
+FINETUNE = "yue2_3b_RS-FW-2.4x0.75_int8_convrot.safetensors"
+
+
+def _yue2_block(template: dict[str, Any]) -> dict[str, Any]:
+    definition = next(d for d in template["definitions"]["subgraphs"] if d["name"] == "Plenio · YuE2 Model")
+    return next(n for n in template["nodes"] if n["type"] == definition["id"])
+
+
+@pytest.mark.parametrize("name", YUE2_TEMPLATES)
+def test_the_yue2_block_shows_its_checkpoint_choice_with_the_original_as_default(name: str) -> None:
+    """GitHub issue #26: collapsed, the block hid its *checkpoint*, and a finetune was wired in by hand inside it."""
+    block = _yue2_block(TEMPLATES[name])
+    assert not block["flags"].get("collapsed")
+    assert block["widgets_values"] == [ORIGINAL]
+    assert [i.get("label") for i in block["inputs"] if i.get("widget")] == ["checkpoint"]
+
+
+@pytest.mark.parametrize("name", YUE2_TEMPLATES)
+def test_a_chosen_checkpoint_gives_the_music_model_its_text_side_its_decoder_and_the_engine(
+    name: str,
+) -> None:
+    from plenio.core.workflow_prompt import to_prompt
+
+    workflow = copy.deepcopy(TEMPLATES[name])
+    _yue2_block(workflow)["widgets_values"] = [FINETUNE]
+    prompt = to_prompt(workflow, SNAPSHOT["nodes"].get)
+    # one loader, with the file chosen; the template's other checkpoint loaders do not exist
+    loaders = [key for key, node in prompt.items() if node["class_type"] == "CheckpointLoaderSimple"]
+    assert len(loaders) == 1 and prompt[loaders[0]]["inputs"]["ckpt_name"] == FINETUNE
+    loader = loaders[0]
+
+    def comes_from_loader(link: Any, seen: frozenset[str] = frozenset()) -> bool:
+        """The link leads to the loader, through what passes MODEL and CLIP on (the LoRAs, the cover's adapter)."""
+        key = str(link[0])
+        if key == loader:
+            return True
+        if key in seen:
+            return False
+        inputs = prompt[key]["inputs"]
+        return any(
+            isinstance(value, list) and len(value) == 2 and comes_from_loader(value, seen | {key})
+            for name, value in inputs.items()
+            if name in ("model", "clip", "on_false", "on_true", "value")
+        )
+
+    loras = next(node for node in prompt.values() if node["class_type"] == "PlenioLoras")
+    assert loras["inputs"]["model"] == [loader, 0] and loras["inputs"]["clip"] == [loader, 1]
+    # the original's instrumental adapter inside the block stays bypassed, as in a template without a choice
+    assert not any(key.endswith(":102") for key in prompt)
+    engine = next(node for node in prompt.values() if node["class_type"] == "PlenioEngine")
+    assert engine["inputs"]["clip"] == [loader, 1]
+    decoders = [node for node in prompt.values() if node["class_type"] == "VAEDecodeAudio"]
+    assert decoders and all(node["inputs"]["vae"] == [loader, 2] for node in decoders)
+    # every take: the text side in YuE2's own node, the music model in its sampler
+    renders = [node for node in prompt.values() if node["class_type"] == "YuE2GenerateMusic"]
+    assert renders and all(comes_from_loader(node["inputs"]["clip"]) for node in renders)
+    samplers = [
+        node
+        for node in prompt.values()
+        if node["class_type"] == "KSampler" and comes_from_loader(node["inputs"]["model"])
+    ]
+    assert len(samplers) == len(renders)
+
+
+@pytest.mark.parametrize(
+    "name", ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song", "5 · YuE2 · DAW"]
+)
+def test_the_writer_default_is_gemma_4_12b_for_this_machine(name: str) -> None:
+    from plenio.core.llm import AUTO
+
+    template = TEMPLATES[name]
+    choices = [n for n in template["nodes"] if n["type"] == "PlenioWriterChoice"]
+    assert [n["widgets_values"] for n in choices] == [[AUTO]]
+    # no template asks to download a ComfyUI writer file: the GGUF is fetched by the run (or found on the machine)
+    assert not choices[0].get("properties", {}).get("models")
+    inner = [
+        node
+        for definition in template["definitions"]["subgraphs"]
+        for node in definition["nodes"]
+        if node["type"] == "PlenioWriterChoice"
+    ]
+    assert inner and all(node["widgets_values"] == [AUTO] for node in inner)

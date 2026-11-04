@@ -104,6 +104,7 @@ def closed_port() -> int:
         ("<think>plan</think>\nThe song", "The song", "plan"),
         ("plan first</think>The song", "The song", "plan first"),  # the template opened the block
         ("<think>a</think>x<think>b</think>y", "xy", "a\n\nb"),
+        ("<think>cut off while thinking", "", "cut off while thinking"),  # the block never closed
     ],
 )
 def test_thoughts_are_split_from_the_answer(text: str, answer: str, thoughts: str) -> None:
@@ -169,7 +170,7 @@ def test_ollama_gets_context_and_unload(app: Callable[[Reply], FakeApp]) -> None
 @pytest.mark.parametrize(
     ("reply", "message"),
     [
-        (completion("cut", finish="length"), "cut off after"),
+        (completion("cut", finish="length"), "cut off at the answer's limit"),
         (completion("<think>only thoughts</think>"), r"no text \(only thoughts\)"),
         ({"unexpected": True}, "unknown format"),
     ],

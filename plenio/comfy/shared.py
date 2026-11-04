@@ -166,11 +166,19 @@ def llm_facts() -> dict[str, Any]:
     counts: dict[str, int] = {}
     for model in found.models:
         counts[model.source] = counts.get(model.source, 0) + 1
+    blocked = False
+    try:
+        choice = llm.gemma_choice(config)
+        writer, blocked = choice.describe(), choice.blocked
+    except Exception as error:  # noqa: BLE001 - the System Check reports what it can
+        writer = f"cannot tell ({error})"
     return {
         "runtimes": runtimes,
         "models": counts,
         "files": sum(1 for model in found.models if model.path is not None),
         "notes": list(found.notes),
+        "writer": writer,
+        "writer_blocked": blocked,
     }
 
 

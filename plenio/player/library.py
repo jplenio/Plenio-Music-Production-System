@@ -28,6 +28,7 @@ from ..core import brief as brief_rules
 from ..core import creativity as creativity_rules
 from ..core import subtitles as subtitle_rules
 from ..core.errors import PlenioError
+from ..core.llm.gemma import AUTO as AUTO_WRITER
 from ..core.release import RECORD_SUFFIX, base_title, numbered_title_in
 from . import other as other_music
 
@@ -286,7 +287,8 @@ def sampling_facts(
         ),
         "",
     )
-    local = " · " in writer  # 'models/LLM · …', 'LM Studio · …': a Local LLM; a bare file name: Generate Text
+    # 'models/LLM · …', 'LM Studio · …' and the default Gemma 4 12B (auto): a Local LLM; a bare file name: Generate Text
+    local = " · " in writer or writer == AUTO_WRITER
     for stage, compose in (("writer", "PlenioComposePrompt"), ("arrangement", "PlenioComposeArrangement")):
         node = first("PlenioLocalLLM" if local else "TextGenerate", compose)
         if node is not None:

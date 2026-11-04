@@ -16,6 +16,7 @@ import os
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, replace
 
+from . import gemma
 from .cache import AnswerCache, model_identity, request_key
 from .catalog import (
     CHOOSE,
@@ -31,6 +32,7 @@ from .catalog import (
     split_ref,
 )
 from .client import Answer, HttpError, Server, Settings, chat, split_thinking
+from .gemma import AUTO
 from .runtime import Runtime, find_runtimes, serve_file
 from .writer import NATIVE, Route, native_writers, route
 
@@ -105,6 +107,7 @@ def generate(
 
 
 __all__ = [
+    "AUTO",
     "CHOOSE",
     "NATIVE",
     "SEPARATOR",
@@ -124,6 +127,7 @@ __all__ = [
     "describe",
     "discover",
     "find_runtimes",
+    "gemma",
     "generate",
     "known_servers",
     "memory_estimate",

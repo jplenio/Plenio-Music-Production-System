@@ -426,7 +426,7 @@
     ],
     "extra": {},
     "category": "Plenio/Model",
-    "description": "Loads YuE2 (int8 by default) and identifies it for the Plenio nodes. Contains an optional instrumental adapter (LoRA, CC BY-NC 4.0), bypassed by default."
+    "description": "Loads YuE2 (int8 by default; checkpoint: another YuE2 file in ComfyUI's format, such as a finetune) and identifies it for the Plenio nodes - MODEL, CLIP, VAE and the engine all come from that one file. Contains an optional instrumental adapter (LoRA, CC BY-NC 4.0), bypassed by default."
    }
   ]
  },

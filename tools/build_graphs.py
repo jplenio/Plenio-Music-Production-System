@@ -39,6 +39,7 @@ from plenio.core import variables  # noqa: E402
 from plenio.core.audio import hq  # noqa: E402
 from plenio.core.brief import TemplateLibrary, cover_text_fields  # noqa: E402
 from plenio.core.creativity import CREATIVITY_DEFAULT  # noqa: E402
+from plenio.core.llm import AUTO as AUTO_WRITER  # noqa: E402
 from plenio.core.llm import CHOOSE  # noqa: E402
 from plenio.core.models import ModelFile, by_file, load_catalogue  # noqa: E402
 from workflow_validation import load_snapshot  # noqa: E402
@@ -58,7 +59,12 @@ def catalogued(name: str) -> ModelFile:
 YUE2_CHECKPOINT = "yue2_3b_int8_convrot.safetensors"
 LORA = "ar_lora_inst_v3abc_comfyui.safetensors"
 SHEETSAGE = "sheetsage2_bf16.safetensors"
-WRITER = "gemma4_e4b_it_fp8_scaled.safetensors"
+WRITER = AUTO_WRITER
+"""The writer models' default since 1.5.1: Gemma 4 12B as a GGUF - the one this machine has, or the one for its
+graphics card, downloaded once into models/LLM (``plenio/core/llm/gemma.py``)."""
+NATIVE_WRITER = "gemma4_e4b_it_fp8_scaled.safetensors"
+"""ComfyUI's Generate Text branch keeps its loader on Gemma 4 E4B, the lighter writer when it is chosen - an
+alternative since 1.5.1, so no template asks to download it."""
 SEED_SUM = "sum(values)"  # works with or without the song seed (a blueprint used without a brief)
 # Every LLM call may answer at length: a thinking model's thoughts come first and can run to many thousand
 # tokens (6144 cut some off); the context holds the prompt, the answer and a margin.
@@ -94,9 +100,11 @@ MAX_SECONDS = (
     "The longest the take may run (the Song Sheet derives it from the score's length); YuE2 may end earlier."
 )
 WRITER_MODEL = (
-    "The writer: a text model of ComfyUI (a bare file name, written by Generate Text; Gemma 4 E4B by default) or "
-    "a Local LLM model (GGUF files, LM Studio, Ollama ...). Only the chosen one is loaded; the templates link it to "
-    "the Writer model node. Press R to refresh the list."
+    "The writer: Gemma 4 12B (auto) by default - the Gemma 4 12B GGUF on this machine, else the one for its card "
+    "(Q6_K from 16 GB, else a QAT Q4) downloaded once into models/LLM -, a text model of ComfyUI (a bare file "
+    "name, written by Generate Text, e.g. the lighter Gemma 4 E4B) or another Local LLM model (GGUF files, LM "
+    "Studio, Ollama ...). Only the chosen one is loaded; the templates link it to the Writer model node. Press R "
+    "to refresh the list."
 )
 NATIVE_TOOLTIPS = {
     "SeedNode": {
@@ -138,8 +146,9 @@ def yue2_model() -> Blueprint:
     return Blueprint(
         "Plenio · YuE2 Model",
         "Plenio/Model",
-        "Loads YuE2 (int8 by default) and identifies it for the Plenio nodes. Contains an optional instrumental "
-        "adapter (LoRA, CC BY-NC 4.0), bypassed by default.",
+        "Loads YuE2 (int8 by default; checkpoint: another YuE2 file in ComfyUI's format, such as a finetune) and "
+        "identifies it for the Plenio nodes - MODEL, CLIP, VAE and the engine all come from that one file. Contains "
+        "an optional instrumental adapter (LoRA, CC BY-NC 4.0), bypassed by default.",
         g,
         [
             BlueprintInput(
@@ -149,8 +158,10 @@ def yue2_model() -> Blueprint:
                 widget=True,
                 default=YUE2_CHECKPOINT,
                 label="checkpoint",
-                tooltip="The YuE2 checkpoint in models/checkpoints: yue2_3b_int8_convrot (default, for 8-16 GB GPUs) "
-                "or yue2_3b_bf16 (24 GB and more). ComfyUI offers the download when the file is missing.",
+                tooltip="The YuE2 checkpoint in models/checkpoints: yue2_3b_int8_convrot (default, for 8-16 GB GPUs), "
+                "yue2_3b_bf16 (24 GB and more) or a YuE2 finetune in ComfyUI's format (one file with the music model, "
+                "the text side and the audio decoder, like these two). Press R after adding a file. Not loadable "
+                "here: GGUF files and m-a-p's Transformers layout (docs/user/models.md).",
             )
         ],
         [
@@ -873,16 +884,13 @@ def write_song() -> Blueprint:
         size=(320, 120),
         title="Writer Choice",
         widgets={"model": WRITER},
-        # the frontend's missing-model dialog reads the download from the node that shows the file name
-        properties=model(WRITER),
     )
     loader = g.add(
         "CLIPLoader",
         (380, 0),
         size=(300, 110),
         title="Writer model (ComfyUI)",
-        widgets={"clip_name": WRITER, "type": "stable_diffusion", "device": "default"},
-        properties=model(WRITER),
+        widgets={"clip_name": NATIVE_WRITER, "type": "stable_diffusion", "device": "default"},
     )
     generate = g.add(
         "TextGenerate",
@@ -980,7 +988,8 @@ def write_song() -> Blueprint:
         "Plenio · Write Song",
         "Plenio/Writing",
         "Writes title, style, lyrics and an artwork prompt following the rules of the loaded music model. The "
-        "writer model is one list: ComfyUI's own text models (native Generate Text, the default) and every "
+        "writer model is one list: Gemma 4 12B (auto, the default: the GGUF this machine has or the one for "
+        "its graphics card), ComfyUI's own text models (native Generate Text) and every "
         "local LLM - GGUF files from models/LLM, LM Studio or the Hugging Face cache, or the models of a "
         "running LM Studio, Ollama, llama.cpp ... Only the chosen one is loaded. The brief's song seed is "
         "added to the draft seed: every song of a 'new song every run' series gets its own. New cover lyrics "
@@ -1104,15 +1113,13 @@ def arrange() -> Blueprint:
         size=(320, 120),
         title="Writer Choice",
         widgets={"model": WRITER},
-        properties=model(WRITER),
     )
     loader = g.add(
         "CLIPLoader",
         (380, 0),
         size=(300, 110),
         title="Writer model (ComfyUI)",
-        widgets={"clip_name": WRITER, "type": "stable_diffusion", "device": "default"},
-        properties=model(WRITER),
+        widgets={"clip_name": NATIVE_WRITER, "type": "stable_diffusion", "device": "default"},
     )
     generate = g.add(
         "TextGenerate",
@@ -1324,15 +1331,13 @@ def check_heard() -> Blueprint:
         size=(WRITER_WIDTH, 120),
         title="Writer Choice",
         widgets={"model": WRITER},
-        properties=model(WRITER),
     )
     loader = g.add(
         "CLIPLoader",
         (460, 0),
         size=(300, 110),
         title="Writer model (ComfyUI)",
-        widgets={"clip_name": WRITER, "type": "stable_diffusion", "device": "default"},
-        properties=model(WRITER),
+        widgets={"clip_name": NATIVE_WRITER, "type": "stable_diffusion", "device": "default"},
     )
     generate = g.add(
         "TextGenerate",
@@ -2192,13 +2197,8 @@ def models_note_text(template: str) -> str:
             "cover's words: Plenio downloads it into `models/plenio/asr` the first time it is needed. Offline "
             "(`PLENIO_OFFLINE=1`) it names the files to place.",
         ]
-    if any("writer" in m.role.lower() for m in needed):
-        lines += [
-            "",
-            "**The writer** can also be a GGUF file of your own in `models/LLM` (or LM Studio's folder) or a model of a "
-            "running LM Studio, Ollama, llama.cpp, vLLM or Jan: choose it in *Writer model*. Only the one chosen is "
-            "loaded.",
-        ]
+    if not enhance:
+        lines += ["", *writer_note_lines()]
     if enhance:
         lines += [
             "",
@@ -2214,12 +2214,12 @@ def models_note_text(template: str) -> str:
             else [("Music model", "minimax" if "MiniMax" in template else "yue2")]
         )
         rows = [
-            "| Graphics card | " + " | ".join(label for label, _ in columns) + " | Cover Art |",
-            "|---|" + "---|" * len(columns) + "---|",
+            "| Graphics card | " + " | ".join(label for label, _ in columns) + " | Cover Art | Writer |",
+            "|---|" + "---|" * len(columns) + "---|---|",
         ]
         for rule in RULES:
             cells = " | ".join(getattr(rule, key) for _, key in columns)
-            rows.append(f"| {rule.label} | {cells} | {rule.cover_art} |")
+            rows.append(f"| {rule.label} | {cells} | {rule.cover_art} | {rule.writer} |")
         lines += [
             "",
             "## Your graphics card",
@@ -2248,6 +2248,34 @@ def models_note_text(template: str) -> str:
         "/blob/main/docs/user/models.md)",
     ]
     return "\n".join(lines) + "\n"
+
+
+def writer_note_lines() -> list[str]:
+    """The *Models* note's paragraph on the writer: Gemma 4 12B, found on the computer or downloaded for its card
+    (``plenio/core/llm/gemma.py``), and what else can write."""
+    from plenio.core.assets import load_catalogue as load_assets
+    from plenio.core.llm import gemma
+
+    assets = load_assets(PROJECT / "resources" / "assets.toml")
+    large, small = assets[gemma.LARGE], assets[gemma.SMALL]
+    native = CATALOGUE[NATIVE_WRITER]
+
+    def link(asset: Any) -> str:
+        file = asset.files[0]
+        return f"[{file.path}]({asset.url(file)}) · {_gb(file.size)}"
+
+    return [
+        "## The writer",
+        "",
+        "*Gemma 4 12B (auto)* in *Writer model* (the default) uses the Gemma 4 12B GGUF already on this computer "
+        "(`models/LLM`, LM Studio's models, the Hugging Face cache). Without one, the first song downloads the file for "
+        f"this graphics card into `models/LLM`: {link(large)} from 16 GB of VRAM, {link(small)} below "
+        f"({large.licence}). Offline (`PLENIO_OFFLINE=1`) it names the file to place.",
+        "",
+        "*Writer model* also takes any other GGUF in `models/LLM`, a model of a running LM Studio, Ollama, llama.cpp, "
+        f"vLLM or Jan, or ComfyUI's lighter text model [{native.file}]({native.url}) · {_gb(native.bytes)} in "
+        f"`{native.folder}/`. Only the one chosen is loaded.",
+    ]
 
 
 def models_note(g: Graph, template: str) -> Node:
@@ -2362,6 +2390,11 @@ SEED_SIZE = (340, 190)
 
 LORAS_SIZE = (380, 430)
 """YuE2 LoRAs: two inputs, four LoRAs with their strengths, the summary."""
+MODEL_BLOCK_SIZE = (380, 130)
+"""The YuE2 model block in a template: open, so that its *checkpoint* (the original or a finetune) is in sight
+(GitHub issue #26: collapsed, it hid the choice, and a finetune was wired in by hand inside the block)."""
+LORAS_BELOW = MODEL_BLOCK_SIZE[1] + 50
+"""How far under the model block's top the YuE2 LoRAs node starts."""
 
 
 def yue2_loras(g: Graph, model_node: Node) -> Node:
@@ -2369,7 +2402,7 @@ def yue2_loras(g: Graph, model_node: Node) -> Node:
     MODEL and CLIP go where the model block's went. Made last of all, once the template stands: every other node
     keeps its id (saved workflows, records and the Song API's prompts name them)."""
     x, y = model_node.pos
-    loras = g.add("PlenioLoras", (x, y + 80), size=LORAS_SIZE)
+    loras = g.add("PlenioLoras", (x, y + (80 if model_node.collapsed else LORAS_BELOW)), size=LORAS_SIZE)
     for name in ("MODEL", "CLIP"):
         out = model_node.output_index(name)
         moved = model_node.output_links.pop(out, [])
@@ -2425,8 +2458,6 @@ def writer_model(g: Graph, pos: tuple[float, float]) -> Node:
         size=(HQ_SWITCH_SIZE[0], 120 + SUMMARY_ROOM),
         title="Writer model",
         widgets={"model": WRITER},
-        # the frontend's missing-model dialog reads the download from the node that shows the file name
-        properties=model(WRITER),
         labels={"model": "writer model"},
     )
 
@@ -2700,8 +2731,9 @@ APP_TEXT = (
 )
 WRITER_TEXT = (
     "**Writer model:** one list in the *Writer model* node - at the start, under the two cards - for every "
-    "writing step (Write Song and Arrange): "
-    "ComfyUI's text models (Gemma 4 E4B by default) and every local LLM - GGUF files in `models/LLM`, LM Studio, "
+    "writing step (Write Song and Arrange): *Gemma 4 12B (auto)* by default - the Gemma 4 12B GGUF on this "
+    "computer, else the one for its graphics card, downloaded once into `models/LLM` -, ComfyUI's text models "
+    "(the lighter Gemma 4 E4B) and every local LLM - GGUF files in `models/LLM`, LM Studio, "
     "Ollama ... Only the chosen one is loaded. Local LLM answers are kept: the same request with the same seed "
     "is answered from Plenio's cache, without asking the model again."
 )
@@ -2774,7 +2806,7 @@ ABOUT_YUE2 = f"""# 1 · YuE2 · Song
 
 {APP_TEXT}
 
-**Models:** every file, its folder and the files for a smaller or larger graphics card are in the note *Models · what goes where* on the left; ComfyUI offers the downloads when you open the template. YuE2 weights are **CC BY-NC 4.0 (non-commercial)**. The model block below is collapsed; expand it to choose other files.
+**Models:** every file, its folder and the files for a smaller or larger graphics card are in the note *Models · what goes where* on the left; ComfyUI offers the downloads when you open the template. YuE2 weights are **CC BY-NC 4.0 (non-commercial)**. In the model block below, *checkpoint* chooses the YuE2 file - the original or a finetune in ComfyUI's format (models/checkpoints; the model guide says which files load).
 """
 
 
@@ -2798,7 +2830,7 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             **template_widgets("pop/singer-songwriter-acoustic-vocal"),
         },
     )
-    model_node = g.add_subgraph(bp["yue2_model"], (0, COLUMN_ONE_Y + 940), size=(380, 140), collapsed=True)
+    model_node = g.add_subgraph(bp["yue2_model"], (0, COLUMN_ONE_Y + 940), size=MODEL_BLOCK_SIZE)
     write = g.add_subgraph(bp["write"], (460, 0), size=(WRITER_WIDTH, 220))
     draft = draft_seed(g, write, (460, 280), keep=False)
     writer = writer_model(g, (0, WRITER_Y))
@@ -3025,11 +3057,11 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         },
     )
     # the music model under the row of sections
-    model_node = g.add_subgraph(bp["yue2_model"], (0, 1700), size=(380, 140), collapsed=True)
+    model_node = g.add_subgraph(bp["yue2_model"], (0, 1700), size=MODEL_BLOCK_SIZE)
     adapter = g.add(
         "LoraLoader",
         # YuE2 LoRAs above it (yue2_loras): the instrumental adapter acts on top of them
-        (0, 1780 + LORAS_SIZE[1] + 40),
+        (0, 1700 + LORAS_BELOW + LORAS_SIZE[1] + 40),
         size=(380, 130),
         title="Instrumental adapter",
         widgets={"lora_name": LORA, "strength_model": 0.0, "strength_clip": 1.0},
@@ -3039,7 +3071,7 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     # edge (make_room moves what is right of the old brief column, not the group)
     adapter_switch = g.add(
         "ComfySwitchNode",
-        (0, 1970 + LORAS_SIZE[1] + 40),
+        (0, 1700 + LORAS_BELOW + 190 + LORAS_SIZE[1] + 40),
         size=(260, 90),
         title="Adapter for instrumental covers",
     )
@@ -3378,7 +3410,7 @@ How to work:
 
 **App mode:** the mode, the brief (with key and meter - the empty score follows them), the writer model, the seeds, both Song Sheet buttons with their status line and the results - the app is usable for a first run, but the score is drawn in the graph's sheet editor.
 
-**Models:** every file, its folder and the files for a smaller or larger graphics card are in the note *Models · what goes where* on the left; ComfyUI offers the downloads when you open the template. YuE2 weights are **CC BY-NC 4.0 (non-commercial)**. The model block below is collapsed; expand it to choose other files.
+**Models:** every file, its folder and the files for a smaller or larger graphics card are in the note *Models · what goes where* on the left; ComfyUI offers the downloads when you open the template. YuE2 weights are **CC BY-NC 4.0 (non-commercial)**. In the model block below, *checkpoint* chooses the YuE2 file - the original or a finetune in ComfyUI's format (models/checkpoints; the model guide says which files load).
 """
 
 
@@ -3400,7 +3432,7 @@ def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
             **template_widgets("pop/singer-songwriter-acoustic-vocal"),
         },
     )
-    model_node = g.add_subgraph(bp["yue2_model"], (0, COLUMN_ONE_Y + 940), size=(380, 140), collapsed=True)
+    model_node = g.add_subgraph(bp["yue2_model"], (0, COLUMN_ONE_Y + 940), size=MODEL_BLOCK_SIZE)
     write = g.add_subgraph(bp["write"], (460, 0), size=(WRITER_WIDTH, 220))
     draft = draft_seed(g, write, (460, 280), keep=True)
     writer = writer_model(g, (0, WRITER_Y))

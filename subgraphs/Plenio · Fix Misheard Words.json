@@ -70,7 +70,7 @@
    "title": "Plenio · Fix Misheard Words",
    "properties": {},
    "widgets_values": [
-    "gemma4_e4b_it_fp8_scaled.safetensors"
+    "Gemma 4 12B (auto)"
    ]
   }
  ],
@@ -329,17 +329,10 @@
       ],
       "title": "Writer Choice",
       "properties": {
-       "Node name for S&R": "PlenioWriterChoice",
-       "models": [
-        {
-         "name": "gemma4_e4b_it_fp8_scaled.safetensors",
-         "url": "https://huggingface.co/Comfy-Org/gemma-4/resolve/main/text_encoders/gemma4_e4b_it_fp8_scaled.safetensors",
-         "directory": "text_encoders"
-        }
-       ]
+       "Node name for S&R": "PlenioWriterChoice"
       },
       "widgets_values": [
-       "gemma4_e4b_it_fp8_scaled.safetensors"
+       "Gemma 4 12B (auto)"
       ]
      },
      {
@@ -397,14 +390,7 @@
       ],
       "title": "Writer model (ComfyUI)",
       "properties": {
-       "Node name for S&R": "CLIPLoader",
-       "models": [
-        {
-         "name": "gemma4_e4b_it_fp8_scaled.safetensors",
-         "url": "https://huggingface.co/Comfy-Org/gemma-4/resolve/main/text_encoders/gemma4_e4b_it_fp8_scaled.safetensors",
-         "directory": "text_encoders"
-        }
-       ]
+       "Node name for S&R": "CLIPLoader"
       },
       "widgets_values": [
        "gemma4_e4b_it_fp8_scaled.safetensors",

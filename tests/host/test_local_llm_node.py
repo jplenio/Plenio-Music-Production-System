@@ -197,6 +197,7 @@ def write_song_branches(writer: str) -> dict[str, Any]:
 def test_the_writer_list_holds_text_models_and_local_models(llm_server: ComfyServer) -> None:
     info = llm_server.get("/object_info/PlenioWriterChoice")["PlenioWriterChoice"]
     assert info["input"]["required"]["model"][1]["options"] == [
+        "Gemma 4 12B (auto)",  # the templates' default: found on this machine or downloaded for its card
         "gemma4_e4b_it_fp8_scaled.safetensors",  # bare name; CLIP and T5 encoders are left out
         "models/LLM · sub/tiny-Q4.gguf",
         "models/text_encoders · Qwen/Qwen2.5-7B-HyperMix.Q8_0.gguf",

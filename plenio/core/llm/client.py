@@ -86,12 +86,16 @@ class HttpError(PlenioUserError):
 
 def split_thinking(text: str) -> tuple[str, str]:
     """(answer, thoughts) of a text that may carry ``<think>`` blocks; a template that opened the block
-    itself leaves only the closing tag."""
+    itself leaves only the closing tag, and an answer cut off while thinking leaves a block that never closes
+    (all of it thoughts)."""
     thoughts = [m.strip() for m in _THINK.findall(text)]
     text = _THINK.sub("", text)
     if "</think>" in text:
         head, _, text = text.partition("</think>")
         thoughts.insert(0, head.replace("<think>", "").strip())
+    if "<think>" in text:
+        text, _, unclosed = text.partition("<think>")
+        thoughts.append(unclosed.strip())
     return text.strip(), "\n\n".join(t for t in thoughts if t)
 
 
@@ -230,6 +234,8 @@ def _openai_once(server: Server, model: str, prompt: str, settings: Settings, ap
         raise PlenioUserError(f"{server.name} sent a chat answer in an unknown format.") from None
     text, inline = split_thinking(str(content))
     usage: dict[str, Any] = result["usage"] if isinstance(result.get("usage"), dict) else {}
+    details = usage.get("completion_tokens_details")
+    reasoning_tokens = details.get("reasoning_tokens") if isinstance(details, dict) else None
     return _checked(
         server,
         Answer(
@@ -243,6 +249,7 @@ def _openai_once(server: Server, model: str, prompt: str, settings: Settings, ap
         ),
         finish == "length",
         settings,
+        reasoning_tokens if isinstance(reasoning_tokens, int) else None,
     )
 
 
@@ -295,12 +302,82 @@ def _ollama(server: Server, model: str, prompt: str, settings: Settings, api_key
     return _checked(server, answer, result.get("done_reason") == "length", settings)
 
 
-def _checked(server: Server, answer: Answer, cut_off: bool, settings: Settings) -> Answer:
-    if cut_off:
-        raise PlenioUserError(
-            f"{server.name}'s answer was cut off after {settings.max_tokens} tokens.",
-            hint="Raise max tokens (and the context length), or turn thinking off.",
+CONTEXT_MARGIN = 16
+"""Tokens of the context a server keeps for itself: a cut within this of a full context counts as a full one."""
+
+
+def cut_off_error(
+    server: Server, answer: Answer, settings: Settings, reasoning_tokens: int | None = None
+) -> PlenioUserError:
+    """Why an answer stopped before its end, as far as the app tells (GitHub issue #26: a custom model's answer was
+    cut at 6144 tokens, and only "raise max tokens, or turn thinking off" was said). It tells apart the answer's
+    limit (max tokens) from a full context (the prompt and the answer together), says how much of it was thinking
+    where the app counts it, and when a model thought although thinking was off - its chat template ignores the
+    switch, so turning it off in the node cannot help. A cut answer is never used."""
+    used, prompt = answer.completion_tokens, answer.prompt_tokens
+    thought = bool(answer.thinking.strip())
+    context_full = (
+        used is not None
+        and prompt is not None
+        and used < settings.max_tokens
+        and prompt + used >= settings.context - CONTEXT_MARGIN
+    )
+    if context_full:
+        what = (
+            f"{server.name}'s answer was cut off after {used} tokens: the context ({settings.context} tokens) was "
+            f"full - the prompt took {prompt}."
         )
+    else:
+        what = (
+            f"{server.name}'s answer was cut off at the answer's limit (max tokens: {settings.max_tokens})."
+        )
+    if reasoning_tokens:
+        what += f" {reasoning_tokens} of the tokens were thinking."
+    elif thought and not answer.text.strip():
+        what += " All of it was thinking: the answer itself had not begun."
+    elif thought:
+        what += " The model thought before it answered."
+    ignored = thought and not settings.thinking
+    if ignored:
+        what += (
+            " Thinking was off for this request, yet the model thought: its chat template ignores the switch."
+        )
+    if context_full:
+        hint = (
+            "Raise the context length (the node's context; for a model of a running app, that app's own setting), "
+            "or shorten what is asked."
+        )
+    elif ignored:
+        hint = (
+            "Raise max tokens (and the context with it), choose a model that answers without thinking (an "
+            "instruction-tuned one, e.g. Gemma 4), or turn its thinking off where it is served - a file Plenio "
+            "runs with llama.cpp: the environment variable LLAMA_ARG_REASONING=off, set before ComfyUI starts; LM "
+            "Studio and Ollama: the model's thinking setting."
+        )
+    elif thought:
+        hint = "Turn thinking off in the node, or raise max tokens (and the context with it)."
+    else:
+        hint = "Raise max tokens (and the context with it); a shorter prompt or answer helps too."
+    return PlenioUserError(
+        what,
+        hint=hint,
+        details={
+            "max_tokens": settings.max_tokens,
+            "context": settings.context,
+            "prompt_tokens": prompt,
+            "completion_tokens": used,
+            "reasoning_tokens": reasoning_tokens,
+            "thinking_requested": settings.thinking,
+            "thought": thought,
+        },
+    )
+
+
+def _checked(
+    server: Server, answer: Answer, cut_off: bool, settings: Settings, reasoning_tokens: int | None = None
+) -> Answer:
+    if cut_off:
+        raise cut_off_error(server, answer, settings, reasoning_tokens)
     if not answer.text:
         raise PlenioUserError(
             f"{server.name} returned no text" + (" (only thoughts)." if answer.thinking else "."),

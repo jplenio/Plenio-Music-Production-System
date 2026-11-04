@@ -5831,10 +5831,10 @@
      "model": [
       "COMBO",
       {
-       "tooltip": "A bare file name: a text model in models/text_encoders (ComfyUI's Generate Text). 'models/LLM · …', '… files · …', 'HF cache · …': a GGUF file. 'LM Studio · …', 'Ollama · …': a running app's model.",
+       "tooltip": "Gemma 4 12B (auto): the one on this machine, else downloaded for its card. A bare file name: a text model for ComfyUI's Generate Text. '… · …': a GGUF file ('models/LLM', 'HF cache' ...) or a running app's model.",
        "multiselect": false,
        "options": [
-        "(choose a model)"
+        "Gemma 4 12B (auto)"
        ]
       }
      ]

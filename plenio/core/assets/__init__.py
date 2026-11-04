@@ -9,7 +9,7 @@ fetched only when a node that needs them runs, under one global policy
 """
 
 from .catalogue import Asset, AssetFile, load_catalogue
-from .fetch import Fetcher, asset_folder, ensure_asset, http_fetch, missing_files
+from .fetch import Fetcher, asset_folder, ensure_asset, ensure_asset_in, http_fetch, missing_files
 
 __all__ = [
     "Asset",
@@ -17,6 +17,7 @@ __all__ = [
     "Fetcher",
     "asset_folder",
     "ensure_asset",
+    "ensure_asset_in",
     "http_fetch",
     "load_catalogue",
     "missing_files",

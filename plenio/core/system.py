@@ -61,7 +61,9 @@ class SystemFacts:
     """A configured folder per asset id (``[asset_paths]`` of the Plenio config), instead of the asset root."""
     llm: Mapping[str, Any] = field(default_factory=dict)
     """Local LLM: ``runtimes`` (names, best first), ``models`` (source -> count), ``files`` (GGUF files
-    among them), ``notes``."""
+    among them), ``notes``, ``writer`` (what the default writer takes here) and ``writer_blocked``."""
+    checkpoints: Mapping[str, str] = field(default_factory=dict)
+    """The YuE2 files of ``models/checkpoints``: file name -> what keeps it from loading (empty: nothing does)."""
 
 
 @dataclass(frozen=True)
@@ -75,6 +77,8 @@ class Rule:
     minimax: str
     cover_art: str
     basis: str
+    writer: str = ""
+    """The default writer's Gemma 4 12B file for this row (``plenio.core.llm.gemma``)."""
 
     def matches(self, vram_gib: float) -> bool:
         return vram_gib >= self.low and (self.high is None or vram_gib < self.high)
@@ -90,6 +94,8 @@ RULES = (
         "only with heavy offloading: very slow",
         "not practical",
         "estimate from the model sizes",
+        "Gemma 4 12B QAT Q4 (6.7 GB), partly in RAM: slow - or choose the lighter Gemma 4 E4B (a ComfyUI text "
+        "model) as writer model",
     ),
     Rule(
         "8-12 GB",
@@ -99,6 +105,7 @@ RULES = (
         "choose the int8 DiT `minimax_music3_dit_int8_convrot` (2.5 GB) and turn on *tiled decode*",
         "choose `flux-2-klein-4b-fp8` and the text encoder `qwen_3_4b_fp4_flux2`",
         "legacy toolkit ratings (not measured by Plenio)",
+        "Gemma 4 12B QAT Q4 (6.7 GB); on 8 GB llama.cpp keeps a part in RAM",
     ),
     Rule(
         "12-16 GB",
@@ -108,15 +115,17 @@ RULES = (
         "the defaults may offload; the int8 DiT is the safer choice",
         "fp8 model and fp4 text encoder",
         "legacy toolkit ratings (not measured by Plenio)",
+        "Gemma 4 12B QAT Q4 (6.7 GB)",
     ),
     Rule(
         "16-24 GB",
         15.5,
         23.0,
-        "int8 checkpoint (template default) with the Gemma 4 E4B writer",
+        "int8 checkpoint (template default)",
         "template defaults (fp16 DiT, int8 text encoder)",
         "template defaults (bf16)",
         "YuE2 measured on 16 GB (Phases 3-5); MiniMax and Cover Art: legacy toolkit ratings",
+        "Gemma 4 12B Q6_K (9.8 GB)",
     ),
     Rule(
         "24 GB and more",
@@ -126,6 +135,7 @@ RULES = (
         "template defaults",
         "template defaults",
         "Plenio design",
+        "Gemma 4 12B Q6_K (9.8 GB)",
     ),
 )
 
@@ -170,6 +180,7 @@ def _recommendations(devices: tuple[Device, ...]) -> list[str]:
         f"YuE2: {rule.yue2}.",
         f"MiniMax Music 3: {rule.minimax}.",
         f"Cover Art (optional): {rule.cover_art}.",
+        f"Writer (Gemma 4 12B (auto), the templates' default): {rule.writer}.",
     ]
     if len([d for d in devices if d.kind != "cpu"]) > 1:
         rules.append(
@@ -201,10 +212,18 @@ def _model_rows(catalogue: Mapping[str, ModelFile], inventory: Inventory) -> lis
 
 def _asset_rows(assets: Mapping[str, Asset], facts: SystemFacts) -> list[dict[str, Any]]:
     root = facts.asset_root.rstrip("/\\") if facts.asset_root else "models/plenio"
+    llm_folder = (facts.models_root.rstrip("/\\") or "models") + "/LLM"
+
+    def folder(asset: Asset) -> str:
+        # the writer's GGUF goes into ComfyUI's models/LLM, where every Local LLM list finds it
+        return facts.asset_folders.get(asset.id) or (
+            llm_folder if asset.kind == "llm" else f"{root}/{asset.kind}/{asset.id}"
+        )
+
     return [
         {
             "asset": asset.id,
-            "folder": facts.asset_folders.get(asset.id) or f"{root}/{asset.kind}/{asset.id}",
+            "folder": folder(asset),
             "size": size_text(asset.total_size),
             "licence": asset.licence,
             "role": asset.role or asset.description,
@@ -231,6 +250,8 @@ def _llm_lines(llm: Mapping[str, Any]) -> list[str]:
             "llama-cpp-python, or set PLENIO_LLAMA_SERVER; models of running apps work without it."
         )
     lines.extend(f"Local LLM note: {note}" for note in llm.get("notes", []))
+    if llm.get("writer"):
+        lines.append(f"Default writer (Gemma 4 12B (auto)) on this machine - {llm['writer']}.")
     return lines
 
 
@@ -283,7 +304,17 @@ def check_system(
         )
     for asset, state in sorted(facts.assets.items()):
         messages.append(f"Plenio asset '{asset}': {state}.")
+    for file, problem in sorted(facts.checkpoints.items()):
+        if problem:
+            statuses.append(Status.WARNING)
+            messages.append(f"YuE2 checkpoint '{file}' will not load: {problem}.")
+        elif catalogue is None or file not in {model.file for model in catalogue.values()}:
+            messages.append(
+                f"YuE2 checkpoint '{file}': loads as a finetune - choose it under *checkpoint* in the model block."
+            )
     messages.extend(_llm_lines(facts.llm))
+    if facts.llm.get("writer_blocked"):
+        statuses.append(Status.WARNING)  # the templates' default writer cannot run as it is
     config = dict(facts.config)
     if config.get("error"):
         statuses.append(Status.WARNING)
@@ -308,6 +339,7 @@ def check_system(
             "packages": dict(facts.packages),
             "config": config,
             "models": dict(facts.models),
+            "checkpoints": dict(facts.checkpoints),
             "misplaced": dict(facts.misplaced),
             "assets": dict(facts.assets),
             "llm": dict(facts.llm),
@@ -319,6 +351,7 @@ def check_system(
                 "yue2": rule.yue2,
                 "minimax": rule.minimax,
                 "cover_art": rule.cover_art,
+                "writer": rule.writer,
                 "basis": rule.basis,
                 "this_machine": rule is matching_rule(facts.devices),
             }
@@ -433,14 +466,14 @@ def to_markdown(report: Report) -> str:
         "",
         "### Hardware rule table",
         "",
-        "| VRAM | YuE2 | MiniMax Music 3 | Cover Art | Basis |",
-        "|---|---|---|---|---|",
+        "| VRAM | YuE2 | MiniMax Music 3 | Cover Art | Writer (default) | Basis |",
+        "|---|---|---|---|---|---|",
     ]
     for rule in report.data.get("rules", []):
         marker = "**this machine** - " if rule["this_machine"] else ""
         lines.append(
             f"| {marker}{rule['vram']} | {_cell(rule['yue2'])} | {_cell(rule['minimax'])} | "
-            f"{_cell(rule['cover_art'])} | {_cell(rule['basis'])} |"
+            f"{_cell(rule['cover_art'])} | {_cell(rule.get('writer', ''))} | {_cell(rule['basis'])} |"
         )
     lines += ["", "### Recommendations"]
     lines.extend(f"- {rule}" for rule in report.data.get("recommendations", []))

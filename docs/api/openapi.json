@@ -1938,11 +1938,11 @@
        "writer.model": {
         "type": "string",
         "enum": [
-         "(choose a model)"
+         "Gemma 4 12B (auto)"
         ],
         "title": "model",
-        "description": "A bare file name: a text model in models/text_encoders (ComfyUI's Generate Text). 'models/LLM · …', '… files · …', 'HF cache · …': a GGUF file. 'LM Studio · …', 'Ollama · …': a running app's model.",
-        "default": "gemma4_e4b_it_fp8_scaled.safetensors"
+        "description": "Gemma 4 12B (auto): the one on this machine, else downloaded for its card. A bare file name: a text model for ComfyUI's Generate Text. '… · …': a GGUF file ('models/LLM', 'HF cache' ...) or a running app's model.",
+        "default": "Gemma 4 12B (auto)"
        }
       },
       "required": []
@@ -2658,11 +2658,11 @@
        "writer.model": {
         "type": "string",
         "enum": [
-         "(choose a model)"
+         "Gemma 4 12B (auto)"
         ],
         "title": "model",
-        "description": "A bare file name: a text model in models/text_encoders (ComfyUI's Generate Text). 'models/LLM · …', '… files · …', 'HF cache · …': a GGUF file. 'LM Studio · …', 'Ollama · …': a running app's model.",
-        "default": "gemma4_e4b_it_fp8_scaled.safetensors"
+        "description": "Gemma 4 12B (auto): the one on this machine, else downloaded for its card. A bare file name: a text model for ComfyUI's Generate Text. '… · …': a GGUF file ('models/LLM', 'HF cache' ...) or a running app's model.",
+        "default": "Gemma 4 12B (auto)"
        },
        "source.audio": {
         "type": "string",

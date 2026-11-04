@@ -35,7 +35,7 @@ Each music model has its own template, so every workflow shows only the controls
 | 4 · Enhance & Master | finishing an existing audio file | [guide](paths/enhance-master.md) |
 | 5 · YuE2 · DAW | composing the score yourself and rendering it with YuE2 | [guide](paths/yue2-daw.md) |
 
-When you open a template, ComfyUI offers to download the model files it is missing ([Models and downloads](models.md)).
+When you open a template, ComfyUI offers to download the model files it is missing ([Models and downloads](models.md)). The writer, Gemma 4 12B, is a GGUF file run by llama.cpp: install llama.cpp first (`winget install llama.cpp`, `brew install llama.cpp`); the first song then downloads the file for your graphics card, unless you have one ([The writer](models.md#the-writer-gemma-4-12b)).
 
 ## How a template is laid out
 
@@ -57,7 +57,7 @@ The numbered sections stand in one row: they start at the same top and end at th
 - **HQ Mastering & Cover Art** (the two cards at the top): click a card to switch it - HQ mastering (off by default, on in Enhance & Master; on: fewer AI artifacts, about twice the time) and the song's cover (on; off needs no image model). Under them, the **Writer model** for every writing step.
 - **Nodes and grey groups marked *(optional)*** are switched off (bypassed). Select the nodes and press **Ctrl+B** to switch them on.
 - **Seeds** follow the brief's mode: *new song every run* starts with every seed on 🎲 (something new every run), *one song, stop to review* keeps the song's seeds on 🔒 while you review it.
-- The **MUSIC MODEL** block is collapsed: expand it (the dot at its top left, or right-click > *Expand*), then open it with the icon at its top right to change the model files.
+- The **MUSIC MODEL** group: in the YuE2 templates *checkpoint* chooses the YuE2 file - the original or a [finetune](models.md#yue2-finetunes). In the MiniMax template the block is collapsed: expand it (the dot at its top left, or right-click > *Expand*), then open it with the icon at its top right to change the model files.
 - **Plenio · Master** finishes every song (tone match, -14 LUFS / -1 dBTP) before Export - with the **stems** first when you switch *stems* on on the block; Export also keeps the unmastered take as `(original).flac`.
 
 ## Two ways to work

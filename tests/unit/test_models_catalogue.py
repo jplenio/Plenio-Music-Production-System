@@ -101,7 +101,7 @@ def test_inventory_and_readiness(tmp_path: Path) -> None:
     files = by_file(CATALOGUE)
     present = {
         "yue2_3b_int8_convrot.safetensors": 3960938800,
-        "gemma4_e4b_it_fp8_scaled.safetensors": 1234,  # size not recorded: any size counts
+        "gemma4_e4b_it_fp8_scaled.safetensors": 9057782194,  # the lighter writer: an alternative since 1.5.1
         "minimax_music3_dav.safetensors": 5,  # wrong size
         "pytorch_model.bin": 229072395,  # UniverSR: HQ 2 in every template's Master, with HQ mastering on
         "flux-2-klein-4b.safetensors": 7751105712,  # the cover art (on since 2026-10-23)
@@ -134,8 +134,13 @@ def test_inventory_and_readiness(tmp_path: Path) -> None:
     }  # a file of the wrong size is reported as incomplete, not as missing
     assert {m.file for m in minimax.incomplete} == {"minimax_music3_dav.safetensors"}
     assert minimax.missing_bytes == 4914197682 + 9196611886
-    # the DAW template needs the same music model and writer as the song template
+    # the DAW template needs the same music model as the song template; no template needs a ComfyUI writer file
+    # since 1.5.1 - the default writer is Gemma 4 12B, a GGUF the first song fetches (resources/assets.toml)
     assert daw.template == "5 · YuE2 · DAW" and daw.ready
+    assert not files["gemma4_e4b_it_fp8_scaled.safetensors"].default
+    assert all(
+        "gemma4_e4b_it_fp8_scaled.safetensors" not in {m.file for m in t.missing} for t in (song, cover, daw)
+    )
     assert {m.file for m in daw.optional_missing} >= {"ar_lora_inst_v3abc_comfyui.safetensors"}
     # Enhance & Master needs UniverSR alone: HQ mastering is on there by default (2026-10-24), the Stems bypassed
     assert enhance.ready

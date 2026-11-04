@@ -46,6 +46,8 @@ an artist's sound, some for instrumentals. Read the card of each: what it was tr
 for which checkpoint it was made (most on `yue2_3b_bf16`; on the int8 checkpoint a LoRA may act a little
 differently). YuE2 itself is CC BY-NC 4.0 - non-commercial use only - and so is what you make with it.
 
+A **finetune** is another thing: a whole model, chosen under *checkpoint* in the model block - see [YuE2 finetunes](../models.md#yue2-finetunes). A LoRA made for the original may act differently on a finetune, and a merge that already holds an adapter must not get it again.
+
 ## Training your own
 
 Plenio does not train LoRAs. Training YuE2 is still experimental, and its makers' own tools for it are not

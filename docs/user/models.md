@@ -11,7 +11,7 @@ The list below is the model catalogue Plenio's templates are built from (`resour
 | File | Folder (`ComfyUI/models/...`) | Size | Licence | |
 |---|---|---|---|---|
 | `yue2_3b_int8_convrot.safetensors` | `checkpoints` | 4.0 GB | CC BY-NC 4.0 | needed |
-| `gemma4_e4b_it_fp8_scaled.safetensors` | `text_encoders` | (see the model card) | Apache-2.0 | needed (writer) |
+| Gemma 4 12B, a GGUF ([the writer](#the-writer-gemma-4-12b)) | `LLM` | 9.8 or 6.7 GB | Apache-2.0 | needed: one already on your computer, else fetched by Plenio for your graphics card |
 | `ar_lora_inst_v3abc_comfyui.safetensors` | `loras` | (see the model card) | CC BY-NC 4.0 | optional: instrumental adapter inside the model block, bypassed |
 | FLUX.2 Klein files (below) | | 16.1 GB | Apache-2.0 | Cover Art (on; the *Cover Art* card switches it off) |
 
@@ -22,7 +22,7 @@ The list below is the model catalogue Plenio's templates are built from (`resour
 | `yue2_3b_int8_convrot.safetensors` | `checkpoints` | 4.0 GB | CC BY-NC 4.0 | needed |
 | `sheetsage2_bf16.safetensors` | `audio_encoders` | 1.4 GB | CC BY-NC 4.0 | needed (score transcription, Check Vocals) |
 | `ar_lora_inst_v3abc_comfyui.safetensors` | `loras` | (see the model card) | CC BY-NC 4.0 | needed (instrumental adapter) |
-| `gemma4_e4b_it_fp8_scaled.safetensors` | `text_encoders` | (see the model card) | Apache-2.0 | needed (writer) |
+| Gemma 4 12B, a GGUF ([the writer](#the-writer-gemma-4-12b)) | `LLM` | 9.8 or 6.7 GB | Apache-2.0 | needed: one already on your computer, else fetched by Plenio for your graphics card |
 | Qwen3-ASR 1.7B and Qwen3-ForcedAligner 0.6B (Plenio assets, below) | `plenio/asr/qwen3-asr-1.7b-hf`, `plenio/asr/qwen3-forcedaligner-0.6b-hf` | 4.1 + 1.8 GB | Apache-2.0 | fetched by Plenio when *original lyrics*, *Check sung lyrics* or the subtitles first need them |
 | FLUX.2 Klein files (below) | | 16.1 GB | Apache-2.0 | Cover Art (on; the *Cover Art* card switches it off) |
 
@@ -33,7 +33,7 @@ The list below is the model catalogue Plenio's templates are built from (`resour
 | `minimax_music3_dit_fp16.safetensors` | `diffusion_models` | 4.9 GB | MiniMax-Music3 Community License | needed |
 | `minimax_music3_text_encoder_pruned_int8_convrot.safetensors` | `text_encoders` | 9.2 GB | MiniMax-Music3 Community License | needed |
 | `minimax_music3_dav.safetensors` | `vae` | 217 MB | MiniMax-Music3 Community License | needed |
-| `gemma4_e4b_it_fp8_scaled.safetensors` | `text_encoders` | (see the model card) | Apache-2.0 | needed (writer) |
+| Gemma 4 12B, a GGUF ([the writer](#the-writer-gemma-4-12b)) | `LLM` | 9.8 or 6.7 GB | Apache-2.0 | needed: one already on your computer, else fetched by Plenio for your graphics card |
 | `pytorch_model.bin` (UniverSR) | `audio_sr` | 229 MB | CC BY 4.0 (weights); MIT (code) | **optional**: HQ 2 · Regenerate Highs, with the HQ Mastering switch on |
 | FLUX.2 Klein files (below) | | 16.1 GB | Apache-2.0 | Cover Art (on; the *Cover Art* card switches it off) |
 
@@ -75,7 +75,8 @@ The block stays bypassed until you turn it on, so a template runs without these 
 |---|---|
 | YuE2, SheetSage2 | [Comfy-Org/YuE2](https://huggingface.co/Comfy-Org/YuE2) |
 | instrumental adapter | [Mothersuperior/YuE2-instrumental-cot-full-loras](https://huggingface.co/Mothersuperior/YuE2-instrumental-cot-full-loras) (pinned revision in the template) |
-| writer | [Comfy-Org/gemma-4](https://huggingface.co/Comfy-Org/gemma-4) |
+| writer (Gemma 4 12B, GGUF) | [unsloth/gemma-4-12b-it-GGUF](https://huggingface.co/unsloth/gemma-4-12b-it-GGUF), [unsloth/gemma-4-12B-it-qat-GGUF](https://huggingface.co/unsloth/gemma-4-12B-it-qat-GGUF) (pinned revisions) |
+| lighter writer (Gemma 4 E4B, ComfyUI's text model) | [Comfy-Org/gemma-4](https://huggingface.co/Comfy-Org/gemma-4) |
 | MiniMax Music 3 | [Comfy-Org/MiniMax-Music-3](https://huggingface.co/Comfy-Org/MiniMax-Music-3) |
 | UniverSR audio (HQ 2, Refine) | [woongzip1/universr-audio](https://huggingface.co/woongzip1/universr-audio) - released as `pytorch_model.bin` (CC BY 4.0; the inference code is MIT and vendored) |
 | BS-RoFormer 4-stem (Stems) | [ZFTurbo/Music-Source-Separation-Training](https://github.com/ZFTurbo/Music-Source-Separation-Training) release v1.0.12 - `model_bs_roformer_ep_17_sdr_9.6568.ckpt` (MIT training code; the inference code is MIT and vendored) |
@@ -97,15 +98,51 @@ The templates default to the files above. The System Check marks the row of its 
 | `qwen_3_4b` | `qwen_3_4b_fp4_flux2.safetensors` | 3.8 GB | 8-16 GB | legacy toolkit rating |
 | `yue2_3b_int8_convrot` | `yue2_3b_bf16.safetensors` | 7.8 GB | 24 GB and more | Plenio design (int8 stays the faster default) |
 
-"Legacy toolkit rating" means the rating Plenio's predecessor gave these files; Plenio has not measured them itself. The YuE2 int8 checkpoint with the Gemma 4 E4B writer is measured on a 16 GB card (RTX 5060 Ti).
+"Legacy toolkit rating" means the rating Plenio's predecessor gave these files; Plenio has not measured them itself. The YuE2 int8 checkpoint is measured on a 16 GB card (RTX 5060 Ti).
 
-## Your own language models
+## YuE2 finetunes
 
-The writer can also be a GGUF file from `models/LLM` (or LM Studio's folder, the Hugging Face cache) or a model of a running LM Studio, Ollama, llama.cpp ... - see [Local LLMs](concepts/local-llm.md). Those files are not in the catalogue; the System Check counts what it finds.
+The **checkpoint** field of the *Plenio · YuE2 Model* block takes any YuE2 file in `models/checkpoints`. A finetune replaces the whole model, so it goes there - no node needs to be added or rewired inside the block. What a file can do depends on its format, not on its name:
+
+| Format | How to tell | In Plenio |
+|---|---|---|
+| **ComfyUI's format**: one file with the music model, the text side with its tokenizer and the audio decoder | Comfy-Org's `yue2_3b_*` files; the `comfyui/` folder of [goldhub/YuE2-RS-Finetunes](https://huggingface.co/goldhub/YuE2-RS-Finetunes/tree/main/comfyui) (`..._int8_convrot` 4.0 GB for smaller cards, `..._bf16` 7.8 GB) | loads: choose it under **checkpoint** |
+| **m-a-p's Transformers layout**: the music model alone | the `...-BF16.safetensors` files at the top of that repository, `model.safetensors` in [goldhub/YuE2-3B-Ruach_Studio-IRA-Merge](https://huggingface.co/goldhub/YuE2-3B-Ruach_Studio-IRA-Merge) | does not load (ComfyUI: *Could not detect model type*); needs a conversion to ComfyUI's format |
+| **GGUF** | `...-Q6_K.gguf`, `...-Q8_0.gguf`, `...-BF16.gguf` | does not load: these are for [yue2.cpp](https://github.com/ServeurpersoCom/yue2.cpp) and Ruach Studio. ComfyUI's YuE2 has no GGUF path, and the Local LLM node runs text models, not music models |
+| **LoRA**: a small adapter on top of a model | a repository's adapter files, in `models/loras` | not a checkpoint: use the [YuE2 LoRAs](concepts/loras.md) node |
+
+1. Download the file and put it into `ComfyUI/models/checkpoints` (or the checkpoints folder of your `extra_model_paths.yaml`).
+2. Press **R** in ComfyUI to refresh the lists.
+3. In the **MUSIC MODEL** group choose it under **checkpoint**. The templates show the block open since 1.5.1; in a workflow saved before, expand it first (the dot at its top left). The choice is saved with the workflow.
+
+The music model, the text side, the audio decoder and the Engine Profile then all come from that one file, and the Engine Profile reads the tokenizer the file brings. **0 · System Check** says for every YuE2 file in the folder whether it loads and, if not, why.
+
+**Adapters on a finetune:** a LoRA or the instrumental adapter was trained on the weights it was made for, and may sound different - or worse - on a finetune; the finetune's own card says more (the RS-FW card advises training an adapter on the weights it will sing on). A merge that already holds an adapter must not get it a second time.
+
+**Licences** are per model - read the card: the RS-FW finetunes are CC BY-NC-SA 4.0, the IRA merges CC BY-NC 4.0, both non-commercial. **Quality:** Plenio tests the choice and the loading with its own files; it has not measured how a finetune sounds.
+
+## The writer: Gemma 4 12B
+
+The templates' **Writer model** is *Gemma 4 12B (auto)*: the model that writes title, style, lyrics, arrangement plan and cover-art prompt. It takes, in this order:
+
+1. **A Gemma 4 12B GGUF already on your computer**, in `models/LLM`, a folder of Plenio's config, LM Studio's models or the Hugging Face cache - any of them is used rather than downloading another. The file named like the one for your card comes first, else the largest that fits your card, else the smallest.
+2. **A Gemma 4 12B of a running app** (LM Studio, Ollama ...).
+3. **The file for your graphics card**, downloaded once into `models/LLM` the first time a song is written (pinned revision, size and SHA-256; a broken download resumes):
+
+| VRAM | File | Size |
+|---|---|---|
+| 16 GB and more | [`gemma-4-12b-it-Q6_K.gguf`](https://huggingface.co/unsloth/gemma-4-12b-it-GGUF) | 9.8 GB |
+| less, or no GPU | [`gemma-4-12B-it-qat-UD-Q4_K_XL.gguf`](https://huggingface.co/unsloth/gemma-4-12B-it-qat-GGUF) (trained for 4-bit, so it keeps more of the model than a plain Q4) | 6.7 GB |
+
+Both are Apache-2.0. On a card too small for the file, llama.cpp keeps the rest in RAM: it writes, more slowly. `PLENIO_OFFLINE=1` or `PLENIO_AUTO_DOWNLOAD=0` turn the download off; the run then names the file to place. **0 · System Check** says what the writer takes on your computer and marks the row of your card.
+
+**A GGUF runs on llama.cpp**, which ComfyUI does not bring: `winget install llama.cpp` (Windows), `brew install llama.cpp` (macOS), your distribution's package or `pip install llama-cpp-python` into ComfyUI's Python. Without it nothing is downloaded: a running app's Gemma 4 12B still writes, else ComfyUI's own Gemma text model if you have one - the node says so -, else the run stops and says what to do.
+
+**Other writers:** *Writer model* lists every model - ComfyUI's lighter [`gemma4_e4b_it_fp8_scaled.safetensors`](https://huggingface.co/Comfy-Org/gemma-4/resolve/main/text_encoders/gemma4_e4b_it_fp8_scaled.safetensors) (9.1 GB, into `models/text_encoders`, no llama.cpp needed), any other GGUF, and the models of a running LM Studio, Ollama, llama.cpp ... - see [Local LLMs](concepts/local-llm.md). A workflow saved before keeps the writer it was saved with.
 
 ## Plenio assets
 
-Some models are not ComfyUI model files but run in a separate Plenio worker. Plenio fetches them itself, pinned to an exact revision, when a node first needs them - **0 · System Check** lists them with their folder and whether they are there:
+Some models are not ComfyUI model files but run in a separate Plenio worker ([the writer's GGUF](#the-writer-gemma-4-12b) goes the same way, into `models/LLM`). Plenio fetches them itself, pinned to an exact revision, when a node first needs them - **0 · System Check** lists them with their folder and whether they are there:
 
 | Asset | Used by | Size | Where |
 |---|---|---|---|

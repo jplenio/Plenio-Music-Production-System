@@ -112,7 +112,7 @@ The plan is written by the template's **Writer model** (one list for every writi
 | Writer | Usable plans, free | Usable plans, held to the format | Sections with new chords | Proposed chord bars that clashed (kept out) |
 |---|---|---|---|---|
 | Gemma 4 E2B (2 B) | 12/12 | 12/12 | all | 19 % |
-| Gemma 4 E4B (4 B, the default writer) | 12/12 | 12/12 | about half | 21-29 % |
+| Gemma 4 E4B (4 B, the default writer until 1.5.0) | 12/12 | 12/12 | about half | 21-29 % |
 | Qwen 3.5 9B | 12/12 | 12/12 | a quarter | 18-26 % |
 | Gemma 4 12B | 12/12 | 12/12 | a quarter to a third | 43-50 % |
 | Qwen 3.8 27B | 12/12 | 12/12 | one in seven | 31 % |

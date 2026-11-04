@@ -2,7 +2,7 @@
  "be8d0fd4-8ce7-561b-8778-c59f81c6c6b4": {
   "inputs": {
    "ckpt_name": {
-    "tooltip": "The YuE2 checkpoint in models/checkpoints: yue2_3b_int8_convrot (default, for 8-16 GB GPUs) or yue2_3b_bf16 (24 GB and more). ComfyUI offers the download when the file is missing."
+    "tooltip": "The YuE2 checkpoint in models/checkpoints: yue2_3b_int8_convrot (default, for 8-16 GB GPUs), yue2_3b_bf16 (24 GB and more) or a YuE2 finetune in ComfyUI's format (one file with the music model, the text side and the audio decoder, like these two). Press R after adding a file. Not loadable here: GGUF files and m-a-p's Transformers layout (docs/user/models.md)."
    }
   },
   "outputs": {
@@ -38,7 +38,7 @@
     "tooltip": "The source's transcribed lyrics (new cover lyrics with the phrasing reference or a lyrics closeness above 0); requested only then."
    },
    "model": {
-    "tooltip": "The writer: a text model of ComfyUI (a bare file name, written by Generate Text; Gemma 4 E4B by default) or a Local LLM model (GGUF files, LM Studio, Ollama ...). Only the chosen one is loaded; the templates link it to the Writer model node. Press R to refresh the list."
+    "tooltip": "The writer: Gemma 4 12B (auto) by default - the Gemma 4 12B GGUF on this machine, else the one for its card (Q6_K from 16 GB, else a QAT Q4) downloaded once into models/LLM -, a text model of ComfyUI (a bare file name, written by Generate Text, e.g. the lighter Gemma 4 E4B) or another Local LLM model (GGUF files, LM Studio, Ollama ...). Only the chosen one is loaded; the templates link it to the Writer model node. Press R to refresh the list."
    },
    "sampling_mode_seed": {
     "tooltip": "The draft seed: the same seed and brief give the same draft; another seed, another draft. The brief's song seed is added, so every song of a series gets its own."
@@ -89,7 +89,7 @@
     "tooltip": "The song's lyrics: the mood, and the exact context budget."
    },
    "model": {
-    "tooltip": "The writer: a text model of ComfyUI (a bare file name, written by Generate Text; Gemma 4 E4B by default) or a Local LLM model (GGUF files, LM Studio, Ollama ...). Only the chosen one is loaded; the templates link it to the Writer model node. Press R to refresh the list."
+    "tooltip": "The writer: Gemma 4 12B (auto) by default - the Gemma 4 12B GGUF on this machine, else the one for its card (Q6_K from 16 GB, else a QAT Q4) downloaded once into models/LLM -, a text model of ComfyUI (a bare file name, written by Generate Text, e.g. the lighter Gemma 4 E4B) or another Local LLM model (GGUF files, LM Studio, Ollama ...). Only the chosen one is loaded; the templates link it to the Writer model node. Press R to refresh the list."
    },
    "seed": {
     "tooltip": "Another seed, another arrangement of the same song (the writer's plan and the notes Plenio writes). The brief's song seed is added."
@@ -122,7 +122,7 @@
     "tooltip": "The language Transcribe Lyrics heard."
    },
    "model": {
-    "tooltip": "The writer: a text model of ComfyUI (a bare file name, written by Generate Text; Gemma 4 E4B by default) or a Local LLM model (GGUF files, LM Studio, Ollama ...). Only the chosen one is loaded; the templates link it to the Writer model node. Press R to refresh the list."
+    "tooltip": "The writer: Gemma 4 12B (auto) by default - the Gemma 4 12B GGUF on this machine, else the one for its card (Q6_K from 16 GB, else a QAT Q4) downloaded once into models/LLM -, a text model of ComfyUI (a bare file name, written by Generate Text, e.g. the lighter Gemma 4 E4B) or another Local LLM model (GGUF files, LM Studio, Ollama ...). Only the chosen one is loaded; the templates link it to the Writer model node. Press R to refresh the list."
    }
   },
   "outputs": {

@@ -69,7 +69,22 @@ def ensure_asset(
     is_cancelled: Callable[[], bool] | None = None,
 ) -> Path:
     """Return the asset folder, downloading missing files when the policy allows it."""
-    folder = asset_folder(root, asset)
+    return ensure_asset_in(
+        asset, asset_folder(root, asset), config, fetch=fetch, progress=progress, is_cancelled=is_cancelled
+    )
+
+
+def ensure_asset_in(
+    asset: Asset,
+    folder: Path,
+    config: PlenioConfig,
+    *,
+    fetch: Fetcher | None = None,
+    progress: ProgressCallback | None = None,
+    is_cancelled: Callable[[], bool] | None = None,
+) -> Path:
+    """``ensure_asset`` into a given ``folder`` (the writer's GGUF goes into ComfyUI's models/LLM, where every
+    Local LLM list finds it): the same offline policy, resumed partial files, sizes and SHA-256 checks."""
     todo = missing_files(asset, folder)
     if not todo:
         return folder
