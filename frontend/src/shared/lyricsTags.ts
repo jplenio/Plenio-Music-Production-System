@@ -16,7 +16,8 @@ export const MORE_TAGS = ['Post-Chorus', 'Hook', 'Refrain', 'Solo', 'Break', 'Br
 /** Sections without words: the editor says so in their button's title. */
 const WORDLESS = new Set(['intro', 'interlude', 'instrumental', 'solo', 'break', 'outro'])
 
-/** At most this many tags of one's own, each at most ``OWN_TAG_LENGTH`` characters (a longer line is no tag). */
+/** At most this many tags of one's own as buttons, each at most ``OWN_TAG_LENGTH`` characters (a tag typed in the
+ * lyrics may be longer). */
 export const MAX_OWN_TAGS = 30
 export const OWN_TAG_LENGTH = 40
 

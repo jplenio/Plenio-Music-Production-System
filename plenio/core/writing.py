@@ -43,7 +43,7 @@ _THINKING = [
     re.compile(r"(?is)<\|?(?:think|thinking)\|?>.*?<\|?/(?:think|thinking)\|?>"),
 ]
 _FENCE = re.compile(r"(?m)^```.*$")
-_BOLD_TAG = re.compile(r"^\**\s*\[([^\]]{1,40})\]\s*\**$")
+_BOLD_TAG = re.compile(rf"^\**\s*\[([^\]]{{1,{lyrics_rules.TAG_MAX_CHARS}}})\]\s*\**$")
 _LABEL_TAG = re.compile(
     r"^\**\s*\(?(intro|verse(?: \d+)?|pre-chorus|chorus|post-chorus|bridge|outro|hook|refrain|interlude|instrumental|solo|break|breakdown)\)?\s*:?\s*\**$",
     re.IGNORECASE,
@@ -394,15 +394,25 @@ def _layout(lyrics_example: str, *, multiline: bool = False, titles: bool = Fals
 
 
 def given_lyrics(text: str) -> str:
-    """The user's own lyrics as the song sings them: their section tags (a label line such as 'Chorus:' made one), or,
-    without any, ``[Verse]`` for every block of lines and ``[Chorus]`` for a block that comes back."""
-    cleaned = _clean_lyrics(text, [])
-    parsed = lyrics_rules.parse_lyrics(cleaned)
+    """The user's own lyrics as the song sings them - as they are written: every tag (however long, with all it says
+    about the section), every line and every blank line stays; nothing is cleaned, joined or left out. Only what makes
+    them lyrics at all is added: ``[Verse]`` before lines that come before the first tag, and, in lyrics without any
+    tag, a tag for every block of lines - a label line such as 'Chorus:' as written, else ``[Verse]``, ``[Chorus]`` for a
+    block that comes back. A tag in markdown emphasis (``**[Chorus]**``, pasted from a chat) loses the stars."""
+    lines = [line.rstrip() for line in text.replace("\r\n", "\n").replace("\r", "\n").strip("\n").split("\n")]
+    lines = [
+        f"[{bold.group(1).strip()}]" if (bold := _BOLD_TAG.match(line.strip())) else line for line in lines
+    ]
+    written = "\n".join(lines).strip("\n")
+    parsed = lyrics_rules.parse_lyrics(written)
     if parsed.sections:
-        if parsed.preamble:  # lines before the first tag: a verse of their own
-            return lyrics_rules.parse_lyrics("[Verse]\n" + cleaned).format()
-        return parsed.format()
-    blocks = [block.strip() for block in re.split(r"\n\s*\n", text.strip()) if block.strip()]
+        return f"[Verse]\n{written}" if parsed.preamble else written
+    labelled = [
+        f"[{label.group(1).strip()}]" if (label := _LABEL_TAG.match(line.strip())) else line for line in lines
+    ]
+    if labelled != lines:  # 'Chorus:' lines: the user's own section marks
+        return given_lyrics("\n".join(labelled))
+    blocks = [block.strip("\n") for block in re.split(r"\n\s*\n", written) if block.strip()]
     repeated = {block for block in blocks if blocks.count(block) > 1}
     return "\n\n".join(f"[{'Chorus' if block in repeated else 'Verse'}]\n{block}" for block in blocks)
 
@@ -719,7 +729,7 @@ _DIRECTION_LINE = re.compile(r"^\s*[\(\{<].*[\)\}>]\s*$")
 _REPEAT_MARK = re.compile(r"^(.*?)\s*\(\s*[x×]\s*([2-4])\s*\)\s*$", re.IGNORECASE)
 
 
-_TAG_LINE = re.compile(r"^\**\s*\[[^\[\]\n]{1,40}\]\s*\**$")
+_TAG_LINE = re.compile(rf"^\**\s*\[[^\[\]\n]{{1,{lyrics_rules.TAG_MAX_CHARS}}}\]\s*\**$")
 _MARKER = re.compile(r"^\s*(?:#{1,6}|>|\*\*)\s*")
 
 
@@ -982,7 +992,7 @@ def parse_draft(text: str, request: Request, taken: Iterable[str] = ()) -> Draft
 
 
 def _section_key(tag: str) -> str:
-    return re.sub(r"\s*\d+$", "", tag.strip("[]").strip()).lower()
+    return lyrics_rules.section_kind(tag)
 
 
 def section_mismatch(lyrics: str, sections: Sequence[str]) -> str | None:

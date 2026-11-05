@@ -93,7 +93,11 @@ def kind(name: str) -> str:
     """``[Verse 2]`` -> ``verse``; ``Pre Chorus`` -> ``pre-chorus``. As a score's section names are written - lower
     case, letters, digits, spaces and hyphens, at most 30 characters - so a tag of one's own and the plan's section
     named after it are one kind: ``[Instrument: Violin Rise]`` -> ``instrument violin rise``, ``[Überleitung]`` ->
-    ``uberleitung``, a name with nothing of these left (another script) -> ``section``."""
+    ``uberleitung``, a name with nothing of these left (another script) -> ``section``. A section named with a
+    description is that section: ``[Verse - Female Choir, Call and Response delivery]`` -> ``verse``."""
+    head = lyrics_rules.section_head(name)
+    if head:
+        return head
     cleaned = re.sub(r"\s*\d+\s*$", "", name.strip().strip("[]").strip().lower())
     cleaned = re.sub(r"\s+", "-", cleaned) if cleaned in ("pre chorus", "post chorus") else cleaned
     plain = "".join(ch for ch in unicodedata.normalize("NFKD", cleaned) if not unicodedata.combining(ch))

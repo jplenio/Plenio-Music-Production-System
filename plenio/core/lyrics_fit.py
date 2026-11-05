@@ -156,7 +156,8 @@ class Fit:
 
 
 def _key(tag: str) -> str:
-    return tag.strip().strip("[]").strip().lower()
+    head = lyrics_rules.section_head(tag)
+    return head or tag.strip().strip("[]").strip().lower()
 
 
 def _match(tags: Sequence[str], parts: Sequence[Mapping[str, Any]]) -> list[tuple[int, ...]]:

@@ -67,7 +67,7 @@ _HEADING = re.compile(
     r"(?im)^\s*(?:#+\s*)?\**\s*(global metadata|vocal details|arrangement)\s*\**\s*:?\s*(.*)$"
 )
 _ABC = re.compile(r"(?m)^(X:|K:|M:|L:|Q:|V:)")
-_TAG_LINE = re.compile(r"(?m)^\s*\[[^\]\n]{1,40}\]\s*$")
+_TAG_LINE = re.compile(rf"(?m)^\s*\[[^\]\n]{{1,{lyrics_rules.TAG_MAX_CHARS}}}\]\s*$")
 _SPECIAL = re.compile(r"<\|[^|]*\|>")
 _VOCAL_TERMS = re.compile(
     r"(?i)\b(vocals?|vocalists?|voices?|singers?|singing|sung|sings?|rap|rapper|rapping|choirs?|chants?|"

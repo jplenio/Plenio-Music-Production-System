@@ -191,16 +191,19 @@ def test_a_tag_of_ones_own_is_a_kind_as_a_score_writes_section_names() -> None:
 def test_a_sung_section_of_ones_own_takes_the_plans_place_under_its_name() -> None:
     # the name holds a colon a score's section names do not: the plan's bridge is renamed all the same
     abc = plan("intro-", "verse", "chorus", "bridge", "chorus")
-    form = song_form.match(lyric("Verse", "Chorus", "Breakdown: Drums Only", "Chorus"), abc)
+    form = song_form.match(lyric("Verse", "Chorus", "Last Call: Drums Only", "Chorus"), abc)
     assert form.category == song_form.RENAME
     assert [label for label, _sung in form_of(form.score)] == [
         "intro",
         "verse",
         "chorus",
-        "breakdown drums only",
+        "last call drums only",
         "chorus",
     ]
     assert score_rules.analyze(form.score).ok
+    # a known section with a description is that section (1.5.1): the score takes its name, not the description
+    described = song_form.match(lyric("Verse", "Chorus", "Breakdown: Drums Only", "Chorus"), abc)
+    assert [label for label, _sung in form_of(described.score)][3] == "breakdown"
 
 
 def test_a_breakdown_the_plan_has_not_sings_on_the_bridges_melody() -> None:

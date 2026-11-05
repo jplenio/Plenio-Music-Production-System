@@ -235,8 +235,9 @@ def pickups(score: canonical.Score) -> frozenset[int]:
 
 
 def _key(tag: str) -> str:
-    """A tag or label as the lyrics checks compare them: no brackets, no trailing number, lower case."""
-    return re.sub(r"\s*\d+$", "", tag.strip("[]").strip()).lower()
+    """A tag or label as the lyrics checks compare them: the section it names (``[Verse - Female Choir]`` is a verse),
+    else no brackets, no trailing number, lower case (``lyrics.section_kind``)."""
+    return lyrics_rules.section_kind(tag)
 
 
 def _match(

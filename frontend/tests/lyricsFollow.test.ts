@@ -38,6 +38,17 @@ describe('lyric blocks', () => {
     ])
   })
 
+  it('keeps a long tag with its description as it is written, as the section it names', () => {
+    const long = 'Verse - Female Choir, Call and Response delivery'
+    expect(tags(`[${long}]\nwe walk\n\n[Chorus: Full Choir]\nhold on`)).toEqual([long, 'Chorus: Full Choir'])
+    expect(sectionKey(`[${long}]`)).toBe('verse')
+    expect(sectionKey('Chorus: Full Choir')).toBe('chorus')
+    expect(sectionKey('Bridge (spoken)')).toBe('bridge')
+    expect(sectionKey('Pre Chorus')).toBe('pre-chorus')
+    expect(sectionKey('Break Free')).toBe('break free')
+    expect(tagFor('verse', { tag: long, lines: [] })).toBe(long)
+  })
+
   it('compares tags without numbers and writes new ones from the label', () => {
     expect(sectionKey('[Verse 2]')).toBe('verse')
     expect(sectionKey('Pre-Chorus')).toBe('pre-chorus')

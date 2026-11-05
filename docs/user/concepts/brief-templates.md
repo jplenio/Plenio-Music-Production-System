@@ -27,6 +27,8 @@ A sung song (and one with sparse vocals) has two inputs after the theme:
 - **lyrics** - *written from the idea below* (default) or *my own, sung as written below*;
 - **lyrics idea or text** - with *written from the idea*: what the words should be about (a story, an image, a message); the template's idea appears here and the writer writes the lyrics from it. With *my own*: your lyrics, sung exactly as written - the writer writes only the title, the style and the cover-art prompt for them, and the title comes from your words. Section tags (`[Verse]`, `[Chorus]` …) are kept; without them every block of lines becomes a verse and a block that comes back a chorus.
 
+Your own lyrics reach the song as you wrote them: every line and every section tag stays, also a tag that describes its section (`[Verse - Female Choir, Call and Response delivery]`, `[Chorus: Male Solo]`, `[Bridge (spoken)]`, up to 160 characters). Such a tag is sung as the section it names (a verse, a chorus, a bridge); YuE2 reads the rest as a hint, and the Song Sheet says so. Plenio adds only what makes them lyrics: `[Verse]` before lines that come before the first tag, and, in lyrics without any tag, a tag for every block (a line such as *Chorus:* as you wrote it, else *Verse*, *Chorus* for a block that comes back). Directions in brackets and repeat marks such as *(x2)* stay too - YuE2 sings what is written, and the Song Sheet warns about them.
+
 Switching to *my own* empties the field if it still holds the template's idea. A template never fills your own lyrics.
 
 The template's **description** says how the song **sounds** - character, instruments, arrangement; what it is **about** is in its lyrics idea (since 1.5.0 the shipped templates keep the two apart).

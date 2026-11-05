@@ -1,5 +1,5 @@
 import { d as wt, m as Oe, a as Yn, i as C, c as A, b as f, t as R, F as ce, r as ye, n as Ee, j as oe, e as G, g as z, h as O, o as hs, u as D, w as $e, v as lt, p as et, f as Ke, q as Et, s as Xn, x as Is, y as di, z as Qt, A as tt, B as os, C as fo, D as Pt, E as vp, G as Kn, H as _n, I as yp, k as bp, l as kp } from "./dialog-Nn1YgW7k.mjs";
-import { a as wp, s as ds, b as fs, n as mh, u as da, P as vh, c as xp, t as Sp, d as Cp, T as Ho, e as Ap, f as js, g as Mp, y as tu, h as Tp, x as Ge, j as Ms, K as Li, k as $p, H as oi, L as Yi, S as po, m as Ts, o as Xi, q as Lp, r as nu, w as Dp, z as Bp, A as Op, B as Ep, C as Ip, D as Rp, E as es, F as Pp, G as Np, I as Vp, J as iu, M as Fn, N as go, O as Hp, Q as Wp, R as su, U as zp, V as Fp, W as ou, X as _p, Y as Kp, Z as ru, _ as Up, $ as Gp, a0 as jp, a1 as qp, a2 as Yp, a3 as Xp, a4 as Jp, a5 as lu, a6 as Zp, a7 as Qp, a8 as eg, a9 as tg, aa as ng, ab as ig, ac as sg, ad as au, ae as og, af as rg, ag as yh, ah as Jo, ai as lg, aj as ag, ak as ug, al as cg, am as hg, an as fa, ao as dg, ap as fg, aq as pg, ar as gg, as as mg, at as vg, au as yg, av as Jt, aw as uu, ax as bg, ay as mo, v as kg, az as Wo, aA as cu, aB as wg, aC as hu, aD as xg, aE as Sg, aF as Cg, aG as zo, aH as Ag, aI as du, aJ as Mg, aK as Tg, aL as fu, aM as $g, aN as Lg, aO as Dg, aP as Bg, aQ as Og, aR as Eg, aS as Ig, aT as Rg, aU as Pg, aV as pu, aW as Ng, aX as Vg, aY as Hg, aZ as Fr, a_ as gu, a$ as mu, b0 as Wg, b1 as vu, b2 as zg, b3 as Fg, b4 as _g, b5 as yu, b6 as bu, b7 as ku, b8 as _r, b9 as Kg, ba as Ug } from "./main-BXs3IBe1.mjs";
+import { a as wp, s as ds, b as fs, n as mh, u as da, P as vh, c as xp, t as Sp, d as Cp, T as Ho, e as Ap, f as js, g as Mp, y as tu, h as Tp, x as Ge, j as Ms, K as Li, k as $p, H as oi, L as Yi, S as po, m as Ts, o as Xi, q as Lp, r as nu, w as Dp, z as Bp, A as Op, B as Ep, C as Ip, D as Rp, E as es, F as Pp, G as Np, I as Vp, J as iu, M as Fn, N as go, O as Hp, Q as Wp, R as su, U as zp, V as Fp, W as ou, X as _p, Y as Kp, Z as ru, _ as Up, $ as Gp, a0 as jp, a1 as qp, a2 as Yp, a3 as Xp, a4 as Jp, a5 as lu, a6 as Zp, a7 as Qp, a8 as eg, a9 as tg, aa as ng, ab as ig, ac as sg, ad as au, ae as og, af as rg, ag as yh, ah as Jo, ai as lg, aj as ag, ak as ug, al as cg, am as hg, an as fa, ao as dg, ap as fg, aq as pg, ar as gg, as as mg, at as vg, au as yg, av as Jt, aw as uu, ax as bg, ay as mo, v as kg, az as Wo, aA as cu, aB as wg, aC as hu, aD as xg, aE as Sg, aF as Cg, aG as zo, aH as Ag, aI as du, aJ as Mg, aK as Tg, aL as fu, aM as $g, aN as Lg, aO as Dg, aP as Bg, aQ as Og, aR as Eg, aS as Ig, aT as Rg, aU as Pg, aV as pu, aW as Ng, aX as Vg, aY as Hg, aZ as Fr, a_ as gu, a$ as mu, b0 as Wg, b1 as vu, b2 as zg, b3 as Fg, b4 as _g, b5 as yu, b6 as bu, b7 as ku, b8 as _r, b9 as Kg, ba as Ug } from "./main-CY5cIrX5.mjs";
 import { a as Gg, r as jg, n as qg, e as Kr, b as Yg, s as Xg, p as Jg } from "./notationExport-DkCMgjck.mjs";
 import { SHIFTABLE as Kt, shiftBlock as Rs, notesLabel as Zg, trackRows as Qg, parseGuide as em, sameGuide as Ps, guideNotes as tm, remapGuide as nm } from "./tracks-ClAVjvds.mjs";
 import { parseBarSources as im, remapBars as sm, keepBars as om, followContent as rm, validBars as lm } from "./barSources-Cq3VGvmq.mjs";
@@ -18607,7 +18607,7 @@ const wS = {
       ])])) : (C(), A("p", d2, "This sheet keeps no Guide track; the three tracks above are what YuE2 reads."))
     ]));
   }
-}), p2 = /^\[([^[\]\n]{1,40})\]$/;
+}), p2 = /^\[([^[\]\n]{1,160})\]$/, g2 = /^(pre[- ]?chorus|post[- ]?chorus|intro|verse|chorus|bridge|interlude|instrumental|inst|outro|hook|refrain|solo|breakdown|break|drop|build)(?:\s*\d+)?(?:\s*[-\u2013\u2014:(,/|]|$)/i;
 function oo(i) {
   const e = [], t = [];
   let n = null;
@@ -18620,7 +18620,12 @@ function oo(i) {
   return { preamble: e, blocks: t };
 }
 function vr(i) {
-  return i.replace(/^\[|\]$/g, "").trim().replace(/\s*\d+$/, "").toLowerCase();
+  const e = i.replace(/^\[|\]$/g, "").trim(), t = g2.exec(e);
+  if (t) {
+    const n = t[1].toLowerCase().replace(/[\s-]+/g, "-");
+    return n === "prechorus" ? "pre-chorus" : n === "postchorus" ? "post-chorus" : n;
+  }
+  return e.replace(/\s*\d+$/, "").toLowerCase();
 }
 function Ua(i, e) {
   return e && vr(e.tag) === vr(i) ? e.tag : i.replace(/(^|[\s-])(\p{L})/gu, (t, n, s) => n + s.toUpperCase());
@@ -18635,7 +18640,7 @@ function No(i, e) {
   let s = 0;
   return { preamble: t.preamble, blocks: e.sections.map((o) => o.implicit ? null : t.blocks[s++]) };
 }
-function g2(i, e) {
+function m2(i, e) {
   const t = i.preamble.length ? [i.preamble.join(`
 `)] : [];
   return e.sections.forEach((n, s) => {
@@ -18666,7 +18671,7 @@ function jf(i, e, t) {
     a.push(h), l.push(h >= 0 && d !== null && (d === s[h] || a[c - 1] !== h) ? h : -1);
   }), l;
 }
-function m2(i, e, t, n, s = () => null) {
+function v2(i, e, t, n, s = () => null) {
   const o = Gf(e, n), r = yr(e), l = yr(t), a = (p) => {
     for (const [g, b, k] of o)
       if (p >= k && p < k + b - g) return g + p - k;
@@ -18691,7 +18696,7 @@ function qf(i, e, t) {
   const n = [...i], s = t.trim();
   return e >= n.length ? s && n.push(s) : s ? n[e] = s : n.splice(e, 1), n;
 }
-function v2(i, e, t, n) {
+function y2(i, e, t, n) {
   const s = oo(i);
   if (!s.blocks[e]) return i;
   const r = s.blocks.map((a, u) => u === e ? { tag: a.tag, lines: qf(a.lines, t, n) } : a), l = s.preamble.length ? [s.preamble.join(`
@@ -18702,7 +18707,7 @@ function v2(i, e, t, n) {
 
 `);
 }
-function y2(i, e, t, n, s) {
+function b2(i, e, t, n, s) {
   const o = e.sections[t]?.label ?? "", r = i.blocks.map((l, a) => {
     if (a !== t) return l;
     const u = l ?? { tag: Ua(o, null), lines: [] };
@@ -18710,7 +18715,7 @@ function y2(i, e, t, n, s) {
   });
   return { preamble: i.preamble, blocks: r };
 }
-function b2(i, e, t) {
+function k2(i, e, t) {
   const n = oo(i);
   if (!n.blocks[e]) return i;
   const s = n.preamble.length ? [n.preamble.join(`
@@ -18720,13 +18725,13 @@ function b2(i, e, t) {
 
 `);
 }
-function k2(i, e, t, n) {
+function w2(i, e, t, n) {
   const s = e.sections[t]?.label ?? "", o = i.blocks.map(
     (r, l) => l === t ? { tag: (r ?? { tag: Ua(s, null) }).tag, lines: [...n] } : r
   );
   return { preamble: i.preamble, blocks: o };
 }
-const Yf = 2, w2 = 0.01, lh = 2.5;
+const Yf = 2, x2 = 0.01, lh = 2.5;
 function ah(i, e, t, n) {
   const s = [];
   for (const o of e) {
@@ -18745,10 +18750,10 @@ function Ga(i) {
 }
 function ha(i, e) {
   let t = 0;
-  for (let n = 0; n < 2; n++) i[n] === e[n] && (t += i[n].endsWith(":") ? w2 : Yf);
+  for (let n = 0; n < 2; n++) i[n] === e[n] && (t += i[n].endsWith(":") ? x2 : Yf);
   return t;
 }
-function x2(i, e) {
+function S2(i, e) {
   return ha(i, e) >= Yf || i[0] === e[0] && i[1] === e[1];
 }
 function uh(i) {
@@ -18781,11 +18786,11 @@ function ch(i, e, t) {
   if (e?.bars?.length)
     return i && t && t.length === i.measures.length ? t.map((n) => n === null ? null : e.bars[n] ?? null) : !i || !e.bar_prints?.length ? i ? i.measures.map((n, s) => e.bars[s] ?? null) : e.bars : Xf(Ga(i), e.bar_prints).map((n) => n === null ? null : e.bars[n] ?? null);
 }
-function S2(i, e) {
+function C2(i, e) {
   return e.bar_prints?.length ? Xf(Ga(i), e.bar_prints) : i.measures.map((t, n) => n < e.bars.length ? n : null);
 }
-const C2 = "1.5.0";
-function A2(i) {
+const A2 = "1.5.0";
+function M2(i) {
   return {
     sounds: { ...i.sounds },
     metronome: i.metronome,
@@ -18842,7 +18847,7 @@ const An = (i, e, t, n) => ({ Vocal: i, Ins: e, chord: t, guide: n }), Vo = [
     builtIn: !0,
     settings: { hear: "notes", wave: !1, sung: !1 }
   }
-], M2 = "plenio/score-editor-presets.json", T2 = "plenio.score_presets/1", Jf = "plenio.score-editor.presets";
+], T2 = "plenio/score-editor-presets.json", $2 = "plenio.score_presets/1", Jf = "plenio.score-editor.presets";
 function Zf(i) {
   const e = typeof i == "object" && i !== null ? i : {};
   if (!Array.isArray(e.presets)) return [];
@@ -18854,24 +18859,24 @@ function Zf(i) {
   return n;
 }
 function Qf(i) {
-  return JSON.stringify({ schema: T2, presets: i.map((e) => ({ name: e.name, settings: e.settings })) }, null, 1);
+  return JSON.stringify({ schema: $2, presets: i.map((e) => ({ name: e.name, settings: e.settings })) }, null, 1);
 }
-function $2() {
+function L2() {
   try {
     return Zf(JSON.parse(window.localStorage.getItem(Jf) ?? "{}"));
   } catch {
     return [];
   }
 }
-function L2(i) {
+function D2(i) {
   try {
     return window.localStorage.setItem(Jf, Qf(i)), !0;
   } catch {
     return !1;
   }
 }
-const ep = `/userdata/${encodeURIComponent(M2)}`;
-async function D2(i) {
+const ep = `/userdata/${encodeURIComponent(T2)}`;
+async function B2(i) {
   if (i)
     try {
       const e = await i.fetchApi(ep, { cache: "no-store" });
@@ -18879,7 +18884,7 @@ async function D2(i) {
       if (e.ok) return { presets: Zf(await e.json()), where: "comfyui" };
     } catch {
     }
-  return { presets: $2(), where: "browser" };
+  return { presets: L2(), where: "browser" };
 }
 async function dh(i, e) {
   const t = e.filter((n) => !n.builtIn);
@@ -18888,16 +18893,16 @@ async function dh(i, e) {
       if ((await i.fetchApi(`${ep}?overwrite=true`, { method: "POST", body: Qf(t) })).ok) return "comfyui";
     } catch {
     }
-  return L2(t) ? "browser" : "failed";
+  return D2(t) ? "browser" : "failed";
 }
-function B2(i, e) {
+function O2(i, e) {
   return [...i.filter((t) => t.name.toLowerCase() !== e.name.toLowerCase()), e].sort((t, n) => t.name.localeCompare(n.name));
 }
 const Xo = "plenio.score_project/1", tp = ".plenio.json";
 function fh(i, e = /* @__PURE__ */ new Date()) {
   return {
     schema: Xo,
-    app: `Plenio Music Production System ${C2}`,
+    app: `Plenio Music Production System ${A2}`,
     saved: e.toISOString(),
     title: (i.title ?? "").trim(),
     score: i.score,
@@ -18908,10 +18913,10 @@ function fh(i, e = /* @__PURE__ */ new Date()) {
     settings: i.settings ? ja(i.settings) : {}
   };
 }
-function O2(i) {
+function E2(i) {
   return `${Array.from((i ?? "").trim(), (t) => /[\p{L}\p{N} \-_()]/u.test(t) ? t : "_").join("").slice(0, 80).trim() || "score"}${tp}`;
 }
-function E2(i) {
+function I2(i) {
   let e;
   try {
     e = JSON.parse(i);
@@ -18932,11 +18937,11 @@ function E2(i) {
     settings: ja(t.settings)
   };
 }
-const I2 = {
+const R2 = {
   class: "record",
   role: "group",
   "aria-label": "Record with a MIDI keyboard"
-}, R2 = ["disabled", "title"], P2 = ["disabled", "title"], N2 = ["title"], V2 = { class: "midi-settings" }, H2 = ["aria-expanded"], W2 = ["onKeydown"], z2 = { class: "facts" }, F2 = { key: 0 }, _2 = ["value"], K2 = ["value"], U2 = ["value"], G2 = { title: "Hear the keys you play (for keyboards without a sound of their own)" }, j2 = ["checked"], q2 = ["value"], Y2 = { title: "Where the take's starts and ends go" }, X2 = ["value"], J2 = { title: "replace: from the start to the stop the voice plays only the take; merge: what you did not play over stays" }, Z2 = ["value"], Q2 = { title: "Silence the old notes of the recorded voice while recording" }, eA = ["checked"], tA = ["value"], nA = /* @__PURE__ */ wt({
+}, P2 = ["disabled", "title"], N2 = ["disabled", "title"], V2 = ["title"], H2 = { class: "midi-settings" }, W2 = ["aria-expanded"], z2 = ["onKeydown"], F2 = { class: "facts" }, _2 = { key: 0 }, K2 = ["value"], U2 = ["value"], G2 = ["value"], j2 = { title: "Hear the keys you play (for keyboards without a sound of their own)" }, q2 = ["checked"], Y2 = ["value"], X2 = { title: "Where the take's starts and ends go" }, J2 = ["value"], Z2 = { title: "replace: from the start to the stop the voice plays only the take; merge: what you did not play over stays" }, Q2 = ["value"], eA = { title: "Silence the old notes of the recorded voice while recording" }, tA = ["checked"], nA = ["value"], iA = /* @__PURE__ */ wt({
   __name: "RecordControls",
   props: /* @__PURE__ */ Pt({
     hub: {},
@@ -18975,19 +18980,19 @@ const I2 = {
     function g(b, k) {
       n.value = { ...n.value, [b]: k };
     }
-    return (b, k) => (C(), A("span", I2, [
+    return (b, k) => (C(), A("span", R2, [
       f("button", {
         class: Ee(["rec", { on: i.recording, counting: i.countingIn }]),
         disabled: !!i.disabled && !i.recording,
         title: p.value,
         onClick: k[0] || (k[0] = (M) => i.recording ? s("stop") : s("record"))
-      }, " ● " + R(i.recording && i.countingIn ? "count-in" : "rec"), 11, R2),
+      }, " ● " + R(i.recording && i.countingIn ? "count-in" : "rec"), 11, P2),
       f("button", {
         class: Ee(["step", { on: i.step }]),
         disabled: !!i.disabled || i.recording,
         title: i.disabled ?? (i.step ? "Step input is on: a key writes a note at the cursor and moves it on - click to stop" : `Step input into ${i.target}: every key writes a note of the step length at the cursor`),
         onClick: k[1] || (k[1] = (M) => s("step"))
-      }, " step ", 10, P2),
+      }, " step ", 10, N2),
       i.step ? (C(), A("button", {
         key: 0,
         title: "A rest: the cursor moves on by one step",
@@ -18997,15 +19002,15 @@ const I2 = {
         class: Ee(["midi-light", { active: d.value, ready: i.hub.status.value === "ready" }]),
         title: h.value,
         "aria-hidden": "true"
-      }, null, 10, N2),
-      f("span", V2, [
+      }, null, 10, V2),
+      f("span", H2, [
         f("button", {
           ref_key: "toggle",
           ref: r,
           "aria-expanded": o.value,
           title: "MIDI keyboard and recording settings",
           onClick: k[3] || (k[3] = (M) => o.value ? l() : o.value = !0)
-        }, "🎹", 8, H2),
+        }, "🎹", 8, W2),
         o.value ? (C(), A("span", {
           key: 0,
           class: "midi-panel",
@@ -19019,8 +19024,8 @@ const I2 = {
             onClick: l
           }, "×"),
           k[24] || (k[24] = f("strong", null, "MIDI keyboard", -1)),
-          f("span", z2, R(h.value), 1),
-          i.hub.status.value === "ready" ? (C(), A("label", F2, [
+          f("span", F2, R(h.value), 1),
+          i.hub.status.value === "ready" ? (C(), A("label", _2, [
             k[13] || (k[13] = oe(" keyboard ", -1)),
             f("select", {
               value: i.hub.selected.value,
@@ -19031,24 +19036,24 @@ const I2 = {
               (C(!0), A(ce, null, ye(i.hub.devices.value.filter((M) => M.connected), (M) => (C(), A("option", {
                 key: M.id,
                 value: M.id
-              }, R(M.name), 9, K2))), 128)),
+              }, R(M.name), 9, U2))), 128)),
               c.value ? (C(), A("option", {
                 key: 0,
                 value: i.hub.selected.value,
                 disabled: ""
-              }, R(c.value) + " (unplugged)", 9, U2)) : G("", !0)
-            ], 40, _2)
+              }, R(c.value) + " (unplugged)", 9, G2)) : G("", !0)
+            ], 40, K2)
           ])) : i.hub.status.value !== "asking" ? (C(), A("button", {
             key: 1,
             title: "Ask the browser for MIDI access",
             onClick: k[5] || (k[5] = (M) => s("enable"))
           }, "use MIDI")) : G("", !0),
-          f("label", G2, [
+          f("label", j2, [
             f("input", {
               checked: n.value.thru,
               type: "checkbox",
               onChange: k[6] || (k[6] = (M) => g("thru", M.target.checked))
-            }, null, 40, j2),
+            }, null, 40, q2),
             k[14] || (k[14] = oe(" hear the keys ", -1))
           ]),
           f("strong", null, "Recording into " + R(i.target), 1),
@@ -19067,9 +19072,9 @@ const I2 = {
               f("option", { value: 0 }, "none", -1),
               f("option", { value: 1 }, "1 bar", -1),
               f("option", { value: 2 }, "2 bars", -1)
-            ])], 40, q2)
+            ])], 40, Y2)
           ]),
-          f("label", Y2, [
+          f("label", X2, [
             k[18] || (k[18] = oe(" quantize ", -1)),
             f("select", {
               value: n.value.quantize,
@@ -19081,9 +19086,9 @@ const I2 = {
               f("option", { value: 16 }, "1/16", -1),
               f("option", { value: 32 }, "1/32", -1),
               f("option", { value: 0 }, "off (the score's finest)", -1)
-            ])], 40, X2)
+            ])], 40, J2)
           ]),
-          f("label", J2, [
+          f("label", Z2, [
             k[20] || (k[20] = oe(" mode ", -1)),
             f("select", {
               value: n.value.mode,
@@ -19092,14 +19097,14 @@ const I2 = {
             }, [...k[19] || (k[19] = [
               f("option", { value: "replace" }, "replace", -1),
               f("option", { value: "merge" }, "merge", -1)
-            ])], 40, Z2)
+            ])], 40, Q2)
           ]),
-          f("label", Q2, [
+          f("label", eA, [
             f("input", {
               checked: n.value.mute,
               type: "checkbox",
               onChange: k[10] || (k[10] = (M) => g("mute", M.target.checked))
-            }, null, 40, eA),
+            }, null, 40, tA),
             k[21] || (k[21] = oe(" mute its old notes ", -1))
           ]),
           k[26] || (k[26] = f("strong", null, "Step input", -1)),
@@ -19115,13 +19120,13 @@ const I2 = {
               f("option", { value: 4 }, "1/4", -1),
               f("option", { value: 8 }, "1/8", -1),
               f("option", { value: 16 }, "1/16", -1)
-            ])], 40, tA)
+            ])], 40, nA)
           ])
-        ], 40, W2)) : G("", !0)
+        ], 40, z2)) : G("", !0)
       ])
     ]));
   }
-}), iA = { class: "notation-export" }, sA = ["disabled", "aria-expanded", "title"], oA = ["onKeydown"], rA = { title: "The paper of the PDF and the print" }, lA = { title: "How large the music is drawn: standard about 3 bars a line (4 pages for a song of 3-4 minutes), smaller 3-4 (3 pages), compact about 4 (2-3 pages), large 1-2 bars a line (the biggest notes)" }, aA = { class: "formats" }, uA = ["disabled"], cA = ["disabled"], hA = ["disabled"], dA = ["disabled"], fA = { class: "facts" }, pA = /* @__PURE__ */ wt({
+}), sA = { class: "notation-export" }, oA = ["disabled", "aria-expanded", "title"], rA = ["onKeydown"], lA = { title: "The paper of the PDF and the print" }, aA = { title: "How large the music is drawn: standard about 3 bars a line (4 pages for a song of 3-4 minutes), smaller 3-4 (3 pages), compact about 4 (2-3 pages), large 1-2 bars a line (the biggest notes)" }, uA = { class: "formats" }, cA = ["disabled"], hA = ["disabled"], dA = ["disabled"], fA = ["disabled"], pA = { class: "facts" }, gA = /* @__PURE__ */ wt({
   __name: "NotationExport",
   props: /* @__PURE__ */ Pt({
     abc: {},
@@ -19159,7 +19164,7 @@ const I2 = {
         h?.dispose(), l.value = !1;
       }
     }
-    return (d, h) => (C(), A("span", iA, [
+    return (d, h) => (C(), A("span", sA, [
       f("button", {
         ref_key: "toggle",
         ref: a,
@@ -19167,7 +19172,7 @@ const I2 = {
         "aria-expanded": r.value,
         title: i.blocked ?? "The sheet music as PDF, PNG or SVG, or printed - both voices, chord symbols, sections and the lyrics",
         onClick: h[0] || (h[0] = (p) => r.value ? u() : r.value = !0)
-      }, " Export notation… ", 8, sA),
+      }, " Export notation… ", 8, oA),
       r.value ? (C(), A("span", {
         key: 0,
         class: "export-panel",
@@ -19180,7 +19185,7 @@ const I2 = {
           "aria-label": "Close",
           onClick: u
         }, "×"),
-        f("label", rA, [
+        f("label", lA, [
           h[8] || (h[8] = oe(" paper ", -1)),
           $e(f("select", {
             "onUpdate:modelValue": h[1] || (h[1] = (p) => n.value = p),
@@ -19192,7 +19197,7 @@ const I2 = {
             [Xn, n.value]
           ])
         ]),
-        f("label", lA, [
+        f("label", aA, [
           h[10] || (h[10] = oe(" size ", -1)),
           $e(f("select", {
             "onUpdate:modelValue": h[2] || (h[2] = (p) => s.value = p),
@@ -19206,46 +19211,46 @@ const I2 = {
             [Xn, s.value]
           ])
         ]),
-        f("span", aA, [
+        f("span", uA, [
           f("button", {
             disabled: l.value,
             title: "Pages of the chosen paper, 300 dpi - for printing and sharing",
             onClick: h[3] || (h[3] = (p) => c("pdf"))
-          }, "PDF", 8, uA),
+          }, "PDF", 8, cA),
           f("button", {
             disabled: l.value,
             title: "The whole score as one picture",
             onClick: h[4] || (h[4] = (p) => c("png"))
-          }, "PNG", 8, cA),
+          }, "PNG", 8, hA),
           f("button", {
             disabled: l.value,
             title: "The whole score as a vector drawing (scales without loss)",
             onClick: h[5] || (h[5] = (p) => c("svg"))
-          }, "SVG", 8, hA),
+          }, "SVG", 8, dA),
           f("button", {
             disabled: l.value,
             title: "The browser’s print dialog - it also saves a vector PDF",
             onClick: h[6] || (h[6] = (p) => c("print"))
-          }, "Print…", 8, dA)
+          }, "Print…", 8, fA)
         ]),
-        f("span", fA, R(l.value ? "drawing the pages…" : "What the notation shows: both voices, chord symbols, sections and the lyrics."), 1)
-      ], 40, oA)) : G("", !0)
+        f("span", pA, R(l.value ? "drawing the pages…" : "What the notation shows: both voices, chord symbols, sections and the lyrics."), 1)
+      ], 40, rA)) : G("", !0)
     ]));
   }
-}), gA = { class: "sounds-settings" }, mA = ["aria-expanded"], vA = ["onKeydown"], yA = { class: "row" }, bA = { label: "Built in" }, kA = ["value", "title"], wA = {
+}), mA = { class: "sounds-settings" }, vA = ["aria-expanded"], yA = ["onKeydown"], bA = { class: "row" }, kA = { label: "Built in" }, wA = ["value", "title"], xA = {
   key: 0,
   label: "Yours"
-}, xA = ["value"], SA = ["disabled"], CA = {
+}, SA = ["value"], CA = ["disabled"], AA = {
   key: 0,
   class: "facts"
-}, AA = { class: "row" }, MA = ["onKeydown"], TA = ["disabled"], $A = {
+}, MA = { class: "row" }, TA = ["onKeydown"], $A = ["disabled"], LA = {
   key: 1,
   class: "facts",
   role: "status"
-}, LA = {
+}, DA = {
   key: 2,
   class: "facts"
-}, DA = { class: "track" }, BA = ["value", "aria-label", "onChange"], OA = ["value", "title"], EA = ["title", "aria-label", "onClick"], IA = /* @__PURE__ */ wt({
+}, BA = { class: "track" }, OA = ["value", "aria-label", "onChange"], EA = ["value", "title"], IA = ["title", "aria-label", "onClick"], RA = /* @__PURE__ */ wt({
   __name: "SoundsPanel",
   props: /* @__PURE__ */ Pt({
     fetcher: {},
@@ -19267,7 +19272,7 @@ const I2 = {
     ), b = O(() => l.value.find((N) => N.name === c.value) ?? null);
     async function k() {
       if (o.value = !0, u.value) return;
-      const N = await D2(t.fetcher);
+      const N = await B2(t.fetcher);
       l.value = N.presets, a.value = N.where, u.value = !0;
     }
     function M() {
@@ -19284,7 +19289,7 @@ const I2 = {
         p.value = `“${N}” is a built-in preset - choose another name.`;
         return;
       }
-      const j = B2(l.value, { name: N, builtIn: !1, settings: structuredClone(t.settings) }), P = await dh(t.fetcher, j);
+      const j = O2(l.value, { name: N, builtIn: !1, settings: structuredClone(t.settings) }), P = await dh(t.fetcher, j);
       if (P === "failed") {
         p.value = "The preset could not be saved (neither in ComfyUI nor in this browser).";
         return;
@@ -19308,14 +19313,14 @@ const I2 = {
       const j = n.value[N], P = N === "chord" ? [[60, 0, 1.2], [64, 0, 1.2], [67, 0, 1.2]] : N === "guide" ? [[36, 0, 0.4], [43, 0.45, 0.4], [48, 0.9, 0.6]] : [[60, 0, 0.3], [64, 0.32, 0.3], [67, 0.64, 0.3], [72, 0.96, 0.7]];
       for (const [Q, H, x] of P) setTimeout(() => ca(Q, x, j), H * 1e3);
     }
-    return (N, j) => (C(), A("span", gA, [
+    return (N, j) => (C(), A("span", mA, [
       f("button", {
         ref_key: "toggle",
         ref: r,
         "aria-expanded": o.value,
         title: "The tracks’ sounds and the presets",
         onClick: j[0] || (j[0] = (P) => o.value ? M() : k())
-      }, "♫ sounds", 8, mA),
+      }, "♫ sounds", 8, vA),
       o.value ? (C(), A("span", {
         key: 0,
         class: "sounds-panel",
@@ -19329,24 +19334,24 @@ const I2 = {
           onClick: M
         }, "×"),
         j[6] || (j[6] = f("strong", null, "Preset", -1)),
-        f("span", yA, [
+        f("span", bA, [
           $e(f("select", {
             "onUpdate:modelValue": j[1] || (j[1] = (P) => c.value = P),
             "aria-label": "Preset"
           }, [
             j[5] || (j[5] = f("option", { value: "" }, "- choose a preset -", -1)),
-            f("optgroup", bA, [
+            f("optgroup", kA, [
               (C(!0), A(ce, null, ye(D(Vo), (P) => (C(), A("option", {
                 key: P.name,
                 value: P.name,
                 title: P.note
-              }, R(P.name), 9, kA))), 128))
+              }, R(P.name), 9, wA))), 128))
             ]),
-            l.value.length ? (C(), A("optgroup", wA, [
+            l.value.length ? (C(), A("optgroup", xA, [
               (C(!0), A(ce, null, ye(l.value, (P) => (C(), A("option", {
                 key: "own-" + P.name,
                 value: P.name
-              }, R(P.name), 9, xA))), 128))
+              }, R(P.name), 9, SA))), 128))
             ])) : G("", !0)
           ], 512), [
             [Xn, c.value]
@@ -19355,15 +19360,15 @@ const I2 = {
             disabled: !c.value,
             title: "Set the preset’s sounds and settings",
             onClick: L
-          }, "use", 8, SA),
+          }, "use", 8, CA),
           b.value ? (C(), A("button", {
             key: 0,
             title: "Delete this preset of yours",
             onClick: F
           }, "delete")) : G("", !0)
         ]),
-        c.value ? (C(), A("span", CA, R([...D(Vo), ...l.value].find((P) => P.name === c.value)?.note ?? "Your preset"), 1)) : G("", !0),
-        f("span", AA, [
+        c.value ? (C(), A("span", AA, R([...D(Vo), ...l.value].find((P) => P.name === c.value)?.note ?? "Your preset"), 1)) : G("", !0),
+        f("span", MA, [
           d.value ? (C(), A(ce, { key: 0 }, [
             $e(f("input", {
               "onUpdate:modelValue": j[2] || (j[2] = (P) => h.value = P),
@@ -19374,26 +19379,26 @@ const I2 = {
                 et(Ke(T, ["prevent"]), ["enter"]),
                 j[3] || (j[3] = et(Ke((P) => d.value = !1, ["stop", "prevent"]), ["esc"]))
               ]
-            }, null, 40, MA), [
+            }, null, 40, TA), [
               [lt, h.value]
             ]),
             f("button", {
               disabled: !h.value.trim(),
               onClick: T
-            }, "save", 8, TA)
+            }, "save", 8, $A)
           ], 64)) : (C(), A("button", {
             key: 1,
             title: "Save the current sounds, metronome, cover view, recording and paper as a preset of yours",
             onClick: j[4] || (j[4] = (P) => d.value = !0)
           }, " save current as preset… "))
         ]),
-        p.value ? (C(), A("span", $A, R(p.value), 1)) : a.value === "browser" ? (C(), A("span", LA, "Your presets are kept in this browser (ComfyUI’s user data could not be reached).")) : G("", !0),
+        p.value ? (C(), A("span", LA, R(p.value), 1)) : a.value === "browser" ? (C(), A("span", DA, "Your presets are kept in this browser (ComfyUI’s user data could not be reached).")) : G("", !0),
         j[7] || (j[7] = f("strong", null, "Sounds", -1)),
         (C(!0), A(ce, null, ye(g.value, ([P, Q]) => (C(), A("label", {
           key: P,
           class: "row"
         }, [
-          f("span", DA, R(Q), 1),
+          f("span", BA, R(Q), 1),
           f("select", {
             value: n.value[P],
             "aria-label": `Sound of the ${Q} track`,
@@ -19403,28 +19408,28 @@ const I2 = {
               key: H,
               value: H,
               title: D(Jo)[H].hint
-            }, R(D(Jo)[H].label), 9, OA))), 128))
-          ], 40, BA),
+            }, R(D(Jo)[H].label), 9, EA))), 128))
+          ], 40, OA),
           f("button", {
             title: `Hear the ${Q} track’s sound`,
             "aria-label": `Hear the ${Q} sound`,
             onClick: Ke((H) => W(P), ["prevent"])
-          }, "▶", 8, EA)
+          }, "▶", 8, IA)
         ]))), 128)),
         j[8] || (j[8] = f("span", { class: "facts" }, "Synthesized in the browser - a sketch of each instrument to tell the tracks apart; YuE2 renders the song itself.", -1))
-      ], 40, vA)) : G("", !0)
+      ], 40, yA)) : G("", !0)
     ]));
   }
 });
-function RA(i) {
+function PA(i) {
   return i.length >= 3 && (i[0] & 240) === 176 && (i[1] === 120 || i[1] === 123);
 }
-function PA(i, e, t) {
+function NA(i, e, t) {
   if (i.length < 3) return null;
   const n = i[0] & 240, s = i[0] & 15, o = i[1] & 127, r = i[2] & 127;
   return n === 144 && r > 0 ? { kind: "on", note: o, velocity: r, time: e, input: t, channel: s } : n === 128 || n === 144 ? { kind: "off", note: o, velocity: r, time: e, input: t, channel: s } : null;
 }
-function NA(i, e) {
+function VA(i, e) {
   switch (i) {
     case "unsupported":
       return "This browser has no Web MIDI. Use Chrome or Edge (in Firefox: allow MIDI for this site); the ComfyUI desktop app may not offer it.";
@@ -19438,7 +19443,7 @@ function NA(i, e) {
       return null;
   }
 }
-class VA {
+class HA {
   constructor(e = typeof navigator > "u" ? null : navigator) {
     this.navigatorLike = e;
   }
@@ -19486,11 +19491,11 @@ class VA {
   }
   receive(e, t) {
     const n = typeof t.timeStamp == "number" && t.timeStamp > 0 ? t.timeStamp : performance.now();
-    if (RA(t.data)) {
+    if (PA(t.data)) {
       this.letGo(e, n);
       return;
     }
-    const s = PA(t.data, n, e);
+    const s = NA(t.data, n, e);
     if (!s) return;
     const o = this.held.get(e) ?? /* @__PURE__ */ new Map();
     if (this.held.set(e, o), s.kind === "off") {
@@ -19517,15 +19522,15 @@ class VA {
       }
   }
   fail(e, t) {
-    this.status.value = e, this.problem.value = NA(e, t);
+    this.status.value = e, this.problem.value = VA(e, t);
   }
 }
 let ph = null;
-function HA() {
-  return ph ??= new VA(), ph;
+function WA() {
+  return ph ??= new HA(), ph;
 }
-const WA = 0.035;
-class zA {
+const zA = 0.035;
+class FA {
   constructor(e, t) {
     this.start = e, this.track = t;
   }
@@ -19557,7 +19562,7 @@ class zA {
     this.held.delete(e.pitch), this.done.push({ ...e, end: Math.max(t, e.start) });
   }
 }
-function FA(i, e) {
+function _A(i, e) {
   const { start: t, stop: n, total: s, chordUnits: o, pickup: r } = e, l = Math.max(1, Math.round(e.grid) || 1), a = i.filter((d) => d.start >= t - r && d.start < n).map((d) => ({ pitch: d.pitch, start: Math.max(t, d.start), end: Math.min(n, Math.max(d.end ?? n, d.start)) })).sort((d, h) => d.start - h.start || h.pitch - d.pitch), u = [];
   for (const d of a) {
     const h = u.at(-1);
@@ -19586,7 +19591,7 @@ function FA(i, e) {
   }
   return c;
 }
-function _A(i, e, t, n, s) {
+function KA(i, e, t, n, s) {
   return {
     op: "place_notes",
     track: i,
@@ -19601,8 +19606,8 @@ function ml(i, e) {
   const t = Number(i.split("/")[1]) || 16;
   return Math.max(1, Math.round(t / e));
 }
-const KA = 40;
-function UA(i) {
+const UA = 40;
+function GA(i) {
   const e = z(!1), t = z(!1), n = di(null), s = z(0), o = new Fw();
   let r = !1, l = null, a = null;
   const u = z(0), c = O(() => {
@@ -19631,14 +19636,14 @@ function UA(i) {
     t.value = !1;
     const Q = i.settings(), H = i.track(), x = Math.min(i.locator.value, P.model.total - 1), E = i.transport();
     if (!E) return;
-    if (n.value = new zA(x, H), r = !1, e.value = !0, s.value = x, !E.record(_a(P, x), {
+    if (n.value = new FA(x, H), r = !1, e.value = !0, s.value = x, !E.record(_a(P, x), {
       countIn: Q.countIn,
       mute: Q.mute ? H === "vocal" ? "Vocal" : "Ins" : null
     })) {
       e.value = !1, n.value = null, i.problem("Playback could not start, so nothing can be recorded.");
       return;
     }
-    i.notify(`recording into ${H === "vocal" ? "Vocal" : "Ins"} from bar ${jA(P, x)} - Space or ■ stop keeps it, Esc throws it away`);
+    i.notify(`recording into ${H === "vocal" ? "Vocal" : "Ins"} from bar ${qA(P, x)} - Space or ■ stop keeps it, Esc throws it away`);
   }
   function b() {
     i.transport()?.stop();
@@ -19661,25 +19666,25 @@ function UA(i) {
       i.notify("recording thrown away");
       return;
     }
-    const x = Math.max(s.value, P.start), E = H.measures.find((ae) => ae.onset <= P.start && P.start < ae.onset + ae.length) ?? H.measures[0], fe = Q.bars[(E?.n ?? 1) - 1], pe = E && fe?.duration_s ? E.length / fe.duration_s : 8, te = Number(E?.meter.split("/")[0]) || 4, xe = FA(P.finish(x), {
+    const x = Math.max(s.value, P.start), E = H.measures.find((ae) => ae.onset <= P.start && P.start < ae.onset + ae.length) ?? H.measures[0], fe = Q.bars[(E?.n ?? 1) - 1], pe = E && fe?.duration_s ? E.length / fe.duration_s : 8, te = Number(E?.meter.split("/")[0]) || 4, xe = _A(P.finish(x), {
       start: P.start,
       stop: x,
       total: H.total,
       grid: ml(H.unit, i.settings().quantize),
-      chordUnits: WA * pe,
+      chordUnits: zA * pe,
       pickup: (E?.length ?? 16) / te / 2
     });
     if (!xe.length) {
       i.notify("nothing recorded - no key was played (is the keyboard chosen in 🎹?)");
       return;
     }
-    await i.operate(_A(P.track, xe, P.start, x, i.settings().mode));
+    await i.operate(KA(P.track, xe, P.start, x, i.settings().mode));
   }
   function T(P) {
     if (i.settings().thru && (i.sound && (o.sound = i.sound()), P.kind === "on" ? o.on(P.note, P.velocity) : o.off(P.note)), e.value && n.value) {
       const H = i.transport()?.scoreSecondAt(P.time) ?? null, x = i.view();
       if (H === null || !x) return;
-      const E = GA(x, n.value.start, H);
+      const E = jA(x, n.value.start, H);
       if (E === null) return;
       P.kind === "on" ? n.value.noteOn(P.note, E) : n.value.noteOff(P.note, E), u.value++;
       return;
@@ -19693,7 +19698,7 @@ function UA(i) {
     }
     a = { pitches: [P], timer: setTimeout(() => {
       B();
-    }, KA) };
+    }, UA) };
   }
   async function B() {
     const P = a?.pitches ?? [];
@@ -19732,7 +19737,7 @@ function UA(i) {
   }
   return { recording: e, step: t, live: c, start: g, stop: b, cancel: k, onTime: M, onStopped: L, toggleStep: N, rest: W, ready: h, dispose: j };
 }
-function GA(i, e, t) {
+function jA(i, e, t) {
   const n = i.model;
   if (!n) return null;
   const s = _a(i, e);
@@ -19740,84 +19745,84 @@ function GA(i, e, t) {
   const o = n.measures.find((a) => a.onset <= e && e < a.onset + a.length) ?? n.measures[0], r = i.bars[(o?.n ?? 1) - 1], l = o && r?.duration_s ? o.length / r.duration_s : 8;
   return e - (s - t) * l;
 }
-function jA(i, e) {
+function qA(i, e) {
   let t = 1;
   for (const n of i.model?.measures ?? []) n.onset <= e && (t = n.n);
   return t;
 }
-const qA = {
+const YA = {
   class: "view-tools",
   role: "group",
   "aria-label": "View"
-}, YA = {
+}, XA = {
   class: "layouts",
   role: "radiogroup",
   "aria-label": "Layout"
-}, XA = ["aria-checked"], JA = ["aria-checked"], ZA = ["aria-checked"], QA = { title: "The piano roll and chord lane above the notation" }, eM = { title: "Show the ABC text under the notation" }, tM = { title: "Zoom of the notation" }, nM = {
+}, JA = ["aria-checked"], ZA = ["aria-checked"], QA = ["aria-checked"], eM = { title: "The piano roll and chord lane above the notation" }, tM = { title: "Show the ABC text under the notation" }, nM = { title: "Zoom of the notation" }, iM = {
   class: "midi-tools",
   role: "group",
   "aria-label": "Files"
-}, iM = ["disabled", "title"], sM = ["disabled", "title"], oM = ["disabled"], rM = ["disabled", "title"], lM = ["disabled", "title"], aM = ["disabled", "title"], uM = ["accept"], cM = {
+}, sM = ["disabled", "title"], oM = ["disabled", "title"], rM = ["disabled"], lM = ["disabled", "title"], aM = ["disabled", "title"], uM = ["disabled", "title"], cM = ["accept"], hM = {
   key: 1,
   class: "facts"
-}, hM = {
+}, dM = {
   key: 2,
   class: "facts ok"
-}, dM = {
+}, fM = {
   key: 3,
   class: "facts bad"
-}, fM = {
+}, pM = {
   key: 4,
   class: "badge"
-}, pM = {
-  key: 1,
-  class: "gate",
-  role: "status"
 }, gM = {
-  key: 2,
+  key: 1,
   class: "gate",
   role: "status"
 }, mM = {
+  key: 2,
+  class: "gate",
+  role: "status"
+}, vM = {
   key: 3,
   class: "gate assumed",
   role: "status",
   "data-testid": "assumed-source-bars"
-}, vM = ["aria-valuenow", "aria-valuemin", "aria-valuemax"], yM = ["data-layout", "data-text"], bM = { class: "side" }, kM = {
+}, yM = ["aria-valuenow", "aria-valuemin", "aria-valuemax"], bM = ["data-layout", "data-text"], kM = { class: "side" }, wM = {
   key: 1,
   class: "lyrics-follow",
   role: "group",
   "aria-label": "Lyrics"
-}, wM = {
-  key: 0,
-  class: "hint"
 }, xM = {
   key: 0,
-  class: "hint changed"
+  class: "hint"
 }, SM = {
+  key: 0,
+  class: "hint changed"
+}, CM = {
   key: 1,
   class: "hint"
-}, CM = {
+}, AM = {
   key: 2,
   class: "fit-panel"
-}, AM = ["aria-valuenow", "aria-valuemin", "aria-valuemax"], MM = ["aria-valuenow", "aria-valuemin", "aria-valuemax"], TM = {
+}, MM = ["aria-valuenow", "aria-valuemin", "aria-valuemax"], TM = ["aria-valuenow", "aria-valuemin", "aria-valuemax"], $M = {
   class: "status",
   "aria-live": "polite"
-}, $M = {
+}, LM = {
   key: 6,
   class: "error",
   role: "alert"
-}, LM = {
+}, DM = {
   key: 7,
   class: "error",
   role: "alert"
-}, DM = {
+}, BM = {
   key: 8,
   class: "error",
   role: "alert"
-}, BM = {
+}, OM = {
   key: 10,
   class: "diagnostics"
-}, OM = ["data-severity"], EM = ["title", "onClick"], IM = {
+}, EM = ["data-severity"], IM = ["title", "onClick"], RM = {
   key: 1,
   class: "where"
 }, gh = /* @__PURE__ */ wt({
@@ -19886,7 +19891,7 @@ const qA = {
           We = Og(We, jf(ge, ve, m.time_map), Pe(ge), Pe(ve), _t);
         }
         if (zo(We, ue) || (En(We), $.spans = [...ue], Y.spans = We), Ce && ge && ve) {
-          const Pe = m2(Ce, ge, ve, m.time_map, a(S));
+          const Pe = v2(Ce, ge, ve, m.time_map, a(S));
           o.value = Pe, $.lyrics = Ce, Y.lyrics = Pe;
         }
         return Object.keys(Y).length ? { before: $, after: Y } : void 0;
@@ -19906,7 +19911,7 @@ const qA = {
     const p = z([]), g = z(0), b = z(null), k = z(null), M = z(null), L = z(null), T = z(null), F = z("vocal"), B = O({
       get: () => c.value.sounds,
       set: (m) => c.value = { ...c.value, sounds: m }
-    }), W = O(() => A2(c.value));
+    }), W = O(() => M2(c.value));
     function N(m, S) {
       c.value = hh(c.value, m), u.notes = [`${S}: ${j(m)}`];
     }
@@ -19916,12 +19921,12 @@ const qA = {
     }
     const P = O(() => c.value.sounds[F.value === "vocal" ? "Vocal" : "Ins"]);
     Oe(c, (m) => Rg(m), { deep: !0 });
-    const Q = HA();
+    const Q = WA();
     Q.selected.value = c.value.midiInput, Oe(Q.selected, (m) => c.value = { ...c.value, midiInput: m });
     const H = O({
       get: () => c.value.record,
       set: (m) => c.value = { ...c.value, record: m }
-    }), x = UA({
+    }), x = GA({
       hub: Q,
       transport: () => M.value,
       view: () => te.value,
@@ -19956,9 +19961,9 @@ const qA = {
         let Ce = xe.get(m);
         if (Ce?.length !== ue.length) {
           if (Ce = (ae.value && be && rm(ae.value, be, ue)) ?? void 0, !Ce && (Ce = lm(t.barSources, S.score_sha256, Y.sha256, ue.length) ?? void 0, !Ce)) {
-            Ce = S2(se, S);
+            Ce = C2(se, S);
             const We = S.bar_prints;
-            Re.value = We?.length ? Ce.filter((Pe, _t) => Pe !== null && !x2(ue[_t], We[Pe])).length : 0;
+            Re.value = We?.length ? Ce.filter((Pe, _t) => Pe !== null && !S2(ue[_t], We[Pe])).length : 0;
           }
           xe.set(m, Ce);
         }
@@ -20009,7 +20014,7 @@ const qA = {
       [o, r, ee],
       () => {
         const m = o.value, S = ee.value;
-        m ? S && m.blocks.length === S.sections.length && (l.value = g2(m, S)) : l.value = r.value;
+        m ? S && m.blocks.length === S.sections.length && (l.value = m2(m, S)) : l.value = r.value;
       },
       { immediate: !0 }
     ), Oe(
@@ -20073,8 +20078,8 @@ const qA = {
         const We = Wt(ve);
         if (We === null) continue;
         const Pe = mo(se, ve, Y.total), _t = Ag(S(ve, du(se, ve, We, Pe, yn())), Pe), an = _t.map(($i) => $i.text);
-        if (o.value) o.value = k2(o.value, Y, xi(ve), an);
-        else if (r.value !== null) r.value = b2(r.value, ve, an);
+        if (o.value) o.value = w2(o.value, Y, xi(ve), an);
+        else if (r.value !== null) r.value = k2(r.value, ve, an);
         else continue;
         _t.forEach(($i, zr) => {
           $i.id.startsWith("*") && Ce.push(es(ve, zr));
@@ -20212,8 +20217,8 @@ const qA = {
         }
       }
       const Y = Ct();
-      if (o.value && S) o.value = y2(o.value, S, xi(m.block), m.line, m.text);
-      else if (r.value !== null) r.value = v2(r.value, m.block, m.line, m.text);
+      if (o.value && S) o.value = b2(o.value, S, xi(m.block), m.line, m.text);
+      else if (r.value !== null) r.value = y2(r.value, m.block, m.line, m.text);
       else return;
       t.readonly || u.recordSide(`lyrics: ${m.text || "line removed"}`, Y, Ct());
     }
@@ -20506,7 +20511,7 @@ const qA = {
         barSources: op(),
         settings: W.value
       });
-      cs(O2(t.title), new TextEncoder().encode(`${JSON.stringify(m, null, 1)}
+      cs(E2(t.title), new TextEncoder().encode(`${JSON.stringify(m, null, 1)}
 `), "application/json"), st.value = null, u.notes = [`saved the project: score${m.guide.length ? `, ${Za(m.guide.length)}` : ""}${m.lyrics ? ", lyrics" : ""}, settings`];
     }
     function lp() {
@@ -20515,7 +20520,7 @@ const qA = {
     async function ap(m) {
       const S = m.target, $ = S.files?.[0];
       if (S.value = "", !$) return;
-      const Y = E2(await $.text());
+      const Y = I2(await $.text());
       typeof Y == "string" ? st.value = Y : Qa(Y, $.name);
     }
     const Za = (m) => m === 1 ? "1 Guide note" : `${m} Guide notes`;
@@ -20695,32 +20700,32 @@ const qA = {
         onUndo: S[1] || (S[1] = ($) => (Mi(), si())),
         onRedo: S[2] || (S[2] = ($) => (ji(), si()))
       }, null, 8, ["fit-surplus", "fit", "view", "selection", "primary", "busy", "stale", "can-undo", "can-redo", "undo-label", "redo-label"])),
-      f("div", qA, [
-        f("span", YA, [
+      f("div", YA, [
+        f("span", XA, [
           f("button", {
             role: "radio",
             "aria-checked": d.value === "review",
             class: Ee({ active: d.value === "review" }),
             title: "Piano roll, notation and inspector; the ABC text under Advanced",
             onClick: S[3] || (S[3] = ($) => h("review"))
-          }, " Review ", 10, XA),
+          }, " Review ", 10, JA),
           f("button", {
             role: "radio",
             "aria-checked": Ae.value,
             class: Ee({ active: Ae.value }),
             title: "Review plus the track headers: Vocal, Instrument, Chords and the Guide track (never sent to YuE2)",
             onClick: S[4] || (S[4] = ($) => h("daw"))
-          }, " DAW ", 10, JA),
+          }, " DAW ", 10, ZA),
           f("button", {
             role: "radio",
             "aria-checked": d.value === "text",
             class: Ee({ active: d.value === "text" }),
             title: "The ABC text with its diagnostics, and the notation",
             onClick: S[5] || (S[5] = ($) => h("text"))
-          }, " Text ", 10, ZA)
+          }, " Text ", 10, QA)
         ]),
         J.value ? (C(), A(ce, { key: 0 }, [
-          f("label", QA, [
+          f("label", eM, [
             $e(f("input", {
               "onUpdate:modelValue": S[6] || (S[6] = ($) => c.value.roll = $),
               type: "checkbox",
@@ -20730,7 +20735,7 @@ const qA = {
             ]),
             S[41] || (S[41] = oe(" piano roll ", -1))
           ]),
-          f("label", eM, [
+          f("label", tM, [
             $e(f("input", {
               "onUpdate:modelValue": S[7] || (S[7] = ($) => c.value.advanced = $),
               type: "checkbox",
@@ -20741,7 +20746,7 @@ const qA = {
             S[42] || (S[42] = oe(" ABC text (advanced) ", -1))
           ])
         ], 64)) : G("", !0),
-        f("label", tM, [
+        f("label", nM, [
           S[43] || (S[43] = oe(" zoom ", -1)),
           $e(f("input", {
             "onUpdate:modelValue": S[8] || (S[8] = ($) => c.value.zoom = $),
@@ -20760,18 +20765,18 @@ const qA = {
           ])
         ]),
         _n(ow),
-        f("span", nM, [
+        f("span", iM, [
           f("button", {
             disabled: zn.value || !!qi.value,
             title: qi.value ?? "Download this score as a standard MIDI file (Vocal, Instrument, Chords and the Guide track)",
             onClick: ip
-          }, " Export MIDI ", 8, iM),
+          }, " Export MIDI ", 8, sM),
           f("button", {
             disabled: zn.value || !!qi.value,
             title: qi.value ?? "Download the sheet music as MusicXML for notation programs (MuseScore, Sibelius, Finale, Dorico, Cubase): both voices, chord symbols, sections and the lyrics",
             onClick: sp
-          }, " Export MusicXML ", 8, sM),
-          _n(pA, {
+          }, " Export MusicXML ", 8, oM),
+          _n(gA, {
             paper: Ya.value,
             "onUpdate:paper": S[9] || (S[9] = ($) => Ya.value = $),
             size: Xa.value,
@@ -20786,22 +20791,22 @@ const qA = {
             disabled: !i.doc.text.trim(),
             title: "Save the score, the Guide notes and the lyrics in one project file, to go on later (Open project…)",
             onClick: rp
-          }, " Save project ", 8, oM),
+          }, " Save project ", 8, rM),
           f("button", {
             disabled: i.readonly,
             title: i.readonly ? "This score belongs to the other sheet." : "Read a MIDI file as the score (the report is shown before anything is replaced)",
             onClick: hp
-          }, " Import MIDI… ", 8, rM),
+          }, " Import MIDI… ", 8, lM),
           f("button", {
             disabled: i.readonly || zn.value,
             title: i.readonly ? "This score belongs to the other sheet." : "Read a MusicXML file that Export MusicXML wrote - also after a script changed it: its score, lyrics and where they are sung replace these (one undo step). Other MusicXML is refused; use Import MIDI for it.",
             onClick: up
-          }, " Import MusicXML… ", 8, lM),
+          }, " Import MusicXML… ", 8, aM),
           f("button", {
             disabled: i.readonly,
             title: i.readonly ? "This score belongs to the other sheet." : "Open a project file: its score, Guide notes and lyrics replace these (one undo step)",
             onClick: lp
-          }, " Open project… ", 8, aM),
+          }, " Open project… ", 8, uM),
           f("input", {
             ref_key: "musicXmlFile",
             ref: eu,
@@ -20828,12 +20833,12 @@ const qA = {
             accept: `${D(tp)},.json,application/json`,
             "aria-label": "Project file",
             onChange: ap
-          }, null, 40, uM)
+          }, null, 40, cM)
         ]),
-        D(u).pending ? (C(), A("span", cM, "checking…")) : D(u).view?.ok ? (C(), A("span", hM, "✓ valid")) : V.value ? (C(), A("span", dM, "✖ " + R(we.value.length) + " error(s)", 1)) : G("", !0),
-        i.readonly ? (C(), A("span", fM, "read-only: owned by the other sheet")) : G("", !0)
+        D(u).pending ? (C(), A("span", hM, "checking…")) : D(u).view?.ok ? (C(), A("span", dM, "✓ valid")) : V.value ? (C(), A("span", fM, "✖ " + R(we.value.length) + " error(s)", 1)) : G("", !0),
+        i.readonly ? (C(), A("span", pM, "read-only: owned by the other sheet")) : G("", !0)
       ]),
-      V.value && !i.readonly ? (C(), A("p", pM, [
+      V.value && !i.readonly ? (C(), A("p", gM, [
         S[44] || (S[44] = oe(" The ABC text has errors: the notation shows the last valid score, and Apply and Approve are off until the text is valid again. ", -1)),
         D(u).canRevert ? (C(), A("button", {
           key: 0,
@@ -20843,7 +20848,7 @@ const qA = {
           key: 1,
           onClick: S[13] || (S[13] = ($) => c.value.advanced = !0)
         }, "Show the ABC text")) : G("", !0)
-      ])) : D(u).view?.ok && D(u).view.model_error && !i.readonly ? (C(), A("p", gM, " This score is valid for YuE2 but outside the editor's supported subset (" + R(D(u).view.model_error.message) + "); edit it as ABC text. ", 1)) : Ot.value && Re.value ? (C(), A("p", mM, R(Re.value === 1 ? "1 bar shares" : `${Re.value} bars share`) + " no notes with the source: placed in the recording's order after the bars before, so that part of the alignment is an assumption. ", 1)) : G("", !0),
+      ])) : D(u).view?.ok && D(u).view.model_error && !i.readonly ? (C(), A("p", mM, " This score is valid for YuE2 but outside the editor's supported subset (" + R(D(u).view.model_error.message) + "); edit it as ABC text. ", 1)) : Ot.value && Re.value ? (C(), A("p", vM, R(Re.value === 1 ? "1 bar shares" : `${Re.value} bars share`) + " no notes with the source: placed in the recording's order after the bars before, so that part of the alignment is an assumption. ", 1)) : G("", !0),
       _.value ? (C(), Kn(gS, {
         key: 4,
         ref_key: "pianoRoll",
@@ -20906,7 +20911,7 @@ const qA = {
         title: "Drag to resize the piano roll (arrow keys work too)",
         onPointerdown: Le,
         onKeydown: je
-      }, null, 40, vM)) : G("", !0),
+      }, null, 40, yM)) : G("", !0),
       _n(ZC, {
         ref_key: "transport",
         ref: M,
@@ -20939,7 +20944,7 @@ const qA = {
         onStopped: D(x).onStopped
       }, {
         record: yp(({ countingIn: $ }) => [
-          _n(nA, {
+          _n(iA, {
             settings: H.value,
             "onUpdate:settings": S[25] || (S[25] = (Y) => H.value = Y),
             hub: D(Q),
@@ -20954,7 +20959,7 @@ const qA = {
             onRest: D(x).rest,
             onEnable: D(x).ready
           }, null, 8, ["settings", "hub", "recording", "counting-in", "step", "target", "disabled", "onRecord", "onStop", "onStep", "onRest", "onEnable"]),
-          _n(IA, {
+          _n(RA, {
             sounds: B.value,
             "onUpdate:sounds": S[26] || (S[26] = (Y) => B.value = Y),
             fetcher: i.fetcher,
@@ -20971,7 +20976,7 @@ const qA = {
         "data-text": J.value ? c.value.advanced ? "shown" : "hidden" : "main",
         style: os(Ue.value)
       }, [
-        f("div", bM, [
+        f("div", kM, [
           Ae.value ? (C(), Kn(f2, {
             key: 0,
             voices: ln.value,
@@ -20998,15 +21003,15 @@ const qA = {
             onOperate: Mt,
             onNotice: S[38] || (S[38] = ($) => D(u).notes = [$])
           }, null, 8, ["view", "bar", "error-bars", "source-starts", "readonly", "section-lyrics"]),
-          i.lyricsTarget && l.value !== null ? (C(), A("div", kM, [
+          i.lyricsTarget && l.value !== null ? (C(), A("div", wM, [
             S[45] || (S[45] = f("strong", null, "Lyrics", -1)),
-            i.lyricsTarget.blocked ? (C(), A("p", wM, R(i.lyricsTarget.blocked), 1)) : (C(), A(ce, { key: 1 }, [
-              wi.value ? (C(), A("p", xM, [
+            i.lyricsTarget.blocked ? (C(), A("p", xM, R(i.lyricsTarget.blocked), 1)) : (C(), A(ce, { key: 1 }, [
+              wi.value ? (C(), A("p", SM, [
                 oe(" Apply writes the changed lyrics into " + R(i.lyricsTarget.title) + ": " + R(Ui.value) + ". That sheet then asks for approval again. ", 1),
                 i.lyricsTarget.replans ? (C(), A(ce, { key: 0 }, [
                   oe(" The planner reads those lyrics and plans again on the next run; this score is kept as yours (manual) and used. ")
                 ], 64)) : G("", !0)
-              ])) : (C(), A("p", SM, [
+              ])) : (C(), A("p", CM, [
                 oe(R(i.lyricsTarget.own ? "This sheet's lyrics" : `The lyrics of ${i.lyricsTarget.title}`) + ": double-click the lyrics lane over the notes to edit a line where it is sung. ", 1),
                 o.value && !i.readonly ? (C(), A(ce, { key: 0 }, [
                   oe("Duplicating, moving or deleting sections arranges them too.")
@@ -21019,7 +21024,7 @@ const qA = {
               }, " Revert the lyrics ")) : G("", !0)
             ], 64))
           ])) : G("", !0),
-          J.value && Zn.value ? (C(), A("details", CM, [
+          J.value && Zn.value ? (C(), A("details", AM, [
             S[46] || (S[46] = f("summary", null, "Lyrics fit", -1)),
             _n(wh, {
               lyrics: Zn.value,
@@ -21041,7 +21046,7 @@ const qA = {
           title: "Drag to resize the navigator column (arrow keys work too)",
           onPointerdown: Ti,
           onKeydown: Pr
-        }, null, 40, AM),
+        }, null, 40, MM),
         f("div", {
           class: Ee(["score-views", { split: J.value && c.value.advanced }])
         }, [
@@ -21076,7 +21081,7 @@ const qA = {
             title: "Drag to give the notation or the ABC text more room (arrow keys work too)",
             onPointerdown: at,
             onKeydown: dt
-          }, null, 40, MM)) : G("", !0),
+          }, null, 40, TM)) : G("", !0),
           J.value && c.value.advanced ? (C(), Kn(_c, {
             key: 2,
             text: i.doc.text,
@@ -21098,17 +21103,17 @@ const qA = {
           busy: D(u).busy,
           "resize-mode": "rests"
         }, null, 8, ["view", "selection", "fallback-bar", "readonly", "stale", "busy"])) : G("", !0)
-      ], 14, yM),
-      f("p", TM, [
+      ], 14, bM),
+      f("p", $M, [
         f("span", null, R(D(u).selection.length > 1 ? `${D(u).selection.length} selected · ` : "") + R(D(Lm)(D(u).primary, mt.value)), 1),
         (C(!0), A(ce, null, ye(D(u).notes, ($, Y) => (C(), A("span", {
           key: Y,
           class: "change"
         }, R($), 1))), 128))
       ]),
-      D(u).error ? (C(), A("p", $M, R(D(u).error), 1)) : G("", !0),
-      st.value ? (C(), A("p", LM, R(st.value), 1)) : G("", !0),
-      E.value ? (C(), A("p", DM, R(E.value), 1)) : G("", !0),
+      D(u).error ? (C(), A("p", LM, R(D(u).error), 1)) : G("", !0),
+      st.value ? (C(), A("p", DM, R(st.value), 1)) : G("", !0),
+      E.value ? (C(), A("p", BM, R(E.value), 1)) : G("", !0),
       Wn.value ? (C(), Kn(Rw, {
         key: 9,
         fetcher: i.fetcher,
@@ -21120,7 +21125,7 @@ const qA = {
         onClose: S[40] || (S[40] = ($) => Wn.value = null),
         onInsert: fp
       }, null, 8, ["fetcher", "data", "filename", "view", "keeps-guide", "current-guide"])) : G("", !0),
-      we.value.length ? (C(), A("ul", BM, [
+      we.value.length ? (C(), A("ul", OM, [
         (C(!0), A(ce, null, ye(we.value, ($, Y) => (C(), A("li", {
           key: Y,
           "data-severity": $.severity
@@ -21131,91 +21136,91 @@ const qA = {
             class: "link",
             title: `Go to bar ${$.bar}`,
             onClick: (se) => Be($.bar)
-          }, "bar " + R($.bar), 9, EM)) : $.line ? (C(), A("span", IM, "line " + R($.line), 1)) : G("", !0),
+          }, "bar " + R($.bar), 9, IM)) : $.line ? (C(), A("span", RM, "line " + R($.line), 1)) : G("", !0),
           oe(" " + R($.message), 1)
-        ], 8, OM))), 128))
+        ], 8, EM))), 128))
       ])) : G("", !0)
     ], 544));
   }
-}), RM = ["aria-label"], PM = ["title"], NM = {
+}), PM = ["aria-label"], NM = ["title"], VM = {
   class: "tabs",
   role: "tablist",
   "aria-label": "Documents"
-}, VM = ["aria-selected", "onClick"], HM = ["title", "aria-label", "aria-pressed"], WM = {
+}, HM = ["aria-selected", "onClick"], WM = ["title", "aria-label", "aria-pressed"], zM = {
   key: 0,
   class: "hint"
-}, zM = {
+}, FM = {
   key: 1,
   class: "confirm",
   role: "alertdialog",
   "aria-label": "Unapplied changes"
-}, FM = ["disabled", "title"], _M = {
+}, _M = ["disabled", "title"], KM = {
   class: "body",
   role: "tabpanel"
-}, KM = { class: "doc-head" }, UM = ["data-state"], GM = ["disabled", "title", "onClick"], jM = ["disabled", "onClick"], qM = ["onClick"], YM = {
+}, UM = { class: "doc-head" }, GM = ["data-state"], jM = ["disabled", "title", "onClick"], qM = ["disabled", "onClick"], YM = ["onClick"], XM = {
   key: 0,
   class: "conflict"
-}, XM = ["onClick"], JM = ["onClick"], ZM = ["onClick"], QM = ["onUpdate:modelValue", "rows", "aria-label", "onFocus", "onInput"], eT = {
+}, JM = ["onClick"], ZM = ["onClick"], QM = ["onClick"], eT = ["onUpdate:modelValue", "rows", "aria-label", "onFocus", "onInput"], tT = {
   key: 3,
   class: "tag-helpers"
-}, tT = ["title", "onClick"], nT = ["title", "onClick"], iT = ["aria-expanded"], sT = ["title", "onClick"], oT = ["title", "onClick"], rT = ["maxlength", "onKeydown"], lT = ["onClick"], aT = {
+}, nT = ["title", "onClick"], iT = ["title", "onClick"], sT = ["aria-expanded"], oT = ["title", "onClick"], rT = ["title", "onClick"], lT = ["maxlength", "onKeydown"], aT = ["onClick"], uT = {
   key: 4,
   class: "error"
-}, uT = {
+}, cT = {
   key: 5,
   class: "facts"
-}, cT = {
+}, hT = {
   key: 4,
   class: "asr"
-}, hT = { key: 0 }, dT = { key: 1 }, fT = { key: 2 }, pT = { key: 5 }, gT = {
+}, dT = { key: 0 }, fT = { key: 1 }, pT = { key: 2 }, gT = { key: 5 }, mT = {
   key: 0,
   class: "diff"
-}, mT = { key: 0 }, vT = { key: 1 }, yT = { key: 2 }, bT = { key: 3 }, kT = {
+}, vT = { key: 0 }, yT = { key: 1 }, bT = { key: 2 }, kT = { key: 3 }, wT = {
   key: 0,
   class: "doc context wide"
-}, wT = { class: "doc-head" }, xT = ["title"], ST = {
+}, xT = { class: "doc-head" }, ST = ["title"], CT = {
   key: 1,
   class: "badge"
-}, CT = {
+}, AT = {
   key: 0,
   class: "hint score-owner"
-}, AT = {
-  key: 1,
-  class: "hint"
 }, MT = {
   key: 1,
-  class: "doc sections"
+  class: "hint"
 }, TT = {
+  key: 1,
+  class: "doc sections"
+}, $T = {
   key: 0,
   class: "doc context"
-}, $T = { class: "doc-head" }, LT = {
+}, LT = { class: "doc-head" }, DT = {
   class: "findings",
   "aria-label": "Validation"
-}, DT = ["data-status"], BT = { key: 0 }, OT = ["title"], ET = { key: 1 }, IT = ["title"], RT = { class: "idea" }, PT = {
+}, BT = ["data-status"], OT = { key: 0 }, ET = ["title"], IT = { key: 1 }, RT = ["title"], PT = { class: "idea" }, NT = {
   key: 0,
   class: "idea"
-}, NT = {
+}, VT = {
   key: 1,
   class: "idea"
-}, VT = { class: "where" }, HT = {
+}, HT = { class: "where" }, WT = {
   key: 0,
   class: "kept"
-}, WT = {
+}, zT = {
   key: 1,
   class: "error"
-}, zT = {
+}, FT = {
   key: 2,
   class: "error"
-}, FT = {
+}, _T = {
   key: 3,
   class: "error"
-}, _T = {
+}, KT = {
   key: 4,
   class: "error"
-}, KT = ["data-severity"], UT = { class: "where" }, GT = {
+}, UT = ["data-severity"], GT = { class: "where" }, jT = {
   key: 0,
   class: "facts"
-}, jT = ["disabled"], qT = ["disabled", "title"], YT = ["disabled", "title"], XT = ["aria-valuenow", "title"], JT = /* @__PURE__ */ wt({
+}, qT = ["disabled"], YT = ["disabled", "title"], XT = ["disabled", "title"], JT = ["aria-valuenow", "title"], ZT = /* @__PURE__ */ wt({
   __name: "SheetDialog",
   props: {
     title: {},
@@ -21523,15 +21528,15 @@ const qA = {
           f("span", {
             class: Ee(["status", { bad: Ai.value || Wt.value.length }]),
             title: p.value?.status ?? ""
-          }, R(As.value), 11, PM),
-          f("div", NM, [
+          }, R(As.value), 11, NM),
+          f("div", VM, [
             (C(!0), A(ce, null, ye(E.value, (y) => (C(), A("button", {
               key: y,
               role: "tab",
               "aria-selected": pe.value === y,
               class: Ee({ active: pe.value === y }),
               onClick: (w) => pe.value = y
-            }, R(c(y)), 11, VM))), 128))
+            }, R(c(y)), 11, HM))), 128))
           ]),
           f("button", {
             class: "icon",
@@ -21539,7 +21544,7 @@ const qA = {
             "aria-label": Be.maximized ? "Restore" : "Maximize",
             "aria-pressed": Be.maximized,
             onClick: Mi
-          }, R(Be.maximized ? "❐" : "⛶"), 9, HM),
+          }, R(Be.maximized ? "❐" : "⛶"), 9, WM),
           f("button", {
             class: "icon",
             title: "Close (Esc)",
@@ -21547,21 +21552,21 @@ const qA = {
             onClick: Hn
           }, "×")
         ], 32),
-        i.payload ? G("", !0) : (C(), A("p", WM, [...v[7] || (v[7] = [
+        i.payload ? G("", !0) : (C(), A("p", zM, [...v[7] || (v[7] = [
           oe(" This sheet has not run yet, so there are no drafts to show. Run the workflow once, or enter text and use ", -1),
           f("em", null, "Make manual", -1),
           oe("; ", -1),
           f("em", null, "Back to auto", -1),
           oe(" hands a document back to the workflow. ", -1)
         ])])),
-        k.value ? (C(), A("div", zM, [
+        k.value ? (C(), A("div", FM, [
           v[8] || (v[8] = oe(" You have changes that are not applied yet. ", -1)),
           f("button", {
             class: "primary",
             disabled: !!rn.value,
             title: rn.value ?? "Save your documents into the node",
             onClick: ni
-          }, " Apply ", 8, FM),
+          }, " Apply ", 8, _M),
           f("button", {
             onClick: v[0] || (v[0] = (y) => n("close"))
           }, "Discard"),
@@ -21569,45 +21574,45 @@ const qA = {
             onClick: v[1] || (v[1] = (y) => k.value = !1)
           }, "Keep editing")
         ])) : G("", !0),
-        f("div", _M, [
+        f("div", KM, [
           (C(!0), A(ce, null, ye(Re(pe.value), (y) => (C(), A("section", {
             key: y.kind + F.value,
             class: Ee(["doc", { wide: y.kind === "score" }])
           }, [
-            f("div", KM, [
+            f("div", UM, [
               f("h3", null, R(u.value[y.kind]), 1),
               f("span", {
                 class: "badge",
                 "data-state": q(y)
-              }, R(q(y)), 9, UM),
+              }, R(q(y)), 9, GM),
               v[9] || (v[9] = f("span", { class: "spacer" }, null, -1)),
               f("button", {
                 disabled: !Ae(y),
                 title: xe(y.kind) !== null ? "Discard your edit and use the draft" : "Discard your text: the next run computes this document again (the writer, the plan or the transcription) and uses it",
                 onClick: (w) => J(y)
-              }, R(xe(y.kind) !== null ? "Use draft" : "Back to auto"), 9, GM),
+              }, R(xe(y.kind) !== null ? "Use draft" : "Back to auto"), 9, jM),
               y.kind === "lyrics" ? (C(), A("button", {
                 key: 0,
                 disabled: y.intent === "manual",
                 title: "Keep exactly these words: the writer is not consulted any more (your lyrics reach YuE2 unchanged)",
                 onClick: (w) => Fe(y)
-              }, " Use my own lyrics ", 8, jM)) : (C(), A("button", {
+              }, " Use my own lyrics ", 8, qM)) : (C(), A("button", {
                 key: 1,
                 title: "Always use your text; the draft is no longer computed",
                 onClick: (w) => Fe(y)
-              }, " Make manual ", 8, qM))
+              }, " Make manual ", 8, YM))
             ]),
-            ae(y.kind) && y.intent === "keep" ? (C(), A("div", YM, [
+            ae(y.kind) && y.intent === "keep" ? (C(), A("div", XM, [
               oe(" The draft changed after you edited this document (" + R(te(y.kind)?.reason) + "). ", 1),
               f("button", {
                 onClick: (w) => ee(y)
-              }, "Keep my edit (manual)", 8, XM),
+              }, "Keep my edit (manual)", 8, JM),
               f("button", {
                 onClick: (w) => J(y)
-              }, "Use the new draft", 8, JM),
+              }, "Use the new draft", 8, ZM),
               f("button", {
                 onClick: (w) => En(y)
-              }, "Merge by hand", 8, ZM)
+              }, "Merge by hand", 8, QM)
             ])) : G("", !0),
             y.kind === "score" ? (C(), Kn(gh, {
               key: 1,
@@ -21641,29 +21646,29 @@ const qA = {
               "aria-label": u.value[y.kind],
               onFocus: (w) => D(Dt).add(y.kind),
               onInput: (w) => it(y)
-            }, null, 40, QM)), [
+            }, null, 40, eT)), [
               [lt, y.text]
             ]),
-            y.kind === "lyrics" ? (C(), A("p", eT, [
+            y.kind === "lyrics" ? (C(), A("p", tT, [
               v[10] || (v[10] = f("span", null, "Section tags (the model sings section by section):", -1)),
               (C(!0), A(ce, null, ye(ke.value, (w) => (C(), A("button", {
                 key: w,
                 title: D(Ur)(w, !0),
                 onClick: (U) => _(y, w)
-              }, " [" + R(w) + "] ", 9, tT))), 128)),
+              }, " [" + R(w) + "] ", 9, nT))), 128)),
               sn.value ? (C(!0), A(ce, { key: 0 }, ye(Se.value, (w) => (C(), A("button", {
                 key: "more-" + w,
                 class: "more",
                 title: D(Ur)(w, !1),
                 onClick: (U) => _(y, w)
-              }, " [" + R(w) + "] ", 9, nT))), 128)) : G("", !0),
+              }, " [" + R(w) + "] ", 9, iT))), 128)) : G("", !0),
               Se.value.length ? (C(), A("button", {
                 key: 1,
                 class: "link",
                 "aria-expanded": sn.value,
                 title: "Tags Plenio knows besides the model's own sections",
                 onClick: v[3] || (v[3] = (w) => sn.value = !sn.value)
-              }, R(sn.value ? "fewer" : `more (${Se.value.length})`), 9, iT)) : G("", !0),
+              }, R(sn.value ? "fewer" : `more (${Se.value.length})`), 9, sT)) : G("", !0),
               (C(!0), A(ce, null, ye(St.value, (w) => (C(), A("span", {
                 key: "own-" + w,
                 class: "own"
@@ -21671,12 +21676,12 @@ const qA = {
                 f("button", {
                   title: `${D(Ur)(w, !1)} - a tag of your own`,
                   onClick: (U) => _(y, w)
-                }, " [" + R(w) + "] ", 9, sT),
+                }, " [" + R(w) + "] ", 9, oT),
                 f("button", {
                   class: "drop",
                   title: `Remove [${w}] from your tags (the lyrics keep it)`,
                   onClick: (U) => Ht(w)
-                }, " × ", 8, oT)
+                }, " × ", 8, rT)
               ]))), 128)),
               On.value ? (C(), A(ce, { key: 2 }, [
                 $e(f("input", {
@@ -21691,24 +21696,24 @@ const qA = {
                     et(Ke((w) => qt(y), ["prevent", "stop"]), ["enter"]),
                     v[5] || (v[5] = et(Ke((w) => On.value = !1, ["prevent", "stop"]), ["esc"]))
                   ]
-                }, null, 40, rT), [
+                }, null, 40, lT), [
                   [lt, jt.value]
                 ]),
                 f("button", {
                   onClick: (w) => qt(y)
-                }, "Add", 8, lT)
+                }, "Add", 8, aT)
               ], 64)) : (C(), A("button", {
                 key: 3,
                 class: "link",
                 title: "A section tag of your own - kept for your next songs, inserted with one click",
                 onClick: Ct
               }, " + your tag ")),
-              Vt.value ? (C(), A("span", aT, R(Vt.value), 1)) : G("", !0),
-              y.intent === "manual" ? (C(), A("span", uT, "the writer is not consulted - these are your lyrics")) : G("", !0)
+              Vt.value ? (C(), A("span", uT, R(Vt.value), 1)) : G("", !0),
+              y.intent === "manual" ? (C(), A("span", cT, "the writer is not consulted - these are your lyrics")) : G("", !0)
             ])) : G("", !0),
-            y.kind === "lyrics" && we.value ? (C(), A("p", cT, [
+            y.kind === "lyrics" && we.value ? (C(), A("p", hT, [
               f("span", null, "Transcribed (" + R(we.value.language) + ").", 1),
-              we.value.corrected?.length ? (C(), A("span", hT, [
+              we.value.corrected?.length ? (C(), A("span", dT, [
                 v[11] || (v[11] = oe(" Corrected as misheard: ", -1)),
                 (C(!0), A(ce, null, ye(we.value.corrected, (w, U) => (C(), A("span", {
                   key: "fix-" + U,
@@ -21718,22 +21723,22 @@ const qA = {
                   oe(" → " + R(w.word), 1)
                 ]))), 128))
               ])) : G("", !0),
-              we.value.low_confidence.length ? (C(), A("span", dT, [
+              we.value.low_confidence.length ? (C(), A("span", fT, [
                 v[12] || (v[12] = oe(" Check these unsure words: ", -1)),
                 (C(!0), A(ce, null, ye(we.value.low_confidence, (w, U) => (C(), A("mark", {
                   key: "low-" + U
                 }, R(w), 1))), 128))
               ])) : G("", !0),
-              we.value.left_out.length ? (C(), A("span", fT, [
+              we.value.left_out.length ? (C(), A("span", pT, [
                 v[13] || (v[13] = oe("Left out as not sung: ", -1)),
                 f("s", null, R(we.value.left_out.join(" ")), 1)
               ])) : G("", !0)
             ])) : G("", !0),
-            xe(y.kind) !== null && D(Jt)(xe(y.kind) ?? "") !== D(Jt)(y.text) ? (C(), A("details", pT, [
+            xe(y.kind) !== null && D(Jt)(xe(y.kind) ?? "") !== D(Jt)(y.text) ? (C(), A("details", gT, [
               f("summary", null, "Changes against the draft (" + R(D(fm)(le(y))) + " words)", 1),
-              y.kind !== "score" ? (C(), A("p", gT, [
+              y.kind !== "score" ? (C(), A("p", mT, [
                 (C(!0), A(ce, null, ye(le(y), (w, U) => (C(), A(ce, { key: U }, [
-                  w.text === D(qs) ? (C(), A("br", mT)) : w.op === "added" ? (C(), A("ins", vT, R(w.text + " "), 1)) : w.op === "removed" ? (C(), A("del", yT, R(w.text + " "), 1)) : (C(), A("span", bT, R(w.text + " "), 1))
+                  w.text === D(qs) ? (C(), A("br", vT)) : w.op === "added" ? (C(), A("ins", yT, R(w.text + " "), 1)) : w.op === "removed" ? (C(), A("del", bT, R(w.text + " "), 1)) : (C(), A("span", kT, R(w.text + " "), 1))
                 ], 64))), 128))
               ])) : G("", !0),
               f("pre", null, R(xe(y.kind)), 1)
@@ -21747,22 +21752,22 @@ const qA = {
               instrumental: i.payload?.instrumental ?? !1
             }, null, 8, ["lyrics", "abc", "fetcher", "engine", "instrumental"])) : G("", !0)
           ], 2))), 128)),
-          pe.value === "score" && !be.value && W.value ? (C(), A("section", kT, [
-            f("div", wT, [
+          pe.value === "score" && !be.value && W.value ? (C(), A("section", wT, [
+            f("div", xT, [
               v[14] || (v[14] = f("h3", null, "Score (ABC)", -1)),
               j.value ? (C(), A("span", {
                 key: 0,
                 class: "badge",
                 title: `The score belongs to ${i.scoreTarget?.title}`
-              }, " from " + R(i.scoreTarget?.title) + R(H.value ? " · changed" : ""), 9, xT)) : (C(), A("span", ST, "from the other sheet (read-only)"))
+              }, " from " + R(i.scoreTarget?.title) + R(H.value ? " · changed" : ""), 9, ST)) : (C(), A("span", CT, "from the other sheet (read-only)"))
             ]),
-            j.value ? (C(), A("p", CT, [
+            j.value ? (C(), A("p", AT, [
               v[15] || (v[15] = oe(" Changes to the score go into ", -1)),
               f("strong", null, R(i.scoreTarget?.title), 1),
               v[16] || (v[16] = oe(" on Apply, and the lyrics are kept as you see them here (manual), so the two stay a pair. ", -1)),
               v[17] || (v[17] = f("strong", null, "Approve", -1)),
               v[18] || (v[18] = oe(" approves the changed score in that sheet too; with Apply it asks for approval again on the next run. ", -1))
-            ])) : i.scoreTarget?.blocked ? (C(), A("p", AT, R(i.scoreTarget.blocked), 1)) : G("", !0),
+            ])) : i.scoreTarget?.blocked ? (C(), A("p", MT, R(i.scoreTarget.blocked), 1)) : G("", !0),
             _n(gh, {
               doc: N,
               fetcher: i.fetcher,
@@ -21781,7 +21786,7 @@ const qA = {
               onGate: v[6] || (v[6] = (y, w) => P.value = { text: y, reason: w })
             }, null, 8, ["doc", "fetcher", "payload", "readonly", "layout-default", "lyrics", "lyrics-target", "lyric-spans", "source-shift", "bar-sources"])
           ])) : G("", !0),
-          pe.value === "lyrics" && V.value.length ? (C(), A("section", MT, [
+          pe.value === "lyrics" && V.value.length ? (C(), A("section", TT, [
             v[20] || (v[20] = f("div", { class: "doc-head" }, [
               f("h3", null, "Sections of the source"),
               f("span", { class: "badge" }, "from Transcribe Score")
@@ -21808,8 +21813,8 @@ const qA = {
           (C(!0), A(ce, null, ye(i.payload?.context ?? {}, (y, w) => (C(), A(ce, {
             key: "context-" + w
           }, [
-            w !== "score" && s[w] === pe.value ? (C(), A("section", TT, [
-              f("div", $T, [
+            w !== "score" && s[w] === pe.value ? (C(), A("section", $T, [
+              f("div", LT, [
                 f("h3", null, R(u.value[w] ?? w), 1),
                 v[21] || (v[21] = f("span", { class: "badge" }, "from the other sheet (read-only)", -1))
               ]),
@@ -21817,39 +21822,39 @@ const qA = {
             ])) : G("", !0)
           ], 64))), 128))
         ]),
-        f("section", LT, [
+        f("section", DT, [
           ct.value ? (C(), A("div", {
             key: 0,
             class: "arrangement",
             "data-status": ct.value.status
           }, [
-            ct.value.status === "fallback" ? (C(), A("p", BT, [
+            ct.value.status === "fallback" ? (C(), A("p", OT, [
               v[22] || (v[22] = f("strong", null, "Arrangement not applied", -1)),
               f("span", {
                 class: "experimental",
                 title: D(Fr)
-              }, "experimental", 8, OT),
+              }, "experimental", 8, ET),
               oe(" - " + R(D(gu)(ct.value)) + ": " + R(ct.value.summary.replace(/^not applied: /, "")), 1)
-            ])) : (C(), A("details", ET, [
+            ])) : (C(), A("details", IT, [
               f("summary", null, [
                 v[23] || (v[23] = f("strong", null, "Arrangement", -1)),
                 f("span", {
                   class: "experimental",
                   title: D(Fr)
-                }, "experimental", 8, IT),
+                }, "experimental", 8, RT),
                 oe(" " + R(D(gu)(ct.value)) + ": " + R(ct.value.summary), 1)
               ]),
-              f("p", RT, R(D(Fr)), 1),
-              D(mu)(ct.value) ? (C(), A("p", PT, R(D(mu)(ct.value)), 1)) : G("", !0),
-              ct.value.idea ? (C(), A("p", NT, R(ct.value.idea), 1)) : G("", !0),
+              f("p", PT, R(D(Fr)), 1),
+              D(mu)(ct.value) ? (C(), A("p", NT, R(D(mu)(ct.value)), 1)) : G("", !0),
+              ct.value.idea ? (C(), A("p", VT, R(ct.value.idea), 1)) : G("", !0),
               f("ul", null, [
                 (C(!0), A(ce, null, ye(ct.value.sections ?? [], (y) => (C(), A("li", {
                   key: y.index
                 }, [
                   f("strong", null, R(y.index) + " " + R(y.label), 1),
-                  f("span", VT, "bars " + R(y.bars), 1),
+                  f("span", HT, "bars " + R(y.bars), 1),
                   oe(" " + R(y.applied.length ? y.applied.join("; ") : "unchanged") + " ", 1),
-                  y.kept.length ? (C(), A("span", HT, " - kept: " + R(y.kept.join("; ")), 1)) : G("", !0)
+                  y.kept.length ? (C(), A("span", WT, " - kept: " + R(y.kept.join("; ")), 1)) : G("", !0)
                 ]))), 128)),
                 (C(!0), A(ce, null, ye(Yt.value, (y, w) => (C(), A("li", {
                   key: "note" + w,
@@ -21857,10 +21862,10 @@ const qA = {
                 }, R(y), 1))), 128))
               ])
             ]))
-          ], 8, DT)) : G("", !0),
-          g.value ? (C(), A("p", WT, R(g.value), 1)) : G("", !0),
-          Wt.value.length ? (C(), A("p", zT, " Resolve the conflict in: " + R(Wt.value.join(", ")) + ". ", 1)) : G("", !0),
-          L.value ? (C(), A("p", FT, "Score: " + R(L.value), 1)) : Q.value ? (C(), A("p", _T, "Score: " + R(Q.value), 1)) : G("", !0),
+          ], 8, BT)) : G("", !0),
+          g.value ? (C(), A("p", zT, R(g.value), 1)) : G("", !0),
+          Wt.value.length ? (C(), A("p", FT, " Resolve the conflict in: " + R(Wt.value.join(", ")) + ". ", 1)) : G("", !0),
+          L.value ? (C(), A("p", _T, "Score: " + R(L.value), 1)) : Q.value ? (C(), A("p", KT, "Score: " + R(Q.value), 1)) : G("", !0),
           f("ul", null, [
             (C(!0), A(ce, null, ye(Ci.value, (y, w) => (C(), A("li", {
               key: w,
@@ -21868,9 +21873,9 @@ const qA = {
             }, [
               f("strong", null, R(y.severity), 1),
               v[24] || (v[24] = oe()),
-              f("span", UT, R(y.where), 1),
+              f("span", GT, R(y.where), 1),
               oe(" " + R(y.message), 1)
-            ], 8, KT))), 128)),
+            ], 8, UT))), 128)),
             (C(!0), A(ce, null, ye(Xt.value, (y, w) => (C(), A("li", {
               key: "i" + w,
               "data-severity": "info"
@@ -21878,27 +21883,27 @@ const qA = {
           ])
         ]),
         f("footer", null, [
-          i.owned.includes("score") && p.value ? (C(), A("span", GT, " render: " + R(p.value.planning_mode) + ", ceiling " + R(Math.round(p.value.score_seconds)) + " s ", 1)) : G("", !0),
+          i.owned.includes("score") && p.value ? (C(), A("span", jT, " render: " + R(p.value.planning_mode) + ", ceiling " + R(Math.round(p.value.score_seconds)) + " s ", 1)) : G("", !0),
           v[25] || (v[25] = f("span", { class: "spacer" }, null, -1)),
           f("button", {
             disabled: !Vn.value,
             title: "Discard every change made in this editor",
             onClick: xi
-          }, "Revert", 8, jT),
+          }, "Revert", 8, qT),
           f("button", { onClick: Hn }, "Close"),
           f("button", {
             class: "primary",
             disabled: !!rn.value,
             title: rn.value ?? "Save your documents into the node",
             onClick: ni
-          }, " Apply ", 8, qT),
+          }, " Apply ", 8, YT),
           i.review === "stop for review" ? (C(), A("button", {
             key: 1,
             class: "primary",
             disabled: !Gi.value,
             title: L.value ?? "Release exactly these documents for the next run",
             onClick: Ft
-          }, " Approve ", 8, YT)) : G("", !0)
+          }, " Approve ", 8, XT)) : G("", !0)
         ]),
         Be.maximized ? G("", !0) : (C(), A("div", {
           key: 2,
@@ -21908,23 +21913,23 @@ const qA = {
           "aria-valuenow": Be.width,
           title: `Resize (${Be.width} × ${Be.height})`,
           onPointerdown: ji
-        }, null, 40, XT))
-      ], 14, RM)
+        }, null, 40, JT))
+      ], 14, PM)
     ], 32));
   }
 });
-function ZT() {
+function QT() {
   if (document.getElementById("plenio-dialog-styles")) return;
   const i = document.createElement("style");
   i.id = "plenio-dialog-styles", i.textContent = kp, document.head.append(i);
 }
-function r$(i) {
-  ZT();
+function l$(i) {
+  QT();
   const e = document.createElement("div");
   document.body.append(e);
   const t = () => {
     n.unmount(), e.remove();
-  }, n = bp(JT, {
+  }, n = bp(ZT, {
     title: i.title,
     state: i.state,
     payload: i.payload,
@@ -21947,5 +21952,5 @@ function r$(i) {
   return n.mount(e), t;
 }
 export {
-  r$ as openSheetDialog
+  l$ as openSheetDialog
 };

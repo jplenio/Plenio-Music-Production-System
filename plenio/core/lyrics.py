@@ -13,7 +13,36 @@ from typing import Any
 from . import syllables
 from .diagnostics import Finding, error, info, warning
 
-_TAG = re.compile(r"^\[([^\[\]\n]{1,40})\]$")
+TAG_MAX_CHARS = 160
+"""The longest section tag: one's own may name and describe a section (``[Verse - Female Choir, Call and Response
+delivery]``); a tag stays as it is written, however long (before 1.5.1 a tag of more than 40 characters was taken
+for a sung line)."""
+_TAG = re.compile(rf"^\[([^\[\]\n]{{1,{TAG_MAX_CHARS}}})\]$")
+SECTION_NAMES = (
+    "pre-chorus",
+    "post-chorus",
+    "intro",
+    "verse",
+    "chorus",
+    "bridge",
+    "interlude",
+    "instrumental",
+    "inst",
+    "outro",
+    "hook",
+    "refrain",
+    "solo",
+    "breakdown",
+    "break",
+    "drop",
+    "build",
+)
+"""The sections a tag may name before a description (the music models' sections and the ones Plenio fits to them)."""
+_SECTION_HEAD = re.compile(
+    r"^(pre[- ]?chorus|post[- ]?chorus|intro|verse|chorus|bridge|interlude|instrumental|inst|outro|hook|refrain|solo|"
+    r"breakdown|break|drop|build)(?:\s*\d+)?(?:\s*[-\u2013\u2014:(,/|]|$)",
+    re.IGNORECASE,
+)
 _REPEAT = re.compile(r"(?i)(\(\s*x\s*\d+\s*\)|\bx\s*\d+\s*$|\brepeat\b|\(\s*\d+\s*x\s*\))")
 _DIRECTION = re.compile(r"^\s*[\(\[\{<].*[\)\]\}>]\s*$")
 # What the band plays, said in a line of the lyrics without brackets (owner's report 2026-10-30: a writer filled a
@@ -145,6 +174,23 @@ def without_playing_directions(lines: Sequence[str]) -> tuple[list[str], list[st
     return kept, removed
 
 
+def section_head(tag: str) -> str | None:
+    """The section a tag names when it is one of ``SECTION_NAMES``, alone or with a number or a description:
+    ``[Verse 2 - Female Choir, Call and Response delivery]``, ``[Chorus: Male Solo]``, ``[Bridge (spoken)]`` ->
+    ``verse``, ``chorus``, ``bridge``; ``[Pre Chorus]`` -> ``pre-chorus``. ``None``: a tag of one's own."""
+    match = _SECTION_HEAD.match(tag.strip().strip("[]").strip())
+    if match is None:
+        return None
+    head = re.sub(r"[\s-]+", "-", match.group(1).lower())
+    return {"prechorus": "pre-chorus", "postchorus": "post-chorus"}.get(head, head)
+
+
+def section_kind(tag: str) -> str:
+    """A tag or a score's section name as sections are compared: the section it names (``section_head``), else the
+    name without brackets and a trailing number, in lower case. The tag itself is never changed."""
+    return section_head(tag) or re.sub(r"\s*\d+$", "", tag.strip().strip("[]").strip()).lower()
+
+
 def tags_only(tags: Sequence[str]) -> str:
     """Lyrics consisting only of section tags (instrumental conditioning)."""
     return "\n\n".join(f"[{tag}]" for tag in tags)
@@ -250,8 +296,16 @@ def check_lyrics(text: str, *, instrumental: bool, vocabulary: Sequence[str] = (
         )
     known = {tag.lower() for tag in vocabulary}
     for section in lyrics.sections:
-        base = re.sub(r"\s*\d+$", "", section.tag).lower()
-        if known and base not in known:
+        plain = re.sub(r"\s*\d+$", "", section.tag).lower()
+        base = section_kind(section.tag)
+        if known and base in known and plain != base:
+            findings.append(
+                info(
+                    f"[{section.tag}] is sung as a {base}: the model reads the rest of the tag as a hint only.",
+                    "lyrics",
+                )
+            )
+        elif known and base not in known:
             findings.append(
                 info(
                     f"[{section.tag}] is a section tag of your own: the model reads its name as a hint only - with "

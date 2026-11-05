@@ -38,7 +38,11 @@ export interface LyricsFollow {
   blocks: (LyricBlock | null)[]
 }
 
-const TAG = /^\[([^[\]\n]{1,40})\]$/
+/** A section tag: one line in brackets, at most 160 characters (backend ``lyrics.TAG_MAX_CHARS``). */
+const TAG = /^\[([^[\]\n]{1,160})\]$/
+/** A tag that names a known section, alone or with a number or a description (backend ``lyrics.section_head``). */
+const SECTION_HEAD =
+  /^(pre[- ]?chorus|post[- ]?chorus|intro|verse|chorus|bridge|interlude|instrumental|inst|outro|hook|refrain|solo|breakdown|break|drop|build)(?:\s*\d+)?(?:\s*[-\u2013\u2014:(,/|]|$)/i
 
 export function parseLyrics(text: string): { preamble: string[]; blocks: LyricBlock[] } {
   const preamble: string[] = []
@@ -58,13 +62,18 @@ export function parseLyrics(text: string): { preamble: string[]; blocks: LyricBl
   return { preamble, blocks }
 }
 
-/** A tag or label as the backend compares them: no brackets, no trailing number, lower case. */
+/**
+ * A tag or label as the backend compares them (``lyrics.section_kind``): the section it names - ``[Verse 2 - Female
+ * Choir]`` is a verse - else no brackets, no trailing number, lower case. The tag itself is never changed.
+ */
 export function sectionKey(tag: string): string {
-  return tag
-    .replace(/^\[|\]$/g, '')
-    .trim()
-    .replace(/\s*\d+$/, '')
-    .toLowerCase()
+  const name = tag.replace(/^\[|\]$/g, '').trim()
+  const head = SECTION_HEAD.exec(name)
+  if (head) {
+    const kind = head[1].toLowerCase().replace(/[\s-]+/g, '-')
+    return kind === 'prechorus' ? 'pre-chorus' : kind === 'postchorus' ? 'post-chorus' : kind
+  }
+  return name.replace(/\s*\d+$/, '').toLowerCase()
 }
 
 /** The tag a section is written with: its block's own tag when it still fits, else from the label. */
