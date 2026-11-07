@@ -46,7 +46,7 @@ curl http://127.0.0.1:8188/plenio/api/v1
 ```
 
 ```json
-{"api": "plenio-song-api", "version": "1.3", "plenio": "1.5.0", "comfyui": "0.41.0",
+{"api": "plenio-song-api", "version": "1.3", "plenio": "1.5.1", "comfyui": "0.41.0",
  "templates": [{"id": "yue2-song", "title": "YuE2 · Song", "kind": "song", "needs": []},
                {"id": "yue2-cover", "title": "YuE2 · Cover", "kind": "cover", "needs": ["source.audio"]}],
  "paths": {"jobs": "/plenio/api/v1/jobs", "...": "..."}}

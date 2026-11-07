@@ -67,7 +67,7 @@ Everything runs on your own machine, inside ComfyUI's own nodes: no cloud servic
 |---|---|
 | **Write** | A Song Brief or Cover Brief with **250 genre templates** in 30 families - choosing one fills every field, and every field is a list with room for your own value; a local language model writes title, style and lyrics - Gemma 4 12B, chosen for your graphics card, or any GGUF, ComfyUI's text models, LM Studio, Ollama, llama.cpp, vLLM or Jan - or you bring your own lyrics, sung as written. A creativity slider goes from steady to adventurous. |
 | **See and change everything** | The **Song Sheet** shows exactly what the music model gets - title, style, lyrics, score - with the exact token budget, counted by the model's own tokenizer. Your edits are never silently overwritten. |
-| **Compose** | A real **score editor**: notation, piano roll, chord lane, lyrics on their notes, a MIDI keyboard, arranging like in a DAW, MIDI and MusicXML in and out, sheet music as PDF - or write the whole melody yourself (*YuE2 · DAW*). |
+| **Compose** | A real **score editor**: notation, piano roll, chord lane, lyrics on their notes and the notes fitted to the lyrics in one click, a MIDI keyboard, arranging like in a DAW, MIDI and MusicXML in and out, sheet music as PDF - or write the whole melody yourself (*YuE2 · DAW*). |
 | **Perform** | **YuE2** for songs, covers and your own melody - with up to four **LoRAs** -, **MiniMax Music 3** for songs. *Lyrics fidelity* renders a second or third take and keeps the one that sings your words best. |
 | **Cover** | Any recording becomes a new version: its score read by SheetSage2, its words heard by Qwen3-ASR, new lyrics fitted to its melody. |
 | **Polish** | **Audio HQ** (stereo cleanup, UniverSR regenerating the highs of a dull take), a tone match on the curve, **-14 LUFS / -1 dBTP** with a true-peak limiter, **stems** with a mixer. |
@@ -96,7 +96,7 @@ Six ready-made templates in ComfyUI's template browser, each one clear path from
 <table>
 <tr>
 <td width="58%"><img src="assets/branding/readme/score-midi.webp" alt="Playing a counter-line in with a MIDI keyboard in Song Sheet · DAW: the notes appear in the piano roll while the score plays, over the notation with the lyrics" width="100%" /></td>
-<td width="42%"><b>A real score editor.</b> YuE2's score opens as notation, piano roll and ABC text, with playback. Draw notes, set chord symbols, arrange sections and bars like in a DAW, play a melody in with a <b>MIDI keyboard</b>, hear every track in its own sound, export <b>MIDI, MusicXML and PDF</b>. For a cover the original recording runs under the notes, with the sung pitch drawn over them - so a wrong note shows at a glance. <a href="docs/user/concepts/score-editor.md">Score editor guide</a></td>
+<td width="42%"><b>A real score editor.</b> YuE2's score opens as notation, piano roll and ABC text, with playback. Draw notes, set chord symbols and hear them, arrange sections and bars like in a DAW, play a melody in with a <b>MIDI keyboard</b>, fit the notes to the lyrics with one click, lock a track while you edit the other, hear every track in its own sound, export <b>MIDI, MusicXML and PDF</b>. For a cover the original recording runs under the notes, with the sung pitch drawn over them - so a wrong note shows at a glance. <a href="docs/user/concepts/score-editor.md">Score editor guide</a></td>
 </tr>
 <tr>
 <td width="58%"><img src="assets/branding/readme/loras.webp" alt="The YuE2 LoRAs node: a LoRA chosen in the first slot, and after the run its summary - 1 of 1 LoRA(s) applied, 112 weights for the plan" width="72%" /></td>
@@ -105,7 +105,7 @@ Six ready-made templates in ComfyUI's template browser, each one clear path from
 </table>
 
 - **Covers from the actual music.** SheetSage2 reads the score out of your recording and keeps its beat grid. Qwen3-ASR transcribes the sung words - from the recording or its vocal stem, whichever it hears more surely -, an aligner times them, and Plenio places them into the score's sections. Choose *instrumental*, *original lyrics* or *new lyrics* written to the phrasing of the original.
-- **Lyrics you can trust.** Export times the lyrics by listening (`.srt`, whole lines and note by note, as written and as sung) and Enhance & Master can stop at a Song Sheet with the words as heard, so a misheard one is fixed before the release.
+- **Lyrics you can trust.** Export times the lyrics by listening to the song's vocals (`.srt`, whole lines and note by note, as written and as sung) and Enhance & Master can stop at a Song Sheet with the words as heard, so a misheard one is fixed before the release.
 - **Finishing built in.** Every song template ends in **Plenio · Master**: Audio HQ, a gentle tone match, compression and a true-peak limiter to -14 LUFS / -1 dBTP. **Stems** splits a song into vocals, drums, bass and other and mixes them back with a residual that keeps a neutral mix exact ([Audio HQ](docs/user/concepts/audio-hq.md), [Stems](docs/user/concepts/stems.md), [Mastering](docs/user/concepts/mastering.md)).
 - **A release, not just a file.** FLAC 24-bit, MP3 V0 or WAV with tags filled from the brief (`Genre: {genre}`, `{lyrics}` …) and cover art; the unmastered take; the sheet music as PDF; the song's page as HTML; and a **release record** of the documents, seeds, settings, loudness, model licences and how the song was made - inside the FLAC too. **File › Continue a Plenio song…** (or dropping the FLAC) opens the song in the workflow it was made with ([Continue a song](docs/user/concepts/continue-a-song.md)).
 - **Your own language models.** The **Local LLM** node runs any GGUF in a llama.cpp server that is gone after the draft - the GPU is free again for the music - or asks a running LM Studio, Ollama, llama.cpp, vLLM or Jan ([Local LLMs](docs/user/concepts/local-llm.md)).
@@ -155,6 +155,14 @@ Guide: [Plenio Player](docs/user/concepts/player.md).
 - **Section tags of your own** - the eight sections YuE2 learned as buttons, more that Plenio fits to its plan, and your own tags (`[Violin Rise]`, `[Choir]` …) kept for every song: with words they are sung, without words they become an instrumental part.
 - **A song form that remembers** - the player's *Make a song* opens with your last song's values and settings, and a maker may *release at once*. And every LLM answer may run to 16 384 tokens: room for thinking models.
 
+**And in 1.5.1:**
+
+- **Notes that fit the lyrics** - the Score tab marks every line whose notes do not match its syllables, and one click fits the notes of the whole song (or the selected lines) to its words, in the song's own chords, key and rhythm.
+- **Lock a track** - the Vocal or the Instrument melody stays exactly as it is while you edit the other.
+- **Lyrics placed by hand stay** - lines in the lyrics lane never overlap or push one another, a double-click on free room starts a new line, and a click on a chord symbol sounds it.
+- **A better writer by default** - Gemma 4 12B, chosen for your graphics card; the YuE2 model block is open, so a finetune is one choice away.
+- **Your own lyrics exactly as written** - long section tags that describe the section included, such as `[Verse - Female Choir, Call and Response delivery]`. The lyrics are timed on the vocal stem, and a cover's bars keep their place in the recording while you change their notes.
+
 Every change, in detail: [CHANGELOG](CHANGELOG.md).
 
 ## 🧩 Under the hood
@@ -166,7 +174,7 @@ Every change, in detail: [CHANGELOG](CHANGELOG.md).
 For the curious and the people who want to build on it:
 
 - **Nothing hidden from the model, nothing hidden from you.** Every document that conditions the music passes through a Song Sheet as *automatic*, *edited* or *manual*; manual text is never replaced, and a draft that changes under an edit stops the run instead of guessing. Budgets are exact: YuE2's shared 24 576-token context and MiniMax Music 3's 5 000-token prompt are counted with the loaded model's own tokenizer.
-- **ComfyUI-native.** Plenio's nodes use ComfyUI's V3 node API; the music, cover-art and writer models are ComfyUI's own loaders and samplers, so ComfyUI does the memory management, the offloading and the missing-model downloads. Plenio installs no Python packages.
+- **ComfyUI-native.** Plenio's nodes use ComfyUI's V3 node API; the music and cover-art models run on ComfyUI's own loaders and samplers, so ComfyUI does the memory management, the offloading and the missing-model downloads, and the writer - a GGUF - runs in a llama.cpp server that is gone when the draft is done. Plenio installs no Python packages.
 - **A record you can read.** Every export writes `<name>.plenio.json` - the documents with SHA-256 hashes, the executed prompt and the workflow (secrets redacted), the seeds, every report, the measured loudness (BS.1770-4, true peak, LRA), the model licences and how the song was made - validated against a [JSON schema](resources/schemas/record-1.schema.json) and embedded in the FLAC as an `APPLICATION` block. Drop the FLAC on ComfyUI: the workflow, the seeds and the sheets are back.
 - **The Song API.** `/plenio/api/v1` on your running ComfyUI makes songs from a template's fields - OpenAPI 3.1, idempotency keys, long-polling with `?wait`, file downloads ([guide](docs/api/README.md)):
 
@@ -180,19 +188,19 @@ curl "http://127.0.0.1:8188/plenio/api/v1/jobs/<id>?wait=30"      # answers the 
 
 - **LoRAs, joined exactly.** ComfyUI's YuE2 fuses q/k/v and gate/up into one projection each; a LoRA trained on the separate ones is joined block-diagonally - `down = [A_q; A_k; A_v]`, `up = diag(B_q, B_k, B_v)` - so that `up · down` is exactly the stacked deltas ([plenio/comfy/loras.py](plenio/comfy/loras.py)).
 - **The player is plain.** A Python standard-library HTTP server and a Vue page: it reads the records, serves only the files a record lists, renders the song's page, muxes the browser's video with PyAV and runs a separate, rate-limited server for the party's phones behind a random 96-bit path. What it starts, writes and opens is listed in [SECURITY.md](SECURITY.md).
-- **Checked.** Over 2 700 tests - unit, contract tests against ComfyUI in-process, host tests with real ComfyUI servers, frontend tests - run in CI on Ubuntu and Windows, with mypy strict and ruff. [Architecture](docs/dev/architecture.md) · [Extending Plenio](docs/dev/extending.md) · [Testing](docs/dev/testing.md)
+- **Checked.** Nearly 3 000 tests - unit, contract tests against ComfyUI in-process, host tests with real ComfyUI servers, frontend tests - run in CI on Ubuntu and Windows, with mypy strict and ruff. [Architecture](docs/dev/architecture.md) · [Extending Plenio](docs/dev/extending.md) · [Testing](docs/dev/testing.md)
 
 ## Built for different computers
 
-The **0 · System Check** template reads your GPU and marks your row. Nothing is switched automatically; you choose the model files in the loaders.
+The **0 · System Check** template reads your GPU and marks your row. Nothing is switched automatically - you choose the model files in the loaders -, except the writer: *Gemma 4 12B (auto)* takes a Gemma 4 12B already on your computer, or the file for your card. It writes before the music model and leaves the card free for it.
 
-| GPU memory | YuE2 | MiniMax Music 3 | Cover Art (FLUX.2 Klein 4B) |
-|---|---|---|---|
-| below 8 GB | only with heavy offloading (the int8 model alone is 4 GB): very slow, keep songs short | only with heavy offloading: very slow | not practical |
-| 8-12 GB | int8 checkpoint (template default); keep songs short | int8 DiT `minimax_music3_dit_int8_convrot` (2.5 GB) and *tiled decode* | `flux-2-klein-4b-fp8` with the text encoder `qwen_3_4b_fp4_flux2` |
-| 12-16 GB | int8 checkpoint (template default) | the defaults may offload; the int8 DiT is the safer choice | fp8 model and fp4 text encoder |
-| 16-24 GB | int8 checkpoint | template defaults (fp16 DiT, int8 text encoder) | template defaults (bf16) |
-| 24 GB and more | the bf16 checkpoint `yue2_3b_bf16` (7.8 GB) is possible; int8 stays the faster default | template defaults | template defaults |
+| GPU memory | YuE2 | MiniMax Music 3 | Cover Art (FLUX.2 Klein 4B) | Writer (Gemma 4 12B) |
+|---|---|---|---|---|
+| below 8 GB | only with heavy offloading (the int8 model alone is 4 GB): very slow, keep songs short | only with heavy offloading: very slow | not practical | QAT Q4 (6.7 GB), partly in RAM: slower |
+| 8-12 GB | int8 checkpoint (template default); keep songs short | int8 DiT `minimax_music3_dit_int8_convrot` (2.5 GB) and *tiled decode* | `flux-2-klein-4b-fp8` with the text encoder `qwen_3_4b_fp4_flux2` | QAT Q4 (6.7 GB) |
+| 12-16 GB | int8 checkpoint (template default) | the defaults may offload; the int8 DiT is the safer choice | fp8 model and fp4 text encoder | QAT Q4; Q6_K (9.8 GB) on a 16 GB card |
+| 16-24 GB | int8 checkpoint | template defaults (fp16 DiT, int8 text encoder) | template defaults (bf16) | Q6_K (9.8 GB) |
+| 24 GB and more | the bf16 checkpoint `yue2_3b_bf16` (7.8 GB) is possible; int8 stays the faster default | template defaults | template defaults | Q6_K |
 
 Measured on a 16 GB RTX 5060 Ti: a 1:44 instrumental - writer, plan, take, master and export, models loaded fresh - in 2½ minutes. The other rows come from model sizes and the predecessor toolkit's ratings. *4 · Enhance & Master* needs no GPU. See [Models and downloads](docs/user/models.md) for every file, folder and size.
 
@@ -215,7 +223,7 @@ cd ComfyUI/custom_nodes
 git clone https://github.com/jplenio/Plenio-Music-Production-System
 ```
 
-Restart ComfyUI, open **0 · System Check** from the template browser and run it. Plenio installs no Python packages. One feature is optional and tells you the command when you use it: `python -m pip install faster-whisper` for covers with lyrics. Model files come through ComfyUI's missing-model dialog when you open a template, or [by hand](docs/user/models.md). The writer, Gemma 4 12B, is a GGUF file run by llama.cpp: install llama.cpp (`winget install llama.cpp`, `brew install llama.cpp`), and the first song uses the one you have or downloads the one for your graphics card - Q6_K from 16 GB, a QAT Q4 below ([details](docs/user/models.md#the-writer-gemma-4-12b)). A [YuE2 finetune](docs/user/models.md#yue2-finetunes) in ComfyUI's format goes into `models/checkpoints` and is chosen under *checkpoint* in the model block.
+Restart ComfyUI, open **0 · System Check** from the template browser and run it. Plenio installs no Python packages. One package is optional: `python -m pip install faster-whisper`, the lyrics ASR for languages Qwen3's aligner cannot time (Dutch, Swedish, Polish, Turkish ...). Model files come through ComfyUI's missing-model dialog when you open a template, or [by hand](docs/user/models.md). The writer, Gemma 4 12B, is a GGUF file run by llama.cpp: install llama.cpp (`winget install llama.cpp`, `brew install llama.cpp`), and the first song uses the one you have or downloads the one for your graphics card - Q6_K from 16 GB, a QAT Q4 below ([details](docs/user/models.md#the-writer-gemma-4-12b)). A [YuE2 finetune](docs/user/models.md#yue2-finetunes) in ComfyUI's format goes into `models/checkpoints` and is chosen under *checkpoint* in the model block.
 
 ## Watch the tutorials
 
