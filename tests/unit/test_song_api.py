@@ -506,13 +506,19 @@ def test_a_job_with_stems_saves_every_strip_beside_the_song(template_id: str) ->
     mixers = stem_mixers(with_stems.workflow)
     assert mixers and all(json.loads(m["widgets_values"][0])["save_all"] is True for m in mixers)
     assert all(m["widgets_values"][0] == "" for m in stem_mixers(plain.workflow))
-    # in the prompt: the mixer's value, and nothing else of the run changed
+    # in the prompt: the Master's stems switches on (else Separate Stems and the mixer never run), the mixer saves
+    # every strip, and nothing else of the run changed (found live 2026-11-08: the mixer's value alone saved nothing)
     changed = {
-        node: inputs["inputs"]["mix"]
+        node: inputs
         for node, inputs in with_stems.prompt.items()
         if inputs["inputs"] != plain.prompt.get(node, {}).get("inputs")
     }
-    assert changed and all(json.loads(v)["save_all"] for v in changed.values())
+    switches = {n: p for n, p in changed.items() if p["class_type"] == "ComfySwitchNode"}
+    mixed = {n: p for n, p in changed.items() if p["class_type"] == "PlenioStemMixer"}
+    assert set(changed) == set(switches) | set(mixed)
+    assert len(switches) == 3 and all(p["inputs"]["switch"] is True for p in switches.values())
+    assert all(plain.prompt[n]["inputs"]["switch"] is False for n in switches)
+    assert len(mixed) == 1 and all(json.loads(p["inputs"]["mix"])["save_all"] for p in mixed.values())
     assert set(plain.prompt) == set(with_stems.prompt)
 
 

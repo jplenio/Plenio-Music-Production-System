@@ -45,6 +45,7 @@ from .workflow_prompt import (
     DYNAMIC_COMBO,
     NOTE_TYPES,
     SEED_LIMIT,
+    SUBGRAPH_INPUT,
     InfoLookup,
     NodeInfo,
     decode_widgets,
@@ -62,12 +63,15 @@ API_VERSION = "1.4"
 """1.1 (2026-10-26) only adds: a finished job's files to download, waiting for a job's change, filters of the job
 list. A program written for 1.0 works unchanged. 1.4 (2026-11-08, for DAW plug-ins) only adds: a job's ``stems``
 option, the bars of a take (``GET /jobs/{id}/bars``), the models a template needs (``GET /models``)."""
+"""The API's version: a new minor version only adds (fields, paths, values); a new major one has its own path."""
+FEATURES = ("stems", "bars", "models")
+"""What this version offers beyond 1.0 that a program may look for in ``GET /`` (``features``), since 1.4."""
 STEMS_MIX = json.dumps({"schema": "plenio.stem_mix/1", "save_all": True, "strips": {}}, sort_keys=True)
 """The Stem Mixer's value for a job with ``"stems": true``: the sound unchanged, every strip saved beside the song."""
 STEM_MIXER_TYPE = "PlenioStemMixer"
-FEATURES = ("stems", "bars", "models")
-"""What this version offers beyond 1.0 that a program may look for in ``GET /`` (``features``), since 1.4."""
-"""The API's version: a new minor version only adds (fields, paths, values); a new major one has its own path."""
+STEMS_INPUT = "stems"
+"""The template's Master subgraph separates the stems only with this input on (its switches route the song through
+Separate Stems and the Stem Mixer, which do not run otherwise); off in the templates."""
 MARKER = "plenio_api"
 BRIEF_TYPES = {"PlenioSongBrief": "song", "PlenioCoverBrief": "cover"}
 EXPORT_TYPE = "PlenioExportRelease"
@@ -747,17 +751,47 @@ def models_answer(
     return {"models": models, "templates": ready}
 
 
+def _promoted_inputs(graph: Mapping[str, Any]) -> list[int]:
+    """A subgraph's inputs that are widgets on its node, in order (its node's ``widgets_values`` follow them): those
+    that lead to a widget inside (``workflow_prompt`` reads them the same way)."""
+    slots = {
+        int(n["id"]): list(n.get("inputs") or []) for n in graph.get("nodes") or [] if isinstance(n, Mapping)
+    }
+    targets: dict[int, list[tuple[int, int]]] = {}
+    for link in graph.get("links") or []:
+        if isinstance(link, Mapping) and int(link.get("origin_id", 0)) == SUBGRAPH_INPUT:
+            targets.setdefault(int(link["origin_slot"]), []).append(
+                (int(link["target_id"]), int(link["target_slot"]))
+            )
+        elif isinstance(link, (list, tuple)) and len(link) >= 5 and int(link[1]) == SUBGRAPH_INPUT:
+            targets.setdefault(int(link[2]), []).append((int(link[3]), int(link[4])))
+    promoted = []
+    for index, _entry in enumerate(graph.get("inputs") or []):
+        for target, slot in targets.get(index, []):
+            found = slots.get(target, [])
+            if slot < len(found) and isinstance(found[slot], Mapping) and found[slot].get("widget"):
+                promoted.append(index)
+                break
+    return promoted
+
+
 def save_stems(workflow: dict[str, Any], info: InfoLookup) -> int:
-    """Every Stem Mixer of ``workflow`` and its subgraphs keeps its sound and saves every strip (``"stems": true``):
-    the template separates the stems in every run anyway, Export Release writes the saved ones beside the song. A
-    mixer with settings of its own keeps them, with ``save_all`` added. Returns how many mixers were set."""
-    graphs: list[Any] = [workflow, *((workflow.get("definitions") or {}).get("subgraphs") or [])]
+    """The stems of the take saved beside the song (``"stems": true``). The template's Master separates them only
+    when its ``stems`` input is on (switches route the song through Separate Stems and the Stem Mixer, which do not
+    run otherwise): that input is turned on, and every Stem Mixer keeps its sound and saves every strip - Export
+    Release writes them. A mixer with settings of its own keeps them, with ``save_all`` added. Returns how many stem
+    mixers will run with it (0: the template separates no stems)."""
+    subgraphs: list[Any] = list((workflow.get("definitions") or {}).get("subgraphs") or [])
     mixer_info = info(STEM_MIXER_TYPE)
-    count = 0
-    for graph in graphs:
+    if mixer_info is None:
+        return 0
+    with_mixer: set[str] = set()
+    for graph in [workflow, *subgraphs]:
         for node in (graph or {}).get("nodes") or []:
-            if not isinstance(node, dict) or node.get("type") != STEM_MIXER_TYPE or mixer_info is None:
+            if not isinstance(node, dict) or node.get("type") != STEM_MIXER_TYPE:
                 continue
+            if graph is not workflow:
+                with_mixer.add(str(graph.get("id")))
             named = decode_widgets(mixer_info, list(node.get("widgets_values") or []))
             current = named.get("mix")
             try:
@@ -770,8 +804,35 @@ def save_stems(workflow: dict[str, Any], info: InfoLookup) -> int:
                 else STEMS_MIX
             )
             node["widgets_values"] = encode_widgets(mixer_info, named)
-            count += 1
-    return count
+    # the switch: the input "stems" of a subgraph that holds a mixer, on its nodes in the workflow
+    switched = 0
+    definitions = {
+        str(g.get("id")): g for g in subgraphs if isinstance(g, dict) and str(g.get("id")) in with_mixer
+    }
+    for node in workflow.get("nodes") or []:
+        graph = definitions.get(str(node.get("type"))) if isinstance(node, dict) else None
+        if graph is None:
+            continue
+        names = [str((i or {}).get("name")) for i in graph.get("inputs") or []]
+        promoted = _promoted_inputs(graph)
+        if STEMS_INPUT not in names or names.index(STEMS_INPUT) not in promoted:
+            continue
+        slot = next(
+            (s for s in node.get("inputs") or [] if isinstance(s, Mapping) and s.get("name") == STEMS_INPUT),
+            None,
+        )
+        if slot is not None and slot.get("link") is not None:
+            continue  # another node drives it: not this request's to change
+        values = list(node.get("widgets_values") or [])
+        at = promoted.index(names.index(STEMS_INPUT))
+        values += [None] * (at + 1 - len(values))
+        values[at] = True
+        node["widgets_values"] = values
+        switched += 1
+    # a mixer in the workflow itself has no switch: it runs whenever its output is used
+    return switched + sum(
+        1 for n in workflow.get("nodes") or [] if isinstance(n, dict) and n.get("type") == STEM_MIXER_TYPE
+    )
 
 
 def _coerce(field: Field, value: Any) -> Any:

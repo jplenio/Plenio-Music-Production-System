@@ -277,12 +277,12 @@ YuE2), the lyrics subtitles (`subtitles`: whole lines, on the notes, as sung), t
 Since API 1.4 (Plenio 1.6.0) a program that puts songs into a DAW - the Plenio VST3 plug-in, the SoundCraft add-in -
 gets what it needs from the API itself.
 
-**Stems with the take.** Send `"stems": true` with the job. The template separates every take into stems anyway (its
-*Master* part: Separate Stems, Stem Mixer); with `stems` the Stem Mixer saves them, and Export Release writes them beside
-the song into `<name>-stems/` - `vocals`, `drums`, `bass`, `other` (the separation model's stems) and `rest` (what they
+**Stems with the take.** Send `"stems": true` with the job. The template's *Master* part separates a take into stems
+when its Stems switch is on (Separate Stems, Stem Mixer); `stems` turns it on and has the Stem Mixer save every stem, and
+Export Release writes them beside the song into `<name>-stems/` - `vocals`, `drums`, `bass`, `other` (the separation model's stems) and `rest` (what they
 miss: the stems add up to the take). They are FLAC files in the result's `files` with `"role": "stem"` and the stem's
-name, downloaded like any file (the name holds the folder). The song itself sounds the same, and the run takes hardly
-longer.
+name, downloaded like any file (the name holds the folder). The song itself sounds the same; the separation model
+(BS-RoFormer, 0.5 GB, the *Separation model (stems)* of the template) takes about half a minute more.
 
 ```json
 {"name": "2026-11-08 Night Drive-stems/vocals.flac", "role": "stem", "stem": "vocals",

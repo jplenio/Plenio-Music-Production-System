@@ -95,8 +95,8 @@ def _request(template: Template) -> dict[str, Any]:
                 "default": False,
                 "description": (
                     "API 1.4: the take's stems (vocals, drums, bass, other and the rest) are saved beside the song "
-                    "and listed in its files (role 'stem'). The template separates them in every run anyway; the "
-                    "sound of the song is the same."
+                    "and listed in its files (role 'stem'): the template's Stems switch is turned on. The song "
+                    "sounds the same; separating takes about half a minute more."
                 ),
             },
         },
