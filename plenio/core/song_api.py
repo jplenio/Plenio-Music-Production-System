@@ -58,9 +58,15 @@ from .workflow_prompt import (
 )
 
 API_NAME = "plenio-song-api"
-API_VERSION = "1.3"
+API_VERSION = "1.4"
 """1.1 (2026-10-26) only adds: a finished job's files to download, waiting for a job's change, filters of the job
-list. A program written for 1.0 works unchanged."""
+list. A program written for 1.0 works unchanged. 1.4 (2026-11-08, for DAW plug-ins) only adds: a job's ``stems``
+option, the bars of a take (``GET /jobs/{id}/bars``), the models a template needs (``GET /models``)."""
+STEMS_MIX = json.dumps({"schema": "plenio.stem_mix/1", "save_all": True, "strips": {}}, sort_keys=True)
+"""The Stem Mixer's value for a job with ``"stems": true``: the sound unchanged, every strip saved beside the song."""
+STEM_MIXER_TYPE = "PlenioStemMixer"
+FEATURES = ("stems", "bars", "models")
+"""What this version offers beyond 1.0 that a program may look for in ``GET /`` (``features``), since 1.4."""
 """The API's version: a new minor version only adds (fields, paths, values); a new major one has its own path."""
 MARKER = "plenio_api"
 BRIEF_TYPES = {"PlenioSongBrief": "song", "PlenioCoverBrief": "cover"}
@@ -146,13 +152,18 @@ def result_file(record: Path, name: str, listed: Iterable[str], output: Path) ->
         hint="The job's result lists its files, each with its url.",
         status=404,
     )
-    if not name or Path(name).name != name or name in (".", ".."):
+    # a file beside the record, or (API 1.4) one in a folder beside it: the stems, '<name>-stems/vocals.flac'
+    parts = name.split("/") if name else []
+    if not 1 <= len(parts) <= 2 or any(
+        not p or p in (".", "..") or Path(p).name != p or "\\" in p for p in parts
+    ):
         raise missing
     if name not in set(listed) | {record.name}:
         raise missing
     folder = record.parent.resolve()
-    path = (folder / name).resolve()
-    if path.parent != folder or output.resolve() not in path.parents or not path.is_file():
+    path = folder.joinpath(*parts).resolve()
+    inside = path.parent == folder if len(parts) == 1 else path.parent.parent == folder
+    if not inside or output.resolve() not in path.parents or not path.is_file():
         raise missing
     return path
 
@@ -693,6 +704,74 @@ class Prepared:
     warnings: list[str] = field(default_factory=list)
     documents: list[str] = field(default_factory=list)
     """The documents given (kept as manual in the sheets)."""
+    stems: bool = False
+    """The stems are saved beside the song (API 1.4)."""
+
+
+def models_answer(
+    catalogue: Mapping[str, Any], inventory: Any, templates: Iterable[Template]
+) -> dict[str, Any]:
+    """``GET /models``: every catalogued model file a template of the API needs or may use, with its state, and per
+    template whether it can run and what is missing (``catalogue``, ``inventory``: ``plenio.core.models``)."""
+    from .models import readiness
+
+    names = {t.name: t for t in templates}
+    used = [
+        m for m in catalogue.values() if any(n in m.templates or n in m.optional_templates for n in names)
+    ]
+    models = [
+        {
+            "id": m.id,
+            "file": m.file,
+            "folder": m.folder,
+            "url": m.url,
+            "bytes": m.bytes,
+            "licence": m.licence,
+            "non_commercial": m.non_commercial,
+            "role": m.role,
+            "status": inventory.status(m),
+            "templates": [names[n].id for n in m.templates if n in names],
+            "optional_for": [names[n].id for n in m.optional_templates if n in names],
+        }
+        for m in used
+    ]
+    ready = {}
+    for found in readiness(catalogue, inventory, list(names)):
+        ready[names[found.template].id] = {
+            "ready": found.ready,
+            "missing": [m.id for m in found.missing],
+            "incomplete": [m.id for m in found.incomplete],
+            "optional_missing": [m.id for m in found.optional_missing],
+            "missing_bytes": found.missing_bytes,
+        }
+    return {"models": models, "templates": ready}
+
+
+def save_stems(workflow: dict[str, Any], info: InfoLookup) -> int:
+    """Every Stem Mixer of ``workflow`` and its subgraphs keeps its sound and saves every strip (``"stems": true``):
+    the template separates the stems in every run anyway, Export Release writes the saved ones beside the song. A
+    mixer with settings of its own keeps them, with ``save_all`` added. Returns how many mixers were set."""
+    graphs: list[Any] = [workflow, *((workflow.get("definitions") or {}).get("subgraphs") or [])]
+    mixer_info = info(STEM_MIXER_TYPE)
+    count = 0
+    for graph in graphs:
+        for node in (graph or {}).get("nodes") or []:
+            if not isinstance(node, dict) or node.get("type") != STEM_MIXER_TYPE or mixer_info is None:
+                continue
+            named = decode_widgets(mixer_info, list(node.get("widgets_values") or []))
+            current = named.get("mix")
+            try:
+                data = json.loads(current) if isinstance(current, str) and current.strip() else {}
+            except ValueError:
+                data = {}
+            named["mix"] = (
+                json.dumps({**data, "save_all": True}, sort_keys=True)
+                if isinstance(data, dict) and data.get("schema") == "plenio.stem_mix/1"
+                else STEMS_MIX
+            )
+            node["widgets_values"] = encode_widgets(mixer_info, named)
+            count += 1
+    return count
 
 
 def _coerce(field: Field, value: Any) -> Any:
@@ -924,6 +1003,9 @@ def prepare(
     ):
         if not isinstance(value, Mapping):
             raise SongApiError("bad_request", f"'{name}' is an object of names and values.", field=name)
+    stems = request.get("stems", False)
+    if not isinstance(stems, bool):
+        raise SongApiError("invalid_value", "'stems' is true or false.", field="stems")
     aliases = FIELD_ALIASES.get(template.id, {})
     by_id = {f.id: f for f in template.fields}
     given: dict[str, Any] = {}
@@ -1077,6 +1159,9 @@ def prepare(
             values[0] = rng.randrange(SEED_LIMIT)
         node["widgets_values"] = values
         seeds[seed.id] = int(values[0])
+    if stems and save_stems(workflow, info) == 0:
+        warnings.append("this template separates no stems - 'stems' left out")
+        stems = False
     randomise_controls(workflow, info, rng)
     prompt = to_prompt(workflow, info, rng=rng)
     return Prepared(
@@ -1088,6 +1173,7 @@ def prepare(
         seeds=seeds,
         warnings=warnings,
         documents=sorted(documents, key=DOCUMENT_KINDS.index),
+        stems=stems,
     )
 
 

@@ -90,6 +90,15 @@ def _request(template: Template) -> dict[str, Any]:
                 "default": True,
                 "description": "false: unknown fields are left out (named in warnings) instead of refused.",
             },
+            "stems": {
+                "type": "boolean",
+                "default": False,
+                "description": (
+                    "API 1.4: the take's stems (vocals, drums, bass, other and the rest) are saved beside the song "
+                    "and listed in its files (role 'stem'). The template separates them in every run anyway; the "
+                    "sound of the song is the same."
+                ),
+            },
         },
     }
 
@@ -391,7 +400,10 @@ def openapi(templates: Iterable[Template], *, plenio: str = "", comfyui: str = "
                     "tags": ["Jobs"],
                     "operationId": "getJobFile",
                     "summary": "A file of a finished job's song: audio, cover, sheet music, subtitles, release record",
-                    "description": "Each file of a job's result has its url. Byte ranges work (audio players seek).",
+                    "description": (
+                        "Each file of a job's result has its url. Byte ranges work (audio players seek). Since 1.4 a "
+                        "name may hold one folder: the stems, '<name>-stems/vocals.flac'."
+                    ),
                     "parameters": [
                         path_id(),
                         path_id("name", "The file's name, as the job's result lists it"),
@@ -405,6 +417,29 @@ def openapi(templates: Iterable[Template], *, plenio: str = "", comfyui: str = "
                         },
                         **refused("404"),
                     },
+                }
+            },
+            "/jobs/{id}/bars": {
+                "get": {
+                    "tags": ["Jobs"],
+                    "operationId": "getJobBars",
+                    "summary": "Where every bar of the take's score lies in its audio (API 1.4)",
+                    "description": (
+                        "A YuE2 take keeps no steady tempo. These are the times of every measure's start in the "
+                        "score (at its own tempo) and in the take's audio, measured from the music - for a DAW's "
+                        "tempo map, so that the metronome and further tracks keep to the take. 'bars' is null when "
+                        "the score and the music do not meet ('why' says so). Measured once, then kept."
+                    ),
+                    "parameters": [path_id()],
+                    "responses": {"200": answer(ref("Bars")), **refused("404")},
+                }
+            },
+            "/models": {
+                "get": {
+                    "tags": ["Discovery"],
+                    "operationId": "getModels",
+                    "summary": "The model files the templates need: installed or missing, sizes, licences (API 1.4)",
+                    "responses": {"200": answer(ref("Models"))},
                 }
             },
             "/from-record": {
@@ -482,7 +517,97 @@ def openapi(templates: Iterable[Template], *, plenio: str = "", comfyui: str = "
                         "comfyui": {"type": "string"},
                         "templates": {"type": "array", "items": ref("TemplateSummary")},
                         "paths": {"type": "object", "additionalProperties": {"type": "string"}},
+                        "features": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Since 1.4: what this version offers beyond 1.0 (stems, bars, models)",
+                        },
                         "docs": {"type": "string"},
+                    },
+                },
+                "Bars": {
+                    "type": "object",
+                    "properties": {
+                        "job": {"type": "string"},
+                        "warp": {
+                            "type": ["array", "null"],
+                            "items": {"type": "number"},
+                            "description": "[a, b]: t_audio = a t_score + b, where the song roughly lies",
+                        },
+                        "bars": {
+                            "oneOf": [
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "score": {
+                                            "type": "array",
+                                            "items": {"type": "number"},
+                                            "description": "Every measure's start and the end, in seconds of the score",
+                                        },
+                                        "audio": {
+                                            "type": "array",
+                                            "items": {"type": "number"},
+                                            "description": "The same times in the take's audio (seconds)",
+                                        },
+                                        "meters": {
+                                            "type": "array",
+                                            "items": {"type": "array", "items": {"type": "integer"}},
+                                            "description": "Every measure's meter, [numerator, denominator]",
+                                        },
+                                    },
+                                },
+                                {"type": "null"},
+                            ]
+                        },
+                        "match": {
+                            "type": "object",
+                            "description": "How well the score's notes meet the music",
+                        },
+                        "why": {"type": "string", "description": "Why there are no bars"},
+                    },
+                },
+                "Models": {
+                    "type": "object",
+                    "properties": {
+                        "models": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "string"},
+                                    "file": {"type": "string"},
+                                    "folder": {
+                                        "type": "string",
+                                        "description": "ComfyUI's models folder it goes in",
+                                    },
+                                    "url": {"type": "string"},
+                                    "bytes": {"type": "integer"},
+                                    "licence": {"type": "string"},
+                                    "non_commercial": {"type": "boolean"},
+                                    "role": {"type": "string"},
+                                    "status": {
+                                        "type": "string",
+                                        "enum": ["installed", "missing", "size differs"],
+                                    },
+                                    "templates": {"type": "array", "items": {"type": "string"}},
+                                    "optional_for": {"type": "array", "items": {"type": "string"}},
+                                },
+                            },
+                        },
+                        "templates": {
+                            "type": "object",
+                            "description": "Per template id: whether it can run, what is missing",
+                            "additionalProperties": {
+                                "type": "object",
+                                "properties": {
+                                    "ready": {"type": "boolean"},
+                                    "missing": {"type": "array", "items": {"type": "string"}},
+                                    "incomplete": {"type": "array", "items": {"type": "string"}},
+                                    "optional_missing": {"type": "array", "items": {"type": "string"}},
+                                    "missing_bytes": {"type": "integer"},
+                                },
+                            },
+                        },
                     },
                 },
                 "TemplateSummary": {
@@ -645,6 +770,10 @@ def openapi(templates: Iterable[Template], *, plenio: str = "", comfyui: str = "
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "The documents given (kept as manual)",
+                        },
+                        "stems": {
+                            "type": "boolean",
+                            "description": "Since 1.4: the stems are saved with the song",
                         },
                         "client": {"type": "object", "additionalProperties": {"type": "string"}},
                         "result": {"oneOf": [ref("Result"), {"type": "null"}]},

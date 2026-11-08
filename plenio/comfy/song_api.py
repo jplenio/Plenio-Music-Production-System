@@ -90,6 +90,7 @@ class Job:
     warnings: list[str] = field(default_factory=list)
     started: float | None = None
     documents: list[str] = field(default_factory=list)
+    stems: bool = False
 
 
 _jobs: dict[str, Job] = {}
@@ -358,7 +359,12 @@ def _result(item: dict[str, Any], prompt_id: str = "") -> dict[str, Any] | None:
                 record = json.loads(path.read_text(encoding="utf-8"))
                 result["title"] = str(record.get("title") or "")
                 result["files"] = [
-                    {"name": str(f.get("name")), **({"role": f["role"]} if f.get("role") else {})}
+                    {
+                        "name": str(f.get("name")),
+                        **({"role": f["role"]} if f.get("role") else {}),
+                        # API 1.4: which stem a stem file is
+                        **({"stem": str(f["stem"])} if isinstance(f.get("stem"), str) else {}),
+                    }
                     for f in record.get("files") or []
                     if isinstance(f, dict) and f.get("name")
                 ]
@@ -418,6 +424,7 @@ def job_view(prompt_id: str) -> dict[str, Any] | None:
         "progress": None,
         "seeds": dict(job.seeds) if job else dict(meta.get("seeds") or {}),
         "documents": list(job.documents) if job else list(meta.get("documents") or []),
+        "stems": bool(job.stems if job else meta.get("stems")),
         "client": dict(job.client) if job else dict(meta.get("client") or {}),
         "result": None,
         "error": None,
@@ -490,7 +497,10 @@ async def index(request: web.Request) -> web.StreamResponse:
                 "from_record": f"{BASE}/from-record",
                 "queue": f"{BASE}/queue",
                 "openapi": f"{BASE}/openapi.json",
+                "models": f"{BASE}/models",
+                "job_bars": f"{BASE}/jobs/{{id}}/bars",
             },
+            "features": list(song_api.FEATURES),
             "docs": "https://github.com/jplenio/Plenio-Music-Production-System/blob/main/docs/api/README.md",
         }
     )
@@ -620,6 +630,7 @@ async def _create(data: dict[str, Any], key: str) -> web.StreamResponse:
         "fields": {k: v for k, v in prepared.fields.items() if not isinstance(v, (dict, list))},
         "release": prepared.release,
         "documents": prepared.documents,
+        "stems": prepared.stems,
     }
     answer = await _post_prompt(prepared.prompt, prepared.workflow, meta)
     prompt_id = str(answer["prompt_id"])
@@ -635,6 +646,7 @@ async def _create(data: dict[str, Any], key: str) -> web.StreamResponse:
         workflow=prepared.workflow,
         warnings=prepared.warnings,
         documents=prepared.documents,
+        stems=prepared.stems,
     )
     with _lock:
         _jobs[prompt_id] = job
@@ -788,6 +800,52 @@ async def job_file(request: web.Request) -> web.StreamResponse:
     return web.FileResponse(path, headers={"Content-Disposition": disposition})
 
 
+def _finished_record(job_id: str) -> Path:
+    """The release record of a finished job, inside ComfyUI's output folder; 404 otherwise."""
+    history = _history(job_id)
+    result = _result(history, job_id) if history is not None else None
+    record = Path(result["record"]) if result and result.get("record") else None
+    output = host.output_directory().resolve()
+    if record is None or not record.is_file() or output not in record.resolve().parents:
+        view = job_view(job_id)
+        raise SongApiError(
+            "not_found",
+            "ComfyUI knows no such job."
+            if view is None
+            else f"The job has no finished song (it is {view['status']}).",
+            status=404,
+        )
+    return record
+
+
+async def job_bars(request: web.Request) -> web.StreamResponse:
+    """Where every bar of the take's score lies in its audio (API 1.4): a DAW sets its tempo map from it, so that the
+    metronome and further tracks keep to the take, which keeps no steady tempo. Measured once (a second or two of
+    CPU), then kept beside the record (``<name>.bars.json``)."""
+    from ..core.bars import record_bars
+
+    job_id = request.match_info["job_id"]
+    record = _finished_record(job_id)
+    try:
+        answer = await asyncio.to_thread(record_bars, record)
+    except (OSError, ValueError, PlenioUserError) as error:
+        raise SongApiError(
+            "internal", f"The bars of the take were not measured: {error}", status=500
+        ) from error
+    return web.json_response({"job": job_id, **answer})
+
+
+async def models_info(request: web.Request) -> web.StreamResponse:
+    """The model files of the API's templates (API 1.4): installed, missing or incomplete, their sizes and licences,
+    and per template whether it can run - before a program orders a song that would fail on a missing file."""
+    from ..core.models import take_inventory
+    from .shared import model_catalogue
+
+    catalogue = model_catalogue()
+    inventory = take_inventory(catalogue, host.locate_model)
+    return web.json_response(song_api.models_answer(catalogue, inventory, _templates(_lookup()).values()))
+
+
 async def job_delete(request: web.Request) -> web.StreamResponse:
     """Cancel a job: out of the queue while it waits, interrupted while it runs; a finished one stays as it is."""
     prompt_id = request.match_info["job_id"]
@@ -867,9 +925,11 @@ ROUTES: tuple[tuple[str, str, Handler], ...] = (
     ("POST", f"{BASE}/from-record", from_record),
     ("GET", f"{BASE}/jobs", jobs_list),
     ("GET", f"{BASE}/jobs/{{job_id}}", job_get),
-    ("GET", f"{BASE}/jobs/{{job_id}}/files/{{name}}", job_file),
+    ("GET", f"{BASE}/jobs/{{job_id}}/files/{{name:.+}}", job_file),
+    ("GET", f"{BASE}/jobs/{{job_id}}/bars", job_bars),
     ("DELETE", f"{BASE}/jobs/{{job_id}}", job_delete),
     ("GET", f"{BASE}/queue", queue_info),
+    ("GET", f"{BASE}/models", models_info),
 )
 
 

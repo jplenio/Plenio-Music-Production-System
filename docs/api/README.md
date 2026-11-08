@@ -14,7 +14,7 @@ open source like the rest of Plenio (Apache 2.0); the music models have licences
 |---|---|
 | **Base address** | `http://127.0.0.1:8188/plenio/api/v1` - ComfyUI's own address and port (ComfyUI Desktop: `8000`) |
 | **Format** | JSON in and out (`Content-Type: application/json`); times are seconds since 1970 (UTC) |
-| **Version** | 1.3 - the path carries the major version; a minor version only adds ([policy](#versions-and-compatibility)) |
+| **Version** | 1.4 - the path carries the major version; a minor version only adds ([policy](#versions-and-compatibility)) |
 | **Machine-readable** | `GET /plenio/api/v1/openapi.json` (OpenAPI 3.1) - a copy: [openapi.json](openapi.json), [browse it](https://jplenio.github.io/Plenio-Music-Production-System/api/) |
 | **Every field** | [fields.md](fields.md) - generated from the templates |
 | **Examples** | [examples/](examples/) - Python, JavaScript and shell, ready to run |
@@ -27,14 +27,15 @@ open source like the rest of Plenio (Apache 2.0); the music models have licences
 4. [A job request](#a-job-request)
 5. [Following a job](#following-a-job)
 6. [The finished song and its files](#the-finished-song-and-its-files)
-7. [Covers: a new version of a recording](#covers-a-new-version-of-a-recording)
-8. [Again: a new take, a new song of the same brief](#again-a-new-take-a-new-song-of-the-same-brief)
-9. [Errors and retries](#errors-and-retries)
-10. [Access from other computers and from web pages](#access-from-other-computers-and-from-web-pages)
-11. [Versions and compatibility](#versions-and-compatibility)
-12. [OpenAPI and client generators](#openapi-and-client-generators)
-13. [Limits](#limits)
-14. [Licences of what you make](#licences-of-what-you-make)
+7. [Stems and bars: a take for a DAW](#stems-and-bars-a-take-for-a-daw)
+8. [Covers: a new version of a recording](#covers-a-new-version-of-a-recording)
+9. [Again: a new take, a new song of the same brief](#again-a-new-take-a-new-song-of-the-same-brief)
+10. [Errors and retries](#errors-and-retries)
+11. [Access from other computers and from web pages](#access-from-other-computers-and-from-web-pages)
+12. [Versions and compatibility](#versions-and-compatibility)
+13. [OpenAPI and client generators](#openapi-and-client-generators)
+14. [Limits](#limits)
+15. [Licences of what you make](#licences-of-what-you-make)
 
 ## Quick start
 
@@ -46,10 +47,10 @@ curl http://127.0.0.1:8188/plenio/api/v1
 ```
 
 ```json
-{"api": "plenio-song-api", "version": "1.3", "plenio": "1.5.1", "comfyui": "0.41.0",
+{"api": "plenio-song-api", "version": "1.4", "plenio": "1.6.0", "comfyui": "0.41.0",
  "templates": [{"id": "yue2-song", "title": "YuE2 · Song", "kind": "song", "needs": []},
                {"id": "yue2-cover", "title": "YuE2 · Cover", "kind": "cover", "needs": ["source.audio"]}],
- "paths": {"jobs": "/plenio/api/v1/jobs", "...": "..."}}
+ "paths": {"jobs": "/plenio/api/v1/jobs", "...": "..."}, "features": ["stems", "bars", "models"]}
 ```
 
 ### With curl
@@ -162,10 +163,12 @@ started; a cover about 4 to 5 minutes. `GET /queue` tells how long the API's run
 | `POST /jobs` | Make a song |
 | `GET /jobs` | The API's jobs ComfyUI still knows, newest first - filter with `status`, `client`, `template`, `limit` |
 | `GET /jobs/{id}` | One job - with `?wait=<s>` it answers when the job changes |
-| `GET /jobs/{id}/files/{name}` | A file of a finished job's song |
+| `GET /jobs/{id}/files/{name}` | A file of a finished job's song (since 1.4 also a stem: `<name>-stems/vocals.flac`) |
+| `GET /jobs/{id}/bars` | Where every bar of a finished take lies in its audio - a DAW's tempo map (1.4) |
 | `DELETE /jobs/{id}` | Cancel a job: out of the queue while it waits, interrupted while it runs |
 | `POST /from-record` | The request that makes a released song again, from its release record |
 | `GET /queue` | How busy ComfyUI is, and how long the API's runs took lately |
+| `GET /models` | The model files the templates need: installed or missing, sizes, licences (1.4) |
 
 All paths are below the base address `/plenio/api/v1`.
 
@@ -192,6 +195,7 @@ All paths are below the base address `/plenio/api/v1`.
 | `documents` | The Song Sheets' documents (`title`, `style`, `lyrics`, `score`, `artwork_prompt`). A document you give is kept as *manual*: the run uses it instead of writing or planning it - your own lyrics, your own title. |
 | `client` | Who asks: up to 12 short texts, kept with the job and shown in its listing (`GET /jobs?client=My%20app`). |
 | `strict` | `true` (default): a field the template does not have is refused. `false`: it is left out and named in the job's `warnings`. |
+| `stems` | `true`: the take's stems are saved beside the song and listed in its files (1.4, see [Stems and bars](#stems-and-bars-a-take-for-a-daw)). Default `false`. |
 
 **Friendly values.** `length` takes seconds (`200`) or a time (`"3:15"`) and picks the nearest length the template
 offers; choices are matched without regard to case (`"SUNG"` is `sung`). A field that does not apply to your choices
@@ -267,6 +271,43 @@ how long, on what) and how well it came out, measured (`quality`: 0 to 5 `stars`
 Which files there are follows the `release` fields: the song as FLAC (default), MP3 (`"mp3": true`) or WAV (no
 `role`), the unmastered take (`original`), the cover (`cover`, with Cover Art on), the sheet music (`sheet_music`,
 YuE2), the lyrics subtitles (`subtitles`: whole lines, on the notes, as sung), the release record (`record`).
+
+## Stems and bars: a take for a DAW
+
+Since API 1.4 (Plenio 1.6.0) a program that puts songs into a DAW - the Plenio VST3 plug-in, the SoundCraft add-in -
+gets what it needs from the API itself.
+
+**Stems with the take.** Send `"stems": true` with the job. The template separates every take into stems anyway (its
+*Master* part: Separate Stems, Stem Mixer); with `stems` the Stem Mixer saves them, and Export Release writes them beside
+the song into `<name>-stems/` - `vocals`, `drums`, `bass`, `other` (the separation model's stems) and `rest` (what they
+miss: the stems add up to the take). They are FLAC files in the result's `files` with `"role": "stem"` and the stem's
+name, downloaded like any file (the name holds the folder). The song itself sounds the same, and the run takes hardly
+longer.
+
+```json
+{"name": "2026-11-08 Night Drive-stems/vocals.flac", "role": "stem", "stem": "vocals",
+ "url": "/plenio/api/v1/jobs/4f6c…/files/2026-11-08%20Night%20Drive-stems/vocals.flac"}
+```
+
+**The bars of a take.** A YuE2 take keeps no steady tempo: its beats wander around the score's tempo by a quarter of a
+second in the median song. No single BPM keeps a metronome on it. `GET /jobs/{id}/bars` measures where every measure of
+the score lies in the take's audio - from the onsets, the score's harmony and the sung words - so that a DAW can set a
+tempo per measure and keep the audio exactly as it is:
+
+```json
+{"job": "4f6c…", "warp": [1.012, -1.71],
+ "bars": {"score": [0.0, 2.857, 5.714, …], "audio": [1.71, 4.59, 7.47, …], "meters": [[4, 4], [4, 4], …]},
+ "match": {"map": 0.41, "line": 0.37}}
+```
+
+`score` and `audio` are the start of every measure and the end, in seconds of the score (at its own tempo) and of the
+take; `meters` has one entry per measure. A measure's tempo is its quarter notes over its length in the audio. When
+the score and the music do not meet (`bars` is `null`), `warp` still says where the song roughly lies, and `why` says
+why. The answer is measured once (a second or two of CPU) and kept beside the release record (`<name>.bars.json`).
+
+**Which models are missing.** `GET /models` lists every model file the templates need or may use - installed, missing
+or of another size - and per template whether it can run, so a program can tell its user before a job fails on a
+missing file.
 
 ## Covers: a new version of a recording
 
@@ -372,6 +413,7 @@ own, the release folder cannot leave ComfyUI's output folder, a job's files are 
 
 | API | Plenio | What changed |
 |---|---|---|
+| 1.4 | 1.6.0 | a job's `stems` option (the stems saved beside the song, `role: stem`, file names with their folder); `GET /jobs/{id}/bars` (a take's bars, for a DAW's tempo map); `GET /models` (what the templates need); `features` and the new paths in `GET /` |
 | 1.3 | 1.5.0 | the Song Brief's `lyrics_from` and `lyrics` (an idea for the writer, or one's own lyrics, sung as written), the Cover Brief's `original_notes`; `creativity` up to 200; a brief's text fields you leave out take the chosen style template's values - another template replaces what the template had filled |
 | 1.2 | 1.4.0 | the release field `song_page`: the song's page (`<name>.html`) beside it - on unless set to `false` |
 | 1.1 | 1.3.1 | `GET /jobs/{id}/files/{name}` and a `url` per result file; `GET /jobs/{id}?wait=<s>`; `GET /jobs` filters (`status`, `client`, `template`, `limit`); one job per `Idempotency-Key` also for requests at the same time; an `operationId` per call and answer schemas in the OpenAPI document |

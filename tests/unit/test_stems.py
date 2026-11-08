@@ -160,3 +160,27 @@ def test_the_mixer_value_round_trips_and_unknown_strips_are_reported() -> None:
     x = song(0.1)
     _out, report = s.mix(s.make_stems(x, RATE, {"vocals": x}), mix_json(guitar={"mute": True}))
     assert report["notes"] == ["strip 'guitar' is not a stem of this separation and was ignored"]
+
+
+def test_save_all_saves_every_strip_and_keeps_the_sound() -> None:
+    """Song API 1.4 (a job's ``stems``): every strip is written, whatever the separation names its stems."""
+    value = s.parse_mix(json.dumps({"schema": s.MIX_SCHEMA, "save_all": True}))
+    assert value.save_all and value.strip("vocals").save and value.strip("anything").save  # noqa: B005 (Mix.strip)
+    assert s.parse_mix(value.to_json()) == value
+    x = song(0.2)
+    stems = s.make_stems(x, RATE, separation(x))
+    saved: dict[str, np.ndarray] = {}
+    out, report = s.mix(stems, value, signals=saved)
+    np.testing.assert_allclose(out, x, atol=1e-6)
+    assert report["neutral"] and report["notes"] == []
+    assert sorted(saved) == ["bass", "drums", "rest", "vocals"]
+    assert [item.get("save") for item in report["strips"]] == [True] * 4
+    # a strip's own settings stay, and are saved as they sound
+    own = s.parse_mix(
+        json.dumps({"schema": s.MIX_SCHEMA, "save_all": True, "strips": {"bass": {"gain_db": -6.0}}})
+    )
+    assert own.strip("bass") == s.Strip(gain_db=-6.0, save=True)  # noqa: B005 (Mix.strip)
+    _out, report = s.mix(stems, own)
+    assert not report["neutral"]
+    with pytest.raises(PlenioUserError, match="save_all"):
+        s.parse_mix(json.dumps({"schema": s.MIX_SCHEMA, "save_all": "yes"}))

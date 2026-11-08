@@ -4,6 +4,7 @@ own prompts), validation, seeds, the field list pinned."""
 
 from __future__ import annotations
 
+import copy
 import json
 import random
 import re
@@ -293,13 +294,15 @@ def test_the_openapi_document_describes_every_template() -> None:
         "/jobs",
         "/jobs/{id}",
         "/jobs/{id}/files/{name}",
+        "/jobs/{id}/bars",
+        "/models",
         "/from-record",
         "/queue",
     }
     # every call has its own operationId (client generators name their functions by it) and answers described
     operations = [op for path in document["paths"].values() for op in path.values()]
     ids = [op["operationId"] for op in operations]
-    assert len(ids) == len(set(ids)) == 13
+    assert len(ids) == len(set(ids)) == 15
     assert all(op["responses"] and op["tags"] for op in operations)
     job = schemas["Job"]["properties"]
     assert job["result"]["oneOf"][0] == {"$ref": "#/components/schemas/Result"}
@@ -477,3 +480,104 @@ def test_a_finished_songs_files_are_given_and_nothing_else(tmp_path: Path) -> No
     # a record outside ComfyUI's output folder gives nothing
     with pytest.raises(song_api.SongApiError):
         song_api.result_file(record, "Night Drive.flac", listed, tmp_path / "elsewhere")
+
+
+# --- API 1.4: stems with the take, files in the stems folder, the models -----------------------------------------
+
+
+def stem_mixers(workflow: dict[str, Any]) -> list[dict[str, Any]]:
+    graphs = [workflow, *((workflow.get("definitions") or {}).get("subgraphs") or [])]
+    return [n for g in graphs for n in g.get("nodes") or [] if n.get("type") == "PlenioStemMixer"]
+
+
+@pytest.mark.parametrize("template_id", ["yue2-song", "yue2-cover"])
+def test_a_job_with_stems_saves_every_strip_beside_the_song(template_id: str) -> None:
+    fields = {"source.audio": "plenio-api-x.mp3"} if template_id == "yue2-cover" else {}
+    plain = prepare(
+        template(template_id), {"fields": fields, "seeds": {"take": 1}}, NODES.get, rng=random.Random(5)
+    )
+    with_stems = prepare(
+        template(template_id),
+        {"fields": fields, "seeds": {"take": 1}, "stems": True},
+        NODES.get,
+        rng=random.Random(5),
+    )
+    assert not plain.stems and with_stems.stems
+    mixers = stem_mixers(with_stems.workflow)
+    assert mixers and all(json.loads(m["widgets_values"][0])["save_all"] is True for m in mixers)
+    assert all(m["widgets_values"][0] == "" for m in stem_mixers(plain.workflow))
+    # in the prompt: the mixer's value, and nothing else of the run changed
+    changed = {
+        node: inputs["inputs"]["mix"]
+        for node, inputs in with_stems.prompt.items()
+        if inputs["inputs"] != plain.prompt.get(node, {}).get("inputs")
+    }
+    assert changed and all(json.loads(v)["save_all"] for v in changed.values())
+    assert set(plain.prompt) == set(with_stems.prompt)
+
+
+def test_stems_is_true_or_false() -> None:
+    with pytest.raises(SongApiError) as refused:
+        prepare(template("yue2-song"), {"stems": "yes"}, NODES.get)
+    assert refused.value.code == "invalid_value" and refused.value.field == "stems"
+
+
+def test_a_mixer_with_settings_of_its_own_keeps_them() -> None:
+    workflow = copy.deepcopy(dict(template("yue2-song").workflow))
+    mixer = stem_mixers(workflow)[0]
+    own = json.dumps({"schema": "plenio.stem_mix/1", "strips": {"bass": {"gain_db": -3.0}}})
+    mixer["widgets_values"] = [own]
+    assert song_api.save_stems(workflow, NODES.get) == 1
+    assert json.loads(mixer["widgets_values"][0]) == {**json.loads(own), "save_all": True}
+
+
+def test_the_stems_are_given_from_their_folder_and_nothing_else(tmp_path: Path) -> None:
+    output = tmp_path / "output"
+    folder = output / "plenio"
+    stems = folder / "Song-stems"
+    stems.mkdir(parents=True)
+    record = folder / "Song.plenio.json"
+    record.write_text("{}", encoding="utf-8")
+    (stems / "vocals.flac").write_bytes(b"x")
+    (stems / "deeper").mkdir()
+    (stems / "deeper" / "x.flac").write_bytes(b"x")
+    listed = [
+        "Song-stems/vocals.flac",
+        "Song-stems/deeper/x.flac",
+        "Song-stems/../Song.plenio.json",
+        "Song-stems\vocals.flac",
+    ]
+    assert (
+        song_api.result_file(record, "Song-stems/vocals.flac", listed, output)
+        == (stems / "vocals.flac").resolve()
+    )
+    for wrong in (
+        "Song-stems/deeper/x.flac",
+        "Song-stems/../Song.plenio.json",
+        "Song-stems\vocals.flac",
+        "Song-stems/",
+        "/vocals.flac",
+        "Song-stems/gone.flac",
+    ):
+        with pytest.raises(SongApiError):
+            song_api.result_file(record, wrong, listed, output)
+
+
+def test_the_models_say_what_each_template_needs() -> None:
+    from plenio.core import models
+
+    catalogue = models.load_catalogue(ROOT / "resources" / "models.toml")
+    loaded = [template("yue2-song"), template("yue2-cover")]
+    none_installed = models.Inventory({})
+    answer = song_api.models_answer(catalogue, none_installed, loaded)
+    assert set(answer["templates"]) == {"yue2-song", "yue2-cover"}
+    song = answer["templates"]["yue2-song"]
+    assert not song["ready"] and song["missing"] and song["missing_bytes"] > 0
+    assert all(m["status"] == "missing" for m in answer["models"])
+    assert not any(
+        "minimax" in m["id"].lower() for m in answer["models"] if not m["templates"] and not m["optional_for"]
+    )
+    everything = models.Inventory({m.file: m.bytes for m in catalogue.values()})
+    assert all(
+        t["ready"] for t in song_api.models_answer(catalogue, everything, loaded)["templates"].values()
+    )

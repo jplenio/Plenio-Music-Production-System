@@ -9,7 +9,8 @@
   (-60 ... +12 dB), mute, solo (solo beats mute; any solo silences every other strip including
   ``rest``), compression amount 0 ... 1 (the existing compressor), muted time ranges (merged,
   clipped, 10 ms raised-cosine edges inside the range; the song keeps its length), reverb and delay
-  sends 0 ... 1 to one shared bus each.
+  sends 0 ... 1 to one shared bus each. ``save_all`` (Song API 1.4, the job option ``stems``) marks
+  every strip *save*, whatever the separation names its stems.
 - The effect buses (reverb, delay) are injected functions (``core.audio.effects``, task D12); a send
   without its bus is refused, never silently ignored. Their returns are cut at the song end with a
   50 ms fade. Mixdown in float64, no normalisation; peaks and gain reduction are reported.
@@ -20,7 +21,7 @@ from __future__ import annotations
 import json
 import math
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Protocol
 
 import numpy as np
@@ -131,9 +132,12 @@ class Mix:
     strips: Mapping[str, Strip] = field(default_factory=dict)
     buses: Mapping[str, Mapping[str, Any]] = field(default_factory=dict)
     """Bus settings (reverb preset, delay time ...), passed to the effect functions unchanged."""
+    save_all: bool = False
+    """Every strip is saved as its own file (Song API 1.4: a job's ``stems`` option), the audio unchanged."""
 
     def strip(self, name: str) -> Strip:
-        return self.strips.get(name, Strip())
+        found = self.strips.get(name, Strip())
+        return replace(found, save=True) if self.save_all and not found.save else found
 
     def to_json(self) -> str:
         strips = {
@@ -145,7 +149,10 @@ class Mix:
             for name, strip in self.strips.items()
             if not strip.neutral
         }
-        return json.dumps({"schema": MIX_SCHEMA, "strips": strips, **dict(self.buses)}, sort_keys=True)
+        extra: dict[str, Any] = {"save_all": True} if self.save_all else {}
+        return json.dumps(
+            {"schema": MIX_SCHEMA, "strips": strips, **extra, **dict(self.buses)}, sort_keys=True
+        )
 
 
 def _flag(value: Any, name: str) -> bool:
@@ -164,9 +171,10 @@ def parse_mix(text: str | None) -> Mix:
         raise PlenioUserError(f"The stem mix is not valid JSON: {error}.") from error
     if not isinstance(data, dict) or data.get("schema") != MIX_SCHEMA:
         raise PlenioUserError(f'The stem mix must be an object with "schema": "{MIX_SCHEMA}".')
-    unknown = set(data) - {"schema", "strips", *BUSES}
+    unknown = set(data) - {"schema", "strips", "save_all", *BUSES}
     if unknown:
         raise PlenioUserError(f"Unknown stem mix fields: {sorted(unknown)}.")
+    save_all = _flag(data.get("save_all", False), "save_all")
     strips: dict[str, Strip] = {}
     raw_strips = data.get("strips", {})
     if not isinstance(raw_strips, dict):
@@ -203,7 +211,7 @@ def parse_mix(text: str | None) -> Mix:
     for bus, value in buses.items():
         if not isinstance(value, dict):
             raise PlenioUserError(f"The {bus} bus settings must be an object.")
-    return Mix(strips, buses)
+    return Mix(strips, buses, save_all)
 
 
 # --- mixing -----------------------------------------------------------------------------
@@ -344,7 +352,8 @@ def mix(
         if wet.shape != shape:
             raise PlenioUserError(f"The {bus} bus returned {wet.shape}, expected {shape}.")
         out = out + _tail_fade(wet, rate)
-    neutral = not soloing and all(options.strip(name).neutral for name in known)
+    # saving every strip (save_all) leaves the sound as it is: only the strips' own settings count here
+    neutral = not soloing and all(options.strips.get(name, Strip()).neutral for name in known)
     report = {
         "schema": MIX_SCHEMA,
         "rate": rate,
