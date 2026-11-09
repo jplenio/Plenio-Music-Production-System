@@ -13,6 +13,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-f59e0b" alt="Apache 2.0" /></a>
   <a href="https://youtu.be/myiZawtsja4"><img src="https://img.shields.io/badge/%E2%96%B6%20the%20spot-54%20s-ff0000?logo=youtube&logoColor=white" alt="Watch the spot on YouTube - 54 seconds" /></a>
   <a href="https://www.youtube.com/playlist?list=PLAFqTtP59fgE"><img src="https://img.shields.io/badge/video%20tutorials-YouTube-ff0000?logo=youtube&logoColor=white" alt="Video tutorials on YouTube" /></a>
+  <a href="https://github.com/jplenio/Plenio-VST3"><img src="https://img.shields.io/badge/in%20your%20DAW-Plenio%20VST3-ff3d8b" alt="Plenio VST3: Plenio in your DAW" /></a>
 </p>
 
 <p align="center">
@@ -25,6 +26,7 @@
   <a href="#-what-plenio-does">What it does</a> ·
   <a href="#-in-comfyui">In ComfyUI</a> ·
   <a href="#-the-plenio-player">The player</a> ·
+  <a href="#-plenio-in-your-daw">In your DAW</a> ·
   <a href="#-new-in-15">New in 1.5</a> ·
   <a href="#-under-the-hood">Under the hood</a> ·
   <a href="#installation">Install</a> ·
@@ -73,6 +75,7 @@ Everything runs on your own machine, inside ComfyUI's own nodes: no cloud servic
 | **Polish** | **Audio HQ** (stereo cleanup, UniverSR regenerating the highs of a dull take), a tone match on the curve, **-14 LUFS / -1 dBTP** with a true-peak limiter, **stems** with a mixer. |
 | **Release** | FLAC, MP3 or WAV with tags and cover art (FLUX.2 Klein), lyrics subtitles timed by listening, the sheet music as PDF, **a page per song** with the full lyrics to copy - and the whole project inside the FLAC: drop it on ComfyUI and you are back in its workflow. |
 | **Listen and share** | The **Plenio Player**: visuals, the lyrics as they are sung, Live Play and party mode, music videos, one-file players to send - and the **Song API** for your own programs. |
+| **In your DAW** | **[Plenio VST3](https://github.com/jplenio/Plenio-VST3)** puts Plenio on an instrument track in REAPER, Cubase, Studio One, Ableton Live, FL Studio or Bitwig: up to four takes per run with their stems and MIDI, a tempo map from the measured bars, and the words, notes and chords changed and sung again right there. |
 
 ## 🎛️ In ComfyUI
 
@@ -137,6 +140,25 @@ A program of its own: it runs without ComfyUI, opens at `http://127.0.0.1:8765/`
 - **On every screen** - phone, tablet and the big screen, with *Add to Home screen*; *In your network* opens the whole player on another device at home.
 
 Guide: [Plenio Player](docs/user/concepts/player.md).
+
+## 🎹 Plenio in your DAW
+
+<table>
+<tr>
+<td width="50%"><a href="https://youtu.be/ppJcVOqIaJg"><img src="assets/branding/1.6.0/plenio-vst3-teaser.jpg" alt="Watch the teaser: Plenio is in your DAW - 72 seconds on YouTube" width="100%" /></a></td>
+<td width="50%"><a href="https://github.com/jplenio/Plenio-VST3"><img src="assets/branding/1.6.0/plenio-vst3-reaper.jpg" alt="Plenio VST3 in REAPER: the song laid out on the project's tracks - every take as one of REAPER's takes, the stems, the melody, instrument line and chords as MIDI, the lyrics, the sections as regions and the tempo map from the measured bars" width="100%" /></a></td>
+</tr>
+</table>
+
+**New with 1.6: [Plenio VST3](https://github.com/jplenio/Plenio-VST3)**, a free VST3 instrument (with ARA 2) that brings Plenio into REAPER, Cubase, Studio One, Ableton Live, FL Studio, Bitwig and every other DAW that loads VST3 instruments. Pick a style, write an idea or your own lyrics, and your ComfyUI makes the song: up to four takes per run land on your track, in time with your project, each with its stems, its MIDI and a tempo map that follows the bars as they were measured in the take. Change the words, the notes or the chords in the plug-in and render again - then keep working with your own instruments and plug-ins.
+
+Plenio 1.6 brings what it needs, in the Song API (API 1.4) and open to every program ([guide](docs/api/README.md)):
+
+- **Stems with every take** - a job asks for them, and Export Release saves vocals, drums, bass, other and the rest beside the song.
+- **The bars of a take** - where every measure lies in the take's audio, so that a DAW's tempo map and metronome keep to a song that never holds one tempo.
+- **The models a template needs** - installed, missing or of another size, and whether a template can run.
+
+▶ [Teaser](https://youtu.be/ppJcVOqIaJg) (72 s) · ▶ [Tutorial: your first song in your DAW](https://youtu.be/rhNspYujXto) (2:51) · [Plenio VST3 on GitHub](https://github.com/jplenio/Plenio-VST3)
 
 ## 🆕 New in 1.5
 
@@ -244,7 +266,7 @@ Restart ComfyUI, open **0 · System Check** from the template browser and run it
 | <a href="https://youtu.be/5vdi3ypvIuw"><img src="assets/branding/1.5.0/tutorial-10-song-api.jpg" alt="Tutorial 10 · Song API" width="180" /></a> | **[10 · Song API](https://youtu.be/5vdi3ypvIuw)** | Songs from your own programs: one POST, the job followed with `?wait`, the files, the song played - and the examples in Python, JavaScript and the shell. |
 | <a href="https://youtu.be/o7NtC3U2pEg"><img src="assets/branding/1.5.0/tutorial-11-yue2-loras.jpg" alt="Tutorial 11 · YuE2 LoRAs" width="180" /></a> | **[11 · YuE2 LoRAs](https://youtu.be/o7NtC3U2pEg)** | The LoRA node under the music model: the two halves a LoRA shapes, a LoRA chosen with its strength, an instrumental made with it, and what the node says after the run. |
 
-**▶ [Your idea. Your song. Your party.](https://youtu.be/myiZawtsja4)** - the spot (54 s) · **▶ [Your idea. Your song. Your control.](https://youtu.be/XpNpks9ZCgE)** - the first spot (54 s)
+**▶ [Your idea. Your song. Your party.](https://youtu.be/myiZawtsja4)** - the spot (54 s) · **▶ [Your idea. Your song. Your control.](https://youtu.be/XpNpks9ZCgE)** - the first spot (54 s) · **▶ [Plenio VST3: your first song in your DAW](https://youtu.be/rhNspYujXto)** (2:51)
 
 ## Documentation
 
