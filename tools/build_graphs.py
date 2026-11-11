@@ -2075,6 +2075,18 @@ def hq_switch(g: Graph, target: Node, name: str = "hq_mastering", *, on: bool = 
     return switch
 
 
+PRESET_SIZE = (HQ_SWITCH_SIZE[0], 76)
+PRESET_Y = WRITER_Y + 120 + SUMMARY_ROOM + 10
+"""Under the writer model, above the brief: group 1's settings for the whole song stand together."""
+
+
+def preset_field(g: Graph) -> Node:
+    """The template's *Preset* field in group 1 under the switches and the writer (PD 7.1): one of the player's six
+    presets sets the template's fields in the page. Made last, so that the template's other node ids stay as they
+    were."""
+    return g.add("PlenioPreset", (0, PRESET_Y), size=PRESET_SIZE, title="Preset", widgets={"preset": "none"})
+
+
 BEST_TAKE_SIZE = (320, 150 + SUMMARY_ROOM)
 
 
@@ -2937,7 +2949,8 @@ def yue2_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         brief=brief,
     )
     switch = hq_switch(g, master_block)
-    g.group("1 · SONG", [switch, writer, brief])
+    preset = preset_field(g)
+    g.group("1 · SONG", [switch, writer, preset, brief])
     g.group("2 · WRITE", [write, draft])
     g.group("3 · TEXT", [text_sheet])
     g.group("4 · SCORE", [plan, plan_seed_node, tools, arrange_node, arrangement, score_sheet])
@@ -3269,7 +3282,8 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     # the original lyrics are heard in the mix and in the vocal stem; the more confident hearing is kept
     g.link(sung_pitch, "vocals", asr, "vocals")
     switch = hq_switch(g, master_block)
-    g.group("1 · SOURCE", [switch, writer, source, excerpt])
+    preset = preset_field(g)
+    g.group("1 · SOURCE", [switch, writer, preset, source, excerpt])
     g.group("2 · COVER", [brief])
     g.group("3 · SCORE", [transcribe, tools, score_sheet, sung_pitch, arrange_node, arrangement])
     g.group("4 · LYRICS", [asr, heard, write, draft, source_switch, tags_switch])
@@ -3389,7 +3403,8 @@ def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         brief=brief,
     )
     switch = hq_switch(g, master_block)
-    g.group("1 · SONG", [switch, writer, brief])
+    preset = preset_field(g)
+    g.group("1 · SONG", [switch, writer, preset, brief])
     g.group("2 · WRITE", [write, draft])
     g.group("3 · SHEET", [sheet])
     g.group("4 · RENDER", [seed, render, best])
@@ -3533,7 +3548,8 @@ def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         brief=brief,
     )
     switch = hq_switch(g, master_block)
-    g.group("1 · SONG", [switch, writer, brief])
+    preset = preset_field(g)
+    g.group("1 · SONG", [switch, writer, preset, brief])
     g.group("2 · WRITE", [write, draft])
     g.group("3 · TEXT", [text_sheet])
     g.group("4 · DAW", [tools, score_sheet])

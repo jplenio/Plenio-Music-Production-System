@@ -90,6 +90,15 @@ def _request(template: Template) -> dict[str, Any]:
                 "default": True,
                 "description": "false: unknown fields are left out (named in warnings) instead of refused.",
             },
+            "preset": {
+                "type": "string",
+                "enum": ["best", "party", "sketch", "full", "takes", "instrumental"],
+                "description": (
+                    "Plenio 2.0: one of the player's six presets (resources/presets/make.json) - its fields and "
+                    "release values are used where the request names none; what the request names wins. "
+                    "'takes' sets only its fields here (a job is one take)."
+                ),
+            },
             "stems": {
                 "type": "boolean",
                 "default": False,

@@ -481,11 +481,13 @@ def test_audio_hq_runs_in_the_master_block_before_the_eq() -> None:
         switch_slot = next(slot for slot in wrapper["inputs"] if slot["name"] == "hq_mastering")
         switch_link = next(link for link in template["links"] if link[0] == switch_slot["link"])
         switch = next(n for n in template["nodes"] if n["id"] == switch_link[1])
-        # off, the first node of group 1, and made last (only the Models note and, since 1.4, the YuE2 LoRAs after
-        # it): the template's other node ids stay as they were
+        # off, the first node of group 1, and made last (only the Models note, since 1.4 the YuE2 LoRAs and since
+        # 2.0 the Preset field after it): the template's other node ids stay as they were
         assert switch["type"] == "PlenioHQMastering" and switch["widgets_values"] == [False], name
         real = [
-            n["id"] for n in template["nodes"] if n["type"] not in ("MarkdownNote", "Note", "PlenioLoras")
+            n["id"]
+            for n in template["nodes"]
+            if n["type"] not in ("MarkdownNote", "Note", "PlenioLoras", "PlenioPreset")
         ]
         assert switch["pos"] == [0, 0] and switch["id"] == max(real), name
         assert [link[3] for link in template["links"] if link[1] == switch["id"]] == [wrapper["id"]], name

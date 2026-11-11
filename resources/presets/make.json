@@ -1,0 +1,57 @@
+{
+  "schema": "plenio.presets/1",
+  "presets": [
+    {
+      "id": "best",
+      "name": "Best quality",
+      "text": "HQ mastering, cover art, the best of three takes for the words, FLAC and MP3 - takes longest",
+      "icon": "star",
+      "fields": {},
+      "studio": {
+        "fields": { "finish.hq_mastering": true, "finish.cover_art": true, "lyrics_fidelity": "highest - best of 3 takes" },
+        "release": { "flac": true, "mp3": true }
+      }
+    },
+    {
+      "id": "party",
+      "name": "Party - fast",
+      "text": "About 1:30 with cover art, ready in a few minutes",
+      "icon": "live",
+      "fields": { "length": "short (about 1:30)" },
+      "studio": { "fields": { "finish.hq_mastering": false, "finish.cover_art": true, "lyrics_fidelity": "standard" } }
+    },
+    {
+      "id": "sketch",
+      "name": "Quick sketch",
+      "text": "About 1:00, no cover art - the fastest way to hear an idea",
+      "icon": "bolt",
+      "fields": { "length": "very short (about 1:00)" },
+      "studio": { "fields": { "finish.hq_mastering": false, "finish.cover_art": false, "lyrics_fidelity": "standard" } }
+    },
+    {
+      "id": "full",
+      "name": "Full song",
+      "text": "About 3:00, HQ mastering, cover art, the better of two takes",
+      "icon": "music",
+      "fields": { "length": "standard (about 3:00)" },
+      "studio": { "fields": { "finish.hq_mastering": true, "finish.cover_art": true, "lyrics_fidelity": "high - best of 2 takes" } }
+    },
+    {
+      "id": "takes",
+      "name": "Three takes",
+      "text": "One song, sung and played three times - keep the take you like best",
+      "icon": "layers",
+      "fields": {},
+      "studio": { "fields": { "finish.cover_art": true } },
+      "takes": 3
+    },
+    {
+      "id": "instrumental",
+      "name": "Instrumental",
+      "text": "No singing - for the background, a video, a game",
+      "icon": "wave",
+      "fields": { "vocals": "instrumental" },
+      "studio": { "fields": { "finish.cover_art": true } }
+    }
+  ]
+}

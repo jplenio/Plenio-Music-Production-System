@@ -51,7 +51,8 @@ import { SEED_NODE, installSeedNode } from './seedNode'
 import { SETUP_COMMAND, installSetupTab } from './setupTab'
 import { installSeedsFollowMode } from './seedsFollowMode'
 import { SHEET_STATE_TYPE, setFetcher, sheetStateWidget } from './sheetStateWidget'
-import { FINISH_SWITCH_TYPE, finishSwitchWidget, refreshFinishSwitches } from './finishSwitch'
+import { FINISH_SWITCH_TYPE, finishSwitchWidget, refreshFinishSwitches, setCover } from './finishSwitch'
+import { NONE as NO_PRESET, PRESET_NODE, applyChanges, changesFor } from './preset'
 import { RELOAD_HINT, codeIsStale, importOrReload, loadFresh } from './staleCode'
 import { addStemMixer } from './stemMixer'
 import { installStyles } from './style'
@@ -131,6 +132,31 @@ function workflowLacksFiles(): boolean {
 }
 
 let setupTab: { open(focus?: string | null): void } | null = null
+
+/** A preset chosen in a template's Preset field: its fields set in the page, one undo step (preset.ts). */
+async function applyPresetChoice(preset: string): Promise<void> {
+  if (preset === NO_PRESET) return
+  const graphNow = comfyApp.graph as (GraphNodes & { extra?: { plenio_api?: { id?: string } } }) | undefined
+  const template = graphNow?.extra?.plenio_api?.id
+  const toast = comfyApp.extensionManager?.toast
+  if (!graphNow || !template) {
+    toast?.add({ severity: 'info', summary: 'Preset', detail: 'This workflow is not a Plenio template: the preset sets nothing here.', life: 8000 })
+    return
+  }
+  try {
+    const changes = (await changesFor(comfyApi, template))[preset] ?? []
+    const changed = applyChanges(graphNow, changes, (name, on) => {
+      if (name === 'cover') setCover(graphNow as Parameters<typeof setCover>[0], on)
+    })
+    refreshFinishSwitches()
+    ;(comfyApp.graph as { setDirtyCanvas?: (a: boolean, b: boolean) => void } | undefined)?.setDirtyCanvas?.(true, true)
+    const workflow = comfyApp.extensionManager?.workflow?.activeWorkflow as { changeTracker?: { checkState?: () => void } } | undefined
+    workflow?.changeTracker?.checkState?.()
+    toast?.add({ severity: 'success', summary: 'Preset', detail: changed.length ? `Set: ${changed.join(', ')} (Ctrl+Z takes it back)` : 'Everything was set already.', life: 6000 })
+  } catch (error) {
+    console.error('Plenio: the preset could not be applied', error)
+  }
+}
 /** The last error a run of this page gave (a problem report carries it). */
 let lastRunError: unknown = null
 
@@ -313,6 +339,19 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
       nodeType.prototype.onExecuted = chain(nodeType.prototype.onExecuted, function (this: ComfyNode, output) {
         for (const note of (output?.plenio_asr as AsrNote[] | undefined) ?? []) setAsrNote(note)
       })
+    }
+    if (nodeData.name === PRESET_NODE) {
+      const created = (nodeType.prototype as ComfyNode & { onNodeCreated?: () => void }).onNodeCreated
+      ;(nodeType.prototype as ComfyNode & { onNodeCreated?: () => void }).onNodeCreated = function (this: ComfyNode) {
+        created?.call(this)
+        const widget = this.widgets?.find((w) => w.name === 'preset') as { callback?: (value: unknown) => void } | undefined
+        if (!widget) return
+        const own = widget.callback
+        widget.callback = (value: unknown) => {
+          own?.(value)
+          void applyPresetChoice(String(value))
+        }
+      }
     }
     if (nodeData.name === 'PlenioEQ') {
       const curves = new WeakMap<ComfyNode, ReturnType<typeof addEqCurve>>()

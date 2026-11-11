@@ -4481,6 +4481,40 @@
    "category": "Plenio/Writing",
    "display_name": "Parse Song Draft"
   },
+  "PlenioPreset": {
+   "input": {
+    "required": {
+     "preset": [
+      "COMBO",
+      {
+       "tooltip": "none: the template as it is. best, party, sketch, full, takes, instrumental: the player's presets - the node's help page lists what each sets.",
+       "default": "none",
+       "multiselect": false,
+       "options": [
+        "none",
+        "best",
+        "party",
+        "sketch",
+        "full",
+        "takes",
+        "instrumental"
+       ]
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "preset"
+    ]
+   },
+   "output": [],
+   "output_name": [],
+   "output_is_list": [],
+   "output_node": false,
+   "category": "Plenio/Song",
+   "display_name": "Preset"
+  },
   "PlenioRefine": {
    "input": {
     "required": {

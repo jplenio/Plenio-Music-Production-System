@@ -1,7 +1,7 @@
 {
  "id": "b96be7a0-0f56-5627-8df4-99ad092a11ce",
  "revision": 0,
- "last_node_id": 19,
+ "last_node_id": 20,
  "last_link_id": 44,
  "nodes": [
   {
@@ -33,7 +33,7 @@
    "type": "PlenioSongBrief",
    "pos": [
     0,
-    560
+    702
    ],
    "size": [
     520,
@@ -385,7 +385,7 @@
    "type": "a469aeef-bca2-5738-b40d-1130a141291b",
    "pos": [
     0.0,
-    1966.0
+    2108.0
    ],
    "size": [
     380,
@@ -1983,6 +1983,40 @@
   },
   {
    "id": 19,
+   "type": "PlenioPreset",
+   "pos": [
+    0,
+    548
+   ],
+   "size": [
+    520,
+    76
+   ],
+   "flags": {},
+   "order": 18,
+   "mode": 0,
+   "inputs": [
+    {
+     "localized_name": "preset",
+     "name": "preset",
+     "type": "COMBO",
+     "widget": {
+      "name": "preset"
+     },
+     "link": null
+    }
+   ],
+   "outputs": [],
+   "title": "Preset",
+   "properties": {
+    "Node name for S&R": "PlenioPreset"
+   },
+   "widgets_values": [
+    "none"
+   ]
+  },
+  {
+   "id": 20,
    "type": "MarkdownNote",
    "pos": [
     -1120,
@@ -1993,7 +2027,7 @@
     1500
    ],
    "flags": {},
-   "order": 18,
+   "order": 19,
    "mode": 0,
    "inputs": [],
    "outputs": [],
@@ -2368,7 +2402,7 @@
     2050,
     -110.0,
     900,
-    1950.0
+    2092.0
    ],
    "color": "#9a6a2c",
    "font_size": 32,
@@ -2394,7 +2428,7 @@
     -30,
     -110.0,
     580,
-    1950.0
+    2092.0
    ],
    "color": "#3f789e",
    "font_size": 32,
@@ -2407,7 +2441,7 @@
     590,
     -110.0,
     460,
-    1950.0
+    2092.0
    ],
    "color": "#2f7d6d",
    "font_size": 32,
@@ -2420,7 +2454,7 @@
     1090,
     -110.0,
     480,
-    1950.0
+    2092.0
    ],
    "color": "#557a35",
    "font_size": 32,
@@ -2433,7 +2467,7 @@
     1610,
     -110.0,
     400,
-    1950.0
+    2092.0
    ],
    "color": "#6e4f9e",
    "font_size": 32,
@@ -2444,7 +2478,7 @@
    "title": "MUSIC MODEL",
    "bounding": [
     -30.0,
-    1880.0,
+    2022.0,
     320.0,
     116.0
    ],

@@ -242,3 +242,35 @@ describe('Home', () => {
     expect(HOME_TEMPLATES.map((t) => t.template)).toContain(SONG)
   })
 })
+
+describe('the Preset field', () => {
+  it('changes exactly the widgets it names and the switch', async () => {
+    const { applyChanges } = await import('../src/extension/preset')
+    const length = { name: 'length', value: 'about 2:00', callback: undefined as undefined | ((v: unknown) => void) }
+    const seen: unknown[] = []
+    length.callback = (v) => seen.push(v)
+    const other = { name: 'genre', value: 'pop' }
+    const graph = { nodes: [{ id: 2, widgets: [length, other] }] as never[] }
+    const switches: [string, boolean][] = []
+    const changed = applyChanges(
+      graph,
+      [
+        { field: 'length', node: 2, input: 'length', value: 'very short (about 1:00)' },
+        { field: 'missing', node: 99, input: 'x', value: 1 },
+        { field: 'finish.cover_art', switch: 'cover', value: false }
+      ],
+      (name, on) => switches.push([name, on])
+    )
+    expect(changed).toEqual(['length', 'finish.cover_art'])
+    expect(length.value).toBe('very short (about 1:00)')
+    expect(seen).toEqual(['very short (about 1:00)'])
+    expect(other.value).toBe('pop')
+    expect(switches).toEqual([['cover', false]])
+  })
+
+  it('the player reads the six presets of the shared file', async () => {
+    const { BUILT_IN_PRESETS } = await import('../src/player/make/presets')
+    expect(BUILT_IN_PRESETS.map((p) => p.id)).toEqual(['best', 'party', 'sketch', 'full', 'takes', 'instrumental'])
+    expect(BUILT_IN_PRESETS.every((p) => p.builtIn)).toBe(true)
+  })
+})

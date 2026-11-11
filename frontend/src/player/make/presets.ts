@@ -4,6 +4,7 @@
  * cover art, lyrics fidelity, the formats …) and how many takes. A preset sets only what applies to the one who uses
  * it: the party's guests get its form fields (a length, the vocals), the whole studio everything.
  */
+import makePresets from '../../../../resources/presets/make.json'
 import { nearestLength, type Draft, type FormData, type StudioSpec } from './form'
 
 export interface MakePreset {
@@ -21,65 +22,12 @@ export interface MakePreset {
   takes?: number
 }
 
-const FIDELITY = { one: 'standard', two: 'high - best of 2 takes', three: 'highest - best of 3 takes' }
-
-export const BUILT_IN_PRESETS: MakePreset[] = [
-  {
-    id: 'best',
-    name: 'Best quality',
-    text: 'HQ mastering, cover art, the best of three takes for the words, FLAC and MP3 - takes longest',
-    icon: 'star',
-    builtIn: true,
-    fields: {},
-    studio: { fields: { 'finish.hq_mastering': true, 'finish.cover_art': true, lyrics_fidelity: FIDELITY.three }, release: { flac: true, mp3: true } },
-  },
-  {
-    id: 'party',
-    name: 'Party - fast',
-    text: 'About 1:30 with cover art, ready in a few minutes',
-    icon: 'live',
-    builtIn: true,
-    fields: { length: 'short (about 1:30)' },
-    studio: { fields: { 'finish.hq_mastering': false, 'finish.cover_art': true, lyrics_fidelity: FIDELITY.one } },
-  },
-  {
-    id: 'sketch',
-    name: 'Quick sketch',
-    text: 'About 1:00, no cover art - the fastest way to hear an idea',
-    icon: 'bolt',
-    builtIn: true,
-    fields: { length: 'very short (about 1:00)' },
-    studio: { fields: { 'finish.hq_mastering': false, 'finish.cover_art': false, lyrics_fidelity: FIDELITY.one } },
-  },
-  {
-    id: 'full',
-    name: 'Full song',
-    text: 'About 3:00, HQ mastering, cover art, the better of two takes',
-    icon: 'music',
-    builtIn: true,
-    fields: { length: 'standard (about 3:00)' },
-    studio: { fields: { 'finish.hq_mastering': true, 'finish.cover_art': true, lyrics_fidelity: FIDELITY.two } },
-  },
-  {
-    id: 'takes',
-    name: 'Three takes',
-    text: 'One song, sung and played three times - keep the take you like best',
-    icon: 'layers',
-    builtIn: true,
-    fields: {},
-    studio: { fields: { 'finish.cover_art': true } },
-    takes: 3,
-  },
-  {
-    id: 'instrumental',
-    name: 'Instrumental',
-    text: 'No singing - for the background, a video, a game',
-    icon: 'wave',
-    builtIn: true,
-    fields: { vocals: 'instrumental' },
-    studio: { fields: { 'finish.cover_art': true } },
-  },
-]
+/** The six ready-made presets: one file for the player, the Song API and the templates' preset field
+ * (``resources/presets/make.json``). */
+export const BUILT_IN_PRESETS: MakePreset[] = (makePresets.presets as unknown as Omit<MakePreset, 'builtIn'>[]).map((preset) => ({
+  ...preset,
+  builtIn: true
+}))
 
 /** The form's fields a preset keeps: every field of the form but the description (that is the song, not a setting). */
 const KEPT_FIELDS = ['template', 'genre', 'mood', 'tempo', 'length', 'vocals', 'language', 'voice', 'theme', 'key', 'meter']

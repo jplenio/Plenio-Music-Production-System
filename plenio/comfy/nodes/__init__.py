@@ -18,6 +18,7 @@ from .loras import PlenioLoras
 from .loudness import PlenioLoudness
 from .model_choice import PlenioModelChoice
 from .parse import PlenioParseDraft
+from .preset import PlenioPreset
 from .refine import PlenioRefine
 from .score_tools import PlenioScoreTools
 from .seed import PlenioSeed
@@ -42,6 +43,7 @@ NODES = (
     PlenioFitLyrics,
     PlenioWriterChoice,
     PlenioModelChoice,
+    PlenioPreset,
     PlenioLocalLLM,
     PlenioSongSheet,
     PlenioScoreTools,

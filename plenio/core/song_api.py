@@ -206,6 +206,10 @@ def brief_node(workflow: Mapping[str, Any]) -> Mapping[str, Any] | None:
     return next((n for n in _top_nodes(workflow) if n.get("type") in BRIEF_TYPES), None)
 
 
+NOT_FIELDS = NOTE_TYPES | {"PlenioPreset"}
+"""Nodes of the song groups that give the API no field: notes, and the Preset field (a request names ``preset``)."""
+
+
 def song_nodes(workflow: Mapping[str, Any]) -> list[Mapping[str, Any]]:
     """The nodes of the song groups (the groups numbered up to the brief's), the brief first, then the others as
     the canvas shows them (group by group, top to bottom)."""
@@ -223,7 +227,7 @@ def song_nodes(workflow: Mapping[str, Any]) -> list[Mapping[str, Any]]:
     for group in groups:
         members = [n for n in _top_nodes(workflow) if _inside(n, group) and n is not brief]
         members.sort(key=lambda n: (float(n["pos"][1]), float(n["pos"][0])))
-        found += [n for n in members if str(n.get("type")) not in NOTE_TYPES and n not in found]
+        found += [n for n in members if str(n.get("type")) not in NOT_FIELDS and n not in found]
     return found
 
 

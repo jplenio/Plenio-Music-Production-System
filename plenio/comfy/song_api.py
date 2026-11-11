@@ -33,6 +33,7 @@ from ..core import brief as brief_rules
 from ..core import song_api
 from ..core.access import Route
 from ..core.errors import PlenioUserError
+from ..core.presets import load_presets, template_changes, with_preset
 from ..core.release import RECORD_SCHEMA
 from ..core.song_api import SongApiError
 from ..core.song_api_doc import openapi
@@ -127,6 +128,26 @@ def guarded(handler: Handler) -> Handler:
             )
 
     return wrapper
+
+
+def _presets() -> dict[str, Any]:
+    from .shared import RESOURCES
+
+    return load_presets(RESOURCES / "presets" / "make.json")
+
+
+async def presets_get(request: web.Request) -> web.StreamResponse:
+    """The six presets, and - with ``?template=<API id>`` - what each changes in that template (its *Preset*
+    field applies it in the page)."""
+    presets = _presets()
+    answer: dict[str, Any] = {
+        "presets": [{"id": p.id, "name": p.name, "text": p.text} for p in presets.values()]
+    }
+    template_id = request.query.get("template", "")
+    if template_id:
+        template = _template(template_id, _lookup())
+        answer["changes"] = {p.id: template_changes(template, p) for p in presets.values()}
+    return web.json_response(answer)
 
 
 def _style(template_id: str) -> brief_rules.Template | None:
@@ -662,6 +683,7 @@ async def _create(data: dict[str, Any], key: str) -> web.StreamResponse:
     if not isinstance(client, dict):
         raise SongApiError("bad_request", "'client' is an object of texts.", field="client")
     client = {str(k)[:40]: str(v)[:200] for k, v in list(client.items())[:12]}
+    data = with_preset(data, _presets())
     prepared = song_api.prepare(template, data, info, rng=random.Random(), styles=_style)
     meta = {
         "api": song_api.API_VERSION,
@@ -1046,8 +1068,10 @@ ROUTES: tuple[Route, ...] = (
     Route("DELETE", f"{BASE}/jobs/{{job_id}}", job_delete, "api"),
     Route("GET", f"{BASE}/queue", queue_info, "api"),
     Route("GET", f"{BASE}/models", models_info, "api"),
+    Route("GET", "/plenio/presets", presets_get, "data"),
 )
-"""The Song API's routes: all of the access class ``api`` (``core.access.CLASSES``)."""
+"""The Song API's routes, of the access class ``api`` (``core.access.CLASSES``) - and the presets for the templates'
+*Preset* field (``data``: names and the template's fields only)."""
 
 
 def register(routes: web.RouteTableDef) -> None:
