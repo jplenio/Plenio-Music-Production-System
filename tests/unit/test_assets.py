@@ -156,6 +156,7 @@ def test_http_fetch_honours_cancellation(server: str, tmp_path: Path) -> None:
         http_fetch(server, tmp_path / "x.part", len(PAYLOAD), None, lambda: True)
 
 
+@pytest.mark.io
 def test_http_fetch_unreachable_host_is_actionable(tmp_path: Path) -> None:
     with pytest.raises(PlenioAssetError, match="Could not download"):
         http_fetch("http://127.0.0.1:9/none", tmp_path / "x.part", 10, None, None)

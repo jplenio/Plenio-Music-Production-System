@@ -52,6 +52,7 @@ def test_crash_reports_exit_code_and_stderr_tail(tmp_path: Path) -> None:
     assert list(tmp_path.iterdir()) == []
 
 
+@pytest.mark.process
 def test_idle_timeout(tmp_path: Path) -> None:
     started = time.monotonic()
     with pytest.raises(PlenioWorkerError, match="no progress"):
@@ -59,11 +60,13 @@ def test_idle_timeout(tmp_path: Path) -> None:
     assert time.monotonic() - started < 15
 
 
+@pytest.mark.process
 def test_total_timeout_even_with_progress(tmp_path: Path) -> None:
     with pytest.raises(PlenioWorkerError, match="did not finish"):
         run("busy", tmp_path, limits=WorkerLimits(timeout_s=1.5, idle_timeout_s=10))
 
 
+@pytest.mark.process
 def test_cancel_stops_the_worker(tmp_path: Path) -> None:
     flag = threading.Event()
     threading.Timer(0.8, flag.set).start()

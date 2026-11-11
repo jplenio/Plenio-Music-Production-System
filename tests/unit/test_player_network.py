@@ -36,12 +36,12 @@ def free_ports(size: int = 4) -> range:
             continue
         try:
             for port in range(base, base + size):
-                with socket.socket() as taken:
-                    taken.settimeout(0.2)  # a listener answers at once; a refusal takes Windows seconds
-                    if taken.connect_ex(("127.0.0.1", port)) == 0:
-                        raise OSError(f"{port} answers")
+                # taking the port on every address, alone, fails at once when anything holds it on any
+                # address (asking each port for an answer waited 0.2 s for every refusal on Windows)
                 with socket.socket() as free:
-                    free.bind(("127.0.0.1", port))
+                    if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+                        free.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+                    free.bind(("0.0.0.0", port))  # noqa: S104 - bound and closed, never listening
         except OSError:
             continue
         return range(base, base + size)
@@ -206,6 +206,7 @@ def test_a_websocket_stays_open_both_ways(tmp_path: Path) -> None:
         upstream.close()
 
 
+@pytest.mark.io
 def test_a_new_link_shuts_the_old_one_out_and_off_closes_the_doors(access: NetworkAccess) -> None:
     status = access.configure({"on": True})
     port, old = status["port"], access.token

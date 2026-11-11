@@ -40,6 +40,8 @@ markers = [
   "comfy: needs an importable ComfyUI checkout (PLENIO_COMFYUI_ROOT)",
   "host: starts a real ComfyUI server (PLENIO_COMFYUI_ROOT, slow)",
   "smoke: runs real models on local hardware (PLENIO_SMOKE=1, very slow)",
+  "io: waits for a socket or the file system (a refused connection takes Windows two seconds)",
+  "process: starts a real process (a player, a worker, a fake llama-server)",
 ]
 
 [tool.ruff]

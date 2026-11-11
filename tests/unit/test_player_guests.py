@@ -72,6 +72,7 @@ def ids(library: Library) -> dict[str, str]:
     return {s["title"]: s["id"] for s in library.songs()}
 
 
+@pytest.mark.io
 def test_the_access_is_off_until_switched_on_and_answers_only_below_its_token(
     party: tuple[Library, GuestHub, int],
 ) -> None:

@@ -8,7 +8,9 @@ ComfyUI server; ``smoke`` runs real models (``PLENIO_SMOKE=1``).
 from __future__ import annotations
 
 import os
+import socketserver
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
@@ -41,6 +43,47 @@ def pytest_terminal_summary(terminalreporter: pytest.TerminalReporter) -> None:
         message = f"{report.nodeid}: {crash.message if crash else report.longrepr}"[:1000]
         message = message.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
         terminalreporter.write_line(f"::error file={path.as_posix()},line={line}::{message}")
+
+
+SERVER_POLL_S = 0.02
+"""How often a test's server looks for its shutdown. The standard library's default is half a second, and
+``shutdown()`` waits for the next look: every test that stops a server paid up to that."""
+TEST_PASSWORD_ROUNDS = 1_000
+"""PBKDF2 rounds for passwords set in tests; the player's own number is asserted by one test."""
+
+
+@pytest.fixture(scope="session", autouse=True)
+def quick_servers() -> Iterator[None]:
+    """Servers started in this process stop at once (see ``SERVER_POLL_S``); what they answer is unchanged."""
+    original = socketserver.BaseServer.serve_forever
+
+    def serve_forever(self: socketserver.BaseServer, poll_interval: float = SERVER_POLL_S) -> None:
+        original(self, poll_interval)
+
+    patch = pytest.MonkeyPatch()
+    patch.setattr(socketserver.BaseServer, "serve_forever", serve_forever)
+    yield
+    patch.undo()
+
+
+@pytest.fixture(scope="session")
+def production_password_rounds() -> int:
+    """The rounds the player gives a new password, read before the tests lower them."""
+    from plenio.player import accounts
+
+    return accounts.ITERATIONS
+
+
+@pytest.fixture(scope="session", autouse=True)
+def quick_passwords(production_password_rounds: int) -> Iterator[None]:
+    """Passwords set in tests are hashed with few rounds: a login costs a millisecond, not a tenth of a
+    second. A stored password is still checked with the rounds stored beside it."""
+    from plenio.player import accounts
+
+    patch = pytest.MonkeyPatch()
+    patch.setattr(accounts, "ITERATIONS", TEST_PASSWORD_ROUNDS)
+    yield
+    patch.undo()
 
 
 @pytest.fixture(scope="session")

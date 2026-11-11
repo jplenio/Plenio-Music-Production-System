@@ -248,3 +248,20 @@ def test_only_the_admin_or_a_helper_takes_songs_out_of_the_library(tmp_path: Pat
     finally:
         server.shutdown()
         server.server_close()
+
+
+def test_a_new_password_gets_the_players_rounds_and_an_old_one_is_checked_with_its_own(
+    tmp_path: Path, production_password_rounds: int, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # the tests lower the rounds (tests/conftest.py); what the player ships is this
+    assert production_password_rounds == 240_000
+    from plenio.player import accounts as accounts_module
+
+    monkeypatch.setattr(accounts_module, "ITERATIONS", production_password_rounds)
+    accounts = Accounts(tmp_path)
+    anna = accounts.create("Anna", "secret1")
+    stored = json.loads((tmp_path / "users.json").read_text(encoding="utf-8"))
+    assert stored["users"][0]["iterations"] == 240_000
+    # the rounds change later (here: back to the tests' few): the stored password is checked with its own
+    monkeypatch.setattr(accounts_module, "ITERATIONS", 1_000)
+    assert accounts.login(anna["id"], "secret1")[1]["id"] == anna["id"]

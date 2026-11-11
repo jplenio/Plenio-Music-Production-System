@@ -60,8 +60,9 @@ class AccountError(ValueError):
         self.status = status
 
 
-def _hash(password: str, salt: bytes, iterations: int = ITERATIONS) -> str:
-    return hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, iterations).hex()
+def _hash(password: str, salt: bytes, iterations: int | None = None) -> str:
+    """PBKDF2-SHA256 of a password; without ``iterations``, with the rounds a new password gets."""
+    return hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, iterations or ITERATIONS).hex()
 
 
 def session_key(token: str) -> str:

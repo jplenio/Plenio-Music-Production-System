@@ -591,6 +591,7 @@ def test_a_port_held_by_a_busy_listener_is_not_free() -> None:
     assert launch._port_free(free) is True
 
 
+@pytest.mark.process
 def test_two_clicks_at_once_start_one_player(
     songs: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -624,6 +625,7 @@ def test_two_clicks_at_once_start_one_player(
         urllib.request.urlopen(quit_request, timeout=5).close()
 
 
+@pytest.mark.process
 def test_comfyui_starts_a_player_of_its_own_and_finds_it_again(
     songs: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

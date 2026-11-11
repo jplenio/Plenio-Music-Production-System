@@ -284,6 +284,7 @@ def test_a_changed_model_file_is_another_model(tmp_path: Path) -> None:
     assert broken.get("k") is None  # an unreadable entry is a miss
 
 
+@pytest.mark.io
 def test_an_app_that_is_not_running_gets_its_start_hint() -> None:
     server = llm.Server(
         "Ollama", f"http://127.0.0.1:{closed_port()}", protocol="ollama", start_hint="Run it."
@@ -598,6 +599,7 @@ def fake_runtime(tmp_path: Path) -> Iterator[llm.Runtime]:
     runtime.KEPT.release()
 
 
+@pytest.mark.process
 def test_a_file_is_served_for_one_answer(tmp_path: Path, fake_runtime: llm.Runtime) -> None:
     model = llm.Model("models/LLM", "tiny.gguf", path=touch(tmp_path / "tiny.gguf", 1000), size=1000)
     room: list[int] = []
@@ -610,6 +612,7 @@ def test_a_file_is_served_for_one_answer(tmp_path: Path, fake_runtime: llm.Runti
     assert runtime.KEPT.server is None  # stopped: its memory is free again
 
 
+@pytest.mark.process
 def test_keep_loaded_reuses_the_server(tmp_path: Path, fake_runtime: llm.Runtime) -> None:
     model = llm.Model("models/LLM", "tiny.gguf", path=touch(tmp_path / "tiny.gguf"), size=10)
     room: list[int] = []
@@ -622,6 +625,7 @@ def test_keep_loaded_reuses_the_server(tmp_path: Path, fake_runtime: llm.Runtime
     assert runtime.KEPT.server is None and not kept.running
 
 
+@pytest.mark.process
 def test_a_runtime_that_cannot_load_the_file_says_why(tmp_path: Path, fake_runtime: llm.Runtime) -> None:
     model = llm.Model("models/LLM", "broken.gguf", path=touch(tmp_path / "broken.gguf"))
     with pytest.raises(PlenioWorkerError) as error:
