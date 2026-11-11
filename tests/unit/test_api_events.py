@@ -37,6 +37,31 @@ def test_a_subscriber_gets_what_it_may_see() -> None:
     run(body())
 
 
+def test_a_token_sees_no_job_of_this_computer_live_or_replayed() -> None:
+    async def body() -> None:
+        hub = EventHub()
+        loop = asyncio.get_running_loop()
+        token = hub.subscribe(loop, here=False, owner="token:a")
+        first = hub.publish("job.queued", {"id": "local"}, owner="here")
+        hub.publish("job.queued", {"id": "open"}, owner="remote")
+        hub.publish("job.queued", {"id": "mine"}, owner="token:a")
+        await asyncio.sleep(0)
+        assert [e.data["id"] for e in drain(token)] == ["mine"]
+        again = hub.subscribe(loop, here=False, owner="token:a", after=first.id)
+        assert [e.data["id"] for e in drain(again)] == ["mine"]
+
+    run(body())
+
+
+def test_a_closed_loop_drops_its_subscriber() -> None:
+    hub = EventHub()
+    loop = asyncio.new_event_loop()
+    gone = hub.subscribe(loop, here=True, owner=None)
+    loop.close()
+    hub.publish("job.queued", {"id": "j"})
+    assert gone.dropped
+
+
 def test_a_reconnect_replays_what_it_missed_and_progress_is_not_kept() -> None:
     async def body() -> None:
         hub = EventHub()

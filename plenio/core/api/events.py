@@ -56,7 +56,7 @@ class Subscriber:
     def wants(self, event: Event) -> bool:
         if event.local and not self.here:
             return False
-        return not (self.owner is not None and event.owner and event.owner != self.owner)
+        return self.owner is None or event.owner == self.owner  # a token: its own jobs, nobody else's
 
 
 class TooManyStreamsError(Exception):
@@ -84,7 +84,10 @@ class EventHub:
             subscribers = list(self._subscribers)
         for subscriber in subscribers:
             if subscriber.wants(event) and not subscriber.dropped:
-                subscriber.loop.call_soon_threadsafe(_offer, subscriber, event)
+                try:
+                    subscriber.loop.call_soon_threadsafe(_offer, subscriber, event)
+                except RuntimeError:  # its loop is closed: the stream is gone
+                    subscriber.dropped = True
         return event
 
     def subscribe(

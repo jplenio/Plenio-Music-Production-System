@@ -6,7 +6,7 @@
  "body": {
   "error": {
    "code": "not_found",
-   "message": "The job has no song yet (it is failed)."
+   "message": "The job has no finished song (it is failed)."
   }
  }
 }

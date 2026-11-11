@@ -568,6 +568,28 @@ def _result(item: dict[str, Any], prompt_id: str = "") -> dict[str, Any] | None:
     return None
 
 
+def _extra(item: Any) -> dict[str, Any]:
+    """The Song API's meta of a queue item or a history entry (``{}``: not the API's)."""
+    prompt = item.get("prompt") if isinstance(item, dict) else item
+    extra = prompt[3] if isinstance(prompt, (list, tuple)) and len(prompt) > 3 else None
+    meta = extra.get("plenio_api") if isinstance(extra, dict) else None
+    return meta if isinstance(meta, dict) else {}
+
+
+def prompt_owner(prompt_id: str) -> str:
+    """Who queued an API run (``here``, ``remote``, ``token:<id>``; ``""``: before 2.0 or not the API's)."""
+    running, pending = _queue_items()
+    item: Any = next((x for x in running + pending if x[1] == prompt_id), None)
+    if item is None:
+        item = _history(prompt_id)
+    return str(_extra(item).get("owner") or "")
+
+
+def _hidden(caller: str, prompt_id: str) -> bool:
+    """A token sees only its own runs (as in v2); this computer and an open API see every run, as in 1.6."""
+    return caller.startswith("token:") and prompt_owner(prompt_id) != caller
+
+
 def job_view(prompt_id: str) -> dict[str, Any] | None:
     """A job as the API shows it (``None``: ComfyUI knows no such prompt)."""
     with _lock:
@@ -779,7 +801,7 @@ async def jobs_create(request: web.Request) -> web.StreamResponse:
     if key and owner.startswith("token:"):
         key = f"{owner}|{key}"  # a key belongs to its token
     if not key:
-        return await _create(data, key)
+        return await _create(data, key, owner)
     lock = _key_locks.setdefault(key, asyncio.Lock())
     try:
         async with lock:
@@ -788,11 +810,11 @@ async def jobs_create(request: web.Request) -> web.StreamResponse:
                 for old in [k for k, (_, at) in _keys.items() if now - at > KEYS_KEPT_S]:
                     _keys.pop(old, None)
                 known = _keys.get(key)
-            if known is not None:
+            if known is not None and not _hidden(owner, known[0]):
                 view = job_view(known[0])
                 if view is not None:
                     return web.json_response(view, status=200)
-            return await _create(data, key)
+            return await _create(data, key, owner)
     finally:
         if not lock.locked() and not getattr(lock, "_waiters", None):
             _key_locks.pop(key, None)
@@ -800,10 +822,10 @@ async def jobs_create(request: web.Request) -> web.StreamResponse:
 
 async def create_job(data: dict[str, Any]) -> web.StreamResponse:
     """Queue a job as ``POST /jobs`` does, for Plenio's own pages (Setup's test song); raises :class:`SongApiError`."""
-    return await _create(data, "")
+    return await _create(data, "", "here")
 
 
-async def _create(data: dict[str, Any], key: str) -> web.StreamResponse:
+async def _create(data: dict[str, Any], key: str, owner: str) -> web.StreamResponse:
     template_id = data.get("template")
     if not isinstance(template_id, str) or not template_id:
         raise SongApiError(
@@ -827,6 +849,7 @@ async def _create(data: dict[str, Any], key: str) -> web.StreamResponse:
         "release": prepared.release,
         "documents": prepared.documents,
         "stems": prepared.stems,
+        "owner": owner,
     }
     refused = await asyncio.to_thread(model_choice_errors, prepared.prompt)
     missing = _missing_files(refused)
@@ -940,7 +963,8 @@ async def jobs_list(request: web.Request) -> web.StreamResponse:
         extra = prompt[3] if isinstance(prompt, (list, tuple)) and len(prompt) > 3 else {}
         if isinstance(extra, dict) and extra.get("plenio_api") and prompt_id not in ids:
             ids.append(str(prompt_id))
-    views = [v for v in (job_view(i) for i in ids) if v is not None]
+    caller = owner_of(request)
+    views = [v for v in (job_view(i) for i in ids if not _hidden(caller, i)) if v is not None]
     views = [
         v
         for v in views
@@ -961,7 +985,7 @@ async def job_get(request: web.Request) -> web.StreamResponse:
     """A job - with ``?wait=<seconds>`` (at most 60) the answer comes when its status, its place in the queue or its
     stage changes, or the time is up: a program follows a song without asking every second."""
     job_id = request.match_info["job_id"]
-    view = job_view(job_id)
+    view = None if _hidden(owner_of(request), job_id) else job_view(job_id)
     if view is None:
         raise SongApiError(
             "not_found", "ComfyUI knows no such job (it may have been restarted since).", status=404
@@ -988,7 +1012,14 @@ async def job_get(request: web.Request) -> web.StreamResponse:
 async def job_file(request: web.Request) -> web.StreamResponse:
     """A file of a finished job's song: its audio, cover, sheet music, subtitles or release record - only what its
     record lists, from the record's folder inside ComfyUI's output folder."""
+    _seen(request)
     return serve_file(request.match_info["job_id"], request.match_info["name"])
+
+
+def _seen(request: web.Request) -> None:
+    """404 for another token's run - as if there were none."""
+    if _hidden(owner_of(request), request.match_info["job_id"]):
+        raise SongApiError("not_found", "ComfyUI knows no such job.", status=404)
 
 
 def serve_file(job_id: str, name: str) -> web.StreamResponse:
@@ -1035,6 +1066,7 @@ async def job_bars(request: web.Request) -> web.StreamResponse:
     CPU), then kept beside the record (``<name>.bars.json``)."""
     from ..core.bars import record_bars
 
+    _seen(request)
     job_id = request.match_info["job_id"]
     record = _finished_record(job_id)
     try:
@@ -1121,6 +1153,7 @@ def _plan_readiness(templates: Any, catalogue: Any) -> dict[str, dict[str, Any]]
 
 async def job_delete(request: web.Request) -> web.StreamResponse:
     """Cancel a job: out of the queue while it waits, interrupted while it runs; a finished one stays as it is."""
+    _seen(request)
     prompt_id = request.match_info["job_id"]
     cancel_prompt(prompt_id)
     view = job_view(prompt_id)
@@ -1151,19 +1184,28 @@ def cancel_prompt(prompt_id: str) -> None:
 
 async def queue_info(request: web.Request) -> web.StreamResponse:
     """How busy ComfyUI is, and how long the API's runs took lately (for estimates)."""
+    caller = owner_of(request)
+
+    def shown(meta: dict[str, Any]) -> bool:
+        return not caller.startswith("token:") or meta.get("owner") == caller
+
     running, pending = _queue_items()
     now_running = None
     if running:
         item = running[0]
-        meta = item[3].get("plenio_api") if isinstance(item[3], dict) else None
-        now_running = {"id": str(item[1]), "api": bool(meta), "template": (meta or {}).get("template", "")}
+        meta = _extra(item)
+        now_running = {
+            "id": str(item[1]) if shown(meta) else "",
+            "api": bool(meta),
+            "template": meta.get("template", "") if shown(meta) else "",
+        }
     recent = []
     history = host.prompt_server().prompt_queue.get_history(max_items=200)
     for prompt_id, item in (history or {}).items():
         prompt = item.get("prompt") if isinstance(item, dict) else None
         extra = prompt[3] if isinstance(prompt, (list, tuple)) and len(prompt) > 3 else {}
         meta = extra.get("plenio_api") if isinstance(extra, dict) else None
-        if not meta:
+        if not meta or not shown(meta):
             continue
         stamps = {event: data.get("timestamp") for event, data in _messages(item)}
         start, end = _ms(stamps.get("execution_start")), _ms(stamps.get("execution_success"))
@@ -1185,7 +1227,7 @@ async def queue_info(request: web.Request) -> web.StreamResponse:
         {
             "running": now_running,
             "pending": len(pending),
-            "pending_api": [str(x[1]) for x in pending if isinstance(x[3], dict) and x[3].get("plenio_api")],
+            "pending_api": [str(x[1]) for x in pending if _extra(x) and shown(_extra(x))],
             "recent": recent[:20],
         }
     )
@@ -1208,10 +1250,9 @@ ROUTES: tuple[Route, ...] = (
     Route("DELETE", f"{BASE}/jobs/{{job_id}}", job_delete, "api"),
     Route("GET", f"{BASE}/queue", queue_info, "api"),
     Route("GET", f"{BASE}/models", models_info, "api"),
-    Route("GET", "/plenio/presets", presets_get, "data"),
 )
-"""The Song API's routes, of the access class ``api`` (``core.access.CLASSES``) - and the presets for the templates'
-*Preset* field (``data``: names and the template's fields only)."""
+"""The Song API's routes, of the access class ``api`` (``core.access.CLASSES``). The presets for the templates'
+*Preset* field (``presets_get``) are a ``data`` route of ``routes.py``: a page needs no API token for them."""
 
 
 def register(routes: web.RouteTableDef) -> None:

@@ -16,6 +16,7 @@ import json
 import random
 import threading
 import time
+import urllib.parse
 from pathlib import Path
 from typing import Any
 
@@ -97,20 +98,22 @@ def refresh(job: Job) -> tuple[Job, dict[str, Any] | None]:
 
 
 def _refresh(job: Job) -> tuple[Job, dict[str, Any] | None]:
-    if job.status in ENDED or not job.prompts:
-        return job, None
+    if job.status in ENDED or job.status == "waiting_for_review" or not job.prompts:
+        return job, None  # a job at a review stop waits for its approval: its run has ended, all is on disk
     view = v1.job_view(job.prompts[-1])
     if view is None:
-        if job.status == "queued" and time.time() - job.created < 30:
-            return job, None  # just queued: ComfyUI's history may not show it yet
-        return store().update(
+        if job.status == "queued" and time.time() - job.updated < 30:
+            return job, None  # just queued (or approved): ComfyUI's history may not show it yet
+        job = store().update(
             job.id,
             status="failed",
             error={
                 "code": "lost",
                 "message": "ComfyUI no longer knows this job's run (its history was cleared).",
             },
-        ), None
+        )
+        tell(job)
+        return job, None
     status = str(view.get("status") or job.status)
     changes: dict[str, Any] = {}
     if status == "succeeded":
@@ -149,7 +152,7 @@ def tell(job: Job, view: dict[str, Any] | None = None) -> None:
             "waiting_at": job.stage or None,
             "stage": ((view or {}).get("stage") or {}).get("group"),
         },
-        owner=job.owner if job.owner.startswith("token:") else "",
+        owner=job.owner,
     )
 
 
@@ -165,7 +168,7 @@ def tell_progress(job: Job, view: dict[str, Any] | None) -> None:
     HUB.publish(
         "job.progress",
         {"id": job.id, "stage": stage, "progress": progress},
-        owner=job.owner if job.owner.startswith("token:") else "",
+        owner=job.owner,
         replay=False,
     )
 
@@ -346,6 +349,7 @@ async def create_job(data: dict[str, Any], key: str, owner: str) -> web.StreamRe
         "template": template.id,
         "kind": template.kind,
         "client": client,
+        "owner": owner,
         "seeds": prepared.seeds,
         "fields": {k: v for k, v in prepared.fields.items() if not isinstance(v, (dict, list))},
         "release": prepared.release,
@@ -438,12 +442,28 @@ async def job_delete(request: web.Request) -> web.StreamResponse:
     return web.json_response(job_answer(job))
 
 
+def _record(job: Job) -> Path:
+    """A succeeded job's release record, from the job as it is kept (not from ComfyUI's history, which a restart
+    or a cleared history empties); inside ComfyUI's output folder, or 404."""
+    record = Path(str((job.result or {}).get("record") or "")) if job.status == "succeeded" else None
+    output = host.output_directory().resolve()
+    if record is None or not record.is_file() or output not in record.resolve().parents:
+        raise SongApiError("not_found", f"The job has no finished song (it is {job.status}).", status=404)
+    return record
+
+
+def _serve(job: Job, name: str) -> web.StreamResponse:
+    record = _record(job)
+    listed = [str(f.get("name")) for f in (job.result or {}).get("files") or [] if isinstance(f, dict)]
+    path = song_api.result_file(record, name, listed, host.output_directory())
+    disposition = f"attachment; filename*=UTF-8''{urllib.parse.quote(path.name)}"
+    return web.FileResponse(path, headers={"Content-Disposition": disposition})
+
+
 async def job_file(request: web.Request) -> web.StreamResponse:
-    """A finished job's file: served as v1 serves it for the job's last run."""
+    """A finished job's file (one its release record lists)."""
     job = _known(request.match_info["job_id"], request)
-    if not job.prompts:
-        raise SongApiError("not_found", "This job made no files.", status=404)
-    return await asyncio.to_thread(v1.serve_file, job.prompts[-1], request.match_info["name"])
+    return await asyncio.to_thread(_serve, job, request.match_info["name"])
 
 
 async def job_approve(request: web.Request) -> web.StreamResponse:
@@ -471,7 +491,7 @@ async def job_approve(request: web.Request) -> web.StreamResponse:
     )
     review.set_stops(prepared.prompt, kept.get("review") or [], approved)
     meta = {"api": API_VERSION, "template": job.template, "kind": job.kind, "client": dict(job.client),
-            "seeds": prepared.seeds, "documents": prepared.documents}  # fmt: skip
+            "seeds": prepared.seeds, "documents": prepared.documents, "owner": job.owner}  # fmt: skip
     answer = await v1._post_prompt(prepared.prompt, prepared.workflow, meta)
     job = store().update(
         job.id,
@@ -492,8 +512,8 @@ async def job_documents(request: web.Request) -> web.StreamResponse:
     shown = _shown(job)
     if shown is not None:
         return web.json_response({"stage": job.stage, "documents": shown})
-    if job.status == "succeeded" and job.prompts:
-        record = await asyncio.to_thread(v1._finished_record, job.prompts[-1])
+    if job.status == "succeeded":
+        record = await asyncio.to_thread(_record, job)
         data = json.loads(await asyncio.to_thread(record.read_text, encoding="utf-8"))
         documents = {
             str(kind): {"text": str(doc.get("text") or ""), "sha256": sha256_text(str(doc.get("text") or ""))}
@@ -507,9 +527,7 @@ async def job_documents(request: web.Request) -> web.StreamResponse:
 async def job_timings(request: web.Request) -> web.StreamResponse:
     """Where the job's time went (the record's ``timings``: seconds per group, of it loading models)."""
     job = _known(request.match_info["job_id"], request)
-    if job.status != "succeeded" or not job.prompts:
-        raise SongApiError("not_found", f"The job has no song yet (it is {job.status}).", status=404)
-    record = await asyncio.to_thread(v1._finished_record, job.prompts[-1])
+    record = await asyncio.to_thread(_record, job)
     data = json.loads(await asyncio.to_thread(record.read_text, encoding="utf-8"))
     return web.json_response({"job": job.id, "timings": data.get("timings")})
 
@@ -519,9 +537,7 @@ async def job_bars(request: web.Request) -> web.StreamResponse:
     from ..core.bars import record_bars
 
     job = _known(request.match_info["job_id"], request)
-    if not job.prompts:
-        raise SongApiError("not_found", "This job made no song.", status=404)
-    record = await asyncio.to_thread(v1._finished_record, job.prompts[-1])
+    record = await asyncio.to_thread(_record, job)
     try:
         answer = await asyncio.to_thread(record_bars, record)
     except (OSError, ValueError, PlenioUserError) as error:
@@ -532,8 +548,18 @@ async def job_bars(request: web.Request) -> web.StreamResponse:
 
 
 async def models_plan(request: web.Request) -> web.StreamResponse:
-    """The model plan of every template for this computer (Plenio Setup's; no folder of this computer in it)."""
-    return await setup.plan_get(request)
+    """The model plan of every template for this computer (Plenio Setup's; no folder of this computer in it). Another
+    computer gets the plan alone: the downloads at work, the download policy and whether there is a Hugging Face
+    token are this computer's business (as the ``download.*`` events are)."""
+    from .routes import is_here
+
+    answer = await setup.plan_get(request)
+    if is_here(request) or not isinstance(answer, web.Response) or answer.text is None:
+        return answer
+    view = json.loads(answer.text)
+    for key in ("downloads", "policy", "token"):
+        view.pop(key, None)
+    return web.json_response(view)
 
 
 # --- routes: songs --------------------------------------------------------------------------------------------

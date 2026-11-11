@@ -93,3 +93,22 @@ def log(server: ComfyServer) -> Log:
     result = Log(server.output_dir / "plenio_test_log.jsonl")
     result.clear()
     return result
+
+
+@pytest.fixture
+def fake_models(server: ComfyServer) -> Iterator[None]:
+    """Empty model files of the catalogue's names on the shared server: a job is accepted and fails at its first
+    loader. The files made are taken away again (other tests expect them missing)."""
+    from plenio.core.models import load_components
+
+    made = []
+    for component in load_components(PROJECT / "resources" / "models.toml").values():
+        for variant in component.variants:
+            target = server.base / "models" / component.folder / variant.file
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if not target.exists():
+                target.write_bytes(b"")
+                made.append(target)
+    yield
+    for path in made:
+        path.unlink(missing_ok=True)

@@ -8,7 +8,6 @@ import os
 import shutil
 import subprocess
 import sys
-from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
@@ -18,23 +17,6 @@ from harness import PROJECT, ComfyServer
 pytestmark = pytest.mark.host
 
 EXAMPLES = PROJECT / "docs" / "api" / "examples"
-
-
-@pytest.fixture
-def fake_models(server: ComfyServer) -> Iterator[None]:
-    from plenio.core.models import load_components
-
-    made = []
-    for component in load_components(PROJECT / "resources" / "models.toml").values():
-        for variant in component.variants:
-            target = server.base / "models" / component.folder / variant.file
-            target.parent.mkdir(parents=True, exist_ok=True)
-            if not target.exists():
-                target.write_bytes(b"")
-                made.append(target)
-    yield
-    for path in made:
-        path.unlink(missing_ok=True)
 
 
 def run(command: list[str], server: ComfyServer, tmp_path: Path) -> subprocess.CompletedProcess[str]:

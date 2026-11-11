@@ -93,3 +93,46 @@ def test_the_brief_lists_need_no_token(server: ComfyServer, config) -> None:
     config(None)
     status, _headers, data = raw(server, "/plenio/brief/choices?kind=song", REMOTE)
     assert status == 200 and data, data
+    status, _headers, data = raw(server, "/plenio/presets?template=yue2-song", REMOTE)  # the Preset field's
+    assert status == 200 and len(data["presets"]) == 6 and data["changes"], data
+
+
+def test_a_token_sees_its_own_runs_in_v1_and_the_queue(
+    server: ComfyServer, config, fake_models: None
+) -> None:
+    """v1 as v2: a token's runs are its own - its list, a run's answer, files, bars, cancel and the queue's ids.
+    This computer sees every run, as in 1.6."""
+    config(None)
+    status, made = server.request("POST", "/plenio/setup/tokens", {"name": "separation"})
+    assert status == 201, made
+    token = {**REMOTE, "Authorization": f"Bearer {made['token']}"}
+    request = {"template": "yue2-song", "fields": {"vocals": "instrumental"}}
+    try:
+        status, local = server.request("POST", "/plenio/api/v1/jobs", request)
+        assert status == 201, local
+        status, mine = server.request("POST", "/plenio/api/v1/jobs", request, headers=token)
+        assert status == 201, mine
+        status, listed = server.request("GET", "/plenio/api/v1/jobs", headers=token)
+        assert status == 200 and [j["id"] for j in listed["jobs"]] == [mine["id"]], listed
+        for method, path in (
+            ("GET", f"/plenio/api/v1/jobs/{local['id']}"),
+            ("GET", f"/plenio/api/v1/jobs/{local['id']}/files/song.flac"),
+            ("GET", f"/plenio/api/v1/jobs/{local['id']}/bars"),
+            ("DELETE", f"/plenio/api/v1/jobs/{local['id']}"),
+        ):
+            assert server.request(method, path, headers=token)[0] == 404, path
+        assert server.request("GET", f"/plenio/api/v1/jobs/{mine['id']}", headers=token)[0] == 200
+        status, queue = server.request("GET", "/plenio/api/v2/queue", headers=token)
+        shown = {
+            *queue["pending_api"],
+            *(r["id"] for r in queue["recent"]),
+            (queue["running"] or {}).get("id"),
+        }
+        assert local["id"] not in shown, queue
+        status, plan = server.request("GET", "/plenio/api/v2/models/plan", headers=token)
+        assert status == 200 and plan["templates"] and not {"downloads", "policy", "token"} & set(plan), plan
+        assert {"downloads", "policy", "token"} <= set(server.get("/plenio/api/v2/models/plan"))
+        everything = {j["id"] for j in server.get("/plenio/api/v1/jobs")["jobs"]}
+        assert {local["id"], mine["id"]} <= everything  # this computer: every run
+    finally:
+        server.request("DELETE", f"/plenio/setup/tokens/{made['id']}")
