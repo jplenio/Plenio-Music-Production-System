@@ -24,6 +24,8 @@ import {
   planTotals,
   rowView,
   startStep,
+  type TestJob,
+  testView,
   wantedTemplates
 } from './model'
 
@@ -53,6 +55,31 @@ const access = ref<string | null>(null)
 /** Files that arrived while the page is open (the plan says so once it is read again). */
 const arrived = reactive(new Set<string>())
 let unsubscribe: (() => void) | null = null
+const testJob = ref<TestJob | null>(null)
+const testRefused = ref<{ message: string; hint?: string | null } | null>(null)
+const testing = ref(false)
+const test = computed(() => testView(testJob.value, testRefused.value))
+let following = true
+
+/** Queue the test song and follow its job until it ends (the API answers when something changes). */
+async function runTest(): Promise<void> {
+  testing.value = true
+  testRefused.value = null
+  testJob.value = null
+  try {
+    let job = await setupApi.testSong(props.fetcher)
+    testJob.value = job
+    while (following && !['succeeded', 'failed', 'cancelled'].includes(job.status)) {
+      job = await setupApi.job(props.fetcher, job.id)
+      testJob.value = job
+    }
+  } catch (reason) {
+    testRefused.value =
+      reason instanceof PlenioApiError ? { message: reason.message, hint: reason.hint } : { message: message(reason) }
+  } finally {
+    testing.value = false
+  }
+}
 
 function message(reason: unknown): string {
   if (reason instanceof PlenioApiError) return reason.hint ? `${reason.message} ${reason.hint}` : reason.message
@@ -206,7 +233,10 @@ onMounted(() => {
   })
   void load()
 })
-onBeforeUnmount(() => unsubscribe?.())
+onBeforeUnmount(() => {
+  following = false
+  unsubscribe?.()
+})
 </script>
 
 <template>
@@ -335,9 +365,22 @@ onBeforeUnmount(() => unsubscribe?.())
     </section>
 
     <section v-if="state && step === 'test'">
-      <p>The test song makes a one-minute instrumental with your files - so that a problem shows here, not in your first song.</p>
-      <button class="primary" @click="openTemplate('1 · YuE2 · Song')">Open 1 · YuE2 · Song</button>
-      <button @click="go('go')">Skip</button>
+      <p>
+        The test song makes a one-minute instrumental with 1 · YuE2 · Song and your files - no cover art, no HQ - so
+        that a problem shows here, not in your first song.
+      </p>
+      <p v-if="test.text" :class="test.state === 'ok' ? 'ok' : test.state === 'failed' ? 'error' : 'hint'">{{ test.text }}</p>
+      <audio v-if="test.audio" :src="test.audio" controls preload="none" />
+      <ul v-if="test.finding" class="findings">
+        <li :class="test.finding.severity">
+          <span>{{ test.finding.text }}</span>
+          <button v-if="test.finding.fix" @click="go('plan')">{{ test.finding.fix.label }}</button>
+        </li>
+      </ul>
+      <button v-if="test.state !== 'running'" class="primary" :disabled="testing" @click="runTest">
+        {{ test.state === 'idle' ? 'Make the test song' : 'Make it again' }}
+      </button>
+      <button @click="go('go')">{{ test.state === 'ok' ? 'Next' : 'Skip' }}</button>
     </section>
 
     <section v-if="state && step === 'go'">

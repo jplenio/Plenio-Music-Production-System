@@ -645,6 +645,11 @@ async def jobs_create(request: web.Request) -> web.StreamResponse:
             _key_locks.pop(key, None)
 
 
+async def create_job(data: dict[str, Any]) -> web.StreamResponse:
+    """Queue a job as ``POST /jobs`` does, for Plenio's own pages (Setup's test song); raises :class:`SongApiError`."""
+    return await _create(data, "")
+
+
 async def _create(data: dict[str, Any], key: str) -> web.StreamResponse:
     template_id = data.get("template")
     if not isinstance(template_id, str) or not template_id:

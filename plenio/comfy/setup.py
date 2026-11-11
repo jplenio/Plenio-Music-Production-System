@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import functools
+import json
 import os
 import time
 from collections.abc import Mapping
@@ -29,7 +30,8 @@ from ..core.errors import PlenioUserError
 from ..core.modelplan import AUTO, Pick, pick
 from ..core.models import Component, file_problem, load_components, take_inventory
 from ..core.setup_plan import Wanted, download_request, find_variant, plan_view
-from ..core.setup_state import Drive, read_state, room_problem, update, write_state
+from ..core.setup_state import TEST_SONG, Drive, read_state, room_problem, update, write_state
+from ..core.song_api import SongApiError
 from . import host
 from .routes import guarded, read_json
 from .shared import RESOURCES, model_catalogue, system_report
@@ -454,6 +456,17 @@ async def findings_get(request: web.Request) -> web.StreamResponse:
     )
 
 
+async def test_song_post(request: web.Request) -> web.StreamResponse:
+    """Queue Setup's test song (``TEST_SONG``) through the Song API; the page follows it as a job of
+    ``/plenio/api/v1/jobs``. A refusal (a model file ComfyUI does not find ...) is answered as the API answers it."""
+    from . import song_api
+
+    try:
+        return await song_api.create_job(json.loads(json.dumps(TEST_SONG)))
+    except SongApiError as error:
+        return web.json_response({"error": error.to_dict()}, status=error.status)
+
+
 def _local(method: str, path: str, handler: Any) -> Route:
     return Route(method, path, handler, "local", what=WHAT, hint=HINT)
 
@@ -471,6 +484,7 @@ ROUTES: tuple[Route, ...] = (
     _local("POST", "/plenio/setup/state", state_post),
     _local("GET", "/plenio/setup/findings", findings_get),
     _local("GET", "/plenio/setup/folders", folders_get),
+    _local("POST", "/plenio/setup/test-song", test_song_post),
     Route("GET", "/plenio/models/files", files_get, "data"),
 )
 """Plenio Setup's routes, all ``local`` - and the file lists of Model Choice (``data``: file names only)."""

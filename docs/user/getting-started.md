@@ -37,7 +37,8 @@ Plenio installs no Python packages. Optional: `python -m pip install faster-whis
 2. **What do you want?** The templates you will use, and the optional parts (cover art, HQ mastering, stems).
 3. **Your plan**: the file for each model that suits your card, why, where it goes and its licence; you can choose another file, or another folder ComfyUI searches. Nothing is downloaded before you press *Download all*, which names the total size; a download that would not fit on its drive does not start.
 4. **Downloading**: progress, speed and time left per file; pause, resume, cancel. Each file is checked against the catalogue's size and SHA-256 before it is put in place. A model whose makers ask for an OK on Hugging Face shows *What to do*: the three steps to get it.
-5. **Test song**, 6. **Go**: open a template and make your first song, or open the player.
+5. **Test song**: a one-minute instrumental with *1 · YuE2 · Song* and your files (no cover art, no HQ; it goes into `output/plenio/Setup test`) - *It works ✓* with the take to listen to, or what failed and the way to fix it. About a minute on a 16 GB card.
+6. **Go**: open a template and make your first song, or open the player.
 
 **0 · System Check** shows the same in detail: versions and GPUs, the findings first (each with an id the [troubleshooting guide](troubleshooting.md) explains), which model files each template still needs, the download policy, and the hardware table - which files the model fields on auto take on each card - with the row for your machine marked. Nothing is changed automatically.
 

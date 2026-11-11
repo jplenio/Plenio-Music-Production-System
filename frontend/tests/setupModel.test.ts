@@ -16,6 +16,7 @@ import {
   rowView,
   shouldOpen,
   startStep,
+  testView,
   wantedTemplates
 } from '../src/setup/model'
 
@@ -205,5 +206,30 @@ describe('the open workflow and its files', () => {
       `/workflow_templates/Plenio-Music-Production-System/${encodeURIComponent(SONG)}.json`
     )
     expect(await templateUrl(fetcher, 'nothing')).toBeNull()
+  })
+})
+
+describe('the test song', () => {
+  it('follows the job and offers the take when it works', () => {
+    expect(testView(null).state).toBe('idle')
+    expect(testView({ id: 'j', status: 'running', stage: { text: '5 · RENDER' } }).text).toBe('Making the test song - 5 · RENDER')
+    const done = testView({
+      id: 'j',
+      status: 'succeeded',
+      started_at: 100,
+      finished_at: 172,
+      result: { files: [{ name: 'a.json', url: '/x/a.json' }, { name: 'Setup test.flac', url: '/x/Setup test.flac' }] }
+    })
+    expect(done).toMatchObject({ state: 'ok', audio: '/x/Setup test.flac', finding: null })
+    expect(done.text).toBe('It works ✓ - the test song took 1 min 12 s')
+  })
+
+  it('shows a failure as a finding, a missing model with the way to the plan', () => {
+    const model = testView({ id: 'j', status: 'failed', error: { message: 'YuE2: x is not on this computer yet.', type: 'PlenioModelError', title: 'Model' } })
+    expect(model.finding).toMatchObject({ id: 'test.model', fix: { label: 'Show the plan' } })
+    const other = testView({ id: 'j', status: 'failed', error: { message: 'out of memory', title: 'Render' } })
+    expect(other.finding).toMatchObject({ id: 'test.failed', text: 'Render: out of memory', fix: null })
+    const refused = testView(null, { message: 'ComfyUI does not find the model file x.', hint: 'Put it in.' })
+    expect(refused).toMatchObject({ state: 'failed', finding: { id: 'test.model', text: 'ComfyUI does not find the model file x. Put it in.' } })
   })
 })

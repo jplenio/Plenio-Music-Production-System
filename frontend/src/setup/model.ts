@@ -304,3 +304,64 @@ export function accessSteps(check: AccessCheck | null): { accept: boolean | null
       return { accept: null, token: null, pending: false }
   }
 }
+
+/** A job of the Song API as Setup's test song reads it (``/plenio/api/v1/jobs/{id}``). */
+export interface TestJob {
+  id: string
+  status: 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled' | string
+  stage?: { text?: string } | null
+  progress?: { done?: number; total?: number } | null
+  started_at?: number | null
+  finished_at?: number | null
+  result?: { files?: { name: string; url: string; kind?: string }[] } | null
+  error?: { message: string; type?: string; title?: string; hint?: string; details?: unknown } | null
+}
+
+export interface TestView {
+  state: 'idle' | 'running' | 'ok' | 'failed'
+  text: string
+  /** The take to listen to, once it is there. */
+  audio: string | null
+  finding: Finding | null
+}
+
+/** What step 5 shows for the test song's job: how far it is, the take when it works, or what failed as a finding
+ * (``test.model``: a model file - the plan fixes it; ``test.failed``: anything else, with the node that failed). */
+export function testView(job: TestJob | null, refused: { message: string; hint?: string | null } | null = null): TestView {
+  if (refused) {
+    return {
+      state: 'failed',
+      text: 'The test song did not start.',
+      audio: null,
+      finding: {
+        id: 'test.model',
+        severity: 'error',
+        text: refused.hint ? `${refused.message} ${refused.hint}` : refused.message,
+        fix: { label: 'Show the plan', action: 'refresh', payload: {} }
+      }
+    }
+  }
+  if (!job) return { state: 'idle', text: '', audio: null, finding: null }
+  if (job.status === 'succeeded') {
+    const seconds = job.started_at && job.finished_at ? Math.round(job.finished_at - job.started_at) : null
+    const audio = job.result?.files?.find((f) => /\.(flac|mp3|wav)$/i.test(f.name))?.url ?? null
+    return { state: 'ok', text: `It works ✓${seconds !== null ? ` - the test song took ${formatSeconds(seconds)}` : ''}`, audio, finding: null }
+  }
+  if (job.status === 'failed' || job.status === 'cancelled') {
+    const error = job.error
+    const model = /model|not on this computer|does not find/i.test(`${error?.type ?? ''} ${error?.message ?? ''}`)
+    return {
+      state: 'failed',
+      text: job.status === 'cancelled' ? 'The test song was cancelled.' : 'The test song failed.',
+      audio: null,
+      finding: {
+        id: model ? 'test.model' : 'test.failed',
+        severity: 'error',
+        text: `${error?.title ? `${error.title}: ` : ''}${error?.message ?? 'the run stopped'}`,
+        fix: model ? { label: 'Show the plan', action: 'refresh', payload: {} } : null
+      }
+    }
+  }
+  const stage = job.stage?.text ? ` - ${job.stage.text}` : ''
+  return { state: 'running', text: `${job.status === 'queued' ? 'Waiting in the queue' : 'Making the test song'}${stage}`, audio: null, finding: null }
+}

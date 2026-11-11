@@ -1,6 +1,6 @@
 /** Plenio Setup's calls to ``/plenio/setup/*`` (all answered only on the computer ComfyUI runs on). */
 import { type Fetcher, PlenioApiError } from '../api/client'
-import type { AccessCheck, DownloadView, Finding, FolderView, PlanView, SetupState } from './model'
+import type { AccessCheck, DownloadView, Finding, FolderView, PlanView, SetupState, TestJob } from './model'
 
 async function call<T>(fetcher: Fetcher, route: string, method = 'GET', body?: unknown): Promise<T> {
   const response = await fetcher.fetchApi(route, {
@@ -49,5 +49,7 @@ export const setupApi = {
   cancel: (f: Fetcher, id: string) =>
     call<{ download: DownloadView }>(f, `/plenio/setup/downloads/${encodeURIComponent(id)}`, 'DELETE'),
   check: (f: Fetcher, variant: string) => call<AccessCheck>(f, '/plenio/setup/check', 'POST', { variant }),
-  saveToken: (f: Fetcher, token: string) => call<{ saved: boolean }>(f, '/plenio/setup/hub-token', 'POST', { token })
+  saveToken: (f: Fetcher, token: string) => call<{ saved: boolean }>(f, '/plenio/setup/hub-token', 'POST', { token }),
+  testSong: (f: Fetcher) => call<TestJob>(f, '/plenio/setup/test-song', 'POST', {}),
+  job: (f: Fetcher, id: string) => call<TestJob>(f, `/plenio/api/v1/jobs/${encodeURIComponent(id)}?wait=20`)
 }

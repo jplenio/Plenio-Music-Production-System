@@ -354,3 +354,23 @@ def test_two_requests_at_once_with_one_key_make_one_job(models: ComfyServer) -> 
         thread.join(60)
     assert len(ids) == 3 and len(set(ids)) == 1, ids
     finished(server, ids[0])
+
+
+def test_setups_test_song_is_the_real_template_with_its_fixed_brief(models: ComfyServer) -> None:
+    status, job = models.request("POST", "/plenio/setup/test-song", {})
+    assert status == 201 and job["template"] == "yue2-song", job
+    view = finished(models, job["id"])
+    # the empty model files: past ComfyUI's validation, failed at the first loader (real files make the song)
+    assert view["status"] == "failed" and view["error"]["title"], view
+    prompt = models.get(f"/history/{job['id']}")[job["id"]]["prompt"][2]
+    brief = next(n for n in prompt.values() if n["class_type"] == "PlenioSongBrief")["inputs"]
+    assert brief["length"] == "very short (about 1:00)" and brief["vocals"] == "instrumental"
+    export = next(n for n in prompt.values() if n["class_type"] == "PlenioExportRelease")["inputs"]
+    assert export["folder"] == "plenio/Setup test"
+    assert "PlenioCoverArt" not in {
+        n["class_type"] for n in prompt.values()
+    }  # the cover's nodes are bypassed
+    hq = next(n for n in prompt.values() if n["class_type"] == "PlenioHQMastering")["inputs"]
+    assert hq["hq_mastering"] is False
+    status, refused = models.request("POST", "/plenio/setup/test-song", {}, headers={"X-Plenio-Remote": "1"})
+    assert status == 403, refused

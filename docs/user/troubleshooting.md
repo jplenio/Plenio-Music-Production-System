@@ -19,6 +19,7 @@ The System Check (and Plenio Setup) name what needs attention as a finding with 
 | `asset.missing` | a Plenio asset (writer GGUF, lyrics recognition, stems) is not downloaded yet | Nothing: it is fetched the first time a node needs it (offline: place it as the System Check says) |
 | `writer.blocked` | the templates' default writer cannot run on this machine as it is | Choose another writer in *Writer model*, or install what the message names |
 | `config.error` | Plenio's `config.toml` has an invalid value or key; the defaults are used | Fix the file as the message says |
+| `test.model`, `test.failed` | Setup's test song stopped: at a model file, or elsewhere (the node is named) | *Show the plan* and fetch or choose the file; otherwise the message says what failed - the same as a run of *1 · YuE2 · Song* would |
 | `disk.low` | the models drive has less free space than the missing files need, plus 2 GB | Free space, or choose another model folder in Plenio Setup |
 
 ## Installation

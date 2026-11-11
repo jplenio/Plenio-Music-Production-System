@@ -141,3 +141,28 @@ def room_problem(drives: Iterable[Drive]) -> str | None:
                 f"{size_text(drive.free)} free where {drive.label} is."
             )
     return None
+
+
+TEST_SONG: dict[str, Any] = {
+    "template": "yue2-song",
+    "fields": {
+        "template": "none",
+        "genre": "lo-fi hip hop",
+        "mood": "calm",
+        "description": "a short calm beat with soft keys - Plenio Setup's test song",
+        "length": "very short (about 1:00)",
+        "vocals": "instrumental",
+        "finish.cover_art": False,
+        "finish.hq_mastering": False,
+    },
+    "release": {
+        "folder": "plenio/Setup test",
+        "naming": "{date} Setup test",
+        "sheet_music": "off",
+        "song_page": False,
+        "lyrics_srt": False,
+    },
+    "client": {"name": "Plenio Setup"},
+}
+"""Setup's test song (step 5, PD 4.1): the real *1 · YuE2 · Song* template with the chosen files and a fixed brief -
+a minute, instrumental, no cover art, no HQ - so that a failure appears in Setup, not in the first real song."""
