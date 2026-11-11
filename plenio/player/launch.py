@@ -39,8 +39,24 @@ def windowless() -> int:
     return subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
 
 
+LISTENING_S = 0.25
+"""How long a connection to this computer may take to open. A listener's connection opens within a
+millisecond, also while its program is busy (the system accepts it); a port nobody listens on refuses, and
+Windows takes two seconds to say so - which made five empty ports ten seconds of waiting."""
+
+
+def _listening(port: int, timeout: float = LISTENING_S) -> bool:
+    """Something accepts connections on ``127.0.0.1:port``."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+        probe.settimeout(timeout)
+        return probe.connect_ex(("127.0.0.1", port)) == 0
+
+
 def player_at(port: int, timeout: float = 2.0) -> dict[str, Any] | None:
-    """The Plenio Player answering on ``127.0.0.1:port`` (its ``/api/info``), else ``None``."""
+    """The Plenio Player answering on ``127.0.0.1:port`` (its ``/api/info``), else ``None``. A port nobody
+    listens on is known at once; a listener has ``timeout`` seconds to answer."""
+    if not _listening(port):
+        return None
     try:
         with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/info", timeout=timeout) as answer:  # noqa: S310 - loopback only
             info = json.loads(answer.read().decode("utf-8"))
@@ -52,9 +68,7 @@ def player_at(port: int, timeout: float = 2.0) -> dict[str, Any] | None:
 def _port_free(port: int) -> bool:
     """Nothing listens on ``127.0.0.1:port``: a connection is refused. A listener that is slow to answer (a
     player busy reading its songs) holds the port all the same."""
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
-        probe.settimeout(1.0)
-        return probe.connect_ex(("127.0.0.1", port)) != 0
+    return not _listening(port)
 
 
 def _same_state(info: dict[str, Any], state: Path) -> bool:
