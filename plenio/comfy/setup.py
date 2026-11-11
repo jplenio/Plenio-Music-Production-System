@@ -459,10 +459,10 @@ async def findings_get(request: web.Request) -> web.StreamResponse:
 async def test_song_post(request: web.Request) -> web.StreamResponse:
     """Queue Setup's test song (``TEST_SONG``) through the Song API; the page follows it as a job of
     ``/plenio/api/v1/jobs``. A refusal (a model file ComfyUI does not find ...) is answered as the API answers it."""
-    from . import song_api
+    from . import song_api_v1
 
     try:
-        return await song_api.create_job(json.loads(json.dumps(TEST_SONG)))
+        return await song_api_v1.create_job(json.loads(json.dumps(TEST_SONG)))
     except SongApiError as error:
         return web.json_response({"error": error.to_dict()}, status=error.status)
 

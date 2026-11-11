@@ -1,0 +1,12 @@
+{
+ "status": 404,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "error": {
+   "code": "not_found",
+   "message": "The job has no finished song (it is failed)."
+  }
+ }
+}

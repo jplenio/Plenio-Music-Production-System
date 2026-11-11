@@ -13,7 +13,7 @@ pytestmark = pytest.mark.comfy
 
 
 def test_a_missing_model_file_is_named(comfy_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    from plenio.comfy import song_api
+    from plenio.comfy import song_api_v1 as song_api
 
     refusal = {
         "error": {"type": "prompt_outputs_failed_validation", "message": "Prompt outputs failed validation"},

@@ -1,0 +1,12 @@
+{
+ "status": 400,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "error": {
+   "code": "bad_request",
+   "message": "The request body is a JSON object."
+  }
+ }
+}

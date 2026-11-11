@@ -1,0 +1,52 @@
+{
+ "status": 200,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "openapi": "3.1.0",
+  "paths": {
+   "/": [
+    "get"
+   ],
+   "/briefs": [
+    "get"
+   ],
+   "/from-record": [
+    "post"
+   ],
+   "/jobs": [
+    "get",
+    "post"
+   ],
+   "/jobs/{id}": [
+    "delete",
+    "get"
+   ],
+   "/jobs/{id}/bars": [
+    "get"
+   ],
+   "/jobs/{id}/files/{name}": [
+    "get"
+   ],
+   "/models": [
+    "get"
+   ],
+   "/openapi.json": [
+    "get"
+   ],
+   "/queue": [
+    "get"
+   ],
+   "/templates": [
+    "get"
+   ],
+   "/templates/{id}": [
+    "get"
+   ],
+   "/uploads": [
+    "post"
+   ]
+  }
+ }
+}

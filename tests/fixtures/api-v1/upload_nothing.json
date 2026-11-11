@@ -1,0 +1,12 @@
+{
+ "status": 415,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "error": {
+   "code": "unsupported_media_type",
+   "message": "A source recording is an audio file: MP3, FLAC, WAV, OGG, M4A, OPUS, AAC or AIFF (its name in ?name=)."
+  }
+ }
+}

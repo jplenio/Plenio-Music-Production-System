@@ -1,0 +1,14 @@
+{
+ "status": 400,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "error": {
+   "code": "invalid_value",
+   "message": "'yodelled' is not a choice of the field 'vocals'.",
+   "hint": "Choices: ['sung', 'sparse vocals', 'instrumental']",
+   "field": "vocals"
+  }
+ }
+}

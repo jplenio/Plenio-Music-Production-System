@@ -1,0 +1,47 @@
+{
+ "status": 200,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "api": "plenio-song-api",
+  "version": "1.4",
+  "plenio": "<version>",
+  "comfyui": "<version>",
+  "templates": [
+   {
+    "id": "yue2-song",
+    "title": "YuE2 · Song",
+    "kind": "song",
+    "workflow": "1 · YuE2 · Song",
+    "needs": []
+   },
+   {
+    "id": "yue2-cover",
+    "title": "YuE2 · Cover",
+    "kind": "cover",
+    "workflow": "2 · YuE2 · Cover",
+    "needs": [
+     "source.audio"
+    ]
+   }
+  ],
+  "paths": {
+   "templates": "/plenio/api/v1/templates",
+   "briefs": "/plenio/api/v1/briefs",
+   "uploads": "/plenio/api/v1/uploads",
+   "jobs": "/plenio/api/v1/jobs",
+   "from_record": "/plenio/api/v1/from-record",
+   "queue": "/plenio/api/v1/queue",
+   "openapi": "/plenio/api/v1/openapi.json",
+   "models": "/plenio/api/v1/models",
+   "job_bars": "/plenio/api/v1/jobs/{id}/bars"
+  },
+  "features": [
+   "stems",
+   "bars",
+   "models"
+  ],
+  "docs": "https://github.com/jplenio/Plenio-Music-Production-System/blob/main/docs/api/README.md"
+ }
+}

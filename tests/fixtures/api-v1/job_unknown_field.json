@@ -1,0 +1,14 @@
+{
+ "status": 400,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "error": {
+   "code": "unknown_field",
+   "message": "The template 'yue2-song' has no field 'loudness_war'.",
+   "hint": "Its fields: arrangement, creativity, description, finish.cover_art, finish.hq_mastering, genre, genre_closeness, key, language, lead_instrument, length, lines_under_singing, lyrics, lyrics_fidelity, lyrics_from, melody, meter, mode, mood, template, tempo, theme, vocals, voice, writer.model.",
+   "field": "loudness_war"
+  }
+ }
+}

@@ -1,0 +1,26 @@
+{
+ "status": 200,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "templates": [
+   {
+    "id": "yue2-song",
+    "title": "YuE2 · Song",
+    "kind": "song",
+    "workflow": "1 · YuE2 · Song",
+    "needs": []
+   },
+   {
+    "id": "yue2-cover",
+    "title": "YuE2 · Cover",
+    "kind": "cover",
+    "workflow": "2 · YuE2 · Cover",
+    "needs": [
+     "source.audio"
+    ]
+   }
+  ]
+ }
+}

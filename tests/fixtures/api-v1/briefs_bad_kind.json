@@ -1,0 +1,13 @@
+{
+ "status": 400,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "error": {
+   "code": "invalid_value",
+   "message": "kind: song or cover.",
+   "field": "kind"
+  }
+ }
+}

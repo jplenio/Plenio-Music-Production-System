@@ -1,0 +1,12 @@
+{
+ "status": 400,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "error": {
+   "code": "bad_request",
+   "message": "The body is a Plenio release record (schema plenio.record/1): the <name>.plenio.json of a song."
+  }
+ }
+}

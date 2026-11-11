@@ -91,7 +91,7 @@ def test_a_job_answer_for_another_computer_keeps_no_place() -> None:
 
     if importlib.util.find_spec("aiohttp") is None:
         return
-    from plenio.comfy.song_api import _without_places
+    from plenio.comfy.song_api_v1 import _without_places
 
     view = {
         "jobs": [

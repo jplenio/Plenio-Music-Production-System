@@ -32,9 +32,9 @@ VALUES = {
 
 def all_routes(comfy_path: Path) -> list[Any]:
     """The route tables, read in this process (``comfy_path`` makes ComfyUI importable for the modules' imports)."""
-    from plenio.comfy import routes, setup, song_api
+    from plenio.comfy import routes, setup, song_api_v1
 
-    return [*routes.ROUTES, *setup.ROUTES, *song_api.ROUTES]
+    return [*routes.ROUTES, *setup.ROUTES, *song_api_v1.ROUTES]
 
 
 def path_of(route: Any) -> str:

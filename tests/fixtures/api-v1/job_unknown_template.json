@@ -1,0 +1,13 @@
+{
+ "status": 404,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "error": {
+   "code": "unknown_template",
+   "message": "No template 'no-such-template'.",
+   "hint": "The templates: yue2-cover, yue2-song."
+  }
+ }
+}

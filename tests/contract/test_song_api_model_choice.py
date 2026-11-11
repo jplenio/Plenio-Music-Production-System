@@ -43,7 +43,8 @@ PROMPT = {
 def test_a_job_whose_model_file_is_not_here_is_refused_before_it_is_queued(
     comfy_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from plenio.comfy import host, setup, song_api
+    from plenio.comfy import host, setup
+    from plenio.comfy import song_api_v1 as song_api
 
     monkeypatch.setattr(host, "locate_model", lambda folder, file: None)
     asked: list[str] = []
@@ -80,7 +81,8 @@ def test_a_job_whose_model_file_is_not_here_is_refused_before_it_is_queued(
 def test_models_says_whether_a_template_runs_by_the_files_auto_takes(
     comfy_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from plenio.comfy import host, setup, song_api
+    from plenio.comfy import host, setup
+    from plenio.comfy import song_api_v1 as song_api
     from plenio.comfy.shared import model_catalogue
 
     template = SimpleNamespace(

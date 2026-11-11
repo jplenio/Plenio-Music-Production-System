@@ -1,0 +1,40 @@
+{
+ "status": 200,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "id": "<id1>",
+  "template": "yue2-song",
+  "status": "failed",
+  "queue_position": null,
+  "created_at": "<number>",
+  "started_at": "<number>",
+  "finished_at": "<number>",
+  "stage": null,
+  "progress": null,
+  "seeds": {
+   "draft": "<seed>",
+   "plan": "<seed>",
+   "arrangement": "<seed>",
+   "take": "<seed>",
+   "cover": "<seed>"
+  },
+  "documents": [],
+  "stems": false,
+  "client": {
+   "name": "golden"
+  },
+  "result": null,
+  "error": {
+   "message": "<run error>",
+   "type": "<run error>",
+   "node": "<run error>",
+   "title": "<run error>"
+  },
+  "warnings": [],
+  "links": {
+   "self": "/plenio/api/v1/jobs/<id1>"
+  }
+ }
+}
