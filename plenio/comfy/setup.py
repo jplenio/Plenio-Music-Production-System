@@ -10,7 +10,9 @@ websocket.
 from __future__ import annotations
 
 import asyncio
+import functools
 from dataclasses import dataclass, replace
+from pathlib import Path
 from typing import Any
 
 from aiohttp import web
@@ -20,7 +22,7 @@ from ..core.assets import access as hub_access
 from ..core.assets.downloads import DownloadManager
 from ..core.errors import PlenioUserError
 from ..core.modelplan import AUTO, Pick, pick
-from ..core.models import Component, load_components, take_inventory
+from ..core.models import Component, file_problem, load_components, take_inventory
 from ..core.setup_plan import download_request, find_variant, plan_view
 from . import host
 from .routes import guarded, read_json
@@ -54,6 +56,47 @@ def _installed() -> dict[str, int]:
 def components() -> dict[str, Component]:
     """The catalogue's components by id (for Model Choice's lists)."""
     return _components()
+
+
+@functools.lru_cache(maxsize=1024)
+def _problem(accepts: str, path: str, _mtime_ns: int, _size: int) -> str | None:
+    # keyed by the file's time and size: a header is read once per version of a file
+    return file_problem(accepts, Path(path))
+
+
+def problem_of(component: Component, file: str) -> str | None:
+    """Why ``file`` in the component's folder would not load as it (``None``: it would, or it is not there)."""
+    if not component.accepts or any(v.file == file for v in component.variants):
+        return None  # the catalogue's own files are the kind by definition (a packed fp4 file has other shapes)
+    path = host.locate_model(component.folder, file)
+    if path is None:
+        return None
+    try:
+        status = path.stat()
+    except OSError:
+        return None
+    return _problem(component.accepts, str(path), status.st_mtime_ns, status.st_size)
+
+
+def file_listing(component: Component) -> dict[str, str | None]:
+    """Every file of the component's folder with what keeps it from loading as the component (``None``: nothing).
+    File names only - no place on this computer."""
+    return {name: problem_of(component, name) for name in sorted(host.model_files(component.folder))}
+
+
+async def files_get(request: web.Request) -> web.StreamResponse:
+    """For Model Choice's lists: per component the files of its folder, and why a file would not load as it - the
+    page greys those. ``?component=<id>`` for one."""
+    found = _components()
+    wanted = request.query.get("component")
+    if wanted is not None and wanted not in found:
+        raise PlenioUserError(f"Plenio's catalogue has no model {wanted[:80]!r}.")
+    chosen = [found[wanted]] if wanted is not None else list(found.values())
+
+    def listing() -> dict[str, Any]:
+        return {c.id: {"folder": c.folder, "files": file_listing(c)} for c in chosen}
+
+    return web.json_response({"components": await asyncio.to_thread(listing)})
 
 
 @dataclass(frozen=True)
@@ -98,6 +141,9 @@ def choose(component_id: str, file: str) -> Chosen:
             else ""
         )
         chosen = replace(chosen, installed=True, warning=chosen.warning or note)
+    problem = problem_of(component, chosen.file) if pinned and chosen.installed else None
+    if problem:  # said, not refused: the header check may not know a new build that loads
+        chosen = replace(chosen, warning=f"{chosen.file} is {problem} - its loader may refuse it.")
     return Chosen(chosen, component, source)
 
 
@@ -215,8 +261,9 @@ ROUTES: tuple[Route, ...] = (
     _local("POST", "/plenio/setup/downloads/{variant}/resume", download_resume),
     _local("POST", "/plenio/setup/hub-token", hub_token),
     _local("POST", "/plenio/setup/check", access_check),
+    Route("GET", "/plenio/models/files", files_get, "data"),
 )
-"""Plenio Setup's routes: all ``local``."""
+"""Plenio Setup's routes, all ``local`` - and the file lists of Model Choice (``data``: file names only)."""
 
 
 def register(routes: web.RouteTableDef) -> None:

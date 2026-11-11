@@ -60,3 +60,37 @@ def test_a_missing_file_stops_the_run_and_says_where_it_goes(server: ComfyServer
     error = server.run_expect_error(prompt("flux2-vae", "auto", "missing"))
     assert error["node_type"] == "PlenioModelChoice"
     assert file in error["exception_message"] and "Plenio Setup" in error["exception_message"]
+
+
+def header_file(path: Path, header: dict[str, Any]) -> None:
+    import json
+    import struct
+
+    raw = json.dumps(header).encode("utf-8")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(struct.pack("<Q", len(raw)) + raw)
+
+
+def test_the_file_lists_say_which_files_a_loader_would_refuse(server: ComfyServer) -> None:
+    folder = server.base / "models" / "vae"
+    tensor = {"dtype": "F32", "data_offsets": [0, 4]}
+    header_file(
+        folder / "my_flux2_vae.safetensors",
+        {
+            "bn.running_mean": {**tensor, "shape": [128]},
+            "encoder.conv_out.weight": {**tensor, "shape": [64, 512, 3, 3]},
+            "decoder.conv_in.weight": {**tensor, "shape": [512, 32, 3, 3]},
+        },
+    )
+    header_file(
+        folder / "an_sdxl_vae.safetensors", {"encoder.conv_out.weight": {**tensor, "shape": [8, 512, 3, 3]}}
+    )
+    data = server.get("/plenio/models/files?component=flux2-vae")
+    files = data["components"]["flux2-vae"]["files"]
+    assert files["my_flux2_vae.safetensors"] is None
+    assert "not a FLUX.2 VAE" in files["an_sdxl_vae.safetensors"]
+    status, refused = server.request("GET", "/plenio/models/files?component=nope")
+    assert status == 400 and "nope" in refused["error"]["message"]
+    # pinned all the same, the file goes to the loader - with the reason in the summary
+    error_or_run = server.run(prompt("flux2-vae", "an_sdxl_vae.safetensors", "wrong kind"))
+    assert error_or_run["status"]["status_str"] == "success"

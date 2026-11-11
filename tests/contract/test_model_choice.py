@@ -139,3 +139,17 @@ def test_an_unknown_component_is_said_before_the_run(world: dict[str, Any]) -> N
     assert node().validate_inputs(component={"component": "demo", "file": "anything.safetensors"}) is True
     said = node().validate_inputs(component={"component": "nope", "file": "auto"})
     assert isinstance(said, str) and "nope" in said
+
+
+def test_a_pinned_file_of_another_kind_is_used_and_said(
+    world: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from plenio.comfy import setup
+
+    world["on_disk"] = {"odd.safetensors": 1}
+    monkeypatch.setattr(
+        setup, "problem_of", lambda component, file: "not a demo model" if file == "odd.safetensors" else None
+    )
+    file, summary = run("odd.safetensors")
+    assert file == "odd.safetensors" and summary["status"] == "warning"
+    assert "not a demo model" in summary["markdown"] and "may refuse" in summary["markdown"]

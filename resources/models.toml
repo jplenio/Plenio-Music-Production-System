@@ -63,6 +63,7 @@ id = "yue2-instrumental-adapter"
 title = "YuE2 instrumental adapter (LoRA)"
 folder = "loras"
 loader = { node = "LoraLoader", input = "lora_name" }
+accepts = "yue2-text-lora"
 templates = ["2 · YuE2 · Cover"]
 optional_templates = ["1 · YuE2 · Song", "5 · YuE2 · DAW"]
 
@@ -86,6 +87,7 @@ optional_templates = ["1 · YuE2 · Song", "5 · YuE2 · DAW"]
 id = "sheetsage2"
 title = "SheetSage2 transcription"
 folder = "audio_encoders"
+accepts = "sheetsage"
 templates = ["2 · YuE2 · Cover"]
 
   [[component.variant]]
@@ -155,6 +157,7 @@ id = "writer-native"
 title = "The writer as a ComfyUI text model (Gemma 4)"
 folder = "text_encoders"
 loader = { node = "CLIPLoader", input = "clip_name" }
+accepts = "gemma4-text"
 templates = []
 
   [[component.variant]]
@@ -210,6 +213,7 @@ id = "minimax-dit"
 title = "MiniMax Music 3 diffusion model"
 folder = "diffusion_models"
 loader = { node = "UNETLoader", input = "unet_name" }
+accepts = "minimax-dit"
 templates = ["3 · MiniMax · Song"]
 
   [[component.variant]]
@@ -249,6 +253,7 @@ id = "minimax-text-encoder"
 title = "MiniMax Music 3 text encoder"
 folder = "text_encoders"
 loader = { node = "CLIPLoader", input = "clip_name" }
+accepts = "minimax-text-encoder"
 templates = ["3 · MiniMax · Song"]
 
   [[component.variant]]
@@ -272,6 +277,7 @@ id = "minimax-vae"
 title = "MiniMax Music 3 audio VAE"
 folder = "vae"
 loader = { node = "VAELoader", input = "vae_name" }
+accepts = "minimax-vae"
 templates = ["3 · MiniMax · Song"]
 
   [[component.variant]]
@@ -295,6 +301,7 @@ id = "flux2-klein"
 title = "FLUX.2 Klein image model (cover art)"
 folder = "diffusion_models"
 loader = { node = "UNETLoader", input = "unet_name" }
+accepts = "flux2-klein-4b"
 templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song", "5 · YuE2 · DAW"]
 
   [[component.variant]]
@@ -334,6 +341,7 @@ id = "flux2-text-encoder"
 title = "FLUX.2 Klein text encoder (Qwen3 4B)"
 folder = "text_encoders"
 loader = { node = "CLIPLoader", input = "clip_name" }
+accepts = "qwen3-4b"
 templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song", "5 · YuE2 · DAW"]
 
   [[component.variant]]
@@ -373,6 +381,7 @@ id = "flux2-vae"
 title = "FLUX.2 image VAE"
 folder = "vae"
 loader = { node = "VAELoader", input = "vae_name" }
+accepts = "flux2-vae"
 templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song", "5 · YuE2 · DAW"]
 
   [[component.variant]]

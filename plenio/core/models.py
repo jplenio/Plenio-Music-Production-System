@@ -232,6 +232,8 @@ def parse_components(data: Mapping[str, Any], source: str, *, strict: bool = Tru
             raise PlenioUserError(f"{where}: a template needs the component either always or optionally.")
         if bool(component.loader_node) != bool(component.loader_input):
             raise PlenioUserError(f"{where}: a loader names its node and its input.")
+        if component.accepts and component.accepts not in SNIFFERS:
+            raise PlenioUserError(f"{where}: no sniffer {component.accepts!r}; one of {', '.join(SNIFFERS)}.")
         ranks = [v.quality for v in component.variants]
         if len(set(ranks)) != len(ranks):
             raise PlenioUserError(f"{where}: two variants have the same quality rank.")
@@ -358,29 +360,51 @@ _MAX_HEADER = 64 * 1024 * 1024
 """A safetensors header larger than this is no model's table of contents."""
 
 
-def yue2_checkpoint_problem(path: Path) -> str | None:
-    """What keeps a YuE2 ``.safetensors`` file from loading as a ComfyUI checkpoint, from its header alone - or
-    ``None`` when nothing does (one file with the music model, the text side with its tokenizer and the audio
-    decoder, as Comfy-Org's own files and the finetunes made for ComfyUI have them). An empty file (an interrupted
-    download) is the inventory's business."""
+Header = Mapping[str, Any]
+"""A safetensors file's table of contents: tensor name -> ``{"dtype", "shape", ...}`` (``__metadata__`` left out)."""
+
+
+def read_header(path: Path) -> tuple[Header | None, str | None]:
+    """The table of contents of a ``.safetensors`` file - or why there is none. An empty file (an interrupted
+    download) has an empty table: the inventory says it is incomplete, not a sniffer."""
     try:
         with path.open("rb") as file:
             prefix = file.read(8)
             if not prefix:
-                return None
+                return {}, None
             size = struct.unpack("<Q", prefix)[0] if len(prefix) == 8 else _MAX_HEADER + 1
             if size > _MAX_HEADER:
-                return "not a safetensors file"
+                return None, "not a safetensors file"
             header = json.loads(file.read(size))
     except (OSError, ValueError):
-        return "not readable as a safetensors file"
-    keys = [str(key) for key in header] if isinstance(header, dict) else []
-    music = any(key.startswith("model.diffusion_model.") for key in keys)
-    decoder = any(key.startswith("vae.") for key in keys)
-    tokenizer = any(key.endswith("yue2_tokenizer_json") for key in keys)
+        return None, "not readable as a safetensors file"
+    if not isinstance(header, dict):
+        return None, "not a safetensors file"
+    return {str(k): v for k, v in header.items() if k != "__metadata__"}, None
+
+
+def _shape(header: Header, key: str) -> list[int]:
+    entry = header.get(key)
+    shape = entry.get("shape") if isinstance(entry, dict) else None
+    return [int(n) for n in shape] if isinstance(shape, list) else []
+
+
+def _starts(header: Header, *prefixes: str) -> bool:
+    return any(key.startswith(prefixes) for key in header)
+
+
+def _layers(header: Header) -> int:
+    found = {m.group(1) for m in (re.match(r"model\.layers\.(\d+)\.", key) for key in header) if m}
+    return len(found)
+
+
+def _yue2_checkpoint(header: Header) -> str | None:
+    music = _starts(header, "model.diffusion_model.")
+    decoder = _starts(header, "vae.")
+    tokenizer = any(key.endswith("yue2_tokenizer_json") for key in header)
     if music and decoder and tokenizer:
         return None
-    if not music and any(key.startswith("model.layers.") or key == "lm_head.weight" for key in keys):
+    if not music and any(key.startswith("model.layers.") or key == "lm_head.weight" for key in header):
         return (
             "in m-a-p's Transformers layout, which ComfyUI does not load: take the file made for ComfyUI (a "
             "repository's comfyui folder) or convert it"
@@ -395,6 +419,124 @@ def yue2_checkpoint_problem(path: Path) -> str | None:
         if not there
     ]
     return f"without {', '.join(missing)}: Load Checkpoint needs them all in one file"
+
+
+def _yue2_text_lora(header: Header) -> str | None:
+    if (
+        header
+        and all(key.startswith("text_encoders.model.") for key in header)
+        and any("lora" in k for k in header)
+    ):
+        return None
+    return "not a LoRA of YuE2's text side (its tensors start with text_encoders.model.)"
+
+
+def _sheetsage(header: Header) -> str | None:
+    if _starts(header, "encoder.subsampling_module.") and _starts(header, "decoder.layers."):
+        return None
+    return "not a SheetSage audio encoder"
+
+
+def _minimax_dit(header: Header) -> str | None:
+    if _starts(header, "diffusion_transformer.transformer.") and "cond_layer_logits" in header:
+        return None
+    return "not a MiniMax Music 3 diffusion model"
+
+
+def _minimax_text_encoder(header: Header) -> str | None:
+    if _starts(header, "model.layers.") and _starts(header, "model.audio_decoder."):
+        return None
+    return "not MiniMax Music 3's text encoder (it has an audio decoder of its own)"
+
+
+def _minimax_vae(header: Header) -> str | None:
+    if "dec_in_proj.weight" in header and _starts(header, "decoder.model."):
+        return None
+    return "not MiniMax Music 3's audio decoder"
+
+
+_FLUX2_KLEIN_4B_TEXT = 3 * 2560
+"""FLUX.2 Klein 4B reads three layers of Qwen3 4B (2560 wide); the 9B reads Qwen3 8B (3 x 4096)."""
+
+
+def _flux2_klein(header: Header) -> str | None:
+    if "double_stream_modulation_img.lin.weight" not in header:
+        return "not a FLUX.2 diffusion model"
+    width = (_shape(header, "txt_in.weight") or [0, 0])[-1]
+    if width != _FLUX2_KLEIN_4B_TEXT:
+        return (
+            f"a FLUX.2 model for another text encoder ({width} wide, not Qwen3 4B's {_FLUX2_KLEIN_4B_TEXT}): "
+            "the Cover Art block loads FLUX.2 Klein 4B"
+        )
+    return None
+
+
+def _qwen3_4b(header: Header) -> str | None:
+    if _starts(header, "visual.", "model.visual.", "model.language_model.", "model.audio_decoder."):
+        return "not a Qwen3 4B text model (a model with vision or audio parts)"
+    width = (_shape(header, "model.embed_tokens.weight") or [0, 0])[-1]
+    if width == 2560 and _layers(header) == 36:
+        return None
+    return f"not a Qwen3 4B text model ({_layers(header)} layers, {width} wide; it has 36 and 2560)"
+
+
+def _flux2_vae(header: Header) -> str | None:
+    channels = (_shape(header, "decoder.conv_in.weight") or [0, 0])[1:2]
+    if (
+        "bn.running_mean" in header
+        and _shape(header, "encoder.conv_out.weight")[:1] == [64]
+        and channels == [32]
+    ):
+        return None
+    return "not a FLUX.2 VAE (32 latent channels)"
+
+
+def _gemma4(header: Header) -> str | None:
+    vocabulary = (_shape(header, "model.embed_tokens.weight") or [0])[0]
+    if _starts(header, "model.layers.") and _starts(header, "vision_model.") and vocabulary == 262144:
+        return None
+    return "not a Gemma 4 text model"
+
+
+SNIFFERS: Mapping[str, Callable[[Header], str | None]] = {
+    "yue2-checkpoint": _yue2_checkpoint,
+    "yue2-text-lora": _yue2_text_lora,
+    "sheetsage": _sheetsage,
+    "minimax-dit": _minimax_dit,
+    "minimax-text-encoder": _minimax_text_encoder,
+    "minimax-vae": _minimax_vae,
+    "flux2-klein-4b": _flux2_klein,
+    "qwen3-4b": _qwen3_4b,
+    "flux2-vae": _flux2_vae,
+    "gemma4-text": _gemma4,
+}
+"""What a component's loader takes, told from a file's header (``accepts`` in the catalogue): ``None`` when the
+file is of the kind, else the reason in words. Keys and shapes only - never the file's name."""
+
+
+def file_problem(accepts: str, path: Path) -> str | None:
+    """Why the file at ``path`` would not load as a component that ``accepts`` this kind (``None``: it would, or
+    the component has no sniffer). Only ``.safetensors`` files have a header to read; the others pass."""
+    sniffer = SNIFFERS.get(accepts)
+    if sniffer is None or path.suffix.lower() != ".safetensors":
+        return None if sniffer is None else "not a safetensors file"
+    header, problem = read_header(path)
+    if problem is not None:
+        return problem
+    if not header:
+        return None  # empty: an interrupted download, the inventory's business
+    return sniffer(header)
+
+
+def yue2_checkpoint_problem(path: Path) -> str | None:
+    """What keeps a YuE2 ``.safetensors`` file from loading as a ComfyUI checkpoint, from its header alone - or
+    ``None`` when nothing does (one file with the music model, the text side with its tokenizer and the audio
+    decoder, as Comfy-Org's own files and the finetunes made for ComfyUI have them). An empty file (an interrupted
+    download) is the inventory's business."""
+    header, problem = read_header(path)
+    if problem is not None:
+        return problem
+    return _yue2_checkpoint(header) if header else None
 
 
 def size_text(size: int) -> str:
