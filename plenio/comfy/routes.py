@@ -507,6 +507,14 @@ async def export_sheet_music_pending(request: web.Request) -> web.StreamResponse
     return web.json_response({"jobs": JOBS.pending()})
 
 
+async def brief_choices(request: web.Request) -> web.StreamResponse:
+    """The brief's lists for ComfyUI's page (the style templates' values per field): the Song API's ``/briefs``
+    as a ``data`` route - a page opened from another computer needs no API token for its own forms."""
+    from . import song_api_v1
+
+    return await song_api_v1.briefs(request)
+
+
 async def records_list(request: web.Request) -> web.StreamResponse:
     """The release records in ComfyUI's output folder, newest first (*Continue a song*)."""
     return web.json_response({"records": continuation.list_records(host.output_directory())})
@@ -608,6 +616,7 @@ ROUTES: tuple[Route, ...] = (
     Route("POST", "/plenio/export/sheet-music", export_sheet_music, "data"),
     Route("GET", "/plenio/export/sheet-music/pending", export_sheet_music_pending, "data"),
     Route("GET", "/plenio/records", records_list, "data"),
+    Route("GET", "/plenio/brief/choices", brief_choices, "data"),
     Route("POST", "/plenio/records/continue", records_continue, "data"),
 )
 """Every route with its access class (``core.access.CLASSES``)."""

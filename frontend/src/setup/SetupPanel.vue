@@ -8,7 +8,7 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 
 import { type Fetcher, PlenioApiError, type RecordRow, listRecords } from '../api/client'
 import AccessDialog from './AccessDialog.vue'
-import { type FindingsAnswer, setupApi } from './api'
+import { type ApiToken, type FindingsAnswer, setupApi } from './api'
 import {
   type DownloadView,
   EXTRAS,
@@ -64,6 +64,45 @@ const arrived = reactive(new Set<string>())
 let unsubscribe: (() => void) | null = null
 const recent = ref<RecordRow[]>([])
 const report = ref<Record<string, string> | null>(null)
+const tokens = ref<ApiToken[]>([])
+const remote = ref('')
+const tokenName = ref('')
+const madeToken = ref<string | null>(null)
+
+/** API access (PD 8.5): the tokens another computer's programs use, and who the Song API answers there. */
+async function loadTokens(): Promise<void> {
+  try {
+    const answer = await setupApi.tokens(props.fetcher)
+    tokens.value = answer.tokens
+    remote.value = answer.remote
+  } catch (reason) {
+    error.value = message(reason)
+  }
+}
+
+async function makeToken(): Promise<void> {
+  try {
+    const made = await setupApi.makeToken(props.fetcher, tokenName.value)
+    madeToken.value = made.token
+    tokenName.value = ''
+    await loadTokens()
+  } catch (reason) {
+    error.value = message(reason)
+  }
+}
+
+async function revokeToken(id: string): Promise<void> {
+  try {
+    await setupApi.revokeToken(props.fetcher, id)
+    await loadTokens()
+  } catch (reason) {
+    error.value = message(reason)
+  }
+}
+
+function when(seconds: number | null): string {
+  return seconds ? new Date(seconds * 1000).toLocaleString() : 'never'
+}
 
 /** The problem report: the cleaned files first, to read; saved as a zip only on the user's word. */
 async function previewReport(): Promise<void> {
@@ -456,6 +495,28 @@ onBeforeUnmount(() => {
         <span class="hint">Recent songs</span>
         <button v-for="row in recent" :key="row.path" class="link" @click="openPlayer(row.path)">▶ {{ row.title }}</button>
       </div>
+      <details class="access" @toggle="loadTokens">
+        <summary>API access</summary>
+        <p class="hint">
+          Programs on another computer (a DAW plug-in, a script) need a token for the Song API. This computer needs
+          none. Now: <strong>{{ remote === 'open' ? 'every computer, no token (as before 2.0)' : remote === 'off' ? 'this computer only' : 'another computer with a token' }}</strong>
+          ([api] remote in Plenio's config.toml).
+        </p>
+        <p v-if="madeToken" class="warn">
+          The new token - copy it now, it is not shown again: <code>{{ madeToken }}</code>
+          <button class="link" @click="madeToken = null">Done</button>
+        </p>
+        <ul class="tokens">
+          <li v-for="token in tokens" :key="token.id">
+            <strong>{{ token.name }}</strong> · made {{ when(token.created) }} · last used {{ when(token.last_used) }}
+            <button class="link" @click="revokeToken(token.id)">Take back</button>
+          </li>
+        </ul>
+        <form class="go two" @submit.prevent="makeToken">
+          <input v-model="tokenName" placeholder="Who uses it (my DAW)" aria-label="Token name" />
+          <button type="submit" :disabled="!tokenName.trim()">Make a token</button>
+        </form>
+      </details>
       <nav class="links">
         <a v-for="link in HOME_LINKS" :key="link.label" :href="link.url" target="_blank" rel="noopener">{{ link.label }}</a>
       </nav>

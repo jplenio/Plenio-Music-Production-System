@@ -108,7 +108,71 @@ _key_locks: dict[str, asyncio.Lock] = {}
 
 
 def _error(error: SongApiError) -> web.Response:
-    return web.json_response({"error": error.to_dict()}, status=error.status)
+    response = web.json_response({"error": error.to_dict()}, status=error.status)
+    if error.status == 401:
+        response.headers["WWW-Authenticate"] = 'Bearer realm="plenio"'
+    return response
+
+
+OWNER_KEY = "plenio_owner"
+"""Where the guard leaves who asks: ``here`` (this computer), ``remote`` (``[api] remote = "open"``) or
+``token:<id>``."""
+_tokens: Any = None
+_tokens_lock = threading.Lock()
+FAILED_WAIT_S = 1.0
+"""A wrong token is answered after this pause (guessing becomes slow; nobody is locked out - every guest of the
+player's gateway arrives from one address)."""
+
+
+def tokens() -> Any:
+    """The Song API's tokens (``<user>/plenio/api/tokens.json``)."""
+    from ..core.api.tokens import TokenStore
+
+    global _tokens
+    with _tokens_lock:
+        if _tokens is None:
+            _tokens = TokenStore(host.user_directory() / "plenio" / "api" / "tokens.json")
+        return _tokens
+
+
+async def admit(request: web.Request) -> None:
+    """Whether the Song API answers this request (v1 and v2, PD 8.5): this computer always - with no token, as in
+    1.6 -, another computer by ``[api] remote``: ``token`` (the default) with a valid token, ``open`` as 1.x did,
+    ``off`` never. Leaves who asks in ``request[OWNER_KEY]``."""
+    from ..core.api.tokens import bearer
+    from .routes import is_here
+
+    if is_here(request):
+        request[OWNER_KEY] = "here"
+        return
+    mode = host.load_config().api_remote
+    if mode == "open":
+        request[OWNER_KEY] = "remote"
+        return
+    if mode == "off":
+        raise SongApiError(
+            "remote_off",
+            'The Song API answers only the computer ComfyUI runs on ([api] remote = "off").',
+            hint='On that computer, set [api] remote = "token" in Plenio\'s config.toml and make a token in '
+            "Plenio Setup > API access.",
+            status=403,
+        )
+    found = await asyncio.to_thread(tokens().check, bearer(request.headers.get("Authorization")))
+    if found is None:
+        await asyncio.sleep(FAILED_WAIT_S)
+        raise SongApiError(
+            "unauthorized",
+            "Another computer needs a token for the Song API.",
+            hint="Make one in Plenio Setup > API access on the computer ComfyUI runs on and send it as "
+            "'Authorization: Bearer plenio_...'. Or set [api] remote = \"open\" in Plenio's config.toml there to "
+            "answer every computer, as before 2.0.",
+            status=401,
+        )
+    request[OWNER_KEY] = f"token:{found.id}"
+
+
+def owner_of(request: web.Request) -> str:
+    return str(request.get(OWNER_KEY) or "here")
 
 
 def _without_places(data: Any) -> Any:
@@ -174,6 +238,7 @@ async def _for_caller(request: web.Request, response: web.StreamResponse) -> web
 def guarded(handler: Handler) -> Handler:
     async def wrapper(request: web.Request) -> web.StreamResponse:
         try:
+            await admit(request)
             return await _for_caller(request, await handler(request))
         except SongApiError as error:
             return _error(error)
@@ -710,6 +775,9 @@ async def upload(request: web.Request) -> web.StreamResponse:
 async def jobs_create(request: web.Request) -> web.StreamResponse:
     data = await _body(request)
     key = str(request.headers.get("Idempotency-Key") or "").strip()[:200]
+    owner = owner_of(request)
+    if key and owner.startswith("token:"):
+        key = f"{owner}|{key}"  # a key belongs to its token
     if not key:
         return await _create(data, key)
     lock = _key_locks.setdefault(key, asyncio.Lock())

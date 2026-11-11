@@ -497,6 +497,32 @@ async def report_post(request: web.Request) -> web.StreamResponse:
     return web.json_response({"files": files})
 
 
+async def tokens_get(request: web.Request) -> web.StreamResponse:
+    """The Song API's tokens (names, when made, when last used - never a token) and who on another computer the
+    API answers (``[api] remote``)."""
+    from . import song_api_v1
+
+    listing = await asyncio.to_thread(song_api_v1.tokens().listing)
+    return web.json_response({"tokens": listing, "remote": host.load_config().api_remote})
+
+
+async def tokens_post(request: web.Request) -> web.StreamResponse:
+    """Make a token: ``{"name": "my DAW"}``. The answer holds the token - the only time it is shown."""
+    from . import song_api_v1
+
+    data = await read_json(request)
+    secret, token = await asyncio.to_thread(song_api_v1.tokens().create, str(data.get("name") or ""))
+    return web.json_response({"token": secret, **token.shown()}, status=201)
+
+
+async def token_delete(request: web.Request) -> web.StreamResponse:
+    from . import song_api_v1
+
+    if not await asyncio.to_thread(song_api_v1.tokens().revoke, request.match_info["token_id"]):
+        raise PlenioUserError("There is no such token.", hint="The list shows the tokens there are.")
+    return web.json_response({"revoked": request.match_info["token_id"]})
+
+
 def _local(method: str, path: str, handler: Any) -> Route:
     return Route(method, path, handler, "local", what=WHAT, hint=HINT)
 
@@ -516,6 +542,9 @@ ROUTES: tuple[Route, ...] = (
     _local("GET", "/plenio/setup/folders", folders_get),
     _local("POST", "/plenio/setup/test-song", test_song_post),
     _local("POST", "/plenio/setup/report", report_post),
+    _local("GET", "/plenio/setup/tokens", tokens_get),
+    _local("POST", "/plenio/setup/tokens", tokens_post),
+    _local("DELETE", "/plenio/setup/tokens/{token_id}", token_delete),
     Route("GET", "/plenio/models/files", files_get, "data"),
 )
 """Plenio Setup's routes, all ``local`` - and the file lists of Model Choice (``data``: file names only)."""

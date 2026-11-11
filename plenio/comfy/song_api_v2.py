@@ -244,7 +244,7 @@ async def presets(request: web.Request) -> web.StreamResponse:
 async def jobs_create(request: web.Request) -> web.StreamResponse:
     data = await v1._body(request)
     key = str(request.headers.get("Idempotency-Key") or "").strip()[:200]
-    return await create_job(data, key, OWNER_HERE)
+    return await create_job(data, key, v1.owner_of(request))
 
 
 async def create_job(data: dict[str, Any], key: str, owner: str) -> web.StreamResponse:
@@ -326,8 +326,17 @@ async def create_job(data: dict[str, Any], key: str, owner: str) -> web.StreamRe
     return web.json_response(job_answer(job), status=201, headers={"Location": f"{BASE}/jobs/{job.id}"})
 
 
-def _known(job_id: str) -> Job:
+def _visible(request: web.Request) -> str | None:
+    """Whose jobs a caller sees: everyone's for this computer and an open API, a token's own for a token."""
+    owner = v1.owner_of(request)
+    return owner if owner.startswith("token:") else None
+
+
+def _known(job_id: str, request: web.Request | None = None) -> Job:
     job = store().get(job_id)
+    visible = _visible(request) if request is not None else None
+    if job is not None and visible is not None and job.owner != visible:
+        job = None  # another caller's job: as if there were none
     if job is None:
         raise SongApiError("not_found", "There is no such job.", status=404)
     return job
@@ -336,7 +345,7 @@ def _known(job_id: str) -> Job:
 async def job_get(request: web.Request) -> web.StreamResponse:
     """A job; ``?wait=<seconds>`` (at most 60): the answer comes when its status, place in the queue or stage
     changes."""
-    job, view = await asyncio.to_thread(refresh, _known(request.match_info["job_id"]))
+    job, view = await asyncio.to_thread(refresh, _known(request.match_info["job_id"], request))
     raw = request.query.get("wait", "")
     if raw:
         try:
@@ -364,12 +373,12 @@ async def job_get(request: web.Request) -> web.StreamResponse:
 async def jobs_list(request: web.Request) -> web.StreamResponse:
     limit = v1._query_limit(request)
     statuses = [s for s in request.query.get("status", "").split(",") if s]
-    found = store().listing(owner=None, statuses=statuses, limit=limit)
+    found = store().listing(owner=_visible(request), statuses=statuses, limit=limit)
     return web.json_response({"jobs": [job_answer(job) for job in found]})
 
 
 async def job_delete(request: web.Request) -> web.StreamResponse:
-    job = _known(request.match_info["job_id"])
+    job = _known(request.match_info["job_id"], request)
     if job.status in ENDED:
         return web.json_response(job_answer(job))
     for prompt in job.prompts[-1:]:
@@ -380,7 +389,7 @@ async def job_delete(request: web.Request) -> web.StreamResponse:
 
 async def job_file(request: web.Request) -> web.StreamResponse:
     """A finished job's file: served as v1 serves it for the job's last run."""
-    job = _known(request.match_info["job_id"])
+    job = _known(request.match_info["job_id"], request)
     if not job.prompts:
         raise SongApiError("not_found", "This job made no files.", status=404)
     return await asyncio.to_thread(v1.serve_file, job.prompts[-1], request.match_info["name"])
@@ -390,7 +399,7 @@ async def job_approve(request: web.Request) -> web.StreamResponse:
     """Let a job that waits at a review stop go on: ``{"documents": {kind: text}}`` (optional) - an edited
     document becomes the Song Sheet's manual text; the same request is queued again under the same job, the
     approved stops passed."""
-    job, _view = await asyncio.to_thread(refresh, _known(request.match_info["job_id"]))
+    job, _view = await asyncio.to_thread(refresh, _known(request.match_info["job_id"], request))
     if job.status != "waiting_for_review" or not job.result:
         raise SongApiError(
             "needs_review", f"The job waits at no review stop (it is {job.status}).", status=409
@@ -427,7 +436,7 @@ async def job_approve(request: web.Request) -> web.StreamResponse:
 
 async def job_documents(request: web.Request) -> web.StreamResponse:
     """The job's documents: those its review stop shows while it waits, those of its song once it is made."""
-    job, _view = await asyncio.to_thread(refresh, _known(request.match_info["job_id"]))
+    job, _view = await asyncio.to_thread(refresh, _known(request.match_info["job_id"], request))
     shown = _shown(job)
     if shown is not None:
         return web.json_response({"stage": job.stage, "documents": shown})
@@ -445,7 +454,7 @@ async def job_documents(request: web.Request) -> web.StreamResponse:
 
 async def job_timings(request: web.Request) -> web.StreamResponse:
     """Where the job's time went (the record's ``timings``: seconds per group, of it loading models)."""
-    job = _known(request.match_info["job_id"])
+    job = _known(request.match_info["job_id"], request)
     if job.status != "succeeded" or not job.prompts:
         raise SongApiError("not_found", f"The job has no song yet (it is {job.status}).", status=404)
     record = await asyncio.to_thread(v1._finished_record, job.prompts[-1])
@@ -457,7 +466,7 @@ async def job_bars(request: web.Request) -> web.StreamResponse:
     """The bars of the take in its audio (as API v1's, for the job's last run)."""
     from ..core.bars import record_bars
 
-    job = _known(request.match_info["job_id"])
+    job = _known(request.match_info["job_id"], request)
     if not job.prompts:
         raise SongApiError("not_found", "This job made no song.", status=404)
     record = await asyncio.to_thread(v1._finished_record, job.prompts[-1])
@@ -557,7 +566,7 @@ async def song_again(request: web.Request) -> web.StreamResponse:
         source = record_file.parent / str(audio["name"])
         name = await asyncio.to_thread(_into_input, source)
         data = {"template": "yue2-cover", "fields": {**extra, "source.audio": name}}
-        return await create_job(data, key, OWNER_HERE)
+        return await create_job(data, key, v1.owner_of(request))
     template = song_api.template_for_record(_templates(v1._lookup()), record)
     if template is None:
         raise SongApiError("unknown_template", "No template of the API makes this song again.", status=422)
@@ -575,7 +584,7 @@ async def song_again(request: web.Request) -> web.StreamResponse:
         data.update(
             seeds={k: v for k, v in answer["seeds"].items() if k != "take"}, documents=answer["documents"]
         )
-    return await create_job(data, key, OWNER_HERE)
+    return await create_job(data, key, v1.owner_of(request))
 
 
 def _into_input(source: Path) -> str:

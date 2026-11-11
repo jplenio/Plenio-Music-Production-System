@@ -15,6 +15,13 @@ async function call<T>(fetcher: Fetcher, route: string, method = 'GET', body?: u
   return data as T
 }
 
+export interface ApiToken {
+  id: string
+  name: string
+  created: number
+  last_used: number | null
+}
+
 export interface StateAnswer {
   state: SetupState
   version: string
@@ -61,6 +68,11 @@ export const setupApi = {
     if (!response.ok) throw new PlenioApiError(`The report could not be made (${response.status})`)
     return response.blob()
   },
+  tokens: (f: Fetcher) => call<{ tokens: ApiToken[]; remote: string }>(f, '/plenio/setup/tokens'),
+  makeToken: (f: Fetcher, name: string) =>
+    call<ApiToken & { token: string }>(f, '/plenio/setup/tokens', 'POST', { name }),
+  revokeToken: (f: Fetcher, id: string) =>
+    call<{ revoked: string }>(f, `/plenio/setup/tokens/${encodeURIComponent(id)}`, 'DELETE'),
   testSong: (f: Fetcher) => call<TestJob>(f, '/plenio/setup/test-song', 'POST', {}),
   job: (f: Fetcher, id: string) => call<TestJob>(f, `/plenio/api/v1/jobs/${encodeURIComponent(id)}?wait=20`)
 }

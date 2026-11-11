@@ -387,7 +387,21 @@ never makes a second song. Wait a little longer each time (2 s, 4 s, 8 s …).
 
 ## Access from other computers and from web pages
 
-The API is as open as ComfyUI itself - and ComfyUI has no login:
+**Since Plenio 2.0 another computer needs a token** (v1 and v2 alike; a program on the computer ComfyUI runs on
+needs none, as before). Make one in **Plenio Setup > API access** on that computer - it is shown once - and send it with
+every request:
+
+```bash
+curl -H "Authorization: Bearer plenio_..." http://studio-pc:8188/plenio/api/v2/templates
+```
+
+Without one the API answers `401` (`unauthorized`) and says how to get one. `[api] remote` in Plenio's `config.toml`
+(or `PLENIO_API_REMOTE`) decides: `"token"` (the default), `"open"` - every computer, no token, as before 2.0 - or
+`"off"` - this computer only (`403`, `remote_off`). Tokens are kept only as their SHA-256; Setup lists their names and
+when they were last used, and takes one back. A token's jobs are its own: another token does not see them. The token
+protects Plenio's routes only - ComfyUI's own `/prompt` and `/history` stay as open as ComfyUI is.
+
+Beyond that, the API is as open as ComfyUI itself - and ComfyUI has no login:
 
 - **On this computer** (ComfyUI's default, `127.0.0.1`): only programs on this computer reach it. Web pages of other
   sites cannot use it: ComfyUI refuses a request whose `Origin` is not its own address.

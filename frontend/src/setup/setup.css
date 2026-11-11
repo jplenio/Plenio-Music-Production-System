@@ -210,3 +210,20 @@
   align-self: flex-start;
   font-size: 12px;
 }
+.plenio-setup .access code {
+  word-break: break-all;
+  user-select: all;
+}
+.plenio-setup .access input {
+  flex: 1;
+  min-width: 0;
+  background: var(--comfy-input-bg, #222);
+  color: inherit;
+  border: 1px solid var(--border-color, #555);
+  border-radius: 4px;
+  padding: 3px 6px;
+}
+.plenio-setup .tokens {
+  margin: 0;
+  padding-left: 16px;
+}

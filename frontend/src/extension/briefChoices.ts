@@ -150,7 +150,7 @@ const LISTS_WAIT_MS = 8000
 /** The values the style templates have, per field (once; none when the answer fails or takes too long). */
 export function briefLists(fetcher: Fetcher): Promise<FieldValues> {
   const answer = fetcher
-    .fetchApi('/plenio/api/v1/briefs')
+    .fetchApi('/plenio/brief/choices')
     .then(async (response) => (response.ok ? (((await response.json()) as { values?: FieldValues }).values ?? {}) : {}))
     .catch(() => ({}))
   lists ??= Promise.race([answer, new Promise<FieldValues>((resolve) => setTimeout(() => resolve({}), LISTS_WAIT_MS))])

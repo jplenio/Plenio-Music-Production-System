@@ -19,6 +19,7 @@ Environment variables:
 ``PLENIO_MODEL_PINS``           ``component=file`` pairs, comma-separated: these files instead of the plan's
 ``PLENIO_MODEL_DOWNLOADS``      ``ask``, ``auto`` or ``off``: whether Plenio fetches missing model files
 ``PLENIO_WORKER_DEVICE``        where Plenio's workers run: ``auto``, ``same``, ``cpu`` or ``cuda:<n>``
+``PLENIO_API_REMOTE``           ``token``, ``open`` or ``off``: who on another computer the Song API answers
 
 Config file only: ``[asset_paths]`` maps an asset id to an existing folder that
 already holds its files (for example a Whisper model you downloaded before);
@@ -48,6 +49,8 @@ CONFIG_FILE_NAME = "config.toml"
 MODEL_PREFERENCES = ("balanced", "quality", "speed", "small")
 """What the model plan prefers among the files that run on the card (``plenio.core.modelplan``)."""
 MODEL_DOWNLOADS = ("ask", "auto", "off")
+API_REMOTE = ("token", "open", "off")
+"""Who on another computer the Song API (v1 and v2) answers: a caller with a token, everyone (as 1.x), nobody."""
 """``ask``: Plenio Setup offers a missing model file and fetches it when confirmed; ``auto``: a run fetches
 what it needs; ``off``: Plenio fetches no model file and names what to put where."""
 _DEVICE = re.compile(r"auto|same|cpu|cuda:\d+")
@@ -80,6 +83,8 @@ class PlenioConfig:
     """Component id -> the file to use instead of the plan's choice (``[models.pins]``)."""
     model_downloads: str = "ask"
     """Whether Plenio fetches missing model files (``MODEL_DOWNLOADS``)."""
+    api_remote: str = "token"
+    """Who on another computer the Song API answers (``API_REMOTE``); this computer needs no token."""
     worker_device: str = "auto"
     """Where Plenio's workers run: ``auto`` (the largest card ComfyUI does not use, else ComfyUI's),
     ``same`` (ComfyUI's card), ``cpu`` or ``cuda:<n>``."""
@@ -111,6 +116,7 @@ class PlenioConfig:
             "models_prefer": self.models_prefer,
             "model_pins": dict(self.model_pins),
             "model_downloads": self.model_downloads,
+            "api_remote": self.api_remote,
             "worker_device": self.worker_device,
             "sources": dict(self.sources),
         }
@@ -138,7 +144,7 @@ def _parse_seconds(value: Any, name: str) -> float:
 def _apply_file(
     config: PlenioConfig, values: dict[str, Any], path: Path, sources: dict[str, str]
 ) -> PlenioConfig:
-    allowed = {"offline", "auto_download", "asset_dir", "workers", "asset_paths", "llm", "models"}
+    allowed = {"offline", "auto_download", "asset_dir", "workers", "asset_paths", "llm", "models", "api"}
     unknown = sorted(set(values) - allowed)
     if unknown:
         raise PlenioUserError(
@@ -176,6 +182,11 @@ def _apply_file(
     if "device" in workers:
         updates["worker_device"] = _device(workers["device"], f"{path}: workers.device")
     updates.update(_model_settings(values.get("models", {}), path))
+    api = values.get("api", {})
+    if not isinstance(api, dict) or sorted(set(api) - {"remote"}):
+        raise PlenioUserError(f'{path}: [api] takes only \'remote\' ("token", "open" or "off").')
+    if "remote" in api:
+        updates["api_remote"] = _choice(api["remote"], API_REMOTE, f"{path}: api.remote")
     updates.update(_llm_settings(values.get("llm", {}), path))
     sources.update({key: "file" for key in updates})
     return replace(config, **updates)
@@ -308,6 +319,9 @@ def _apply_env(config: PlenioConfig, env: Mapping[str, str], sources: dict[str, 
             env["PLENIO_MODELS_PREFER"], MODEL_PREFERENCES, "PLENIO_MODELS_PREFER"
         )
         sources["models_prefer"] = "PLENIO_MODELS_PREFER"
+    if env.get("PLENIO_API_REMOTE", "").strip():
+        updates["api_remote"] = _choice(env["PLENIO_API_REMOTE"], API_REMOTE, "PLENIO_API_REMOTE")
+        sources["api_remote"] = "PLENIO_API_REMOTE"
     if env.get("PLENIO_MODEL_DOWNLOADS", "").strip():
         updates["model_downloads"] = _choice(
             env["PLENIO_MODEL_DOWNLOADS"], MODEL_DOWNLOADS, "PLENIO_MODEL_DOWNLOADS"
