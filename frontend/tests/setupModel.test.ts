@@ -233,3 +233,12 @@ describe('the test song', () => {
     expect(refused).toMatchObject({ state: 'failed', finding: { id: 'test.model', text: 'ComfyUI does not find the model file x. Put it in.' } })
   })
 })
+
+describe('Home', () => {
+  it('counts the files of the wanted templates and the optional ones apart', async () => {
+    const { homeModels, HOME_TEMPLATES } = await import('../src/setup/model')
+    expect(homeModels(PLAN, [SONG])).toEqual({ line: '0 of 1 files for your templates · 1 optional not installed', ready: false })
+    expect(homeModels(PLAN, [MINIMAX])).toEqual({ line: '1 of 1 files for your templates', ready: true })
+    expect(HOME_TEMPLATES.map((t) => t.template)).toContain(SONG)
+  })
+})

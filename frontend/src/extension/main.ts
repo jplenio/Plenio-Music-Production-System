@@ -394,7 +394,11 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
     setupTab = installSetupTab({
       app: comfyApp,
       fetcher: comfyApi,
-      openPlayer: () => void openPlayer(playerHost),
+      openPlayer: (record) => void openPlayer(playerHost, record ?? null),
+      openContinue: () =>
+        void openContinueSong(continueHost).catch((error: unknown) =>
+          console.error('Plenio: the Continue a song dialog could not open', error)
+        ),
       lacksFiles: workflowLacksFiles
     })
     // a run stopped at a model file that is not there: what to do, and Setup at that file's row

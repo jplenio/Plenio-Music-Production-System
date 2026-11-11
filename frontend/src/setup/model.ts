@@ -365,3 +365,40 @@ export function testView(job: TestJob | null, refused: { message: string; hint?:
   const stage = job.stage?.text ? ` - ${job.stage.text}` : ''
   return { state: 'running', text: `${job.status === 'queued' ? 'Waiting in the queue' : 'Making the test song'}${stage}`, audio: null, finding: null }
 }
+
+/** Home's buttons: what one wants to do, and the template that does it (PD 7.2). */
+export const HOME_TEMPLATES: { label: string; template: string }[] = [
+  { label: 'Make a song', template: '1 · YuE2 · Song' },
+  { label: 'Cover a recording', template: '2 · YuE2 · Cover' },
+  { label: 'A song with MiniMax', template: '3 · MiniMax · Song' },
+  { label: 'Compose it yourself', template: '5 · YuE2 · DAW' },
+  { label: 'Master a file', template: '4 · Enhance & Master' }
+]
+
+const REPOSITORY = 'https://github.com/jplenio/Plenio-Music-Production-System'
+export const HOME_LINKS: { label: string; url: string }[] = [
+  { label: 'New in 2.0', url: `${REPOSITORY}/blob/main/CHANGELOG.md` },
+  { label: 'Tutorials', url: 'https://www.youtube.com/playlist?list=PLAFqTtP59fgE' },
+  { label: 'Documentation', url: `${REPOSITORY}/blob/main/docs/user/getting-started.md` },
+  { label: 'Report a problem', url: `${REPOSITORY}/blob/main/docs/user/troubleshooting.md#reporting-a-problem` }
+]
+
+/** Home's models line: how many of the wanted templates' files are there, and the optional ones that are not. */
+export function homeModels(plan: Pick<PlanView, 'templates'>, templates: string[]): { line: string; ready: boolean } {
+  const needed = new Map<string, boolean>()
+  const optional = new Map<string, boolean>()
+  for (const template of plan.templates) {
+    if (!templates.includes(template.template)) continue
+    for (const pick of template.picks) {
+      const into = pick.optional ? optional : needed
+      into.set(pick.component, (into.get(pick.component) ?? false) || pick.installed)
+    }
+  }
+  for (const component of needed.keys()) optional.delete(component)
+  const have = [...needed.values()].filter(Boolean).length
+  const missingOptional = [...optional.values()].filter((installed) => !installed).length
+  const line =
+    `${have} of ${needed.size} files for your templates` +
+    (missingOptional ? ` · ${missingOptional} optional not installed` : '')
+  return { line, ready: have === needed.size }
+}

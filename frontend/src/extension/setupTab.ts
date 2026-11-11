@@ -15,7 +15,8 @@ export const DOWNLOAD_EVENT = 'plenio.download'
 export interface SetupTabHost {
   app: ComfyApp
   fetcher: Fetcher & { addEventListener(type: string, listener: (event: CustomEvent) => void): void }
-  openPlayer: () => void
+  openPlayer: (record?: string | null) => void
+  openContinue: () => void
   /** Whether the open workflow lacks a model file (the tab's dot). */
   lacksFiles: () => boolean
 }
@@ -79,7 +80,8 @@ export function installSetupTab(host: SetupTabHost): { open(focus?: string | nul
           life: 12000
         })
       ),
-    openPlayer: host.openPlayer
+    openPlayer: host.openPlayer,
+    openContinue: host.openContinue
   }
   const manager = host.app.extensionManager
   manager?.registerSidebarTab?.({

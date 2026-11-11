@@ -120,6 +120,22 @@ try {
   const song = plan.templates.find((t) => t.template === '1 · YuE2 · Song')
   const expected = song.picks.filter((p) => !p.optional && p.file !== args.gated)
   record('the plan counts the files as installed', expected.every((p) => p.installed), expected.map((p) => `${p.file}: ${p.installed}`).join(', '))
+  // 6. Home: every template button opens its template in a tab of its name
+  await panel.getByRole('button', { name: /6 Go/ }).click()
+  await panel.locator('.home').waitFor()
+  await page.screenshot({ path: path.join(OUT, '6-home.png') })
+  const buttons = panel.locator('.home .go:not(.two) button')
+  const openedTemplates = []
+  for (let index = 0; index < (await buttons.count()); index++) {
+    const button = buttons.nth(index)
+    const template = await button.getAttribute('title')
+    await button.click()
+    const ok = await page
+      .waitForFunction((name) => document.title.includes(name) || [...document.querySelectorAll('.workflow-tabs *, [role="tab"]')].some((e) => e.textContent?.includes(name)), template, { timeout: 30000 })
+      .then(() => true, () => false)
+    openedTemplates.push(`${template}: ${ok}`)
+  }
+  record('Home opens each template', openedTemplates.length >= 5 && openedTemplates.every((o) => o.endsWith('true')), openedTemplates.join(', '))
   record('no Plenio error in the console', errors.length === 0, errors.slice(0, 3).join(' | '))
 } catch (error) {
   record('the check ran through', false, String(error?.message ?? error))

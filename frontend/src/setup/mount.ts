@@ -10,7 +10,8 @@ export interface SetupHost {
   fetcher: Fetcher
   onDownloads: (listener: (download: DownloadView) => void) => () => void
   openTemplate: (title: string) => void
-  openPlayer: () => void
+  openPlayer: (record?: string | null) => void
+  openContinue: () => void
 }
 
 export interface MountedSetup {
@@ -39,6 +40,7 @@ export function mountSetup(element: HTMLElement, host: SetupHost, focus: string 
         onDownloads: host.onDownloads,
         openTemplate: host.openTemplate,
         openPlayer: host.openPlayer,
+        openContinue: host.openContinue,
         focus: focused.value
       })
   })

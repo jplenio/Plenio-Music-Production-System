@@ -170,3 +170,31 @@
 .plenio-setup audio {
   width: 100%;
 }
+.plenio-setup .go.two {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.plenio-setup .go button {
+  text-align: left;
+}
+.plenio-setup .recent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.plenio-setup .links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 12px;
+}
+.plenio-setup .links a {
+  color: var(--p-primary-color, #60a5fa);
+}
+.plenio-setup button.link {
+  background: none;
+  border: none;
+  padding: 0 2px;
+  color: var(--p-primary-color, #60a5fa);
+  text-align: left;
+}

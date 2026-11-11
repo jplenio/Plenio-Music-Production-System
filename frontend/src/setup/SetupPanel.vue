@@ -6,13 +6,15 @@
  */
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 
-import { type Fetcher, PlenioApiError } from '../api/client'
+import { type Fetcher, PlenioApiError, type RecordRow, listRecords } from '../api/client'
 import AccessDialog from './AccessDialog.vue'
 import { type FindingsAnswer, setupApi } from './api'
 import {
   type DownloadView,
   EXTRAS,
   type FolderView,
+  HOME_LINKS,
+  HOME_TEMPLATES,
   type PlanView,
   type RowAction,
   STEPS,
@@ -20,6 +22,7 @@ import {
   type SetupState,
   type Step,
   formatBytes,
+  homeModels,
   planRows,
   planTotals,
   rowView,
@@ -35,7 +38,9 @@ const props = defineProps<{
   onDownloads: (listener: (download: DownloadView) => void) => () => void
   /** Open a template by its title (Home and step 6). */
   openTemplate: (title: string) => void
-  openPlayer: () => void
+  /** Open the player, at a song's record when one is given. */
+  openPlayer: (record?: string | null) => void
+  openContinue: () => void
   /** A component to show first (a run stopped at its missing file). */
   focus?: string | null
 }>()
@@ -55,6 +60,21 @@ const access = ref<string | null>(null)
 /** Files that arrived while the page is open (the plan says so once it is read again). */
 const arrived = reactive(new Set<string>())
 let unsubscribe: (() => void) | null = null
+const recent = ref<RecordRow[]>([])
+const models = computed(() => (plan.value ? homeModels(plan.value, templates.value) : null))
+const shownTemplates = computed(() => HOME_TEMPLATES.filter((t) => allTemplates.value.includes(t.template)))
+
+async function loadRecent(): Promise<void> {
+  try {
+    recent.value = (await listRecords(props.fetcher)).filter((row) => row.audio).slice(0, 5)
+  } catch {
+    recent.value = [] // no songs yet, or the output folder cannot be read: Home works without them
+  }
+}
+
+watch(step, (now) => {
+  if (now === 'go') void loadRecent()
+})
 const testJob = ref<TestJob | null>(null)
 const testRefused = ref<{ message: string; hint?: string | null } | null>(null)
 const testing = ref(false)
@@ -231,7 +251,9 @@ onMounted(() => {
     if (item.state === 'installed') arrived.add(item.id)
     else arrived.delete(item.id)
   })
-  void load()
+  void load().then(() => {
+    if (step.value === 'go') void loadRecent()
+  })
 })
 onBeforeUnmount(() => {
   following = false
@@ -383,11 +405,33 @@ onBeforeUnmount(() => {
       <button @click="go('go')">{{ test.state === 'ok' ? 'Next' : 'Skip' }}</button>
     </section>
 
-    <section v-if="state && step === 'go'">
+    <section v-if="state && step === 'go'" class="home">
+      <p v-if="models" :class="models.ready ? 'ok' : 'warn'">
+        {{ models.ready ? 'Everything ready ✓' : 'Files are missing' }} · {{ models.line }}
+        <button class="link" @click="go('plan')">Manage</button>
+      </p>
       <div class="go">
-        <button v-for="title in templates" :key="title" class="primary" @click="openTemplate(title)">{{ title }}</button>
-        <button @click="openPlayer()">Open the player</button>
+        <button
+          v-for="item in shownTemplates"
+          :key="item.template"
+          :class="{ primary: templates.includes(item.template) }"
+          :title="item.template"
+          @click="openTemplate(item.template)"
+        >
+          {{ item.label }}
+        </button>
       </div>
+      <div class="go two">
+        <button @click="openPlayer()">Open the player</button>
+        <button @click="openContinue()">Continue a song…</button>
+      </div>
+      <div v-if="recent.length" class="recent">
+        <span class="hint">Recent songs</span>
+        <button v-for="row in recent" :key="row.path" class="link" @click="openPlayer(row.path)">▶ {{ row.title }}</button>
+      </div>
+      <nav class="links">
+        <a v-for="link in HOME_LINKS" :key="link.label" :href="link.url" target="_blank" rel="noopener">{{ link.label }}</a>
+      </nav>
     </section>
 
     <AccessDialog v-if="access" :fetcher="fetcher" :variant="access" @close="access = null" @ready="(v) => { access = null; void start([v]) }" />
