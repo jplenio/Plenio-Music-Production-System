@@ -67,9 +67,11 @@ A session that takes over reads `.claude/handover.md` first if it exists (local,
 - Done too: 2.5 the download manager (`core/assets/downloads.py`, refusals in `hub.py`), 2.6 gated access and the token (`core/assets/access.py`).
 - Done too: 2.7 the Setup routes (`plenio/comfy/setup.py`), and the fixes of the review after 2.7.
 - Done in phase 3: 3.1 Model Choice (`plenio/comfy/nodes/model_choice.py`), 3.2 sniffers (`core/models.py: SNIFFERS`), 3.3 the model blocks on `auto`, 3.4 the labels in the frontend (`frontend/src/extension/modelChoice.ts`), 3.5 *Bring the model blocks up to date* (`core/blocks.py: upgrade_models`), the fixes of the review after 3.5, 3.6 the writer plan (`core/llm/gemma.py: STEPS`), 3.7 the hardware table (`core/system.py: hardware_rows`).
-- Next: phase 4 (Plenio Setup and Home).
+- Done in phase 4 (exit passed on the owner's word): 4.1 findings (`core/system.py: Finding`), 4.2 the Setup tab (`frontend/src/setup/`, `plenio/comfy/setup.py`, `downloads = "auto"`, `HF_ENDPOINT`), 4.3 the test song, 4.4 Home, 4.5 the problem report (`core/problem_report.py`), 4.6 presets (`resources/presets/make.json`), 4.7 Approve goes on, 4.8 Brief List and the recipes (`example_workflows/recipes/`).
+- Next: phase 5 (Song API v2, tokens, Player API, MCP), with the Fable review before its critical parts.
+- Setup in the browser: `tools/dev_server.py --fake-hub <port>` and `tools/setup_check.mjs` (a local stand-in for Hugging Face, reached as `HF_ENDPOINT`).
 - Reviews at the plan's checkpoints run as a subagent (`model: fable`, `effort: high`), read-only, focused; next one: phase 5.
 - Exit of phase 3 passed on 2026-11-11: the owner's real song with every model field on `auto` (16 GB card).
 - `pytest-xdist` is in `.devdeps` and CI (0.5 done); 0.4 done (the native 12B measured in ComfyUI 0.41.0).
-- Waiting for the owner: the cover brief's recording (0.2), coverage in `.devdeps` (0.6).
+- Waiting for the owner: the cover brief's recording (0.2), coverage in `.devdeps` (0.6), whether the Q6_K GGUF stays the writer download from 15.5 GiB (it measured 2.4 times slower than the native 12B on a 16 GB card).
 - The plan's boxes are the record of what is done; tick a box in the commit that makes its acceptance line hold.
