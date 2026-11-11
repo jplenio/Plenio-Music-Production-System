@@ -118,3 +118,17 @@ def test_after_a_restart_a_running_job_is_interrupted_and_its_key_runs_again(
         "POST", f"{BASE}/jobs", REQUEST, headers={"Idempotency-Key": "night-7"}
     )
     assert status == 201 and fresh["id"] != job["id"], fresh
+
+
+def test_songs_models_and_the_editors_routes(restartable: ComfyServer) -> None:
+    assert isinstance(restartable.get(f"{BASE}/songs")["songs"], list)
+    assert restartable.request("GET", f"{BASE}/songs/bm90LWEtc29uZw")[0] == 404
+    plan = restartable.get(f"{BASE}/models/plan")
+    assert {t["template"] for t in plan["templates"]} >= {"1 · YuE2 · Song"}
+    assert restartable.get(f"{BASE}/models")["templates"]
+    status, data = restartable.request("POST", f"{BASE}/scores/analyze", {"abc": "not a score"})
+    assert status in (200, 400), data
+    if status == 400:
+        assert data["error"]["code"] == "bad_request"
+    status, data = restartable.request("POST", f"{BASE}/lyrics/analyze", {"lyrics": "[verse]\nA paper boat"})
+    assert status == 200, data

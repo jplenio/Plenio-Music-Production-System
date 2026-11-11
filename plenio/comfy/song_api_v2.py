@@ -16,19 +16,21 @@ import json
 import random
 import threading
 import time
+from pathlib import Path
 from typing import Any
 
 from aiohttp import web
 
 from .. import __version__
-from ..core import song_api
+from ..core import continuation, song_api
 from ..core.access import Route
-from ..core.api import review
+from ..core.api import review, songs
 from ..core.api.jobstore import ACTIVE, ENDED, Job, JobStore
+from ..core.errors import PlenioUserError
 from ..core.hashing import sha256_text
 from ..core.presets import with_preset
 from ..core.song_api import SongApiError
-from . import host
+from . import host, routes, setup
 from . import song_api_v1 as v1
 from .shared import template_workflows
 
@@ -426,6 +428,100 @@ async def job_documents(request: web.Request) -> web.StreamResponse:
     raise SongApiError("not_found", f"The job has no documents yet (it is {job.status}).", status=404)
 
 
+async def job_timings(request: web.Request) -> web.StreamResponse:
+    """Where the job's time went (the record's ``timings``: seconds per group, of it loading models)."""
+    job = _known(request.match_info["job_id"])
+    if job.status != "succeeded" or not job.prompts:
+        raise SongApiError("not_found", f"The job has no song yet (it is {job.status}).", status=404)
+    record = await asyncio.to_thread(v1._finished_record, job.prompts[-1])
+    data = json.loads(await asyncio.to_thread(record.read_text, encoding="utf-8"))
+    return web.json_response({"job": job.id, "timings": data.get("timings")})
+
+
+async def job_bars(request: web.Request) -> web.StreamResponse:
+    """The bars of the take in its audio (as API v1's, for the job's last run)."""
+    from ..core.bars import record_bars
+
+    job = _known(request.match_info["job_id"])
+    if not job.prompts:
+        raise SongApiError("not_found", "This job made no song.", status=404)
+    record = await asyncio.to_thread(v1._finished_record, job.prompts[-1])
+    try:
+        answer = await asyncio.to_thread(record_bars, record)
+    except (OSError, ValueError, PlenioUserError) as error:
+        raise SongApiError(
+            "internal", f"The bars of the take were not measured: {error}", status=500
+        ) from error
+    return web.json_response({"job": job.id, **answer})
+
+
+async def models_plan(request: web.Request) -> web.StreamResponse:
+    """The model plan of every template for this computer (Plenio Setup's; no folder of this computer in it)."""
+    return await setup.plan_get(request)
+
+
+# --- routes: songs --------------------------------------------------------------------------------------------
+
+
+def _record_of(song: str) -> Path:
+    try:
+        return continuation.record_path(host.output_directory(), songs.relative_of(song))
+    except PlenioUserError as error:
+        raise SongApiError("not_found", str(error), status=404) from error
+
+
+async def songs_list(request: web.Request) -> web.StreamResponse:
+    """The released songs (the records in ComfyUI's output folder), newest first; ``?q=`` words of the title, the
+    date or the folder; ``?limit=``."""
+    rows = await asyncio.to_thread(continuation.list_records, host.output_directory())
+    return web.json_response(
+        {"songs": songs.listing(rows, request.query.get("q", ""), v1._query_limit(request))}
+    )
+
+
+async def song_get(request: web.Request) -> web.StreamResponse:
+    record = _record_of(request.match_info["song_id"])
+    data = await asyncio.to_thread(continuation.read_record, record)
+    relative = record.relative_to(host.output_directory().resolve()).as_posix()
+    row = continuation.summary(data, relative)
+    files = [
+        {**({"role": f["role"]} if f.get("role") else {}), "name": str(f["name"]),
+         "url": f"{BASE}/songs/{request.match_info['song_id']}/files/{f['name']}"}
+        for f in data.get("files") or [] if isinstance(f, dict) and f.get("name")
+    ]  # fmt: skip
+    documents = {
+        str(kind): {"text": str(doc.get("text") or ""), "sha256": sha256_text(str(doc.get("text") or ""))}
+        for kind, doc in (data.get("documents") or {}).items()
+        if isinstance(doc, dict)
+    }
+    return web.json_response(
+        {**songs.song_row(row), "files": files, "documents": documents, "timings": data.get("timings")}
+    )
+
+
+async def song_file(request: web.Request) -> web.StreamResponse:
+    record = _record_of(request.match_info["song_id"])
+    data = await asyncio.to_thread(continuation.read_record, record)
+    listed = [str(f["name"]) for f in data.get("files") or [] if isinstance(f, dict) and f.get("name")]
+    path = song_api.result_file(record, request.match_info["name"], listed, host.output_directory())
+    return web.FileResponse(path)
+
+
+# --- routes: scores and lyrics (the editor's functions behind versioned paths) ---------------------------------
+
+
+def _editor(handler: Any) -> Any:
+    """An editor route in v2's error shape: what it refuses is a ``bad_request``."""
+
+    async def wrapped(request: web.Request) -> web.StreamResponse:
+        try:
+            return await handler(request)
+        except PlenioUserError as error:
+            raise SongApiError("bad_request", error.message, hint=error.hint or "") from error
+
+    return wrapped
+
+
 def _route(method: str, path: str, handler: Any) -> Route:
     return Route(method, f"{BASE}{path}", handler, "api")
 
@@ -444,6 +540,20 @@ ROUTES: tuple[Route, ...] = (
     _route("GET", "/jobs/{job_id}/files/{name:.+}", job_file),
     _route("POST", "/jobs/{job_id}/approve", job_approve),
     _route("GET", "/jobs/{job_id}/documents", job_documents),
+    _route("GET", "/jobs/{job_id}/timings", job_timings),
+    _route("GET", "/jobs/{job_id}/bars", job_bars),
+    _route("GET", "/models", v1.models_info),
+    _route("GET", "/models/plan", models_plan),
+    _route("GET", "/songs", songs_list),
+    _route("GET", "/songs/{song_id}", song_get),
+    _route("GET", "/songs/{song_id}/files/{name:.+}", song_file),
+    _route("POST", "/scores/analyze", _editor(routes.score_analyze)),
+    _route("POST", "/scores/transform", _editor(routes.score_transform)),
+    _route("POST", "/scores/import/midi", _editor(routes.score_midi_import)),
+    _route("POST", "/scores/import/musicxml", _editor(routes.score_musicxml_import)),
+    _route("POST", "/scores/export/midi", _editor(routes.score_midi_export)),
+    _route("POST", "/scores/export/musicxml", _editor(routes.score_musicxml_export)),
+    _route("POST", "/lyrics/analyze", _editor(routes.lyrics_analyze)),
     _route("POST", "/uploads", v1.upload),
     _route("GET", "/queue", v1.queue_info),
 )
