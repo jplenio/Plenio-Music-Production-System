@@ -50,6 +50,7 @@
    }
   ],
   "paths": {
+   "openapi": "/plenio/api/v2/openapi.json",
    "templates": "/plenio/api/v2/templates",
    "briefs": "/plenio/api/v2/briefs",
    "presets": "/plenio/api/v2/presets",

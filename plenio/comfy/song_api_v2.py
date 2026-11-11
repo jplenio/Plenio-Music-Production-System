@@ -31,12 +31,11 @@ from ..core.errors import PlenioUserError
 from ..core.hashing import sha256_text
 from ..core.presets import with_preset
 from ..core.song_api import SongApiError
+from ..core.song_api_doc_v2 import API_VERSION, BASE, openapi_v2
 from . import host, routes, setup
 from . import song_api_v1 as v1
 from .shared import template_workflows
 
-BASE = "/plenio/api/v2"
-API_VERSION = "2.0"
 WAIT_LIMIT_S = 60.0
 WATCH_EVERY_S = 2.0
 OWNER_HERE = "here"
@@ -251,6 +250,7 @@ async def index(request: web.Request) -> web.StreamResponse:
             "comfyui": host.comfyui_version(),
             "templates": [t.summary() for t in _templates(info).values()],
             "paths": {
+                "openapi": f"{BASE}/openapi.json",
                 "templates": f"{BASE}/templates",
                 "briefs": f"{BASE}/briefs",
                 "presets": f"{BASE}/presets",
@@ -258,6 +258,13 @@ async def index(request: web.Request) -> web.StreamResponse:
             },
             "docs": "https://github.com/jplenio/Plenio-Music-Production-System/blob/main/docs/api/README.md",
         }
+    )
+
+
+async def openapi_document(request: web.Request) -> web.StreamResponse:
+    """The OpenAPI 3.1 document of v2, made from this ComfyUI's templates."""
+    return web.json_response(
+        openapi_v2(_templates(v1._lookup()).values(), plenio=__version__, comfyui=host.comfyui_version())
     )
 
 
@@ -717,6 +724,7 @@ def _route(method: str, path: str, handler: Any) -> Route:
 ROUTES: tuple[Route, ...] = (
     _route("GET", "", index),
     _route("GET", "/", index),
+    _route("GET", "/openapi.json", openapi_document),
     _route("GET", "/templates", templates),
     _route("GET", "/templates/{template_id}", template_detail),
     _route("GET", "/briefs", v1.briefs),

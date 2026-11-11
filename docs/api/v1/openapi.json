@@ -1,0 +1,3207 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "Plenio Song API",
+  "version": "1.4",
+  "summary": "Make songs with Plenio on a running ComfyUI, and follow them to the finished files.",
+  "description": "Make songs with the Plenio Music Production System on a running ComfyUI: choose a template, give its fields (the song part of the workflow), queue the job, follow it, download its files. Plenio 1.6.0, ComfyUI 0.41.0. The fields are read from the templates themselves, so this document is as current as the templates of this ComfyUI. Versioning: the path carries the major version (/v1); a minor version (1.1) only adds. Guide: docs/api/README.md.",
+  "license": {
+   "name": "Apache-2.0",
+   "identifier": "Apache-2.0"
+  },
+  "x-api-name": "plenio-song-api"
+ },
+ "servers": [
+  {
+   "url": "http://127.0.0.1:8188/plenio/api/v1",
+   "description": "ComfyUI on this computer (its default port)"
+  },
+  {
+   "url": "http://127.0.0.1:8000/plenio/api/v1",
+   "description": "ComfyUI Desktop"
+  }
+ ],
+ "tags": [
+  {
+   "name": "Discovery",
+   "description": "What this ComfyUI's API offers: templates, fields, style templates"
+  },
+  {
+   "name": "Jobs",
+   "description": "Make a song, follow it, cancel it, download its files"
+  },
+  {
+   "name": "Sources",
+   "description": "Recordings for covers, release records made again"
+  }
+ ],
+ "paths": {
+  "/": {
+   "get": {
+    "tags": [
+     "Discovery"
+    ],
+    "operationId": "getApi",
+    "summary": "The API: its version, Plenio's and ComfyUI's, the templates, the paths",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Index"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/openapi.json": {
+   "get": {
+    "tags": [
+     "Discovery"
+    ],
+    "operationId": "getOpenApi",
+    "summary": "This document",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/templates": {
+   "get": {
+    "tags": [
+     "Discovery"
+    ],
+    "operationId": "listTemplates",
+    "summary": "The templates the API runs",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "templates"
+         ],
+         "properties": {
+          "templates": {
+           "type": "array",
+           "items": {
+            "$ref": "#/components/schemas/TemplateSummary"
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/templates/{id}": {
+   "get": {
+    "tags": [
+     "Discovery"
+    ],
+    "operationId": "getTemplate",
+    "summary": "A template's fields, release fields, seeds and documents",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "enum": [
+        "yue2-song",
+        "yue2-cover"
+       ]
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TemplateDetail"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/briefs": {
+   "get": {
+    "tags": [
+     "Discovery"
+    ],
+    "operationId": "listBriefs",
+    "summary": "The style templates and every value their fields have (the lists of a simple form)",
+    "parameters": [
+     {
+      "name": "kind",
+      "in": "query",
+      "schema": {
+       "type": "string",
+       "enum": [
+        "song",
+        "cover"
+       ],
+       "default": "song"
+      }
+     },
+     {
+      "name": "reload",
+      "in": "query",
+      "schema": {
+       "type": "string",
+       "enum": [
+        "1"
+       ]
+      },
+      "description": "1: read the style templates from disk again first"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Briefs"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Refused: the error names the field and why",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/uploads": {
+   "post": {
+    "tags": [
+     "Sources"
+    ],
+    "operationId": "uploadSource",
+    "summary": "A source recording for a cover (the body); the answer's name goes into source.audio",
+    "parameters": [
+     {
+      "name": "name",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string"
+      },
+      "description": "The file's name with its extension (MP3, FLAC, WAV, OGG, M4A, OPUS, AAC, AIFF)"
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "audio/*": {
+       "schema": {
+        "type": "string",
+        "format": "binary"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Saved in ComfyUI's input folder",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "name",
+          "bytes"
+         ],
+         "properties": {
+          "name": {
+           "type": "string"
+          },
+          "bytes": {
+           "type": "integer"
+          }
+         }
+        },
+        "example": {
+         "name": "plenio-api-3fa2b0c1d4e5-my-song.mp3",
+         "bytes": 4810233
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Refused: the error names the field and why",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "413": {
+      "description": "Too large",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "415": {
+      "description": "Not the type the call takes",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/jobs": {
+   "get": {
+    "tags": [
+     "Jobs"
+    ],
+    "operationId": "listJobs",
+    "summary": "The jobs made through the API that ComfyUI still knows, newest first",
+    "parameters": [
+     {
+      "name": "status",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      },
+      "description": "Only jobs of these statuses, comma-separated (queued,running)"
+     },
+     {
+      "name": "client",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      },
+      "description": "Only the jobs whose client.name is this"
+     },
+     {
+      "name": "template",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 200,
+       "default": 200
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "jobs"
+         ],
+         "properties": {
+          "jobs": {
+           "type": "array",
+           "items": {
+            "$ref": "#/components/schemas/Job"
+           }
+          }
+         }
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Refused: the error names the field and why",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   },
+   "post": {
+    "tags": [
+     "Jobs"
+    ],
+    "operationId": "createJob",
+    "summary": "Make a song",
+    "parameters": [
+     {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "schema": {
+       "type": "string",
+       "maxLength": 200
+      },
+      "description": "The same key again (for 24 hours) returns the first job instead of a second song."
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "oneOf": [
+         {
+          "$ref": "#/components/schemas/JobRequest_yue2_song"
+         },
+         {
+          "$ref": "#/components/schemas/JobRequest_yue2_cover"
+         }
+        ]
+       },
+       "example": {
+        "template": "yue2-song",
+        "fields": {
+         "genre": "synthwave",
+         "description": "a night drive through a rainy city",
+         "length": "short (about 1:30)",
+         "vocals": "sung",
+         "language": "English",
+         "finish.cover_art": true
+        },
+        "release": {
+         "album": "Night drives",
+         "artist": "Me"
+        },
+        "client": {
+         "name": "My app"
+        }
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Queued",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Job"
+        },
+        "example": {
+         "id": "4f6c1d0e-8a3b-4e55-9d2c-0b7e2a1f9c33",
+         "template": "yue2-song",
+         "status": "queued",
+         "queue_position": 1,
+         "created_at": 1761484800.0,
+         "started_at": 1761484803.2,
+         "finished_at": null,
+         "stage": {
+          "group": "5 · RENDER",
+          "text": "singing and playing",
+          "index": 5,
+          "of": 6
+         },
+         "progress": {
+          "nodes_done": 41,
+          "nodes": 88,
+          "step": 12.0,
+          "steps": 32.0
+         },
+         "seeds": {
+          "draft": 11,
+          "plan": 12,
+          "arrangement": 13,
+          "take": 14,
+          "cover": 15
+         },
+         "documents": [],
+         "client": {
+          "name": "My app"
+         },
+         "result": null,
+         "error": null,
+         "warnings": [],
+         "links": {
+          "self": "/plenio/api/v1/jobs/4f6c1d0e-8a3b-4e55-9d2c-0b7e2a1f9c33"
+         }
+        }
+       }
+      },
+      "headers": {
+       "Location": {
+        "schema": {
+         "type": "string"
+        },
+        "description": "The job's address"
+       }
+      }
+     },
+     "200": {
+      "description": "The job of this Idempotency-Key, made before",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Job"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Refused: the error names the field and why",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "415": {
+      "description": "Not the type the call takes",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "503": {
+      "description": "ComfyUI's queue does not answer",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/jobs/{id}": {
+   "get": {
+    "tags": [
+     "Jobs"
+    ],
+    "operationId": "getJob",
+    "summary": "A job: queued, running (with its stage), succeeded (with its files), failed or cancelled",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      },
+      "description": "The job's id (ComfyUI's prompt id)"
+     },
+     {
+      "name": "wait",
+      "in": "query",
+      "schema": {
+       "type": "number",
+       "minimum": 0,
+       "maximum": 60
+      },
+      "description": "Seconds to wait for a change of its status, its place in the queue or its stage before answering (at most 60): follow a song without asking every second"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Job"
+        },
+        "example": {
+         "id": "4f6c1d0e-8a3b-4e55-9d2c-0b7e2a1f9c33",
+         "template": "yue2-song",
+         "status": "running",
+         "queue_position": null,
+         "created_at": 1761484800.0,
+         "started_at": 1761484803.2,
+         "finished_at": null,
+         "stage": {
+          "group": "5 · RENDER",
+          "text": "singing and playing",
+          "index": 5,
+          "of": 6
+         },
+         "progress": {
+          "nodes_done": 41,
+          "nodes": 88,
+          "step": 12.0,
+          "steps": 32.0
+         },
+         "seeds": {
+          "draft": 11,
+          "plan": 12,
+          "arrangement": 13,
+          "take": 14,
+          "cover": 15
+         },
+         "documents": [],
+         "client": {
+          "name": "My app"
+         },
+         "result": null,
+         "error": null,
+         "warnings": [],
+         "links": {
+          "self": "/plenio/api/v1/jobs/4f6c1d0e-8a3b-4e55-9d2c-0b7e2a1f9c33"
+         }
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Refused: the error names the field and why",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "tags": [
+     "Jobs"
+    ],
+    "operationId": "cancelJob",
+    "summary": "Cancel a job: out of the queue while it waits, interrupted while it runs",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      },
+      "description": "The job's id (ComfyUI's prompt id)"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Job"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/jobs/{id}/files/{name}": {
+   "get": {
+    "tags": [
+     "Jobs"
+    ],
+    "operationId": "getJobFile",
+    "summary": "A file of a finished job's song: audio, cover, sheet music, subtitles, release record",
+    "description": "Each file of a job's result has its url. Byte ranges work (audio players seek). Since 1.4 a name may hold one folder: the stems, '<name>-stems/vocals.flac'.",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      },
+      "description": "The job's id (ComfyUI's prompt id)"
+     },
+     {
+      "name": "name",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      },
+      "description": "The file's name, as the job's result lists it"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "The file",
+      "content": {
+       "application/octet-stream": {
+        "schema": {
+         "type": "string",
+         "format": "binary"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/jobs/{id}/bars": {
+   "get": {
+    "tags": [
+     "Jobs"
+    ],
+    "operationId": "getJobBars",
+    "summary": "Where every bar of the take's score lies in its audio (API 1.4)",
+    "description": "A YuE2 take keeps no steady tempo. These are the times of every measure's start in the score (at its own tempo) and in the take's audio, measured from the music - for a DAW's tempo map, so that the metronome and further tracks keep to the take. 'bars' is null when the score and the music do not meet ('why' says so). Measured once, then kept.",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      },
+      "description": "The job's id (ComfyUI's prompt id)"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Bars"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/models": {
+   "get": {
+    "tags": [
+     "Discovery"
+    ],
+    "operationId": "getModels",
+    "summary": "The model files the templates need: installed or missing, sizes, licences (API 1.4)",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Models"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/from-record": {
+   "post": {
+    "tags": [
+     "Sources"
+    ],
+    "operationId": "requestFromRecord",
+    "summary": "The request that makes a record's song again (a new take of it, or a new song)",
+    "description": "The body is a release record (<name>.plenio.json). The answer is a job request - template, fields, release, seeds, documents - as the record's prompt has them, with 'take' (whether its documents make a new take here) and 'warnings' (values the template no longer takes). Leave out seeds.take for a new take; the documents and the seeds for a new song.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/FromRecord"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Refused: the error names the field and why",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "415": {
+      "description": "Not the type the call takes",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "No template makes the record's song",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/queue": {
+   "get": {
+    "tags": [
+     "Jobs"
+    ],
+    "operationId": "getQueue",
+    "summary": "How busy ComfyUI is, and how long API runs took lately (for estimates)",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Queue"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "Error": {
+    "type": "object",
+    "required": [
+     "error"
+    ],
+    "properties": {
+     "error": {
+      "type": "object",
+      "required": [
+       "code",
+       "message"
+      ],
+      "properties": {
+       "code": {
+        "type": "string",
+        "description": "Stable, for programs",
+        "examples": [
+         "bad_request",
+         "unknown_template",
+         "unknown_field",
+         "invalid_value",
+         "missing_field",
+         "not_supported",
+         "comfyui_rejected",
+         "not_found",
+         "too_large",
+         "unsupported_media_type",
+         "not_ready",
+         "internal"
+        ]
+       },
+       "message": {
+        "type": "string",
+        "description": "For people"
+       },
+       "hint": {
+        "type": "string",
+        "description": "What to do"
+       },
+       "field": {
+        "type": "string",
+        "description": "The field it is about"
+       },
+       "details": {
+        "description": "comfyui_rejected: the nodes and why"
+       }
+      }
+     }
+    }
+   },
+   "Index": {
+    "type": "object",
+    "properties": {
+     "api": {
+      "type": "string",
+      "const": "plenio-song-api"
+     },
+     "version": {
+      "type": "string",
+      "description": "The API's version (1.x only adds)"
+     },
+     "plenio": {
+      "type": "string"
+     },
+     "comfyui": {
+      "type": "string"
+     },
+     "templates": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/TemplateSummary"
+      }
+     },
+     "paths": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "string"
+      }
+     },
+     "features": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "Since 1.4: what this version offers beyond 1.0 (stems, bars, models)"
+     },
+     "docs": {
+      "type": "string"
+     }
+    }
+   },
+   "Bars": {
+    "type": "object",
+    "properties": {
+     "job": {
+      "type": "string"
+     },
+     "warp": {
+      "type": [
+       "array",
+       "null"
+      ],
+      "items": {
+       "type": "number"
+      },
+      "description": "[a, b]: t_audio = a t_score + b, where the song roughly lies"
+     },
+     "bars": {
+      "oneOf": [
+       {
+        "type": "object",
+        "properties": {
+         "score": {
+          "type": "array",
+          "items": {
+           "type": "number"
+          },
+          "description": "Every measure's start and the end, in seconds of the score"
+         },
+         "audio": {
+          "type": "array",
+          "items": {
+           "type": "number"
+          },
+          "description": "The same times in the take's audio (seconds)"
+         },
+         "meters": {
+          "type": "array",
+          "items": {
+           "type": "array",
+           "items": {
+            "type": "integer"
+           }
+          },
+          "description": "Every measure's meter, [numerator, denominator]"
+         }
+        }
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "match": {
+      "type": "object",
+      "description": "How well the score's notes meet the music"
+     },
+     "why": {
+      "type": "string",
+      "description": "Why there are no bars"
+     }
+    }
+   },
+   "Models": {
+    "type": "object",
+    "properties": {
+     "models": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "id": {
+         "type": "string"
+        },
+        "file": {
+         "type": "string"
+        },
+        "folder": {
+         "type": "string",
+         "description": "ComfyUI's models folder it goes in"
+        },
+        "url": {
+         "type": "string"
+        },
+        "bytes": {
+         "type": "integer"
+        },
+        "licence": {
+         "type": "string"
+        },
+        "non_commercial": {
+         "type": "boolean"
+        },
+        "role": {
+         "type": "string"
+        },
+        "status": {
+         "type": "string",
+         "enum": [
+          "installed",
+          "missing",
+          "size differs"
+         ]
+        },
+        "templates": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "optional_for": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        }
+       }
+      }
+     },
+     "templates": {
+      "type": "object",
+      "description": "Per template id: whether it can run, what is missing",
+      "additionalProperties": {
+       "type": "object",
+       "properties": {
+        "ready": {
+         "type": "boolean"
+        },
+        "missing": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "incomplete": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "optional_missing": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "missing_bytes": {
+         "type": "integer"
+        }
+       }
+      }
+     }
+    }
+   },
+   "TemplateSummary": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string",
+      "examples": [
+       "yue2-song",
+       "yue2-cover"
+      ]
+     },
+     "title": {
+      "type": "string"
+     },
+     "kind": {
+      "type": "string",
+      "enum": [
+       "song",
+       "cover"
+      ]
+     },
+     "workflow": {
+      "type": "string",
+      "description": "The template's name in ComfyUI"
+     },
+     "needs": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "Required fields"
+     }
+    }
+   },
+   "Field": {
+    "type": "object",
+    "required": [
+     "id",
+     "label",
+     "type",
+     "default"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "description": "The name in fields/release: genre, writer.model …"
+     },
+     "label": {
+      "type": "string"
+     },
+     "type": {
+      "type": "string",
+      "enum": [
+       "text",
+       "string",
+       "integer",
+       "number",
+       "boolean",
+       "choice",
+       "upload"
+      ]
+     },
+     "default": {
+      "description": "The template's value"
+     },
+     "description": {
+      "type": "string"
+     },
+     "choices": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "minimum": {
+      "type": "number"
+     },
+     "maximum": {
+      "type": "number"
+     },
+     "step": {
+      "type": "number"
+     },
+     "when": {
+      "type": "object",
+      "description": "Applies only when these fields have one of these values",
+      "additionalProperties": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       }
+      }
+     },
+     "defaults": {
+      "type": "object",
+      "description": "The default per choice of the field it hangs on"
+     },
+     "fixed": {
+      "type": "boolean",
+      "description": "Not changeable in v1"
+     },
+     "required": {
+      "type": "boolean"
+     },
+     "advanced": {
+      "type": "boolean"
+     },
+     "node": {
+      "type": "object",
+      "description": "The node it sets: id, type, title"
+     },
+     "group": {
+      "type": "string"
+     }
+    }
+   },
+   "TemplateDetail": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/TemplateSummary"
+     },
+     {
+      "type": "object",
+      "properties": {
+       "fields": {
+        "type": "array",
+        "items": {
+         "$ref": "#/components/schemas/Field"
+        }
+       },
+       "release": {
+        "type": "array",
+        "items": {
+         "$ref": "#/components/schemas/Field"
+        }
+       },
+       "seeds": {
+        "type": "array",
+        "items": {
+         "type": "object",
+         "properties": {
+          "id": {
+           "type": "string"
+          },
+          "node": {
+           "type": "integer"
+          },
+          "title": {
+           "type": "string"
+          },
+          "drawn": {
+           "type": "boolean"
+          }
+         }
+        }
+       },
+       "documents": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        }
+       },
+       "aliases": {
+        "type": "object",
+        "description": "Old field names that keep working, and their new names",
+        "additionalProperties": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    ]
+   },
+   "Briefs": {
+    "type": "object",
+    "properties": {
+     "kind": {
+      "type": "string",
+      "enum": [
+       "song",
+       "cover"
+      ]
+     },
+     "briefs": {
+      "type": "array",
+      "description": "The style templates: id, name, group, their fields",
+      "items": {
+       "type": "object"
+      }
+     },
+     "values": {
+      "type": "object",
+      "description": "Per field, every value the style templates have",
+      "additionalProperties": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       }
+      }
+     }
+    }
+   },
+   "Stage": {
+    "type": "object",
+    "properties": {
+     "group": {
+      "type": "string",
+      "examples": [
+       "5 · RENDER"
+      ]
+     },
+     "text": {
+      "type": "string",
+      "examples": [
+       "singing and playing"
+      ]
+     },
+     "index": {
+      "type": [
+       "integer",
+       "null"
+      ]
+     },
+     "of": {
+      "type": [
+       "integer",
+       "null"
+      ]
+     }
+    }
+   },
+   "Progress": {
+    "type": "object",
+    "properties": {
+     "nodes_done": {
+      "type": "integer"
+     },
+     "nodes": {
+      "type": "integer"
+     },
+     "step": {
+      "type": "number",
+      "description": "The running node's step (a sampler's)"
+     },
+     "steps": {
+      "type": "number"
+     }
+    }
+   },
+   "File": {
+    "type": "object",
+    "required": [
+     "name",
+     "url"
+    ],
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "role": {
+      "type": "string",
+      "description": "original, cover, pdf, lines, notes, record …"
+     },
+     "url": {
+      "type": "string",
+      "description": "GET it from this ComfyUI"
+     }
+    }
+   },
+   "Result": {
+    "type": "object",
+    "properties": {
+     "title": {
+      "type": "string"
+     },
+     "record": {
+      "type": "string",
+      "description": "The release record's path on the ComfyUI computer"
+     },
+     "folder": {
+      "type": "string"
+     },
+     "seconds": {
+      "type": "number"
+     },
+     "files": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/File"
+      }
+     }
+    }
+   },
+   "Job": {
+    "type": "object",
+    "required": [
+     "id",
+     "status"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "description": "ComfyUI's prompt id"
+     },
+     "template": {
+      "type": "string"
+     },
+     "status": {
+      "type": "string",
+      "enum": [
+       "queued",
+       "running",
+       "succeeded",
+       "failed",
+       "cancelled",
+       "waiting_for_review"
+      ],
+      "description": "waiting_for_review is reserved for a later version"
+     },
+     "queue_position": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "description": "1: next to run"
+     },
+     "created_at": {
+      "type": [
+       "number",
+       "null"
+      ],
+      "description": "Seconds since 1970 (UTC)"
+     },
+     "started_at": {
+      "type": [
+       "number",
+       "null"
+      ]
+     },
+     "finished_at": {
+      "type": [
+       "number",
+       "null"
+      ]
+     },
+     "stage": {
+      "oneOf": [
+       {
+        "$ref": "#/components/schemas/Stage"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "progress": {
+      "oneOf": [
+       {
+        "$ref": "#/components/schemas/Progress"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "seeds": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "integer"
+      }
+     },
+     "documents": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "The documents given (kept as manual)"
+     },
+     "stems": {
+      "type": "boolean",
+      "description": "Since 1.4: the stems are saved with the song"
+     },
+     "client": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "string"
+      }
+     },
+     "result": {
+      "oneOf": [
+       {
+        "$ref": "#/components/schemas/Result"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "error": {
+      "oneOf": [
+       {
+        "type": "object",
+        "properties": {
+         "message": {
+          "type": "string"
+         },
+         "type": {
+          "type": "string"
+         },
+         "node": {
+          "type": "string"
+         },
+         "title": {
+          "type": "string"
+         }
+        }
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "warnings": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "links": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "string"
+      }
+     }
+    }
+   },
+   "Queue": {
+    "type": "object",
+    "properties": {
+     "running": {
+      "oneOf": [
+       {
+        "type": "object",
+        "properties": {
+         "id": {
+          "type": "string"
+         },
+         "api": {
+          "type": "boolean"
+         },
+         "template": {
+          "type": "string"
+         }
+        }
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "pending": {
+      "type": "integer"
+     },
+     "pending_api": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "recent": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "id": {
+         "type": "string"
+        },
+        "template": {
+         "type": "string"
+        },
+        "kind": {
+         "type": "string"
+        },
+        "length": {
+         "type": "string"
+        },
+        "seconds": {
+         "type": "number",
+         "description": "How long the run took"
+        },
+        "audio_seconds": {
+         "type": [
+          "number",
+          "null"
+         ]
+        },
+        "finished_at": {
+         "type": "number"
+        }
+       }
+      }
+     }
+    }
+   },
+   "FromRecord": {
+    "type": "object",
+    "properties": {
+     "template": {
+      "type": "string"
+     },
+     "kind": {
+      "type": "string",
+      "enum": [
+       "song",
+       "cover"
+      ]
+     },
+     "title": {
+      "type": "string"
+     },
+     "model": {
+      "type": "string",
+      "description": "The music model the song was made with"
+     },
+     "fields": {
+      "type": "object"
+     },
+     "release": {
+      "type": "object"
+     },
+     "seeds": {
+      "type": "object"
+     },
+     "documents": {
+      "type": "object"
+     },
+     "take": {
+      "type": "object",
+      "properties": {
+       "possible": {
+        "type": "boolean"
+       },
+       "why": {
+        "type": "string"
+       }
+      }
+     },
+     "warnings": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    }
+   },
+   "JobRequest_yue2_song": {
+    "type": "object",
+    "required": [
+     "template"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "template": {
+      "const": "yue2-song"
+     },
+     "fields": {
+      "type": "object",
+      "properties": {
+       "mode": {
+        "type": "string",
+        "enum": [
+         "new song every run",
+         "one song, stop to review"
+        ],
+        "title": "mode",
+        "const": "new song every run",
+        "description": "new song every run: each run writes and renders another song from this brief (the batch count next to Run makes a series). one song, stop to review: the Song Sheets stop for checking; later runs render new takes. Fixed in API v1 (no review stops).",
+        "default": "new song every run"
+       },
+       "template": {
+        "type": "string",
+        "enum": [
+         "none",
+         "african/afrobeat-classic-instrumental",
+         "african/afrobeats-vocal",
+         "african/amapiano-instrumental",
+         "african/desert-blues-vocal",
+         "african/ethio-jazz-instrumental",
+         "african/gqom-instrumental",
+         "african/highlife-instrumental",
+         "african/soukous-instrumental",
+         "alternative/alternative-rock-vocal",
+         "alternative/britpop-vocal",
+         "alternative/new-wave-vocal",
+         "alternative/uk-garage-vocal",
+         "ambient/ambient-choir-vocalise",
+         "ambient/ambient-guitar",
+         "ambient/chillout-pads-strings",
+         "ambient/dark-ambient-drone",
+         "asian/anime-opening-vocal",
+         "asian/bollywood-vocal",
+         "asian/chinese-traditional-instrumental",
+         "asian/city-pop-vocal",
+         "asian/enka-vocal",
+         "asian/game-jrpg-orchestral",
+         "asian/indian-classical-instrumental",
+         "asian/j-rock-vocal",
+         "asian/kpop-vocal",
+         "asian/mandopop-ballad-vocal",
+         "blues/blues-ballad-vocal",
+         "blues/boogie-woogie-instrumental",
+         "blues/chicago-blues-vocal",
+         "blues/delta-blues-vocal",
+         "blues/electric-blues-instrumental",
+         "cinematic/corporate-uplifting-instrumental",
+         "cinematic/documentary-underscore-instrumental",
+         "cinematic/emotional-piano-underscore",
+         "cinematic/epic-trailer-instrumental",
+         "cinematic/fantasy-adventure-orchestral",
+         "cinematic/horror-suspense-instrumental",
+         "cinematic/orchestral-action-instrumental",
+         "cinematic/sports-stadium-anthem",
+         "classical/baroque-concerto-instrumental",
+         "classical/cello-and-piano",
+         "classical/choral-sacred-vocal",
+         "classical/cinematic-romance",
+         "classical/gregorian-chant-vocal",
+         "classical/impressionist-piano-instrumental",
+         "classical/minimalism-instrumental",
+         "classical/mystical-neoclassical",
+         "classical/neoclassical-piano",
+         "classical/opera-aria-vocal",
+         "classical/piano-and-strings",
+         "classical/romantic-string-ensemble",
+         "classical/string-quartet-instrumental",
+         "classical/symphonic-orchestral-instrumental",
+         "comedy/comedy-rap-vocal",
+         "comedy/english-parody-pop-vocal",
+         "comedy/german-absurd-novelty",
+         "country/americana-vocal",
+         "country/bluegrass-instrumental",
+         "country/country-ballad-vocal",
+         "country/honky-tonk-vocal",
+         "country/modern-country-pop-vocal",
+         "country/outlaw-country-vocal",
+         "disco/classic-disco-vocal",
+         "disco/italo-disco-vocal",
+         "edm/big-room-festival-instrumental",
+         "edm/breakbeat-instrumental",
+         "edm/dance-anthem-instrumental",
+         "edm/drum-and-bass-instrumental",
+         "edm/dubstep-instrumental",
+         "edm/eurodance-vocal",
+         "edm/future-bass-vocal",
+         "edm/future-rave-sparse-vocals",
+         "edm/goa-trance-instrumental",
+         "edm/hardgroove-techno-instrumental",
+         "edm/hardstyle-instrumental",
+         "edm/jungle-instrumental",
+         "edm/liquid-drum-and-bass-sparse-vocals",
+         "edm/melodic-techno-instrumental",
+         "edm/neurofunk-dnb-instrumental",
+         "edm/progressive-trance-instrumental",
+         "edm/psytrance-instrumental",
+         "edm/uplifting-trance-instrumental",
+         "electronic/analog-space-electronic",
+         "electronic/berlin-school-sequencer",
+         "electronic/chiptune-instrumental",
+         "electronic/cinematic-electronica",
+         "electronic/downtempo-electronica",
+         "electronic/ebm-darkwave-vocal",
+         "electronic/electro-swing-vocal",
+         "electronic/idm-experimental-instrumental",
+         "electronic/lofi-hiphop-instrumental",
+         "electronic/minimal-electronic-german-vocals",
+         "electronic/peak-time-techno-sparse-vocals",
+         "electronic/synth-pop-vocal",
+         "electronic/synthwave",
+         "electronic/trip-hop",
+         "electronic/vaporwave-instrumental",
+         "european/alpine-volksmusik-instrumental",
+         "european/balkan-brass-instrumental",
+         "european/chanson-vocal",
+         "european/fado-vocal",
+         "european/flamenco-instrumental",
+         "european/carnival-song-vocal",
+         "european/irish-pub-session-instrumental",
+         "european/italian-pop-vocal",
+         "european/klezmer-instrumental",
+         "european/party-schlager-vocal",
+         "european/polka-instrumental",
+         "european/russian-folk-vocal",
+         "european/schlager-vocal",
+         "european/viennese-waltz-instrumental",
+         "folk/appalachian-folk-instrumental",
+         "folk/celtic-folk-vocal",
+         "folk/dark-fairytale-folk-vocal",
+         "folk/folk-punk-vocal",
+         "folk/german-liedermacher-vocal",
+         "folk/melancholic-folk-ballad-vocal",
+         "folk/mystical-medieval-folk-vocal",
+         "folk/nordic-folk-vocal",
+         "folk/romantic-solo-guitar",
+         "folk/sea-shanty-vocal",
+         "funk/classic-funk-instrumental",
+         "funk/nu-disco-funk",
+         "gospel/contemporary-worship-vocal",
+         "gospel/german-worship-vocal",
+         "gospel/gospel-choir-vocal",
+         "gospel/hymn-choir-vocal",
+         "hiphop/boom-bap-hiphop-vocal",
+         "hiphop/cloud-rap-vocal",
+         "hiphop/drill-instrumental",
+         "hiphop/german-rap-vocal",
+         "hiphop/melodic-trap-vocal",
+         "hiphop/old-school-hiphop-vocal",
+         "hiphop/phonk-instrumental",
+         "hiphop/rnb-vocal",
+         "hiphop/trap-instrumental",
+         "house/acid-house-instrumental",
+         "house/afro-house-vocal",
+         "house/bass-house-instrumental",
+         "house/deep-house",
+         "house/disco-house-vocal",
+         "house/electro-house-instrumental",
+         "house/french-house-instrumental",
+         "house/melodic-house",
+         "house/organic-house",
+         "house/progressive-house-dreamy-bittersweet",
+         "house/progressive-house-melodic-trance",
+         "house/progressive-house-sparse-vocals",
+         "house/tech-house-instrumental",
+         "jazz/bebop-instrumental",
+         "jazz/cool-jazz-instrumental",
+         "jazz/dixieland-instrumental",
+         "jazz/gypsy-jazz-instrumental",
+         "jazz/jazz-funk",
+         "jazz/smooth-jazz-instrumental",
+         "jazz/smooth-jazz-vocal-late-night",
+         "jazz/smooth-jazz-vocal-positive-resolution",
+         "jazz/swing-big-band-instrumental",
+         "jazz/vocal-jazz-crooner",
+         "kids/birthday-song-vocal",
+         "kids/children-song-vocal",
+         "kids/german-birthday-song-vocal",
+         "kids/kids-adventure-song-vocal",
+         "kids/lullaby-vocal",
+         "kids/nursery-rhyme-german-vocal",
+         "latin/bachata-vocal",
+         "latin/bossa-nova-vocal",
+         "latin/cumbia-instrumental",
+         "latin/latin-pop-vocal",
+         "latin/merengue-instrumental",
+         "latin/norteno-corrido-vocal",
+         "latin/reggaeton-vocal",
+         "latin/salsa-vocal",
+         "latin/samba-instrumental",
+         "latin/son-cubano-vocal",
+         "latin/tango-instrumental",
+         "meditation/focus-study-instrumental",
+         "meditation/meditation-healing-instrumental",
+         "meditation/nature-soundscape-instrumental",
+         "meditation/sleep-music-instrumental",
+         "metal/black-metal-instrumental",
+         "metal/death-metal-vocal",
+         "metal/doom-metal-instrumental",
+         "metal/folk-metal-vocal",
+         "metal/grunge-vocal",
+         "metal/heavy-metal-vocal",
+         "metal/industrial-metal-vocal",
+         "metal/melodic-metal-instrumental",
+         "metal/metalcore-vocal",
+         "metal/nu-metal-vocal",
+         "metal/power-metal-vocal",
+         "metal/progressive-djent-instrumental",
+         "metal/sludge-post-metal-instrumental",
+         "metal/symphonic-metal-vocal",
+         "metal/thrash-metal-vocal",
+         "musical/broadway-ballad-vocal",
+         "musical/german-musical-vocal",
+         "musical/musical-theatre-ensemble-vocal",
+         "pop/art-pop-vocal",
+         "pop/bedroom-pop-vocal",
+         "pop/dance-pop-vocal",
+         "pop/dream-pop-electronic-vocal",
+         "pop/german-pop-vocal",
+         "pop/hyperpop-vocal",
+         "pop/indie-pop-vocal",
+         "pop/power-ballad-vocal",
+         "pop/singer-songwriter-acoustic-vocal",
+         "punk/pop-punk-vocal",
+         "punk/post-punk-vocal",
+         "punk/punk-rock-vocal",
+         "punk/ska-punk-vocal",
+         "reggae/dancehall-vocal",
+         "reggae/dub-instrumental",
+         "reggae/rocksteady-vocal",
+         "reggae/roots-reggae-vocal",
+         "reggae/ska-jamaican-instrumental",
+         "rock/blues-rock-instrumental",
+         "rock/classic-rock-vocal",
+         "rock/garage-rock-vocal",
+         "rock/hard-rock-vocal",
+         "rock/indie-rock-vocal",
+         "rock/pop-rock-vocal",
+         "rock/post-rock-instrumental",
+         "rock/progressive-rock-instrumental",
+         "rock/psychedelic-rock-instrumental",
+         "rock/rockabilly-vocal",
+         "rock/shoegaze-vocal",
+         "rock/southern-rock-vocal",
+         "rock/stoner-rock-instrumental",
+         "rock/surf-rock-instrumental",
+         "seasonal/christmas-carol-vocal",
+         "seasonal/christmas-pop-vocal",
+         "seasonal/german-christmas-vocal",
+         "seasonal/wedding-ceremony-instrumental",
+         "seasonal/wedding-first-dance-vocal",
+         "soul/doo-wop-vocal",
+         "soul/motown-soul-vocal",
+         "soul/neo-soul-vocal",
+         "soul/soul-ballad-vocal",
+         "world/andean-folk-instrumental",
+         "world/arabic-pop-vocal",
+         "world/bhangra-instrumental",
+         "world/calypso-soca-vocal",
+         "world/gamelan-instrumental",
+         "world/gnawa-instrumental",
+         "world/hawaiian-slack-key-instrumental",
+         "world/mariachi-vocal",
+         "world/mongolian-throat-singing-instrumental",
+         "world/qawwali-vocal",
+         "world/turkish-folk-instrumental"
+        ],
+        "title": "template",
+        "description": "Optional starting point. Text fields you leave empty are taken from the template.",
+        "default": "pop/singer-songwriter-acoustic-vocal"
+       },
+       "description": {
+        "type": "string",
+        "maxLength": 4000,
+        "title": "description",
+        "description": "How the song should sound - its character, instruments and arrangement (the lyrics have a field of their own). Sent to the writing model.",
+        "default": "Honest acoustic singer-songwriter song: fingerpicked or gently strummed acoustic guitar, subtle piano, upright bass and brushed drums entering late, plus a close, unpolished vocal with audible breath. Conversational verses, one quietly devastating refrain, minimal production and lots of space."
+       },
+       "genre": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "genre",
+        "description": "Genre and sub-genre, e.g. 'indie pop'.",
+        "default": "singer-songwriter"
+       },
+       "mood": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "mood",
+        "description": "Mood words, e.g. 'warm, hopeful'.",
+        "default": ""
+       },
+       "tempo": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "tempo",
+        "description": "Tempo, e.g. '88 BPM' or 'midtempo'.",
+        "default": "Laid-back (70-100 BPM)"
+       },
+       "length": {
+        "oneOf": [
+         {
+          "type": "string",
+          "enum": [
+           "very short (about 1:00)",
+           "short (about 1:30)",
+           "about 2:00",
+           "about 2:30",
+           "standard (about 3:00)",
+           "about 3:30",
+           "about 4:00",
+           "long (about 4:30)",
+           "about 5:00",
+           "very long (about 6:00)"
+          ]
+         },
+         {
+          "type": "number",
+          "description": "seconds: the nearest length"
+         }
+        ],
+        "title": "length",
+        "description": "Target length. Guides the writing and, without a score, the render ceiling.",
+        "default": "short (about 1:30)"
+       },
+       "vocals": {
+        "type": "string",
+        "enum": [
+         "sung",
+         "sparse vocals",
+         "instrumental"
+        ],
+        "title": "vocals",
+        "description": "sung: a song with lyrics. sparse vocals: mostly instrumental, the voice sings only a few short phrases (a hook, a call, wordless sounds like 'ooh'). instrumental: no singing; hides all vocal settings.",
+        "default": "sung"
+       },
+       "language": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "language",
+        "description": "Language of the lyrics, e.g. 'English'. Only when vocals is sung, sparse vocals.",
+        "default": "English"
+       },
+       "voice": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "voice",
+        "description": "Vocal character, e.g. 'warm female voice'. Only when vocals is sung, sparse vocals.",
+        "default": "whispered & intimate vocal"
+       },
+       "theme": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "theme",
+        "description": "What the lyrics are about, in a few words. Only when vocals is sung, sparse vocals.",
+        "default": "self-discovery & growth"
+       },
+       "lyrics_from": {
+        "type": "string",
+        "enum": [
+         "written from the idea below",
+         "my own, sung as written below"
+        ],
+        "title": "lyrics",
+        "description": "written from the idea below: the writer writes the lyrics; the field says what they should be about (a template gives an idea). my own: the field holds your lyrics, sung exactly as written. Only when vocals is sung, sparse vocals.",
+        "default": "written from the idea below"
+       },
+       "lyrics": {
+        "type": "string",
+        "maxLength": 4000,
+        "title": "lyrics idea or text",
+        "description": "The idea for the lyrics - a story, an image, a message - or, with 'my own', the lyrics themselves: sections as [Verse], [Chorus] ... (without them Plenio adds them). Only when vocals is sung, sparse vocals.",
+        "default": "Plain-spoken and personal, about a conversation that never happened."
+       },
+       "melody": {
+        "type": "string",
+        "enum": [
+         "instrument plays the lead",
+         "accompaniment only"
+        ],
+        "title": "melody",
+        "description": "Whether an instrument carries a lead melody or the song is accompaniment only. Only when vocals is instrumental.",
+        "default": "instrument plays the lead"
+       },
+       "lead_instrument": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "lead instrument",
+        "description": "Optional lead instrument, e.g. 'saxophone'. Only when vocals is instrumental.",
+        "default": ""
+       },
+       "key": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "key",
+        "description": "Optional key, e.g. 'G major'. Music models that use a score take the key from the score; the DAW template's empty score is built in it.",
+        "default": ""
+       },
+       "meter": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "meter",
+        "description": "Optional meter, e.g. '3/4' or '6/8'. Music models that use a score take the meter from the score; the DAW template's empty score is built in it.",
+        "default": "4/4"
+       },
+       "arrangement": {
+        "type": "string",
+        "enum": [
+         "off",
+         "standard",
+         "sterile",
+         "unplugged",
+         "varied",
+         "call and response",
+         "signature motif",
+         "hypnotic",
+         "breakdown",
+         "dramatic",
+         "many instruments",
+         "jazz colours",
+         "fantasy",
+         "key change"
+        ],
+        "title": "arrangement (experimental)",
+        "description": "off (default): the music model plans the music by itself. A creative mode (experimental) lets the writer plan chords, lines and energy per section; the line under the brief says what the chosen mode does.",
+        "default": "off"
+       },
+       "genre_closeness": {
+        "type": "integer",
+        "minimum": 0.0,
+        "maximum": 100.0,
+        "title": "genre closeness",
+        "description": "Creative modes only (experimental): how close the song stays to its genre - 100 strictly typical, 70 typical with personal touches, 40 free within the genre, 0 any style.",
+        "default": 70
+       },
+       "lines_under_singing": {
+        "type": "boolean",
+        "title": "lines under the singing (experimental)",
+        "description": "Creative modes only (experimental): off - the instrument line plays where the voice rests, as in YuE2's own scores; on - it also sounds under the singing, calm and below the voice.",
+        "default": false
+       },
+       "creativity": {
+        "type": "integer",
+        "minimum": 0.0,
+        "maximum": 200.0,
+        "title": "creativity",
+        "description": "0 steady ... 50 the reference (as before the slider) ... 100 experimental (the default) ... 200 adventurous: how much the writer and YuE2 dare. More surprises also means more misses - try a few seeds.",
+        "default": 100
+       },
+       "lyrics_fidelity": {
+        "type": "string",
+        "enum": [
+         "standard",
+         "high - best of 2 takes",
+         "highest - best of 3 takes"
+        ],
+        "title": "lyrics fidelity",
+        "description": "standard: one take. high: a second take when the first sang under 96 % of the words as written; the better is kept. highest: a third when neither reached 96 %. Takes longer (up to 2x or 3x).",
+        "default": "standard"
+       },
+       "finish.hq_mastering": {
+        "type": "boolean",
+        "title": "HQ mastering",
+        "description": "Highest mastering quality: UniverSR (HQ 2) regenerates the highs - clearly fewer AI shimmer and artifacts, but the song takes about twice as long. Off (default; on in Enhance & Master): UniverSR is not needed.",
+        "default": false
+       },
+       "finish.cover_art": {
+        "type": "boolean",
+        "title": "Cover Art",
+        "description": "Paints the cover from the artwork prompt the writer wrote (embedded in the files); off: no cover and no image model.",
+        "default": true
+       },
+       "writer.model": {
+        "type": "string",
+        "enum": [
+         "Gemma 4 12B (auto)"
+        ],
+        "title": "model",
+        "description": "Gemma 4 12B (auto): the one on this machine, else downloaded for its card. A bare file name: a text model for ComfyUI's Generate Text. '… · …': a GGUF file ('models/LLM', 'HF cache' ...) or a running app's model.",
+        "default": "Gemma 4 12B (auto)"
+       }
+      },
+      "required": []
+     },
+     "release": {
+      "type": "object",
+      "properties": {
+       "folder": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "folder",
+        "description": "Sub-folder of the ComfyUI output folder.",
+        "default": "plenio"
+       },
+       "naming": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "naming",
+        "description": "File name: {title}, {date}, {seed}, {genre}, {artist} ... (the variables of the tags); '/' makes sub-folders; [optional {parts}] vanish when empty.",
+        "default": "{date} {title}"
+       },
+       "collision": {
+        "type": "string",
+        "enum": [
+         "number",
+         "overwrite",
+         "error"
+        ],
+        "title": "collision",
+        "description": "When the file exists: number (add ' (2)' - also to a title another song of the folder has), overwrite, or stop with an error.",
+        "default": "number"
+       },
+       "flac": {
+        "type": "boolean",
+        "title": "flac",
+        "description": "FLAC 24-bit (lossless).",
+        "default": true
+       },
+       "mp3": {
+        "type": "boolean",
+        "title": "mp3",
+        "description": "MP3 VBR V0 (LAME).",
+        "default": false
+       },
+       "wav": {
+        "type": "boolean",
+        "title": "wav",
+        "description": "WAV 32-bit float (no clipping; few tags, no cover).",
+        "default": false
+       },
+       "tags": {
+        "type": "string",
+        "enum": [
+         "title only",
+         "tags",
+         "copy from loaded file"
+        ],
+        "title": "tags",
+        "description": "Metadata written into the files: the title only, tags typed or connected (with {variables}), or the tags of the loaded file.",
+        "default": "tags"
+       },
+       "artist": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "artist",
+        "description": "The artist tag. Text with {variables}, or connect a text output to the field. Only when tags is tags.",
+        "default": ""
+       },
+       "album": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "album",
+        "description": "The album tag. Text with {variables}, or connect a text output to the field. Only when tags is tags.",
+        "default": ""
+       },
+       "date": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "date",
+        "description": "Year or date, e.g. 2026 or {date}. Text with {variables}, or connect a text output to the field. Only when tags is tags.",
+        "default": "{date}"
+       },
+       "track": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "track",
+        "description": "Track number, e.g. 3 or 3/12. Text with {variables}, or connect a text output to the field. Only when tags is tags.",
+        "default": ""
+       },
+       "genre": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "genre",
+        "description": "The genre tag, e.g. {genre} (the brief's). Text with {variables}, or connect a text output to the field. Only when tags is tags.",
+        "default": "{genre}"
+       },
+       "comment": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "comment",
+        "description": "The comment tag; empty: none. Text with {variables}, or connect a text output to the field. Only when tags is tags.",
+        "default": "[Genre: {genre} · ][Mood: {mood} · ][Language: {language} · ]Powered by Plenio Music Production System / ComfyUI"
+       },
+       "album_artist": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "album artist",
+        "description": "The album artist tag. Text with {variables}, or connect a text output to the field. Only when tags is tags.",
+        "default": ""
+       },
+       "composer": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "composer",
+        "description": "The composer tag. Text with {variables}, or connect a text output to the field. Only when tags is tags.",
+        "default": ""
+       },
+       "lyrics": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "lyrics",
+        "description": "The lyrics tag (FLAC, MP3; players show it), e.g. {lyrics}. Text with {variables}, or connect a text output to the field. Only when tags is tags.",
+        "default": "{lyrics}"
+       },
+       "sheet_music": {
+        "type": "string",
+        "enum": [
+         "off",
+         "PDF (A4)",
+         "PDF (Letter)"
+        ],
+        "title": "sheet music",
+        "description": "Also save the sheet music (both voices, chords, sections, the lyrics under the notes) as '<name>.pdf' on A4 or Letter pages; an open ComfyUI page draws it after the export. Needs a score (YuE2).",
+        "default": "PDF (A4)"
+       },
+       "sheet_music_size": {
+        "type": "string",
+        "enum": [
+         "standard",
+         "smaller",
+         "compact",
+         "large"
+        ],
+        "title": "sheet music size",
+        "description": "How large the sheet music draws: standard about 3 bars a line, smaller 3-4, compact about 4, large 1-2 (the biggest notes).",
+        "default": "standard"
+       },
+       "project_in_flac": {
+        "type": "boolean",
+        "title": "project in FLAC",
+        "description": "Store the release record (workflow, Song Sheets, seeds, settings) inside the song's FLAC: File > Continue a Plenio song... opens the song from the FLAC alone. Off for files you share without their making-of.",
+        "default": true
+       },
+       "lyrics_srt": {
+        "type": "boolean",
+        "title": "lyrics subtitles (SRT)",
+        "description": "Write the lyrics as subtitles: '(lines).srt' whole lines, '(notes).srt' note by note, '(sung).srt' what the take really sings. Timed by listening (Qwen3-ASR and its aligner, 5.9 GB, fetched on first use).",
+        "default": true
+       },
+       "lyrics_timing": {
+        "type": "string",
+        "enum": [
+         "the song",
+         "vocal stem"
+        ],
+        "title": "lyrics heard on",
+        "description": "What the lyrics ASR hears for the subtitles and the player: the take's vocal stem - more exact times, the model of Stems and Sung Pitch, about half a minute per take - or the song (quicker).",
+        "default": "vocal stem"
+       },
+       "song_page": {
+        "type": "boolean",
+        "title": "song page (HTML)",
+        "description": "Also write '<name>.html': the song on one page to open in any browser - the lyrics with their sections and the prompts to copy, every setting, how it was made, the sound, the score and links to the files.",
+        "default": true
+       }
+      }
+     },
+     "seeds": {
+      "type": "object",
+      "properties": {
+       "draft": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 4294967295,
+        "title": "Draft seed"
+       },
+       "plan": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 4294967295,
+        "title": "Plan seed"
+       },
+       "arrangement": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 4294967295,
+        "title": "Arrangement seed"
+       },
+       "take": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 4294967295,
+        "title": "Take seed"
+       },
+       "cover": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 4294967295,
+        "title": "Cover seed"
+       }
+      }
+     },
+     "documents": {
+      "type": "object",
+      "description": "Documents the Song Sheets keep as manual: the run keeps them instead of writing or planning them anew. A song's documents with a new take seed make a new take of it (POST /from-record gives them).",
+      "properties": {
+       "title": {
+        "type": "string",
+        "maxLength": 200000
+       },
+       "style": {
+        "type": "string",
+        "maxLength": 200000
+       },
+       "lyrics": {
+        "type": "string",
+        "maxLength": 200000
+       },
+       "score": {
+        "type": "string",
+        "maxLength": 200000
+       },
+       "artwork_prompt": {
+        "type": "string",
+        "maxLength": 200000
+       }
+      },
+      "additionalProperties": false
+     },
+     "client": {
+      "type": "object",
+      "description": "Who asks (kept with the job, shown in its listing): a name, a user, a reference.",
+      "additionalProperties": {
+       "type": "string"
+      }
+     },
+     "strict": {
+      "type": "boolean",
+      "default": true,
+      "description": "false: unknown fields are left out (named in warnings) instead of refused."
+     },
+     "preset": {
+      "type": "string",
+      "enum": [
+       "best",
+       "party",
+       "sketch",
+       "full",
+       "takes",
+       "instrumental"
+      ],
+      "description": "Plenio 2.0: one of the player's six presets (resources/presets/make.json) - its fields and release values are used where the request names none; what the request names wins. 'takes' sets only its fields here (a job is one take)."
+     },
+     "stems": {
+      "type": "boolean",
+      "default": false,
+      "description": "API 1.4: the take's stems (vocals, drums, bass, other and the rest) are saved beside the song and listed in its files (role 'stem'): the template's Stems switch is turned on. The song sounds the same; separating takes about half a minute more."
+     }
+    }
+   },
+   "JobRequest_yue2_cover": {
+    "type": "object",
+    "required": [
+     "template"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "template": {
+      "const": "yue2-cover"
+     },
+     "fields": {
+      "type": "object",
+      "properties": {
+       "mode": {
+        "type": "string",
+        "enum": [
+         "new cover every run",
+         "one cover, stop to review"
+        ],
+        "title": "mode",
+        "const": "new cover every run",
+        "description": "new cover every run (default): each run writes and renders another version, without stops. one cover, stop to review: the Song Sheets stop so you can check the transcription and the lyrics; later runs render new takes. Fixed in API v1 (no review stops).",
+        "default": "new cover every run"
+       },
+       "template": {
+        "type": "string",
+        "enum": [
+         "none",
+         "african/afrobeat-classic-instrumental",
+         "african/afrobeats-vocal",
+         "african/amapiano-instrumental",
+         "african/desert-blues-vocal",
+         "african/ethio-jazz-instrumental",
+         "african/gqom-instrumental",
+         "african/highlife-instrumental",
+         "african/soukous-instrumental",
+         "alternative/alternative-rock-vocal",
+         "alternative/britpop-vocal",
+         "alternative/new-wave-vocal",
+         "alternative/uk-garage-vocal",
+         "ambient/ambient-choir-vocalise",
+         "ambient/ambient-guitar",
+         "ambient/chillout-pads-strings",
+         "ambient/dark-ambient-drone",
+         "asian/anime-opening-vocal",
+         "asian/bollywood-vocal",
+         "asian/chinese-traditional-instrumental",
+         "asian/city-pop-vocal",
+         "asian/enka-vocal",
+         "asian/game-jrpg-orchestral",
+         "asian/indian-classical-instrumental",
+         "asian/j-rock-vocal",
+         "asian/kpop-vocal",
+         "asian/mandopop-ballad-vocal",
+         "blues/blues-ballad-vocal",
+         "blues/boogie-woogie-instrumental",
+         "blues/chicago-blues-vocal",
+         "blues/delta-blues-vocal",
+         "blues/electric-blues-instrumental",
+         "cinematic/corporate-uplifting-instrumental",
+         "cinematic/documentary-underscore-instrumental",
+         "cinematic/emotional-piano-underscore",
+         "cinematic/epic-trailer-instrumental",
+         "cinematic/fantasy-adventure-orchestral",
+         "cinematic/horror-suspense-instrumental",
+         "cinematic/orchestral-action-instrumental",
+         "cinematic/sports-stadium-anthem",
+         "classical/baroque-concerto-instrumental",
+         "classical/cello-and-piano",
+         "classical/choral-sacred-vocal",
+         "classical/cinematic-romance",
+         "classical/gregorian-chant-vocal",
+         "classical/impressionist-piano-instrumental",
+         "classical/minimalism-instrumental",
+         "classical/mystical-neoclassical",
+         "classical/neoclassical-piano",
+         "classical/opera-aria-vocal",
+         "classical/piano-and-strings",
+         "classical/romantic-string-ensemble",
+         "classical/string-quartet-instrumental",
+         "classical/symphonic-orchestral-instrumental",
+         "comedy/comedy-rap-vocal",
+         "comedy/english-parody-pop-vocal",
+         "comedy/german-absurd-novelty",
+         "country/americana-vocal",
+         "country/bluegrass-instrumental",
+         "country/country-ballad-vocal",
+         "country/honky-tonk-vocal",
+         "country/modern-country-pop-vocal",
+         "country/outlaw-country-vocal",
+         "disco/classic-disco-vocal",
+         "disco/italo-disco-vocal",
+         "edm/big-room-festival-instrumental",
+         "edm/breakbeat-instrumental",
+         "edm/dance-anthem-instrumental",
+         "edm/drum-and-bass-instrumental",
+         "edm/dubstep-instrumental",
+         "edm/eurodance-vocal",
+         "edm/future-bass-vocal",
+         "edm/future-rave-sparse-vocals",
+         "edm/goa-trance-instrumental",
+         "edm/hardgroove-techno-instrumental",
+         "edm/hardstyle-instrumental",
+         "edm/jungle-instrumental",
+         "edm/liquid-drum-and-bass-sparse-vocals",
+         "edm/melodic-techno-instrumental",
+         "edm/neurofunk-dnb-instrumental",
+         "edm/progressive-trance-instrumental",
+         "edm/psytrance-instrumental",
+         "edm/uplifting-trance-instrumental",
+         "electronic/analog-space-electronic",
+         "electronic/berlin-school-sequencer",
+         "electronic/chiptune-instrumental",
+         "electronic/cinematic-electronica",
+         "electronic/downtempo-electronica",
+         "electronic/ebm-darkwave-vocal",
+         "electronic/electro-swing-vocal",
+         "electronic/idm-experimental-instrumental",
+         "electronic/lofi-hiphop-instrumental",
+         "electronic/minimal-electronic-german-vocals",
+         "electronic/peak-time-techno-sparse-vocals",
+         "electronic/synth-pop-vocal",
+         "electronic/synthwave",
+         "electronic/trip-hop",
+         "electronic/vaporwave-instrumental",
+         "european/alpine-volksmusik-instrumental",
+         "european/balkan-brass-instrumental",
+         "european/chanson-vocal",
+         "european/fado-vocal",
+         "european/flamenco-instrumental",
+         "european/carnival-song-vocal",
+         "european/irish-pub-session-instrumental",
+         "european/italian-pop-vocal",
+         "european/klezmer-instrumental",
+         "european/party-schlager-vocal",
+         "european/polka-instrumental",
+         "european/russian-folk-vocal",
+         "european/schlager-vocal",
+         "european/viennese-waltz-instrumental",
+         "folk/appalachian-folk-instrumental",
+         "folk/celtic-folk-vocal",
+         "folk/dark-fairytale-folk-vocal",
+         "folk/folk-punk-vocal",
+         "folk/german-liedermacher-vocal",
+         "folk/melancholic-folk-ballad-vocal",
+         "folk/mystical-medieval-folk-vocal",
+         "folk/nordic-folk-vocal",
+         "folk/romantic-solo-guitar",
+         "folk/sea-shanty-vocal",
+         "funk/classic-funk-instrumental",
+         "funk/nu-disco-funk",
+         "gospel/contemporary-worship-vocal",
+         "gospel/german-worship-vocal",
+         "gospel/gospel-choir-vocal",
+         "gospel/hymn-choir-vocal",
+         "hiphop/boom-bap-hiphop-vocal",
+         "hiphop/cloud-rap-vocal",
+         "hiphop/drill-instrumental",
+         "hiphop/german-rap-vocal",
+         "hiphop/melodic-trap-vocal",
+         "hiphop/old-school-hiphop-vocal",
+         "hiphop/phonk-instrumental",
+         "hiphop/rnb-vocal",
+         "hiphop/trap-instrumental",
+         "house/acid-house-instrumental",
+         "house/afro-house-vocal",
+         "house/bass-house-instrumental",
+         "house/deep-house",
+         "house/disco-house-vocal",
+         "house/electro-house-instrumental",
+         "house/french-house-instrumental",
+         "house/melodic-house",
+         "house/organic-house",
+         "house/progressive-house-dreamy-bittersweet",
+         "house/progressive-house-melodic-trance",
+         "house/progressive-house-sparse-vocals",
+         "house/tech-house-instrumental",
+         "jazz/bebop-instrumental",
+         "jazz/cool-jazz-instrumental",
+         "jazz/dixieland-instrumental",
+         "jazz/gypsy-jazz-instrumental",
+         "jazz/jazz-funk",
+         "jazz/smooth-jazz-instrumental",
+         "jazz/smooth-jazz-vocal-late-night",
+         "jazz/smooth-jazz-vocal-positive-resolution",
+         "jazz/swing-big-band-instrumental",
+         "jazz/vocal-jazz-crooner",
+         "kids/birthday-song-vocal",
+         "kids/children-song-vocal",
+         "kids/german-birthday-song-vocal",
+         "kids/kids-adventure-song-vocal",
+         "kids/lullaby-vocal",
+         "kids/nursery-rhyme-german-vocal",
+         "latin/bachata-vocal",
+         "latin/bossa-nova-vocal",
+         "latin/cumbia-instrumental",
+         "latin/latin-pop-vocal",
+         "latin/merengue-instrumental",
+         "latin/norteno-corrido-vocal",
+         "latin/reggaeton-vocal",
+         "latin/salsa-vocal",
+         "latin/samba-instrumental",
+         "latin/son-cubano-vocal",
+         "latin/tango-instrumental",
+         "meditation/focus-study-instrumental",
+         "meditation/meditation-healing-instrumental",
+         "meditation/nature-soundscape-instrumental",
+         "meditation/sleep-music-instrumental",
+         "metal/black-metal-instrumental",
+         "metal/death-metal-vocal",
+         "metal/doom-metal-instrumental",
+         "metal/folk-metal-vocal",
+         "metal/grunge-vocal",
+         "metal/heavy-metal-vocal",
+         "metal/industrial-metal-vocal",
+         "metal/melodic-metal-instrumental",
+         "metal/metalcore-vocal",
+         "metal/nu-metal-vocal",
+         "metal/power-metal-vocal",
+         "metal/progressive-djent-instrumental",
+         "metal/sludge-post-metal-instrumental",
+         "metal/symphonic-metal-vocal",
+         "metal/thrash-metal-vocal",
+         "musical/broadway-ballad-vocal",
+         "musical/german-musical-vocal",
+         "musical/musical-theatre-ensemble-vocal",
+         "pop/art-pop-vocal",
+         "pop/bedroom-pop-vocal",
+         "pop/dance-pop-vocal",
+         "pop/dream-pop-electronic-vocal",
+         "pop/german-pop-vocal",
+         "pop/hyperpop-vocal",
+         "pop/indie-pop-vocal",
+         "pop/power-ballad-vocal",
+         "pop/singer-songwriter-acoustic-vocal",
+         "punk/pop-punk-vocal",
+         "punk/post-punk-vocal",
+         "punk/punk-rock-vocal",
+         "punk/ska-punk-vocal",
+         "reggae/dancehall-vocal",
+         "reggae/dub-instrumental",
+         "reggae/rocksteady-vocal",
+         "reggae/roots-reggae-vocal",
+         "reggae/ska-jamaican-instrumental",
+         "rock/blues-rock-instrumental",
+         "rock/classic-rock-vocal",
+         "rock/garage-rock-vocal",
+         "rock/hard-rock-vocal",
+         "rock/indie-rock-vocal",
+         "rock/pop-rock-vocal",
+         "rock/post-rock-instrumental",
+         "rock/progressive-rock-instrumental",
+         "rock/psychedelic-rock-instrumental",
+         "rock/rockabilly-vocal",
+         "rock/shoegaze-vocal",
+         "rock/southern-rock-vocal",
+         "rock/stoner-rock-instrumental",
+         "rock/surf-rock-instrumental",
+         "seasonal/christmas-carol-vocal",
+         "seasonal/christmas-pop-vocal",
+         "seasonal/german-christmas-vocal",
+         "seasonal/wedding-ceremony-instrumental",
+         "seasonal/wedding-first-dance-vocal",
+         "soul/doo-wop-vocal",
+         "soul/motown-soul-vocal",
+         "soul/neo-soul-vocal",
+         "soul/soul-ballad-vocal",
+         "world/andean-folk-instrumental",
+         "world/arabic-pop-vocal",
+         "world/bhangra-instrumental",
+         "world/calypso-soca-vocal",
+         "world/gamelan-instrumental",
+         "world/gnawa-instrumental",
+         "world/hawaiian-slack-key-instrumental",
+         "world/mariachi-vocal",
+         "world/mongolian-throat-singing-instrumental",
+         "world/qawwali-vocal",
+         "world/turkish-folk-instrumental"
+        ],
+        "title": "template",
+        "description": "Optional target style. Style fields you leave empty are taken from the template.",
+        "default": "pop/dance-pop-vocal"
+       },
+       "description": {
+        "type": "string",
+        "maxLength": 4000,
+        "title": "description",
+        "description": "How the cover should sound - instruments, feel, production. Sent to the writing model; a genre or a description is needed.",
+        "default": "Modern dance-pop: four-on-the-floor kick, bright plucky synths, deep sidechained bass, claps, a tight pre-chorus build and an explosive chorus combining a sung hook with a post-chorus drop. Glossy radio production, huge and immediate."
+       },
+       "genre": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "genre",
+        "description": "Target genre, e.g. 'acoustic folk'.",
+        "default": "dance-pop"
+       },
+       "mood": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "mood",
+        "description": "Mood words, e.g. 'warm, intimate'.",
+        "default": ""
+       },
+       "vocals": {
+        "type": "string",
+        "enum": [
+         "instrumental",
+         "original lyrics",
+         "new lyrics"
+        ],
+        "title": "vocals",
+        "description": "original lyrics: the source's words, transcribed. new lyrics: new words on the source's melody. instrumental: an instrument plays the vocal melody, or accompaniment only.",
+        "default": "original lyrics"
+       },
+       "melody": {
+        "type": "string",
+        "enum": [
+         "instrument plays the lead",
+         "accompaniment only"
+        ],
+        "title": "melody",
+        "description": "An instrument plays the vocal melody, or accompaniment only. Only when vocals is instrumental.",
+        "default": "instrument plays the lead"
+       },
+       "lead_instrument": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "lead instrument",
+        "description": "Optional lead instrument, e.g. 'piano'. Only when vocals is instrumental.",
+        "default": ""
+       },
+       "language": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "language",
+        "description": "Language of the source's lyrics; 'auto' detects it from the singing. Only when vocals is original lyrics, new lyrics.",
+        "default": ""
+       },
+       "voice": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "voice",
+        "description": "Vocal character, e.g. 'soft female voice'. Only when vocals is original lyrics, new lyrics.",
+        "default": "female vocal"
+       },
+       "theme": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "theme",
+        "description": "What the new lyrics are about, e.g. 'leaving home'. Only when vocals is new lyrics.",
+        "default": ""
+       },
+       "phrasing_reference": {
+        "type": "boolean",
+        "title": "phrasing reference",
+        "description": "Show the writer the source's transcribed lyrics as a phrasing reference (runs the lyrics ASR). Only when vocals is new lyrics.",
+        "default": false
+       },
+       "harmony": {
+        "type": "string",
+        "enum": [
+         "new accompaniment",
+         "keep original chords"
+        ],
+        "title": "harmony",
+        "description": "new accompaniment: the source's chords are removed and YuE2 re-harmonises (melody mode). keep original chords: the chords stay (full mode; the 2 · YuE2 · Cover template starts with it).",
+        "default": "keep original chords"
+       },
+       "title": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "title",
+        "description": "Optional fixed title, e.g. 'Original Title (Jazz Cover)'. Empty: the source recording's title with '-cover' when 'source' is connected; else the writer proposes one.",
+        "default": ""
+       },
+       "arrangement": {
+        "type": "string",
+        "enum": [
+         "off",
+         "standard",
+         "sterile",
+         "unplugged",
+         "varied",
+         "call and response",
+         "signature motif",
+         "hypnotic",
+         "breakdown",
+         "dramatic",
+         "many instruments",
+         "jazz colours",
+         "fantasy",
+         "key change"
+        ],
+        "title": "arrangement (experimental)",
+        "description": "off (default): the transcribed score stays as it is. A creative mode (experimental) re-arranges the sections within the song flow closeness; the line under the brief says what the chosen mode does.",
+        "default": "off"
+       },
+       "song_flow_closeness": {
+        "type": "integer",
+        "minimum": 0.0,
+        "maximum": 100.0,
+        "title": "song flow closeness",
+        "description": "Creative modes only (experimental): how close the cover stays to the original - 100 exactly, 80 chords and key stay, 50 recognisable, 20 a free version, 0 only a hint. The form always stays.",
+        "default": 70
+       },
+       "lyrics_closeness": {
+        "type": "integer",
+        "minimum": 0.0,
+        "maximum": 100.0,
+        "title": "lyrics closeness",
+        "description": "New lyrics only (experimental): how close they stay to the source's lyrics - 0 without its text (default), 30 its theme, 60 its story, 90-100 its meaning line by line.",
+        "default": 0
+       },
+       "lines_under_singing": {
+        "type": "boolean",
+        "title": "lines under the singing (experimental)",
+        "description": "Creative modes only (experimental): off - the instrument line plays where the voice rests, as in YuE2's own scores; on - it also sounds under the singing, calm and below the voice.",
+        "default": false
+       },
+       "creativity": {
+        "type": "integer",
+        "minimum": 0.0,
+        "maximum": 200.0,
+        "title": "creativity",
+        "description": "0 steady ... 50 the reference (as before the slider) ... 100 experimental (the default) ... 200 adventurous: how much the writer and YuE2 dare. More surprises also means more misses - try a few seeds.",
+        "default": 100
+       },
+       "lyrics_fidelity": {
+        "type": "string",
+        "enum": [
+         "standard",
+         "high - best of 2 takes",
+         "highest - best of 3 takes"
+        ],
+        "title": "lyrics fidelity",
+        "description": "standard: one take. high: a second take when the first sang under 96 % of the words as written; the better is kept. highest: a third when neither reached 96 %. Takes longer (up to 2x or 3x).",
+        "default": "standard"
+       },
+       "original_notes": {
+        "type": "integer",
+        "minimum": 0.0,
+        "maximum": 100.0,
+        "title": "original notes",
+        "description": "How many of the source's notes YuE2 gets: 100 all. Less leaves out the least important of the instrument line and chords (an instrumental's melody too; a sung one keeps all), nothing new; 0 about a quarter.",
+        "default": 100
+       },
+       "finish.hq_mastering": {
+        "type": "boolean",
+        "title": "HQ mastering",
+        "description": "Highest mastering quality: UniverSR (HQ 2) regenerates the highs - clearly fewer AI shimmer and artifacts, but the song takes about twice as long. Off (default; on in Enhance & Master): UniverSR is not needed.",
+        "default": false
+       },
+       "finish.cover_art": {
+        "type": "boolean",
+        "title": "Cover Art",
+        "description": "Paints the cover from the artwork prompt the writer wrote (embedded in the files); off: no cover and no image model.",
+        "default": true
+       },
+       "writer.model": {
+        "type": "string",
+        "enum": [
+         "Gemma 4 12B (auto)"
+        ],
+        "title": "model",
+        "description": "Gemma 4 12B (auto): the one on this machine, else downloaded for its card. A bare file name: a text model for ComfyUI's Generate Text. '… · …': a GGUF file ('models/LLM', 'HF cache' ...) or a running app's model.",
+        "default": "Gemma 4 12B (auto)"
+       },
+       "source.audio": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "audio",
+        "description": "A recording in ComfyUI's input folder: upload it with POST /uploads?name=<file> and give the answer's name here.",
+        "default": ""
+       },
+       "excerpt.start_index": {
+        "type": "number",
+        "minimum": -1.8446744073709552e+19,
+        "maximum": 1.8446744073709552e+19,
+        "title": "start index",
+        "description": "Start time in seconds, can be negative to count from the end (supports sub-seconds).",
+        "default": 0.0
+       },
+       "excerpt.duration": {
+        "type": "number",
+        "minimum": 0.0,
+        "title": "duration",
+        "description": "Duration in seconds",
+        "default": 120.0
+       },
+       "excerpt.enabled": {
+        "type": "boolean",
+        "title": "Excerpt",
+        "description": "Whether the optional node 'Excerpt (optional)' runs (bypassed when off).",
+        "default": false
+       }
+      },
+      "required": [
+       "source.audio"
+      ]
+     },
+     "release": {
+      "type": "object",
+      "properties": {
+       "folder": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "folder",
+        "description": "Sub-folder of the ComfyUI output folder.",
+        "default": "plenio"
+       },
+       "naming": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "naming",
+        "description": "File name: {title}, {date}, {seed}, {genre}, {artist} ... (the variables of the tags); '/' makes sub-folders; [optional {parts}] vanish when empty.",
+        "default": "{date} {title}"
+       },
+       "collision": {
+        "type": "string",
+        "enum": [
+         "number",
+         "overwrite",
+         "error"
+        ],
+        "title": "collision",
+        "description": "When the file exists: number (add ' (2)' - also to a title another song of the folder has), overwrite, or stop with an error.",
+        "default": "number"
+       },
+       "flac": {
+        "type": "boolean",
+        "title": "flac",
+        "description": "FLAC 24-bit (lossless).",
+        "default": true
+       },
+       "mp3": {
+        "type": "boolean",
+        "title": "mp3",
+        "description": "MP3 VBR V0 (LAME).",
+        "default": false
+       },
+       "wav": {
+        "type": "boolean",
+        "title": "wav",
+        "description": "WAV 32-bit float (no clipping; few tags, no cover).",
+        "default": false
+       },
+       "tags": {
+        "type": "string",
+        "enum": [
+         "title only",
+         "tags",
+         "copy from loaded file"
+        ],
+        "title": "tags",
+        "description": "Metadata written into the files: the title only, tags typed or connected (with {variables}), or the tags of the loaded file.",
+        "default": "tags"
+       },
+       "artist": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "artist",
+        "description": "The artist tag. Text with {variables}, or connect a text output to the field. Only when tags is tags.",
+        "default": ""
+       },
+       "album": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "album",
+        "description": "The album tag. Text with {variables}, or connect a text output to the field. Only when tags is tags.",
+        "default": ""
+       },
+       "date": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "date",
+        "description": "Year or date, e.g. 2026 or {date}. Text with {variables}, or connect a text output to the field. Only when tags is tags.",
+        "default": "{date}"
+       },
+       "track": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "track",
+        "description": "Track number, e.g. 3 or 3/12. Text with {variables}, or connect a text output to the field. Only when tags is tags.",
+        "default": ""
+       },
+       "genre": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "genre",
+        "description": "The genre tag, e.g. {genre} (the brief's). Text with {variables}, or connect a text output to the field. Only when tags is tags.",
+        "default": "{genre}"
+       },
+       "comment": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "comment",
+        "description": "The comment tag; empty: none. Text with {variables}, or connect a text output to the field. Only when tags is tags.",
+        "default": "[Genre: {genre} · ][Mood: {mood} · ][Language: {language} · ]Powered by Plenio Music Production System / ComfyUI"
+       },
+       "album_artist": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "album artist",
+        "description": "The album artist tag. Text with {variables}, or connect a text output to the field. Only when tags is tags.",
+        "default": ""
+       },
+       "composer": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "composer",
+        "description": "The composer tag. Text with {variables}, or connect a text output to the field. Only when tags is tags.",
+        "default": ""
+       },
+       "lyrics": {
+        "type": "string",
+        "maxLength": 400,
+        "title": "lyrics",
+        "description": "The lyrics tag (FLAC, MP3; players show it), e.g. {lyrics}. Text with {variables}, or connect a text output to the field. Only when tags is tags.",
+        "default": "{lyrics}"
+       },
+       "sheet_music": {
+        "type": "string",
+        "enum": [
+         "off",
+         "PDF (A4)",
+         "PDF (Letter)"
+        ],
+        "title": "sheet music",
+        "description": "Also save the sheet music (both voices, chords, sections, the lyrics under the notes) as '<name>.pdf' on A4 or Letter pages; an open ComfyUI page draws it after the export. Needs a score (YuE2).",
+        "default": "PDF (A4)"
+       },
+       "sheet_music_size": {
+        "type": "string",
+        "enum": [
+         "standard",
+         "smaller",
+         "compact",
+         "large"
+        ],
+        "title": "sheet music size",
+        "description": "How large the sheet music draws: standard about 3 bars a line, smaller 3-4, compact about 4, large 1-2 (the biggest notes).",
+        "default": "standard"
+       },
+       "project_in_flac": {
+        "type": "boolean",
+        "title": "project in FLAC",
+        "description": "Store the release record (workflow, Song Sheets, seeds, settings) inside the song's FLAC: File > Continue a Plenio song... opens the song from the FLAC alone. Off for files you share without their making-of.",
+        "default": true
+       },
+       "lyrics_srt": {
+        "type": "boolean",
+        "title": "lyrics subtitles (SRT)",
+        "description": "Write the lyrics as subtitles: '(lines).srt' whole lines, '(notes).srt' note by note, '(sung).srt' what the take really sings. Timed by listening (Qwen3-ASR and its aligner, 5.9 GB, fetched on first use).",
+        "default": true
+       },
+       "lyrics_timing": {
+        "type": "string",
+        "enum": [
+         "the song",
+         "vocal stem"
+        ],
+        "title": "lyrics heard on",
+        "description": "What the lyrics ASR hears for the subtitles and the player: the take's vocal stem - more exact times, the model of Stems and Sung Pitch, about half a minute per take - or the song (quicker).",
+        "default": "vocal stem"
+       },
+       "song_page": {
+        "type": "boolean",
+        "title": "song page (HTML)",
+        "description": "Also write '<name>.html': the song on one page to open in any browser - the lyrics with their sections and the prompts to copy, every setting, how it was made, the sound, the score and links to the files.",
+        "default": true
+       }
+      }
+     },
+     "seeds": {
+      "type": "object",
+      "properties": {
+       "arrangement": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 4294967295,
+        "title": "Arrangement seed"
+       },
+       "draft": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 4294967295,
+        "title": "Draft seed"
+       },
+       "take": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 4294967295,
+        "title": "Take seed"
+       },
+       "cover": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 4294967295,
+        "title": "Cover seed"
+       }
+      }
+     },
+     "documents": {
+      "type": "object",
+      "description": "Documents the Song Sheets keep as manual: the run keeps them instead of writing or planning them anew. A song's documents with a new take seed make a new take of it (POST /from-record gives them).",
+      "properties": {
+       "title": {
+        "type": "string",
+        "maxLength": 200000
+       },
+       "style": {
+        "type": "string",
+        "maxLength": 200000
+       },
+       "lyrics": {
+        "type": "string",
+        "maxLength": 200000
+       },
+       "score": {
+        "type": "string",
+        "maxLength": 200000
+       },
+       "artwork_prompt": {
+        "type": "string",
+        "maxLength": 200000
+       }
+      },
+      "additionalProperties": false
+     },
+     "client": {
+      "type": "object",
+      "description": "Who asks (kept with the job, shown in its listing): a name, a user, a reference.",
+      "additionalProperties": {
+       "type": "string"
+      }
+     },
+     "strict": {
+      "type": "boolean",
+      "default": true,
+      "description": "false: unknown fields are left out (named in warnings) instead of refused."
+     },
+     "preset": {
+      "type": "string",
+      "enum": [
+       "best",
+       "party",
+       "sketch",
+       "full",
+       "takes",
+       "instrumental"
+      ],
+      "description": "Plenio 2.0: one of the player's six presets (resources/presets/make.json) - its fields and release values are used where the request names none; what the request names wins. 'takes' sets only its fields here (a job is one take)."
+     },
+     "stems": {
+      "type": "boolean",
+      "default": false,
+      "description": "API 1.4: the take's stems (vocals, drums, bass, other and the rest) are saved beside the song and listed in its files (role 'stem'): the template's Stems switch is turned on. The song sounds the same; separating takes about half a minute more."
+     }
+    }
+   }
+  }
+ }
+}

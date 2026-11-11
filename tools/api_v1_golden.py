@@ -150,6 +150,8 @@ def series_v2(url: str) -> Iterator[tuple[str, Answer]]:
     """API v2's series (phase 5.3): every endpoint that answers without real models, and the refusals. Recorded
     from 2.0's own code - a guard for the tasks after it, not a comparison with 1.6."""
     yield "v2_index", call(url, "GET", V2)
+    doc = call(url, "GET", f"{V2}/openapi.json")
+    yield "v2_openapi", Answer(doc.status, openapi_shape(doc.body), doc.headers)
     yield "v2_templates", call(url, "GET", f"{V2}/templates")
     for template in ("yue2-song", "yue2-cover", "yue2-daw", "minimax-song", "enhance-master"):
         yield f"v2_template_{template}", call(url, "GET", f"{V2}/templates/{template}")

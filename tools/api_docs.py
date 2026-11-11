@@ -1,7 +1,7 @@
-"""Write the Song API's reference for reading without a running ComfyUI: ``docs/api/openapi.json`` and
-``docs/api/fields.md``.
+"""Write the Song API's reference for reading without a running ComfyUI: v2's ``docs/api/openapi.json`` and
+``docs/api/fields.md``, and v1's - frozen as 1.6.0 served it - in ``docs/api/v1/``.
 
-A running ComfyUI describes its API itself (``GET /plenio/api/v1/openapi.json``, ``GET /plenio/api/v1/templates/{id}``),
+A running ComfyUI describes its API itself (``GET /plenio/api/v2/openapi.json``, ``GET /plenio/api/v2/templates/{id}``),
 made from its templates and node definitions. These copies are made the same way from the shipped templates and the
 node types of the ComfyUI version Plenio is tested against (``tools/data/node_types.json``) - for docs/api/index.html,
 for client generators, for readers who have no ComfyUI at hand. A test checks that they are current.
@@ -22,6 +22,7 @@ sys.path.insert(0, str(PROJECT))
 from plenio import __version__  # noqa: E402
 from plenio.core.song_api import V1_TEMPLATES, Field, Template, api_templates, load_template  # noqa: E402
 from plenio.core.song_api_doc import openapi  # noqa: E402
+from plenio.core.song_api_doc_v2 import openapi_v2  # noqa: E402
 
 FOLDER = PROJECT / "docs" / "api"
 LIST_SHOWN = 12
@@ -39,27 +40,29 @@ def _comfyui(snapshot: dict[str, Any]) -> str:
     return str(snapshot.get("comfyui_ref") or snapshot.get("comfyui_version") or "").lstrip("v")
 
 
-def templates() -> list[Template]:
+def templates(version: str = "v2") -> list[Template]:
+    """The templates of the API ``version``: v1's two, v2's five."""
     nodes: dict[str, Any] = _snapshot()["nodes"]
     workflows = {
         path.stem: json.loads(path.read_text(encoding="utf-8"))
         for path in sorted((PROJECT / "example_workflows").glob("*.json"))
     }
+    ids = V1_TEMPLATES if version == "v1" else None
     return [
-        load_template(name, workflow, nodes.get)
-        for name, workflow in api_templates(workflows, V1_TEMPLATES).values()
+        load_template(name, workflow, nodes.get) for name, workflow in api_templates(workflows, ids).values()
     ]
 
 
-def document() -> dict[str, Any]:
-    data = openapi(templates(), plenio=__version__, comfyui=_comfyui(_snapshot()))
+def document(version: str = "v2") -> dict[str, Any]:
+    make = openapi if version == "v1" else openapi_v2
+    data = make(templates(version), plenio=__version__, comfyui=_comfyui(_snapshot()))
     # the copy describes the API of a ComfyUI on this computer: the full address, as a program would use it
     data["servers"] = [
         {
-            "url": "http://127.0.0.1:8188/plenio/api/v1",
+            "url": f"http://127.0.0.1:8188/plenio/api/{version}",
             "description": "ComfyUI on this computer (its default port)",
         },
-        {"url": "http://127.0.0.1:8000/plenio/api/v1", "description": "ComfyUI Desktop"},
+        {"url": f"http://127.0.0.1:8000/plenio/api/{version}", "description": "ComfyUI Desktop"},
     ]
     return data
 
@@ -98,19 +101,19 @@ def _rows(fields: tuple[Field, ...]) -> list[str]:
     return rows
 
 
-def fields_text() -> str:
+def fields_text(version: str = "v2") -> str:
     snapshot = _snapshot()
     lines = [
-        "# Song API: the fields of each template",
+        f"# Song API {version}: the fields of each template",
         "",
         "*Made by `tools/api_docs.py` from the shipped templates and the node definitions of ComfyUI "
         f"{_comfyui(snapshot)} - do not edit by hand.* A running ComfyUI tells its own, current list: "
-        "`GET /plenio/api/v1/templates/{id}`. The guide: [README.md](README.md).",
+        f"`GET /plenio/api/{version}/templates/{{id}}`. The guide: [README.md](README.md).",
         "",
         "Every field you leave out keeps the template's value (the *Default*). A field with *Only when* applies only "
         "while that field has one of those values; given otherwise, it is left out with a warning.",
     ]
-    for template in templates():
+    for template in templates(version):
         lines += [
             "",
             f"## `{template.id}` - {template.name}",
@@ -131,15 +134,16 @@ def fields_text() -> str:
 
 
 def outputs() -> dict[Path, str]:
-    return {
-        FOLDER / "openapi.json": json.dumps(document(), ensure_ascii=False, indent=1) + "\n",
-        FOLDER / "fields.md": fields_text(),
-    }
+    found = {}
+    for version, folder in (("v2", FOLDER), ("v1", FOLDER / "v1")):
+        found[folder / "openapi.json"] = json.dumps(document(version), ensure_ascii=False, indent=1) + "\n"
+        found[folder / "fields.md"] = fields_text(version)
+    return found
 
 
 def main() -> int:
-    FOLDER.mkdir(parents=True, exist_ok=True)
     for path, text in outputs().items():
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(text.encode("utf-8"))
         print(f"wrote {path.relative_to(PROJECT).as_posix()}")
     return 0

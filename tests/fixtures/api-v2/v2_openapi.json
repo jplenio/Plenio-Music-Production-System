@@ -1,0 +1,106 @@
+{
+ "status": 200,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "openapi": "3.1.0",
+  "paths": {
+   "/": [
+    "get"
+   ],
+   "/briefs": [
+    "get"
+   ],
+   "/events": [
+    "get"
+   ],
+   "/jobs": [
+    "get",
+    "post"
+   ],
+   "/jobs/{id}": [
+    "delete",
+    "get"
+   ],
+   "/jobs/{id}/approve": [
+    "post"
+   ],
+   "/jobs/{id}/bars": [
+    "get"
+   ],
+   "/jobs/{id}/documents": [
+    "get"
+   ],
+   "/jobs/{id}/files/{name}": [
+    "get"
+   ],
+   "/jobs/{id}/timings": [
+    "get"
+   ],
+   "/loras": [
+    "get"
+   ],
+   "/lyrics/analyze": [
+    "post"
+   ],
+   "/models": [
+    "get"
+   ],
+   "/models/plan": [
+    "get"
+   ],
+   "/openapi.json": [
+    "get"
+   ],
+   "/presets": [
+    "get"
+   ],
+   "/queue": [
+    "get"
+   ],
+   "/scores/analyze": [
+    "post"
+   ],
+   "/scores/export/midi": [
+    "post"
+   ],
+   "/scores/export/musicxml": [
+    "post"
+   ],
+   "/scores/import/midi": [
+    "post"
+   ],
+   "/scores/import/musicxml": [
+    "post"
+   ],
+   "/scores/transform": [
+    "post"
+   ],
+   "/songs": [
+    "get"
+   ],
+   "/songs/{id}": [
+    "get"
+   ],
+   "/songs/{id}/again": [
+    "post"
+   ],
+   "/songs/{id}/files/{name}": [
+    "get"
+   ],
+   "/templates": [
+    "get"
+   ],
+   "/templates/{id}": [
+    "get"
+   ],
+   "/uploads": [
+    "post"
+   ],
+   "/writers": [
+    "get"
+   ]
+  }
+ }
+}
