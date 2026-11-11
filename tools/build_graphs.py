@@ -3801,6 +3801,204 @@ def blueprints() -> dict[str, Blueprint]:
     }
 
 
+# --- recipes (PD 7.3): short workflows from the templates, shipped in example_workflows/recipes/ -------------
+
+
+def _node(g: Graph, node_type: str) -> Node:
+    return next(n for n in g.nodes if n.type == node_type)
+
+
+def _set(node: Node, **values: Any) -> None:
+    """Change widget values of a node that is made already."""
+    names = {name for name, _value in node.widgets}
+    unknown = set(values) - names
+    if unknown:
+        raise KeyError(f"{node.type} has no widgets {sorted(unknown)}")
+    node.widgets = [(name, values.get(name, value)) for name, value in node.widgets]
+
+
+def brief_list(g: Graph, target: Node, entries: list[str], title: str) -> Node:
+    """A Brief List at the foot of the group that holds ``target`` (the brief, the source), in that group."""
+    index = next(i for i, members in enumerate(g._members) if target in members)
+    members = g._members[index]
+    left = min(n.pos[0] for n in members)
+    bottom = max(n.pos[1] + n.size[1] for n in members)
+    node = g.add(
+        "PlenioBriefList",
+        (left, bottom + 60),
+        size=(520, 230 + SUMMARY_ROOM),
+        title=title,
+        widgets={"entries": "\n".join(entries), "file": "", "index": 0, "index.control": "increment"},
+    )
+    g.join(g.groups[index]["title"], node)
+    return node
+
+
+def recipe_note(g: Graph, text: str) -> Node:
+    return g.add_frontend("MarkdownNote", (-560, -420), size=(480, 380), title="Recipe", widgets=[text])
+
+
+SERIES_BRIEFS = [
+    "A bright summer pop song about a road trip with old friends, handclaps and a big singalong chorus",
+    "A slow late-night jazz ballad about a city that never sleeps, brushed drums and a muted trumpet",
+    "An energetic indie rock song about starting over, driving guitars and a shouted bridge",
+]
+"""Invented briefs: the recipe's list shows the shape, the user writes their own."""
+
+
+def recipe_series(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
+    g, app = yue2_song(bp)
+    brief = _node(g, "PlenioSongBrief")
+    _set(brief, template="none", genre="", description="")
+    items = brief_list(g, brief, SERIES_BRIEFS, "Brief List · one song per line")
+    g.link(items, "text", brief, "description")
+    recipe_note(
+        g,
+        "## A series from a list of briefs\n\nEvery line of **Brief List** is one song. Write your briefs, one per "
+        "line (or name a text file in ComfyUI's input folder), set the **batch count** beside *Run* to the number "
+        "of lines and press *Run* once: each run takes the next line (*index* increments).\n\nThe rest is "
+        "*1 · YuE2 · Song*: each song is written, scored, rendered, mastered and saved.",
+    )
+    return g, app
+
+
+COVER_STYLES = ["acoustic folk", "synthwave", "big band swing"]
+
+
+def recipe_cover_styles(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
+    g, app = yue2_cover(bp)
+    brief = _node(g, "PlenioCoverBrief")
+    items = brief_list(g, brief, COVER_STYLES, "Brief List · one style per run")
+    g.link(items, "text", brief, "genre")
+    recipe_note(
+        g,
+        "## A cover in three styles\n\nLoad your recording in *Source*, set the **batch count** beside *Run* to 3 "
+        "and press *Run* once: the same song is covered as acoustic folk, synthwave and big band swing - one style "
+        "per run from **Brief List** (change the lines for other styles).\n\nThe rest is *2 · YuE2 · Cover*.",
+    )
+    return g, app
+
+
+OWN_LYRICS = (
+    "[verse]\nThe kettle sings before the sun\nTwo cups, one chair, the day's begun\n\n"
+    "[chorus]\nSlow morning, stay a while\nSlow morning, keep your smile"
+)
+"""Invented lyrics for the recipe; the user puts their own."""
+GENRES = ["soul", "bossa nova", "punk rock"]
+
+
+def recipe_lyrics_genres(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
+    g, app = yue2_song(bp)
+    brief = _node(g, "PlenioSongBrief")
+    _set(
+        brief,
+        template="none",
+        genre="",
+        description="The same lyrics in a new genre every run.",
+        **{"vocals.lyrics_from": "my own, sung as written below", "vocals.lyrics": OWN_LYRICS},
+    )
+    items = brief_list(g, brief, GENRES, "Brief List · one genre per run")
+    g.link(items, "text", brief, "genre")
+    recipe_note(
+        g,
+        "## The same lyrics in three genres\n\nPut your lyrics into the brief's *lyrics* (they are sung as written), "
+        "set the **batch count** beside *Run* to 3 and press *Run* once: soul, bossa nova and punk rock - one genre "
+        "per run from **Brief List**.\n\nThe rest is *1 · YuE2 · Song*.",
+    )
+    return g, app
+
+
+def recipe_daw_stems(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
+    g, app = yue2_song(bp)
+    recipe_note(
+        g,
+        "## A song with stems for a DAW\n\n*1 · YuE2 · Song* with the **stems** saved: the Master block separates the "
+        "take into vocals, drums, bass and other, and Export Release saves every stem next to the song - ready to "
+        "drag into a DAW. Separating takes about half a minute more; the song sounds the same.\n\nFor writing the "
+        "score yourself, use *5 · YuE2 · DAW*.",
+    )
+    return g, app
+
+
+def below(top: Graph, other: Graph, gap: float, prefix: str) -> Graph:
+    """``other``'s nodes, links and groups added to ``top`` under it: ids moved past ``top``'s, positions down by
+    ``gap``, group titles prefixed (two templates side by side in one workflow)."""
+    nodes = max(n.id for n in top.nodes)
+    links = max((link["id"] for link in top.links), default=0)
+    notes = [n for n in other.nodes if n.type in ("MarkdownNote", "Note")]
+    other.nodes = [n for n in other.nodes if n not in notes]  # the top template's notes say it
+    other._members = [[n for n in members if n not in notes] for members in other._members]
+    for node in other.nodes:
+        node.id += nodes
+        node.pos = (node.pos[0], node.pos[1] + gap)
+        node.input_links = {name: link + links for name, link in node.input_links.items()}
+        node.output_links = {slot: [link + links for link in ids] for slot, ids in node.output_links.items()}
+    for link in other.links:
+        link.update(
+            id=link["id"] + links, origin_id=link["origin_id"] + nodes, target_id=link["target_id"] + nodes
+        )
+    for group in other.groups:
+        x, y, width, height = group["bounding"]
+        group.update(
+            id=group["id"] + len(top.groups),
+            title=f"{prefix}{group['title']}",
+            bounding=[x, y + gap, width, height],
+        )
+    top.nodes += other.nodes
+    top.links += other.links
+    top.groups += other.groups
+    top._members += other._members
+    top._min_heights += other._min_heights
+    top._next_node = max(n.id for n in top.nodes) + 1
+    top._next_link = max(link["id"] for link in top.links) + 1
+    return top
+
+
+def recipe_two_models(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
+    g, app = yue2_song(bp)
+    minimax, _minimax_app = minimax_song(bp)
+    bottom = max(n.pos[1] + n.size[1] for n in g.nodes)
+    top_of_minimax = min(n.pos[1] for n in minimax.nodes)
+    below(g, minimax, bottom - top_of_minimax + 400, "MiniMax · ")
+    briefs = [n for n in g.nodes if n.type == "PlenioSongBrief"]
+    for brief in briefs:
+        _set(brief, template="none", genre="")
+    items = brief_list(g, briefs[0], [SERIES_BRIEFS[0]], "Brief List · the brief for both")
+    for brief in briefs:
+        g.link(items, "text", brief, "description")
+    recipe_note(
+        g,
+        "## Two music models from one brief\n\nOne brief, two songs: **YuE2** (above) and **MiniMax Music 3** "
+        "(below) each write and render their own song from the line in **Brief List** - to hear which model suits "
+        "an idea. Both run one after the other in one press of *Run*; they need both models' files (Plenio Setup).",
+    )
+    return g, app
+
+
+FOLDER_FILES = ["song-one.flac", "song-two.flac", "song-three.flac"]
+
+
+def recipe_master_folder(bp: dict[str, Blueprint]) -> tuple[Graph, App | None]:
+    g, _app = enhance_master(bp)
+    source = _node(g, "LoadAudio")
+    # ComfyUI's Load Audio takes no linked name (its check gets none): Load Audio by Name in its place, same id
+    loader = g.add("PlenioLoadAudioByName", source.pos, size=source.size, title="Source · by name")
+    g.nodes.remove(loader)
+    loader.id, loader.output_links = source.id, source.output_links
+    g.nodes[g.nodes.index(source)] = loader
+    g._members = [[loader if n is source else n for n in members] for members in g._members]
+    items = brief_list(g, loader, FOLDER_FILES, "Brief List · one file per run")
+    g.link(items, "text", loader, "file")
+    recipe_note(
+        g,
+        "## Master a folder of files\n\nPut your recordings into ComfyUI's **input** folder and write their names "
+        "into **Brief List**, one per line (or a text file with the names). Set the **batch count** beside *Run* to "
+        "the number of files and press *Run* once: each run masters the next file.\n\nThe rest is "
+        "*4 · Enhance & Master*.",
+    )
+    return g, None
+
+
 def templates(bp: dict[str, Blueprint]) -> list[tuple[str, Graph, list[Blueprint], App | None]]:
     song, song_app_config = yue2_song(bp)
     cover, cover_app = yue2_cover(bp)
@@ -3864,6 +4062,45 @@ def templates(bp: dict[str, Blueprint]) -> list[tuple[str, Graph, list[Blueprint
     ]
 
 
+RECIPES = (
+    ("A series from a list of briefs", recipe_series, False),
+    ("Two music models from one brief", recipe_two_models, False),
+    ("A cover in three styles", recipe_cover_styles, False),
+    ("The same lyrics in three genres", recipe_lyrics_genres, False),
+    ("A song with stems for a DAW", recipe_daw_stems, True),
+    ("Master a folder of files", recipe_master_folder, False),
+)
+"""The recipes: name, builder, whether the Master block saves the stems."""
+
+
+def recipes(bp: dict[str, Blueprint], shipped: list[tuple[str, Graph, list[Blueprint], App | None]]) -> int:
+    from plenio.core.song_api import save_stems
+
+    used = {name: blueprints_used for name, _graph, blueprints_used, _app in shipped}
+    sources = {
+        recipe_series: "1 · YuE2 · Song",
+        recipe_two_models: "1 · YuE2 · Song",
+        recipe_cover_styles: "2 · YuE2 · Cover",
+        recipe_lyrics_genres: "1 · YuE2 · Song",
+        recipe_daw_stems: "1 · YuE2 · Song",
+        recipe_master_folder: "4 · Enhance & Master",
+    }
+    folder = PROJECT / "example_workflows" / "recipes"
+    for name, build, stems in RECIPES:
+        graph, app = build(bp)
+        graph.extra.pop("plenio_api", None)  # the Song API runs the templates, not the recipes
+        models_note(graph, sources[build])
+        blueprints_used = list(used[sources[build]])
+        if build is recipe_two_models:
+            blueprints_used += [b for b in used["3 · MiniMax · Song"] if b not in blueprints_used]
+        data = workflow(graph, name, blueprints_used, app)
+        if stems:
+            snapshot = load_snapshot()
+            save_stems(data, snapshot["nodes"].get)
+        write_json(folder / f"{name}.json", data)
+    return len(RECIPES)
+
+
 def main() -> int:
     bp = blueprints()
     for blueprint in bp.values():
@@ -3871,8 +4108,9 @@ def main() -> int:
     shipped = templates(bp)
     for name, graph, used, app in shipped:
         write_json(PROJECT / "example_workflows" / f"{name}.json", workflow(graph, name, used, app))
+    count = recipes(bp, shipped)
     write_json(PROJECT / "locales" / "en" / "nodeDefs.json", locale(bp))
-    print(f"wrote {len(bp)} blueprints, {len(shipped)} templates and their tooltips")
+    print(f"wrote {len(bp)} blueprints, {len(shipped)} templates, {count} recipes and their tooltips")
     return 0
 
 

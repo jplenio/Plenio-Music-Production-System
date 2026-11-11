@@ -24,7 +24,8 @@ USER = "<user>"
 
 # a Windows path (C:\… or C:/…, also \\server\share\…) or an absolute POSIX path of two parts or more
 _PATH = re.compile(
-    r"(?:(?<![\w])[A-Za-z]:[\\/]|(?<![\w])~[\\/]|\\\\[^\\/\s]+[\\/])(?:[^\\/\s\"'<>|:*?]+[\\/])*[^\\/\s\"'<>|:*?]*"
+    # separators may come doubled: a path quoted in a Python message reads C:\\Users\\...
+    r"(?:(?<![\w])[A-Za-z]:[\\/]+|(?<![\w])~[\\/]+|\\\\+[^\\/\s]+[\\/]+)(?:[^\\/\s\"'<>|:*?]+[\\/]+)*[^\\/\s\"'<>|:*?]*"
     r"|(?<![\w.:/])/(?:[^/\s\"'<>]+/)+[^/\s\"'<>]*"
 )
 

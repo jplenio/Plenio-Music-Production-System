@@ -4,6 +4,7 @@ from .arrangement import PlenioApplyArrangement, PlenioComposeArrangement
 from .audio_model import PlenioAudioModelLoader
 from .best_take import PlenioBestTake
 from .brief import PlenioSongBrief
+from .brief_list import PlenioBriefList, PlenioLoadAudioByName
 from .compose import PlenioComposePrompt
 from .cover_brief import PlenioCoverBrief
 from .creativity import PlenioCreativity
@@ -44,6 +45,8 @@ NODES = (
     PlenioWriterChoice,
     PlenioModelChoice,
     PlenioPreset,
+    PlenioBriefList,
+    PlenioLoadAudioByName,
     PlenioLocalLLM,
     PlenioSongSheet,
     PlenioScoreTools,

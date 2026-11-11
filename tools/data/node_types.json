@@ -1534,6 +1534,63 @@
    "category": "Plenio/Audio analysis",
    "display_name": "Best Take · lyrics fidelity"
   },
+  "PlenioBriefList": {
+   "input": {
+    "required": {
+     "entries": [
+      "STRING",
+      {
+       "tooltip": "One entry per line (a brief's description, a genre ...). Lines starting with # are left out.",
+       "default": "",
+       "multiline": true
+      }
+     ],
+     "file": [
+      "STRING",
+      {
+       "tooltip": "Or a text file in ComfyUI's input folder, one entry per line (added after the lines above).",
+       "default": "",
+       "multiline": false
+      }
+     ],
+     "index": [
+      "INT",
+      {
+       "tooltip": "Which entry this run takes, from 0 (it wraps round); increment: the next one every run.",
+       "default": 0,
+       "min": 0,
+       "max": 100000,
+       "control_after_generate": "increment"
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "entries",
+     "file",
+     "index"
+    ]
+   },
+   "output": [
+    "*",
+    "INT",
+    "INT"
+   ],
+   "output_name": [
+    "text",
+    "position",
+    "count"
+   ],
+   "output_is_list": [
+    false,
+    false,
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Song",
+   "display_name": "Brief List"
+  },
   "PlenioComposeArrangement": {
    "input": {
     "required": {
@@ -3535,6 +3592,37 @@
    "output_node": false,
    "category": "Plenio/Mastering",
    "display_name": "HQ 1 · Stereo Cleanup"
+  },
+  "PlenioLoadAudioByName": {
+   "input": {
+    "required": {
+     "file": [
+      "STRING",
+      {
+       "tooltip": "The file's name in ComfyUI's input folder (or a path inside it).",
+       "default": "",
+       "multiline": false
+      }
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "file"
+    ]
+   },
+   "output": [
+    "AUDIO"
+   ],
+   "output_name": [
+    "audio"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Audio",
+   "display_name": "Load Audio by Name"
   },
   "PlenioLocalLLM": {
    "input": {

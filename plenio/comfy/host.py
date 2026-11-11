@@ -1083,3 +1083,11 @@ def log_lines() -> list[str]:
     entries = list(get_logs() or [])
     text = "".join(str(entry.get("m", "")) for entry in entries if isinstance(entry, dict))
     return text.splitlines()
+
+
+def load_input_audio(path: Path) -> dict[str, Any]:
+    """An audio file of ComfyUI's input folder, read as ComfyUI's Load Audio reads it (``comfy_extras``)."""
+    from comfy_extras.nodes_audio import load
+
+    waveform, sample_rate = load(str(path))
+    return {"waveform": waveform.unsqueeze(0), "sample_rate": sample_rate}

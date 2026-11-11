@@ -42,6 +42,8 @@ Plenio installs no Python packages. Optional: `python -m pip install faster-whis
 
 **0 · System Check** shows the same in detail: versions and GPUs, the findings first (each with an id the [troubleshooting guide](troubleshooting.md) explains), which model files each template still needs, the download policy, and the hardware table - which files the model fields on auto take on each card - with the row for your machine marked. Nothing is changed automatically.
 
+For things you do again and again - a series from a list, a cover in three styles, a folder to master - see the [Recipes](recipes.md).
+
 ## Choosing a template = choosing the music model
 
 Each music model has its own template, so every workflow shows only the controls that apply to it.

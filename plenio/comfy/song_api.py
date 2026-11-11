@@ -111,10 +111,62 @@ def _error(error: SongApiError) -> web.Response:
     return web.json_response({"error": error.to_dict()}, status=error.status)
 
 
+def _without_places(data: Any) -> Any:
+    """A job's error as another computer gets it: a path in its message keeps its last two parts (a model file
+    that failed names its folder on this computer), its type is the exception's class name alone."""
+    from ..core.problem_report import clean_text
+
+    if isinstance(data, list):
+        return [_without_places(item) for item in data]
+    if not isinstance(data, dict):
+        return data
+    out = {key: _without_places(value) for key, value in data.items()}
+    error = out.get("error")
+    if isinstance(error, dict):
+        error = dict(error)
+        for key in ("message", "title", "node"):
+            if isinstance(error.get(key), str):
+                error[key] = clean_text(error[key])
+        if isinstance(error.get("type"), str):
+            # ComfyUI names a custom node's exception by its module, which is the package's folder path
+            error["type"] = error["type"].replace("\\", "/").rsplit("/", 1)[-1].rsplit(".", 1)[-1]
+        out["error"] = error
+    return out
+
+
+async def _for_caller(request: web.Request, response: web.StreamResponse) -> web.StreamResponse:
+    """The answer as it goes out: unchanged for this computer (as in 1.6), without this computer's places for
+    another."""
+    from .routes import is_here
+
+    if (
+        not isinstance(response, web.Response)
+        or response.content_type != "application/json"
+        or is_here(request)
+    ):
+        return response
+    try:
+        data = json.loads(response.text or "null")
+    except ValueError:
+        return response
+    cleaned = _without_places(data)
+    if cleaned == data:
+        return response
+    return web.json_response(
+        cleaned,
+        status=response.status,
+        headers={
+            key: value
+            for key, value in response.headers.items()
+            if key.lower() in ("location", "retry-after")
+        },
+    )
+
+
 def guarded(handler: Handler) -> Handler:
     async def wrapper(request: web.Request) -> web.StreamResponse:
         try:
-            return await handler(request)
+            return await _for_caller(request, await handler(request))
         except SongApiError as error:
             return _error(error)
         except Exception:  # noqa: BLE001 - a bug: said as one, its text only in the log (it can name folders)

@@ -274,7 +274,9 @@ def validate_file(
                 problems.append(f"{where}: description missing")
     else:
         _check_template(data, path, nodes_info, subgraph_ids, definitions, problems)
-        for definition in definitions:
+        # a recipe may set a block's inner values (the Master's Stem Mixer saving every stem): built by
+        # tools/build_graphs.py from the same blueprints, so it is not out of date
+        for definition in [] if path.parent.name == "recipes" else definitions:
             blueprint = blueprints.get(definition.get("name", ""))
             if blueprint is not None and _normalised_definition(definition) != _normalised_definition(
                 blueprint
@@ -352,7 +354,9 @@ def _check_template(
     where = path.name
     nodes = data.get("nodes", [])
     notes = [n.get("title") for n in nodes if n["type"] in FRONTEND_ONLY_TYPES]
-    if notes.count(ABOUT_TITLE) != 1 or any(title not in (ABOUT_TITLE, *EXTRA_NOTES) for title in notes):
+    recipe = path.parent.name == "recipes"
+    allowed = (ABOUT_TITLE, *EXTRA_NOTES, *(("Recipe",) if recipe else ()))
+    if notes.count(ABOUT_TITLE) != 1 or any(title not in allowed for title in notes):
         problems.append(
             f"{where}: exactly one note titled {ABOUT_TITLE!r}, others only {EXTRA_NOTES} (found {notes})"
         )
@@ -396,7 +400,7 @@ def _check_template(
             )
     problems.extend(f"{where}: {clash}" for clash in id_clashes(definitions))
     _check_layout(where, data, problems)
-    if not path.with_suffix(".jpg").is_file():
+    if not recipe and not path.with_suffix(".jpg").is_file():  # a recipe is opened from Home, not the browser
         problems.append(f"{where}: thumbnail {path.stem}.jpg missing (tools/build_thumbnails.py)")
 
 
@@ -438,8 +442,10 @@ def validate_all(
 
 
 def main() -> int:
-    paths = sorted((PROJECT / "subgraphs").glob("*.json")) + sorted(
-        (PROJECT / "example_workflows").glob("*.json")
+    paths = (
+        sorted((PROJECT / "subgraphs").glob("*.json"))
+        + sorted((PROJECT / "example_workflows").glob("*.json"))
+        + sorted((PROJECT / "example_workflows" / "recipes").glob("*.json"))
     )
     failures = 0
     for path, problems in validate_all(paths).items():

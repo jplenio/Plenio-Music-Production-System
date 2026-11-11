@@ -79,3 +79,8 @@ def test_clean_text_cuts_posix_and_unc_paths() -> None:
     assert clean_text("at /Users/ana/Music/x.flac", ["ana"]) == "at …/Music/x.flac"
     assert clean_text("share \\\\server\\songs\\a\\b.flac") == "share …/a/b.flac"
     assert clean_text("a 1/2 bar and http://127.0.0.1:8188/x") == "a 1/2 bar and http://127.0.0.1:8188/x"
+
+
+def test_a_path_quoted_in_a_python_message_is_cut_too() -> None:
+    message = "No such file: 'C:\\Users\\ana\\ComfyUI\\models\\checkpoints\\a.safetensors'"
+    assert clean_text(message, ["ana"]) == "No such file: '…/checkpoints/a.safetensors'"

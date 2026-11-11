@@ -63,6 +63,13 @@ def _own_names() -> tuple[str, ...]:
     return (name, full)
 
 
+def is_here(request: web.Request) -> bool:
+    """Whether a request comes from a browser on this computer (``core.access``)."""
+    sockname = request.transport.get_extra_info("sockname") if request.transport is not None else None
+    own = [str(sockname[0])] if isinstance(sockname, tuple) and sockname else []
+    return from_this_computer(request.remote, request.headers, own, _own_names())
+
+
 def only_here(request: web.Request, what: str, hint: str) -> None:
     """Refuse a request that does not come from a browser on this computer (``core.access``): ComfyUI has no login,
     and with ``--listen`` - or the Plenio Player's *In your network* - everyone in the network reaches its routes."""
