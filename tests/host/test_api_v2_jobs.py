@@ -191,3 +191,17 @@ def test_enhance_master_masters_an_uploaded_file(restartable: ComfyServer) -> No
     first = next(f for f in done["result"]["files"] if f["name"].endswith(".flac"))
     with urllib.request.urlopen(restartable.url + first["url"], timeout=60) as answer:  # noqa: S310 - local
         assert answer.status == 200 and answer.read(4) == b"fLaC"
+
+
+def test_a_released_song_is_listed_and_made_again(restartable: ComfyServer) -> None:
+    """After the mastering test: its song is in /songs, and a cover of it is queued from its audio."""
+    found = restartable.get(f"{BASE}/songs?q=v2%20master")["songs"]
+    assert found, restartable.get(f"{BASE}/songs")
+    song = restartable.get(f"{BASE}/songs/{found[0]['id']}")
+    assert song["files"] and all(f["url"].startswith(f"{BASE}/songs/") for f in song["files"])
+    status, job = restartable.request("POST", f"{BASE}/songs/{found[0]['id']}/again", {"as": "cover"})
+    assert status == 201 and job["template"] == "yue2-cover", job
+    status, refused = restartable.request("POST", f"{BASE}/songs/{found[0]['id']}/again", {"as": "remix"})
+    assert status == 400 and refused["error"]["field"] == "as"
+    assert isinstance(restartable.get(f"{BASE}/writers")["writers"], list)
+    assert isinstance(restartable.get(f"{BASE}/loras")["loras"], list)

@@ -244,8 +244,13 @@ async def presets(request: web.Request) -> web.StreamResponse:
 async def jobs_create(request: web.Request) -> web.StreamResponse:
     data = await v1._body(request)
     key = str(request.headers.get("Idempotency-Key") or "").strip()[:200]
+    return await create_job(data, key, OWNER_HERE)
+
+
+async def create_job(data: dict[str, Any], key: str, owner: str) -> web.StreamResponse:
+    """Queue a job (``POST /jobs``, ``POST /songs/{id}/again``): 201 with the job, 200 with the job its key named."""
     jobs = store()
-    known = jobs.by_key(OWNER_HERE, key)
+    known = jobs.by_key(owner, key)
     if known is not None:
         job, view = refresh(known)
         return web.json_response(job_answer(job, view), status=200)
@@ -303,7 +308,7 @@ async def jobs_create(request: web.Request) -> web.StreamResponse:
         template=template.id,
         kind=template.kind,
         prompt=str(answer["prompt_id"]),
-        owner=OWNER_HERE,
+        owner=owner,
         key=key,
         client=client,
         request={
@@ -517,6 +522,89 @@ async def song_file(request: web.Request) -> web.StreamResponse:
     return web.FileResponse(path)
 
 
+AUDIO = (".flac", ".mp3", ".wav")
+AGAIN = ("again", "take", "like", "cover")
+"""``again``: the song as it was made (its documents, seeds, settings); ``take``: a new take of it; ``like``: a new
+song of its brief; ``cover``: a cover of its audio (``yue2-cover``)."""
+
+
+async def song_again(request: web.Request) -> web.StreamResponse:
+    """Make a song again: ``{"as": "take" | "again" | "like" | "cover", "fields": {...}}`` (fields change the
+    request; for a cover they are the cover's)."""
+    body = await v1._body(request)
+    mode = body.get("as", "take")
+    if mode not in AGAIN:
+        raise SongApiError("invalid_value", f"'as' is one of {', '.join(AGAIN)}.", field="as")
+    extra = body.get("fields") or {}
+    if not isinstance(extra, dict):
+        raise SongApiError("invalid_value", "'fields' is an object.", field="fields")
+    record_file = _record_of(request.match_info["song_id"])
+    record = await asyncio.to_thread(continuation.read_record, record_file)
+    key = str(request.headers.get("Idempotency-Key") or "").strip()[:200]
+    if mode == "cover":
+        audio = next(  # the song's audio is the file without a role (as the record's summary takes it)
+            (
+                f
+                for f in record.get("files") or []
+                if isinstance(f, dict)
+                and not f.get("role")
+                and str(f.get("name", "")).lower().endswith(AUDIO)
+            ),
+            None,
+        )
+        if audio is None:
+            raise SongApiError("not_found", "The song has no audio file to cover.", status=404)
+        source = record_file.parent / str(audio["name"])
+        name = await asyncio.to_thread(_into_input, source)
+        data = {"template": "yue2-cover", "fields": {**extra, "source.audio": name}}
+        return await create_job(data, key, OWNER_HERE)
+    template = song_api.template_for_record(_templates(v1._lookup()), record)
+    if template is None:
+        raise SongApiError("unknown_template", "No template of the API makes this song again.", status=422)
+    answer = song_api.request_from_record(template, record)
+    data = {
+        "template": answer["template"],
+        "fields": {**answer["fields"], **extra},
+        "release": answer["release"],
+    }
+    if mode == "again":
+        data.update(seeds=answer["seeds"], documents=answer["documents"])
+    elif mode == "take":
+        if not answer["take"]["possible"]:
+            raise SongApiError("invalid_value", f"No new take: {answer['take'].get('why', '')}", field="as")
+        data.update(
+            seeds={k: v for k, v in answer["seeds"].items() if k != "take"}, documents=answer["documents"]
+        )
+    return await create_job(data, key, OWNER_HERE)
+
+
+def _into_input(source: Path) -> str:
+    """A song's audio copied into ComfyUI's input folder for a cover (named as the API's uploads are)."""
+    import shutil
+
+    digest = hashlib.sha256(source.read_bytes()).hexdigest()[:12]
+    name = f"plenio-api-{digest}-{source.name.replace(' ', '-')}"
+    target = host.input_directory() / name
+    if not target.exists():
+        shutil.copyfile(source, target)
+    return name
+
+
+async def writers(request: web.Request) -> web.StreamResponse:
+    """The writer models a form may offer (Writer Choice's list on this ComfyUI)."""
+    found = await asyncio.to_thread(host.node_info, "PlenioWriterChoice")
+    spec = (((found or {}).get("input") or {}).get("required") or {}).get("model") or [[]]
+    options = (
+        spec[0] if isinstance(spec[0], list) else (spec[1] or {}).get("options", []) if len(spec) > 1 else []
+    )
+    return web.json_response({"writers": [str(o) for o in options]})
+
+
+async def loras(request: web.Request) -> web.StreamResponse:
+    """The LoRA files in ComfyUI's ``models/loras`` (names only)."""
+    return web.json_response({"loras": sorted(await asyncio.to_thread(host.model_files, "loras"))})
+
+
 # --- routes: scores and lyrics (the editor's functions behind versioned paths) ---------------------------------
 
 
@@ -557,6 +645,9 @@ ROUTES: tuple[Route, ...] = (
     _route("GET", "/songs", songs_list),
     _route("GET", "/songs/{song_id}", song_get),
     _route("GET", "/songs/{song_id}/files/{name:.+}", song_file),
+    _route("POST", "/songs/{song_id}/again", song_again),
+    _route("GET", "/writers", writers),
+    _route("GET", "/loras", loras),
     _route("POST", "/scores/analyze", _editor(routes.score_analyze)),
     _route("POST", "/scores/transform", _editor(routes.score_transform)),
     _route("POST", "/scores/import/midi", _editor(routes.score_midi_import)),
