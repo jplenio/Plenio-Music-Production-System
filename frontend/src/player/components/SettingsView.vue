@@ -223,7 +223,7 @@ function jumpTo(id: string): void {
 
     <div v-if="stopped" class="block stopped">
       <h3>The player has stopped</h3>
-      <p>Start it again with the <b>Plenio Player</b> button in ComfyUI, with <code>Plenio Player.bat</code> in the Plenio folder, or with <code>python plenio_player.py</code>.</p>
+      <p>Start it again with the <b>Plenio Player</b> button in ComfyUI or with <code>python plenio_player.py</code> in the Plenio folder - Plenio from GitHub also has <code>Plenio Player.bat</code> there.</p>
     </div>
 
     <section v-if="isPortable" class="block">

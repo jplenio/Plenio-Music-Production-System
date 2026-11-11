@@ -196,27 +196,25 @@ def test_only_the_players_page_makes_videos_and_nothing_else_is_served(
     assert call(server, "GET", "/videos/../state.json")[0] == 404
 
 
-def test_the_folder_is_shown_by_explorer_with_the_video_chosen(
+def test_the_videos_folder_is_shown_and_the_answer_says_whether_it_opened(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    # owner's report 2026-10-16: "Open the folder" did nothing in a player started from ComfyUI
+    # "Open the folder" answers the folder and whether a file manager opened it (tests/unit/test_addons.py has
+    # the file manager itself); without the Studio add-on the page gets the path and a sentence instead
+    from plenio.core import features
     from plenio.player import visuals
 
-    started: list[object] = []
-    monkeypatch.setattr(visuals.subprocess, "Popen", lambda command, *a, **k: started.append(command))
-    monkeypatch.setattr(visuals.sys, "platform", "win32")
+    shown: list[Path] = []
     folder = tmp_path / "my videos"
-    folder.mkdir()
-    (folder / "Song (1920x1080).mp4").write_bytes(b"x")
-    visuals.show_folder(folder, folder / "Song (1920x1080).mp4")
-    visuals.show_folder(folder)
-    visuals.show_folder(folder, tmp_path / "elsewhere.mp4")  # a file outside: the folder only
-    assert started[0].endswith(f' /select,"{(folder / "Song (1920x1080).mp4").resolve()}"')
-    assert started[0].lower().startswith('"') and "explorer.exe" in started[0].lower()
-    assert started[1].endswith(f' "{folder.resolve()}"') and started[2] == started[1]
+
+    class FileManager:
+        show_folder = staticmethod(shown.append)
+
+    monkeypatch.setattr(features, "load", lambda addon: FileManager)
+    assert visuals.show_folder(folder) == {"folder": str(folder), "opened": True}
+    assert shown == [folder] and folder.is_dir()
     assert not (folder / "README.txt").exists()  # the visuals' README belongs to the visuals folder only
-    # a quote would end the path inside Explorer's command line: such a folder (no Windows name holds one) is not
-    # shown - nothing of its name becomes an argument of its own
-    with pytest.raises(OSError):
-        visuals.show_folder(tmp_path / 'my" /root,"C:\\Windows')
-    assert len(started) == 3
+    monkeypatch.setenv(features.SWITCH, "0")
+    answer = visuals.show_folder(folder)
+    assert answer["folder"] == str(folder) and answer["opened"] is False and "copy it" in str(answer["hint"])
+    assert shown == [folder]  # nothing was started

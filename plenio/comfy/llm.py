@@ -57,6 +57,11 @@ def servers(config: PlenioConfig) -> list[llm.Server]:
     return found
 
 
+def _capital(text: str) -> str:
+    """``text`` as the start of a sentence (it may begin with a command in backticks)."""
+    return text[:1].upper() + text[1:]
+
+
 def runtimes(config: PlenioConfig) -> list[llm.Runtime]:
     return llm.find_runtimes(os.environ, Path.home(), configured=config.llama_server)
 
@@ -118,7 +123,7 @@ def auto_writer(
             return llm.Route(text_encoder=native), choice
         raise PlenioModelError(
             "The writer Gemma 4 12B runs on llama.cpp, and this computer has none.",
-            hint=f"{llm.gemma.INSTALL_LLAMA_CPP}, then run again: Plenio then downloads the model for your graphics "
+            hint=f"{_capital(llm.gemma.how_to_run_files())}, then run again: Plenio then downloads the model for your graphics "
             f"card. Or choose another writer model: a running LM Studio or Ollama works as it is, and ComfyUI's own "
             f"Gemma 4 E4B runs without llama.cpp - {llm.gemma.NATIVE_E4B_URL} into models/text_encoders, then press R.",
         )

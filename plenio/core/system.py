@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from . import features
 from .assets import Asset
 from .models import Inventory, ModelFile, readiness, size_text, template_names
 from .reports import Report, Status, worst
@@ -234,6 +235,22 @@ def _asset_rows(assets: Mapping[str, Asset], facts: SystemFacts) -> list[dict[st
     ]
 
 
+def _addon_line() -> str:
+    """Whether this installation carries the Studio add-on (``plenio.core.features``), and what its absence
+    means."""
+    if all(features.summary().values()):
+        return (
+            "Studio add-on: installed - the player can start ComfyUI, a llama-server program runs GGUF files, "
+            "folders open in the file manager."
+        )
+    return (
+        "Studio add-on: not part of this installation (the Comfy Registry package, or PLENIO_ADDONS=0). Songs, "
+        "the editor, the API and the player work as they are; three conveniences are left out - the player "
+        "starting ComfyUI, starting a llama-server program for GGUF files, opening folders in the file manager. "
+        "Plenio from GitHub (git clone or the release zip) has them."
+    )
+
+
 def _llm_lines(llm: Mapping[str, Any]) -> list[str]:
     """What the Local LLM node can use on this machine (nothing when the facts were not gathered)."""
     if not llm:
@@ -248,6 +265,10 @@ def _llm_lines(llm: Mapping[str, Any]) -> list[str]:
         lines.append(
             "Local LLM: no llama.cpp runtime for GGUF files - install llama.cpp (winget/brew) or "
             "llama-cpp-python, or set PLENIO_LLAMA_SERVER; models of running apps work without it."
+            if features.has("llm_server")
+            else "Local LLM: no runtime for GGUF files - `pip install llama-cpp-python` into ComfyUI's Python; "
+            "models of running apps (LM Studio, Ollama, a llama-server you started) work without it. This "
+            "installation starts no llama-server program itself."
         )
     lines.extend(f"Local LLM note: {note}" for note in llm.get("notes", []))
     if llm.get("writer"):
@@ -312,6 +333,7 @@ def check_system(
             messages.append(
                 f"YuE2 checkpoint '{file}': loads as a finetune - choose it under *checkpoint* in the model block."
             )
+    messages.append(_addon_line())
     messages.extend(_llm_lines(facts.llm))
     if facts.llm.get("writer_blocked"):
         statuses.append(Status.WARNING)  # the templates' default writer cannot run as it is

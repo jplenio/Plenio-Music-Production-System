@@ -1,5 +1,6 @@
 /** The Plenio Player's server (plenio/player/server.py): the library, one song, the files and the state - or,
  * in a shared player (one HTML file, portable.ts), the songs inside the page and the listener's browser. */
+import { type FolderAnswer, noteFolder } from './folderNote'
 import { ensureMedia, isPortable, notInShared, portable, portableMedia, portablePage, portableState, savePortableState } from './portable'
 
 export interface Loudness {
@@ -325,6 +326,9 @@ export interface StudioStatus {
   own: boolean
   starting: boolean
   since: number | null
+  /** This installation starts ComfyUI at all (the Studio add-on); `false` in the Comfy Registry package. An older
+   * server leaves the field out: it does. */
+  launcher?: boolean
   can_start: boolean
   why: string
   url: string
@@ -519,7 +523,8 @@ const serverApi = {
   videoCancel: (job: string) => post<{ ok: boolean }>(`/api/video/${job}/cancel`, {}),
   videos: () => json<{ folder: string; files: { name: string; size: number; mtime: number }[] }>('/api/videos'),
   /** The videos folder in the file manager (``file``: that video chosen). */
-  openVideos: (file = '') => post<{ folder: string }>('/api/videos/open', file ? { file } : {}),
+  /** The videos folder on this computer's screen - or, where the player opens no file manager, as a path to copy. */
+  openVideos: (file = '') => post<FolderAnswer>('/api/videos/open', file ? { file } : {}).then(noteFolder),
   /** The songs that appeared since ``since`` (the last answer's ``now``; ``null``: only the ``now``). */
   newSongs: (since: number | null) => json<{ now: number; songs: SongSummary[] }>(`/api/new${since !== null ? `?since=${since}` : ''}`),
   /** Save the folders (or ``null``: back to the ones it started with); errors carry the server's words. */
@@ -542,7 +547,9 @@ const serverApi = {
   packageCancel: (job: string) => post<{ ok: boolean }>(`/api/package/${job}/cancel`, {}),
   packageClear: () => post<{ jobs: PackageStatus[] }>('/api/package-jobs/clear', {}),
   packages: () => json<{ folder: string; files: { name: string; size: number; mtime: number }[] }>('/api/packages'),
-  openPackages: (file = '') => post<{ folder: string }>('/api/packages/open', file ? { file } : {}),
+  openPackages: (file = '') => post<FolderAnswer>('/api/packages/open', file ? { file } : {}).then(noteFolder),
+  /** The folder of the listener's own visuals, the same way. */
+  openVisuals: () => post<FolderAnswer>('/api/visuals/open', {}).then(noteFolder),
   guests: () => json<GuestStatus>('/api/guests'),
   /** Switch the guests' access on or off, choose what they may do and what the screen shows, or make a new
    * address (``regenerate``). */

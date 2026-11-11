@@ -79,12 +79,13 @@ Goal: numbers the later phases are judged by, and a test suite fast enough to ru
 - [ ] **0.4 The writer on the native 12B.** With the owner's permission to download `gemma4_12b_int8_convrot.safetensors` (12.06 GB): run `tools/writer_probe.py` with the native 12B and with the GGUF Q6_K and QAT Q4 on the same twenty briefs; record time, peak memory, cut-off answers and the probe's quality measures. Check whether ComfyUI 0.41.0 loads the 12B.
   *Accept:* a report that states the order of steps 2 and 3 of PD §5.6 and the memory from which step 3 is taken; if 0.41.0 cannot load it, the report says which version can.
 - [ ] **0.5 Faster tests, same assertions** (PD §10.1).
-  - [ ] `serve()` and `serve_guests()` and the network gateway take `poll_interval` (default as today); test fixtures pass 0.02.
+  - [x] `serve()` and `serve_guests()` and the network gateway take `poll_interval` (default as today); test fixtures pass 0.02.
   - [ ] Servers that a module's tests only read become module-scoped fixtures.
-  - [ ] `Accounts(folder, iterations=…)`; tests pass 1 000; one test asserts the production default of 240 000.
-  - [ ] Markers `io` and `process` in `pyproject.toml`; the ten slowest tests carry them.
-  - [ ] The two torch adapter tests move to the host job.
+  - [x] `Accounts(folder, iterations=…)`; tests pass 1 000; one test asserts the production default of 240 000.
+  - [x] Markers `io` and `process` in `pyproject.toml`; the ten slowest tests carry them.
+  - [x] The two torch adapter tests move to the host job.
   - [ ] With the owner's permission: `pytest-xdist` in `.devdeps` and in CI; `-n auto` for the `io` tier; every server test binds port 0.
+  *Done so far (2026-11-11):* 144 s -> 81-84 s, the fast tier (`-m "not io and not process"`) 56 s; done with one session fixture for the poll interval and one for the PBKDF2 rounds instead of new parameters; module-scoped servers were not needed for the budget; `pytest-xdist` waits for the owner's permission to install it.
   *Accept:* `pytest tests/unit tests/workflows tests/contract/test_data_schemas.py` under 90 s on the owner's machine; the number of test functions is unchanged; three consecutive runs with `-n auto -p no:randomly` and three with a random order pass.
 - [ ] **0.6 Coverage baseline.** With permission: `coverage` in `.devdeps`; `coverage run --contexts=test`; the report per module is committed as `docs/test-reports/…-coverage-1.6.0.md` (percentages only).
   *Accept:* the report exists; nothing is deleted on its basis in this phase.
@@ -97,23 +98,23 @@ Goal: numbers the later phases are judged by, and a test suite fast enough to ru
 
 Goal: PD §3.1 to §3.4. It ships with 2.0.0 (PD §3.5).
 
-- [ ] **1.1 `plenio/core/features.py`** with `has(addon)` and a test for a present and an absent module.
-- [ ] **1.2 The add-on package `plenio/addons/`.**
-  - [ ] `studio_launcher.py`: the process-starting half of `plenio/player/studio.py` (command building, start, stop, the log). `studio.py` keeps status, settings and the "is a ComfyUI answering" logic and calls the add-on through `features.has`.
-  - [ ] `llm_server.py`: `find_runtimes`' `llama-server` discovery and the server process of `plenio/core/llm/runtime.py`. `runtime.py` keeps the `llama-cpp-python` shim (fixed interpreter, in-package module) and the port probe.
-  - [ ] `file_manager.py`: `show_folder`, rewritten without a command string (PD §3.1). The select-a-file behaviour is dropped; the callers pass a folder.
+- [x] **1.1 `plenio/core/features.py`** with `has(addon)` and a test for a present and an absent module.
+- [x] **1.2 The add-on package `plenio/addons/`.**
+  - [x] `studio_launcher.py`: the process-starting half of `plenio/player/studio.py` (command building, start, stop, the log). `studio.py` keeps status, settings and the "is a ComfyUI answering" logic and calls the add-on through `features.has`.
+  - [x] `llm_server.py`: `find_runtimes`' `llama-server` discovery and the server process of `plenio/core/llm/runtime.py`. `runtime.py` keeps the `llama-cpp-python` shim (fixed interpreter, in-package module) and the port probe.
+  - [x] `file_manager.py`: `show_folder`, rewritten without a command string (PD §3.1). The select-a-file behaviour is dropped; the callers pass a folder.
   *Accept:* with the add-on present every existing test passes unchanged except those that asserted Explorer's `/select,`; with `plenio/addons` removed from the import path (a fixture that hides it) the player, the Local LLM node and Writer Choice import and run, and each degraded function answers with the sentence of PD §3.1's table.
-- [ ] **1.3 Degraded paths, in words.** The player's studio panel, the *Open folder* buttons (path with *Copy*), the Local LLM node's and Writer Choice's messages, the System Check's writer line. Each message says what the user can do.
+- [x] **1.3 Degraded paths, in words.** The player's studio panel, the *Open folder* buttons (path with *Copy*), the Local LLM node's and Writer Choice's messages, the System Check's writer line. Each message says what the user can do.
   *Accept:* frontend tests for the two panels; unit tests for the three messages; `docs/user/troubleshooting.md` has an entry per message.
-- [ ] **1.4 `.comfyignore`** excludes `/plenio/addons/`; `tests/host/harness.py` copies it only when a test asks for the full install.
+- [x] **1.4 `.comfyignore`** excludes `/plenio/addons/`; `tests/host/harness.py` copies it only when a test asks for the full install.
   *Accept:* `comfy node pack` → the zip has no `plenio/addons/`; ComfyUI started from the zip registers all 37 nodes with no import error (host test over the unpacked zip).
-- [ ] **1.5 `tools/package_gate.py`** (PD §3.3) with `resolve_argv0`, tests with one passing and six failing fixtures (a string command, `shell=True`, `os.system`, `os.startfile`, a launch in an unlisted file, an argv whose first element is not `sys.executable`), and the `--delta <tag>` report.
+- [x] **1.5 `tools/package_gate.py`** (PD §3.3) with `resolve_argv0`, tests with one passing and six failing fixtures (a string command, `shell=True`, `os.system`, `os.startfile`, a launch in an unlisted file, an argv whose first element is not `sys.executable`), and the `--delta <tag>` report.
   *Accept:* the gate passes on the packed zip of this phase and fails on the packed zip of `v1.6.0`, naming `visuals.py`, `runtime.py` and `studio.py`; it runs in the CI job *Registry package*.
-- [ ] **1.6 Route access classes** (PD §3.4): a `Route` record with `access`, `guarded()`, the table in `routes.py` and `song_api.py`, one parametrised test over every route (remote peer → 403 for `local`; no absolute path in any answer to a remote peer). `api` behaves as today in this phase (tokens come in 5.4).
+- [x] **1.6 Route access classes** (PD §3.4): a `Route` record with `access`, `guarded()`, the table in `routes.py` and `song_api.py`, one parametrised test over every route (remote peer → 403 for `local`; no absolute path in any answer to a remote peer). `api` behaves as today in this phase (tokens come in 5.4).
   *Accept:* the test enumerates `ROUTES` and fails when a route has no class.
-- [ ] **1.7 Ruff rules** `S301`, `S602`, `S605` added; findings fixed or justified with a `noqa` and a reason.
+- [x] **1.7 Ruff rules** `S301`, `S602`, `S605` added; findings fixed or justified with a `noqa` and a reason.
 - **1.8** *(moved to R0: the release tool is written once, for 2.0.0.)*
-- [ ] **1.9 Docs for the boundary.** SECURITY.md (what the Registry package starts: two fixed patterns; what the add-on adds), `docs/user/getting-started.md` (the two ways to install and what differs), the CHANGELOG's *2.0.0 - unreleased* section, a short ADR-0012 *Two artefacts*.
+- [x] **1.9 Docs for the boundary.** SECURITY.md (what the Registry package starts: two fixed patterns; what the add-on adds), `docs/user/getting-started.md` (the two ways to install and what differs), the CHANGELOG's *2.0.0 - unreleased* section, a short ADR-0012 *Two artefacts*.
 - **1.10** *(dropped with the canary; the hand-over is R6.)*
 
 **Exit of phase 1:** the gate passes on the packed zip and names the three launchers on 1.6.0; ComfyUI loads the package without the add-on with every node; the owner has the German summary of what the Registry package leaves out.

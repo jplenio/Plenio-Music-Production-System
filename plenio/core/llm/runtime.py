@@ -5,6 +5,11 @@ nothing stays behind for ComfyUI's models to trip over (rule R9; the caller asks
 before the start). Runtimes, in this order: a configured ``llama-server``, ``llama-server`` on the PATH,
 the builds other apps install (Unsloth Studio, winget, Homebrew), and llama-cpp-python through Plenio's
 small server (``plenio.workers.llama_http``), which takes the same command line.
+
+This module starts one thing only: this Python with Plenio's own server module (the llama-cpp-python
+runtime). Finding and starting a ``llama-server`` program is the Studio add-on's part
+(``plenio/addons/llm_server.py``, see ``plenio.core.features``); an installation without the add-on - the
+Comfy Registry package - does neither.
 """
 
 from __future__ import annotations
@@ -12,7 +17,6 @@ from __future__ import annotations
 import atexit
 import importlib.util
 import os
-import shutil
 import socket
 import subprocess
 import sys
@@ -26,12 +30,26 @@ from typing import TypeVar
 from urllib.error import HTTPError, URLError
 from urllib.request import ProxyHandler, build_opener
 
+from .. import features
 from ..errors import PlenioCancelledError, PlenioWorkerError
 from .client import Server
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[3]
 """The folder that contains the ``plenio`` package (the server shim runs as ``python -m plenio...``)."""
 SHIM_MODULE = "plenio.workers.llama_http"
+SHIM_NAME = "llama-cpp-python"
+ADDON = "llm_server"
+NO_PROGRAM = (
+    "This installation of Plenio starts no llama-server program (the Comfy Registry package leaves that part "
+    "out)."
+)
+WAYS_WITHOUT_PROGRAM = (
+    "Run the model in an app that is already running - LM Studio, Ollama or a llama-server you started yourself "
+    "(Local LLM lists their models) -, or `pip install llama-cpp-python` into ComfyUI's Python, or choose "
+    "ComfyUI's own Gemma 4 as the writer. Plenio from GitHub (git clone or the release zip) also starts an "
+    "installed llama-server."
+)
+"""What runs a GGUF file where the Studio add-on is not installed."""
 _LOG_TAIL = 3000
 _OPENER = build_opener(ProxyHandler({}))
 T = TypeVar("T")
@@ -60,45 +78,20 @@ def find_runtimes(
 ) -> list[Runtime]:
     """The runtimes on this machine, best first (see the module text); ``configured`` is llama.cpp's
     ``llama-server`` or the folder that holds it - a program of another name is not started (a configuration, or
-    an environment variable, names no other program to run)."""
-    server = _exe("llama-server", platform)
-    local = Path(env["LOCALAPPDATA"]) if env.get("LOCALAPPDATA") else home / "AppData" / "Local"
-    candidates: list[tuple[str, Path | None]] = []
-    if configured is not None:
-        program = configured / server if configured.is_dir() else configured
-        if program.name.lower().startswith(
-            "llama-server"
-        ):  # llama-server, llama-server.exe, llama-server-cuda ...
-            candidates.append(("configured", program))
-    found = shutil.which("llama-server", path=env.get("PATH"))
-    candidates.append(("PATH", Path(found) if found else None))
-    unsloth = home / ".unsloth" / "llama.cpp"
-    for path in (
-        unsloth / "build" / "bin" / "Release" / server,
-        unsloth / "build" / "bin" / server,
-        unsloth / server,
-    ):
-        candidates.append(("Unsloth Studio", path))
-    candidates += [
-        ("winget", p)
-        for p in sorted((local / "Microsoft" / "WinGet" / "Packages").glob(f"ggml.llamacpp*/{server}"))
-    ]
-    for folder in ("/opt/homebrew/bin", "/usr/local/bin", str(home / ".local" / "bin")):
-        candidates.append(("Homebrew" if "homebrew" in folder else "local", Path(folder) / server))
+    an environment variable, names no other program to run). The ``llama-server`` programs are found by the Studio
+    add-on; an installation without it runs GGUF files with llama-cpp-python only."""
     runtimes: list[Runtime] = []
-    seen: set[str] = set()
-    for origin, candidate in candidates:
-        if candidate is None or not candidate.is_file():
-            continue
-        key = os.path.normcase(str(candidate.resolve()))
-        if key not in seen:
-            seen.add(key)
-            runtimes.append(Runtime(f"llama-server ({origin})", (str(candidate),)))
+    if features.has(ADDON):
+        programs = features.load(ADDON).find_programs(env, home, platform=platform, configured=configured)
+        runtimes += [Runtime(f"llama-server ({origin})", (str(program),)) for origin, program in programs]
     if importlib.util.find_spec("llama_cpp") is not None:
-        runtimes.append(
-            Runtime("llama-cpp-python", (python, "-m", SHIM_MODULE), {"PYTHONPATH": str(PACKAGE_ROOT)})
-        )
+        runtimes.append(Runtime(SHIM_NAME, (python, "-m", SHIM_MODULE), {"PYTHONPATH": str(PACKAGE_ROOT)}))
     return runtimes
+
+
+def is_shim(runtime: Runtime) -> bool:
+    """``runtime`` is Plenio's own llama-cpp-python server on this Python - started here, with a fixed command."""
+    return tuple(runtime.command) == (sys.executable, "-m", SHIM_MODULE)
 
 
 def _free_port() -> int:
@@ -131,8 +124,7 @@ class LocalServer:
 
     def start(self, *, timeout_s: float = 900.0, is_cancelled: Callable[[], bool] | None = None) -> Server:
         port = _free_port()
-        argv = [
-            *self.runtime.command,
+        arguments = [
             *("-m", str(self.model), "--host", "127.0.0.1", "--port", str(port)),
             *("-c", str(self.context), "-np", "1"),
         ]
@@ -141,14 +133,21 @@ class LocalServer:
             env[name] = value + (os.pathsep + env[name] if name == "PYTHONPATH" and env.get(name) else "")
         flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)  # no console window on Windows
         with self._log.open("wb") as log:
-            self._process = subprocess.Popen(  # noqa: S603 - fixed argv, no shell
-                argv,
-                stdin=subprocess.DEVNULL,
-                stdout=log,
-                stderr=subprocess.STDOUT,
-                env=env,
-                creationflags=flags,
-            )
+            if is_shim(self.runtime):
+                self._process = subprocess.Popen(  # noqa: S603 - this Python, Plenio's own module, no shell
+                    [sys.executable, "-m", SHIM_MODULE, *arguments],
+                    stdin=subprocess.DEVNULL,
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                    env=env,
+                    creationflags=flags,
+                )
+            elif features.has(ADDON):
+                self._process = features.load(ADDON).start(
+                    self.runtime.command, arguments, log=log, env=env, creationflags=flags
+                )
+            else:
+                raise PlenioWorkerError(NO_PROGRAM, hint=WAYS_WITHOUT_PROGRAM)
         started = time.monotonic()
         try:
             while not self._healthy(port):
@@ -244,7 +243,9 @@ def serve_file(
             f"No llama.cpp runtime was found to run {model.name}.",
             hint="Install llama.cpp (Windows: `winget install llama.cpp`, macOS: `brew install llama.cpp`) or "
             "Unsloth Studio, or `pip install llama-cpp-python` into ComfyUI's Python - or set the path of a "
-            "llama-server in PLENIO_LLAMA_SERVER. A running LM Studio or Ollama works without any of these.",
+            "llama-server in PLENIO_LLAMA_SERVER. A running LM Studio or Ollama works without any of these."
+            if features.has(ADDON)
+            else f"{NO_PROGRAM} {WAYS_WITHOUT_PROGRAM}",
         )
     runtime = runtimes[0]
     with KEPT.lock:

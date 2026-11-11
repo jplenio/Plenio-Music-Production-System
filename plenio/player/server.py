@@ -41,7 +41,7 @@ from .song_page import render as render_song_page
 from .studio import StudioLauncher, StudioLaunchError
 from .thumbs import thumbnail
 from .video import AUDIO_BITRATE, VideoJobs, videos_dir
-from .visuals import list_presets, open_folder, save_copy, show_folder, visuals_dir
+from .visuals import list_presets, prepare_folder, save_copy, show_folder, visuals_dir
 
 STATIC = Path(__file__).resolve().parent / "static"
 MEDIA_KINDS = {
@@ -1151,14 +1151,10 @@ def make_handler(
             if route == "/api/packages/open":
                 if self._not_from_network("Opening a folder on this computer's screen"):
                     return None
-                folder = packages_dir(state.path.parent)
                 try:
-                    chosen = json.loads(raw.decode("utf-8")).get("file") if raw else None
-                    made = package_file(state.path.parent, str(chosen)) if chosen else None
-                    show_folder(folder, made)
-                except (OSError, ValueError, AttributeError) as error:
+                    return self._json(show_folder(packages_dir(state.path.parent)))
+                except OSError as error:
                     return self._error(500, f"could not show the folder: {error}")
-                return self._json({"folder": str(folder)})
             try:
                 body = json.loads(raw.decode("utf-8")) if raw else None
             except ValueError:
@@ -1198,12 +1194,9 @@ def make_handler(
                 if self._not_from_network("Opening a folder on this computer's screen"):
                     return None
                 try:
-                    show_folder(
-                        jobs.folder, jobs.file(str(body.get("file") or "")) if body.get("file") else None
-                    )
+                    return self._json(show_folder(jobs.folder))
                 except OSError as error:
                     return self._error(500, f"could not show the folder: {error}")
-                return self._json({"folder": str(jobs.folder)})
             if route == "/api/video":
                 song = library.song(str(body.get("song", "")))
                 if song is None:
@@ -1327,10 +1320,9 @@ def make_handler(
                     if self._not_from_network("Opening a folder on this computer's screen"):
                         return None
                     try:
-                        open_folder(folder)
+                        return self._json(show_folder(prepare_folder(folder)))
                     except OSError as error:
                         return self._error(500, str(error))
-                    return self._json({"folder": str(folder)})
                 try:
                     body = json.loads(raw.decode("utf-8")) if raw else None
                 except ValueError:

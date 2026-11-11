@@ -10,6 +10,7 @@ import { BUILTIN, randomPreset } from './builtin'
 import { FormulaError, compilePreset, slug, type PresetFile } from './format'
 import { MILKDROP } from './milkdrop'
 import { dropRenderer, type DropDef } from './renderer'
+import { noteFolder } from '../../folderNote'
 import { isPortable, portable } from '../../portable'
 
 /** The preset file of the Drop visual on screen (for *Edit a copy*; *Random* makes a new one each time). */
@@ -135,5 +136,7 @@ export async function copyToMyPresets(file: PresetFile): Promise<string> {
 }
 
 export async function openMyPresetFolder(): Promise<void> {
-  await fetch('/api/visuals/open', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+  const response = await fetch('/api/visuals/open', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+  // where the player opens no file manager, the folder's path is shown to copy
+  if (response.ok) noteFolder((await response.json().catch(() => null)) ?? { folder: '' })
 }

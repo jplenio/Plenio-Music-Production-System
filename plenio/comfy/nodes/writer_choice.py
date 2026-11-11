@@ -102,7 +102,7 @@ class PlenioWriterChoice(io.ComfyNode):
                 status = "warning"
                 markdown = (
                     f"Writer: **{route.text_encoder}** - ComfyUI's Generate Text. Gemma 4 12B, the better writer, "
-                    f"needs llama.cpp: {llm.gemma.INSTALL_LLAMA_CPP}."
+                    f"needs llama.cpp: {llm.gemma.how_to_run_files()}."
                 )
             else:
                 how = "found on this machine" if choice.model is not None else "downloaded for this card"

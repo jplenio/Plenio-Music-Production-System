@@ -90,8 +90,13 @@ jobs:
           tracked = subprocess.check_output(["git", "ls-files", "-z"], text=True).split("\0")
           runtime = ("plenio/", "web/", "subgraphs/", "example_workflows/", "resources/", "locales/")
           missing = [f for f in tracked if f.startswith(runtime) or f in ("__init__.py", "pyproject.toml", "LICENSE")]
-          missing = [f for f in missing if f not in names]
+          # the Studio add-on is left out on purpose (.comfyignore): the package starts no other program
+          missing = [f for f in missing if f not in names and not f.startswith("plenio/addons/")]
           leaked = sorted({n.split("/")[0] for n in names} & {"tests", "tools", "frontend", "assets", ".github"})
+          leaked += sorted(n for n in names if n.startswith("plenio/addons/") or n.endswith((".bat", ".sh")))
           print(len(names), "files; missing:", missing, "; leaked:", leaked)
           raise SystemExit(1 if missing or leaked else 0)
           PY
+      # nothing in the package starts a process but this Python with Plenio's own modules (docs/security)
+      - name: The package gate
+        run: python tools/package_gate.py node.zip

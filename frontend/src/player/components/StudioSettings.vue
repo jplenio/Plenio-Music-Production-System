@@ -4,8 +4,12 @@
  * only to make songs, without opening a workflow): whether it runs, *Start* and *Stop* (only the one the player
  * started), the folder and the arguments it starts with, starting by itself when a song is ordered, stopping after
  * idle minutes - and the end of its log. The admin on the player's own computer only.
+ *
+ * Starting ComfyUI is the Studio add-on's part. An installation without it (the Comfy Registry package) answers
+ * `launcher: false`: the panel then says whether ComfyUI runs and how to get it running, and offers nothing it
+ * cannot do.
  */
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 import { api, type StudioStatus } from '../api'
 import { lookForComfyUI, say } from '../store'
@@ -21,6 +25,8 @@ const root = ref('')
 const args = ref('')
 const port = ref(8188)
 const showLog = ref(false)
+/** This installation starts ComfyUI (an older server does not say: it does). */
+const launches = computed(() => studio.value?.launcher !== false)
 let timer: number | undefined
 
 async function read(): Promise<void> {
@@ -72,23 +78,34 @@ onBeforeUnmount(() => window.clearInterval(timer))
 <template>
   <section v-if="studio" id="studio" class="block studio">
     <h3><Icon name="studio" /> The studio (ComfyUI)</h3>
-    <p class="lead">
+    <p v-if="launches" class="lead">
       The player plays without ComfyUI. To <b>make songs</b> - <i>Make a song</i>, the party's songs, a new take - ComfyUI must run on this computer: start it here, and it
       runs in the background, without a window and without a workflow to open.
+    </p>
+    <p v-else class="lead">
+      The player plays without ComfyUI. To <b>make songs</b> - <i>Make a song</i>, the party's songs, a new take - ComfyUI must run on this computer. The player finds it by
+      itself once it runs.
     </p>
     <p class="status" :class="{ ok: studio.running, busy: studio.starting }">
       <i />
       {{ studio.running ? `ComfyUI is running at ${studio.url}${studio.own ? ' - started by the player' : ''}` : studio.starting ? 'ComfyUI is starting …' : 'ComfyUI is not running' }}
     </p>
     <div class="row-buttons">
-      <button v-if="!studio.running && !studio.starting" class="primary" :disabled="busy || !studio.can_start" @click="act(() => api.studioStart(), 'ComfyUI is starting')"><Icon name="power" :size="16" /> Start the studio</button>
+      <button v-if="launches && !studio.running && !studio.starting" class="primary" :disabled="busy || !studio.can_start" @click="act(() => api.studioStart(), 'ComfyUI is starting')"><Icon name="power" :size="16" /> Start the studio</button>
       <button v-if="studio.own" class="ghost" :disabled="busy" @click="act(() => api.studioStop(), 'ComfyUI was stopped')"><Icon name="close" :size="16" /> Stop it</button>
       <a v-if="studio.running" class="ghost" :href="studio.url" target="_blank" rel="noopener"><Icon name="external" :size="16" /> Open ComfyUI</a>
     </div>
-    <p v-if="!studio.can_start" class="hint warn">{{ studio.why }}</p>
+    <p v-if="launches && !studio.can_start" class="hint warn">{{ studio.why }}</p>
+    <div v-if="!launches" class="without">
+      <p v-if="!studio.running" class="hint"><b>Start ComfyUI the way you usually do</b> - its shortcut, <code>run_nvidia_gpu.bat</code>, ComfyUI Desktop, or <code>python main.py</code> - and come back: this line turns green within a few seconds.</p>
+      <p class="hint">
+        Plenio installed through the ComfyUI Manager does not start programs, so there is no <i>Start the studio</i> button here. Plenio from GitHub
+        (<code>git clone</code> or the release zip) starts ComfyUI for you - <a href="https://github.com/jplenio/Plenio-Music-Production-System/blob/main/docs/user/getting-started.md#two-ways-to-install" target="_blank" rel="noopener">the two ways to install</a>.
+      </p>
+    </div>
     <p v-if="error || studio.error" class="error">{{ error || studio.error }}</p>
 
-    <div class="options">
+    <div v-if="launches" class="options">
       <label class="check"><input type="checkbox" :checked="studio.auto" :disabled="busy" @change="setAuto" /> Start it by itself when a song is ordered</label>
       <label class="check">
         Stop the ComfyUI the player started after
@@ -103,7 +120,7 @@ onBeforeUnmount(() => window.clearInterval(timer))
       </label>
     </div>
 
-    <details class="how">
+    <details v-if="launches" class="how">
       <summary>How it starts ComfyUI</summary>
       <label class="field">
         ComfyUI's folder

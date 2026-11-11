@@ -31,6 +31,7 @@ from aiohttp import ClientError, ClientSession, ClientTimeout, web
 from .. import __version__
 from ..core import brief as brief_rules
 from ..core import song_api
+from ..core.access import Route
 from ..core.errors import PlenioUserError
 from ..core.release import RECORD_SCHEMA
 from ..core.song_api import SongApiError
@@ -913,26 +914,27 @@ async def queue_info(request: web.Request) -> web.StreamResponse:
     )
 
 
-ROUTES: tuple[tuple[str, str, Handler], ...] = (
-    ("GET", BASE, index),
-    ("GET", f"{BASE}/", index),
-    ("GET", f"{BASE}/openapi.json", openapi_document),
-    ("GET", f"{BASE}/templates", templates),
-    ("GET", f"{BASE}/templates/{{template_id}}", template_detail),
-    ("GET", f"{BASE}/briefs", briefs),
-    ("POST", f"{BASE}/uploads", upload),
-    ("POST", f"{BASE}/jobs", jobs_create),
-    ("POST", f"{BASE}/from-record", from_record),
-    ("GET", f"{BASE}/jobs", jobs_list),
-    ("GET", f"{BASE}/jobs/{{job_id}}", job_get),
-    ("GET", f"{BASE}/jobs/{{job_id}}/files/{{name:.+}}", job_file),
-    ("GET", f"{BASE}/jobs/{{job_id}}/bars", job_bars),
-    ("DELETE", f"{BASE}/jobs/{{job_id}}", job_delete),
-    ("GET", f"{BASE}/queue", queue_info),
-    ("GET", f"{BASE}/models", models_info),
+ROUTES: tuple[Route, ...] = (
+    Route("GET", BASE, index, "api"),
+    Route("GET", f"{BASE}/", index, "api"),
+    Route("GET", f"{BASE}/openapi.json", openapi_document, "api"),
+    Route("GET", f"{BASE}/templates", templates, "api"),
+    Route("GET", f"{BASE}/templates/{{template_id}}", template_detail, "api"),
+    Route("GET", f"{BASE}/briefs", briefs, "api"),
+    Route("POST", f"{BASE}/uploads", upload, "api"),
+    Route("POST", f"{BASE}/jobs", jobs_create, "api"),
+    Route("POST", f"{BASE}/from-record", from_record, "api"),
+    Route("GET", f"{BASE}/jobs", jobs_list, "api"),
+    Route("GET", f"{BASE}/jobs/{{job_id}}", job_get, "api"),
+    Route("GET", f"{BASE}/jobs/{{job_id}}/files/{{name:.+}}", job_file, "api"),
+    Route("GET", f"{BASE}/jobs/{{job_id}}/bars", job_bars, "api"),
+    Route("DELETE", f"{BASE}/jobs/{{job_id}}", job_delete, "api"),
+    Route("GET", f"{BASE}/queue", queue_info, "api"),
+    Route("GET", f"{BASE}/models", models_info, "api"),
 )
+"""The Song API's routes: all of the access class ``api`` (``core.access.CLASSES``)."""
 
 
 def register(routes: web.RouteTableDef) -> None:
-    for method, path, handler in ROUTES:
-        routes.route(method, path)(guarded(handler))
+    for route in ROUTES:
+        routes.route(route.method, route.path)(guarded(route.handler))

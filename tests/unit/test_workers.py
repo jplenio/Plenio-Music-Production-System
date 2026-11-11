@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import sys
 import threading
 import time
 from pathlib import Path
@@ -14,7 +13,7 @@ from plenio.core.workers import WorkerEnv, WorkerLimits, run_worker
 from plenio.core.workers.protocol import _remove_job
 
 ROOT = Path(__file__).resolve().parents[2]
-ENV = WorkerEnv(python=Path(sys.executable), pythonpath=(ROOT, ROOT / "tests" / "fixtures" / "workers"))
+ENV = WorkerEnv(pythonpath=(ROOT, ROOT / "tests" / "fixtures" / "workers"))
 MODULE = "plenio_fake_worker"
 
 

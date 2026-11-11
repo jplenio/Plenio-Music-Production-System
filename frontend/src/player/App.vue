@@ -27,6 +27,8 @@ import LoginView from './components/LoginView.vue'
 import MiniPlayer from './components/MiniPlayer.vue'
 import BottomNav from './components/BottomNav.vue'
 import HelpView from './components/HelpView.vue'
+import FolderNote from './components/FolderNote.vue'
+import { folderNote } from './folderNote'
 import Reactions from './components/Reactions.vue'
 import { loadCheers } from './reactions'
 import { layout, slimBar } from './layout'
@@ -364,6 +366,7 @@ onBeforeUnmount(() => {
     <Reactions v-if="!isPortable" />
     <Transition name="fade"><div v-if="toast" class="toast">{{ toast }}</div></Transition>
     <Transition name="fade"><RemoveDialog v-if="removing" :song="removing" @close="removing = null" @done="say" /></Transition>
+    <Transition name="fade"><FolderNote v-if="folderNote" /></Transition>
   </div>
 </template>
 

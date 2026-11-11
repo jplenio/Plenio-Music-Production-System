@@ -29,6 +29,7 @@ import re
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 
+from .. import features
 from ..assets import Asset
 from .catalog import Model, is_chat_model_file
 
@@ -51,6 +52,19 @@ INSTALL_LLAMA_CPP = (
     "Install llama.cpp (Windows: `winget install llama.cpp`, macOS: `brew install llama.cpp`) or `pip install "
     "llama-cpp-python` into ComfyUI's Python, or set the path of a llama-server in PLENIO_LLAMA_SERVER"
 )
+"""What makes GGUF files run where Plenio starts a llama-server program (the Studio add-on)."""
+INSTALL_LLAMA_CPP_PYTHON = (
+    "`pip install llama-cpp-python` into ComfyUI's Python, or run the model in LM Studio, Ollama or a "
+    "llama-server you start yourself (this installation of Plenio starts no llama-server program; Plenio from "
+    "GitHub - git clone or the release zip - does)"
+)
+"""The same where it does not: the Comfy Registry package."""
+
+
+def how_to_run_files() -> str:
+    """What to do so that this installation runs GGUF files, as the start of a sentence."""
+    return INSTALL_LLAMA_CPP if features.has("llm_server") else INSTALL_LLAMA_CPP_PYTHON
+
 
 _NAME = re.compile(r"gemma[-_ ]?4[-_ ]?12b", re.IGNORECASE)
 _NOT_THE_MODEL = ("mtp-", "-mtp", "draft", "imatrix")
@@ -139,7 +153,7 @@ class Choice:
         if self.blocked:
             return (
                 f"Gemma 4 12B needs llama.cpp, and this computer has none - songs fall back to ComfyUI's own Gemma "
-                f"text model when one is installed. {INSTALL_LLAMA_CPP}"
+                f"text model when one is installed. To use the 12B: {how_to_run_files()}"
             )
         return (
             f"Gemma 4 12B: {file_of(self.asset)} ({self.asset.total_size / GIB:.1f} GiB, {self.asset.licence}) for "
@@ -164,6 +178,8 @@ __all__ = [
     "GIB",
     "HEADROOM_GIB",
     "INSTALL_LLAMA_CPP",
+    "INSTALL_LLAMA_CPP_PYTHON",
+    "how_to_run_files",
     "LARGE",
     "LARGE_FROM_GIB",
     "NATIVE_E4B",

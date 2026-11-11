@@ -28,7 +28,9 @@ folder (`~/.plenio/player`).
 
 ### Without ComfyUI: a double click
 
-In the Plenio folder (`ComfyUI/custom_nodes/Plenio-Music-Production-System`):
+In the Plenio folder (`ComfyUI/custom_nodes/Plenio-Music-Production-System`), with Plenio from GitHub (`git clone`
+or the release zip - the ComfyUI Manager's package leaves the two start scripts out, see
+[two ways to install](../getting-started.md#two-ways-to-install); there, use the command below):
 
 - **Windows:** double-click **`Plenio Player.bat`**. It finds the Python of your ComfyUI - the portable
   build's `python_embeded`, or the `.venv` of a manual or Desktop install.

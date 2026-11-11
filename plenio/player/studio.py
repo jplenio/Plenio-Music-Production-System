@@ -1,14 +1,14 @@
-"""Start the studio - ComfyUI - from the player (owner's request 2026-10-26: the player runs on its own; ComfyUI is
-started only to make songs, and nobody has to open a workflow for it).
+"""The studio - ComfyUI - seen from the player: its settings, whether one answers, and the start.
 
-The player finds the ComfyUI it is installed in (``ComfyUI/custom_nodes/<Plenio>``: ``main.py`` two folders up), or the
-folder the admin chose, and starts it in the background: the Python of that ComfyUI (the portable build's embedded
-Python, a ``.venv``) or the one the player runs on, ``main.py`` and the arguments the admin set in Settings
-(``--models-directory D:/models``, ``--cuda-device 1`` …) - a fixed argument list, no shell, no window, detached; its
-output in ``comfyui.log`` in the player's state folder. It listens on this computer only: ``--listen`` and
-``--enable-cors-header`` are refused (*In your network* is the network's way in, with its link). A ComfyUI the player
-started can be stopped from it - by hand, or when nothing was made for a while -; one started otherwise is never
-touched. When the admin wishes, a song ordered while ComfyUI is not running starts it.
+The player runs on its own; ComfyUI is started only to make songs, and nobody has to open a workflow for it. This
+module keeps the admin's settings (``studio.json`` in the player's state folder: ComfyUI's folder, more arguments,
+the port, starting by itself, stopping when idle), checks them, knows whether a ComfyUI answers on this computer
+and reports all of it to the page.
+
+**Starting and stopping ComfyUI is the Studio add-on's part** (``plenio/addons/studio_launcher.py``: the command,
+the process, the log; see ``plenio.core.features``). A ``git clone`` and the release zip carry it. The Comfy
+Registry package does not: there the player starts no program, says so, and uses the ComfyUI that runs - the one
+that opened the player, or one started the usual way.
 
 Standard library only.
 """
@@ -17,17 +17,17 @@ from __future__ import annotations
 
 import json
 import os
-import re
 import shlex
-import subprocess
-import sys
 import threading
 import time
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from .launch import windowless
+from ..core import features
+
+if TYPE_CHECKING:
+    import subprocess
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[2]
 FILE = "studio.json"
@@ -44,19 +44,15 @@ RESTART_AFTER_S = 120.0
 """A ComfyUI started by itself that ended (a port taken, a broken install) is started by itself again only after
 so many seconds - not every few seconds while a song waits."""
 ARGS_LIMIT = 1000
+ADDON = "studio_launcher"
+NO_LAUNCHER = (
+    "This installation of Plenio does not start ComfyUI (the Comfy Registry package leaves that part out). Start "
+    "ComfyUI the way you usually do - the player finds it. Plenio from GitHub (git clone or the release zip) "
+    "starts it for you."
+)
+"""What the page hears where the Studio add-on is not installed."""
 START_FILE = "comfyui-start.json"
-"""How each ComfyUI with Plenio was last started (its ``main.py``, Python and arguments), kept in the player's state
-folder when ComfyUI loads Plenio: the player starts it the same way - with the models folder and the options its
-owner gives it - when Settings has no arguments of its own."""
-NOT_REPEATED = {
-    "--listen": "?",
-    "--port": 1,
-    "--enable-cors-header": "?",
-    "--tls-keyfile": 1,
-    "--tls-certfile": 1,
-}
-"""Arguments of the remembered start the player leaves out (and how many values follow): it keeps ComfyUI on this
-computer, on its own port. ``?``: a value only when the next word is not an option."""
+"""How each ComfyUI with Plenio was last started, kept in the player's state folder by the Studio add-on."""
 
 
 class StudioLaunchError(ValueError):
@@ -69,8 +65,6 @@ class StudioLaunchError(ValueError):
 
 COMFYUI_FILES = ("main.py", "folder_paths.py", "execution.py")
 """What a ComfyUI folder holds besides its ``comfy`` package: the player starts no other ``main.py``."""
-PYTHON_NAME = re.compile(r"pythonw?(\d+(\.\d+)*)?(\.exe)?", re.IGNORECASE)
-"""A Python interpreter's file name (``python.exe``, ``python3.12``): the only program the player starts."""
 
 
 def is_comfyui(folder: Path) -> bool:
@@ -84,20 +78,6 @@ def installed_root() -> Path | None:
     if PACKAGE_ROOT.parent.name == "custom_nodes" and is_comfyui(candidate):
         return candidate
     return None
-
-
-def python_of(root: Path) -> tuple[Path, bool]:
-    """The Python that runs ``root``'s ComfyUI, and whether it is the portable build's embedded one: the portable
-    build's ``python_embeded`` beside the ComfyUI folder, a ``.venv`` or ``venv`` in it - else the player's own."""
-    windows = os.name == "nt"
-    embedded = root.parent / "python_embeded" / "python.exe"
-    if windows and embedded.is_file():
-        return embedded, True
-    for venv in (".venv", "venv"):
-        found = root / venv / ("Scripts/python.exe" if windows else "bin/python")
-        if found.is_file():
-            return found, False
-    return Path(sys.executable), False
 
 
 def parse_args(text: str) -> list[str]:
@@ -125,81 +105,9 @@ def parse_args(text: str) -> list[str]:
     return parts
 
 
-def repeatable(argv: list[str]) -> list[str]:
-    """A start's arguments without those the player sets itself or refuses (the address, the port, TLS, CORS, the
-    portable build's flag - added again when its Python is the embedded one)."""
-    out: list[str] = []
-    skip = 0
-    for index, part in enumerate(argv):
-        if skip:
-            skip -= 1
-            continue
-        name = part.split("=", 1)[0].lower()
-        if name == "--windows-standalone-build":
-            continue
-        values = NOT_REPEATED.get(name)
-        if values is None:
-            if any(ch in part for ch in "\r\n\0"):
-                return []
-            out.append(part)
-            continue
-        if "=" in part:
-            continue
-        following = argv[index + 1] if index + 1 < len(argv) else ""
-        skip = 1 if values == 1 or (following and not following.startswith("-")) else 0
-    return out
-
-
-def remember_start(
-    directory: Path, argv: list[str], python: str, clock: Callable[[], float] = time.time
-) -> None:
-    """Keep how this ComfyUI was started (called when ComfyUI loads Plenio): ``argv`` begins with its ``main.py``."""
-    if not argv or Path(argv[0]).name != "main.py":
-        return
-    main = str(Path(argv[0]).resolve())
-    file = directory / START_FILE
-    try:
-        known = json.loads(file.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        known = {}
-    if not isinstance(known, dict):
-        known = {}
-    known[main] = {"python": python, "args": repeatable(list(argv[1:])), "at": clock()}
-    directory.mkdir(parents=True, exist_ok=True)
-    temp = file.with_suffix(".tmp")
-    temp.write_text(json.dumps(known, indent=1), encoding="utf-8")
-    temp.replace(file)
-
-
-def remembered_start(directory: Path, root: Path | None = None) -> tuple[Path, dict[str, Any]] | None:
-    """The last start of the ComfyUI in ``root`` (``None``: of any whose ``main.py`` still exists, the newest):
-    its ``main.py`` and ``{python, args, at}``."""
-    try:
-        known = json.loads((directory / START_FILE).read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return None
-    if not isinstance(known, dict):
-        return None
-    found: list[tuple[float, Path, dict[str, Any]]] = []
-    for main, entry in known.items():
-        path = Path(main)
-        if not isinstance(entry, dict) or not path.is_file():
-            continue
-        if root is not None and path.resolve() != (root / "main.py").resolve():
-            continue
-        args = entry.get("args")
-        if not isinstance(args, list) or not all(isinstance(a, str) for a in args):
-            continue
-        found.append((float(entry.get("at") or 0), path, entry))
-    if not found:
-        return None
-    _at, path, entry = max(found, key=lambda item: item[0])
-    return path, entry
-
-
 class StudioLauncher:
-    """The ComfyUI the player starts: its settings (``studio.json`` in the player's state folder), the process it
-    started, whether it came up."""
+    """The ComfyUI the player uses: its settings (``studio.json`` in the player's state folder), whether one
+    answers, and - with the Studio add-on - the process the player started and whether it came up."""
 
     def __init__(
         self,
@@ -286,21 +194,23 @@ class StudioLauncher:
         installed = installed_root()
         if installed is not None:
             return installed
-        last = remembered_start(self.directory)
-        return last[0].parent if last and is_comfyui(last[0].parent) else None
+        if not self.can_launch():
+            return None
+        found: Path | None = features.load(ADDON).last_root(self.directory)
+        return found
+
+    def can_launch(self) -> bool:
+        """This installation carries the part that starts ComfyUI (the Studio add-on)."""
+        return features.has(ADDON)
 
     def arguments(self, root: Path) -> tuple[list[str], str, dict[str, Any] | None]:
         """The arguments for ``main.py``: the ones set in Settings, else those of the last start of this ComfyUI
         (its models folder, its options), else none - and where they come from (``settings``, ``last start`` or
         ``""``), with that last start."""
-        own = str(self.settings.get("args") or "").strip()
-        if own:
-            return parse_args(own), "settings", None
-        last = remembered_start(self.directory, root)
-        if last is None:
+        if not self.can_launch():
             return [], "", None
-        # filtered again: the file is the player's, but a hand-edited --listen must not open ComfyUI to the network
-        return repeatable(list(last[1]["args"])), "last start", last[1]
+        found: tuple[list[str], str, dict[str, Any] | None] = features.load(ADDON).arguments(self, root)
+        return found
 
     def url(self) -> str:
         return f"http://127.0.0.1:{int(self.settings.get('port') or 8188)}"
@@ -314,30 +224,10 @@ class StudioLauncher:
 
     def command(self) -> tuple[list[str], Path]:
         """The argument list that starts ComfyUI, and the folder it runs in."""
-        root = self.root()
-        if root is None:
-            raise StudioLaunchError(
-                "The player does not know yet how to start ComfyUI: Plenio is not inside a ComfyUI folder here, and "
-                "ComfyUI has not run with Plenio since. Start ComfyUI once the way you usually do - from then on the "
-                "player starts it the same way - or choose its folder under How it starts ComfyUI.",
-                409,
-            )
-        extra, _source, last = self.arguments(root)
-        python, embedded = python_of(root)
-        last_python = Path(str((last or {}).get("python") or ""))
-        if last_python.is_file() and PYTHON_NAME.fullmatch(last_python.name):
-            # the Python it last ran on (ComfyUI Desktop's own environment, a conda one ...) - a Python, whatever
-            # the start file says
-            python = last_python
-            embedded = python.parent.name == "python_embeded"
-        command = [str(python)]
-        if embedded:
-            command.append("-s")
-        command += [str(root / "main.py"), "--port", str(int(self.settings.get("port") or 8188))]
-        if embedded:
-            command.append("--windows-standalone-build")
-        command += extra
-        return command, root
+        if not self.can_launch():
+            raise StudioLaunchError(NO_LAUNCHER, 409)
+        found: tuple[list[str], Path] = features.load(ADDON).command(self)
+        return found
 
     # --- start, stop ------------------------------------------------------------------------------------------
     def started(self) -> bool:
@@ -351,33 +241,13 @@ class StudioLauncher:
                 return self.status()
             if self.started():
                 return self.status()
-            command, root = self.command()
-            self.directory.mkdir(parents=True, exist_ok=True)
-            flags: dict[str, Any] = {}
-            if sys.platform == "win32":
-                flags["creationflags"] = windowless()
-            else:
-                flags["start_new_session"] = True
-            log = (self.directory / LOG).open("ab")
+            if not self.can_launch():
+                raise StudioLaunchError(NO_LAUNCHER, 409)
             try:
-                log.write(
-                    f"\n--- started by the Plenio Player {time.ctime()}: {' '.join(command)}\n".encode()
-                )
-                log.flush()
-                self.process = subprocess.Popen(  # noqa: S603 - a fixed argument list, no shell
-                    command,
-                    cwd=str(root),
-                    stdin=subprocess.DEVNULL,
-                    stdout=log,
-                    stderr=subprocess.STDOUT,
-                    env={**os.environ, "PYTHONIOENCODING": "utf-8"},
-                    **flags,
-                )
+                self.process = features.load(ADDON).start(self)
             except OSError as error:
                 self.error = f"ComfyUI did not start: {error}"
                 raise StudioLaunchError(self.error, 500) from error
-            finally:
-                log.close()
             self.started_at = self.clock()
             self.last_busy = self.clock()
             self.error = ""
@@ -391,17 +261,7 @@ class StudioLauncher:
                 raise StudioLaunchError(
                     "The player did not start the ComfyUI that runs - stop it where it was started.", 409
                 )
-            if sys.platform == "win32":
-                # the whole tree: ComfyUI may have started workers of its own
-                subprocess.run(  # noqa: S603, S607 - a fixed argument list
-                    ["taskkill", "/T", "/F", "/PID", str(process.pid)], capture_output=True, check=False
-                )
-            else:
-                process.terminate()
-            try:
-                process.wait(timeout=15)
-            except subprocess.TimeoutExpired:
-                process.kill()
+            features.load(ADDON).stop(process)
             self.process = None
         return self.status()
 
@@ -416,6 +276,7 @@ class StudioLauncher:
             self.busy()
             if (
                 self.settings.get("auto")
+                and self.can_launch()
                 and not self.started()
                 and self.clock() - self.started_at > RESTART_AFTER_S
                 and not self.answering()
@@ -444,8 +305,9 @@ class StudioLauncher:
         return [line for line in text.splitlines() if line.strip()][-lines:]
 
     def status(self, *, admin: bool = True) -> dict[str, Any]:
-        """What the page shows: whether ComfyUI runs, whether the player started it (and when), whether it can,
-        and for the admin the folder, the Python, the arguments and the end of the log."""
+        """What the page shows: whether ComfyUI runs, whether the player started it (and when), whether it can
+        (``launcher``: this installation starts ComfyUI at all), and for the admin the folder, the Python, the
+        arguments and the end of the log."""
         found = self.answering()
         running = found is not None
         own = self.started()
@@ -460,6 +322,7 @@ class StudioLauncher:
             "own": own,
             "starting": starting,
             "since": self.started_at if own else None,
+            "launcher": self.can_launch(),
             "can_start": can,
             "why": why,
             "url": found or self.url(),

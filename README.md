@@ -121,7 +121,7 @@ Six ready-made templates in ComfyUI's template browser, each one clear path from
   <img src="assets/branding/readme/bento-player.jpg" alt="The Plenio Player - your songs deserve a stage: visuals that move with the music (99, with Plenio Drop presets after MilkDrop and Plenio Nova scenes worked out for every pixel - here a black hole), on every screen (phone, tablet, the party's big screen), party mode (guests order songs and react, live on the big screen), every song on one page (the full lyrics to copy, the prompts, how it was made), songs as videos (karaoke lyrics, notation, 4K or upright), your look (eleven fonts, eleven effects) and share as a player (one HTML file)" width="100%" />
 </p>
 
-A program of its own: it runs without ComfyUI, opens at `http://127.0.0.1:8765/`, and finds every song Export Release wrote. **Plenio Player** beside *Run* in ComfyUI opens it; or double-click `Plenio Player.bat` (`./plenio_player.sh` on macOS and Linux).
+A program of its own: it runs without ComfyUI, opens at `http://127.0.0.1:8765/`, and finds every song Export Release wrote. **Plenio Player** beside *Run* in ComfyUI opens it; or run `python plenio_player.py` in the Plenio folder - with Plenio from GitHub, double-click `Plenio Player.bat` (`./plenio_player.sh` on macOS and Linux).
 
 <table>
 <tr>

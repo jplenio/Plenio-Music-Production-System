@@ -60,7 +60,7 @@ def test_comfyui_starts_the_way_it_was_last_started(tmp_path: Path, monkeypatch:
     """Issue 2026-10-28: the player started ComfyUI without the owner's --models-directory, so every song stopped
     at "Load checkpoint: Value not in list". Plenio keeps each start when ComfyUI loads it; with no arguments in
     Settings the player repeats it - without the address, the port and TLS, which it sets itself."""
-    from plenio.player.studio import remember_start, remembered_start, repeatable
+    from plenio.addons.studio_launcher import remember_start, remembered_start, repeatable
 
     assert repeatable(
         [

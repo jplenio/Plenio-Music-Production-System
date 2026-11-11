@@ -14,6 +14,19 @@
 - **By hand:** `git clone https://github.com/jplenio/Plenio-Music-Production-System` inside `ComfyUI/custom_nodes`, then restart ComfyUI.
 - **After an update** (any of the ways above): restart ComfyUI and reload every open ComfyUI page (F5) - a page that was open keeps the old Plenio code and says so.
 
+### Two ways to install
+
+Both install the same nodes, templates, editor, Song API and player. They differ in three conveniences that start another program on your computer - the **Studio add-on**, which only the download from GitHub carries (since 2.0):
+
+| | ComfyUI Manager, Comfy CLI (the Comfy Registry package) | `git clone`, the release zip |
+|---|---|---|
+| The Plenio Player starts ComfyUI for you (*Start the studio*) | no - start ComfyUI the way you usually do; the player finds it | yes |
+| A GGUF writer model runs through an installed `llama-server` | no - through a running app (LM Studio, Ollama, a `llama-server` you started), through `llama-cpp-python`, or ComfyUI's own Gemma writes | yes |
+| *Open the folder* in the player opens your file manager | no - the folder's path is shown with a *Copy* button | yes |
+| `Plenio Player.bat`, `plenio_player.sh` to start the player by double-click | no - open it from ComfyUI (*Plenio Player* beside *Run*) or with `python plenio_player.py` | yes |
+
+The Registry package starts nothing but ComfyUI's own Python with Plenio's own modules ([SECURITY.md](../../SECURITY.md#programs-plenio-starts)). **0 · System Check** says which of the two you have (*Studio add-on: ...*).
+
 Plenio installs no Python packages. Optional: `python -m pip install faster-whisper` (the lyrics ASR's fallback for languages Qwen3's aligner cannot time), in the Python that runs ComfyUI. Cover art is embedded in FLAC and MP3 without any extra package.
 
 ## First run

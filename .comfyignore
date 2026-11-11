@@ -3,6 +3,14 @@
 # example_workflows/, resources/, locales/ - plus the licence files, README, CHANGELOG and the user guide.
 # Patterns start with "/" so they only match at the repository root (an unanchored `assets/`
 # also dropped plenio/core/assets and broke the import - found by installing the packed zip).
+# The Studio add-on - the functions that start a program (ComfyUI from the player, a llama-server, the file
+# manager) - is part of a git clone and of the release zip only; the Registry package starts nothing but its own
+# Python with Plenio's own modules (plenio/core/features.py, tools/package_gate.py).
+/plenio/addons/
+# The two start scripts of the player run on their own (they pick the Python beside ComfyUI): part of the full
+# download too. The package's player is opened from ComfyUI, or with `python plenio_player.py`.
+/Plenio Player.bat
+/plenio_player.sh
 /.github/
 /.gitattributes
 /tests/

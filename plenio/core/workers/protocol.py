@@ -1,8 +1,8 @@
 """Parent side of the worker protocol.
 
 A worker is a Python module run as ``python -m <module> --job <folder>`` in a
-separate process (optionally with another interpreter, for isolated
-environments). Communication uses files in the job folder:
+separate process, always on this interpreter (``sys.executable``).
+Communication uses files in the job folder:
 
 ``request.json``    written by the parent before start
 ``progress.jsonl``  appended by the worker: ``{"progress": 0.4, "message": "..."}``
@@ -38,13 +38,13 @@ _STDERR_TAIL = 4000
 
 @dataclass(frozen=True)
 class WorkerEnv:
-    """How to start a worker process."""
+    """How to start a worker process. The interpreter is never part of it: a worker runs on this Python
+    (``sys.executable``), and only the import path and the environment are the caller's to add."""
 
-    python: Path = field(default_factory=lambda: Path(sys.executable))
     pythonpath: tuple[Path, ...] = ()
     extra_env: Mapping[str, str] = field(default_factory=dict)
     name: str = "host"
-    """``host`` for ComfyUI's own interpreter, otherwise the isolated environment's name."""
+    """A name for messages (``host``: ComfyUI's own environment)."""
 
 
 @dataclass(frozen=True)
@@ -112,7 +112,7 @@ def run_worker(
         process_env["PYTHONIOENCODING"] = "utf-8"
         with (job / "stderr.log").open("wb") as stderr:
             process = subprocess.Popen(  # noqa: S603 - fixed argv, no shell
-                [str(env.python), "-m", module, "--job", str(job)],
+                [sys.executable, "-m", module, "--job", str(job)],
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
                 stderr=stderr,

@@ -2,17 +2,52 @@
 only on the computer itself (the System Check's report names its folders; the Plenio Player button starts a program
 on it). ComfyUI itself has no login: with ``--listen`` everyone in the network reaches its routes.
 
+Every route of Plenio in ComfyUI has one **access class** (``CLASSES``), declared where the route is listed
+(``Route``) and enforced in one place (``plenio.comfy.routes.guarded``); a test walks every route.
+
 Standard library only (``plenio.comfy.routes`` passes aiohttp's request apart, so this is tested without it).
 """
 
 from __future__ import annotations
 
 import ipaddress
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
+from dataclasses import dataclass
+from typing import Any
 
 PASSED_ON = ("forwarded", "x-forwarded-for", "x-real-ip", "x-plenio-remote")
 """Headers of a request a proxy passed on - from another computer, whatever address it comes from. The Plenio
 Player's gateways (*In your network*) say ``X-Plenio-Remote``; a browser's own value never gets through them."""
+
+
+CLASSES: Mapping[str, str] = {
+    "local": "answered to a browser or program on this computer only: the route describes or changes the "
+    "computer itself (its folders and versions, a program started on it)",
+    "compute": "answered to whoever reaches ComfyUI: the route reads only its request and writes nothing",
+    "data": "answered to whoever reaches ComfyUI: the route reads or writes only inside ComfyUI's own folders, "
+    "by names checked against them, and names no place on this computer",
+    "api": "the Song API: answered to whoever reaches ComfyUI (2.0: another computer needs an API token)",
+}
+"""The access classes of Plenio's routes in ComfyUI and what each means."""
+
+
+@dataclass(frozen=True)
+class Route:
+    """One HTTP route: its method, path and handler, and who is answered (``access``, one of ``CLASSES``).
+    A ``local`` route says ``what`` it is and gives a ``hint`` for the request it refuses."""
+
+    method: str
+    path: str
+    handler: Callable[..., Any]
+    access: str
+    what: str = ""
+    hint: str = ""
+
+    def __post_init__(self) -> None:
+        if self.access not in CLASSES:
+            raise ValueError(f"{self.method} {self.path}: no access class {self.access!r}")
+        if self.access == "local" and not (self.what and self.hint):
+            raise ValueError(f"{self.method} {self.path}: a local route says what it is and gives a hint")
 
 
 def _address(text: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:

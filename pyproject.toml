@@ -50,11 +50,11 @@ target-version = "py310"
 extend-exclude = ["plenio/third_party", "frontend", "web", ".devdeps"]
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "B", "UP", "N", "S307", "S102", "T20"]
+select = ["E", "F", "W", "I", "B", "UP", "N", "S307", "S102", "S301", "S602", "S605", "S606", "T20"]
 ignore = ["E501", "N999"]  # N999: the ComfyUI package folder name contains hyphens
 
 [tool.ruff.lint.isort]
-known-first-party = ["plenio", "harness", "workflow_validation", "score_strategies"]
+known-first-party = ["plenio", "harness", "workflow_validation", "score_strategies", "package_gate"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["T20", "S101"]
@@ -63,7 +63,7 @@ known-first-party = ["plenio", "harness", "workflow_validation", "score_strategi
 
 [tool.mypy]
 python_version = "3.10"
-files = ["plenio/core", "plenio/player"]
+files = ["plenio/core", "plenio/player", "plenio/addons"]
 exclude = ["plenio/third_party/"]
 strict = true
 warn_unused_ignores = true

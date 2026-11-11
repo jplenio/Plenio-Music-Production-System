@@ -20,7 +20,7 @@ from aiohttp import web
 from ..core import blocks, continuation, song_form, syllables
 from ..core import lyrics as lyrics_rules
 from ..core import score as score_rules
-from ..core.access import from_this_computer
+from ..core.access import Route, from_this_computer
 from ..core.engines import rules_for
 from ..core.errors import PlenioAccessError, PlenioError, PlenioUserError, public_error
 from ..core.sheet import DOCUMENT_KINDS, REVIEW_MODES, evaluate_sheet, parse_sheet_state
@@ -56,9 +56,15 @@ def only_here(request: web.Request, what: str, hint: str) -> None:
         raise PlenioAccessError(f"{what} - only for a browser on the computer ComfyUI runs on.", hint=hint)
 
 
-def guarded(handler: Handler) -> Handler:
+def guarded(route: Route) -> Handler:
+    """The handler of ``route`` behind its access class and Plenio's error answers: a ``local`` route refuses a
+    request that does not come from this computer before its handler runs."""
+    handler: Handler = route.handler
+
     async def wrapper(request: web.Request) -> web.StreamResponse:
         try:
+            if route.access == "local":
+                only_here(request, route.what, route.hint)
             return await handler(request)
         except PlenioError as error:
             return error_response(error)
@@ -110,11 +116,6 @@ def _text(data: dict[str, Any], key: str, required: bool = True) -> str:
 
 async def system(request: web.Request) -> web.StreamResponse:
     """The System Check's report - this computer's folders, versions and graphics cards: for a browser on it."""
-    only_here(
-        request,
-        "The System Check's report names this computer's folders and versions",
-        "From another computer, run the System Check node: its report shows in the workflow.",
-    )
     report, markdown = system_report()
     return web.json_response({"report": report.to_dict(), "markdown": markdown})
 
@@ -528,12 +529,6 @@ async def player_open(request: web.Request) -> web.StreamResponse:
     this computer - started now when none runs, as a program of its own that plays ComfyUI's output folder
     and keeps running when ComfyUI stops (``plenio.player.launch``). ComfyUI never serves the player. It starts a
     program, so only for a browser on this computer - where the answer's address (``127.0.0.1``) leads, too."""
-    only_here(
-        request,
-        "Starting the Plenio Player",
-        "From another computer, open the player by its address in your network: on the computer itself, the "
-        "player's Settings > In your network shows it.",
-    )
     comfyui = f"{request.scheme}://{request.host}"
     try:
         found = await asyncio.to_thread(ensure_player, host.output_directory(), comfyui, state_dir())
@@ -545,32 +540,51 @@ async def player_open(request: web.Request) -> web.StreamResponse:
     return web.json_response(found)
 
 
-ROUTES: tuple[tuple[str, str, Handler], ...] = (
-    ("GET", "/plenio/system", system),
-    ("POST", "/plenio/score/analyze", score_analyze),
-    ("POST", "/plenio/score/transform", score_transform),
-    ("POST", "/plenio/score/midi/export", score_midi_export),
-    ("POST", "/plenio/score/midi/import", score_midi_import),
-    ("POST", "/plenio/score/musicxml/import", score_musicxml_import),
-    ("POST", "/plenio/score/musicxml/export", score_musicxml_export),
-    ("POST", "/plenio/lyrics/analyze", lyrics_analyze),
-    ("POST", "/plenio/sheet/resolve", sheet_resolve),
-    ("GET", "/plenio/templates", templates_list),
-    ("GET", "/plenio/templates/{template_id:.+}", template_get),
-    ("POST", "/plenio/templates", template_save),
-    ("POST", "/plenio/brief/fields", brief_fields),
-    ("GET", "/plenio/asr/notes/{draft_sha256}", asr_note),
-    ("GET", "/plenio/presets/{kind}", presets),
-    ("POST", "/plenio/eq/response", eq_response),
-    ("POST", "/plenio/export/sheet-music", export_sheet_music),
-    ("GET", "/plenio/export/sheet-music/pending", export_sheet_music_pending),
-    ("GET", "/plenio/records", records_list),
-    ("POST", "/plenio/records/continue", records_continue),
-    ("POST", "/plenio/workflow/blocks", workflow_blocks),
-    ("POST", "/plenio/player/open", player_open),
+ROUTES: tuple[Route, ...] = (
+    # local: describes or changes this computer - answered to a browser on it only
+    Route(
+        "GET",
+        "/plenio/system",
+        system,
+        "local",
+        what="The System Check's report names this computer's folders and versions",
+        hint="From another computer, run the System Check node: its report shows in the workflow.",
+    ),
+    Route(
+        "POST",
+        "/plenio/player/open",
+        player_open,
+        "local",
+        what="Starting the Plenio Player",
+        hint="From another computer, open the player by its address in your network: on the computer itself, the "
+        "player's Settings > In your network shows it.",
+    ),
+    # compute: reads only the request, writes nothing
+    Route("POST", "/plenio/score/analyze", score_analyze, "compute"),
+    Route("POST", "/plenio/score/transform", score_transform, "compute"),
+    Route("POST", "/plenio/score/midi/export", score_midi_export, "compute"),
+    Route("POST", "/plenio/score/midi/import", score_midi_import, "compute"),
+    Route("POST", "/plenio/score/musicxml/import", score_musicxml_import, "compute"),
+    Route("POST", "/plenio/score/musicxml/export", score_musicxml_export, "compute"),
+    Route("POST", "/plenio/lyrics/analyze", lyrics_analyze, "compute"),
+    Route("POST", "/plenio/sheet/resolve", sheet_resolve, "compute"),
+    Route("POST", "/plenio/brief/fields", brief_fields, "compute"),
+    Route("POST", "/plenio/eq/response", eq_response, "compute"),
+    Route("POST", "/plenio/workflow/blocks", workflow_blocks, "compute"),
+    # data: reads or writes inside ComfyUI's own folders, by names checked against them
+    Route("GET", "/plenio/templates", templates_list, "data"),
+    Route("GET", "/plenio/templates/{template_id:.+}", template_get, "data"),
+    Route("POST", "/plenio/templates", template_save, "data"),
+    Route("GET", "/plenio/asr/notes/{draft_sha256}", asr_note, "data"),
+    Route("GET", "/plenio/presets/{kind}", presets, "data"),
+    Route("POST", "/plenio/export/sheet-music", export_sheet_music, "data"),
+    Route("GET", "/plenio/export/sheet-music/pending", export_sheet_music_pending, "data"),
+    Route("GET", "/plenio/records", records_list, "data"),
+    Route("POST", "/plenio/records/continue", records_continue, "data"),
 )
+"""Every route with its access class (``core.access.CLASSES``)."""
 
 
 def register(routes: web.RouteTableDef) -> None:
-    for method, path, handler in ROUTES:
-        routes.route(method, path)(guarded(handler))
+    for route in ROUTES:
+        routes.route(route.method, route.path)(guarded(route))

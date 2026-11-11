@@ -8,6 +8,7 @@ import sys
 from comfy_api.latest import ComfyExtension, io
 
 from .. import __version__
+from ..core import features
 from ..core.dependencies import probe
 from ..core.errors import PlenioError
 from . import host, routes, song_api
@@ -18,12 +19,14 @@ log = logging.getLogger("plenio")
 
 def remember_start() -> None:
     """How this ComfyUI was started - its Python, its main.py and the arguments (the models folder ...) - for the
-    Plenio Player, which starts ComfyUI the same way when a song is ordered and none runs."""
+    Plenio Player, which starts ComfyUI the same way when a song is ordered and none runs. Only where the
+    player starts ComfyUI at all (the Studio add-on); the Comfy Registry package keeps nothing."""
+    if not features.has("studio_launcher"):
+        return
     from ..player.paths import state_dir
-    from ..player.studio import remember_start as keep
 
     try:
-        keep(state_dir(), list(sys.argv), sys.executable)
+        features.load("studio_launcher").remember_start(state_dir(), list(sys.argv), sys.executable)
     except OSError as error:  # the player then starts it with its own settings only
         log.warning("Plenio: could not keep how ComfyUI was started for the player: %s", error)
 

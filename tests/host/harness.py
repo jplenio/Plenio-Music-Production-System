@@ -58,11 +58,22 @@ def free_port() -> int:
         return int(sock.getsockname()[1])
 
 
-def copy_package(target: Path, extra_files: Mapping[str, Path] | None = None) -> Path:
-    """Copy the runtime parts of Plenio (a snapshot, like an installed release)."""
+def copy_package(
+    target: Path, extra_files: Mapping[str, Path] | None = None, *, addons: bool = False
+) -> Path:
+    """Copy the runtime parts of Plenio (a snapshot, like an installed release). As the Comfy Registry
+    package: without the Studio add-on (``plenio/addons``), so that every host test runs what the package
+    ships; ``addons=True`` copies the full installation."""
     destination = target / PACKAGE_NAME
     destination.mkdir(parents=True)
-    ignore = shutil.ignore_patterns("__pycache__", "*.pyc")
+    skipped = shutil.ignore_patterns("__pycache__", "*.pyc")
+
+    def ignore(folder: str, names: list[str]) -> set[str]:
+        out = set(skipped(folder, names))
+        if not addons and Path(folder) == PROJECT / "plenio":
+            out.add("addons")
+        return out
+
     for part in PACKAGE_PARTS:
         source = PROJECT / part
         if source.is_dir():
@@ -72,6 +83,19 @@ def copy_package(target: Path, extra_files: Mapping[str, Path] | None = None) ->
     for relative, source in (extra_files or {}).items():
         (destination / relative).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination / relative)
+    return destination
+
+
+def copy_registry_package(target: Path) -> Path:
+    """Plenio exactly as ``comfy node pack`` ships it: the tracked files without what ``.comfyignore`` leaves
+    out (``tools/package_gate.py`` reads the same set). Needs git; files not tracked yet are not part of it."""
+    from package_gate import read_tree
+
+    destination = target / PACKAGE_NAME
+    for relative, data in read_tree(PROJECT).items():
+        path = destination / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(data)
     return destination
 
 

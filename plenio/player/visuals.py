@@ -6,13 +6,13 @@ script, so a file someone shares can draw and nothing else.
 
 from __future__ import annotations
 
-import os
 import re
-import subprocess
-import sys
 from pathlib import Path
 from typing import Any
 
+from ..core import features
+
+ADDON = "file_manager"
 FILE_LIMIT = 256 * 1024
 COUNT_LIMIT = 200
 README = """Plenio Drop presets
@@ -78,42 +78,29 @@ def save_copy(folder: Path, name: str, text: str) -> Path:
     return target
 
 
-def open_folder(folder: Path) -> None:
-    """Show the visuals folder in the system's file manager, with a README on what goes there."""
+def prepare_folder(folder: Path) -> Path:
+    """The visuals folder, made when it is not there yet, with a README on what goes there."""
     folder.mkdir(parents=True, exist_ok=True)
     readme = folder / "README.txt"
     if not readme.exists():
         readme.write_text(README, encoding="utf-8")
-    show_folder(folder)
+    return folder
 
 
-def show_folder(folder: Path, select: Path | None = None) -> None:
-    """Show a folder of the player's in the system's file manager (made when it is not there yet), with
-    ``select`` - a file in it - chosen where the file manager can.
+NOT_SHOWN = (
+    "This installation of Plenio opens no file manager (the Comfy Registry package leaves that part out): the "
+    "folder's path is shown instead - copy it into your file manager's address bar."
+)
+"""What the page hears with the folder's path where the Studio add-on is not installed."""
 
-    On Windows Explorer is started as a program of its own: ``os.startfile`` asks the shell to open the
-    folder, and in a player started from ComfyUI (a background process without a window) that did nothing at
-    all (owner's report 2026-10-16)."""
+
+def show_folder(folder: Path) -> dict[str, object]:
+    """Show a folder of the player's in the system's file manager (made when it is not there yet), and answer
+    what the page needs: the ``folder`` and whether it was ``opened``. Opening is the Studio add-on's part
+    (``plenio/addons/file_manager.py``); without it the answer carries the path and a ``hint``, and the page
+    shows both with a button that copies the path."""
     folder.mkdir(parents=True, exist_ok=True)
-    chosen = (
-        select
-        if select is not None and select.parent.resolve() == folder.resolve() and select.is_file()
-        else None
-    )
-    if sys.platform == "win32":
-        windir = Path(os.environ.get("WINDIR") or os.environ.get("SystemRoot") or "C:\\Windows")
-        explorer = windir / "explorer.exe"
-        program = str(explorer) if explorer.is_file() else "explorer.exe"
-        shown = chosen.resolve() if chosen else folder.resolve()
-        if '"' in str(
-            shown
-        ):  # no Windows name holds one: nothing slips out of the quotes below as an argument
-            raise OSError(f"no folder to show: {shown.name}")
-        # Explorer reads /select,"path" - the quotes round the path only (a list of arguments would quote
-        # the whole "/select,path", and Explorer then opens Documents instead)
-        target = f'/select,"{shown}"' if chosen else f'"{shown}"'
-        subprocess.Popen(f'"{program}" {target}')  # noqa: S603 - Explorer with our own folder
-    elif sys.platform == "darwin":
-        subprocess.Popen(["open", "-R", str(chosen)] if chosen else ["open", str(folder)])  # noqa: S603, S607
-    else:
-        subprocess.Popen(["xdg-open", str(folder)])  # noqa: S603, S607
+    if not features.has(ADDON):
+        return {"folder": str(folder), "opened": False, "hint": NOT_SHOWN}
+    features.load(ADDON).show_folder(folder)
+    return {"folder": str(folder), "opened": True}

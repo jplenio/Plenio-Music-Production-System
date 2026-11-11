@@ -12,8 +12,9 @@ Plenio has very few settings. Everything else is chosen in the workflow.
 | `PLENIO_ASSET_DIR` | a folder | where Plenio assets are stored (default: `models/plenio`) |
 | `PLENIO_WORKER_TIMEOUT` | seconds | how long an out-of-process worker may run in total (default 3600) |
 | `PLENIO_WORKER_IDLE_TIMEOUT` | seconds | how long a worker may run without reporting progress (default 300) |
-| `PLENIO_LLAMA_SERVER` | a program or its folder | the llama.cpp server that runs GGUF files for **Local LLM** (default: found on the PATH, in Unsloth Studio, winget or Homebrew) |
+| `PLENIO_LLAMA_SERVER` | a program or its folder | the llama.cpp server that runs GGUF files for **Local LLM** (default: found on the PATH, in Unsloth Studio, winget or Homebrew); used only with the Studio add-on |
 | `PLENIO_LLM_OTHER_APPS` | `1` (default) / `0` | **Local LLM** also lists the model folders and running servers of other apps |
+| `PLENIO_ADDONS` | `1` (default) / `0` | `0` switches the Studio add-on off where it is installed (`git clone`, the release zip): Plenio then starts no other program - not ComfyUI from the player, no `llama-server`, no file manager -, like the Comfy Registry package ([two ways to install](getting-started.md#two-ways-to-install)) |
 
 Invalid values stop with an error message instead of being ignored.
 
