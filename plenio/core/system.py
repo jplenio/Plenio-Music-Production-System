@@ -1,7 +1,9 @@
-"""System Check: diagnostics and transparent recommendations.
+"""System Check: diagnostics, findings with fixes, and transparent recommendations.
 
-The adapter collects facts from ComfyUI and torch; this module turns them into
-a report. Recommendations are text only - nothing is switched automatically.
+The adapter collects facts from ComfyUI and torch; this module turns them into a report. What needs attention is a
+:class:`Finding` with a stable id (listed in ``docs/user/troubleshooting.md``) and, where a button can help, a
+:class:`Fix`: the System Check node renders them as text, Plenio Setup as rows with buttons, the API as JSON - one
+list, three views. Nothing is switched automatically.
 """
 
 from __future__ import annotations
@@ -65,6 +67,62 @@ class SystemFacts:
     among them), ``notes``, ``writer`` (what the default writer takes here) and ``writer_blocked``."""
     checkpoints: Mapping[str, str] = field(default_factory=dict)
     """The YuE2 files of ``models/checkpoints``: file name -> what keeps it from loading (empty: nothing does)."""
+    disk_free_bytes: int | None = None
+    """Free space on the drive of ComfyUI's models folder (``None``: not measured)."""
+
+
+@dataclass(frozen=True)
+class Fix:
+    """What a button can do about a finding."""
+
+    label: str
+    """The button's words: "Download 4.0 GB", "Copy the line for extra_model_paths.yaml"."""
+    action: str
+    """``download`` (payload ``variant``: a catalogue variant id), ``copy`` (``text``), ``open_url`` (``url``),
+    ``choose_writer`` or ``refresh``."""
+    payload: Mapping[str, str] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"label": self.label, "action": self.action, "payload": dict(self.payload)}
+
+
+@dataclass(frozen=True)
+class Finding:
+    """One thing the System Check found: what is the matter, in one sentence, and the fix if a button can do it."""
+
+    id: str
+    severity: Status
+    text: str
+    fix: Fix | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "severity": self.severity.value,
+            "text": self.text,
+            "fix": self.fix.to_dict() if self.fix else None,
+        }
+
+
+FINDINGS: Mapping[str, str] = {
+    "comfyui.too_old": "ComfyUI is older than the oldest version Plenio supports",
+    "gpu.none": "no graphics card was found",
+    "package.missing": "a package ComfyUI installs itself is missing",
+    "model.missing": "a model file a template needs is not installed (not a fault: Setup offers the download)",
+    "model.incomplete": "a model file has another size than the catalogue's (an interrupted download?)",
+    "model.misplaced": "a model file is in a folder ComfyUI does not search",
+    "model.unloadable": "a YuE2 checkpoint will not load",
+    "model.finetune": "a YuE2 checkpoint loads as a finetune",
+    "asset.missing": "a Plenio asset (writer, lyrics recognition, stems) is not downloaded yet",
+    "writer.blocked": "the templates' default writer cannot run as it is",
+    "config.error": "Plenio's config.toml has an error; the defaults are used",
+    "disk.low": "the models drive has less free space than the missing files need",
+}
+"""Every finding id with what it means. The ids are stable: Setup, the API and the troubleshooting guide use them."""
+_PIP_NAMES = {"PIL": "pillow"}
+COMFYUI_RELEASES = "https://github.com/Comfy-Org/ComfyUI/releases"
+DISK_SPARE = 2 * GIB
+"""Room beyond the files a download leaves on the drive (PD 4.1)."""
 
 
 @dataclass(frozen=True)
@@ -287,6 +345,71 @@ def _llm_lines(llm: Mapping[str, Any]) -> list[str]:
     return lines
 
 
+def _file_findings(
+    facts: SystemFacts,
+    catalogue: Mapping[str, ModelFile] | None,
+    assets: Mapping[str, Asset] | None,
+    components: Mapping[str, Any] | None,
+) -> list[Finding]:
+    """The files the templates need and do not have (each with its download), files of the wrong size, the assets
+    not fetched yet, and whether the models drive has room for them."""
+    from .modelplan import pick
+
+    found: list[Finding] = []
+    gpu = largest_gpu(facts.devices)
+    vram = (gpu.total_bytes or 0) / GIB if gpu is not None and gpu.total_bytes else None
+    needed = 0
+    for component in (components or {}).values():
+        if not component.templates:
+            continue
+        chosen = pick(component, vram_gib=vram, installed=facts.models)
+        if chosen.installed or chosen.variant is None:
+            continue
+        needed += chosen.variant.bytes
+        size = size_text(chosen.variant.bytes)
+        found.append(
+            Finding(
+                "model.missing",
+                Status.OK,
+                f"{component.title}: {chosen.file} is not installed ({size}); "
+                f"{', '.join(component.templates)} need{'s' if len(component.templates) == 1 else ''} it.",
+                Fix(f"Download {size}", "download", {"variant": chosen.variant.id}),
+            )
+        )
+    for model in (catalogue or {}).values():
+        on_disk = facts.models.get(model.file)
+        if on_disk is not None and model.bytes and on_disk != model.bytes:
+            found.append(
+                Finding(
+                    "model.incomplete",
+                    Status.OK,  # the Templates table shows it, as in 1.x; Setup offers the download
+                    f"Model file '{model.file}' has {size_text(on_disk)}, the catalogue says {size_text(model.bytes)} "
+                    "(an interrupted download?).",
+                    Fix(f"Download it again ({size_text(model.bytes)})", "download", {"variant": model.id}),
+                )
+            )
+    for asset_id, state in sorted(facts.assets.items()):
+        if state.startswith("not downloaded") and assets is not None and asset_id in assets:
+            found.append(
+                Finding(
+                    "asset.missing",
+                    Status.OK,
+                    f"Plenio asset '{asset_id}' is not downloaded yet ({size_text(assets[asset_id].total_size)}); "
+                    "Plenio fetches it the first time a node needs it.",
+                )
+            )
+    if facts.disk_free_bytes is not None and facts.disk_free_bytes < needed + DISK_SPARE:
+        found.append(
+            Finding(
+                "disk.low",
+                Status.WARNING,
+                f"{size_text(needed + DISK_SPARE)} needed for the missing model files and room to spare, "
+                f"{size_text(facts.disk_free_bytes)} free on the drive of {facts.models_root or 'the models folder'}.",
+            )
+        )
+    return found
+
+
 def check_system(
     facts: SystemFacts,
     catalogue: Mapping[str, ModelFile] | None = None,
@@ -294,14 +417,23 @@ def check_system(
     components: Mapping[str, Any] | None = None,
 ) -> Report:
     rows = hardware_rows(components, assets) if components else ()
-    statuses: list[Status] = []
+    found: list[Finding] = []
     messages: list[str] = []
+
+    def finding(item: Finding) -> None:
+        found.append(item)
+        messages.append(item.text)
+
     comfy = parse_version(facts.comfyui_version)
     minimum = ".".join(map(str, MIN_COMFYUI))
     if comfy is None or comfy < MIN_COMFYUI:
-        statuses.append(Status.WARNING)
-        messages.append(
-            f"ComfyUI {facts.comfyui_version} is older than the supported {minimum}; update ComfyUI."
+        finding(
+            Finding(
+                "comfyui.too_old",
+                Status.WARNING,
+                f"ComfyUI {facts.comfyui_version} is older than the supported {minimum}; update ComfyUI.",
+                Fix("Open ComfyUI's releases", "open_url", {"url": COMFYUI_RELEASES}),
+            )
         )
     else:
         messages.append(
@@ -317,45 +449,86 @@ def check_system(
             f"{_gib(device.free_bytes)} free."
         )
     if not [d for d in facts.devices if d.kind != "cpu"]:
-        statuses.append(Status.WARNING)
+        found.append(
+            Finding(
+                "gpu.none",
+                Status.WARNING,
+                "No graphics card was found: YuE2 and MiniMax Music 3 are not practical on the CPU.",
+            )
+        )
     messages.append(f"System RAM: {_gib(facts.ram_total_bytes)}.")
     for module, version in sorted(facts.packages.items()):
         if version is None:
             if module in ESSENTIAL_PACKAGES:
-                statuses.append(Status.WARNING)
-                messages.append(f"Package '{module}' is not installed (ComfyUI normally installs it).")
+                command = f"python -m pip install {_PIP_NAMES.get(module, module)}"
+                finding(
+                    Finding(
+                        "package.missing",
+                        Status.WARNING,
+                        f"Package '{module}' is not installed (ComfyUI normally installs it).",
+                        Fix("Copy the install command", "copy", {"text": command}),
+                    )
+                )
             else:
                 messages.append(f"Optional package '{module}' is not installed.")
         else:
             messages.append(f"Package '{module}' {version}.")
     for file, path in sorted(facts.misplaced.items()):
-        statuses.append(Status.WARNING)
         folder = Path(path).parent
-        messages.append(
-            f"Model file '{file}' is in {folder}, but ComfyUI does not search that folder: list it in "
-            f"extra_model_paths.yaml as '{folder.name}: ...' beside your other model folders there, or move the "
-            f"file into ComfyUI's models/{folder.name}; then restart ComfyUI."
+        finding(
+            Finding(
+                "model.misplaced",
+                Status.WARNING,
+                f"Model file '{file}' is in {folder}, but ComfyUI does not search that folder: list it in "
+                f"extra_model_paths.yaml as '{folder.name}: ...' beside your other model folders there, or move the "
+                f"file into ComfyUI's models/{folder.name}; then restart ComfyUI.",
+                Fix(
+                    "Copy the line for extra_model_paths.yaml",
+                    "copy",
+                    {"text": f"{folder.name}: {folder.as_posix()}"},
+                ),
+            )
         )
     for asset, state in sorted(facts.assets.items()):
         messages.append(f"Plenio asset '{asset}': {state}.")
     for file, problem in sorted(facts.checkpoints.items()):
         if problem:
-            statuses.append(Status.WARNING)
-            messages.append(f"YuE2 checkpoint '{file}' will not load: {problem}.")
+            finding(
+                Finding(
+                    "model.unloadable", Status.WARNING, f"YuE2 checkpoint '{file}' will not load: {problem}."
+                )
+            )
         elif catalogue is None or file not in {model.file for model in catalogue.values()}:
-            messages.append(
-                f"YuE2 checkpoint '{file}': loads as a finetune - choose it under *checkpoint* in the model block."
+            finding(
+                Finding(
+                    "model.finetune",
+                    Status.OK,
+                    f"YuE2 checkpoint '{file}': loads as a finetune - choose it under *checkpoint* in the model block.",
+                )
             )
     messages.append(_addon_line())
     messages.extend(_llm_lines(facts.llm))
     if facts.llm.get("writer_blocked"):
-        statuses.append(Status.WARNING)  # the templates' default writer cannot run as it is
+        found.append(
+            Finding(
+                "writer.blocked",
+                Status.WARNING,
+                "The templates' default writer (Gemma 4 12B (auto)) cannot run as it is"
+                + (f" - {facts.llm['writer']}" if facts.llm.get("writer") else "")
+                + ".",
+                Fix("Choose another writer", "choose_writer"),
+            )
+        )
     config = dict(facts.config)
     if config.get("error"):
-        statuses.append(Status.WARNING)
-        messages.append(
-            f"Plenio configuration error (defaults are used until it is fixed): {config['error']}"
+        finding(
+            Finding(
+                "config.error",
+                Status.WARNING,
+                f"Plenio configuration error (defaults are used until it is fixed): {config['error']}",
+            )
         )
+    found.extend(_file_findings(facts, catalogue, assets, components))
     messages.append(
         f"Offline mode: {'on' if config.get('offline') else 'off'}; "
         f"automatic asset downloads: {'on' if config.get('auto_download', True) else 'off'}."
@@ -378,6 +551,8 @@ def check_system(
             "misplaced": dict(facts.misplaced),
             "assets": dict(facts.assets),
             "llm": dict(facts.llm),
+            "disk_free_bytes": facts.disk_free_bytes,
+            "models_root": facts.models_root,
         },
         "recommendations": _recommendations(facts.devices, rows),
         "rules": [
@@ -425,7 +600,8 @@ def check_system(
         data["models_root"] = facts.models_root
     if assets is not None:
         data["assets"] = _asset_rows(assets, facts)
-    status = worst(statuses)
+    data["findings"] = [item.to_dict() for item in found]
+    status = worst([item.severity for item in found])
     summary = "System looks usable for Plenio." if status is Status.OK else "System check found warnings."
     return Report(kind="system_check", status=status, summary=summary, messages=tuple(messages), data=data)
 
@@ -434,8 +610,27 @@ def _cell(text: str) -> str:
     return text.replace("|", "\\|")
 
 
+def _finding_line(item: Mapping[str, Any]) -> str:
+    line = f"- **{item['severity'].capitalize()}** `{item['id']}` - {item['text']}"
+    fix = item.get("fix")
+    if fix:
+        detail = fix["payload"].get("text") or fix["payload"].get("url")
+        line += f" Fix: *{fix['label']}*" + (f": `{detail}`" if detail else " (in Plenio Setup)")
+    return line
+
+
 def to_markdown(report: Report) -> str:
-    lines = ["## Plenio System Check", "", report.to_markdown()]
+    """The node's report: what needs attention first (the findings of warning and error, with their ids and fixes),
+    then the details."""
+    findings = [f for f in report.data.get("findings", []) if f["severity"] in (Status.WARNING, Status.ERROR)]
+    shown = {f["text"] for f in findings}
+    head, *_ = report.to_markdown().splitlines()
+    lines = ["## Plenio System Check", "", head]
+    if findings:
+        lines += ["", "### Findings", ""]
+        lines.extend(_finding_line(item) for item in findings)
+        lines += ["", "### Details", ""]
+    lines.extend(f"- {message}" for message in report.messages if message not in shown)
     templates = report.data.get("templates")
     if templates:
         lines += ["", "### Templates", "", "| Template | Model files |", "|---|---|"]

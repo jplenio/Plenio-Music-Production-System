@@ -308,8 +308,9 @@ Goal: PD §3.1 to §3.4. It ships with 2.0.0 (PD §3.5).
 
 ## Phase 4 - Plenio Setup and Home
 
-- [ ] **4.1 Findings with fixes** (PD §4.2) in `core/system.py`; the Markdown report is rendered from them; ids are stable and listed in `docs/user/troubleshooting.md`.
+- [x] **4.1 Findings with fixes** (PD §4.2) in `core/system.py`; the Markdown report is rendered from them; ids are stable and listed in `docs/user/troubleshooting.md`.
   *Accept:* a test per finding id; the report of 1.6.0's facts differs only in wording.
+  *Done 2026-11-11:* `core/system.py: Finding`, `Fix`, `FINDINGS` (twelve ids, each in `docs/user/troubleshooting.md` - a test reads the guide); the node's Markdown lists the warnings first with their ids and fixes, then the details; `Report.messages` and the status are as in 1.6 for the same facts (a missing or incomplete model file is a finding of severity *ok*: the Templates table showed it, the status stayed OK). New facts: free space of the models drive (`disk.low`), and the download fix of each missing file is the plan's variant for the card.
 - [ ] **4.2 The sidebar tab** (`frontend/src/setup/`, lazy chunk): the six steps of PD §4.1 with the plan, the download rows (progress, pause, resume, blocked states with their fix buttons), the gated dialog of PD §5.5, the disk-space line, the choice of target folder among the registered ones. Opens once after an install or update that lacks files for a template; later from the Plenio menu; a red dot when an opened template lacks files.
   *Accept:* Vitest for each state of a row; a Playwright run against the dev server with a fake hub: plan → download → verified; the gated path with a fake gated file.
 - [ ] **4.3 The test song** (step 5): the real `1 · YuE2 · Song` template through the Song API with the fixed brief of PD §4.1; failures are shown as findings with fixes.

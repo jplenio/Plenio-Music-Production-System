@@ -2,6 +2,25 @@
 
 Start with **0 · System Check**: it shows versions, GPUs, which model files of each template are installed and the download policy. Set *detail* to `full` and attach the output to a bug report.
 
+## System Check findings
+
+The System Check (and Plenio Setup) name what needs attention as a finding with a stable id; the node's report lists them first, each with its fix where a button or a copied line can help.
+
+| Finding | What it means | What to do |
+|---|---|---|
+| `comfyui.too_old` | ComfyUI is older than 0.37.0 | Update ComfyUI (*Open ComfyUI's releases*) |
+| `gpu.none` | no graphics card was found | YuE2 and MiniMax Music 3 need one; 0 · System Check and 4 · Enhance & Master run on the CPU |
+| `package.missing` | `av`, `PIL` or `scipy` is missing - ComfyUI installs them | Run the copied `pip install` line with ComfyUI's Python, or reinstall ComfyUI's requirements |
+| `model.missing` | a template needs a file you do not have (not a fault) | *Download* in Plenio Setup, or place the file as [Models and downloads](models.md) says |
+| `model.incomplete` | a model file has another size than the catalogue's - usually an interrupted download | *Download it again*, or replace the file |
+| `model.misplaced` | a model file is in a folder ComfyUI does not search | Add the copied line to `extra_model_paths.yaml` beside your other folders, or move the file; restart ComfyUI |
+| `model.unloadable` | a file in `models/checkpoints` is not a YuE2 checkpoint that loads | The message says why; replace the file or remove it |
+| `model.finetune` | a YuE2 checkpoint that is not in the catalogue - it loads as a finetune | Choose it in the model block's *checkpoint* field |
+| `asset.missing` | a Plenio asset (writer GGUF, lyrics recognition, stems) is not downloaded yet | Nothing: it is fetched the first time a node needs it (offline: place it as the System Check says) |
+| `writer.blocked` | the templates' default writer cannot run on this machine as it is | Choose another writer in *Writer model*, or install what the message names |
+| `config.error` | Plenio's `config.toml` has an invalid value or key; the defaults are used | Fix the file as the message says |
+| `disk.low` | the models drive has less free space than the missing files need, plus 2 GB | Free space, or choose another model folder in Plenio Setup |
+
 ## Installation
 
 | What you see | Why | What to do |
