@@ -113,7 +113,14 @@ def test_a_missing_file_stops_the_run_with_its_data_and_tells_the_page(world: di
         run()
     error = caught.value
     assert BIG in error.message and "Plenio Setup" in (error.hint or "")
-    assert error.details == {"component": "demo", "file": BIG, "variant": "demo-big", "folder": "checkpoints"}
+    assert error.details == {
+        "component": "demo",
+        "file": BIG,
+        "variant": "demo-big",
+        "folder": "checkpoints",
+        "url": f"https://huggingface.co/org/demo/resolve/{'a' * 40}/{BIG}",
+    }
+    assert BIG in (error.hint or "") and "models/checkpoints" in (error.hint or "")  # until Setup's page
     ((event, data),) = world["events"]
     assert event == "plenio.models_missing" and data["component"] == "demo" and data["file"] == BIG
     # a file of one's own that is not there is named with its folder, without Setup

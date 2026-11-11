@@ -88,6 +88,8 @@ def test_the_file_lists_say_which_files_a_loader_would_refuse(server: ComfyServe
     data = server.get("/plenio/models/files?component=flux2-vae")
     files = data["components"]["flux2-vae"]["files"]
     assert files["my_flux2_vae.safetensors"] is None
+    pick = data["components"]["flux2-vae"]["pick"]
+    assert pick["file"] == "flux2-vae.safetensors" and pick["reason"] and pick["source"] == "plan"
     assert "not a FLUX.2 VAE" in files["an_sdxl_vae.safetensors"]
     status, refused = server.request("GET", "/plenio/models/files?component=nope")
     assert status == 400 and "nope" in refused["error"]["message"]

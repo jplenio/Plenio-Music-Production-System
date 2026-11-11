@@ -87,16 +87,29 @@ def file_listing(component: Component) -> dict[str, str | None]:
 
 
 async def files_get(request: web.Request) -> web.StreamResponse:
-    """For Model Choice's lists: per component the files of its folder, and why a file would not load as it - the
-    page greys those. ``?component=<id>`` for one."""
+    """For Model Choice's lists: per component the files of its folder, why a file would not load as it (the page
+    marks those) and what ``auto`` takes on this computer (``pick``). ``?component=<id>`` for one."""
     found = _components()
     wanted = request.query.get("component")
     if wanted is not None and wanted not in found:
         raise PlenioUserError(f"Plenio's catalogue has no model {wanted[:80]!r}.")
     chosen = [found[wanted]] if wanted is not None else list(found.values())
 
+    def pick_of(component: Component) -> dict[str, Any] | None:
+        try:
+            found = choose(component.id, AUTO)
+        except Exception:  # noqa: BLE001 - the list still shows its files
+            return None
+        return {
+            "file": found.pick.file,
+            "reason": found.pick.reason,
+            "warning": found.pick.warning,
+            "installed": found.pick.installed,
+            "source": found.source,
+        }
+
     def listing() -> dict[str, Any]:
-        return {c.id: {"folder": c.folder, "files": file_listing(c)} for c in chosen}
+        return {c.id: {"folder": c.folder, "files": file_listing(c), "pick": pick_of(c)} for c in chosen}
 
     return web.json_response({"components": await asyncio.to_thread(listing)})
 

@@ -122,6 +122,7 @@ class PlenioModelChoice(io.ComfyNode):
                 "file": found.file,
                 "variant": found.variant.id if found.variant is not None else None,
                 "folder": chosen.component.folder,
+                "url": found.variant.url if found.variant is not None else None,
             }
             try:
                 node_id = getattr(cls.hidden, "unique_id", None)  # none when called outside a run

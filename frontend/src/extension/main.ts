@@ -20,6 +20,7 @@ import { CONTINUE_COMMAND, type ContinueHost, installRecordDrop, openContinueSon
 import { dynamicComboNames, restoreWidgetValues, savedWidgetValues } from './dynamicCombo'
 import { addEqCurve } from './eqWidget'
 import { MODE_BEFORE_0_2_2, migrateWidgetValues, renameWidgetValues } from './migrate'
+import { MISSING_EVENT, MODEL_CHOICE, type MissingDetail, ModelChoiceLabels, missingNotice } from './modelChoice'
 import { setAsrNote, setPayload } from './payloads'
 import { PLAYER_COMMAND, installContinueFromPlayer, installPlayerButton, openPlayer } from './player'
 import { ReviewQueue } from './reviewQueue'
@@ -60,6 +61,21 @@ interface GraphNodes {
 }
 
 const graph = (): GraphNodes | undefined => comfyApp.graph as GraphNodes | undefined
+
+/** Model Choice's fields: the plan's file beside *auto*, files that do not fit marked (modelChoice.ts). */
+const modelLabels = new ModelChoiceLabels(comfyApi)
+
+type BlockNode = ComfyNode & { subgraph?: { nodes?: ComfyNode[] } }
+
+/** Labels on every Model Choice of the open graph, inside blocks too, and on the blocks' promoted fields. */
+function labelModelChoices(): void {
+  for (const node of (graph()?.nodes ?? []) as BlockNode[]) {
+    if (node.type === MODEL_CHOICE) modelLabels.label(node)
+    for (const inner of node.subgraph?.nodes ?? []) if (inner.type === MODEL_CHOICE) modelLabels.label(inner)
+    if (node.subgraph) modelLabels.labelBlock(node)
+  }
+  ;(comfyApp.graph as { setDirtyCanvas?: (a: boolean, b: boolean) => void } | undefined)?.setDirtyCanvas?.(true, true)
+}
 
 /** A node of the open graph by the id an execution event names (a subgraph's inner nodes read ``outer:inner``). */
 function nodeById(id: unknown): ComfyNode | null {
@@ -198,6 +214,7 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
   },
   // the sheets' review stops depend on the linked brief's mode: known once the links are in place
   afterConfigureGraph: () => {
+    labelModelChoices()
     refreshRunStatus()
     // the Cover Art switch shows what the loaded workflow's cover nodes do
     refreshFinishSwitches()
@@ -239,6 +256,22 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
       }
       nodeType.prototype.onExecuted = chain(nodeType.prototype.onExecuted, function (this: ComfyNode, output) {
         curves.get(this)?.showExecuted(output)
+      })
+    }
+    if (nodeData.name === MODEL_CHOICE) {
+      const created = (nodeType.prototype as ComfyNode & { onNodeCreated?: () => void }).onNodeCreated
+      ;(nodeType.prototype as ComfyNode & { onNodeCreated?: () => void }).onNodeCreated = function (this: ComfyNode) {
+        created?.call(this)
+        modelLabels.label(this)
+        // another component makes the file field anew: label the new one
+        const component = this.widgets?.find((w) => w.name === 'component')
+        if (component) {
+          component.callback = chain(component.callback, () => window.setTimeout(() => modelLabels.label(this), 0))
+        }
+      }
+      // what is installed may have changed with the run: the labels follow
+      nodeType.prototype.onExecuted = chain(nodeType.prototype.onExecuted, function (this: ComfyNode) {
+        void modelLabels.refresh().then(labelModelChoices)
       })
     }
     if (nodeData.name === 'PlenioExportRelease') {
@@ -283,8 +316,20 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
       })
     }
   },
+  // R: the lists are read again - and the facts behind the labels (ComfyUI then copies the inner fields' options,
+  // labels included, to the blocks' promoted fields)
+  async refreshComboInNodes() {
+    await modelLabels.refresh()
+    labelModelChoices()
+  },
   setup() {
     installStyles()
+    void modelLabels.refresh().then(labelModelChoices)
+    // a run stopped at a model file that is not there: what to do (Plenio Setup does it once it is there)
+    comfyApi.addEventListener(MISSING_EVENT, (event: CustomEvent) => {
+      const notice = missingNotice((event.detail ?? {}) as MissingDetail)
+      comfyApp.extensionManager?.toast?.add({ severity: 'warn', ...notice, life: 30000 })
+    })
     // Plenio nodes' tooltips beside the node, not over its fields (tooltipPlacement.ts)
     installTooltipPlacement(() => (comfyApp as { canvas?: unknown }).canvas as CanvasLike | undefined)
     // a <name>.plenio.json dropped onto ComfyUI continues its song (instead of loading nothing)

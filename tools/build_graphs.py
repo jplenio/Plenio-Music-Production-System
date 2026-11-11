@@ -2180,8 +2180,11 @@ def models_note_text(template: str) -> str:
         )
     else:
         lines.append(
-            "When the template opens, ComfyUI offers the files it misses (*Missing models*: download them there). By "
-            "hand: put each file into its folder below - or into a folder of your `extra_model_paths.yaml`. "
+            "The model blocks' fields are on **auto**: when the template runs, each takes the file that suits this "
+            "computer's graphics card - the one listed below or a lighter or larger variant of it (the field shows "
+            "which) -, and a file that is not there stops the "
+            "run with its folder and download link. Put each file into its folder below - or into a folder of your "
+            "`extra_model_paths.yaml`. The optional files ComfyUI offers when the template opens (*Missing models*). "
             "**0 · System Check** lists what is there and what is missing."
         )
 
