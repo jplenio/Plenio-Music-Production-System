@@ -47,10 +47,23 @@ def manager() -> DownloadManager:
     """The one download manager of this ComfyUI (made on first use)."""
     global _manager
     if _manager is None:
-        _manager = DownloadManager(
-            token=hub_access.read_token, on_event=lambda event: host.broadcast(EVENT, event)
-        )
+        _manager = DownloadManager(token=hub_access.read_token, on_event=_tell)
     return _manager
+
+
+def _tell(event: dict[str, Any]) -> None:
+    """A download's change: to ComfyUI's pages, and to the Song API's event stream (this computer only)."""
+    host.broadcast(EVENT, event)
+    from .song_api_v2 import HUB
+
+    state = str(event.get("state") or "")
+    kind = {"downloading": "download.progress", "installed": "download.done"}.get(state, f"download.{state}")
+    HUB.publish(
+        kind,
+        {key: event.get(key) for key in ("id", "file", "state", "bytes", "done")},
+        local=True,
+        replay=state != "downloading",
+    )
 
 
 def _components() -> dict[str, Any]:

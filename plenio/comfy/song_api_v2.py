@@ -25,6 +25,7 @@ from .. import __version__
 from ..core import continuation, song_api
 from ..core.access import Route
 from ..core.api import review, songs
+from ..core.api.events import EventHub, TooManyStreamsError
 from ..core.api.jobstore import ACTIVE, ENDED, Job, JobStore
 from ..core.errors import PlenioUserError
 from ..core.hashing import sha256_text
@@ -40,6 +41,11 @@ WAIT_LIMIT_S = 60.0
 WATCH_EVERY_S = 2.0
 OWNER_HERE = "here"
 """The caller on this computer (a token's id once tokens exist, phase 5.4)."""
+
+HUB = EventHub()
+"""The events of jobs and downloads (``GET /events``)."""
+KEEP_ALIVE_S = 15.0
+_progress_seen: dict[str, Any] = {}
 
 _store: JobStore | None = None
 _store_lock = threading.Lock()
@@ -116,6 +122,7 @@ def _refresh(job: Job) -> tuple[Job, dict[str, Any] | None]:
                 job = store().update(
                     job.id, status="waiting_for_review", stage=stop["stage"], result={"waiting": stop}
                 )
+                tell(job, view)
             return job, view
     if status != job.status and status in (*ACTIVE, *ENDED):
         changes["status"] = status
@@ -126,7 +133,42 @@ def _refresh(job: Job) -> tuple[Job, dict[str, Any] | None]:
         changes["error"] = {"code": "run_failed", **error}
     if changes:
         job = store().update(job.id, **changes)
+        if "status" in changes:
+            tell(job, view)
+    tell_progress(job, view)
     return job, view
+
+
+def tell(job: Job, view: dict[str, Any] | None = None) -> None:
+    """The job's state as an event: its id, status, the stop it waits at, its stage - nothing of its content."""
+    kind = {"waiting_for_review": "job.waiting"}.get(job.status, f"job.{job.status}")
+    HUB.publish(
+        kind,
+        {
+            "id": job.id,
+            "status": job.status,
+            "waiting_at": job.stage or None,
+            "stage": ((view or {}).get("stage") or {}).get("group"),
+        },
+        owner=job.owner if job.owner.startswith("token:") else "",
+    )
+
+
+def tell_progress(job: Job, view: dict[str, Any] | None) -> None:
+    """A running job's progress, when it moved (not kept for a replay: only the newest matters)."""
+    progress = (view or {}).get("progress")
+    stage = ((view or {}).get("stage") or {}).get("group")
+    if job.status != "running" or (progress, stage) == _progress_seen.get(job.id):
+        return
+    _progress_seen[job.id] = (progress, stage)
+    for old in list(_progress_seen)[:-200]:
+        _progress_seen.pop(old, None)
+    HUB.publish(
+        "job.progress",
+        {"id": job.id, "stage": stage, "progress": progress},
+        owner=job.owner if job.owner.startswith("token:") else "",
+        replay=False,
+    )
 
 
 def job_answer(job: Job, view: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -323,6 +365,7 @@ async def create_job(data: dict[str, Any], key: str, owner: str) -> web.StreamRe
         },
     )
     watch()
+    tell(job)
     return web.json_response(job_answer(job), status=201, headers={"Location": f"{BASE}/jobs/{job.id}"})
 
 
@@ -384,6 +427,7 @@ async def job_delete(request: web.Request) -> web.StreamResponse:
     for prompt in job.prompts[-1:]:
         await asyncio.to_thread(v1.cancel_prompt, prompt)
     job = store().update(job.id, status="cancelled")
+    tell(job)
     return web.json_response(job_answer(job))
 
 
@@ -431,6 +475,7 @@ async def job_approve(request: web.Request) -> web.StreamResponse:
         request={**kept, "source": source, "approved": approved},
     )
     watch()
+    tell(job)
     return web.json_response(job_answer(job), status=202)
 
 
@@ -629,6 +674,42 @@ def _editor(handler: Any) -> Any:
     return wrapped
 
 
+async def events(request: web.Request) -> web.StreamResponse:
+    """Server-Sent Events of jobs and downloads (PD 8.1): ``job.queued`` ... ``job.failed``, ``job.waiting``,
+    ``job.progress``, ``download.*`` (this computer only). ``Last-Event-ID`` replays what a reconnecting program
+    missed - or sends ``sync`` when that is no longer kept. A comment every 15 s keeps the stream open."""
+    from .routes import is_here
+
+    try:
+        subscriber = HUB.subscribe(
+            asyncio.get_running_loop(),
+            here=is_here(request),
+            owner=_visible(request),
+            after=request.headers.get("Last-Event-ID") or None,
+        )
+    except TooManyStreamsError as error:
+        raise SongApiError(
+            "busy", f"{error}.", hint="Close a stream, or follow jobs with ?wait.", status=503
+        ) from error
+    response = web.StreamResponse(
+        headers={"Content-Type": "text/event-stream", "Cache-Control": "no-store", "X-Accel-Buffering": "no"}
+    )
+    await response.prepare(request)
+    try:
+        while not subscriber.dropped:
+            try:
+                event = await asyncio.wait_for(subscriber.queue.get(), timeout=KEEP_ALIVE_S)
+            except TimeoutError:
+                await response.write(b": keep-alive\n\n")
+                continue
+            await response.write(event.wire())
+    except (ConnectionResetError, asyncio.CancelledError):
+        pass
+    finally:
+        HUB.unsubscribe(subscriber)
+    return response
+
+
 def _route(method: str, path: str, handler: Any) -> Route:
     return Route(method, f"{BASE}{path}", handler, "api")
 
@@ -664,6 +745,7 @@ ROUTES: tuple[Route, ...] = (
     _route("POST", "/scores/export/midi", _editor(routes.score_midi_export)),
     _route("POST", "/scores/export/musicxml", _editor(routes.score_musicxml_export)),
     _route("POST", "/lyrics/analyze", _editor(routes.lyrics_analyze)),
+    _route("GET", "/events", events),
     _route("POST", "/uploads", v1.upload),
     _route("GET", "/queue", v1.queue_info),
 )

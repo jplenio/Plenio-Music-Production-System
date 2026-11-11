@@ -67,6 +67,8 @@ def test_every_route_has_an_access_class(comfy_path: Path) -> None:
 
 def test_every_route_is_registered_with_the_server(server: ComfyServer, comfy_path: Path) -> None:
     for route in all_routes(comfy_path):
+        if route.path.endswith("/events"):
+            continue  # a stream that stays open: tests/host/test_api_v2_events.py reads it
         status, _ = server.request(route.method, path_of(route), {} if route.method == "POST" else None)
         assert status != 405, f"{route.method} {route.path} is not registered"
 
