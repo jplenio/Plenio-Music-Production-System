@@ -14,7 +14,7 @@ from typing import Any
 from ..core.arrangement import ModeLibrary
 from ..core.assets import Asset, load_catalogue
 from ..core.audio.presets import Library
-from ..core.blocks import Block, brief_outputs, current_blocks
+from ..core.blocks import Block, brief_outputs, current_blocks, model_blocks
 from ..core.brief import TemplateLibrary
 from ..core.config import PlenioConfig
 from ..core.errors import PlenioError
@@ -48,10 +48,7 @@ def template_workflows() -> dict[str, dict[str, Any]]:
     return workflows
 
 
-@lru_cache(maxsize=1)
-def shipped_blocks() -> dict[str, Block]:
-    """The package's blocks that follow the brief's creativity (``subgraphs/``): a workflow saved before
-    keeps older ones, brought up to date when it opens (``core.blocks``)."""
+def _blueprint_files() -> list[dict[str, Any]]:
     files: list[dict[str, Any]] = []
     for path in sorted(BLUEPRINTS.glob("*.json")):
         try:
@@ -60,7 +57,21 @@ def shipped_blocks() -> dict[str, Block]:
             continue
         if isinstance(data, dict):
             files.append(data)
-    return current_blocks(files)
+    return files
+
+
+@lru_cache(maxsize=1)
+def shipped_blocks() -> dict[str, Block]:
+    """The package's blocks that follow the brief's creativity (``subgraphs/``): a workflow saved before
+    keeps older ones, brought up to date when it opens (``core.blocks``)."""
+    return current_blocks(_blueprint_files())
+
+
+@lru_cache(maxsize=1)
+def shipped_model_blocks() -> dict[str, Block]:
+    """The package's model blocks with Model Choice (``subgraphs/``): offered to a workflow saved with 1.x when
+    asked (``core.blocks.upgrade_models``)."""
+    return model_blocks(_blueprint_files())
 
 
 @lru_cache(maxsize=1)

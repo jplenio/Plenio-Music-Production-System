@@ -56,6 +56,58 @@ export interface BlocksMessage {
   detail: string
 }
 
+/** The model blocks a workflow saved with 1.x has without Model Choice (2.0): they run as they are; the command
+ * *Bring the model blocks up to date* gives them Model Choice and keeps their files. */
+export const MODEL_BLOCKS = new Set(['Plenio · YuE2 Model', 'Plenio · MiniMax Model', 'Plenio · Cover Art'])
+export const MODEL_BLOCKS_COMMAND = 'Plenio.ModelBlocksUpToDate'
+
+/** The names of ``graph``'s model blocks saved before Model Choice. */
+export function oldModelBlocks(graph: unknown): string[] {
+  return definitions(graph)
+    .filter((definition) => typeof definition?.name === 'string' && MODEL_BLOCKS.has(definition.name))
+    .filter((definition) => !(definition.nodes ?? []).some((node) => node?.type === 'PlenioModelChoice'))
+    .map((definition) => String(definition.name))
+}
+
+/** Said once when such a workflow opens: what it does as it is, and what the command does. */
+export function oldModelBlocksMessage(graph: unknown): BlocksMessage | null {
+  const old = oldModelBlocks(graph)
+  if (!old.length) return null
+  return {
+    severity: 'info',
+    summary: 'Model blocks of Plenio 1.x',
+    detail:
+      `${list(old)} load the files they name, as before. Plenio › Bring the model blocks up to date gives them ` +
+      "Model Choice - the field shows what the file is and what auto would take - and keeps your files."
+  }
+}
+
+/** The toasts for the command's answer. */
+export function modelBlocksMessages(answer: BlocksUpgrade | null): BlocksMessage[] {
+  if (!answer) return []
+  const out: BlocksMessage[] = []
+  if (answer.updated.length) {
+    out.push({
+      severity: 'info',
+      summary: 'Model blocks brought up to date',
+      detail:
+        `${list(answer.updated)} choose their files with Model Choice now; each keeps the file it loaded. Set a ` +
+        'field to auto to let Plenio choose for the computer that runs it. Save the workflow to keep it.'
+    })
+  }
+  if (answer.kept.length) {
+    out.push({
+      severity: 'warn',
+      summary: 'Some model blocks were kept as they were',
+      detail: `${answer.kept.map(([name, why]) => `${short(name)} (${why})`).join('; ')}. They load the files they name.`
+    })
+  }
+  if (!answer.updated.length && !answer.kept.length) {
+    out.push({ severity: 'info', summary: 'Nothing to bring up to date', detail: 'The model blocks are the current ones.' })
+  }
+  return out
+}
+
 /** The toasts for an answer: what was brought up to date, and what the creativity does not reach. */
 export function blocksMessages(answer: BlocksUpgrade | null): BlocksMessage[] {
   if (!answer) return []

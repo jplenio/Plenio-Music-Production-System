@@ -351,6 +351,6 @@ export interface BlocksUpgrade {
   unlinked: [string, string][]
 }
 
-export function upgradeBlocks(fetcher: Fetcher, workflow: unknown): Promise<BlocksUpgrade> {
-  return post<BlocksUpgrade>(fetcher, '/plenio/workflow/blocks', { workflow })
+export function upgradeBlocks(fetcher: Fetcher, workflow: unknown, models = false): Promise<BlocksUpgrade> {
+  return post<BlocksUpgrade>(fetcher, '/plenio/workflow/blocks', models ? { workflow, models: true } : { workflow })
 }

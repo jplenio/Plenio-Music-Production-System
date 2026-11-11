@@ -9,10 +9,16 @@ import { api } from '../../../scripts/api.js'
 // @ts-expect-error - provided by ComfyUI at runtime (scripts shim), kept external by the build
 import { app } from '../../../scripts/app.js'
 
-import { type Fetcher, PlenioApiError } from '../api/client'
+import { type Fetcher, PlenioApiError, upgradeBlocks } from '../api/client'
 import { chain, type ComfyApp, type ComfyNode } from '../shared/comfy'
 import type { AsrNote, SheetPayload } from '../shared/sheetSession'
-import { blocksMessages, bringBlocksUpToDate } from './blocks'
+import {
+  MODEL_BLOCKS_COMMAND,
+  blocksMessages,
+  bringBlocksUpToDate,
+  modelBlocksMessages,
+  oldModelBlocksMessage
+} from './blocks'
 import { MAX_TOKENS, raiseLlmLimits } from './llmLimits'
 import { installBriefLists } from './briefChoices'
 import { BRIEF_NODES, installBriefTemplatePanel } from './briefTemplate'
@@ -61,6 +67,23 @@ interface GraphNodes {
 }
 
 const graph = (): GraphNodes | undefined => comfyApp.graph as GraphNodes | undefined
+
+/** Plenio › Bring the model blocks up to date: the open workflow's 1.x model blocks get Model Choice, their files
+ * kept as pins (core/blocks.py ``upgrade_models``), and the workflow is loaded again in its tab. */
+async function modelBlocksUpToDate(): Promise<void> {
+  const toast = (message: { severity: string; summary: string; detail: string }) =>
+    comfyApp.extensionManager?.toast?.add({ ...message, life: 20000 })
+  try {
+    const current = (comfyApp.graph as { serialize?: () => unknown } | undefined)?.serialize?.()
+    if (!current) return
+    const answer = await upgradeBlocks(comfyApi, current, true)
+    if (answer.workflow && comfyApp.loadGraphData) await comfyApp.loadGraphData(answer.workflow, false)
+    for (const message of modelBlocksMessages(answer)) toast(message)
+  } catch (error) {
+    const detail = error instanceof PlenioApiError && error.hint ? `${error.message} ${error.hint}` : String(error)
+    toast({ severity: 'error', summary: 'Model blocks not brought up to date', detail })
+  }
+}
 
 /** Model Choice's fields: the plan's file beside *auto*, files that do not fit marked (modelChoice.ts). */
 const modelLabels = new ModelChoiceLabels(comfyApi)
@@ -177,11 +200,17 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
           })
         })
     },
-    { id: PLAYER_COMMAND, label: 'Plenio Player', icon: 'pi pi-play-circle', function: () => openPlayer(playerHost) }
+    { id: PLAYER_COMMAND, label: 'Plenio Player', icon: 'pi pi-play-circle', function: () => openPlayer(playerHost) },
+    {
+      id: MODEL_BLOCKS_COMMAND,
+      label: 'Bring the model blocks up to date',
+      icon: 'pi pi-sync',
+      function: () => void modelBlocksUpToDate()
+    }
   ],
   menuCommands: [
-    { path: ['File'], commands: [CONTINUE_COMMAND] },
-    { path: ['Plenio'], commands: [PLAYER_COMMAND, CONTINUE_COMMAND] }
+    { path: ['File'], commands: [CONTINUE_COMMAND, MODEL_BLOCKS_COMMAND] },
+    { path: ['Plenio'], commands: [PLAYER_COMMAND, CONTINUE_COMMAND, MODEL_BLOCKS_COMMAND] }
   ],
   // the Plenio Player, one click away beside Run (player.ts): started as a program of its own when none runs
   actionBarButtons: [
@@ -198,6 +227,9 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
     // the blocks' LLM nodes get 1.5.0's answer length where they have the one an earlier version shipped
     const raised = raiseLlmLimits(graphData)
     if (raised.length) console.info(`Plenio: longer LLM answers (${MAX_TOKENS} tokens) in ${raised.join(', ')}`)
+    // model blocks saved before Model Choice run as they are: said once, the command offered (blocks.ts)
+    const models = oldModelBlocksMessage(graphData)
+    if (models) comfyApp.extensionManager?.toast?.add({ ...models, life: 20000 })
     try {
       const answer = await bringBlocksUpToDate(graphData, comfyApi)
       for (const message of blocksMessages(answer)) comfyApp.extensionManager?.toast?.add({ ...message, life: 20000 })

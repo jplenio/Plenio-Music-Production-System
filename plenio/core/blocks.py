@@ -331,3 +331,140 @@ def upgrade(
         _link_creativity(result, brief, output, node, slot)
         linked.append(label)
     return Upgrade(result, tuple(updated), tuple(kept), tuple(linked), tuple(unlinked))
+
+
+# --- the model blocks (2.0) ---------------------------------------------------------------------------------------
+
+MODEL_CHOICE = "PlenioModelChoice"
+LOADER_FILES = {
+    "CheckpointLoaderSimple": "ckpt_name",
+    "UNETLoader": "unet_name",
+    "CLIPLoader": "clip_name",
+    "VAELoader": "vae_name",
+    "LoraLoader": "lora_name",
+}
+"""ComfyUI's loaders whose file a Model Choice gives (the file is their first value)."""
+
+
+def has_model_choice(definition: Mapping[str, Any]) -> bool:
+    return any(node.get("type") == MODEL_CHOICE for node in _nodes(definition))
+
+
+def model_blocks(files: Iterable[Mapping[str, Any]]) -> dict[str, Block]:
+    """The model blocks of the blueprint files (``subgraphs/*.json``): those with Model Choice, by definition id."""
+    blocks: dict[str, Block] = {}
+    for data in files:
+        for definition in (data.get("definitions") or {}).get("subgraphs") or []:
+            if not isinstance(definition, Mapping) or not has_model_choice(definition):
+                continue
+            instance = next(
+                (
+                    node
+                    for node in data.get("nodes") or []
+                    if isinstance(node, Mapping) and node.get("type") == definition.get("id")
+                ),
+                {},
+            )
+            blocks[str(definition.get("id"))] = Block(definition, instance)
+    return blocks
+
+
+def models_outdated(workflow: Mapping[str, Any], blocks: Mapping[str, Block]) -> list[str]:
+    """The workflow's model blocks without Model Choice whose current block has it (by name) - what *Bring this
+    workflow's model blocks up to date* offers."""
+    return [
+        str(definition.get("name") or definition.get("id"))
+        for definition in (workflow.get("definitions") or {}).get("subgraphs") or []
+        if isinstance(definition, Mapping)
+        and not has_model_choice(definition)
+        and _block_for(definition, blocks) is not None
+    ]
+
+
+def _loaders(definition: Mapping[str, Any]) -> dict[str, list[Mapping[str, Any]]]:
+    found: dict[str, list[Mapping[str, Any]]] = {}
+    for node in _nodes(definition):
+        if node.get("type") in LOADER_FILES:
+            found.setdefault(str(node["type"]), []).append(node)
+    return found
+
+
+def _fed_loaders(definition: Mapping[str, Any]) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+    """``(Model Choice, loader)`` pairs of a block: each Model Choice and the loader its file goes to."""
+    nodes = {node.get("id"): node for node in definition.get("nodes") or [] if isinstance(node, dict)}
+    pairs = []
+    for link in definition.get("links") or []:
+        if not isinstance(link, Mapping):
+            continue
+        source, target = nodes.get(link.get("origin_id")), nodes.get(link.get("target_id"))
+        if source and target and source.get("type") == MODEL_CHOICE and target.get("type") in LOADER_FILES:
+            pairs.append((source, target))
+    return pairs
+
+
+def _hand_changed(old: Mapping[str, Any], current: Mapping[str, Any]) -> str | None:
+    """A node inside the old block, other than its loaders, whose values differ from the current block's - set by
+    hand: the block is kept rather than lose it."""
+    fresh: dict[str, list[Mapping[str, Any]]] = {}
+    for node in _nodes(current):
+        fresh.setdefault(str(node.get("type")), []).append(node)
+    seen: dict[str, int] = {}
+    for node in _nodes(old):
+        kind = str(node.get("type"))
+        if kind in LOADER_FILES:
+            continue
+        index = seen.get(kind, 0)
+        seen[kind] = index + 1
+        candidates = fresh.get(kind) or []
+        if index >= len(candidates):
+            return f"it has a node the current block does not have ({node.get('title') or kind})"
+        # a node without fields: no values saved, or an empty list - alike
+        if not _same(node.get("widgets_values") or [], candidates[index].get("widgets_values") or []):
+            return f"its node {node.get('title') or kind} was changed inside the block"
+    return None
+
+
+def upgrade_models(workflow: Mapping[str, Any], blocks: Mapping[str, Block]) -> Upgrade:
+    """``workflow`` with its model blocks made the current ones (a copy; ``blocks``: :func:`model_blocks`). Asked
+    for, never done on opening: each Model Choice keeps the file the old loader had - the block's field on the
+    block, the loader's own value inside it - so the workflow loads what it loaded. The old loaders' other values
+    (an adapter switched on, its strengths, a weight type) go to the new loaders; a block with another node
+    changed inside, or other inputs, is kept and named."""
+    result: dict[str, Any] = copy.deepcopy(dict(workflow))
+    definitions = (result.get("definitions") or {}).get("subgraphs")
+    if not isinstance(definitions, list):
+        return Upgrade(result)
+    updated: list[str] = []
+    kept: list[tuple[str, str]] = []
+    for index, old in enumerate(definitions):
+        if not isinstance(old, Mapping) or has_model_choice(old):
+            continue
+        block = _block_for(old, blocks)
+        if block is None:
+            continue
+        name = str(old.get("name") or block.name)
+        why = misfit(old, block.definition) or _hand_changed(old, block.definition)
+        if why:
+            kept.append((name, why))
+            continue
+        fresh: dict[str, Any] = {**copy.deepcopy(dict(block.definition)), "id": old.get("id")}
+        before = _loaders(old)
+        taken: dict[str, int] = {}
+        for choice, loader in _fed_loaders(fresh):
+            kind = str(loader["type"])
+            position = taken.get(kind, 0)
+            taken[kind] = position + 1
+            olds = before.get(kind) or []
+            if position >= len(olds):
+                continue
+            previous = olds[position]
+            values = previous.get("widgets_values")
+            if isinstance(values, list) and values and isinstance(values[0], str) and values[0]:
+                component = (choice.get("widgets_values") or [""])[0]
+                choice["widgets_values"] = [component, values[0]]  # the user's file: a pin, not auto
+                loader["widgets_values"] = copy.deepcopy(values)
+            if "mode" in previous:
+                loader["mode"] = previous["mode"]
+        definitions[index] = fresh
+        updated.append(name)
+    return Upgrade(result, tuple(updated), tuple(kept))

@@ -31,6 +31,7 @@ from . import host
 from .shared import (
     preset_library,
     shipped_blocks,
+    shipped_model_blocks,
     system_report,
     template_briefs,
     template_library,
@@ -521,13 +522,18 @@ async def records_continue(request: web.Request) -> web.StreamResponse:
 
 async def workflow_blocks(request: web.Request) -> web.StreamResponse:
     """A workflow's blocks saved before they followed the brief's creativity, brought up to date
-    (``core.blocks``; the frontend asks when such a workflow opens). ``workflow`` is ``null`` when nothing
+    (``core.blocks``; the frontend asks when such a workflow opens) - or, with ``"models": true``, its model blocks
+    saved before Model Choice, their files kept (asked for by the user). ``workflow`` is ``null`` when nothing
     changed."""
     data = await read_json(request)
     workflow = data.get("workflow")
     if not isinstance(workflow, dict):
         raise PlenioUserError("The request needs the 'workflow' to bring up to date.")
-    found = blocks.upgrade(workflow, shipped_blocks(), template_briefs())
+    if data.get("models") is True:
+        # asked for (Plenio > Bring the model blocks up to date): the 2.0 model blocks, the files kept as pins
+        found = blocks.upgrade_models(workflow, shipped_model_blocks())
+    else:
+        found = blocks.upgrade(workflow, shipped_blocks(), template_briefs())
     return web.json_response(
         {
             "workflow": found.workflow if found.updated or found.linked else None,

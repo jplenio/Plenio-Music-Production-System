@@ -3,7 +3,16 @@
 import { describe, expect, it } from 'vitest'
 
 import type { BlocksUpgrade, Fetcher } from '../src/api/client'
-import { blocksMessages, bringBlocksUpToDate, mayBeOutdated } from '../src/extension/blocks'
+import type { BlocksUpgrade as Answer } from '../src/api/client'
+import { upgradeBlocks } from '../src/api/client'
+import {
+  blocksMessages,
+  bringBlocksUpToDate,
+  mayBeOutdated,
+  modelBlocksMessages,
+  oldModelBlocks,
+  oldModelBlocksMessage
+} from '../src/extension/blocks'
 
 const block = (name: string, ...types: string[]) => ({ id: name, name, nodes: types.map((type, id) => ({ id, type })) })
 const graph = (...subgraphs: unknown[]) => ({ nodes: [{ id: 1 }], links: [], definitions: { subgraphs } })
@@ -70,5 +79,36 @@ describe('blocks saved before the creativity', () => {
     expect(warn.severity).toBe('warn')
     expect(warn.detail).toContain('YuE2 Render was kept as it was (its node YuE2GenerateMusic was changed inside the block) - its sampling stays fixed')
     expect(warn.detail).toContain('YuE2 Takes has its own creativity slider (the workflow has no single brief to link it from)')
+  })
+})
+
+
+describe('the model blocks of a workflow saved with 1.x', () => {
+  const old = block('Plenio · YuE2 Model', 'CheckpointLoaderSimple', 'LoraLoader', 'PlenioEngine')
+  const current = block('Plenio · MiniMax Model', 'PlenioModelChoice', 'UNETLoader')
+
+  it('are named when it opens, with what they do as they are and what the command does', () => {
+    expect(oldModelBlocks(graph(old, current))).toEqual(['Plenio · YuE2 Model'])
+    const message = oldModelBlocksMessage(graph(old))
+    expect(message?.detail).toContain('load the files they name, as before')
+    expect(message?.detail).toContain('Bring the model blocks up to date')
+    expect(oldModelBlocksMessage(graph(current))).toBeNull()
+  })
+
+  it('come up to date only through the command, which asks for models', async () => {
+    const sent: unknown[] = []
+    await upgradeBlocks(fetcher(NOTHING, sent), graph(old), true)
+    await upgradeBlocks(fetcher(NOTHING, sent), graph(old))
+    expect((sent[0] as [string, Record<string, unknown>])[1].models).toBe(true)
+    expect('models' in (sent[1] as [string, Record<string, unknown>])[1]).toBe(false)
+  })
+
+  it('say what the command did', () => {
+    const done: Answer = { ...NOTHING, workflow: {}, updated: ['Plenio · YuE2 Model'], kept: [['Plenio · Cover Art', 'its node Flux2Scheduler was changed inside the block']] }
+    const [first, second] = modelBlocksMessages(done)
+    expect(first.detail).toContain('YuE2 Model choose their files with Model Choice now; each keeps the file it loaded')
+    expect(second.severity).toBe('warn')
+    expect(second.detail).toContain('Cover Art (its node Flux2Scheduler was changed inside the block)')
+    expect(modelBlocksMessages(NOTHING)[0].summary).toBe('Nothing to bring up to date')
   })
 })
