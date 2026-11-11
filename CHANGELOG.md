@@ -4,6 +4,10 @@ All notable changes of the current version and the one before. Versions follow s
 
 ## 2.0.0 - unreleased
 
+### Added
+
+- **Where a song's time went**: the release record says how many seconds each group of the template took, how much of that ComfyUI spent loading models, and the peak memory on the graphics card (`timings`, `plenio.timings/1`). A record without it reads as before.
+
 ### Changed
 
 - **The Comfy Registry package starts no other program.** Plenio now comes in two forms. The package of the ComfyUI Manager and `comfy node install` starts nothing but ComfyUI's own Python with Plenio's own modules - the lyrics ASR worker, the Plenio Player opened from ComfyUI, llama-cpp-python for a GGUF file. Three conveniences that start another program moved into the *Studio add-on* (`plenio/addons`), which a `git clone` and the release zip carry: the player starting ComfyUI, an installed `llama-server` running a GGUF file, and *Open the folder* opening the file manager. Without the add-on each says what to do instead: the player finds the ComfyUI you start and says so, GGUF models run in LM Studio, Ollama or a `llama-server` you started (or with llama-cpp-python, else ComfyUI's own Gemma writes), and *Open the folder* shows the path with a *Copy* button. **0 · System Check** says which form is installed; `PLENIO_ADDONS=0` switches the add-on off. A check on the packed zip (`tools/package_gate.py`, in the CI) fails the build if a launch site comes back. [Two ways to install](docs/user/getting-started.md#two-ways-to-install), [SECURITY.md](SECURITY.md#programs-plenio-starts).

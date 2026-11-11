@@ -13,7 +13,7 @@ import os
 import platform
 import sys
 import time
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any
 
@@ -729,6 +729,7 @@ def watch_runs() -> None:
         taken = original(*args, **kwargs)
         try:
             if taken:
+                _reset_peak_memory()
                 _RUNS[str(taken[0][1])] = time.time()
                 for old in list(_RUNS)[:-20]:
                     _RUNS.pop(old, None)
@@ -738,6 +739,103 @@ def watch_runs() -> None:
 
     get.plenio_runs = True  # type: ignore[attr-defined]
     queue.get = get
+    _watch_nodes()
+
+
+_STARTS: dict[str, list[tuple[str, float]]] = {}
+"""The nodes ComfyUI started in each of the last runs, in order, each with its time (prompt id -> starts)."""
+_LOADS: dict[str, dict[str, float]] = {}
+"""The seconds ComfyUI spent loading models while each node ran (prompt id -> node id -> seconds)."""
+_NOW: dict[str, str] = {}
+"""The run and the node that execute now (``prompt``, ``node``), for the loading time."""
+
+
+def _note_start(prompt_id: str, node_id: str) -> None:
+    _STARTS.setdefault(prompt_id, []).append((node_id, time.time()))
+    _NOW.update(prompt=prompt_id, node=node_id)
+    for old in list(_STARTS)[:-20]:
+        _STARTS.pop(old, None)
+        _LOADS.pop(old, None)
+
+
+def _watch_nodes() -> None:
+    """Note when ComfyUI starts each node of a run and how long it loads models meanwhile, for the record's
+    timings (``plenio.core.timings``). ComfyUI's progress registry and its model loader are wrapped once; a
+    ComfyUI without them only leaves the timings out."""
+    try:
+        import comfy.model_management as management
+        from comfy_execution.progress import ProgressRegistry
+    except Exception:  # noqa: BLE001 - another ComfyUI: no timings
+        return
+    start = getattr(ProgressRegistry, "start_progress", None)
+    if start is not None and not getattr(start, "plenio_timings", False):
+
+        def start_progress(self: Any, node_id: str, *args: Any, **kwargs: Any) -> Any:
+            try:
+                _note_start(str(getattr(self, "prompt_id", "")), str(node_id))
+            except Exception:  # noqa: BLE001, S110 - a note, never a reason for a run to fail
+                pass
+            return start(self, node_id, *args, **kwargs)
+
+        start_progress.plenio_timings = True  # type: ignore[attr-defined]
+        ProgressRegistry.start_progress = start_progress  # type: ignore[method-assign]
+    load = getattr(management, "load_models_gpu", None)
+    if load is not None and not getattr(load, "plenio_timings", False):
+
+        def load_models_gpu(*args: Any, **kwargs: Any) -> Any:
+            began = time.time()
+            try:
+                return load(*args, **kwargs)
+            finally:
+                prompt_id, node_id = _NOW.get("prompt"), _NOW.get("node")
+                if prompt_id and node_id:
+                    spent = _LOADS.setdefault(prompt_id, {})
+                    spent[node_id] = spent.get(node_id, 0.0) + (time.time() - began)
+
+        load_models_gpu.plenio_timings = True  # type: ignore[attr-defined]
+        management.load_models_gpu = load_models_gpu
+
+
+def _reset_peak_memory() -> None:
+    try:
+        import comfy.model_management
+        import torch
+
+        device = comfy.model_management.get_torch_device()
+        if getattr(device, "type", "") == "cuda":
+            torch.cuda.reset_peak_memory_stats(device)
+    except Exception:  # noqa: BLE001, S110 - no GPU facts: the peak is left out
+        pass
+
+
+def _peak_memory_gib() -> float | None:
+    try:
+        import comfy.model_management
+        import torch
+
+        device = comfy.model_management.get_torch_device()
+        if getattr(device, "type", "") != "cuda":
+            return None
+        return float(torch.cuda.max_memory_allocated(device)) / 2**30
+    except Exception:  # noqa: BLE001 - no GPU facts
+        return None
+
+
+def run_timings(stage_of: Callable[[str], str]) -> dict[str, Any] | None:
+    """Where the time of the run that executes now went, per stage (``plenio.core.timings``; ``None``: nothing was
+    noted). ``stage_of`` names a node's stage. The peak is what ComfyUI's own process held on its graphics card -
+    a GGUF writer in a process of its own is not in it."""
+    from ..core.timings import stage_timings
+
+    prompt_id = str(getattr(prompt_server(), "last_prompt_id", "") or "")
+    return stage_timings(
+        list(_STARTS.get(prompt_id, ())),
+        time.time(),
+        stage_of,
+        began=_RUNS.get(prompt_id),
+        loads=_LOADS.get(prompt_id),
+        peak_vram_gib=_peak_memory_gib(),
+    )
 
 
 def run_started() -> float | None:

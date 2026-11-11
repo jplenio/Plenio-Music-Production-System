@@ -806,6 +806,9 @@ class RecordInput:
     """How well it came out, measured (since 1.4.0, ``plenio.core.quality``): the stars and every measure - a hint
     where to listen first, never the verdict. Like ``made``, not part of the fingerprint."""
     made: Mapping[str, Any] | None = field(default=None)
+    timings: Mapping[str, Any] | None = field(default=None)
+    """Where the run's time went (since 2.0, ``plenio.core.timings``): seconds per stage, the part spent
+    loading models, the peak memory on the graphics card. Like ``made``, not part of the fingerprint."""
     """How the song was made (since 1.4.0): when its run began and ended (``started``, ``finished``), how long it
     took (``seconds``), on what (``on``: the graphics card and its memory or the processor, the RAM) and the lyrics
     fidelity (``lyrics_fidelity``). Like ``created``, not part of the fingerprint."""
@@ -816,7 +819,11 @@ def record_fingerprint(record: Mapping[str, Any]) -> str:
     after it was made) and the fingerprint itself."""
     return sha256_text(
         canonical_json(
-            {k: v for k, v in record.items() if k not in ("created", "made", "quality", "fingerprint")}
+            {
+                k: v
+                for k, v in record.items()
+                if k not in ("created", "made", "timings", "quality", "fingerprint")
+            }
         )
     )
 
@@ -859,6 +866,8 @@ def build_record(data: RecordInput) -> dict[str, Any]:
         record["subtitles"] = dict(data.subtitles)
     if data.made is not None:
         record["made"] = dict(data.made)
+    if data.timings is not None:
+        record["timings"] = dict(data.timings)
     if data.quality is not None:
         record["quality"] = dict(data.quality)
     record["fingerprint"] = record_fingerprint(record)

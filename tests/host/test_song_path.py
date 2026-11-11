@@ -164,6 +164,11 @@ def test_brief_to_flac_with_exact_conditioning(server: ComfyServer, log: Log) ->
     assert record["documents"]["score"]["text"] == render["abc"]
     assert record["prompt"]["10"]["inputs"]["seed"] == 1
     assert any("CC BY-NC" in licence for licence in record["licences"])
+    # where the run's time went (plenio.timings/1): every stage the run reached, each with its seconds
+    timings = record["timings"]
+    assert timings["schema"] == "plenio.timings/1" and timings["total_seconds"] > 0
+    assert timings["stages"] and all(stage["stage"] and stage["seconds"] > 0 for stage in timings["stages"])
+    assert sum(stage["seconds"] for stage in timings["stages"]) <= timings["total_seconds"] + 0.01
 
 
 def test_new_take_reuses_draft_and_plan(server: ComfyServer, log: Log) -> None:

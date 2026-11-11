@@ -70,7 +70,7 @@ Phases 5, 6 and 7 are independent of each other after phase 4 and may be done in
 
 Goal: numbers the later phases are judged by, and a test suite fast enough to run on every step. No behaviour of the product changes.
 
-- [ ] **0.1 Stage timings in the record.** `host.Progress` gains a stage name; `host.py` measures load time around ComfyUI's model loading and the node's own time; Export Release writes `timings` (`plenio.timings/1`, PD §6.1) into the record; `resources/schemas/record-1.schema.json` allows the optional key.
+- [x] **0.1 Stage timings in the record.** `host.Progress` gains a stage name; `host.py` measures load time around ComfyUI's model loading and the node's own time; Export Release writes `timings` (`plenio.timings/1`, PD §6.1) into the record; `resources/schemas/record-1.schema.json` allows the optional key.
   *Accept:* a host test runs a fake-model song and finds one entry per stage with `seconds > 0`; an old record without `timings` still validates and plays.
 - [ ] **0.2 `tools/bench.py`.** Runs the four fixed briefs of PD §6.1 through the Song API, three times each, against a running ComfyUI; writes JSON and a Markdown table to `docs/test-reports/`. `--fake` runs with the test nodes for CI.
   *Accept:* `bench.py --fake` passes in the host job; the owner (or the agent on GPU 1, with permission) has run it with real models on 1.6.0 and the report `docs/test-reports/2026-…-bench-1.6.0.md` is committed.

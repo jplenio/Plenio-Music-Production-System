@@ -177,6 +177,31 @@
         "lyrics_fidelity": { "type": "string" }
       }
     },
+    "timings": {
+      "description": "Since 2.0: where the run's time went (plenio.timings/1) - seconds per stage (a group of the template), the part of it spent loading models, the peak memory ComfyUI held on its graphics card. Not part of the fingerprint.",
+      "type": "object",
+      "required": ["schema", "total_seconds", "stages"],
+      "additionalProperties": false,
+      "properties": {
+        "schema": { "const": "plenio.timings/1" },
+        "total_seconds": { "type": "number", "minimum": 0 },
+        "stages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["stage", "seconds"],
+            "additionalProperties": false,
+            "properties": {
+              "stage": { "type": "string", "minLength": 1 },
+              "seconds": { "type": "number", "minimum": 0 },
+              "load_seconds": { "type": "number", "minimum": 0 },
+              "model": { "type": "string" }
+            }
+          }
+        },
+        "peak_vram_gib": { "type": "number", "minimum": 0 }
+      }
+    },
     "sheet_music": {
       "type": "object",
       "required": ["file", "status"],

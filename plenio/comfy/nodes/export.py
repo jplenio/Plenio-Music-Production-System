@@ -191,6 +191,17 @@ def made_facts(brief: Any, reports: list[dict[str, Any]], now: float | None = No
     return out
 
 
+def run_timings(workflow: Any) -> dict[str, Any] | None:
+    """Where this run's time went, per group of the template (``plenio.core.timings``), up to this node."""
+    from ...core.song_api import stage_of
+
+    shown = workflow if isinstance(workflow, dict) else {}
+    try:
+        return host.run_timings(lambda node_id: stage_of(shown, node_id))
+    except Exception:  # noqa: BLE001 - the timings are a note; the export does not fail for them
+        return None
+
+
 def _plain(value: Any) -> str:
     if isinstance(value, bool):
         return "on" if value else "off"
@@ -717,6 +728,7 @@ class PlenioExportRelease(io.ComfyNode):
             title=song_title,
             licences=licences,
             made=made_facts(brief, report_dicts),
+            timings=run_timings((cls.hidden.extra_pnginfo or {}).get("workflow")),
             sheet_music=(
                 {
                     "file": file(SHEET_SUFFIX).name,
