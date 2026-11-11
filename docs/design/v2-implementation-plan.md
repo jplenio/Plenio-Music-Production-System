@@ -276,7 +276,8 @@ Goal: PD §3.1 to §3.4. It ships with 2.0.0 (PD §3.5).
 
 ## Phase 3 - Model Choice, templates, the writer plan
 
-- [ ] **3.1 `PlenioModelChoice`** (PD §5.3) with `fingerprint_inputs`, its help page `web/docs/PlenioModelChoice.md`, tooltips, the `models_missing` error data.
+- [x] **3.1 `PlenioModelChoice`** (PD §5.3) with `fingerprint_inputs`, its help page `web/docs/PlenioModelChoice.md`, tooltips, the `models_missing` error data.
+  *Done 2026-11-11:* `plenio/comfy/nodes/model_choice.py` over `setup.choose` (the node's field, then `[models.pins]`, then the plan; a pinned file in its folder counts as there whatever its size). The error's `details` hold component, file, variant and folder; the page that queued the run also gets `plenio.models_missing` (the frontend acts on it in 3.4). The lists show every file of the folder until 3.2's sniffers narrow them. `downloads = "auto"` does not fetch during a run yet (phase 4). The fake catalogue is in the contract tests (`tests/contract/test_model_choice.py`); the host tests run the real catalogue (a pin of one's own, `auto` with a sparse file of the catalogued size, a missing file).
   *Accept:* contract tests (schema, tooltips); host tests: `auto` picks the installed variant of a fake catalogue and the loader receives its name; a pinned file wins; a missing file fails with the hint and the data; installing a file changes the fingerprint.
 - [ ] **3.2 Sniffers** `accepts` per component in `core/models.py` (YuE2 checkpoints exist; add the same header check for MiniMax DiT, FLUX.2, text encoders by their key prefixes) so that lists show only files a loader takes.
   *Accept:* tests with synthetic safetensors headers for each kind; a file of the wrong kind is listed greyed with the reason by the frontend (test in 3.4).

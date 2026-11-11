@@ -4158,6 +4158,279 @@
    "category": "Plenio/Score",
    "display_name": "Match Song Form"
   },
+  "PlenioModelChoice": {
+   "input": {
+    "required": {
+     "component": [
+      "COMFY_DYNAMICCOMBO_V3",
+      {
+       "tooltip": "Which model this node chooses a file for.",
+       "options": [
+        {
+         "key": "yue2",
+         "inputs": {
+          "required": {
+           "file": [
+            "COMBO",
+            {
+             "tooltip": "auto: the file of the YuE2 music model for this computer (Plenio Setup shows which and why). Or any file in models/checkpoints - a finetune, too.",
+             "default": "auto",
+             "multiselect": false,
+             "options": [
+              "auto",
+              "yue2_3b_bf16.safetensors",
+              "yue2_3b_int8_convrot.safetensors"
+             ]
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "yue2-instrumental-adapter",
+         "inputs": {
+          "required": {
+           "file": [
+            "COMBO",
+            {
+             "tooltip": "auto: the file of the YuE2 instrumental adapter (LoRA) for this computer (Plenio Setup shows which and why). Or any file in models/loras - a finetune, too.",
+             "default": "auto",
+             "multiselect": false,
+             "options": [
+              "auto",
+              "ar_lora_inst_v3abc_comfyui.safetensors"
+             ]
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "sheetsage2",
+         "inputs": {
+          "required": {
+           "file": [
+            "COMBO",
+            {
+             "tooltip": "auto: the file of the SheetSage2 transcription for this computer (Plenio Setup shows which and why). Or any file in models/audio_encoders - a finetune, too.",
+             "default": "auto",
+             "multiselect": false,
+             "options": [
+              "auto",
+              "sheetsage2_bf16.safetensors"
+             ]
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "audio-sr",
+         "inputs": {
+          "required": {
+           "file": [
+            "COMBO",
+            {
+             "tooltip": "auto: the file of the UniverSR audio super-resolution for this computer (Plenio Setup shows which and why). Or any file in models/audio_sr - a finetune, too.",
+             "default": "auto",
+             "multiselect": false,
+             "options": [
+              "auto",
+              "pytorch_model.bin"
+             ]
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "stems",
+         "inputs": {
+          "required": {
+           "file": [
+            "COMBO",
+            {
+             "tooltip": "auto: the file of the BS-RoFormer stem separation for this computer (Plenio Setup shows which and why). Or any file in models/audio_separation - a finetune, too.",
+             "default": "auto",
+             "multiselect": false,
+             "options": [
+              "auto",
+              "model_bs_roformer_ep_17_sdr_9.6568.ckpt"
+             ]
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "writer-native",
+         "inputs": {
+          "required": {
+           "file": [
+            "COMBO",
+            {
+             "tooltip": "auto: the file of the The writer as a ComfyUI text model (Gemma 4) for this computer (Plenio Setup shows which and why). Or any file in models/text_encoders - a finetune, too.",
+             "default": "auto",
+             "multiselect": false,
+             "options": [
+              "auto",
+              "gemma4_12b_int8_convrot.safetensors",
+              "gemma4_e4b_it_fp8_scaled.safetensors",
+              "gemma4_e2b_it_int8_convrot.safetensors"
+             ]
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "minimax-dit",
+         "inputs": {
+          "required": {
+           "file": [
+            "COMBO",
+            {
+             "tooltip": "auto: the file of the MiniMax Music 3 diffusion model for this computer (Plenio Setup shows which and why). Or any file in models/diffusion_models - a finetune, too.",
+             "default": "auto",
+             "multiselect": false,
+             "options": [
+              "auto",
+              "minimax_music3_dit_fp16.safetensors",
+              "minimax_music3_dit_int8_convrot.safetensors"
+             ]
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "minimax-text-encoder",
+         "inputs": {
+          "required": {
+           "file": [
+            "COMBO",
+            {
+             "tooltip": "auto: the file of the MiniMax Music 3 text encoder for this computer (Plenio Setup shows which and why). Or any file in models/text_encoders - a finetune, too.",
+             "default": "auto",
+             "multiselect": false,
+             "options": [
+              "auto",
+              "minimax_music3_text_encoder_pruned_int8_convrot.safetensors"
+             ]
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "minimax-vae",
+         "inputs": {
+          "required": {
+           "file": [
+            "COMBO",
+            {
+             "tooltip": "auto: the file of the MiniMax Music 3 audio VAE for this computer (Plenio Setup shows which and why). Or any file in models/vae - a finetune, too.",
+             "default": "auto",
+             "multiselect": false,
+             "options": [
+              "auto",
+              "minimax_music3_dav.safetensors"
+             ]
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "flux2-klein",
+         "inputs": {
+          "required": {
+           "file": [
+            "COMBO",
+            {
+             "tooltip": "auto: the file of the FLUX.2 Klein image model (cover art) for this computer (Plenio Setup shows which and why). Or any file in models/diffusion_models - a finetune, too.",
+             "default": "auto",
+             "multiselect": false,
+             "options": [
+              "auto",
+              "flux-2-klein-4b.safetensors",
+              "flux-2-klein-4b-fp8.safetensors"
+             ]
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "flux2-text-encoder",
+         "inputs": {
+          "required": {
+           "file": [
+            "COMBO",
+            {
+             "tooltip": "auto: the file of the FLUX.2 Klein text encoder (Qwen3 4B) for this computer (Plenio Setup shows which and why). Or any file in models/text_encoders - a finetune, too.",
+             "default": "auto",
+             "multiselect": false,
+             "options": [
+              "auto",
+              "qwen_3_4b.safetensors",
+              "qwen_3_4b_fp4_flux2.safetensors"
+             ]
+            }
+           ]
+          }
+         }
+        },
+        {
+         "key": "flux2-vae",
+         "inputs": {
+          "required": {
+           "file": [
+            "COMBO",
+            {
+             "tooltip": "auto: the file of the FLUX.2 image VAE for this computer (Plenio Setup shows which and why). Or any file in models/vae - a finetune, too.",
+             "default": "auto",
+             "multiselect": false,
+             "options": [
+              "auto",
+              "flux2-vae.safetensors"
+             ]
+            }
+           ]
+          }
+         }
+        }
+       ]
+      }
+     ]
+    },
+    "hidden": {
+     "unique_id": [
+      "UNIQUE_ID"
+     ]
+    }
+   },
+   "input_order": {
+    "required": [
+     "component"
+    ],
+    "hidden": [
+     "unique_id"
+    ]
+   },
+   "output": [
+    "*"
+   ],
+   "output_name": [
+    "file"
+   ],
+   "output_is_list": [
+    false
+   ],
+   "output_node": false,
+   "category": "Plenio/Model",
+   "display_name": "Model Choice"
+  },
   "PlenioParseDraft": {
    "input": {
     "required": {

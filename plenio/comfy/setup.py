@@ -10,6 +10,7 @@ websocket.
 from __future__ import annotations
 
 import asyncio
+from dataclasses import dataclass, replace
 from typing import Any
 
 from aiohttp import web
@@ -18,7 +19,8 @@ from ..core.access import Route
 from ..core.assets import access as hub_access
 from ..core.assets.downloads import DownloadManager
 from ..core.errors import PlenioUserError
-from ..core.models import load_components, take_inventory
+from ..core.modelplan import AUTO, Pick, pick
+from ..core.models import Component, load_components, take_inventory
 from ..core.setup_plan import download_request, find_variant, plan_view
 from . import host
 from .routes import guarded, read_json
@@ -47,6 +49,56 @@ def _components() -> dict[str, Any]:
 
 def _installed() -> dict[str, int]:
     return dict(take_inventory(model_catalogue(), host.locate_model).found)
+
+
+def components() -> dict[str, Component]:
+    """The catalogue's components by id (for Model Choice's lists)."""
+    return _components()
+
+
+@dataclass(frozen=True)
+class Chosen:
+    """Model Choice's answer: the plan's pick and where the choice came from."""
+
+    pick: Pick
+    component: Component
+    source: str
+    """``field`` (the node's own), ``config`` (a pin in config.toml) or ``plan``."""
+
+
+def choose(component_id: str, file: str) -> Chosen:
+    """The file for ``component_id`` on this computer now: the node's ``file`` when it is not ``auto``, else a
+    pin of ``config.toml``, else the model plan with the configured preference. A pinned file that is in its
+    folder counts as there whatever its size - it is the user's choice (another build, a finetune)."""
+    found = _components()
+    component = found.get(component_id)
+    if component is None:
+        raise PlenioUserError(
+            f"Plenio's catalogue has no model {component_id!r}.",
+            hint=f"Choose one of: {', '.join(found)}.",
+        )
+    config = host.load_config()
+    if file and file != AUTO:
+        pinned, source = file, "field"
+    elif config.model_pins.get(component_id, AUTO) != AUTO:
+        pinned, source = config.model_pins[component_id], "config"
+    else:
+        pinned, source = None, "plan"
+    chosen = pick(
+        component,
+        vram_gib=host.active_vram_gib(),
+        installed=_installed(),
+        prefer=config.models_prefer,
+        pinned=pinned,
+    )
+    if pinned and not chosen.installed and host.locate_model(component.folder, pinned) is not None:
+        note = (
+            f"{pinned} has another size than Plenio's catalogue says - used as your choice."
+            if chosen.variant is not None
+            else ""
+        )
+        chosen = replace(chosen, installed=True, warning=chosen.warning or note)
+    return Chosen(chosen, component, source)
 
 
 async def plan_get(request: web.Request) -> web.StreamResponse:

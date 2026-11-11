@@ -16,6 +16,7 @@ from .hq import PlenioHQDeReverb, PlenioHQMastering, PlenioHQRegenerateHighs, Pl
 from .local_llm import PlenioLocalLLM
 from .loras import PlenioLoras
 from .loudness import PlenioLoudness
+from .model_choice import PlenioModelChoice
 from .parse import PlenioParseDraft
 from .refine import PlenioRefine
 from .score_tools import PlenioScoreTools
@@ -40,6 +41,7 @@ NODES = (
     PlenioParseDraft,
     PlenioFitLyrics,
     PlenioWriterChoice,
+    PlenioModelChoice,
     PlenioLocalLLM,
     PlenioSongSheet,
     PlenioScoreTools,
