@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import json
 import random
 import threading
 import time
@@ -22,7 +23,9 @@ from aiohttp import web
 from .. import __version__
 from ..core import song_api
 from ..core.access import Route
+from ..core.api import review
 from ..core.api.jobstore import ACTIVE, ENDED, Job, JobStore
+from ..core.hashing import sha256_text
 from ..core.presets import with_preset
 from ..core.song_api import SongApiError
 from . import host
@@ -94,6 +97,15 @@ def refresh(job: Job) -> tuple[Job, dict[str, Any] | None]:
         ), None
     status = str(view.get("status") or job.status)
     changes: dict[str, Any] = {}
+    if status == "succeeded":
+        history = v1._history(job.prompts[-1])
+        stop = review.waiting(history) if history is not None else None
+        if stop is not None:
+            if job.status != "waiting_for_review" or job.stage != stop["stage"]:
+                job = store().update(
+                    job.id, status="waiting_for_review", stage=stop["stage"], result={"waiting": stop}
+                )
+            return job, view
     if status != job.status and status in (*ACTIVE, *ENDED):
         changes["status"] = status
     if status == "succeeded" and view.get("result") is not None:
@@ -124,14 +136,23 @@ def job_answer(job: Job, view: dict[str, Any] | None = None) -> dict[str, Any]:
         "client": dict(job.client),
         "review": list(request.get("review") or []),
         "waiting_at": job.stage or None,
+        "documents": _shown(job),
         "result": _v2_result(job),
         "error": dict(job.error) if job.error else None,
         "links": {"self": f"{BASE}/jobs/{job.id}"},
     }
 
 
+def _shown(job: Job) -> dict[str, Any] | None:
+    """The documents a review stop shows, each with its SHA-256 (``None`` while the job waits at no stop)."""
+    if job.status != "waiting_for_review" or not job.result:
+        return None
+    documents = (job.result.get("waiting") or {}).get("documents") or {}
+    return {kind: {"text": text, "sha256": sha256_text(text)} for kind, text in documents.items()}
+
+
 def _v2_result(job: Job) -> dict[str, Any] | None:
-    if job.result is None:
+    if job.result is None or "waiting" in job.result:
         return None
     result = dict(job.result)
     prompt = job.prompts[-1] if job.prompts else ""
@@ -217,10 +238,9 @@ async def jobs_create(request: web.Request) -> web.StreamResponse:
     if known is not None:
         job, view = refresh(known)
         return web.json_response(job_answer(job, view), status=200)
-    if "review" in data:
-        raise SongApiError(
-            "invalid_value", "Review stops come with a later version of API v2.", field="review", status=400
-        )
+    wanted = data.pop("review", None) or []
+    if not isinstance(wanted, list) or not all(isinstance(stage, str) for stage in wanted):
+        raise SongApiError("invalid_value", "'review' is a list of stages ('text', 'score').", field="review")
     template_id = data.get("template")
     if not isinstance(template_id, str) or not template_id:
         raise SongApiError(
@@ -234,6 +254,16 @@ async def jobs_create(request: web.Request) -> web.StreamResponse:
     client = {str(k)[:40]: str(v)[:200] for k, v in list(client.items())[:12]}
     data = with_preset(data, v1._presets())
     prepared = song_api.prepare(template, data, info, rng=random.Random(), styles=v1._style)
+    unknown = review.unknown_stages(prepared.prompt, wanted)
+    if unknown:
+        raise SongApiError(
+            "invalid_value",
+            f"The template {template.id!r} has no review stop {unknown[0]!r}.",
+            hint=f"Its stops: {', '.join(sorted(set(review.stages(prepared.prompt).values())))}.",
+            field="review",
+        )
+    if wanted:
+        review.set_stops(prepared.prompt, wanted, [])
     refused = await asyncio.to_thread(v1.model_choice_errors, prepared.prompt)
     missing = v1._missing_files(refused)
     if missing:
@@ -269,6 +299,10 @@ async def jobs_create(request: web.Request) -> web.StreamResponse:
             "release": dict(prepared.release),
             "seeds": dict(prepared.seeds),
             "warnings": list(prepared.warnings),
+            # to queue it again at an approval: the request as it was taken, with its seeds fixed
+            "source": {**data, "seeds": dict(prepared.seeds)},
+            "review": list(wanted),
+            "approved": [],
         },
     )
     watch()
@@ -335,6 +369,63 @@ async def job_file(request: web.Request) -> web.StreamResponse:
     return await asyncio.to_thread(v1.serve_file, job.prompts[-1], request.match_info["name"])
 
 
+async def job_approve(request: web.Request) -> web.StreamResponse:
+    """Let a job that waits at a review stop go on: ``{"documents": {kind: text}}`` (optional) - an edited
+    document becomes the Song Sheet's manual text; the same request is queued again under the same job, the
+    approved stops passed."""
+    job, _view = await asyncio.to_thread(refresh, _known(request.match_info["job_id"]))
+    if job.status != "waiting_for_review" or not job.result:
+        raise SongApiError(
+            "needs_review", f"The job waits at no review stop (it is {job.status}).", status=409
+        )
+    body = await v1._body(request)
+    stop = dict(job.result.get("waiting") or {})
+    try:
+        changed = review.edited(stop.get("documents") or {}, body.get("documents"))
+    except ValueError as error:
+        raise SongApiError("invalid_value", str(error), field="documents") from error
+    kept = dict(job.request)
+    source = dict(kept.get("source") or {})
+    source["documents"] = {**dict(source.get("documents") or {}), **changed}
+    approved = [*kept.get("approved", []), stop.get("stage", "")]
+    info = v1._lookup()
+    prepared = song_api.prepare(
+        _template(job.template, info), source, info, rng=random.Random(), styles=v1._style
+    )
+    review.set_stops(prepared.prompt, kept.get("review") or [], approved)
+    meta = {"api": API_VERSION, "template": job.template, "kind": job.kind, "client": dict(job.client),
+            "seeds": prepared.seeds, "documents": prepared.documents}  # fmt: skip
+    answer = await v1._post_prompt(prepared.prompt, prepared.workflow, meta)
+    job = store().update(
+        job.id,
+        status="queued",
+        stage="",
+        result=None,
+        prompt=str(answer["prompt_id"]),
+        request={**kept, "source": source, "approved": approved},
+    )
+    watch()
+    return web.json_response(job_answer(job), status=202)
+
+
+async def job_documents(request: web.Request) -> web.StreamResponse:
+    """The job's documents: those its review stop shows while it waits, those of its song once it is made."""
+    job, _view = await asyncio.to_thread(refresh, _known(request.match_info["job_id"]))
+    shown = _shown(job)
+    if shown is not None:
+        return web.json_response({"stage": job.stage, "documents": shown})
+    if job.status == "succeeded" and job.prompts:
+        record = await asyncio.to_thread(v1._finished_record, job.prompts[-1])
+        data = json.loads(await asyncio.to_thread(record.read_text, encoding="utf-8"))
+        documents = {
+            str(kind): {"text": str(doc.get("text") or ""), "sha256": sha256_text(str(doc.get("text") or ""))}
+            for kind, doc in (data.get("documents") or {}).items()
+            if isinstance(doc, dict)
+        }
+        return web.json_response({"stage": None, "documents": documents})
+    raise SongApiError("not_found", f"The job has no documents yet (it is {job.status}).", status=404)
+
+
 def _route(method: str, path: str, handler: Any) -> Route:
     return Route(method, f"{BASE}{path}", handler, "api")
 
@@ -351,6 +442,8 @@ ROUTES: tuple[Route, ...] = (
     _route("GET", "/jobs/{job_id}", job_get),
     _route("DELETE", "/jobs/{job_id}", job_delete),
     _route("GET", "/jobs/{job_id}/files/{name:.+}", job_file),
+    _route("POST", "/jobs/{job_id}/approve", job_approve),
+    _route("GET", "/jobs/{job_id}/documents", job_documents),
     _route("POST", "/uploads", v1.upload),
     _route("GET", "/queue", v1.queue_info),
 )
