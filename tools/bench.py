@@ -258,8 +258,8 @@ def run_once(
 
 
 def summary(runs: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
-    """The medians of a brief's runs: the total, every stage and its loading, the peak memory - and the first run
-    apart (it loads what the runs after it find loaded)."""
+    """The medians of all of a brief's runs: the total, every stage (in the template's order) and its loading, the
+    peak memory - and the first run's total shown apart (it loads what the runs after it find loaded)."""
     timed = [r for r in runs if isinstance(r.get("timings"), Mapping)]
     if not timed:
         return {"runs": len(runs), "succeeded": 0}
@@ -268,7 +268,7 @@ def summary(runs: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     for run in timed:
         names += [s["stage"] for s in run["timings"]["stages"] if s["stage"] not in names]
     stages = []
-    for name in names:
+    for name in sorted(names):  # "1 · SONG" ... "6 · FINISH", then the model blocks
         spent = [float(s["seconds"]) for r in timed for s in r["timings"]["stages"] if s["stage"] == name]
         loads = [
             float(s.get("load_seconds", 0.0))
@@ -324,8 +324,8 @@ def markdown(report: Mapping[str, Any], compared: Sequence[Mapping[str, Any]] = 
         "",
         f"Plenio {report.get('plenio', '?')} in ComfyUI {report.get('comfyui', '?')} on "
         f"{report.get('card') or 'an unnamed machine'}, {report['runs']} run(s) "
-        f"per brief, {report['date']}. Seconds from the release record's `timings`; the median of the runs, the "
-        "first run apart (it loads what the later ones find loaded). *load* is the part of a stage spent loading "
+        f"per brief, {report['date']}. Seconds from the release record's `timings`; the median of all runs; the "
+        "first run's total also on its own (it loads what the later ones find loaded). *load* is the part of a stage spent loading "
         "models.",
         "",
         "| Brief | Runs | Median | First run | Fastest | Peak VRAM |",
