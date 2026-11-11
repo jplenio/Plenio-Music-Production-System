@@ -249,6 +249,7 @@ async def jobs_create(request: web.Request) -> web.StreamResponse:
     if known is not None:
         job, view = refresh(known)
         return web.json_response(job_answer(job, view), status=200)
+    asked = "review" in data  # an empty list too: stop nowhere (the DAW template's sheet stops by itself)
     wanted = data.pop("review", None) or []
     if not isinstance(wanted, list) or not all(isinstance(stage, str) for stage in wanted):
         raise SongApiError("invalid_value", "'review' is a list of stages ('text', 'score').", field="review")
@@ -273,7 +274,7 @@ async def jobs_create(request: web.Request) -> web.StreamResponse:
             hint=f"Its stops: {', '.join(sorted(set(review.stages(prepared.prompt).values())))}.",
             field="review",
         )
-    if wanted:
+    if asked:
         review.set_stops(prepared.prompt, wanted, [])
     refused = await asyncio.to_thread(v1.model_choice_errors, prepared.prompt)
     missing = v1._missing_files(refused)
