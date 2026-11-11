@@ -59,10 +59,12 @@ def test_the_template_files_give_the_frontends_prompt(name: str, template: str) 
 def test_the_song_prompt_has_the_blocks_inner_nodes_and_no_frontend_nodes() -> None:
     prompt = fixture("yue2-song.shipped.json")["prompt"]
     assert {"MarkdownNote", "Note", "Reroute"}.isdisjoint(n["class_type"] for n in prompt.values())
-    # the YuE2 Model block: its checkpoint loader and engine, its bypassed adapter left out and passed through
-    assert prompt["3:101"]["inputs"] == {"ckpt_name": "yue2_3b_int8_convrot.safetensors"}
-    assert prompt["3:103"]["inputs"]["clip"] == ["3:101", 1]
-    assert "3:102" not in prompt
+    # the YuE2 Model block: its Model Choice feeds the checkpoint loader, the engine reads the loader's CLIP, its
+    # bypassed adapter is left out and passed through
+    assert prompt["3:101"]["inputs"] == {"component": "yue2", "component.file": "auto"}
+    assert prompt["3:103"]["inputs"] == {"ckpt_name": ["3:101", 0]}
+    assert prompt["3:105"]["inputs"]["clip"] == ["3:103", 1]
+    assert "3:104" not in prompt
     assert all(":" not in key or key.split(":")[0].isdigit() for key in prompt)
 
 

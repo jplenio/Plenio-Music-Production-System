@@ -129,7 +129,8 @@ class PlenioModelChoice(io.ComfyNode):
             except Exception as error:  # noqa: BLE001 - the error below says it all the same
                 host.log.debug("Plenio Model Choice: the page was not told: %s", error)
             fetch = (
-                "Open Plenio Setup: it downloads the file into the right folder."
+                "Open Plenio Setup: it downloads the file into the right folder. Or download it yourself "
+                f"({found.variant.url}) into models/{chosen.component.folder}."
                 if found.variant is not None
                 else f"Put it into models/{chosen.component.folder}, or choose another file (auto: the one "
                 "Plenio's catalogue has for this computer)."

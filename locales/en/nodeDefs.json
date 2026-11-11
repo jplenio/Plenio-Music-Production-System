@@ -2,7 +2,7 @@
  "be8d0fd4-8ce7-561b-8778-c59f81c6c6b4": {
   "inputs": {
    "ckpt_name": {
-    "tooltip": "The YuE2 checkpoint in models/checkpoints: yue2_3b_int8_convrot (default, for 8-16 GB GPUs), yue2_3b_bf16 (24 GB and more) or a YuE2 finetune in ComfyUI's format (one file with the music model, the text side and the audio decoder, like these two). Press R after adding a file. Not loadable here: GGUF files and m-a-p's Transformers layout (docs/user/models.md)."
+    "tooltip": "The YuE2 checkpoint (models/checkpoints), or a finetune in ComfyUI's format. auto: the file for this computer, chosen when the workflow runs (Plenio Setup shows which and why; config.toml can pin one). Or a file of your own in that folder."
    }
   },
   "outputs": {
@@ -290,13 +290,13 @@
  "a469aeef-bca2-5738-b40d-1130a141291b": {
   "inputs": {
    "unet_name": {
-    "tooltip": "MiniMax Music 3's diffusion model in models/diffusion_models: the fp16 file (default) or minimax_music3_dit_int8_convrot (2.5 GB, for 8-12 GB GPUs)."
+    "tooltip": "MiniMax Music 3's diffusion model (models/diffusion_models). auto: the file for this computer, chosen when the workflow runs (Plenio Setup shows which and why; config.toml can pin one). Or a file of your own in that folder."
    },
    "clip_name": {
-    "tooltip": "MiniMax Music 3's text encoder in models/text_encoders (int8 by default); the Song Sheet counts the 5,000-token prompt budget with it, exactly."
+    "tooltip": "MiniMax Music 3's text encoder (models/text_encoders); the Song Sheet counts the prompt budget with it. auto: the file for this computer, chosen when the workflow runs (Plenio Setup shows which and why; config.toml can pin one). Or a file of your own in that folder."
    },
    "vae_name": {
-    "tooltip": "MiniMax Music 3's audio decoder in models/vae."
+    "tooltip": "MiniMax Music 3's audio decoder (models/vae). auto: the file for this computer, chosen when the workflow runs (Plenio Setup shows which and why; config.toml can pin one). Or a file of your own in that folder."
    }
   },
   "outputs": {

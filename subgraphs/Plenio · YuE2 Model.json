@@ -58,7 +58,7 @@
    "title": "Plenio · YuE2 Model",
    "properties": {},
    "widgets_values": [
-    "yue2_3b_int8_convrot.safetensors"
+    "auto"
    ]
   }
  ],
@@ -71,8 +71,8 @@
     "version": 1,
     "state": {
      "lastGroupId": 0,
-     "lastNodeId": 103,
-     "lastLinkId": 8,
+     "lastNodeId": 105,
+     "lastLinkId": 10,
      "lastRerouteId": 0
     },
     "revision": 0,
@@ -90,7 +90,7 @@
     "outputNode": {
      "id": -20,
      "bounding": [
-      1120,
+      1520,
       0,
       160,
       120
@@ -102,7 +102,7 @@
       "name": "ckpt_name",
       "type": "COMBO",
       "linkIds": [
-       4
+       6
       ],
       "pos": [
        0,
@@ -117,7 +117,7 @@
       "name": "MODEL",
       "type": "MODEL",
       "linkIds": [
-       5
+       7
       ],
       "pos": [
        0,
@@ -129,7 +129,7 @@
       "name": "CLIP",
       "type": "CLIP",
       "linkIds": [
-       6
+       8
       ],
       "pos": [
        0,
@@ -141,7 +141,7 @@
       "name": "VAE",
       "type": "VAE",
       "linkIds": [
-       7
+       9
       ],
       "pos": [
        0,
@@ -153,7 +153,7 @@
       "name": "engine",
       "type": "PLENIO_ENGINE",
       "linkIds": [
-       8
+       10
       ],
       "pos": [
        0,
@@ -165,9 +165,115 @@
     "nodes": [
      {
       "id": 101,
-      "type": "CheckpointLoaderSimple",
+      "type": "PlenioModelChoice",
       "pos": [
        0,
+       0
+      ],
+      "size": [
+       340,
+       110
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "component",
+        "name": "component",
+        "type": "COMFY_DYNAMICCOMBO_V3",
+        "widget": {
+         "name": "component"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "component.file",
+        "name": "component.file",
+        "type": "COMBO",
+        "widget": {
+         "name": "component.file"
+        },
+        "link": 6
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "file",
+        "name": "file",
+        "type": "*",
+        "links": [
+         1
+        ]
+       }
+      ],
+      "title": "Music model",
+      "properties": {
+       "Node name for S&R": "PlenioModelChoice"
+      },
+      "widgets_values": [
+       "yue2",
+       "auto"
+      ]
+     },
+     {
+      "id": 102,
+      "type": "PlenioModelChoice",
+      "pos": [
+       0.0,
+       204
+      ],
+      "size": [
+       340,
+       110
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "component",
+        "name": "component",
+        "type": "COMFY_DYNAMICCOMBO_V3",
+        "widget": {
+         "name": "component"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "component.file",
+        "name": "component.file",
+        "type": "COMBO",
+        "widget": {
+         "name": "component.file"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "file",
+        "name": "file",
+        "type": "*",
+        "links": [
+         2
+        ]
+       }
+      ],
+      "title": "Instrumental adapter file",
+      "properties": {
+       "Node name for S&R": "PlenioModelChoice"
+      },
+      "widgets_values": [
+       "yue2-instrumental-adapter",
+       "auto"
+      ]
+     },
+     {
+      "id": 103,
+      "type": "CheckpointLoaderSimple",
+      "pos": [
+       400,
        0
       ],
       "size": [
@@ -175,7 +281,7 @@
        100
       ],
       "flags": {},
-      "order": 0,
+      "order": 2,
       "mode": 0,
       "inputs": [
        {
@@ -185,7 +291,7 @@
         "widget": {
          "name": "ckpt_name"
         },
-        "link": 4
+        "link": 1
        }
       ],
       "outputs": [
@@ -194,7 +300,7 @@
         "name": "MODEL",
         "type": "MODEL",
         "links": [
-         1
+         3
         ]
        },
        {
@@ -202,7 +308,7 @@
         "name": "CLIP",
         "type": "CLIP",
         "links": [
-         2
+         4
         ]
        },
        {
@@ -210,29 +316,22 @@
         "name": "VAE",
         "type": "VAE",
         "links": [
-         7
+         9
         ]
        }
       ],
       "properties": {
-       "Node name for S&R": "CheckpointLoaderSimple",
-       "models": [
-        {
-         "name": "yue2_3b_int8_convrot.safetensors",
-         "url": "https://huggingface.co/Comfy-Org/YuE2/resolve/2f76ca75e6ee094169de899cc7fc99d6887e2196/checkpoints/yue2_3b_int8_convrot.safetensors",
-         "directory": "checkpoints"
-        }
-       ]
+       "Node name for S&R": "CheckpointLoaderSimple"
       },
       "widgets_values": [
        "yue2_3b_int8_convrot.safetensors"
       ]
      },
      {
-      "id": 102,
+      "id": 104,
       "type": "LoraLoader",
       "pos": [
-       380,
+       780,
        0
       ],
       "size": [
@@ -240,20 +339,20 @@
        130
       ],
       "flags": {},
-      "order": 1,
+      "order": 3,
       "mode": 4,
       "inputs": [
        {
         "localized_name": "model",
         "name": "model",
         "type": "MODEL",
-        "link": 1
+        "link": 3
        },
        {
         "localized_name": "clip",
         "name": "clip",
         "type": "CLIP",
-        "link": 2
+        "link": 4
        },
        {
         "localized_name": "lora_name",
@@ -262,7 +361,7 @@
         "widget": {
          "name": "lora_name"
         },
-        "link": null
+        "link": 2
        },
        {
         "localized_name": "strength_model",
@@ -289,7 +388,7 @@
         "name": "MODEL",
         "type": "MODEL",
         "links": [
-         5
+         7
         ]
        },
        {
@@ -297,21 +396,14 @@
         "name": "CLIP",
         "type": "CLIP",
         "links": [
-         3,
-         6
+         5,
+         8
         ]
        }
       ],
       "title": "Instrumental adapter (optional)",
       "properties": {
-       "Node name for S&R": "LoraLoader",
-       "models": [
-        {
-         "name": "ar_lora_inst_v3abc_comfyui.safetensors",
-         "url": "https://huggingface.co/Mothersuperior/YuE2-instrumental-cot-full-loras/resolve/947f2f4b28978b2b6c3e316e6a87925c76bf3c4b/ar_lora_inst_v3abc_comfyui.safetensors",
-         "directory": "loras"
-        }
-       ]
+       "Node name for S&R": "LoraLoader"
       },
       "widgets_values": [
        "ar_lora_inst_v3abc_comfyui.safetensors",
@@ -320,10 +412,10 @@
       ]
      },
      {
-      "id": 103,
+      "id": 105,
       "type": "PlenioEngine",
       "pos": [
-       760,
+       1160,
        0
       ],
       "size": [
@@ -331,14 +423,14 @@
        60
       ],
       "flags": {},
-      "order": 2,
+      "order": 4,
       "mode": 0,
       "inputs": [
        {
         "localized_name": "clip",
         "name": "clip",
         "type": "CLIP",
-        "link": 3
+        "link": 5
        }
       ],
       "outputs": [
@@ -347,7 +439,7 @@
         "name": "engine",
         "type": "PLENIO_ENGINE",
         "links": [
-         8
+         10
         ]
        }
       ],
@@ -363,61 +455,77 @@
       "id": 1,
       "origin_id": 101,
       "origin_slot": 0,
-      "target_id": 102,
+      "target_id": 103,
       "target_slot": 0,
-      "type": "MODEL"
+      "type": "*"
      },
      {
       "id": 2,
-      "origin_id": 101,
+      "origin_id": 102,
+      "origin_slot": 0,
+      "target_id": 104,
+      "target_slot": 2,
+      "type": "*"
+     },
+     {
+      "id": 3,
+      "origin_id": 103,
+      "origin_slot": 0,
+      "target_id": 104,
+      "target_slot": 0,
+      "type": "MODEL"
+     },
+     {
+      "id": 4,
+      "origin_id": 103,
       "origin_slot": 1,
-      "target_id": 102,
+      "target_id": 104,
       "target_slot": 1,
       "type": "CLIP"
      },
      {
-      "id": 3,
-      "origin_id": 102,
+      "id": 5,
+      "origin_id": 104,
       "origin_slot": 1,
-      "target_id": 103,
+      "target_id": 105,
       "target_slot": 0,
       "type": "CLIP"
      },
      {
-      "id": 4,
+      "id": 6,
       "origin_id": -10,
       "origin_slot": 0,
       "target_id": 101,
-      "target_slot": 0,
+      "target_slot": 1,
       "type": "COMBO"
      },
      {
-      "id": 5,
-      "origin_id": 102,
+      "id": 7,
+      "origin_id": 104,
       "origin_slot": 0,
       "target_id": -20,
       "target_slot": 0,
       "type": "MODEL"
      },
      {
-      "id": 6,
-      "origin_id": 102,
+      "id": 8,
+      "origin_id": 104,
       "origin_slot": 1,
       "target_id": -20,
       "target_slot": 1,
       "type": "CLIP"
      },
      {
-      "id": 7,
-      "origin_id": 101,
+      "id": 9,
+      "origin_id": 103,
       "origin_slot": 2,
       "target_id": -20,
       "target_slot": 2,
       "type": "VAE"
      },
      {
-      "id": 8,
-      "origin_id": 103,
+      "id": 10,
+      "origin_id": 105,
       "origin_slot": 0,
       "target_id": -20,
       "target_slot": 3,

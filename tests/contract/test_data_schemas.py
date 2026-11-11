@@ -93,9 +93,12 @@ def test_release_record_matches_schema(tmp_path: Path) -> None:
                 "nodes": [{"id": 9, "type": "PlenioSongSheet", "widgets_values": ["continue", ""]}],
                 "links": [],
             },
+            # since 2.0: what each Model Choice chose
+            models={"3:101": {"component": "yue2", "file": "yue2_3b_int8_convrot.safetensors"}},
         )
     )
     data = json.loads(json.dumps(record, allow_nan=False))
+    assert data["models"]["3:101"]["file"] == "yue2_3b_int8_convrot.safetensors"
     jsonschema.validate(data, schema("record-1.schema.json"))
     for entry in data["reports"]:
         jsonschema.validate(entry, schema("report-1.schema.json"))

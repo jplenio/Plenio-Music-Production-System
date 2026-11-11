@@ -177,6 +177,19 @@
         "lyrics_fidelity": { "type": "string" }
       }
     },
+    "models": {
+      "description": "Since 2.0: the file each Model Choice of the prompt chose, by prompt node id (the prompt says only auto).",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["component", "file"],
+        "additionalProperties": false,
+        "properties": {
+          "component": { "type": "string", "minLength": 1 },
+          "file": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
     "timings": {
       "description": "Since 2.0: where the run's time went (plenio.timings/1) - seconds per stage (a group of the template), the part of it spent loading models, the peak memory ComfyUI held on its graphics card. Not part of the fingerprint.",
       "type": "object",

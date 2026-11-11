@@ -202,6 +202,24 @@ def run_timings(workflow: Any) -> dict[str, Any] | None:
         return None
 
 
+def chosen_models(prompt: Any) -> dict[str, dict[str, str]] | None:
+    """The file each Model Choice of ``prompt`` chose, by node id: resolved again here as the node did - the
+    same plan on the same computer - so a Model Choice ComfyUI took from its cache counts too."""
+    from .. import setup
+
+    found: dict[str, dict[str, str]] = {}
+    for node_id, node in (prompt or {}).items() if isinstance(prompt, dict) else ():
+        if not isinstance(node, dict) or node.get("class_type") != "PlenioModelChoice":
+            continue
+        inputs = node.get("inputs") or {}
+        component, file = str(inputs.get("component", "")), str(inputs.get("component.file", "") or "auto")
+        try:
+            found[str(node_id)] = {"component": component, "file": setup.choose(component, file).pick.file}
+        except Exception:  # noqa: BLE001 - a note of the record; the export does not fail for it
+            continue
+    return found or None
+
+
 def _plain(value: Any) -> str:
     if isinstance(value, bool):
         return "on" if value else "off"
@@ -729,6 +747,7 @@ class PlenioExportRelease(io.ComfyNode):
             licences=licences,
             made=made_facts(brief, report_dicts),
             timings=run_timings((cls.hidden.extra_pnginfo or {}).get("workflow")),
+            models=chosen_models(cls.hidden.prompt),
             sheet_music=(
                 {
                     "file": file(SHEET_SUFFIX).name,

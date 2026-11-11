@@ -454,7 +454,7 @@
    "title": "Plenio · YuE2 Model",
    "properties": {},
    "widgets_values": [
-    "yue2_3b_int8_convrot.safetensors"
+    "auto"
    ]
   },
   {
@@ -3475,8 +3475,8 @@
     "version": 1,
     "state": {
      "lastGroupId": 0,
-     "lastNodeId": 103,
-     "lastLinkId": 8,
+     "lastNodeId": 105,
+     "lastLinkId": 10,
      "lastRerouteId": 0
     },
     "revision": 0,
@@ -3494,7 +3494,7 @@
     "outputNode": {
      "id": -20,
      "bounding": [
-      1120,
+      1520,
       0,
       160,
       120
@@ -3506,7 +3506,7 @@
       "name": "ckpt_name",
       "type": "COMBO",
       "linkIds": [
-       4
+       6
       ],
       "pos": [
        0,
@@ -3521,7 +3521,7 @@
       "name": "MODEL",
       "type": "MODEL",
       "linkIds": [
-       5
+       7
       ],
       "pos": [
        0,
@@ -3533,7 +3533,7 @@
       "name": "CLIP",
       "type": "CLIP",
       "linkIds": [
-       6
+       8
       ],
       "pos": [
        0,
@@ -3545,7 +3545,7 @@
       "name": "VAE",
       "type": "VAE",
       "linkIds": [
-       7
+       9
       ],
       "pos": [
        0,
@@ -3557,7 +3557,7 @@
       "name": "engine",
       "type": "PLENIO_ENGINE",
       "linkIds": [
-       8
+       10
       ],
       "pos": [
        0,
@@ -3569,9 +3569,115 @@
     "nodes": [
      {
       "id": 101,
-      "type": "CheckpointLoaderSimple",
+      "type": "PlenioModelChoice",
       "pos": [
        0,
+       0
+      ],
+      "size": [
+       340,
+       110
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "component",
+        "name": "component",
+        "type": "COMFY_DYNAMICCOMBO_V3",
+        "widget": {
+         "name": "component"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "component.file",
+        "name": "component.file",
+        "type": "COMBO",
+        "widget": {
+         "name": "component.file"
+        },
+        "link": 6
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "file",
+        "name": "file",
+        "type": "*",
+        "links": [
+         1
+        ]
+       }
+      ],
+      "title": "Music model",
+      "properties": {
+       "Node name for S&R": "PlenioModelChoice"
+      },
+      "widgets_values": [
+       "yue2",
+       "auto"
+      ]
+     },
+     {
+      "id": 102,
+      "type": "PlenioModelChoice",
+      "pos": [
+       0.0,
+       204
+      ],
+      "size": [
+       340,
+       110
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "component",
+        "name": "component",
+        "type": "COMFY_DYNAMICCOMBO_V3",
+        "widget": {
+         "name": "component"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "component.file",
+        "name": "component.file",
+        "type": "COMBO",
+        "widget": {
+         "name": "component.file"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "file",
+        "name": "file",
+        "type": "*",
+        "links": [
+         2
+        ]
+       }
+      ],
+      "title": "Instrumental adapter file",
+      "properties": {
+       "Node name for S&R": "PlenioModelChoice"
+      },
+      "widgets_values": [
+       "yue2-instrumental-adapter",
+       "auto"
+      ]
+     },
+     {
+      "id": 103,
+      "type": "CheckpointLoaderSimple",
+      "pos": [
+       400,
        0
       ],
       "size": [
@@ -3579,7 +3685,7 @@
        100
       ],
       "flags": {},
-      "order": 0,
+      "order": 2,
       "mode": 0,
       "inputs": [
        {
@@ -3589,7 +3695,7 @@
         "widget": {
          "name": "ckpt_name"
         },
-        "link": 4
+        "link": 1
        }
       ],
       "outputs": [
@@ -3598,7 +3704,7 @@
         "name": "MODEL",
         "type": "MODEL",
         "links": [
-         1
+         3
         ]
        },
        {
@@ -3606,7 +3712,7 @@
         "name": "CLIP",
         "type": "CLIP",
         "links": [
-         2
+         4
         ]
        },
        {
@@ -3614,29 +3720,22 @@
         "name": "VAE",
         "type": "VAE",
         "links": [
-         7
+         9
         ]
        }
       ],
       "properties": {
-       "Node name for S&R": "CheckpointLoaderSimple",
-       "models": [
-        {
-         "name": "yue2_3b_int8_convrot.safetensors",
-         "url": "https://huggingface.co/Comfy-Org/YuE2/resolve/2f76ca75e6ee094169de899cc7fc99d6887e2196/checkpoints/yue2_3b_int8_convrot.safetensors",
-         "directory": "checkpoints"
-        }
-       ]
+       "Node name for S&R": "CheckpointLoaderSimple"
       },
       "widgets_values": [
        "yue2_3b_int8_convrot.safetensors"
       ]
      },
      {
-      "id": 102,
+      "id": 104,
       "type": "LoraLoader",
       "pos": [
-       380,
+       780,
        0
       ],
       "size": [
@@ -3644,20 +3743,20 @@
        130
       ],
       "flags": {},
-      "order": 1,
+      "order": 3,
       "mode": 4,
       "inputs": [
        {
         "localized_name": "model",
         "name": "model",
         "type": "MODEL",
-        "link": 1
+        "link": 3
        },
        {
         "localized_name": "clip",
         "name": "clip",
         "type": "CLIP",
-        "link": 2
+        "link": 4
        },
        {
         "localized_name": "lora_name",
@@ -3666,7 +3765,7 @@
         "widget": {
          "name": "lora_name"
         },
-        "link": null
+        "link": 2
        },
        {
         "localized_name": "strength_model",
@@ -3693,7 +3792,7 @@
         "name": "MODEL",
         "type": "MODEL",
         "links": [
-         5
+         7
         ]
        },
        {
@@ -3701,21 +3800,14 @@
         "name": "CLIP",
         "type": "CLIP",
         "links": [
-         3,
-         6
+         5,
+         8
         ]
        }
       ],
       "title": "Instrumental adapter (optional)",
       "properties": {
-       "Node name for S&R": "LoraLoader",
-       "models": [
-        {
-         "name": "ar_lora_inst_v3abc_comfyui.safetensors",
-         "url": "https://huggingface.co/Mothersuperior/YuE2-instrumental-cot-full-loras/resolve/947f2f4b28978b2b6c3e316e6a87925c76bf3c4b/ar_lora_inst_v3abc_comfyui.safetensors",
-         "directory": "loras"
-        }
-       ]
+       "Node name for S&R": "LoraLoader"
       },
       "widgets_values": [
        "ar_lora_inst_v3abc_comfyui.safetensors",
@@ -3724,10 +3816,10 @@
       ]
      },
      {
-      "id": 103,
+      "id": 105,
       "type": "PlenioEngine",
       "pos": [
-       760,
+       1160,
        0
       ],
       "size": [
@@ -3735,14 +3827,14 @@
        60
       ],
       "flags": {},
-      "order": 2,
+      "order": 4,
       "mode": 0,
       "inputs": [
        {
         "localized_name": "clip",
         "name": "clip",
         "type": "CLIP",
-        "link": 3
+        "link": 5
        }
       ],
       "outputs": [
@@ -3751,7 +3843,7 @@
         "name": "engine",
         "type": "PLENIO_ENGINE",
         "links": [
-         8
+         10
         ]
        }
       ],
@@ -3767,61 +3859,77 @@
       "id": 1,
       "origin_id": 101,
       "origin_slot": 0,
-      "target_id": 102,
+      "target_id": 103,
       "target_slot": 0,
-      "type": "MODEL"
+      "type": "*"
      },
      {
       "id": 2,
-      "origin_id": 101,
+      "origin_id": 102,
+      "origin_slot": 0,
+      "target_id": 104,
+      "target_slot": 2,
+      "type": "*"
+     },
+     {
+      "id": 3,
+      "origin_id": 103,
+      "origin_slot": 0,
+      "target_id": 104,
+      "target_slot": 0,
+      "type": "MODEL"
+     },
+     {
+      "id": 4,
+      "origin_id": 103,
       "origin_slot": 1,
-      "target_id": 102,
+      "target_id": 104,
       "target_slot": 1,
       "type": "CLIP"
      },
      {
-      "id": 3,
-      "origin_id": 102,
+      "id": 5,
+      "origin_id": 104,
       "origin_slot": 1,
-      "target_id": 103,
+      "target_id": 105,
       "target_slot": 0,
       "type": "CLIP"
      },
      {
-      "id": 4,
+      "id": 6,
       "origin_id": -10,
       "origin_slot": 0,
       "target_id": 101,
-      "target_slot": 0,
+      "target_slot": 1,
       "type": "COMBO"
      },
      {
-      "id": 5,
-      "origin_id": 102,
+      "id": 7,
+      "origin_id": 104,
       "origin_slot": 0,
       "target_id": -20,
       "target_slot": 0,
       "type": "MODEL"
      },
      {
-      "id": 6,
-      "origin_id": 102,
+      "id": 8,
+      "origin_id": 104,
       "origin_slot": 1,
       "target_id": -20,
       "target_slot": 1,
       "type": "CLIP"
      },
      {
-      "id": 7,
-      "origin_id": 101,
+      "id": 9,
+      "origin_id": 103,
       "origin_slot": 2,
       "target_id": -20,
       "target_slot": 2,
       "type": "VAE"
      },
      {
-      "id": 8,
-      "origin_id": 103,
+      "id": 10,
+      "origin_id": 105,
       "origin_slot": 0,
       "target_id": -20,
       "target_slot": 3,
@@ -13305,8 +13413,8 @@
     "version": 1,
     "state": {
      "lastGroupId": 0,
-     "lastNodeId": 1012,
-     "lastLinkId": 19,
+     "lastNodeId": 1015,
+     "lastLinkId": 22,
      "lastRerouteId": 0
     },
     "revision": 0,
@@ -13315,7 +13423,7 @@
     "inputNode": {
      "id": -10,
      "bounding": [
-      -260,
+      -660,
       0,
       160,
       100
@@ -13336,7 +13444,7 @@
       "name": "text",
       "type": "STRING",
       "linkIds": [
-       13
+       16
       ],
       "pos": [
        0,
@@ -13349,7 +13457,7 @@
       "name": "noise_seed",
       "type": "INT",
       "linkIds": [
-       14
+       17
       ],
       "pos": [
        0,
@@ -13362,10 +13470,10 @@
       "name": "size",
       "type": "INT",
       "linkIds": [
-       15,
-       16,
-       17,
-       18
+       18,
+       19,
+       20,
+       21
       ],
       "pos": [
        0,
@@ -13380,7 +13488,7 @@
       "name": "IMAGE",
       "type": "IMAGE",
       "linkIds": [
-       19
+       22
       ],
       "pos": [
        0,
@@ -13392,6 +13500,165 @@
     "nodes": [
      {
       "id": 1001,
+      "type": "PlenioModelChoice",
+      "pos": [
+       -400,
+       0
+      ],
+      "size": [
+       340,
+       110
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "component",
+        "name": "component",
+        "type": "COMFY_DYNAMICCOMBO_V3",
+        "widget": {
+         "name": "component"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "component.file",
+        "name": "component.file",
+        "type": "COMBO",
+        "widget": {
+         "name": "component.file"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "file",
+        "name": "file",
+        "type": "*",
+        "links": [
+         1
+        ]
+       }
+      ],
+      "title": "Image model",
+      "properties": {
+       "Node name for S&R": "PlenioModelChoice"
+      },
+      "widgets_values": [
+       "flux2-klein",
+       "auto"
+      ]
+     },
+     {
+      "id": 1002,
+      "type": "PlenioModelChoice",
+      "pos": [
+       -400.0,
+       204
+      ],
+      "size": [
+       340,
+       110
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "component",
+        "name": "component",
+        "type": "COMFY_DYNAMICCOMBO_V3",
+        "widget": {
+         "name": "component"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "component.file",
+        "name": "component.file",
+        "type": "COMBO",
+        "widget": {
+         "name": "component.file"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "file",
+        "name": "file",
+        "type": "*",
+        "links": [
+         2
+        ]
+       }
+      ],
+      "title": "Text encoder",
+      "properties": {
+       "Node name for S&R": "PlenioModelChoice"
+      },
+      "widgets_values": [
+       "flux2-text-encoder",
+       "auto"
+      ]
+     },
+     {
+      "id": 1003,
+      "type": "PlenioModelChoice",
+      "pos": [
+       -400.0,
+       408
+      ],
+      "size": [
+       340,
+       110
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+       {
+        "localized_name": "component",
+        "name": "component",
+        "type": "COMFY_DYNAMICCOMBO_V3",
+        "widget": {
+         "name": "component"
+        },
+        "link": null
+       },
+       {
+        "localized_name": "component.file",
+        "name": "component.file",
+        "type": "COMBO",
+        "widget": {
+         "name": "component.file"
+        },
+        "link": null
+       }
+      ],
+      "outputs": [
+       {
+        "localized_name": "file",
+        "name": "file",
+        "type": "*",
+        "links": [
+         3
+        ]
+       }
+      ],
+      "title": "Image decoder",
+      "properties": {
+       "Node name for S&R": "PlenioModelChoice"
+      },
+      "widgets_values": [
+       "flux2-vae",
+       "auto"
+      ]
+     },
+     {
+      "id": 1004,
       "type": "UNETLoader",
       "pos": [
        0,
@@ -13402,7 +13669,7 @@
        90
       ],
       "flags": {},
-      "order": 0,
+      "order": 3,
       "mode": 0,
       "inputs": [
        {
@@ -13412,7 +13679,7 @@
         "widget": {
          "name": "unet_name"
         },
-        "link": null
+        "link": 1
        },
        {
         "localized_name": "weight_dtype",
@@ -13430,19 +13697,12 @@
         "name": "MODEL",
         "type": "MODEL",
         "links": [
-         3
+         6
         ]
        }
       ],
       "properties": {
-       "Node name for S&R": "UNETLoader",
-       "models": [
-        {
-         "name": "flux-2-klein-4b.safetensors",
-         "url": "https://huggingface.co/Comfy-Org/Flux-2-Klein-4B/resolve/5b3abca5c0dc1ecd4eaf3340868d09063fc1c965/split_files/diffusion_models/flux-2-klein-4b.safetensors",
-         "directory": "diffusion_models"
-        }
-       ]
+       "Node name for S&R": "UNETLoader"
       },
       "widgets_values": [
        "flux-2-klein-4b.safetensors",
@@ -13450,7 +13710,7 @@
       ]
      },
      {
-      "id": 1002,
+      "id": 1005,
       "type": "CLIPLoader",
       "pos": [
        0.0,
@@ -13461,7 +13721,7 @@
        110
       ],
       "flags": {},
-      "order": 1,
+      "order": 4,
       "mode": 0,
       "inputs": [
        {
@@ -13471,7 +13731,7 @@
         "widget": {
          "name": "clip_name"
         },
-        "link": null
+        "link": 2
        },
        {
         "localized_name": "type",
@@ -13498,19 +13758,12 @@
         "name": "CLIP",
         "type": "CLIP",
         "links": [
-         1
+         4
         ]
        }
       ],
       "properties": {
-       "Node name for S&R": "CLIPLoader",
-       "models": [
-        {
-         "name": "qwen_3_4b.safetensors",
-         "url": "https://huggingface.co/Comfy-Org/Flux-2-Klein-4B/resolve/5b3abca5c0dc1ecd4eaf3340868d09063fc1c965/split_files/text_encoders/qwen_3_4b.safetensors",
-         "directory": "text_encoders"
-        }
-       ]
+       "Node name for S&R": "CLIPLoader"
       },
       "widgets_values": [
        "qwen_3_4b.safetensors",
@@ -13519,7 +13772,7 @@
       ]
      },
      {
-      "id": 1003,
+      "id": 1006,
       "type": "VAELoader",
       "pos": [
        0.0,
@@ -13530,7 +13783,7 @@
        60
       ],
       "flags": {},
-      "order": 2,
+      "order": 5,
       "mode": 0,
       "inputs": [
        {
@@ -13540,7 +13793,7 @@
         "widget": {
          "name": "vae_name"
         },
-        "link": null
+        "link": 3
        }
       ],
       "outputs": [
@@ -13549,26 +13802,19 @@
         "name": "VAE",
         "type": "VAE",
         "links": [
-         12
+         15
         ]
        }
       ],
       "properties": {
-       "Node name for S&R": "VAELoader",
-       "models": [
-        {
-         "name": "flux2-vae.safetensors",
-         "url": "https://huggingface.co/Comfy-Org/Flux-2-Dev/resolve/9630c1b4b6e690497ae0c19bb6b1b35d4ebedcb7/split_files/vae/flux2-vae.safetensors",
-         "directory": "vae"
-        }
-       ]
+       "Node name for S&R": "VAELoader"
       },
       "widgets_values": [
        "flux2-vae.safetensors"
       ]
      },
      {
-      "id": 1004,
+      "id": 1007,
       "type": "CLIPTextEncode",
       "pos": [
        400,
@@ -13579,14 +13825,14 @@
        160
       ],
       "flags": {},
-      "order": 3,
+      "order": 6,
       "mode": 0,
       "inputs": [
        {
         "localized_name": "clip",
         "name": "clip",
         "type": "CLIP",
-        "link": 1
+        "link": 4
        },
        {
         "localized_name": "text",
@@ -13595,7 +13841,7 @@
         "widget": {
          "name": "text"
         },
-        "link": 13
+        "link": 16
        }
       ],
       "outputs": [
@@ -13604,8 +13850,8 @@
         "name": "CONDITIONING",
         "type": "CONDITIONING",
         "links": [
-         2,
-         4
+         5,
+         7
         ]
        }
       ],
@@ -13617,7 +13863,7 @@
       ]
      },
      {
-      "id": 1005,
+      "id": 1008,
       "type": "ConditioningZeroOut",
       "pos": [
        400.0,
@@ -13628,14 +13874,14 @@
        50
       ],
       "flags": {},
-      "order": 4,
+      "order": 7,
       "mode": 0,
       "inputs": [
        {
         "localized_name": "conditioning",
         "name": "conditioning",
         "type": "CONDITIONING",
-        "link": 2
+        "link": 5
        }
       ],
       "outputs": [
@@ -13644,7 +13890,7 @@
         "name": "CONDITIONING",
         "type": "CONDITIONING",
         "links": [
-         5
+         8
         ]
        }
       ],
@@ -13654,7 +13900,7 @@
       "widgets_values": []
      },
      {
-      "id": 1006,
+      "id": 1009,
       "type": "CFGGuider",
       "pos": [
        780,
@@ -13665,26 +13911,26 @@
        100
       ],
       "flags": {},
-      "order": 5,
+      "order": 8,
       "mode": 0,
       "inputs": [
        {
         "localized_name": "model",
         "name": "model",
         "type": "MODEL",
-        "link": 3
+        "link": 6
        },
        {
         "localized_name": "positive",
         "name": "positive",
         "type": "CONDITIONING",
-        "link": 4
+        "link": 7
        },
        {
         "localized_name": "negative",
         "name": "negative",
         "type": "CONDITIONING",
-        "link": 5
+        "link": 8
        },
        {
         "localized_name": "cfg",
@@ -13702,7 +13948,7 @@
         "name": "GUIDER",
         "type": "GUIDER",
         "links": [
-         7
+         10
         ]
        }
       ],
@@ -13714,7 +13960,7 @@
       ]
      },
      {
-      "id": 1007,
+      "id": 1010,
       "type": "RandomNoise",
       "pos": [
        780.0,
@@ -13725,7 +13971,7 @@
        90
       ],
       "flags": {},
-      "order": 6,
+      "order": 9,
       "mode": 0,
       "inputs": [
        {
@@ -13735,7 +13981,7 @@
         "widget": {
          "name": "noise_seed"
         },
-        "link": 14
+        "link": 17
        }
       ],
       "outputs": [
@@ -13744,7 +13990,7 @@
         "name": "NOISE",
         "type": "NOISE",
         "links": [
-         6
+         9
         ]
        }
       ],
@@ -13757,7 +14003,7 @@
       ]
      },
      {
-      "id": 1008,
+      "id": 1011,
       "type": "KSamplerSelect",
       "pos": [
        780.0,
@@ -13768,7 +14014,7 @@
        60
       ],
       "flags": {},
-      "order": 7,
+      "order": 10,
       "mode": 0,
       "inputs": [
        {
@@ -13787,7 +14033,7 @@
         "name": "SAMPLER",
         "type": "SAMPLER",
         "links": [
-         8
+         11
         ]
        }
       ],
@@ -13799,7 +14045,7 @@
       ]
      },
      {
-      "id": 1009,
+      "id": 1012,
       "type": "Flux2Scheduler",
       "pos": [
        780.0,
@@ -13810,7 +14056,7 @@
        110
       ],
       "flags": {},
-      "order": 8,
+      "order": 11,
       "mode": 0,
       "inputs": [
        {
@@ -13829,7 +14075,7 @@
         "widget": {
          "name": "width"
         },
-        "link": 15
+        "link": 18
        },
        {
         "localized_name": "height",
@@ -13838,7 +14084,7 @@
         "widget": {
          "name": "height"
         },
-        "link": 16
+        "link": 19
        }
       ],
       "outputs": [
@@ -13847,7 +14093,7 @@
         "name": "SIGMAS",
         "type": "SIGMAS",
         "links": [
-         9
+         12
         ]
        }
       ],
@@ -13861,7 +14107,7 @@
       ]
      },
      {
-      "id": 1010,
+      "id": 1013,
       "type": "EmptyFlux2LatentImage",
       "pos": [
        780.0,
@@ -13872,7 +14118,7 @@
        110
       ],
       "flags": {},
-      "order": 9,
+      "order": 12,
       "mode": 0,
       "inputs": [
        {
@@ -13882,7 +14128,7 @@
         "widget": {
          "name": "width"
         },
-        "link": 17
+        "link": 20
        },
        {
         "localized_name": "height",
@@ -13891,7 +14137,7 @@
         "widget": {
          "name": "height"
         },
-        "link": 18
+        "link": 21
        },
        {
         "localized_name": "batch_size",
@@ -13909,7 +14155,7 @@
         "name": "LATENT",
         "type": "LATENT",
         "links": [
-         10
+         13
         ]
        }
       ],
@@ -13923,7 +14169,7 @@
       ]
      },
      {
-      "id": 1011,
+      "id": 1014,
       "type": "SamplerCustomAdvanced",
       "pos": [
        1100,
@@ -13934,38 +14180,38 @@
        110
       ],
       "flags": {},
-      "order": 10,
+      "order": 13,
       "mode": 0,
       "inputs": [
        {
         "localized_name": "noise",
         "name": "noise",
         "type": "NOISE",
-        "link": 6
+        "link": 9
        },
        {
         "localized_name": "guider",
         "name": "guider",
         "type": "GUIDER",
-        "link": 7
+        "link": 10
        },
        {
         "localized_name": "sampler",
         "name": "sampler",
         "type": "SAMPLER",
-        "link": 8
+        "link": 11
        },
        {
         "localized_name": "sigmas",
         "name": "sigmas",
         "type": "SIGMAS",
-        "link": 9
+        "link": 12
        },
        {
         "localized_name": "latent_image",
         "name": "latent_image",
         "type": "LATENT",
-        "link": 10
+        "link": 13
        }
       ],
       "outputs": [
@@ -13974,7 +14220,7 @@
         "name": "output",
         "type": "LATENT",
         "links": [
-         11
+         14
         ]
        },
        {
@@ -13990,7 +14236,7 @@
       "widgets_values": []
      },
      {
-      "id": 1012,
+      "id": 1015,
       "type": "VAEDecode",
       "pos": [
        1420,
@@ -14001,20 +14247,20 @@
        50
       ],
       "flags": {},
-      "order": 11,
+      "order": 14,
       "mode": 0,
       "inputs": [
        {
         "localized_name": "samples",
         "name": "samples",
         "type": "LATENT",
-        "link": 11
+        "link": 14
        },
        {
         "localized_name": "vae",
         "name": "vae",
         "type": "VAE",
-        "link": 12
+        "link": 15
        }
       ],
       "outputs": [
@@ -14023,7 +14269,7 @@
         "name": "IMAGE",
         "type": "IMAGE",
         "links": [
-         19
+         22
         ]
        }
       ],
@@ -14037,136 +14283,136 @@
     "links": [
      {
       "id": 1,
-      "origin_id": 1002,
+      "origin_id": 1001,
       "origin_slot": 0,
       "target_id": 1004,
+      "target_slot": 0,
+      "type": "*"
+     },
+     {
+      "id": 2,
+      "origin_id": 1002,
+      "origin_slot": 0,
+      "target_id": 1005,
+      "target_slot": 0,
+      "type": "*"
+     },
+     {
+      "id": 3,
+      "origin_id": 1003,
+      "origin_slot": 0,
+      "target_id": 1006,
+      "target_slot": 0,
+      "type": "*"
+     },
+     {
+      "id": 4,
+      "origin_id": 1005,
+      "origin_slot": 0,
+      "target_id": 1007,
       "target_slot": 0,
       "type": "CLIP"
      },
      {
-      "id": 2,
-      "origin_id": 1004,
-      "origin_slot": 0,
-      "target_id": 1005,
-      "target_slot": 0,
-      "type": "CONDITIONING"
-     },
-     {
-      "id": 3,
-      "origin_id": 1001,
-      "origin_slot": 0,
-      "target_id": 1006,
-      "target_slot": 0,
-      "type": "MODEL"
-     },
-     {
-      "id": 4,
-      "origin_id": 1004,
-      "origin_slot": 0,
-      "target_id": 1006,
-      "target_slot": 1,
-      "type": "CONDITIONING"
-     },
-     {
       "id": 5,
-      "origin_id": 1005,
+      "origin_id": 1007,
       "origin_slot": 0,
-      "target_id": 1006,
-      "target_slot": 2,
+      "target_id": 1008,
+      "target_slot": 0,
       "type": "CONDITIONING"
      },
      {
       "id": 6,
-      "origin_id": 1007,
+      "origin_id": 1004,
       "origin_slot": 0,
-      "target_id": 1011,
+      "target_id": 1009,
       "target_slot": 0,
-      "type": "NOISE"
+      "type": "MODEL"
      },
      {
       "id": 7,
-      "origin_id": 1006,
+      "origin_id": 1007,
       "origin_slot": 0,
-      "target_id": 1011,
+      "target_id": 1009,
       "target_slot": 1,
-      "type": "GUIDER"
+      "type": "CONDITIONING"
      },
      {
       "id": 8,
       "origin_id": 1008,
       "origin_slot": 0,
-      "target_id": 1011,
+      "target_id": 1009,
       "target_slot": 2,
-      "type": "SAMPLER"
+      "type": "CONDITIONING"
      },
      {
       "id": 9,
-      "origin_id": 1009,
+      "origin_id": 1010,
       "origin_slot": 0,
-      "target_id": 1011,
-      "target_slot": 3,
-      "type": "SIGMAS"
+      "target_id": 1014,
+      "target_slot": 0,
+      "type": "NOISE"
      },
      {
       "id": 10,
-      "origin_id": 1010,
+      "origin_id": 1009,
       "origin_slot": 0,
-      "target_id": 1011,
-      "target_slot": 4,
-      "type": "LATENT"
+      "target_id": 1014,
+      "target_slot": 1,
+      "type": "GUIDER"
      },
      {
       "id": 11,
       "origin_id": 1011,
       "origin_slot": 0,
-      "target_id": 1012,
+      "target_id": 1014,
+      "target_slot": 2,
+      "type": "SAMPLER"
+     },
+     {
+      "id": 12,
+      "origin_id": 1012,
+      "origin_slot": 0,
+      "target_id": 1014,
+      "target_slot": 3,
+      "type": "SIGMAS"
+     },
+     {
+      "id": 13,
+      "origin_id": 1013,
+      "origin_slot": 0,
+      "target_id": 1014,
+      "target_slot": 4,
+      "type": "LATENT"
+     },
+     {
+      "id": 14,
+      "origin_id": 1014,
+      "origin_slot": 0,
+      "target_id": 1015,
       "target_slot": 0,
       "type": "LATENT"
      },
      {
-      "id": 12,
-      "origin_id": 1003,
+      "id": 15,
+      "origin_id": 1006,
       "origin_slot": 0,
-      "target_id": 1012,
+      "target_id": 1015,
       "target_slot": 1,
       "type": "VAE"
      },
      {
-      "id": 13,
+      "id": 16,
       "origin_id": -10,
       "origin_slot": 0,
-      "target_id": 1004,
+      "target_id": 1007,
       "target_slot": 1,
       "type": "STRING"
      },
      {
-      "id": 14,
-      "origin_id": -10,
-      "origin_slot": 1,
-      "target_id": 1007,
-      "target_slot": 0,
-      "type": "INT"
-     },
-     {
-      "id": 15,
-      "origin_id": -10,
-      "origin_slot": 2,
-      "target_id": 1009,
-      "target_slot": 1,
-      "type": "INT"
-     },
-     {
-      "id": 16,
-      "origin_id": -10,
-      "origin_slot": 2,
-      "target_id": 1009,
-      "target_slot": 2,
-      "type": "INT"
-     },
-     {
       "id": 17,
       "origin_id": -10,
-      "origin_slot": 2,
+      "origin_slot": 1,
       "target_id": 1010,
       "target_slot": 0,
       "type": "INT"
@@ -14175,13 +14421,37 @@
       "id": 18,
       "origin_id": -10,
       "origin_slot": 2,
-      "target_id": 1010,
+      "target_id": 1012,
       "target_slot": 1,
       "type": "INT"
      },
      {
       "id": 19,
-      "origin_id": 1012,
+      "origin_id": -10,
+      "origin_slot": 2,
+      "target_id": 1012,
+      "target_slot": 2,
+      "type": "INT"
+     },
+     {
+      "id": 20,
+      "origin_id": -10,
+      "origin_slot": 2,
+      "target_id": 1013,
+      "target_slot": 0,
+      "type": "INT"
+     },
+     {
+      "id": 21,
+      "origin_id": -10,
+      "origin_slot": 2,
+      "target_id": 1013,
+      "target_slot": 1,
+      "type": "INT"
+     },
+     {
+      "id": 22,
+      "origin_id": 1015,
       "origin_slot": 0,
       "target_id": -20,
       "target_slot": 0,

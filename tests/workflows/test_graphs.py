@@ -183,12 +183,43 @@ def model_files(template: dict[str, Any]) -> tuple[dict[str, dict[str, Any]], se
     hq_on = any(n["type"] == "PlenioHQMastering" and n["widgets_values"] == [True] for n in template["nodes"])
     lazy_off = {"separation"} | (set() if hq_on else {"super-resolution"})
 
-    def walk(nodes: list[dict[str, Any]], bypassed: bool) -> None:
+    from plenio.core.models import load_components
+
+    components = load_components(PROJECT / "resources" / "models.toml")
+
+    def chosen_by(node: dict[str, Any], nodes: list[dict[str, Any]], links: list[Any]) -> str | None:
+        """The component of the Model Choice that feeds the loader's file widget (``None``: none does)."""
+        widget = LOADER_WIDGETS[node["type"]]
+        slot = next((s for s in node.get("inputs") or [] if s.get("name") == widget), None)
+        if slot is None or slot.get("link") is None:
+            return None
+        origin = next(
+            (
+                link["origin_id"] if isinstance(link, dict) else link[1]
+                for link in links
+                if (link["id"] if isinstance(link, dict) else link[0]) == slot["link"]
+            ),
+            None,
+        )
+        source = next((n for n in nodes if n["id"] == origin), None)  # none: a block's input (-10)
+        if source is None or source["type"] != "PlenioModelChoice":
+            return None
+        return str(source["widgets_values"][0])
+
+    def walk(nodes: list[dict[str, Any]], bypassed: bool, links: list[Any]) -> None:
         for node in nodes:
             off = bypassed or node.get("mode") == 4
             if node["type"] in definitions:
-                walk(definitions[node["type"]]["nodes"], off)
+                definition = definitions[node["type"]]
+                walk(definition["nodes"], off, definition.get("links") or [])
             elif node["type"] in LOADER_WIDGETS:
+                component = chosen_by(node, nodes, links)
+                if component is not None:
+                    # Model Choice decides the file when the workflow runs: no download entry on the loader (the
+                    # missing-model dialog would ask for the default on a computer whose plan chose another)
+                    assert "models" not in (node.get("properties") or {}), node
+                    (optional if off else required).add(components[component].default.file)
+                    continue
                 if "models" not in (node.get("properties") or {}):
                     # the Generate Text branch's loader stays on Gemma 4 E4B, an alternative since 1.5.1 (the default
                     # writer is a GGUF): loaded only when that writer is chosen, so no download is offered for it
@@ -203,7 +234,7 @@ def model_files(template: dict[str, Any]) -> tuple[dict[str, dict[str, Any]], se
                 lazy = node["type"] == "PlenioAudioModelLoader" and node["widgets_values"][0] in lazy_off
                 (optional if off or lazy else required).add(entry["name"])
 
-    walk(template["nodes"], False)
+    walk(template["nodes"], False, template.get("links") or [])
     return entries, required, optional - required
 
 
@@ -836,7 +867,8 @@ def test_the_yue2_block_shows_its_checkpoint_choice_with_the_original_as_default
     """GitHub issue #26: collapsed, the block hid its *checkpoint*, and a finetune was wired in by hand inside it."""
     block = _yue2_block(TEMPLATES[name])
     assert not block["flags"].get("collapsed")
-    assert block["widgets_values"] == [ORIGINAL]
+    # since 2.0 the field is the block's Model Choice: auto, the plan's file for the computer that runs it
+    assert block["widgets_values"] == ["auto"]
     assert [i.get("label") for i in block["inputs"] if i.get("widget")] == ["checkpoint"]
 
 
@@ -849,10 +881,14 @@ def test_a_chosen_checkpoint_gives_the_music_model_its_text_side_its_decoder_and
     workflow = copy.deepcopy(TEMPLATES[name])
     _yue2_block(workflow)["widgets_values"] = [FINETUNE]
     prompt = to_prompt(workflow, SNAPSHOT["nodes"].get)
-    # one loader, with the file chosen; the template's other checkpoint loaders do not exist
+    # one loader, its file from the block's Model Choice, which holds the file chosen; the template's other
+    # checkpoint loaders do not exist
     loaders = [key for key, node in prompt.items() if node["class_type"] == "CheckpointLoaderSimple"]
-    assert len(loaders) == 1 and prompt[loaders[0]]["inputs"]["ckpt_name"] == FINETUNE
+    assert len(loaders) == 1
     loader = loaders[0]
+    choice = prompt[str(prompt[loader]["inputs"]["ckpt_name"][0])]
+    assert choice["class_type"] == "PlenioModelChoice"
+    assert choice["inputs"] == {"component": "yue2", "component.file": FINETUNE}
 
     def comes_from_loader(link: Any, seen: frozenset[str] = frozenset()) -> bool:
         """The link leads to the loader, through what passes MODEL and CLIP on (the LoRAs, the cover's adapter)."""
@@ -871,7 +907,11 @@ def test_a_chosen_checkpoint_gives_the_music_model_its_text_side_its_decoder_and
     loras = next(node for node in prompt.values() if node["class_type"] == "PlenioLoras")
     assert loras["inputs"]["model"] == [loader, 0] and loras["inputs"]["clip"] == [loader, 1]
     # the original's instrumental adapter inside the block stays bypassed, as in a template without a choice
-    assert not any(key.endswith(":102") for key in prompt)
+    assert not [
+        k
+        for k, node in prompt.items()
+        if node["class_type"] == "LoraLoader" and ":" in k and k.split(":")[0] == loader.split(":")[0]
+    ]
     engine = next(node for node in prompt.values() if node["class_type"] == "PlenioEngine")
     assert engine["inputs"]["clip"] == [loader, 1]
     decoders = [node for node in prompt.values() if node["class_type"] == "VAEDecodeAudio"]

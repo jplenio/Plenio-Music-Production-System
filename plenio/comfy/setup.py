@@ -67,7 +67,9 @@ def _problem(accepts: str, path: str, _mtime_ns: int, _size: int) -> str | None:
 def problem_of(component: Component, file: str) -> str | None:
     """Why ``file`` in the component's folder would not load as it (``None``: it would, or it is not there)."""
     if not component.accepts or any(v.file == file for v in component.variants):
-        return None  # the catalogue's own files are the kind by definition (a packed fp4 file has other shapes)
+        return (
+            None  # the catalogue's own files are the kind by definition (a packed fp4 file has other shapes)
+        )
     path = host.locate_model(component.folder, file)
     if path is None:
         return None

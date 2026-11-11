@@ -188,6 +188,29 @@ def test_the_page_says_how_it_was_made() -> None:
     assert ("HQ mastering", "off", "") in mastering
 
 
+def test_a_model_chosen_by_model_choice_is_named_from_the_record() -> None:
+    """Since 2.0 a loader's file comes from the block's Model Choice: the prompt says auto, the record the file."""
+    record = record_of()
+    prompt = record["prompt"]
+    prompt["3:100"] = {
+        "class_type": "PlenioModelChoice",
+        "inputs": {"component": "yue2", "component.file": "auto"},
+    }
+    prompt["3:101"]["inputs"]["ckpt_name"] = ["3:100", 0]
+    prompt["21:1000"] = {
+        "class_type": "PlenioModelChoice",
+        "inputs": {"component": "flux2-klein", "component.file": "my_flux_finetune.safetensors"},
+    }
+    prompt["21:1001"]["inputs"]["unet_name"] = ["21:1000", 0]
+    record["models"] = {"3:100": {"component": "yue2", "file": "yue2_3b_bf16.safetensors"}}
+    models = model_facts(record)
+    assert ("Music model", "yue2_3b_bf16.safetensors", "") in models
+    # a record without the note: the field's own file, when it names one
+    assert ("Cover art model", "my_flux_finetune.safetensors", "") in models
+    del record["models"]
+    assert not any(label == "Music model" for label, _value, _note in model_facts(record))  # auto: not known
+
+
 def test_the_facts_of_the_brief_mark_their_defaults() -> None:
     facts = {label: (value, note) for label, value, note in song_facts(detail_of())}
     assert facts["Mood"] == ("open - the writer chose", "default")

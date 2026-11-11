@@ -121,25 +121,50 @@ def model(name: str) -> dict[str, list[dict[str, str]]]:
     return {"models": [catalogued(name).download_entry()]}
 
 
+MODEL_CHOICE_SIZE = (340, 110)
+"""A Model Choice inside a model block: the field and two lines of its summary."""
+
+
+def model_choice(g: Graph, component: str, pos: tuple[float, float], title: str) -> Node:
+    """The Model Choice of ``component`` (``auto``): the plan's file for the computer that runs the workflow. Its
+    output feeds the loader's file widget, so the loader has no ``properties.models`` - ComfyUI's missing-model
+    dialog would otherwise ask for the default file on a computer whose plan chose another (PD 5.3)."""
+    return g.add(
+        "PlenioModelChoice",
+        pos,
+        size=MODEL_CHOICE_SIZE,
+        title=title,
+        widgets={"component": component, "component.file": "auto"},
+    )
+
+
+MODEL_FILE = (
+    "auto: the file for this computer, chosen when the workflow runs (Plenio Setup shows which and why; "
+    "config.toml can pin one). Or a file of your own in that folder."
+)
+
+
 def yue2_model() -> Blueprint:
     g = Graph(first_id=101)
+    checkpoint = model_choice(g, "yue2", (0, 0), "Music model")
+    adapter = model_choice(g, "yue2-instrumental-adapter", (0, 160), "Instrumental adapter file")
     loader = g.add(
         "CheckpointLoaderSimple",
-        (0, 0),
+        (400, 0),
         size=(320, 100),
         widgets={"ckpt_name": YUE2_CHECKPOINT},
-        properties=model(YUE2_CHECKPOINT),
     )
     lora = g.add(
         "LoraLoader",
-        (380, 0),
+        (780, 0),
         size=(320, 130),
         mode=4,
         title="Instrumental adapter (optional)",
         widgets={"lora_name": LORA, "strength_model": 0.0, "strength_clip": 1.0},
-        properties=model(LORA),
     )
-    engine = g.add("PlenioEngine", (760, 0), size=(260, 60))
+    engine = g.add("PlenioEngine", (1160, 0), size=(260, 60))
+    g.link(checkpoint, "file", loader, "ckpt_name")
+    g.link(adapter, "file", lora, "lora_name")
     g.link(loader, "MODEL", lora, "model")
     g.link(loader, "CLIP", lora, "clip")
     g.link(lora, "CLIP", engine, "clip")
@@ -154,14 +179,12 @@ def yue2_model() -> Blueprint:
             BlueprintInput(
                 "ckpt_name",
                 "COMBO",
-                [(loader, "ckpt_name")],
+                [(checkpoint, "component.file")],
                 widget=True,
-                default=YUE2_CHECKPOINT,
+                default="auto",
                 label="checkpoint",
-                tooltip="The YuE2 checkpoint in models/checkpoints: yue2_3b_int8_convrot (default, for 8-16 GB GPUs), "
-                "yue2_3b_bf16 (24 GB and more) or a YuE2 finetune in ComfyUI's format (one file with the music model, "
-                "the text side and the audio decoder, like these two). Press R after adding a file. Not loadable "
-                "here: GGUF files and m-a-p's Transformers layout (docs/user/models.md).",
+                tooltip="The YuE2 checkpoint (models/checkpoints), or a finetune in ComfyUI's format. "
+                + MODEL_FILE,
             )
         ],
         [
@@ -185,28 +208,26 @@ def yue2_model() -> Blueprint:
 
 def minimax_model() -> Blueprint:
     g = Graph(first_id=201)
+    dit_choice = model_choice(g, "minimax-dit", (0, 0), "Diffusion model")
+    te_choice = model_choice(g, "minimax-text-encoder", (0, 160), "Text encoder")
+    vae_choice = model_choice(g, "minimax-vae", (0, 320), "Audio decoder")
     unet = g.add(
         "UNETLoader",
-        (0, 0),
+        (400, 0),
         size=(340, 90),
         widgets={"unet_name": MINIMAX_DIT, "weight_dtype": "default"},
-        properties=model(MINIMAX_DIT),
     )
     clip = g.add(
         "CLIPLoader",
-        (0, 140),
+        (400, 160),
         size=(340, 110),
         widgets={"clip_name": MINIMAX_TE, "type": "minimax", "device": "default"},
-        properties=model(MINIMAX_TE),
     )
-    vae = g.add(
-        "VAELoader",
-        (0, 300),
-        size=(340, 60),
-        widgets={"vae_name": MINIMAX_VAE},
-        properties=model(MINIMAX_VAE),
-    )
-    engine = g.add("PlenioEngine", (400, 140), size=(260, 60))
+    vae = g.add("VAELoader", (400, 320), size=(340, 60), widgets={"vae_name": MINIMAX_VAE})
+    engine = g.add("PlenioEngine", (800, 160), size=(260, 60))
+    g.link(dit_choice, "file", unet, "unet_name")
+    g.link(te_choice, "file", clip, "clip_name")
+    g.link(vae_choice, "file", vae, "vae_name")
     g.link(clip, "CLIP", engine, "clip")
     return Blueprint(
         "Plenio · MiniMax Model",
@@ -218,31 +239,30 @@ def minimax_model() -> Blueprint:
             BlueprintInput(
                 "unet_name",
                 "COMBO",
-                [(unet, "unet_name")],
+                [(dit_choice, "component.file")],
                 widget=True,
-                default=MINIMAX_DIT,
+                default="auto",
                 label="model",
-                tooltip="MiniMax Music 3's diffusion model in models/diffusion_models: the fp16 file (default) or "
-                "minimax_music3_dit_int8_convrot (2.5 GB, for 8-12 GB GPUs).",
+                tooltip="MiniMax Music 3's diffusion model (models/diffusion_models). " + MODEL_FILE,
             ),
             BlueprintInput(
                 "clip_name",
                 "COMBO",
-                [(clip, "clip_name")],
+                [(te_choice, "component.file")],
                 widget=True,
-                default=MINIMAX_TE,
+                default="auto",
                 label="text encoder",
-                tooltip="MiniMax Music 3's text encoder in models/text_encoders (int8 by default); the Song Sheet "
-                "counts the 5,000-token prompt budget with it, exactly.",
+                tooltip="MiniMax Music 3's text encoder (models/text_encoders); the Song Sheet counts the prompt "
+                "budget with it. " + MODEL_FILE,
             ),
             BlueprintInput(
                 "vae_name",
                 "COMBO",
-                [(vae, "vae_name")],
+                [(vae_choice, "component.file")],
                 widget=True,
-                default=MINIMAX_VAE,
+                default="auto",
                 label="vae",
-                tooltip="MiniMax Music 3's audio decoder in models/vae.",
+                tooltip="MiniMax Music 3's audio decoder (models/vae). " + MODEL_FILE,
             ),
         ],
         [
@@ -1918,23 +1938,22 @@ COVER_SIZE = 1024
 
 def cover_art() -> Blueprint:
     g = Graph(first_id=1001)
+    flux_choice = model_choice(g, "flux2-klein", (-400, 0), "Image model")
+    te_choice = model_choice(g, "flux2-text-encoder", (-400, 160), "Text encoder")
+    vae_choice = model_choice(g, "flux2-vae", (-400, 320), "Image decoder")
     unet = g.add(
         "UNETLoader",
         (0, 0),
         size=(340, 90),
         widgets={"unet_name": FLUX, "weight_dtype": "default"},
-        properties=model(FLUX),
     )
     clip = g.add(
         "CLIPLoader",
         (0, 140),
         size=(340, 110),
         widgets={"clip_name": FLUX_TE, "type": "flux2", "device": "default"},
-        properties=model(FLUX_TE),
     )
-    vae = g.add(
-        "VAELoader", (0, 300), size=(340, 60), widgets={"vae_name": FLUX_VAE}, properties=model(FLUX_VAE)
-    )
+    vae = g.add("VAELoader", (0, 300), size=(340, 60), widgets={"vae_name": FLUX_VAE})
     encode = g.add("CLIPTextEncode", (400, 0), size=(340, 160), widgets={"text": ""})
     zero = g.add("ConditioningZeroOut", (400, 220), size=(240, 50))
     guider = g.add("CFGGuider", (780, 0), size=(260, 100), widgets={"cfg": 1.0})
@@ -1956,6 +1975,9 @@ def cover_art() -> Blueprint:
     )
     sample = g.add("SamplerCustomAdvanced", (1100, 0), size=(260, 110))
     decode = g.add("VAEDecode", (1420, 0), size=(220, 50))
+    g.link(flux_choice, "file", unet, "unet_name")
+    g.link(te_choice, "file", clip, "clip_name")
+    g.link(vae_choice, "file", vae, "vae_name")
     g.link(clip, "CLIP", encode, "clip")
     g.link(encode, "CONDITIONING", zero, "conditioning")
     g.link(unet, "MODEL", guider, "model")

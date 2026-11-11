@@ -809,6 +809,9 @@ class RecordInput:
     timings: Mapping[str, Any] | None = field(default=None)
     """Where the run's time went (since 2.0, ``plenio.core.timings``): seconds per stage, the part spent
     loading models, the peak memory on the graphics card. Like ``made``, not part of the fingerprint."""
+    models: Mapping[str, Mapping[str, str]] | None = field(default=None)
+    """The file each Model Choice of the prompt chose (since 2.0): prompt node id -> ``{"component", "file"}`` -
+    the prompt itself says only ``auto``. ``None``: the workflow has no Model Choice."""
     """How the song was made (since 1.4.0): when its run began and ended (``started``, ``finished``), how long it
     took (``seconds``), on what (``on``: the graphics card and its memory or the processor, the RAM) and the lyrics
     fidelity (``lyrics_fidelity``). Like ``created``, not part of the fingerprint."""
@@ -868,6 +871,8 @@ def build_record(data: RecordInput) -> dict[str, Any]:
         record["made"] = dict(data.made)
     if data.timings is not None:
         record["timings"] = dict(data.timings)
+    if data.models:
+        record["models"] = {key: dict(value) for key, value in data.models.items()}
     if data.quality is not None:
         record["quality"] = dict(data.quality)
     record["fingerprint"] = record_fingerprint(record)

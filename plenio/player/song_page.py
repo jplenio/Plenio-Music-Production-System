@@ -285,6 +285,21 @@ def _plain_value(value: Any) -> str:
     return str(value)
 
 
+def _model_file(record: Mapping[str, Any], prompt: Mapping[str, Any], value: Any) -> str:
+    """A loader's file: written in the prompt (1.x), or - since 2.0 - from the Model Choice that feeds it: the file
+    the record says it chose, else its own field when that names a file."""
+    if not (isinstance(value, list) and len(value) == 2):
+        return _plain_value(value)
+    source = prompt.get(str(value[0]))
+    if not isinstance(source, Mapping) or source.get("class_type") != "PlenioModelChoice":
+        return ""
+    chosen = (record.get("models") or {}).get(str(value[0])) or {}
+    if isinstance(chosen, Mapping) and chosen.get("file"):
+        return str(chosen["file"])
+    own = _plain_value((source.get("inputs") or {}).get("component.file"))
+    return own if own and own != "auto" else ""
+
+
 IMAGE_NODES = ("VAEDecode", "PreviewImage", "SaveImage", "EmptyFlux2LatentImage", "EmptyLatentImage")
 """Nodes of a block that makes a picture: its model is the cover art's."""
 
@@ -314,7 +329,7 @@ def model_facts(record: Mapping[str, Any]) -> list[Fact]:
         ):
             continue
         inputs = node.get("inputs") or {}
-        name = _plain_value(inputs.get("ckpt_name") or inputs.get("unet_name"))
+        name = _model_file(record, prompt, inputs.get("ckpt_name") or inputs.get("unet_name"))
         if name and name not in seen:
             seen.add(name)
             picture = _block(node_id) in picture_blocks

@@ -1,6 +1,6 @@
 # Models and downloads
 
-Plenio ships no model weights. Each template's loader nodes name the files they need, and **ComfyUI** offers to download missing ones when you open the template (the *missing models* dialog). You can also download them yourself and put them into the folders below. The **0 · System Check** template lists which files of each template are installed on your machine.
+Plenio ships no model weights. The model blocks of the templates (*Plenio · YuE2 Model*, *Plenio · MiniMax Model*, *Plenio · Cover Art*) have one field per model, set to **auto**: when the workflow runs, a **Model Choice** node takes the file of the catalogue below that suits the computer that runs it - the best one that runs on its graphics card, or an installed one that is nearly as good - and its summary says which and why. A file that is not there stops the run with its name, its folder and its address; download it into the folder below. The **0 · System Check** template lists which files of each template are installed on your machine. A workflow saved with 1.x keeps the files its loaders name, and ComfyUI's *missing models* dialog still offers the other files (the separation, super-resolution and SheetSage models, the instrumental adapter of 2 · YuE2 · Cover).
 
 The list below is the model catalogue Plenio's templates are built from (`resources/models.toml`). Sizes are those of the public files (decimal GB, as download dialogs show them).
 
@@ -85,11 +85,11 @@ The block stays bypassed until you turn it on, so a template runs without these 
 | Qwen3-ASR 1.7B, Qwen3-ForcedAligner 0.6B | [Qwen/Qwen3-ASR-1.7B-hf](https://huggingface.co/Qwen/Qwen3-ASR-1.7B-hf), [Qwen/Qwen3-ForcedAligner-0.6B-hf](https://huggingface.co/Qwen/Qwen3-ForcedAligner-0.6B-hf) (pinned revisions; the inference code is Apache-2.0 and vendored from transformers 5.17) |
 | faster-whisper large-v3 | [Systran/faster-whisper-large-v3](https://huggingface.co/Systran/faster-whisper-large-v3) (pinned revision) |
 
-The exact URLs are in `resources/models.toml` (the templates' loaders carry the same entries for ComfyUI's download dialog).
+The exact URLs are in `resources/models.toml`; a missing file's message names its URL too.
 
 ## Smaller GPUs: alternative files
 
-The templates default to the files above. The System Check marks the row of its hardware rule table that matches your GPU; for smaller cards it suggests these alternatives (choose them in the loader nodes - nothing is switched automatically):
+The tables above name each model's default file. With a model field on **auto** the plan may take one of these alternatives instead, by the card's memory; to use one regardless, choose it in the field (or pin it in `config.toml`, [Configuration](configuration.md)). The System Check marks the row of its hardware rule table that matches your GPU:
 
 | Instead of | Choose | Size | For | Basis |
 |---|---|---|---|---|
@@ -113,7 +113,7 @@ The **checkpoint** field of the *Plenio · YuE2 Model* block takes any YuE2 file
 
 1. Download the file and put it into `ComfyUI/models/checkpoints` (or the checkpoints folder of your `extra_model_paths.yaml`).
 2. Press **R** in ComfyUI to refresh the lists.
-3. In the **MUSIC MODEL** group choose it under **checkpoint**. The templates show the block open since 1.5.1; in a workflow saved before, expand it first (the dot at its top left). The choice is saved with the workflow.
+3. In the **MUSIC MODEL** group choose it under **checkpoint** instead of *auto*. The templates show the block open since 1.5.1; in a workflow saved before, expand it first (the dot at its top left). The choice is saved with the workflow.
 
 The music model, the text side, the audio decoder and the Engine Profile then all come from that one file, and the Engine Profile reads the tokenizer the file brings. **0 · System Check** says for every YuE2 file in the folder whether it loads and, if not, why.
 
