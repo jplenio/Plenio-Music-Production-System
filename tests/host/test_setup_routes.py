@@ -68,6 +68,10 @@ def test_setup_answers_this_computer_only(server: ComfyServer) -> None:
         ("POST", "/plenio/setup/downloads"),
         ("POST", "/plenio/setup/hub-token"),
         ("POST", "/plenio/setup/check"),
+        ("GET", "/plenio/setup/state"),
+        ("POST", "/plenio/setup/state"),
+        ("GET", "/plenio/setup/findings"),
+        ("GET", "/plenio/setup/folders"),
     ):
         body = (
             {"variants": ["yue2-3b-int8"], "token": "x", "variant": "yue2-3b-int8"}
@@ -76,3 +80,44 @@ def test_setup_answers_this_computer_only(server: ComfyServer) -> None:
         )
         status, data = server.request(method, path, body, headers=REMOTE)
         assert status == 403 and data["error"]["type"] == "PlenioAccessError", (path, data)
+
+
+def test_setup_remembers_its_step_and_the_templates(server: ComfyServer) -> None:
+    first = server.get("/plenio/setup/state")
+    assert first["state"]["step"] == "computer" and first["version"]
+    changed = server.request(
+        "POST", "/plenio/setup/state", {"step": "plan", "templates": ["1 · YuE2 · Song"], "opened_for": "x"}
+    )
+    assert changed[0] == 200, changed
+    again = server.get("/plenio/setup/state")["state"]
+    assert (
+        again["step"] == "plan" and again["templates"] == ["1 · YuE2 · Song"] and again["opened_for"] == "x"
+    )
+    assert (server.base / "user" / "plenio" / "setup.json").is_file()
+    status, data = server.request("POST", "/plenio/setup/state", {"templates": ["9 · Nothing"]})
+    assert status == 400 and "no template" in data["error"]["message"]
+    server.request("POST", "/plenio/setup/state", {"step": "computer", "templates": [], "opened_for": ""})
+
+
+def test_the_findings_carry_ids_and_fixes(server: ComfyServer) -> None:
+    answer = server.get("/plenio/setup/findings")
+    ids = {item["id"] for item in answer["findings"]}
+    assert "model.missing" in ids  # the test server has no model files
+    from plenio.core.system import FINDINGS
+
+    assert ids <= set(FINDINGS)  # only documented ids
+    missing = next(item for item in answer["findings"] if item["id"] == "model.missing")
+    assert missing["fix"]["action"] == "download" and missing["fix"]["payload"]["variant"]
+    assert answer["computer"]["disk_free_bytes"] > 0 and answer["computer"]["comfyui"]
+
+
+def test_the_folders_are_comfyuis_and_a_download_goes_nowhere_else(server: ComfyServer) -> None:
+    folders = server.get("/plenio/setup/folders")["folders"]
+    assert folders["checkpoints"][0]["target"] and folders["checkpoints"][0]["free_bytes"] > 0
+    status, data = server.request(
+        "POST",
+        "/plenio/setup/downloads",
+        {"variants": ["yue2-3b-int8"], "folders": {"checkpoints": "C:/elsewhere"}},
+    )
+    # offline refuses first; the folder check itself is a unit of setup.py's _targets
+    assert status == 400, data

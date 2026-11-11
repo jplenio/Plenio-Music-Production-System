@@ -97,6 +97,18 @@ export interface ComfyExtension {
   actionBarButtons?: { icon: string; label?: string; tooltip?: string; onClick: () => void }[]
 }
 
+export interface SidebarTab {
+  id: string
+  icon: string
+  title: string
+  tooltip?: string
+  type: 'custom'
+  /** A small mark on the tab's icon (a dot: something needs the user); ``null``: none. */
+  iconBadge?: () => string | null
+  render(element: HTMLElement): void
+  destroy?(): void
+}
+
 export interface ComfyApp {
   registerExtension(extension: ComfyExtension): void
   graph?: unknown
@@ -108,6 +120,12 @@ export interface ComfyApp {
     toast?: { add(message: { severity: string; summary: string; detail?: string; life?: number }): void }
     /** The workflow store (1.2x+): the open tab's workflow. */
     workflow?: { activeWorkflow?: unknown }
+    /** A tab of the sidebar (1.3+): ``custom`` tabs render into the element they are given. */
+    registerSidebarTab?(tab: SidebarTab): void
+    /** Runs a command by its id (``Workspace.ToggleSidebarTab.<tab id>`` opens or closes a sidebar tab). */
+    command?: { execute(id: string): unknown }
+    /** Which sidebar tab is open (``null``: none). */
+    sidebarTab?: { activeSidebarTabId?: string | null }
     dialog?: {
       prompt?(options: { title: string; message: string; defaultValue?: string; placeholder?: string }): Promise<
         string | null

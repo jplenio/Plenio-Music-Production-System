@@ -163,3 +163,21 @@ def test_a_redirect_to_another_host_does_not_carry_the_token(two_hosts: tuple[st
     with urllib.request.build_opener().open(request, timeout=10) as answer:
         answer.read()
     assert Storage.seen[0].get("authorization") == "Bearer hf_secret"
+
+
+def test_a_mirror_serves_the_same_path_and_never_gets_the_token() -> None:
+    url = "https://huggingface.co/org/repo/resolve/0123/file.safetensors"
+    assert (
+        hub.mirrored(url, "http://127.0.0.1:9000/")
+        == "http://127.0.0.1:9000/org/repo/resolve/0123/file.safetensors"
+    )
+    assert (
+        hub.mirrored(url, "https://mirror.example/hf")
+        == "https://mirror.example/hf/org/repo/resolve/0123/file.safetensors"
+    )
+    assert hub.mirrored(url, None) == url and hub.mirrored(url, "") == url
+    for strange in ("file:///C:/x", "ftp://host", "http://host/?q=1", "not a url"):
+        assert hub.mirrored(url, strange) == url
+    release = "https://github.com/a/b/releases/download/v1/file.ckpt"
+    assert hub.mirrored(release, "http://127.0.0.1:9000") == release  # only the hub's files
+    assert hub.token_for(hub.mirrored(url, "https://mirror.example"), "hf_secret") is None

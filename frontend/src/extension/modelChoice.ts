@@ -79,6 +79,15 @@ export function missingNotice(detail: MissingDetail): { summary: string; detail:
 }
 
 /** The component a Model Choice node is set to. */
+/** Whether a Model Choice set to ``value`` has no file to give: *auto* whose plan file is not installed, or a
+ * file that is not in its folder. Unknown (nothing read yet): ``false``. */
+export function lacksFile(value: unknown, info: ComponentFiles | undefined): boolean {
+  if (!info) return false
+  const text = String(value ?? '')
+  if (text === AUTO) return info.pick ? !info.pick.installed : false
+  return !(text in info.files)
+}
+
 export function componentOf(node: ComfyNode): string {
   return String(node.widgets?.find((w) => w.name === 'component')?.value ?? '')
 }

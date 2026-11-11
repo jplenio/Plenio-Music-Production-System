@@ -21,6 +21,7 @@ from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT / "tests" / "host"))
+sys.path.insert(0, str(PROJECT / "tools"))
 
 from harness import PACKAGE_NAME, ComfyServer, copy_package  # noqa: E402
 
@@ -36,6 +37,14 @@ def main() -> int:
     parser.add_argument("--port", type=int, default=0)
     parser.add_argument(
         "--base", type=Path, help="reuse this base directory (outputs are kept, nodes re-copied)"
+    )
+    parser.add_argument(
+        "--fake-hub",
+        type=int,
+        metavar="PORT",
+        help="serve the catalogue's files from a throttled local stand-in for Hugging Face on PORT (tools/fake_hub.py), "
+        "reached as the mirror HF_ENDPOINT; the copied package's models.toml expects its bytes; PLENIO_FAKE_GATED "
+        "names file names that answer as gated",
     )
     parser.add_argument(
         "--comfy-args",
@@ -55,6 +64,18 @@ def main() -> int:
             PROJECT / "tests" / "fixtures" / "graphs" / "Plenio Test Blueprint.json"
         )
     copy_package(custom, extra)
+    hub = None
+    if args.fake_hub:
+        from fake_hub import rewrite_catalogue, serve
+
+        ids = rewrite_catalogue(custom / PACKAGE_NAME / "resources" / "models.toml")
+        os.environ["HF_ENDPOINT"] = f"http://127.0.0.1:{args.fake_hub}"  # the server reaches it as a mirror
+        gated = frozenset(filter(None, os.environ.get("PLENIO_FAKE_GATED", "").split(",")))
+        hub = serve(args.fake_hub, gated=gated)
+        print(
+            f"fake hub at http://127.0.0.1:{args.fake_hub} for {len(ids)} files (gated: {sorted(gated)})",
+            flush=True,
+        )
     packs = [PACKAGE_NAME]
     if args.test_nodes:
         shutil.copytree(
@@ -83,6 +104,8 @@ def main() -> int:
         pass
     finally:
         server.stop()
+        if hub is not None:
+            hub.shutdown()
     return 0
 
 

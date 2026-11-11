@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import asyncio
 import functools
+import os
+import time
 from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -18,16 +20,19 @@ from typing import Any
 
 from aiohttp import web
 
+from .. import __version__
 from ..core.access import Route
 from ..core.assets import access as hub_access
+from ..core.assets import hub
 from ..core.assets.downloads import DownloadManager
 from ..core.errors import PlenioUserError
 from ..core.modelplan import AUTO, Pick, pick
 from ..core.models import Component, file_problem, load_components, take_inventory
-from ..core.setup_plan import download_request, find_variant, plan_view
+from ..core.setup_plan import Wanted, download_request, find_variant, plan_view
+from ..core.setup_state import Drive, read_state, room_problem, update, write_state
 from . import host
 from .routes import guarded, read_json
-from .shared import RESOURCES, model_catalogue
+from .shared import RESOURCES, model_catalogue, system_report
 
 EVENT = "plenio.download"
 WHAT = "Plenio Setup reads this computer's model folders and writes into them"
@@ -193,12 +198,28 @@ def choose(component_id: str, file: str) -> Chosen:
     return Chosen(chosen, component, source)
 
 
+def _templates(components: Mapping[str, Component]) -> list[str]:
+    return sorted({t for c in components.values() for t in (*c.templates, *c.optional_templates)})
+
+
+def _folders(components: Mapping[str, Component]) -> dict[str, list[dict[str, Any]]]:
+    """Per model folder name the folders ComfyUI registered for it, the download target first, each with its free
+    space: Setup's step 3 shows the target and lets the user choose another of these."""
+    out: dict[str, list[dict[str, Any]]] = {}
+    for kind in sorted({c.folder for c in components.values()}):
+        out[kind] = [
+            {"path": str(folder), "free_bytes": host.drive_of(folder)[1], "target": index == 0}
+            for index, folder in enumerate(host.model_folders(kind))
+        ]
+    return out
+
+
 async def plan_get(request: web.Request) -> web.StreamResponse:
     """The model plan of every template: which file suits this computer and why, what is installed, what is still
-    to fetch - and the downloads at work."""
+    to fetch - and the downloads at work. No path: the folders are their own answer (``folders_get``)."""
     config = host.load_config()
     components = _components()
-    templates = sorted({t for c in components.values() for t in (*c.templates, *c.optional_templates)})
+    templates = _templates(components)
     view = plan_view(
         components,
         templates,
@@ -216,8 +237,85 @@ async def plan_get(request: web.Request) -> web.StreamResponse:
     return web.json_response(view)
 
 
+def _source(url: str) -> str:
+    """Where a catalogue file is fetched from: its address, or the same path on the mirror ``HF_ENDPOINT`` names."""
+    return hub.mirrored(url, os.environ.get("HF_ENDPOINT"))
+
+
+def fetch_now(component: Component, variant: Any, *, poll_s: float = 0.5) -> str | None:
+    """Fetch one catalogue file while a run waits for it (``[models] downloads = "auto"``): ``None`` once it is
+    installed and verified, else what kept it (a refusal in words). Interrupting the run cancels the download."""
+    folder = host.model_folder(component.folder)
+    if folder is None:
+        return f"ComfyUI has no model folder '{component.folder}'."
+    wanted = [Wanted(variant, component, folder / variant.file)]
+    problem = _room(wanted)
+    if problem:
+        return problem
+    item = manager().add(
+        variant.id,
+        _source(variant.url),
+        wanted[0].target,
+        variant.bytes,
+        variant.sha256,
+        title=f"{component.title} - {variant.file}",
+        manual_approval=variant.manual_approval,
+    )
+    progress = host.Progress(100)
+    while item.state in ("queued", "downloading", "verifying"):
+        if host.is_interrupted():
+            manager().cancel(variant.id)
+            host.raise_if_interrupted()
+        progress.update(item.done / item.size if item.size else 0.0)
+        time.sleep(poll_s)
+    if item.state == "installed":
+        return None
+    if item.refusal is not None:
+        return f"{item.refusal.message} {item.refusal.fix}".strip()
+    return f"The download stopped ({item.state})."
+
+
+def _targets(chosen: Any, components: Mapping[str, Component]) -> dict[str, Path | None]:
+    """The folder each kind of model goes to: ComfyUI's target, or one of its other registered folders the request
+    chose (``{"folders": {"diffusion_models": "<a registered path>"}}``) - never another."""
+    if chosen is not None and not (
+        isinstance(chosen, dict) and all(isinstance(v, str) for v in chosen.values())
+    ):
+        raise PlenioUserError("'folders' maps a kind of model to one of its registered folders.")
+    targets: dict[str, Path | None] = {}
+    for kind in {c.folder for c in components.values()}:
+        registered = host.model_folders(kind)
+        targets[kind] = registered[0] if registered else None
+        wanted = (chosen or {}).get(kind)
+        if wanted is not None:
+            match = [folder for folder in registered if str(folder) == wanted]
+            if not match:
+                raise PlenioUserError(
+                    f"{wanted[:120]!r} is not a folder ComfyUI searches for {kind}.",
+                    hint="Choose one of the folders the plan lists, or add yours to extra_model_paths.yaml first.",
+                )
+            targets[kind] = match[0]
+    return targets
+
+
+def _room(wanted: list[Any]) -> str | None:
+    """Whether the files to fetch fit on their drives, with 2 GB to spare."""
+    drives: dict[Any, Drive] = {}
+    for item in wanted:
+        if item.target.is_file() and item.target.stat().st_size == item.variant.bytes:
+            continue  # there already: nothing to fetch
+        device, free = host.drive_of(item.target.parent)
+        key = device if device is not None else str(item.target.parent)
+        known = drives.get(key)
+        drives[key] = Drive(
+            str(item.target.parent), free, (known.needed if known else 0) + item.variant.bytes
+        )
+    return room_problem(drives.values())
+
+
 async def downloads_start(request: web.Request) -> web.StreamResponse:
-    """Fetch catalogue files: ``{"variants": [<variant id>, ...]}``."""
+    """Fetch catalogue files: ``{"variants": [<variant id>, ...], "folders": {<kind>: <registered folder>}}``
+    (``folders`` optional). Refused before anything starts when the files do not fit on their drives."""
     config = host.load_config()
     if config.offline:
         raise PlenioUserError(
@@ -232,12 +330,18 @@ async def downloads_start(request: web.Request) -> web.StreamResponse:
         )
     data = await read_json(request)
     components = _components()
-    folders = {c.folder: host.model_folder(c.folder) for c in components.values()}
+    folders = await asyncio.to_thread(_targets, data.get("folders"), components)
+    request_files = download_request(data.get("variants"), components, folders)
+    problem = await asyncio.to_thread(_room, request_files)
+    if problem:
+        raise PlenioUserError(
+            problem, hint="Free some space, or choose another folder for these files in Plenio Setup's plan."
+        )
     started = []
-    for wanted in download_request(data.get("variants"), components, folders):
+    for wanted in request_files:
         item = manager().add(
             wanted.variant.id,
-            wanted.variant.url,
+            _source(wanted.variant.url),
             wanted.target,
             wanted.variant.bytes,
             wanted.variant.sha256,
@@ -288,10 +392,66 @@ async def access_check(request: web.Request) -> web.StreamResponse:
     variant = find_variant(data.get("variant"), _components())
 
     def probe() -> dict[str, Any]:
-        return hub_access.check(variant.url, hub_access.read_token(), manual_approval=variant.manual_approval)
+        return hub_access.check(
+            _source(variant.url), hub_access.read_token(), manual_approval=variant.manual_approval
+        )
 
     found = await asyncio.to_thread(probe)
     return web.json_response({"variant": variant.id, **found})
+
+
+async def folders_get(request: web.Request) -> web.StreamResponse:
+    """The folders each kind of model can go to - the target first - with their free space (step 3)."""
+    return web.json_response({"folders": await asyncio.to_thread(_folders, _components())})
+
+
+def _state_file() -> Path:
+    return host.user_directory() / "plenio" / "setup.json"
+
+
+async def state_get(request: web.Request) -> web.StreamResponse:
+    """Where Setup was (``<user>/plenio/setup.json``) and this Plenio's version."""
+    state = await asyncio.to_thread(read_state, _state_file())
+    return web.json_response({"state": state.to_dict(), "version": __version__})
+
+
+async def state_post(request: web.Request) -> web.StreamResponse:
+    """Change where Setup is: ``step``, ``templates``, ``opened_for``, ``done``."""
+    data = await read_json(request)
+    templates = _templates(_components())
+
+    def change() -> Any:
+        path = _state_file()
+        state = update(read_state(path), data, templates=templates)
+        write_state(path, state)
+        return state
+
+    state = await asyncio.to_thread(change)
+    return web.json_response({"state": state.to_dict(), "version": __version__})
+
+
+async def findings_get(request: web.Request) -> web.StreamResponse:
+    """The System Check's findings with their fixes, and the facts Setup's first step shows."""
+    report, _markdown = await asyncio.to_thread(system_report)
+    facts = report.data["facts"]
+    return web.json_response(
+        {
+            "status": report.status.value,
+            "findings": report.data["findings"],
+            "computer": {
+                key: facts.get(key)
+                for key in (
+                    "comfyui",
+                    "platform",
+                    "devices",
+                    "ram_total_bytes",
+                    "disk_free_bytes",
+                    "models_root",
+                )
+            },
+            "templates": report.data.get("templates", []),
+        }
+    )
 
 
 def _local(method: str, path: str, handler: Any) -> Route:
@@ -307,6 +467,10 @@ ROUTES: tuple[Route, ...] = (
     _local("POST", "/plenio/setup/downloads/{variant}/resume", download_resume),
     _local("POST", "/plenio/setup/hub-token", hub_token),
     _local("POST", "/plenio/setup/check", access_check),
+    _local("GET", "/plenio/setup/state", state_get),
+    _local("POST", "/plenio/setup/state", state_post),
+    _local("GET", "/plenio/setup/findings", findings_get),
+    _local("GET", "/plenio/setup/folders", folders_get),
     Route("GET", "/plenio/models/files", files_get, "data"),
 )
 """Plenio Setup's routes, all ``local`` - and the file lists of Model Choice (``data``: file names only)."""

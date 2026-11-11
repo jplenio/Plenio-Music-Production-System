@@ -187,6 +187,19 @@ def occupied(name: str) -> Refusal:
     )
 
 
+def mirrored(url: str, endpoint: str | None) -> str:
+    """``url`` on a mirror of Hugging Face when ``endpoint`` names one (``HF_ENDPOINT``, which Hugging Face's own
+    tools read): the same path on that host. The file is still checked against the catalogue's size and SHA-256,
+    and a token is never sent there (:func:`token_for`). An endpoint that is no plain http(s) address is ignored."""
+    prefix = f"https://{HUB_HOST}/"
+    if not endpoint or not url.startswith(prefix):
+        return url
+    parts = urllib.parse.urlsplit(endpoint.strip())
+    if parts.scheme not in ("http", "https") or not parts.hostname or parts.query or parts.fragment:
+        return url
+    return f"{endpoint.strip().rstrip('/')}/{url[len(prefix) :]}"
+
+
 def token_for(url: str, token: str | None) -> str | None:
     """``token`` when ``url`` is on a host it may be sent to (https only), else ``None``."""
     parts = urllib.parse.urlsplit(url)

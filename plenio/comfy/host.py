@@ -11,6 +11,7 @@ import importlib.metadata
 import logging
 import os
 import platform
+import shutil
 import sys
 import time
 from collections.abc import Callable, Mapping
@@ -428,6 +429,23 @@ def model_folder(folder: str) -> Path | None:
     goes (``None``: this ComfyUI knows no such folder)."""
     paths = _registered().get(folder) or []
     return Path(paths[0]) if paths else None
+
+
+def model_folders(folder: str) -> list[Path]:
+    """Every folder ComfyUI registered for a kind of model, the download target first (Setup lets the user choose
+    among them - never another)."""
+    return [Path(path) for path in _registered().get(folder) or []]
+
+
+def drive_of(folder: Path) -> tuple[int | None, int | None]:
+    """The device a folder is on and its free bytes - of its nearest existing parent when it is not made yet
+    (``None`` each when none can be read)."""
+    for place in (folder, *folder.parents):
+        try:
+            return os.stat(place).st_dev, shutil.disk_usage(place).free
+        except OSError:
+            continue
+    return None, None
 
 
 def send_event(event: str, data: dict[str, Any]) -> None:
@@ -1045,4 +1063,12 @@ def system_facts(
         models_root=str(models_directory()),
         asset_root=str(asset_root(config)),
         asset_folders={asset_id: str(path) for asset_id, path in config.asset_paths.items()},
+        disk_free_bytes=_free_bytes(models_directory()),
     )
+
+
+def _free_bytes(folder: Path) -> int | None:
+    try:
+        return shutil.disk_usage(folder).free
+    except OSError:
+        return None

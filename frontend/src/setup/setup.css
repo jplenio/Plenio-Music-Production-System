@@ -1,0 +1,169 @@
+/* Plenio Setup in ComfyUI's sidebar. Scoped by .plenio-setup; colours from ComfyUI's own variables. */
+.plenio-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  font-size: 13px;
+  color: var(--fg-color, #ddd);
+  overflow-y: auto;
+  height: 100%;
+  box-sizing: border-box;
+}
+.plenio-setup header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.plenio-setup h2 {
+  margin: 0;
+  font-size: 16px;
+}
+.plenio-setup .version,
+.plenio-setup .hint {
+  color: var(--descrip-text, #999);
+  font-size: 12px;
+}
+.plenio-setup .steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.plenio-setup .steps button {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color, #555);
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+.plenio-setup .steps button.current {
+  background: var(--comfy-menu-secondary-bg, #333);
+  font-weight: 600;
+}
+.plenio-setup section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.plenio-setup button {
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, #555);
+  background: var(--comfy-input-bg, #222);
+  color: inherit;
+  cursor: pointer;
+}
+.plenio-setup button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.plenio-setup button.primary {
+  align-self: flex-start;
+  background: var(--p-primary-color, #3b82f6);
+  border-color: transparent;
+  color: var(--p-primary-contrast-color, #fff);
+}
+.plenio-setup .row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 8px;
+  border: 1px solid var(--border-color, #444);
+  border-radius: 6px;
+}
+.plenio-setup .row.focus {
+  border-color: var(--p-primary-color, #3b82f6);
+}
+.plenio-setup .row .what {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 200px;
+  min-width: 0;
+}
+.plenio-setup .row progress {
+  width: 100%;
+}
+.plenio-setup .state.ok {
+  color: #4ade80;
+}
+.plenio-setup .state.warn,
+.plenio-setup .warn {
+  color: #fbbf24;
+}
+.plenio-setup .state.error,
+.plenio-setup .error {
+  color: #f87171;
+}
+.plenio-setup .ok {
+  color: #4ade80;
+}
+.plenio-setup .findings {
+  margin: 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.plenio-setup .choice,
+.plenio-setup .folder {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.plenio-setup select {
+  max-width: 100%;
+  background: var(--comfy-input-bg, #222);
+  color: inherit;
+  border: 1px solid var(--border-color, #555);
+  border-radius: 4px;
+}
+.plenio-setup .go {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.plenio-access {
+  border: 1px solid var(--p-primary-color, #3b82f6);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.plenio-access header {
+  display: flex;
+  justify-content: space-between;
+}
+.plenio-access .close {
+  background: none;
+  border: none;
+  font-size: 18px;
+}
+.plenio-access ol {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.plenio-access .mark {
+  display: inline-block;
+  width: 1.2em;
+}
+.plenio-access form {
+  display: flex;
+  gap: 6px;
+}
+.plenio-access input {
+  flex: 1;
+  min-width: 0;
+  background: var(--comfy-input-bg, #222);
+  color: inherit;
+  border: 1px solid var(--border-color, #555);
+  border-radius: 4px;
+  padding: 3px 6px;
+}

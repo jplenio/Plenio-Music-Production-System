@@ -26,7 +26,15 @@ import { CONTINUE_COMMAND, type ContinueHost, installRecordDrop, openContinueSon
 import { dynamicComboNames, restoreWidgetValues, savedWidgetValues } from './dynamicCombo'
 import { addEqCurve } from './eqWidget'
 import { MODE_BEFORE_0_2_2, migrateWidgetValues, renameWidgetValues } from './migrate'
-import { MISSING_EVENT, MODEL_CHOICE, type MissingDetail, ModelChoiceLabels, missingNotice } from './modelChoice'
+import {
+  MISSING_EVENT,
+  MODEL_CHOICE,
+  type MissingDetail,
+  ModelChoiceLabels,
+  componentOf,
+  lacksFile,
+  missingNotice
+} from './modelChoice'
 import { setAsrNote, setPayload } from './payloads'
 import { PLAYER_COMMAND, installContinueFromPlayer, installPlayerButton, openPlayer } from './player'
 import { ReviewQueue } from './reviewQueue'
@@ -40,6 +48,7 @@ import {
 } from './runStatus'
 import { type SheetMusicHost, type SheetMusicOutcome, SheetMusicJobs, sheetMusicJobs } from './sheetMusic'
 import { SEED_NODE, installSeedNode } from './seedNode'
+import { SETUP_COMMAND, installSetupTab } from './setupTab'
 import { installSeedsFollowMode } from './seedsFollowMode'
 import { SHEET_STATE_TYPE, setFetcher, sheetStateWidget } from './sheetStateWidget'
 import { FINISH_SWITCH_TYPE, finishSwitchWidget, refreshFinishSwitches } from './finishSwitch'
@@ -108,6 +117,20 @@ function labelModelChoices(): void {
   }
   ;(comfyApp.graph as { setDirtyCanvas?: (a: boolean, b: boolean) => void } | undefined)?.setDirtyCanvas?.(true, true)
 }
+
+/** Whether a Model Choice of the open workflow has no file to give (Setup's dot). */
+function workflowLacksFiles(): boolean {
+  for (const node of (graph()?.nodes ?? []) as BlockNode[]) {
+    for (const choice of [node, ...(node.subgraph?.nodes ?? [])]) {
+      if (choice.type !== MODEL_CHOICE) continue
+      const value = choice.widgets?.find((w) => w.name === 'component.file')?.value
+      if (lacksFile(value, modelLabels.info(componentOf(choice)))) return true
+    }
+  }
+  return false
+}
+
+let setupTab: { open(focus?: string | null): void } | null = null
 
 /** A node of the open graph by the id an execution event names (a subgraph's inner nodes read ``outer:inner``). */
 function nodeById(id: unknown): ComfyNode | null {
@@ -210,6 +233,7 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
         })
     },
     { id: PLAYER_COMMAND, label: 'Plenio Player', icon: 'pi pi-play-circle', function: () => openPlayer(playerHost) },
+    { id: SETUP_COMMAND, label: 'Plenio Setup', icon: 'pi pi-box', function: () => setupTab?.open() },
     {
       id: MODEL_BLOCKS_COMMAND,
       label: 'Bring the model blocks up to date',
@@ -219,7 +243,7 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
   ],
   menuCommands: [
     { path: ['File'], commands: [CONTINUE_COMMAND, MODEL_BLOCKS_COMMAND] },
-    { path: ['Plenio'], commands: [PLAYER_COMMAND, CONTINUE_COMMAND, MODEL_BLOCKS_COMMAND] }
+    { path: ['Plenio'], commands: [SETUP_COMMAND, PLAYER_COMMAND, CONTINUE_COMMAND, MODEL_BLOCKS_COMMAND] }
   ],
   // the Plenio Player, one click away beside Run (player.ts): started as a program of its own when none runs
   actionBarButtons: [
@@ -366,10 +390,18 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
   setup() {
     installStyles()
     void modelLabels.refresh().then(labelModelChoices)
-    // a run stopped at a model file that is not there: what to do (Plenio Setup does it once it is there)
+    // Plenio Setup in the sidebar: opens by itself once when a wanted template lacks files (setupTab.ts)
+    setupTab = installSetupTab({
+      app: comfyApp,
+      fetcher: comfyApi,
+      openPlayer: () => void openPlayer(playerHost),
+      lacksFiles: workflowLacksFiles
+    })
+    // a run stopped at a model file that is not there: what to do, and Setup at that file's row
     comfyApi.addEventListener(MISSING_EVENT, (event: CustomEvent) => {
-      const notice = missingNotice((event.detail ?? {}) as MissingDetail)
-      comfyApp.extensionManager?.toast?.add({ severity: 'warn', ...notice, life: 30000 })
+      const detail = (event.detail ?? {}) as MissingDetail
+      comfyApp.extensionManager?.toast?.add({ severity: 'warn', ...missingNotice(detail), life: 30000 })
+      if (detail.variant) setupTab?.open(detail.component ?? null)
     })
     // Plenio nodes' tooltips beside the node, not over its fields (tooltipPlacement.ts)
     installTooltipPlacement(() => (comfyApp as { canvas?: unknown }).canvas as CanvasLike | undefined)

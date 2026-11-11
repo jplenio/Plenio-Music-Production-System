@@ -31,9 +31,15 @@ Plenio installs no Python packages. Optional: `python -m pip install faster-whis
 
 ## First run
 
-1. Open the template browser and choose **0 · System Check** (listed under the Plenio package).
-2. Press **Run**. The node shows versions and GPUs, which model files each template still needs, the download policy, and the hardware table - which files the model fields on auto take on each card - with the row for your machine marked.
-3. Nothing is changed automatically. You choose model files in the loader nodes of each template.
+**Plenio Setup** opens in ComfyUI's sidebar the first time a template you want lacks files (later: the *Plenio* menu, or the box icon in the sidebar). It goes through six steps - each can be left and taken up again:
+
+1. **This computer**: graphics card, memory, free space on the models drive, and anything that needs attention, with its fix.
+2. **What do you want?** The templates you will use, and the optional parts (cover art, HQ mastering, stems).
+3. **Your plan**: the file for each model that suits your card, why, where it goes and its licence; you can choose another file, or another folder ComfyUI searches. Nothing is downloaded before you press *Download all*, which names the total size; a download that would not fit on its drive does not start.
+4. **Downloading**: progress, speed and time left per file; pause, resume, cancel. Each file is checked against the catalogue's size and SHA-256 before it is put in place. A model whose makers ask for an OK on Hugging Face shows *What to do*: the three steps to get it.
+5. **Test song**, 6. **Go**: open a template and make your first song, or open the player.
+
+**0 · System Check** shows the same in detail: versions and GPUs, the findings first (each with an id the [troubleshooting guide](troubleshooting.md) explains), which model files each template still needs, the download policy, and the hardware table - which files the model fields on auto take on each card - with the row for your machine marked. Nothing is changed automatically.
 
 ## Choosing a template = choosing the music model
 

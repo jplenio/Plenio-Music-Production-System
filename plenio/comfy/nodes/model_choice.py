@@ -116,6 +116,16 @@ class PlenioModelChoice(io.ComfyNode):
         name, file = _value(component)
         chosen = setup.choose(name, file)
         found = chosen.pick
+        fetched = ""
+        if not found.installed and found.variant is not None and _fetches_itself():
+            # [models] downloads = "auto": the run fetches the catalogue's file and goes on
+            kept = setup.fetch_now(chosen.component, found.variant)
+            if kept is None:
+                chosen = setup.choose(name, file)
+                found = chosen.pick
+                fetched = " - downloaded for this run"
+            else:
+                fetched = f" - not downloaded: {kept}"
         if not found.installed:
             details = {
                 "component": name,
@@ -137,7 +147,7 @@ class PlenioModelChoice(io.ComfyNode):
                 "Plenio's catalogue has for this computer)."
             )
             raise PlenioModelError(
-                f"{chosen.component.title}: {found.file} is not on this computer yet.",
+                f"{chosen.component.title}: {found.file} is not on this computer yet{fetched}.",
                 hint=fetch,
                 details=details,
             )
@@ -146,9 +156,15 @@ class PlenioModelChoice(io.ComfyNode):
             "config": "pinned in config.toml",
             "plan": found.reason,
         }[chosen.source]
-        text = f"{chosen.component.title}: **{found.file}** - {how}"
+        text = f"{chosen.component.title}: **{found.file}** - {how}{fetched}"
         if found.warning:
             text += f" - {found.warning}"
         status = "warning" if found.warning else "ok"
         setup.note_taken(str(getattr(cls.hidden, "unique_id", "") or ""), name, found.file)
         return io.NodeOutput(found.file, ui={"plenio_summary": [{"status": status, "markdown": text}]})
+
+
+def _fetches_itself() -> bool:
+    """``[models] downloads = "auto"`` and not offline: a run fetches a missing catalogue file itself."""
+    config = host.load_config()
+    return config.model_downloads == "auto" and not config.offline
