@@ -44,7 +44,7 @@ def test_the_entry_is_valid_and_first_in_the_list(node: Any, monkeypatch: pytest
 def test_a_gemma_file_found_goes_to_the_local_llm(node: Any, monkeypatch: pytest.MonkeyPatch) -> None:
     from plenio.core import llm
 
-    choice = SimpleNamespace(blocked=False, model=object())
+    choice = SimpleNamespace(blocked=False, model=object(), step="file", detail="")
     monkeypatch.setattr(
         node.local,
         "auto_writer",
@@ -63,7 +63,9 @@ def test_without_llama_cpp_comfyuis_gemma_writes_and_the_summary_says_so(
 ) -> None:
     from plenio.core import llm
 
-    choice = SimpleNamespace(blocked=True, model=None)
+    choice = SimpleNamespace(
+        blocked=True, model=None, step="native", detail="16.0 GB of graphics memory: installed"
+    )
     monkeypatch.setattr(
         node.local,
         "auto_writer",

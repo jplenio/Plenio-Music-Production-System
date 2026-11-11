@@ -125,9 +125,8 @@ The music model, the text side, the audio decoder and the Engine Profile then al
 
 The templates' **Writer model** is *Gemma 4 12B (auto)*: the model that writes title, style, lyrics, arrangement plan and cover-art prompt. It takes, in this order:
 
-1. **A Gemma 4 12B GGUF already on your computer**, in `models/LLM`, a folder of Plenio's config, LM Studio's models or the Hugging Face cache - any of them is used rather than downloading another. The file named like the one for your card comes first, else the largest that fits your card, else the smallest.
-2. **A Gemma 4 12B of a running app** (LM Studio, Ollama ...).
-3. **The file for your graphics card**, downloaded once into `models/LLM` the first time a song is written (pinned revision, size and SHA-256; a broken download resumes):
+1. **A Gemma 4 12B of a running app** (LM Studio, Ollama ...): it is loaded already, so it costs no load time.
+2. **A Gemma 4 12B GGUF already on your computer**, in `models/LLM`, a folder of Plenio's config, LM Studio's models or the Hugging Face cache - any of them is used rather than downloading another. The file named like the one for your card comes first, else the largest that fits your card, else the smallest. Without one, **the file for your graphics card** is downloaded once into `models/LLM` the first time a song is written (pinned revision, size and SHA-256; a broken download resumes):
 
 | VRAM | File | Size |
 |---|---|---|
@@ -136,9 +135,12 @@ The templates' **Writer model** is *Gemma 4 12B (auto)*: the model that writes t
 
 Both are Apache-2.0. On a card too small for the file, llama.cpp keeps the rest in RAM: it writes, more slowly. `PLENIO_OFFLINE=1` or `PLENIO_AUTO_DOWNLOAD=0` turn the download off; the run then names the file to place. **0 · System Check** says what the writer takes on your computer and marks the row of your card.
 
-**A GGUF runs on llama.cpp**, which ComfyUI does not bring: `winget install llama.cpp` (Windows), `brew install llama.cpp` (macOS), your distribution's package or `pip install llama-cpp-python` into ComfyUI's Python. Without it nothing is downloaded: a running app's Gemma 4 12B still writes, else ComfyUI's own Gemma text model if you have one - the node says so -, else the run stops and says what to do.
+**A GGUF runs on llama.cpp**, which ComfyUI does not bring: `winget install llama.cpp` (Windows), `brew install llama.cpp` (macOS), your distribution's package or `pip install llama-cpp-python` into ComfyUI's Python. Without it nothing is downloaded that could not run, and the next steps write:
 
-**ComfyUI's own Gemma 4 files** (`models/text_encoders`, from [Comfy-Org/gemma-4](https://huggingface.co/Comfy-Org/gemma-4), Apache-2.0) write without llama.cpp: `gemma4_12b_int8_convrot` (12.1 GB, the 12B), `gemma4_e4b_it_fp8_scaled` (9.1 GB) and `gemma4_e2b_it_int8_convrot` (5.2 GB, for cards below 8 GB). The memory each needs is an estimate until measured.
+3. **ComfyUI's own Gemma 4 12B**, `gemma4_12b_int8_convrot` (12.1 GB), in `models/text_encoders` - on a card with enough memory, and a ComfyUI that knows the 12B (0.41.0 and later).
+4. **ComfyUI's lighter Gemma 4**: `gemma4_e4b_it_fp8_scaled` (9.1 GB), or `gemma4_e2b_it_int8_convrot` (5.2 GB) on small cards.
+
+ComfyUI's Gemma 4 files come from [Comfy-Org/gemma-4](https://huggingface.co/Comfy-Org/gemma-4) (Apache-2.0) and write without llama.cpp. Steps 3 and 4 are chosen like every model file: the one for your card, an installed one kept rather than a run stopped, a pin in `config.toml` (`[models.pins] writer-native = "..."`) first. Any other Gemma 4 text model in `models/text_encoders` writes too. If none is there, the run stops and names the file for your card and its address. The memory each file needs, and whether step 2 or 3 writes better on a 16 GB card, are estimates until measured. *Writer model*'s summary says which step wrote and why.
 
 **Other writers:** *Writer model* lists every model - ComfyUI's lighter [`gemma4_e4b_it_fp8_scaled.safetensors`](https://huggingface.co/Comfy-Org/gemma-4/resolve/main/text_encoders/gemma4_e4b_it_fp8_scaled.safetensors) (9.1 GB, into `models/text_encoders`, no llama.cpp needed), any other GGUF, and the models of a running LM Studio, Ollama, llama.cpp ... - see [Local LLMs](concepts/local-llm.md). A workflow saved before keeps the writer it was saved with.
 

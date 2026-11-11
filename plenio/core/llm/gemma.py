@@ -28,6 +28,7 @@ from __future__ import annotations
 import re
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
+from typing import Any
 
 from .. import features
 from ..assets import Asset
@@ -134,6 +135,10 @@ class Choice:
     vram_gib: float | None
     runs_files: bool = True
     """A llama.cpp runtime is there to serve GGUF files."""
+    step: str = ""
+    """Which step of the writer plan (``STEPS``) a run took - set by the host once it knows."""
+    detail: str = ""
+    """Why, in words (the native file's reason, the app's name)."""
 
     @property
     def download(self) -> bool:
@@ -161,16 +166,52 @@ class Choice:
         )
 
 
+STEPS = ("app", "file", "download", "native")
+"""The writer plan (PD 5.6), in order: (1) a Gemma 4 12B of a running app - loaded already, no load time; (2) a
+Gemma 4 12B GGUF on this machine, or the one for the card downloaded - needs llama.cpp; without llama.cpp
+(3) ComfyUI's native Gemma 4 12B, (4) its E4B or, on small cards, E2B - chosen by the model plan from the
+catalogue's ``writer-native``. The order of 2 and 3 is PD's expectation until phase 0.4 measures both."""
+
+NATIVE_12B = "gemma4_12b_int8_convrot.safetensors"
+
+
 def choose(
     models: Sequence[Model], assets: Mapping[str, Asset], vram_gib: float | None, *, runs_files: bool = True
 ) -> Choice:
-    """What ``AUTO`` stands for: a file found on this machine (when llama.cpp can run it), a running app's Gemma 4
-    12B, or the file to download for this card."""
+    """What ``AUTO`` stands for: a running app's Gemma 4 12B first (it costs no load time), then a file found on
+    this machine (when llama.cpp can run it), else the file to download for this card."""
     asset = assets[wanted(vram_gib)]
-    found = pick(models, vram_gib, file_of(asset)) if runs_files else None
-    if found is None:
-        found = next((m for m in models if is_gemma_12b_of_app(m)), None)
+    found = next((m for m in models if is_gemma_12b_of_app(m)), None)
+    if found is None and runs_files:
+        found = pick(models, vram_gib, file_of(asset))
     return Choice(asset, found, vram_gib, runs_files)
+
+
+def native_pick(
+    component: Any,
+    vram_gib: float | None,
+    installed: Mapping[str, int],
+    *,
+    has_12b: bool,
+    prefer: str = "balanced",
+    pinned: str | None = None,
+) -> Any:
+    """Steps 3 and 4: ComfyUI's own Gemma 4 file for this card, by the model plan (``plenio.core.modelplan``) over the
+    catalogue's ``writer-native`` - the 12B only where this ComfyUI can load it (``has_12b``)."""
+    from dataclasses import replace
+
+    from ..modelplan import pick as plan_pick
+
+    variants = tuple(v for v in component.variants if has_12b or v.file != NATIVE_12B)
+    if not any(v.default for v in variants):  # the plan reads the default only for its reason
+        variants = tuple(replace(v, default=v is variants[0]) for v in variants)
+    return plan_pick(
+        replace(component, variants=variants),
+        vram_gib=vram_gib,
+        installed=installed,
+        prefer=prefer,
+        pinned=pinned,
+    )
 
 
 __all__ = [
@@ -185,8 +226,11 @@ __all__ = [
     "NATIVE_E4B",
     "NATIVE_E4B_URL",
     "SMALL",
+    "NATIVE_12B",
+    "STEPS",
     "Choice",
     "choose",
+    "native_pick",
     "file_of",
     "is_gemma_12b",
     "is_gemma_12b_of_app",

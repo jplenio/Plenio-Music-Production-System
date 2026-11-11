@@ -17,6 +17,7 @@ from plenio.core.assets import AssetFile, load_catalogue
 from plenio.core.errors import PlenioUserError
 from plenio.core.llm import client, gemma
 from plenio.core.llm.catalog import Model
+from plenio.core.models import load_components
 from plenio.core.system import RULES, Device, SystemFacts, _asset_rows, _llm_lines
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -231,8 +232,9 @@ def test_without_llama_cpp_no_file_is_used_and_nothing_is_downloaded() -> None:
     served = gemma.choose([q6, other_app, app_model], ASSETS, 15.9, runs_files=False)
     assert served.model is app_model and not served.blocked
     assert gemma.choose([other_app, app_model], ASSETS, 15.9).model is app_model
-    # with llama.cpp, a file comes first
-    assert gemma.choose([app_model, q6], ASSETS, 15.9).model is q6
+    # with llama.cpp too, a running app's model comes first: it is loaded already (writer plan, step 1)
+    assert gemma.choose([app_model, q6], ASSETS, 15.9).model is app_model
+    assert gemma.choose([other_app, q6], ASSETS, 15.9).model is q6
 
 
 def test_the_native_fallback_is_comfyuis_own_gemma_4() -> None:
@@ -268,6 +270,13 @@ def machine(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> dict[str, Any]:
     monkeypatch.setattr(host, "active_vram_gib", lambda: state["vram"])
     monkeypatch.setattr(host, "llm_folders", lambda: [state["folder"]])
     monkeypatch.setattr(host, "model_files", lambda folder: state["text_encoders"])
+    monkeypatch.setattr(host, "comfy_loads_gemma4_12b", lambda: state.get("has_12b", True))
+    native = {v.file: v.bytes for v in NATIVE.variants}
+    monkeypatch.setattr(
+        local,
+        "native_installed",
+        lambda component: {f: native[f] for f in state["text_encoders"] if f in native},
+    )
     calls: list[tuple[str, Path]] = []
     monkeypatch.setattr(
         local, "ensure_asset_in", lambda asset, folder, config, **kwargs: calls.append((asset.id, folder))
@@ -322,11 +331,12 @@ def test_without_llama_cpp_a_run_writes_with_comfyuis_gemma_or_says_what_to_do(
         local.auto_writer(PlenioConfig())
     text = str(error.value)
     assert (
-        "runs on llama.cpp" in text
-        and "winget install llama.cpp" in text
-        and "brew install llama.cpp" in text
+        "needs llama.cpp" in text and "winget install llama.cpp" in text and "brew install llama.cpp" in text
     )
-    assert gemma.NATIVE_E4B_URL in text and machine["downloads"] == []
+    # the plan's native file for this 15.9 GB card - the 12B - with its pinned address
+    assert (
+        "gemma4_12b_int8_convrot.safetensors" in text and "/resolve/" in text and machine["downloads"] == []
+    )
 
 
 def test_offline_the_download_is_refused_with_the_file_to_place(tmp_path: Path) -> None:
@@ -433,3 +443,76 @@ def test_the_system_check_says_which_yue2_files_load() -> None:
     bad = check_system(facts(**{"BF16.safetensors": "in m-a-p's Transformers layout"}))
     assert bad.status is Status.WARNING
     assert "YuE2 checkpoint 'BF16.safetensors' will not load: in m-a-p's Transformers layout." in bad.messages
+
+
+NATIVE = next(
+    c for c in load_components(ROOT / "resources" / "models.toml").values() if c.id == "writer-native"
+)
+E2B, E4B, N12B = (
+    "gemma4_e2b_it_int8_convrot.safetensors",
+    "gemma4_e4b_it_fp8_scaled.safetensors",
+    "gemma4_12b_int8_convrot.safetensors",
+)
+NATIVE_BY_CARD = {None: E2B, 6.0: E2B, 8.0: E2B, 12.0: E4B, 15.9: N12B}
+"""Steps 3/4 with every native file there: the model plan's pick by the card (the thresholds are estimates)."""
+
+
+@pytest.mark.parametrize("vram", list(NATIVE_BY_CARD))
+@pytest.mark.parametrize("addon", [True, False], ids=["add-on", "no add-on"])
+@pytest.mark.parametrize("llama_cpp", [True, False], ids=["llama_cpp", "no llama_cpp"])
+@pytest.mark.parametrize("found", ["app", "file", "nothing"])
+def test_the_writer_plan_takes_its_steps_in_order(
+    machine: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+    vram: float | None,
+    addon: bool,
+    llama_cpp: bool,
+    found: str,
+) -> None:
+    """PD 5.6: (1) a running app's Gemma 4 12B, (2) a GGUF here or the card's downloaded - with llama.cpp (the add-on's
+    llama-server or llama-cpp-python), (3/4) ComfyUI's own Gemma 4 by the model plan - for every card."""
+    from plenio.comfy import llm as local
+    from plenio.core import features
+    from plenio.core.config import PlenioConfig
+
+    monkeypatch.setattr(features, "has", lambda name: addon)
+    machine["vram"] = vram
+    machine["runtimes"] = ["llama-server"] * addon + ["llama-cpp-python"] * llama_cpp
+    machine["models"] = {
+        "app": [Model("Ollama", "gemma4:12b")],
+        "file": [model("gemma-4-12b-it-Q6_K.gguf", 9.1)],
+        "nothing": [],
+    }[found]
+    machine["text_encoders"] = [E2B, E4B, N12B]
+    route, choice = local.auto_writer(PlenioConfig())
+    runs = addon or llama_cpp
+    if found == "app":
+        assert choice.step == "app" and route.local_model == "Ollama · gemma4:12b"
+    elif runs:
+        assert choice.step == ("file" if found == "file" else "download") and route.use_local
+    else:
+        assert choice.step == "native" and route.text_encoder == NATIVE_BY_CARD[vram] and not route.use_local
+        assert machine["downloads"] == []  # nothing is fetched that could not run
+
+
+def test_without_the_12bs_configuration_the_e4b_writes(machine: dict[str, Any]) -> None:
+    from plenio.comfy import llm as local
+    from plenio.core.config import PlenioConfig
+
+    machine["runtimes"], machine["text_encoders"], machine["has_12b"] = [], [E2B, E4B, N12B], False
+    route, choice = local.auto_writer(PlenioConfig())
+    assert route.text_encoder == E4B and choice.step == "native"
+
+
+def test_writer_choice_says_which_step_wrote_and_why() -> None:
+    from plenio.comfy.llm import writer_summary
+
+    choice = gemma.choose([], ASSETS, 15.9)
+    native = llm.Route(text_encoder=E4B)
+    said = writer_summary(
+        native, replace(choice, step="native", detail="12.0 GB of graphics memory: runs on the card")
+    )
+    assert "ComfyUI's own Gemma 4" in said and "runs on the card" in said and "writes better" in said
+    assert "runs in ComfyUI" in writer_summary(llm.Route(text_encoder=N12B), replace(choice, step="native"))
+    app = writer_summary(llm.Route(local_model="Ollama · gemma4:12b"), replace(choice, step="app"))
+    assert "running app" in app

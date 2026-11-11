@@ -9,7 +9,9 @@ import os
 import threading
 import time
 from collections.abc import Callable
+from dataclasses import replace
 from pathlib import Path
+from typing import Any
 
 from ..core import llm
 from ..core.assets import ensure_asset_in
@@ -108,24 +110,33 @@ def auto_writer(
     progress: Callable[[int, int, str], None] | None = None,
     is_cancelled: Callable[[], bool] | None = None,
 ) -> tuple[llm.Route, llm.gemma.Choice]:
-    """Where the writer ``llm.AUTO`` goes on this machine, and the choice behind it. A Gemma 4 12B already here is
-    used as it is; else the file for this card is downloaded once into ComfyUI's models/LLM (offline mode and
-    ``PLENIO_AUTO_DOWNLOAD=0`` refuse that and say what to put where). Without llama.cpp nothing is downloaded that
-    could not run: ComfyUI's own Gemma text model writes if one is installed, else the run stops and says what to
-    do."""
+    """Where the writer ``llm.AUTO`` goes on this machine, and the choice behind it - the writer plan
+    (``llm.gemma.STEPS``): a running app's Gemma 4 12B; a Gemma 4 12B GGUF here, else the one for this card
+    downloaded once into ComfyUI's models/LLM (offline mode and ``PLENIO_AUTO_DOWNLOAD=0`` refuse that and say what
+    to put where); without llama.cpp ComfyUI's own Gemma 4 file the model plan takes for this card (12B, E4B or
+    E2B), or any Gemma 4 text model installed - else the run stops and says what to do. ``choice.step`` says which
+    step it took."""
     choice = gemma_choice(config, fresh=True)
     if choice.model is not None:
-        return llm.Route(local_model=choice.model.ref), choice
+        # step 1: a running app's model (no file), step 2: a GGUF on this machine
+        step = "app" if choice.model.path is None else "file"
+        return llm.Route(local_model=choice.model.ref), replace(choice, step=step, detail=choice.model.ref)
     if choice.blocked:
-        native = llm.gemma.native_fallback(llm.native_writers(host.model_files("text_encoders")))
-        if native is not None:
-            log.warning("Plenio writer: no llama.cpp for Gemma 4 12B; writing with ComfyUI's %s", native)
-            return llm.Route(text_encoder=native), choice
+        # steps 3 and 4: no llama.cpp - ComfyUI's own Gemma 4 file for this card, by the model plan
+        native = native_writer(config)
+        if native.installed:
+            return llm.Route(text_encoder=native.file), replace(choice, step="native", detail=native.reason)
+        other = llm.gemma.native_fallback(llm.native_writers(host.model_files("text_encoders")))
+        if other is not None:  # a Gemma 4 text model of one's own: it writes rather than the run stopping
+            log.warning("Plenio writer: no llama.cpp for Gemma 4 12B; writing with ComfyUI's %s", other)
+            return llm.Route(text_encoder=other), replace(choice, step="native", detail="installed")
+        url = native.variant.url if native.variant is not None else llm.gemma.NATIVE_E4B_URL
         raise PlenioModelError(
-            "The writer Gemma 4 12B runs on llama.cpp, and this computer has none.",
-            hint=f"{_capital(llm.gemma.how_to_run_files())}, then run again: Plenio then downloads the model for your graphics "
-            f"card. Or choose another writer model: a running LM Studio or Ollama works as it is, and ComfyUI's own "
-            f"Gemma 4 E4B runs without llama.cpp - {llm.gemma.NATIVE_E4B_URL} into models/text_encoders, then press R.",
+            f"The writer needs llama.cpp for Gemma 4 12B as a GGUF, or ComfyUI's own {native.file}, and this "
+            "computer has neither.",
+            hint=f"Download {native.file} ({url}) into models/text_encoders and press R - Plenio Setup does it for "
+            f"you. Or {llm.gemma.how_to_run_files()}, then run again: Plenio then downloads the GGUF for your "
+            "graphics card. A running LM Studio or Ollama with Gemma 4 12B works as it is.",
         )
     folders = host.llm_folders()
     if not folders:
@@ -138,7 +149,37 @@ def auto_writer(
     ensure_asset_in(asset, folders[0], config, progress=progress, is_cancelled=is_cancelled)
     with _lock:
         _cache.clear()  # the next list has the new file
-    return llm.Route(local_model=f"{COMFYUI_LABEL}{llm.SEPARATOR}{llm.gemma.file_of(asset)}"), choice
+    route = llm.Route(local_model=f"{COMFYUI_LABEL}{llm.SEPARATOR}{llm.gemma.file_of(asset)}")
+    return route, replace(choice, step="download", detail=llm.gemma.file_of(asset))
+
+
+def native_installed(component: Any) -> dict[str, int]:
+    """The native writer files in models/text_encoders, with their sizes."""
+    found: dict[str, int] = {}
+    for variant in component.variants:
+        path = host.locate_model("text_encoders", variant.file)
+        if path is not None:
+            try:
+                found[variant.file] = path.stat().st_size
+            except OSError:
+                continue
+    return found
+
+
+def native_writer(config: PlenioConfig) -> Any:
+    """Steps 3 and 4 of the writer plan: ComfyUI's own Gemma 4 for this card (``writer-native`` of the catalogue,
+    a pin in ``[models.pins]`` first), the 12B only where this ComfyUI loads it."""
+    from . import setup
+
+    component = setup.components()["writer-native"]
+    return llm.gemma.native_pick(
+        component,
+        host.active_vram_gib(),
+        native_installed(component),
+        has_12b=host.comfy_loads_gemma4_12b(),
+        prefer=config.models_prefer,
+        pinned=config.model_pins.get("writer-native"),
+    )
 
 
 def answer_cache() -> llm.AnswerCache:
@@ -150,3 +191,21 @@ def make_room(required_bytes: int) -> None:
     """Ask ComfyUI to free GPU memory for a GGUF server (R9); nothing to do on a CPU-only host."""
     if host.torch_device() != "cpu":
         host.free_memory(required_bytes)
+
+
+def writer_summary(route: llm.Route, choice: llm.gemma.Choice) -> str:
+    """Which step of the writer plan wrote, and why (``llm.gemma.STEPS``)."""
+    if choice.step == "app":
+        return f"Writer: **{route.local_model}** - Gemma 4 12B of a running app (loaded already) - Local LLM"
+    if choice.step == "file":
+        return f"Writer: **{route.local_model}** - Gemma 4 12B, found on this machine - Local LLM"
+    if choice.step == "download":
+        return f"Writer: **{route.local_model}** - Gemma 4 12B, downloaded for this card - Local LLM"
+    why = f" ({choice.detail})" if choice.detail and choice.detail != "installed" else ""
+    text = f"Writer: **{route.text_encoder}** - ComfyUI's own Gemma 4, Generate Text{why}"
+    if llm.gemma.NATIVE_12B in route.text_encoder:
+        return text + ". Without llama.cpp, the 12B runs in ComfyUI."
+    return (
+        text + f". Gemma 4 12B writes better: {llm.gemma.how_to_run_files()}, or put "
+        f"{llm.gemma.NATIVE_12B} into models/text_encoders (Plenio Setup)."
+    )

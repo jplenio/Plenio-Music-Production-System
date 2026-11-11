@@ -98,15 +98,10 @@ class PlenioWriterChoice(io.ComfyNode):
                 progress=lambda done, total, _message: progress.update(done / max(total, 1)),
                 is_cancelled=host.is_interrupted,
             )
-            if choice.blocked:
+            markdown = local.writer_summary(route, choice)
+            # ComfyUI's own E4B/E2B writes where the 12B cannot: said, so that llama.cpp or the 12B can be added
+            if choice.step == "native" and llm.gemma.NATIVE_12B not in route.text_encoder:
                 status = "warning"
-                markdown = (
-                    f"Writer: **{route.text_encoder}** - ComfyUI's Generate Text. Gemma 4 12B, the better writer, "
-                    f"needs llama.cpp: {llm.gemma.how_to_run_files()}."
-                )
-            else:
-                how = "found on this machine" if choice.model is not None else "downloaded for this card"
-                markdown = f"Writer: **{route.local_model}** - Gemma 4 12B, {how} - Local LLM"
         elif route.use_local:
             markdown = f"Writer: **{model}** - Local LLM"
         else:

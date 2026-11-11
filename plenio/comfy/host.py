@@ -290,6 +290,15 @@ def prompt_server() -> Any:
     return PromptServer.instance
 
 
+def comfy_loads_gemma4_12b() -> bool:
+    """This ComfyUI has Gemma 4 12B's configuration (``comfy/text_encoders/gemma4.py``; 0.41.0 and later)."""
+    try:
+        import comfy.text_encoders.gemma4 as gemma4
+    except Exception:  # noqa: BLE001 - an older ComfyUI, or outside one
+        return False
+    return hasattr(gemma4, "Gemma4_12B_Config")
+
+
 def node_info(node_type: str) -> dict[str, Any] | None:
     """A node type's definition as ``/object_info`` gives it - its inputs in their order, its outputs, its name -
     read now (a list of files is the one on disk now); ``None`` for a type this ComfyUI does not have."""
