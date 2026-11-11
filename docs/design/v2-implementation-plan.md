@@ -1,0 +1,338 @@
+# Plenio 2.0 - implementation plan
+
+For a coding agent. Design: [v2-product-design.md](v2-product-design.md) (cited as **PD §n**) and [v2-marketing-and-publishing.md](v2-marketing-and-publishing.md) (**MP §n**). Written 2026-11-11 against 1.6.0 (`c307d35`).
+
+Tick a box when its acceptance line holds, in the commit that makes it hold. Do not tick a box for work that is written but not verified.
+
+---
+
+## How to work
+
+### Rules that bind every task
+
+1. **Languages.** Answers to the owner in German. Code, comments, UI strings, docs and commit messages in English (ADR-0008).
+2. **Commits.** Commit locally, one task or a coherent part of one per commit. **Never push, never tag.** Never commit `.codewhale/`, `.claude/` or `dist/`.
+3. **Private material.** The owner's release records and songs are read-only study input. Report aggregates; never copy lyrics, titles or sung lines into code, tests, docs, commit messages or the CHANGELOG. Invent examples of the same kind.
+4. **Downloads and installs** need the owner's explicit permission, each time. This includes Python packages, npm packages, model files and browsers.
+5. **Graphics cards.** GPU jobs run on GPU 1 only (`CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1`). One GPU job at a time. Browsers that draw WebGL use Playwright's own Chromium with GPU flags, never a browser channel.
+6. **Public texts** (CHANGELOG, README, docs, release notes) say what changed and why it is better. They never say who asked.
+7. **Claims.** A number in a doc or a message is measured, or it is labelled an estimate. "Not rendered", "not heard", "not measured" are said plainly.
+8. **Architecture rules stay** (`docs/dev/coding-standards.md`): `plenio.core` imports no ComfyUI, torch or aiohttp; `host.py` is the only module that touches ComfyUI internals; relative imports inside `plenio`; errors carry a message and a hint; every input and output has a tooltip.
+9. **Frontend sources are LF** in the working tree before any build; the committed builds must match the sources.
+10. **Compatibility.** A workflow saved with 1.x opens and runs. `/plenio/api/v1` answers as in 1.6.0 for a caller on this computer. The player reads its existing state. Breaking any of the three needs the owner's decision first.
+
+### Checks before every commit that touches the named area
+
+The commands are in `docs/dev/testing.md`; local paths are in the session's memory notes, not in this file.
+
+| Area | Checks |
+|---|---|
+| any Python | `ruff check .` and `ruff format --check .` with the pinned ruff 0.13 binary; `mypy --python-version 3.12`; `pytest tests/unit tests/workflows tests/contract/test_data_schemas.py` |
+| nodes, routes, templates, blueprints | also `pytest tests/contract tests/host` against the tagged ComfyUI exports; `tools/workflow_validation.py`; `tools/build_graphs.py` leaves no diff |
+| frontend | `npm run typecheck`, `npm test`, `npm run build`, `npm run build:player`; `git status web/js plenio/player/static plenio/player/guest_static` shows only intended changes |
+| templates, widgets | `tools/browser_check.mjs` against a dev server |
+| packaging | `comfy node validate`, `comfy node pack` (after committing), `tools/package_gate.py node.zip`, then delete `node.zip` |
+
+### When to stop and ask the owner
+
+- A task needs a decision listed in PD §12 or MP §10 that the owner has not made, and the recommendation does not obviously apply.
+- A measurement contradicts the design (for example: the native writer is unusable on 16 GB). Record the numbers in `docs/test-reports/`, propose the change to the design, wait.
+- A task would break rule 10.
+- Anything outward-facing: a push, a tag, a post, an issue, an upload.
+
+Otherwise proceed with the recommendation and say so in the report.
+
+### Order and releases
+
+```text
+Phase 0  baseline, measurements, faster tests            no release
+Phase 1  package boundary, route classes, release tool   → 1.7.0 (the canary; the owner publishes)
+Phase 2  catalogue v2, model plan, downloads, gated
+Phase 3  Model Choice, templates, writer plan
+Phase 4  Plenio Setup and Home                           → 2.0.0-beta.1 (git only: a tag the owner may push, no Registry)
+Phase 5  Song API v2, tokens, Player API, MCP
+Phase 6  player: People & access, navigation, guests' languages
+Phase 7  visuals: devices, analysis, Director, chooser, one light
+Phase 8  performance, by measurement                     → 2.0.0-beta.2
+Phase 9  tests: tiers, mutation
+Phase D  docs: facts, links, site, rewrites
+Phase M  media pipeline and kit (repository Plenio-Media)
+Phase R  release automation, 2.0.0                       → 2.0.0
+```
+
+Phases 5, 6 and 7 are independent of each other after phase 4 and may be done in any order. Phase D's tasks D1 and D2 are needed by phase 1's release tool and are pulled forward there.
+
+---
+
+## Phase 0 - baseline and measurements
+
+Goal: numbers the later phases are judged by, and a test suite fast enough to run on every step. No behaviour of the product changes.
+
+- [ ] **0.1 Stage timings in the record.** `host.Progress` gains a stage name; `host.py` measures load time around ComfyUI's model loading and the node's own time; Export Release writes `timings` (`plenio.timings/1`, PD §6.1) into the record; `resources/schemas/record-1.schema.json` allows the optional key.
+  *Accept:* a host test runs a fake-model song and finds one entry per stage with `seconds > 0`; an old record without `timings` still validates and plays.
+- [ ] **0.2 `tools/bench.py`.** Runs the four fixed briefs of PD §6.1 through the Song API, three times each, against a running ComfyUI; writes JSON and a Markdown table to `docs/test-reports/`. `--fake` runs with the test nodes for CI.
+  *Accept:* `bench.py --fake` passes in the host job; the owner (or the agent on GPU 1, with permission) has run it with real models on 1.6.0 and the report `docs/test-reports/2026-…-bench-1.6.0.md` is committed.
+- [ ] **0.3 Peak memory per variant.** A study script (`tools/studies/variant_memory.py`) loads each YuE2, MiniMax and FLUX.2 variant present on the machine through ComfyUI's loaders on GPU 1 and records `torch.cuda.max_memory_allocated` per stage for a 60 s and a 180 s song.
+  *Accept:* a report with one row per variant and stage; the thresholds for PD §5.1 are derived from it and marked *measured* with the card's name; variants that are not on the machine stay *estimate*.
+- [ ] **0.4 The writer on the native 12B.** With the owner's permission to download `gemma4_12b_int8_convrot.safetensors` (12.06 GB): run `tools/writer_probe.py` with the native 12B and with the GGUF Q6_K and QAT Q4 on the same twenty briefs; record time, peak memory, cut-off answers and the probe's quality measures. Check whether ComfyUI 0.41.0 loads the 12B.
+  *Accept:* a report that states the order of steps 2 and 3 of PD §5.6 and the memory from which step 3 is taken; if 0.41.0 cannot load it, the report says which version can.
+- [ ] **0.5 Faster tests, same assertions** (PD §10.1).
+  - [ ] `serve()` and `serve_guests()` and the network gateway take `poll_interval` (default as today); test fixtures pass 0.02.
+  - [ ] Servers that a module's tests only read become module-scoped fixtures.
+  - [ ] `Accounts(folder, iterations=…)`; tests pass 1 000; one test asserts the production default of 240 000.
+  - [ ] Markers `io` and `process` in `pyproject.toml`; the ten slowest tests carry them.
+  - [ ] The two torch adapter tests move to the host job.
+  - [ ] With the owner's permission: `pytest-xdist` in `.devdeps` and in CI; `-n auto` for the `io` tier; every server test binds port 0.
+  *Accept:* `pytest tests/unit tests/workflows tests/contract/test_data_schemas.py` under 90 s on the owner's machine; the number of test functions is unchanged; three consecutive runs with `-n auto -p no:randomly` and three with a random order pass.
+- [ ] **0.6 Coverage baseline.** With permission: `coverage` in `.devdeps`; `coverage run --contexts=test`; the report per module is committed as `docs/test-reports/…-coverage-1.6.0.md` (percentages only).
+  *Accept:* the report exists; nothing is deleted on its basis in this phase.
+
+**Exit of phase 0:** the three reports are committed, the unit suite is under 90 s, and the owner has read the reports' conclusions (in German, in the session).
+
+---
+
+## Phase 1 - package boundary and the canary (1.7.0)
+
+Goal: PD §3. Nothing else that touches processes or the network changes in this phase.
+
+- [ ] **1.1 `plenio/core/features.py`** with `has(addon)` and a test for a present and an absent module.
+- [ ] **1.2 The add-on package `plenio/addons/`.**
+  - [ ] `studio_launcher.py`: the process-starting half of `plenio/player/studio.py` (command building, start, stop, the log). `studio.py` keeps status, settings and the "is a ComfyUI answering" logic and calls the add-on through `features.has`.
+  - [ ] `llm_server.py`: `find_runtimes`' `llama-server` discovery and the server process of `plenio/core/llm/runtime.py`. `runtime.py` keeps the `llama-cpp-python` shim (fixed interpreter, in-package module) and the port probe.
+  - [ ] `file_manager.py`: `show_folder`, rewritten without a command string (PD §3.1). The select-a-file behaviour is dropped; the callers pass a folder.
+  *Accept:* with the add-on present every existing test passes unchanged except those that asserted Explorer's `/select,`; with `plenio/addons` removed from the import path (a fixture that hides it) the player, the Local LLM node and Writer Choice import and run, and each degraded function answers with the sentence of PD §3.1's table.
+- [ ] **1.3 Degraded paths, in words.** The player's studio panel, the *Open folder* buttons (path with *Copy*), the Local LLM node's and Writer Choice's messages, the System Check's writer line. Each message says what the user can do.
+  *Accept:* frontend tests for the two panels; unit tests for the three messages; `docs/user/troubleshooting.md` has an entry per message.
+- [ ] **1.4 `.comfyignore`** excludes `/plenio/addons/`; `tests/host/harness.py` copies it only when a test asks for the full install.
+  *Accept:* `comfy node pack` → the zip has no `plenio/addons/`; ComfyUI started from the zip registers all 37 nodes with no import error (host test over the unpacked zip).
+- [ ] **1.5 `tools/package_gate.py`** (PD §3.3) with `resolve_argv0`, tests with one passing and six failing fixtures (a string command, `shell=True`, `os.system`, `os.startfile`, a launch in an unlisted file, an argv whose first element is not `sys.executable`), and the `--delta <tag>` report.
+  *Accept:* the gate passes on the packed zip of this phase and fails on the packed zip of `v1.6.0`, naming `visuals.py`, `runtime.py` and `studio.py`; it runs in the CI job *Registry package*.
+- [ ] **1.6 Route access classes** (PD §3.4): a `Route` record with `access`, `guarded()`, the table in `routes.py` and `song_api.py`, one parametrised test over every route (remote peer → 403 for `local`; no absolute path in any answer to a remote peer). `api` behaves as today in this phase (tokens come in 5.4).
+  *Accept:* the test enumerates `ROUTES` and fails when a route has no class.
+- [ ] **1.7 Ruff rules** `S301`, `S602`, `S605` added; findings fixed or justified with a `noqa` and a reason.
+- [ ] **1.8 Release tool, first part** (MP §8.2): `tools/release.py version|prepare|verify` covering version strings, builds, CHANGELOG check, `tools/release_notes.py` (from the session's scratch script) writing `docs/releases/<version>.md`, the package gate and its delta, and `docs/security/review-<version>.md` generated from a template plus the delta.
+  *Accept:* `release.py prepare 1.7.0` on a clean tree produces exactly the diff a hand-made release would; `verify` passes.
+- [ ] **1.9 Docs for the boundary.** SECURITY.md (what the Registry package starts: two fixed patterns; what the add-on adds), `docs/user/getting-started.md` (the two ways to install and what differs), CHANGELOG 1.7.0, a short ADR-0013 *Two artefacts*.
+- [ ] **1.10 Hand over 1.7.0.** A German report to the owner: what changed, the gate's delta against 1.6.0, the checks, the steps to publish, and the review request to file.
+
+**Exit of phase 1:** the owner has published 1.7.0 (or decided not to). `tools/registry_status.py` (MP §8.4) is written and reads the verdict. While waiting, phase 2 starts. When the verdict arrives, apply PD §3.5's table before phase R.
+
+---
+
+## Phase 2 - catalogue v2, the model plan, downloads
+
+- [ ] **2.1 Catalogue schema 2** (PD §5.1): `resources/models.toml` rewritten into components and variants, the assets of `resources/assets.toml` folded in; `plenio/core/models.py` parses `plenio.models/2` into `Component` and `Variant`; a reader for schema 1 is not kept (the file ships with the code).
+  *Accept:* parser tests for every rejection (missing hash, unknown folder, URL not on the allowlist, two variants with one file name, a quality rank used twice in a component); `tools/build_graphs.py` and the System Check read the new structures; every 1.6.0 file is present with the same folder and file name.
+- [ ] **2.2 `tools/catalogue_check.py`**: reads the hub's model info and file headers (PD §5.1); `--write` fills `revision`, `bytes`, `sha256`, `gated`, `licence`, current repository names; `--check` fails on drift. Network access by the tool only, never by a test: tests use recorded answers.
+  *Accept:* after `--write` no entry points at `resolve/main`, every file has a SHA-256, the three renamed repositories carry their current names; a weekly CI job runs `--check`.
+- [ ] **2.3 `plenio/core/modelplan.py`**: `pick` as in PD §5.2, `plan(template, facts, catalogue, installed, config)` returning one `Pick` per component the template needs plus sizes, licences, disk need and warnings; `fingerprint`.
+  *Accept:* table tests: for 6, 8, 12, 16, 24 GiB and no GPU × the four preferences × three installed sets, the picks equal a reviewed table; property test: the pick is stable under changes of free memory and of the order of variants; the reason is never empty.
+- [ ] **2.4 Config** (`core/config.py`): `[models] prefer`, per-component pins, `downloads = "ask" | "auto" | "off"`, `[workers] device`; environment variables for each; unknown keys stay errors.
+  *Accept:* config tests; the generated table in `docs/user/configuration.md` (after D1) lists them.
+- [ ] **2.5 The downloader** (PD §5.4): `core/assets/fetch.py` gains a download manager (queue, two at once, pause, cancel, states, speed), the refusal classifier `core/assets/hub.py`, `open_hub` with the redirect handler, the disk-space check, the Windows rename retry. Standard library only in `core`; the token is read through a small adapter that uses `huggingface_hub` behind `dependencies.require`.
+  *Accept:* tests against a local fake hub for every row of PD §5.4's table; the redirect test proves the token never reaches a second host; a resumed download after a killed process ends with the right hash; cancelling leaves a `.part` that the next start resumes.
+- [ ] **2.6 The gated flow, backend**: `check(repo, file, token)` returning the open step (no accept, pending, token lacks the right, ready); saving a token through `huggingface_hub.login`.
+  *Accept:* tests for the four outcomes with recorded hub answers; no test and no log line prints a token (a test greps the captured log).
+- [ ] **2.7 Routes** (class `local`): `GET /plenio/setup/plan`, `POST /plenio/setup/downloads` (variant ids only), `GET/DELETE /plenio/setup/downloads[/{id}]`, `POST /plenio/setup/hub-token`, `POST /plenio/setup/check`; events `plenio.download` over ComfyUI's websocket.
+  *Accept:* a property test posts ids, paths and URLs: only catalogue ids start a download, and every target lies inside a registered model folder; the access test of 1.6 covers the routes.
+
+**Exit of phase 2:** from a Python shell inside ComfyUI, `plan("yue2-song")` on the owner's machine names the files the owner would choose, with reasons; a missing file can be downloaded, paused, resumed and verified through the routes.
+
+---
+
+## Phase 3 - Model Choice, templates, the writer plan
+
+- [ ] **3.1 `PlenioModelChoice`** (PD §5.3) with `fingerprint_inputs`, its help page `web/docs/PlenioModelChoice.md`, tooltips, the `models_missing` error data.
+  *Accept:* contract tests (schema, tooltips); host tests: `auto` picks the installed variant of a fake catalogue and the loader receives its name; a pinned file wins; a missing file fails with the hint and the data; installing a file changes the fingerprint.
+- [ ] **3.2 Sniffers** `accepts` per component in `core/models.py` (YuE2 checkpoints exist; add the same header check for MiniMax DiT, FLUX.2, text encoders by their key prefixes) so that lists show only files a loader takes.
+  *Accept:* tests with synthetic safetensors headers for each kind; a file of the wrong kind is listed greyed with the reason by the frontend (test in 3.4).
+- [ ] **3.3 Blueprints and templates**: `Plenio · YuE2 Model`, `Plenio · MiniMax Model`, `Plenio · Cover Art` get a Model Choice per component feeding the loaders; the loaders lose `properties.models`; `tools/build_graphs.py` generates them; thumbnails rebuilt.
+  *Accept:* `tools/workflow_validation.py`; `tests/workflows`; `tools/browser_check.mjs` (load, save and reload, API prompt identical); a 1.6.0 workflow from `tests/fixtures/workflows/` still loads and runs with its own file names.
+- [ ] **3.4 Frontend**: the Model Choice widget shows the plan's pick beside `auto` ("auto · yue2_3b_int8_convrot · runs on the card"), opens Setup at the component on a `models_missing` error, greys files that do not fit.
+  *Accept:* Vitest for the label and the error path.
+- [ ] **3.5 `core/blocks.py`**: *Bring this workflow's blocks up to date* offers the new model blocks for 1.x workflows and keeps the user's file as the pin.
+  *Accept:* tests on the 1.0.1 and 1.5 workflow fixtures: after the update the Model Choice holds the old file name, not `auto`.
+- [ ] **3.6 The writer plan** (PD §5.6) in `core/llm/gemma.py` and `comfy/llm.py`: the four steps in the order phase 0.4 measured; `writer-native` and `writer-gguf` are catalogue components, so Setup lists the writer's file like any other; Writer Choice's summary says which step wrote and why.
+  *Accept:* `tests/unit/test_writer_default.py` extended to the four steps × (add-on present, absent) × (`llama_cpp` importable, not) × five memory sizes; a saved workflow keeps its writer.
+- [ ] **3.7 The hardware table** is generated from the catalogue (System Check, README block after D1, `docs/user/models.md`); `core/system.py: RULES` is removed.
+  *Accept:* the System Check's report on 16 GiB names the same files as `plan()`.
+
+**Exit of phase 3:** on a machine with only the files the plan chose, every template runs from a fresh `git clone` with every model field on `auto`. The owner has made one real song this way (GPU 1).
+
+---
+
+## Phase 4 - Plenio Setup and Home
+
+- [ ] **4.1 Findings with fixes** (PD §4.2) in `core/system.py`; the Markdown report is rendered from them; ids are stable and listed in `docs/user/troubleshooting.md`.
+  *Accept:* a test per finding id; the report of 1.6.0's facts differs only in wording.
+- [ ] **4.2 The sidebar tab** (`frontend/src/setup/`, lazy chunk): the six steps of PD §4.1 with the plan, the download rows (progress, pause, resume, blocked states with their fix buttons), the gated dialog of PD §5.5, the disk-space line, the choice of target folder among the registered ones. Opens once after an install or update that lacks files for a template; later from the Plenio menu; a red dot when an opened template lacks files.
+  *Accept:* Vitest for each state of a row; a Playwright run against the dev server with a fake hub: plan → download → verified; the gated path with a fake gated file.
+- [ ] **4.3 The test song** (step 5): the real `1 · YuE2 · Song` template through the Song API with the fixed brief of PD §4.1; failures are shown as findings with fixes.
+  *Accept:* host test with fake models; on the owner's machine with real models once (GPU 1), time noted.
+- [ ] **4.4 Home** (PD §7.2): the tab's page once setup is done - template buttons, the player, *Continue a song*, recent songs from `/plenio/records`, the models line, links.
+  *Accept:* Vitest; browser check extended by "Home opens each template".
+- [ ] **4.5 Problem report** (PD §4.3): the zip, the cleaning of paths and names, the preview.
+  *Accept:* a test feeds a system report with the user's home path and asserts the zip contains neither the user name nor a drive path beyond two parts.
+- [ ] **4.6 Presets in the templates** (PD §7.1): `resources/presets/make.json` as the single source; the player's `presets.ts` and the API read it; a preset field in the templates' first group sets widgets through the frontend.
+  *Accept:* a test asserts the player, the API and the template widget list the same six ids; choosing a preset changes exactly the widgets the file names, and undo restores them.
+- [ ] **4.7 Approve continues the run** (PD §7.4), with the setting to keep the old behaviour.
+  *Accept:* browser check: approve on a stopped sheet queues one run; with the setting off it queues none.
+- [ ] **4.8 Recipes and Brief List** (PD §7.3): the node, its help page, the six recipe workflows built by `build_graphs.py`.
+  *Accept:* each recipe validates and runs with fake models in the host job.
+
+**Exit of phase 4:** on a clean ComfyUI (a fresh base directory, no Plenio files, an empty models folder, a throttled fake hub for the test and the real hub once with the owner's permission): install, open ComfyUI, follow Setup, hear the test song - without reading documentation. The owner does this once and names what was unclear; those points are fixed before the beta tag.
+
+---
+
+## Phase 5 - Song API v2, tokens, Player API, MCP
+
+- [ ] **5.1 Freeze v1.** Move v1's handlers to `comfy/song_api_v1.py`; record golden answers for every endpoint and state from 1.6.0's behaviour (`tests/fixtures/api-v1/`); a test replays them.
+  *Accept:* the golden test passes before and after every later task of this phase.
+- [ ] **5.2 Jobs on disk** (PD §8.1): `core/api/jobstore.py` (atomic JSON per job, index, retention, `interrupted` on restart); v1 and v2 both read it.
+  *Accept:* a host test restarts the server mid-job and finds the job `failed/interrupted`; an `Idempotency-Key` reused after the restart starts a new run.
+- [ ] **5.3 v2 endpoints** in the order: discovery and templates for all five production templates (`extra.plenio_api` in `yue2-daw`, `minimax-song`, `enhance-master`), system and models (plan, downloads through 2.7's manager), jobs with `review` and `approve`, documents, timings, songs (`core/api/songs.py` over the records index), scores and lyrics (the existing route functions behind versioned paths), uploads, queue.
+  *Accept:* per endpoint a golden test; a host test drives a job through both review stops with an edited lyrics document and finds the edit in the record; `enhance-master` masters an uploaded file; `yue2-daw` renders a posted score.
+- [ ] **5.4 Tokens and `api.remote`** (PD §8.5): `core/api/tokens.py`, the Setup page *API access*, the guard for `api` routes (v1 and v2), the refusal text.
+  *Accept:* tests: remote without a token → 401 with the hint; with a token → as local; `remote = "open"` → as 1.x; `off` → 403; a token is stored only as its hash; the list shows names and last use.
+- [ ] **5.5 Events** (PD §8.1): the hub with replay by `Last-Event-ID`, the stream handler, events from the job store and the download manager.
+  *Accept:* a host test reads the stream through a whole job and a download; a reconnect with `Last-Event-ID` misses nothing.
+- [ ] **5.6 OpenAPI and docs**: `tools/api_docs.py` writes v2's `openapi.json`, `fields.md` and the reference page; `docs/api/README.md` is rewritten for v2 with a short *Coming from v1*; examples updated.
+  *Accept:* the committed OpenAPI equals the generated one; the examples run against the fake-model server in the host job.
+- [ ] **5.7 `plenio_client.py`** (single file, standard library, typed) in `docs/api/examples/`; the examples use it.
+- [ ] **5.8 Player API v1** (PD §8.3): the six routes under `/api/v1` in `plenio/player/`, their OpenAPI (`docs/api/player-openapi.json`), a guide page, events.
+  *Accept:* tests for each route and for a transport command reaching a (simulated) playing page within one second.
+- [ ] **5.9 MCP server** (PD §8.4, if D-8): `plenio_mcp.py`, tests with a scripted JSON-RPC session against the fake-model server, a guide page with the configuration snippet for assistants.
+- [ ] **5.10 The player and VST3 move to v2 where it helps**: the player's maker uses job persistence and events (it keeps its own line today); VST3 is the owner's repository - write the change notes for it (`docs/api/coming-from-v1.md`), touch nothing there.
+
+**Exit of phase 5:** a script on another computer with a token makes a song with a review stop, edits a line, approves, downloads the files, and a second script lists the song in `/songs`.
+
+---
+
+## Phase 6 - the player: people, navigation, languages
+
+- [ ] **6.1 Invitations** (PD §9.1): `Accounts.invite/accept`, the routes, the QR page, the accept page (password or four-digit PIN), expiry and rate limit.
+  *Accept:* tests: a code works once; after 15 minutes it is refused; eight wrong tries make the device wait; the code is stored only as its hash.
+- [ ] **6.2 The page *People & access***: the three cards, the grid bound to the existing settings (no new stored fields except invitations), the three starting points, the role names of D-9. *Settings › Accounts*, *Party songs*, *In your network* redirect here.
+  *Accept:* a test maps every cell of the grid to the setting it reads and writes and asserts the old pages' switches and the grid agree; state files of 1.6.0 load with the same permissions as before.
+- [ ] **6.3 *Start a party*** and *End the party*: the three questions, the settings set together, the code on the big screen.
+  *Accept:* a test: after *Start* the guests' access, Live Play and guests' song making are on with the chosen permissions; after *End* each is as before *Start*.
+- [ ] **6.4 Navigation** (PD §9.2): the five places on every screen size; Settings as tabs with a search over labels, *Basic* and *Everything*; first-run cards; empty states.
+  *Accept:* Vitest for the routes and the search; screenshots at 390, 820 and 1440 px in the test report; every setting of 1.6.0 is reachable (a test lists setting keys against rendered controls).
+- [ ] **6.5 *Make a song*, short first**: the one field, the style chips, *Generate*; *More options* holds today's form unchanged.
+  *Accept:* the existing form tests pass with *More options* open; a new test makes a song from the short form with the defaults of the chosen style.
+- [ ] **6.6 The guests' page in seven languages** (PD §9.7, if D-12): strings in `plenio/player/guest_locales/<lang>.json`, the choice by `navigator.languages`, English as the fallback, ADR-0012.
+  *Accept:* a test asserts every locale has every key; no string of the page is left in the source.
+- [ ] **6.7 Docs**: the player guide split into seven pages (PD §10.3), each section with its key in `resources/media.toml` for the how-to chapter that will be embedded.
+
+**Exit of phase 6:** the owner sets up "two friends who make songs, one child who listens, a party tonight" from a fresh player state in under two minutes, without the guide.
+
+---
+
+## Phase 7 - visuals
+
+- [ ] **7.1 Half floats** (PD §9.5): `gpu.ts`, `nova/renderer.ts`, `drop/renderer.ts` accept `EXT_color_buffer_half_float`; an `RGBA8` path with dithering when neither exists.
+  *Accept:* tests with mocked contexts for the three cases; on the owner's phone Nova is offered (the owner checks; note the model in the report).
+- [ ] **7.2 `uQuality`** in every Nova scene (march steps, octaves); the governor lowers quality before pixels; tiers A, B, C; the frame cap and pixel-ratio cap.
+  *Accept:* `nova.test.ts` extended: the governor's order of steps; each scene compiles with quality 0.5 and 1 (the existing compile test over all scenes); on the integrated GPU of the test machine at least 20 of 22 Nova scenes stay offered, as measured before.
+- [ ] **7.3 The analysis track** (PD §9.4): `plenio/player/analysis.py` (envelopes, onsets, beats from bars or score or autocorrelation, sections, drops, a confidence), the cache, the route, the shared player carries the tracks of its songs.
+  *Accept:* tests on synthetic audio (a click track at 120 BPM: beats within 20 ms; a quiet-then-loud signal: one drop at the jump); on twenty of the owner's songs, read-only: the share of downbeats within 50 ms of the measured bars, reported as an aggregate.
+- [ ] **7.4 The heard time** (PD §9.4): `engine.ts` exposes `heard()`; lyrics, notation cursor and visuals use it; *Settings › Sound › Picture and sound together* with the reported latency, the slider and the test pattern.
+  *Accept:* unit tests for `heard()` with and without `outputLatency`; the lyrics-follow tests pass with an offset of zero.
+- [ ] **7.5 The cue** (`visuals/conductor.ts`, PD §9.4) and its uniforms in the mixer and the three engines; every visual may read it, none must.
+  *Accept:* table tests for `cueAt` on a hand-made track (phase, anticipation rising before an onset, impact at it, tension before a louder section); a visual that ignores the cue renders as before (image hash test on one classic).
+- [ ] **7.6 The Director** as a mode: one visual per kind of section, changes on the section's downbeat with the crossfade centred on it, transitions by section energy, the fallback to *Match the music* below the confidence threshold.
+  *Accept:* a simulation test over a track with verse, chorus, verse, chorus, bridge: five changes, each within one frame of its downbeat, both choruses the same visual.
+- [ ] **7.7 One light** (PD §9.6): Nova's finishing as the mixer's last pass for all engines, with a setting to switch it off.
+  *Accept:* the video maker's frame tests pass; a visual comparison sheet (before, after) for six visuals in the report for the owner.
+- [ ] **7.8 The chooser** (PD §9.3): themes on every visual, the collections, *Show* and *Energy*, *Fine-tune* with today's panel, the live gallery, ♥ and ✕ in the full-screen view, `tools/visual_posters.mjs` and the sprite sheet.
+  *Accept:* a test asserts every visual has a theme and a poster; settings of 1.6.0 load into *Fine-tune* unchanged; *Energy* maps to the three settings by a tested table.
+- [ ] **7.9 Signatures** (if D-11): the owner names twelve; each is tuned for `anticipation`, `impact`, `tension`; a page in the report with a clip per visual for the owner's approval.
+- [ ] **7.10 Motion in the page** (PD §9.6): the three shared-element moves, the one easing, reduced motion.
+
+**Exit of phase 7:** the owner watches ten songs with the Director on a desktop, a phone and a television with a sound bar, and decides D-10.
+
+---
+
+## Phase 8 - performance, by measurement
+
+For each hypothesis P1 to P6 and P8 of PD §6.2, in this order: measure with `bench.py` → if the gain is below 5 % of a run, record it and stop → else implement → measure again → record.
+
+- [ ] **8.1 P1** the plan prefers variants that leave room (the catalogue's `vram_full` already expresses it; verify the cover-art picks below 24 GiB).
+- [ ] **8.2 P2** the writer stays loaded across a series when the plan says it fits; it stops when the queue is empty.
+- [ ] **8.3 P3** workers on the second card (`[workers] device`), default: the largest card ComfyUI does not use.
+- [ ] **8.4 P4** the cover never runs between the music model's plan and take.
+- [ ] **8.5 P5** *a new take* hits ComfyUI's cache for writer and plan (a test compares prompts).
+- [ ] **8.6 P6, P8** the warm-up note; the editor chunk preloaded on idle.
+- [ ] **8.7 Budgets**: `docs/dev/performance.md` with the measured numbers of 1.6.0 and of this phase; `release.py prepare` asks for a `bench.py` report and compares.
+
+**Exit of phase 8:** a report with before and after per brief; no brief is slower than on 1.6.0.
+
+---
+
+## Phase 9 - tests: tiers and necessity
+
+- [ ] **9.1 CI in tiers** (PD §10.1): `ci.yml` as a reusable workflow; jobs fast, io (`-n auto`), host as a matrix over the minimum and the newest ComfyUI tag, frontend, package (with the gate), browser on pushes to `main`; a weekly job against ComfyUI `master` that opens an issue on failure.
+  *Accept:* a pull request's checks finish in under eight minutes of wall time.
+- [ ] **9.2 Node-type snapshots per tag** (`tests/fixtures/node_types/<tag>.json`), the snapshot tool takes a tag.
+- [ ] **9.3 Mutation runs** (with permission to add `mutmut` to `.devdeps`): `tools/mutation.sh` over the modules of PD §10.1; for every surviving mutant a test or a removal, recorded in `docs/test-reports/…-mutation.md`.
+  *Accept:* the surviving-mutant rate of each listed module is reported before and after; after is below 10 % or each survivor has a written reason.
+- [ ] **9.4 Merge candidates**: from per-test coverage contexts and the mutation results, a list of tests that add nothing; the agent proposes, the owner (or a review pass by the agent with the list in the report) confirms; merged tests keep every assertion that is not a duplicate.
+  *Accept:* the list and what was done with each entry are in the report; no test named after a reported bug was removed.
+- [ ] **9.5 Hypothesis profiles**: 25 examples on pushes, 300 weekly.
+- [ ] **9.6 `docs/dev/testing.md` and `docs/design/testing-strategy.md`** rewritten for the tiers and budgets.
+
+---
+
+## Phase D - documentation
+
+D1 and D2 are needed by 1.8 and are done there; they are listed here for completeness.
+
+- [ ] **D1 `tools/facts.py`** (PD §10.3): `docs/facts.json`, the markers, `--write`, `--check` in CI; blocks in README, `docs/user/models.md`, `docs/user/configuration.md`, SECURITY.md, `docs/dev/release.md`.
+  *Accept:* `--check` fails when a number in a block is edited by hand; the README's node, blueprint and test counts equal the code's.
+- [ ] **D2 `resources/media.toml` and `tools/media_links.py`** (MP §6): the registry with today's sixteen videos, the go-link pages under `docs/go/`, `plenio/player/static/media.json` read by the player's help (`help.ts` loses its id list), thumbnails at `assets/media/<key>.jpg`, the generated tutorial table; the rule "no `youtu.be` outside generated blocks" replaces `tests/unit/test_tutorial_links.py`.
+  *Accept:* changing one id in `media.toml` and running the tool changes README, docs, the go page and the player's JSON, and nothing else needs an edit.
+- [ ] **D3 Link and coverage checks** in CI: relative links, environment variables and config keys against `core/config.py`, routes against the references.
+- [ ] **D4 Rewrites** (PD §10.3): Getting started, Models and downloads, the seven player pages, Troubleshooting by finding id, the API guide, *From 1.x to 2.0*; node help pages for the new nodes; every page checked against the running program, not against the design.
+- [ ] **D5 The site** (if D-13, with permission to add VitePress to the frontend's dev dependencies): `docs/.vitepress/`, the Pages workflow that builds the site, the demo page, the API reference and the go-links together.
+  *Accept:* the site builds in CI; the demo page and the go-links keep their addresses.
+- [ ] **D6 The README** in the order of MP §4, with the one line of D-M2.
+- [ ] **D7 Design records**: this plan's boxes ticked; `docs/design/README.md` lists the three v2 documents as implemented with the commits; ADR-0012 (guests' languages), ADR-0013 (two artefacts), ADR-0014 (Plenio downloads catalogue models after confirmation).
+
+---
+
+## Phase M - media pipeline and the kit
+
+In the repository `Plenio-Media` (if D-M1; otherwise in `tools/media/` of this repository, with `out/` ignored). The agent creates the repository locally; publishing it is the owner's step.
+
+- [ ] **M1 The workspace** (MP §3.2): layout, `media.mjs` with `status`, `build`, `check`, `kit`; `lib/` moved from `tools/tutorials/lib`; `checks/` rebuilt from the descriptions in the session's memory notes where the scratch scripts are gone; `data/facts.json` read from the product checkout.
+- [ ] **M2 Scenes and the cache** (MP §3.3, §3.4): `scene.yaml`, capture keys, render keys, checkpoints, `models: fake` captures against the test nodes, the drift check.
+  *Accept:* a second `build` with no change does no work; touching a watched file re-captures exactly the scenes that watch it; the drift check flags a scene after a deliberate CSS change.
+- [ ] **M3 The tutorials as chapters** (MP §5): the twelve scripts split into scenes; path tutorials and how-to chapters defined in `tutorials/*.yaml`; narration in `copy/en.yaml`; thumbnails from the template.
+  *Accept:* `build tutorials` produces every path tutorial and chapter; `check` passes; a rehearsal of all captures finishes without a broken locator.
+- [ ] **M4 The films** F1, F4, F5, F6, F8, F9, F10 new; F2 and F3 from the spot projects with 2.0 screens (MP §2, §2.1); three formats where listed.
+  *Accept:* every film passes `check` (loudness, cues, no frozen picture); the owner approves each storyboard's first render before the final one.
+- [ ] **M5 Stills and texts**: README hero loop, bento pictures, diagrams, posters; posts and store texts from templates with facts (MP §2.2).
+- [ ] **M6 The YouTube publisher** (MP §7): `publish/youtube.py` with `--auth`, `--plan`, `--apply`, `--release`, the quota planner, the description templates, captions, playlists, the write-back into `resources/media.toml`.
+  *Accept:* tests against a fake API for upload, replace, update and the quota split; `--plan` against the real channel changes nothing (the owner runs it after the setup of MP §7.2).
+- [ ] **M7 The kit**: `media.mjs kit 2.0.0` → films, stills, posts in posting order with days, store texts, the press page, a README that says how each piece was made and what is drawn or simulated.
+- [ ] **M8 The owner's guides**: `Plenio-Media/docs/` - *A new version in six commands*, *YouTube setup once* (MP §7.2 as steps with pictures), *When a tutorial changes*, *What stays manual and why*.
+
+---
+
+## Phase R - release automation and 2.0.0
+
+- [ ] **R1 `release.yml`** (MP §8.2): the tag workflow, `tools/verify_install.py`, the release created from `docs/releases/<version>.md`; `publish.yml` retired.
+  *Accept:* a dry run on a throwaway tag in a fork or with `act` is described in the report; nothing is pushed by the agent.
+- [ ] **R2 The Registry watcher**: `tools/registry_status.py` and the scheduled workflow that opens an issue in this repository on a status change.
+- [ ] **R3 The canary's consequence**: apply PD §3.5's table to the verdict on 1.7.0 (and 1.7.1 if one was needed); update SECURITY.md and the review request.
+- [ ] **R4 Migration**: *From 1.x to 2.0* complete; the refusals and messages of PD §11 checked in the running program; a 1.6.0 player state, three 1.x workflows and a 1.6.0 API client run against 2.0 in the host job.
+- [ ] **R5 The full check** on the owner's machine: all tiers, the browser check, `bench.py` against the budgets, the real-model smoke suite, Setup from a clean base, the kit's films against the release build (`media status` shows nothing stale).
+- [ ] **R6 `release.py prepare 2.0.0`**, the CHANGELOG with the intro, the release notes, the review request with the delta against 1.7.x, the German hand-over with the steps of MP §9's T-0 and what is not verified.
+
+**Exit:** the owner publishes.
+
+---
+
+## Out of scope for 2.0
+
+Recorded so that nobody builds it on the way: album mode (D-14), new music models, a WebGPU renderer, the standalone application (`docs/design/standalone-app-concept.md`), new visuals beyond the twelve signatures' tuning, audio dubbing of the tutorials, posting to social networks by script.
