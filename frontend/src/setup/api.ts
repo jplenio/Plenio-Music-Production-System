@@ -50,6 +50,17 @@ export const setupApi = {
     call<{ download: DownloadView }>(f, `/plenio/setup/downloads/${encodeURIComponent(id)}`, 'DELETE'),
   check: (f: Fetcher, variant: string) => call<AccessCheck>(f, '/plenio/setup/check', 'POST', { variant }),
   saveToken: (f: Fetcher, token: string) => call<{ saved: boolean }>(f, '/plenio/setup/hub-token', 'POST', { token }),
+  report: (f: Fetcher, workflow: unknown, error: unknown) =>
+    call<{ files: Record<string, string> }>(f, '/plenio/setup/report', 'POST', { workflow, error }),
+  reportZip: async (f: Fetcher, workflow: unknown, error: unknown): Promise<Blob> => {
+    const response = await f.fetchApi('/plenio/setup/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ workflow, error, download: true })
+    })
+    if (!response.ok) throw new PlenioApiError(`The report could not be made (${response.status})`)
+    return response.blob()
+  },
   testSong: (f: Fetcher) => call<TestJob>(f, '/plenio/setup/test-song', 'POST', {}),
   job: (f: Fetcher, id: string) => call<TestJob>(f, `/plenio/api/v1/jobs/${encodeURIComponent(id)}?wait=20`)
 }

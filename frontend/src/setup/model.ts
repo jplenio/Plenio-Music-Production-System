@@ -380,7 +380,7 @@ export const HOME_LINKS: { label: string; url: string }[] = [
   { label: 'New in 2.0', url: `${REPOSITORY}/blob/main/CHANGELOG.md` },
   { label: 'Tutorials', url: 'https://www.youtube.com/playlist?list=PLAFqTtP59fgE' },
   { label: 'Documentation', url: `${REPOSITORY}/blob/main/docs/user/getting-started.md` },
-  { label: 'Report a problem', url: `${REPOSITORY}/blob/main/docs/user/troubleshooting.md#reporting-a-problem` }
+  { label: 'Where to report it', url: `${REPOSITORY}/issues` }
 ]
 
 /** Home's models line: how many of the wanted templates' files are there, and the optional ones that are not. */

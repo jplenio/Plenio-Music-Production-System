@@ -121,4 +121,6 @@ The System Check (and Plenio Setup) name what needs attention as a finding with 
 
 ## Reporting a problem
 
-Run **0 · System Check** with *detail* = `full`, and include its output, the ComfyUI console lines around the error, and - for a run - the release record (`<song>.plenio.json` next to the audio; it holds the documents, seeds and settings, with secrets removed).
+**Plenio Setup › Report a problem…** makes the report for you: the System Check, the ComfyUI log lines that mention Plenio (the last 200), the last error of a run on this page and the open workflow with its text fields emptied. Every path keeps only its last two parts and your user name is replaced by `<user>`; you read every file before *Save the zip*. Attach the zip to an issue.
+
+Without Setup: run **0 · System Check** with *detail* = `full`, and include its output, the ComfyUI console lines around the error, and - for a run - the release record (`<song>.plenio.json` next to the audio; it holds the documents, seeds and settings, with secrets removed).

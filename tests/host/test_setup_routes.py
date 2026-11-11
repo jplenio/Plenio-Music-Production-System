@@ -121,3 +121,25 @@ def test_the_folders_are_comfyuis_and_a_download_goes_nowhere_else(server: Comfy
     )
     # offline refuses first; the folder check itself is a unit of setup.py's _targets
     assert status == 400, data
+
+
+def test_a_problem_report_carries_no_place_and_no_user_name(server: ComfyServer) -> None:
+    from pathlib import Path
+
+    user = Path.home().name
+    workflow = {
+        "nodes": [{"type": "PlenioSongBrief", "widgets_values": ["a song about my secret garden", "pop"]}]
+    }
+    error = {"exception_message": f"cannot read {server.base / 'models' / 'checkpoints' / 'x.safetensors'}"}
+    status, data = server.request("POST", "/plenio/setup/report", {"workflow": workflow, "error": error})
+    assert status == 200, data
+    files = data["files"]
+    assert {"README.txt", "system-check.md", "comfyui-log.txt", "error.json", "workflow.json"} <= set(files)
+    text = "\n".join(files.values())
+    assert "secret garden" not in text and "…/checkpoints/x.safetensors" in text
+    assert str(server.base) not in text and str(Path.home()) not in text
+    assert user.lower() not in text.lower(), [
+        line for line in text.splitlines() if user.lower() in line.lower()
+    ][:3]
+    status, _ = server.request("POST", "/plenio/setup/report", {}, headers=REMOTE)
+    assert status == 403

@@ -1072,3 +1072,14 @@ def _free_bytes(folder: Path) -> int | None:
         return shutil.disk_usage(folder).free
     except OSError:
         return None
+
+
+def log_lines() -> list[str]:
+    """The lines ComfyUI keeps of its console (``app.logger``), oldest first; none outside ComfyUI."""
+    try:
+        from app.logger import get_logs
+    except ImportError:
+        return []
+    entries = list(get_logs() or [])
+    text = "".join(str(entry.get("m", "")) for entry in entries if isinstance(entry, dict))
+    return text.splitlines()

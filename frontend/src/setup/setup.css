@@ -198,3 +198,15 @@
   color: var(--p-primary-color, #60a5fa);
   text-align: left;
 }
+.plenio-setup .report pre {
+  white-space: pre-wrap;
+  max-height: 240px;
+  overflow: auto;
+  font-size: 11px;
+  background: var(--comfy-input-bg, #1a1a1a);
+  padding: 6px;
+}
+.plenio-setup .report-button {
+  align-self: flex-start;
+  font-size: 12px;
+}

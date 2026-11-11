@@ -131,6 +131,8 @@ function workflowLacksFiles(): boolean {
 }
 
 let setupTab: { open(focus?: string | null): void } | null = null
+/** The last error a run of this page gave (a problem report carries it). */
+let lastRunError: unknown = null
 
 /** A node of the open graph by the id an execution event names (a subgraph's inner nodes read ``outer:inner``). */
 function nodeById(id: unknown): ComfyNode | null {
@@ -399,6 +401,10 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
         void openContinueSong(continueHost).catch((error: unknown) =>
           console.error('Plenio: the Continue a song dialog could not open', error)
         ),
+      problemContext: () => ({
+        workflow: (comfyApp.graph as { serialize?: () => unknown } | undefined)?.serialize?.() ?? null,
+        error: lastRunError
+      }),
       lacksFiles: workflowLacksFiles
     })
     // a run stopped at a model file that is not there: what to do, and Setup at that file's row
@@ -430,6 +436,7 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
       clearRunStates(graph()?.nodes ?? [])
     })
     comfyApi.addEventListener('execution_error', (event: CustomEvent) => {
+      lastRunError = event.detail ?? null
       const node = nodeById((event.detail as { node_id?: unknown } | undefined)?.node_id)
       if (node && String(node.type).startsWith('Plenio')) setRunState(node, 'error')
     })

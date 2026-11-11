@@ -41,6 +41,8 @@ const props = defineProps<{
   /** Open the player, at a song's record when one is given. */
   openPlayer: (record?: string | null) => void
   openContinue: () => void
+  /** The open workflow and the last error a run gave, for a problem report. */
+  problemContext: () => { workflow: unknown; error: unknown }
   /** A component to show first (a run stopped at its missing file). */
   focus?: string | null
 }>()
@@ -61,6 +63,31 @@ const access = ref<string | null>(null)
 const arrived = reactive(new Set<string>())
 let unsubscribe: (() => void) | null = null
 const recent = ref<RecordRow[]>([])
+const report = ref<Record<string, string> | null>(null)
+
+/** The problem report: the cleaned files first, to read; saved as a zip only on the user's word. */
+async function previewReport(): Promise<void> {
+  try {
+    const context = props.problemContext()
+    report.value = (await setupApi.report(props.fetcher, context.workflow, context.error)).files
+  } catch (reason) {
+    error.value = message(reason)
+  }
+}
+
+async function saveReport(): Promise<void> {
+  try {
+    const context = props.problemContext()
+    const blob = await setupApi.reportZip(props.fetcher, context.workflow, context.error)
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = 'plenio-report.zip'
+    link.click()
+    setTimeout(() => URL.revokeObjectURL(link.href), 10000)
+  } catch (reason) {
+    error.value = message(reason)
+  }
+}
 const models = computed(() => (plan.value ? homeModels(plan.value, templates.value) : null))
 const shownTemplates = computed(() => HOME_TEMPLATES.filter((t) => allTemplates.value.includes(t.template)))
 
@@ -433,6 +460,22 @@ onBeforeUnmount(() => {
         <a v-for="link in HOME_LINKS" :key="link.label" :href="link.url" target="_blank" rel="noopener">{{ link.label }}</a>
       </nav>
     </section>
+
+    <section v-if="report" class="report" aria-label="Problem report">
+      <p>
+        <strong>Problem report</strong> - what the zip holds. Paths keep their last two parts, your user name is replaced,
+        the workflow's texts are empty. Attach the zip to an issue.
+      </p>
+      <details v-for="(text, name) in report" :key="name">
+        <summary>{{ name }}</summary>
+        <pre>{{ text }}</pre>
+      </details>
+      <div class="go two">
+        <button class="primary" @click="saveReport">Save the zip</button>
+        <button @click="report = null">Close</button>
+      </div>
+    </section>
+    <button v-if="state && !report" class="link report-button" @click="previewReport">Report a problem…</button>
 
     <AccessDialog v-if="access" :fetcher="fetcher" :variant="access" @close="access = null" @ready="(v) => { access = null; void start([v]) }" />
   </div>

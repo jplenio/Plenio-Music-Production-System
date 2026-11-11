@@ -467,6 +467,36 @@ async def test_song_post(request: web.Request) -> web.StreamResponse:
         return web.json_response({"error": error.to_dict()}, status=error.status)
 
 
+async def report_post(request: web.Request) -> web.StreamResponse:
+    """A problem report (PD 4.3): ``{"workflow": ..., "error": ..., "download": false}`` answers the cleaned files
+    for the page to show; with ``"download": true`` the same as a zip."""
+    from ..core.problem_report import report_files, zip_bytes
+
+    data = await read_json(request)
+    workflow = data.get("workflow") if isinstance(data.get("workflow"), dict) else None
+    error = data.get("error") if isinstance(data.get("error"), dict) else None
+
+    def build() -> dict[str, str]:
+        _report, markdown = system_report()
+        return report_files(
+            system=markdown,
+            log=host.log_lines(),
+            error=error,
+            workflow=workflow,
+            home=str(Path.home()),
+            version=__version__,
+        )
+
+    files = await asyncio.to_thread(build)
+    if data.get("download") is True:
+        return web.Response(
+            body=zip_bytes(files),
+            content_type="application/zip",
+            headers={"Content-Disposition": 'attachment; filename="plenio-report.zip"'},
+        )
+    return web.json_response({"files": files})
+
+
 def _local(method: str, path: str, handler: Any) -> Route:
     return Route(method, path, handler, "local", what=WHAT, hint=HINT)
 
@@ -485,6 +515,7 @@ ROUTES: tuple[Route, ...] = (
     _local("GET", "/plenio/setup/findings", findings_get),
     _local("GET", "/plenio/setup/folders", folders_get),
     _local("POST", "/plenio/setup/test-song", test_song_post),
+    _local("POST", "/plenio/setup/report", report_post),
     Route("GET", "/plenio/models/files", files_get, "data"),
 )
 """Plenio Setup's routes, all ``local`` - and the file lists of Model Choice (``data``: file names only)."""

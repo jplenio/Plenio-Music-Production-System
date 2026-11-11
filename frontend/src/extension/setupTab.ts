@@ -17,6 +17,7 @@ export interface SetupTabHost {
   fetcher: Fetcher & { addEventListener(type: string, listener: (event: CustomEvent) => void): void }
   openPlayer: (record?: string | null) => void
   openContinue: () => void
+  problemContext: () => { workflow: unknown; error: unknown }
   /** Whether the open workflow lacks a model file (the tab's dot). */
   lacksFiles: () => boolean
 }
@@ -81,7 +82,8 @@ export function installSetupTab(host: SetupTabHost): { open(focus?: string | nul
         })
       ),
     openPlayer: host.openPlayer,
-    openContinue: host.openContinue
+    openContinue: host.openContinue,
+    problemContext: host.problemContext
   }
   const manager = host.app.extensionManager
   manager?.registerSidebarTab?.({

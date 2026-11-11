@@ -12,6 +12,7 @@ export interface SetupHost {
   openTemplate: (title: string) => void
   openPlayer: (record?: string | null) => void
   openContinue: () => void
+  problemContext: () => { workflow: unknown; error: unknown }
 }
 
 export interface MountedSetup {
@@ -41,6 +42,7 @@ export function mountSetup(element: HTMLElement, host: SetupHost, focus: string 
         openTemplate: host.openTemplate,
         openPlayer: host.openPlayer,
         openContinue: host.openContinue,
+        problemContext: host.problemContext,
         focus: focused.value
       })
   })
