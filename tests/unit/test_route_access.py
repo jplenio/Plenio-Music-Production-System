@@ -62,3 +62,21 @@ def test_a_route_says_plenios_errors_as_written_and_a_bug_without_its_text() -> 
         "details": {},
     }
     assert "someone" not in str(body)
+
+
+def test_a_page_of_another_site_in_a_browser_here_is_not_this_computer() -> None:
+    """Pre-review of phase 5: a website open in a browser on this computer can send to ComfyUI's address in the
+    network - the peer is then this computer's own address; its Origin gives it away."""
+    own = ["192.168.1.20"]
+    lan = {"Host": "192.168.1.20:8188"}
+    assert from_this_computer("192.168.1.20", {**lan, "Origin": "http://192.168.1.20:8188"}, own)
+    assert from_this_computer("127.0.0.1", {"Host": "localhost:8188", "Origin": "http://localhost:8188"})
+    assert not from_this_computer("192.168.1.20", {**lan, "Origin": "https://example.org"}, own)
+    assert not from_this_computer(
+        "192.168.1.20", {**lan, "Origin": "http://192.168.1.20:8799"}, own
+    )  # another port
+    assert not from_this_computer("127.0.0.1", {"Host": "127.0.0.1:8188", "Origin": "null"})
+    assert not from_this_computer("127.0.0.1", {"Host": "127.0.0.1:8188", "Sec-Fetch-Site": "cross-site"})
+    assert not from_this_computer("127.0.0.1", {"Host": "127.0.0.1:8188", "Sec-Fetch-Site": "same-site"})
+    assert from_this_computer("127.0.0.1", {"Host": "127.0.0.1:8188", "Sec-Fetch-Site": "same-origin"})
+    assert from_this_computer("127.0.0.1", {"Host": "127.0.0.1:8188"})  # a program: no Origin

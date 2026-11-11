@@ -21,6 +21,7 @@ All notable changes of the current version and the one before. Versions follow s
 
 ### Security
 
+- **A website open in a browser on this computer is no longer taken for this computer.** Such a page could send requests to ComfyUI's address in the network, which come from the computer's own address; Plenio's routes for this computer only now also require the request's `Origin` to match the address it was sent to.
 - **A failed job no longer tells another computer where Plenio is installed.** The Song API's job list and job answers held the error ComfyUI reported, whose type names the package's folder and whose message can name a model file's path. Answers to another computer keep the class name and a path's last two parts; this computer gets them as before.
 - **Routes for this computer only also check the address a request was sent to.** A web page whose name was pointed at 127.0.0.1 (DNS rebinding) reached them from the browser of this computer; its `Host` header still names the page, and is now refused. `localhost`, loopback addresses and the computer's own address and name still work.
 - **Where a song's time went**: the release record says how many seconds each group of the template took, how much of that ComfyUI spent loading models, and the peak memory on the graphics card (`timings`, `plenio.timings/1`). A record without it reads as before.

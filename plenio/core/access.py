@@ -11,6 +11,7 @@ Standard library only (``plenio.comfy.routes`` passes aiohttp's request apart, s
 from __future__ import annotations
 
 import ipaddress
+import urllib.parse
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from typing import Any
@@ -104,4 +105,32 @@ def from_this_computer(
     if any(name in lowered for name in PASSED_ON):
         return False
     host = lowered.get("host")
-    return host is None or _addressed_here(str(host), here, names)
+    if host is not None and not _addressed_here(str(host), here, names):
+        return False
+    return _same_origin(lowered, host)
+
+
+def _same_origin(headers: Mapping[str, str], host: str | None) -> bool:
+    """A browser's request from a page of another site is no request of this computer's user: a website open in a
+    browser here can send to ComfyUI's address in the network (the peer is then this computer's own address). Such
+    a request carries an ``Origin`` other than the address it goes to, or ``Sec-Fetch-Site: cross-site``. A request
+    without these headers (a program, a typed address) is judged by its peer and ``Host`` alone."""
+    site = str(headers.get("sec-fetch-site", "")).strip().lower()
+    if site in ("cross-site", "same-site"):
+        return False
+    origin = str(headers.get("origin", "")).strip().lower()
+    if not origin:
+        return True
+    if origin == "null" or host is None:
+        return False
+    parts = urllib.parse.urlsplit(origin)
+    try:
+        port = parts.port or {"http": 80, "https": 443}.get(parts.scheme)
+    except ValueError:
+        return False
+    sent_to = urllib.parse.urlsplit(f"//{str(host).strip().lower()}")
+    try:
+        host_port = sent_to.port or {"http": 80, "https": 443}.get(parts.scheme)
+    except ValueError:
+        return False
+    return (parts.hostname or "") == (sent_to.hostname or "") and port == host_port

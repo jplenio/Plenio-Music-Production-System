@@ -84,3 +84,33 @@ def test_clean_text_cuts_posix_and_unc_paths() -> None:
 def test_a_path_quoted_in_a_python_message_is_cut_too() -> None:
     message = "No such file: 'C:\\Users\\ana\\ComfyUI\\models\\checkpoints\\a.safetensors'"
     assert clean_text(message, ["ana"]) == "No such file: '…/checkpoints/a.safetensors'"
+
+
+def test_a_job_answer_for_another_computer_keeps_no_place() -> None:
+    import importlib.util
+
+    if importlib.util.find_spec("aiohttp") is None:
+        return
+    from plenio.comfy.song_api import _without_places
+
+    view = {
+        "jobs": [
+            {
+                "result": {
+                    "record": r"C:\Users\ana\ComfyUI\output\plenio\x.plenio.json",
+                    "folder": r"C:\Users\ana\ComfyUI\output\plenio",
+                    "files": [{"name": "x.flac", "url": "/plenio/api/v1/jobs/1/files/x.flac"}],
+                },
+                "error": {
+                    "message": "no",
+                    "type": r"C:\Users\ana\custom_nodes\Plenio.plenio.core.errors.PlenioModelError",
+                },
+            }
+        ]
+    }
+    job = _without_places(view)["jobs"][0]
+    assert (
+        job["result"]["record"] == "…/plenio/x.plenio.json" and job["result"]["folder"] == "…/output/plenio"
+    )
+    assert job["result"]["files"][0]["url"] == "/plenio/api/v1/jobs/1/files/x.flac"
+    assert job["error"]["type"] == "PlenioModelError"

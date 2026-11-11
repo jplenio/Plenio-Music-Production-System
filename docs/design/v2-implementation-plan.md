@@ -340,6 +340,38 @@ Goal: PD §3.1 to §3.4. It ships with 2.0.0 (PD §3.5).
 
 ## Phase 5 - Song API v2, tokens, Player API, MCP
 
+*Pre-implementation review (Fable 5.2, 2026-11-11, read-only) - binding for the tasks below:*
+
+- *Fixed at once:* a page of another site in a browser on this computer counted as this computer (its request to
+  ComfyUI's network address came from the computer's own address): `core/access.py` now also requires a matching
+  `Origin` and refuses `Sec-Fetch-Site: cross-site/same-site`. A finished job told another computer its record's and
+  folder's paths: cleaned like the error (`song_api._without_places`).
+- *5.1:* record the golden answers by running an export of 1.6.0 (`c307d35`) on the pinned ComfyUI with the same fake
+  base, then replay on HEAD; every difference goes into a reviewed delta list (already known: the `preset` request
+  key - 1.6 ignored unknown top-level keys - the refusal of a missing model file naming Model Choice, `/models`
+  listing the plan's files, the cleaning of job answers for other computers). Compare parsed JSON with volatile fields
+  masked; keep status codes, key sets, error `code`/`field`/`hint`, `Location`, 201 against 200 on a replay, the 404
+  texts. A `succeeded` answer needs a golden made from a fabricated history. Keep `song_api.create_job` (Setup) and
+  the 16 v1 routes the route test counts, or change both together.
+- *5.2:* v1 keeps its queue- and history-derived view and its 404 after a restart (the player's maker makes the
+  song again on it); the job store serves v2 only. v2 jobs get an id of their own with a list of prompt ids. State
+  changes need an observer (nothing sees a run end today); reconcile queued jobs at start; stamp jobs with an
+  instance id (two ComfyUIs can share a user folder); on Windows one writer, reads from the in-memory index, retry
+  `os.replace`, never persist progress, skip corrupt or `.tmp` files when rebuilding.
+- *5.4:* one guard for v1 and v2 `api` routes, made from the route table. Order: `is_here` passes without a token
+  (1.6 callers, the player's maker); else `off` 403, `open` passes, `token` needs `Authorization: Bearer` (401 in
+  v1's error shape with `WWW-Authenticate`). Tokens: 256-bit, stored as SHA-256, compared with
+  `hmac.compare_digest`, never in a query string, never logged, *last used* written about once a minute, never in
+  the problem report. Delay failed attempts, no lock-out by peer (gateway users all arrive as 127.0.0.1).
+  `briefChoices.ts` reads `/plenio/api/v1/briefs` from ComfyUI's page: move it to a `data` route first. Cleaning of
+  places follows `is_here`, token or not (reword 5.4's line "with a token: as local"). Idempotency keys per token.
+- *5.5:* filter events per subscriber (`download.*` are `local`) on the live and the replay path; events carry ids,
+  status and stage only; a ring buffer, progress coalesced and not replayed, bounded per-subscriber queues, a cap on
+  subscribers; event ids with a boot epoch, an unknown `Last-Event-ID` gets a `sync` event; publish from worker
+  threads with `call_soon_threadsafe`.
+- *Docs:* the token protects Plenio's routes only - ComfyUI's own `/prompt` and `/history` stay open; a tunnel that
+  rewrites `Host` to localhost without a forwarding header counts as this computer.
+
 - [ ] **5.1 Freeze v1.** Move v1's handlers to `comfy/song_api_v1.py`; record golden answers for every endpoint and state from 1.6.0's behaviour (`tests/fixtures/api-v1/`); a test replays them.
   *Accept:* the golden test passes before and after every later task of this phase.
 - [ ] **5.2 Jobs on disk** (PD §8.1): `core/api/jobstore.py` (atomic JSON per job, index, retention, `interrupted` on restart); v1 and v2 both read it.

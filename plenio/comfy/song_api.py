@@ -112,8 +112,9 @@ def _error(error: SongApiError) -> web.Response:
 
 
 def _without_places(data: Any) -> Any:
-    """A job's error as another computer gets it: a path in its message keeps its last two parts (a model file
-    that failed names its folder on this computer), its type is the exception's class name alone."""
+    """A job as another computer gets it: a path in its error message, its record and its folder keeps its last two
+    parts (a model file that failed names its folder on this computer), the error's type is the exception's class
+    name alone."""
     from ..core.problem_report import clean_text
 
     if isinstance(data, list):
@@ -121,6 +122,13 @@ def _without_places(data: Any) -> Any:
     if not isinstance(data, dict):
         return data
     out = {key: _without_places(value) for key, value in data.items()}
+    result = out.get("result")
+    if isinstance(result, dict):
+        # the record's and folder's places: their last two parts (the files' addresses are the API's own)
+        out["result"] = {
+            key: clean_text(value) if key in ("record", "folder") and isinstance(value, str) else value
+            for key, value in result.items()
+        }
     error = out.get("error")
     if isinstance(error, dict):
         error = dict(error)
