@@ -236,17 +236,21 @@ def _lookup() -> InfoLookup:
     return info
 
 
+def _v1_templates() -> dict[str, tuple[str, Any]]:
+    return song_api.api_templates(template_workflows(), song_api.V1_TEMPLATES)
+
+
 def _templates(info: InfoLookup) -> dict[str, song_api.Template]:
     return {
         template_id: song_api.load_template(name, workflow, info)
-        for template_id, (name, workflow) in song_api.api_templates(template_workflows()).items()
+        for template_id, (name, workflow) in _v1_templates().items()
     }
 
 
 def _template(template_id: str, info: InfoLookup) -> song_api.Template:
-    found = song_api.api_templates(template_workflows()).get(template_id)
+    found = _v1_templates().get(template_id)
     if found is None:
-        known = ", ".join(sorted(song_api.api_templates(template_workflows())))
+        known = ", ".join(sorted(_v1_templates()))
         raise SongApiError(
             "unknown_template", f"No template {template_id!r}.", hint=f"The templates: {known}.", status=404
         )
@@ -916,8 +920,11 @@ async def job_get(request: web.Request) -> web.StreamResponse:
 async def job_file(request: web.Request) -> web.StreamResponse:
     """A file of a finished job's song: its audio, cover, sheet music, subtitles or release record - only what its
     record lists, from the record's folder inside ComfyUI's output folder."""
-    job_id = request.match_info["job_id"]
-    name = request.match_info["name"]
+    return serve_file(request.match_info["job_id"], request.match_info["name"])
+
+
+def serve_file(job_id: str, name: str) -> web.StreamResponse:
+    """A finished run's file by its prompt id (API v1 and v2)."""
     history = _history(job_id)
     result = _result(history, job_id) if history is not None else None
     if not result or not result.get("record"):
@@ -1047,6 +1054,17 @@ def _plan_readiness(templates: Any, catalogue: Any) -> dict[str, dict[str, Any]]
 async def job_delete(request: web.Request) -> web.StreamResponse:
     """Cancel a job: out of the queue while it waits, interrupted while it runs; a finished one stays as it is."""
     prompt_id = request.match_info["job_id"]
+    cancel_prompt(prompt_id)
+    view = job_view(prompt_id)
+    if view is None:
+        raise SongApiError("not_found", "ComfyUI knows no such job.", status=404)
+    if view["status"] == "queued":  # it started in between: interrupted now
+        view["status"] = "cancelled"
+    return web.json_response(view)
+
+
+def cancel_prompt(prompt_id: str) -> None:
+    """Take a prompt out of ComfyUI's queue while it waits, or interrupt it while it runs (API v1 and v2)."""
     queue = host.prompt_server().prompt_queue
     running, pending = _queue_items()
     if any(x[1] == prompt_id for x in pending):
@@ -1061,12 +1079,6 @@ async def job_delete(request: web.Request) -> web.StreamResponse:
             stop(prompt_id)
         else:
             host.interrupt()
-    view = job_view(prompt_id)
-    if view is None:
-        raise SongApiError("not_found", "ComfyUI knows no such job.", status=404)
-    if view["status"] == "queued":  # it started in between: interrupted now
-        view["status"] = "cancelled"
-    return web.json_response(view)
 
 
 async def queue_info(request: web.Request) -> web.StreamResponse:

@@ -686,11 +686,20 @@ def switch_nodes(workflow: Mapping[str, Any], switch: str) -> list[Mapping[str, 
     return [n for n in _top_nodes(workflow) if (n.get("properties") or {}).get("plenio_switch") == switch]
 
 
-def api_templates(workflows: Mapping[str, Mapping[str, Any]]) -> dict[str, tuple[str, Mapping[str, Any]]]:
-    """The workflows the API runs, by template id: ``id -> (workflow name, workflow)``."""
+V1_TEMPLATES = ("yue2-song", "yue2-cover")
+"""The templates API v1 runs - as in 1.6.0 (phase 5.1); API v2 runs every template that carries the marker."""
+
+
+def api_templates(
+    workflows: Mapping[str, Mapping[str, Any]], ids: Iterable[str] | None = None
+) -> dict[str, tuple[str, Mapping[str, Any]]]:
+    """The workflows the API runs, by template id: ``id -> (workflow name, workflow)``; ``ids``: only these."""
+    wanted = set(ids) if ids is not None else None
     found: dict[str, tuple[str, Mapping[str, Any]]] = {}
     for name, workflow in workflows.items():
         marker = (workflow.get("extra") or {}).get(MARKER)
+        if wanted is not None and isinstance(marker, Mapping) and str(marker.get("id")) not in wanted:
+            continue
         if isinstance(marker, Mapping) and marker.get("id") and brief_node(workflow) is not None:
             found[str(marker["id"])] = (name, workflow)
     return found

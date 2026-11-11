@@ -3349,6 +3349,7 @@ ABOUT_MINIMAX = f"""# 3 · MiniMax · Song
 
 def minimax_song(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g = Graph()
+    g.extra["plenio_api"] = {"id": "minimax-song", "kind": "song"}  # API v2 (v1 runs the YuE2 two)
     about_note(g, ABOUT_MINIMAX, height=1080)
     brief = g.add(
         "PlenioSongBrief",
@@ -3463,6 +3464,7 @@ How to work:
 
 def yue2_daw(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     g = Graph()
+    g.extra["plenio_api"] = {"id": "yue2-daw", "kind": "song"}  # API v2 (v1 runs the YuE2 two)
     about_note(g, ABOUT_DAW, height=1300)
     brief = g.add(
         "PlenioSongBrief",

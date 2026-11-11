@@ -24,7 +24,7 @@ NODES: dict[str, Any] = json.loads((ROOT / "tools" / "data" / "node_types.json")
 WORKFLOWS = {
     p.stem: json.loads(p.read_text(encoding="utf-8")) for p in (ROOT / "example_workflows").glob("*.json")
 }
-TEMPLATES = api_templates(WORKFLOWS)
+TEMPLATES = api_templates(WORKFLOWS, song_api.V1_TEMPLATES)
 
 SONG_FIELDS = [
     ("mode", "choice"), ("template", "choice"), ("description", "text"), ("genre", "string"), ("mood", "string"),

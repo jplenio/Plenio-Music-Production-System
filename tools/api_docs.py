@@ -20,7 +20,7 @@ PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT))
 
 from plenio import __version__  # noqa: E402
-from plenio.core.song_api import Field, Template, api_templates, load_template  # noqa: E402
+from plenio.core.song_api import V1_TEMPLATES, Field, Template, api_templates, load_template  # noqa: E402
 from plenio.core.song_api_doc import openapi  # noqa: E402
 
 FOLDER = PROJECT / "docs" / "api"
@@ -45,7 +45,10 @@ def templates() -> list[Template]:
         path.stem: json.loads(path.read_text(encoding="utf-8"))
         for path in sorted((PROJECT / "example_workflows").glob("*.json"))
     }
-    return [load_template(name, workflow, nodes.get) for name, workflow in api_templates(workflows).values()]
+    return [
+        load_template(name, workflow, nodes.get)
+        for name, workflow in api_templates(workflows, V1_TEMPLATES).values()
+    ]
 
 
 def document() -> dict[str, Any]:

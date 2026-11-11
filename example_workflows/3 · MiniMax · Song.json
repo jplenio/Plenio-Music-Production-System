@@ -10676,6 +10676,10 @@
     12,
     13
    ]
+  },
+  "plenio_api": {
+   "id": "minimax-song",
+   "kind": "song"
   }
  },
  "version": 0.4
