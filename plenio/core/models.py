@@ -376,7 +376,7 @@ def read_header(path: Path) -> tuple[Header | None, str | None]:
             if size > _MAX_HEADER:
                 return None, "not a safetensors file"
             header = json.loads(file.read(size))
-    except (OSError, ValueError):
+    except (OSError, ValueError, RecursionError):  # RecursionError: JSON nested deeper than any header
         return None, "not readable as a safetensors file"
     if not isinstance(header, dict):
         return None, "not a safetensors file"
@@ -386,7 +386,9 @@ def read_header(path: Path) -> tuple[Header | None, str | None]:
 def _shape(header: Header, key: str) -> list[int]:
     entry = header.get(key)
     shape = entry.get("shape") if isinstance(entry, dict) else None
-    return [int(n) for n in shape] if isinstance(shape, list) else []
+    if not isinstance(shape, list) or not all(isinstance(n, int) and not isinstance(n, bool) for n in shape):
+        return []  # a shape of text, null or nested lists is no tensor's: as if the key were absent
+    return list(shape)
 
 
 def _starts(header: Header, *prefixes: str) -> bool:
@@ -516,16 +518,25 @@ file is of the kind, else the reason in words. Keys and shapes only - never the 
 
 def file_problem(accepts: str, path: Path) -> str | None:
     """Why the file at ``path`` would not load as a component that ``accepts`` this kind (``None``: it would, or
-    the component has no sniffer). Only ``.safetensors`` files have a header to read; the others pass."""
+    the component has no sniffer). A component with a sniffer takes safetensors files only (``.safetensors``, and
+    ``.sft`` as ComfyUI lists them); a header that cannot be read is said, never raised."""
     sniffer = SNIFFERS.get(accepts)
-    if sniffer is None or path.suffix.lower() != ".safetensors":
-        return None if sniffer is None else "not a safetensors file"
+    if sniffer is None:
+        return None
+    if path.suffix.lower() not in SAFETENSORS_SUFFIXES:
+        return "not a safetensors file"
     header, problem = read_header(path)
     if problem is not None:
         return problem
     if not header:
         return None  # empty: an interrupted download, the inventory's business
-    return sniffer(header)
+    try:
+        return sniffer(header)
+    except (TypeError, ValueError, AttributeError, OverflowError):  # a header of the wrong shape
+        return "not readable as a safetensors file"
+
+
+SAFETENSORS_SUFFIXES = (".safetensors", ".sft")
 
 
 def yue2_checkpoint_problem(path: Path) -> str | None:

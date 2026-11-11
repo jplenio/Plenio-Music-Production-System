@@ -160,3 +160,42 @@ def test_a_pinned_file_of_another_kind_is_used_and_said(
     file, summary = run("odd.safetensors")
     assert file == "odd.safetensors" and summary["status"] == "warning"
     assert "not a demo model" in summary["markdown"] and "may refuse" in summary["markdown"]
+
+
+def test_the_record_names_what_each_model_choice_gave_a_loader(
+    world: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The review after 3.5 (C7, R1): the file the node output in this run; a cached one resolved again; a Model
+    Choice that fed nothing (beside a bypassed adapter) left out."""
+    from plenio.comfy import host, setup
+    from plenio.comfy.nodes.export import chosen_models
+
+    monkeypatch.setattr(host, "current_prompt_id", lambda: "run-1")
+    world["installed"] = {SMALL: 1000, BIG: 2000}
+    node().hidden = type("Hidden", (), {"unique_id": "3:101"})()
+    try:
+        run()  # outputs BIG and notes it for run-1
+    finally:
+        node().hidden = None
+    world["installed"] = {SMALL: 1000}  # BIG gone before the export: the record still says what was loaded
+    prompt = {
+        "3:101": {
+            "class_type": "PlenioModelChoice",
+            "inputs": {"component": "demo", "component.file": "auto"},
+        },
+        "3:102": {
+            "class_type": "PlenioModelChoice",
+            "inputs": {"component": "demo", "component.file": "auto"},
+        },
+        "5:101": {
+            "class_type": "PlenioModelChoice",
+            "inputs": {"component": "demo", "component.file": "auto"},
+        },
+        "3:103": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": ["3:101", 0]}},
+        "5:103": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": ["5:101", 0]}},
+    }
+    assert chosen_models(prompt) == {
+        "3:101": {"component": "demo", "file": BIG},  # what it output
+        "5:101": {"component": "demo", "file": SMALL},  # cached: resolved again
+    }
+    assert setup.taken_in_this_run() == {"3:101": {"component": "demo", "file": BIG}}

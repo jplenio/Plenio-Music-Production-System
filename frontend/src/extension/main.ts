@@ -77,7 +77,9 @@ async function modelBlocksUpToDate(): Promise<void> {
     const current = (comfyApp.graph as { serialize?: () => unknown } | undefined)?.serialize?.()
     if (!current) return
     const answer = await upgradeBlocks(comfyApi, current, true)
-    if (answer.workflow && comfyApp.loadGraphData) await comfyApp.loadGraphData(answer.workflow, false)
+    // into the open tab (its workflow object): without it the frontend opens a new, unsaved tab
+    const active = comfyApp.extensionManager?.workflow?.activeWorkflow ?? null
+    if (answer.workflow && comfyApp.loadGraphData) await comfyApp.loadGraphData(answer.workflow, false, true, active)
     for (const message of modelBlocksMessages(answer)) toast(message)
   } catch (error) {
     const detail = error instanceof PlenioApiError && error.hint ? `${error.message} ${error.hint}` : String(error)
@@ -89,6 +91,13 @@ async function modelBlocksUpToDate(): Promise<void> {
 const modelLabels = new ModelChoiceLabels(comfyApi)
 
 type BlockNode = ComfyNode & { subgraph?: { nodes?: ComfyNode[] } }
+
+let labelsTimer: number | undefined
+/** One reading of the facts after the Model Choices of a run have executed (each would ask on its own). */
+function refreshLabelsSoon(): void {
+  window.clearTimeout(labelsTimer)
+  labelsTimer = window.setTimeout(() => void modelLabels.refresh().then(labelModelChoices), 1500)
+}
 
 /** Labels on every Model Choice of the open graph, inside blocks too, and on the blocks' promoted fields. */
 function labelModelChoices(): void {
@@ -301,9 +310,9 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
           component.callback = chain(component.callback, () => window.setTimeout(() => modelLabels.label(this), 0))
         }
       }
-      // what is installed may have changed with the run: the labels follow
+      // what is installed may have changed with the run: the labels follow, once for all Model Choices of a run
       nodeType.prototype.onExecuted = chain(nodeType.prototype.onExecuted, function (this: ComfyNode) {
-        void modelLabels.refresh().then(labelModelChoices)
+        refreshLabelsSoon()
       })
     }
     if (nodeData.name === 'PlenioExportRelease') {

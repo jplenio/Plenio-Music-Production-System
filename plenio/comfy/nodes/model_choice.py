@@ -150,4 +150,5 @@ class PlenioModelChoice(io.ComfyNode):
         if found.warning:
             text += f" - {found.warning}"
         status = "warning" if found.warning else "ok"
+        setup.note_taken(str(getattr(cls.hidden, "unique_id", "") or ""), name, found.file)
         return io.NodeOutput(found.file, ui={"plenio_summary": [{"status": status, "markdown": text}]})

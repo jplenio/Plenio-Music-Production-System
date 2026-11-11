@@ -336,7 +336,7 @@ def model_facts(record: Mapping[str, Any]) -> list[Fact]:
             out.append(("Cover art model" if picture else "Music model", name, ""))
     for node in _prompt_nodes(record, ("LoraLoader", "LoraLoaderModelOnly")):
         inputs = node["inputs"]
-        name = _plain_value(inputs.get("lora_name"))
+        name = _model_file(record, prompt, inputs.get("lora_name"))  # 2.0: from the adapter's Model Choice
         if not name:
             continue
         strengths = [

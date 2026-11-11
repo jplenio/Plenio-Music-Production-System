@@ -132,3 +132,34 @@ def test_the_catalogue_names_known_sniffers_and_its_own_files_pass_their_own(tmp
     )
     with pytest.raises(PlenioUserError, match="no sniffer 'no-such-kind'"):
         load_components(broken)
+
+
+@pytest.mark.parametrize(
+    "shape", [["7680", 3072], [None], [[1, 2]], [1e999], "3072", None, [True, 2]], ids=lambda s: repr(s)[:12]
+)
+def test_a_malformed_header_is_said_never_raised(tmp_path: Path, shape: Any) -> None:
+    """The review after 3.5 (C4): one odd file must not break the lists of every component."""
+    header = {
+        "double_stream_modulation_img.lin.weight": {"dtype": "BF16", "shape": [1], "data_offsets": [0, 2]}
+    }
+    header["txt_in.weight"] = {"dtype": "BF16", "shape": shape, "data_offsets": [0, 2]}
+    for kind in ("flux2-klein-4b", "qwen3-4b", "gemma4-text", "flux2-vae"):
+        said = file_problem(kind, write(tmp_path, f"odd-{kind}.safetensors", header))
+        assert said is None or isinstance(said, str)
+    deep = tmp_path / "deep.safetensors"
+    raw = ("[" * 100_000 + "]" * 100_000).encode()
+    deep.write_bytes(struct.pack("<Q", len(raw)) + raw)
+    assert file_problem("qwen3-4b", deep) == "not readable as a safetensors file"
+    entry = tmp_path / "entry.safetensors"
+    raw = json.dumps({"model.embed_tokens.weight": "not a dict"}).encode()
+    entry.write_bytes(struct.pack("<Q", len(raw)) + raw)
+    assert isinstance(file_problem("qwen3-4b", entry), str)
+
+
+def test_an_sft_file_is_read_like_a_safetensors_file(tmp_path: Path) -> None:
+    """The review after 3.5 (C5): ComfyUI lists .sft files, the same format."""
+    assert file_problem("minimax-vae", write(tmp_path, "decoder.sft", KINDS["minimax-vae"])) is None
+    assert (
+        file_problem("minimax-vae", write(tmp_path, "other.sft", KINDS["flux2-vae"]))
+        == "not MiniMax Music 3's audio decoder"
+    )

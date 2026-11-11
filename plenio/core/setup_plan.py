@@ -54,6 +54,7 @@ def _pick(found: Pick, component: Component, installed: Mapping[str, int], optio
         "installed": found.installed,
         "reason": found.reason,
         "warning": found.warning,
+        "better": found.better.id if found.better is not None else None,
         "download_bytes": found.download_bytes,
         "variants": [_variant(v, installed) for v in component.variants],
     }

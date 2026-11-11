@@ -408,6 +408,12 @@ def _hand_changed(old: Mapping[str, Any], current: Mapping[str, Any]) -> str | N
     fresh: dict[str, list[Mapping[str, Any]]] = {}
     for node in _nodes(current):
         fresh.setdefault(str(node.get("type")), []).append(node)
+    # the same nodes, Model Choice aside: one added, removed or of another kind (a LoRA of one's own chained in, a
+    # second VAE) would be lost or come back
+    kinds = sorted(str(n.get("type")) for n in _nodes(old))
+    current_kinds = sorted(str(n.get("type")) for n in _nodes(current) if n.get("type") != MODEL_CHOICE)
+    if kinds != current_kinds:
+        return "its nodes inside differ from the current block's (one added or removed by hand?)"
     seen: dict[str, int] = {}
     for node in _nodes(old):
         kind = str(node.get("type"))
@@ -421,6 +427,8 @@ def _hand_changed(old: Mapping[str, Any], current: Mapping[str, Any]) -> str | N
         # a node without fields: no values saved, or an empty list - alike
         if not _same(node.get("widgets_values") or [], candidates[index].get("widgets_values") or []):
             return f"its node {node.get('title') or kind} was changed inside the block"
+        if (node.get("mode") or 0) != (candidates[index].get("mode") or 0):
+            return f"its node {node.get('title') or kind} was switched on or off inside the block"
     return None
 
 

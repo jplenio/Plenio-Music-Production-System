@@ -245,6 +245,42 @@ async def _post_prompt(
 _NOT_IN_LIST = re.compile(r"'([^']+)' not in")
 
 
+def model_choice_errors(prompt: dict[str, Any]) -> list[dict[str, Any]]:
+    """The Model Choices of ``prompt`` whose file is not on this computer, as ComfyUI's validation names a missing file
+    (``Value not in list``): since 2.0 the loaders take their files from Model Choice, which ComfyUI's own check does
+    not look into - so the Song API refuses the job before it is queued, as 1.6 did."""
+    from . import setup
+
+    out: list[dict[str, Any]] = []
+    for node_id, node in prompt.items():
+        if not isinstance(node, dict) or node.get("class_type") != "PlenioModelChoice":
+            continue
+        if not setup.consumed(prompt, str(node_id)):
+            continue
+        inputs = node.get("inputs") or {}
+        component, file = str(inputs.get("component", "")), str(inputs.get("component.file", "") or "auto")
+        try:
+            chosen = setup.choose(component, file)
+        except PlenioUserError as error:
+            message, details = "Value not in list", f"component: {error.message}"
+        else:
+            found = chosen.pick
+            # as ComfyUI's own check of 1.6: a file of the name is there - its size is the loader's business
+            if found.installed or host.locate_model(chosen.component.folder, found.file) is not None:
+                continue
+            message, details = "Value not in list", f"file: '{found.file}' not in the model folder"
+        out.append(
+            {
+                "node": str(node_id),
+                "title": ((node.get("_meta") or {}).get("title") or ""),
+                "type": "PlenioModelChoice",
+                "message": message,
+                "details": details,
+            }
+        )
+    return out
+
+
 def _missing_files(details: list[dict[str, Any]]) -> list[str]:
     """The files ComfyUI's validation did not find in a loader's list (``Value not in list``): ``name (node)``."""
     found: list[str] = []
@@ -633,6 +669,18 @@ async def _create(data: dict[str, Any], key: str) -> web.StreamResponse:
         "documents": prepared.documents,
         "stems": prepared.stems,
     }
+    refused = await asyncio.to_thread(model_choice_errors, prepared.prompt)
+    missing = _missing_files(refused)
+    if missing:
+        raise SongApiError(
+            "comfyui_rejected",
+            f"ComfyUI does not find {'the model file' if len(missing) == 1 else 'the model files'} "
+            + ", ".join(missing)
+            + ".",
+            hint="Put the file into ComfyUI's models folder, or start ComfyUI with the folder that holds it "
+            "(--models-directory). The template 0 · System Check lists every model file and its folder.",
+            details=refused,
+        )
     answer = await _post_prompt(prepared.prompt, prepared.workflow, meta)
     prompt_id = str(answer["prompt_id"])
     job = Job(
@@ -844,7 +892,69 @@ async def models_info(request: web.Request) -> web.StreamResponse:
 
     catalogue = model_catalogue()
     inventory = take_inventory(catalogue, host.locate_model)
-    return web.json_response(song_api.models_answer(catalogue, inventory, _templates(_lookup()).values()))
+    answer = song_api.models_answer(catalogue, inventory, _templates(_lookup()).values())
+    # since 2.0 a template's model blocks choose by the plan: whether it runs, and what is missing, follow the
+    # files its Model Choices take here - not the catalogue's defaults (the fields keep 1.4's shape)
+    plan_ready = await asyncio.to_thread(_plan_readiness, _templates(_lookup()).values(), catalogue)
+    for template_id, ready in plan_ready.items():
+        if template_id in answer["templates"]:
+            answer["templates"][template_id].update(ready)
+    return web.json_response(answer)
+
+
+def _plan_readiness(templates: Any, catalogue: Any) -> dict[str, dict[str, Any]]:
+    """Per API template with Model Choices: ``ready``, ``missing`` and ``incomplete`` (catalogue ids) and
+    ``missing_bytes`` - the components its Model Choices decide by the file ``auto`` takes on this computer, the
+    others by the catalogue's default as in 1.4."""
+    from ..core.models import take_inventory
+    from . import setup
+
+    components = setup.components()
+    inventory = take_inventory(catalogue, host.locate_model)
+    out: dict[str, dict[str, Any]] = {}
+    for template in templates:
+        chosen = {
+            str((node.get("widgets_values") or [""])[0])
+            for definition in (template.workflow.get("definitions") or {}).get("subgraphs") or []
+            for node in definition.get("nodes") or []
+            if isinstance(node, dict) and node.get("type") == "PlenioModelChoice"
+        }
+        if not chosen:
+            continue
+        missing: list[str] = []
+        incomplete: list[str] = []
+        size = 0
+        for component in components.values():
+            if template.name not in component.templates:
+                continue
+            if component.id in chosen:
+                try:
+                    found = setup.choose(component.id, "auto").pick
+                except PlenioUserError:
+                    continue
+                entry = found.variant.id if found.variant is not None else found.file
+                if found.installed:
+                    continue
+                if host.locate_model(component.folder, found.file) is not None:
+                    incomplete.append(entry)  # there, of another size (as 1.4 says of a default)
+                else:
+                    missing.append(entry)
+                    size += found.download_bytes
+                continue
+            model = catalogue.get(component.default.id)
+            status = inventory.status(model) if model is not None else "missing"
+            if status == "missing":
+                missing.append(component.default.id)
+                size += component.default.bytes
+            elif status == "size differs":
+                incomplete.append(component.default.id)
+        out[template.id] = {
+            "ready": not missing and not incomplete,
+            "missing": missing,
+            "incomplete": incomplete,
+            "missing_bytes": size,
+        }
+    return out
 
 
 async def job_delete(request: web.Request) -> web.StreamResponse:

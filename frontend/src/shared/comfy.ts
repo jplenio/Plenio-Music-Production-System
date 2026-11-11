@@ -100,12 +100,14 @@ export interface ComfyExtension {
 export interface ComfyApp {
   registerExtension(extension: ComfyExtension): void
   graph?: unknown
-  /** Loads a workflow (``clean``: false keeps the open tab's identity). */
+  /** Loads a workflow; ``workflow``: the open tab's workflow object to load it into (else a new tab opens). */
   loadGraphData?(graph: unknown, clean?: boolean, restoreView?: boolean, workflow?: unknown): Promise<void>
   canvas?: { ds?: { scale?: number } }
   /** The frontend's services (1.2x+): the toast, and the dialog's prompt (asks for a text; ``null``: cancelled). */
   extensionManager?: {
     toast?: { add(message: { severity: string; summary: string; detail?: string; life?: number }): void }
+    /** The workflow store (1.2x+): the open tab's workflow. */
+    workflow?: { activeWorkflow?: unknown }
     dialog?: {
       prompt?(options: { title: string; message: string; defaultValue?: string; placeholder?: string }): Promise<
         string | null

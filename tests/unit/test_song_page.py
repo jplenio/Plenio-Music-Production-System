@@ -207,6 +207,14 @@ def test_a_model_chosen_by_model_choice_is_named_from_the_record() -> None:
     assert ("Music model", "yue2_3b_bf16.safetensors", "") in models
     # a record without the note: the field's own file, when it names one
     assert ("Cover art model", "my_flux_finetune.safetensors", "") in models
+    # the instrumental adapter, switched on in a 2.0 block: its file comes from its Model Choice too (C6)
+    prompt["3:99"] = {
+        "class_type": "PlenioModelChoice",
+        "inputs": {"component": "yue2-instrumental-adapter", "component.file": "auto"},
+    }
+    prompt["3:102"]["inputs"]["lora_name"] = ["3:99", 0]
+    record["models"]["3:99"] = {"component": "yue2-instrumental-adapter", "file": "my_adapter.safetensors"}
+    assert ("LoRA", "my_adapter.safetensors", "plan 1.0") in model_facts(record)
     del record["models"]
     assert not any(label == "Music model" for label, _value, _note in model_facts(record))  # auto: not known
 

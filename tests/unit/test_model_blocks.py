@@ -126,3 +126,41 @@ def test_opening_a_workflow_never_changes_its_model_blocks() -> None:
         assert not {"Plenio · YuE2 Model", "Plenio · MiniMax Model", "Plenio · Cover Art"} & set(
             found.updated
         )
+
+
+def _block(workflow: dict[str, Any], name: str) -> dict[str, Any]:
+    return next(d for d in workflow["definitions"]["subgraphs"] if d["name"] == name)
+
+
+def test_a_node_added_removed_or_switched_inside_keeps_the_block() -> None:
+    """The review after 3.5 (C3): a LoRA of one's own chained in, a second VAE, a node removed or bypassed inside -
+    the block is kept and named, never upgraded with the change lost."""
+    added_lora = saved("1.6.0 song template")
+    _block(added_lora, "Plenio · YuE2 Model")["nodes"].append(
+        {
+            "id": 150,
+            "type": "LoraLoader",
+            "mode": 0,
+            "widgets_values": ["my_style_lora.safetensors", 0.8, 0.8],
+        }
+    )
+    added_vae = saved("1.6.0 song template")
+    _block(added_vae, "Plenio · YuE2 Model")["nodes"].append(
+        {"id": 160, "type": "VAELoader", "mode": 0, "widgets_values": ["my_decoder.safetensors"]}
+    )
+    removed = saved("1.6.0 song template")
+    art = _block(removed, "Plenio · Cover Art")
+    art["nodes"] = [n for n in art["nodes"] if n["type"] != "ConditioningZeroOut"]
+    bypassed = saved("1.6.0 song template")
+    next(n for n in _block(bypassed, "Plenio · Cover Art")["nodes"] if n["type"] == "ConditioningZeroOut")[
+        "mode"
+    ] = 4
+    for workflow, name in (
+        (added_lora, "Plenio · YuE2 Model"),
+        (added_vae, "Plenio · YuE2 Model"),
+        (removed, "Plenio · Cover Art"),
+        (bypassed, "Plenio · Cover Art"),
+    ):
+        upgraded = blocks.upgrade_models(workflow, shipped())
+        assert name in dict(upgraded.kept) and name not in upgraded.updated, name
+        assert _block(upgraded.workflow, name) == _block(workflow, name)  # left exactly as it was

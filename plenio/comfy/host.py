@@ -853,6 +853,14 @@ def run_timings(stage_of: Callable[[str], str]) -> dict[str, Any] | None:
     )
 
 
+def current_prompt_id() -> str:
+    """The id of the run that executes now (``""``: none, or outside ComfyUI)."""
+    try:
+        return str(getattr(prompt_server(), "last_prompt_id", "") or "")
+    except Exception:  # noqa: BLE001 - outside a running ComfyUI
+        return ""
+
+
 def run_started() -> float | None:
     """When the run that executes now was taken from the queue (``None``: not known)."""
     prompt_id = getattr(prompt_server(), "last_prompt_id", None)

@@ -203,13 +203,22 @@ def run_timings(workflow: Any) -> dict[str, Any] | None:
 
 
 def chosen_models(prompt: Any) -> dict[str, dict[str, str]] | None:
-    """The file each Model Choice of ``prompt`` chose, by node id: resolved again here as the node did - the
-    same plan on the same computer - so a Model Choice ComfyUI took from its cache counts too."""
+    """The file each Model Choice of ``prompt`` gave a loader, by node id: what it output in this run; one ComfyUI
+    took from its cache did not run, and is resolved again as it did - the same plan on the same computer. A Model
+    Choice that fed nothing (beside a bypassed adapter) is left out."""
     from .. import setup
 
+    if not isinstance(prompt, dict):
+        return None
+    taken = setup.taken_in_this_run()
     found: dict[str, dict[str, str]] = {}
-    for node_id, node in (prompt or {}).items() if isinstance(prompt, dict) else ():
+    for node_id, node in prompt.items():
         if not isinstance(node, dict) or node.get("class_type") != "PlenioModelChoice":
+            continue
+        if not setup.consumed(prompt, str(node_id)):
+            continue
+        if str(node_id) in taken:
+            found[str(node_id)] = taken[str(node_id)]
             continue
         inputs = node.get("inputs") or {}
         component, file = str(inputs.get("component", "")), str(inputs.get("component.file", "") or "auto")

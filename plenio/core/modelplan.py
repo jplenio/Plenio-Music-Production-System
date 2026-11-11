@@ -41,6 +41,9 @@ class Pick:
     reason: str
     alternatives: tuple[Variant, ...] = ()
     warning: str = ""
+    better: Variant | None = None
+    """The file that would suit the card better but is not installed: ``auto`` keeps the installed one rather than
+    stop a run, and Setup offers this one."""
 
     @property
     def download_bytes(self) -> int:
@@ -87,6 +90,9 @@ def pick(
     3. Among the candidates the preference orders them.
     4. A candidate that is installed is kept when it is at most one quality rank below the best (``quality``:
        only when it is the best).
+    5. ``auto`` never stops a run for a file it can do without: when the pick is not installed but another variant
+       is, the installed one is taken (the best of them that runs, by the preference) and the pick is named as
+       ``better``, for Setup to offer. A computer with 1.6's files keeps running them.
     """
     if prefer not in PREFERENCES:
         raise ValueError(f"unknown preference {prefer!r}: one of {', '.join(PREFERENCES)}")
@@ -125,6 +131,12 @@ def pick(
         if candidate is best or candidate.quality >= best.quality - _KEEP_WITHIN[prefer]:
             kept = candidate is not best
             best = candidate
+    better = None
+    if not is_installed(best, installed):
+        have_any = [v for v in variants if is_installed(v, installed)]
+        if have_any:
+            runnable = [v for v in have_any if vram >= v.vram_min_gib] or have_any
+            better, best = best, _best(prefer, runnable)
     if best in full:
         where = "runs on the card"
     elif best in runs:
@@ -142,6 +154,9 @@ def pick(
             f"{best.file} needs about {best.vram_min_gib:g} GB of graphics memory; this machine has "
             f"{'none' if not vram_gib else f'{vram_gib:.1f}'} - expect it to be very slow."
         )
+    if better is not None:
+        offer = f"{better.file} would suit this card better; Plenio Setup can fetch it."
+        warning = f"{warning} {offer}" if warning else offer
     return Pick(
         component.id,
         best,
@@ -150,6 +165,7 @@ def pick(
         reason,
         tuple(v for v in variants if v is not best),
         warning,
+        better,
     )
 
 

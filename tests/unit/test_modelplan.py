@@ -90,13 +90,25 @@ def test_an_installed_file_one_rank_below_the_best_is_kept_but_not_two() -> None
     kept = chosen(48.0, installed=have_middle)
     assert kept.file == "middle.safetensors" and kept.installed and kept.download_bytes == 0
     assert kept.reason.endswith("installed (kept: nearly as good as the best for this card)")
+    # two ranks below: the better file is worth it - but auto does not stop a run for it; it keeps the installed
+    # one and names the better one (2.0's review after 3.5: a computer with 1.6's files keeps running them)
     have_small = {"small.safetensors": 2_000}
-    assert (
-        chosen(48.0, installed=have_small).file == "large.safetensors"
-    )  # two ranks: the better file is worth it
-    assert chosen(48.0, "quality", have_middle).file == "large.safetensors"  # quality keeps only the best
+    small = chosen(48.0, installed=have_small)
+    assert small.file == "small.safetensors" and small.installed and small.better is LARGE
+    assert "large.safetensors would suit this card better" in small.warning
+    quality = chosen(48.0, "quality", have_middle)
+    assert quality.file == "middle.safetensors" and quality.better is LARGE  # quality names the best
     best = chosen(48.0, installed={"large.safetensors": 9_000})
     assert best.installed and best.reason.endswith("runs on the card, installed")
+
+
+def test_auto_takes_an_installed_file_rather_than_stop_a_run() -> None:
+    # only the large file is there, and the card is too small to run it fully: it runs, slower, and is kept
+    slow = chosen(8.0, installed={"large.safetensors": 9_000})
+    assert slow.file == "large.safetensors" and slow.installed and slow.better is not None
+    assert "slower" in slow.warning or "very slow" in slow.warning
+    # nothing installed: the plan's file, to fetch
+    assert chosen(8.0).better is None and not chosen(8.0).installed
 
 
 def test_a_file_of_another_size_is_not_installed() -> None:
@@ -162,6 +174,16 @@ def test_the_song_templates_files_for_the_usual_cards(card: float | None) -> Non
     assert not found.ready and found.download_bytes == sum(p.variant.bytes for p in found.needed)  # type: ignore[union-attr]
     assert all(p.reason for p in (*found.needed, *found.optional))
     assert found.licences[0] == "CC BY-NC 4.0"  # YuE2's, first: the song is non-commercial
+
+
+@pytest.mark.parametrize("card", [None, 4.0, 6.0, 8.0, 10.0, 11.9, 12.0, 15.4, 15.9, 23.9, 48.0])
+def test_a_computer_with_1_6s_files_runs_every_template_on_auto(card: float | None) -> None:
+    """The review after 3.5 (C1): with the templates' 1.6 defaults installed, auto must not stop on any card."""
+    installed = {v.file: v.bytes for c in COMPONENTS.values() for v in c.variants if v.default}
+    templates = {t for c in COMPONENTS.values() for t in c.templates}
+    for template in templates:
+        found = plan(template, COMPONENTS, vram_gib=card, installed=installed)
+        assert found.ready, (template, card, [p.file for p in found.missing])
 
 
 def test_what_is_installed_on_a_16_gb_card_is_what_the_plan_names() -> None:

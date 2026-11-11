@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import functools
+from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
@@ -53,12 +54,42 @@ def _installed() -> dict[str, int]:
     return dict(take_inventory(model_catalogue(), host.locate_model).found)
 
 
+_TAKEN: dict[str, dict[str, dict[str, str]]] = {}
+"""The file each Model Choice output, per run (prompt id -> node id -> component and file): what the release
+record names - not the plan asked again, which a download or a pin made during the run could change."""
+_RUNS_KEPT = 16
+
+
+def note_taken(node_id: str, component: str, file: str) -> None:
+    """Model Choice of the run that executes now output ``file``."""
+    run = host.current_prompt_id()
+    if not run or not node_id:
+        return
+    _TAKEN.setdefault(run, {})[node_id] = {"component": component, "file": file}
+    for old in list(_TAKEN)[:-_RUNS_KEPT]:
+        _TAKEN.pop(old, None)
+
+
+def taken_in_this_run() -> dict[str, dict[str, str]]:
+    return dict(_TAKEN.get(host.current_prompt_id(), {}))
+
+
+def consumed(prompt: Mapping[str, Any], node_id: str) -> bool:
+    """Another node of the prompt takes ``node_id``'s output (a Model Choice beside a bypassed loader does not)."""
+    return any(
+        isinstance(value, list) and len(value) == 2 and str(value[0]) == node_id
+        for node in prompt.values()
+        if isinstance(node, Mapping)
+        for value in (node.get("inputs") or {}).values()
+    )
+
+
 def components() -> dict[str, Component]:
     """The catalogue's components by id (for Model Choice's lists)."""
     return _components()
 
 
-@functools.lru_cache(maxsize=1024)
+@functools.lru_cache(maxsize=4096)
 def _problem(accepts: str, path: str, _mtime_ns: int, _size: int) -> str | None:
     # keyed by the file's time and size: a header is read once per version of a file
     return file_problem(accepts, Path(path))
