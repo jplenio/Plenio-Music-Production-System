@@ -205,14 +205,15 @@ Goal: numbers the later phases are judged by, and a test suite fast enough to ru
   *Accept:* a report with one row per variant and stage; the thresholds for PD §5.1 are derived from it and marked *measured* with the card's name; variants that are not on the machine stay *estimate*.
 - [ ] **0.4 The writer on the native 12B.** With the owner's permission to download `gemma4_12b_int8_convrot.safetensors` (12.06 GB): run `tools/writer_probe.py` with the native 12B and with the GGUF Q6_K and QAT Q4 on the same twenty briefs; record time, peak memory, cut-off answers and the probe's quality measures. Check whether ComfyUI 0.41.0 loads the 12B.
   *Accept:* a report that states the order of steps 2 and 3 of PD §5.6 and the memory from which step 3 is taken; if 0.41.0 cannot load it, the report says which version can.
-- [ ] **0.5 Faster tests, same assertions** (PD §10.1).
+- [x] **0.5 Faster tests, same assertions** (PD §10.1).
   - [x] `serve()` and `serve_guests()` and the network gateway take `poll_interval` (default as today); test fixtures pass 0.02.
-  - [ ] Servers that a module's tests only read become module-scoped fixtures.
+  - [ ] Servers that a module's tests only read become module-scoped fixtures. *(Not done: the budget holds without it.)*
   - [x] `Accounts(folder, iterations=…)`; tests pass 1 000; one test asserts the production default of 240 000.
   - [x] Markers `io` and `process` in `pyproject.toml`; the ten slowest tests carry them.
   - [x] The two torch adapter tests move to the host job.
-  - [ ] With the owner's permission: `pytest-xdist` in `.devdeps` and in CI; `-n auto` for the `io` tier; every server test binds port 0.
+  - [x] With the owner's permission: `pytest-xdist` in `.devdeps` and in CI; `-n auto` for the `io` tier; every server test binds port 0.
   *Done so far (2026-11-11):* 144 s -> 81-84 s, the fast tier (`-m "not io and not process"`) 56 s; done with one session fixture for the poll interval and one for the PBKDF2 rounds instead of new parameters; module-scoped servers were not needed for the budget; `pytest-xdist` waits for the owner's permission to install it.
+  *Done 2026-11-11 (permission given):* `pytest-xdist` 3.8 in `.devdeps` and in the CI's unit job (`-n auto` for the whole command, not only the `io` tier: it is safe and the gain is larger); 2386 tests, unchanged; three runs with `-n auto -p no:randomly` and two more with `-n auto` pass in 20-31 s; three runs in a seeded random order (a shuffle plugin in the session's scratch; `pytest-randomly` is not installed) pass in 86-89 s in one process. The test servers already bound port 0. Module-scoped servers stay undone: not needed for the budget.
   *Accept:* `pytest tests/unit tests/workflows tests/contract/test_data_schemas.py` under 90 s on the owner's machine; the number of test functions is unchanged; three consecutive runs with `-n auto -p no:randomly` and three with a random order pass.
 - [ ] **0.6 Coverage baseline.** With permission: `coverage` in `.devdeps`; `coverage run --contexts=test`; the report per module is committed as `docs/test-reports/…-coverage-1.6.0.md` (percentages only).
   *Accept:* the report exists; nothing is deleted on its basis in this phase.
@@ -300,6 +301,7 @@ Goal: PD §3.1 to §3.4. It ships with 2.0.0 (PD §3.5).
   *Done 2026-11-11:* `core/system.py: hardware_rows(components, assets)` - per row (`CARDS`, a typical card of each) the plan's picks with nothing installed, the writer's GGUF and its native step, and whether the thresholds are measured (all *estimate* today). The System Check and the templates' *Models* notes show it; `RULES` is gone. The README block and the table of `docs/user/models.md` follow with D1's facts tool (they are written by hand until then). Browser check 109/111, the two old failures.
 
 **Exit of phase 3:** on a machine with only the files the plan chose, every template runs from a fresh `git clone` with every model field on `auto`. The owner has made one real song this way (GPU 1).
+*Passed 2026-11-11:* the owner's real song from `1 · YuE2 · Song` with every Model Choice on `auto` on a 16 GB card (15.9 GiB): the record's `models` key lists the YuE2 file and the three cover-art files the plan took, the unused instrumental adapter is not listed; 235 s in all, peak 3.6 GiB as the record measures it; heard by the owner ("sounds good"). The fresh-clone runs of the other templates are the host job's, with fake models.
 
 ---
 

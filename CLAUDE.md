@@ -38,7 +38,7 @@ Run with ComfyUI's Python; dev tools live in `.devdeps` (`PYTHONPATH=.devdeps`).
 
 | Area | Commands |
 |---|---|
-| any Python | `.devdeps/bin/ruff check .` and `.devdeps/bin/ruff format --check .` (the pinned 0.13 binary - not `python -m ruff`), `python -m mypy --python-version 3.12`, `python -m pytest tests/unit tests/workflows tests/contract/test_data_schemas.py` (about 85 s; add `-m "not io and not process"` for 56 s) |
+| any Python | `.devdeps/bin/ruff check .` and `.devdeps/bin/ruff format --check .` (the pinned 0.13 binary - not `python -m ruff`), `python -m mypy --python-version 3.12`, `python -m pytest tests/unit tests/workflows tests/contract/test_data_schemas.py -n auto` (about 21 s; about 85 s in one process) |
 | nodes, routes, templates | `python -m pytest tests/contract tests/host` with `PLENIO_COMFYUI_ROOT=<export of the ComfyUI tag the CI pins>` and `PLENIO_COMFYUI_PYTHON=<ComfyUI's python>` (about 3.5 min); `python tools/workflow_validation.py`; `python tools/build_graphs.py` leaves no diff |
 | frontend | in `frontend/`: `npm run typecheck`, `npm test`, `npm run build`, `npm run build:player`; then `git status web/js plenio/player/static plenio/player/guest_static` shows only intended changes |
 | packaging | `python tools/package_gate.py --tree .` (must print *no finding*); after committing: `comfy node validate`, `comfy node pack`, `python tools/package_gate.py node.zip`, delete `node.zip` |
@@ -67,8 +67,9 @@ A session that takes over reads `.claude/handover.md` first if it exists (local,
 - Done too: 2.5 the download manager (`core/assets/downloads.py`, refusals in `hub.py`), 2.6 gated access and the token (`core/assets/access.py`).
 - Done too: 2.7 the Setup routes (`plenio/comfy/setup.py`), and the fixes of the review after 2.7.
 - Done in phase 3: 3.1 Model Choice (`plenio/comfy/nodes/model_choice.py`), 3.2 sniffers (`core/models.py: SNIFFERS`), 3.3 the model blocks on `auto`, 3.4 the labels in the frontend (`frontend/src/extension/modelChoice.ts`), 3.5 *Bring the model blocks up to date* (`core/blocks.py: upgrade_models`), the fixes of the review after 3.5, 3.6 the writer plan (`core/llm/gemma.py: STEPS`), 3.7 the hardware table (`core/system.py: hardware_rows`).
-- Exit of phase 3 is the owner's: one real song with every model field on `auto` (GPU 1).
 - Next: phase 4 (Plenio Setup and Home).
 - Reviews at the plan's checkpoints run as a subagent (`model: fable`, `effort: high`), read-only, focused; next one: phase 5.
-- Waiting for the owner's permission: `pytest-xdist` (0.5), the 12 GB native Gemma download (0.4), real-model benchmark runs on GPU 1 (0.2, 0.3).
+- Exit of phase 3 passed on 2026-11-11: the owner's real song with every model field on `auto` (16 GB card).
+- `pytest-xdist` is in `.devdeps` and CI (0.5 done); the native Gemma 4 12B is on the machine (0.4 can run).
+- Waiting for the owner: the cover brief's recording (0.2), coverage in `.devdeps` (0.6).
 - The plan's boxes are the record of what is done; tick a box in the commit that makes its acceptance line hold.

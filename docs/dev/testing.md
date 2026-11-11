@@ -7,7 +7,7 @@ Strategy and verification levels: [docs/design/testing-strategy.md](../design/te
 Tests run with **ComfyUI's Python** (it has torch, numpy, av, jsonschema). Dev tools are installed into a project-local folder so that ComfyUI's environment is not changed:
 
 ```bash
-<ComfyUI python> -m pip install --target .devdeps "pytest==8.4.*" "hypothesis==6.*" "ruff==0.13.*" "mypy==1.18.*" "pyloudnorm==0.2.*"
+<ComfyUI python> -m pip install --target .devdeps "pytest==8.4.*" "pytest-xdist==3.8.*" "hypothesis==6.*" "ruff==0.13.*" "mypy==1.18.*" "pyloudnorm==0.2.*"
 ```
 
 `pyloudnorm` is the loudness oracle of `tests/unit/test_audio.py` (skipped without it). The cover-art tests read the embedded picture back with PyAV (Pillow is needed for the JPEG).
@@ -18,7 +18,7 @@ Frontend: `cd frontend && npm ci`.
 
 | What | Command (bash; on PowerShell set the variables with `$env:NAME = "..."`) |
 |---|---|
-| unit, workflow and data-contract tests | `PYTHONPATH=.devdeps <python> -m pytest tests/unit tests/workflows tests/contract/test_data_schemas.py` |
+| unit, workflow and data-contract tests | `PYTHONPATH=.devdeps <python> -m pytest tests/unit tests/workflows tests/contract/test_data_schemas.py -n auto` (without `-n auto` one process) |
 | the same without the slow dozen (while working on a change) | add `-m "not io and not process"` |
 | node-schema contract tests | `PLENIO_COMFYUI_ROOT=<ComfyUI> PYTHONPATH=.devdeps <python> -m pytest tests/contract` |
 | host integration (starts real ComfyUI servers on the CPU) | `PLENIO_COMFYUI_ROOT=<ComfyUI> PYTHONPATH=.devdeps <python> -m pytest tests/host` |
@@ -30,7 +30,7 @@ Frontend: `cd frontend && npm ci`.
 | templates and blueprints | `<python> tools/workflow_validation.py` (also: no two groups or nodes overlap, no embedded definition is unused, no two blueprints share a node id) |
 | frontend | `cd frontend && npm run check` (types, Vitest, build) |
 
-**Markers for slow tests.** `process` marks a test that starts a real process (a player, a worker, a fake `llama-server`), `io` one that waits for a socket (a refused connection takes Windows two seconds). Everything else is the fast tier. Measured on 2026-11-11 (Windows, the reference machine): the whole command 81 s, the fast tier 56 s.
+**Markers for slow tests.** `process` marks a test that starts a real process (a player, a worker, a fake `llama-server`), `io` one that waits for a socket (a refused connection takes Windows two seconds). Everything else is the fast tier. Measured on 2026-11-11 (Windows, the reference machine, 24 threads): the whole command 81-89 s in one process, 20-22 s with `-n auto` (`pytest-xdist`); the fast tier 56 s in one process. Every test server binds port 0, so the workers never compete for a port.
 
 **What keeps the tests quick** (`tests/conftest.py`): servers started inside the test process look for their shutdown every 20 ms (the standard library's half second made every `shutdown()` wait), and passwords set in tests are hashed with 1 000 PBKDF2 rounds - the player's own number is asserted once, in `test_player_accounts.py`. A test that needs free ports takes them with an exclusive bind instead of waiting for refusals. The two torch adapter suites (`test_msst_adapter.py`, `test_universr_adapter.py`) live in `tests/contract`, where the CI installs torch; in `tests/unit` the CI skipped them.
 
