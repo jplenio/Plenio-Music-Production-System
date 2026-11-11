@@ -210,12 +210,40 @@ NOT_FIELDS = NOTE_TYPES | {"PlenioPreset"}
 """Nodes of the song groups that give the API no field: notes, and the Preset field (a request names ``preset``)."""
 
 
+MASTER_KIND = "master"
+MASTER_GROUPS = 3
+"""A mastering template's fields: the nodes of its groups 1 to 3 (the source, Audio HQ, the master)."""
+
+
+def _group_nodes(workflow: Mapping[str, Any], last: int) -> list[Mapping[str, Any]]:
+    groups = sorted(
+        (
+            g
+            for g in workflow.get("groups") or []
+            if isinstance(g, Mapping)
+            and (number := group_number(g.get("title"))) is not None
+            and number <= last
+        ),
+        key=lambda g: group_number(g.get("title")) or 0,
+    )
+    found: list[Mapping[str, Any]] = []
+    for group in groups:
+        members = [n for n in _top_nodes(workflow) if _inside(n, group)]
+        members.sort(key=lambda n: (float(n["pos"][1]), float(n["pos"][0])))
+        found += [n for n in members if str(n.get("type")) not in NOT_FIELDS and n not in found]
+    return found
+
+
 def song_nodes(workflow: Mapping[str, Any]) -> list[Mapping[str, Any]]:
     """The nodes of the song groups (the groups numbered up to the brief's), the brief first, then the others as
     the canvas shows them (group by group, top to bottom)."""
     brief = brief_node(workflow)
     if brief is None:
-        return []
+        marker = (workflow.get("extra") or {}).get(MARKER)
+        if not (isinstance(marker, Mapping) and marker.get("kind") == MASTER_KIND):
+            return []
+        # a template without a brief (Enhance & Master): the groups up to its master's are its fields
+        return _group_nodes(workflow, MASTER_GROUPS)
     last = group_number(group_of(workflow, brief)) or 1
     groups = [
         g
@@ -562,7 +590,7 @@ def load_template(name: str, workflow: Mapping[str, Any], info: InfoLookup) -> T
     if not isinstance(marker, Mapping) or not marker.get("id"):
         raise SongApiError("unknown_template", f"The workflow {name!r} is not a Song API template.")
     brief = brief_node(workflow)
-    if brief is None:
+    if brief is None and marker.get("kind") != MASTER_KIND:
         raise SongApiError("unknown_template", f"The template {name!r} has no Song Brief or Cover Brief.")
     template_id = str(marker["id"])
     fields: list[Field] = []
@@ -658,7 +686,9 @@ def load_template(name: str, workflow: Mapping[str, Any], info: InfoLookup) -> T
     owners = sheet_owners(workflow)
     return Template(
         id=template_id,
-        kind=str(marker.get("kind") or BRIEF_TYPES[str(brief.get("type"))]),
+        kind=str(
+            marker.get("kind") or (BRIEF_TYPES[str(brief.get("type"))] if brief is not None else MASTER_KIND)
+        ),
         name=name,
         workflow=workflow,
         fields=tuple(fields),
@@ -700,7 +730,10 @@ def api_templates(
         marker = (workflow.get("extra") or {}).get(MARKER)
         if wanted is not None and isinstance(marker, Mapping) and str(marker.get("id")) not in wanted:
             continue
-        if isinstance(marker, Mapping) and marker.get("id") and brief_node(workflow) is not None:
+        runs = brief_node(workflow) is not None or (
+            isinstance(marker, Mapping) and marker.get("kind") == MASTER_KIND
+        )
+        if isinstance(marker, Mapping) and marker.get("id") and runs:
             found[str(marker["id"])] = (name, workflow)
     return found
 

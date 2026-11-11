@@ -80,9 +80,18 @@ def _template(template_id: str, info: Any) -> song_api.Template:
 # --- a job's state ----------------------------------------------------------------------------------------------
 
 
+_refresh_lock = threading.Lock()
+
+
 def refresh(job: Job) -> tuple[Job, dict[str, Any] | None]:
     """The job with what ComfyUI says of its last prompt, written when its state changed; and that prompt's v1
-    view (stage, progress, the queue position), ``None`` when ComfyUI no longer knows it."""
+    view (stage, progress, the queue position), ``None`` when ComfyUI no longer knows it. One at a time: the
+    watcher and a request may both look at a job, and the second must see what the first wrote."""
+    with _refresh_lock:
+        return _refresh(store().get(job.id) or job)
+
+
+def _refresh(job: Job) -> tuple[Job, dict[str, Any] | None]:
     if job.status in ENDED or not job.prompts:
         return job, None
     view = v1.job_view(job.prompts[-1])

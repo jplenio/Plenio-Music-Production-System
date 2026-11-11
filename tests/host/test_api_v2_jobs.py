@@ -69,10 +69,16 @@ def ended(server: ComfyServer, job_id: str, timeout: float = 120.0) -> dict[str,
     raise TimeoutError(server.log_tail())
 
 
-def test_discovery_names_the_four_song_templates_and_the_presets(restartable: ComfyServer) -> None:
+def test_discovery_names_the_five_templates_and_the_presets(restartable: ComfyServer) -> None:
     index = restartable.get(BASE)
     assert index["version"] == "2.0"
-    assert {t["id"] for t in index["templates"]} == {"yue2-song", "yue2-cover", "yue2-daw", "minimax-song"}
+    assert {t["id"] for t in index["templates"]} == {
+        "yue2-song",
+        "yue2-cover",
+        "yue2-daw",
+        "minimax-song",
+        "enhance-master",
+    }
     assert [p["id"] for p in restartable.get(f"{BASE}/presets")["presets"]][:2] == ["best", "party"]
     v1 = restartable.get("/plenio/api/v1/templates")["templates"]
     assert {t["id"] for t in v1} == {"yue2-song", "yue2-cover"}  # v1 as 1.6.0
@@ -132,3 +138,56 @@ def test_songs_models_and_the_editors_routes(restartable: ComfyServer) -> None:
         assert data["error"]["code"] == "bad_request"
     status, data = restartable.request("POST", f"{BASE}/lyrics/analyze", {"lyrics": "[verse]\nA paper boat"})
     assert status == 200, data
+
+
+def silent_wav(seconds: float = 4.0, rate: int = 44100) -> bytes:
+    import io
+    import math
+    import struct
+    import wave
+
+    buffer = io.BytesIO()
+    with wave.open(buffer, "wb") as out:
+        out.setnchannels(2)
+        out.setsampwidth(2)
+        out.setframerate(rate)
+        frames = bytearray()
+        for i in range(int(seconds * rate)):
+            sample = int(
+                3000 * math.sin(2 * math.pi * 220 * i / rate)
+            )  # a quiet tone, so loudness can be measured
+            frames += struct.pack("<hh", sample, sample)
+        out.writeframes(bytes(frames))
+    return buffer.getvalue()
+
+
+def test_enhance_master_masters_an_uploaded_file(restartable: ComfyServer) -> None:
+    import urllib.request
+
+    request = urllib.request.Request(
+        restartable.url + f"{BASE}/uploads?name=tone.wav",
+        data=silent_wav(),
+        method="POST",
+        headers={"Content-Type": "audio/wav"},
+    )
+    with urllib.request.urlopen(request, timeout=60) as answer:  # noqa: S310 - local test server
+        uploaded = json.loads(answer.read())
+    detail = restartable.get(f"{BASE}/templates/enhance-master")
+    assert detail["kind"] == "master" and "source.audio" in detail["needs"]
+    status, job = restartable.request(
+        "POST",
+        f"{BASE}/jobs",
+        {
+            "template": "enhance-master",
+            "fields": {"source.audio": uploaded["name"], "finish.hq_mastering": False},
+            "release": {"folder": "plenio/v2 master", "sheet_music": "off", "song_page": False},
+        },
+    )
+    assert status == 201, job
+    done = ended(restartable, job["id"], timeout=300)
+    assert done["status"] == "succeeded", done
+    names = [f["name"] for f in done["result"]["files"]]
+    assert any(name.endswith(".flac") for name in names), names
+    first = next(f for f in done["result"]["files"] if f["name"].endswith(".flac"))
+    with urllib.request.urlopen(restartable.url + first["url"], timeout=60) as answer:  # noqa: S310 - local
+        assert answer.status == 200 and answer.read(4) == b"fLaC"

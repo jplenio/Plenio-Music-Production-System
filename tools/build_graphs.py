@@ -3595,6 +3595,7 @@ def enhance_master(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
     """Plain nodes (the EQ curve and the HQ presets stay at hand): Audio HQ 1-3 before the EQ, like the Master
     block. No brief here, so the HQ presets are *standard* (auto would say so and take standard too)."""
     g = Graph()
+    g.extra["plenio_api"] = {"id": "enhance-master", "kind": "master"}  # API v2 (v1 runs the YuE2 two)
     about_note(g, ABOUT_ENHANCE, height=760)
     # group 1: the HQ switch, the source and the optional stems under it (2026-10-24: every section at the top
     # of one row, of one height)
