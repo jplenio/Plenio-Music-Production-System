@@ -7,7 +7,11 @@ All notable changes of the current version and the one before. Versions follow s
 ### Added
 
 - **A model plan** (`plenio/core/modelplan.py`): for every model a template needs, Plenio works out which file suits the graphics card - the best that runs on it, keeping an installed file that is nearly as good - and says why in a sentence. `[models] prefer` (`balanced`, `quality`, `speed`, `small`) and `[models.pins]` in `config.toml` override it. The memory figures are estimates until measured; the plan is not yet used by the templates.
-- **A download manager for model files** (`plenio/core/assets/downloads.py`): queue, two at a time, pause, resume from a partial file, size and SHA-256 checked before a file is put in place, and every refusal of the host in words - terms to accept, a missing token, a moved file, a busy host, a full disk. A Hugging Face token is sent to huggingface.co only, never along a redirect. Not yet reachable from the interface.
+- **A download manager for model files** (`plenio/core/assets/downloads.py`): queue, two at a time, pause, resume from a partial file, size and SHA-256 checked before a file is put in place, and every refusal of the host in words - terms to accept, a missing token, a moved file, a busy host, a full disk. A Hugging Face token is sent to huggingface.co only, never along a redirect. A different file that already has the catalogued name is left as it is and named, never deleted or replaced. Plenio Setup's routes (`/plenio/setup/*`, this computer only) list the plan, start downloads by catalogue id and keep the token; the page for them comes with Plenio Setup.
+
+### Security
+
+- **Routes for this computer only also check the address a request was sent to.** A web page whose name was pointed at 127.0.0.1 (DNS rebinding) reached them from the browser of this computer; its `Host` header still names the page, and is now refused. `localhost`, loopback addresses and the computer's own address and name still work.
 - **Where a song's time went**: the release record says how many seconds each group of the template took, how much of that ComfyUI spent loading models, and the peak memory on the graphics card (`timings`, `plenio.timings/1`). A record without it reads as before.
 
 ### Changed

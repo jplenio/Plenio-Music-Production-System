@@ -79,6 +79,8 @@ class Variant:
     """Where the two thresholds come from: ``estimate`` or ``measured ...``."""
     gated: bool = False
     """The repository asks for an agreement on its page before the file can be downloaded."""
+    manual_approval: bool = False
+    """The model's makers approve each agreement by hand (the hub's ``gated = "manual"``): access can take days."""
 
     @property
     def non_commercial(self) -> bool:
@@ -158,6 +160,7 @@ def _variant(raw: Mapping[str, Any], where: str, *, strict: bool) -> Variant:
             vram_full_gib=float(raw.get("vram_full_gib", 0.0)),
             basis=str(raw.get("basis", "estimate")),
             gated=bool(raw.get("gated", False)),
+            manual_approval=bool(raw.get("manual_approval", False)),
         )
     except (KeyError, TypeError, ValueError) as error:
         raise PlenioUserError(f"{where} is incomplete or malformed: {error!r}.") from error

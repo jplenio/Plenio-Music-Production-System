@@ -78,6 +78,17 @@ def test_a_local_route_answers_this_computer_only(server: ComfyServer, comfy_pat
         assert route.what in data["error"]["message"] and data["error"]["hint"] == route.hint
 
 
+def test_a_local_route_refuses_a_page_whose_name_points_here(server: ComfyServer, comfy_path: Path) -> None:
+    """DNS rebinding: the connection comes from loopback, the Host header names another site."""
+    rebound = {"Host": "rebound.example:8188"}
+    for route in (r for r in all_routes(comfy_path) if r.access == "local"):
+        body = {} if route.method == "POST" else None
+        status, data = server.request(route.method, path_of(route), body, headers=rebound)
+        assert status == 403 and data["error"]["type"] == "PlenioAccessError", (route.path, status, data)
+    status, _ = server.request("GET", "/plenio/setup/plan", headers={"Host": "localhost"})
+    assert status == 200
+
+
 def test_no_answer_to_another_computer_names_a_place_on_this_one(
     server: ComfyServer, comfy_path: Path
 ) -> None:

@@ -76,6 +76,9 @@ def test_exceptions_are_refusals_too() -> None:
     http = urllib.error.HTTPError("https://huggingface.co/x", 401, "Unauthorized", GATED, None)  # type: ignore[arg-type]
     assert hub.classify_error(http).kind == "gated"
     assert hub.classify_error(ValueError("odd")).kind == "other"
+    # an error's own text stays in the log: it can name this computer's folders
+    other = hub.classify_error(OSError(5, "I/O error", "D:\\ComfyUI\\models\\x.part"))
+    assert other.kind == "other" and "ComfyUI" not in other.message and "OSError" in other.message
     room = hub.no_room(24_100_000_000, 11_300_000_000, "D:")
     assert room.kind == "disk" and room.message == "24.1 GB needed, 11.3 GB free on D:."
 

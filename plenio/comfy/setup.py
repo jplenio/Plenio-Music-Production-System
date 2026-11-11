@@ -10,7 +10,6 @@ websocket.
 from __future__ import annotations
 
 import asyncio
-from pathlib import Path
 from typing import Any
 
 from aiohttp import web
@@ -20,7 +19,7 @@ from ..core.assets import access as hub_access
 from ..core.assets.downloads import DownloadManager
 from ..core.errors import PlenioUserError
 from ..core.models import load_components, take_inventory
-from ..core.setup_plan import download_request, plan_view
+from ..core.setup_plan import download_request, find_variant, plan_view
 from . import host
 from .routes import guarded, read_json
 from .shared import RESOURCES, model_catalogue
@@ -64,10 +63,11 @@ async def plan_get(request: web.Request) -> web.StreamResponse:
         prefer=config.models_prefer,
         pins=config.model_pins,
     )
+    token = await asyncio.to_thread(hub_access.read_token)  # the token store is a file
     view.update(
         downloads=manager().listing(),
         policy={"downloads": config.model_downloads, "offline": config.offline},
-        token=hub_access.read_token() is not None,  # whether there is one - never the token
+        token=token is not None,  # whether there is one - never the token
     )
     return web.json_response(view)
 
@@ -98,6 +98,7 @@ async def downloads_start(request: web.Request) -> web.StreamResponse:
             wanted.variant.bytes,
             wanted.variant.sha256,
             title=f"{wanted.component.title} - {wanted.variant.file}",
+            manual_approval=wanted.variant.manual_approval,
         )
         started.append(item.to_dict())
     return web.json_response({"downloads": started})
@@ -140,13 +141,13 @@ async def access_check(request: web.Request) -> web.StreamResponse:
     """Which step is open before a catalogue file can be fetched (``{"variant": <id>}``): accept the terms, a
     token, the makers' approval - or nothing."""
     data = await read_json(request)
-    wanted = download_request([data.get("variant")], _components(), _all_folders())[0]
-    found = await asyncio.to_thread(hub_access.check, wanted.variant.url, hub_access.read_token())
-    return web.json_response({"variant": wanted.variant.id, **found})
+    variant = find_variant(data.get("variant"), _components())
 
+    def probe() -> dict[str, Any]:
+        return hub_access.check(variant.url, hub_access.read_token(), manual_approval=variant.manual_approval)
 
-def _all_folders() -> dict[str, Path | None]:
-    return {c.folder: host.model_folder(c.folder) for c in _components().values()}
+    found = await asyncio.to_thread(probe)
+    return web.json_response({"variant": variant.id, **found})
 
 
 def _local(method: str, path: str, handler: Any) -> Route:

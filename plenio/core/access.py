@@ -61,15 +61,47 @@ def _address(text: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:
     return found
 
 
-def from_this_computer(peer: str | None, headers: Mapping[str, str], own: Iterable[str] = ()) -> bool:
+def host_name(value: str) -> str:
+    """The name of a ``Host`` header without its port, lower-case (``[::1]:8188`` -> ``::1``)."""
+    text = value.strip().lower()
+    if text.startswith("["):
+        return text[1:].partition("]")[0]
+    if text.count(":") == 1:
+        return text.partition(":")[0]
+    return text  # a bare IPv6 address, or a name without a port
+
+
+def _addressed_here(
+    host: str, here: set[ipaddress.IPv4Address | ipaddress.IPv6Address], names: Iterable[str]
+) -> bool:
+    """The ``Host`` a request was sent to names this computer: a loopback address, ``localhost``, one of the
+    computer's own addresses or names. A page whose name was turned to 127.0.0.1 (DNS rebinding) is same-origin
+    for the browser - its ``Host`` still carries the page's own name, and is refused."""
+    name = host_name(host)
+    if not name:
+        return False
+    if name == "localhost" or name.endswith(".localhost"):
+        return True
+    address = _address(name)
+    if address is not None:
+        return address.is_loopback or address in here
+    return name in {str(n).strip().lower() for n in names if str(n).strip()}
+
+
+def from_this_computer(
+    peer: str | None, headers: Mapping[str, str], own: Iterable[str] = (), names: Iterable[str] = ()
+) -> bool:
     """A request of a browser on this computer: its connection comes from a loopback address - or from the address it
-    was made to (``own``: a browser here that uses the computer's address in the network) - and no proxy passed it on.
-    """
+    was made to (``own``: a browser here that uses the computer's address in the network) -, no proxy passed it on,
+    and its ``Host`` (when it has one) names this computer (``names``: the computer's own host names)."""
     address = _address(peer or "")
     if address is None:
         return False
     here = {found for found in (_address(text) for text in own) if found is not None}
     if not (address.is_loopback or address in here):
         return False
-    names = {str(name).lower() for name in headers}
-    return not any(name in names for name in PASSED_ON)
+    lowered = {str(name).lower(): value for name, value in headers.items()}
+    if any(name in lowered for name in PASSED_ON):
+        return False
+    host = lowered.get("host")
+    return host is None or _addressed_here(str(host), here, names)

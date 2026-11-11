@@ -32,6 +32,7 @@ def _variant(variant: Variant, installed: Mapping[str, int]) -> dict[str, Any]:
         "non_commercial": variant.non_commercial,
         "role": variant.role,
         "gated": variant.gated,
+        "manual_approval": variant.manual_approval,
         "quality": variant.quality,
         "speed": variant.speed,
         "vram_min_gib": variant.vram_min_gib,
@@ -85,6 +86,19 @@ def plan_view(
             }
         )
     return {"vram_gib": vram_gib, "prefer": prefer, "pins": dict(pins or {}), "templates": out}
+
+
+def find_variant(item: Any, components: Mapping[str, Component]) -> Variant:
+    """The catalogue's variant of id ``item`` (anything else is refused)."""
+    for component in components.values():
+        for variant in component.variants:
+            if isinstance(item, str) and variant.id == item:
+                return variant
+    shown = item[:80] if isinstance(item, str) else type(item).__name__
+    raise PlenioUserError(
+        f"Plenio's catalogue has no model file {shown!r}.",
+        hint="Plenio checks only the files of its own catalogue (resources/models.toml).",
+    )
 
 
 @dataclass(frozen=True)

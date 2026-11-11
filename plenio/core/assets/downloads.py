@@ -17,6 +17,7 @@ Standard library only; threads, no event loop (ComfyUI's routes hand work over a
 from __future__ import annotations
 
 import hashlib
+import logging
 import os
 import shutil
 import threading
@@ -28,6 +29,8 @@ from pathlib import Path
 from typing import Any
 
 from . import hub
+
+log = logging.getLogger("plenio")
 
 STATES = ("queued", "downloading", "paused", "verifying", "installed", "blocked", "failed", "cancelled")
 ACTIVE = ("queued", "downloading", "verifying")
@@ -122,10 +125,14 @@ class DownloadManager:
         title: str = "",
         manual_approval: bool = False,
     ) -> Download:
-        """Queue a file (one already queued, loading or installed under this id is returned as it is)."""
+        """Queue a file (one already queued or loading under this id is returned as it is - and goes on, if a
+        pause or cancel was asked; one installed is returned while its file is still there)."""
         with self.lock:
             known = self.items.get(item_id)
-            if known is not None and known.state in (*ACTIVE, "installed"):
+            if known is not None and known.state in ACTIVE:
+                known.wanted = "run"
+                return known
+            if known is not None and known.state == "installed" and _whole(known.target, known.size):
                 return known
             item = Download(item_id, url, target, size, sha256, title, manual_approval)
             self.items[item_id] = item
@@ -161,6 +168,8 @@ class DownloadManager:
         with self.lock:
             if item.state in ("paused", "blocked", "failed", "cancelled"):
                 item.state, item.wanted, item.refusal = "queued", "run", None
+            elif item.state == "downloading":  # a pause not noticed yet is taken back
+                item.wanted = "run"
         self._say(item, force=True)
         self._work()
         return item
@@ -217,6 +226,9 @@ class DownloadManager:
                 if item.state == "queued":
                     item.state = "downloading"
                     return item
+            # leaving: off the list under the same lock, so that a file queued now gets a worker of its own
+            current = threading.current_thread()
+            self._threads = [t for t in self._threads if t is not current]
         return None
 
     def _run(self) -> None:
@@ -227,6 +239,7 @@ class DownloadManager:
             try:
                 self._fetch(item)
             except Exception as error:  # noqa: BLE001 - every failure ends as a state with words
+                log.warning("Plenio download %s failed: %s", item.id, error)
                 self._stop(item, hub.classify_error(error))
             self._say(item, force=True)
 
@@ -236,14 +249,17 @@ class DownloadManager:
             item.speed = 0.0
             # what the user can fix is blocked; what trying again may cure has failed
             item.state = (
-                "blocked" if refusal.kind in ("gated", "pending", "token", "moved", "disk") else "failed"
+                "blocked"
+                if refusal.kind in ("gated", "pending", "token", "moved", "disk", "occupied")
+                else "failed"
             )
 
     def _fetch(self, item: Download) -> None:
         item.target.parent.mkdir(parents=True, exist_ok=True)
+        if item.target.exists():
+            # there already (put there by hand, or a file of the user's): checked, never deleted or replaced
+            return self._take_present(item)
         part = item.part
-        if item.target.is_file() and item.target.stat().st_size == item.size:
-            part = item.target  # there already (put there by hand): verified like a download
         start = part.stat().st_size if part.is_file() else 0
         if start > item.size:
             part.unlink()
@@ -267,18 +283,32 @@ class DownloadManager:
             return self._stop(
                 item, hub.Refusal("damaged", "The download was damaged; it was discarded.", "Try again.")
             )
-        if part != item.target:
-            for attempt in range(_RENAME_TRIES):
-                try:
-                    os.replace(part, item.target)
-                    break
-                except PermissionError as error:
-                    if attempt == _RENAME_TRIES - 1:
-                        return self._stop(item, hub.classify_error(error))
-                    self.sleep(_RENAME_WAIT_S)
+        if item.target.exists():  # a file that appeared meanwhile is the user's: the download is kept apart
+            return self._stop(item, hub.occupied(item.target.name))
+        for attempt in range(_RENAME_TRIES):
+            try:
+                os.replace(part, item.target)
+                break
+            except PermissionError as error:
+                if attempt == _RENAME_TRIES - 1:
+                    return self._stop(item, hub.classify_error(error))
+                self.sleep(_RENAME_WAIT_S)
         with self.lock:
             item.state, item.done, item.refusal = "installed", item.size, None
         return None
+
+    def _take_present(self, item: Download) -> None:
+        """A file is at the target already: installed when it is the catalogue's, else left alone and said."""
+        if _whole(item.target, item.size):
+            with self.lock:
+                item.state, item.speed = "verifying", 0.0
+            self._say(item, force=True)
+            if not item.sha256 or _sha256(item.target) == item.sha256:
+                with self.lock:
+                    item.state, item.done, item.refusal = "installed", item.size, None
+                return None
+        item.done = 0
+        return self._stop(item, hub.occupied(item.target.name))
 
     def _load(self, item: Download, part: Path, start: int) -> bool:
         """Fetch from ``start`` into ``part``. ``True``: the whole file is there; ``False``: paused, cancelled or
@@ -323,7 +353,7 @@ class DownloadManager:
                         handle.flush()
                         item.done = done
                         return self._interrupted(item)
-                    block = read(_CHUNK)
+                    block = read(_CHUNK)[: item.size - done]  # a longer answer than the file is cut off
                     if not block:
                         break
                     handle.write(block)
@@ -342,6 +372,14 @@ class DownloadManager:
         with self.lock:
             item.state = "paused" if item.wanted == "pause" else "cancelled"
             item.speed, item.wanted = 0.0, "run"
+        return False
+
+
+def _whole(path: Path, size: int) -> bool:
+    """``path`` is a file of ``size`` bytes."""
+    try:
+        return path.is_file() and path.stat().st_size == size
+    except OSError:
         return False
 
 

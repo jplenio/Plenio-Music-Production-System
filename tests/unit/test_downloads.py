@@ -57,6 +57,8 @@ class Host(BaseHTTPRequestHandler):
             body = bytes(len(DATA))
         if self.path == "/short":
             body = DATA[:1000]
+        if self.path == "/long":
+            body = DATA + b"more than the file" * 1000
         start = 0
         if "range" in headers:
             start = int(headers["range"].removeprefix("bytes=").rstrip("-"))
@@ -152,6 +154,51 @@ def test_a_file_put_there_by_hand_is_verified_not_fetched(host: str, tmp_path: P
     downloads, _ = manager()
     item = downloads.add("demo", f"{host}/ok", target, len(DATA), DIGEST)
     assert downloads.wait() and item.state == "installed" and Host.requests == []
+
+
+def test_a_file_deleted_after_its_download_is_fetched_again(host: str, tmp_path: Path) -> None:
+    downloads, _ = manager()
+    target = tmp_path / "model.safetensors"
+    downloads.add("demo", f"{host}/ok", target, len(DATA), DIGEST)
+    assert downloads.wait() and target.is_file()
+    target.unlink()
+    item = downloads.add("demo", f"{host}/ok", target, len(DATA), DIGEST)
+    assert downloads.wait() and item.state == "installed" and target.read_bytes() == DATA
+    assert len([p for p, _ in Host.requests if p == "/ok"]) == 2
+
+
+@pytest.mark.parametrize("own", [bytes(len(DATA)), b"a file of the user's"], ids=["same size", "other size"])
+def test_a_different_file_of_the_catalogued_name_is_left_alone(host: str, tmp_path: Path, own: bytes) -> None:
+    """Another build of the model, or the user's own file: Plenio says so and neither deletes nor replaces it."""
+    target = tmp_path / "model.safetensors"
+    target.write_bytes(own)
+    downloads, _ = manager()
+    item = downloads.add("demo", f"{host}/ok", target, len(DATA), DIGEST)
+    assert downloads.wait() and item.state == "blocked"
+    assert (
+        item.refusal is not None
+        and item.refusal.kind == "occupied"
+        and "model.safetensors" in item.refusal.message
+    )
+    assert target.read_bytes() == own and Host.requests == [] and not item.part.exists()
+
+
+def test_an_answer_longer_than_the_file_is_cut_at_its_size(host: str, tmp_path: Path) -> None:
+    downloads, _ = manager()
+    target = tmp_path / "model.safetensors"
+    item = downloads.add("demo", f"{host}/long", target, len(DATA), DIGEST)
+    assert downloads.wait() and item.state == "installed" and target.read_bytes() == DATA
+
+
+def test_a_pause_taken_back_before_it_is_noticed_lets_the_file_go_on(host: str, tmp_path: Path) -> None:
+    downloads, _ = manager()
+    target = tmp_path / "model.safetensors"
+    item = downloads.add("demo", f"{host}/slow", target, len(DATA), DIGEST)
+    until(lambda: item.done >= 262144)
+    downloads.pause("demo")
+    downloads.resume("demo")  # the worker still waits for the host's next block
+    Host.gate.set()
+    assert downloads.wait() and item.state == "installed" and target.read_bytes() == DATA
 
 
 def test_pause_keeps_the_part_and_resume_goes_on_from_it(host: str, tmp_path: Path) -> None:

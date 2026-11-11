@@ -113,6 +113,7 @@ def dump(components: Mapping[str, Component]) -> str:
                 f"  role = {_quoted(variant.role)}",
                 f"  default = {'true' if variant.default else 'false'}",
                 f"  gated = {'true' if variant.gated else 'false'}",
+                *(["  manual_approval = true"] if variant.manual_approval else []),
                 f"  quality = {variant.quality}",
                 f"  speed = {variant.speed}",
                 f"  vram_min_gib = {_number(variant.vram_min_gib)}",
@@ -160,6 +161,11 @@ def _hub_file(variant: Variant, fetch: Fetch, repos: dict[str, dict[str, Any]]) 
     gated = bool(facts.get("gated"))
     if gated != variant.gated:
         notes.append(f"the repository {name} is {'now gated' if gated else 'no longer gated'}")
+    manual = facts.get("gated") == "manual"  # the hub says "auto" or "manual" for a gated repository
+    if manual != variant.manual_approval:
+        notes.append(
+            f"the makers of {name} {'now approve' if manual else 'no longer approve'} each request by hand"
+        )
     commit = revision if _COMMIT.fullmatch(revision) else str(facts.get("sha") or "")
     if not _COMMIT.fullmatch(commit):
         return variant, [*notes, f"no commit to pin {repo} to"]
@@ -185,7 +191,14 @@ def _hub_file(variant: Variant, fetch: Fetch, repos: dict[str, dict[str, Any]]) 
     if not variant.bytes and size:
         notes.append("size filled")
     return (
-        replace(variant, url=url, bytes=size or variant.bytes, sha256=digest or variant.sha256, gated=gated),
+        replace(
+            variant,
+            url=url,
+            bytes=size or variant.bytes,
+            sha256=digest or variant.sha256,
+            gated=gated,
+            manual_approval=manual,
+        ),
         notes,
     )
 

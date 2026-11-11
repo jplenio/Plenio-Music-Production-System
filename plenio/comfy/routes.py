@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import functools
 import logging
 from collections.abc import Awaitable, Callable
 from typing import Any
@@ -47,12 +48,26 @@ def error_response(error: Exception) -> web.Response:
     return web.json_response({"error": body}, status=status)
 
 
+@functools.cache
+def _own_names() -> tuple[str, ...]:
+    """This computer's host names, so that a browser here may use ``http://<computer name>:8188`` (looked up
+    once: ``getfqdn`` can ask the network)."""
+    import socket
+
+    name = socket.gethostname()
+    try:
+        full = socket.getfqdn()
+    except OSError:
+        full = name
+    return (name, full)
+
+
 def only_here(request: web.Request, what: str, hint: str) -> None:
     """Refuse a request that does not come from a browser on this computer (``core.access``): ComfyUI has no login,
     and with ``--listen`` - or the Plenio Player's *In your network* - everyone in the network reaches its routes."""
     sockname = request.transport.get_extra_info("sockname") if request.transport is not None else None
     own = [str(sockname[0])] if isinstance(sockname, tuple) and sockname else []
-    if not from_this_computer(request.remote, request.headers, own):
+    if not from_this_computer(request.remote, request.headers, own, _own_names()):
         raise PlenioAccessError(f"{what} - only for a browser on the computer ComfyUI runs on.", hint=hint)
 
 

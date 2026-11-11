@@ -94,6 +94,15 @@ def test_a_renamed_or_gated_repository_and_a_changed_file_are_drift() -> None:
     assert tool.drift(notes) == notes
 
 
+def test_makers_who_approve_by_hand_are_recorded_and_written() -> None:
+    updated, notes = tool.survey(catalogue(), fetch=Hub(gated="manual"))
+    assert "the makers of org/repo now approve each request by hand" in notes["demo"]
+    found = updated["demo"].variants[0]
+    assert found.gated and found.manual_approval
+    assert "manual_approval = true" in tool.dump(updated)
+    assert "manual_approval" not in tool.dump(catalogue())  # written only where it holds
+
+
 def test_a_file_that_no_longer_resolves_keeps_its_entry_and_is_drift() -> None:
     hub = Hub()
     hub.status = 404

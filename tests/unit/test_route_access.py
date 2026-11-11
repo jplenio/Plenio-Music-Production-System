@@ -31,6 +31,21 @@ def test_a_request_a_proxy_passed_on_comes_from_the_network() -> None:
     assert from_this_computer("127.0.0.1", {"Host": "127.0.0.1:8188", "Origin": "http://127.0.0.1:8188"})
 
 
+def test_a_request_addressed_to_another_name_is_refused_though_it_comes_from_here() -> None:
+    """DNS rebinding: a page whose name now points at 127.0.0.1 is same-origin for the browser and connects from
+    loopback - but its Host header still names the page."""
+    for host in ("127.0.0.1:8188", "localhost:8188", "LOCALHOST", "app.localhost:8188", "[::1]:8188", "::1"):
+        assert from_this_computer("127.0.0.1", {"Host": host}), host
+    for host in ("evil.example:8188", "evil.example", "192.168.1.20:8188", "", "127.0.0.1.evil.example"):
+        assert not from_this_computer("127.0.0.1", {"Host": host}), host
+    # the computer's own address and name, as a browser here may use them
+    assert from_this_computer("192.168.1.5", {"Host": "192.168.1.5:8188"}, own=["192.168.1.5"])
+    assert from_this_computer("127.0.0.1", {"Host": "studio-pc:8188"}, names=["Studio-PC"])
+    assert not from_this_computer("127.0.0.1", {"Host": "other-pc:8188"}, names=["Studio-PC"])
+    # a program without a Host header (HTTP/1.0) is still judged by its address
+    assert from_this_computer("127.0.0.1", {})
+
+
 def test_a_route_says_plenios_errors_as_written_and_a_bug_without_its_text() -> None:
     status, body = public_error(PlenioUserError("The record is gone.", hint="Choose another."))
     assert status == 400 and body["message"] == "The record is gone." and body["hint"] == "Choose another."

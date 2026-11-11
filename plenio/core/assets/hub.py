@@ -38,6 +38,7 @@ KINDS = (
     "disk",  # no room
     "damaged",  # the file that arrived is not the catalogue's
     "locked",  # another program holds the file
+    "occupied",  # a different file of the catalogued name is in the folder (Plenio leaves it alone)
     "other",
 )
 
@@ -159,7 +160,13 @@ def classify_error(error: BaseException, *, host: str = HUB_HOST) -> Refusal:
             "Check the network (a proxy, a firewall); the file can also be placed by hand - its folder and "
             "address are shown.",
         )
-    return Refusal("other", f"The download failed: {error}", "Try again; if it stays, report it.")
+    # the error's own text stays in the log: an OSError names this computer's folders, and a refusal reaches
+    # every open ComfyUI page
+    return Refusal(
+        "other",
+        f"The download failed ({type(error).__name__}).",
+        "Try again; if it stays, report it with ComfyUI's log.",
+    )
 
 
 def no_room(needed: int, free: int, where: str) -> Refusal:
@@ -168,6 +175,15 @@ def no_room(needed: int, free: int, where: str) -> Refusal:
         "disk",
         f"{needed / 1e9:.1f} GB needed, {free / 1e9:.1f} GB free on {where}.",
         "Free some room, or choose another model folder.",
+    )
+
+
+def occupied(name: str) -> Refusal:
+    """The refusal for a target that holds another file than the catalogue's: it is the user's, never replaced."""
+    return Refusal(
+        "occupied",
+        f"A different file named {name} is already in the model folder; Plenio leaves it as it is.",
+        "Move or rename that file, then try again - or keep it and choose it in the model field.",
     )
 
 

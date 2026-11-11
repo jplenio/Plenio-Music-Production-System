@@ -66,6 +66,8 @@ A session that takes over reads `.claude/handover.md` first if it exists (local,
 - Done in phase 2: 2.1 catalogue schema 2 (`resources/models.toml`: components and variants, pinned and hashed; `assets.toml` still apart), 2.2 `tools/catalogue_check.py`, 2.3 `plenio/core/modelplan.py`, 2.4 the `[models]` and `[workers] device` settings.
 - Done too: 2.5 the download manager (`core/assets/downloads.py`, refusals in `hub.py`), 2.6 gated access and the token (`core/assets/access.py`).
 - Done too: 2.7 the Setup routes (`plenio/comfy/setup.py`: `/plenio/setup/*`, class `local`, events on ComfyUI's websocket).
-- Next: fix the findings of the review after 2.7 (listed at 2.7 in the plan); then phase 3 (Model Choice node).
+- Review after 2.7 done, its findings fixed (noted at 2.7 in the plan).
+- Next: the benchmark baseline (rest of 0.2, see the handover), then phase 3 (Model Choice node).
+- Reviews at the plan's checkpoints run as a subagent (`model: fable`, `effort: high`), read-only, focused.
 - Waiting for the owner's permission: `pytest-xdist` (0.5), the 12 GB native Gemma download (0.4), real-model benchmark runs on GPU 1 (0.2, 0.3).
 - The plan's boxes are the record of what is done; tick a box in the commit that makes its acceptance line hold.
