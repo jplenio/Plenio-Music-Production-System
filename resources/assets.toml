@@ -59,7 +59,7 @@ files = [
 
 # The default writer since 1.5.1: Gemma 4 12B as a GGUF (Local LLM), downloaded into ComfyUI's models/LLM when a run
 # uses the writer "Gemma 4 12B (auto)" and no Gemma 4 12B GGUF is on the machine yet (plenio/core/llm/gemma.py).
-# The file goes by the card: Q6_K from 15.5 GiB of VRAM, the QAT Q4 below.
+# The file goes by the card: Q6_K from 20 GiB of VRAM, the QAT Q4 below (a 16 GB card too: measured 2026-11-11).
 
 [[asset]]
 id = "gemma-4-12b-it-q6-k"
@@ -68,7 +68,7 @@ repo = "unsloth/gemma-4-12b-it-GGUF"
 revision = "fc034cfff751157913579611efad8462ac1be606"
 licence = "Apache-2.0"
 description = "Gemma 4 12B instruction model, GGUF Q6_K (Unsloth)"
-role = "the writer (title, style, lyrics, cover-art prompt, arrangement, misheard words) on cards from 16 GB"
+role = "the writer (title, style, lyrics, cover-art prompt, arrangement, misheard words) on cards from 20 GB"
 files = [
   { path = "gemma-4-12b-it-Q6_K.gguf", size = 9786022720, sha256 = "6f394336500bb5409bd68c31aa9d75097b5e6104f6cf30c82a09a7b64df41faf" },
 ]

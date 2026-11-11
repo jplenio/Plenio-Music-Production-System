@@ -227,5 +227,7 @@ def test_the_hardware_table_names_the_files_the_plan_takes() -> None:
     assert all(
         p.file.rsplit(".", 1)[0] in row["cover_art"] for p in cover if p.component.startswith("flux2-k")
     )
-    assert "Q6_K" in row["writer"] and row["basis"].startswith("estimate")
+    assert "qat-UD-Q4" in row["writer"] and row["basis"].startswith(
+        "estimate"
+    )  # 16 GB: the QAT Q4 (measured)
     assert len(hardware_rows(COMPONENTS, ASSETS)) == 5

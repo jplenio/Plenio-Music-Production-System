@@ -52,10 +52,9 @@ def test_a_gemma_4_12b_file_is_known_by_its_name(name: str, is_it: bool) -> None
 
 
 def test_the_card_decides_the_file() -> None:
-    assert (
-        gemma.wanted(15.9) == gemma.wanted(15.5) == gemma.wanted(23.6) == gemma.LARGE
-    )  # a card sold as 16 GB on
-    assert gemma.wanted(15.4) == gemma.wanted(11.9) == gemma.wanted(7.8) == gemma.SMALL
+    assert gemma.wanted(20.0) == gemma.wanted(23.6) == gemma.LARGE  # from 20 GiB on
+    # a 16 GB card too (measured 2026-11-11: the Q6_K and its context fill it and write 2.4 times slower)
+    assert gemma.wanted(15.9) == gemma.wanted(11.9) == gemma.wanted(7.8) == gemma.SMALL
     assert gemma.wanted(None) == gemma.SMALL  # no GPU
     large, small = ASSETS[gemma.LARGE], ASSETS[gemma.SMALL]
     assert (large.kind, small.kind) == ("llm", "llm")
@@ -65,10 +64,11 @@ def test_the_card_decides_the_file() -> None:
     # pinned like every asset: revision, size and SHA-256; Apache-2.0
     for asset in (large, small):
         assert len(asset.revision) == 40 and asset.files[0].sha256 and asset.licence == "Apache-2.0"
-    # both leave the card room for the context: the file is at least HEADROOM_GIB smaller than the smallest VRAM
-    # of its row (16 GB: 15.5 GiB; below: 12 GB cards with 11.5 GiB)
+    # both leave the card room for the context where they were measured: the file is at least HEADROOM_GIB smaller
+    # than the smallest VRAM of its row (20 GiB; the QAT Q4 on a 16 GB card with 15.9 GiB - on smaller cards
+    # llama.cpp keeps what does not fit in RAM)
     assert large.total_size / GIB <= gemma.LARGE_FROM_GIB - gemma.HEADROOM_GIB
-    assert small.total_size / GIB <= 11.5 - gemma.HEADROOM_GIB
+    assert small.total_size / GIB <= 15.9 - gemma.HEADROOM_GIB
 
 
 def test_a_file_on_the_machine_is_used_before_anything_is_downloaded() -> None:
@@ -124,8 +124,8 @@ def test_the_writer_entry_routes_to_a_local_llm_and_the_others_stay_as_they_were
 def test_the_system_check_names_the_writer_for_each_card_and_where_its_file_goes() -> None:
     rows = hardware_rows(load_components(ROOT / "resources" / "models.toml"), ASSETS)
     writers = {rule.label: rule.writer for rule in rows}
-    assert "Q6_K" in writers["16-24 GB"] and "Q6_K" in writers["24 GB and more"]
-    assert all("qat-UD-Q4" in writers[label] for label in ("below 8 GB", "8-12 GB", "12-16 GB"))
+    assert "Q6_K" in writers["24 GB and more"]
+    assert all("qat-UD-Q4" in writers[label] for label in ("below 8 GB", "8-12 GB", "12-16 GB", "16-24 GB"))
     lines = _llm_lines(
         {"runtimes": ["llama-server (PATH)"], "models": {"models/LLM": 1}, "writer": "Gemma 4 12B: x"}
     )
@@ -296,7 +296,9 @@ def test_a_run_uses_the_file_on_the_machine(machine: dict[str, Any]) -> None:
     assert choice.model is not None and machine["downloads"] == []
 
 
-@pytest.mark.parametrize(("vram", "asset"), [(15.9, gemma.LARGE), (11.9, gemma.SMALL), (None, gemma.SMALL)])
+@pytest.mark.parametrize(
+    ("vram", "asset"), [(23.6, gemma.LARGE), (15.9, gemma.SMALL), (11.9, gemma.SMALL), (None, gemma.SMALL)]
+)
 def test_a_run_downloads_the_file_for_the_card_into_models_llm(
     machine: dict[str, Any], vram: float | None, asset: str
 ) -> None:

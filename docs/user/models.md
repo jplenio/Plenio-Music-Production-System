@@ -130,8 +130,10 @@ The templates' **Writer model** is *Gemma 4 12B (auto)*: the model that writes t
 
 | VRAM | File | Size |
 |---|---|---|
-| 16 GB and more | [`gemma-4-12b-it-Q6_K.gguf`](https://huggingface.co/unsloth/gemma-4-12b-it-GGUF) | 9.8 GB |
-| less, or no GPU | [`gemma-4-12B-it-qat-UD-Q4_K_XL.gguf`](https://huggingface.co/unsloth/gemma-4-12B-it-qat-GGUF) (trained for 4-bit, so it keeps more of the model than a plain Q4) | 6.7 GB |
+| 20 GB and more | [`gemma-4-12b-it-Q6_K.gguf`](https://huggingface.co/unsloth/gemma-4-12b-it-GGUF) | 9.8 GB |
+| less (a 16 GB card too), or no GPU | [`gemma-4-12B-it-qat-UD-Q4_K_XL.gguf`](https://huggingface.co/unsloth/gemma-4-12B-it-qat-GGUF) (trained for 4-bit, so it keeps more of the model than a plain Q4) | 6.7 GB |
+
+On a 16 GB card the Q6_K and the writer's context fill the card: measured, it wrote 2.4 times slower than the QAT Q4 and ComfyUI's own 12B ([the report](../test-reports/2026-11-11-writer-native-12b.md)). A GGUF already on your computer is used only when it leaves 7.5 GB of the card free.
 
 Both are Apache-2.0. On a card too small for the file, llama.cpp keeps the rest in RAM: it writes, more slowly. `PLENIO_OFFLINE=1` or `PLENIO_AUTO_DOWNLOAD=0` turn the download off; the run then names the file to place. **0 · System Check** says what the writer takes on your computer and marks the row of your card.
 

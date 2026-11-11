@@ -17,8 +17,8 @@ nothing is downloaded: a running app's model still serves, else ComfyUI's own Ge
 (``native_fallback``: templates saved with it keep working, and the summary says what to install), else the run
 stops and says what to do.
 
-Which file: Q6_K (9.8 GB) from 15.5 GiB of VRAM on (a card sold as 16 GB) - near the full model's quality -,
-below that the QAT Q4 (6.7 GB) Google trained for 4-bit, which keeps more of it than a plain Q4. Both leave room
+Which file: Q6_K (9.8 GB) from 20 GiB of VRAM on - near the full model's quality -, below that (a 16 GB card too:
+measured, the Q6_K and its context do not fit there and write 2.4 times slower) the QAT Q4 (6.7 GB) Google trained for 4-bit, which keeps more of it than a plain Q4. Both leave room
 for the writer's 24 576-token context; on a smaller card llama.cpp keeps the layers that do not fit in RAM.
 Both are Unsloth's GGUFs of Google's Gemma 4 12B instruction model (Apache-2.0).
 """
@@ -40,11 +40,14 @@ LARGE = "gemma-4-12b-it-q6-k"
 """The asset for cards from ``LARGE_FROM_GIB`` on."""
 SMALL = "gemma-4-12b-it-qat-ud-q4-k-xl"
 """The asset for smaller cards and machines without a GPU."""
-LARGE_FROM_GIB = 15.5
-"""VRAM (GiB, as torch reports it) from which the Q6_K file is chosen: a card sold as 16 GB reports ~15.9."""
-HEADROOM_GIB = 5.0
+LARGE_FROM_GIB = 20.0
+"""VRAM (GiB, as torch reports it) from which the Q6_K file is chosen. Measured 2026-11-11 on a 16 GB card
+(15.9 GiB): the Q6_K with the 24 576-token context filled the card and wrote 2.4 times slower than the QAT Q4
+(docs/test-reports/2026-11-11-writer-native-12b.md) - so 16 GB cards get the QAT Q4."""
+HEADROOM_GIB = 7.5
 """What a found file leaves of the card for the context and the server: a file fits when it is this much
-smaller than the VRAM."""
+smaller than the VRAM (measured: the QAT Q4_0 of 6.4 GiB peaked at 14.8 GiB, the Q6_K of 9.1 GiB at 15.1 GiB and
+was slowed down on a 15.9 GiB card)."""
 GIB = 1024**3
 NATIVE_E4B = "gemma4_e4b_it_fp8_scaled.safetensors"
 """ComfyUI's lighter Gemma writer, the templates' default before 1.5.1."""

@@ -220,8 +220,8 @@ The **0 · System Check** template reads your GPU and marks your row. Nothing is
 |---|---|---|---|---|
 | below 8 GB | only with heavy offloading (the int8 model alone is 4 GB): very slow, keep songs short | only with heavy offloading: very slow | not practical | QAT Q4 (6.7 GB), partly in RAM: slower |
 | 8-12 GB | int8 checkpoint (template default); keep songs short | int8 DiT `minimax_music3_dit_int8_convrot` (2.5 GB) and *tiled decode* | `flux-2-klein-4b-fp8` with the text encoder `qwen_3_4b_fp4_flux2` | QAT Q4 (6.7 GB) |
-| 12-16 GB | int8 checkpoint (template default) | the defaults may offload; the int8 DiT is the safer choice | fp8 model and fp4 text encoder | QAT Q4; Q6_K (9.8 GB) on a 16 GB card |
-| 16-24 GB | int8 checkpoint | template defaults (fp16 DiT, int8 text encoder) | template defaults (bf16) | Q6_K (9.8 GB) |
+| 12-16 GB | int8 checkpoint (template default) | the defaults may offload; the int8 DiT is the safer choice | fp8 model and fp4 text encoder | QAT Q4 (a 16 GB card too) |
+| 16-24 GB | int8 checkpoint | template defaults (fp16 DiT, int8 text encoder) | template defaults (bf16) | QAT Q4 below 20 GB, Q6_K (9.8 GB) from 20 GB |
 | 24 GB and more | the bf16 checkpoint `yue2_3b_bf16` (7.8 GB) is possible; int8 stays the faster default | template defaults | template defaults | Q6_K |
 
 Measured on a 16 GB RTX 5060 Ti: a 1:44 instrumental - writer, plan, take, master and export, models loaded fresh - in 2½ minutes. The other rows come from model sizes and the predecessor toolkit's ratings. *4 · Enhance & Master* needs no GPU. See [Models and downloads](docs/user/models.md) for every file, folder and size.
