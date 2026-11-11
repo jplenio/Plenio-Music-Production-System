@@ -46,21 +46,23 @@ Otherwise proceed with the recommendation and say so in the report.
 
 ```text
 Phase 0  baseline, measurements, faster tests            no release
-Phase 1  package boundary, route classes, release tool   → 1.7.0 (the canary; the owner publishes)
+Phase 1  package boundary, route classes                 no release
 Phase 2  catalogue v2, model plan, downloads, gated
 Phase 3  Model Choice, templates, writer plan
-Phase 4  Plenio Setup and Home                           → 2.0.0-beta.1 (git only: a tag the owner may push, no Registry)
+Phase 4  Plenio Setup and Home                           no release
 Phase 5  Song API v2, tokens, Player API, MCP
 Phase 6  player: People & access, navigation, guests' languages
 Phase 7  visuals: devices, analysis, Director, chooser, one light
-Phase 8  performance, by measurement                     → 2.0.0-beta.2
+Phase 8  performance, by measurement                     no release
 Phase 9  tests: tiers, mutation
 Phase D  docs: facts, links, site, rewrites
 Phase M  media pipeline and kit (repository Plenio-Media)
-Phase R  release automation, 2.0.0                       → 2.0.0
+Phase R  release automation, 2.0.0                       → 2.0.0 (the only release; the owner tests it first)
 ```
 
-Phases 5, 6 and 7 are independent of each other after phase 4 and may be done in any order. Phase D's tasks D1 and D2 are needed by phase 1's release tool and are pulled forward there.
+**No pre-release versions** (owner's decision 2026-11-11): the canary 1.7.0 and the two betas of the first draft of this plan are dropped. Everything is committed locally on `main` and ships as 2.0.0, which the owner tests from the repository before publishing. `pyproject.toml` keeps 1.6.0 until `release.py prepare 2.0.0`; the CHANGELOG collects the changes under *2.0.0 - unreleased*.
+
+Phases 5, 6 and 7 are independent of each other after phase 4 and may be done in any order.
 
 ---
 
@@ -91,9 +93,9 @@ Goal: numbers the later phases are judged by, and a test suite fast enough to ru
 
 ---
 
-## Phase 1 - package boundary and the canary (1.7.0)
+## Phase 1 - package boundary
 
-Goal: PD §3. Nothing else that touches processes or the network changes in this phase.
+Goal: PD §3.1 to §3.4. It ships with 2.0.0 (PD §3.5).
 
 - [ ] **1.1 `plenio/core/features.py`** with `has(addon)` and a test for a present and an absent module.
 - [ ] **1.2 The add-on package `plenio/addons/`.**
@@ -110,12 +112,11 @@ Goal: PD §3. Nothing else that touches processes or the network changes in this
 - [ ] **1.6 Route access classes** (PD §3.4): a `Route` record with `access`, `guarded()`, the table in `routes.py` and `song_api.py`, one parametrised test over every route (remote peer → 403 for `local`; no absolute path in any answer to a remote peer). `api` behaves as today in this phase (tokens come in 5.4).
   *Accept:* the test enumerates `ROUTES` and fails when a route has no class.
 - [ ] **1.7 Ruff rules** `S301`, `S602`, `S605` added; findings fixed or justified with a `noqa` and a reason.
-- [ ] **1.8 Release tool, first part** (MP §8.2): `tools/release.py version|prepare|verify` covering version strings, builds, CHANGELOG check, `tools/release_notes.py` (from the session's scratch script) writing `docs/releases/<version>.md`, the package gate and its delta, and `docs/security/review-<version>.md` generated from a template plus the delta.
-  *Accept:* `release.py prepare 1.7.0` on a clean tree produces exactly the diff a hand-made release would; `verify` passes.
-- [ ] **1.9 Docs for the boundary.** SECURITY.md (what the Registry package starts: two fixed patterns; what the add-on adds), `docs/user/getting-started.md` (the two ways to install and what differs), CHANGELOG 1.7.0, a short ADR-0013 *Two artefacts*.
-- [ ] **1.10 Hand over 1.7.0.** A German report to the owner: what changed, the gate's delta against 1.6.0, the checks, the steps to publish, and the review request to file.
+- **1.8** *(moved to R0: the release tool is written once, for 2.0.0.)*
+- [ ] **1.9 Docs for the boundary.** SECURITY.md (what the Registry package starts: two fixed patterns; what the add-on adds), `docs/user/getting-started.md` (the two ways to install and what differs), the CHANGELOG's *2.0.0 - unreleased* section, a short ADR-0012 *Two artefacts*.
+- **1.10** *(dropped with the canary; the hand-over is R6.)*
 
-**Exit of phase 1:** the owner has published 1.7.0 (or decided not to). `tools/registry_status.py` (MP §8.4) is written and reads the verdict. While waiting, phase 2 starts. When the verdict arrives, apply PD §3.5's table before phase R.
+**Exit of phase 1:** the gate passes on the packed zip and names the three launchers on 1.6.0; ComfyUI loads the package without the add-on with every node; the owner has the German summary of what the Registry package leaves out.
 
 ---
 
@@ -180,7 +181,7 @@ Goal: PD §3. Nothing else that touches processes or the network changes in this
 - [ ] **4.8 Recipes and Brief List** (PD §7.3): the node, its help page, the six recipe workflows built by `build_graphs.py`.
   *Accept:* each recipe validates and runs with fake models in the host job.
 
-**Exit of phase 4:** on a clean ComfyUI (a fresh base directory, no Plenio files, an empty models folder, a throttled fake hub for the test and the real hub once with the owner's permission): install, open ComfyUI, follow Setup, hear the test song - without reading documentation. The owner does this once and names what was unclear; those points are fixed before the beta tag.
+**Exit of phase 4:** on a clean ComfyUI (a fresh base directory, no Plenio files, an empty models folder, a throttled fake hub for the test and the real hub once with the owner's permission): install, open ComfyUI, follow Setup, hear the test song - without reading documentation. The owner does this once and names what was unclear; those points are fixed before phase 5 builds on them.
 
 ---
 
@@ -220,7 +221,7 @@ Goal: PD §3. Nothing else that touches processes or the network changes in this
   *Accept:* Vitest for the routes and the search; screenshots at 390, 820 and 1440 px in the test report; every setting of 1.6.0 is reachable (a test lists setting keys against rendered controls).
 - [ ] **6.5 *Make a song*, short first**: the one field, the style chips, *Generate*; *More options* holds today's form unchanged.
   *Accept:* the existing form tests pass with *More options* open; a new test makes a song from the short form with the defaults of the chosen style.
-- [ ] **6.6 The guests' page in seven languages** (PD §9.7, if D-12): strings in `plenio/player/guest_locales/<lang>.json`, the choice by `navigator.languages`, English as the fallback, ADR-0012.
+- [ ] **6.6 The guests' page in seven languages** (PD §9.7, if D-12): strings in `plenio/player/guest_locales/<lang>.json`, the choice by `navigator.languages`, English as the fallback, ADR-0013.
   *Accept:* a test asserts every locale has every key; no string of the page is left in the source.
 - [ ] **6.7 Docs**: the player guide split into seven pages (PD §10.3), each section with its key in `resources/media.toml` for the how-to chapter that will be embedded.
 
@@ -285,8 +286,6 @@ For each hypothesis P1 to P6 and P8 of PD §6.2, in this order: measure with `be
 
 ## Phase D - documentation
 
-D1 and D2 are needed by 1.8 and are done there; they are listed here for completeness.
-
 - [ ] **D1 `tools/facts.py`** (PD §10.3): `docs/facts.json`, the markers, `--write`, `--check` in CI; blocks in README, `docs/user/models.md`, `docs/user/configuration.md`, SECURITY.md, `docs/dev/release.md`.
   *Accept:* `--check` fails when a number in a block is edited by hand; the README's node, blueprint and test counts equal the code's.
 - [ ] **D2 `resources/media.toml` and `tools/media_links.py`** (MP §6): the registry with today's sixteen videos, the go-link pages under `docs/go/`, `plenio/player/static/media.json` read by the player's help (`help.ts` loses its id list), thumbnails at `assets/media/<key>.jpg`, the generated tutorial table; the rule "no `youtu.be` outside generated blocks" replaces `tests/unit/test_tutorial_links.py`.
@@ -296,7 +295,7 @@ D1 and D2 are needed by 1.8 and are done there; they are listed here for complet
 - [ ] **D5 The site** (if D-13, with permission to add VitePress to the frontend's dev dependencies): `docs/.vitepress/`, the Pages workflow that builds the site, the demo page, the API reference and the go-links together.
   *Accept:* the site builds in CI; the demo page and the go-links keep their addresses.
 - [ ] **D6 The README** in the order of MP §4, with the one line of D-M2.
-- [ ] **D7 Design records**: this plan's boxes ticked; `docs/design/README.md` lists the three v2 documents as implemented with the commits; ADR-0012 (guests' languages), ADR-0013 (two artefacts), ADR-0014 (Plenio downloads catalogue models after confirmation).
+- [ ] **D7 Design records**: this plan's boxes ticked; `docs/design/README.md` lists the three v2 documents as implemented with the commits; ADR-0012 (two artefacts), ADR-0013 (guests' languages), ADR-0014 (Plenio downloads catalogue models after confirmation).
 
 ---
 
@@ -321,15 +320,17 @@ In the repository `Plenio-Media` (if D-M1; otherwise in `tools/media/` of this r
 
 ## Phase R - release automation and 2.0.0
 
+- [ ] **R0 Release tool** (MP §8.2; D1 and D2 first): `tools/release.py version|prepare|verify` covering version strings, builds, CHANGELOG check, `tools/release_notes.py` (from the session's scratch script) writing `docs/releases/<version>.md`, the package gate and its delta against 1.6.0, and `docs/security/review-<version>.md` generated from a template plus the delta.
+  *Accept:* `release.py prepare 2.0.0` on a clean tree produces exactly the diff a hand-made release would; `verify` passes.
 - [ ] **R1 `release.yml`** (MP §8.2): the tag workflow, `tools/verify_install.py`, the release created from `docs/releases/<version>.md`; `publish.yml` retired.
   *Accept:* a dry run on a throwaway tag in a fork or with `act` is described in the report; nothing is pushed by the agent.
 - [ ] **R2 The Registry watcher**: `tools/registry_status.py` and the scheduled workflow that opens an issue in this repository on a status change.
-- [ ] **R3 The canary's consequence**: apply PD §3.5's table to the verdict on 1.7.0 (and 1.7.1 if one was needed); update SECURITY.md and the review request.
+- [ ] **R3 After the launch: the verdict** (PD §3.5): `registry_status.py` reads the verdict on 2.0.0; the table's consequence is applied in a 2.0.x; SECURITY.md and the review request are updated. (Not a condition of 2.0.0.)
 - [ ] **R4 Migration**: *From 1.x to 2.0* complete; the refusals and messages of PD §11 checked in the running program; a 1.6.0 player state, three 1.x workflows and a 1.6.0 API client run against 2.0 in the host job.
 - [ ] **R5 The full check** on the owner's machine: all tiers, the browser check, `bench.py` against the budgets, the real-model smoke suite, Setup from a clean base, the kit's films against the release build (`media status` shows nothing stale).
-- [ ] **R6 `release.py prepare 2.0.0`**, the CHANGELOG with the intro, the release notes, the review request with the delta against 1.7.x, the German hand-over with the steps of MP §9's T-0 and what is not verified.
+- [ ] **R6 `release.py prepare 2.0.0`**, the CHANGELOG with the intro, the release notes, the review request with the gate's delta against 1.6.0, the German hand-over with the steps of MP §9's T-0 and what is not verified.
 
-**Exit:** the owner publishes.
+**Exit:** the owner has tested 2.0.0 from the repository, the points found are fixed, and the owner publishes.
 
 ---
 

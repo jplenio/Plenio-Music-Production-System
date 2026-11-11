@@ -598,7 +598,7 @@ Pages (the demo page, the docs site, the go-links, the API reference) deploy fro
 
 | When | What | Who |
 |---|---|---|
-| T-21 | the canary release 1.7.0 with the new package boundary is published; its Registry verdict decides the boundary (product design section 3.5) | owner publishes |
+| T-21 | the owner starts testing the 2.0.0 build from the repository (no pre-release version is published: owner's decision 2026-11-11); what is unclear or broken is fixed before T-0 | owner tests, agent fixes |
 | T-14 | feature freeze; `media status` against the release candidate; captures of drifted scenes | agent |
 | T-10 | F8 *Install in three minutes* and *Your first song* recorded on a clean machine profile; reviewed by the owner | agent, owner |
 | T-7 | all films and tutorials built, `media check` green; kit folder complete; YouTube `--apply` (private) | agent, owner |

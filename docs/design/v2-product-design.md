@@ -23,7 +23,7 @@ This document makes the technical and design decisions for 2.0. Where a decision
 | 7 | **Visuals that know the song**: a per-song analysis track (beats, bars, sections, onsets, energy) with look-ahead, a director that changes scenes on the downbeat of a section, sound-to-picture sync that accounts for output latency, visuals organised by what they show, and Plenio Nova on phones. | Visuals react to a live FFT, after the fact; Nova is refused on devices without `EXT_color_buffer_float` although it draws half floats [repo: `frontend/src/player/visuals/gpu.ts:59`]. |
 | 8 | **Tests in tiers with a time budget**: the 2 110 unit tests run in 144 s, of which 73 s belong to the player's server tests and 37 s to teardowns [measured 2026-11-11]; the fix is fixtures, not fewer assertions. Mutation testing on the critical core modules decides which tests are necessary. | |
 | 9 | **Facts from one source**: counts, sizes, the hardware table, the install line and every video link are generated into README and docs; CI fails on drift. | The README says 35 nodes, the release guide 31 nodes and 13 blueprints; the code declares 37 nodes and the repository has 14 blueprints [repo]. |
-| 10 | **A canary release (1.7.0)** ships decision 1 alone, weeks before 2.0, to learn the Registry's verdict on the new boundary. | Verdicts for 1.5.1 arrived within four days of publishing [checked 2026-11-11]. |
+| 10 | **One release, no pre-release versions.** The package boundary ships with 2.0.0 itself; the owner tests 2.0.0 before it is published (owner's decision 2026-11-11 - a canary release 1.7.0 was proposed and declined). | The Registry's verdict on the new boundary is learned on 2.0.0; section 3.5 says what follows from it. |
 
 Compatibility promises of 2.0:
 
@@ -210,15 +210,17 @@ def guarded(route: Route) -> Handler:
 
 `compute` and `data` keep a ComfyUI opened from another computer (a server at home, a rented GPU) fully working: the Song Sheet editor's routes are pure functions, and *Continue a song* and the brief templates stay inside ComfyUI's folders. Only what describes or changes the computer itself is `local`.
 
-### 3.5 The canary
+### 3.5 The verdict on 2.0.0
 
-1.7.0 = 1.6.0 + sections 3.1 to 3.4 and nothing else that touches processes or the network. It is published three weeks before 2.0. Its verdict decides:
+A canary release (1.7.0 = 1.6.0 plus sections 3.1 to 3.4, three weeks ahead) was proposed to learn the Registry's verdict before 2.0. **Declined by the owner on 2026-11-11: no pre-release versions; the boundary ships with 2.0.0, which the owner tests before publishing.** The verdict is therefore read on 2.0.0 (`tools/registry_status.py`), and decides what a 2.0.x does:
 
-| Verdict on 1.7.0 | Consequence for 2.0 |
+| Verdict on 2.0.0 | Consequence |
 |---|---|
-| active | the boundary stands; the Manager becomes the first install line in every text |
-| flagged with a class that names a remaining module | that module moves behind the add-on seam (candidates, in order: the network gateway `player/network.py`, the party server `player/guest.py`, the player as a whole per section 3.2); 1.7.1 repeats the canary |
-| flagged without a class, or no review in three weeks | 2.0 ships with the boundary; texts keep `comfy node install` and `git clone` first; the review request with the delta is filed and the Discord review channel is asked once |
+| active | the boundary stands; the Manager becomes the first install line in every text (a docs-only change, no new version needed for the README on GitHub) |
+| flagged with a class that names a remaining module | that module moves behind the add-on seam (candidates, in order: the network gateway `player/network.py`, the party server `player/guest.py`, the player as a whole per section 3.2) in 2.0.1 |
+| flagged without a class, or no review in three weeks | texts keep `comfy node install` and `git clone` first; the review request with the gate's delta against 1.6.0 is filed and the Discord review channel is asked once |
+
+Until the verdict is known, every text of 2.0.0 names `git clone` and `comfy node install` first, as today.
 
 No design can promise the verdict: the Registry's policy and scanner are private. The design removes every site the verdicts' classes describe and makes the removal verifiable.
 
@@ -1118,7 +1120,7 @@ Generated blocks: counts in README and docs, the hardware table (from the catalo
 | Id | Decision | Recommendation | If decided otherwise |
 |---|---|---|---|
 | D-1 | Two artefacts; the three launchers leave the Registry package (section 3.1) | yes | the Registry status stays as it is; sections 3.3 and 3.4 still apply |
-| D-2 | A canary release 1.7.0 with only the boundary (section 3.5) | yes | 2.0 learns the verdict after its launch |
+| D-2 | A canary release 1.7.0 with only the boundary (section 3.5) | yes | **decided 2026-11-11: no** - no pre-release versions; 2.0.0 carries the boundary and learns the verdict after its launch |
 | D-3 | Minimum ComfyUI 0.41.0 | yes | keep 0.37.0 and its two frontend repairs |
 | D-4 | Plenio downloads ComfyUI-format model files itself, after the user's confirmation in Setup | yes | Setup shows the plan and links; files are fetched by hand or by ComfyUI's dialog |
 | D-5 | `downloads = "ask"` as the default for runs that lack a file | yes | `auto`: the first run downloads without asking, as the writer does today |
@@ -1138,7 +1140,7 @@ Generated blocks: counts in README and docs, the hardware table (from the catalo
 
 | Risk | Likelihood | Effect | Answer |
 |---|---|---|---|
-| The Registry flags 1.7.0 for a class outside the three launchers | medium | 2.0 is not listed as active | the seam of section 3.1 moves the named module; the canary leaves three weeks for it |
+| The Registry flags 2.0.0 for a class outside the three launchers | medium | 2.0.0 is not listed as active | the seam of section 3.1 moves the named module in 2.0.1; the launch texts name `git clone` and `comfy node install` first until the verdict is known |
 | The native Gemma 4 12B is too slow or too large on 12-16 GB | medium | the newcomer's writer is the E4B | the plan's thresholds come from phase 0; the E4B and E2B steps exist |
 | Model Choice feeding ComfyUI's loaders breaks on a ComfyUI release | low | templates do not run | it is Writer Choice's pattern, in production since 1.5.1; the weekly canary against ComfyUI `master` finds it first |
 | Downloading model files adds a network finding for the Registry | low | a new *info* finding | the downloader exists and is in every review request since 1.5.1; it fetches pinned catalogue entries only, behind a `local` route |
