@@ -1,0 +1,1137 @@
+{
+ "status": 200,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "id": "minimax-song",
+  "title": "MiniMax · Song",
+  "kind": "song",
+  "workflow": "3 · MiniMax · Song",
+  "needs": [],
+  "fields": [
+   {
+    "id": "mode",
+    "label": "mode",
+    "type": "choice",
+    "default": "new song every run",
+    "description": "new song every run: each run writes and renders another song from this brief (the batch count next to Run makes a series). one song, stop to review: the Song Sheets stop for checking; later runs render new takes.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG",
+    "choices": [
+     "new song every run",
+     "one song, stop to review"
+    ],
+    "fixed": true
+   },
+   {
+    "id": "template",
+    "label": "template",
+    "type": "choice",
+    "default": "pop/singer-songwriter-acoustic-vocal",
+    "description": "Optional starting point. Text fields you leave empty are taken from the template.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG",
+    "choices": [
+     "none",
+     "african/afrobeat-classic-instrumental",
+     "african/afrobeats-vocal",
+     "african/amapiano-instrumental",
+     "african/desert-blues-vocal",
+     "african/ethio-jazz-instrumental",
+     "african/gqom-instrumental",
+     "african/highlife-instrumental",
+     "african/soukous-instrumental",
+     "alternative/alternative-rock-vocal",
+     "alternative/britpop-vocal",
+     "alternative/new-wave-vocal",
+     "alternative/uk-garage-vocal",
+     "ambient/ambient-choir-vocalise",
+     "ambient/ambient-guitar",
+     "ambient/chillout-pads-strings",
+     "ambient/dark-ambient-drone",
+     "asian/anime-opening-vocal",
+     "asian/bollywood-vocal",
+     "asian/chinese-traditional-instrumental",
+     "asian/city-pop-vocal",
+     "asian/enka-vocal",
+     "asian/game-jrpg-orchestral",
+     "asian/indian-classical-instrumental",
+     "asian/j-rock-vocal",
+     "asian/kpop-vocal",
+     "asian/mandopop-ballad-vocal",
+     "blues/blues-ballad-vocal",
+     "blues/boogie-woogie-instrumental",
+     "blues/chicago-blues-vocal",
+     "blues/delta-blues-vocal",
+     "blues/electric-blues-instrumental",
+     "cinematic/corporate-uplifting-instrumental",
+     "cinematic/documentary-underscore-instrumental",
+     "cinematic/emotional-piano-underscore",
+     "cinematic/epic-trailer-instrumental",
+     "cinematic/fantasy-adventure-orchestral",
+     "cinematic/horror-suspense-instrumental",
+     "cinematic/orchestral-action-instrumental",
+     "cinematic/sports-stadium-anthem",
+     "classical/baroque-concerto-instrumental",
+     "classical/cello-and-piano",
+     "classical/choral-sacred-vocal",
+     "classical/cinematic-romance",
+     "classical/gregorian-chant-vocal",
+     "classical/impressionist-piano-instrumental",
+     "classical/minimalism-instrumental",
+     "classical/mystical-neoclassical",
+     "classical/neoclassical-piano",
+     "classical/opera-aria-vocal",
+     "classical/piano-and-strings",
+     "classical/romantic-string-ensemble",
+     "classical/string-quartet-instrumental",
+     "classical/symphonic-orchestral-instrumental",
+     "comedy/comedy-rap-vocal",
+     "comedy/english-parody-pop-vocal",
+     "comedy/german-absurd-novelty",
+     "country/americana-vocal",
+     "country/bluegrass-instrumental",
+     "country/country-ballad-vocal",
+     "country/honky-tonk-vocal",
+     "country/modern-country-pop-vocal",
+     "country/outlaw-country-vocal",
+     "disco/classic-disco-vocal",
+     "disco/italo-disco-vocal",
+     "edm/big-room-festival-instrumental",
+     "edm/breakbeat-instrumental",
+     "edm/dance-anthem-instrumental",
+     "edm/drum-and-bass-instrumental",
+     "edm/dubstep-instrumental",
+     "edm/eurodance-vocal",
+     "edm/future-bass-vocal",
+     "edm/future-rave-sparse-vocals",
+     "edm/goa-trance-instrumental",
+     "edm/hardgroove-techno-instrumental",
+     "edm/hardstyle-instrumental",
+     "edm/jungle-instrumental",
+     "edm/liquid-drum-and-bass-sparse-vocals",
+     "edm/melodic-techno-instrumental",
+     "edm/neurofunk-dnb-instrumental",
+     "edm/progressive-trance-instrumental",
+     "edm/psytrance-instrumental",
+     "edm/uplifting-trance-instrumental",
+     "electronic/analog-space-electronic",
+     "electronic/berlin-school-sequencer",
+     "electronic/chiptune-instrumental",
+     "electronic/cinematic-electronica",
+     "electronic/downtempo-electronica",
+     "electronic/ebm-darkwave-vocal",
+     "electronic/electro-swing-vocal",
+     "electronic/idm-experimental-instrumental",
+     "electronic/lofi-hiphop-instrumental",
+     "electronic/minimal-electronic-german-vocals",
+     "electronic/peak-time-techno-sparse-vocals",
+     "electronic/synth-pop-vocal",
+     "electronic/synthwave",
+     "electronic/trip-hop",
+     "electronic/vaporwave-instrumental",
+     "european/alpine-volksmusik-instrumental",
+     "european/balkan-brass-instrumental",
+     "european/chanson-vocal",
+     "european/fado-vocal",
+     "european/flamenco-instrumental",
+     "european/carnival-song-vocal",
+     "european/irish-pub-session-instrumental",
+     "european/italian-pop-vocal",
+     "european/klezmer-instrumental",
+     "european/party-schlager-vocal",
+     "european/polka-instrumental",
+     "european/russian-folk-vocal",
+     "european/schlager-vocal",
+     "european/viennese-waltz-instrumental",
+     "folk/appalachian-folk-instrumental",
+     "folk/celtic-folk-vocal",
+     "folk/dark-fairytale-folk-vocal",
+     "folk/folk-punk-vocal",
+     "folk/german-liedermacher-vocal",
+     "folk/melancholic-folk-ballad-vocal",
+     "folk/mystical-medieval-folk-vocal",
+     "folk/nordic-folk-vocal",
+     "folk/romantic-solo-guitar",
+     "folk/sea-shanty-vocal",
+     "funk/classic-funk-instrumental",
+     "funk/nu-disco-funk",
+     "gospel/contemporary-worship-vocal",
+     "gospel/german-worship-vocal",
+     "gospel/gospel-choir-vocal",
+     "gospel/hymn-choir-vocal",
+     "hiphop/boom-bap-hiphop-vocal",
+     "hiphop/cloud-rap-vocal",
+     "hiphop/drill-instrumental",
+     "hiphop/german-rap-vocal",
+     "hiphop/melodic-trap-vocal",
+     "hiphop/old-school-hiphop-vocal",
+     "hiphop/phonk-instrumental",
+     "hiphop/rnb-vocal",
+     "hiphop/trap-instrumental",
+     "house/acid-house-instrumental",
+     "house/afro-house-vocal",
+     "house/bass-house-instrumental",
+     "house/deep-house",
+     "house/disco-house-vocal",
+     "house/electro-house-instrumental",
+     "house/french-house-instrumental",
+     "house/melodic-house",
+     "house/organic-house",
+     "house/progressive-house-dreamy-bittersweet",
+     "house/progressive-house-melodic-trance",
+     "house/progressive-house-sparse-vocals",
+     "house/tech-house-instrumental",
+     "jazz/bebop-instrumental",
+     "jazz/cool-jazz-instrumental",
+     "jazz/dixieland-instrumental",
+     "jazz/gypsy-jazz-instrumental",
+     "jazz/jazz-funk",
+     "jazz/smooth-jazz-instrumental",
+     "jazz/smooth-jazz-vocal-late-night",
+     "jazz/smooth-jazz-vocal-positive-resolution",
+     "jazz/swing-big-band-instrumental",
+     "jazz/vocal-jazz-crooner",
+     "kids/birthday-song-vocal",
+     "kids/children-song-vocal",
+     "kids/german-birthday-song-vocal",
+     "kids/kids-adventure-song-vocal",
+     "kids/lullaby-vocal",
+     "kids/nursery-rhyme-german-vocal",
+     "latin/bachata-vocal",
+     "latin/bossa-nova-vocal",
+     "latin/cumbia-instrumental",
+     "latin/latin-pop-vocal",
+     "latin/merengue-instrumental",
+     "latin/norteno-corrido-vocal",
+     "latin/reggaeton-vocal",
+     "latin/salsa-vocal",
+     "latin/samba-instrumental",
+     "latin/son-cubano-vocal",
+     "latin/tango-instrumental",
+     "meditation/focus-study-instrumental",
+     "meditation/meditation-healing-instrumental",
+     "meditation/nature-soundscape-instrumental",
+     "meditation/sleep-music-instrumental",
+     "metal/black-metal-instrumental",
+     "metal/death-metal-vocal",
+     "metal/doom-metal-instrumental",
+     "metal/folk-metal-vocal",
+     "metal/grunge-vocal",
+     "metal/heavy-metal-vocal",
+     "metal/industrial-metal-vocal",
+     "metal/melodic-metal-instrumental",
+     "metal/metalcore-vocal",
+     "metal/nu-metal-vocal",
+     "metal/power-metal-vocal",
+     "metal/progressive-djent-instrumental",
+     "metal/sludge-post-metal-instrumental",
+     "metal/symphonic-metal-vocal",
+     "metal/thrash-metal-vocal",
+     "musical/broadway-ballad-vocal",
+     "musical/german-musical-vocal",
+     "musical/musical-theatre-ensemble-vocal",
+     "pop/art-pop-vocal",
+     "pop/bedroom-pop-vocal",
+     "pop/dance-pop-vocal",
+     "pop/dream-pop-electronic-vocal",
+     "pop/german-pop-vocal",
+     "pop/hyperpop-vocal",
+     "pop/indie-pop-vocal",
+     "pop/power-ballad-vocal",
+     "pop/singer-songwriter-acoustic-vocal",
+     "punk/pop-punk-vocal",
+     "punk/post-punk-vocal",
+     "punk/punk-rock-vocal",
+     "punk/ska-punk-vocal",
+     "reggae/dancehall-vocal",
+     "reggae/dub-instrumental",
+     "reggae/rocksteady-vocal",
+     "reggae/roots-reggae-vocal",
+     "reggae/ska-jamaican-instrumental",
+     "rock/blues-rock-instrumental",
+     "rock/classic-rock-vocal",
+     "rock/garage-rock-vocal",
+     "rock/hard-rock-vocal",
+     "rock/indie-rock-vocal",
+     "rock/pop-rock-vocal",
+     "rock/post-rock-instrumental",
+     "rock/progressive-rock-instrumental",
+     "rock/psychedelic-rock-instrumental",
+     "rock/rockabilly-vocal",
+     "rock/shoegaze-vocal",
+     "rock/southern-rock-vocal",
+     "rock/stoner-rock-instrumental",
+     "rock/surf-rock-instrumental",
+     "seasonal/christmas-carol-vocal",
+     "seasonal/christmas-pop-vocal",
+     "seasonal/german-christmas-vocal",
+     "seasonal/wedding-ceremony-instrumental",
+     "seasonal/wedding-first-dance-vocal",
+     "soul/doo-wop-vocal",
+     "soul/motown-soul-vocal",
+     "soul/neo-soul-vocal",
+     "soul/soul-ballad-vocal",
+     "world/andean-folk-instrumental",
+     "world/arabic-pop-vocal",
+     "world/bhangra-instrumental",
+     "world/calypso-soca-vocal",
+     "world/gamelan-instrumental",
+     "world/gnawa-instrumental",
+     "world/hawaiian-slack-key-instrumental",
+     "world/mariachi-vocal",
+     "world/mongolian-throat-singing-instrumental",
+     "world/qawwali-vocal",
+     "world/turkish-folk-instrumental"
+    ]
+   },
+   {
+    "id": "description",
+    "label": "description",
+    "type": "text",
+    "default": "Honest acoustic singer-songwriter song: fingerpicked or gently strummed acoustic guitar, subtle piano, upright bass and brushed drums entering late, plus a close, unpolished vocal with audible breath. Conversational verses, one quietly devastating refrain, minimal production and lots of space.",
+    "description": "How the song should sound - its character, instruments and arrangement (the lyrics have a field of their own). Sent to the writing model.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG"
+   },
+   {
+    "id": "genre",
+    "label": "genre",
+    "type": "string",
+    "default": "singer-songwriter",
+    "description": "Genre and sub-genre, e.g. 'indie pop'.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG"
+   },
+   {
+    "id": "mood",
+    "label": "mood",
+    "type": "string",
+    "default": "",
+    "description": "Mood words, e.g. 'warm, hopeful'.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG"
+   },
+   {
+    "id": "tempo",
+    "label": "tempo",
+    "type": "string",
+    "default": "Laid-back (70-100 BPM)",
+    "description": "Tempo, e.g. '88 BPM' or 'midtempo'.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG"
+   },
+   {
+    "id": "length",
+    "label": "length",
+    "type": "choice",
+    "default": "short (about 1:30)",
+    "description": "Target length. Guides the writing and, without a score, the render ceiling.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG",
+    "choices": [
+     "very short (about 1:00)",
+     "short (about 1:30)",
+     "about 2:00",
+     "about 2:30",
+     "standard (about 3:00)",
+     "about 3:30",
+     "about 4:00",
+     "long (about 4:30)",
+     "about 5:00",
+     "very long (about 6:00)"
+    ]
+   },
+   {
+    "id": "vocals",
+    "label": "vocals",
+    "type": "choice",
+    "default": "sung",
+    "description": "sung: a song with lyrics. sparse vocals: mostly instrumental, the voice sings only a few short phrases (a hook, a call, wordless sounds like 'ooh'). instrumental: no singing; hides all vocal settings.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG",
+    "choices": [
+     "sung",
+     "sparse vocals",
+     "instrumental"
+    ]
+   },
+   {
+    "id": "language",
+    "label": "language",
+    "type": "string",
+    "default": "English",
+    "description": "Language of the lyrics, e.g. 'English'.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG",
+    "when": {
+     "vocals": [
+      "sung",
+      "sparse vocals"
+     ]
+    },
+    "defaults": {
+     "sung": "",
+     "sparse vocals": ""
+    }
+   },
+   {
+    "id": "voice",
+    "label": "voice",
+    "type": "string",
+    "default": "whispered & intimate vocal",
+    "description": "Vocal character, e.g. 'warm female voice'.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG",
+    "when": {
+     "vocals": [
+      "sung",
+      "sparse vocals"
+     ]
+    },
+    "defaults": {
+     "sung": "",
+     "sparse vocals": ""
+    }
+   },
+   {
+    "id": "theme",
+    "label": "theme",
+    "type": "string",
+    "default": "self-discovery & growth",
+    "description": "What the lyrics are about, in a few words.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG",
+    "when": {
+     "vocals": [
+      "sung",
+      "sparse vocals"
+     ]
+    },
+    "defaults": {
+     "sung": "",
+     "sparse vocals": ""
+    }
+   },
+   {
+    "id": "lyrics_from",
+    "label": "lyrics",
+    "type": "choice",
+    "default": "written from the idea below",
+    "description": "written from the idea below: the writer writes the lyrics; the field says what they should be about (a template gives an idea). my own: the field holds your lyrics, sung exactly as written.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG",
+    "choices": [
+     "written from the idea below",
+     "my own, sung as written below"
+    ],
+    "when": {
+     "vocals": [
+      "sung",
+      "sparse vocals"
+     ]
+    },
+    "defaults": {
+     "sung": "written from the idea below",
+     "sparse vocals": "written from the idea below"
+    }
+   },
+   {
+    "id": "lyrics",
+    "label": "lyrics idea or text",
+    "type": "text",
+    "default": "Plain-spoken and personal, about a conversation that never happened.",
+    "description": "The idea for the lyrics - a story, an image, a message - or, with 'my own', the lyrics themselves: sections as [Verse], [Chorus] ... (without them Plenio adds them).",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG",
+    "when": {
+     "vocals": [
+      "sung",
+      "sparse vocals"
+     ]
+    },
+    "defaults": {
+     "sung": "",
+     "sparse vocals": ""
+    }
+   },
+   {
+    "id": "melody",
+    "label": "melody",
+    "type": "choice",
+    "default": "instrument plays the lead",
+    "description": "Whether an instrument carries a lead melody or the song is accompaniment only.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG",
+    "choices": [
+     "instrument plays the lead",
+     "accompaniment only"
+    ],
+    "when": {
+     "vocals": [
+      "instrumental"
+     ]
+    },
+    "defaults": {
+     "instrumental": "instrument plays the lead"
+    }
+   },
+   {
+    "id": "lead_instrument",
+    "label": "lead instrument",
+    "type": "string",
+    "default": "",
+    "description": "Optional lead instrument, e.g. 'saxophone'.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG",
+    "when": {
+     "vocals": [
+      "instrumental"
+     ]
+    },
+    "defaults": {
+     "instrumental": ""
+    }
+   },
+   {
+    "id": "key",
+    "label": "key",
+    "type": "string",
+    "default": "",
+    "description": "Optional key, e.g. 'G major'. Music models that use a score take the key from the score; the DAW template's empty score is built in it.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG"
+   },
+   {
+    "id": "meter",
+    "label": "meter",
+    "type": "string",
+    "default": "4/4",
+    "description": "Optional meter, e.g. '3/4' or '6/8'. Music models that use a score take the meter from the score; the DAW template's empty score is built in it.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG"
+   },
+   {
+    "id": "arrangement",
+    "label": "arrangement (experimental)",
+    "type": "choice",
+    "default": "off",
+    "description": "off (default): the music model plans the music by itself. A creative mode (experimental) lets the writer plan chords, lines and energy per section; the line under the brief says what the chosen mode does.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG",
+    "choices": [
+     "off",
+     "standard",
+     "sterile",
+     "unplugged",
+     "varied",
+     "call and response",
+     "signature motif",
+     "hypnotic",
+     "breakdown",
+     "dramatic",
+     "many instruments",
+     "jazz colours",
+     "fantasy",
+     "key change"
+    ]
+   },
+   {
+    "id": "genre_closeness",
+    "label": "genre closeness",
+    "type": "integer",
+    "default": 70,
+    "description": "Creative modes only (experimental): how close the song stays to its genre - 100 strictly typical, 70 typical with personal touches, 40 free within the genre, 0 any style.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG",
+    "minimum": 0.0,
+    "maximum": 100.0,
+    "step": 1.0
+   },
+   {
+    "id": "lines_under_singing",
+    "label": "lines under the singing (experimental)",
+    "type": "boolean",
+    "default": false,
+    "description": "Creative modes only (experimental): off - the instrument line plays where the voice rests, as in YuE2's own scores; on - it also sounds under the singing, calm and below the voice.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG"
+   },
+   {
+    "id": "creativity",
+    "label": "creativity",
+    "type": "integer",
+    "default": 100,
+    "description": "0 steady ... 50 the reference (as before the slider) ... 100 experimental (the default) ... 200 adventurous: how much the writer and YuE2 dare. More surprises also means more misses - try a few seeds.",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG",
+    "minimum": 0.0,
+    "maximum": 200.0,
+    "step": 1.0
+   },
+   {
+    "id": "lyrics_fidelity",
+    "label": "lyrics fidelity",
+    "type": "choice",
+    "default": "standard",
+    "description": "standard: one take. high: a second take when the first sang under 96 % of the words as written; the better is kept. highest: a third when neither reached 96 %. Takes longer (up to 2x or 3x).",
+    "node": {
+     "id": 2,
+     "type": "PlenioSongBrief",
+     "title": "Song Brief"
+    },
+    "group": "1 · SONG",
+    "choices": [
+     "standard",
+     "high - best of 2 takes",
+     "highest - best of 3 takes"
+    ]
+   },
+   {
+    "id": "finish.hq_mastering",
+    "label": "HQ mastering",
+    "type": "boolean",
+    "default": false,
+    "description": "Highest mastering quality: UniverSR (HQ 2) regenerates the highs - clearly fewer AI shimmer and artifacts, but the song takes about twice as long. Off (default; on in Enhance & Master): UniverSR is not needed.",
+    "node": {
+     "id": 18,
+     "type": "PlenioHQMastering",
+     "title": "HQ Mastering & Cover Art"
+    },
+    "group": "1 · SONG"
+   },
+   {
+    "id": "finish.cover_art",
+    "label": "Cover Art",
+    "type": "boolean",
+    "default": true,
+    "description": "Paints the cover from the artwork prompt the writer wrote (embedded in the files); off: no cover and no image model.",
+    "node": {
+     "id": 18,
+     "type": "PlenioHQMastering",
+     "title": "HQ Mastering & Cover Art"
+    },
+    "group": "1 · SONG"
+   },
+   {
+    "id": "writer.model",
+    "label": "model",
+    "type": "choice",
+    "default": "Gemma 4 12B (auto)",
+    "description": "Gemma 4 12B (auto): the one on this machine, else downloaded for its card. A bare file name: a text model for ComfyUI's Generate Text. '… · …': a GGUF file ('models/LLM', 'HF cache' ...) or a running app's model.",
+    "node": {
+     "id": 6,
+     "type": "PlenioWriterChoice",
+     "title": "Writer model"
+    },
+    "group": "1 · SONG",
+    "choices": [
+     "Gemma 4 12B (auto)",
+     "gemma4_12b_int8_convrot.safetensors",
+     "gemma4_e2b_it_int8_convrot.safetensors",
+     "gemma4_e4b_it_fp8_scaled.safetensors",
+     "qwen_3_4b.safetensors",
+     "qwen_3_4b_fp4_flux2.safetensors"
+    ]
+   }
+  ],
+  "release": [
+   {
+    "id": "folder",
+    "label": "folder",
+    "type": "string",
+    "default": "plenio",
+    "description": "Sub-folder of the ComfyUI output folder.",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH"
+   },
+   {
+    "id": "naming",
+    "label": "naming",
+    "type": "string",
+    "default": "{date} {title}",
+    "description": "File name: {title}, {date}, {seed}, {genre}, {artist} ... (the variables of the tags); '/' makes sub-folders; [optional {parts}] vanish when empty.",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH"
+   },
+   {
+    "id": "collision",
+    "label": "collision",
+    "type": "choice",
+    "default": "number",
+    "description": "When the file exists: number (add ' (2)' - also to a title another song of the folder has), overwrite, or stop with an error.",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH",
+    "choices": [
+     "number",
+     "overwrite",
+     "error"
+    ],
+    "advanced": true
+   },
+   {
+    "id": "flac",
+    "label": "flac",
+    "type": "boolean",
+    "default": true,
+    "description": "FLAC 24-bit (lossless).",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH"
+   },
+   {
+    "id": "mp3",
+    "label": "mp3",
+    "type": "boolean",
+    "default": false,
+    "description": "MP3 VBR V0 (LAME).",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH"
+   },
+   {
+    "id": "wav",
+    "label": "wav",
+    "type": "boolean",
+    "default": false,
+    "description": "WAV 32-bit float (no clipping; few tags, no cover).",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH"
+   },
+   {
+    "id": "tags",
+    "label": "tags",
+    "type": "choice",
+    "default": "tags",
+    "description": "Metadata written into the files: the title only, tags typed or connected (with {variables}), or the tags of the loaded file.",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH",
+    "choices": [
+     "title only",
+     "tags",
+     "copy from loaded file"
+    ]
+   },
+   {
+    "id": "artist",
+    "label": "artist",
+    "type": "string",
+    "default": "",
+    "description": "The artist tag. Text with {variables}, or connect a text output to the field.",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH",
+    "when": {
+     "tags": [
+      "tags"
+     ]
+    },
+    "defaults": {
+     "tags": ""
+    }
+   },
+   {
+    "id": "album",
+    "label": "album",
+    "type": "string",
+    "default": "",
+    "description": "The album tag. Text with {variables}, or connect a text output to the field.",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH",
+    "when": {
+     "tags": [
+      "tags"
+     ]
+    },
+    "defaults": {
+     "tags": ""
+    }
+   },
+   {
+    "id": "date",
+    "label": "date",
+    "type": "string",
+    "default": "{date}",
+    "description": "Year or date, e.g. 2026 or {date}. Text with {variables}, or connect a text output to the field.",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH",
+    "when": {
+     "tags": [
+      "tags"
+     ]
+    },
+    "defaults": {
+     "tags": ""
+    }
+   },
+   {
+    "id": "track",
+    "label": "track",
+    "type": "string",
+    "default": "",
+    "description": "Track number, e.g. 3 or 3/12. Text with {variables}, or connect a text output to the field.",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH",
+    "when": {
+     "tags": [
+      "tags"
+     ]
+    },
+    "defaults": {
+     "tags": ""
+    }
+   },
+   {
+    "id": "genre",
+    "label": "genre",
+    "type": "string",
+    "default": "{genre}",
+    "description": "The genre tag, e.g. {genre} (the brief's). Text with {variables}, or connect a text output to the field.",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH",
+    "when": {
+     "tags": [
+      "tags"
+     ]
+    },
+    "defaults": {
+     "tags": ""
+    }
+   },
+   {
+    "id": "comment",
+    "label": "comment",
+    "type": "string",
+    "default": "[Genre: {genre} · ][Mood: {mood} · ][Language: {language} · ]Powered by Plenio Music Production System / ComfyUI",
+    "description": "The comment tag; empty: none. Text with {variables}, or connect a text output to the field.",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH",
+    "when": {
+     "tags": [
+      "tags"
+     ]
+    },
+    "defaults": {
+     "tags": "Powered by Plenio Music Production System / ComfyUI"
+    }
+   },
+   {
+    "id": "album_artist",
+    "label": "album artist",
+    "type": "string",
+    "default": "",
+    "description": "The album artist tag. Text with {variables}, or connect a text output to the field.",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH",
+    "when": {
+     "tags": [
+      "tags"
+     ]
+    },
+    "defaults": {
+     "tags": ""
+    }
+   },
+   {
+    "id": "composer",
+    "label": "composer",
+    "type": "string",
+    "default": "",
+    "description": "The composer tag. Text with {variables}, or connect a text output to the field.",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH",
+    "when": {
+     "tags": [
+      "tags"
+     ]
+    },
+    "defaults": {
+     "tags": ""
+    }
+   },
+   {
+    "id": "lyrics",
+    "label": "lyrics",
+    "type": "string",
+    "default": "{lyrics}",
+    "description": "The lyrics tag (FLAC, MP3; players show it), e.g. {lyrics}. Text with {variables}, or connect a text output to the field.",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH",
+    "when": {
+     "tags": [
+      "tags"
+     ]
+    },
+    "defaults": {
+     "tags": ""
+    }
+   },
+   {
+    "id": "sheet_music",
+    "label": "sheet music",
+    "type": "choice",
+    "default": "off",
+    "description": "Also save the sheet music (both voices, chords, sections, the lyrics under the notes) as '<name>.pdf' on A4 or Letter pages; an open ComfyUI page draws it after the export. Needs a score (YuE2).",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH",
+    "choices": [
+     "off",
+     "PDF (A4)",
+     "PDF (Letter)"
+    ]
+   },
+   {
+    "id": "sheet_music_size",
+    "label": "sheet music size",
+    "type": "choice",
+    "default": "standard",
+    "description": "How large the sheet music draws: standard about 3 bars a line, smaller 3-4, compact about 4, large 1-2 (the biggest notes).",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH",
+    "choices": [
+     "standard",
+     "smaller",
+     "compact",
+     "large"
+    ]
+   },
+   {
+    "id": "project_in_flac",
+    "label": "project in FLAC",
+    "type": "boolean",
+    "default": true,
+    "description": "Store the release record (workflow, Song Sheets, seeds, settings) inside the song's FLAC: File > Continue a Plenio song... opens the song from the FLAC alone. Off for files you share without their making-of.",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH"
+   },
+   {
+    "id": "lyrics_srt",
+    "label": "lyrics subtitles (SRT)",
+    "type": "boolean",
+    "default": true,
+    "description": "Write the lyrics as subtitles: '(lines).srt' whole lines, '(notes).srt' note by note, '(sung).srt' what the take really sings. Timed by listening (Qwen3-ASR and its aligner, 5.9 GB, fetched on first use).",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH"
+   },
+   {
+    "id": "lyrics_timing",
+    "label": "lyrics heard on",
+    "type": "choice",
+    "default": "vocal stem",
+    "description": "What the lyrics ASR hears for the subtitles and the player: the take's vocal stem - more exact times, the model of Stems and Sung Pitch, about half a minute per take - or the song (quicker).",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH",
+    "choices": [
+     "the song",
+     "vocal stem"
+    ]
+   },
+   {
+    "id": "song_page",
+    "label": "song page (HTML)",
+    "type": "boolean",
+    "default": true,
+    "description": "Also write '<name>.html': the song on one page to open in any browser - the lyrics with their sections and the prompts to copy, every setting, how it was made, the sound, the score and links to the files.",
+    "node": {
+     "id": 13,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "5 · FINISH"
+   }
+  ],
+  "seeds": [
+   {
+    "id": "<seed>",
+    "node": "<seed>",
+    "title": "<seed>",
+    "drawn": "<seed>"
+   },
+   {
+    "id": "<seed>",
+    "node": "<seed>",
+    "title": "<seed>",
+    "drawn": "<seed>"
+   },
+   {
+    "id": "<seed>",
+    "node": "<seed>",
+    "title": "<seed>",
+    "drawn": "<seed>"
+   }
+  ],
+  "documents": [
+   "title",
+   "style",
+   "lyrics",
+   "artwork_prompt"
+  ],
+  "aliases": {}
+ }
+}

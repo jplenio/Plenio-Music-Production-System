@@ -1,0 +1,70 @@
+{
+ "status": 200,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "presets": [
+   {
+    "id": "best",
+    "name": "Best quality",
+    "text": "HQ mastering, cover art, the best of three takes for the words, FLAC and MP3 - takes longest",
+    "fields": {
+     "finish.hq_mastering": true,
+     "finish.cover_art": true,
+     "lyrics_fidelity": "highest - best of 3 takes"
+    }
+   },
+   {
+    "id": "party",
+    "name": "Party - fast",
+    "text": "About 1:30 with cover art, ready in a few minutes",
+    "fields": {
+     "finish.hq_mastering": false,
+     "finish.cover_art": true,
+     "lyrics_fidelity": "standard",
+     "length": "short (about 1:30)"
+    }
+   },
+   {
+    "id": "sketch",
+    "name": "Quick sketch",
+    "text": "About 1:00, no cover art - the fastest way to hear an idea",
+    "fields": {
+     "finish.hq_mastering": false,
+     "finish.cover_art": false,
+     "lyrics_fidelity": "standard",
+     "length": "very short (about 1:00)"
+    }
+   },
+   {
+    "id": "full",
+    "name": "Full song",
+    "text": "About 3:00, HQ mastering, cover art, the better of two takes",
+    "fields": {
+     "finish.hq_mastering": true,
+     "finish.cover_art": true,
+     "lyrics_fidelity": "high - best of 2 takes",
+     "length": "standard (about 3:00)"
+    }
+   },
+   {
+    "id": "takes",
+    "name": "Three takes",
+    "text": "One song, sung and played three times - keep the take you like best",
+    "fields": {
+     "finish.cover_art": true
+    }
+   },
+   {
+    "id": "instrumental",
+    "name": "Instrumental",
+    "text": "No singing - for the background, a video, a game",
+    "fields": {
+     "finish.cover_art": true,
+     "vocals": "instrumental"
+    }
+   }
+  ]
+ }
+}

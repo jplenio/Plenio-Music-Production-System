@@ -1,0 +1,13 @@
+{
+ "status": 400,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "error": {
+   "code": "missing_field",
+   "message": "The request names its template ('template': 'yue2-song').",
+   "field": "template"
+  }
+ }
+}

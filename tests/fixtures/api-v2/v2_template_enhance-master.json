@@ -1,0 +1,1285 @@
+{
+ "status": 200,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "id": "enhance-master",
+  "title": "Enhance & Master",
+  "kind": "master",
+  "workflow": "4 · Enhance & Master",
+  "needs": [
+   "source.audio"
+  ],
+  "fields": [
+   {
+    "id": "finish.hq_mastering",
+    "label": "HQ mastering",
+    "type": "boolean",
+    "default": true,
+    "description": "Highest mastering quality: UniverSR (HQ 2) regenerates the highs - clearly fewer AI shimmer and artifacts, but the song takes about twice as long. Off (default; on in Enhance & Master): UniverSR is not needed.",
+    "node": {
+     "id": 14,
+     "type": "PlenioHQMastering",
+     "title": "HQ Mastering & Cover Art"
+    },
+    "group": "1 · SOURCE"
+   },
+   {
+    "id": "source.audio",
+    "label": "audio",
+    "type": "upload",
+    "default": "",
+    "description": "A recording in ComfyUI's input folder: upload it with POST /uploads?name=<file> and give the answer's name here.",
+    "node": {
+     "id": 2,
+     "type": "LoadAudio",
+     "title": "Source"
+    },
+    "group": "1 · SOURCE",
+    "required": true
+   },
+   {
+    "id": "h_q_stereo_cleanup.preset",
+    "label": "preset",
+    "type": "choice",
+    "default": "standard - pop, hip-hop, soul, world",
+    "description": "auto: the profile that fits the song's genre (from the connected brief; standard without one). standard, gentle, strong and wide are the same four profiles in HQ 1, 2 and 3; custom shows the fields.",
+    "node": {
+     "id": 4,
+     "type": "PlenioHQStereoCleanup",
+     "title": "HQ 1 · Stereo Cleanup"
+    },
+    "group": "2 · AUDIO HQ (before the EQ)",
+    "choices": [
+     "auto - from the song's genre",
+     "standard - pop, hip-hop, soul, world",
+     "gentle - classical, jazz, folk",
+     "strong - rock, metal, punk",
+     "wide - electronic, dance, ambient",
+     "custom - the fields below"
+    ]
+   },
+   {
+    "id": "h_q_stereo_cleanup.preset.side_highcut_hz",
+    "label": "side highcut hz",
+    "type": "number",
+    "default": 10500.0,
+    "description": "Above this the side signal is cut (Hz, zero-phase).",
+    "node": {
+     "id": 4,
+     "type": "PlenioHQStereoCleanup",
+     "title": "HQ 1 · Stereo Cleanup"
+    },
+    "group": "2 · AUDIO HQ (before the EQ)",
+    "minimum": 4000.0,
+    "maximum": 20000.0,
+    "step": 250.0,
+    "when": {
+     "h_q_stereo_cleanup.preset": [
+      "custom - the fields below"
+     ]
+    },
+    "defaults": {
+     "custom - the fields below": 10500.0
+    }
+   },
+   {
+    "id": "h_q_stereo_cleanup.preset.side_cleanup",
+    "label": "side cleanup",
+    "type": "number",
+    "default": 0.65,
+    "description": "0 off ... 1 strongest: the high-cut's share and the cleanup of the side's diffuse highs.",
+    "node": {
+     "id": 4,
+     "type": "PlenioHQStereoCleanup",
+     "title": "HQ 1 · Stereo Cleanup"
+    },
+    "group": "2 · AUDIO HQ (before the EQ)",
+    "minimum": 0.0,
+    "maximum": 1.0,
+    "step": 0.05,
+    "when": {
+     "h_q_stereo_cleanup.preset": [
+      "custom - the fields below"
+     ]
+    },
+    "defaults": {
+     "custom - the fields below": 0.65
+    }
+   },
+   {
+    "id": "h_q_stereo_cleanup.preset.warmth",
+    "label": "warmth",
+    "type": "number",
+    "default": 0.18,
+    "description": "0 off ... 0.8: saturation above 400 Hz (2nd and 3rd harmonics).",
+    "node": {
+     "id": 4,
+     "type": "PlenioHQStereoCleanup",
+     "title": "HQ 1 · Stereo Cleanup"
+    },
+    "group": "2 · AUDIO HQ (before the EQ)",
+    "minimum": 0.0,
+    "maximum": 0.8,
+    "step": 0.02,
+    "when": {
+     "h_q_stereo_cleanup.preset": [
+      "custom - the fields below"
+     ]
+    },
+    "defaults": {
+     "custom - the fields below": 0.18
+    }
+   },
+   {
+    "id": "audio_model_loader.kind",
+    "label": "kind",
+    "type": "choice",
+    "default": "super-resolution",
+    "description": "super-resolution: for HQ 2 · Regenerate Highs and Refine (48 kHz); separation: for Separate Stems.",
+    "node": {
+     "id": 5,
+     "type": "PlenioAudioModelLoader",
+     "title": "Super-resolution model (HQ mastering)"
+    },
+    "group": "2 · AUDIO HQ (before the EQ)",
+    "choices": [
+     "super-resolution",
+     "separation"
+    ]
+   },
+   {
+    "id": "audio_model_loader.kind.model",
+    "label": "model",
+    "type": "choice",
+    "default": "pytorch_model.bin",
+    "description": "A model file in models/audio_sr.",
+    "node": {
+     "id": 5,
+     "type": "PlenioAudioModelLoader",
+     "title": "Super-resolution model (HQ mastering)"
+    },
+    "group": "2 · AUDIO HQ (before the EQ)",
+    "choices": [
+     "pytorch_model.bin"
+    ],
+    "when": {
+     "audio_model_loader.kind": [
+      "super-resolution",
+      "separation"
+     ]
+    },
+    "defaults": {
+     "super-resolution": "",
+     "separation": ""
+    }
+   },
+   {
+    "id": "h_q_regenerate_highs.preset",
+    "label": "preset",
+    "type": "choice",
+    "default": "standard - pop, hip-hop, soul, world",
+    "description": "auto: the profile that fits the song's genre (from the connected brief; standard without one). standard, gentle, strong and wide are the same four profiles in HQ 1, 2 and 3; custom shows the fields.",
+    "node": {
+     "id": 6,
+     "type": "PlenioHQRegenerateHighs",
+     "title": "HQ 2 · Regenerate Highs"
+    },
+    "group": "2 · AUDIO HQ (before the EQ)",
+    "choices": [
+     "auto - from the song's genre",
+     "standard - pop, hip-hop, soul, world",
+     "gentle - classical, jazz, folk",
+     "strong - rock, metal, punk",
+     "wide - electronic, dance, ambient",
+     "custom - the fields below"
+    ]
+   },
+   {
+    "id": "h_q_regenerate_highs.preset.from_hz",
+    "label": "from hz",
+    "type": "number",
+    "default": 8200.0,
+    "description": "New highs from (Hz): the crossover. The model sees the song up to its nearest input edge below it (UniverSR: 4, 6, 8 or 12 kHz).",
+    "node": {
+     "id": 6,
+     "type": "PlenioHQRegenerateHighs",
+     "title": "HQ 2 · Regenerate Highs"
+    },
+    "group": "2 · AUDIO HQ (before the EQ)",
+    "minimum": 4500.0,
+    "maximum": 20000.0,
+    "step": 100.0,
+    "when": {
+     "h_q_regenerate_highs.preset": [
+      "custom - the fields below"
+     ]
+    },
+    "defaults": {
+     "custom - the fields below": 8200.0
+    }
+   },
+   {
+    "id": "h_q_regenerate_highs.preset.new_share",
+    "label": "new share",
+    "type": "number",
+    "default": 0.85,
+    "description": "Share of the new highs above the crossover; the rest stays the original's.",
+    "node": {
+     "id": 6,
+     "type": "PlenioHQRegenerateHighs",
+     "title": "HQ 2 · Regenerate Highs"
+    },
+    "group": "2 · AUDIO HQ (before the EQ)",
+    "minimum": 0.0,
+    "maximum": 1.0,
+    "step": 0.05,
+    "when": {
+     "h_q_regenerate_highs.preset": [
+      "custom - the fields below"
+     ]
+    },
+    "defaults": {
+     "custom - the fields below": 0.85
+    }
+   },
+   {
+    "id": "h_q_regenerate_highs.preset.level_match",
+    "label": "level match",
+    "type": "number",
+    "default": 0.9,
+    "description": "The new highs follow the original's level (40 ms envelope) times this.",
+    "node": {
+     "id": 6,
+     "type": "PlenioHQRegenerateHighs",
+     "title": "HQ 2 · Regenerate Highs"
+    },
+    "group": "2 · AUDIO HQ (before the EQ)",
+    "minimum": 0.3,
+    "maximum": 1.5,
+    "step": 0.05,
+    "when": {
+     "h_q_regenerate_highs.preset": [
+      "custom - the fields below"
+     ]
+    },
+    "defaults": {
+     "custom - the fields below": 0.9
+    }
+   },
+   {
+    "id": "h_q_regenerate_highs.seed",
+    "label": "seed",
+    "type": "integer",
+    "default": 0,
+    "description": "Seed of the model: the same seed gives the same highs.",
+    "node": {
+     "id": 6,
+     "type": "PlenioHQRegenerateHighs",
+     "title": "HQ 2 · Regenerate Highs"
+    },
+    "group": "2 · AUDIO HQ (before the EQ)",
+    "minimum": 0.0,
+    "maximum": 4294967295.0
+   },
+   {
+    "id": "h_q_regenerate_highs.model_steps",
+    "label": "model steps",
+    "type": "integer",
+    "default": 4,
+    "description": "UniverSR's flow steps: 4 (default) about 1.5 s per second of music on an RTX 5060 Ti, 3 about 1.1 s, 2 about 0.75 s - fewer steps, other and quieter highs.",
+    "node": {
+     "id": 6,
+     "type": "PlenioHQRegenerateHighs",
+     "title": "HQ 2 · Regenerate Highs"
+    },
+    "group": "2 · AUDIO HQ (before the EQ)",
+    "minimum": 2.0,
+    "maximum": 8.0,
+    "advanced": true
+   },
+   {
+    "id": "h_q_de_reverb.preset",
+    "label": "preset",
+    "type": "choice",
+    "default": "standard - pop, hip-hop, soul, world",
+    "description": "auto: the profile that fits the song's genre (from the connected brief; standard without one). standard, gentle, strong and wide are the same four profiles in HQ 1, 2 and 3; custom shows the fields.",
+    "node": {
+     "id": 7,
+     "type": "PlenioHQDeReverb",
+     "title": "HQ 3 · De-Reverb (optional)"
+    },
+    "group": "2 · AUDIO HQ (before the EQ)",
+    "choices": [
+     "auto - from the song's genre",
+     "standard - pop, hip-hop, soul, world",
+     "gentle - classical, jazz, folk",
+     "strong - rock, metal, punk",
+     "wide - electronic, dance, ambient",
+     "custom - the fields below"
+    ]
+   },
+   {
+    "id": "h_q_de_reverb.preset.dereverb",
+    "label": "dereverb",
+    "type": "number",
+    "default": 0.45,
+    "description": "0 off ... 1: how much of the late, diffuse room above 600 Hz is taken out.",
+    "node": {
+     "id": 7,
+     "type": "PlenioHQDeReverb",
+     "title": "HQ 3 · De-Reverb (optional)"
+    },
+    "group": "2 · AUDIO HQ (before the EQ)",
+    "minimum": 0.0,
+    "maximum": 1.0,
+    "step": 0.05,
+    "when": {
+     "h_q_de_reverb.preset": [
+      "custom - the fields below"
+     ]
+    },
+    "defaults": {
+     "custom - the fields below": 0.45
+    }
+   },
+   {
+    "id": "h_q_de_reverb.preset.phase_lock",
+    "label": "phase lock",
+    "type": "number",
+    "default": 0.55,
+    "description": "0 off ... 1: how far the phase above 2 kHz follows its strong neighbours.",
+    "node": {
+     "id": 7,
+     "type": "PlenioHQDeReverb",
+     "title": "HQ 3 · De-Reverb (optional)"
+    },
+    "group": "2 · AUDIO HQ (before the EQ)",
+    "minimum": 0.0,
+    "maximum": 1.0,
+    "step": 0.05,
+    "when": {
+     "h_q_de_reverb.preset": [
+      "custom - the fields below"
+     ]
+    },
+    "defaults": {
+     "custom - the fields below": 0.55
+    }
+   },
+   {
+    "id": "h_q_de_reverb.enabled",
+    "label": "HQ 3 · De-Reverb",
+    "type": "boolean",
+    "default": false,
+    "description": "Whether the optional node 'HQ 3 · De-Reverb (optional)' runs (bypassed when off).",
+    "node": {
+     "id": 7,
+     "type": "PlenioHQDeReverb",
+     "title": "HQ 3 · De-Reverb (optional)"
+    },
+    "group": "2 · AUDIO HQ (before the EQ)"
+   },
+   {
+    "id": "e_q.mode",
+    "label": "mode",
+    "type": "choice",
+    "default": "match preset",
+    "description": "flat: no change; manual: your bands; match: a proposal fitted to the audio.",
+    "node": {
+     "id": 8,
+     "type": "PlenioEQ",
+     "title": "EQ"
+    },
+    "group": "3 · MASTER",
+    "choices": [
+     "flat",
+     "manual",
+     "match preset",
+     "custom match"
+    ]
+   },
+   {
+    "id": "e_q.mode.bands",
+    "label": "bands",
+    "type": "text",
+    "default": "{\"schema\": \"plenio.eq/1\", \"preamp_db\": 0.0, \"bands\": []}",
+    "description": "EQ bands (plenio.eq/1); edit them on the curve.",
+    "node": {
+     "id": 8,
+     "type": "PlenioEQ",
+     "title": "EQ"
+    },
+    "group": "3 · MASTER",
+    "when": {
+     "e_q.mode": [
+      "manual"
+     ]
+    },
+    "defaults": {
+     "manual": "{\"schema\": \"plenio.eq/1\", \"preamp_db\": 0.0, \"bands\": []}"
+    }
+   },
+   {
+    "id": "e_q.mode.preset",
+    "label": "preset",
+    "type": "choice",
+    "default": "Warm - gentle (workflow default)",
+    "description": "Tone match recipes (reference recipes need the reference input).",
+    "node": {
+     "id": 8,
+     "type": "PlenioEQ",
+     "title": "EQ"
+    },
+    "group": "3 · MASTER",
+    "choices": [
+     "Warm - gentle (workflow default)",
+     "Warm - subtle mastering",
+     "Warm - rounded mix",
+     "Warm - upper-mid softening",
+     "Bright - subtle mastering",
+     "Bright - gentle clarity",
+     "Bright - open mix",
+     "Reference - subtle mastering",
+     "Reference - balanced",
+     "Reference - broad match"
+    ],
+    "when": {
+     "e_q.mode": [
+      "match preset"
+     ]
+    },
+    "defaults": {
+     "match preset": "Warm - gentle (workflow default)"
+    }
+   },
+   {
+    "id": "e_q.mode.target",
+    "label": "target",
+    "type": "choice",
+    "default": "warm",
+    "description": "warm / bright: a gentle tilt around 1 kHz; reference: the tone of the reference input.",
+    "node": {
+     "id": 8,
+     "type": "PlenioEQ",
+     "title": "EQ"
+    },
+    "group": "3 · MASTER",
+    "choices": [
+     "warm",
+     "bright",
+     "reference"
+    ],
+    "when": {
+     "e_q.mode": [
+      "custom match"
+     ]
+    },
+    "defaults": {
+     "custom match": "warm"
+    }
+   },
+   {
+    "id": "e_q.mode.strength",
+    "label": "strength",
+    "type": "number",
+    "default": 0.35,
+    "description": "How far to move towards the target.",
+    "node": {
+     "id": 8,
+     "type": "PlenioEQ",
+     "title": "EQ"
+    },
+    "group": "3 · MASTER",
+    "minimum": 0.0,
+    "maximum": 1.0,
+    "step": 0.05,
+    "when": {
+     "e_q.mode": [
+      "custom match"
+     ]
+    },
+    "defaults": {
+     "custom match": 0.35
+    }
+   },
+   {
+    "id": "e_q.mode.max_gain_db",
+    "label": "max gain db",
+    "type": "number",
+    "default": 2.0,
+    "description": "Largest boost or cut of the curve.",
+    "node": {
+     "id": 8,
+     "type": "PlenioEQ",
+     "title": "EQ"
+    },
+    "group": "3 · MASTER",
+    "minimum": 0.1,
+    "maximum": 6.0,
+    "step": 0.1,
+    "when": {
+     "e_q.mode": [
+      "custom match"
+     ]
+    },
+    "defaults": {
+     "custom match": 2.0
+    }
+   },
+   {
+    "id": "e_q.mode.max_bands",
+    "label": "max bands",
+    "type": "integer",
+    "default": 4,
+    "description": "Most peak bands the match may use.",
+    "node": {
+     "id": 8,
+     "type": "PlenioEQ",
+     "title": "EQ"
+    },
+    "group": "3 · MASTER",
+    "minimum": 1.0,
+    "maximum": 6.0,
+    "when": {
+     "e_q.mode": [
+      "custom match"
+     ]
+    },
+    "defaults": {
+     "custom match": 4
+    }
+   },
+   {
+    "id": "e_q.mode.min_hz",
+    "label": "min hz",
+    "type": "number",
+    "default": 40.0,
+    "description": "Lowest frequency the match measures and may place a band at (Hz).",
+    "node": {
+     "id": 8,
+     "type": "PlenioEQ",
+     "title": "EQ"
+    },
+    "group": "3 · MASTER",
+    "minimum": 20.0,
+    "maximum": 1000.0,
+    "step": 1.0,
+    "when": {
+     "e_q.mode": [
+      "custom match"
+     ]
+    },
+    "defaults": {
+     "custom match": 40.0
+    },
+    "advanced": true
+   },
+   {
+    "id": "e_q.mode.max_hz",
+    "label": "max hz",
+    "type": "number",
+    "default": 16000.0,
+    "description": "Highest frequency the match measures and may place a band at (Hz; at most 45 % of the sample rate).",
+    "node": {
+     "id": 8,
+     "type": "PlenioEQ",
+     "title": "EQ"
+    },
+    "group": "3 · MASTER",
+    "minimum": 1000.0,
+    "maximum": 20000.0,
+    "step": 100.0,
+    "when": {
+     "e_q.mode": [
+      "custom match"
+     ]
+    },
+    "defaults": {
+     "custom match": 16000.0
+    },
+    "advanced": true
+   },
+   {
+    "id": "loudness.target",
+    "label": "target",
+    "type": "choice",
+    "default": "streaming (-14 LUFS, -1 dBTP)",
+    "description": "Loudness target and true-peak ceiling.",
+    "node": {
+     "id": 9,
+     "type": "PlenioLoudness",
+     "title": "Loudness & Dynamics"
+    },
+    "group": "3 · MASTER",
+    "choices": [
+     "streaming (-14 LUFS, -1 dBTP)",
+     "Apple Music / podcasts (-16 LUFS, -1 dBTP)",
+     "dynamic (-18 LUFS, -1 dBTP)",
+     "broadcast EBU R128 (-23 LUFS, -1 dBTP)",
+     "loud (-9 LUFS, -0.5 dBTP)",
+     "custom"
+    ]
+   },
+   {
+    "id": "loudness.target.lufs",
+    "label": "lufs",
+    "type": "number",
+    "default": -14.0,
+    "description": "Integrated loudness (LUFS).",
+    "node": {
+     "id": 9,
+     "type": "PlenioLoudness",
+     "title": "Loudness & Dynamics"
+    },
+    "group": "3 · MASTER",
+    "minimum": -30.0,
+    "maximum": -5.0,
+    "step": 0.5,
+    "when": {
+     "loudness.target": [
+      "custom"
+     ]
+    },
+    "defaults": {
+     "custom": -14.0
+    }
+   },
+   {
+    "id": "loudness.target.ceiling_dbtp",
+    "label": "ceiling dbtp",
+    "type": "number",
+    "default": -1.0,
+    "description": "True-peak ceiling (dBTP).",
+    "node": {
+     "id": 9,
+     "type": "PlenioLoudness",
+     "title": "Loudness & Dynamics"
+    },
+    "group": "3 · MASTER",
+    "minimum": -12.0,
+    "maximum": -0.1,
+    "step": 0.1,
+    "when": {
+     "loudness.target": [
+      "custom"
+     ]
+    },
+    "defaults": {
+     "custom": -1.0
+    }
+   },
+   {
+    "id": "loudness.compression",
+    "label": "compression",
+    "type": "choice",
+    "default": "Balanced - gentle glue",
+    "description": "off: limiter only; a style: gentle genre presets; custom: your settings.",
+    "node": {
+     "id": 9,
+     "type": "PlenioLoudness",
+     "title": "Loudness & Dynamics"
+    },
+    "group": "3 · MASTER",
+    "choices": [
+     "off",
+     "Balanced - gentle glue",
+     "Acoustic - gentle",
+     "Classical - preserve dynamics",
+     "Jazz - natural",
+     "Vocal pop - smooth",
+     "Pop - punchy",
+     "Rock - bus glue",
+     "Electronic - tight",
+     "Club - loud",
+     "Hip-hop - low-end punch",
+     "Ambient - spacious",
+     "Limiter only - transparent",
+     "custom"
+    ]
+   },
+   {
+    "id": "loudness.compression.threshold_db",
+    "label": "threshold db",
+    "type": "number",
+    "default": -18.0,
+    "description": "Level above which the compressor works (dB).",
+    "node": {
+     "id": 9,
+     "type": "PlenioLoudness",
+     "title": "Loudness & Dynamics"
+    },
+    "group": "3 · MASTER",
+    "minimum": -60.0,
+    "maximum": 0.0,
+    "step": 0.5,
+    "when": {
+     "loudness.compression": [
+      "custom"
+     ]
+    },
+    "defaults": {
+     "custom": -18.0
+    }
+   },
+   {
+    "id": "loudness.compression.ratio",
+    "label": "ratio",
+    "type": "number",
+    "default": 1.5,
+    "description": "Compression ratio above the threshold.",
+    "node": {
+     "id": 9,
+     "type": "PlenioLoudness",
+     "title": "Loudness & Dynamics"
+    },
+    "group": "3 · MASTER",
+    "minimum": 1.0,
+    "maximum": 10.0,
+    "step": 0.1,
+    "when": {
+     "loudness.compression": [
+      "custom"
+     ]
+    },
+    "defaults": {
+     "custom": 1.5
+    }
+   },
+   {
+    "id": "loudness.compression.knee_db",
+    "label": "knee db",
+    "type": "number",
+    "default": 6.0,
+    "description": "Width of the soft knee around the threshold (dB); 0 is a hard knee.",
+    "node": {
+     "id": 9,
+     "type": "PlenioLoudness",
+     "title": "Loudness & Dynamics"
+    },
+    "group": "3 · MASTER",
+    "minimum": 0.0,
+    "maximum": 24.0,
+    "step": 0.5,
+    "when": {
+     "loudness.compression": [
+      "custom"
+     ]
+    },
+    "defaults": {
+     "custom": 6.0
+    },
+    "advanced": true
+   },
+   {
+    "id": "loudness.compression.attack_ms",
+    "label": "attack ms",
+    "type": "number",
+    "default": 20.0,
+    "description": "How fast the compressor reacts (ms).",
+    "node": {
+     "id": 9,
+     "type": "PlenioLoudness",
+     "title": "Loudness & Dynamics"
+    },
+    "group": "3 · MASTER",
+    "minimum": 1.0,
+    "maximum": 200.0,
+    "step": 1.0,
+    "when": {
+     "loudness.compression": [
+      "custom"
+     ]
+    },
+    "defaults": {
+     "custom": 20.0
+    }
+   },
+   {
+    "id": "loudness.compression.release_ms",
+    "label": "release ms",
+    "type": "number",
+    "default": 150.0,
+    "description": "How fast it lets go (ms).",
+    "node": {
+     "id": 9,
+     "type": "PlenioLoudness",
+     "title": "Loudness & Dynamics"
+    },
+    "group": "3 · MASTER",
+    "minimum": 10.0,
+    "maximum": 2000.0,
+    "step": 5.0,
+    "when": {
+     "loudness.compression": [
+      "custom"
+     ]
+    },
+    "defaults": {
+     "custom": 150.0
+    }
+   },
+   {
+    "id": "loudness.compression.sidechain_hz",
+    "label": "sidechain hz",
+    "type": "number",
+    "default": 80.0,
+    "description": "High-pass on what the compressor listens to (Hz), so the bass does not pump it; 0 is off.",
+    "node": {
+     "id": 9,
+     "type": "PlenioLoudness",
+     "title": "Loudness & Dynamics"
+    },
+    "group": "3 · MASTER",
+    "minimum": 0.0,
+    "maximum": 500.0,
+    "step": 5.0,
+    "when": {
+     "loudness.compression": [
+      "custom"
+     ]
+    },
+    "defaults": {
+     "custom": 80.0
+    },
+    "advanced": true
+   },
+   {
+    "id": "loudness.compression.detector",
+    "label": "detector",
+    "type": "choice",
+    "default": "RMS",
+    "description": "RMS follows the average level (smooth); Peak reacts to single peaks.",
+    "node": {
+     "id": 9,
+     "type": "PlenioLoudness",
+     "title": "Loudness & Dynamics"
+    },
+    "group": "3 · MASTER",
+    "choices": [
+     "RMS",
+     "Peak"
+    ],
+    "when": {
+     "loudness.compression": [
+      "custom"
+     ]
+    },
+    "defaults": {
+     "custom": "RMS"
+    },
+    "advanced": true
+   },
+   {
+    "id": "loudness.sample_rate",
+    "label": "sample rate",
+    "type": "choice",
+    "default": "keep",
+    "description": "Output sample rate (converted before limiting).",
+    "node": {
+     "id": 9,
+     "type": "PlenioLoudness",
+     "title": "Loudness & Dynamics"
+    },
+    "group": "3 · MASTER",
+    "choices": [
+     "keep",
+     "44100",
+     "48000"
+    ]
+   }
+  ],
+  "release": [
+   {
+    "id": "folder",
+    "label": "folder",
+    "type": "string",
+    "default": "plenio/enhanced",
+    "description": "Sub-folder of the ComfyUI output folder.",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH"
+   },
+   {
+    "id": "naming",
+    "label": "naming",
+    "type": "string",
+    "default": "{title}",
+    "description": "File name: {title}, {date}, {seed}, {genre}, {artist} ... (the variables of the tags); '/' makes sub-folders; [optional {parts}] vanish when empty.",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH"
+   },
+   {
+    "id": "collision",
+    "label": "collision",
+    "type": "choice",
+    "default": "number",
+    "description": "When the file exists: number (add ' (2)' - also to a title another song of the folder has), overwrite, or stop with an error.",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH",
+    "choices": [
+     "number",
+     "overwrite",
+     "error"
+    ],
+    "advanced": true
+   },
+   {
+    "id": "flac",
+    "label": "flac",
+    "type": "boolean",
+    "default": true,
+    "description": "FLAC 24-bit (lossless).",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH"
+   },
+   {
+    "id": "mp3",
+    "label": "mp3",
+    "type": "boolean",
+    "default": true,
+    "description": "MP3 VBR V0 (LAME).",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH"
+   },
+   {
+    "id": "wav",
+    "label": "wav",
+    "type": "boolean",
+    "default": false,
+    "description": "WAV 32-bit float (no clipping; few tags, no cover).",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH"
+   },
+   {
+    "id": "tags",
+    "label": "tags",
+    "type": "choice",
+    "default": "copy from loaded file",
+    "description": "Metadata written into the files: the title only, tags typed or connected (with {variables}), or the tags of the loaded file.",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH",
+    "choices": [
+     "title only",
+     "tags",
+     "copy from loaded file"
+    ]
+   },
+   {
+    "id": "artist",
+    "label": "artist",
+    "type": "string",
+    "default": "",
+    "description": "The artist tag. Text with {variables}, or connect a text output to the field.",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH",
+    "when": {
+     "tags": [
+      "tags"
+     ]
+    },
+    "defaults": {
+     "tags": ""
+    }
+   },
+   {
+    "id": "album",
+    "label": "album",
+    "type": "string",
+    "default": "",
+    "description": "The album tag. Text with {variables}, or connect a text output to the field.",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH",
+    "when": {
+     "tags": [
+      "tags"
+     ]
+    },
+    "defaults": {
+     "tags": ""
+    }
+   },
+   {
+    "id": "date",
+    "label": "date",
+    "type": "string",
+    "default": "",
+    "description": "Year or date, e.g. 2026 or {date}. Text with {variables}, or connect a text output to the field.",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH",
+    "when": {
+     "tags": [
+      "tags"
+     ]
+    },
+    "defaults": {
+     "tags": ""
+    }
+   },
+   {
+    "id": "track",
+    "label": "track",
+    "type": "string",
+    "default": "",
+    "description": "Track number, e.g. 3 or 3/12. Text with {variables}, or connect a text output to the field.",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH",
+    "when": {
+     "tags": [
+      "tags"
+     ]
+    },
+    "defaults": {
+     "tags": ""
+    }
+   },
+   {
+    "id": "genre",
+    "label": "genre",
+    "type": "string",
+    "default": "",
+    "description": "The genre tag, e.g. {genre} (the brief's). Text with {variables}, or connect a text output to the field.",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH",
+    "when": {
+     "tags": [
+      "tags"
+     ]
+    },
+    "defaults": {
+     "tags": ""
+    }
+   },
+   {
+    "id": "comment",
+    "label": "comment",
+    "type": "string",
+    "default": "Powered by Plenio Music Production System / ComfyUI",
+    "description": "The comment tag; empty: none. Text with {variables}, or connect a text output to the field.",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH",
+    "when": {
+     "tags": [
+      "tags"
+     ]
+    },
+    "defaults": {
+     "tags": "Powered by Plenio Music Production System / ComfyUI"
+    }
+   },
+   {
+    "id": "album_artist",
+    "label": "album artist",
+    "type": "string",
+    "default": "",
+    "description": "The album artist tag. Text with {variables}, or connect a text output to the field.",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH",
+    "when": {
+     "tags": [
+      "tags"
+     ]
+    },
+    "defaults": {
+     "tags": ""
+    }
+   },
+   {
+    "id": "composer",
+    "label": "composer",
+    "type": "string",
+    "default": "",
+    "description": "The composer tag. Text with {variables}, or connect a text output to the field.",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH",
+    "when": {
+     "tags": [
+      "tags"
+     ]
+    },
+    "defaults": {
+     "tags": ""
+    }
+   },
+   {
+    "id": "lyrics",
+    "label": "lyrics",
+    "type": "string",
+    "default": "",
+    "description": "The lyrics tag (FLAC, MP3; players show it), e.g. {lyrics}. Text with {variables}, or connect a text output to the field.",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH",
+    "when": {
+     "tags": [
+      "tags"
+     ]
+    },
+    "defaults": {
+     "tags": ""
+    }
+   },
+   {
+    "id": "sheet_music",
+    "label": "sheet music",
+    "type": "choice",
+    "default": "off",
+    "description": "Also save the sheet music (both voices, chords, sections, the lyrics under the notes) as '<name>.pdf' on A4 or Letter pages; an open ComfyUI page draws it after the export. Needs a score (YuE2).",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH",
+    "choices": [
+     "off",
+     "PDF (A4)",
+     "PDF (Letter)"
+    ]
+   },
+   {
+    "id": "sheet_music_size",
+    "label": "sheet music size",
+    "type": "choice",
+    "default": "standard",
+    "description": "How large the sheet music draws: standard about 3 bars a line, smaller 3-4, compact about 4, large 1-2 (the biggest notes).",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH",
+    "choices": [
+     "standard",
+     "smaller",
+     "compact",
+     "large"
+    ]
+   },
+   {
+    "id": "project_in_flac",
+    "label": "project in FLAC",
+    "type": "boolean",
+    "default": true,
+    "description": "Store the release record (workflow, Song Sheets, seeds, settings) inside the song's FLAC: File > Continue a Plenio song... opens the song from the FLAC alone. Off for files you share without their making-of.",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH"
+   },
+   {
+    "id": "lyrics_srt",
+    "label": "lyrics subtitles (SRT)",
+    "type": "boolean",
+    "default": true,
+    "description": "Write the lyrics as subtitles: '(lines).srt' whole lines, '(notes).srt' note by note, '(sung).srt' what the take really sings. Timed by listening (Qwen3-ASR and its aligner, 5.9 GB, fetched on first use).",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH"
+   },
+   {
+    "id": "lyrics_timing",
+    "label": "lyrics heard on",
+    "type": "choice",
+    "default": "vocal stem",
+    "description": "What the lyrics ASR hears for the subtitles and the player: the take's vocal stem - more exact times, the model of Stems and Sung Pitch, about half a minute per take - or the song (quicker).",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH",
+    "choices": [
+     "the song",
+     "vocal stem"
+    ]
+   },
+   {
+    "id": "song_page",
+    "label": "song page (HTML)",
+    "type": "boolean",
+    "default": true,
+    "description": "Also write '<name>.html': the song on one page to open in any browser - the lyrics with their sections and the prompts to copy, every setting, how it was made, the sound, the score and links to the files.",
+    "node": {
+     "id": 11,
+     "type": "PlenioExportRelease",
+     "title": "Export Release"
+    },
+    "group": "4 · FINISH"
+   }
+  ],
+  "seeds": [],
+  "documents": [
+   "lyrics"
+  ],
+  "aliases": {}
+ }
+}

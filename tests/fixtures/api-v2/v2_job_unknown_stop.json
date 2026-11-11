@@ -1,0 +1,14 @@
+{
+ "status": 400,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "error": {
+   "code": "invalid_value",
+   "message": "The template 'yue2-song' has no review stop 'chorus'.",
+   "hint": "Its stops: score, text.",
+   "field": "review"
+  }
+ }
+}

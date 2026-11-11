@@ -1,0 +1,21 @@
+{
+ "status": 200,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "sections": [
+   {
+    "tag": "verse",
+    "lines": 1,
+    "words": 3,
+    "syllables": 4
+   }
+  ],
+  "tags": [
+   "verse"
+  ],
+  "words": 3,
+  "findings": []
+ }
+}

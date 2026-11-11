@@ -26,11 +26,13 @@ from pathlib import Path
 from typing import Any
 
 BASE = "/plenio/api/v1"
-UUID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
+UUID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|job_[0-9a-f]{16}")
 VOLATILE_NUMBERS = {
     "created_at",
     "started_at",
     "finished_at",
+    "updated_at",
+    "ended_at",
     "queue_position",
     "seconds",
     "timestamp",
@@ -141,6 +143,52 @@ def series(url: str) -> Iterator[tuple[str, Answer]]:
     yield "upload_nothing", call(url, "POST", f"{BASE}/uploads", {})
 
 
+V2 = "/plenio/api/v2"
+
+
+def series_v2(url: str) -> Iterator[tuple[str, Answer]]:
+    """API v2's series (phase 5.3): every endpoint that answers without real models, and the refusals. Recorded
+    from 2.0's own code - a guard for the tasks after it, not a comparison with 1.6."""
+    yield "v2_index", call(url, "GET", V2)
+    yield "v2_templates", call(url, "GET", f"{V2}/templates")
+    for template in ("yue2-song", "yue2-cover", "yue2-daw", "minimax-song", "enhance-master"):
+        yield f"v2_template_{template}", call(url, "GET", f"{V2}/templates/{template}")
+    yield "v2_template_unknown", call(url, "GET", f"{V2}/templates/no-such-template")
+    yield "v2_briefs", call(url, "GET", f"{V2}/briefs?kind=song")
+    yield "v2_presets", call(url, "GET", f"{V2}/presets")
+    yield "v2_queue", call(url, "GET", f"{V2}/queue")
+    request = {"template": "yue2-song", "preset": "sketch", "fields": SONG_FIELDS, "review": ["text"]}
+    created = call(url, "POST", f"{V2}/jobs", request, {"Idempotency-Key": "golden-v2-1"})
+    yield "v2_job_create", created
+    yield "v2_job_create_again", call(url, "POST", f"{V2}/jobs", request, {"Idempotency-Key": "golden-v2-1"})
+    job_id = str((created.body or {}).get("id", ""))
+    deadline = time.monotonic() + 180
+    ended = call(url, "GET", f"{V2}/jobs/{job_id}?wait=5")
+    while ended.status == 200 and ended.body.get("status") not in ("succeeded", "failed", "cancelled"):
+        if time.monotonic() > deadline:
+            raise TimeoutError(job_id)
+        ended = call(url, "GET", f"{V2}/jobs/{job_id}?wait=5")
+    yield "v2_job_failed", ended
+    yield "v2_job_documents_none", call(url, "GET", f"{V2}/jobs/{job_id}/documents")
+    yield "v2_job_approve_not_waiting", call(url, "POST", f"{V2}/jobs/{job_id}/approve", {})
+    yield "v2_job_timings_none", call(url, "GET", f"{V2}/jobs/{job_id}/timings")
+    yield "v2_job_delete_ended", call(url, "DELETE", f"{V2}/jobs/{job_id}")
+    yield "v2_job_unknown", call(url, "GET", f"{V2}/jobs/job_0000000000000000")
+    yield "v2_job_bad_review", call(url, "POST", f"{V2}/jobs", {"template": "yue2-song", "review": "text"})
+    yield (
+        "v2_job_unknown_stop",
+        call(url, "POST", f"{V2}/jobs", {"template": "yue2-song", "review": ["chorus"]}),
+    )
+    yield "v2_job_bad_preset", call(url, "POST", f"{V2}/jobs", {"template": "yue2-song", "preset": "loud"})
+    yield "v2_job_no_template", call(url, "POST", f"{V2}/jobs", {"fields": {}})
+    yield "v2_song_unknown", call(url, "GET", f"{V2}/songs/bm90LWEtc29uZw")
+    yield "v2_lyrics_analyze", call(url, "POST", f"{V2}/lyrics/analyze", {"lyrics": "[verse]\nA paper boat"})
+    yield "v2_score_bad", call(url, "POST", f"{V2}/scores/analyze", {"abc": 3})
+
+
+SERIES = {"v1": series, "v2": series_v2}
+
+
 def normalise(answer: Answer, base: str = "") -> dict[str, Any]:
     """An answer without what changes from run to run, as the golden file keeps it."""
     ids: dict[str, str] = {}
@@ -178,11 +226,25 @@ def normalise(answer: Answer, base: str = "") -> dict[str, Any]:
     return {"status": answer.status, "headers": walk(answer.headers), "body": walk(answer.body)}
 
 
+TIMING = {"progress", "stage"}
+"""A job's keys that depend on when the answer was taken (whether the run had begun), not on the code."""
+
+
+def _files_list(value: Any) -> bool:
+    """A field whose choices are the files of a model folder (they depend on what the server has)."""
+    return isinstance(value, dict) and str(value.get("id", "")).endswith(".model") and "choices" in value
+
+
 def differences(golden: Any, current: Any, where: str = "") -> Iterator[str]:
-    """Where ``current`` differs from ``golden``: a JSON path and what changed."""
+    """Where ``current`` differs from ``golden``: a JSON path and what changed - leaving out what depends on the
+    moment or on the server's files (``TIMING``, the choices of a model-file field)."""
     if isinstance(golden, dict) and isinstance(current, dict):
+        if _files_list(golden) and _files_list(current):
+            golden, current = {**golden, "choices": None}, {**current, "choices": None}
         for key in sorted(set(golden) | set(current)):
             path = f"{where}/{key}"
+            if key in TIMING:
+                continue
             if key not in current:
                 yield f"{path}: gone"
             elif key not in golden:
@@ -231,13 +293,14 @@ def main(argv: list[str] | None = None, *, log: Callable[[str], None] = print) -
     )
     parser.add_argument("--url", required=True)
     parser.add_argument("--base", default="", help="the server's base folder, masked in the answers")
+    parser.add_argument("--api", choices=sorted(SERIES), default="v1")
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--record", type=Path)
     mode.add_argument("--compare", type=Path)
     args = parser.parse_args(argv)
     url = args.url.rstrip("/")
     bad = 0
-    for case, answer in series(url):
+    for case, answer in SERIES[args.api](url):
         current = normalise(answer, args.base)
         if args.record:
             args.record.mkdir(parents=True, exist_ok=True)

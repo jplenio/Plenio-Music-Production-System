@@ -1,0 +1,14 @@
+{
+ "status": 400,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "error": {
+   "code": "invalid_value",
+   "message": "There is no preset 'loud'.",
+   "hint": "Presets: best, party, sketch, full, takes, instrumental.",
+   "field": "preset"
+  }
+ }
+}

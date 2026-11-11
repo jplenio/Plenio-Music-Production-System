@@ -1,0 +1,13 @@
+{
+ "status": 400,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "error": {
+   "code": "invalid_value",
+   "message": "'review' is a list of stages ('text', 'score').",
+   "field": "review"
+  }
+ }
+}

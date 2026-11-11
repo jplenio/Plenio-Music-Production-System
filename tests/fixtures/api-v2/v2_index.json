@@ -1,0 +1,60 @@
+{
+ "status": 200,
+ "headers": {
+  "Content-Type": "application/json"
+ },
+ "body": {
+  "api": "plenio-song-api",
+  "version": "2.0",
+  "plenio": "<version>",
+  "comfyui": "<version>",
+  "templates": [
+   {
+    "id": "yue2-song",
+    "title": "YuE2 · Song",
+    "kind": "song",
+    "workflow": "1 · YuE2 · Song",
+    "needs": []
+   },
+   {
+    "id": "yue2-cover",
+    "title": "YuE2 · Cover",
+    "kind": "cover",
+    "workflow": "2 · YuE2 · Cover",
+    "needs": [
+     "source.audio"
+    ]
+   },
+   {
+    "id": "minimax-song",
+    "title": "MiniMax · Song",
+    "kind": "song",
+    "workflow": "3 · MiniMax · Song",
+    "needs": []
+   },
+   {
+    "id": "enhance-master",
+    "title": "Enhance & Master",
+    "kind": "master",
+    "workflow": "4 · Enhance & Master",
+    "needs": [
+     "source.audio"
+    ]
+   },
+   {
+    "id": "yue2-daw",
+    "title": "YuE2 · DAW",
+    "kind": "song",
+    "workflow": "5 · YuE2 · DAW",
+    "needs": []
+   }
+  ],
+  "paths": {
+   "templates": "/plenio/api/v2/templates",
+   "briefs": "/plenio/api/v2/briefs",
+   "presets": "/plenio/api/v2/presets",
+   "jobs": "/plenio/api/v2/jobs"
+  },
+  "docs": "https://github.com/jplenio/Plenio-Music-Production-System/blob/main/docs/api/README.md"
+ }
+}
