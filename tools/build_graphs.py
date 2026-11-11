@@ -2161,7 +2161,14 @@ def models_note_text(template: str) -> str:
     file goes into which folder, with its link and size, the optional ones, what Plenio fetches itself, and the files
     for a smaller or a larger graphics card - all from the model catalogue, so the note and the loaders agree. The
     System Check's note shows every template's files at once."""
-    from plenio.core.system import RULES
+    from plenio.core.assets import load_catalogue as load_assets
+    from plenio.core.models import load_components
+    from plenio.core.system import hardware_rows
+
+    rows_of_cards = hardware_rows(
+        load_components(PROJECT / "resources" / "models.toml"),
+        load_assets(PROJECT / "resources" / "assets.toml"),
+    )
 
     catalogue = [m for m in CATALOGUE.values() if m.default]
     overview = template == "0 · System Check"
@@ -2242,7 +2249,7 @@ def models_note_text(template: str) -> str:
             "| Graphics card | " + " | ".join(label for label, _ in columns) + " | Cover Art | Writer |",
             "|---|" + "---|" * len(columns) + "---|---|",
         ]
-        for rule in RULES:
+        for rule in rows_of_cards:
             cells = " | ".join(getattr(rule, key) for _, key in columns)
             rows.append(f"| {rule.label} | {cells} | {rule.cover_art} | {rule.writer} |")
         lines += [
@@ -3703,7 +3710,7 @@ Press **Run**. The node lists:
 - the Plenio assets - the lyrics ASR Qwen3-ASR, its aligner and the Whisper fallback - with the folder Plenio keeps them in and whether they are there
 - optional Python packages
 - the offline and download policy (`PLENIO_OFFLINE`, `PLENIO_AUTO_DOWNLOAD`)
-- the hardware rule table, with the row for this machine marked
+- the hardware table (what auto takes on each card), with the row for this machine marked
 
 Recommendations are text only. Plenio never changes a setting or a model on its own; you choose the model files in the loader nodes of each template.
 

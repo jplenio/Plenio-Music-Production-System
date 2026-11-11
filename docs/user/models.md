@@ -89,7 +89,7 @@ The exact URLs are in `resources/models.toml`; a missing file's message names it
 
 ## Smaller GPUs: alternative files
 
-The tables above name each model's default file. With a model field on **auto** the plan may take one of these alternatives instead, by the card's memory; to use one regardless, choose it in the field (or pin it in `config.toml`, [Configuration](configuration.md)). The System Check marks the row of its hardware rule table that matches your GPU:
+The tables above name each model's default file. With a model field on **auto** the plan may take one of these alternatives instead, by the card's memory; to use one regardless, choose it in the field (or pin it in `config.toml`, [Configuration](configuration.md)). The System Check's hardware table shows what auto takes on each card and marks your row:
 
 | Instead of | Choose | Size | For | Basis |
 |---|---|---|---|---|

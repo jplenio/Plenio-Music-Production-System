@@ -11,7 +11,7 @@ Shows whether this ComfyUI installation is ready for Plenio.
 - **Plenio assets**: the lyrics ASR - Qwen3-ASR, Qwen3-ForcedAligner and the faster-whisper fallback - each with the folder Plenio keeps it in, size, licence, what it is for, a link to its pinned source, and whether it is installed (otherwise Plenio fetches it on first use)
 - Python packages (a missing `av`, `PIL` or `scipy` is a warning; `transformers` - ComfyUI's own - is what Qwen3-ASR runs on; `faster-whisper` is optional, for the Whisper fallback)
 - the download policy: offline mode (`PLENIO_OFFLINE`, `HF_HUB_OFFLINE`) and automatic asset downloads (`PLENIO_AUTO_DOWNLOAD`)
-- the **hardware rule table** (VRAM of the largest GPU -> which files to choose for YuE2, MiniMax Music 3 and Cover Art), with the row for this machine marked and the basis of every row (measured, legacy toolkit rating, or design)
+- the **hardware table** (VRAM of the largest GPU -> the files the model fields on *auto* take for YuE2, MiniMax Music 3, Cover Art and the writer), made from the model catalogue, with the row for this machine marked and whether its memory figures are measured or estimated
 
 ## Inputs
 

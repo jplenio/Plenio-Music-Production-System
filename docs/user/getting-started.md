@@ -5,7 +5,7 @@
 ## Requirements
 
 - ComfyUI **0.37.0** or newer, tested with 0.41.0 (it provides the native YuE2, SheetSage2, MiniMax Music 3, FLUX.2 and text-generation nodes Plenio builds on)
-- an NVIDIA GPU for the music models (Plenio is developed and measured on a 16 GB card; the System Check's rule table covers smaller and larger ones). *4 · Enhance & Master* runs on the CPU.
+- an NVIDIA GPU for the music models (Plenio is developed and measured on a 16 GB card; the System Check's hardware table covers smaller and larger ones). *4 · Enhance & Master* runs on the CPU.
 
 ## Install
 
@@ -32,7 +32,7 @@ Plenio installs no Python packages. Optional: `python -m pip install faster-whis
 ## First run
 
 1. Open the template browser and choose **0 · System Check** (listed under the Plenio package).
-2. Press **Run**. The node shows versions and GPUs, which model files each template still needs, the download policy, and the hardware rule table with the row for your machine marked.
+2. Press **Run**. The node shows versions and GPUs, which model files each template still needs, the download policy, and the hardware table - which files the model fields on auto take on each card - with the row for your machine marked.
 3. Nothing is changed automatically. You choose model files in the loader nodes of each template.
 
 ## Choosing a template = choosing the music model

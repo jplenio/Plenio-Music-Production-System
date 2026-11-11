@@ -69,7 +69,7 @@ class SystemFacts:
 
 @dataclass(frozen=True)
 class Rule:
-    """One row of the hardware rule table (VRAM of the largest GPU, GiB as torch reports it)."""
+    """One row of the hardware table (VRAM of the largest GPU, GiB as torch reports it): what auto takes there."""
 
     label: str
     low: float
@@ -85,60 +85,70 @@ class Rule:
         return vram_gib >= self.low and (self.high is None or vram_gib < self.high)
 
 
-# A card sold as "16 GB" reports about 15.9 GiB, hence the boundaries just below the nominal sizes.
-RULES = (
-    Rule(
-        "below 8 GB",
-        0.0,
-        7.5,
-        "only with heavy offloading (the int8 model alone is 4 GB): very slow, keep songs short",
-        "only with heavy offloading: very slow",
-        "not practical",
-        "estimate from the model sizes",
-        "Gemma 4 12B QAT Q4 (6.7 GB), partly in RAM: slow - or choose the lighter Gemma 4 E4B (a ComfyUI text "
-        "model) as writer model",
-    ),
-    Rule(
-        "8-12 GB",
-        7.5,
-        11.5,
-        "int8 checkpoint (template default); keep songs short",
-        "choose the int8 DiT `minimax_music3_dit_int8_convrot` (2.5 GB) and turn on *tiled decode*",
-        "choose `flux-2-klein-4b-fp8` and the text encoder `qwen_3_4b_fp4_flux2`",
-        "legacy toolkit ratings (not measured by Plenio)",
-        "Gemma 4 12B QAT Q4 (6.7 GB); on 8 GB llama.cpp keeps a part in RAM",
-    ),
-    Rule(
-        "12-16 GB",
-        11.5,
-        15.5,
-        "int8 checkpoint (template default)",
-        "the defaults may offload; the int8 DiT is the safer choice",
-        "fp8 model and fp4 text encoder",
-        "legacy toolkit ratings (not measured by Plenio)",
-        "Gemma 4 12B QAT Q4 (6.7 GB)",
-    ),
-    Rule(
-        "16-24 GB",
-        15.5,
-        23.0,
-        "int8 checkpoint (template default)",
-        "template defaults (fp16 DiT, int8 text encoder)",
-        "template defaults (bf16)",
-        "YuE2 measured on 16 GB (Phases 3-5); MiniMax and Cover Art: legacy toolkit ratings",
-        "Gemma 4 12B Q6_K (9.8 GB)",
-    ),
-    Rule(
-        "24 GB and more",
-        23.0,
-        None,
-        "the bf16 checkpoint `yue2_3b_bf16` (7.8 GB) is possible; int8 stays the faster default",
-        "template defaults",
-        "template defaults",
-        "Plenio design",
-        "Gemma 4 12B Q6_K (9.8 GB)",
-    ),
+CARDS: tuple[tuple[str, float, float | None, float], ...] = (
+    # label, low, high (GiB as torch reports them: a card sold as "16 GB" reports about 15.9), the size the row
+    # shows - a typical card of the row, its low end where the row is wide
+    ("below 8 GB", 0.0, 7.5, 6.0),
+    ("8-12 GB", 7.5, 11.5, 7.9),
+    ("12-16 GB", 11.5, 15.5, 11.9),
+    ("16-24 GB", 15.5, 23.0, 15.9),
+    ("24 GB and more", 23.0, None, 23.6),
 )
+"""The rows of the hardware table. What each row says is the model plan's pick for its card (``hardware_rows``)."""
+_WHERE = ("runs on the card", "runs with offloading: slower", "too large for this card: very slow")
+
+
+def _where(reason: str) -> str:
+    found = [w for w in _WHERE if w in reason]
+    return found[0] if found else reason
+
+
+def _row_cell(picks: list[Any]) -> str:
+    files = " + ".join(
+        f"`{p.file.rsplit('.', 1)[0]}` ({size_text(p.variant.bytes)})" for p in picks if p.variant
+    )
+    worst = max((_where(p.reason) for p in picks), key=lambda w: _WHERE.index(w) if w in _WHERE else 0)
+    return f"{files} - {worst}"
+
+
+def hardware_rows(
+    components: Mapping[str, Any], assets: Mapping[str, Asset] | None = None
+) -> tuple[Rule, ...]:
+    """The hardware table, made from the catalogue: per row the files ``auto`` takes on its card with nothing
+    installed (``plenio.core.modelplan``), the writer's file, and whether the thresholds behind it are measured."""
+    from .llm import gemma
+    from .modelplan import pick
+
+    def picks(*ids: str, vram: float) -> list[Any]:
+        return [pick(components[i], vram_gib=vram, installed={}) for i in ids if i in components]
+
+    rows = []
+    for label, low, high, vram in CARDS:
+        yue2 = picks("yue2", vram=vram)
+        minimax = picks("minimax-dit", "minimax-text-encoder", vram=vram)
+        cover = picks("flux2-klein", "flux2-text-encoder", vram=vram)
+        writer = ""
+        if assets is not None and gemma.wanted(vram) in assets:
+            asset = assets[gemma.wanted(vram)]
+            writer = f"`{gemma.file_of(asset)}` ({size_text(asset.total_size)})"
+        if "writer-native" in components:
+            native = gemma.native_pick(components["writer-native"], vram, {}, has_12b=True)
+            writer += f"{'; ' if writer else ''}without llama.cpp: `{native.file.rsplit('.', 1)[0]}`"
+        chosen = [p.variant for p in (*yue2, *minimax, *cover) if p.variant is not None]
+        measured = bool(chosen) and all(v.basis.startswith("measured") for v in chosen)
+        rows.append(
+            Rule(
+                label,
+                low,
+                high,
+                _row_cell(yue2) if yue2 else "",
+                _row_cell(minimax) if minimax else "",
+                _row_cell(cover) if cover else "",
+                "measured" if measured else "estimate (the catalogue's memory thresholds)",
+                writer,
+            )
+        )
+    return tuple(rows)
 
 
 def parse_version(text: str) -> tuple[int, ...] | None:
@@ -157,32 +167,33 @@ def largest_gpu(devices: tuple[Device, ...]) -> Device | None:
     return max(gpus, key=lambda d: d.total_bytes or 0) if gpus else None
 
 
-def matching_rule(devices: tuple[Device, ...]) -> Rule | None:
+def matching_rule(devices: tuple[Device, ...], rows: tuple[Rule, ...] = ()) -> Rule | None:
     gpu = largest_gpu(devices)
     if gpu is None:
         return None
     vram = (gpu.total_bytes or 0) / GIB
-    return next(rule for rule in RULES if rule.matches(vram))
+    return next((rule for rule in rows if rule.matches(vram)), None)
 
 
-def _recommendations(devices: tuple[Device, ...]) -> list[str]:
+def _recommendations(devices: tuple[Device, ...], rows: tuple[Rule, ...] = ()) -> list[str]:
     gpu = largest_gpu(devices)
     if gpu is None:
         return [
             "No GPU detected: YuE2 and MiniMax Music 3 are not practical on the CPU. "
             "0 · System Check and 4 · Enhance & Master run on the CPU."
         ]
-    rule = matching_rule(devices)
-    assert rule is not None
     vram = (gpu.total_bytes or 0) / GIB
-    rules = [
-        f"Largest GPU: {gpu.name} with {vram:.1f} GiB - row '{rule.label}' of the rule table "
-        "(nothing is applied automatically; choose files in the loader nodes).",
-        f"YuE2: {rule.yue2}.",
-        f"MiniMax Music 3: {rule.minimax}.",
-        f"Cover Art (optional): {rule.cover_art}.",
-        f"Writer (Gemma 4 12B (auto), the templates' default): {rule.writer}.",
-    ]
+    rule = matching_rule(devices, rows)
+    rules = [f"Largest GPU: {gpu.name} with {vram:.1f} GiB."]
+    if rule is not None:
+        rules = [
+            f"Largest GPU: {gpu.name} with {vram:.1f} GiB - row '{rule.label}' of the hardware table: the model "
+            "fields on auto take these files (Model Choice decides on the card it runs on; a file you choose wins).",
+            f"YuE2: {rule.yue2}.",
+            f"MiniMax Music 3: {rule.minimax}.",
+            f"Cover Art (optional): {rule.cover_art}.",
+            f"Writer (Gemma 4 12B (auto), the templates' default): {rule.writer}.",
+        ]
     if len([d for d in devices if d.kind != "cpu"]) > 1:
         rules.append(
             "Several GPUs: ComfyUI uses one device for native models (--cuda-device); "
@@ -280,7 +291,9 @@ def check_system(
     facts: SystemFacts,
     catalogue: Mapping[str, ModelFile] | None = None,
     assets: Mapping[str, Asset] | None = None,
+    components: Mapping[str, Any] | None = None,
 ) -> Report:
+    rows = hardware_rows(components, assets) if components else ()
     statuses: list[Status] = []
     messages: list[str] = []
     comfy = parse_version(facts.comfyui_version)
@@ -366,7 +379,7 @@ def check_system(
             "assets": dict(facts.assets),
             "llm": dict(facts.llm),
         },
-        "recommendations": _recommendations(facts.devices),
+        "recommendations": _recommendations(facts.devices, rows),
         "rules": [
             {
                 "vram": rule.label,
@@ -375,9 +388,9 @@ def check_system(
                 "cover_art": rule.cover_art,
                 "writer": rule.writer,
                 "basis": rule.basis,
-                "this_machine": rule is matching_rule(facts.devices),
+                "this_machine": rule is matching_rule(facts.devices, rows),
             }
-            for rule in RULES
+            for rule in rows
         ],
     }
     if catalogue is not None:
@@ -486,7 +499,10 @@ def to_markdown(report: Report) -> str:
             )
     lines += [
         "",
-        "### Hardware rule table",
+        "### Hardware table",
+        "",
+        "What the model fields on auto take on each card, with nothing installed (the model plan; an installed file "
+        "that runs is kept).",
         "",
         "| VRAM | YuE2 | MiniMax Music 3 | Cover Art | Writer (default) | Basis |",
         "|---|---|---|---|---|---|",

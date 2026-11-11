@@ -2,10 +2,25 @@ from pathlib import Path
 
 import pytest
 
+from plenio.core.assets import load_catalogue as load_assets
 from plenio.core.dependencies import OptionalPackage, probe, require
 from plenio.core.errors import PlenioDependencyError
+from plenio.core.modelplan import plan
+from plenio.core.models import load_components
 from plenio.core.reports import Status
-from plenio.core.system import GIB, Device, SystemFacts, check_system, parse_version, to_markdown
+from plenio.core.system import (
+    GIB,
+    Device,
+    SystemFacts,
+    check_system,
+    hardware_rows,
+    parse_version,
+    to_markdown,
+)
+
+RESOURCES = Path(__file__).resolve().parents[2] / "resources"
+COMPONENTS = load_components(RESOURCES / "models.toml")
+ASSETS = load_assets(RESOURCES / "assets.toml")
 
 MISSING = OptionalPackage(
     "plenio_surely_missing_pkg", "plenio-missing", "Demo feature", "python -m pip install x"
@@ -48,7 +63,7 @@ def facts(**overrides: object) -> SystemFacts:
 
 
 def test_healthy_system() -> None:
-    report = check_system(facts())
+    report = check_system(facts(), components=COMPONENTS, assets=ASSETS)
     assert report.status is Status.OK
     recommendations = report.data["recommendations"]
     assert "row '16-24 GB'" in recommendations[0]  # a 16 GB card reports just under 16 GiB
@@ -65,7 +80,9 @@ def test_healthy_system() -> None:
     [(6.0, "below 8 GB"), (7.9, "8-12 GB"), (11.9, "12-16 GB"), (15.9, "16-24 GB"), (23.6, "24 GB and more")],
 )
 def test_rule_rows_follow_the_reported_vram(gib: float, row: str) -> None:
-    report = check_system(facts(devices=(Device(0, "GPU", "cuda", int(gib * GIB), None),)))
+    report = check_system(
+        facts(devices=(Device(0, "GPU", "cuda", int(gib * GIB), None),)), components=COMPONENTS, assets=ASSETS
+    )
     assert [r["vram"] for r in report.data["rules"] if r["this_machine"]] == [row]
     assert len(report.data["rules"]) == 5 and all(r["basis"] for r in report.data["rules"])
 
@@ -192,3 +209,23 @@ def test_the_check_says_where_every_model_file_and_asset_goes() -> None:
     assert (
         "`models/audio_sr`" in universr and "1 · YuE2 · Song" in universr
     )  # every template, with HQ mastering
+
+
+def test_the_hardware_table_names_the_files_the_plan_takes() -> None:
+    """3.7: the table is made from the catalogue - on 16 GiB it names the files plan() takes for the templates."""
+    report = check_system(
+        facts(devices=(Device(0, "GPU", "cuda", int(15.9 * GIB), None),)),
+        components=COMPONENTS,
+        assets=ASSETS,
+    )
+    (row,) = [r for r in report.data["rules"] if r["this_machine"]]
+    for template, column in (("1 · YuE2 · Song", "yue2"), ("3 · MiniMax · Song", "minimax")):
+        picks = plan(template, COMPONENTS, vram_gib=15.9, installed={}).needed
+        music = [p for p in picks if p.component in ("yue2", "minimax-dit", "minimax-text-encoder")]
+        assert music and all(p.file.rsplit(".", 1)[0] in row[column] for p in music), (template, row[column])
+    cover = plan("1 · YuE2 · Song", COMPONENTS, vram_gib=15.9, installed={}).needed
+    assert all(
+        p.file.rsplit(".", 1)[0] in row["cover_art"] for p in cover if p.component.startswith("flux2-k")
+    )
+    assert "Q6_K" in row["writer"] and row["basis"].startswith("estimate")
+    assert len(hardware_rows(COMPONENTS, ASSETS)) == 5

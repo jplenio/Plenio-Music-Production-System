@@ -18,7 +18,7 @@ from plenio.core.errors import PlenioUserError
 from plenio.core.llm import client, gemma
 from plenio.core.llm.catalog import Model
 from plenio.core.models import load_components
-from plenio.core.system import RULES, Device, SystemFacts, _asset_rows, _llm_lines
+from plenio.core.system import Device, SystemFacts, _asset_rows, _llm_lines, hardware_rows
 
 ROOT = Path(__file__).resolve().parents[2]
 ASSETS = load_catalogue(ROOT / "resources" / "assets.toml")
@@ -122,9 +122,10 @@ def test_the_writer_entry_routes_to_a_local_llm_and_the_others_stay_as_they_were
 
 
 def test_the_system_check_names_the_writer_for_each_card_and_where_its_file_goes() -> None:
-    writers = {rule.label: rule.writer for rule in RULES}
+    rows = hardware_rows(load_components(ROOT / "resources" / "models.toml"), ASSETS)
+    writers = {rule.label: rule.writer for rule in rows}
     assert "Q6_K" in writers["16-24 GB"] and "Q6_K" in writers["24 GB and more"]
-    assert all("QAT Q4" in writers[label] for label in ("below 8 GB", "8-12 GB", "12-16 GB"))
+    assert all("qat-UD-Q4" in writers[label] for label in ("below 8 GB", "8-12 GB", "12-16 GB"))
     lines = _llm_lines(
         {"runtimes": ["llama-server (PATH)"], "models": {"models/LLM": 1}, "writer": "Gemma 4 12B: x"}
     )

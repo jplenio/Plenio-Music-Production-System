@@ -75,7 +75,7 @@ def test_system_route(server: ComfyServer) -> None:
         and assets["qwen3-asr-1.7b-hf"]["size"] == "4.1 GB"
     )
     assert "### Plenio assets" in data["markdown"] and "`models/audio_sr`" in data["markdown"]
-    assert "### Hardware rule table" in data["markdown"]
+    assert "### Hardware table" in data["markdown"]
 
 
 def test_what_only_this_computer_may_ask_is_not_answered_to_the_network(server: ComfyServer) -> None:

@@ -22,7 +22,7 @@ class PlenioSystemCheck(io.ComfyNode):
                 "Shows ComfyUI and Plenio versions, GPUs and VRAM, which model files of each template are "
                 "installed and the folder each one goes into (with its download link), the Plenio assets - the "
                 "lyrics ASR - with their folders, optional packages, the offline/download policy and the hardware "
-                "rule table with this machine's row. Nothing is changed automatically."
+                "table (what the model fields on auto take on each card) with this machine's row. Nothing is changed."
             ),
             inputs=[
                 io.Combo.Input(
