@@ -15,6 +15,10 @@ Plenio has very few settings. Everything else is chosen in the workflow.
 | `PLENIO_LLAMA_SERVER` | a program or its folder | the llama.cpp server that runs GGUF files for **Local LLM** (default: found on the PATH, in Unsloth Studio, winget or Homebrew); used only with the Studio add-on |
 | `PLENIO_LLM_OTHER_APPS` | `1` (default) / `0` | **Local LLM** also lists the model folders and running servers of other apps |
 | `PLENIO_ADDONS` | `1` (default) / `0` | `0` switches the Studio add-on off where it is installed (`git clone`, the release zip): Plenio then starts no other program - not ComfyUI from the player, no `llama-server`, no file manager -, like the Comfy Registry package ([two ways to install](getting-started.md#two-ways-to-install)) |
+| `PLENIO_MODELS_PREFER` | `balanced` (default), `quality`, `speed`, `small` | what `auto` chooses among a model's files that run on your card: the best one but keeping an installed file that is nearly as good; the best; the fastest; the smallest download (config file: `[models] prefer`) |
+| `PLENIO_MODEL_PINS` | `component=file`, comma-separated | these files instead of the plan's choice, e.g. `yue2=yue2_3b_bf16.safetensors` - a file name in the component's model folder, also a finetune of your own (config file: `[models.pins]`; the component ids are those of `resources/models.toml`) |
+| `PLENIO_MODEL_DOWNLOADS` | `ask` (default), `auto`, `off` | whether Plenio fetches a missing model file: when you confirm it in Plenio Setup; by itself when a run needs it; never - it then names the file and its folder (config file: `[models] downloads`) |
+| `PLENIO_WORKER_DEVICE` | `auto` (default), `same`, `cpu`, `cuda:<n>` | where Plenio's own workers (the lyrics ASR) run: the largest graphics card ComfyUI does not use, else ComfyUI's; ComfyUI's card; the processor; a card by number (config file: `[workers] device`) |
 
 Invalid values stop with an error message instead of being ignored.
 

@@ -1,10 +1,15 @@
-"""The model catalogue (``resources/models.toml``, schema ``plenio.models/1``).
+"""The model catalogue (``resources/models.toml``, schema ``plenio.models/2``).
 
-ComfyUI-format model files the templates load: where each file lives, where it comes from, its
-licence and which templates need it. Plenio never downloads these files (ComfyUI's missing-model
-dialog or the user does); the catalogue feeds the templates' download entries, the System Check
-inventory and the model guide. ``yue2_checkpoint_problem`` reads a YuE2 file's own table of contents: a finetune
-loads as a ComfyUI checkpoint only in ComfyUI's format.
+The ComfyUI-format model files Plenio's templates load, as **components** and their **variants**. A component is
+one thing a template needs - the YuE2 music model, FLUX.2's text encoder -; a variant is one file that can be it:
+the int8 or the bf16 checkpoint, the full or the fp4 encoder. Every variant says where its file comes from (a URL
+pinned to a commit, its size and SHA-256), its licence, and what a graphics card needs to run it, so that the
+model plan (``plenio.core.modelplan``) can choose per machine.
+
+The catalogue feeds the templates' download entries, the System Check's inventory, the model guide and Plenio
+Setup. ``load_catalogue`` gives the flat view older code reads: one ``ModelFile`` per variant.
+``yue2_checkpoint_problem`` reads a YuE2 file's own table of contents: a finetune loads as a ComfyUI checkpoint
+only in ComfyUI's format.
 """
 
 from __future__ import annotations
@@ -21,7 +26,7 @@ from typing import Any
 from .errors import PlenioUserError
 from .files import read_toml
 
-SCHEMA = "plenio.models/1"
+SCHEMA = "plenio.models/2"
 AUDIO_MODEL_FOLDERS = {"super-resolution": "audio_sr", "separation": "audio_separation"}
 """Plenio's own model folders (registered with ComfyUI) for Load Audio Model, by model kind."""
 FILE_SUFFIXES = (".safetensors", ".bin", ".ckpt")
@@ -39,16 +44,81 @@ FOLDERS = frozenset(
     }
 )
 _ID = re.compile(r"[a-z0-9][a-z0-9.-]*")
-_URL = re.compile(
-    r"https://huggingface\.co/[\w.-]+/[\w.-]+/resolve/[\w.-]+/[\w./-]+"
-    r"|https://github\.com/[\w.-]+/[\w.-]+/releases/download/[\w.-]+/[\w./-]+"
+_HUB_URL = re.compile(
+    r"https://huggingface\.co/(?P<repo>[\w.-]+/[\w.-]+)/resolve/(?P<revision>[\w.-]+)/(?P<path>[\w./-]+)"
 )
+_RELEASE_URL = re.compile(r"https://github\.com/[\w.-]+/[\w.-]+/releases/download/[\w.-]+/[\w./-]+")
 """A direct file URL: a Hugging Face ``resolve`` path or a GitHub release asset (both download the
 file itself; the MSST checkpoints are published as GitHub release assets)."""
+_COMMIT = re.compile(r"[0-9a-f]{40}")
+_SHA256 = re.compile(r"[0-9a-f]{64}")
+
+
+@dataclass(frozen=True)
+class Variant:
+    """One file that can be a component: where it comes from and what it needs."""
+
+    id: str
+    file: str
+    url: str
+    bytes: int
+    sha256: str
+    licence: str
+    role: str
+    default: bool
+    """The file the templates' loaders are set to (one per component)."""
+    quality: int = 1
+    """Rank within the component; higher is better."""
+    speed: int = 1
+    """Rank within the component; higher is faster."""
+    vram_min_gib: float = 0.0
+    """Below this much graphics memory the file runs only with heavy offloading."""
+    vram_full_gib: float = 0.0
+    """From this much graphics memory on, its stage runs on the card."""
+    basis: str = "estimate"
+    """Where the two thresholds come from: ``estimate`` or ``measured ...``."""
+    gated: bool = False
+    """The repository asks for an agreement on its page before the file can be downloaded."""
+
+    @property
+    def non_commercial(self) -> bool:
+        return re.search(r"(?<![A-Za-z])NC(?![A-Za-z])", self.licence) is not None  # CC BY-NC, BY-NC-SA ...
+
+    @property
+    def hub(self) -> tuple[str, str, str] | None:
+        """``(repository, revision, path)`` of a Hugging Face file; ``None`` for a GitHub release asset."""
+        match = _HUB_URL.fullmatch(self.url)
+        return (match["repo"], match["revision"], match["path"]) if match else None
+
+
+@dataclass(frozen=True)
+class Component:
+    """One thing a template needs, and the files that can be it."""
+
+    id: str
+    title: str
+    folder: str
+    variants: tuple[Variant, ...]
+    templates: tuple[str, ...] = ()
+    """Templates that need the component to run."""
+    optional_templates: tuple[str, ...] = ()
+    """Templates in which only an optional (bypassed) block uses it."""
+    loader_node: str = ""
+    loader_input: str = ""
+    """The ComfyUI node and input that take the file's name (empty: a Plenio node lists the folder itself)."""
+    accepts: str = ""
+    """Which other files on disk may stand in (a sniffer's name; empty: only the catalogued ones)."""
+
+    @property
+    def default(self) -> Variant:
+        return next(v for v in self.variants if v.default)
 
 
 @dataclass(frozen=True)
 class ModelFile:
+    """A variant in the flat view: its file with its component's folder and templates. Only a component's default
+    variant belongs to templates; the others are alternatives to choose."""
+
     id: str
     file: str
     folder: str
@@ -59,6 +129,8 @@ class ModelFile:
     default: bool
     templates: tuple[str, ...]
     optional_templates: tuple[str, ...] = ()
+    component: str = ""
+    sha256: str = ""
 
     @property
     def non_commercial(self) -> bool:
@@ -69,54 +141,140 @@ class ModelFile:
         return {"name": self.file, "url": self.url, "directory": self.folder}
 
 
-def parse_catalogue(data: Mapping[str, Any], source: str) -> dict[str, ModelFile]:
+def _variant(raw: Mapping[str, Any], where: str, *, strict: bool) -> Variant:
+    try:
+        variant = Variant(
+            id=str(raw["id"]),
+            file=str(raw["file"]),
+            url=str(raw["url"]),
+            bytes=int(raw.get("bytes", 0)),
+            sha256=str(raw.get("sha256", "")).lower(),
+            licence=str(raw["licence"]),
+            role=str(raw["role"]),
+            default=bool(raw.get("default", False)),
+            quality=int(raw.get("quality", 1)),
+            speed=int(raw.get("speed", 1)),
+            vram_min_gib=float(raw.get("vram_min_gib", 0.0)),
+            vram_full_gib=float(raw.get("vram_full_gib", 0.0)),
+            basis=str(raw.get("basis", "estimate")),
+            gated=bool(raw.get("gated", False)),
+        )
+    except (KeyError, TypeError, ValueError) as error:
+        raise PlenioUserError(f"{where} is incomplete or malformed: {error!r}.") from error
+    if not _ID.fullmatch(variant.id):
+        raise PlenioUserError(f"{where}: id {variant.id!r} must be a lower-case identifier.")
+    if len(PurePosixPath(variant.file).parts) != 1 or not variant.file.endswith(FILE_SUFFIXES):
+        raise PlenioUserError(
+            f"{where}: file {variant.file!r} must be a {' or '.join(FILE_SUFFIXES)} file name."
+        )
+    hub = _HUB_URL.fullmatch(variant.url)
+    if not (hub or _RELEASE_URL.fullmatch(variant.url)) or not variant.url.endswith("/" + variant.file):
+        raise PlenioUserError(
+            f"{where}: the URL must be a Hugging Face or GitHub release file URL ending in the file name."
+        )
+    if variant.bytes < 0 or variant.quality < 1 or variant.speed < 1:
+        raise PlenioUserError(f"{where}: bytes must not be negative; quality and speed are ranks from 1.")
+    if not 0 <= variant.vram_min_gib <= variant.vram_full_gib:
+        raise PlenioUserError(f"{where}: 0 <= vram_min_gib <= vram_full_gib.")
+    if strict:
+        if hub and not _COMMIT.fullmatch(hub["revision"]):
+            raise PlenioUserError(
+                f"{where}: the URL must be pinned to a full commit hash, not {hub['revision']!r} "
+                "(tools/catalogue_check.py --write pins it)."
+            )
+        if variant.bytes <= 0 or not _SHA256.fullmatch(variant.sha256):
+            raise PlenioUserError(
+                f"{where}: the size and the SHA-256 of the file are needed (tools/catalogue_check.py --write)."
+            )
+    return variant
+
+
+def parse_components(data: Mapping[str, Any], source: str, *, strict: bool = True) -> dict[str, Component]:
+    """The catalogue's components by id. ``strict`` (the shipped file): every Hugging Face URL is pinned to a
+    commit and every file has its size and SHA-256; ``tools/catalogue_check.py`` reads a draft without."""
     if data.get("schema") != SCHEMA:
         raise PlenioUserError(f"{source}: expected schema {SCHEMA!r}, got {data.get('schema')!r}.")
-    models: dict[str, ModelFile] = {}
+    components: dict[str, Component] = {}
+    ids: set[str] = set()
     files: set[str] = set()
-    for index, raw in enumerate(data.get("model", [])):
-        where = f"{source} model #{index + 1}"
+    for index, raw in enumerate(data.get("component", [])):
+        where = f"{source} component #{index + 1}"
         try:
-            model = ModelFile(
+            loader = raw.get("loader") or {}
+            component = Component(
                 id=str(raw["id"]),
-                file=str(raw["file"]),
+                title=str(raw["title"]),
                 folder=str(raw["folder"]),
-                url=str(raw["url"]),
-                bytes=int(raw.get("bytes", 0)),
-                licence=str(raw["licence"]),
-                role=str(raw["role"]),
-                default=bool(raw["default"]),
+                variants=tuple(
+                    _variant(item, f"{where} variant #{number + 1}", strict=strict)
+                    for number, item in enumerate(raw.get("variant", []))
+                ),
                 templates=tuple(str(t) for t in raw.get("templates", [])),
                 optional_templates=tuple(str(t) for t in raw.get("optional_templates", [])),
+                loader_node=str(loader.get("node", "")),
+                loader_input=str(loader.get("input", "")),
+                accepts=str(raw.get("accepts", "")),
             )
-        except (KeyError, TypeError, ValueError) as error:
+        except (KeyError, TypeError, ValueError, AttributeError) as error:
             raise PlenioUserError(f"{where} is incomplete or malformed: {error!r}.") from error
-        if not _ID.fullmatch(model.id) or model.id in models:
-            raise PlenioUserError(f"{where}: id {model.id!r} must be a unique lower-case identifier.")
-        pure = PurePosixPath(model.file)
-        if len(pure.parts) != 1 or model.file in files or not model.file.endswith(FILE_SUFFIXES):
-            raise PlenioUserError(
-                f"{where}: file {model.file!r} must be a unique {' or '.join(FILE_SUFFIXES)} file name."
+        if not _ID.fullmatch(component.id) or component.id in components:
+            raise PlenioUserError(f"{where}: id {component.id!r} must be a unique lower-case identifier.")
+        if component.folder not in FOLDERS:
+            raise PlenioUserError(f"{where}: unknown model folder {component.folder!r}.")
+        if not component.variants:
+            raise PlenioUserError(f"{where}: a component has at least one variant.")
+        if sum(v.default for v in component.variants) != 1:
+            raise PlenioUserError(f"{where}: exactly one variant is the default.")
+        if set(component.templates) & set(component.optional_templates):
+            raise PlenioUserError(f"{where}: a template needs the component either always or optionally.")
+        if bool(component.loader_node) != bool(component.loader_input):
+            raise PlenioUserError(f"{where}: a loader names its node and its input.")
+        ranks = [v.quality for v in component.variants]
+        if len(set(ranks)) != len(ranks):
+            raise PlenioUserError(f"{where}: two variants have the same quality rank.")
+        for variant in component.variants:
+            if variant.id in ids or variant.file in files:
+                raise PlenioUserError(
+                    f"{where}: variant {variant.id!r} ({variant.file}) - ids and file names are unique."
+                )
+            ids.add(variant.id)
+            files.add(variant.file)
+        components[component.id] = component
+    return components
+
+
+def flat(components: Mapping[str, Component]) -> dict[str, ModelFile]:
+    """One ``ModelFile`` per variant, by variant id, in the catalogue's order."""
+    models: dict[str, ModelFile] = {}
+    for component in components.values():
+        for variant in component.variants:
+            models[variant.id] = ModelFile(
+                id=variant.id,
+                file=variant.file,
+                folder=component.folder,
+                url=variant.url,
+                bytes=variant.bytes,
+                licence=variant.licence,
+                role=variant.role,
+                default=variant.default,
+                templates=component.templates if variant.default else (),
+                optional_templates=component.optional_templates if variant.default else (),
+                component=component.id,
+                sha256=variant.sha256,
             )
-        if model.folder not in FOLDERS:
-            raise PlenioUserError(f"{where}: unknown model folder {model.folder!r}.")
-        if not _URL.fullmatch(model.url) or not model.url.endswith("/" + model.file):
-            raise PlenioUserError(
-                f"{where}: the URL must be a Hugging Face or GitHub release file URL ending in the file name."
-            )
-        if model.bytes < 0:
-            raise PlenioUserError(f"{where}: bytes must not be negative.")
-        if not model.default and (model.templates or model.optional_templates):
-            raise PlenioUserError(f"{where}: an alternative (default = false) is not used by templates.")
-        if set(model.templates) & set(model.optional_templates):
-            raise PlenioUserError(f"{where}: a template needs the file either always or optionally.")
-        models[model.id] = model
-        files.add(model.file)
     return models
 
 
+def parse_catalogue(data: Mapping[str, Any], source: str) -> dict[str, ModelFile]:
+    return flat(parse_components(data, source))
+
+
+def load_components(path: Path) -> dict[str, Component]:
+    return parse_components(read_toml(path), str(path))
+
+
 def load_catalogue(path: Path) -> dict[str, ModelFile]:
-    return parse_catalogue(read_toml(path), str(path))
+    return flat(load_components(path))
 
 
 def by_file(catalogue: Mapping[str, ModelFile]) -> dict[str, ModelFile]:

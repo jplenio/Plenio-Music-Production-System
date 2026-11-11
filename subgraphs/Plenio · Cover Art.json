@@ -209,7 +209,7 @@
        "models": [
         {
          "name": "flux-2-klein-4b.safetensors",
-         "url": "https://huggingface.co/Comfy-Org/flux2-klein/resolve/main/split_files/diffusion_models/flux-2-klein-4b.safetensors",
+         "url": "https://huggingface.co/Comfy-Org/Flux-2-Klein-4B/resolve/5b3abca5c0dc1ecd4eaf3340868d09063fc1c965/split_files/diffusion_models/flux-2-klein-4b.safetensors",
          "directory": "diffusion_models"
         }
        ]
@@ -277,7 +277,7 @@
        "models": [
         {
          "name": "qwen_3_4b.safetensors",
-         "url": "https://huggingface.co/Comfy-Org/flux2-klein/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors",
+         "url": "https://huggingface.co/Comfy-Org/Flux-2-Klein-4B/resolve/5b3abca5c0dc1ecd4eaf3340868d09063fc1c965/split_files/text_encoders/qwen_3_4b.safetensors",
          "directory": "text_encoders"
         }
        ]
@@ -328,7 +328,7 @@
        "models": [
         {
          "name": "flux2-vae.safetensors",
-         "url": "https://huggingface.co/Comfy-Org/flux2-dev/resolve/main/split_files/vae/flux2-vae.safetensors",
+         "url": "https://huggingface.co/Comfy-Org/Flux-2-Dev/resolve/9630c1b4b6e690497ae0c19bb6b1b35d4ebedcb7/split_files/vae/flux2-vae.safetensors",
          "directory": "vae"
         }
        ]

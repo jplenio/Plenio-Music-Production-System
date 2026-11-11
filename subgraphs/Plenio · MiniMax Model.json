@@ -260,7 +260,7 @@
        "models": [
         {
          "name": "minimax_music3_dit_fp16.safetensors",
-         "url": "https://huggingface.co/Comfy-Org/MiniMax-Music-3/resolve/main/diffusion_models/minimax_music3_dit_fp16.safetensors",
+         "url": "https://huggingface.co/Comfy-Org/MiniMax-Music-3/resolve/9e364ccd290a401561091fb441ed19cd7de92550/diffusion_models/minimax_music3_dit_fp16.safetensors",
          "directory": "diffusion_models"
         }
        ]
@@ -329,7 +329,7 @@
        "models": [
         {
          "name": "minimax_music3_text_encoder_pruned_int8_convrot.safetensors",
-         "url": "https://huggingface.co/Comfy-Org/MiniMax-Music-3/resolve/main/text_encoders/minimax_music3_text_encoder_pruned_int8_convrot.safetensors",
+         "url": "https://huggingface.co/Comfy-Org/MiniMax-Music-3/resolve/9e364ccd290a401561091fb441ed19cd7de92550/text_encoders/minimax_music3_text_encoder_pruned_int8_convrot.safetensors",
          "directory": "text_encoders"
         }
        ]
@@ -380,7 +380,7 @@
        "models": [
         {
          "name": "minimax_music3_dav.safetensors",
-         "url": "https://huggingface.co/Comfy-Org/MiniMax-Music-3/resolve/main/vae/minimax_music3_dav.safetensors",
+         "url": "https://huggingface.co/Comfy-Org/MiniMax-Music-3/resolve/9e364ccd290a401561091fb441ed19cd7de92550/vae/minimax_music3_dav.safetensors",
          "directory": "vae"
         }
        ]

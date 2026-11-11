@@ -11,7 +11,7 @@ from .. import __version__
 from ..core import features
 from ..core.dependencies import probe
 from ..core.errors import PlenioError
-from . import host, routes, song_api
+from . import host, routes, setup, song_api
 from .nodes import NODES
 
 log = logging.getLogger("plenio")
@@ -39,6 +39,8 @@ class PlenioExtension(ComfyExtension):
         routes.register(host.prompt_server_routes())
         # the Song API: songs made by other programs, the Plenio Player first (docs/design/party-songs.md)
         song_api.register(host.prompt_server_routes())
+        # Plenio Setup: the model plan and downloads of catalogue files, for a browser on this computer
+        setup.register(host.prompt_server_routes())
         try:
             config = host.load_config()
         except PlenioError as error:

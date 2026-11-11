@@ -13,9 +13,11 @@ from plenio.core.models import (
     Inventory,
     by_file,
     load_catalogue,
+    load_components,
     misplaced_file,
     model_roots,
     parse_catalogue,
+    parse_components,
     readiness,
     sibling_folders,
     size_text,
@@ -25,22 +27,39 @@ from plenio.core.models import (
 
 ROOT = Path(__file__).resolve().parents[2]
 CATALOGUE = load_catalogue(ROOT / "resources" / "models.toml")
+COMPONENTS = load_components(ROOT / "resources" / "models.toml")
+COMMIT = "0123456789abcdef0123456789abcdef01234567"
 
 
-def entry(**changes: Any) -> dict[str, Any]:
+def variant(**changes: Any) -> dict[str, Any]:
     base: dict[str, Any] = {
         "id": "demo",
         "file": "demo.safetensors",
-        "folder": "checkpoints",
-        "url": "https://huggingface.co/org/repo/resolve/main/checkpoints/demo.safetensors",
+        "url": f"https://huggingface.co/org/repo/resolve/{COMMIT}/checkpoints/demo.safetensors",
         "bytes": 10,
+        "sha256": "ab" * 32,
         "licence": "MIT",
         "role": "demo",
         "default": True,
+    }
+    base.update(changes)
+    return {k: v for k, v in base.items() if v is not None}
+
+
+def component(*variants: dict[str, Any], **changes: Any) -> dict[str, Any]:
+    base: dict[str, Any] = {
+        "id": "demo",
+        "title": "Demo model",
+        "folder": "checkpoints",
         "templates": ["1 · Demo"],
+        "variant": list(variants) or [variant()],
     }
     base.update(changes)
     return base
+
+
+def catalogue(*components: dict[str, Any]) -> dict[str, Any]:
+    return {"schema": "plenio.models/2", "component": list(components) or [component()]}
 
 
 def test_shipped_catalogue() -> None:
@@ -61,40 +80,129 @@ def test_shipped_catalogue() -> None:
     assert all(not m.templates and not m.optional_templates for m in CATALOGUE.values() if not m.default)
 
 
+def test_a_complete_entry_is_read_into_a_component_its_variant_and_the_flat_view() -> None:
+    found = parse_components(catalogue(), "test")["demo"]
+    assert found.default.file == "demo.safetensors" and found.default.hub == (
+        "org/repo",
+        COMMIT,
+        "checkpoints/demo.safetensors",
+    )
+    model = parse_catalogue(catalogue(), "test")["demo"]
+    assert (model.folder, model.templates, model.component) == ("checkpoints", ("1 · Demo",), "demo")
+    assert model.download_entry() == {
+        "name": "demo.safetensors",
+        "url": found.default.url,
+        "directory": "checkpoints",
+    }
+
+
+@pytest.mark.parametrize(
+    ("changes", "message"),
+    [
+        ({"file": "sub/demo.safetensors"}, "file name"),
+        ({"url": "https://example.com/demo.safetensors"}, "Hugging Face or GitHub release file URL"),
+        (
+            {"url": f"https://huggingface.co/org/repo/resolve/{COMMIT}/other.safetensors"},
+            "ending in the file name",
+        ),
+        # not pinned: a branch name can point at another file tomorrow
+        (
+            {"url": "https://huggingface.co/org/repo/resolve/main/checkpoints/demo.safetensors"},
+            "pinned to a full commit hash",
+        ),
+        ({"sha256": None}, "the size and the SHA-256"),
+        ({"sha256": "abc"}, "the size and the SHA-256"),
+        ({"bytes": 0}, "the size and the SHA-256"),
+        ({"bytes": -1}, "negative"),
+        ({"quality": 0}, "ranks from 1"),
+        ({"vram_min_gib": 12.0, "vram_full_gib": 8.0}, "vram_min_gib <= vram_full_gib"),
+        ({"licence": None}, "incomplete"),
+        ({"id": "Demo File"}, "lower-case identifier"),
+    ],
+)
+def test_bad_variants_are_refused(changes: dict[str, Any], message: str) -> None:
+    with pytest.raises(PlenioUserError, match=message):
+        parse_components(catalogue(component(variant(**changes))), "test")
+
+
+def test_a_draft_may_lack_what_the_tool_fills() -> None:
+    draft = variant(url="https://huggingface.co/org/repo/resolve/main/demo.safetensors", sha256=None, bytes=0)
+    found = parse_components(catalogue(component(draft)), "test", strict=False)["demo"].default
+    assert found.sha256 == "" and found.hub == ("org/repo", "main", "demo.safetensors")
+    release = variant(
+        file="model.ckpt",
+        url="https://github.com/org/repo/releases/download/v1.0.12/model.ckpt",
+    )
+    assert parse_components(catalogue(component(release)), "test")["demo"].default.hub is None
+
+
 @pytest.mark.parametrize(
     ("changes", "message"),
     [
         ({"folder": "somewhere"}, "unknown model folder"),
-        ({"file": "sub/demo.safetensors"}, "unique .safetensors or .bin or .ckpt file name"),
-        ({"url": "https://example.com/demo.safetensors"}, "Hugging Face or GitHub release file URL"),
-        (
-            {"url": "https://huggingface.co/org/repo/resolve/main/other.safetensors"},
-            "ending in the file name",
-        ),
-        ({"default": False}, "alternative"),
         ({"optional_templates": ["1 · Demo"]}, "either always or optionally"),
-        ({"bytes": -1}, "negative"),
-        ({"licence": None} | {"role": None}, "incomplete"),
+        ({"variant": []}, "at least one variant"),
+        ({"variant": [variant(default=False)]}, "exactly one variant is the default"),
+        ({"loader": {"node": "CheckpointLoaderSimple"}}, "names its node and its input"),
+        ({"title": None}, "incomplete"),
     ],
 )
-def test_bad_entries_are_refused(changes: dict[str, Any], message: str) -> None:
-    raw = entry(**changes)
-    raw = {k: v for k, v in raw.items() if v is not None}
+def test_bad_components_are_refused(changes: dict[str, Any], message: str) -> None:
+    raw = {k: v for k, v in component(**changes).items() if v is not None}
     with pytest.raises(PlenioUserError, match=message):
-        parse_catalogue({"schema": "plenio.models/1", "model": [raw]}, "test")
+        parse_components(catalogue(raw), "test")
 
 
-def test_duplicates_and_schema_are_refused() -> None:
+def test_duplicates_ranks_and_the_schema_are_refused() -> None:
+    other = variant(id="other", file="other.safetensors", url=variant()["url"].replace("demo", "other"))
+    two_defaults = component(variant(), other)
+    with pytest.raises(PlenioUserError, match="exactly one variant is the default"):
+        parse_components(catalogue(two_defaults), "t")
+    same_rank = component(variant(), {**other, "default": False})
+    with pytest.raises(PlenioUserError, match="same quality rank"):
+        parse_components(catalogue(same_rank), "t")
+    fine = component(variant(), {**other, "default": False, "quality": 2})
+    assert len(parse_components(catalogue(fine), "t")["demo"].variants) == 2
+    # one file name, or one id, in two components
+    again = component(variant(id="twin"), id="second")
+    with pytest.raises(PlenioUserError, match="ids and file names are unique"):
+        parse_components(catalogue(component(), again), "t")
     with pytest.raises(PlenioUserError, match="unique lower-case identifier"):
-        parse_catalogue(
-            {
-                "schema": "plenio.models/1",
-                "model": [entry(), entry(file="b.safetensors", url=entry()["url"].replace("demo", "b"))],
-            },
+        parse_components(
+            catalogue(
+                component(),
+                component(variant(id="x", file="x.safetensors", url=variant()["url"].replace("demo", "x"))),
+            ),
             "t",
         )
     with pytest.raises(PlenioUserError, match="expected schema"):
-        parse_catalogue({"schema": "x"}, "t")
+        parse_components({"schema": "plenio.models/1"}, "t")
+
+
+def test_the_shipped_catalogue_is_pinned_hashed_and_ranked() -> None:
+    assert len(COMPONENTS) == 12 and len(CATALOGUE) == 18
+    for found in COMPONENTS.values():
+        for item in found.variants:
+            hub = item.hub
+            assert hub is None or len(hub[1]) == 40, item.id  # no branch name
+            assert len(item.sha256) == 64 and item.bytes > 0, item.id
+            assert item.basis, item.id
+        ranked = sorted(found.variants, key=lambda v: v.quality)
+        # a better file never needs less graphics memory than a lesser one of its component
+        assert [v.vram_full_gib for v in ranked] == sorted(v.vram_full_gib for v in ranked), found.id
+    # every file of 1.6.0 is there, in its folder
+    files = by_file(CATALOGUE)
+    assert files["yue2_3b_int8_convrot.safetensors"].folder == "checkpoints"
+    assert files["model_bs_roformer_ep_17_sdr_9.6568.ckpt"].folder == "audio_separation"
+    assert COMPONENTS["yue2"].loader_node == "CheckpointLoaderSimple" and COMPONENTS["yue2"].accepts
+    # the repositories the hub renamed carry their current names
+    urls = " ".join(m.url for m in CATALOGUE.values())
+    assert (
+        "Comfy-Org/flux2-klein/" not in urls
+        and "vae-text-encorder" not in urls
+        and "Comfy-Org/flux2-dev/" not in urls
+    )
+    assert "/resolve/main/" not in urls
 
 
 def test_inventory_and_readiness(tmp_path: Path) -> None:
@@ -106,7 +214,7 @@ def test_inventory_and_readiness(tmp_path: Path) -> None:
         "pytorch_model.bin": 229072395,  # UniverSR: HQ 2 in every template's Master, with HQ mastering on
         "flux-2-klein-4b.safetensors": 7751105712,  # the cover art (on since 2026-10-23)
         "qwen_3_4b.safetensors": 8044982048,
-        "flux2-vae.safetensors": 336211292,
+        "flux2-vae.safetensors": 336213556,
     }
 
     def locate(folder: str, file: str) -> Path | None:
@@ -137,7 +245,7 @@ def test_inventory_and_readiness(tmp_path: Path) -> None:
     # the DAW template needs the same music model as the song template; no template needs a ComfyUI writer file
     # since 1.5.1 - the default writer is Gemma 4 12B, a GGUF the first song fetches (resources/assets.toml)
     assert daw.template == "5 · YuE2 · DAW" and daw.ready
-    assert not files["gemma4_e4b_it_fp8_scaled.safetensors"].default
+    assert not files["gemma4_e4b_it_fp8_scaled.safetensors"].templates  # its component is needed by none
     assert all(
         "gemma4_e4b_it_fp8_scaled.safetensors" not in {m.file for m in t.missing} for t in (song, cover, daw)
     )

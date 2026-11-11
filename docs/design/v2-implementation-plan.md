@@ -6,6 +6,131 @@ Tick a box when its acceptance line holds, in the commit that makes it hold. Do 
 
 ---
 
+## Model and effort strategy
+
+The goal is to maintain implementation quality while using model capacity
+and tokens economically. Apply this strategy throughout the plan.
+
+### Primary implementation model: Claude Opus 5.5
+
+Use **Claude Opus 5.5 at medium effort** for the normal implementation work:
+
+- Implement plan tasks in coherent, testable blocks.
+- Inspect the existing code and the relevant design sections before editing.
+- Write and run the tests required by the task and the project rules.
+- Fix ordinary test failures and regressions.
+- Update the plan, handover and documentation to reflect verified results.
+- Commit locally as required by the project rules.
+
+Use **high effort** for a particularly difficult implementation, a subtle
+regression, a complex integration, or a problem that remains unresolved
+after a reasonable investigation at medium effort. Return to medium for
+subsequent ordinary work.
+
+Do not use xhigh or max by default. If high effort is insufficient, follow
+the escalation procedure below.
+
+### Specialist model: Claude Fable 5.2
+
+Use **Claude Fable 5.2 at high effort** selectively for:
+
+- Independent reviews of high-impact changes and integration boundaries.
+- Architecture decisions with consequences across multiple components.
+- Difficult bugs or design conflicts that Opus has not resolved after a
+  reasonable, evidence-based investigation.
+- Reviews of security, access control, data integrity and compatibility
+  where a mistake could have significant consequences.
+
+Fable reviews should be focused. Give the reviewer the relevant plan and
+design sections, the applicable project rules, the changed files or commit
+range, and the specific risks to investigate. The reviewer may inspect
+related code and callers where necessary.
+
+By default, a review is read-only. Report concrete findings with their
+location, impact and a reproducible scenario. Distinguish confirmed defects
+from risks or hypotheses. If no significant issue is found, say so.
+
+Use Fable at medium effort only for tasks where previous project experience
+shows that it preserves the required quality. Do not use xhigh or max by
+default.
+
+### Review checkpoints
+
+Do not review every small commit with Fable. Group related changes into
+meaningful checkpoints. Use a targeted Fable review at least for:
+
+1. **After 2.7:** Setup routes, local access restrictions, input validation,
+   download lifecycle, errors and WebSocket events.
+2. **After 3.5:** Model Choice integration, generated templates and migration
+   of existing 1.x workflows, including preservation of users' model choices.
+3. **Before and after the critical parts of phase 5:** API v1 compatibility,
+   persistent jobs, API v2, token handling, route access and remote access.
+   A short pre-implementation review is sufficient; review the resulting
+   implementation after the related tasks are complete.
+4. **After the access-related parts of phase 6:** invitations, authentication,
+   roles, expiry and rate limiting.
+5. **Before release:** one focused review of the integrated changes,
+   outstanding findings, compatibility evidence and release gates.
+
+If a checkpoint is reached with incomplete prerequisites, state what has
+and has not been verified. Do not mark it as passed without evidence.
+
+Opus normally fixes confirmed findings. Escalate a fix to Fable when the
+problem remains difficult or when Opus cannot resolve it reliably.
+
+### Switching models and effort
+
+Prefer Opus as the main implementation session. When a Fable review is due:
+
+1. If this Claude Code environment supports starting a subagent with
+   Claude Fable 5.2, and the requested model and appropriate effort can be
+   selected and verified, use a focused Fable subagent for the review.
+   Continue only after reading its findings. Report the model and effort
+   actually used when they are available.
+
+2. If the required model or effort cannot be selected or verified for the
+   subagent, stop at a safe checkpoint and ask the owner in German to switch
+   the main session to **Claude Fable 5.2, high effort**. State the exact
+   review task and what the owner should do next.
+
+3. Once the Fable work is complete, record the findings and any necessary
+   handover. If further implementation is due and the main session is still
+   running Fable, stop and ask the owner to switch back to **Claude Opus 5.5,
+   medium effort**.
+
+4. If only the effort needs to change and the environment cannot change it
+   reliably, stop and ask the owner to make that change.
+
+Do not claim that a model or effort change has happened unless it has
+actually been applied. Do not silently substitute another model. If Fable
+is unavailable, explain this and wait for the owner's decision before
+treating a mandatory Fable checkpoint as complete.
+
+Use subagents only when they have a clear purpose. Avoid launching multiple
+overlapping reviews or repeatedly asking Fable to reread the entire project.
+
+### Handover and completion
+
+Before a requested model switch, leave the working tree and the handover in
+a clear state. Record:
+
+- The completed task or commit and the next task.
+- The relevant files and any uncommitted changes.
+- Checks run, their results, and checks not run.
+- Open findings, unresolved decisions and the precise review or problem.
+
+Follow the existing commit, privacy, download, GPU and compatibility rules.
+Do not commit a task as complete or tick its plan box unless its acceptance
+criteria have actually been verified.
+
+Continue through the assigned task or coherent work block until it is
+complete, unless a project stop condition, missing permission, required
+owner decision or model/effort switch requires a pause. Keep reports concise,
+but do not omit failures, uncertainty or unverified behavior.
+
+
+---
+
 ## How to work
 
 ### Rules that bind every task
@@ -124,19 +249,23 @@ Goal: PD §3.1 to §3.4. It ships with 2.0.0 (PD §3.5).
 
 ## Phase 2 - catalogue v2, the model plan, downloads
 
-- [ ] **2.1 Catalogue schema 2** (PD §5.1): `resources/models.toml` rewritten into components and variants, the assets of `resources/assets.toml` folded in; `plenio/core/models.py` parses `plenio.models/2` into `Component` and `Variant`; a reader for schema 1 is not kept (the file ships with the code).
+- [x] **2.1 Catalogue schema 2** (PD §5.1): `resources/models.toml` rewritten into components and variants, the assets of `resources/assets.toml` folded in; `plenio/core/models.py` parses `plenio.models/2` into `Component` and `Variant`; a reader for schema 1 is not kept (the file ships with the code).
+  *Done 2026-11-11, with one part moved:* the ComfyUI-format files are components and variants (12 components, 18 variants, the native Gemma writers added). `resources/assets.toml` (the multi-file ASR models, the writer's GGUFs) stays a file of its own until 2.5: the downloader is what reads both, and folding them in belongs to it.
   *Accept:* parser tests for every rejection (missing hash, unknown folder, URL not on the allowlist, two variants with one file name, a quality rank used twice in a component); `tools/build_graphs.py` and the System Check read the new structures; every 1.6.0 file is present with the same folder and file name.
-- [ ] **2.2 `tools/catalogue_check.py`**: reads the hub's model info and file headers (PD §5.1); `--write` fills `revision`, `bytes`, `sha256`, `gated`, `licence`, current repository names; `--check` fails on drift. Network access by the tool only, never by a test: tests use recorded answers.
+- [x] **2.2 `tools/catalogue_check.py`**: reads the hub's model info and file headers (PD §5.1); `--write` fills `revision`, `bytes`, `sha256`, `gated`, `licence`, current repository names; `--check` fails on drift. Network access by the tool only, never by a test: tests use recorded answers.
   *Accept:* after `--write` no entry points at `resolve/main`, every file has a SHA-256, the three renamed repositories carry their current names; a weekly CI job runs `--check`.
-- [ ] **2.3 `plenio/core/modelplan.py`**: `pick` as in PD §5.2, `plan(template, facts, catalogue, installed, config)` returning one `Pick` per component the template needs plus sizes, licences, disk need and warnings; `fingerprint`.
+- [x] **2.3 `plenio/core/modelplan.py`**: `pick` as in PD §5.2, `plan(template, facts, catalogue, installed, config)` returning one `Pick` per component the template needs plus sizes, licences, disk need and warnings; `fingerprint`.
   *Accept:* table tests: for 6, 8, 12, 16, 24 GiB and no GPU × the four preferences × three installed sets, the picks equal a reviewed table; property test: the pick is stable under changes of free memory and of the order of variants; the reason is never empty.
-- [ ] **2.4 Config** (`core/config.py`): `[models] prefer`, per-component pins, `downloads = "ask" | "auto" | "off"`, `[workers] device`; environment variables for each; unknown keys stay errors.
+- [x] **2.4 Config** (`core/config.py`): `[models] prefer`, per-component pins, `downloads = "ask" | "auto" | "off"`, `[workers] device`; environment variables for each; unknown keys stay errors.
   *Accept:* config tests; the generated table in `docs/user/configuration.md` (after D1) lists them.
-- [ ] **2.5 The downloader** (PD §5.4): `core/assets/fetch.py` gains a download manager (queue, two at once, pause, cancel, states, speed), the refusal classifier `core/assets/hub.py`, `open_hub` with the redirect handler, the disk-space check, the Windows rename retry. Standard library only in `core`; the token is read through a small adapter that uses `huggingface_hub` behind `dependencies.require`.
+- [x] **2.5 The downloader** (PD §5.4): `core/assets/fetch.py` gains a download manager (queue, two at once, pause, cancel, states, speed), the refusal classifier `core/assets/hub.py`, `open_hub` with the redirect handler, the disk-space check, the Windows rename retry. Standard library only in `core`; the token is read through a small adapter that uses `huggingface_hub` behind `dependencies.require`.
+  *Done 2026-11-11:* `core/assets/downloads.py` (the manager: one file per item, so a multi-file asset of `assets.toml` is several items - the two catalogues stay two files and meet here), `core/assets/hub.py` (refusals in words, `HubRedirects`), the token in `core/assets/access.py`. `ensure_asset` of 1.x (downloads during a run) is unchanged; 2.7 and phase 4 put the manager to use.
   *Accept:* tests against a local fake hub for every row of PD §5.4's table; the redirect test proves the token never reaches a second host; a resumed download after a killed process ends with the right hash; cancelling leaves a `.part` that the next start resumes.
-- [ ] **2.6 The gated flow, backend**: `check(repo, file, token)` returning the open step (no accept, pending, token lacks the right, ready); saving a token through `huggingface_hub.login`.
+- [x] **2.6 The gated flow, backend**: `check(repo, file, token)` returning the open step (no accept, pending, token lacks the right, ready); saving a token through `huggingface_hub.login`.
   *Accept:* tests for the four outcomes with recorded hub answers; no test and no log line prints a token (a test greps the captured log).
-- [ ] **2.7 Routes** (class `local`): `GET /plenio/setup/plan`, `POST /plenio/setup/downloads` (variant ids only), `GET/DELETE /plenio/setup/downloads[/{id}]`, `POST /plenio/setup/hub-token`, `POST /plenio/setup/check`; events `plenio.download` over ComfyUI's websocket.
+- [x] **2.7 Routes** (class `local`): `GET /plenio/setup/plan`, `POST /plenio/setup/downloads` (variant ids only), `GET/DELETE /plenio/setup/downloads[/{id}]`, `POST /plenio/setup/hub-token`, `POST /plenio/setup/check`; events `plenio.download` over ComfyUI's websocket.
+  *Done 2026-11-11:* `plenio/comfy/setup.py` over `core/setup_plan.py`; pause and resume are routes of their own. No route test drives a download through ComfyUI (catalogue URLs are fixed): the manager is tested against a local stand-in host, a real download through the routes is owed in phase 4.
+  *Review after 2.7 (Claude Fable 5.2, the main session; its effort setting could not be read):* two confirmed defects in the download manager (a file asked for again after it was deleted is not fetched; a file of the user's with the catalogued name and size but other content is deleted) and three risks (a `local` route does not look at the `Host` header; `plenio.download` events reach every websocket client; the `pending` step is unreachable). They are fixed before phase 3 builds on the routes; the checkpoint is passed when they are.
   *Accept:* a property test posts ids, paths and URLs: only catalogue ids start a download, and every target lies inside a registered model folder; the access test of 1.6 covers the routes.
 
 **Exit of phase 2:** from a Python shell inside ComfyUI, `plan("yue2-song")` on the owner's machine names the files the owner would choose, with reasons; a missing file can be downloaded, paused, resumed and verified through the routes.

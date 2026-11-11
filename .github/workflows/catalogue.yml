@@ -1,0 +1,19 @@
+name: Model catalogue
+
+# Once a week: is every file of resources/models.toml still where the catalogue says, with the same size and
+# hash, in a repository of the same name that is not gated? Reads headers only; downloads no model.
+on:
+  schedule:
+    - cron: "17 5 * * 1"
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: The catalogue is true to its hosts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: python tools/catalogue_check.py --check

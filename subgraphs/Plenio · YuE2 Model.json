@@ -219,7 +219,7 @@
        "models": [
         {
          "name": "yue2_3b_int8_convrot.safetensors",
-         "url": "https://huggingface.co/Comfy-Org/YuE2/resolve/main/checkpoints/yue2_3b_int8_convrot.safetensors",
+         "url": "https://huggingface.co/Comfy-Org/YuE2/resolve/2f76ca75e6ee094169de899cc7fc99d6887e2196/checkpoints/yue2_3b_int8_convrot.safetensors",
          "directory": "checkpoints"
         }
        ]

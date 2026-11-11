@@ -138,6 +138,8 @@ Both are Apache-2.0. On a card too small for the file, llama.cpp keeps the rest 
 
 **A GGUF runs on llama.cpp**, which ComfyUI does not bring: `winget install llama.cpp` (Windows), `brew install llama.cpp` (macOS), your distribution's package or `pip install llama-cpp-python` into ComfyUI's Python. Without it nothing is downloaded: a running app's Gemma 4 12B still writes, else ComfyUI's own Gemma text model if you have one - the node says so -, else the run stops and says what to do.
 
+**ComfyUI's own Gemma 4 files** (`models/text_encoders`, from [Comfy-Org/gemma-4](https://huggingface.co/Comfy-Org/gemma-4), Apache-2.0) write without llama.cpp: `gemma4_12b_int8_convrot` (12.1 GB, the 12B), `gemma4_e4b_it_fp8_scaled` (9.1 GB) and `gemma4_e2b_it_int8_convrot` (5.2 GB, for cards below 8 GB). The memory each needs is an estimate until measured.
+
 **Other writers:** *Writer model* lists every model - ComfyUI's lighter [`gemma4_e4b_it_fp8_scaled.safetensors`](https://huggingface.co/Comfy-Org/gemma-4/resolve/main/text_encoders/gemma4_e4b_it_fp8_scaled.safetensors) (9.1 GB, into `models/text_encoders`, no llama.cpp needed), any other GGUF, and the models of a running LM Studio, Ollama, llama.cpp ... - see [Local LLMs](concepts/local-llm.md). A workflow saved before keeps the writer it was saved with.
 
 ## Plenio assets

@@ -406,6 +406,21 @@ def soft_empty_cache() -> None:
     comfy.model_management.soft_empty_cache()
 
 
+def broadcast(event: str, data: dict[str, Any]) -> None:
+    """Send a custom message to every open ComfyUI page (a download's progress concerns all of them). Called
+    from any thread."""
+    from server import PromptServer
+
+    PromptServer.instance.send_sync(event, data)
+
+
+def model_folder(folder: str) -> Path | None:
+    """ComfyUI's own folder for a kind of model - the first one it registered for ``folder``, where a download
+    goes (``None``: this ComfyUI knows no such folder)."""
+    paths = _registered().get(folder) or []
+    return Path(paths[0]) if paths else None
+
+
 def send_event(event: str, data: dict[str, Any]) -> None:
     """Send a custom message to the browser that queued the prompt (``api.addEventListener`` in the frontend)."""
     from server import PromptServer

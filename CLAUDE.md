@@ -59,8 +59,13 @@ The Comfy Registry package starts nothing but `sys.executable` with Plenio's own
 
 ## State of the 2.0 work (update when it changes)
 
+A session that takes over reads `.claude/handover.md` first if it exists (local, untracked: machine paths, uncommitted work, next steps).
+
 - Done: phase 0.5 (tests 144 s to about 85 s), phase 1 (package boundary, gate, route classes, docs).
 - Done too: 0.1 stage timings in the record (`plenio/core/timings.py`), 0.2 `tools/bench.py` (the tool; no real-model run yet).
-- Next: phase 2 (catalogue schema 2, model plan, downloader, gated flow).
+- Done in phase 2: 2.1 catalogue schema 2 (`resources/models.toml`: components and variants, pinned and hashed; `assets.toml` still apart), 2.2 `tools/catalogue_check.py`, 2.3 `plenio/core/modelplan.py`, 2.4 the `[models]` and `[workers] device` settings.
+- Done too: 2.5 the download manager (`core/assets/downloads.py`, refusals in `hub.py`), 2.6 gated access and the token (`core/assets/access.py`).
+- Done too: 2.7 the Setup routes (`plenio/comfy/setup.py`: `/plenio/setup/*`, class `local`, events on ComfyUI's websocket).
+- Next: fix the findings of the review after 2.7 (listed at 2.7 in the plan); then phase 3 (Model Choice node).
 - Waiting for the owner's permission: `pytest-xdist` (0.5), the 12 GB native Gemma download (0.4), real-model benchmark runs on GPU 1 (0.2, 0.3).
 - The plan's boxes are the record of what is done; tick a box in the commit that makes its acceptance line hold.

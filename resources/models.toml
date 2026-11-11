@@ -1,207 +1,392 @@
-# Catalogue of the ComfyUI-format model files the Plenio templates load (schema plenio.models/1).
+# The model catalogue (schema plenio.models/2): the ComfyUI-format model files Plenio's templates load.
 #
-# One source of truth: tools/build_graphs.py writes the loaders' download entries
-# (properties.models) from it, the System Check lists what is installed, and the model guide
-# (docs/user/models.md) follows it. The files themselves are downloaded by ComfyUI (missing-model
-# dialog) or by hand - Plenio never downloads them.
+# A component is one thing a template needs; a variant is one file that can be it. One source of truth:
+# tools/build_graphs.py writes the loaders' download entries from it, the System Check lists what is installed,
+# the model plan (plenio/core/modelplan.py) chooses a variant per machine, and docs/user/models.md follows it.
 #
-#   default             a template's loader is set to this file (false: an alternative that the
-#                       System Check may recommend; choose it in the loader)
-#   templates           templates that need the file to run
+#   templates           templates that need the component to run (they load its default variant)
 #   optional_templates  templates in which only an optional (bypassed) block uses it
-#   bytes               file size where a public listing gave it (legacy toolkit models_config.json,
-#                       checked against the Hugging Face tree API on 2026-09-14); 0 = not recorded
+#   default             the variant the templates' loaders are set to (one per component)
+#   url                 pinned to a full commit; bytes and sha256 are the file's own
+#   quality, speed      ranks within the component (higher: better, faster)
+#   vram_min_gib        below this much graphics memory the file runs only with heavy offloading
+#   vram_full_gib       from this much on, its stage runs on the card
+#   basis               where the two thresholds come from: "estimate" or "measured <when, on what>"
+#
+# This file is written by tools/catalogue_check.py --write (revisions, sizes, hashes, repository names): edit
+# roles, licences, ranks and thresholds here; let the tool fill the rest.
 
-schema = "plenio.models/1"
+schema = "plenio.models/2"
 
-# --- YuE2 -------------------------------------------------------------------------------------
-
-[[model]]
-id = "yue2-3b-int8"
-file = "yue2_3b_int8_convrot.safetensors"
+[[component]]
+id = "yue2"
+title = "YuE2 music model"
 folder = "checkpoints"
-url = "https://huggingface.co/Comfy-Org/YuE2/resolve/main/checkpoints/yue2_3b_int8_convrot.safetensors"
-bytes = 3960938800
-licence = "CC BY-NC 4.0"
-role = "YuE2 3B music model (int8)"
-default = true
+loader = { node = "CheckpointLoaderSimple", input = "ckpt_name" }
+accepts = "yue2-checkpoint"
 templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "5 · YuE2 · DAW"]
 
-[[model]]
-id = "yue2-3b-bf16"
-file = "yue2_3b_bf16.safetensors"
-folder = "checkpoints"
-url = "https://huggingface.co/Comfy-Org/YuE2/resolve/main/checkpoints/yue2_3b_bf16.safetensors"
-bytes = 7799983228
-licence = "CC BY-NC 4.0"
-role = "YuE2 3B music model (bf16, alternative)"
-default = false
-templates = []
+  [[component.variant]]
+  id = "yue2-3b-int8"
+  file = "yue2_3b_int8_convrot.safetensors"
+  url = "https://huggingface.co/Comfy-Org/YuE2/resolve/2f76ca75e6ee094169de899cc7fc99d6887e2196/checkpoints/yue2_3b_int8_convrot.safetensors"
+  bytes = 3960938800
+  sha256 = "96fe199377309001ed8cd26a944baeee8cc31a20ba7c36d1d3c0a7e1f4149db6"
+  licence = "CC BY-NC 4.0"
+  role = "YuE2 3B music model (int8)"
+  default = true
+  gated = false
+  quality = 2
+  speed = 3
+  vram_min_gib = 6.0
+  vram_full_gib = 9.0
+  basis = "runs on 16 GB (measured 2026-10, RTX 5060 Ti); the thresholds: estimate"
 
-[[model]]
-id = "yue2-instrumental-lora"
-file = "ar_lora_inst_v3abc_comfyui.safetensors"
+  [[component.variant]]
+  id = "yue2-3b-bf16"
+  file = "yue2_3b_bf16.safetensors"
+  url = "https://huggingface.co/Comfy-Org/YuE2/resolve/2f76ca75e6ee094169de899cc7fc99d6887e2196/checkpoints/yue2_3b_bf16.safetensors"
+  bytes = 7799983228
+  sha256 = "33765adbf9813c9a50318218760b2fd819a319862460a04884607581961c6fee"
+  licence = "CC BY-NC 4.0"
+  role = "YuE2 3B music model (bf16, alternative)"
+  default = false
+  gated = false
+  quality = 3
+  speed = 2
+  vram_min_gib = 12.0
+  vram_full_gib = 20.0
+  basis = "estimate (the hardware table of 1.6)"
+
+[[component]]
+id = "yue2-instrumental-adapter"
+title = "YuE2 instrumental adapter (LoRA)"
 folder = "loras"
-url = "https://huggingface.co/Mothersuperior/YuE2-instrumental-cot-full-loras/resolve/947f2f4b28978b2b6c3e316e6a87925c76bf3c4b/ar_lora_inst_v3abc_comfyui.safetensors"
-bytes = 0
-licence = "CC BY-NC 4.0"
-role = "YuE2 instrumental adapter (community LoRA)"
-default = true
+loader = { node = "LoraLoader", input = "lora_name" }
 templates = ["2 · YuE2 · Cover"]
 optional_templates = ["1 · YuE2 · Song", "5 · YuE2 · DAW"]
 
-[[model]]
+  [[component.variant]]
+  id = "yue2-instrumental-lora"
+  file = "ar_lora_inst_v3abc_comfyui.safetensors"
+  url = "https://huggingface.co/Mothersuperior/YuE2-instrumental-cot-full-loras/resolve/947f2f4b28978b2b6c3e316e6a87925c76bf3c4b/ar_lora_inst_v3abc_comfyui.safetensors"
+  bytes = 212891736
+  sha256 = "de6a11d5701df103a191c87dc73115266e2420f3834739319dec5c24d2119f31"
+  licence = "CC BY-NC 4.0"
+  role = "YuE2 instrumental adapter (community LoRA)"
+  default = true
+  gated = false
+  quality = 1
+  speed = 1
+  vram_min_gib = 0.0
+  vram_full_gib = 0.0
+  basis = "loads with the YuE2 model"
+
+[[component]]
 id = "sheetsage2"
-file = "sheetsage2_bf16.safetensors"
+title = "SheetSage2 transcription"
 folder = "audio_encoders"
-url = "https://huggingface.co/Comfy-Org/YuE2/resolve/main/audio_encoders/sheetsage2_bf16.safetensors"
-bytes = 1386868122
-licence = "CC BY-NC 4.0"
-role = "SheetSage2 transcription (score of the source, Check Vocals)"
-default = true
 templates = ["2 · YuE2 · Cover"]
 
-# --- Audio HQ 2 and Refine: audio super-resolution (HQ 2 runs with HQ mastering on: Enhance & Master) --
+  [[component.variant]]
+  id = "sheetsage2"
+  file = "sheetsage2_bf16.safetensors"
+  url = "https://huggingface.co/Comfy-Org/YuE2/resolve/2f76ca75e6ee094169de899cc7fc99d6887e2196/audio_encoders/sheetsage2_bf16.safetensors"
+  bytes = 1386868122
+  sha256 = "5fd960ce3df281e3f3a889d174584d88f96247711480cf96377b12d7e8b6adc5"
+  licence = "CC BY-NC 4.0"
+  role = "SheetSage2 transcription (score of the source, Check Vocals)"
+  default = true
+  gated = false
+  quality = 1
+  speed = 1
+  vram_min_gib = 0.0
+  vram_full_gib = 4.0
+  basis = "estimate (the hardware table of 1.6)"
 
-[[model]]
-id = "universr-audio"
-file = "pytorch_model.bin"
+[[component]]
+id = "audio-sr"
+title = "UniverSR audio super-resolution"
 folder = "audio_sr"
-url = "https://huggingface.co/woongzip1/universr-audio/resolve/main/pytorch_model.bin"
-bytes = 229072395
-licence = "CC BY 4.0 (weights); MIT (inference code)"
-role = "UniverSR audio super-resolution (8/12/16/24 kHz -> 48 kHz, vocoder-free flow matching): HQ 2 · Regenerate Highs in every template's Master when HQ mastering is on (on by default in Enhance & Master), and Refine"
-default = true
 templates = ["4 · Enhance & Master"]
 optional_templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song", "5 · YuE2 · DAW"]
 
-# --- Stems: BS-RoFormer 4-stem separation (optional stage: the Master's stems switch, off) ------
+  [[component.variant]]
+  id = "universr-audio"
+  file = "pytorch_model.bin"
+  url = "https://huggingface.co/woongzip1/universr-audio/resolve/1c3294844285af851b6ffa56cbde4e43cd41fc2b/pytorch_model.bin"
+  bytes = 229072395
+  sha256 = "eb99f98943cc32fa82226c2da14b32b5d890416070af4946acbce442b30dc20b"
+  licence = "CC BY 4.0 (weights); MIT (inference code)"
+  role = "UniverSR audio super-resolution (8/12/16/24 kHz -> 48 kHz, vocoder-free flow matching): HQ 2 · Regenerate Highs in every template's Master when HQ mastering is on (on by default in Enhance & Master), and Refine"
+  default = true
+  gated = false
+  quality = 1
+  speed = 1
+  vram_min_gib = 0.0
+  vram_full_gib = 2.0
+  basis = "estimate (the hardware table of 1.6)"
 
-[[model]]
-id = "bs-roformer-4stem"
-file = "model_bs_roformer_ep_17_sdr_9.6568.ckpt"
+[[component]]
+id = "stems"
+title = "BS-RoFormer stem separation"
 folder = "audio_separation"
-url = "https://github.com/ZFTurbo/Music-Source-Separation-Training/releases/download/v1.0.12/model_bs_roformer_ep_17_sdr_9.6568.ckpt"
-bytes = 527385512
-licence = "MIT (trainer); trained on MUSDB18-HQ, whose dataset terms are research-oriented"
-role = "BS-RoFormer 4-stem separation (vocals, drums, bass, other; MUSDB18-HQ SDR 9.66): the Master's stems, the vocal stem Export Release hears the lyrics on (without it: the song), and a cover's Sung Pitch"
-default = true
 templates = []
 optional_templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song", "4 · Enhance & Master", "5 · YuE2 · DAW"]
 
-# --- writer -------------------------------------------------------------------------------------
-# The templates' writer since 1.5.1 is Gemma 4 12B as a GGUF (Local LLM; resources/assets.toml, plenio/core/llm/gemma.py),
-# not a ComfyUI-format file. Gemma 4 E4B stays the lighter writer of ComfyUI's Generate Text: choose it as writer model.
+  [[component.variant]]
+  id = "bs-roformer-4stem"
+  file = "model_bs_roformer_ep_17_sdr_9.6568.ckpt"
+  url = "https://github.com/ZFTurbo/Music-Source-Separation-Training/releases/download/v1.0.12/model_bs_roformer_ep_17_sdr_9.6568.ckpt"
+  bytes = 527385512
+  sha256 = "3e9daecd70aaed5b5a0d1f861cc4d77eaa45afb3fc6301b1cf32c1be0f5868fb"
+  licence = "MIT (trainer); trained on MUSDB18-HQ, whose dataset terms are research-oriented"
+  role = "BS-RoFormer 4-stem separation (vocals, drums, bass, other; MUSDB18-HQ SDR 9.66): the Master's stems, the vocal stem Export Release hears the lyrics on (without it: the song), and a cover's Sung Pitch"
+  default = true
+  gated = false
+  quality = 1
+  speed = 1
+  vram_min_gib = 0.0
+  vram_full_gib = 4.0
+  basis = "estimate (the hardware table of 1.6)"
 
-[[model]]
-id = "gemma4-e4b-writer"
-file = "gemma4_e4b_it_fp8_scaled.safetensors"
+[[component]]
+id = "writer-native"
+title = "The writer as a ComfyUI text model (Gemma 4)"
 folder = "text_encoders"
-url = "https://huggingface.co/Comfy-Org/gemma-4/resolve/main/text_encoders/gemma4_e4b_it_fp8_scaled.safetensors"
-bytes = 9057782194
-licence = "Apache-2.0"
-role = "Gemma 4 E4B, the lighter writer of ComfyUI's Generate Text (choose it as writer model; the default writer is Gemma 4 12B)"
-default = false
-
-# --- MiniMax Music 3 ------------------------------------------------------------------------------
-
-[[model]]
-id = "minimax-dit-fp16"
-file = "minimax_music3_dit_fp16.safetensors"
-folder = "diffusion_models"
-url = "https://huggingface.co/Comfy-Org/MiniMax-Music-3/resolve/main/diffusion_models/minimax_music3_dit_fp16.safetensors"
-bytes = 4914197682
-licence = "MiniMax-Music3 Community License"
-role = "MiniMax Music 3 diffusion model (fp16)"
-default = true
-templates = ["3 · MiniMax · Song"]
-
-[[model]]
-id = "minimax-dit-int8"
-file = "minimax_music3_dit_int8_convrot.safetensors"
-folder = "diffusion_models"
-url = "https://huggingface.co/Comfy-Org/MiniMax-Music-3/resolve/main/diffusion_models/minimax_music3_dit_int8_convrot.safetensors"
-bytes = 2502161682
-licence = "MiniMax-Music3 Community License"
-role = "MiniMax Music 3 diffusion model (int8, alternative for smaller GPUs)"
-default = false
+loader = { node = "CLIPLoader", input = "clip_name" }
 templates = []
 
-[[model]]
-id = "minimax-text-encoder-int8"
-file = "minimax_music3_text_encoder_pruned_int8_convrot.safetensors"
-folder = "text_encoders"
-url = "https://huggingface.co/Comfy-Org/MiniMax-Music-3/resolve/main/text_encoders/minimax_music3_text_encoder_pruned_int8_convrot.safetensors"
-bytes = 9196611886
-licence = "MiniMax-Music3 Community License"
-role = "MiniMax Music 3 text encoder (pruned, int8)"
-default = true
+  [[component.variant]]
+  id = "gemma4-e4b-writer"
+  file = "gemma4_e4b_it_fp8_scaled.safetensors"
+  url = "https://huggingface.co/Comfy-Org/gemma-4/resolve/63d0f7c476756b88910170c1df75e2384ea1af31/text_encoders/gemma4_e4b_it_fp8_scaled.safetensors"
+  bytes = 9057782194
+  sha256 = "bf0b4fa2e41a25684dc9e9b256cd505564f02fed09be3da95ce024e653e2c52b"
+  licence = "Apache-2.0"
+  role = "Gemma 4 E4B, the lighter writer of ComfyUI's Generate Text (choose it as writer model; the default writer is Gemma 4 12B)"
+  default = true
+  gated = false
+  quality = 2
+  speed = 2
+  vram_min_gib = 8.0
+  vram_full_gib = 11.5
+  basis = "estimate (the hardware table of 1.6)"
+
+  [[component.variant]]
+  id = "gemma4-12b-writer-int8"
+  file = "gemma4_12b_int8_convrot.safetensors"
+  url = "https://huggingface.co/Comfy-Org/gemma-4/resolve/63d0f7c476756b88910170c1df75e2384ea1af31/text_encoders/gemma4_12b_int8_convrot.safetensors"
+  bytes = 12055234634
+  sha256 = "bf77dc0b435c487a638909d8f2ccf5a7e4c9838e7bc56545ea6e251a603c5793"
+  licence = "Apache-2.0"
+  role = "Gemma 4 12B as a ComfyUI text model (int8): the writer where no GGUF runtime is installed"
+  default = false
+  gated = false
+  quality = 3
+  speed = 1
+  vram_min_gib = 11.5
+  vram_full_gib = 15.5
+  basis = "estimate (not measured)"
+
+  [[component.variant]]
+  id = "gemma4-e2b-writer-int8"
+  file = "gemma4_e2b_it_int8_convrot.safetensors"
+  url = "https://huggingface.co/Comfy-Org/gemma-4/resolve/63d0f7c476756b88910170c1df75e2384ea1af31/text_encoders/gemma4_e2b_it_int8_convrot.safetensors"
+  bytes = 5199997904
+  sha256 = "efeca0fcad2f863e5ed0a75e3af952b72bc963604c1dda6d20aee87a32b17566"
+  licence = "Apache-2.0"
+  role = "Gemma 4 E2B as a ComfyUI text model (int8): the smallest writer, for cards below 8 GB"
+  default = false
+  gated = false
+  quality = 1
+  speed = 3
+  vram_min_gib = 0.0
+  vram_full_gib = 7.5
+  basis = "estimate (not measured)"
+
+[[component]]
+id = "minimax-dit"
+title = "MiniMax Music 3 diffusion model"
+folder = "diffusion_models"
+loader = { node = "UNETLoader", input = "unet_name" }
 templates = ["3 · MiniMax · Song"]
 
-[[model]]
+  [[component.variant]]
+  id = "minimax-dit-fp16"
+  file = "minimax_music3_dit_fp16.safetensors"
+  url = "https://huggingface.co/Comfy-Org/MiniMax-Music-3/resolve/9e364ccd290a401561091fb441ed19cd7de92550/diffusion_models/minimax_music3_dit_fp16.safetensors"
+  bytes = 4914197682
+  sha256 = "45494a2b6b69af115902ff28eaf54118d19067aa54da01000f3e3efce7ba0e34"
+  licence = "MiniMax-Music3 Community License"
+  role = "MiniMax Music 3 diffusion model (fp16)"
+  default = true
+  gated = false
+  quality = 3
+  speed = 2
+  vram_min_gib = 11.5
+  vram_full_gib = 15.5
+  basis = "estimate (the hardware table of 1.6)"
+
+  [[component.variant]]
+  id = "minimax-dit-int8"
+  file = "minimax_music3_dit_int8_convrot.safetensors"
+  url = "https://huggingface.co/Comfy-Org/MiniMax-Music-3/resolve/9e364ccd290a401561091fb441ed19cd7de92550/diffusion_models/minimax_music3_dit_int8_convrot.safetensors"
+  bytes = 2502161682
+  sha256 = "d6b959633e69899f99f3a92d6741c0fe79f26958a30811e50e372ef978b24d5f"
+  licence = "MiniMax-Music3 Community License"
+  role = "MiniMax Music 3 diffusion model (int8, alternative for smaller GPUs)"
+  default = false
+  gated = false
+  quality = 2
+  speed = 3
+  vram_min_gib = 6.0
+  vram_full_gib = 7.5
+  basis = "estimate (the hardware table of 1.6)"
+
+[[component]]
+id = "minimax-text-encoder"
+title = "MiniMax Music 3 text encoder"
+folder = "text_encoders"
+loader = { node = "CLIPLoader", input = "clip_name" }
+templates = ["3 · MiniMax · Song"]
+
+  [[component.variant]]
+  id = "minimax-text-encoder-int8"
+  file = "minimax_music3_text_encoder_pruned_int8_convrot.safetensors"
+  url = "https://huggingface.co/Comfy-Org/MiniMax-Music-3/resolve/9e364ccd290a401561091fb441ed19cd7de92550/text_encoders/minimax_music3_text_encoder_pruned_int8_convrot.safetensors"
+  bytes = 9196611886
+  sha256 = "010b7416d2336a08c711bc22ee65849c9623069ddb7d89bec011a75699e52014"
+  licence = "MiniMax-Music3 Community License"
+  role = "MiniMax Music 3 text encoder (pruned, int8)"
+  default = true
+  gated = false
+  quality = 1
+  speed = 1
+  vram_min_gib = 7.5
+  vram_full_gib = 11.5
+  basis = "estimate (the hardware table of 1.6)"
+
+[[component]]
 id = "minimax-vae"
-file = "minimax_music3_dav.safetensors"
+title = "MiniMax Music 3 audio VAE"
 folder = "vae"
-url = "https://huggingface.co/Comfy-Org/MiniMax-Music-3/resolve/main/vae/minimax_music3_dav.safetensors"
-bytes = 216696128
-licence = "MiniMax-Music3 Community License"
-role = "MiniMax Music 3 audio VAE"
-default = true
+loader = { node = "VAELoader", input = "vae_name" }
 templates = ["3 · MiniMax · Song"]
 
-# --- Cover Art: FLUX.2 Klein 4B (distilled, 4 steps) - on in the song templates since 2026-10-23 (switch: HQ Mastering & Cover Art) ----
+  [[component.variant]]
+  id = "minimax-vae"
+  file = "minimax_music3_dav.safetensors"
+  url = "https://huggingface.co/Comfy-Org/MiniMax-Music-3/resolve/9e364ccd290a401561091fb441ed19cd7de92550/vae/minimax_music3_dav.safetensors"
+  bytes = 216696128
+  sha256 = "2a32155b769be01445fcc2a8663b910fc9e1751e18dc1c3ec528064512d9ef0c"
+  licence = "MiniMax-Music3 Community License"
+  role = "MiniMax Music 3 audio VAE"
+  default = true
+  gated = false
+  quality = 1
+  speed = 1
+  vram_min_gib = 0.0
+  vram_full_gib = 1.0
+  basis = "estimate (the hardware table of 1.6)"
 
-[[model]]
-id = "flux2-klein-4b"
-file = "flux-2-klein-4b.safetensors"
+[[component]]
+id = "flux2-klein"
+title = "FLUX.2 Klein image model (cover art)"
 folder = "diffusion_models"
-url = "https://huggingface.co/Comfy-Org/flux2-klein/resolve/main/split_files/diffusion_models/flux-2-klein-4b.safetensors"
-bytes = 7751105712
-licence = "Apache-2.0"
-role = "FLUX.2 Klein 4B image model (distilled, cover art)"
-default = true
+loader = { node = "UNETLoader", input = "unet_name" }
 templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song", "5 · YuE2 · DAW"]
 
-[[model]]
-id = "flux2-klein-4b-fp8"
-file = "flux-2-klein-4b-fp8.safetensors"
-folder = "diffusion_models"
-url = "https://huggingface.co/black-forest-labs/FLUX.2-klein-4b-fp8/resolve/5b4408e59397a4a37ccb46afe426d8ed86379441/flux-2-klein-4b-fp8.safetensors"
-bytes = 4070624520
-licence = "Apache-2.0"
-role = "FLUX.2 Klein 4B image model (fp8, alternative for smaller GPUs)"
-default = false
-templates = []
+  [[component.variant]]
+  id = "flux2-klein-4b"
+  file = "flux-2-klein-4b.safetensors"
+  url = "https://huggingface.co/Comfy-Org/Flux-2-Klein-4B/resolve/5b3abca5c0dc1ecd4eaf3340868d09063fc1c965/split_files/diffusion_models/flux-2-klein-4b.safetensors"
+  bytes = 7751105712
+  sha256 = "ec3d4e733a771f61c052fb4856c48b336c55eaf2c65487c2a1faeb9bbda7a343"
+  licence = "Apache-2.0"
+  role = "FLUX.2 Klein 4B image model (distilled, cover art)"
+  default = true
+  gated = false
+  quality = 3
+  speed = 2
+  vram_min_gib = 11.5
+  vram_full_gib = 15.5
+  basis = "estimate (the hardware table of 1.6)"
 
-[[model]]
+  [[component.variant]]
+  id = "flux2-klein-4b-fp8"
+  file = "flux-2-klein-4b-fp8.safetensors"
+  url = "https://huggingface.co/black-forest-labs/FLUX.2-klein-4b-fp8/resolve/5b4408e59397a4a37ccb46afe426d8ed86379441/flux-2-klein-4b-fp8.safetensors"
+  bytes = 4070624520
+  sha256 = "97ed34fe0567e436200f2faee3939b88f2b5d99f8af2a4dc16532c4245c0ccb6"
+  licence = "Apache-2.0"
+  role = "FLUX.2 Klein 4B image model (fp8, alternative for smaller GPUs)"
+  default = false
+  gated = false
+  quality = 2
+  speed = 3
+  vram_min_gib = 6.0
+  vram_full_gib = 7.5
+  basis = "estimate (the hardware table of 1.6)"
+
+[[component]]
 id = "flux2-text-encoder"
-file = "qwen_3_4b.safetensors"
+title = "FLUX.2 Klein text encoder (Qwen3 4B)"
 folder = "text_encoders"
-url = "https://huggingface.co/Comfy-Org/flux2-klein/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors"
-bytes = 8044982048
-licence = "Apache-2.0"
-role = "Qwen3 4B text encoder of FLUX.2 Klein"
-default = true
+loader = { node = "CLIPLoader", input = "clip_name" }
 templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song", "5 · YuE2 · DAW"]
 
-[[model]]
-id = "flux2-text-encoder-fp4"
-file = "qwen_3_4b_fp4_flux2.safetensors"
-folder = "text_encoders"
-url = "https://huggingface.co/Comfy-Org/vae-text-encorder-for-flux-klein-4b/resolve/5f526678002e43af5551dadb73ce2e8c91b43afe/split_files/text_encoders/qwen_3_4b_fp4_flux2.safetensors"
-bytes = 3848213998
-licence = "Apache-2.0"
-role = "Qwen3 4B text encoder of FLUX.2 Klein (fp4, alternative for smaller GPUs)"
-default = false
-templates = []
+  [[component.variant]]
+  id = "flux2-text-encoder"
+  file = "qwen_3_4b.safetensors"
+  url = "https://huggingface.co/Comfy-Org/Flux-2-Klein-4B/resolve/5b3abca5c0dc1ecd4eaf3340868d09063fc1c965/split_files/text_encoders/qwen_3_4b.safetensors"
+  bytes = 8044982048
+  sha256 = "6c671498573ac2f7a5501502ccce8d2b08ea6ca2f661c458e708f36b36edfc5a"
+  licence = "Apache-2.0"
+  role = "Qwen3 4B text encoder of FLUX.2 Klein"
+  default = true
+  gated = false
+  quality = 3
+  speed = 2
+  vram_min_gib = 11.5
+  vram_full_gib = 15.5
+  basis = "estimate (the hardware table of 1.6)"
 
-[[model]]
+  [[component.variant]]
+  id = "flux2-text-encoder-fp4"
+  file = "qwen_3_4b_fp4_flux2.safetensors"
+  url = "https://huggingface.co/Comfy-Org/Flux-2-Klein-4B/resolve/5f526678002e43af5551dadb73ce2e8c91b43afe/split_files/text_encoders/qwen_3_4b_fp4_flux2.safetensors"
+  bytes = 3848213998
+  sha256 = "3eab03a77adb0ee5304a4e677d5c10ac22f9049c1d7c894adca4f8bb39206ca8"
+  licence = "Apache-2.0"
+  role = "Qwen3 4B text encoder of FLUX.2 Klein (fp4, alternative for smaller GPUs)"
+  default = false
+  gated = false
+  quality = 2
+  speed = 3
+  vram_min_gib = 6.0
+  vram_full_gib = 7.5
+  basis = "estimate (the hardware table of 1.6)"
+
+[[component]]
 id = "flux2-vae"
-file = "flux2-vae.safetensors"
+title = "FLUX.2 image VAE"
 folder = "vae"
-url = "https://huggingface.co/Comfy-Org/flux2-dev/resolve/main/split_files/vae/flux2-vae.safetensors"
-bytes = 336211292
-licence = "Apache-2.0"
-role = "FLUX.2 image VAE"
-default = true
+loader = { node = "VAELoader", input = "vae_name" }
 templates = ["1 · YuE2 · Song", "2 · YuE2 · Cover", "3 · MiniMax · Song", "5 · YuE2 · DAW"]
+
+  [[component.variant]]
+  id = "flux2-vae"
+  file = "flux2-vae.safetensors"
+  url = "https://huggingface.co/Comfy-Org/Flux-2-Dev/resolve/9630c1b4b6e690497ae0c19bb6b1b35d4ebedcb7/split_files/vae/flux2-vae.safetensors"
+  bytes = 336213556
+  sha256 = "d64f3a68e1cc4f9f4e29b6e0da38a0204fe9a49f2d4053f0ec1fa1ca02f9c4b5"
+  licence = "Apache-2.0"
+  role = "FLUX.2 image VAE"
+  default = true
+  gated = false
+  quality = 1
+  speed = 1
+  vram_min_gib = 0.0
+  vram_full_gib = 1.0
+  basis = "estimate (the hardware table of 1.6)"

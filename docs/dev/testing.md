@@ -57,6 +57,7 @@ Put `cover_source.flac` and `browser-check.flac` (any short audio) into `<dir>/i
 
 ## Generated files
 
+- The model catalogue's revisions, sizes and hashes: `tools/catalogue_check.py --write` (reads the hosts' headers; `--check` compares, weekly in the CI).
 - Templates and blueprints: `tools/build_graphs.py` (reads `resources/models.toml` for the loaders' download entries); never edit the JSON by hand.
 - Thumbnails: `<python with Pillow> tools/build_thumbnails.py` writes `example_workflows/<template>.jpg`.
 

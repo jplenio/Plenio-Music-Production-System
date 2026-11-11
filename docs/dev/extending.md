@@ -43,7 +43,7 @@ come off only with the owner's verdict.
 
 ## New model file
 
-One entry in `resources/models.toml` (file, folder, pinned URL, size, licence, role, templates). `tools/build_graphs.py` writes the loader's download entry from it; the System Check lists it; `docs/user/models.md` must name it (test). A non-commercial file also needs a `MODEL_LICENCES` entry (test above).
+One variant in `resources/models.toml` (schema `plenio.models/2`): in the component it can stand for, or in a new component (folder, loader, templates) - with its file, URL, licence, role, quality and speed ranks and the graphics memory it needs (`basis` says whether measured). Then `python tools/catalogue_check.py --write` pins the URL to a commit and fills size and SHA-256 from the host's headers (no download). `tools/build_graphs.py` writes the loader's download entry from it; the System Check lists it; `docs/user/models.md` must name it (test). A non-commercial file also needs a `MODEL_LICENCES` entry (test above).
 
 ## New score operation
 

@@ -6,10 +6,13 @@ All notable changes of the current version and the one before. Versions follow s
 
 ### Added
 
+- **A model plan** (`plenio/core/modelplan.py`): for every model a template needs, Plenio works out which file suits the graphics card - the best that runs on it, keeping an installed file that is nearly as good - and says why in a sentence. `[models] prefer` (`balanced`, `quality`, `speed`, `small`) and `[models.pins]` in `config.toml` override it. The memory figures are estimates until measured; the plan is not yet used by the templates.
+- **A download manager for model files** (`plenio/core/assets/downloads.py`): queue, two at a time, pause, resume from a partial file, size and SHA-256 checked before a file is put in place, and every refusal of the host in words - terms to accept, a missing token, a moved file, a busy host, a full disk. A Hugging Face token is sent to huggingface.co only, never along a redirect. Not yet reachable from the interface.
 - **Where a song's time went**: the release record says how many seconds each group of the template took, how much of that ComfyUI spent loading models, and the peak memory on the graphics card (`timings`, `plenio.timings/1`). A record without it reads as before.
 
 ### Changed
 
+- **Every model file is pinned and has its hash.** The model catalogue now lists components and their variants (`resources/models.toml`, schema 2): each file's link points at a fixed commit and carries its size and SHA-256, read from the host's headers by `tools/catalogue_check.py` and checked weekly. Twelve links pointed at a branch before; three named repositories Hugging Face has renamed since.
 - **The Comfy Registry package starts no other program.** Plenio now comes in two forms. The package of the ComfyUI Manager and `comfy node install` starts nothing but ComfyUI's own Python with Plenio's own modules - the lyrics ASR worker, the Plenio Player opened from ComfyUI, llama-cpp-python for a GGUF file. Three conveniences that start another program moved into the *Studio add-on* (`plenio/addons`), which a `git clone` and the release zip carry: the player starting ComfyUI, an installed `llama-server` running a GGUF file, and *Open the folder* opening the file manager. Without the add-on each says what to do instead: the player finds the ComfyUI you start and says so, GGUF models run in LM Studio, Ollama or a `llama-server` you started (or with llama-cpp-python, else ComfyUI's own Gemma writes), and *Open the folder* shows the path with a *Copy* button. **0 · System Check** says which form is installed; `PLENIO_ADDONS=0` switches the add-on off. A check on the packed zip (`tools/package_gate.py`, in the CI) fails the build if a launch site comes back. [Two ways to install](docs/user/getting-started.md#two-ways-to-install), [SECURITY.md](SECURITY.md#programs-plenio-starts).
 - ***Open the folder* opens the folder**, no longer with the file selected in it: selecting needed a command line built as one string. Explorer now gets the folder as one argument.
 - **Workers run on ComfyUI's own Python only**: the worker protocol no longer takes another interpreter.
@@ -17,6 +20,7 @@ All notable changes of the current version and the one before. Versions follow s
 
 ### Fixed
 
+- **The FLUX.2 VAE no longer counts as incomplete**: the catalogue had its size wrong by 2 kB, so the System Check and the API's `/models` said *size differs* for a correct file and the cover-art templates were *not ready*.
 - **The Plenio Player opens from ComfyUI without a pause.** Looking for a running player waited two seconds for every port nobody listened on - ten seconds on Windows before a player was started. Measured: 10.2 s before, 1.3 s after.
 
 ## 1.6.0 - 2026-11-09

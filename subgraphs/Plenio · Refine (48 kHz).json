@@ -269,7 +269,7 @@
        "models": [
         {
          "name": "pytorch_model.bin",
-         "url": "https://huggingface.co/woongzip1/universr-audio/resolve/main/pytorch_model.bin",
+         "url": "https://huggingface.co/woongzip1/universr-audio/resolve/1c3294844285af851b6ffa56cbde4e43cd41fc2b/pytorch_model.bin",
          "directory": "audio_sr"
         }
        ]

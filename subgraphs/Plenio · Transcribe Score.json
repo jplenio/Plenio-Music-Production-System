@@ -198,7 +198,7 @@
        "models": [
         {
          "name": "sheetsage2_bf16.safetensors",
-         "url": "https://huggingface.co/Comfy-Org/YuE2/resolve/main/audio_encoders/sheetsage2_bf16.safetensors",
+         "url": "https://huggingface.co/Comfy-Org/YuE2/resolve/2f76ca75e6ee094169de899cc7fc99d6887e2196/audio_encoders/sheetsage2_bf16.safetensors",
          "directory": "audio_encoders"
         }
        ]

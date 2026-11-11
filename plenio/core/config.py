@@ -14,10 +14,18 @@ Environment variables:
 ``PLENIO_WORKER_IDLE_TIMEOUT``  seconds a worker may go without reporting progress
 ``PLENIO_LLAMA_SERVER``         the llama.cpp server program that runs GGUF files (Local LLM)
 ``PLENIO_LLM_OTHER_APPS``       ``1``/``0``: Local LLM also lists other apps' models and servers
+``PLENIO_MODELS_PREFER``        what ``auto`` chooses among a component's files: ``balanced``, ``quality``,
+                                ``speed`` or ``small``
+``PLENIO_MODEL_PINS``           ``component=file`` pairs, comma-separated: these files instead of the plan's
+``PLENIO_MODEL_DOWNLOADS``      ``ask``, ``auto`` or ``off``: whether Plenio fetches missing model files
+``PLENIO_WORKER_DEVICE``        where Plenio's workers run: ``auto``, ``same``, ``cpu`` or ``cuda:<n>``
 
 Config file only: ``[asset_paths]`` maps an asset id to an existing folder that
 already holds its files (for example a Whisper model you downloaded before);
 Plenio then uses that folder instead of ``<asset_dir>/<kind>/<id>``.
+
+``[models]``: ``prefer``, ``downloads`` and ``[models.pins]`` (a file name per component id of
+``resources/models.toml``); ``[workers]``: ``device``.
 
 ``[llm]`` (Local LLM): ``llama_server`` (path of the program), ``other_apps``
 (``false``: do not look into other apps' model folders and servers),
@@ -27,6 +35,7 @@ Plenio then uses that folder instead of ``<asset_dir>/<kind>/<id>``.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from pathlib import Path
@@ -36,6 +45,12 @@ from .errors import PlenioUserError
 from .files import read_toml
 
 CONFIG_FILE_NAME = "config.toml"
+MODEL_PREFERENCES = ("balanced", "quality", "speed", "small")
+"""What the model plan prefers among the files that run on the card (``plenio.core.modelplan``)."""
+MODEL_DOWNLOADS = ("ask", "auto", "off")
+"""``ask``: Plenio Setup offers a missing model file and fetches it when confirmed; ``auto``: a run fetches
+what it needs; ``off``: Plenio fetches no model file and names what to put where."""
+_DEVICE = re.compile(r"auto|same|cpu|cuda:\d+")
 
 _TRUE = {"1", "true", "yes", "on"}
 _FALSE = {"0", "false", "no", "off"}
@@ -59,6 +74,15 @@ class PlenioConfig:
     """Label -> an extra folder with GGUF files (``[llm.folders]``)."""
     llm_servers: Mapping[str, str] = field(default_factory=dict)
     """Label -> the API base of an extra OpenAI-compatible server (``[llm.servers]``)."""
+    models_prefer: str = "balanced"
+    """What ``auto`` prefers among a component's files (``MODEL_PREFERENCES``)."""
+    model_pins: Mapping[str, str] = field(default_factory=dict)
+    """Component id -> the file to use instead of the plan's choice (``[models.pins]``)."""
+    model_downloads: str = "ask"
+    """Whether Plenio fetches missing model files (``MODEL_DOWNLOADS``)."""
+    worker_device: str = "auto"
+    """Where Plenio's workers run: ``auto`` (the largest card ComfyUI does not use, else ComfyUI's),
+    ``same`` (ComfyUI's card), ``cpu`` or ``cuda:<n>``."""
     sources: Mapping[str, str] = field(default_factory=dict)
     """Where each non-default value came from (``file`` or the variable name)."""
 
@@ -84,6 +108,10 @@ class PlenioConfig:
             "llm_other_apps": self.llm_other_apps,
             "llm_folders": {key: str(value) for key, value in self.llm_folders.items()},
             "llm_servers": dict(self.llm_servers),
+            "models_prefer": self.models_prefer,
+            "model_pins": dict(self.model_pins),
+            "model_downloads": self.model_downloads,
+            "worker_device": self.worker_device,
             "sources": dict(self.sources),
         }
 
@@ -110,7 +138,7 @@ def _parse_seconds(value: Any, name: str) -> float:
 def _apply_file(
     config: PlenioConfig, values: dict[str, Any], path: Path, sources: dict[str, str]
 ) -> PlenioConfig:
-    allowed = {"offline", "auto_download", "asset_dir", "workers", "asset_paths", "llm"}
+    allowed = {"offline", "auto_download", "asset_dir", "workers", "asset_paths", "llm", "models"}
     unknown = sorted(set(values) - allowed)
     if unknown:
         raise PlenioUserError(
@@ -136,7 +164,7 @@ def _apply_file(
     workers = values.get("workers", {})
     if not isinstance(workers, dict):
         raise PlenioUserError(f"{path}: [workers] must be a table.")
-    unknown_workers = sorted(set(workers) - {"timeout_seconds", "idle_timeout_seconds"})
+    unknown_workers = sorted(set(workers) - {"timeout_seconds", "idle_timeout_seconds", "device"})
     if unknown_workers:
         raise PlenioUserError(f"{path}: unknown [workers] settings {unknown_workers}.")
     if "timeout_seconds" in workers:
@@ -145,9 +173,66 @@ def _apply_file(
         updates["worker_idle_timeout_s"] = _parse_seconds(
             workers["idle_timeout_seconds"], "workers.idle_timeout_seconds"
         )
+    if "device" in workers:
+        updates["worker_device"] = _device(workers["device"], f"{path}: workers.device")
+    updates.update(_model_settings(values.get("models", {}), path))
     updates.update(_llm_settings(values.get("llm", {}), path))
     sources.update({key: "file" for key in updates})
     return replace(config, **updates)
+
+
+def _choice(value: Any, choices: tuple[str, ...], name: str) -> str:
+    text = str(value).strip().lower() if isinstance(value, str) else ""
+    if text not in choices:
+        raise PlenioUserError(f"{name}={value!r} is not one of {', '.join(choices)}.")
+    return text
+
+
+def _device(value: Any, name: str) -> str:
+    text = str(value).strip().lower() if isinstance(value, str) else ""
+    if not _DEVICE.fullmatch(text):
+        raise PlenioUserError(
+            f"{name}={value!r} is no device.", hint="Use auto, same, cpu or cuda:<number>, e.g. cuda:1."
+        )
+    return text
+
+
+def _pins(pairs: Mapping[str, Any], name: str) -> dict[str, str]:
+    if not all(
+        isinstance(k, str)
+        and k.strip()
+        and isinstance(v, str)
+        and v.strip()
+        and "/" not in v
+        and "\\" not in v
+        for k, v in pairs.items()
+    ):
+        raise PlenioUserError(
+            f"{name} must map component ids to file names.",
+            hint='Example: yue2 = "yue2_3b_bf16.safetensors" (a file name, not a path; "auto": the plan chooses).',
+        )
+    return {key.strip(): value.strip() for key, value in pairs.items()}
+
+
+def _model_settings(models: Any, path: Path) -> dict[str, Any]:
+    if not isinstance(models, dict):
+        raise PlenioUserError(f"{path}: [models] must be a table.")
+    unknown = sorted(set(models) - {"prefer", "downloads", "pins"})
+    if unknown:
+        raise PlenioUserError(f"{path}: unknown [models] settings {unknown}.")
+    updates: dict[str, Any] = {}
+    if "prefer" in models:
+        updates["models_prefer"] = _choice(models["prefer"], MODEL_PREFERENCES, f"{path}: models.prefer")
+    if "downloads" in models:
+        updates["model_downloads"] = _choice(
+            models["downloads"], MODEL_DOWNLOADS, f"{path}: models.downloads"
+        )
+    pins = models.get("pins", {})
+    if not isinstance(pins, dict):
+        raise PlenioUserError(f"{path}: [models.pins] must be a table.")
+    if pins:
+        updates["model_pins"] = _pins(pins, f"{path}: [models.pins]")
+    return updates
 
 
 def _llm_settings(llm: Any, path: Path) -> dict[str, Any]:
@@ -218,4 +303,27 @@ def _apply_env(config: PlenioConfig, env: Mapping[str, str], sources: dict[str, 
     if env.get("PLENIO_LLAMA_SERVER", "").strip():
         updates["llama_server"] = Path(env["PLENIO_LLAMA_SERVER"]).expanduser()
         sources["llama_server"] = "PLENIO_LLAMA_SERVER"
+    if env.get("PLENIO_MODELS_PREFER", "").strip():
+        updates["models_prefer"] = _choice(
+            env["PLENIO_MODELS_PREFER"], MODEL_PREFERENCES, "PLENIO_MODELS_PREFER"
+        )
+        sources["models_prefer"] = "PLENIO_MODELS_PREFER"
+    if env.get("PLENIO_MODEL_DOWNLOADS", "").strip():
+        updates["model_downloads"] = _choice(
+            env["PLENIO_MODEL_DOWNLOADS"], MODEL_DOWNLOADS, "PLENIO_MODEL_DOWNLOADS"
+        )
+        sources["model_downloads"] = "PLENIO_MODEL_DOWNLOADS"
+    if env.get("PLENIO_MODEL_PINS", "").strip():
+        pairs = [part.split("=", 1) for part in env["PLENIO_MODEL_PINS"].split(",") if part.strip()]
+        if not all(len(pair) == 2 for pair in pairs):
+            raise PlenioUserError(
+                f"PLENIO_MODEL_PINS={env['PLENIO_MODEL_PINS']!r} is not a list of component=file pairs.",
+                hint="Example: PLENIO_MODEL_PINS=yue2=yue2_3b_bf16.safetensors,flux2-klein=auto",
+            )
+        # the variable's pins join the file's; a component named in both takes the variable's
+        updates["model_pins"] = {**config.model_pins, **_pins(dict(pairs), "PLENIO_MODEL_PINS")}
+        sources["model_pins"] = "PLENIO_MODEL_PINS"
+    if env.get("PLENIO_WORKER_DEVICE", "").strip():
+        updates["worker_device"] = _device(env["PLENIO_WORKER_DEVICE"], "PLENIO_WORKER_DEVICE")
+        sources["worker_device"] = "PLENIO_WORKER_DEVICE"
     return replace(config, **updates)

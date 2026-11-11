@@ -152,7 +152,7 @@ class FakeApi:
 
     def call(self, method: str, path: str, body: Any = None, headers: Mapping[str, str] | None = None) -> Any:
         if method == "GET" and path == "/":
-            return {"api": {"name": "plenio-song-api", "version": "fake"}, "plenio": "fake"}
+            return {"api": "plenio-song-api", "version": "fake", "plenio": "fake", "comfyui": "fake"}
         if method == "POST" and path == "/jobs":
             job_id = uuid.uuid4().hex
             self.jobs[job_id] = dict(body)
@@ -322,7 +322,8 @@ def markdown(report: Mapping[str, Any], compared: Sequence[Mapping[str, Any]] = 
     lines = [
         f"# Benchmark {report['label']}",
         "",
-        f"Plenio {report.get('plenio', '?')} on {report.get('card') or 'an unnamed machine'}, {report['runs']} run(s) "
+        f"Plenio {report.get('plenio', '?')} in ComfyUI {report.get('comfyui', '?')} on "
+        f"{report.get('card') or 'an unnamed machine'}, {report['runs']} run(s) "
         f"per brief, {report['date']}. Seconds from the release record's `timings`; the median of the runs, the "
         "first run apart (it loads what the later ones find loaded). *load* is the part of a stage spent loading "
         "models.",
@@ -388,7 +389,8 @@ def bench(
         "schema": SCHEMA,
         "label": label or str(about.get("plenio") or "unnamed"),
         "plenio": about.get("plenio"),
-        "api": (about.get("api") or {}).get("version"),
+        "api": about.get("version"),
+        "comfyui": about.get("comfyui"),
         "card": card,
         "date": time.strftime("%Y-%m-%d"),
         "runs": runs,

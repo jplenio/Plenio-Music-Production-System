@@ -54,7 +54,7 @@ select = ["E", "F", "W", "I", "B", "UP", "N", "S307", "S102", "S301", "S602", "S
 ignore = ["E501", "N999"]  # N999: the ComfyUI package folder name contains hyphens
 
 [tool.ruff.lint.isort]
-known-first-party = ["plenio", "harness", "workflow_validation", "score_strategies", "package_gate", "bench"]
+known-first-party = ["plenio", "harness", "workflow_validation", "score_strategies", "package_gate", "bench", "catalogue_check"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["T20", "S101"]

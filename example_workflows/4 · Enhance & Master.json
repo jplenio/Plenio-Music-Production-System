@@ -242,7 +242,7 @@
     "models": [
      {
       "name": "pytorch_model.bin",
-      "url": "https://huggingface.co/woongzip1/universr-audio/resolve/main/pytorch_model.bin",
+      "url": "https://huggingface.co/woongzip1/universr-audio/resolve/1c3294844285af851b6ffa56cbde4e43cd41fc2b/pytorch_model.bin",
       "directory": "audio_sr"
      }
     ]
@@ -1265,7 +1265,7 @@
    ],
    "size": [
     520,
-    1169
+    1190
    ],
    "flags": {},
    "order": 14,
@@ -1277,7 +1277,7 @@
     "Node name for S&R": "MarkdownNote"
    },
    "widgets_values": [
-    "# Models · what goes where\n\nWhen the template opens, ComfyUI offers the files it misses (*Missing models*: download them there). By hand: put each file into its folder below - or into a folder of your `extra_model_paths.yaml`. **0 · System Check** lists what is there and what is missing.\n\n## Needed\n- [pytorch_model.bin](https://huggingface.co/woongzip1/universr-audio/resolve/main/pytorch_model.bin) · 229 MB · CC BY 4.0 (weights); MIT (inference code)  \n  UniverSR audio super-resolution (8/12/16/24 kHz -> 48 kHz, vocoder-free flow matching): HQ 2 · Regenerate Highs in every template's Master when HQ mastering is on (on by default in Enhance & Master), and Refine\n\n## Optional\n- [model_bs_roformer_ep_17_sdr_9.6568.ckpt](https://github.com/ZFTurbo/Music-Source-Separation-Training/releases/download/v1.0.12/model_bs_roformer_ep_17_sdr_9.6568.ckpt) · 527 MB · MIT (trainer); trained on MUSDB18-HQ, whose dataset terms are research-oriented  \n  the *Stems (optional)* block (bypassed: select it and press Ctrl+B)\n\n## Where they go\n\n```\n📂 ComfyUI/\n└── 📂 models/\n    ├── 📂 audio_separation/ (stems, the vocal stem for the lyrics times)\n    │   └── model_bs_roformer_ep_17_sdr_9.6568.ckpt\n    └── 📂 audio_sr/\n        └── pytorch_model.bin\n```\n\n## Your computer\n\nEnhance & Master runs on the CPU. HQ mastering (UniverSR) is faster on a graphics card: about 1.5 s per second of music on an RTX 5060 Ti; switched off it needs no model at all.\n\nLicences: [docs/user/licensing.md](https://github.com/jplenio/Plenio-Music-Production-System/blob/main/docs/user/licensing.md) · every file: [docs/user/models.md](https://github.com/jplenio/Plenio-Music-Production-System/blob/main/docs/user/models.md)\n"
+    "# Models · what goes where\n\nWhen the template opens, ComfyUI offers the files it misses (*Missing models*: download them there). By hand: put each file into its folder below - or into a folder of your `extra_model_paths.yaml`. **0 · System Check** lists what is there and what is missing.\n\n## Needed\n- [pytorch_model.bin](https://huggingface.co/woongzip1/universr-audio/resolve/1c3294844285af851b6ffa56cbde4e43cd41fc2b/pytorch_model.bin) · 229 MB · CC BY 4.0 (weights); MIT (inference code)  \n  UniverSR audio super-resolution (8/12/16/24 kHz -> 48 kHz, vocoder-free flow matching): HQ 2 · Regenerate Highs in every template's Master when HQ mastering is on (on by default in Enhance & Master), and Refine\n\n## Optional\n- [model_bs_roformer_ep_17_sdr_9.6568.ckpt](https://github.com/ZFTurbo/Music-Source-Separation-Training/releases/download/v1.0.12/model_bs_roformer_ep_17_sdr_9.6568.ckpt) · 527 MB · MIT (trainer); trained on MUSDB18-HQ, whose dataset terms are research-oriented  \n  the *Stems (optional)* block (bypassed: select it and press Ctrl+B)\n\n## Where they go\n\n```\n📂 ComfyUI/\n└── 📂 models/\n    ├── 📂 audio_separation/ (stems, the vocal stem for the lyrics times)\n    │   └── model_bs_roformer_ep_17_sdr_9.6568.ckpt\n    └── 📂 audio_sr/\n        └── pytorch_model.bin\n```\n\n## Your computer\n\nEnhance & Master runs on the CPU. HQ mastering (UniverSR) is faster on a graphics card: about 1.5 s per second of music on an RTX 5060 Ti; switched off it needs no model at all.\n\nLicences: [docs/user/licensing.md](https://github.com/jplenio/Plenio-Music-Production-System/blob/main/docs/user/licensing.md) · every file: [docs/user/models.md](https://github.com/jplenio/Plenio-Music-Production-System/blob/main/docs/user/models.md)\n"
    ]
   }
  ],

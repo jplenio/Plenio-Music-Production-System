@@ -84,7 +84,7 @@ def test_template_inventory_and_optional_packages() -> None:
         # the cover art, on in the song templates since 2026-10-23
         "flux-2-klein-4b.safetensors": 7751105712,
         "qwen_3_4b.safetensors": 8044982048,
-        "flux2-vae.safetensors": 336211292,
+        "flux2-vae.safetensors": 336213556,
     }
     report = check_system(
         facts(

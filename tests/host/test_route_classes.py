@@ -32,9 +32,9 @@ VALUES = {
 
 def all_routes(comfy_path: Path) -> list[Any]:
     """The route tables, read in this process (``comfy_path`` makes ComfyUI importable for the modules' imports)."""
-    from plenio.comfy import routes, song_api
+    from plenio.comfy import routes, setup, song_api
 
-    return [*routes.ROUTES, *song_api.ROUTES]
+    return [*routes.ROUTES, *setup.ROUTES, *song_api.ROUTES]
 
 
 def path_of(route: Any) -> str:
@@ -50,7 +50,12 @@ def test_every_route_has_an_access_class(comfy_path: Path) -> None:
     keys = [(r.method, r.path) for r in routes]
     assert len(keys) == len(set(keys))  # no route is listed twice with two answers
     by_class = {name: [r.path for r in routes if r.access == name] for name in CLASSES}
-    assert sorted(by_class["local"]) == ["/plenio/player/open", "/plenio/system"]
+    assert {"/plenio/player/open", "/plenio/system", "/plenio/setup/plan"} <= set(by_class["local"])
+    assert all(
+        p.startswith("/plenio/setup/")
+        for p in by_class["local"]
+        if p not in ("/plenio/player/open", "/plenio/system")
+    )
     assert all(path.startswith("/plenio/api/") for path in by_class["api"]) and len(by_class["api"]) == 16
     assert not [r.path for r in routes if r.access != "api" and r.path.startswith("/plenio/api/")]
     # a compute route takes a body and keeps nothing: none of them is a GET or has a name in its path
