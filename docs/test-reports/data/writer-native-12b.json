@@ -1,0 +1,645 @@
+{
+ "server": {
+  "comfyui_version": "0.41.0",
+  "python_version": "3.12.9 (main, Feb 12 2025, 14:52:31) [MSC v.1942 64 bit (AMD64)]",
+  "pytorch_version": "2.9.1+cu130"
+ },
+ "writers": [
+  {
+   "kind": "native",
+   "file": "gemma4_12b_int8_convrot.safetensors",
+   "answers": [
+    {
+     "seconds": 29.08,
+     "chars": 944,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "african/afrobeat-classic-instrumental"
+    },
+    {
+     "seconds": 10.89,
+     "chars": 1082,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 10,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "african/afrobeats-vocal"
+    },
+    {
+     "seconds": 8.8,
+     "chars": 912,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "african/amapiano-instrumental"
+    },
+    {
+     "seconds": 13.39,
+     "chars": 1276,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 10,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "african/desert-blues-vocal"
+    },
+    {
+     "seconds": 8.77,
+     "chars": 924,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "african/ethio-jazz-instrumental"
+    },
+    {
+     "seconds": 8.78,
+     "chars": 892,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "african/gqom-instrumental"
+    },
+    {
+     "seconds": 8.77,
+     "chars": 930,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "african/highlife-instrumental"
+    },
+    {
+     "seconds": 8.91,
+     "chars": 905,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "african/soukous-instrumental"
+    },
+    {
+     "seconds": 11.81,
+     "chars": 1240,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 8,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "alternative/alternative-rock-vocal"
+    },
+    {
+     "seconds": 12.44,
+     "chars": 1252,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 10,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "alternative/britpop-vocal"
+    },
+    {
+     "seconds": 11.41,
+     "chars": 1238,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 10,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "alternative/new-wave-vocal"
+    },
+    {
+     "seconds": 11.83,
+     "chars": 1118,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 8,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "alternative/uk-garage-vocal"
+    },
+    {
+     "seconds": 9.78,
+     "chars": 904,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 10,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "ambient/ambient-choir-vocalise"
+    },
+    {
+     "seconds": 8.22,
+     "chars": 871,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "ambient/ambient-guitar"
+    },
+    {
+     "seconds": 8.44,
+     "chars": 894,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "ambient/chillout-pads-strings"
+    },
+    {
+     "seconds": 8.25,
+     "chars": 885,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "ambient/dark-ambient-drone"
+    },
+    {
+     "seconds": 14.89,
+     "chars": 1178,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 10,
+     "sections": 7,
+     "fixes": 1,
+     "brief": "asian/anime-opening-vocal"
+    },
+    {
+     "seconds": 14.52,
+     "chars": 1312,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 9,
+     "sections": 5,
+     "fixes": 1,
+     "brief": "asian/bollywood-vocal"
+    },
+    {
+     "seconds": 9.75,
+     "chars": 1017,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 2,
+     "brief": "asian/chinese-traditional-instrumental"
+    },
+    {
+     "seconds": 14.03,
+     "chars": 905,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 7,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "asian/city-pop-vocal"
+    }
+   ],
+   "first_seconds": 29.08,
+   "median_seconds_after_first": 9.78,
+   "parsed": 20,
+   "cut_off": 0,
+   "failed": 0,
+   "peak_mib_above_idle": 12344
+  },
+  {
+   "kind": "native",
+   "file": "gemma4_e4b_it_fp8_scaled.safetensors",
+   "answers": [
+    {
+     "seconds": 24.34,
+     "chars": 975,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "african/afrobeat-classic-instrumental"
+    },
+    {
+     "seconds": 8.75,
+     "chars": 1125,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 8,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "african/afrobeats-vocal"
+    },
+    {
+     "seconds": 7.28,
+     "chars": 972,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "african/amapiano-instrumental"
+    },
+    {
+     "seconds": 8.2,
+     "chars": 1042,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 8,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "african/desert-blues-vocal"
+    },
+    {
+     "seconds": 7.66,
+     "chars": 991,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "african/ethio-jazz-instrumental"
+    },
+    {
+     "seconds": 7.19,
+     "chars": 923,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "african/gqom-instrumental"
+    },
+    {
+     "seconds": 7.2,
+     "chars": 944,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "african/highlife-instrumental"
+    },
+    {
+     "seconds": 8.23,
+     "chars": 1039,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "african/soukous-instrumental"
+    },
+    {
+     "seconds": 8.2,
+     "chars": 1089,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 8,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "alternative/alternative-rock-vocal"
+    },
+    {
+     "seconds": 10.28,
+     "chars": 1390,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 12,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "alternative/britpop-vocal"
+    },
+    {
+     "seconds": 8.7,
+     "chars": 1153,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 6,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "alternative/new-wave-vocal"
+    },
+    {
+     "seconds": 9.25,
+     "chars": 1178,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 8,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "alternative/uk-garage-vocal"
+    },
+    {
+     "seconds": 8.22,
+     "chars": 1047,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 8,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "ambient/ambient-choir-vocalise"
+    },
+    {
+     "seconds": 6.78,
+     "chars": 936,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "ambient/ambient-guitar"
+    },
+    {
+     "seconds": 7.23,
+     "chars": 943,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "ambient/chillout-pads-strings"
+    },
+    {
+     "seconds": 7.22,
+     "chars": 973,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "ambient/dark-ambient-drone"
+    },
+    {
+     "seconds": 10.8,
+     "chars": 945,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 8,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "asian/anime-opening-vocal"
+    },
+    {
+     "seconds": 11.31,
+     "chars": 1250,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 13,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "asian/bollywood-vocal"
+    },
+    {
+     "seconds": 7.2,
+     "chars": 954,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 2,
+     "brief": "asian/chinese-traditional-instrumental"
+    },
+    {
+     "seconds": 9.3,
+     "chars": 986,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 8,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "asian/city-pop-vocal"
+    }
+   ],
+   "first_seconds": 24.34,
+   "median_seconds_after_first": 8.2,
+   "parsed": 20,
+   "cut_off": 0,
+   "failed": 0,
+   "peak_mib_above_idle": 9472
+  },
+  {
+   "kind": "gguf",
+   "file": "gemma-4-12B-it-QAT-Q4_0.gguf",
+   "answers": [
+    {
+     "seconds": 18.53,
+     "chars": 908,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "african/afrobeat-classic-instrumental"
+    },
+    {
+     "seconds": 10.84,
+     "chars": 1261,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 10,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "african/afrobeats-vocal"
+    },
+    {
+     "seconds": 8.69,
+     "chars": 902,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "african/amapiano-instrumental"
+    },
+    {
+     "seconds": 10.75,
+     "chars": 1247,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 10,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "african/desert-blues-vocal"
+    },
+    {
+     "seconds": 8.72,
+     "chars": 926,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "african/ethio-jazz-instrumental"
+    },
+    {
+     "seconds": 8.75,
+     "chars": 885,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "african/gqom-instrumental"
+    },
+    {
+     "seconds": 8.78,
+     "chars": 967,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "african/highlife-instrumental"
+    },
+    {
+     "seconds": 9.33,
+     "chars": 1048,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "african/soukous-instrumental"
+    },
+    {
+     "seconds": 10.83,
+     "chars": 1254,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 8,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "alternative/alternative-rock-vocal"
+    },
+    {
+     "seconds": 11.36,
+     "chars": 1386,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 10,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "alternative/britpop-vocal"
+    },
+    {
+     "seconds": 10.28,
+     "chars": 1277,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 10,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "alternative/new-wave-vocal"
+    },
+    {
+     "seconds": 10.34,
+     "chars": 1228,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 10,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "alternative/uk-garage-vocal"
+    },
+    {
+     "seconds": 9.26,
+     "chars": 917,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 10,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "ambient/ambient-choir-vocalise"
+    },
+    {
+     "seconds": 8.83,
+     "chars": 980,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "ambient/ambient-guitar"
+    },
+    {
+     "seconds": 8.8,
+     "chars": 956,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "ambient/chillout-pads-strings"
+    },
+    {
+     "seconds": 8.25,
+     "chars": 908,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 1,
+     "brief": "ambient/dark-ambient-drone"
+    },
+    {
+     "seconds": 11.27,
+     "chars": 970,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 9,
+     "sections": 5,
+     "fixes": 1,
+     "brief": "asian/anime-opening-vocal"
+    },
+    {
+     "seconds": 10.84,
+     "chars": 1147,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 6,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "asian/bollywood-vocal"
+    },
+    {
+     "seconds": 8.75,
+     "chars": 962,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 0,
+     "sections": 1,
+     "fixes": 2,
+     "brief": "asian/chinese-traditional-instrumental"
+    },
+    {
+     "seconds": 11.36,
+     "chars": 940,
+     "parsed": true,
+     "cut_off": false,
+     "lines": 10,
+     "sections": 4,
+     "fixes": 1,
+     "brief": "asian/city-pop-vocal"
+    }
+   ],
+   "first_seconds": 18.53,
+   "median_seconds_after_first": 9.33,
+   "parsed": 20,
+   "cut_off": 0,
+   "failed": 0,
+   "peak_mib_above_idle": 15181
+  }
+ ]
+}

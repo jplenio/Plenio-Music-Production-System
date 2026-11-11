@@ -19,6 +19,7 @@ All scripts run with ComfyUI's Python and `PLENIO_COMFYUI_ROOT` set; GPU scripts
 | `lyrics_fit_llm.py` | A2 | new cover lyrics with local LLMs (llama.cpp): the draft, Fit Lyrics' two repair rounds (held to the schema, or free as the native writer) and the last step - lines fitting, deviation, lines fixed, words kept |
 | `arrangement_renders.py` | E7 | the plan, 0.4.5's arrangement, the guard with fills and under the singing rendered with YuE2 (`prepare`, `render`, `evaluate` with SheetSage2, `pack`: a blind listening pack) |
 | `song_form.py` | G1 | the song form of the lyrics against YuE2's plan in release records (match, assemble, rename, differs; with the last resort), aggregates only |
+| `writer_compare.py` | 0.4 | the song writer on ComfyUI's own Gemma 4 files against GGUF files over twenty briefs: seconds, parsed, cut off, the card's peak memory (`nvidia-smi`) |
 | `export_summary.py` | — | compact results (no audio, no word lists) for `docs/test-reports/data/` |
 
 Typical order: `dev_server.py --gpu` → `render_matrix.py` → free the server → `sheetsage_timeline.py` and `asr_whisper.py` on the takes → `evaluate_takes.py`.

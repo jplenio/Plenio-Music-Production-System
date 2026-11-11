@@ -70,6 +70,6 @@ A session that takes over reads `.claude/handover.md` first if it exists (local,
 - Next: phase 4 (Plenio Setup and Home).
 - Reviews at the plan's checkpoints run as a subagent (`model: fable`, `effort: high`), read-only, focused; next one: phase 5.
 - Exit of phase 3 passed on 2026-11-11: the owner's real song with every model field on `auto` (16 GB card).
-- `pytest-xdist` is in `.devdeps` and CI (0.5 done); the native Gemma 4 12B is on the machine (0.4 can run).
+- `pytest-xdist` is in `.devdeps` and CI (0.5 done); 0.4 done (the native 12B measured in ComfyUI 0.41.0).
 - Waiting for the owner: the cover brief's recording (0.2), coverage in `.devdeps` (0.6).
 - The plan's boxes are the record of what is done; tick a box in the commit that makes its acceptance line hold.

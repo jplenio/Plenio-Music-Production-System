@@ -173,8 +173,8 @@ templates = []
   quality = 2
   speed = 2
   vram_min_gib = 8.0
-  vram_full_gib = 11.5
-  basis = "estimate (the hardware table of 1.6)"
+  vram_full_gib = 10.0
+  basis = "measured 2026-11-11, RTX 5060 Ti 16 GB: peak 9.3 GiB writing 20 briefs (nvidia-smi); 10.0 leaves room for longer answers"
 
   [[component.variant]]
   id = "gemma4-12b-writer-int8"
@@ -189,8 +189,8 @@ templates = []
   quality = 3
   speed = 1
   vram_min_gib = 11.5
-  vram_full_gib = 15.5
-  basis = "estimate (not measured)"
+  vram_full_gib = 13.0
+  basis = "measured 2026-11-11, RTX 5060 Ti 16 GB: peak 12.1 GiB writing 20 briefs (nvidia-smi); 13.0 leaves room for longer answers"
 
   [[component.variant]]
   id = "gemma4-e2b-writer-int8"
