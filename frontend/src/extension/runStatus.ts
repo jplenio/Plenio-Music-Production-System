@@ -49,6 +49,19 @@ export function stopsForReview(review: string, briefMode: string | null | undefi
   return false
 }
 
+/** *Approve* on a sheet the run stopped at queues the continuing run (PD 7.4) - unless the setting keeps the old
+ * way (``Plenio.Sheet.ApproveContinues`` off: approve, then press Run). */
+let approveContinues = true
+
+export function setApproveContinues(on: boolean): void {
+  approveContinues = on
+}
+
+/** Whether an approval goes on with the run: the sheet waited for it, it was approved, and the setting is on. */
+export function continuesAfterApproval(before: RunState | null, approved: boolean, setting: unknown): boolean {
+  return before === 'waiting' && approved && setting !== false
+}
+
 /** A Song Sheet's state after a run, from its payload. */
 export function sheetState(payload: SheetPayload): RunState {
   if (/^(conflict|invalid)/.test(payload.status)) return 'error'
@@ -64,7 +77,9 @@ export function sheetLine(state: RunState | null): string {
     case 'stop':
       return '⏸ stops here for review'
     case 'waiting':
-      return '⏸ waiting for your approval: Edit, Approve, run again'
+      return approveContinues
+        ? '⏸ waiting for your approval: Edit, Approve - the run goes on'
+        : '⏸ waiting for your approval: Edit, Approve, run again'
     case 'approved':
       return '✓ approved'
     case 'error':

@@ -43,6 +43,8 @@ import {
   clearRunStates,
   installRunStatus,
   refreshRunStatus,
+  continuesAfterApproval,
+  setApproveContinues,
   setRunState,
   sheetState
 } from './runStatus'
@@ -50,7 +52,7 @@ import { type SheetMusicHost, type SheetMusicOutcome, SheetMusicJobs, sheetMusic
 import { SEED_NODE, installSeedNode } from './seedNode'
 import { SETUP_COMMAND, installSetupTab } from './setupTab'
 import { installSeedsFollowMode } from './seedsFollowMode'
-import { SHEET_STATE_TYPE, setFetcher, sheetStateWidget } from './sheetStateWidget'
+import { SHEET_STATE_TYPE, onApprovedWhileWaiting, setFetcher, sheetStateWidget } from './sheetStateWidget'
 import { FINISH_SWITCH_TYPE, finishSwitchWidget, refreshFinishSwitches, setCover } from './finishSwitch'
 import { NONE as NO_PRESET, PRESET_NODE, applyChanges, changesFor } from './preset'
 import { RELOAD_HINT, codeIsStale, importOrReload, loadFresh } from './staleCode'
@@ -132,6 +134,17 @@ function workflowLacksFiles(): boolean {
 }
 
 let setupTab: { open(focus?: string | null): void } | null = null
+const APPROVE_SETTING = 'Plenio.Sheet.ApproveContinues'
+
+/** The run stopped at a sheet, the sheet is approved: the continuing run is queued (PD 7.4), unless the setting
+ * keeps the old way. */
+function approvedWhileWaiting(): void {
+  const setting = comfyApp.extensionManager?.setting?.get(APPROVE_SETTING)
+  setApproveContinues(setting !== false)
+  if (!continuesAfterApproval('waiting', true, setting)) return
+  void comfyApp.queuePrompt?.(0, 1)?.catch((error: unknown) => console.error('Plenio: the run could not go on', error))
+  comfyApp.extensionManager?.toast?.add({ severity: 'info', summary: 'Approved', detail: 'The run goes on.', life: 5000 })
+}
 
 /** A preset chosen in a template's Preset field: its fields set in the page, one undo step (preset.ts). */
 async function applyPresetChoice(preset: string): Promise<void> {
@@ -267,6 +280,17 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
       label: 'Bring the model blocks up to date',
       icon: 'pi pi-sync',
       function: () => void modelBlocksUpToDate()
+    }
+  ],
+  settings: [
+    {
+      id: APPROVE_SETTING,
+      name: 'Approve goes on with the run',
+      type: 'boolean',
+      defaultValue: true,
+      category: ['Plenio', 'Song Sheet', 'Approve'],
+      tooltip:
+        'On: Approve on a Song Sheet the run stopped at queues the continuing run. Off: approve, then press Run (as before 2.0).'
     }
   ],
   menuCommands: [
@@ -430,6 +454,8 @@ const sheetJobs = new SheetMusicJobs(sheetHost, (outcome) => {
   },
   setup() {
     installStyles()
+    onApprovedWhileWaiting(approvedWhileWaiting)
+    setApproveContinues(comfyApp.extensionManager?.setting?.get(APPROVE_SETTING) !== false)
     void modelLabels.refresh().then(labelModelChoices)
     // Plenio Setup in the sidebar: opens by itself once when a wanted template lacks files (setupTab.ts)
     setupTab = installSetupTab({

@@ -24,14 +24,14 @@ There is no fourth conditioning track and no hidden arrangement: what you see in
 ## The first run
 
 1. In **Song Brief** describe the song - genre, mood, length, tempo, key, meter. The default mode is *one song, stop to review*.
-2. Press **Run**. The writer drafts title, style and lyrics, and the run **stops at Song Sheet · Text**: check the words, **Approve**, and press **Run** again.
+2. Press **Run**. The writer drafts title, style and lyrics, and the run **stops at Song Sheet · Text**: check the words and **Approve**: the run goes on (*Approve* goes on with the run by itself; the setting *Plenio › Song Sheet › Approve goes on with the run* off: run again by hand).
 3. *Score Tools* builds an **empty score** from the brief: the length and tempo give the number of measures, the brief's *meter* and *key* are read where you wrote them, and anything missing falls back to 4/4, C major and 100 BPM (the report lists every fallback). The score is one `verse` section of rests. The run **stops at Song Sheet · DAW**. Open it and compose:
    - **piano roll**: draw a note on an empty place, drag to move, drag the right end to resize; switch to **⬚ Select** to frame several notes (Shift adds) and move or delete them together; `Delete` turns notes into rests, `Shift+Delete` closes the gap;
    - **chord lane**: double-click to write a chord symbol, drag one to move it, double-click to rename;
    - **navigator**: split the score into sections (`verse`, `chorus`, ...), because YuE2 sings section by section;
    - **ABC text**: still there, under *Advanced* - the same text, synchronised both ways.
    You can also press **Import MIDI…** and read a sketch from any DAW; the dialog shows what the import did before anything is replaced. With the lyrics of Song Sheet · Text, the lyrics lane shows the words over the imported melody, in their order - give the sketch the lyrics' sections (verse, chorus, ...) so that every block starts where its section does.
-4. **Approve** the sheet, then press **Run** again: YuE2 renders exactly this score, and Master and Export finish the song - Export also saves your score with the lyrics as sheet music, `<name>.pdf` next to the audio (*sheet music* on the Export node: A4, Letter or off; *sheet music size*: standard about 3 bars a line, smaller, compact or large; an open ComfyUI page draws it). Every further run is a new **take** of the same score. *Song Sheet · DAW* always stops for review - the score is composed there; in *new song every run* each new song (new lyrics) stops there to be composed or approved.
+4. **Approve** the sheet - the run goes on: YuE2 renders exactly this score, and Master and Export finish the song - Export also saves your score with the lyrics as sheet music, `<name>.pdf` next to the audio (*sheet music* on the Export node: A4, Letter or off; *sheet music size*: standard about 3 bars a line, smaller, compact or large; an open ComfyUI page draws it). Every further run is a new **take** of the same score. *Song Sheet · DAW* always stops for review - the score is composed there; in *new song every run* each new song (new lyrics) stops there to be composed or approved.
 
 A score that has only rests cannot be rendered - YuE2 needs at least one note. The sheet says so instead of rendering silence.
 

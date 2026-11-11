@@ -93,6 +93,8 @@ export interface ComfyExtension {
   commands?: { id: string; label: string; icon?: string; function: () => void | Promise<void> }[]
   /** Menu entries: the commands under a path of the top menu (``['Workflow']``). */
   menuCommands?: { path: string[]; commands: string[] }[]
+  /** Settings of the extension (ComfyUI's settings dialog). */
+  settings?: { id: string; name: string; type: 'boolean'; defaultValue: boolean; category?: string[]; tooltip?: string }[]
   /** Buttons in the action bar beside Run (frontend 1.2x+; an older frontend leaves them out). */
   actionBarButtons?: { icon: string; label?: string; tooltip?: string; onClick: () => void }[]
 }
@@ -115,6 +117,8 @@ export interface ComfyApp {
   /** Loads a workflow; ``workflow``: the open tab's workflow object to load it into (else a new tab opens). */
   loadGraphData?(graph: unknown, clean?: boolean, restoreView?: boolean, workflow?: unknown): Promise<void>
   canvas?: { ds?: { scale?: number } }
+  /** Queue the open workflow (``number``: 0 at the end of the queue, -1 at its front). */
+  queuePrompt?(number: number, batchCount?: number): Promise<unknown>
   /** The frontend's services (1.2x+): the toast, and the dialog's prompt (asks for a text; ``null``: cancelled). */
   extensionManager?: {
     toast?: { add(message: { severity: string; summary: string; detail?: string; life?: number }): void }
@@ -124,6 +128,8 @@ export interface ComfyApp {
     registerSidebarTab?(tab: SidebarTab): void
     /** Runs a command by its id (``Workspace.ToggleSidebarTab.<tab id>`` opens or closes a sidebar tab). */
     command?: { execute(id: string): unknown }
+    /** The settings store: a setting's value by its id. */
+    setting?: { get(id: string): unknown }
     /** Which sidebar tab is open (``null``: none). */
     sidebarTab?: { activeSidebarTabId?: string | null }
     dialog?: {

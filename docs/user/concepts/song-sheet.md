@@ -65,7 +65,7 @@ The canvas shows it on the nodes, the sheet's button line says it in words (also
 
 | Before a run | After a run |
 |---|---|
-| **⏸ review stop** (blue badge above the sheet; *stops here for review* under its button) - the sheet will hold the run | **⏸ waiting for your approval** (amber badge and an amber frame around the sheet, a message) - the run stopped here: *Edit Song Sheet…*, check, *Approve*, run again |
+| **⏸ review stop** (blue badge above the sheet; *stops here for review* under its button) - the sheet will hold the run | **⏸ waiting for your approval** (amber badge and an amber frame around the sheet, a message) - the run stopped here: *Edit Song Sheet…*, check, *Approve* - the run goes on (*Approve* goes on with the run by itself; the setting *Plenio › Song Sheet › Approve goes on with the run* off: run again by hand) |
 | *runs through, no review stop* - the run passes this sheet | **✓ approved** - you approved exactly these documents; ✓ *passed*, ⚠ *warnings* or ✖ *fix the sheet* (red frame) for a sheet that does not stop |
 
 Every other Plenio node shows its result the same way (✓, ⚠ warning, ✖ error with a red frame). A new run clears the badges first, so they show how far the current run got - a node after the stop has none. The frame stays visible when you zoom out.

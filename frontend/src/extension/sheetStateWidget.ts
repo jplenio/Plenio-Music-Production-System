@@ -4,7 +4,7 @@ import { ownedBeforeRun } from '../shared/sheetSession'
 import { DOCUMENT_KINDS, parseState, serializeState, summarize } from '../shared/sheetState'
 import { lyricsTargetOf, scoreTargetOf, writeLyrics, writeScore } from './lyricsOwner'
 import { getAsrNote, getPayload, onPayload } from './payloads'
-import { displayState, onRunState, runState, setRunState, sheetLine } from './runStatus'
+import { continuesAfterApproval, displayState, onRunState, runState, setRunState, sheetLine } from './runStatus'
 import { SHEET_LOOKS, sheetKind, type SheetKind } from './sheetKind'
 import { codeIsStale, importOrReload, loadFresh } from './staleCode'
 
@@ -21,6 +21,13 @@ interface InputSlot {
 let fetcher: Fetcher | null = null
 
 /** Provided by main.ts (the ComfyUI api object handles the server's base path). */
+/** Called when a sheet the run waited at is approved (main.ts queues the continuing run). */
+let approvedWhileWaiting: ((node: ComfyNode) => void) | null = null
+
+export function onApprovedWhileWaiting(hook: (node: ComfyNode) => void): void {
+  approvedWhileWaiting = hook
+}
+
 export function setFetcher(value: Fetcher): void {
   fetcher = value
 }
@@ -163,6 +170,7 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
       scoreTarget: score?.target ?? null,
       onApply: (next, guide, arranged, changedScore, approved, extras) => {
         const before = String(widget.value ?? '')
+        const stateBefore = runState(node)
         widget.value = serializeState(next)
         node.properties = {
           ...(node.properties ?? {}),
@@ -191,6 +199,7 @@ export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: 
           )
         }
         node.setDirtyCanvas?.(true, true)
+        if (continuesAfterApproval(stateBefore, approved, true)) approvedWhileWaiting?.(node)
       }
     })
   }

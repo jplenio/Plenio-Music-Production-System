@@ -274,3 +274,19 @@ describe('the Preset field', () => {
     expect(BUILT_IN_PRESETS.every((p) => p.builtIn)).toBe(true)
   })
 })
+
+describe('Approve goes on with the run', () => {
+  it('only for a sheet the run waited at, and not with the setting off', async () => {
+    const { continuesAfterApproval, sheetLine, setApproveContinues } = await import('../src/extension/runStatus')
+    expect(continuesAfterApproval('waiting', true, true)).toBe(true)
+    expect(continuesAfterApproval('waiting', true, undefined)).toBe(true) // the default
+    expect(continuesAfterApproval('waiting', true, false)).toBe(false)
+    expect(continuesAfterApproval('stop', true, true)).toBe(false) // nothing ran yet
+    expect(continuesAfterApproval('approved', true, true)).toBe(false)
+    expect(continuesAfterApproval('waiting', false, true)).toBe(false)
+    expect(sheetLine('waiting')).toContain('the run goes on')
+    setApproveContinues(false)
+    expect(sheetLine('waiting')).toContain('run again')
+    setApproveContinues(true)
+  })
+})
