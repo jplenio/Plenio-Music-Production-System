@@ -65,9 +65,10 @@ A session that takes over reads `.claude/handover.md` first if it exists (local,
 - Done too: 0.1 stage timings in the record (`plenio/core/timings.py`), 0.2 `tools/bench.py` (the tool; no real-model run yet).
 - Done in phase 2: 2.1 catalogue schema 2 (`resources/models.toml`: components and variants, pinned and hashed; `assets.toml` still apart), 2.2 `tools/catalogue_check.py`, 2.3 `plenio/core/modelplan.py`, 2.4 the `[models]` and `[workers] device` settings.
 - Done too: 2.5 the download manager (`core/assets/downloads.py`, refusals in `hub.py`), 2.6 gated access and the token (`core/assets/access.py`).
-- Done too: 2.7 the Setup routes (`plenio/comfy/setup.py`: `/plenio/setup/*`, class `local`, events on ComfyUI's websocket).
-- Review after 2.7 done, its findings fixed (noted at 2.7 in the plan).
-- Next: the benchmark baseline (rest of 0.2, see the handover), then phase 3 (Model Choice node).
-- Reviews at the plan's checkpoints run as a subagent (`model: fable`, `effort: high`), read-only, focused.
+- Done too: 2.7 the Setup routes (`plenio/comfy/setup.py`), and the fixes of the review after 2.7.
+- Done in phase 3: 3.1 Model Choice (`plenio/comfy/nodes/model_choice.py`), 3.2 sniffers (`core/models.py: SNIFFERS`), 3.3 the model blocks on `auto`, 3.4 the labels in the frontend (`frontend/src/extension/modelChoice.ts`), 3.5 *Bring the model blocks up to date* (`core/blocks.py: upgrade_models`), the fixes of the review after 3.5, 3.6 the writer plan (`core/llm/gemma.py: STEPS`), 3.7 the hardware table (`core/system.py: hardware_rows`).
+- Exit of phase 3 is the owner's: one real song with every model field on `auto` (GPU 1).
+- Next: phase 4 (Plenio Setup and Home).
+- Reviews at the plan's checkpoints run as a subagent (`model: fable`, `effort: high`), read-only, focused; next one: phase 5.
 - Waiting for the owner's permission: `pytest-xdist` (0.5), the 12 GB native Gemma download (0.4), real-model benchmark runs on GPU 1 (0.2, 0.3).
 - The plan's boxes are the record of what is done; tick a box in the commit that makes its acceptance line hold.
