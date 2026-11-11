@@ -36,6 +36,14 @@ Frontend: `cd frontend && npm ci`.
 
 Host tests use an isolated base directory (`--base-directory`, `--disable-all-custom-nodes` with a whitelist): the user's custom nodes, user data and outputs are never touched.
 
+## Benchmark
+
+`tools/bench.py` orders fixed briefs through the Song API of a running ComfyUI (three runs each, fixed seeds), reads every song's release record and reports the seconds per group of the template, the part spent loading models and the peak memory on the graphics card (`timings`, since 2.0). `--compare <older.json>` marks a brief that got slower by more than 10 % and exits with 1. `--fake` checks the tool itself against canned answers. Reports go to `docs/test-reports/data/bench-<label>.json`.
+
+```bash
+<python> tools/bench.py --api http://127.0.0.1:8188 --label 2.0.0 --card "<your card>" [--source <recording for the cover brief>]
+```
+
 ## Browser checks of the templates
 
 `tools/browser_check.mjs` loads every template in the real ComfyUI frontend and checks: load (widget values as shipped, no Plenio console errors, no node-id renumbering), save/reload (widget values and API prompt identical), optional blocks on/off and Master bypassed (the frontend's API prompt has the expected shape and the server validates it), summaries (after a run every node's summary shows at least four lines, no text field is squeezed below 60 px, no node overlaps another once nodes grew), status (before a run every Song Sheet says whether it stops for review, matching the brief's mode), App Mode (configured controls shown, configuration kept). Run it after every change to a template, a blueprint or a node's widgets - the validator cannot see what the frontend adds (a seed's *control after generate*, the height of DOM widgets). It needs a running server whose models folder holds files with the catalogue's names - empty files are enough, the server only validates the names:

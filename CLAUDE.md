@@ -60,6 +60,7 @@ The Comfy Registry package starts nothing but `sys.executable` with Plenio's own
 ## State of the 2.0 work (update when it changes)
 
 - Done: phase 0.5 (tests 144 s to about 85 s), phase 1 (package boundary, gate, route classes, docs).
-- In work: phase 0.1 (stage timings in the record, `plenio/core/timings.py`), then 0.2 `tools/bench.py`.
+- Done too: 0.1 stage timings in the record (`plenio/core/timings.py`), 0.2 `tools/bench.py` (the tool; no real-model run yet).
+- Next: phase 2 (catalogue schema 2, model plan, downloader, gated flow).
 - Waiting for the owner's permission: `pytest-xdist` (0.5), the 12 GB native Gemma download (0.4), real-model benchmark runs on GPU 1 (0.2, 0.3).
 - The plan's boxes are the record of what is done; tick a box in the commit that makes its acceptance line hold.
