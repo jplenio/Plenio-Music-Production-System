@@ -57,7 +57,9 @@ def test_every_route_has_an_access_class(comfy_path: Path) -> None:
         if p not in ("/plenio/player/open", "/plenio/system")
     )
     api_v1 = [path for path in by_class["api"] if path.startswith("/plenio/api/v1")]
-    assert all(path.startswith("/plenio/api/") for path in by_class["api"]) and len(api_v1) == 16  # v1 as 1.6.0
+    assert (
+        all(path.startswith("/plenio/api/") for path in by_class["api"]) and len(api_v1) == 16
+    )  # v1 as 1.6.0
     assert not [r.path for r in routes if r.access != "api" and r.path.startswith("/plenio/api/")]
     # a compute route takes a body and keeps nothing: none of them is a GET or has a name in its path
     assert all(r.method == "POST" and "{" not in r.path for r in routes if r.access == "compute")
