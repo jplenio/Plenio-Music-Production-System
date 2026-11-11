@@ -73,5 +73,5 @@ A session that takes over reads `.claude/handover.md` first if it exists (local,
 - Reviews at the plan's checkpoints run as a subagent (`model: fable`, `effort: high`), read-only, focused; next one: phase 5.
 - Exit of phase 3 passed on 2026-11-11: the owner's real song with every model field on `auto` (16 GB card).
 - `pytest-xdist` is in `.devdeps` and CI (0.5 done); 0.4 done (the native 12B measured in ComfyUI 0.41.0).
-- Waiting for the owner: the cover brief's recording (0.2). Decided 2026-11-11: the Q6_K GGUF from 20 GiB only; `coverage` permitted (0.6).
+- Waiting for the owner: the cover brief's recording (0.2). Decided 2026-11-11: the Q6_K GGUF from 20 GiB only; `coverage` in `.devdeps` (0.6 done).
 - The plan's boxes are the record of what is done; tick a box in the commit that makes its acceptance line hold.
