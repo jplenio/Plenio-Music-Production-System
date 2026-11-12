@@ -1,0 +1,40 @@
+name: Weekly
+
+# Once a week: every tier against ComfyUI master (what the next ComfyUI release will be), 300 examples per property
+# test, the browser check too. A failure opens an issue (or comments on the open one), so a change in ComfyUI is
+# known before users meet it.
+on:
+  schedule:
+    - cron: "41 4 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  tiers:
+    uses: ./.github/workflows/ci.yml
+    with:
+      comfyui: '["master"]'
+      hypothesis: weekly
+      browser: true
+
+  report:
+    name: Open an issue on failure
+    needs: tiers
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Weekly check against ComfyUI master failed"
+          open=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "in:title \"$title\"" --json number --jq '.[0].number')
+          body="The weekly run of every tier against ComfyUI \`master\` failed: $RUN"
+          if [ -n "$open" ]; then
+            gh issue comment "$open" --repo "$GITHUB_REPOSITORY" --body "$body"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
+          fi

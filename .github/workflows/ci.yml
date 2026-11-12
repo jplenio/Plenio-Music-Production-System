@@ -1,13 +1,34 @@
 name: CI
 
+# The tiers of PD 10.1: fast and io on both systems, host on the oldest and the newest ComfyUI this release
+# supports, frontend, package; the browser check on pushes to main. weekly.yml calls this workflow against ComfyUI
+# master with 300 examples per property test.
 on:
   push:
   pull_request:
+  workflow_call:
+    inputs:
+      comfyui:
+        description: the ComfyUI refs the host tier runs on, as a JSON list
+        type: string
+        default: '["v0.41.0", "v0.44.2"]'
+      hypothesis:
+        description: the property tests' profile (push 25 examples, weekly 300)
+        type: string
+        default: push
+      browser:
+        description: also run the browser check
+        type: boolean
+        default: false
+
+env:
+  HYPOTHESIS_PROFILE: ${{ inputs.hypothesis || 'push' }}
 
 jobs:
-  python:
-    name: Python (${{ matrix.os }})
+  fast:
+    name: Fast (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -17,17 +38,50 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: .github/workflows/ci.yml
       # numpy, scipy, av and Pillow come with ComfyUI; the unit tests of the audio chain and covers need them
       - run: python -m pip install "pytest==8.4.*" "pytest-xdist==3.8.*" "hypothesis==6.*" "ruff==0.13.*" "mypy==1.18.*" "jsonschema==4.*" tomli numpy scipy av pillow
       - run: python -m ruff check .
       - run: python -m ruff format --check .
       # numpy's stubs use Python 3.12 syntax (CURRENT_STATUS known issues): check with the CI interpreter's version
       - run: python -m mypy --python-version 3.12
-      - run: python -m pytest tests/unit tests/workflows tests/contract/test_data_schemas.py -n auto
+      # the numbers and tables of the docs are the code's (docs/facts.json)
+      - run: python tools/facts.py --check
+      # relative links, environment variables, config sections and routes against the code
+      - run: python tools/doc_check.py
+      # every video by its key: go pages and the player's list as resources/media.toml says, no direct YouTube link
+      - run: python tools/media_links.py --check
+      - run: python -m pytest tests/unit tests/workflows tests/contract/test_data_schemas.py -n auto -m "not io and not process"
 
-  comfyui:
-    name: ComfyUI 0.41.0 contract + host tests (CPU)
+  io:
+    name: IO (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: .github/workflows/ci.yml
+      - run: python -m pip install "pytest==8.4.*" "pytest-xdist==3.8.*" "hypothesis==6.*" "jsonschema==4.*" tomli numpy scipy av pillow
+      # local servers, files and real processes; each binds port 0, so they run in parallel
+      - run: python -m pytest tests/unit tests/workflows tests/contract/test_data_schemas.py -n auto -m "io or process"
+
+  host:
+    name: Host (ComfyUI ${{ matrix.comfyui }}, CPU)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        # the oldest ComfyUI this release supports and the newest tag it was checked with
+        comfyui: ${{ fromJSON(inputs.comfyui || '["v0.41.0", "v0.44.2"]') }}
     env:
       PLENIO_COMFYUI_ROOT: ${{ github.workspace }}/ComfyUI
       PLENIO_COMFYUI_PYTHON: python
@@ -38,7 +92,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           repository: Comfy-Org/ComfyUI
-          ref: v0.41.0
+          ref: ${{ matrix.comfyui }}
           path: ComfyUI
       - uses: actions/setup-python@v6
         with:
@@ -51,6 +105,7 @@ jobs:
   frontend:
     name: Frontend
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: frontend
@@ -72,11 +127,14 @@ jobs:
   package:
     name: Registry package
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+      # the tree first: nothing starts a process but Plenio's own launchers (docs/security)
+      - run: python tools/package_gate.py --tree .
       - run: python -m pip install comfy-cli
       - run: git config --global core.quotePath false
       - run: comfy --skip-prompt --no-enable-telemetry node validate
@@ -100,3 +158,58 @@ jobs:
       # nothing in the package starts a process but this Python with Plenio's own modules (docs/security)
       - name: The package gate
         run: python tools/package_gate.py node.zip
+
+  browser:
+    name: Browser check (templates in the real frontend)
+    # pushes to main, and the weekly run
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || inputs.browser
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PLENIO_COMFYUI_ROOT: ${{ github.workspace }}/ComfyUI
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: plenio
+      - uses: actions/checkout@v5
+        with:
+          repository: Comfy-Org/ComfyUI
+          ref: ${{ fromJSON(inputs.comfyui || '["v0.41.0", "v0.44.2"]')[0] }}
+          path: ComfyUI
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - run: python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+      - run: python -m pip install -r ComfyUI/requirements.txt
+      - run: npm install --global playwright@1 && npx playwright install --with-deps chromium
+      - name: Empty model files of the catalogue's names, two short recordings
+        working-directory: plenio
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from plenio.core.models import load_components
+          for component in load_components(Path("resources/models.toml")).values():
+              for variant in component.variants:
+                  target = Path("../check/models") / component.folder / variant.file
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_bytes(b"")
+          PY
+          mkdir -p ../check/base/input
+          for name in cover_source browser-check; do ffmpeg -loglevel error -f lavfi -i sine=frequency=440:duration=4 "../check/base/input/$name.flac"; done
+      - name: Start ComfyUI with Plenio
+        working-directory: plenio
+        run: |
+          python tools/dev_server.py --port 8190 --base ../check/base --models ../check/models > ../check/dev.log 2>&1 &
+          for i in $(seq 1 90); do curl -sf http://127.0.0.1:8190/plenio/api/v2 > /dev/null && break; sleep 2; done
+          curl -sf http://127.0.0.1:8190/plenio/api/v2 > /dev/null || { cat ../check/dev.log ../check/base/server.log; exit 1; }
+      - name: The browser check
+        working-directory: plenio
+        run: PLAYWRIGHT_MODULE="$(npm root --global)/playwright/index.js" node tools/browser_check.mjs --url http://127.0.0.1:8190 --out ../check/results
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-check
+          path: check/results

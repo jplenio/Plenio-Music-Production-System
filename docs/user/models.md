@@ -87,6 +87,22 @@ The block stays bypassed until you turn it on, so a template runs without these 
 
 The exact URLs are in `resources/models.toml`; a missing file's message names its URL too.
 
+## What `auto` takes on your card
+
+Generated from the catalogue (`resources/models.toml`) by the model plan; Plenio Setup shows the same for your own card, with what is already installed.
+
+<!--facts:hardware-table-->
+| GPU memory | YuE2 | MiniMax Music 3 | Cover Art (FLUX.2 Klein 4B) | Writer (Gemma 4) |
+|---|---|---|---|---|
+| below 8 GB | `yue2_3b_int8_convrot` (4.0 GB) - runs with offloading: slower | `minimax_music3_dit_int8_convrot` (2.5 GB) + `minimax_music3_text_encoder_pruned_int8_convrot` (9.2 GB) - too large for this card: very slow | `flux-2-klein-4b-fp8` (4.1 GB) + `qwen_3_4b_fp4_flux2` (3.8 GB) - runs with offloading: slower | `gemma-4-12B-it-qat-UD-Q4_K_XL.gguf` (6.7 GB); without llama.cpp: `gemma4_e2b_it_int8_convrot` |
+| 8-12 GB | `yue2_3b_int8_convrot` (4.0 GB) - runs with offloading: slower | `minimax_music3_dit_int8_convrot` (2.5 GB) + `minimax_music3_text_encoder_pruned_int8_convrot` (9.2 GB) - runs with offloading: slower | `flux-2-klein-4b-fp8` (4.1 GB) + `qwen_3_4b_fp4_flux2` (3.8 GB) - runs on the card | `gemma-4-12B-it-qat-UD-Q4_K_XL.gguf` (6.7 GB); without llama.cpp: `gemma4_e2b_it_int8_convrot` |
+| 12-16 GB | `yue2_3b_int8_convrot` (4.0 GB) - runs on the card | `minimax_music3_dit_int8_convrot` (2.5 GB) + `minimax_music3_text_encoder_pruned_int8_convrot` (9.2 GB) - runs on the card | `flux-2-klein-4b-fp8` (4.1 GB) + `qwen_3_4b_fp4_flux2` (3.8 GB) - runs on the card | `gemma-4-12B-it-qat-UD-Q4_K_XL.gguf` (6.7 GB); without llama.cpp: `gemma4_e4b_it_fp8_scaled` |
+| 16-24 GB | `yue2_3b_int8_convrot` (4.0 GB) - runs on the card | `minimax_music3_dit_fp16` (4.9 GB) + `minimax_music3_text_encoder_pruned_int8_convrot` (9.2 GB) - runs on the card | `flux-2-klein-4b` (7.8 GB) + `qwen_3_4b` (8.0 GB) - runs on the card | `gemma-4-12B-it-qat-UD-Q4_K_XL.gguf` (6.7 GB); without llama.cpp: `gemma4_12b_int8_convrot` |
+| 24 GB and more | `yue2_3b_bf16` (7.8 GB) - runs on the card | `minimax_music3_dit_fp16` (4.9 GB) + `minimax_music3_text_encoder_pruned_int8_convrot` (9.2 GB) - runs on the card | `flux-2-klein-4b` (7.8 GB) + `qwen_3_4b` (8.0 GB) - runs on the card | `gemma-4-12b-it-Q6_K.gguf` (9.8 GB); without llama.cpp: `gemma4_12b_int8_convrot` |
+
+*What `auto` takes with nothing installed. Basis: estimate (the catalogue's memory thresholds).*
+<!--/facts-->
+
 ## Smaller GPUs: alternative files
 
 The tables above name each model's default file. With a model field on **auto** the plan may take one of these alternatives instead, by the card's memory; to use one regardless, choose it in the field (or pin it in `config.toml`, [Configuration](configuration.md)). The System Check's hardware table shows what auto takes on each card and marks your row:

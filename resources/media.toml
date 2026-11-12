@@ -1,0 +1,150 @@
+# Every video of Plenio, by a key that never changes (schema plenio.media/1, MP section 6).
+#
+# README, docs, posts and the descriptions of other videos link a key's go-link,
+# https://jplenio.github.io/Plenio-Music-Production-System/go/<key>/ - never YouTube directly. A video uploaded
+# anew changes one line here; `python tools/media_links.py --write` then writes the go pages (docs/go/) and the
+# player's list (frontend/src/player/media.generated.ts). An old upload is set to unlisted, never deleted: an
+# installed player of an older version keeps playing its id.
+
+schema = "plenio.media/1"
+site = "https://jplenio.github.io/Plenio-Music-Production-System"
+
+[[playlist]]
+key = "tutorials"
+youtube = "PLAFqTtP59fgE"
+
+[[playlist]]
+key = "songs"
+youtube = "PLBZzzh1IMZzk"
+
+[[video]]
+key = "tutorial-0-system-check"
+title = "Tutorial 0 · System Check"
+youtube = "v38t0bFqu5Q"
+kind = "tutorial"
+
+[[video]]
+key = "tutorial-1-yue2-song"
+title = "Tutorial 1 · YuE2 · Song"
+youtube = "PdL7mCKEE1k"
+kind = "tutorial"
+
+[[video]]
+key = "tutorial-2-yue2-cover"
+title = "Tutorial 2 · YuE2 · Cover"
+youtube = "XFkgFgvImzM"
+kind = "tutorial"
+
+[[video]]
+key = "tutorial-3-minimax-song"
+title = "Tutorial 3 · MiniMax · Song"
+youtube = "rptsvP0yYio"
+kind = "tutorial"
+
+[[video]]
+key = "tutorial-4-enhance-master"
+title = "Tutorial 4 · Enhance & Master"
+youtube = "3bBbOivHvzc"
+kind = "tutorial"
+
+[[video]]
+key = "tutorial-5-yue2-daw"
+title = "Tutorial 5 · YuE2 · DAW"
+youtube = "K1Jr_JpkCUg"
+kind = "tutorial"
+
+[[video]]
+key = "tutorial-6-yue2-song-creative"
+title = "Tutorial 6 · YuE2 · Song · Creative modes"
+youtube = "JTlRvyGssfo"
+kind = "tutorial"
+
+[[video]]
+key = "tutorial-7-yue2-cover-creative"
+title = "Tutorial 7 · YuE2 · Cover · Creative modes"
+youtube = "5bPU2-coElw"
+kind = "tutorial"
+
+[[video]]
+key = "tutorial-8-player"
+title = "Tutorial 8 · The Plenio Player"
+youtube = "FkWj-3P99PM"
+kind = "tutorial"
+
+[[video]]
+key = "tutorial-9-party-songs"
+title = "Tutorial 9 · Party songs"
+youtube = "2GBx2xUOnPw"
+kind = "tutorial"
+
+[[video]]
+key = "tutorial-10-song-api"
+title = "Tutorial 10 · Song API"
+youtube = "5vdi3ypvIuw"
+kind = "tutorial"
+
+[[video]]
+key = "tutorial-11-yue2-loras"
+title = "Tutorial 11 · YuE2 LoRAs"
+youtube = "o7NtC3U2pEg"
+kind = "tutorial"
+
+[[video]]
+key = "spot-your-party"
+title = "Your idea. Your song. Your party."
+youtube = "myiZawtsja4"
+kind = "film"
+
+[[video]]
+key = "spot-your-control"
+title = "Your idea. Your song. Your control."
+youtube = "XpNpks9ZCgE"
+kind = "film"
+
+[[video]]
+key = "vst3-teaser"
+title = "Plenio is in your DAW"
+youtube = "ppJcVOqIaJg"
+kind = "film"
+
+[[video]]
+key = "vst3-first-song"
+title = "Plenio VST3: your first song in your DAW"
+youtube = "rhNspYujXto"
+kind = "howto"
+
+[[video]]
+key = "song-1"
+title = "A song made with Plenio"
+youtube = "hPq9tUjTzr0"
+kind = "song"
+
+[[video]]
+key = "song-2"
+title = "A song made with Plenio"
+youtube = "hAaLnEOe6-g"
+kind = "song"
+
+[[video]]
+key = "song-3"
+title = "A song made with Plenio"
+youtube = "VcDpDqVAz3g"
+kind = "song"
+
+[[video]]
+key = "song-4"
+title = "A song made with Plenio"
+youtube = "UoQnC7ceOl8"
+kind = "song"
+
+[[video]]
+key = "song-5"
+title = "A song made with Plenio"
+youtube = "r-X1GWI-BR0"
+kind = "song"
+
+[[video]]
+key = "song-6"
+title = "A song made with Plenio"
+youtube = "4A_jQsZj8B4"
+kind = "song"

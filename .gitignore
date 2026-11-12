@@ -15,3 +15,7 @@ frontend/coverage/
 .idea/
 .coverage
 .browser-check/
+frontend/dist-site/
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+.mutmut-cache

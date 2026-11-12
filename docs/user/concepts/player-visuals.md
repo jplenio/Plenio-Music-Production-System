@@ -36,7 +36,7 @@ Your presets live in the player's state folder, in `visuals`:
 
 (If you set `PLENIO_PLAYER_STATE`, it is the `visuals` folder in there.) Every `.json` file in this folder
 is a visual of yours. The visuals' settings (✦ in Now playing, or **V**) list them under **My presets**, as
-*My · <name>*, and you choose them like any other visual: in the mode's choice, as the fixed visual, for a
+*My · &lt;name&gt;*, and you choose them like any other visual: in the mode's choice, as the fixed visual, for a
 song or for a playlist.
 
 **The quickest start:** play a Plenio Drop visual you like, open the visuals' settings, and click

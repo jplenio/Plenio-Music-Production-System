@@ -4,7 +4,7 @@ A page in your browser that plays the songs you made with Plenio. It is a progra
 **without ComfyUI**, and ComfyUI can start it with one click. Make songs in ComfyUI and listen in the player
 at the same time, or just listen.
 
-▶ **Videos:** [Tutorial 8 · Plenio Player](https://youtu.be/FkWj-3P99PM) - listening, a song's page with the full lyrics and its stars, the visuals with Plenio Nova, Live Play, videos; [Tutorial 9 · Party songs](https://youtu.be/2GBx2xUOnPw) - songs made from the player, with presets, takes and your guests. All of them in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE).
+▶ **Videos:** [Tutorial 8 · Plenio Player](https://jplenio.github.io/Plenio-Music-Production-System/go/tutorial-8-player/) - listening, a song's page with the full lyrics and its stars, the visuals with Plenio Nova, Live Play, videos; [Tutorial 9 · Party songs](https://jplenio.github.io/Plenio-Music-Production-System/go/tutorial-9-party-songs/) - songs made from the player, with presets, takes and your guests. All of them in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE).
 
 It finds every song that Export Release wrote (each export writes a `.plenio.json` release record next to
 the audio). It shows them as a library you can search. While a song plays, the lyrics light up word by word,

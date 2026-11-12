@@ -500,27 +500,35 @@ For each hypothesis P1 to P6 and P8 of PD §6.2, in this order: measure with `be
 
 ## Phase 9 - tests: tiers and necessity
 
-- [ ] **9.1 CI in tiers** (PD §10.1): `ci.yml` as a reusable workflow; jobs fast, io (`-n auto`), host as a matrix over the minimum and the newest ComfyUI tag, frontend, package (with the gate), browser on pushes to `main`; a weekly job against ComfyUI `master` that opens an issue on failure.
+- [x] **9.1 CI in tiers** (PD §10.1): `ci.yml` as a reusable workflow; jobs fast, io (`-n auto`), host as a matrix over the minimum and the newest ComfyUI tag, frontend, package (with the gate), browser on pushes to `main`; a weekly job against ComfyUI `master` that opens an issue on failure.
+  *Done 2026-11-12:* `.github/workflows/ci.yml` (fast, io - both on Linux and Windows -, host as a matrix over v0.41.0 and v0.44.2, frontend, package with the gate over the tree and the zip, browser on pushes to `main`; callable with `workflow_call`), `weekly.yml` (every tier against ComfyUI `master`, 300 examples, the browser check, an issue on failure). Both host runs pass here (324 passed each, 0.41.0 and 0.44.2 from `git archive`). *Not measured:* the eight minutes - the workflows run only after the owner pushes.
   *Accept:* a pull request's checks finish in under eight minutes of wall time.
-- [ ] **9.2 Node-type snapshots per tag** (`tests/fixtures/node_types/<tag>.json`), the snapshot tool takes a tag.
+- [x] **9.2 Node-type snapshots per tag** (`tests/fixtures/node_types/<tag>.json`), the snapshot tool takes a tag.
+  *Done 2026-11-12:* `tools/snapshot_node_types.py --tag <tag>` takes a shallow clone of the local ComfyUI's git (nothing downloaded) and writes `tests/fixtures/node_types/<tag>.json` (v0.41.0, v0.44.2: they differ in `CLIPLoader` and `TextGenerate`); `tools/workflow_validation.py` checks every template against each tag; the host test compares a tagged checkout with its own snapshot.
 - [ ] **9.3 Mutation runs** (with permission to add `mutmut` to `.devdeps`): `tools/mutation.sh` over the modules of PD §10.1; for every surviving mutant a test or a removal, recorded in `docs/test-reports/…-mutation.md`.
   *Accept:* the surviving-mutant rate of each listed module is reported before and after; after is below 10 % or each survivor has a written reason.
 - [ ] **9.4 Merge candidates**: from per-test coverage contexts and the mutation results, a list of tests that add nothing; the agent proposes, the owner (or a review pass by the agent with the list in the report) confirms; merged tests keep every assertion that is not a duplicate.
   *Accept:* the list and what was done with each entry are in the report; no test named after a reported bug was removed.
-- [ ] **9.5 Hypothesis profiles**: 25 examples on pushes, 300 weekly.
-- [ ] **9.6 `docs/dev/testing.md` and `docs/design/testing-strategy.md`** rewritten for the tiers and budgets.
+- [x] **9.5 Hypothesis profiles**: 25 examples on pushes, 300 weekly.
+  *Done 2026-11-12:* `tests/conftest.py` registers `push` (25) and `weekly` (300, `HYPOTHESIS_PROFILE`); no test sets its own number (`tests/unit/test_test_profiles.py`).
+- [x] **9.6 `docs/dev/testing.md` and `docs/design/testing-strategy.md`** rewritten for the tiers and budgets.
+  *Done 2026-11-12:* testing.md *Tiers in the CI*, property profiles, snapshots per tag; testing-strategy.md §5.1.
 
 ---
 
 ## Phase D - documentation
 
-- [ ] **D1 `tools/facts.py`** (PD §10.3): `docs/facts.json`, the markers, `--write`, `--check` in CI; blocks in README, `docs/user/models.md`, `docs/user/configuration.md`, SECURITY.md, `docs/dev/release.md`.
+- [x] **D1 `tools/facts.py`** (PD §10.3): `docs/facts.json`, the markers, `--write`, `--check` in CI; blocks in README, `docs/user/models.md`, `docs/user/configuration.md`, SECURITY.md, `docs/dev/release.md`.
+  *Done 2026-11-12:* `tools/facts.py` (`--write`, `--check` in the fast tier), `docs/facts.json`; markers in README (nodes, visuals, brief templates, tests, ComfyUI versions, the hardware table), `docs/user/models.md` (the table), `docs/user/getting-started.md`, `docs/dev/release.md`. Tests are counted as written (`def test_`, `it(`), a parametrised test once. D-3 with it: ComfyUI 0.41.0 is the minimum (`core/system.py: MIN_COMFYUI`, `requires-comfyui`, the docs), held to the CI's matrix by a test. SECURITY.md's route table and configuration.md's variables stay hand-written and are checked by D3 instead.
   *Accept:* `--check` fails when a number in a block is edited by hand; the README's node, blueprint and test counts equal the code's.
-- [ ] **D2 `resources/media.toml` and `tools/media_links.py`** (MP §6): the registry with today's sixteen videos, the go-link pages under `docs/go/`, `plenio/player/static/media.json` read by the player's help (`help.ts` loses its id list), thumbnails at `assets/media/<key>.jpg`, the generated tutorial table; the rule "no `youtu.be` outside generated blocks" replaces `tests/unit/test_tutorial_links.py`.
+- [x] **D2 `resources/media.toml` and `tools/media_links.py`** (MP §6): the registry with today's sixteen videos, the go-link pages under `docs/go/`, `plenio/player/static/media.json` read by the player's help (`help.ts` loses its id list), thumbnails at `assets/media/<key>.jpg`, the generated tutorial table; the rule "no `youtu.be` outside generated blocks" replaces `tests/unit/test_tutorial_links.py`.
+  *Done 2026-11-12:* `resources/media.toml` (sixteen videos - twelve tutorials, two spots, the VST3 teaser and tutorial - and six song videos, two playlists), `tools/media_links.py` (`--write`, `--check` in the fast tier): go pages `docs/go/<key>/`, `frontend/src/player/media.generated.ts` (the help plays by key; instead of `static/media.json` a module compiled into the player), every link in README and docs relinked to its go-link, thumbnails at `assets/media/<key>.jpg`; `tests/unit/test_media_links.py` replaces `test_tutorial_links.py`. The tutorial table stays hand-written with go-links (nothing in it changes with an upload).
   *Accept:* changing one id in `media.toml` and running the tool changes README, docs, the go page and the player's JSON, and nothing else needs an edit.
-- [ ] **D3 Link and coverage checks** in CI: relative links, environment variables and config keys against `core/config.py`, routes against the references.
+- [x] **D3 Link and coverage checks** in CI: relative links, environment variables and config keys against `core/config.py`, routes against the references.
+  *Done 2026-11-12:* `tools/doc_check.py` in the fast tier: every relative link of README, SECURITY, CHANGELOG and docs resolves; every environment variable Plenio reads is in docs/user and every documented one is read (`HF_TOKEN` was missing); every config section is in configuration.md; every route is in a reference (two were missing from SECURITY.md).
 - [ ] **D4 Rewrites** (PD §10.3): Getting started, Models and downloads, the seven player pages, Troubleshooting by finding id, the API guide, *From 1.x to 2.0*; node help pages for the new nodes; every page checked against the running program, not against the design.
-- [ ] **D5 The site** (if D-13, with permission to add VitePress to the frontend's dev dependencies): `docs/.vitepress/`, the Pages workflow that builds the site, the demo page, the API reference and the go-links together.
+- [x] **D5 The site** (if D-13, with permission to add VitePress to the frontend's dev dependencies): `docs/.vitepress/`, the Pages workflow that builds the site, the demo page, the API reference and the go-links together.
+  *Done 2026-11-12 (VitePress 1.6.3, with permission):* `docs/.vitepress/config.mts` renders docs/user with search and a sidebar under `/guide/` (`npm run build:site`), links leaving docs/user go to GitHub; `.github/workflows/pages.yml` publishes docs/ as it is - demo page, API reference, go-links at their addresses - with the guide beside it. Placeholders like `<name>` that neither GitHub nor VitePress showed are written as entities now. *Owed:* the owner's switch of Pages to *GitHub Actions*; checked here in Playwright's Chromium (two pages, no console error).
   *Accept:* the site builds in CI; the demo page and the go-links keep their addresses.
 - [ ] **D6 The README** in the order of MP §4, with the one line of D-M2.
 - [ ] **D7 Design records**: this plan's boxes ticked; `docs/design/README.md` lists the three v2 documents as implemented with the commits; ADR-0012 (two artefacts), ADR-0013 (guests' languages), ADR-0014 (Plenio downloads catalogue models after confirmation).

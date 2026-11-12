@@ -44,7 +44,7 @@ def test_require_missing_package_is_actionable() -> None:
 def facts(**overrides: object) -> SystemFacts:
     values: dict[str, object] = dict(
         plenio_version="0.1.0",
-        comfyui_version="0.37.0",
+        comfyui_version="0.41.0",
         frontend_version="1.53.6",
         python_version="3.12.9",
         platform="Windows 11",
@@ -151,7 +151,7 @@ def test_warnings_for_old_comfyui_cpu_only_and_missing_packages() -> None:
     )
     assert report.status is Status.WARNING
     text = " ".join(report.messages)
-    assert "older than the supported 0.37.0" in text
+    assert "older than the supported 0.41.0" in text
     assert "'av' is not installed" in text
     assert "No GPU detected" in report.data["recommendations"][0]
 

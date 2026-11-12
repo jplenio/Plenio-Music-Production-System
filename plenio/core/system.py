@@ -19,7 +19,8 @@ from .assets import Asset
 from .models import Inventory, ModelFile, readiness, size_text, template_names
 from .reports import Report, Status, worst
 
-MIN_COMFYUI = (0, 37, 0)
+MIN_COMFYUI = (0, 41, 0)
+"""The oldest ComfyUI Plenio runs on (D-3, 2.0): the CI's host tier runs it and the newest tag."""
 GIB = 1024**3
 ESSENTIAL_PACKAGES = frozenset({"av", "PIL", "scipy"})
 """Packages ComfyUI itself installs; missing means a broken installation (the others are optional)."""

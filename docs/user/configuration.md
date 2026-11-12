@@ -9,6 +9,7 @@ Plenio has very few settings. Everything else is chosen in the workflow.
 | `PLENIO_OFFLINE` | `1` / `0` | never access the network; missing assets produce an error that names the folder and files to place |
 | `HF_HUB_OFFLINE` | `1` | Hugging Face's own offline switch; also puts Plenio offline (it cannot be undone with `PLENIO_OFFLINE=0`) |
 | `HF_ENDPOINT` | a URL | Hugging Face's own mirror setting: Plenio Setup fetches the catalogue's model files from the same paths on that host (each file is still checked against the catalogue's size and SHA-256; a token is never sent there) |
+| `HF_TOKEN` (or `HUGGING_FACE_HUB_TOKEN`) | a Hugging Face token | Hugging Face's own setting: Plenio Setup uses it for gated model files before a token saved with `huggingface_hub`; it is sent to huggingface.co only, never to a mirror, and never written into a file of Plenio's |
 | `PLENIO_AUTO_DOWNLOAD` | `1` (default) / `0` | fetch missing Plenio assets when a node that needs them runs; `0` gives an error with manual steps instead |
 | `PLENIO_ASSET_DIR` | a folder | where Plenio assets are stored (default: `models/plenio`) |
 | `PLENIO_WORKER_TIMEOUT` | seconds | how long an out-of-process worker may run in total (default 3600) |

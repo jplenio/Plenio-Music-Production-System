@@ -54,6 +54,14 @@ def test_the_node_type_snapshot_matches_the_server(comfy_path: Path, tmp_path: P
         if (name.startswith("Plenio") or same_comfyui) and committed["nodes"].get(name) != entry
     ]
     assert stale == [], f"re-run tools/snapshot_node_types.py (changed: {stale})"
+    # on a tag the CI runs (phase 9.2): its own snapshot of the native nodes, as the templates were validated
+    tagged = PROJECT / "tests" / "fixtures" / "node_types" / f"{live.get('comfyui_ref')}.json"
+    if tagged.is_file():
+        native = json.loads(tagged.read_text(encoding="utf-8"))["nodes"]
+        changed = [name for name, entry in native.items() if live["nodes"].get(name) != entry]
+        assert changed == [], (
+            f"re-run tools/snapshot_node_types.py --tag {live.get('comfyui_ref')} ({changed})"
+        )
 
 
 def test_system_route(server: ComfyServer) -> None:

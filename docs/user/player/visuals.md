@@ -155,7 +155,7 @@ draw falls back to the mode.
 
 **Write your own:** a Plenio Drop preset is a short text file of numbers and small formulas. *Edit a copy*
 in the visuals' settings saves the visual that plays into your presets folder; change it in any editor, save,
-and the visual changes on screen. Your presets appear as *My · <name>*. The guide:
+and the visual changes on screen. Your presets appear as *My · &lt;name&gt;*. The guide:
 [Plenio Drop: visuals of your own](../concepts/player-visuals.md).
 
 Open the visuals' settings with ✦ in Now playing (or press **V**):

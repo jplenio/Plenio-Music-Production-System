@@ -8,7 +8,7 @@ The System Check (and Plenio Setup) name what needs attention as a finding with 
 
 | Finding | What it means | What to do |
 |---|---|---|
-| `comfyui.too_old` | ComfyUI is older than 0.37.0 | Update ComfyUI (*Open ComfyUI's releases*) |
+| `comfyui.too_old` | ComfyUI is older than 0.41.0 | Update ComfyUI (*Open ComfyUI's releases*) |
 | `gpu.none` | no graphics card was found | YuE2 and MiniMax Music 3 need one; 0 · System Check and 4 · Enhance & Master run on the CPU |
 | `package.missing` | `av`, `PIL` or `scipy` is missing - ComfyUI installs them | Run the copied `pip install` line with ComfyUI's Python, or reinstall ComfyUI's requirements |
 | `model.missing` | a template needs a file you do not have (not a fault) | *Download* in Plenio Setup, or place the file as [Models and downloads](models.md) says |
@@ -26,9 +26,9 @@ The System Check (and Plenio Setup) name what needs attention as a finding with 
 
 | What you see | Why | What to do |
 |---|---|---|
-| The Plenio templates are not in the template browser | ComfyUI lists custom-node templates under the package's folder name; an old ComfyUI or an import error hides them | Update ComfyUI to 0.37.0 or newer; look for `Plenio` and `Cannot import` in the ComfyUI console at start-up |
-| Red nodes, *missing node types* | ComfyUI older than 0.37.0 (the native YuE2, MiniMax, FLUX.2 and loop nodes are missing) | Update ComfyUI |
-| System Check: *older than the supported 0.37.0* | as above | Update ComfyUI |
+| The Plenio templates are not in the template browser | ComfyUI lists custom-node templates under the package's folder name; an old ComfyUI or an import error hides them | Update ComfyUI to 0.41.0 or newer; look for `Plenio` and `Cannot import` in the ComfyUI console at start-up |
+| Red nodes, *missing node types* | ComfyUI older than 0.41.0 (the native YuE2, MiniMax, FLUX.2 and loop nodes are missing) | Update ComfyUI |
+| System Check: *older than the supported 0.41.0* | as above | Update ComfyUI |
 | System Check: *Package 'av' / 'PIL' / 'scipy' is not installed* | a broken ComfyUI environment (ComfyUI installs them) | Reinstall ComfyUI's requirements in its Python |
 | A template you saved in `user/plenio/templates` does not appear | the file could not be read (for example a front-matter line without `:`) | The ComfyUI log says *skipped the user template ...* with the reason; fix or delete the file and refresh |
 | System Check: *Plenio configuration error* | `user/plenio/config.toml` has an invalid value or key | Fix the file as the message says; until then Plenio uses its defaults |

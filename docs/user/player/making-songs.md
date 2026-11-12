@@ -150,7 +150,7 @@ visual:
 - **Drift**: the same moments, and between them the name floats slowly across the picture.
 
 The name glows with the beat. The party's phones show *made by …* under the song that plays and in *Up next*. The
-name comes from the song's tags: the album *Party-Song <date>* and its artist - songs made before show it too.
+name comes from the song's tags: the album *Party-Song &lt;date&gt;* and its artist - songs made before show it too.
 
 The times are estimates: from the song's length and how long the songs before took on this computer - the first
 estimate is rough, then they get better. Songs wait in the player's own line until the studio takes them, one at a
@@ -158,7 +158,7 @@ time; your own runs in ComfyUI come first. When ComfyUI does not run, songs wait
 
 Every song from the player: YuE2, **HQ mastering off** (twice as fast), **cover art on**. Only a song ordered on the
 **party's page** - a guest's, from the phone - is a **party song**: saved in `plenio/Party-Songs-<date>` of ComfyUI's
-output folder, album **Party-Song <date>**, artist **Guest**, named on the big screen while it plays. A song you or a
+output folder, album **Party-Song &lt;date&gt;**, artist **Guest**, named on the big screen while it plays. A song you or a
 user makes in the player is saved like a song made in ComfyUI - the template's folder and tags - and joins your songs
 (and Live Play while it runs) like every new song. The player reads the folder a song was saved in by itself, also
 when it is not one of its folders. A shared player has none of this: making songs needs this computer.

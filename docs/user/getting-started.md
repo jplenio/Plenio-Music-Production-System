@@ -1,10 +1,10 @@
 # Getting started
 
-▶ **Videos:** [Your idea. Your song. Your party.](https://youtu.be/myiZawtsja4) (the spot, 54 seconds), [Your idea. Your song. Your control.](https://youtu.be/XpNpks9ZCgE) (the first spot) - and one tutorial for every template, starting with [Tutorial 0 · System Check](https://youtu.be/v38t0bFqu5Q), plus two on the experimental creative modes (*Tutorials 6 and 7*), three on the Plenio Player - listening, party songs, the Song API (*Tutorials 8 to 10*) - and one on LoRAs for YuE2 (*Tutorial 11*), in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE). **Songs made with Plenio**, as videos made by the Plenio Player: [the example playlist](https://www.youtube.com/playlist?list=PLBZzzh1IMZzk).
+▶ **Videos:** [Your idea. Your song. Your party.](https://jplenio.github.io/Plenio-Music-Production-System/go/spot-your-party/) (the spot, 54 seconds), [Your idea. Your song. Your control.](https://jplenio.github.io/Plenio-Music-Production-System/go/spot-your-control/) (the first spot) - and one tutorial for every template, starting with [Tutorial 0 · System Check](https://jplenio.github.io/Plenio-Music-Production-System/go/tutorial-0-system-check/), plus two on the experimental creative modes (*Tutorials 6 and 7*), three on the Plenio Player - listening, party songs, the Song API (*Tutorials 8 to 10*) - and one on LoRAs for YuE2 (*Tutorial 11*), in the [tutorial playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE). **Songs made with Plenio**, as videos made by the Plenio Player: [the example playlist](https://www.youtube.com/playlist?list=PLBZzzh1IMZzk).
 
 ## Requirements
 
-- ComfyUI **0.37.0** or newer, tested with 0.41.0 (it provides the native YuE2, SheetSage2, MiniMax Music 3, FLUX.2 and text-generation nodes Plenio builds on)
+- ComfyUI **<!--fact:comfyui.minimum-->0.41.0<!--/fact-->** or newer, tested with <!--fact:comfyui.tested-->0.41.0, 0.44.2<!--/fact--> (it provides the native YuE2, SheetSage2, MiniMax Music 3, FLUX.2 and text-generation nodes Plenio builds on)
 - an NVIDIA GPU for the music models (Plenio is developed and measured on a 16 GB card; the System Check's hardware table covers smaller and larger ones). *4 · Enhance & Master* runs on the CPU.
 
 ## Install

@@ -32,6 +32,26 @@ Frontend: `cd frontend && npm ci`.
 | templates and blueprints | `<python> tools/workflow_validation.py` (also: no two groups or nodes overlap, no embedded definition is unused, no two blueprints share a node id) |
 | frontend | `cd frontend && npm run check` (types, Vitest, build) |
 
+## Tiers in the CI
+
+`.github/workflows/ci.yml` runs the tiers of the product design (PD §10.1) as separate jobs, so a failure names its tier and the jobs run side by side:
+
+| Tier | Job | What | Budget | Runs |
+|---|---|---|---|---|
+| fast | `fast` | lint, format, types, and every test of `tests/unit`, `tests/workflows`, the data schemas that is not `io` or `process` | 30 s of tests | every push and pull request, Linux and Windows |
+| io | `io` | the `io` and `process` tests (local servers, files, real processes), `-n auto` | 60 s | every push and pull request, Linux and Windows |
+| host | `host` | `tests/contract` and `tests/host` on the CPU with fake models, once on the oldest ComfyUI the release supports and once on the newest tag it was checked with | 5 min | every push and pull request, Linux |
+| frontend | `frontend` | types, Vitest, both builds, the committed builds match | - | every push and pull request |
+| package | `package` | the gate over the tree, `comfy node validate` and `pack`, the zip holds every runtime file, the gate over the zip | - | every push and pull request |
+| browser | `browser` | `tools/browser_check.mjs` headless in Playwright's Chromium against a dev server with empty model files | 6 min | pushes to `main`, and weekly |
+| smoke | - | real models (`PLENIO_SMOKE=1`) | - | the owner's machine before a release |
+
+`.github/workflows/weekly.yml` calls the same workflow every Tuesday against ComfyUI `master`, with 300 examples per property test and the browser check; a failure opens an issue (or comments on the open one).
+
+**Property tests** run by profile (`tests/conftest.py`): `push` (25 examples, the default here and on every push) and `weekly` (300, `HYPOTHESIS_PROFILE=weekly`). A test sets its deadline and health checks, never its own number of examples (`tests/unit/test_test_profiles.py`).
+
+**Node types per ComfyUI tag.** `tools/data/node_types.json` is the build reference (Plenio's nodes and the native ones of the pinned tag). `tests/fixtures/node_types/<tag>.json` holds the native nodes of each tag the host tier runs on; `tools/workflow_validation.py` checks every template against each of them, so an input a newer ComfyUI added cannot slip into a template that must also run on the older one. Take a tag's snapshot from the local ComfyUI's git (a shallow clone, nothing downloaded): `PLENIO_COMFYUI_ROOT=<ComfyUI git> <python> tools/snapshot_node_types.py --tag v0.44.2`. Add the tag to the host matrix in `ci.yml` in the same commit.
+
 **Markers for slow tests.** `process` marks a test that starts a real process (a player, a worker, a fake `llama-server`), `io` one that waits for a socket (a refused connection takes Windows two seconds). Everything else is the fast tier. Measured on 2026-11-11 (Windows, the reference machine, 24 threads): the whole command 81-89 s in one process, 20-22 s with `-n auto` (`pytest-xdist`); the fast tier 56 s in one process. Every test server binds port 0, so the workers never compete for a port.
 
 **What keeps the tests quick** (`tests/conftest.py`): servers started inside the test process look for their shutdown every 20 ms (the standard library's half second made every `shutdown()` wait), and passwords set in tests are hashed with 1 000 PBKDF2 rounds - the player's own number is asserted once, in `test_player_accounts.py`. A test that needs free ports takes them with an exclusive bind instead of waiting for refusals. The two torch adapter suites (`test_msst_adapter.py`, `test_universr_adapter.py`) live in `tests/contract`, where the CI installs torch; in `tests/unit` the CI skipped them.

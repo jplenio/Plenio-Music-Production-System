@@ -57,6 +57,20 @@ def load_snapshot(path: Path = SNAPSHOT) -> dict[str, Any]:
     return data
 
 
+TAGS = PROJECT / "tests" / "fixtures" / "node_types"
+"""The native nodes of each ComfyUI tag the CI's host tier runs on (``tools/snapshot_node_types.py --tag``)."""
+
+
+def tag_snapshots() -> dict[str, dict[str, Any]]:
+    """Per tag, the snapshot the templates must hold on: that tag's native nodes with Plenio's own."""
+    own = {k: v for k, v in load_snapshot()["nodes"].items() if k.startswith("Plenio")}
+    found = {}
+    for path in sorted(TAGS.glob("v*.json")):
+        tag = load_snapshot(path)
+        found[path.stem] = {**tag, "nodes": {**tag["nodes"], **own}}
+    return found
+
+
 def _spec(info: Mapping[str, Any], name: str) -> tuple[Any, dict[str, Any]]:
     for section in ("required", "optional"):
         entry = (info.get("input") or {}).get(section, {}).get(name)
@@ -434,7 +448,15 @@ def validate_all(
 ) -> dict[str, list[str]]:
     snapshot = load_snapshot()
     blueprints = load_blueprints(blueprint_folder)
+    paths = list(paths)
     results = {str(path): validate_file(path, snapshot, blueprints) for path in paths}
+    # the same templates on every ComfyUI the CI's host tier runs on: an input a newer ComfyUI added is missing on an
+    # older one
+    for tag, other in tag_snapshots().items():
+        for path in paths:
+            results[str(path)] += [
+                f"ComfyUI {tag}: {problem}" for problem in validate_file(path, other, blueprints)
+            ]
     clashes = id_clashes(blueprints.values())
     if clashes:
         results[str(blueprint_folder)] = [f"blueprints: {clash}" for clash in clashes]

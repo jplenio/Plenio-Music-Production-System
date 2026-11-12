@@ -12,6 +12,10 @@ The ComfyUI must be the release the CI host job checks out (a tag such as ``v0.3
 (``TextGenerate`` did, and the CI failed on the 0.3.0 push). The tool refuses a checkout that is
 not exactly on a release tag unless ``--allow-untagged`` is given; the snapshot records the
 checkout (``comfyui_ref``) so the host test compares native nodes only against the same one.
+
+With ``--tag v0.44.2`` the tool takes the tag itself - a shallow clone of the local ComfyUI's git (nothing is
+downloaded) - and writes the native nodes of that tag to ``tests/fixtures/node_types/<tag>.json`` (phase 9.2): the
+templates are validated against every tag the CI's host tier runs on (``tools/workflow_validation.py``).
 """
 
 from __future__ import annotations
@@ -19,6 +23,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -130,8 +135,55 @@ def take_snapshot(root: Path, base: Path) -> dict[str, Any]:
     }
 
 
+TAGS = PROJECT / "tests" / "fixtures" / "node_types"
+"""The native nodes of each ComfyUI tag the CI checks (``<tag>.json``)."""
+
+
+def native_only(snapshot: dict[str, Any]) -> dict[str, Any]:
+    """A tag's snapshot: Plenio's own nodes are the same on every tag (``tools/data/node_types.json`` has them)."""
+    return {**snapshot, "nodes": {k: v for k, v in snapshot["nodes"].items() if not k.startswith("Plenio")}}
+
+
+def snapshot_tag(root: Path, tag: str) -> Path:
+    """Clone ``tag`` of the ComfyUI at ``root`` (a local git) into a temporary folder and write its native nodes."""
+    if not RELEASE_TAG.fullmatch(tag):
+        raise SystemExit(f"{tag!r} is not a release tag (v0.44.2)")
+    work = Path(tempfile.mkdtemp(prefix="plenio-snapshot-"))
+    try:
+        subprocess.run(
+            [
+                "git",
+                "clone",
+                "--quiet",
+                "--branch",
+                tag,
+                "--depth",
+                "1",
+                root.resolve().as_uri(),
+                str(work / "ComfyUI"),
+            ],
+            check=True,
+            timeout=600,
+        )
+        snapshot = native_only(take_snapshot(work / "ComfyUI", work / "base"))
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+    snapshot["comfyui_ref"] = tag
+    target = TAGS / f"{tag}.json"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        json.dumps(snapshot, indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
+    )
+    return target
+
+
 def main() -> int:
     root = Path(os.environ["PLENIO_COMFYUI_ROOT"])
+    if "--tag" in sys.argv[1:]:
+        tag = sys.argv[sys.argv.index("--tag") + 1]
+        target = snapshot_tag(root, tag)
+        print(f"wrote the native nodes of ComfyUI {tag} to {target.relative_to(PROJECT)}")
+        return 0
     ref = comfyui_ref(root)
     if not (ref and RELEASE_TAG.fullmatch(ref)) and "--allow-untagged" not in sys.argv[1:]:
         print(

@@ -30,7 +30,7 @@ Banner = "https://raw.githubusercontent.com/jplenio/Plenio-Music-Production-Syst
 # Templates and blueprints have "·" in their names; `git ls-files` quotes such paths by default and
 # comfy-cli would skip them, so the two folders are included by directory.
 includes = ["example_workflows", "subgraphs"]
-requires-comfyui = ">=0.37.0"
+requires-comfyui = ">=0.41.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

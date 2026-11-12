@@ -41,6 +41,7 @@ Run with ComfyUI's Python; dev tools live in `.devdeps` (`PYTHONPATH=.devdeps`).
 | any Python | `.devdeps/bin/ruff check .` and `.devdeps/bin/ruff format --check .` (the pinned 0.13 binary - not `python -m ruff`), `python -m mypy --python-version 3.12`, `python -m pytest tests/unit tests/workflows tests/contract/test_data_schemas.py -n auto` (about 21 s; about 85 s in one process) |
 | nodes, routes, templates | `python -m pytest tests/contract tests/host` with `PLENIO_COMFYUI_ROOT=<export of the ComfyUI tag the CI pins>` and `PLENIO_COMFYUI_PYTHON=<ComfyUI's python>` (about 3.5 min); `python tools/workflow_validation.py`; `python tools/build_graphs.py` leaves no diff |
 | frontend | in `frontend/`: `npm run typecheck`, `npm test`, `npm run build`, `npm run build:player`; then `git status web/js plenio/player/static plenio/player/guest_static` shows only intended changes |
+| docs | `python tools/facts.py --check` (after adding a test or a node: `--write` - the README counts them), `python tools/doc_check.py`, `python tools/media_links.py --check`; the site: in `frontend/`, `npm run build:site` |
 | packaging | `python tools/package_gate.py --tree .` (must print *no finding*); after committing: `comfy node validate`, `comfy node pack`, `python tools/package_gate.py node.zip`, delete `node.zip` |
 
 ## Traps on this machine (Windows)

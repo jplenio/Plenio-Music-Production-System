@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Phase 1B design baseline |
+| Status | Phase 1B design baseline; tiers and budgets since 2.0 (§5.1) |
 | Date | 2026-09-25 |
 | Related | [target-architecture.md](target-architecture.md), [implementation-roadmap.md](implementation-roadmap.md) |
 
@@ -106,6 +106,22 @@ EQ response vs. analytic biquad response; auto-EQ bounded corrections; compresso
 - Template leak scan: no absolute local paths, IPs, user names, API keys.
 - CI matrix: Windows + Linux; Python versions supported by the pinned ComfyUI; frontend build must reproduce the committed `web/js` output (build determinism check).
 
+### 5.1 Tiers and budgets (2.0, PD §10.1)
+
+Since 2.0 the CI runs the layers above as tiers, each a job of its own, with a budget for its test time; the commands and the jobs are in [docs/dev/testing.md](../dev/testing.md#tiers-in-the-ci).
+
+| Tier | Marker | Budget | Runs |
+|---|---|---|---|
+| fast | (none) | 30 s | every push, Linux and Windows |
+| io | `io`, `process` | 60 s with `-n auto` | every push, Linux and Windows |
+| host | `host`, `comfy` | 5 min | every push, Linux; the oldest and the newest supported ComfyUI tag, each against its own snapshot of the native nodes |
+| browser | - | 6 min | pushes to `main`, weekly |
+| smoke | `smoke` | - | the owner's machine before a release |
+
+- **Weekly** (`weekly.yml`): every tier against ComfyUI `master`, property tests with 300 examples (25 on a push), the browser check; a failure opens an issue.
+- **Necessity, not only coverage.** Line coverage says a line runs; a mutation run says a fault in it would be noticed. The modules where a silent fault costs a song (score operations and note repair, lyrics fitting, loudness and dynamics, the release record, access, the model plan, fetching) get mutation runs before a release (`tools/mutation.sh`, phase 9.3); a surviving mutant gets a test or its line is removed. Tests that cover nothing another shorter test does not and kill no mutant of their own are merge candidates, reviewed by a person - a test named after a reported bug stays.
+- A test that needs a fixed port or a shared folder is a bug to fix, not a reason to run serially.
+
 ---
 
 ## 6. Smoke tests with real models (local, opt-in)
@@ -137,3 +153,4 @@ Results (time, peak memory where measurable, pass/fail, notes) are stored in `do
 | 7 | DSP regression suite, export matrix, bypass tests, S-7 |
 | 8 | template/App configuration tests, usability checklist, full smoke pass |
 | 9–10 | audit re-runs everything; coverage and flakiness review |
+| 2.0 phase 9 | tiers in the CI (fast, io, host on two ComfyUI tags, frontend, package, browser), the weekly run against `master`, node-type snapshots per tag, property-test profiles, mutation runs and merge candidates (§5.1) |

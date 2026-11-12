@@ -1,0 +1,73 @@
+{
+ "version": "1.6.0",
+ "nodes": 39,
+ "blueprints": 14,
+ "templates": 6,
+ "recipes": 6,
+ "brief_templates": 250,
+ "visuals": {
+  "classic": 25,
+  "drop": 51,
+  "nova": 22,
+  "all": 99
+ },
+ "tests": {
+  "python": 1752,
+  "frontend": 774,
+  "all": 2526
+ },
+ "comfyui": {
+  "minimum": "0.41.0",
+  "tested": [
+   "0.41.0",
+   "0.44.2"
+  ]
+ },
+ "api": {
+  "song": "2.0",
+  "player": "1.0"
+ },
+ "install_line": "comfy node install comfyui-plenio-music",
+ "hardware": [
+  {
+   "card": "below 8 GB",
+   "yue2": "`yue2_3b_int8_convrot` (4.0 GB) - runs with offloading: slower",
+   "minimax": "`minimax_music3_dit_int8_convrot` (2.5 GB) + `minimax_music3_text_encoder_pruned_int8_convrot` (9.2 GB) - too large for this card: very slow",
+   "cover_art": "`flux-2-klein-4b-fp8` (4.1 GB) + `qwen_3_4b_fp4_flux2` (3.8 GB) - runs with offloading: slower",
+   "writer": "`gemma-4-12B-it-qat-UD-Q4_K_XL.gguf` (6.7 GB); without llama.cpp: `gemma4_e2b_it_int8_convrot`",
+   "basis": "estimate (the catalogue's memory thresholds)"
+  },
+  {
+   "card": "8-12 GB",
+   "yue2": "`yue2_3b_int8_convrot` (4.0 GB) - runs with offloading: slower",
+   "minimax": "`minimax_music3_dit_int8_convrot` (2.5 GB) + `minimax_music3_text_encoder_pruned_int8_convrot` (9.2 GB) - runs with offloading: slower",
+   "cover_art": "`flux-2-klein-4b-fp8` (4.1 GB) + `qwen_3_4b_fp4_flux2` (3.8 GB) - runs on the card",
+   "writer": "`gemma-4-12B-it-qat-UD-Q4_K_XL.gguf` (6.7 GB); without llama.cpp: `gemma4_e2b_it_int8_convrot`",
+   "basis": "estimate (the catalogue's memory thresholds)"
+  },
+  {
+   "card": "12-16 GB",
+   "yue2": "`yue2_3b_int8_convrot` (4.0 GB) - runs on the card",
+   "minimax": "`minimax_music3_dit_int8_convrot` (2.5 GB) + `minimax_music3_text_encoder_pruned_int8_convrot` (9.2 GB) - runs on the card",
+   "cover_art": "`flux-2-klein-4b-fp8` (4.1 GB) + `qwen_3_4b_fp4_flux2` (3.8 GB) - runs on the card",
+   "writer": "`gemma-4-12B-it-qat-UD-Q4_K_XL.gguf` (6.7 GB); without llama.cpp: `gemma4_e4b_it_fp8_scaled`",
+   "basis": "estimate (the catalogue's memory thresholds)"
+  },
+  {
+   "card": "16-24 GB",
+   "yue2": "`yue2_3b_int8_convrot` (4.0 GB) - runs on the card",
+   "minimax": "`minimax_music3_dit_fp16` (4.9 GB) + `minimax_music3_text_encoder_pruned_int8_convrot` (9.2 GB) - runs on the card",
+   "cover_art": "`flux-2-klein-4b` (7.8 GB) + `qwen_3_4b` (8.0 GB) - runs on the card",
+   "writer": "`gemma-4-12B-it-qat-UD-Q4_K_XL.gguf` (6.7 GB); without llama.cpp: `gemma4_12b_int8_convrot`",
+   "basis": "estimate (the catalogue's memory thresholds)"
+  },
+  {
+   "card": "24 GB and more",
+   "yue2": "`yue2_3b_bf16` (7.8 GB) - runs on the card",
+   "minimax": "`minimax_music3_dit_fp16` (4.9 GB) + `minimax_music3_text_encoder_pruned_int8_convrot` (9.2 GB) - runs on the card",
+   "cover_art": "`flux-2-klein-4b` (7.8 GB) + `qwen_3_4b` (8.0 GB) - runs on the card",
+   "writer": "`gemma-4-12b-it-Q6_K.gguf` (9.8 GB); without llama.cpp: `gemma4_12b_int8_convrot`",
+   "basis": "estimate (the catalogue's memory thresholds)"
+  }
+ ]
+}
