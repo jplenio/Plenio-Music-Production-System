@@ -523,7 +523,8 @@ address:
 | `GET /jobs/{id}?wait` only | `?wait`, or `GET /events` |
 
 The fields, the release fields, seeds, documents, uploads, files and bars are the same. A program on another computer
-needs a token for v1 too since Plenio 2.0. The v1 guide stays at [v1/README.md](v1/README.md).
+needs a token for v1 too since Plenio 2.0. The v1 guide stays at [v1/README.md](v1/README.md). Step by step, with
+the change list for a DAW plug-in: [coming-from-v1.md](coming-from-v1.md).
 
 ## OpenAPI and client generators
 

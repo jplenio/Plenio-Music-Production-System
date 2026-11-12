@@ -40,7 +40,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterator, Mapping
 from pathlib import Path
 from typing import Any
 
@@ -133,6 +133,9 @@ KEEP_FINISHED_S = 12 * 3600
 SOURCES_KEPT_S = 6 * 3600
 POLL_S = 2.0
 STUDIO_EVERY_S = 5.0
+EVENTS_TIMEOUT_S = 40.0
+"""The v2 event stream says it is there every 15 s; silent this long, it is opened again."""
+EVENTS_RETRY_S = 10.0
 PRIOR = {"song": (120.0, 3.0), "cover": (120.0, 1.5), "take": (60.0, 1.5)}
 """Seconds of work before the first song is measured: a fixed part and so many per second of music (measured on an
 RTX 5060 Ti: 2026-10-25 a song of about 1:00 took 300-360 s once the models were loaded; 2026-10-26 a new song of 1:10
@@ -165,11 +168,21 @@ class StudioError(ValueError):
         self.code = code
 
 
+V2_GONE = ("interrupted", "lost")
+"""A v2 job that failed because ComfyUI stopped or forgot its run: made again once, as a v1 job ComfyUI forgot."""
+
+
 class Studio:
-    """The Song API of the ComfyUI on this computer (``url()`` finds it; loopback addresses only)."""
+    """The Song API of the ComfyUI on this computer (``url()`` finds it; loopback addresses only).
+
+    Songs are made through v2 where ComfyUI's Plenio has it (since 2.0): its jobs are kept on disk, so a song that
+    finished while the player looked away is still found after a restart of ComfyUI, and its events wake the
+    player's worker when a job changes. A job of an older player (a v1 id) is followed on v1, as is everything when
+    ComfyUI's Plenio is older. Briefs, templates, uploads and *from a record* stay on v1 (frozen, served by both)."""
 
     def __init__(self, url: Callable[[], str | None]):
         self.url = url
+        self._v2: dict[str, bool] = {}
 
     def _call(
         self,
@@ -181,12 +194,11 @@ class Studio:
         content_type: str = "",
         headers: Mapping[str, str] | None = None,
         timeout: float = 10.0,
+        api: str = "v1",
     ) -> Any:
-        base = (self.url() or "").rstrip("/")
-        if not base or not LOOPBACK.fullmatch(base + "/"):
-            raise StudioUnavailableError("ComfyUI is not running on this computer")
+        base = self._base()
         sent = data if data is not None else (json.dumps(body).encode("utf-8") if body is not None else None)
-        request = urllib.request.Request(f"{base}/plenio/api/v1{path}", data=sent, method=method)
+        request = urllib.request.Request(f"{base}/plenio/api/{api}{path}", data=sent, method=method)
         if sent is not None:
             request.add_header("Content-Type", content_type or "application/json")
         for name, value in (headers or {}).items():
@@ -219,6 +231,25 @@ class Studio:
         except (urllib.error.URLError, OSError, ValueError) as error:
             raise StudioUnavailableError(str(getattr(error, "reason", error))) from error
 
+    def _base(self) -> str:
+        base = (self.url() or "").rstrip("/")
+        if not base or not LOOPBACK.fullmatch(base + "/"):
+            raise StudioUnavailableError("ComfyUI is not running on this computer")
+        return base
+
+    def has_v2(self) -> bool:
+        """Whether ComfyUI's Plenio has the Song API v2 (asked once per address; unknown while it does not answer)."""
+        base = self._base()
+        if base not in self._v2:
+            try:
+                self._call("GET", "", timeout=4.0, api="v2")
+                self._v2[base] = True
+            except StudioError as error:
+                if error.status != 404:
+                    raise
+                self._v2[base] = False
+        return self._v2[base]
+
     def index(self) -> dict[str, Any]:
         return dict(self._call("GET", "/", timeout=4.0))
 
@@ -240,19 +271,65 @@ class Studio:
         )
 
     def create(self, body: Mapping[str, Any], key: str) -> dict[str, Any]:
+        if self.has_v2():  # never a review stop: the player's songs run straight through
+            sent = {**body, "review": []}
+            answer = self._call(
+                "POST", "/jobs", sent, headers={"Idempotency-Key": key}, timeout=60.0, api="v2"
+            )
+            return as_v1_view(dict(answer))
         return dict(self._call("POST", "/jobs", body, headers={"Idempotency-Key": key}, timeout=60.0))
 
     def job(self, job_id: str) -> dict[str, Any]:
+        if job_id.startswith("job_"):
+            view = as_v1_view(dict(self._call("GET", f"/jobs/{job_id}", timeout=5.0, api="v2")))
+            error = view.get("error") or {}
+            if view.get("status") == "failed" and error.get("code") in V2_GONE:
+                # ComfyUI stopped or forgot the run: as v1's 404, so the song is made again once (the same
+                # Idempotency-Key starts a new run after such an end)
+                raise StudioError(
+                    404, str(error.get("code")), str(error.get("message") or "the run was lost")
+                )
+            return view
         return dict(self._call("GET", f"/jobs/{job_id}", timeout=5.0))
 
     def cancel(self, job_id: str) -> dict[str, Any]:
-        return dict(self._call("DELETE", f"/jobs/{job_id}", timeout=10.0))
+        api = "v2" if job_id.startswith("job_") else "v1"
+        return dict(self._call("DELETE", f"/jobs/{job_id}", timeout=10.0, api=api))
+
+    def events(self, stop: threading.Event) -> Iterator[str]:
+        """The kinds of the v2 events as they come (``job.succeeded`` ...), until ``stop`` or the stream ends; nothing
+        when ComfyUI's Plenio has no v2."""
+        if not self.has_v2():
+            return
+        request = urllib.request.Request(f"{self._base()}/plenio/api/v2/events")
+        try:
+            with urllib.request.urlopen(request, timeout=EVENTS_TIMEOUT_S) as stream:  # noqa: S310 - loopback only
+                for raw in stream:
+                    if stop.is_set():
+                        return
+                    line = raw.decode("utf-8", "replace").strip()
+                    if line.startswith("event:"):
+                        yield line.removeprefix("event:").strip()
+        except (urllib.error.URLError, OSError, ValueError) as error:
+            raise StudioUnavailableError(str(getattr(error, "reason", error))) from error
 
     def from_record(self, record: Mapping[str, Any]) -> dict[str, Any]:
         return dict(self._call("POST", "/from-record", record, timeout=20.0))
 
     def queue(self) -> dict[str, Any]:
         return dict(self._call("GET", "/queue", timeout=5.0))
+
+
+def as_v1_view(job: Mapping[str, Any]) -> dict[str, Any]:
+    """A v2 job in the words the worker reads (v1's): the times by v1's names, a stop for review as running."""
+    view = dict(job)
+    status = str(view.get("status") or "")
+    view["status"] = "running" if status == "waiting_for_review" else status
+    if view.get("ended_at") is not None:
+        view["finished_at"] = view["ended_at"]
+    if status == "running" and view.get("started_at") is None:
+        view["started_at"] = view.get("updated_at")
+    return view
 
 
 def party_date(tags: Mapping[str, Any]) -> str:
@@ -419,6 +496,7 @@ class PartySongs:
         self.studio_state: dict[str, Any] = {"reachable": False, "checked": 0.0, "queue": None, "error": ""}
         self._form: tuple[float, dict[str, Any]] | None = None
         self._stop = threading.Event()
+        self._wake = threading.Event()
         self._thread: threading.Thread | None = None
         self.launcher: Any = None
         """The studio the player starts itself (``plenio.player.studio.StudioLauncher``): a song that waits starts it
@@ -1474,19 +1552,37 @@ class PartySongs:
         if self._thread is None:
             self._thread = threading.Thread(target=self._run, name="plenio-party-songs", daemon=True)
             self._thread.start()
+            if callable(getattr(self.studio, "events", None)):
+                threading.Thread(target=self._listen, name="plenio-party-events", daemon=True).start()
 
     def close(self) -> None:
         self._stop.set()
+        self._wake.set()
         if self._thread is not None:
             self._thread.join(timeout=5)
 
     def _run(self) -> None:
-        while not self._stop.wait(POLL_S):
+        while not self._stop.is_set():
+            self._wake.wait(POLL_S)
+            self._wake.clear()
+            if self._stop.is_set():
+                return
             try:
                 self.tick()
             except Exception as error:  # noqa: BLE001 - the worker goes on with the next song
                 with self.lock:
                     self.studio_state["error"] = f"{type(error).__name__}: {error}"
+
+    def _listen(self) -> None:
+        """Song API v2's events: a job that changes wakes the worker at once (it still looks every few seconds)."""
+        while not self._stop.is_set():
+            try:
+                for kind in self.studio.events(self._stop):
+                    if kind.startswith("job.") and kind != "job.progress":
+                        self._wake.set()
+            except (StudioUnavailableError, StudioError):
+                pass
+            self._stop.wait(EVENTS_RETRY_S)
 
     def _check_studio(self) -> None:
         now = self.clock()
