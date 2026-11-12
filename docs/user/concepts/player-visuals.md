@@ -154,6 +154,11 @@ Dividing by zero gives 0, and so does anything that would not be a number. A for
 | `songtime` | seconds into the song (for a title at the start: `clamp(1 - songtime / 8, 0, 1)`) |
 | `line_on` | 1 while a lyrics line is sung, else 0 |
 | `line_age` | seconds since the line sung now began |
+| `anticipation` | 0..1, rising in the 180 ms before a strong onset of the song (from its analysis; 0 without one) |
+| `impact` | 1 on a strong onset, falling within about 120 ms |
+| `tension` | 0..1 across the two bars before a louder section |
+| `beat_phase`, `bar_phase` | 0 on a beat (a bar's first beat), rising to 1 at the next |
+| `section_energy` | 0..1, how loud the section that plays is against the song's loudest |
 | `pi` `e` | 3.14159…, 2.71828… |
 | every parameter | its value so far this frame (`zoom`, `decay` …) |
 | your variables | the names in `init` and the new names in `frame` |

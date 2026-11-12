@@ -35,6 +35,10 @@ export interface NovaDef {
    * ``rate`` times a second whatever the frame rate, ``height`` pixels high and as wide as the picture's shape (or
    * ``width``); ``wrap``: what leaves one side comes in at the other. */
   state?: { code: string; rate: number; height: number; width?: number; wrap?: boolean }
+  /** A signature's answer to the cue (phase 7.9; 0 or none: the scene as it was): ``lean`` - the picture leans in
+   * before a strong onset (anticipation), ``flash`` - its light jumps on it (impact), ``build`` - it brightens and
+   * saturates across the bars before a louder section (tension). */
+  cue?: { lean: number; flash: number; build: number }
 }
 
 export const BINS = 128
@@ -180,6 +184,8 @@ export class NovaRenderer {
   /** The quality the visuals draw with, 0.5 .. 1 (their march steps and octaves): the live picture's follows the
    * governor; a video's and a timing's are 1. */
   quality = 1
+  /** The cue's weights of the scene being drawn (``NovaDef.cue``). */
+  weights = { lean: 0, flash: 0, build: 0 }
   private readonly specBytes = new Uint8ClampedArray(BINS * 4)
   private readonly waveBytes = new Uint8ClampedArray(WAVE_POINTS * 4)
   private readonly palBytes = new Uint8ClampedArray(256 * 4)
@@ -249,6 +255,7 @@ export class NovaRenderer {
    * ``pixels`` pixels at most (more than the screen's: drawn finer, up to ``MAX_SUPERSAMPLE`` each way). ``null``:
    * nothing to show (compiling still, or it does not work here). */
   render(def: NovaDef, music: NovaMusic, palette: Uint8ClampedArray, width: number, height: number, slot: object, pixels: number): NovaPicture | null {
+    this.weights = def.cue ?? { lean: 0, flash: 0, build: 0 }
     if (this.lost) return null
     const programs = this.programs(def, !this.live)
     if (!programs) return null
@@ -422,6 +429,9 @@ export class NovaRenderer {
     set('beatPhase', music.cue.beatPhase)
     set('barPhase', music.cue.barPhase)
     set('sectionEnergy', music.cue.sectionEnergy)
+    set('cueLean', this.weights.lean)
+    set('cueFlash', this.weights.flash)
+    set('cueBuild', this.weights.build)
     gl.uniform1i(this.u(program, 'specTex'), 0)
     gl.uniform1i(this.u(program, 'waveTex'), 1)
     gl.uniform1i(this.u(program, 'palTex'), 2)

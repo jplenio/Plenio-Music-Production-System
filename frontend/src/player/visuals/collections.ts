@@ -8,7 +8,18 @@ import type { SwitchOn } from './chooser'
 
 export type Theme = 'space' | 'nature' | 'club' | 'retro' | 'flow' | 'geometry' | 'song'
 
-export const COLLECTIONS: { id: Theme; name: string }[] = [
+/**
+ * The twelve signature visuals (phase 7.9, PD §9.6): shown first, in the films and to a new player; each tuned by hand
+ * for the Director's cue (anticipation, impact, tension). Chosen across the collections and the three engines, all
+ * offered on an integrated graphics chip (the two Nova scenes too heavy there are not among them).
+ */
+export const SIGNATURES = [
+  'nova-hyperspace', 'nova-aurora', 'nova-silk', 'nova-city', 'nova-lasers', 'nova-ocean', 'nova-mandala',
+  'drop-nebula-swirl', 'drop-kaleido-bloom', 'drop-cover-galaxy', 'retro', 'vumeter',
+] // prettier-ignore
+
+export const COLLECTIONS: { id: Theme | 'signature'; name: string }[] = [
+  { id: 'signature', name: 'Signature twelve' },
   { id: 'space', name: 'Space' },
   { id: 'nature', name: 'Nature' },
   { id: 'club', name: 'Club' },
@@ -60,6 +71,7 @@ export function themesOf(id: string): Theme[] {
 /** The visuals of a collection, among ``ids`` (``favourites``: the listener's ♥). */
 export function inCollection(collection: string, ids: string[], favourites: string[] = []): string[] {
   if (collection === 'favourites') return ids.filter((id) => favourites.includes(id))
+  if (collection === 'signature') return ids.filter((id) => SIGNATURES.includes(id))
   return ids.filter((id) => themesOf(id).includes(collection as Theme))
 }
 
@@ -102,7 +114,7 @@ export function energyOf(settings: { sensitivity: number; switchOn: SwitchOn; fa
 
 // --- Show -------------------------------------------------------------------------------------------------------------
 
-export type Show = 'director' | 'one' | 'off' | 'all' | Theme | 'favourites'
+export type Show = 'director' | 'one' | 'off' | 'all' | Theme | 'favourites' | 'signature'
 
 /** What *Show* says for the visuals' settings of now. */
 export function showOf(v: { enabled: boolean; mode: string; collection?: string }): Show {

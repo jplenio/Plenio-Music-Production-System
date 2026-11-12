@@ -14,12 +14,13 @@ export const BUILTIN: PresetFile[] = [
     blurb: 'A slow swirl of colour around a ring the music swells.',
     suits: ['calm', 'electronic', 'any'],
     base: { decay: 0.975, family: 'swirl', famB: 0.9, warp: 0.6, hueShift: 0.006, gamma: 1.7 },
+    // a signature (phase 7.9): it draws in before an onset, the ring jumps on it, the swirl tightens before a louder part
     frame: {
-      zoom: '1.004 + 0.012 * bass',
-      rot: '0.004 * sin(time * 0.3)',
-      famA: '0.12 + 0.1 * bass_att',
+      zoom: '1.004 + 0.012 * bass + 0.02 * anticipation',
+      rot: '0.004 * sin(time * 0.3) + 0.01 * tension',
+      famA: '0.12 + 0.1 * bass_att + 0.08 * tension',
     },
-    waves: [{ mode: 'circle', scale: '0.55 + 0.25 * bass_att', thick: 0.007, alpha: 0.9, hue: 'time * 0.05' }],
+    waves: [{ mode: 'circle', scale: '0.55 + 0.25 * bass_att + 0.2 * impact', thick: 0.007, alpha: 0.9, hue: 'time * 0.05' }],
   },
   {
     name: 'Liquid Mirror',
@@ -49,12 +50,13 @@ export const BUILTIN: PresetFile[] = [
     blurb: 'Six mirrored slices, three shapes circling, the spectrum as a ring of dots.',
     suits: ['electronic', 'energetic'],
     base: { decay: 0.955, family: 'kaleidoscope', famB: 6, famA: 0.5, gamma: 1.6 },
+    // a signature (phase 7.9): the slices turn faster as a louder part comes, the shapes swell on the hit
     frame: {
-      zoom: '1.01 + 0.02 * bass',
-      rot: '0.01 * sin(time * 0.2)',
+      zoom: '1.01 + 0.02 * bass + 0.015 * anticipation',
+      rot: '0.01 * sin(time * 0.2) + 0.02 * tension',
     },
-    waves: [{ mode: 'dots', scale: '0.9 + 0.2 * mid_att', thick: 0.012, alpha: 0.8, hue: 'time * 0.04' }],
-    shapes: [{ repeat: 3, sides: 5, radius: '0.06 + 0.06 * pulse', x: '0.45 * cos(time * 0.7 + i * 2.094)', y: '0.45 * sin(time * 0.7 + i * 2.094)', angle: 'time', hue: 'i / n + time * 0.05', alpha: 0.15, inner: 0.6 }],
+    waves: [{ mode: 'dots', scale: '0.9 + 0.2 * mid_att + 0.15 * impact', thick: 0.012, alpha: 0.8, hue: 'time * 0.04' }],
+    shapes: [{ repeat: 3, sides: 5, radius: '0.06 + 0.06 * pulse + 0.05 * impact', x: '0.45 * cos(time * 0.7 + i * 2.094)', y: '0.45 * sin(time * 0.7 + i * 2.094)', angle: 'time', hue: 'i / n + time * 0.05', alpha: 0.15, inner: 0.6 }],
   },
   {
     name: 'Pulse Rings',
@@ -205,8 +207,9 @@ export const BUILTIN: PresetFile[] = [
     suits: ['calm', 'electronic', 'any'],
     // a long memory (decay) and a steady pull outward (zoom), so the swirl carries the cover's colours to the edges
     base: { decay: 0.988, family: 'swirl', famB: 2, hueShift: 0.001, warp: 0.2, gamma: 1.4 },
-    frame: { zoom: '1.01 + 0.01 * bass_att', famA: '0.07 + 0.04 * bass_att', rot: 0.003 },
-    sprites: [{ source: 'cover', size: '0.19 + 0.03 * pulse', angle: 'time * 0.25', alpha: 0.55, blend: 'over' }],
+    // a signature (phase 7.9): the galaxy pulls harder before a louder part, the cover breathes on the hit
+    frame: { zoom: '1.01 + 0.01 * bass_att + 0.012 * tension', famA: '0.07 + 0.04 * bass_att', rot: '0.003 + 0.004 * anticipation' },
+    sprites: [{ source: 'cover', size: '0.19 + 0.03 * pulse + 0.04 * impact', angle: 'time * 0.25', alpha: 0.55, blend: 'over' }],
     // three lights circling the cover: their trails are the arms
     shapes: [{ repeat: 3, sides: 16, radius: '0.018 + 0.02 * pulse', x: '0.3 * cos(time * 0.9 + i * 2.094) / aspect', y: '0.3 * sin(time * 0.9 + i * 2.094)', hue: 'i / n + time * 0.02', alpha: 0.35, inner: 1 }],
     waves: [{ mode: 'dots', scale: '0.5 + 0.15 * mid_att', thick: 0.005, alpha: 0.3, hue: 'time * 0.03' }],

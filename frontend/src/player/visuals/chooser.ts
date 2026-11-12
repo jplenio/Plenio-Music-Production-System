@@ -85,6 +85,8 @@ export const DEFAULT_VISUALS: VisualSettings = {
 export function withDefaults(raw: unknown): VisualSettings {
   const given = (raw && typeof raw === 'object' ? raw : {}) as Partial<VisualSettings>
   const merged = { ...DEFAULT_VISUALS, ...given }
+  // a new player (nothing saved yet) shows the twelve signatures first (phase 7.9)
+  if (!Object.keys(given).length) merged.collection = 'signature'
   // the listener's own presets (my-...) are read later: their ids stay
   merged.pool = (merged.pool ?? []).filter((id) => id.startsWith('my-') || PRESETS.some((p) => p.id === id))
   if (!merged.pool.length) merged.pool = DEFAULT_VISUALS.pool
@@ -152,7 +154,9 @@ export function chooseVisual({ settings, song, playlist = '', previous = null, t
   const ticked = known.length ? known : all.map((p) => p.id)
   // *Show* a collection: its visuals of the pool (none of them here: the whole pool)
   const shown = settings.collection ? inCollection(settings.collection, ticked, settings.favourites) : []
-  const pool = shown.length ? shown : ticked
+  // the signatures where a device draws at least three of them (without WebGL only two classics are left)
+  const enough = settings.collection === 'signature' ? shown.length >= 3 : shown.length > 0
+  const pool = enough ? shown : ticked
   switch (settings.mode) {
     case 'fixed':
       return all.some((p) => p.id === settings.fixed) ? settings.fixed : 'bars'

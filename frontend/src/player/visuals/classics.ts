@@ -147,7 +147,8 @@ const vumeter: Preset = {
         ctx.fillRect(x0 - mw * 0.03, y0 - mw * 0.03, mw * 1.06, mh + mw * 0.06)
         ctx.fillStyle = face
         ctx.fillRect(x0, y0, mw, mh)
-        ctx.fillStyle = c.at(0.6, 0.12 + 0.1 * f.pulse)
+        // a signature (phase 7.9): the dial's lamp glows warmer as a louder part comes, and flares on the hit
+        ctx.fillStyle = c.at(0.6, 0.12 + 0.1 * f.pulse + 0.12 * (f.cue?.tension ?? 0) + 0.15 * (f.cue?.impact ?? 0))
         ctx.fillRect(x0, y0, mw, mh)
         const cx = x0 + mw / 2
         const cy = y0 + mh * 1.02

@@ -36,7 +36,7 @@ export const BLENDS = ['over', 'add'] as const
 export const PARAMETERS = Object.keys(DEFAULTS).filter((k) => k !== 'waves' && k !== 'shapes') as (keyof DropParams)[]
 
 /** What every formula can read: the music, the time, and the screen. */
-export const MUSIC_NAMES = ['time', 'frame', 'dt', 'fps', 'bass', 'mid', 'treb', 'bass_att', 'mid_att', 'treb_att', 'vol', 'beat', 'pulse', 'aspect', 'songtime', 'line_on', 'line_age', 'pi', 'e'] as const
+export const MUSIC_NAMES = ['time', 'frame', 'dt', 'fps', 'bass', 'mid', 'treb', 'bass_att', 'mid_att', 'treb_att', 'vol', 'beat', 'pulse', 'aspect', 'songtime', 'line_on', 'line_age', 'anticipation', 'impact', 'tension', 'beat_phase', 'bar_phase', 'section_energy', 'pi', 'e'] as const
 
 const WAVE_FIELDS = ['mode', 'scale', 'x', 'y', 'thick', 'alpha', 'hue'] as const
 const SHAPE_FIELDS = ['sides', 'radius', 'x', 'y', 'angle', 'hue', 'alpha', 'inner'] as const

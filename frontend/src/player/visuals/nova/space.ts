@@ -4,6 +4,8 @@ import type { NovaDef } from './renderer'
 
 const hyperspace: NovaDef = {
   id: 'nova-hyperspace',
+  // a signature (phase 7.9): tuned for the Director's cue
+  cue: { lean: 0.12, flash: 0.45, build: 0.35 },
   name: 'Hyperspace',
   blurb: 'Warp speed through a tunnel of stars - the bass on the throttle, a flash at its end on every beat',
   suits: ['energetic', 'electronic'],
@@ -205,6 +207,8 @@ vec3 image(vec2 p, vec2 uv) {
 
 const aurora: NovaDef = {
   id: 'nova-aurora',
+  // a signature (phase 7.9): tuned for the Director's cue
+  cue: { lean: 0.04, flash: 0.2, build: 0.3 },
   name: 'Northern lights',
   blurb: 'Curtains of light rippling over the stars, mirrored in a still lake below dark mountains - they flare with the mids',
   suits: ['calm', 'acoustic'],
@@ -256,6 +260,8 @@ vec3 image(vec2 p, vec2 uv) {
 
 const ocean: NovaDef = {
   id: 'nova-ocean',
+  // a signature (phase 7.9): tuned for the Director's cue
+  cue: { lean: 0.05, flash: 0.2, build: 0.3 },
   name: 'Moonlit sea',
   blurb: 'Waves rolling under a big moon, its light a glittering path on the water - the swell rises with the bass',
   suits: ['calm', 'acoustic'],

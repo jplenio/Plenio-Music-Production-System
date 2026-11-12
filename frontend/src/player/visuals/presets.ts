@@ -684,7 +684,9 @@ const retro: Preset = {
         ctx.fillStyle = sky
         ctx.fillRect(0, 0, w, horizon)
         // the sun with its stripes
-        const r = Math.min(w, h) * (0.2 + f.pulse * 0.015)
+        // a signature (phase 7.9): the sun swells on the hit and rises a little as a louder part comes
+        const cue = f.cue
+        const r = Math.min(w, h) * (0.2 + f.pulse * 0.015 + 0.03 * (cue?.impact ?? 0) + 0.025 * (cue?.tension ?? 0))
         const sun = ctx.createLinearGradient(0, horizon - r * 1.6, 0, horizon)
         sun.addColorStop(0, c.at(1))
         sun.addColorStop(1, c.at(0.55))

@@ -196,6 +196,8 @@ vec3 image(vec2 p, vec2 uv) {
 
 const city: NovaDef = {
   id: 'nova-city',
+  // a signature (phase 7.9): tuned for the Director's cue
+  cue: { lean: 0.1, flash: 0.5, build: 0.4 },
   name: 'Spectrum city',
   blurb: 'Flying low over a night city whose towers rise and fall with the spectrum, neon on the roofs, lights in the windows',
   suits: ['energetic', 'electronic'],

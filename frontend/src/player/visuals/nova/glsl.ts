@@ -52,6 +52,7 @@ uniform float fresh, stepDt, lag;
 // the cue (conductor.ts; 0 without a track): anticipation and impact around a strong onset, tension before a louder
 // section, the beat's and the bar's phase, the section's energy
 uniform float anticipation, impact, tension, beatPhase, barPhase, sectionEnergy;
+uniform float cueLean, cueFlash, cueBuild;
 // Q: the quality, 0.5 .. 1 (phase 7.2) - the march steps and the octaves a visual takes; the governor lowers it
 // before it takes pixels away
 uniform float Q;
@@ -106,7 +107,11 @@ export const IMAGE_MAIN = `
 void main() {
   vec2 uv = gl_FragCoord.xy / R;
   vec2 p = (gl_FragCoord.xy * 2.0 - R) / R.y;
-  vec3 c = image(p, uv);
+  // a signature's answer to the cue: it leans in before an onset, flashes on it, builds before a louder section
+  vec3 c = image(p * (1.0 - cueLean * anticipation), uv);
+  c *= 1.0 + cueFlash * impact + cueBuild * tension;
+  float grey = dot(c, vec3(0.2126, 0.7152, 0.0722));
+  c = mix(vec3(grey), c, 1.0 + 0.5 * cueBuild * tension);
   bvec3 bad = bvec3(isnan(c.x) || isinf(c.x), isnan(c.y) || isinf(c.y), isnan(c.z) || isinf(c.z));
   if (any(bad)) c = vec3(0.0);
   o = vec4(enc(clamp(c, 0.0, 64.0)), 1.0);

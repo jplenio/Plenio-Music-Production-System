@@ -294,6 +294,8 @@ vec3 image(vec2 p, vec2 uv) {
 
 const lasers: NovaDef = {
   id: 'nova-lasers',
+  // a signature (phase 7.9): tuned for the Director's cue
+  cue: { lean: 0.06, flash: 0.6, build: 0.3 },
   name: 'Laser show',
   blurb: 'Laser fans sweeping through stage smoke, each beam a band of the spectrum - a new formation every eight beats',
   suits: ['energetic', 'electronic'],
@@ -331,6 +333,8 @@ vec3 image(vec2 p, vec2 uv) {
 
 const mandala: NovaDef = {
   id: 'nova-mandala',
+  // a signature (phase 7.9): tuned for the Director's cue
+  cue: { lean: 0.08, flash: 0.35, build: 0.3 },
   name: 'Mandala',
   blurb: 'An endless kaleidoscope of fractal lace, folding and blooming with the bass, its finest threads lit by the highs',
   suits: ['calm', 'electronic'],
@@ -377,6 +381,8 @@ vec3 image(vec2 p, vec2 uv) {
 
 const silk: NovaDef = {
   id: 'nova-silk',
+  // a signature (phase 7.9): tuned for the Director's cue
+  cue: { lean: 0.05, flash: 0.25, build: 0.25 },
   name: 'Silk',
   blurb: 'Ribbons of silk drifting in the dark, catching the light as they turn - soft and slow, rippling with the spectrum',
   suits: ['calm', 'acoustic'],
