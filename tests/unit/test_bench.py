@@ -134,3 +134,31 @@ def test_a_cover_is_benched_with_the_recording_uploaded(tmp_path: Path) -> None:
     report = bench.bench(api, ["cover"], 1, source=recording, sleep=lambda s: None)
     assert report["briefs"]["cover"]["summary"]["succeeded"] == 1
     assert next(iter(api.jobs.values()))["fields"]["source.audio"] == "source.flac"
+
+
+def test_a_report_is_checked_against_the_budgets_without_running(tmp_path: Path) -> None:
+    budgets = json.loads(bench.BUDGETS.read_text(encoding="utf-8"))
+    assert bench.check_report(bench.BUDGETS) and not any(
+        r["slower"] for r in bench.check_report(bench.BUDGETS)
+    )
+    slow = json.loads(json.dumps(budgets))
+    slow["briefs"]["sung-90"]["summary"]["total_seconds"] *= 1.2
+    for run in slow["briefs"]["sung-90"]["runs"]:
+        run["timings"]["total_seconds"] *= 1.2
+    path = tmp_path / "slow.json"
+    path.write_text(json.dumps(slow), encoding="utf-8")
+    assert [r["brief"] for r in bench.check_report(path) if r["slower"]] == ["sung-90"]
+    assert bench.main(["--check", str(path)]) == 1
+    assert bench.main(["--check", str(bench.BUDGETS)]) == 0
+
+
+def test_a_longer_song_is_not_a_slower_program() -> None:
+    def report(total: float, song: float) -> dict[str, Any]:
+        run = {"timings": {"total_seconds": total}, "song_seconds": song}
+        return {"briefs": {"b": {"summary": {"total_seconds": total}, "runs": [run]}}}
+
+    # the same seeds made a song a fifth longer: 20 % more time is the same speed
+    row = bench.compare(report(120.0, 120.0), report(100.0, 100.0), 0.10)[0]
+    assert (row["change_percent"], row["per_song_second_change_percent"], row["slower"]) == (20.0, 0.0, False)
+    row = bench.compare(report(130.0, 100.0), report(100.0, 100.0), 0.10)[0]
+    assert row["slower"] is True

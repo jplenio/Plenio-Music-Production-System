@@ -284,6 +284,12 @@ def summary(runs: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
             }
         )
     peaks = [float(r["timings"]["peak_vram_gib"]) for r in timed if r["timings"].get("peak_vram_gib")]
+    # seconds of work per second of song: two versions make songs of other lengths from the same seeds
+    rates = [
+        float(r["timings"]["total_seconds"]) / float(r["song_seconds"])
+        for r in timed
+        if r.get("song_seconds")
+    ]
     return {
         "runs": len(runs),
         "succeeded": len(timed),
@@ -292,12 +298,24 @@ def summary(runs: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         "fastest_seconds": round(min(totals), 2),
         "stages": stages,
         **({"peak_vram_gib": round(max(peaks), 2)} if peaks else {}),
+        **({"seconds_per_song_second": round(statistics.median(rates), 3)} if rates else {}),
     }
+
+
+def _rate(brief: Mapping[str, Any]) -> float | None:
+    """A report written before ``seconds_per_song_second``: the median from its runs."""
+    rates = [
+        float(r["timings"]["total_seconds"]) / float(r["song_seconds"])
+        for r in brief.get("runs") or []
+        if isinstance(r.get("timings"), Mapping) and r.get("song_seconds")
+    ]
+    return statistics.median(rates) if rates else None
 
 
 def compare(new: Mapping[str, Any], old: Mapping[str, Any], tolerance: float) -> list[dict[str, Any]]:
     """Per brief both reports have: the medians, the change in percent, and whether the new one is slower by more
-    than ``tolerance`` (0.1 = 10 %)."""
+    than ``tolerance`` (0.1 = 10 %). Where both know their songs' lengths, slower means slower per second of song:
+    the same seeds make songs of other lengths in another version (a longer song is not a slower program)."""
     rows = []
     for name, brief in new.get("briefs", {}).items():
         before = (old.get("briefs", {}).get(name) or {}).get("summary") or {}
@@ -306,13 +324,22 @@ def compare(new: Mapping[str, Any], old: Mapping[str, Any], tolerance: float) ->
             continue
         was, now = float(before["total_seconds"]), float(after["total_seconds"])
         change = (now - was) / was if was else 0.0
+        rate_was = before.get("seconds_per_song_second") or _rate(old.get("briefs", {}).get(name) or {})
+        rate_now = after.get("seconds_per_song_second") or _rate(brief)
+        rate_change = (rate_now - rate_was) / rate_was if rate_was and rate_now else None
+        judged = rate_change if rate_change is not None else change
         rows.append(
             {
                 "brief": name,
                 "before": was,
                 "after": now,
                 "change_percent": round(change * 100, 1),
-                "slower": change > tolerance,
+                **(
+                    {"per_song_second_change_percent": round(rate_change * 100, 1)}
+                    if rate_change is not None
+                    else {}
+                ),
+                "slower": judged > tolerance,
             }
         )
     return rows
@@ -361,13 +388,16 @@ def markdown(report: Mapping[str, Any], compared: Sequence[Mapping[str, Any]] = 
             "",
             f"## Against {against}",
             "",
-            "| Brief | Before | Now | Change | |",
-            "|---|---|---|---|---|",
+            "| Brief | Before | Now | Change | Per second of song | |",
+            "|---|---|---|---|---|---|",
         ]
         for row in compared:
             mark = "**slower**" if row["slower"] else ""
+            rate = row.get("per_song_second_change_percent")
+            per = f"{rate:+.1f} %" if rate is not None else "-"
             lines.append(
-                f"| `{row['brief']}` | {row['before']:.1f} s | {row['after']:.1f} s | {row['change_percent']:+.1f} % | {mark} |"
+                f"| `{row['brief']}` | {row['before']:.1f} s | {row['after']:.1f} s | {row['change_percent']:+.1f} % | "
+                f"{per} | {mark} |"
             )
     return "\n".join(lines) + "\n"
 
@@ -412,6 +442,21 @@ def bench(
     return report
 
 
+BUDGETS = Path(__file__).resolve().parents[1] / "docs" / "test-reports" / "data" / "bench-1.6.0-baseline.json"
+"""The budgets (PD 6.3, ``docs/dev/performance.md``): 1.6.0's medians on the owner's 16 GB card. A release whose
+report is slower than one of them by more than the tolerance says so in its release checklist, with a reason."""
+
+
+def check_report(report: Path, budgets: Path = BUDGETS, tolerance: float = 0.10) -> list[dict[str, Any]]:
+    """The briefs of ``report`` compared with the budgets (``release.py prepare`` asks for a report and calls this);
+    a row with ``slower`` true is over its budget."""
+    return compare(
+        json.loads(report.read_text(encoding="utf-8")),
+        json.loads(budgets.read_text(encoding="utf-8")),
+        tolerance,
+    )
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=(__doc__ or "").split("\n\n")[0])
     parser.add_argument("--api", default="http://127.0.0.1:8188", help="the ComfyUI that makes the songs")
@@ -431,7 +476,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--tolerance", type=float, default=0.10, help="slower by more than this fails (0.10 = 10 %%)"
     )
+    parser.add_argument(
+        "--check", type=Path, help="compare a report's JSON with the budgets (1.6.0's medians); runs nothing"
+    )
     args = parser.parse_args(argv)
+    if args.check is not None:
+        rows = check_report(args.check, args.compare or BUDGETS, args.tolerance)
+        for row in rows:
+            mark = "OVER BUDGET" if row["slower"] else "ok"
+            print(
+                f"{row['brief']}: {row['before']:.1f} s -> {row['after']:.1f} s ({row['change_percent']:+.1f} %) {mark}"
+            )
+        return 1 if any(row["slower"] for row in rows) or not rows else 0
     names = [n.strip() for n in args.briefs.split(",") if n.strip()] or list(BRIEFS)
     unknown = [n for n in names if n not in BRIEFS]
     if unknown or args.runs < 1:

@@ -1,0 +1,537 @@
+{
+ "schema": "plenio.bench/1",
+ "label": "2.0.0-phase-8-before",
+ "plenio": "1.6.0",
+ "api": "1.4",
+ "comfyui": "0.44.0",
+ "card": "RTX 5060 Ti 16 GB (second card)",
+ "date": "2026-11-12",
+ "runs": 3,
+ "seeds": {
+  "draft": 1101,
+  "plan": 1102,
+  "arrangement": 1103,
+  "take": 1104,
+  "cover": 1105
+ },
+ "briefs": {
+  "instrumental-60": {
+   "what": "an instrumental of about a minute, no cover art",
+   "runs": [
+    {
+     "status": "succeeded",
+     "seconds": 70.2,
+     "job": "e2d02efd-77b3-4c2a-8d15-1898f92de05b",
+     "timings": {
+      "schema": "plenio.timings/1",
+      "total_seconds": 69.361,
+      "stages": [
+       {
+        "stage": "1 · SONG",
+        "seconds": 0.044
+       },
+       {
+        "stage": "6 · FINISH",
+        "seconds": 10.563
+       },
+       {
+        "stage": "MUSIC MODEL",
+        "seconds": 0.66
+       },
+       {
+        "stage": "3 · TEXT",
+        "seconds": 0.028
+       },
+       {
+        "stage": "2 · WRITE",
+        "seconds": 15.802
+       },
+       {
+        "stage": "5 · RENDER",
+        "seconds": 24.583,
+        "load_seconds": 0.115
+       },
+       {
+        "stage": "4 · SCORE",
+        "seconds": 17.423,
+        "load_seconds": 0.021
+       }
+      ],
+      "peak_vram_gib": 2.23
+     },
+     "song_seconds": 59.28
+    },
+    {
+     "status": "succeeded",
+     "seconds": 57.5,
+     "job": "13871fb2-44bc-435a-943b-2bdc7e8cd4c7",
+     "timings": {
+      "schema": "plenio.timings/1",
+      "total_seconds": 56.986,
+      "stages": [
+       {
+        "stage": "1 · SONG",
+        "seconds": 0.19
+       },
+       {
+        "stage": "3 · TEXT",
+        "seconds": 0.026
+       },
+       {
+        "stage": "6 · FINISH",
+        "seconds": 10.013
+       },
+       {
+        "stage": "2 · WRITE",
+        "seconds": 19.748
+       },
+       {
+        "stage": "5 · RENDER",
+        "seconds": 17.036,
+        "load_seconds": 0.052
+       },
+       {
+        "stage": "4 · SCORE",
+        "seconds": 9.914,
+        "load_seconds": 0.196
+       }
+      ],
+      "peak_vram_gib": 2.26
+     },
+     "song_seconds": 60.4
+    },
+    {
+     "status": "succeeded",
+     "seconds": 52.7,
+     "job": "2cbc442f-5f90-4925-8957-32cf3d6750e9",
+     "timings": {
+      "schema": "plenio.timings/1",
+      "total_seconds": 52.002,
+      "stages": [
+       {
+        "stage": "1 · SONG",
+        "seconds": 0.222
+       },
+       {
+        "stage": "3 · TEXT",
+        "seconds": 0.06
+       },
+       {
+        "stage": "6 · FINISH",
+        "seconds": 9.218
+       },
+       {
+        "stage": "2 · WRITE",
+        "seconds": 14.317
+       },
+       {
+        "stage": "5 · RENDER",
+        "seconds": 16.24,
+        "load_seconds": 0.038
+       },
+       {
+        "stage": "4 · SCORE",
+        "seconds": 11.88,
+        "load_seconds": 0.408
+       }
+      ],
+      "peak_vram_gib": 2.23
+     },
+     "song_seconds": 59.28
+    }
+   ],
+   "summary": {
+    "runs": 3,
+    "succeeded": 3,
+    "total_seconds": 56.99,
+    "first_run_seconds": 69.36,
+    "fastest_seconds": 52.0,
+    "stages": [
+     {
+      "stage": "1 · SONG",
+      "seconds": 0.19,
+      "load_seconds": 0.0
+     },
+     {
+      "stage": "2 · WRITE",
+      "seconds": 15.8,
+      "load_seconds": 0.0
+     },
+     {
+      "stage": "3 · TEXT",
+      "seconds": 0.03,
+      "load_seconds": 0.0
+     },
+     {
+      "stage": "4 · SCORE",
+      "seconds": 11.88,
+      "load_seconds": 0.2
+     },
+     {
+      "stage": "5 · RENDER",
+      "seconds": 17.04,
+      "load_seconds": 0.05
+     },
+     {
+      "stage": "6 · FINISH",
+      "seconds": 10.01,
+      "load_seconds": 0.0
+     },
+     {
+      "stage": "MUSIC MODEL",
+      "seconds": 0.66,
+      "load_seconds": 0.0
+     }
+    ],
+    "peak_vram_gib": 2.26,
+    "seconds_per_song_second": 0.943
+   }
+  },
+  "sung-90": {
+   "what": "a sung song of about 1:30, no cover art",
+   "runs": [
+    {
+     "status": "succeeded",
+     "seconds": 166.6,
+     "job": "31329615-cc1b-40e8-a13a-60c7eba88c04",
+     "timings": {
+      "schema": "plenio.timings/1",
+      "total_seconds": 165.854,
+      "stages": [
+       {
+        "stage": "1 · SONG",
+        "seconds": 0.182
+       },
+       {
+        "stage": "3 · TEXT",
+        "seconds": 0.032
+       },
+       {
+        "stage": "6 · FINISH",
+        "seconds": 92.351
+       },
+       {
+        "stage": "2 · WRITE",
+        "seconds": 16.479
+       },
+       {
+        "stage": "5 · RENDER",
+        "seconds": 40.68,
+        "load_seconds": 0.313
+       },
+       {
+        "stage": "4 · SCORE",
+        "seconds": 16.069,
+        "load_seconds": 0.205
+       }
+      ],
+      "peak_vram_gib": 4.56
+     },
+     "song_seconds": 136.36
+    },
+    {
+     "status": "succeeded",
+     "seconds": 174.0,
+     "job": "87862f16-254a-44f0-8f98-2e5f8bf2ee22",
+     "timings": {
+      "schema": "plenio.timings/1",
+      "total_seconds": 173.185,
+      "stages": [
+       {
+        "stage": "1 · SONG",
+        "seconds": 0.211
+       },
+       {
+        "stage": "3 · TEXT",
+        "seconds": 0.026
+       },
+       {
+        "stage": "6 · FINISH",
+        "seconds": 85.301
+       },
+       {
+        "stage": "2 · WRITE",
+        "seconds": 10.341
+       },
+       {
+        "stage": "5 · RENDER",
+        "seconds": 66.413,
+        "load_seconds": 0.187
+       },
+       {
+        "stage": "4 · SCORE",
+        "seconds": 10.833,
+        "load_seconds": 0.015
+       }
+      ],
+      "peak_vram_gib": 6.53
+     },
+     "song_seconds": 199.0
+    },
+    {
+     "status": "succeeded",
+     "seconds": 123.9,
+     "job": "6f691994-842e-4435-9c14-649084e117fa",
+     "timings": {
+      "schema": "plenio.timings/1",
+      "total_seconds": 123.24,
+      "stages": [
+       {
+        "stage": "1 · SONG",
+        "seconds": 0.229
+       },
+       {
+        "stage": "3 · TEXT",
+        "seconds": 0.025
+       },
+       {
+        "stage": "6 · FINISH",
+        "seconds": 62.071
+       },
+       {
+        "stage": "2 · WRITE",
+        "seconds": 10.109
+       },
+       {
+        "stage": "5 · RENDER",
+        "seconds": 41.853,
+        "load_seconds": 0.177
+       },
+       {
+        "stage": "4 · SCORE",
+        "seconds": 8.891,
+        "load_seconds": 0.034
+       }
+      ],
+      "peak_vram_gib": 4.61
+     },
+     "song_seconds": 138.04
+    }
+   ],
+   "summary": {
+    "runs": 3,
+    "succeeded": 3,
+    "total_seconds": 165.85,
+    "first_run_seconds": 165.85,
+    "fastest_seconds": 123.24,
+    "stages": [
+     {
+      "stage": "1 · SONG",
+      "seconds": 0.21,
+      "load_seconds": 0.0
+     },
+     {
+      "stage": "2 · WRITE",
+      "seconds": 10.34,
+      "load_seconds": 0.0
+     },
+     {
+      "stage": "3 · TEXT",
+      "seconds": 0.03,
+      "load_seconds": 0.0
+     },
+     {
+      "stage": "4 · SCORE",
+      "seconds": 10.83,
+      "load_seconds": 0.03
+     },
+     {
+      "stage": "5 · RENDER",
+      "seconds": 41.85,
+      "load_seconds": 0.19
+     },
+     {
+      "stage": "6 · FINISH",
+      "seconds": 85.3,
+      "load_seconds": 0.0
+     }
+    ],
+    "peak_vram_gib": 6.53,
+    "seconds_per_song_second": 0.893
+   }
+  },
+  "sung-180-hq-cover": {
+   "what": "a sung song of about 3:00 with HQ mastering and cover art",
+   "runs": [
+    {
+     "status": "succeeded",
+     "seconds": 693.5,
+     "job": "0e059f73-a928-4b8d-bdf8-3cef8882bfe5",
+     "timings": {
+      "schema": "plenio.timings/1",
+      "total_seconds": 692.225,
+      "stages": [
+       {
+        "stage": "1 · SONG",
+        "seconds": 0.239
+       },
+       {
+        "stage": "3 · TEXT",
+        "seconds": 0.041
+       },
+       {
+        "stage": "6 · FINISH",
+        "seconds": 545.44
+       },
+       {
+        "stage": "2 · WRITE",
+        "seconds": 14.408
+       },
+       {
+        "stage": "COVER ART",
+        "seconds": 29.12,
+        "load_seconds": 0.217
+       },
+       {
+        "stage": "5 · RENDER",
+        "seconds": 82.761,
+        "load_seconds": 0.957
+       },
+       {
+        "stage": "4 · SCORE",
+        "seconds": 20.128,
+        "load_seconds": 0.015
+       }
+      ],
+      "peak_vram_gib": 7.25
+     },
+     "song_seconds": 221.92
+    },
+    {
+     "status": "succeeded",
+     "seconds": 572.0,
+     "job": "cc7e3cde-fd16-427e-a588-d40ed8f088ec",
+     "timings": {
+      "schema": "plenio.timings/1",
+      "total_seconds": 570.602,
+      "stages": [
+       {
+        "stage": "1 · SONG",
+        "seconds": 0.289
+       },
+       {
+        "stage": "3 · TEXT",
+        "seconds": 0.025
+       },
+       {
+        "stage": "6 · FINISH",
+        "seconds": 424.644
+       },
+       {
+        "stage": "2 · WRITE",
+        "seconds": 31.223
+       },
+       {
+        "stage": "5 · RENDER",
+        "seconds": 69.992,
+        "load_seconds": 1.112
+       },
+       {
+        "stage": "4 · SCORE",
+        "seconds": 17.263,
+        "load_seconds": 0.015
+       },
+       {
+        "stage": "COVER ART",
+        "seconds": 27.075,
+        "load_seconds": 0.118
+       }
+      ],
+      "peak_vram_gib": 6.56
+     },
+     "song_seconds": 193.28
+    },
+    {
+     "status": "succeeded",
+     "seconds": 592.9,
+     "job": "17ed8962-dc0c-417c-818a-87e3d9986b4c",
+     "timings": {
+      "schema": "plenio.timings/1",
+      "total_seconds": 591.514,
+      "stages": [
+       {
+        "stage": "1 · SONG",
+        "seconds": 0.251
+       },
+       {
+        "stage": "3 · TEXT",
+        "seconds": 0.036
+       },
+       {
+        "stage": "6 · FINISH",
+        "seconds": 443.496
+       },
+       {
+        "stage": "2 · WRITE",
+        "seconds": 30.189
+       },
+       {
+        "stage": "5 · RENDER",
+        "seconds": 72.862,
+        "load_seconds": 0.868
+       },
+       {
+        "stage": "4 · SCORE",
+        "seconds": 15.535,
+        "load_seconds": 0.019
+       },
+       {
+        "stage": "COVER ART",
+        "seconds": 29.056,
+        "load_seconds": 0.148
+       }
+      ],
+      "peak_vram_gib": 6.9
+     },
+     "song_seconds": 203.92
+    }
+   ],
+   "summary": {
+    "runs": 3,
+    "succeeded": 3,
+    "total_seconds": 591.51,
+    "first_run_seconds": 692.23,
+    "fastest_seconds": 570.6,
+    "stages": [
+     {
+      "stage": "1 · SONG",
+      "seconds": 0.25,
+      "load_seconds": 0.0
+     },
+     {
+      "stage": "2 · WRITE",
+      "seconds": 30.19,
+      "load_seconds": 0.0
+     },
+     {
+      "stage": "3 · TEXT",
+      "seconds": 0.04,
+      "load_seconds": 0.0
+     },
+     {
+      "stage": "4 · SCORE",
+      "seconds": 17.26,
+      "load_seconds": 0.01
+     },
+     {
+      "stage": "5 · RENDER",
+      "seconds": 72.86,
+      "load_seconds": 0.96
+     },
+     {
+      "stage": "6 · FINISH",
+      "seconds": 443.5,
+      "load_seconds": 0.0
+     },
+     {
+      "stage": "COVER ART",
+      "seconds": 29.06,
+      "load_seconds": 0.15
+     }
+    ],
+    "peak_vram_gib": 7.25,
+    "seconds_per_song_second": 2.952
+   }
+  }
+ }
+}

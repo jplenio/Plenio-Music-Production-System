@@ -478,17 +478,23 @@ Goal: PD §3.1 to §3.4. It ships with 2.0.0 (PD §3.5).
 
 For each hypothesis P1 to P6 and P8 of PD §6.2, in this order: measure with `bench.py` → if the gain is below 5 % of a run, record it and stop → else implement → measure again → record.
 
-- [ ] **8.1 P1** the plan prefers variants that leave room (the catalogue's `vram_full` already expresses it; verify the cover-art picks below 24 GiB).
-- [ ] **8.2 P2** the writer stays loaded across a series when the plan says it fits; it stops when the queue is empty.
-- [ ] **8.3 P3** workers on the second card (`[workers] device`), default: the largest card ComfyUI does not use.
-- [ ] **8.4 P4** the cover never runs between the music model's plan and take.
+- [x] **8.1 P1** the plan prefers variants that leave room (the catalogue's `vram_full` already expresses it; verify the cover-art picks below 24 GiB).
+  *Done 2026-11-12, measured, no change:* cover art is 29.1 s of the long brief's 591.5 s (4.9 %), its load 0.1 s; the plan takes the fp8 model and the fp4 text encoder below 15.5 GiB (`hardware_rows`), the full files from 16 GB. (docs/test-reports/2026-11-12-bench-2.0.md)
+- [x] **8.2 P2** the writer stays loaded across a series when the plan says it fits; it stops when the queue is empty.
+  *Done 2026-11-12, measured, no change:* the writer's `llama-server` is ready 3.2 s after its start (10.0 s cold) - 0.5 % to 5.6 % of a run; writer + 2 GB + YuE2's 9.0 GiB do not fit a 16 GB card, so the condition never holds on the reference card. (docs/test-reports/2026-11-12-bench-2.0.md)
+- [x] **8.3 P3** workers on the second card (`[workers] device`), default: the largest card ComfyUI does not use.
+  *Recorded 2026-11-12, not measured:* the reference machine's second card is the owner's; `[workers] device` exists as a setting and is read by nothing yet - owed on a machine with a free second card. (docs/test-reports/2026-11-12-bench-2.0.md)
+- [x] **8.4 P4** the cover never runs between the music model's plan and take.
+  *Done 2026-11-12, measured, no change:* the take's model load is 1.0 s median (0.2 % of the run) with cover art on. (docs/test-reports/2026-11-12-bench-2.0.md)
 - [x] **8.5 P5** *a new take* hits ComfyUI's cache for writer and plan (a test compares prompts).
   *Done 2026-11-12, nothing to change:* a take of `yue2-song` runs neither the writer nor the plan nor the arrangement - not by ComfyUI's cache (the sheets' state changes, so every node after them has a new signature) but because a Song Sheet asks for no document its state holds (`check_lazy_status`); a test walks the take's prompt from its output nodes the way ComfyUI does and finds only YuE2's take among the heavy nodes (`tests/unit/test_song_api.py`). Found on the way, not measured (the cover brief needs a recording): a take of `yue2-cover` transcribes again (Transcribe Lyrics reads the score sheet's output) and asks the writer's misheard check again (Export Release reads its report), and a take with cover art paints the same picture again (its text encoder follows the text sheet) - the cover art is about 27 s of a 534 s run on 1.6.0 (5 %).
 - [x] **8.6 P6, P8** the warm-up note; the editor chunk preloaded on idle.
   *Done 2026-11-12:* the player's studio panel says the first song after a start takes longer, with the factor measured on 1.6.0 (`player/warmUp.ts`: first runs 1.0 to 1.5 times a brief's median); Setup says its test song loads the models once. A Sheet State widget on the canvas fetches the editor's chunk once when the browser is idle (`extension/editorPreload.ts`). Perception only: not measured as time, as PD §6.2 says.
-- [ ] **8.7 Budgets**: `docs/dev/performance.md` with the measured numbers of 1.6.0 and of this phase; `release.py prepare` asks for a `bench.py` report and compares.
+- [x] **8.7 Budgets**: `docs/dev/performance.md` with the measured numbers of 1.6.0 and of this phase; `release.py prepare` asks for a `bench.py` report and compares.
+  *Done 2026-11-12:* `docs/dev/performance.md` (1.6.0's medians as budgets, phase 8's numbers); `tools/bench.py --check <report>` compares a report with the budgets, per second of song where both know their songs' lengths (`check_report` for `release.py prepare`, which R0 writes).
 
 **Exit of phase 8:** a report with before and after per brief; no brief is slower than on 1.6.0.
+*Passed 2026-11-12 per second of song (docs/test-reports/2026-11-12-bench-2.0.md): every brief as fast or faster than 1.6.0; by the raw median the long brief is 10.7 % longer with 15 % longer songs. Nothing in phase 8 changed a run's time, so the report is before and after.*
 
 ---
 
