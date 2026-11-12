@@ -17,5 +17,6 @@ Decisions confirmed by the owner on 2026-09-25 (design: `docs/design/target-arch
 | [0011](0011-section-plan-not-abc.md) | Creative modes: the writer plans a section plan, Plenio writes the notes |
 | [0012](0012-two-artefacts.md) | Two artefacts: the Registry package starts no other program; the Studio add-on does |
 | [0013](0013-guests-languages.md) | The guests' page in the guest's language (amends 0008 for one page) |
+| [0014](0014-downloads-after-confirmation.md) | Plenio downloads catalogue model files after the user's confirmation |
 
 New decisions get the next number and the same structure (context, decision, consequences).

@@ -154,8 +154,16 @@ def route_problems() -> list[str]:
     return problems
 
 
+def finding_problems() -> list[str]:
+    """Every finding the System Check and Setup can show (``core/system.py``) has its row in Troubleshooting."""
+    source = (PROJECT / "plenio" / "core" / "system.py").read_text(encoding="utf-8")
+    ids = sorted(set(re.findall(r"Finding\(\s*\"([a-z]+\.[a-z_]+)\"", source)))
+    page = (PROJECT / "docs" / "user" / "troubleshooting.md").read_text(encoding="utf-8")
+    return [f"finding {i}: no row in docs/user/troubleshooting.md" for i in ids if f"`{i}`" not in page]
+
+
 def main() -> int:
-    problems = broken_links() + variable_problems() + config_sections() + route_problems()
+    problems = broken_links() + variable_problems() + config_sections() + route_problems() + finding_problems()
     for problem in problems:
         print(problem)
     print(f"doc check: {len(problems)} problem(s)" if problems else "doc check: no problem")

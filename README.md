@@ -4,7 +4,9 @@
 
 <h1 align="center">Plenio Music Production System</h1>
 
-<p align="center"><b>A one-of-a-kind song production suite for ComfyUI - from the idea to a mastered song with YuE2, every note under your control,<br />and a player that turns any party into a live music studio. Free, open source and completely local.</b></p>
+<p align="center"><b>Type an idea. Get a finished song. On your own PC.</b></p>
+
+<p align="center">A song production suite for ComfyUI - from the idea to a mastered song with YuE2 and MiniMax Music 3, every note under your control,<br />and a player that turns any party into a live music studio. Free, open source and completely local.</p>
 
 <p align="center">
   <a href="https://github.com/jplenio/Plenio-Music-Production-System/releases"><img src="https://img.shields.io/github/v/release/jplenio/Plenio-Music-Production-System?label=release&color=8b5cf6" alt="Latest release" /></a>
@@ -21,13 +23,23 @@
   <br /><sub>🔊 <a href="https://jplenio.github.io/Plenio-Music-Production-System/#sound"><b>Hear it with sound</b></a> · twelve songs made with Plenio, each from its strongest moment, as the Plenio Player shows them · ▶ <a href="https://jplenio.github.io/Plenio-Music-Production-System/"><b>Plenio in 30 seconds</b></a></sub>
 </p>
 
+**Finished, not generated:** a song comes out mastered and tagged, with its lyrics timed and its sheet music - ready to play, to share or to release. **Nothing is a black box:** the text, the notes and the files the models get are yours to see and change, and the record says how every song was made. **Music is for people:** the Plenio Player plays it to a room, and the room joins in from its phones.
+
+**Install** - in the ComfyUI Manager search for *Plenio Music Production System*, or:
+
+```bash
+comfy node install comfyui-plenio-music     # or: git clone https://github.com/jplenio/Plenio-Music-Production-System into ComfyUI/custom_nodes
+```
+
+Restart ComfyUI; **Plenio Setup** opens and plans the model files for your graphics card before anything is fetched ([Getting started](docs/user/getting-started.md), [two ways to install](docs/user/getting-started.md#two-ways-to-install)).
+
 <p align="center">
   <a href="#-listen-first">Listen</a> ·
   <a href="#-what-plenio-does">What it does</a> ·
   <a href="#-in-comfyui">In ComfyUI</a> ·
   <a href="#-the-plenio-player">The player</a> ·
   <a href="#-plenio-in-your-daw">In your DAW</a> ·
-  <a href="#-new-in-15">New in 1.5</a> ·
+  <a href="#-new-in-20">New in 2.0</a> ·
   <a href="#-under-the-hood">Under the hood</a> ·
   <a href="#installation">Install</a> ·
   <a href="#watch-the-tutorials">Tutorials</a>
@@ -160,7 +172,16 @@ Plenio 1.6 brings what it needs, in the Song API (API 1.4) and open to every pro
 
 ▶ [Teaser](https://jplenio.github.io/Plenio-Music-Production-System/go/vst3-teaser/) (72 s) · ▶ [Tutorial: your first song in your DAW](https://jplenio.github.io/Plenio-Music-Production-System/go/vst3-first-song/) (2:51) · [Plenio VST3 on GitHub](https://github.com/jplenio/Plenio-VST3)
 
-## 🆕 New in 1.5
+## 🆕 New in 2.0
+
+- **Plenio Setup** - the model files for your card, planned, downloaded with a check of every file and tested with a first song; every model block says `auto` and takes what runs on your card ([Models and downloads](docs/user/models.md)).
+- **Song API v2** - jobs that survive a restart, review stops, an event stream, tokens for other computers, an MCP server for AI assistants and an API for the player ([API guide](docs/api/README.md)).
+- **People & access in the player** - Host, Co-host, Maker, Listener, Party guest; invitations by code, five places instead of a long menu, the guests' page in seven languages ([People & access](docs/user/player/people.md)).
+- **The Director** - visuals that see a song's beats, bars, sections and drops coming, twelve signature visuals tuned for it, one light over every picture ([Visuals](docs/user/player/visuals.md)).
+- **Two artefacts** - the Comfy Registry package starts no other program; the GitHub download keeps the Studio add-on ([SECURITY.md](SECURITY.md#programs-plenio-starts)).
+- Updating from 1.x: [what changes and what to do](docs/user/from-1x-to-2.md).
+
+### New in 1.5
 
 <table>
 <tr>
@@ -210,7 +231,7 @@ curl "http://127.0.0.1:8188/plenio/api/v1/jobs/<id>?wait=30"      # answers the 
 
 - **LoRAs, joined exactly.** ComfyUI's YuE2 fuses q/k/v and gate/up into one projection each; a LoRA trained on the separate ones is joined block-diagonally - `down = [A_q; A_k; A_v]`, `up = diag(B_q, B_k, B_v)` - so that `up · down` is exactly the stacked deltas ([plenio/comfy/loras.py](plenio/comfy/loras.py)).
 - **The player is plain.** A Python standard-library HTTP server and a Vue page: it reads the records, serves only the files a record lists, renders the song's page, muxes the browser's video with PyAV and runs a separate, rate-limited server for the party's phones behind a random 96-bit path. What it starts, writes and opens is listed in [SECURITY.md](SECURITY.md).
-- **Checked.** <!--fact:tests.all-->2 526<!--/fact--> test functions - unit, contract tests against ComfyUI in-process, host tests with real ComfyUI servers, frontend tests - run in CI on Ubuntu and Windows, with mypy strict and ruff. [Architecture](docs/dev/architecture.md) · [Extending Plenio](docs/dev/extending.md) · [Testing](docs/dev/testing.md)
+- **Checked.** <!--fact:tests.all-->2 527<!--/fact--> test functions - unit, contract tests against ComfyUI in-process, host tests with real ComfyUI servers, frontend tests - run in CI on Ubuntu and Windows, with mypy strict and ruff. [Architecture](docs/dev/architecture.md) · [Extending Plenio](docs/dev/extending.md) · [Testing](docs/dev/testing.md)
 
 ## Built for different computers
 

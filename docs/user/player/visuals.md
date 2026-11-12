@@ -195,3 +195,26 @@ Open the visuals' settings with ✦ in Now playing (or press **V**):
 - **Visuals on** switches all visuals off (Now playing then shows the song's colours).
 
 A song's own visual wins, then the playlist's, then the mode. **N** shows another visual right away.
+
+## Show, Energy and the Director (2.0)
+<!-- media: player.visuals.director -->
+
+The visuals' settings start with three choices; **Fine-tune** keeps every setting of before.
+
+- **Show**: the *Director*, one of the collections - *Signature twelve*, *Space*, *Nature*, *Club*, *Retro & hi-fi*,
+  *Flow*, *Geometry*, *This song*, your ♥ favourites -, one visual, or none. A new player starts with the
+  **Signature twelve**: seven Plenio Nova scenes, three Plenio Drop presets and two classics, each tuned to lean in
+  before a beat lands, flash on it and build up before a louder part. On a device that draws fewer than three of
+  them, the player chooses from every visual it offers.
+- **Energy**, calm to intense: how strongly the pictures answer the music, how often they change (with the song,
+  at every section, when the music drops in) and how they cross over - together.
+- **The Director** (*Show › Director*, a choice, not the default): the player reads the song's beats, bars, sections
+  and drops once (kept in the player's own folder, so the next time is instant), gives every kind of section its visual - every
+  chorus the same -, changes on a bar's first beat, and lets a drop flash. Where the song's beats are uncertain it
+  falls back to *Match the music*.
+- **One light over every visual**: Plenio Nova's glow, tone curve, vignette and grain over the classics and Drop too.
+- **Picture and sound together** (in Settings): if the pictures run ahead of the music or behind it - a wireless
+  speaker delays the sound -, move the slider until a beat and its flash meet (-300 to +300 ms).
+
+The visuals of the collection shown are listed by their pictures: a click shows one now, ♥ marks a favourite and ✕
+takes one out.

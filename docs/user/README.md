@@ -5,6 +5,7 @@
 - [Configuration](configuration.md) - offline mode, downloads, worker limits, Local LLM folders and servers
 - [Licensing](licensing.md) - what the model licences mean for your songs
 - [Troubleshooting](troubleshooting.md) - common messages and what to do
+- [From 1.x to 2.0](from-1x-to-2.md) - what changes with the update, who notices it and what to do
 - [1 · YuE2 · Song](paths/yue2-song.md) - new songs with YuE2, the Song Sheet, takes, instrumentals
 - [2 · YuE2 · Cover](paths/yue2-cover.md) - covers of a recording: original lyrics, new lyrics or instrumental
 - [3 · MiniMax · Song](paths/minimax-song.md) - new songs with MiniMax Music 3: structured caption, exact 5 000-token budget

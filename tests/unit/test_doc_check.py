@@ -19,3 +19,9 @@ def test_the_variables_plenio_reads_are_found() -> None:
     read = doc_check.read_variables()
     assert {"PLENIO_OFFLINE", "PLENIO_API_REMOTE", "PLENIO_ADDONS", "HF_ENDPOINT"} <= read
     assert "PLENIO_BRIEF" not in read  # a type name, not a variable
+
+
+def test_every_finding_has_its_row_in_troubleshooting() -> None:
+    assert doc_check.finding_problems() == []
+    source = (doc_check.PROJECT / "plenio" / "core" / "system.py").read_text(encoding="utf-8")
+    assert len(set(__import__("re").findall(r"Finding\(\s*\"([a-z]+\.[a-z_]+)\"", source))) >= 10

@@ -38,6 +38,7 @@ FILES = (
     "docs/user/models.md",
     "docs/user/configuration.md",
     "docs/user/getting-started.md",
+    "docs/user/from-1x-to-2.md",
     "docs/dev/release.md",
     "docs/dev/testing.md",
 )

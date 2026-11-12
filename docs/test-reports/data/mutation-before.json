@@ -1,0 +1,47 @@
+{
+ "schema": "plenio.mutation/1",
+ "label": "before",
+ "tool": "mutmut 2.5.1",
+ "modules": {
+  "plenio/core/access.py": {
+   "mutants": 120,
+   "survived": 30,
+   "timed_out": 0,
+   "suspicious": 0,
+   "killed": 90,
+   "survived_percent": 25.0,
+   "survivors": {
+    "7": "@@ -22,7 +22,7 @@\n-    \"local\": \"answered to a browser or program on this computer only: the route describes or changes the \"\n+    \"local\": \"XXanswered to a browser or program on this computer only: the route describes or changes the XX\"",
+    "8": "@@ -23,7 +23,7 @@\n-    \"computer itself (its folders and versions, a program started on it)\",\n+    \"XXcomputer itself (its folders and versions, a program started on it)XX\",",
+    "10": "@@ -24,7 +24,7 @@\n-    \"compute\": \"answered to whoever reaches ComfyUI: the route reads only its request and writes nothing\",\n+    \"compute\": \"XXanswered to whoever reaches ComfyUI: the route reads only its request and writes nothingXX\",",
+    "12": "@@ -25,7 +25,7 @@\n-    \"data\": \"answered to whoever reaches ComfyUI: the route reads or writes only inside ComfyUI's own folders, \"\n+    \"data\": \"XXanswered to whoever reaches ComfyUI: the route reads or writes only inside ComfyUI's own folders, XX\"",
+    "13": "@@ -26,7 +26,7 @@\n-    \"by names checked against them, and names no place on this computer\",\n+    \"XXby names checked against them, and names no place on this computerXX\",",
+    "15": "@@ -27,7 +27,7 @@\n-    \"api\": \"the Song API: answered to whoever reaches ComfyUI (2.0: another computer needs an API token)\",\n+    \"api\": \"XXthe Song API: answered to whoever reaches ComfyUI (2.0: another computer needs an API token)XX\",",
+    "17": "@@ -32,7 +32,7 @@\n-@dataclass(frozen=True)\n+@dataclass(frozen=False)",
+    "19": "@@ -41,7 +41,7 @@\n-    what: str = \"\"\n+    what: str = \"XXXX\"",
+    "20": "@@ -41,7 +41,7 @@\n-    what: str = \"\"\n+    what: str = None",
+    "22": "@@ -42,7 +42,7 @@\n-    hint: str = \"\"\n+    hint: str = None",
+    "24": "@@ -46,7 +46,7 @@\n-            raise ValueError(f\"{self.method} {self.path}: no access class {self.access!r}\")\n+            raise ValueError(f\"XX{self.method} {self.path}: no access class {self.access!r}XX\")",
+    "30": "@@ -48,7 +48,7 @@\n-            raise ValueError(f\"{self.method} {self.path}: a local route says what it is and gives a hint\")\n+            raise ValueError(f\"XX{self.method} {self.path}: a local route says what it is and gives a hintXX\")",
+    "31": "@@ -54,7 +54,7 @@\n-        found = ipaddress.ip_address(text.split(\"%\", 1)[0])\n+        found = ipaddress.ip_address(text.split(\"XX%XX\", 1)[0])",
+    "32": "@@ -54,7 +54,7 @@\n-        found = ipaddress.ip_address(text.split(\"%\", 1)[0])\n+        found = ipaddress.ip_address(text.split(\"%\", 2)[0])",
+    "60": "@@ -95,7 +95,7 @@\n-    address = _address(peer or \"\")\n+    address = _address(peer or \"XXXX\")",
+    "81": "@@ -115,7 +115,7 @@\n-    site = str(headers.get(\"sec-fetch-site\", \"\")).strip().lower()\n+    site = str(headers.get(\"sec-fetch-site\", \"XXXX\")).strip().lower()",
+    "93": "@@ -121,7 +121,7 @@\n-    if origin == \"null\" or host is None:\n+    if origin == \"XXnullXX\" or host is None:",
+    "95": "@@ -121,7 +121,7 @@\n-    if origin == \"null\" or host is None:\n+    if origin == \"null\" and host is None:",
+    "98": "@@ -125,7 +125,7 @@\n-        port = parts.port or {\"http\": 80, \"https\": 443}.get(parts.scheme)\n+        port = parts.port or {\"XXhttpXX\": 80, \"https\": 443}.get(parts.scheme)",
+    "99": "@@ -125,7 +125,7 @@\n-        port = parts.port or {\"http\": 80, \"https\": 443}.get(parts.scheme)\n+        port = parts.port or {\"http\": 81, \"https\": 443}.get(parts.scheme)",
+    "100": "@@ -125,7 +125,7 @@\n-        port = parts.port or {\"http\": 80, \"https\": 443}.get(parts.scheme)\n+        port = parts.port or {\"http\": 80, \"XXhttpsXX\": 443}.get(parts.scheme)",
+    "101": "@@ -125,7 +125,7 @@\n-        port = parts.port or {\"http\": 80, \"https\": 443}.get(parts.scheme)\n+        port = parts.port or {\"http\": 80, \"https\": 444}.get(parts.scheme)",
+    "104": "@@ -127,7 +127,7 @@\n-        return False\n+        return True",
+    "107": "@@ -130,7 +130,7 @@\n-        host_port = sent_to.port or {\"http\": 80, \"https\": 443}.get(parts.scheme)\n+        host_port = sent_to.port or {\"XXhttpXX\": 80, \"https\": 443}.get(parts.scheme)",
+    "108": "@@ -130,7 +130,7 @@\n-        host_port = sent_to.port or {\"http\": 80, \"https\": 443}.get(parts.scheme)\n+        host_port = sent_to.port or {\"http\": 81, \"https\": 443}.get(parts.scheme)",
+    "109": "@@ -130,7 +130,7 @@\n-        host_port = sent_to.port or {\"http\": 80, \"https\": 443}.get(parts.scheme)\n+        host_port = sent_to.port or {\"http\": 80, \"XXhttpsXX\": 443}.get(parts.scheme)",
+    "110": "@@ -130,7 +130,7 @@\n-        host_port = sent_to.port or {\"http\": 80, \"https\": 443}.get(parts.scheme)\n+        host_port = sent_to.port or {\"http\": 80, \"https\": 444}.get(parts.scheme)",
+    "113": "@@ -132,6 +132,6 @@\n-        return False\n+        return True",
+    "114": "@@ -133,5 +133,5 @@\n-    return (parts.hostname or \"\") == (sent_to.hostname or \"\") and port == host_port\n+    return (parts.hostname or \"XXXX\") == (sent_to.hostname or \"\") and port == host_port",
+    "117": "@@ -133,5 +133,5 @@\n-    return (parts.hostname or \"\") == (sent_to.hostname or \"\") and port == host_port\n+    return (parts.hostname or \"\") == (sent_to.hostname or \"XXXX\") and port == host_port"
+   }
+  }
+ }
+}
