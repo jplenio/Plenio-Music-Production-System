@@ -41,7 +41,10 @@ def test_every_section_has_its_chapter_key(page: str) -> None:
     lines = (GUIDE / f"{page}.md").read_text(encoding="utf-8").splitlines()
     for n, line in enumerate(lines):
         if line.startswith("## "):
-            assert re.fullmatch(rf"<!-- media: player\.{re.escape(page)}\.[\w-]+ -->", lines[n + 1]), (page, line)
+            assert re.fullmatch(rf"<!-- media: player\.{re.escape(page)}\.[\w-]+ -->", lines[n + 1]), (
+                page,
+                line,
+            )
 
 
 def test_the_old_page_leads_to_every_section() -> None:
