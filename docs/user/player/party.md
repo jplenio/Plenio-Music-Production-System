@@ -2,6 +2,14 @@
 
 Live Play and your guests: the live playlist, the party's page on their phones. The player's guide in seven pages: [Listening](listening.md) · [Visuals](visuals.md) · [Party](party.md) · [Making songs](making-songs.md) · [People & access](people.md) · [Sharing](sharing.md) · [Videos](videos.md).
 
+## The party's page in the guest's language
+<!-- media: player.party.languages -->
+
+The page your guests open with the party's code speaks their phone's language: English, German, Spanish, French,
+Italian, Portuguese or Japanese - English for every other. Song titles and names stay as they are. The player
+itself, and the song form below *Make your own song*, stay English. To start a party in one step, see
+[People & access › Start a party](people.md#start-a-party-end-the-party).
+
 ## Live Play: make songs at a party, and they play
 <!-- media: player.party.live-play-make-songs-at-a-party-and-they-play -->
 

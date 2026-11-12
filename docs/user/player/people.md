@@ -2,6 +2,54 @@
 
 Who comes in and what each may do: your devices, a party, people with accounts. The player's guide in seven pages: [Listening](listening.md) · [Visuals](visuals.md) · [Party](party.md) · [Making songs](making-songs.md) · [People & access](people.md) · [Sharing](sharing.md) · [Videos](videos.md).
 
+## People & access
+<!-- media: player.people.people-and-access -->
+
+**More › People & access** is the one page for who comes in and what each may do. It has three cards:
+
+- **My devices** - your player on your own phone, tablet or laptop: you, on another screen (*Show the code*).
+- **Party** - guests scan a code and join in, without an account (*Start a party*, below).
+- **People** - family and friends with accounts of their own: their playlists, likes and plays on every device.
+
+Five roles name what people may do. The groups behind them are the same as before 2.0, so nothing changes in
+what is kept:
+
+| Role | Who | Comes in by |
+|---|---|---|
+| **Host** | you, at the player's computer | being there - and on your devices by *My devices* |
+| **Co-host** | an account of the group *admin* | their password, from any device: everything the host may but this computer's own things |
+| **Maker** | an account of the group *maker* | their password: listens and makes songs, as the grid allows |
+| **Listener** | an account of the group *listener* | their password: listens, keeps their own playlists |
+| **Party guest** | a phone on the party's page | the party's code, no account |
+
+**What each may do** is a grid below the cards. A ✓ or a dash is fixed; a box is yours to tick, and it sets the
+setting that does it - the guests' access, the party songs. A box that two columns share is one setting (covers,
+approval, the party's page, the whole studio from the network): ticking one ticks both. Three starting points set
+the grid at once: **Just me** (only you, on your devices), **Family** (people with accounts listen and make songs,
+no party), **House party** (guests add and make songs, you approve them first).
+
+### Invite someone
+<!-- media: player.people.invite-someone -->
+
+Under *People*, type a name and choose a role, then **Invite someone**: a QR code shows. The person scans it with
+their phone, chooses a password - or a four-digit PIN - and is logged in. The code works once and for 15 minutes;
+*Take back* cancels one not used yet. You do not type anyone's password.
+
+The code carries the link of *My devices* - that is how the phone reaches the player - so switch *My devices* on
+first. A device that came in by that link stays in the player as a guest after the invitation, until you make a
+*New link* under My devices. Eight wrong codes or passwords from one device in ten minutes make it wait, and twenty
+for one person from any number of devices.
+
+### Start a party, end the party
+<!-- media: player.people.start-a-party -->
+
+**Start a party** asks three things: the party's name, what guests may do (add songs, make songs - with or without
+your approval -, react), and then shows the code big on the screen. It switches on together what a party needs:
+the guests' access, Live Play and song making for guests. **End the party** puts every one of these back as it was
+before - also after the page was closed in between.
+
+The old addresses *Settings › Accounts*, *Party songs* and *In your network* lead to this page.
+
 ## The player in your network
 <!-- media: player.people.the-player-in-your-network -->
 

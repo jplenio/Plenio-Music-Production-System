@@ -2,6 +2,18 @@
 
 Open the player, find your songs, a song's page, Now playing, playlists, keys. The player's guide in seven pages: [Listening](listening.md) · [Visuals](visuals.md) · [Party](party.md) · [Making songs](making-songs.md) · [People & access](people.md) · [Sharing](sharing.md) · [Videos](videos.md).
 
+## Finding your way
+<!-- media: player.listening.finding-your-way -->
+
+The player has five places, the same in the sidebar of a computer and in a phone's tab bar: **Songs**, **Playlists**
+(with Favourites, Most played, Recently played and your saved filters), **Live** (Live Play and the party),
+**Make**, and **More** (People & access, In the making, Help, Settings). **Settings** opens on *Basic* - eight
+settings most people change -; *Everything* has every section as a tab, and *Find a setting* searches every
+label. A new player shows three cards once: your songs, *F* for the show, a party.
+
+For remote controls, stream decks and home automation, the player has an API of its own:
+[Player API](../../api/player.md).
+
 ## Open the player
 <!-- media: player.listening.open-the-player -->
 

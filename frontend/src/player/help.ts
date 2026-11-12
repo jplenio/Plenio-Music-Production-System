@@ -46,7 +46,7 @@ export interface HelpTopic {
   more?: string
 }
 
-const DOCS = 'https://github.com/jplenio/Plenio-Music-Production-System/blob/main/docs/user/concepts/player.md'
+const DOCS = 'https://github.com/jplenio/Plenio-Music-Production-System/blob/main/docs/user/player'
 
 export const TOPICS: HelpTopic[] = [
   {
@@ -62,7 +62,7 @@ export const TOPICS: HelpTopic[] = [
       '**Put the player on your home screen**: in the browser\'s menu, *Add to Home screen* (Android) or *Share › Add to Home Screen* (iPhone, iPad) - it then opens like an app, on the whole screen.',
       'Everything you set - playlists, favourites, the visuals, the look of the lyrics - is kept by the player itself, on the computer it runs on.',
     ],
-    more: DOCS,
+    more: `${DOCS}/README.md`,
   },
   {
     id: 'find',
@@ -80,7 +80,7 @@ export const TOPICS: HelpTopic[] = [
       '**Tags of your own** on a song\'s page or for every song shown (*Tag…*); **Save this filter…** keeps a search under a name in the menu.',
       'The **letters at the side** of a long list jump to a letter (sorted by title) or a month (sorted by date).',
     ],
-    more: `${DOCS}#the-library`,
+    more: `${DOCS}/listening.md#the-library`,
   },
   {
     id: 'playing',
@@ -94,7 +94,7 @@ export const TOPICS: HelpTopic[] = [
       '**How the lyrics look** (🎤): eleven fonts, eleven effects (*Glow*, *Bounce*, *Neon*, *On the beat* …), colour and size - also in videos.',
       '**A · master / B · original** plays the unmastered take in step; the speed changes without changing the pitch.',
     ],
-    more: `${DOCS}#now-playing`,
+    more: `${DOCS}/listening.md#now-playing`,
   },
   {
     id: 'party',
@@ -108,7 +108,7 @@ export const TOPICS: HelpTopic[] = [
       'Every song’s reactions are counted and kept - Live Play and the song’s page show them, apart from your favourite heart. In the guests’ settings: as many per song as they like, or one per song and guest (a tap on another changes it); *Reactions* switches them off.',
       '**Party songs**: guests make songs of their own on their phones - a style, a few words, *Generate Song* - when you allow it in *Settings › Party songs*; *Who made it* shows their name and the party’s date while their song plays. Only a guest’s song is a party song: yours are saved like songs made in ComfyUI.',
     ],
-    more: `${DOCS}#live-play-make-songs-at-a-party-and-they-play`,
+    more: `${DOCS}/party.md#live-play-make-songs-at-a-party-and-they-play`,
   },
   {
     id: 'make',
@@ -123,7 +123,7 @@ export const TOPICS: HelpTopic[] = [
       '**The studio**: ComfyUI must run on this computer. When it does not, *Start the studio* starts it in the background - the way you last started it yourself, with your models folder (*Settings › The studio* shows how); the player itself needs no ComfyUI to play.',
       'In ComfyUI itself, the templates give you every control - the Song Sheet, the score editor, MIDI: the tutorials below show them.',
     ],
-    more: `${DOCS}#party-songs-guests-make-songs`,
+    more: `${DOCS}/making-songs.md#party-songs-guests-make-songs`,
   },
   {
     id: 'network',
@@ -136,7 +136,7 @@ export const TOPICS: HelpTopic[] = [
       '**ComfyUI** opens through the second link, and *Make a song* has the whole studio from there.',
       'Windows asks once whether Python may accept connections: allow it for private networks. Leave it off on networks you do not trust.',
     ],
-    more: `${DOCS}#the-player-in-your-network`,
+    more: `${DOCS}/people.md#the-player-in-your-network`,
   },
   {
     id: 'share',
@@ -148,7 +148,7 @@ export const TOPICS: HelpTopic[] = [
       '**Share as a player…** packs the player and the songs you choose into one HTML file: anyone double-clicks it and listens - with the lyrics, the notation and the visuals, without installing anything.',
       'Both are made in the background: **In the making** in the menu shows how far they are.',
     ],
-    more: `${DOCS}#save-a-song-as-a-video`,
+    more: `${DOCS}/videos.md#save-a-song-as-a-video`,
   },
   {
     id: 'trouble',

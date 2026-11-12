@@ -2,6 +2,15 @@
 
 Songs made from the player - by you, your people and your guests. The player's guide in seven pages: [Listening](listening.md) · [Visuals](visuals.md) · [Party](party.md) · [Making songs](making-songs.md) · [People & access](people.md) · [Sharing](sharing.md) · [Videos](videos.md).
 
+## Make a song: the short form
+<!-- media: player.making-songs.short-form -->
+
+**Make** opens with three things: *What should the song be about?*, the style chips, **Generate**. A chip takes a
+template of that style - one that sings - and *another one* the next; the song gets every value of that template,
+and your words become the idea its lyrics are written from (for an instrumental style, the start of its
+description). **More options** opens the full form below: every field, the presets, covers, several takes at once.
+A song you change or make again opens the full form by itself.
+
 ## Party songs: guests make songs
 <!-- media: player.making-songs.party-songs-guests-make-songs -->
 

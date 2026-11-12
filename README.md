@@ -126,7 +126,7 @@ A program of its own: it runs without ComfyUI, opens at `http://127.0.0.1:8765/`
 <table>
 <tr>
 <td width="56%"><img src="assets/branding/readme/party-reactions.webp" alt="Live Play on the party's big screen: a Plenio Drop visual with the lyrics and the guests' QR code; beside it a guest's phone - taps on fire, hearts and party poppers float up the big screen" width="100%" /></td>
-<td width="44%"><b>Party mode.</b> Everyone on the party's Wi-Fi scans a QR code: the live playlist on their phones, songs to add - and with <b>party songs</b> they order a song of their own: a style, a few words, <i>Generate</i>. It plays when it is ready, with who made it and at which party on the big screen. Their reactions 🔥 ❤️ 🎉 float up the screen and are kept for every song, and the songs made at the party play again on their phones. <a href="docs/user/concepts/player.md#guests-in-your-network">Party guide</a></td>
+<td width="44%"><b>Party mode.</b> Everyone on the party's Wi-Fi scans a QR code: the live playlist on their phones, songs to add - and with <b>party songs</b> they order a song of their own: a style, a few words, <i>Generate</i>. It plays when it is ready, with who made it and at which party on the big screen. Their reactions 🔥 ❤️ 🎉 float up the screen and are kept for every song, and the songs made at the party play again on their phones. <a href="docs/user/player/party.md#guests-in-your-network">Party guide</a></td>
 </tr>
 </table>
 
@@ -139,7 +139,7 @@ A program of its own: it runs without ComfyUI, opens at `http://127.0.0.1:8765/`
 - **Share as a player** - one HTML file with the songs you choose: anyone double-clicks it and listens, with the lyrics and the visuals. No install, no server, no account.
 - **On every screen** - phone, tablet and the big screen, with *Add to Home screen*; *In your network* opens the whole player on another device at home.
 
-Guide: [Plenio Player](docs/user/concepts/player.md).
+Guide: [Plenio Player](docs/user/player/README.md) - in seven pages.
 
 ## 🎹 Plenio in your DAW
 
@@ -270,7 +270,7 @@ Restart ComfyUI, open **0 · System Check** from the template browser and run it
 
 ## Documentation
 
-- Users: [Getting started](docs/user/getting-started.md) · [YuE2 Song](docs/user/paths/yue2-song.md) · [YuE2 Cover](docs/user/paths/yue2-cover.md) · [YuE2 DAW](docs/user/paths/yue2-daw.md) · [MiniMax Song](docs/user/paths/minimax-song.md) · [Enhance & Master](docs/user/paths/enhance-master.md) · [Song Sheet](docs/user/concepts/song-sheet.md) · [Continue a song](docs/user/concepts/continue-a-song.md) · [Brief templates](docs/user/concepts/brief-templates.md) · [Score editor](docs/user/concepts/score-editor.md) · [Stems](docs/user/concepts/stems.md) · [Refine (48 kHz)](docs/user/concepts/refine.md) · [Instrumental](docs/user/concepts/instrumental.md) · [Mastering](docs/user/concepts/mastering.md) · [Plenio Player](docs/user/concepts/player.md) · [Plenio Drop presets](docs/user/concepts/player-visuals.md) · [Tags and subtitles](docs/user/concepts/tags-and-subtitles.md) · [Seeds](docs/user/concepts/seeds.md) · [App mode](docs/user/concepts/app-mode.md) · [Local LLMs](docs/user/concepts/local-llm.md) · [LoRAs for YuE2](docs/user/concepts/loras.md) · [Models](docs/user/models.md) · [Configuration](docs/user/configuration.md) · [Licensing](docs/user/licensing.md) · [Troubleshooting](docs/user/troubleshooting.md)
+- Users: [Getting started](docs/user/getting-started.md) · [YuE2 Song](docs/user/paths/yue2-song.md) · [YuE2 Cover](docs/user/paths/yue2-cover.md) · [YuE2 DAW](docs/user/paths/yue2-daw.md) · [MiniMax Song](docs/user/paths/minimax-song.md) · [Enhance & Master](docs/user/paths/enhance-master.md) · [Song Sheet](docs/user/concepts/song-sheet.md) · [Continue a song](docs/user/concepts/continue-a-song.md) · [Brief templates](docs/user/concepts/brief-templates.md) · [Score editor](docs/user/concepts/score-editor.md) · [Stems](docs/user/concepts/stems.md) · [Refine (48 kHz)](docs/user/concepts/refine.md) · [Instrumental](docs/user/concepts/instrumental.md) · [Mastering](docs/user/concepts/mastering.md) · [Plenio Player](docs/user/player/README.md) · [Plenio Drop presets](docs/user/concepts/player-visuals.md) · [Tags and subtitles](docs/user/concepts/tags-and-subtitles.md) · [Seeds](docs/user/concepts/seeds.md) · [App mode](docs/user/concepts/app-mode.md) · [Local LLMs](docs/user/concepts/local-llm.md) · [LoRAs for YuE2](docs/user/concepts/loras.md) · [Models](docs/user/models.md) · [Configuration](docs/user/configuration.md) · [Licensing](docs/user/licensing.md) · [Troubleshooting](docs/user/troubleshooting.md)
 - Developers: [Song API](docs/api/README.md) · [Architecture](docs/dev/architecture.md) · [Extending Plenio](docs/dev/extending.md) · [Testing](docs/dev/testing.md) · [Design documents](docs/design/README.md) · [Decisions](docs/adr/README.md)
 - [Changelog](CHANGELOG.md): every change of the current version and the one before · [Security and privacy](SECURITY.md): what Plenio downloads, starts and writes
 

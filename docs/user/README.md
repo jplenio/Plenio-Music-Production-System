@@ -26,7 +26,7 @@ Concepts:
 - [Local LLMs](concepts/local-llm.md) - GGUF files from models/LLM and the models of LM Studio, Ollama, llama.cpp ... as the song writer or anywhere else
 - [Seeds](concepts/seeds.md) - one switch per seed: 🔒 keep a part (the draft, the take), 🎲 renew it every run
 - [Tags, variables and lyrics subtitles](concepts/tags-and-subtitles.md) - tags filled from the brief (`{genre}`, `{mood}` ...), file names, the lyrics as SRT timed by listening
-- [Plenio Player](concepts/player.md) - listen to your songs: one click from ComfyUI or a double click without it; search, a page per song, lyrics and sheet music following the music, playlists, Winamp-style visuals; settings kept; a song back into ComfyUI
+- [Plenio Player](player/README.md) - in seven pages: listening, visuals, party, making songs, people & access, sharing, videos - listen to your songs: one click from ComfyUI or a double click without it; search, a page per song, lyrics and sheet music following the music, playlists, Winamp-style visuals; settings kept; a song back into ComfyUI
 - [The Song API](concepts/song-api.md) - make songs from other programs: one HTTP request with a template's fields, the job followed to its record; the fields follow the template
 - [Lyrics fidelity](concepts/lyrics-fidelity.md) - one take, or the best of two or three: a further take only while the best so far sang less than 96 % of its lyrics as written (takes longer)
 - [Creativity](concepts/creativity.md) - one slider from steady to adventurous (0-200; 50 as before the slider, 100 the default): the writer's rules and temperature, YuE2's plan and takes
