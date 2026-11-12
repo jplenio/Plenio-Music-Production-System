@@ -4,7 +4,7 @@
   "title": "Plenio Song API",
   "version": "2.0",
   "summary": "Make songs with Plenio on a running ComfyUI: every template, review stops, songs, events.",
-  "description": "Make songs with the Plenio Music Production System on a running ComfyUI: choose one of the five templates, give its fields, queue the job - stop it where the Song Sheet stops to read or edit the lyrics and the score -, follow it (?wait or the event stream), download its files; make a released song again. Plenio 1.6.0, ComfyUI 0.41.0. Jobs are kept on disk and survive a restart of ComfyUI. This computer needs no token; another computer sends one (Plenio Setup > API access). The path carries the major version (/v2); a minor version only adds. v1 stays served as it was. Guide: docs/api/README.md.",
+  "description": "Make songs with the Plenio Music Production System on a running ComfyUI: choose one of the five templates, give its fields, queue the job - stop it where the Song Sheet stops to read or edit the lyrics and the score -, follow it (?wait or the event stream), download its files; make a released song again. Plenio 2.0.0, ComfyUI 0.41.0. Jobs are kept on disk and survive a restart of ComfyUI. This computer needs no token; another computer sends one (Plenio Setup > API access). The path carries the major version (/v2); a minor version only adds. v1 stays served as it was. Guide: docs/api/README.md.",
   "license": {
    "name": "Apache-2.0",
    "identifier": "Apache-2.0"
