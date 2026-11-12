@@ -9,6 +9,7 @@ import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vu
 import { api, media, type StudioStatus } from '../api'
 import { isPhone } from '../layout'
 import MakeForm from '../make/MakeForm.vue'
+import QuickMake from '../make/QuickMake.vue'
 import MakeQueue from '../make/MakeQueue.vue'
 import { retryRequest } from '../make/form'
 import type { MakeJob, Remake } from '../make/form'
@@ -20,6 +21,8 @@ import Icon from './Icon.vue'
 const props = defineProps<{ from?: string }>()
 
 const editing = ref<MakeJob | null>(null)
+/** *More options*: the full form under the short one (a song being changed or made again opens it by itself). */
+const more = ref(false)
 const remake = shallowRef<Remake | null>(null)
 const remakeError = ref('')
 const reading = ref(false)
@@ -233,8 +236,12 @@ const cover = (job: MakeJob): string | null =>
         <p v-if="remakeError" class="banner bad">
           <Icon name="info" :size="16" /> {{ remakeError }} <a @click="go('/make')">Make a new song instead</a>
         </p>
+        <template v-if="makeForm && !from && !editing">
+          <QuickMake v-if="!more" :client="makeApi" :form="makeForm" :may="!!status && (status.may || !!status.me.full)" :why="status?.why" @made="(job) => made(job, false)" />
+          <button class="link more-options" type="button" :aria-expanded="more" @click="more = !more">{{ more ? 'Fewer options - the short form' : 'More options - every field, presets, covers, several takes' }}</button>
+        </template>
         <MakeForm
-          v-if="makeForm && (!from || remake)"
+          v-if="makeForm && (!from || remake) && (more || !!editing || !!from)"
           :client="makeApi"
           :form="makeForm"
           :status="status"
@@ -297,6 +304,16 @@ const cover = (job: MakeJob): string | null =>
 </template>
 
 <style scoped>
+.more-options {
+  justify-self: start;
+  margin: 10px 0 4px;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+}
 .make-page {
   padding: 26px 34px 48px;
   max-width: 1400px;
