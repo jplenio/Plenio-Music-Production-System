@@ -233,6 +233,13 @@ def _v2_result(job: Job) -> dict[str, Any] | None:
             url = str(entry.get("url") or "").replace(f"{v1.BASE}/jobs/{prompt}/", f"{BASE}/jobs/{job.id}/")
             files.append({**entry, "url": url})
     result["files"] = files
+    record = result.get("record")
+    if isinstance(record, str) and record:
+        try:  # the song's id in /songs (the record's place inside the output folder)
+            relative = Path(record).resolve().relative_to(host.output_directory().resolve()).as_posix()
+            result["song"] = songs.song_id(relative)
+        except (OSError, ValueError):
+            pass
     return result
 
 

@@ -4,6 +4,7 @@ says so. What a real song makes is not covered here (it needs the models)."""
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
@@ -59,3 +60,53 @@ def test_the_shell_example(server: ComfyServer, fake_models: None, tmp_path: Pat
     done = run(["sh", str(EXAMPLES / "make_song.sh"), "a quiet walk by the sea"], server, tmp_path)
     assert done.returncode == 1, done.stdout + done.stderr
     assert "job job_" in done.stdout and "\nfailed" in done.stdout, done.stdout
+
+
+def test_the_mcp_server(server: ComfyServer, fake_models: None, tmp_path: Path) -> None:
+    """A scripted JSON-RPC session with plenio_mcp.py: it starts a song through the Song API v2, follows the job to
+    its end (failed at the first loader: the model files are empty) and lists the songs."""
+
+    def ask(n: int, method: str, params: dict[str, object] | None = None) -> str:
+        return json.dumps({"jsonrpc": "2.0", "id": n, "method": method, "params": params or {}}) + "\n"
+
+    def tool(n: int, name: str, **arguments: object) -> str:
+        return ask(n, "tools/call", {"name": name, "arguments": arguments})
+
+    env = {**os.environ, "PLENIO_API": server.url, "PYTHONUTF8": "1"}
+    process = subprocess.Popen(
+        [sys.executable, str(PROJECT / "plenio_mcp.py")], cwd=tmp_path, env=env, text=True, encoding="utf-8",
+        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    )  # fmt: skip
+    assert process.stdin is not None and process.stdout is not None
+
+    def answer(line: str) -> dict[str, object]:
+        process.stdin.write(line)
+        process.stdin.flush()
+        return json.loads(process.stdout.readline())
+
+    try:
+        assert (
+            answer(ask(1, "initialize", {"protocolVersion": "2025-06-18"}))["result"]["serverInfo"]["name"]
+            == "plenio"
+        )
+        process.stdin.write(json.dumps({"jsonrpc": "2.0", "method": "notifications/initialized"}) + "\n")
+        assert len(answer(ask(2, "tools/list"))["result"]["tools"]) == 5
+        made = answer(
+            tool(3, "make_song", description="a quiet walk by the sea", length="very short (about 1:00)")
+        )
+        job = made["result"]["structuredContent"]
+        assert job["id"].startswith("job_") and job["status"] in ("queued", "running"), made
+        status = job["status"]
+        for n in range(4, 20):
+            found = answer(tool(n, "job_status", id=job["id"], wait_seconds=10))["result"][
+                "structuredContent"
+            ]
+            status = found["status"]
+            if status in ("succeeded", "failed", "cancelled"):
+                break
+        assert status == "failed" and found["error"]["code"], found
+        listed = answer(tool(30, "list_songs"))["result"]
+        assert not listed["isError"] and isinstance(listed["structuredContent"]["songs"], list)
+    finally:
+        process.stdin.close()
+        process.wait(timeout=30)

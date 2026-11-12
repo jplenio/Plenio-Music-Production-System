@@ -245,6 +245,9 @@ def openapi() -> dict[str, Any]:
             "parameters": [
                 {"name": "q", "in": "query", "schema": {"type": "string"},
                  "description": "free words, field filters (genre:pop, bpm:>100, #party, is:fav ...), quotes, -"},
+                {"name": "record", "in": "query", "schema": {"type": "string"},
+                 "description": "only the song whose release record lies at this place inside a song folder, e.g. "
+                                "plenio/Neon Rain.plenio.json (what a Song API song id carries)"},
                 {"name": "limit", "in": "query", "schema": {"type": "integer", "minimum": 1,
                                                             "maximum": SONGS_LIMIT, "default": 50}},
             ],

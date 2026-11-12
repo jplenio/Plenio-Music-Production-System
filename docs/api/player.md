@@ -92,6 +92,9 @@ brief; field filters (`genre:pop`, `mood:warm`, `bpm:>100`, `bpm:90-120`, `key:A
 out what matches. The best matches come first, then the newest. The page and this API are tested against the
 same cases.
 
+A song made through the Song API is found by its record: `?record=plenio/Neon%20Rain.plenio.json` - the place
+inside ComfyUI's output folder, which a Song API song id carries (`plenio_mcp.py` plays a new song this way).
+
 ### Live Play
 
 ```sh

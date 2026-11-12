@@ -148,6 +148,8 @@ def test_queue_live_and_songs(player: tuple[int, Library]) -> None:
     assert call(port, "GET", "/api/v1/songs?limit=2")[1]["total"] == 3
     assert len(call(port, "GET", "/api/v1/songs?limit=2")[1]["songs"]) == 2
     assert call(port, "GET", "/api/v1/songs?limit=x")[0] == 400
+    code, found = call(port, "GET", "/api/v1/songs?record=plenio/Paper%20Boats.plenio.json")
+    assert [s["title"] for s in found["songs"]] == ["Paper Boats"]
 
 
 def test_refusals(player: tuple[int, Library]) -> None:

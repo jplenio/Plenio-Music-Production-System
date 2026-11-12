@@ -959,7 +959,14 @@ def make_handler(
             context = SearchContext.of_state(
                 mine.read() if mine is not None else {}, measured.stars(library) if wants_measured else None
             )
-            found = search_songs(library.songs(), words, context)
+            songs: list[Any] = library.songs()
+            record = query.get("record", "").replace("\\", "/").strip("/")
+            if (
+                record
+            ):  # the song whose record lies at this place inside a folder (the Song API's song id carries it)
+                ending = "/" + record
+                songs = [dict(s.summary) for s in library.every() if s.record.as_posix().endswith(ending)]
+            found = search_songs(songs, words, context)
             return self._json(
                 {"songs": [player_api.song_view(s) for s in found[:limit]], "total": len(found)}
             )

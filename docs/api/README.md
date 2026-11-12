@@ -329,7 +329,7 @@ waits at no stop answers `409` (`needs_review`). The `yue2-daw` template stops a
 
 ```json
 {"status": "succeeded",
- "result": {"title": "Night Drive", "seconds": 92.4,
+ "result": {"title": "Night Drive", "seconds": 92.4, "song": "cGxlbmlvLzIwMjYtMTEtMTEgTmlnaHQgRHJpdmUucGxlbmlvLmpzb24",
             "files": [
               {"name": "2026-11-11 Night Drive.flac",
                "url": "/plenio/api/v2/jobs/job_5d0c…/files/2026-11-11%20Night%20Drive.flac"},
@@ -340,7 +340,9 @@ waits at no stop answers `409` (`needs_review`). The `yue2-daw` template stops a
               {"name": "2026-11-11 Night Drive.plenio.json", "role": "record", "url": "…"}]}}
 ```
 
-`GET` a file's `url` to download it; byte ranges work, so an audio player can stream and seek. Only the files the
+`song` is the song's id in [`/songs`](#songs-the-library-and-making-one-again) (left out when the record lies
+outside ComfyUI's output folder). `GET` a file's `url` to download it; byte ranges work, so an audio player can
+stream and seek. Only the files the
 song's release record lists can be fetched - nothing else of the computer. The record (`role: record`) holds
 everything: the documents, the seeds, every setting, the loudness, the lyrics' timing, the models' licences, how it was
 made and how well it came out, measured. `GET /jobs/{id}/documents` gives the documents alone, `GET /jobs/{id}/timings`

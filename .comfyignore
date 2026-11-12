@@ -11,6 +11,8 @@
 # download too. The package's player is opened from ComfyUI, or with `python plenio_player.py`.
 /Plenio Player.bat
 /plenio_player.sh
+# The MCP server for AI assistants is a program the user starts (docs/api/mcp.md), not a node.
+/plenio_mcp.py
 /.github/
 /CLAUDE.md
 /.gitattributes
