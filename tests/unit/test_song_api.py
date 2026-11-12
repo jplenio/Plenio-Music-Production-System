@@ -587,3 +587,58 @@ def test_the_models_say_what_each_template_needs() -> None:
     assert all(
         t["ready"] for t in song_api.models_answer(catalogue, everything, loaded)["templates"].values()
     )
+
+
+# --- a new take runs only the take (phase 8.5, PD 6.2 P5) ---------------------------------------------------------------
+
+HEAVY = ("YuE2GenerateABC", "TextGenerate", "PlenioLocalLLM", "YuE2GenerateMusic")
+
+
+def runs(prompt: dict[str, Any]) -> set[str]:
+    """The class types ComfyUI reaches from the output nodes - a Song Sheet asks for none of the documents its
+    state holds (``check_lazy_status``), nor for the score's reports when it holds the score."""
+    from plenio.core.sheet import DOCUMENT_KINDS
+
+    seen: set[str] = set()
+    stack = [n for n, v in prompt.items() if (NODES.get(v["class_type"]) or {}).get("output_node")]
+    while stack:
+        nid = stack.pop()
+        if nid in seen:
+            continue
+        seen.add(nid)
+        node = prompt[nid]
+        skip: set[str] = set()
+        if node["class_type"] == "PlenioSongSheet":
+            docs = json.loads(node["inputs"].get("sheet_state") or "{}").get("docs") or {}
+            held = {kind for kind, doc in docs.items() if doc.get("state") == "manual"} & set(DOCUMENT_KINDS)
+            skip = held | ({"arrangement", "song_form"} if "score" in held else set())
+        stack += [
+            v[0]
+            for k, v in node["inputs"].items()
+            if k not in skip
+            and isinstance(v, list)
+            and len(v) == 2
+            and isinstance(v[0], str)
+            and v[0] in prompt
+        ]
+    return {prompt[n]["class_type"] for n in seen}
+
+
+def test_a_new_take_runs_the_take_and_neither_the_writer_nor_the_plan() -> None:
+    song = template("yue2-song")
+    first = prepare(song, {"template": "yue2-song"}, NODES.get, rng=random.Random(3))
+    assert {"YuE2GenerateABC", "TextGenerate", "PlenioLocalLLM", "YuE2GenerateMusic"} <= runs(first.prompt)
+    back = song_api.request_from_record(song, record_of(first))
+    take = prepare(
+        song,
+        {
+            "fields": back["fields"],
+            "release": back["release"],
+            "documents": back["documents"],
+            "seeds": {k: v for k, v in back["seeds"].items() if k != "take"},
+        },
+        NODES.get,
+        rng=random.Random(9),
+    )
+    # the sheets hold every document: writer, plan and arrangement are never asked; the take is
+    assert runs(take.prompt) & set(HEAVY) == {"YuE2GenerateMusic"}
