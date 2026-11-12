@@ -160,3 +160,82 @@ def test_http_fetch_honours_cancellation(server: str, tmp_path: Path) -> None:
 def test_http_fetch_unreachable_host_is_actionable(tmp_path: Path) -> None:
     with pytest.raises(PlenioAssetError, match="Could not download"):
         http_fetch("http://127.0.0.1:9/none", tmp_path / "x.part", 10, None, None)
+
+
+# --- found by the mutation run (phase 9.3) ---------------------------------------------------------------------------
+
+
+class RecordingHandler(RangeHandler):
+    """The Range server that notes what it was asked, and can ignore Range (a host that always sends all)."""
+
+    asked: list[str | None] = []
+    ignore_range = False
+
+    def do_GET(self) -> None:
+        RecordingHandler.asked.append(self.headers.get("Range"))
+        if RecordingHandler.ignore_range:
+            del self.headers["Range"]
+        super().do_GET()
+
+
+@pytest.fixture
+def recording() -> Iterator[str]:
+    RecordingHandler.asked = []
+    RecordingHandler.ignore_range = False
+    httpd = http.server.ThreadingHTTPServer(("127.0.0.1", 0), RecordingHandler)
+    thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+    thread.start()
+    yield f"http://127.0.0.1:{httpd.server_address[1]}/file"
+    httpd.shutdown()
+
+
+def test_a_partial_file_asks_only_for_the_rest_and_progress_counts_on(recording: str, tmp_path: Path) -> None:
+    destination = tmp_path / "model.bin.part"
+    destination.write_bytes(PAYLOAD[:1000])
+    seen: list[int] = []
+    http_fetch(recording, destination, len(PAYLOAD), lambda d, t, m: seen.append(d), None)
+    assert RecordingHandler.asked == ["bytes=1000-"]
+    assert destination.read_bytes() == PAYLOAD
+    assert seen[0] > 1000 and seen[-1] == len(PAYLOAD)
+
+
+def test_a_host_that_sends_everything_again_overwrites_the_partial_file(recording: str, tmp_path: Path) -> None:
+    RecordingHandler.ignore_range = True
+    destination = tmp_path / "model.bin.part"
+    destination.write_bytes(PAYLOAD[:1000])
+    seen: list[int] = []
+    http_fetch(recording, destination, len(PAYLOAD), lambda d, t, m: seen.append(d), None)
+    assert destination.read_bytes() == PAYLOAD  # not the partial file with everything appended
+    assert seen[-1] == len(PAYLOAD)
+
+
+def test_a_fresh_download_starts_at_the_first_byte_and_a_whole_one_is_not_asked_again(
+    recording: str, tmp_path: Path
+) -> None:
+    fresh = tmp_path / "fresh.part"
+    http_fetch(recording, fresh, len(PAYLOAD), None, None)
+    assert RecordingHandler.asked == [None] and fresh.read_bytes() == PAYLOAD
+    http_fetch(recording, fresh, len(PAYLOAD), None, None)
+    assert RecordingHandler.asked == [None]  # complete: no request at all
+    too_long = tmp_path / "long.part"
+    too_long.write_bytes(PAYLOAD + b"extra")
+    http_fetch(recording, too_long, len(PAYLOAD), None, None)
+    assert too_long.read_bytes() == PAYLOAD and RecordingHandler.asked[-1] is None
+
+
+def test_progress_runs_over_every_file_of_an_asset_and_the_message_names_its_size(tmp_path: Path) -> None:
+    two = Asset(
+        "pair",
+        "asr",
+        "org/pair",
+        REVISION,
+        "MIT",
+        "two files",
+        (AssetFile("a.bin", len(PAYLOAD), None), AssetFile("b.bin", len(PAYLOAD), None)),
+    )
+    seen: list[tuple[int, int]] = []
+    ensure_asset(two, tmp_path, PlenioConfig(), fetch=FakeFetcher(), progress=lambda d, t, m: seen.append((d, t)))
+    assert seen == [(len(PAYLOAD), 2 * len(PAYLOAD)), (2 * len(PAYLOAD), 2 * len(PAYLOAD))]
+    big = Asset("big", "asr", "org/big", REVISION, "MIT", "", (AssetFile("x.bin", 3 * 2**20, None),))
+    with pytest.raises(PlenioAssetError, match=r"'big' \(asr, 3\.0 MiB, licence MIT\)"):
+        ensure_asset(big, tmp_path, PlenioConfig(offline=True))

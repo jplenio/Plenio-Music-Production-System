@@ -55,7 +55,8 @@ MODULES: dict[str, tuple[str, ...]] = {
         "test_fit_length.py",
     ),
 }
-"""The modules of PD 10.1 and the unit tests that exercise them (a mutant is run against these only)."""
+"""The modules of PD 10.1 and the unit tests that exercise them (a mutant is run against these only - all of them,
+the ``io`` ones too: a download resumed over a local server is the test of a resume)."""
 
 
 def export(target: Path) -> None:
@@ -72,7 +73,7 @@ def run_module(root: Path, module: str, python: str) -> dict[str, object]:
     tests = " ".join(f"tests/unit/{name}" for name in MODULES[module])
     # a wall-clock limit per run: a mutant can make a test hang, and mutmut's timeout does not end it on Windows
     limiter = PROJECT / "tools" / "mutation_runner.py"
-    runner = f'"{python}" "{limiter}" 180 -x -q -p no:randomly -p no:cacheprovider -m "not io and not process" {tests}'
+    runner = f'"{python}" "{limiter}" 180 -x -q -p no:randomly -p no:cacheprovider {tests}'
     env = {**os.environ, "PYTHONPATH": str(DEVDEPS), "HYPOTHESIS_PROFILE": "push", "PYTHONUTF8": "1"}
     cache = root / ".mutmut-cache"
     cache.unlink(missing_ok=True)
