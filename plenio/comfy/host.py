@@ -336,6 +336,16 @@ def interrupt() -> None:
     comfy.model_management.interrupt_current_processing()
 
 
+def server_port() -> int:
+    """The port ComfyUI listens on, from its arguments (``--port``): known while the custom nodes load, when the
+    server itself has no port yet."""
+    try:
+        from comfy.cli_args import args
+    except ImportError:
+        return 8188
+    return int(getattr(args, "port", 8188) or 8188)
+
+
 def tls_enabled() -> bool:
     """ComfyUI serves HTTPS (``--tls-keyfile``)."""
     try:

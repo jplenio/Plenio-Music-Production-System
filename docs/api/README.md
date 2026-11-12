@@ -129,7 +129,7 @@ Its **fields** are the inputs of its song part - the brief's genre, mood, length
 mastering, cover art. The API reads them from the template and the node definitions of the running ComfyUI on every
 request, so a field a later Plenio adds is in the API at once.
 
-A **job** is a song in the making: it has an id of its own (`job_` and 32 hex digits) and is **kept on disk**, so it
+A **job** is a song in the making: it has an id of its own (`job_` and 16 hex digits) and is **kept on disk**, so it
 is still there after ComfyUI restarts. It writes the lyrics, composes a score, sings and plays it, masters it, paints
 the cover and exports the song below ComfyUI's output folder.
 
@@ -239,11 +239,11 @@ jobs, 30 days) - unless that job was interrupted by a restart of ComfyUI: then t
 `POST /jobs` answers `201` with the job (and its address in the `Location` header):
 
 ```json
-{"id": "job_5d0c4e1b9a7f42c08e3b6a1d2f9c7e40", "template": "yue2-song", "kind": "song", "status": "queued",
+{"id": "job_5d0c4e1b9a7f42c0", "template": "yue2-song", "kind": "song", "status": "queued",
  "queue_position": 1, "stage": null, "progress": null, "created_at": 1762858800.0, "updated_at": 1762858800.0,
  "ended_at": null, "seeds": {"draft": 11, "plan": 12, "arrangement": 13, "take": 14}, "client": {"name": "My app"},
  "review": ["text"], "waiting_at": null, "documents": null, "result": null, "error": null,
- "links": {"self": "/plenio/api/v2/jobs/job_5d0c4e1b9a7f42c08e3b6a1d2f9c7e40"}}
+ "links": {"self": "/plenio/api/v2/jobs/job_5d0c4e1b9a7f42c0"}}
 ```
 
 | `status` | Meaning | Also there |
@@ -519,7 +519,7 @@ A copy made from the shipped templates is in this folder ([openapi.json](openapi
 | `wait` | 60 seconds at most |
 | `Idempotency-Key` | 200 characters; kept with its job |
 | Jobs | the newest 500, none older than 30 days once ended; one song is made at a time (ComfyUI's queue) |
-| Event streams | 32 open at once; a stream that falls 200 events behind is closed (reconnect with `Last-Event-ID`) |
+| Event streams | 32 open at once, 4 of them per token; a stream that falls 200 events behind is closed (reconnect with `Last-Event-ID`) |
 
 ## Licences of what you make
 

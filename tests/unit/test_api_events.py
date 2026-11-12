@@ -53,6 +53,20 @@ def test_a_token_sees_no_job_of_this_computer_live_or_replayed() -> None:
     run(body())
 
 
+def test_one_token_cannot_take_every_stream() -> None:
+    async def body() -> None:
+        hub = EventHub(subscribers=8, per_token=2)
+        loop = asyncio.get_running_loop()
+        for _ in range(2):
+            hub.subscribe(loop, here=False, owner="token:a")
+        with pytest.raises(TooManyStreamsError):
+            hub.subscribe(loop, here=False, owner="token:a")
+        hub.subscribe(loop, here=False, owner="token:b")  # another token still gets one
+        hub.subscribe(loop, here=True, owner=None)  # and this computer
+
+    run(body())
+
+
 def test_a_closed_loop_drops_its_subscriber() -> None:
     hub = EventHub()
     loop = asyncio.new_event_loop()

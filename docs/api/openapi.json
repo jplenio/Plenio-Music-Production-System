@@ -615,7 +615,7 @@
          "$ref": "#/components/schemas/Job"
         },
         "example": {
-         "id": "job_5d0c4e1b9a7f42c08e3b6a1d2f9c7e40",
+         "id": "job_5d0c4e1b9a7f42c0",
          "template": "yue2-song",
          "kind": "song",
          "status": "queued",
@@ -642,7 +642,7 @@
          "result": null,
          "error": null,
          "links": {
-          "self": "/plenio/api/v2/jobs/job_5d0c4e1b9a7f42c08e3b6a1d2f9c7e40"
+          "self": "/plenio/api/v2/jobs/job_5d0c4e1b9a7f42c0"
          }
         }
        }
@@ -786,7 +786,7 @@
       "schema": {
        "type": "string"
       },
-      "description": "The job's id (job_ followed by 32 hex digits)"
+      "description": "The job's id (job_ followed by 16 hex digits)"
      },
      {
       "name": "wait",
@@ -809,7 +809,7 @@
          "$ref": "#/components/schemas/Job"
         },
         "example": {
-         "id": "job_5d0c4e1b9a7f42c08e3b6a1d2f9c7e40",
+         "id": "job_5d0c4e1b9a7f42c0",
          "template": "yue2-song",
          "kind": "song",
          "status": "waiting_for_review",
@@ -845,7 +845,7 @@
          "result": null,
          "error": null,
          "links": {
-          "self": "/plenio/api/v2/jobs/job_5d0c4e1b9a7f42c08e3b6a1d2f9c7e40"
+          "self": "/plenio/api/v2/jobs/job_5d0c4e1b9a7f42c0"
          }
         }
        }
@@ -907,7 +907,7 @@
       "schema": {
        "type": "string"
       },
-      "description": "The job's id (job_ followed by 32 hex digits)"
+      "description": "The job's id (job_ followed by 16 hex digits)"
      }
     ],
     "responses": {
@@ -969,7 +969,7 @@
       "schema": {
        "type": "string"
       },
-      "description": "The job's id (job_ followed by 32 hex digits)"
+      "description": "The job's id (job_ followed by 16 hex digits)"
      }
     ],
     "requestBody": {
@@ -1066,7 +1066,7 @@
       "schema": {
        "type": "string"
       },
-      "description": "The job's id (job_ followed by 32 hex digits)"
+      "description": "The job's id (job_ followed by 16 hex digits)"
      }
     ],
     "responses": {
@@ -1129,7 +1129,7 @@
       "schema": {
        "type": "string"
       },
-      "description": "The job's id (job_ followed by 32 hex digits)"
+      "description": "The job's id (job_ followed by 16 hex digits)"
      },
      {
       "name": "name",
@@ -1201,7 +1201,7 @@
       "schema": {
        "type": "string"
       },
-      "description": "The job's id (job_ followed by 32 hex digits)"
+      "description": "The job's id (job_ followed by 16 hex digits)"
      }
     ],
     "responses": {
@@ -1264,7 +1264,7 @@
       "schema": {
        "type": "string"
       },
-      "description": "The job's id (job_ followed by 32 hex digits)"
+      "description": "The job's id (job_ followed by 16 hex digits)"
      }
     ],
     "responses": {
@@ -3033,7 +3033,7 @@
     "properties": {
      "id": {
       "type": "string",
-      "description": "job_ and 32 hex digits; kept on disk, across restarts"
+      "description": "job_ and 16 hex digits; kept on disk, across restarts"
      },
      "template": {
       "type": "string"

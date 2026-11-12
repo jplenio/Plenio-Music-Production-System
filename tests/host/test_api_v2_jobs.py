@@ -205,3 +205,24 @@ def test_a_released_song_is_listed_and_made_again(restartable: ComfyServer) -> N
     assert status == 400 and refused["error"]["field"] == "as"
     assert isinstance(restartable.get(f"{BASE}/writers")["writers"], list)
     assert isinstance(restartable.get(f"{BASE}/loras")["loras"], list)
+
+
+def test_one_key_at_once_makes_one_job(server: ComfyServer, fake_models: None) -> None:
+    """Four requests with one Idempotency-Key at the same moment: one job, the same answer to all (review)."""
+    import threading
+
+    answers: list[tuple[int, dict]] = []
+
+    def post() -> None:
+        answers.append(
+            server.request("POST", "/plenio/api/v2/jobs", REQUEST, headers={"Idempotency-Key": "at-once"})
+        )
+
+    threads = [threading.Thread(target=post) for _ in range(4)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(timeout=120)
+    assert sorted(status for status, _ in answers) == [200, 200, 200, 201], answers
+    assert len({job["id"] for _, job in answers}) == 1
+    server.request("DELETE", f"/plenio/api/v2/jobs/{answers[0][1]['id']}")

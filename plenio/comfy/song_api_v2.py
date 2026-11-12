@@ -11,6 +11,7 @@ background (``watch``), so that a job that ends while nobody asks is written too
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import hashlib
 import json
 import random
@@ -53,8 +54,9 @@ _watcher: threading.Thread | None = None
 
 
 def instance_id() -> str:
-    """This server: its user folder and its address (two ComfyUIs may share a user folder)."""
-    text = f"{host.user_directory()}|{v1._self_url()}"
+    """This server: its user folder and its port (two ComfyUIs may share a user folder, not a port). The port comes
+    from ComfyUI's arguments: the server learns its own only after every custom node has loaded."""
+    text = f"{host.user_directory()}|{host.server_port()}"
     return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
 
 
@@ -87,6 +89,20 @@ def _template(template_id: str, info: Any) -> song_api.Template:
 
 
 _refresh_lock = threading.Lock()
+_locks: dict[str, asyncio.Lock] = {}
+
+
+@contextlib.asynccontextmanager
+async def _one_at_a_time(name: str) -> Any:
+    """One request at a time for ``name`` (an Idempotency-Key, a job): two at once must not make two songs, or
+    approve a stop twice."""
+    lock = _locks.setdefault(name, asyncio.Lock())
+    try:
+        async with lock:
+            yield
+    finally:
+        if not lock.locked() and not getattr(lock, "_waiters", None):
+            _locks.pop(name, None)
 
 
 def refresh(job: Job) -> tuple[Job, dict[str, Any] | None]:
@@ -300,11 +316,19 @@ async def jobs_create(request: web.Request) -> web.StreamResponse:
 
 
 async def create_job(data: dict[str, Any], key: str, owner: str) -> web.StreamResponse:
-    """Queue a job (``POST /jobs``, ``POST /songs/{id}/again``): 201 with the job, 200 with the job its key named."""
+    """Queue a job (``POST /jobs``, ``POST /songs/{id}/again``): 201 with the job, 200 with the job its key named -
+    two requests with one key at once make one job."""
+    if not key:
+        return await _create_job(data, key, owner)
+    async with _one_at_a_time(f"key|{owner}|{key}"):
+        return await _create_job(data, key, owner)
+
+
+async def _create_job(data: dict[str, Any], key: str, owner: str) -> web.StreamResponse:
     jobs = store()
     known = jobs.by_key(owner, key)
     if known is not None:
-        job, view = refresh(known)
+        job, view = await asyncio.to_thread(refresh, known)
         return web.json_response(job_answer(job, view), status=200)
     asked = "review" in data  # an empty list too: stop nowhere (the DAW template's sheet stops by itself)
     wanted = data.pop("review", None) or []
@@ -433,13 +457,18 @@ async def jobs_list(request: web.Request) -> web.StreamResponse:
 
 async def job_delete(request: web.Request) -> web.StreamResponse:
     job = _known(request.match_info["job_id"], request)
-    if job.status in ENDED:
+    async with _one_at_a_time(f"job|{job.id}"):
+        job = store().get(job.id) or job
+        if job.status in ENDED:
+            return web.json_response(job_answer(job))
+        for prompt in job.prompts[-1:]:
+            await asyncio.to_thread(v1.cancel_prompt, prompt)
+        try:
+            job = store().update(job.id, status="cancelled")
+        except ValueError:  # it ended in between (the watcher wrote it): as it ended
+            return web.json_response(job_answer(store().get(job.id) or job))
+        tell(job)
         return web.json_response(job_answer(job))
-    for prompt in job.prompts[-1:]:
-        await asyncio.to_thread(v1.cancel_prompt, prompt)
-    job = store().update(job.id, status="cancelled")
-    tell(job)
-    return web.json_response(job_answer(job))
 
 
 def _record(job: Job) -> Path:
@@ -469,8 +498,14 @@ async def job_file(request: web.Request) -> web.StreamResponse:
 async def job_approve(request: web.Request) -> web.StreamResponse:
     """Let a job that waits at a review stop go on: ``{"documents": {kind: text}}`` (optional) - an edited
     document becomes the Song Sheet's manual text; the same request is queued again under the same job, the
-    approved stops passed."""
-    job, _view = await asyncio.to_thread(refresh, _known(request.match_info["job_id"], request))
+    approved stops passed. One approval of a job at a time: a second one finds it queued (409)."""
+    known = _known(request.match_info["job_id"], request)
+    async with _one_at_a_time(f"job|{known.id}"):
+        return await _approve(request, known)
+
+
+async def _approve(request: web.Request, known: Job) -> web.StreamResponse:
+    job, _view = await asyncio.to_thread(refresh, known)
     if job.status != "waiting_for_review" or not job.result:
         raise SongApiError(
             "needs_review", f"The job waits at no review stop (it is {job.status}).", status=409
@@ -493,14 +528,18 @@ async def job_approve(request: web.Request) -> web.StreamResponse:
     meta = {"api": API_VERSION, "template": job.template, "kind": job.kind, "client": dict(job.client),
             "seeds": prepared.seeds, "documents": prepared.documents, "owner": job.owner}  # fmt: skip
     answer = await v1._post_prompt(prepared.prompt, prepared.workflow, meta)
-    job = store().update(
-        job.id,
-        status="queued",
-        stage="",
-        result=None,
-        prompt=str(answer["prompt_id"]),
-        request={**kept, "source": source, "approved": approved},
-    )
+    try:
+        job = store().update(
+            job.id,
+            status="queued",
+            stage="",
+            result=None,
+            prompt=str(answer["prompt_id"]),
+            request={**kept, "source": source, "approved": approved},
+        )
+    except ValueError as error:  # cancelled in between: the run just queued is taken back
+        await asyncio.to_thread(v1.cancel_prompt, str(answer["prompt_id"]))
+        raise SongApiError("needs_review", "The job ended while it was approved.", status=409) from error
     watch()
     tell(job)
     return web.json_response(job_answer(job), status=202)
@@ -542,7 +581,7 @@ async def job_bars(request: web.Request) -> web.StreamResponse:
         answer = await asyncio.to_thread(record_bars, record)
     except (OSError, ValueError, PlenioUserError) as error:
         raise SongApiError(
-            "internal", f"The bars of the take were not measured: {error}", status=500
+            "internal", f"The bars of the take were not measured ({type(error).__name__}).", status=500
         ) from error
     return web.json_response({"job": job.id, **answer})
 
@@ -572,6 +611,14 @@ def _record_of(song: str) -> Path:
         raise SongApiError("not_found", str(error), status=404) from error
 
 
+def _read_song(record: Path) -> dict[str, Any]:
+    """A song's release record; one that is gone or cannot be read is not found (its words name no place)."""
+    try:
+        return continuation.read_record(record)
+    except (OSError, PlenioUserError) as error:
+        raise SongApiError("not_found", "The song's release record cannot be read.", status=404) from error
+
+
 async def songs_list(request: web.Request) -> web.StreamResponse:
     """The released songs (the records in ComfyUI's output folder), newest first; ``?q=`` words of the title, the
     date or the folder; ``?limit=``."""
@@ -583,12 +630,12 @@ async def songs_list(request: web.Request) -> web.StreamResponse:
 
 async def song_get(request: web.Request) -> web.StreamResponse:
     record = _record_of(request.match_info["song_id"])
-    data = await asyncio.to_thread(continuation.read_record, record)
+    data = await asyncio.to_thread(_read_song, record)
     relative = record.relative_to(host.output_directory().resolve()).as_posix()
     row = continuation.summary(data, relative)
     files = [
         {**({"role": f["role"]} if f.get("role") else {}), "name": str(f["name"]),
-         "url": f"{BASE}/songs/{request.match_info['song_id']}/files/{f['name']}"}
+         "url": f"{BASE}/songs/{request.match_info['song_id']}/files/{urllib.parse.quote(str(f['name']))}"}
         for f in data.get("files") or [] if isinstance(f, dict) and f.get("name")
     ]  # fmt: skip
     documents = {
@@ -603,7 +650,7 @@ async def song_get(request: web.Request) -> web.StreamResponse:
 
 async def song_file(request: web.Request) -> web.StreamResponse:
     record = _record_of(request.match_info["song_id"])
-    data = await asyncio.to_thread(continuation.read_record, record)
+    data = await asyncio.to_thread(_read_song, record)
     listed = [str(f["name"]) for f in data.get("files") or [] if isinstance(f, dict) and f.get("name")]
     path = song_api.result_file(record, request.match_info["name"], listed, host.output_directory())
     return web.FileResponse(path)
@@ -626,7 +673,7 @@ async def song_again(request: web.Request) -> web.StreamResponse:
     if not isinstance(extra, dict):
         raise SongApiError("invalid_value", "'fields' is an object.", field="fields")
     record_file = _record_of(request.match_info["song_id"])
-    record = await asyncio.to_thread(continuation.read_record, record_file)
+    record = await asyncio.to_thread(_read_song, record_file)
     key = str(request.headers.get("Idempotency-Key") or "").strip()[:200]
     if mode == "cover":
         audio = next(  # the song's audio is the file without a role (as the record's summary takes it)
@@ -641,7 +688,11 @@ async def song_again(request: web.Request) -> web.StreamResponse:
         )
         if audio is None:
             raise SongApiError("not_found", "The song has no audio file to cover.", status=404)
-        source = record_file.parent / str(audio["name"])
+        listed = [str(f["name"]) for f in record.get("files") or [] if isinstance(f, dict) and f.get("name")]
+        try:  # only a file the record lists, beside it inside the output folder
+            source = song_api.result_file(record_file, str(audio["name"]), listed, host.output_directory())
+        except SongApiError as error:
+            raise SongApiError("not_found", "The song's audio file is not there.", status=404) from error
         name = await asyncio.to_thread(_into_input, source)
         data = {"template": "yue2-cover", "fields": {**extra, "source.audio": name}}
         return await create_job(data, key, v1.owner_of(request))
@@ -727,8 +778,8 @@ async def events(request: web.Request) -> web.StreamResponse:
     response = web.StreamResponse(
         headers={"Content-Type": "text/event-stream", "Cache-Control": "no-store", "X-Accel-Buffering": "no"}
     )
-    await response.prepare(request)
     try:
+        await response.prepare(request)
         while not subscriber.dropped:
             try:
                 event = await asyncio.wait_for(subscriber.queue.get(), timeout=KEEP_ALIVE_S)

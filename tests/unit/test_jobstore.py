@@ -87,3 +87,21 @@ def test_the_listing_is_the_callers(tmp_path: Path) -> None:
     jobs.create(template="t", kind="song", prompt="2", owner="token:b")
     assert [j.id for j in jobs.listing(owner="token:a")] == [a.id]
     assert len(jobs.listing()) == 2 and jobs.listing(statuses=["succeeded"]) == []
+
+
+def test_a_lost_runs_key_makes_a_new_one(tmp_path: Path) -> None:
+    jobs = store(tmp_path)
+    job = jobs.create(template="yue2-song", kind="song", prompt="p1", owner="here", key="k1")
+    assert jobs.by_key("here", "k1") == job
+    jobs.update(job.id, status="failed", error={"code": "lost", "message": "gone"})
+    assert jobs.by_key("here", "k1") is None
+
+
+def test_old_jobs_are_forgotten_while_the_server_runs(tmp_path: Path) -> None:
+    clock = Clock()
+    jobs = store(tmp_path, clock=clock)
+    old = jobs.create(template="yue2-song", kind="song", prompt="p1", owner="here")
+    jobs.update(old.id, status="succeeded", result={})
+    clock.now += jobstore.KEEP_DAYS * 86400 + jobstore.PRUNE_EVERY_S + 1
+    jobs.create(template="yue2-song", kind="song", prompt="p2", owner="here")
+    assert jobs.get(old.id) is None and not (tmp_path / f"{old.id}.json").exists()

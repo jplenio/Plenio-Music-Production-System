@@ -101,7 +101,7 @@ def _param(name: str, text: str, where: str = "path", schema: dict[str, Any] | N
     }
 
 
-JOB_ID = _param("id", "The job's id (job_ followed by 32 hex digits)")
+JOB_ID = _param("id", "The job's id (job_ followed by 16 hex digits)")
 SONG_ID = _param("id", "The song's id (from GET /songs)")
 FILE_NAME = _param("name", "A file's name as the result lists it")
 LIMIT = _param("limit", "At most this many (1-200, default 200)", "query", {"type": "integer", "minimum": 1})
@@ -144,7 +144,7 @@ SONG = {
 }
 
 EXAMPLE_JOB: dict[str, Any] = {
-    "id": "job_5d0c4e1b9a7f42c08e3b6a1d2f9c7e40",
+    "id": "job_5d0c4e1b9a7f42c0",
     "template": "yue2-song",
     "kind": "song",
     "status": "waiting_for_review",
@@ -164,7 +164,7 @@ EXAMPLE_JOB: dict[str, Any] = {
     },
     "result": None,
     "error": None,
-    "links": {"self": f"{BASE}/jobs/job_5d0c4e1b9a7f42c08e3b6a1d2f9c7e40"},
+    "links": {"self": f"{BASE}/jobs/job_5d0c4e1b9a7f42c0"},
 }
 """An invented job, waiting at its text stop."""
 
@@ -235,7 +235,7 @@ def _schemas(v1: dict[str, Any], templates: list[Template]) -> dict[str, Any]:
             {
                 "id": {
                     "type": "string",
-                    "description": "job_ and 32 hex digits; kept on disk, across restarts",
+                    "description": "job_ and 16 hex digits; kept on disk, across restarts",
                 },
                 "template": TEXT,
                 "kind": {"type": "string", "description": "song, cover, daw or master"},

@@ -35,6 +35,10 @@ ENDED = ("succeeded", "failed", "cancelled")
 STATES = (*ACTIVE, *ENDED)
 KEEP = 500
 KEEP_DAYS = 30
+PRUNE_EVERY_S = 3600.0
+"""While it runs, the store forgets old jobs at most this often (and at start)."""
+GONE = ("interrupted", "lost")
+"""A job's ``error.code`` when its run is gone: its ``Idempotency-Key`` starts a new one."""
 _RENAME_TRIES = 6
 _RENAME_WAIT_S = 0.25
 
@@ -107,6 +111,7 @@ class JobStore:
         self._jobs: dict[str, Job] = {}
         self.skipped: list[str] = []
         """Files that could not be read at start (their names)."""
+        self._pruned = 0.0
         self._load()
 
     # --- start ------------------------------------------------------------------------------------------------
@@ -141,18 +146,22 @@ class JobStore:
 
     # --- reading ----------------------------------------------------------------------------------------------
     def get(self, job_id: str) -> Job | None:
-        return self._jobs.get(job_id)
+        with self._lock:
+            return self._jobs.get(job_id)
 
     def by_prompt(self, prompt_id: str) -> Job | None:
-        return next((job for job in self._jobs.values() if prompt_id in job.prompts), None)
+        with self._lock:
+            return next((job for job in self._jobs.values() if prompt_id in job.prompts), None)
 
     def by_key(self, owner: str, key: str) -> Job | None:
-        """The job an ``Idempotency-Key`` stands for: the caller's, not interrupted."""
+        """The job an ``Idempotency-Key`` stands for: the caller's, not interrupted or lost (its run is gone: the key
+        makes a new one)."""
         if not key:
             return None
-        for job in self._jobs.values():
-            if job.owner == owner and job.key == key and (job.error or {}).get("code") != "interrupted":
-                return job
+        with self._lock:
+            for job in self._jobs.values():
+                if job.owner == owner and job.key == key and (job.error or {}).get("code") not in GONE:
+                    return job
         return None
 
     def listing(
@@ -160,15 +169,17 @@ class JobStore:
     ) -> list[Job]:
         """The newest jobs first; ``owner``: only that caller's (``None``: everyone's - this computer)."""
         wanted = set(statuses)
-        found = [
-            job
-            for job in self._jobs.values()
-            if (owner is None or job.owner == owner) and (not wanted or job.status in wanted)
-        ]
+        with self._lock:
+            found = [
+                job
+                for job in self._jobs.values()
+                if (owner is None or job.owner == owner) and (not wanted or job.status in wanted)
+            ]
         return sorted(found, key=lambda job: job.created, reverse=True)[: max(0, limit)]
 
     def active(self) -> list[Job]:
-        return [job for job in self._jobs.values() if job.status in ACTIVE and job.instance == self.instance]
+        with self._lock:
+            return [j for j in self._jobs.values() if j.status in ACTIVE and j.instance == self.instance]
 
     # --- writing ----------------------------------------------------------------------------------------------
     def create(
@@ -198,6 +209,8 @@ class JobStore:
             request=dict(request or {}),
         )
         self._write(job)
+        if now - self._pruned > PRUNE_EVERY_S or len(self._jobs) > KEEP + 50:
+            self.prune()
         return job
 
     def update(self, job_id: str, **changes: Any) -> Job:
@@ -224,13 +237,16 @@ class JobStore:
     def prune(self) -> int:
         """Forget ended jobs beyond the newest ``KEEP`` or older than ``KEEP_DAYS``; returns how many."""
         now = self.clock()
-        ended = sorted(
-            (j for j in self._jobs.values() if j.status in ENDED), key=lambda j: j.created, reverse=True
-        )
-        gone = [
-            j for i, j in enumerate(ended) if i >= KEEP or (j.ended or j.created) < now - KEEP_DAYS * 86400
-        ]
         with self._lock:
+            self._pruned = now
+            ended = sorted(
+                (j for j in self._jobs.values() if j.status in ENDED), key=lambda j: j.created, reverse=True
+            )
+            gone = [
+                j
+                for i, j in enumerate(ended)
+                if i >= KEEP or (j.ended or j.created) < now - KEEP_DAYS * 86400
+            ]
             for job in gone:
                 self._jobs.pop(job.id, None)
                 (self.folder / f"{job.id}.json").unlink(missing_ok=True)

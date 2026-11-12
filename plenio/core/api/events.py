@@ -26,6 +26,8 @@ from typing import Any
 KEEP = 500
 QUEUE = 200
 SUBSCRIBERS = 32
+PER_TOKEN = 4
+"""Streams one token may hold open at once (the rest stay free for the others)."""
 
 
 @dataclass(frozen=True)
@@ -64,12 +66,13 @@ class TooManyStreamsError(Exception):
 
 
 class EventHub:
-    def __init__(self, *, keep: int = KEEP, subscribers: int = SUBSCRIBERS):
+    def __init__(self, *, keep: int = KEEP, subscribers: int = SUBSCRIBERS, per_token: int = PER_TOKEN):
         self.boot = secrets.token_hex(4)
         self._seq = 0
         self._kept: deque[Event] = deque(maxlen=keep)
         self._subscribers: list[Subscriber] = []
         self._limit = subscribers
+        self._per_token = per_token
         self._lock = threading.Lock()
 
     def publish(
@@ -99,6 +102,8 @@ class EventHub:
         with self._lock:
             if len(self._subscribers) >= self._limit:
                 raise TooManyStreamsError(f"{self._limit} event streams are open already")
+            if owner is not None and sum(s.owner == owner for s in self._subscribers) >= self._per_token:
+                raise TooManyStreamsError(f"this token holds {self._per_token} event streams open already")
             self._subscribers.append(subscriber)
             backlog = self._after(after) if after else []
         for event in backlog:

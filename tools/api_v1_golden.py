@@ -245,8 +245,8 @@ def differences(golden: Any, current: Any, where: str = "") -> Iterator[str]:
             golden, current = {**golden, "choices": None}, {**current, "choices": None}
         for key in sorted(set(golden) | set(current)):
             path = f"{where}/{key}"
-            if key in TIMING:
-                continue
+            if key in TIMING and (key in golden) == (key in current):
+                continue  # its value depends on the moment; that it is there does not
             if key not in current:
                 yield f"{path}: gone"
             elif key not in golden:
@@ -265,28 +265,28 @@ def differences(golden: Any, current: Any, where: str = "") -> Iterator[str]:
 DELTAS: list[tuple[str, str, str]] = [
     (
         "models",
-        "/body/models/",
+        r"/body/models/\d+/(url|bytes|status): ",
         "2.1: every catalogue file is pinned to a commit (its url) and carries its measured size; a file of the "
         "wrong size says so (an empty stand-in of the instrumental adapter, whose size 1.6 did not know)",
     ),
     (
         "models",
-        "/body/templates/",
+        r"/body/templates/[\w-]+/incomplete(/\d+)?: ",
         "3.3: a template's readiness follows its Model Choices - the files the model plan takes on this computer "
         "(here, without a graphics card, the fp8 and fp4 cover-art files), named by their catalogue variant",
     ),
     (
         "job_create_again",
-        "/body/progress/nodes",
+        r"/body/progress/nodes: ",
         "3.3, 4.6: the templates hold Model Choice nodes and the Preset field - the prompt has more nodes",
     ),
 ]
-"""The differences of 2.0 against 1.6.0 that are reviewed: (case, path prefix, why). Everything else a local caller
+"""The differences of 2.0 against 1.6.0 that are reviewed: (case, a pattern of the path and key, why). Everything else a local caller
 gets is as 1.6.0 answered it."""
 
 
 def unexplained(case: str, found: list[str], deltas: list[tuple[str, str, str]] = DELTAS) -> list[str]:
-    return [d for d in found if not any(case == c and d.startswith(prefix) for c, prefix, _why in deltas)]
+    return [d for d in found if not any(case == c and re.match(pattern, d) for c, pattern, _why in deltas)]
 
 
 def main(argv: list[str] | None = None, *, log: Callable[[str], None] = print) -> int:
