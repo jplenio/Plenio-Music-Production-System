@@ -263,7 +263,9 @@ def test_files_that_tie_are_ordered_by_size_the_smaller_first() -> None:
     b = variant("b-small", 4_000, 2, 2, 0.0, 4.0)
     component = Component("c", "C", "checkpoints", (a, b), templates=("T",))
     for prefer in ("balanced", "quality", "speed"):
-        assert pick(component, vram_gib=8.0, installed={}, prefer=prefer).file == "b-small.safetensors", prefer
+        assert pick(component, vram_gib=8.0, installed={}, prefer=prefer).file == "b-small.safetensors", (
+            prefer
+        )
 
 
 def test_an_installed_file_one_rank_below_is_kept_but_not_two() -> None:

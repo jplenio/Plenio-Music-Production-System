@@ -9,6 +9,7 @@ import re
 from pathlib import Path
 
 import pytest
+
 import workflow_validation as wv
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "workflows"
@@ -16,7 +17,9 @@ SAVED = sorted(FIXTURES.glob("*.json.gz"))
 
 
 @pytest.mark.parametrize("saved", SAVED, ids=[p.name for p in SAVED])
-def test_a_1x_workflow_uses_nodes_that_exist_with_no_more_values_than_they_take(saved: Path, tmp_path: Path) -> None:
+def test_a_1x_workflow_uses_nodes_that_exist_with_no_more_values_than_they_take(
+    saved: Path, tmp_path: Path
+) -> None:
     workflow = tmp_path / saved.name.removesuffix(".gz")
     workflow.write_bytes(gzip.decompress(saved.read_bytes()))
     problems = wv.validate_file(workflow, wv.load_snapshot(), wv.load_blueprints(wv.PROJECT / "subgraphs"))
