@@ -6,6 +6,7 @@
  * device draws, and smoothly, are chosen (gpu.ts): no Drop or Nova visual where there is no WebGL2 on the graphics
  * card, no Nova visual too heavy for it, none that did not keep up in this session.
  */
+import { inCollection } from './collections'
 import type { SongSummary } from '../api'
 import { hashOf } from '../colors'
 import { DEFAULT_FADE, fadeWithDefaults, type FadeStyle } from './mixer'
@@ -52,6 +53,10 @@ export interface VisualSettings {
   fadeSeconds: number
   /** One light (finish.ts): Nova's glow, tone curve, vignette and grain over every visual. */
   finish: boolean
+  /** *Show* a collection (collections.ts: a theme, or ``favourites``; ``''``: every visual of the pool). */
+  collection: string
+  /** The visuals the listener gave a ♥ (*My favourites*). */
+  favourites: string[]
 }
 
 export const DEFAULT_VISUALS: VisualSettings = {
@@ -73,6 +78,8 @@ export const DEFAULT_VISUALS: VisualSettings = {
   fade: DEFAULT_FADE.style,
   fadeSeconds: DEFAULT_FADE.seconds,
   finish: true,
+  collection: '',
+  favourites: [],
 }
 
 export function withDefaults(raw: unknown): VisualSettings {
@@ -100,6 +107,8 @@ export function withDefaults(raw: unknown): VisualSettings {
   merged.fade = fade.style
   merged.fadeSeconds = fade.seconds
   merged.finish = merged.finish !== false
+  merged.collection = typeof merged.collection === 'string' ? merged.collection : ''
+  merged.favourites = Array.isArray(merged.favourites) ? merged.favourites.filter((id): id is string => typeof id === 'string') : []
   return merged
 }
 
@@ -140,7 +149,10 @@ export function chooseVisual({ settings, song, playlist = '', previous = null, t
   if (own && all.some((p) => p.id === own)) return own
   if (playlist && all.some((p) => p.id === playlist)) return playlist
   const known = settings.pool.filter((id) => all.some((p) => p.id === id))
-  const pool = known.length ? known : all.map((p) => p.id)
+  const ticked = known.length ? known : all.map((p) => p.id)
+  // *Show* a collection: its visuals of the pool (none of them here: the whole pool)
+  const shown = settings.collection ? inCollection(settings.collection, ticked, settings.favourites) : []
+  const pool = shown.length ? shown : ticked
   switch (settings.mode) {
     case 'fixed':
       return all.some((p) => p.id === settings.fixed) ? settings.fixed : 'bars'

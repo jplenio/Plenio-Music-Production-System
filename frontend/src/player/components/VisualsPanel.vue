@@ -11,7 +11,9 @@
  * this device can draw smoothly is offered (owner's request 2026-10-30); what is not, and why, is said under its
  * group, and the lists of one visual show it greyed with the reason (a Nova visual still being timed, too heavy).
  */
-import { computed, nextTick, ref } from 'vue'
+import { COLLECTIONS, type Show, energyLevel, energyOf, energySettings, inCollection, showOf, showSettings } from '../visuals/collections'
+import { loadPosters, posterOf, posterSheet } from '../visuals/posters'
+import { computed, nextTick, onMounted, ref } from 'vue'
 
 import { guestStatus } from '../guests'
 import { current, queueSource, say, settings, state } from '../store'
@@ -126,6 +128,35 @@ function shortName(name: string): string {
 // --- the settings -------------------------------------------------------------------------------------------------
 
 const v = settings.visuals
+const show = computed(() => showOf(v))
+onMounted(() => void loadPosters())
+const showName = computed(() => COLLECTIONS.find((c) => c.id === show.value)?.name ?? (show.value === 'favourites' ? 'My favourites' : 'every visual'))
+/** The visuals of the collection shown, by picture (posters.ts): click one to see it now. */
+const pictures = computed(() => {
+  const ids = offeredAll.value.map((p) => p.id)
+  const chosen = show.value === 'director' || show.value === 'all' || show.value === 'one' || show.value === 'off' ? ids : inCollection(show.value, ids, v.favourites)
+  return offeredAll.value.filter((p) => chosen.includes(p.id) && posterSheet.value?.ids.includes(p.id))
+})
+const energy = computed(() => energyOf(v))
+const energyName = computed(() => energyLevel(energy.value).name.replace(/^./, (c) => c.toUpperCase()))
+function setShow(next: Show): void {
+  Object.assign(v, showSettings(next))
+  emit('next')
+}
+function setEnergy(value: number): void {
+  Object.assign(v, energySettings(value))
+}
+/** ♥: more of this - it joins My favourites (and the visuals to choose from). */
+function love(id: string): void {
+  v.favourites = v.favourites.includes(id) ? v.favourites.filter((x) => x !== id) : [...v.favourites, id]
+  if (!v.pool.includes(id)) v.pool = [...v.pool, id]
+}
+/** ✕: never this one - it leaves the pool, and another visual comes. */
+function never(id: string): void {
+  v.pool = v.pool.filter((x) => x !== id)
+  v.favourites = v.favourites.filter((x) => x !== id)
+  emit('next')
+}
 const MODES: [VisualMode, string, string][] = [
   ['auto', 'Match the music', 'A visual that suits the song’s genre, mood and tempo'],
   ['director', 'Director', 'One visual per kind of section - every chorus the same - changing on the downbeat; a drop flashes'],
@@ -206,9 +237,32 @@ async function editCopy(): Promise<void> {
     <div class="now">
       Now: <b>{{ activePreset?.name ?? '-' }}</b>
       <button class="chip" title="Another visual (N)" @click="emit('next')"><Icon name="dice" :size="14" /> next</button>
+      <button v-if="activePreset" class="chip" :class="{ on: v.favourites.includes(activePreset.id) }" title="More of this: it joins My favourites" @click="love(activePreset.id)">♥</button>
+      <button v-if="activePreset" class="chip" title="Never this one: it leaves the visuals to choose from" @click="never(activePreset.id)">✕</button>
       <button class="chip" title="Only the visual, on the whole screen (Shift+F, or double-click the visual)" @click="emit('fullscreen')"><Icon name="expand" :size="14" /> full screen</button>
     </div>
 
+    <h4>Show</h4>
+    <select :value="show" aria-label="What the visuals show" @change="setShow(($event.target as HTMLSelectElement).value as Show)">
+      <option value="director">Director - one visual per kind of section</option>
+      <option value="all">Every visual, matching the music</option>
+      <option v-for="c in COLLECTIONS" :key="c.id" :value="c.id">{{ c.name }}</option>
+      <option v-if="v.favourites.length" value="favourites">My favourites ({{ v.favourites.length }})</option>
+      <option value="one">One visual</option>
+      <option value="off">Off</option>
+    </select>
+    <label class="row energy">Energy <span class="ends">calm</span><input type="range" min="0" max="1" step="0.01" :value="energy" aria-label="Energy, calm to intense" @input="setEnergy(Number(($event.target as HTMLInputElement).value))" /><span class="ends">intense</span></label>
+    <p class="note tight">{{ energyName }}: sensitivity, how often it changes and the crossfade, together.</p>
+
+    <div v-if="pictures.length" class="pictures" :aria-label="`The visuals of ${showName}, by picture`">
+      <button v-for="p in pictures" :key="p.id" class="picture" :class="{ on: p.id === activePreset?.id }" :title="p.name" @click="play(p.id)">
+        <span class="still" :style="posterOf(p.id) ?? {}" />
+        <small>{{ shortName(p.name) }}</small>
+      </button>
+    </div>
+
+    <details class="fine">
+    <summary>Fine-tune</summary>
     <label class="row switch"><input v-model="v.enabled" type="checkbox" /> Visuals on</label>
 
     <h4>Mode</h4>
@@ -328,10 +382,63 @@ async function editCopy(): Promise<void> {
     <label class="row switch" title="Plenio Nova's glow, tone curve, vignette and grain over every visual - the classics, Drop and Nova alike"><input v-model="v.finish" type="checkbox" /> One light over every visual</label>
     <label v-if="guestStatus?.on" class="row switch" title="The QR code and address of the live playlist over the visual (its corner and size: Live Play > Guests)"><input v-model="settings.live.overVisual" type="checkbox" /> The guests' way in over the visual</label>
     <p class="note">A song’s own visual wins, then the playlist’s, then the mode.</p>
+    </details>
   </aside>
 </template>
 
 <style scoped>
+.now {
+  flex-wrap: wrap;
+}
+.pictures {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 8px 0;
+}
+.picture {
+  display: grid;
+  gap: 2px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  overflow: hidden;
+}
+.picture.on {
+  border-color: var(--accent);
+}
+.picture .still {
+  display: block;
+  zoom: 0.5;
+  border-radius: 8px;
+}
+.picture small {
+  font-size: 10px;
+  opacity: 0.75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.energy {
+  gap: 8px;
+}
+.energy input {
+  flex: 1;
+}
+.ends {
+  font-size: 11px;
+  opacity: 0.6;
+}
+.fine summary {
+  margin: 14px 0 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
 .panel {
   width: 340px;
   max-height: 100%;
