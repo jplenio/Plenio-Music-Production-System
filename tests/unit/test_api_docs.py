@@ -33,6 +33,8 @@ def test_the_guide_names_every_endpoint_of_the_api(folder: Path) -> None:
     # the examples are there and use the calls the guide describes
     for example in ("make_song.py", "make_song.mjs", "make_song.sh"):
         text = (folder / "examples" / example).read_text(encoding="utf-8")
+        if "from plenio_client import" in text:  # v2's Python examples call the client
+            text = (folder / "examples" / "plenio_client.py").read_text(encoding="utf-8")
         assert "Idempotency-Key" in text and "wait=30" in text, example
 
 

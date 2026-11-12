@@ -113,6 +113,38 @@ The complete scripts, with error handling, a token for another computer and revi
 [examples/make_song.py](examples/make_song.py) · JavaScript (Node 18+): [examples/make_song.mjs](examples/make_song.mjs)
 · shell: [examples/make_song.sh](examples/make_song.sh).
 
+### The Python client
+
+[examples/plenio_client.py](examples/plenio_client.py) is the API in one file - standard library only, typed,
+Python 3.9 or newer. Copy it next to your script:
+
+```python
+from plenio_client import Plenio, PlenioError
+
+plenio = Plenio("http://studio:8188", token="plenio_...")   # no token on this computer
+job = plenio.make_song("yue2-song", {"description": "a night drive through a rainy city"}, review=["text"])
+job = plenio.wait(job)                     # until it ends or stops at a review
+while job["status"] == "waiting_for_review":
+    job = plenio.wait(plenio.approve(job, {"title": "Neon Rain"}))   # an edited document is kept as written
+if job["status"] == "succeeded":
+    print(plenio.download(job, "songs"))
+```
+
+| Method | What it does |
+|---|---|
+| `about()`, `templates()`, `template(id)` | what the server offers |
+| `make_song(template, fields, review=, release=, preset=, key=)` | `POST /jobs`; a lost answer or `busy` is tried again with the same `Idempotency-Key` |
+| `job(id, wait=)`, `jobs()`, `wait(job, on_change=, until_review=, timeout=)` | follow a job |
+| `documents(job)`, `approve(job, documents)`, `cancel(job)`, `timings(job)` | review stops and the rest of a job |
+| `download(job_or_song, folder)` | the files of a finished job or of a song |
+| `songs(query)`, `song(id)`, `again(id, as_, fields)` | the songs in the output folder |
+| `upload(path)` | a recording for a cover; returns the name for the audio field |
+| `events(after=)` | the event stream; pass the last event's `id` to reconnect without a gap |
+
+Every refusal raises `PlenioError` with `status`, `code`, `message`, `hint` and `field`; a ComfyUI that does not
+answer is `status` 0, `code` `unreachable`. [examples/make_song.py](examples/make_song.py) and
+[examples/list_songs.py](examples/list_songs.py) are built on it.
+
 ## How a song is made
 
 A **template** is a ComfyUI workflow that Plenio ships. The API runs all five:

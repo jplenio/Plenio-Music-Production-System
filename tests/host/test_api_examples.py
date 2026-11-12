@@ -38,6 +38,12 @@ def test_the_python_example(server: ComfyServer, fake_models: None, tmp_path: Pa
     assert "no song: failed" in done.stdout, done.stdout
 
 
+def test_the_python_song_list(server: ComfyServer, tmp_path: Path) -> None:
+    done = run([sys.executable, str(EXAMPLES / "list_songs.py"), "--files"], server, tmp_path)
+    assert done.returncode == 0, done.stdout + done.stderr
+    assert done.stdout.strip().endswith("song(s)"), done.stdout
+
+
 @pytest.mark.skipif(shutil.which("node") is None, reason="Node.js is not installed")
 def test_the_javascript_example(server: ComfyServer, fake_models: None, tmp_path: Path) -> None:
     done = run(["node", str(EXAMPLES / "make_song.mjs"), "a quiet walk by the sea"], server, tmp_path)
