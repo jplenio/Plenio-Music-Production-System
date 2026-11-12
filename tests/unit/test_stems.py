@@ -30,7 +30,7 @@ def mix_json(**strips: dict[str, object]) -> s.Mix:
     return s.parse_mix(json.dumps({"schema": s.MIX_SCHEMA, "strips": strips}))
 
 
-@settings(max_examples=40, deadline=None)
+@settings(deadline=None)
 @given(st.integers(1, 2), st.integers(1, 4), st.integers(0, 2**31))
 def test_a_neutral_mix_returns_the_input(channels: int, count: int, seed: int) -> None:
     rng = np.random.default_rng(seed)

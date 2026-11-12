@@ -48,7 +48,7 @@ def labels(score: c.Score) -> list[str]:
     return [s.label for s in ops._section_starts(score)]
 
 
-@settings(max_examples=60, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+@settings(deadline=None, suppress_health_check=[HealthCheck.too_slow])
 @given(data=st.data(), score=scores())
 def test_every_arrangement_keeps_each_measure_and_writes_valid_text(
     data: st.DataObject, score: c.Score

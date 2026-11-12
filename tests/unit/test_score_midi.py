@@ -36,7 +36,7 @@ def test_round_trip_of_real_scores(text: str) -> None:
     assert c.to_abc(back.score) == c.canonical_text(score)
 
 
-@settings(max_examples=120, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+@settings(deadline=None, suppress_health_check=[HealthCheck.too_slow])
 @given(
     scores(), st.lists(st.tuples(st.integers(0, 200), st.integers(1, 64), st.integers(0, 127)), max_size=8)
 )

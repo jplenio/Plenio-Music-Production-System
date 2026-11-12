@@ -105,7 +105,7 @@ def test_recognised_chords_make_a_valid_score() -> None:
     assert "C" in text and "Bb" in text
 
 
-@settings(max_examples=200, deadline=None)
+@settings(deadline=None)
 @given(
     st.lists(
         st.tuples(st.integers(0, 8), st.lists(st.integers(0, 127), min_size=1, max_size=6)),

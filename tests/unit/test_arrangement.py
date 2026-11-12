@@ -759,7 +759,7 @@ def answers(draw: st.DrawFn, sections: int) -> str:
     return json.dumps({"idea": "fuzz", "tempo_change": draw(st.integers(-40, 40)), "sections": entries})
 
 
-@settings(max_examples=150, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+@settings(deadline=None, suppress_health_check=[HealthCheck.too_slow])
 @given(
     score=scores(max_groups=4, max_notes=16),
     data=st.data(),

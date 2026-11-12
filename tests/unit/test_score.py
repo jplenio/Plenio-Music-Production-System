@@ -152,7 +152,7 @@ def test_transpose_limits() -> None:
         score.transpose(SONG, 30)
 
 
-@settings(max_examples=30, deadline=None)
+@settings(deadline=None)
 @given(st.integers(min_value=-12, max_value=12), st.integers(min_value=-12, max_value=12))
 def test_transpose_composes(first: int, second: int) -> None:
     once = score.transpose(score.transpose(TRICKY, first).abc, second)

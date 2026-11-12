@@ -15,6 +15,17 @@ from pathlib import Path
 
 import pytest
 
+# Property tests by profile (PD 10.1): 25 examples on every push and here, 300 in the weekly run
+# (HYPOTHESIS_PROFILE=weekly). A test sets its deadline and health checks, never its number of examples.
+try:
+    from hypothesis import settings as _hypothesis
+
+    _hypothesis.register_profile("push", max_examples=25)
+    _hypothesis.register_profile("weekly", max_examples=300)
+    _hypothesis.load_profile(os.environ.get("HYPOTHESIS_PROFILE", "push"))
+except ImportError:  # the host job may run without Hypothesis
+    pass
+
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures"
 COMFY_ROOT = os.environ.get("PLENIO_COMFYUI_ROOT", "").strip()

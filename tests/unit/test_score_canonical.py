@@ -28,7 +28,7 @@ HEADER = (
     'V: Vocal clef=treble name="Vocal Melody" snm="Vocal"\n'
     'V: Ins clef=treble name="Ins Melody" snm="Inst."\n'
 )
-PROPERTY = settings(max_examples=150, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+PROPERTY = settings(deadline=None, suppress_health_check=[HealthCheck.too_slow])
 
 
 def build(key: str, groups: list[tuple[str | None, str, str]], header: str = HEADER) -> str:

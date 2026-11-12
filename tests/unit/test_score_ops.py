@@ -588,7 +588,7 @@ class EditSession(RuleBasedStateMachine):
 
 
 EditSession.TestCase.settings = settings(
-    max_examples=60, stateful_step_count=12, deadline=None, suppress_health_check=[HealthCheck.too_slow]
+    stateful_step_count=12, deadline=None, suppress_health_check=[HealthCheck.too_slow]
 )
 test_random_edit_sequences = EditSession.TestCase
 

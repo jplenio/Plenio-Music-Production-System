@@ -144,7 +144,7 @@ def test_a_key_change_in_a_bar_of_rests_survives() -> None:
     assert score  # the song itself has no key change
 
 
-@settings(max_examples=40, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+@settings(deadline=None, suppress_health_check=[HealthCheck.too_slow])
 @given(scores())
 def test_every_score_comes_back_as_it_was(score: c.Score) -> None:
     assert import_musicxml(musicxml.export_musicxml(score)).score == score
