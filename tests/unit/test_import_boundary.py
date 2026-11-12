@@ -124,3 +124,8 @@ def test_no_legacy_ids_or_local_paths_in_shipped_files() -> None:
 def test_vendored_abc_tools_is_unchanged() -> None:
     digest = hashlib.sha256((PLENIO / "third_party" / "yue2_abc_tools.py").read_bytes()).hexdigest()
     assert digest == "ea04b922dacebec7ad257a2f8d83bdb5dfecb7a23110c1a3121c5c41c313930e"
+
+
+def test_vendored_yue2_vae_rs_is_unchanged() -> None:
+    digest = hashlib.sha256((PLENIO / "third_party" / "yue2_vae_rs.py").read_bytes()).hexdigest()
+    assert digest == "b7fd8baeddbe1f8c5dd9940cc071d9e4dd4a0f137ef695cb8f301396ecfb21a1"
