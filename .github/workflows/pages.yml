@@ -1,0 +1,61 @@
+name: Pages
+
+# The project's site (phase D5, PD 10.3): everything under docs/ at the address it has today (the demo page, the
+# API reference, the go-links of resources/media.toml), and the user guide built with VitePress under /guide/.
+# Needs Settings > Pages > Source "GitHub Actions" (the owner's switch; until then the branch's docs/ is served).
+on:
+  push:
+    branches: [main]
+    paths: ["docs/**", "resources/media.toml", "frontend/package*.json", ".github/workflows/pages.yml"]
+  pull_request:
+    paths: ["docs/**", "resources/media.toml", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      # the go pages are generated; the site is built from what the registry says
+      - run: python tools/media_links.py --check
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - working-directory: frontend
+        run: npm ci && npm run build:site
+      - name: The site - docs/ as it is, the guide beside it
+        run: |
+          mkdir -p _site
+          rsync -a --exclude '.vitepress' docs/ _site/
+          cp -r frontend/dist-site/guide _site/guide
+          test -f _site/index.html && test -f _site/guide/index.html && test -f _site/go/tutorial-1-yue2-song/index.html
+      - if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
