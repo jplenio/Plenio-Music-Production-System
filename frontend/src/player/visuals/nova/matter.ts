@@ -37,7 +37,7 @@ vec3 image(vec2 p, vec2 uv) {
   vec3 rd = look(ro, vec3(0.0), p, 1.9);
   vec3 col = env(rd) * 0.08 * exp(-dot(p, p) * 0.4);
   float t = 0.0;
-  for (int i = 0; i < 80; i++) {
+  for (int i = 0; i < 80; i++) { if (i >= QSTEPS(80)) break;
     vec3 q = ro + rd * t;
     float d = map(q);
     if (d < 0.001) {
@@ -68,7 +68,7 @@ float B[8];
 float bands(float x) {
   float s = 0.0;
   float w = 0.0;
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < 8; i++) { if (i >= QSTEPS(8)) break;
     float k = exp(-pow((x - float(i) / 7.0) * 6.0, 2.0));
     s += B[i] * k;
     w += k;
@@ -93,7 +93,7 @@ vec3 image(vec2 p, vec2 uv) {
   float w = wave(atan(p.y, p.x) / TAU + 0.5) * 0.08 * (0.5 + level);
   vec3 col = pal(0.62) * 0.03 * exp(-r) + pal(0.1) * smoothstep(0.012, 0.0, abs(r - 0.95 - w)) * (0.6 + 1.5 * pulse);
   float t = 2.0;
-  for (int i = 0; i < 130; i++) {
+  for (int i = 0; i < 130; i++) { if (i >= QSTEPS(130)) break;
     vec3 q = ro + rd * t;
     float d = map(q);
     if (d < 0.001) {
@@ -234,7 +234,7 @@ vec3 image(vec2 p, vec2 uv) {
   float inside = smoothstep(R0 + 0.01, R0 - 0.01, r);
   vec3 col = pal(0.62) * (smoothstep(0.025, 0.0, abs(r - R0)) * 0.5 + pow(clamp(r / R0, 0.0, 1.0), 6.0) * inside * 0.15);
   col += vec3(1.0) * smoothstep(0.06, 0.0, length(p - vec2(-0.32, 0.38)) - 0.03) * 0.25;
-  for (int i = 0; i < 9; i++) {
+  for (int i = 0; i < 9; i++) { if (i >= QSTEPS(9)) break;
     float fi = float(i);
     float energy = spec(fi / 9.0 * 0.75 + 0.03);
     float base = fi / 9.0 * TAU + 0.7 * sin(T * (0.21 + 0.05 * fi) + fi * 1.9) + spin * 0.3;
@@ -354,7 +354,7 @@ vec3 kali(vec2 q) {
   float acc = 0.0;
   float trap = 1e3;
   float trapPx = 0.0;
-  for (int i = 0; i < 11; i++) {
+  for (int i = 0; i < 11; i++) { if (i >= QSTEPS(11)) break;
     float m = max(dot(q, q), 1e-4);
     q = abs(q) / m - c;
     fp /= m;

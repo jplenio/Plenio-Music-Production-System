@@ -173,6 +173,9 @@ export class NovaRenderer {
   private chains: Chain[] = []
   private readonly slots = new Map<object, Slot>()
   private readonly uniforms = new Map<WebGLProgram, Map<string, WebGLUniformLocation | null>>()
+  /** The quality the visuals draw with, 0.5 .. 1 (their march steps and octaves): the live picture's follows the
+   * governor; a video's and a timing's are 1. */
+  quality = 1
   private readonly specBytes = new Uint8ClampedArray(BINS * 4)
   private readonly waveBytes = new Uint8ClampedArray(WAVE_POINTS * 4)
   private readonly palBytes = new Uint8ClampedArray(256 * 4)
@@ -408,6 +411,7 @@ export class NovaRenderer {
     set('beats', music.beats)
     set('travel', music.travel)
     set('spin', music.spin)
+    set('Q', this.quality)
     gl.uniform1i(this.u(program, 'specTex'), 0)
     gl.uniform1i(this.u(program, 'waveTex'), 1)
     gl.uniform1i(this.u(program, 'palTex'), 2)

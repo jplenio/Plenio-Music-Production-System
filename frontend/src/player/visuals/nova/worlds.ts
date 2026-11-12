@@ -32,7 +32,7 @@ vec3 image(vec2 p, vec2 uv) {
   vec3 rd = look(ro, ta, rot(sin(T * 0.13) * 0.2) * p, 1.4);
   vec3 col = vec3(0.0);
   float t = 0.05;
-  for (int i = 0; i < 72; i++) {
+  for (int i = 0; i < 72; i++) { if (i >= QSTEPS(72)) break;
     vec3 q = ro + rd * t;
     float d = map(q);
     float e = spec(fract(abs(ring) * 0.137) * 0.8);
@@ -108,7 +108,7 @@ vec3 image(vec2 p, vec2 uv) {
     float nearest = 1e9;
     float nearT = 0.0;
     float nearSteps = 0.0;
-    for (int i = 0; i < 110; i++) {
+    for (int i = 0; i < 110; i++) { if (i >= QSTEPS(110)) break;
       vec3 q = ro + rd * t;
       float d = bulb(q);
       glow += exp(-d * 40.0);
@@ -163,7 +163,7 @@ vec3 image(vec2 p, vec2 uv) {
   float glow = 0.0;
   float steps = 0.0;
   bool hit = false;
-  for (int i = 0; i < 96; i++) {
+  for (int i = 0; i < 96; i++) { if (i >= QSTEPS(96)) break;
     vec3 q = ro + rd * t;
     float d = map(q);
     glow += 0.02 / (0.03 + abs(d) * 10.0);
@@ -247,7 +247,7 @@ vec3 image(vec2 p, vec2 uv) {
   vec2 sd = vec2(rd.x >= 0.0 ? 1.0 : -1.0, rd.z >= 0.0 ? 1.0 : -1.0) * max(abs(rd.xz), vec2(1e-4));
   float t = 0.0;
   bool hit = false;
-  for (int i = 0; i < 160; i++) {
+  for (int i = 0; i < 160; i++) { if (i >= QSTEPS(160)) break;
     vec3 q = ro + rd * t;
     float d = map(q);
     if (d < 0.002) {
@@ -339,7 +339,7 @@ vec3 image(vec2 p, vec2 uv) {
   float t = 0.0;
   float last = 0.0;
   bool hit = false;
-  for (int i = 0; i < 110; i++) {
+  for (int i = 0; i < 110; i++) { if (i >= QSTEPS(110)) break;
     vec3 q = ro + rd * t;
     float h = q.y - ground(q.xz);
     if (h < 0.002 * t) {
@@ -401,7 +401,7 @@ vec3 image(vec2 p, vec2 uv) {
   float f = abs(x);
   float env = smoothstep(1.0, 0.22, f);
   float px = 2.0 / R.y;
-  for (int j = 0; j < 42; j++) {
+  for (int j = 0; j < 42; j++) { if (j >= QSTEPS(42)) break;
     float fj = float(j);
     float depth = fj + lag;
     float base = -0.86 + depth * 0.034;
@@ -446,7 +446,7 @@ vec3 image(vec2 p, vec2 uv) {
   float t = 0.0;
   float last = 0.0;
   bool hit = false;
-  for (int i = 0; i < 120; i++) {
+  for (int i = 0; i < 120; i++) { if (i >= QSTEPS(120)) break;
     vec3 q = ro + rd * t;
     float d = q.y - hgt(q.xz);
     if (d < 0.003 * t) {

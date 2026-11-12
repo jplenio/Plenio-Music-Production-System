@@ -24,7 +24,7 @@ import { chooseVisual } from '../visuals/chooser'
 import { dropOptions, dropRenderer } from '../visuals/drop/renderer'
 import { myPresets } from '../visuals/drop'
 import { tellRenderer } from '../visuals/drop/story'
-import { governor, leaveOut, loadTimings } from '../visuals/gpu'
+import { governor, leaveOut, loadTimings, medianTiming, novaTimings, tierOf } from '../visuals/gpu'
 import { SceneMixer } from '../visuals/mixer'
 import { NOVA_VERSION, checkNova, novaOptions, novaScaleFor } from '../visuals/nova'
 import { makeColors, miniScene, presetById, type Scene } from '../visuals/presets'
@@ -104,7 +104,7 @@ function resize(): void {
   if (!el) return
   // the classics draw every pixel of the canvas: fewer while frames come late (Drop and Nova draw at their own size)
   const gpu = mixer.preset?.kind === 'drop' || mixer.preset?.kind === 'nova'
-  const ratio = Math.min(props.mini ? 2 : 1.5, window.devicePixelRatio || 1) * (props.mini || gpu ? 1 : Math.max(0.6, Math.sqrt(governor.factor)))
+  const ratio = Math.min(props.mini ? 2 : governor.tier.ratio, window.devicePixelRatio || 1) * (props.mini || gpu ? 1 : Math.max(0.6, Math.sqrt(governor.factor)))
   const w = Math.max(1, Math.floor(el.clientWidth * ratio))
   const h = Math.max(1, Math.floor(el.clientHeight * ratio))
   if (el.width !== w || el.height !== h) {
@@ -113,10 +113,15 @@ function resize(): void {
   }
 }
 
-function loop(): void {
+let drawnAt = 0
+function loop(now: number = performance.now()): void {
   raf = requestAnimationFrame(loop)
   const el = canvas.value
   if (!el || (props.mini ? !mini : !mixer.preset)) return
+  // the tier's frame cap (a phone draws 30 a second: the music needs no more, the battery thanks it)
+  const cap = props.mini ? 0 : governor.tier.fps
+  if (cap && now - drawnAt < 1000 / cap - 2) return
+  drawnAt = now
   resize()
   const ctx = el.getContext('2d')
   if (!ctx) return
@@ -193,6 +198,7 @@ watch(myPresets, () => {
 onMounted(() => {
   // the timings of Plenio Nova's visuals kept for this graphics card: which ones play smoothly here
   loadTimings(NOVA_VERSION)
+  governor.use(tierOf(medianTiming(novaTimings.value), { touch: matchMedia?.('(pointer: coarse)').matches ?? false, width: window.innerWidth }))
   pick()
   raf = requestAnimationFrame(loop)
 })

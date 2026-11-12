@@ -123,7 +123,7 @@ vec3 trace(vec2 p) {
   vec3 pos = ro;
   vec3 col = vec3(0.0);
   float through = 1.0;
-  for (int i = 0; i < 220; i++) {
+  for (int i = 0; i < 220; i++) { if (i >= QSTEPS(220)) break;
     float r = length(pos);
     float dt = clamp(0.06 * r, 0.025, 0.7);
     vec3 hv = cross(pos, rd);
@@ -214,7 +214,7 @@ const aurora: NovaDef = {
   image: `
 vec3 curtain(vec3 rd) {
   vec3 acc = vec3(0.0);
-  for (int i = 0; i < 32; i++) {
+  for (int i = 0; i < 32; i++) { if (i >= QSTEPS(32)) break;
     float fi = float(i);
     float t = (1.0 + fi * 0.06) / max(rd.y, 0.04);
     vec2 q = rd.xz * t * 0.22 + vec2(T * 0.015, travel * 0.03);
@@ -300,7 +300,7 @@ vec3 image(vec2 p, vec2 uv) {
   vec3 rd = normalize(vec3(p.x, p.y - 0.1, 1.5));
   if (rd.y > 0.02) return skyColor(rd, moon, PX / 1.5);
   float t = 0.0;
-  for (int i = 0; i < 96; i++) {
+  for (int i = 0; i < 96; i++) { if (i >= QSTEPS(96)) break;
     vec3 q = ro + rd * t;
     float d = q.y - sea(q.xz);
     if (d < 0.004 * t) break;

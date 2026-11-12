@@ -49,6 +49,10 @@ uniform float T, bass, mid, treb, level, kick, pulse, beats, travel, spin;
 uniform sampler2D specTex, waveTex, palTex, state;
 uniform vec2 S;
 uniform float fresh, stepDt, lag;
+// Q: the quality, 0.5 .. 1 (phase 7.2) - the march steps and the octaves a visual takes; the governor lowers it
+// before it takes pixels away
+uniform float Q;
+#define QSTEPS(n) max(1, int(float(n) * Q + 0.5))
 out vec4 o;
 #define PI 3.14159265
 #define TAU 6.28318531
@@ -71,8 +75,8 @@ float noise3(vec3 p) {
   return mix(mix(mix(hash13(i), hash13(i + vec3(1.0, 0.0, 0.0)), u.x), mix(hash13(i + vec3(0.0, 1.0, 0.0)), hash13(i + vec3(1.0, 1.0, 0.0)), u.x), u.y),
              mix(mix(hash13(i + vec3(0.0, 0.0, 1.0)), hash13(i + vec3(1.0, 0.0, 1.0)), u.x), mix(hash13(i + vec3(0.0, 1.0, 1.0)), hash13(i + vec3(1.0, 1.0, 1.0)), u.x), u.y), u.z);
 }
-float fbm(vec2 p) { float s = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { s += a * noise(p); p = mat2(1.6, 1.2, -1.2, 1.6) * p; a *= 0.5; } return s; }
-float fbm3(vec3 p) { float s = 0.0, a = 0.5; for (int i = 0; i < 4; i++) { s += a * noise3(p); p = p * 2.03 + vec3(1.7, 9.2, 3.1); a *= 0.5; } return s; }
+float fbm(vec2 p) { float s = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { if (i >= 3 + int(2.0 * Q + 0.01)) break; s += a * noise(p); p = mat2(1.6, 1.2, -1.2, 1.6) * p; a *= 0.5; } return s; }
+float fbm3(vec3 p) { float s = 0.0, a = 0.5; for (int i = 0; i < 4; i++) { if (i >= 2 + int(2.0 * Q + 0.01)) break; s += a * noise3(p); p = p * 2.03 + vec3(1.7, 9.2, 3.1); a *= 0.5; } return s; }
 float smin(float a, float b, float k) { float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0); return mix(b, a, h) - k * h * (1.0 - h); }
 vec3 look(vec3 from, vec3 to, vec2 p, float lens) {
   vec3 f = normalize(to - from), r = normalize(cross(vec3(0.0, 1.0, 0.0), f)), u = cross(f, r);

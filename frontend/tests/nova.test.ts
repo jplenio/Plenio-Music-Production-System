@@ -254,7 +254,7 @@ describe('the governor', () => {
     const g = new Governor()
     run(g, 16.7, 3)
     expect(g.factor).toBe(1)
-    run(g, 40, 3)
+    run(g, 40, 6) // the quality gives way first (governor.test.ts), then the pixels
     expect(g.factor).toBeLessThan(0.6)
     run(g, 16.7, 15)
     expect(g.factor).toBe(1)
@@ -271,7 +271,7 @@ describe('the governor', () => {
   it('says a visual struggles once the fewest pixels do not help', () => {
     const g = new Governor()
     run(g, 16.7, 2)
-    run(g, 45, 8)
+    run(g, 45, 11)
     expect(g.factor).toBeCloseTo(0.35, 2)
     expect(g.struggling).toBeGreaterThan(4)
     g.fresh()

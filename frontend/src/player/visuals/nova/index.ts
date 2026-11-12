@@ -4,7 +4,7 @@
  * timing on this graphics card allows (gpu.ts); every visual is timed once in the background, which also compiles it
  * ahead, so that it starts at once when it comes.
  */
-import { NOVA_FLOOR, NOVA_FRAME_MS, gpuSupport, keepTiming, loadTimings, novaPixels, novaTimings } from '../gpu'
+import { NOVA_FLOOR, NOVA_FRAME_MS, QUALITY_LOW, governor, gpuSupport, keepTiming, loadTimings, novaPixels, novaTimings } from '../gpu'
 import type { Preset, Scene, SceneOptions } from '../presets'
 import { MATTER } from './matter'
 import { MAX_SUPERSAMPLE, NovaMusic, NovaRenderer, type NovaDef } from './renderer'
@@ -62,6 +62,7 @@ function asVisual(def: NovaDef): Preset {
           music.update(frame, def.speed)
           const screen = width * height
           const pixels = own ? Math.min(VIDEO_PIXELS, screen * own.scale * own.scale) : novaPixels(def.id, screen * novaOptions.scale * novaOptions.scale)
+          if (renderer) renderer.quality = own ? 1 : governor.quality
           const picture = renderer?.render(def, music, colors.palette(), width, height, slot, pixels) ?? null
           if (!picture) {
             ctx.fillStyle = '#05040a'
@@ -123,7 +124,12 @@ export function checkNova(palette: Uint8ClampedArray): void {
       checking = false
       return
     }
+    // timed at the lowest quality the governor goes to: a visual is offered where it can play smoothly at all, and
+    // the governor then takes its quality as high as the card keeps up with (phase 7.2)
+    const live = renderer.quality
+    renderer.quality = QUALITY_LOW
     const ns = renderer.measure(def, palette)
+    renderer.quality = live
     if (ns !== null) {
       const before = novaTimings.value[def.id]
       keepTiming(def.id, before !== undefined && before > 0 && ns > 0 ? Math.min(before, ns) : ns)

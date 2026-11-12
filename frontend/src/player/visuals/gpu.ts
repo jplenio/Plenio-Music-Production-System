@@ -138,6 +138,22 @@ export function novaPixels(id: string, screen: number): number {
 
 // --- while it plays ---------------------------------------------------------------------------------------------------
 
+/** How hard a device is asked (phase 7.2): its Nova quality to start with, the most frames a second the live visual
+ * draws (0: as the screen comes) and the most device pixels per CSS pixel. */
+export interface Tier {
+  id: 'A' | 'B' | 'C'
+  quality: number
+  fps: number
+  ratio: number
+}
+
+export const QUALITY_LOW = 0.5
+export const TIERS: Record<Tier['id'], Tier> = {
+  A: { id: 'A', quality: 1, fps: 0, ratio: 1.5 },
+  B: { id: 'B', quality: 0.8, fps: 60, ratio: 1.25 },
+  C: { id: 'C', quality: 0.6, fps: 30, ratio: 1 },
+}
+
 /**
  * Keeps the live visual smooth: ``factor`` (0.35 .. 1) of the pixels a visual may have comes down while frames come
  * late, and goes back up when they come in time again. Late is measured against the screen's own pace lately (the best
@@ -146,7 +162,11 @@ export function novaPixels(id: string, screen: number): number {
  */
 export class Governor {
   factor = 1
+  /** Nova's quality (march steps, octaves), 0.5 .. 1: it gives way first, the pixels after it (phase 7.2). */
+  quality = 1
   struggling = 0
+  /** The tier this device plays in: where quality starts and the caps of frames and pixel ratio. */
+  tier: Tier = TIERS.A
   private ema = 16.7
   private best = 16.7
   private wait = 0
@@ -159,11 +179,20 @@ export class Governor {
     const late = this.ema > Math.max(22, this.best * 1.45)
     this.wait -= dt
     if (this.wait <= 0) {
-      if (late && this.factor > 0.35) {
+      const easy = !late && this.ema < this.best * 1.2 + 1
+      if (late && this.quality > QUALITY_LOW) {
+        // fewer march steps first: the picture keeps its sharpness
+        this.quality = Math.max(QUALITY_LOW, this.quality - 0.1)
+        this.wait = 0.5
+      } else if (late && this.factor > 0.35) {
         this.factor = Math.max(0.35, this.factor * 0.8)
         this.wait = 0.6
-      } else if (!late && this.factor < 1 && this.ema < this.best * 1.2 + 1) {
+      } else if (easy && this.factor < 1) {
+        // back in the other order: the pixels first, then the steps
         this.factor = Math.min(1, this.factor * 1.15)
+        this.wait = 1
+      } else if (easy && this.quality < this.tier.quality) {
+        this.quality = Math.min(this.tier.quality, this.quality + 0.05)
         this.wait = 1
       }
     }
@@ -173,12 +202,33 @@ export class Governor {
   /** A new visual: it starts with all its pixels again. */
   fresh(): void {
     this.factor = 1
+    this.quality = this.tier.quality
     this.struggling = 0
     this.wait = 1
+  }
+
+  /** The device's tier (``tierOf``): quality starts there. */
+  use(tier: Tier): void {
+    this.tier = tier
+    this.quality = Math.min(this.quality, tier.quality)
   }
 }
 
 export const governor = new Governor()
+
+/** The tier by what a device is: a phone or tablet (touch, a small screen) is C; a computer whose Nova visuals take
+ * more than half their share of a frame at the smallest picture (``ns`` per pixel, the median timed) is B; else A. */
+export function tierOf(ns: number | null, device: { touch: boolean; width: number }): Tier {
+  if (device.touch && device.width < 1100) return TIERS.C
+  if (ns !== null && ns > 0 && (ns * NOVA_FLOOR) / 1e6 > NOVA_FRAME_MS / 2) return TIERS.B
+  return TIERS.A
+}
+
+/** The median of the Nova timings here (``null``: none yet). */
+export function medianTiming(timings: Record<string, number>): number | null {
+  const found = Object.values(timings).filter((ns) => ns > 0).sort((x, y) => x - y)
+  return found.length ? found[Math.floor(found.length / 2)] : null
+}
 
 /** Visuals that did not keep up here in this session (left out until the player is opened again, or *Try again*). */
 export const leftOut = shallowRef<ReadonlySet<string>>(new Set())
