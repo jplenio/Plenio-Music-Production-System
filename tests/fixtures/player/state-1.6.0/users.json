@@ -1,0 +1,32 @@
+{
+ "users": [
+  {
+   "id": "8c0cb32a699c",
+   "name": "Sam",
+   "salt": "f4991ca2ed104c959403fef3c2edb775",
+   "hash": "63b1396af95515f2c94500f333f6f2b07e106a58601cb0ca261d86df8d4909db",
+   "iterations": 240000,
+   "avatar": "",
+   "color": "#e0a83c",
+   "created": 1794494539,
+   "group": "listener"
+  },
+  {
+   "id": "ed2a0a6afd16",
+   "name": "Robin",
+   "salt": "be9160cf879d1d89e2b1ae2ee6b7bdd1",
+   "hash": "c3f44014e92e7ce46310746321bf4c57491b34ea9a8faa08c935bef740e47ce3",
+   "iterations": 240000,
+   "avatar": "",
+   "color": "#4fbf7f",
+   "created": 1794494546,
+   "group": "admin"
+  }
+ ],
+ "sessions": {},
+ "admin": {
+  "name": "Admin",
+  "avatar": "",
+  "color": "#e4573d"
+ }
+}

@@ -70,9 +70,9 @@ def export(target: Path) -> None:
 
 def run_module(root: Path, module: str, python: str) -> dict[str, object]:
     tests = " ".join(f"tests/unit/{name}" for name in MODULES[module])
-    runner = (
-        f'"{python}" -m pytest -x -q -p no:randomly -p no:cacheprovider -m "not io and not process" {tests}'
-    )
+    # a wall-clock limit per run: a mutant can make a test hang, and mutmut's timeout does not end it on Windows
+    limiter = PROJECT / "tools" / "mutation_runner.py"
+    runner = f'"{python}" "{limiter}" 180 -x -q -p no:randomly -p no:cacheprovider -m "not io and not process" {tests}'
     env = {**os.environ, "PYTHONPATH": str(DEVDEPS), "HYPOTHESIS_PROFILE": "push", "PYTHONUTF8": "1"}
     cache = root / ".mutmut-cache"
     cache.unlink(missing_ok=True)

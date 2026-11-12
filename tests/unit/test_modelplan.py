@@ -232,3 +232,78 @@ def test_the_fingerprint_changes_when_a_file_arrives_or_the_pick_changes() -> No
     other = plan(SONG, COMPONENTS, vram_gib=8.0, installed={}).needed
     assert len({fingerprint(before), fingerprint(after), fingerprint(other)}) == 3
     assert fingerprint(before) == fingerprint(tuple(reversed(before))) and len(fingerprint(before)) == 16
+
+
+# --- found by the mutation run (phase 9.3) ---------------------------------------------------------------------------
+
+
+def test_a_card_with_exactly_the_files_threshold_runs_it() -> None:
+    # 12.0 GiB is MIDDLE's full threshold: it runs on the card there, not below
+    assert chosen(12.0, prefer="quality").reason.endswith("runs on the card")
+    assert chosen(12.0, prefer="quality").file == "middle.safetensors"
+    assert chosen(11.99, prefer="quality").file == "small.safetensors"
+    # and LARGE's minimum: alone, it runs with offloading at exactly 12, too large below
+    alone = Component("l", "L", "checkpoints", (LARGE,), templates=("T",))
+    assert pick(alone, vram_gib=12.0, installed={}).reason.endswith("runs with offloading: slower")
+    assert pick(alone, vram_gib=11.9, installed={}).reason.endswith("too large for this card: very slow")
+    pinned = pick(DEMO, vram_gib=12.0, installed={}, pinned="large.safetensors")
+    assert pinned.warning == ""  # exactly the minimum is enough
+    assert "needs about 12 GB" in pick(DEMO, vram_gib=11.9, installed={}, pinned="large.safetensors").warning
+
+
+def test_with_no_card_only_a_file_that_needs_none_runs() -> None:
+    tiny = variant("tiny", 1_000, 1, 1, 0.5, 4.0)
+    none_needed = variant("cpu", 3_000, 1, 1, 0.0, 0.0)
+    component = Component("c", "C", "checkpoints", (tiny, none_needed), templates=("T",))
+    assert pick(component, vram_gib=None, installed={}).file == "cpu.safetensors"
+
+
+def test_files_that_tie_are_ordered_by_size_the_smaller_first() -> None:
+    a = variant("a-big", 9_000, 2, 2, 0.0, 4.0)
+    b = variant("b-small", 4_000, 2, 2, 0.0, 4.0)
+    component = Component("c", "C", "checkpoints", (a, b), templates=("T",))
+    for prefer in ("balanced", "quality", "speed"):
+        assert pick(component, vram_gib=8.0, installed={}, prefer=prefer).file == "b-small.safetensors", prefer
+
+
+def test_an_installed_file_one_rank_below_is_kept_but_not_two() -> None:
+    # 24 GiB: LARGE is the best; MIDDLE (one rank below) installed is kept, SMALL (two below) is not
+    for prefer in ("balanced", "small"):
+        kept = pick(DEMO, vram_gib=24.0, installed={MIDDLE.file: MIDDLE.bytes}, prefer="balanced")
+        assert kept.file == MIDDLE.file and "kept" in kept.reason, prefer
+    two_below = pick(DEMO, vram_gib=24.0, installed={SMALL.file: SMALL.bytes}, prefer="balanced")
+    assert two_below.file == SMALL.file and two_below.better == LARGE  # used, but the better one is offered
+    assert "kept" not in two_below.reason
+    # speed: SMALL is the fastest; an installed file of higher quality is kept (it is not below the best)
+    fast = pick(DEMO, vram_gib=24.0, installed={LARGE.file: LARGE.bytes}, prefer="speed")
+    assert fast.file == LARGE.file and fast.better is None and "kept" in fast.reason
+    # one rank below the fastest is the most "speed" and "small" keep: two below is replaced
+    fastest = variant("fastest", 1_000, 3, 9, 0.0, 4.0)
+    slow = variant("slow", 1_000, 1, 1, 0.0, 4.0)
+    two = Component("c", "C", "checkpoints", (fastest, slow), templates=("T",))
+    for prefer in ("speed", "small", "balanced"):
+        replaced = pick(two, vram_gib=8.0, installed={slow.file: slow.bytes}, prefer=prefer)
+        assert replaced.better == fastest and "kept" not in replaced.reason, prefer
+
+
+def test_a_fresh_pick_is_not_called_kept_and_names_its_alternatives() -> None:
+    fresh = chosen(24.0)
+    assert "kept" not in fresh.reason
+    assert fresh.variant not in fresh.alternatives and set(fresh.alternatives) == {SMALL, MIDDLE}
+    pinned = pick(DEMO, vram_gib=24.0, installed={}, pinned="middle.safetensors")
+    assert pinned.variant not in pinned.alternatives and len(pinned.alternatives) == 2
+
+
+def test_a_slow_file_and_a_better_one_are_both_said() -> None:
+    # 8 GiB with only LARGE installed: it runs with offloading (needs 12), and MIDDLE would suit better
+    found = pick(DEMO, vram_gib=8.0, installed={LARGE.file: LARGE.bytes})
+    assert found.file == LARGE.file
+    assert "needs about 12 GB" in found.warning and found.warning.endswith("Plenio Setup can fetch it.")
+    assert found.warning.index("needs about") < found.warning.index("would suit this card better")
+
+
+def test_a_pick_and_a_plan_cannot_be_changed_afterwards() -> None:
+    import dataclasses
+
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        chosen(8.0).file = "other"  # type: ignore[misc]

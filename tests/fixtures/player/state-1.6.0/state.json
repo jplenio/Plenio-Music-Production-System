@@ -1,0 +1,46 @@
+{
+ "playlists": [
+  {
+   "id": "p1a2b3c4",
+   "name": "Test tones",
+   "songs": [
+    "84c06ed19949",
+    "bf666ce018f5"
+   ],
+   "hue": 200,
+   "visual": "nova-aurora"
+  }
+ ],
+ "favorites": [
+  "84c06ed19949"
+ ],
+ "plays": {},
+ "last_played": {},
+ "tags": {
+  "84c06ed19949": [
+   "calm"
+  ]
+ },
+ "settings": {
+  "visuals": {
+   "enabled": true,
+   "mode": "auto",
+   "sensitivity": 1.2,
+   "pool": [
+    "bars",
+    "scope",
+    "nova-aurora"
+   ],
+   "fixed": "bars"
+  },
+  "lyrics": {
+   "font": "inter",
+   "size": 1.1
+  },
+  "theme": "dark",
+  "crossfade": 3
+ },
+ "ratings": {
+  "bf666ce018f5": 4.0
+ }
+}
