@@ -10,7 +10,7 @@ import { computed, ref } from 'vue'
 import { engine } from '../engine'
 import { isPhone } from '../layout'
 import { lineIndex, lines, paletteStyle } from '../now'
-import { current, duration, isFavorite, next, nowPlayingOpen, playing, previous, settings, time, toggleFavorite } from '../store'
+import { current, duration, isFavorite, next, nowPlayingOpen, openNowPlaying, playing, previous, settings, time, toggleFavorite } from '../store'
 import CoverArt from './CoverArt.vue'
 import Icon from './Icon.vue'
 import VisualCanvas from './VisualCanvas.vue'
@@ -22,6 +22,7 @@ const progress = computed(() => (duration.value > 0 ? Math.min(1, time.value / d
 
 // a swipe: sideways the next or the previous song, up Now playing; the card follows the finger a little
 const shift = ref(0)
+const art = ref<HTMLElement | null>(null)
 /** The next song comes in from the side the finger swiped from. */
 const arriving = ref<'' | 'from-left' | 'from-right'>('')
 let start: { x: number; y: number; at: number } | null = null
@@ -47,7 +48,7 @@ function up(event: PointerEvent): void {
   } else if (dy < -50 && Math.abs(dy) > Math.abs(dx)) nowPlayingOpen.value = true
 }
 function open(): void {
-  if (Math.abs(shift.value) < 4) nowPlayingOpen.value = true
+  if (Math.abs(shift.value) < 4) openNowPlaying(art.value)
 }
 </script>
 
@@ -68,7 +69,7 @@ function open(): void {
       @click="open"
       @keydown.enter="nowPlayingOpen = true"
     >
-      <span class="art"><CoverArt :song="current" :live="playing" rounded :size="48" /></span>
+      <span ref="art" class="art"><CoverArt :song="current" :live="playing" rounded :size="48" /></span>
       <span class="meta">
         <b>{{ current.title }}</b>
         <Transition name="lyric" mode="out-in"><small :key="line">{{ line || current.genre || current.style.split(',')[0] }}</small></Transition>

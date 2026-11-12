@@ -4,11 +4,21 @@
 import { computed, ref } from 'vue'
 
 import type { Playlist, SongSummary } from '../api'
-import { byId, go, library, newPlaylist, playSongs, state } from '../store'
+import { byId, go, library, newPlaylist, playSongs, route, state } from '../store'
+import { moveWith } from '../layout'
+import { nextTick } from 'vue'
 import { countOf, formatTime } from '../timing'
 import CoverArt from './CoverArt.vue'
 import Icon from './Icon.vue'
 
+/** A playlist opened from its tile: its mosaic moves to the page's head (layout.ts moveWith). */
+function openPlaylist(id: string, tile: Element): void {
+  moveWith(tile.querySelector('.mosaic'), 'playlist-mosaic', async () => {
+    go(`/playlist/${id}`)
+    route.value = `/playlist/${id}`
+    await nextTick()
+  })
+}
 const name = ref('')
 
 const smart = computed(() => {
@@ -51,7 +61,7 @@ function create(): void {
     </div>
     <h3>Yours</h3>
     <div class="grid">
-      <article v-for="{ p, songs } in own" :key="p.id" class="tile" :style="{ '--hue': p.hue ?? 260 }" @click="go(`/playlist/${p.id}`)">
+      <article v-for="{ p, songs } in own" :key="p.id" class="tile" :style="{ '--hue': p.hue ?? 260 }" @click="openPlaylist(p.id, $event.currentTarget as Element)">
         <div class="mosaic" :class="`n${Math.min(4, songs.length)}`">
           <CoverArt v-for="s in songs.slice(0, 4)" :key="s.id" :song="s" :size="120" />
           <Icon v-if="!songs.length" name="playlist" :size="46" />

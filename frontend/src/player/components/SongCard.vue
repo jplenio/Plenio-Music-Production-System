@@ -5,7 +5,7 @@
 import type { SongSummary } from '../api'
 import { isNew } from '../live'
 import { isPhone } from '../layout'
-import { current, go, isFavorite, openSong, playing, songTags } from '../store'
+import { current, go, isFavorite, openSong, playing, songTags, openNowPlaying } from '../store'
 import { formatTime } from '../timing'
 import CoverArt from './CoverArt.vue'
 import Icon from './Icon.vue'
@@ -40,7 +40,7 @@ function open(event: Event): void {
     <div class="art">
       <CoverArt :song="song" :live="current?.id === song.id && playing" rounded :size="list ? 56 : 240" />
       <button class="play" title="Play" @click.stop="emit('play')"><Icon :name="current?.id === song.id && playing ? 'pause' : 'play'" :size="22" /></button>
-      <span v-if="current?.id === song.id && playing" class="eq"><i /><i /><i /><i /></span>
+      <span v-if="current?.id === song.id && playing" class="eq" role="button" title="Now playing" @click.stop="openNowPlaying(($event.currentTarget as Element).parentElement)"><i /><i /><i /><i /></span>
     </div>
     <div class="text">
       <a class="title" @click="titleClick">{{ song.title }}</a>

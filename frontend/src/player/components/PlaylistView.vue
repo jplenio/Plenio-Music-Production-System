@@ -76,7 +76,7 @@ function removeAll(): void {
 <template>
   <div v-if="playlist" class="pl" :style="{ '--hue': playlist.hue ?? 260 }">
     <section class="head">
-      <div class="mosaic" :class="`n${covers.length}`">
+      <div class="mosaic" :class="`n${covers.length}`" style="view-transition-name: playlist-mosaic">
         <CoverArt v-for="s in covers" :key="s.id" :song="s" :size="160" />
         <div v-if="!covers.length" class="blank"><Icon name="playlist" :size="54" /></div>
       </div>

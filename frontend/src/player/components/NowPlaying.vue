@@ -190,7 +190,7 @@ defineExpose({ nextVisual: () => visual.value?.next(), setView: (v: View) => (vi
 
     <main v-if="current" class="stage" title="" @dblclick.self="visualFullscreen">
       <section v-if="view === 'stage'" class="cover-col">
-        <div class="cover-wrap" :class="{ playing }">
+        <div class="cover-wrap" :class="{ playing }" style="view-transition-name: np-cover">
           <CoverArt :song="current" :live="playing" rounded :size="420" />
         </div>
         <h1 @click="go(`/song/${current.id}`); nowPlayingOpen = false">{{ current.title }}</h1>

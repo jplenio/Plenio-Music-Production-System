@@ -15,7 +15,7 @@ import { type VisualSettings, withDefaults } from './visuals/chooser'
 import { type MakePreset, presetsOf } from './make/presets'
 import { type Remembered, rememberedOf } from './make/remember'
 import { ownTags } from '../shared/lyricsTags'
-import { withTransition } from './layout'
+import { moveWith, withTransition } from './layout'
 import type { Before } from './people'
 
 export interface Settings {
@@ -660,6 +660,14 @@ export const time = ref(0)
 export const heard = ref(0)
 export const duration = ref(0)
 export const nowPlayingOpen = ref(false)
+/** Now playing opened from ``from`` (the slim player's cover, a card's): the cover moves there (layout.ts). */
+export function openNowPlaying(from?: Element | null): void {
+  if (nowPlayingOpen.value) return
+  moveWith(from, 'np-cover', async () => {
+    nowPlayingOpen.value = true
+    await nextTick()
+  })
+}
 /** The song put back where it stopped when the page opened, and not played since: the bar's ▶ (and Space)
  * goes on from there; its page or its card starts it from the beginning (owner's report 2026-10-16: songs
  * started in the middle). */

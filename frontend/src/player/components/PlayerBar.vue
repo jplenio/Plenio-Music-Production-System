@@ -15,6 +15,7 @@ import {
   muted,
   next,
   nowPlayingOpen,
+  openNowPlaying,
   openCurrentPage,
   playing,
   previous,
@@ -60,7 +61,7 @@ function volume(event: Event): void {
 <template>
   <footer class="bar" :style="paletteStyle">
     <div class="song" v-if="current">
-      <button class="art" title="Now playing (F)" @click="nowPlayingOpen = true">
+      <button class="art" title="Now playing (F)" @click="openNowPlaying(($event.currentTarget as Element).querySelector('.cover, img, canvas, div') ?? ($event.currentTarget as Element))">
         <CoverArt :song="current" :live="playing" rounded :size="56" />
         <span class="open"><Icon name="expand" :size="18" /></span>
       </button>

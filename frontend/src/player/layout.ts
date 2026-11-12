@@ -54,3 +54,20 @@ export function withTransition(change: () => void | Promise<void>): void {
   if (transition?.finished) transition.finished.then(done, done)
   else done()
 }
+
+/**
+ * One of the three moves a user makes most (phase 7.10, PD §9.6) - a card or the slim player to Now playing, a
+ * playlist to its page: ``from`` carries ``name`` for the moment of the change, the page's element that receives it
+ * has the same name in its style, and the browser moves one into the other. Without View Transitions, or with less
+ * motion asked for, the change just happens.
+ */
+export function moveWith(from: Element | null | undefined, name: string, change: () => void | Promise<void>): void {
+  const el = from instanceof HTMLElement ? from : null
+  if (el) el.style.viewTransitionName = name
+  withTransition(async () => {
+    if (el) el.style.viewTransitionName = ''
+    await change()
+  })
+  // without a transition the change ran at once: the source keeps no name
+  if (el && !document.documentElement.classList.contains('vt')) el.style.viewTransitionName = ''
+}

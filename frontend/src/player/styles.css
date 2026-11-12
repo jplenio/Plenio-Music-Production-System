@@ -1,19 +1,25 @@
 /* The Plenio Player's base: the colours (the song's palette sets --accent, --accent2, --deep, --glow),
    the fonts of the system (the player works offline), buttons, chips and the scrollbars. */
 /* a song's page opened from a card: its cover glides there, the rest fades (layout.ts withTransition) */
-::view-transition-group(song-cover) {
+::view-transition-group(song-cover),
+::view-transition-group(np-cover),
+::view-transition-group(playlist-mosaic) {
   animation-duration: 0.42s;
-  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation-timing-function: var(--ease);
 }
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 0.22s;
+  animation-duration: var(--dur);
+  animation-timing-function: var(--ease);
 }
 html.vt .main > * {
   animation: none !important;
 }
 
 :root {
+  /* one easing and one duration for every move of the page (phase 7.10) */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur: 220ms;
   --font: 'Inter', 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
   --mono: 'JetBrains Mono', 'Cascadia Code', 'SF Mono', Consolas, 'Liberation Mono', monospace;
   --muted: rgba(235, 232, 245, 0.52);
