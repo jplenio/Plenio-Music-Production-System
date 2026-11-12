@@ -1,6 +1,6 @@
 # Plenio Music Production System - notes for a coding agent
 
-A ComfyUI custom-node pack: song writing with local LLMs, YuE2 and MiniMax Music 3, an editable Song Sheet, covers, stems, mastering, release export, a Song API, and the Plenio Player (a program of its own). Published version: 1.6.0. **In work: 2.0.0**, by [docs/design/v2-implementation-plan.md](docs/design/v2-implementation-plan.md).
+A ComfyUI custom-node pack: song writing with local LLMs, YuE2 and MiniMax Music 3, an editable Song Sheet, covers, stems, mastering, release export, a Song API, and the Plenio Player (a program of its own). Published version: 1.6.0. **2.0.0 is prepared** (`release.py prepare`, not tagged), by [docs/design/v2-implementation-plan.md](docs/design/v2-implementation-plan.md).
 
 ## Rules that always hold
 
@@ -76,7 +76,7 @@ A session that takes over reads `.claude/handover.md` first if it exists (local,
 - Done in phase 9: 9.1 CI tiers (`ci.yml` fast, io, host on v0.41.0 and v0.44.2, frontend, package, browser; `weekly.yml` against master), 9.2 snapshots per tag (`tests/fixtures/node_types/`), 9.5 Hypothesis profiles, 9.6 docs; 9.3 mutation runs (`tools/mutation.py`, mutmut 2.5.1 in `.devdeps`, in an export of HEAD) in progress, 9.4 follows from them.
 - Done in phase D: D1 `tools/facts.py` (+ D-3: ComfyUI 0.41.0 minimum), D2 `resources/media.toml` + `tools/media_links.py` + `docs/go/`, D3 `tools/doc_check.py`, D4 rewrites incl. `docs/user/from-1x-to-2.md`, D5 VitePress site (`docs/.vitepress`, `pages.yml`; the owner switches Pages to Actions), D6 README top, D7 ADR-0014.
 - Phase M in `../Plenio-Media` (its own local git repository; `tools/tutorials` moved there as `legacy/`): M1, M2, M6, M7, M8 done; F1 first render for the owner's approval; M3 (tutorial scenes), M4 (F2-F10), M5 (stills) owed.
-- Phase R: R0 `tools/release.py`, R1 `release.yml` + `verify_install.py` (the release zip carries the add-on), R2 `registry_status.py` + `registry.yml`, R4 migration tests done; R5 full check and R6 `prepare 2.0.0` after checkpoint 5 (Fable).
+- Phase R: R0-R2, R4, R5 (checkpoint 5 passed on its fixes), R6 (`94ecc13`: 2.0.0 prepared, `verify` passes) done; R3 (the Registry's verdict) after the launch. The owner tags and pushes.
 - After adding a test or a node: `python tools/facts.py --write` (the README counts them; the fast tier checks it).
 - Setup in the browser: `tools/dev_server.py --fake-hub <port>` and `tools/setup_check.mjs` (a local stand-in for Hugging Face, reached as `HF_ENDPOINT`).
 - Reviews at the plan's checkpoints run as a subagent (`model: fable`, `effort: high`), read-only, focused; next one: phase 5.
