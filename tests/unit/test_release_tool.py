@@ -107,3 +107,9 @@ def test_prepare_takes_only_this_versions_benchmark_with_every_brief(
     path.write_text(json.dumps(partial), encoding="utf-8")
     with pytest.raises(SystemExit, match=r"no successful run of \['sung-90'\]"):
         release.prepare("2.0.0", path, "2026-12-01")
+
+
+def test_the_notes_link_files_at_the_tag_not_relative() -> None:
+    text = release_notes.absolute_links("[guide](docs/user/x.md) [site](https://a.b/) [here](#top)", "2.0.0")
+    assert "](https://github.com/jplenio/Plenio-Music-Production-System/blob/v2.0.0/docs/user/x.md)" in text
+    assert "](https://a.b/)" in text and "](#top)" in text

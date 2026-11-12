@@ -57,7 +57,20 @@ def notes(version: str, changelog: str, install_line: str) -> str:
         "[what changes](https://github.com/jplenio/Plenio-Music-Production-System/blob/main/docs/user/from-1x-to-2.md).",
         "",
     ]
-    return "\n".join(lines)
+    return absolute_links("\n".join(lines), version)
+
+
+REPOSITORY = "https://github.com/jplenio/Plenio-Music-Production-System"
+
+
+def absolute_links(text: str, version: str) -> str:
+    """The CHANGELOG's links, relative to the repository's root, as links to the files at the version's tag: the
+    notes live in docs/releases/ and on the GitHub release page, where a relative link leads nowhere."""
+    return re.sub(
+        r"\]\((?![a-z][a-z0-9+.-]*:|#|/)([^)\s]+)\)",
+        lambda m: f"]({REPOSITORY}/blob/v{version}/{m.group(1)})",
+        text,
+    )
 
 
 def target(version: str) -> Path:
