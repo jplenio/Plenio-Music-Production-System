@@ -1,0 +1,510 @@
+{
+ "about": "The library's search: the player's page (search.ts) and the Player API (search.py) find the same songs in the same order for each query. Invented songs.",
+ "songs": [
+  {
+   "id": "s1",
+   "title": "Neon Rain",
+   "created": "2026-10-01T10:00:00",
+   "year": "2026",
+   "seconds": 150.0,
+   "model": "yue2",
+   "kind": "song",
+   "brief": {
+    "description": "a night drive",
+    "creativity": 100
+   },
+   "genre": "synthwave",
+   "mood": "dreamy",
+   "language": "english",
+   "vocals": "sung",
+   "instrumental": false,
+   "arrangement": "",
+   "template": "1 · YuE2 · Song",
+   "style": "",
+   "lyrics": "streetlights hum in the rain",
+   "tags": {},
+   "plenio": "1.6.0",
+   "has": {
+    "audio": true,
+    "original": false,
+    "cover": true,
+    "pdf": false,
+    "lines": false,
+    "notes": false,
+    "stems": false,
+    "timing": false,
+    "score": false
+   },
+   "writer": "gemma",
+   "bpm": 104
+  },
+  {
+   "id": "s2",
+   "title": "Paper Boats",
+   "created": "2026-10-03T10:00:00",
+   "year": "2026",
+   "seconds": 200.0,
+   "model": "yue2",
+   "kind": "song",
+   "brief": {
+    "creativity": 50,
+    "key": "G major"
+   },
+   "genre": "folk",
+   "mood": "warm",
+   "language": "english",
+   "vocals": "sung",
+   "instrumental": false,
+   "arrangement": "",
+   "template": "1 · YuE2 · Song",
+   "style": "acoustic guitar, soft voice",
+   "lyrics": "",
+   "tags": {},
+   "plenio": "1.6.0",
+   "has": {
+    "audio": true,
+    "original": false,
+    "cover": true,
+    "pdf": false,
+    "lines": false,
+    "notes": false,
+    "stems": false,
+    "timing": false,
+    "score": false
+   },
+   "writer": "gemma",
+   "bpm": 88
+  },
+  {
+   "id": "s3",
+   "title": "Rain Dance",
+   "created": "2026-09-20T10:00:00",
+   "year": "2026",
+   "seconds": 150.0,
+   "model": "yue2",
+   "kind": "song",
+   "brief": {},
+   "genre": "latin pop",
+   "mood": "happy",
+   "language": "english",
+   "vocals": "instrumental",
+   "instrumental": true,
+   "arrangement": "",
+   "template": "1 · YuE2 · Song",
+   "style": "",
+   "lyrics": "",
+   "tags": {},
+   "plenio": "1.4.1",
+   "has": {
+    "audio": true,
+    "original": false,
+    "cover": true,
+    "pdf": true,
+    "lines": false,
+    "notes": false,
+    "stems": false,
+    "timing": false,
+    "score": false
+   },
+   "writer": "gemma",
+   "bpm": 122
+  },
+  {
+   "id": "s4",
+   "title": "Café Lumière",
+   "created": "2026-08-11T10:00:00",
+   "year": "2026",
+   "seconds": 150.0,
+   "model": "yue2",
+   "kind": "cover",
+   "brief": {},
+   "genre": "chanson",
+   "mood": "",
+   "language": "french",
+   "vocals": "sung",
+   "instrumental": false,
+   "arrangement": "",
+   "template": "1 · YuE2 · Song",
+   "style": "",
+   "lyrics": "la pluie sur les toits",
+   "tags": {},
+   "plenio": "1.6.0",
+   "has": {
+    "audio": true,
+    "original": false,
+    "cover": true,
+    "pdf": false,
+    "lines": false,
+    "notes": false,
+    "stems": false,
+    "timing": false,
+    "score": false
+   },
+   "writer": "gemma",
+   "bpm": 96,
+   "score_key": "Am"
+  },
+  {
+   "id": "s5",
+   "title": "Iron Hearts",
+   "created": "2026-10-05T10:00:00",
+   "year": "2026",
+   "seconds": 95.0,
+   "model": "minimax",
+   "kind": "song",
+   "brief": {},
+   "genre": "metal",
+   "mood": "dark",
+   "language": "english",
+   "vocals": "sung",
+   "instrumental": false,
+   "arrangement": "",
+   "template": "3 · MiniMax · Song",
+   "style": "",
+   "lyrics": "",
+   "tags": {
+    "artist": "The Night Shift"
+   },
+   "plenio": "1.6.0",
+   "has": {
+    "audio": true,
+    "original": false,
+    "cover": true,
+    "pdf": false,
+    "lines": false,
+    "notes": false,
+    "stems": false,
+    "timing": false,
+    "score": false
+   },
+   "writer": "gemma",
+   "bpm": 160
+  },
+  {
+   "id": "s6",
+   "title": "Old Tape",
+   "created": "2025-12-24T10:00:00",
+   "year": "2025",
+   "seconds": 150.0,
+   "model": "",
+   "kind": "other",
+   "brief": {},
+   "genre": "",
+   "mood": "",
+   "language": "english",
+   "vocals": "sung",
+   "instrumental": false,
+   "arrangement": "",
+   "template": "1 · YuE2 · Song",
+   "style": "",
+   "lyrics": "",
+   "tags": {
+    "album": "Winter Rain"
+   },
+   "plenio": "",
+   "has": {
+    "audio": true,
+    "original": false,
+    "cover": true,
+    "pdf": false,
+    "lines": false,
+    "notes": false,
+    "stems": false,
+    "timing": false,
+    "score": false
+   },
+   "writer": "gemma",
+   "other": true
+  }
+ ],
+ "state": {
+  "favorites": [
+   "s2"
+  ],
+  "tags": {
+   "s1": [
+    "party",
+    "drive"
+   ],
+   "s5": [
+    "party"
+   ]
+  },
+  "plays": {
+   "s1": 3,
+   "s4": 1
+  },
+  "ratings": {
+   "s1": 4.5,
+   "s3": 2
+  }
+ },
+ "measured": {
+  "s1": 4.0,
+  "s2": null
+ },
+ "cases": [
+  {
+   "query": "",
+   "ids": [
+    "s5",
+    "s2",
+    "s1",
+    "s3",
+    "s4",
+    "s6"
+   ]
+  },
+  {
+   "query": "rain",
+   "ids": [
+    "s1",
+    "s3",
+    "s6"
+   ]
+  },
+  {
+   "query": "Rain -dance",
+   "ids": [
+    "s1",
+    "s6"
+   ]
+  },
+  {
+   "query": "genre:folk",
+   "ids": [
+    "s2"
+   ]
+  },
+  {
+   "query": "bpm:>100",
+   "ids": [
+    "s5",
+    "s1",
+    "s3"
+   ]
+  },
+  {
+   "query": "bpm:90-110",
+   "ids": [
+    "s1",
+    "s4"
+   ]
+  },
+  {
+   "query": "len:<2",
+   "ids": [
+    "s5"
+   ]
+  },
+  {
+   "query": "#party",
+   "ids": [
+    "s5",
+    "s1"
+   ]
+  },
+  {
+   "query": "tag:party is:fav",
+   "ids": []
+  },
+  {
+   "query": "is:fav",
+   "ids": [
+    "s2"
+   ]
+  },
+  {
+   "query": "is:unplayed",
+   "ids": [
+    "s5",
+    "s2",
+    "s3",
+    "s6"
+   ]
+  },
+  {
+   "query": "has:pdf",
+   "ids": [
+    "s3"
+   ]
+  },
+  {
+   "query": "stars:>=4",
+   "ids": [
+    "s1"
+   ]
+  },
+  {
+   "query": "stars:none",
+   "ids": [
+    "s5",
+    "s2",
+    "s4",
+    "s6"
+   ]
+  },
+  {
+   "query": "measured:none",
+   "ids": [
+    "s5",
+    "s2",
+    "s3",
+    "s4",
+    "s6"
+   ]
+  },
+  {
+   "query": "creativity:balanced",
+   "ids": [
+    "s2"
+   ]
+  },
+  {
+   "query": "creativity:>60",
+   "ids": [
+    "s1"
+   ]
+  },
+  {
+   "query": "key:Am",
+   "ids": [
+    "s4"
+   ]
+  },
+  {
+   "query": "key:g",
+   "ids": [
+    "s2"
+   ]
+  },
+  {
+   "query": "lang:french",
+   "ids": [
+    "s4"
+   ]
+  },
+  {
+   "query": "cafe",
+   "ids": [
+    "s4"
+   ]
+  },
+  {
+   "query": "\"night drive\"",
+   "ids": [
+    "s1"
+   ]
+  },
+  {
+   "query": "vocals:sung",
+   "ids": [
+    "s5",
+    "s2",
+    "s1",
+    "s4",
+    "s6"
+   ]
+  },
+  {
+   "query": "vocals:instrumental",
+   "ids": [
+    "s3"
+   ]
+  },
+  {
+   "query": "model:master",
+   "ids": []
+  },
+  {
+   "query": "plenio:<1.5",
+   "ids": [
+    "s3"
+   ]
+  },
+  {
+   "query": "plenio:from 1.6",
+   "ids": []
+  },
+  {
+   "query": "plenio:>=1.6",
+   "ids": [
+    "s5",
+    "s2",
+    "s1",
+    "s4"
+   ]
+  },
+  {
+   "query": "plenio:1.4",
+   "ids": [
+    "s3"
+   ]
+  },
+  {
+   "query": "kind:other",
+   "ids": [
+    "s6"
+   ]
+  },
+  {
+   "query": "artist:night",
+   "ids": [
+    "s5"
+   ]
+  },
+  {
+   "query": "album:winter",
+   "ids": [
+    "s6"
+   ]
+  },
+  {
+   "query": "title:rain",
+   "ids": [
+    "s1",
+    "s3"
+   ]
+  },
+  {
+   "query": "year:2025",
+   "ids": [
+    "s6"
+   ]
+  },
+  {
+   "query": "is:cover",
+   "ids": [
+    "s4"
+   ]
+  },
+  {
+   "query": "is:other",
+   "ids": [
+    "s6"
+   ]
+  },
+  {
+   "query": "mode:x",
+   "ids": []
+  },
+  {
+   "query": "unknown:thing",
+   "ids": []
+  },
+  {
+   "query": "-rain",
+   "ids": [
+    "s5",
+    "s2",
+    "s4"
+   ]
+  },
+  {
+   "query": "drive",
+   "ids": [
+    "s1"
+   ]
+  }
+ ]
+}

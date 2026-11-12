@@ -405,6 +405,14 @@ export interface GuestReaction {
   id: string
 }
 
+/** A command of the Player API for the page that plays (``plenio/player/remote.py``). */
+export type RemoteCommand = { n: number } & (
+  | { do: 'play' | 'pause' | 'toggle' | 'next' | 'previous' }
+  | { do: 'seek'; seconds: number }
+  | { do: 'queue'; id: string; where: 'next' | 'end' }
+  | { do: 'live'; on?: boolean; insert?: 'next' | 'end' | 'random'; auto?: boolean; atEnd?: 'again' | 'wait' }
+)
+
 export interface GuestWish {
   n: number
   op: 'up' | 'down' | 'next' | 'remove' | 'add'
@@ -557,6 +565,10 @@ const serverApi = {
     json<GuestStatus>('/api/guests', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(changes) }),
   /** What the page shows of the live playlist, for the guests. */
   showGuests: (shown: unknown) => post<{ ok: boolean }>('/api/guests/live', shown),
+  /** The Player API (remote.ts): this page's state, the commands for it (a long poll), its leaving. */
+  remoteReport: (shown: unknown) => post<{ ok: boolean }>('/api/remote/now', shown),
+  remoteCommands: (page: string, after: number, wait = 25) =>
+    json<{ commands: RemoteCommand[] }>(`/api/remote/commands?page=${encodeURIComponent(page)}&after=${after}&wait=${wait}`),
   /** The guests' wishes after ``after``, and their reactions after ``reacted`` (left out: only the counts). */
   guestWishes: (after: number, reacted?: number) =>
     json<{ wishes: GuestWish[]; last: number; reactions?: GuestReaction[]; last_reaction?: number; cheers?: Record<string, Record<string, number>> }>(

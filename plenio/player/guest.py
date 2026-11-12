@@ -38,6 +38,7 @@ import socket
 import threading
 import time
 from collections import deque
+from collections.abc import Callable
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
@@ -136,6 +137,8 @@ class GuestHub:
         self.lock = threading.Lock()
         self.settings = self._load()
         self.server: ThreadingHTTPServer | None = None
+        self.on_reaction: Callable[[dict[str, Any]], None] | None = None
+        """Told of each reaction counted (the Player API's ``reaction`` events)."""
         self.error = ""
         self.snapshot: dict[str, Any] = {}
         self.snapshot_at = 0.0
@@ -566,6 +569,8 @@ class GuestHub:
             self.last_reaction += 1
             self.reactions.append({"n": self.last_reaction, "kind": kind, "id": song})
             self._save_tally()
+            if self.on_reaction is not None:  # the Player API's events (server.serve)
+                self.on_reaction({"kind": kind, "id": song})
             answer: dict[str, Any] = {"ok": True, "cheers": dict(tally)}
             if self.settings["reactions_per_song"] == "one":
                 answer["mine"] = kind

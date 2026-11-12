@@ -64,6 +64,7 @@ import {
 import { loadMyPresets } from './visuals/drop'
 import { loadJobs, videosAtWork } from './jobs'
 import './live'
+import './remote'
 import { isPortable } from './portable'
 import { pollMake } from './make/state'
 

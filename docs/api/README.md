@@ -18,6 +18,7 @@ open source like the rest of Plenio (Apache 2.0); the music models have licences
 | **Every field** | [fields.md](fields.md) - generated from the five templates |
 | **Examples** | [examples/](examples/) - Python, JavaScript and shell, ready to run |
 | **API v1** | frozen, still served at `/plenio/api/v1`: [v1/README.md](v1/README.md) - see [Coming from v1](#coming-from-v1) |
+| **Player API** | the Plenio Player's remote control (what plays, play/pause, queue, Live Play, events): [player.md](player.md) |
 
 ## Contents
 

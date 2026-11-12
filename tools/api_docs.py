@@ -1,5 +1,5 @@
 """Write the Song API's reference for reading without a running ComfyUI: v2's ``docs/api/openapi.json`` and
-``docs/api/fields.md``, and v1's - frozen as 1.6.0 served it - in ``docs/api/v1/``.
+``docs/api/fields.md``, and v1's - frozen as 1.6.0 served it - in ``docs/api/v1/`` - and the Player API's ``docs/api/player-openapi.json``.
 
 A running ComfyUI describes its API itself (``GET /plenio/api/v2/openapi.json``, ``GET /plenio/api/v2/templates/{id}``),
 made from its templates and node definitions. These copies are made the same way from the shipped templates and the
@@ -23,6 +23,7 @@ from plenio import __version__  # noqa: E402
 from plenio.core.song_api import V1_TEMPLATES, Field, Template, api_templates, load_template  # noqa: E402
 from plenio.core.song_api_doc import openapi  # noqa: E402
 from plenio.core.song_api_doc_v2 import openapi_v2  # noqa: E402
+from plenio.player.player_api import openapi as player_openapi  # noqa: E402
 
 FOLDER = PROJECT / "docs" / "api"
 LIST_SHOWN = 12
@@ -138,6 +139,7 @@ def outputs() -> dict[Path, str]:
     for version, folder in (("v2", FOLDER), ("v1", FOLDER / "v1")):
         found[folder / "openapi.json"] = json.dumps(document(version), ensure_ascii=False, indent=1) + "\n"
         found[folder / "fields.md"] = fields_text(version)
+    found[FOLDER / "player-openapi.json"] = json.dumps(player_openapi(), ensure_ascii=False, indent=1) + "\n"
     return found
 
 

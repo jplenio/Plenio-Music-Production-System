@@ -30,6 +30,7 @@ from . import accounts as account_rules
 from . import folders as folder_choice
 from . import maker as maker_rules
 from . import other as other_music
+from . import player_api
 from .guest import GuestHub
 from .library import RETIRED_DIR, Library, song_detail
 from .measured import measured_for, ratings_of
@@ -37,6 +38,9 @@ from .network import REMOTE_HEADER, REMOTE_HOST_HEADER, NetworkAccess
 from .package import MAX_SONGS, PackageJobs, package_file, packages_dir
 from .package import listing as package_listing
 from .peaks import peaks
+from .remote import PlayerRemote, RemoteError, check_live, check_queue, check_transport
+from .search import Context as SearchContext
+from .search import search as search_songs
 from .song_page import render as render_song_page
 from .studio import StudioLauncher, StudioLaunchError
 from .thumbs import thumbnail
@@ -70,6 +74,8 @@ GZIP_MIN = 1400
 JSON, 1 MB compressed (2026-10-26) - a phone in the network had to load all of it at every start."""
 GZIP_TYPES = (".js", ".mjs", ".css", ".html", ".htm", ".svg", ".json", ".webmanifest")
 LIBRARY_WAIT_S = 2.0
+EVENTS_WAIT_S = 15.0
+"""The Player API's event stream says it is still there at least this often."""
 """While the folders are read the first time, the library's answer waits this long, then says how far it is."""
 THUMB_SIZES = (128, 256, 512, 768)
 """The sizes of the covers' small pictures (``?size=``): the page picks the smallest one large enough."""
@@ -292,6 +298,7 @@ def make_handler(
     accounts: account_rules.Accounts | None = None,
     maker: maker_rules.PartySongs | None = None,
     launcher: StudioLauncher | None = None,
+    remote: PlayerRemote | None = None,
 ) -> type[BaseHTTPRequestHandler]:
     """The requests' handler; with ``hosts`` it answers only requests addressed to one of them (a player on
     the loopback address is then out of reach of web pages that rename themselves to it: DNS rebinding).
@@ -300,8 +307,10 @@ def make_handler(
     their own; here their settings) - requests that come by them do all but what belongs to this computer
     alone. ``accounts``: the login (``plenio.player.accounts``) - each user's state of their own; without it
     every page has the player's state, as before. ``maker``: the party songs (``plenio.player.maker``) - songs
-    made from the page through ComfyUI's Song API."""
+    made from the page through ComfyUI's Song API. ``remote``: the Player API's reports and commands (one per
+    server: ``serve`` makes it)."""
 
+    hub = remote or PlayerRemote()
     jobs = VideoJobs(videos_dir(state.path.parent))
     packages = PackageJobs()
     # how well each song came out, measured: the record's, else measured once and kept (owner's request 2026-10-29)
@@ -655,6 +664,8 @@ def make_handler(
             parsed = urlparse(self.path)
             route = unquote(parsed.path)
             query = {k: v[0] for k, v in parse_qs(parsed.query).items()}
+            if route == "/api/v1" or route.startswith(("/api/v1/", "/api/remote/")):
+                return self._player_api("GET", route, query, None)
             if route == "/api/info":
                 # who answers here (ComfyUI's launcher looks for this), where the state is kept, which ComfyUI
                 return self._json(
@@ -878,6 +889,137 @@ def make_handler(
             if not target.is_file():
                 target = static / "index.html"
             return self._file(target, cache="/assets/" in route)
+
+        # --- Player API v1 (player_api.py, remote.py) -------------------------------------------------------------
+        def _api_error(self, status: int, code: str, message: str, hint: str = "") -> None:
+            self._json(player_api.error(code, message, hint), status)
+
+        def _player_api(self, method: str, route: str, query: dict[str, str], raw: bytes | None) -> None:
+            """``/api/v1/...`` (the Player API) and ``/api/remote/...`` (the page that plays reports and asks for
+            commands). This computer passes; from the network a login of the player (its session cookie)."""
+            account = self.account
+            if account is None:
+                return self._api_error(
+                    401, "unauthorized", "The player asks devices in the network to log in.",
+                    "Log in to the player in this browser, or send its session cookie.",
+                )  # fmt: skip
+            owner = str(account.get("id"))
+            body: Any = None
+            if method == "POST":
+                if not self._from_this_page():
+                    return self._api_error(
+                        400, "bad_request", "Send JSON (Content-Type: application/json).",
+                        "A page of another site cannot send JSON here without asking first.",
+                    )  # fmt: skip
+                try:
+                    body = json.loads(raw.decode("utf-8")) if raw else {}
+                except (ValueError, UnicodeDecodeError):
+                    return self._api_error(400, "bad_request", "The body is not JSON.")
+            key = (method, route.removeprefix(player_api.BASE).rstrip("/"))
+            try:
+                if route.startswith("/api/remote/"):
+                    return self._remote_page(method, route, query, body, owner)
+                if key == ("GET", ""):
+                    return self._json(player_api.index())
+                if key == ("GET", "/openapi.json"):
+                    return self._json(player_api.openapi())
+                if key == ("GET", "/now"):
+                    return self._json(player_api.now_answer(hub.now(owner), self._summary_of))
+                if key == ("POST", "/transport"):
+                    return self._json({"sent": hub.send(owner, check_transport(body))}, 202)
+                if key == ("GET", "/songs"):
+                    return self._api_songs(query, account)
+                if key == ("POST", "/queue"):
+                    command = check_queue(body, lambda song: library.song(song) is not None)
+                    return self._json({"sent": hub.send(owner, command)}, 202)
+                if key == ("GET", "/live"):
+                    return self._json(player_api.live_answer(hub.now(owner)))
+                if key == ("POST", "/live"):
+                    return self._json({"sent": hub.send(owner, check_live(body))}, 202)
+                if key == ("GET", "/events"):
+                    return self._api_events(owner)
+            except RemoteError as refused:
+                return self._api_error(refused.status, refused.code, str(refused), refused.hint)
+            return self._api_error(
+                404, "not_found", f"No {method} {route} in the Player API.", "See /api/v1."
+            )
+
+        def _summary_of(self, song_id: str) -> dict[str, Any] | None:
+            song = library.song(song_id)
+            return dict(song.summary) if song is not None else None
+
+        def _api_songs(self, query: dict[str, str], account: dict[str, Any]) -> None:
+            try:
+                limit = max(1, min(player_api.SONGS_LIMIT, int(query.get("limit", "50"))))
+            except ValueError:
+                return self._api_error(400, "invalid_value", "'limit' is a number from 1 to 500.")
+            words = query.get("q", "")
+            mine = state_of(account)
+            wants_measured = "measured:" in words or "auto:" in words
+            context = SearchContext.of_state(
+                mine.read() if mine is not None else {}, measured.stars(library) if wants_measured else None
+            )
+            found = search_songs(library.songs(), words, context)
+            return self._json(
+                {"songs": [player_api.song_view(s) for s in found[:limit]], "total": len(found)}
+            )
+
+        def _api_events(self, owner: str) -> None:
+            """Server-Sent Events: a ``now`` first, then ``now``, ``queue``, ``live``, ``reaction`` as they come;
+            ids ``<start>-<n>`` (a ``Last-Event-ID`` of another start of the player gets only what is new)."""
+            hub.open_stream()
+            try:
+                last = self.headers.get("Last-Event-ID") or ""
+                boot, _, number = last.partition("-")
+                after = int(number) if boot == BOOT and number.isdigit() else hub.last_event()
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+                self.send_header("Cache-Control", "no-cache")
+                self.end_headers()
+                self.close_connection = True
+                first = player_api.now_answer(hub.now(owner), self._summary_of)
+                self.wfile.write(self._event(f"{BOOT}-{after}", "now", first))
+                self.wfile.flush()
+                while True:
+                    found = hub.events(owner, after, EVENTS_WAIT_S)
+                    if not found:
+                        self.wfile.write(b": still here\n\n")
+                    for event in found:
+                        after = event.id
+                        data: Any = event.data
+                        if event.kind == "now":
+                            data = player_api.now_answer(hub.now(owner), self._summary_of)
+                        self.wfile.write(self._event(f"{BOOT}-{event.id}", event.kind, data))
+                    self.wfile.flush()
+            except OSError:  # the client went away
+                return None
+            finally:
+                hub.close_stream()
+
+        def _event(self, event_id: str, kind: str, data: Any) -> bytes:
+            text = json.dumps(without_places(data) if self.remote else data, ensure_ascii=False)
+            return f"id: {event_id}\nevent: {kind}\ndata: {text}\n\n".encode()
+
+        def _remote_page(self, method: str, route: str, query: dict[str, str], body: Any, owner: str) -> None:
+            """The page's side: ``POST /api/remote/now`` (its state), ``GET /api/remote/commands?page=&after=&wait=``
+            (a long poll for commands), ``POST /api/remote/leave`` (the page closes)."""
+            if method == "POST" and route == "/api/remote/now":
+                if not isinstance(body, dict) or not isinstance(body.get("page"), str):
+                    return self._api_error(400, "bad_request", "The page's state, with its 'page' id.")
+                hub.report(body["page"], owner, body)
+                return self._json({"ok": True})
+            if method == "POST" and route == "/api/remote/leave":
+                if isinstance(body, dict) and isinstance(body.get("page"), str):
+                    hub.leave(body["page"])
+                return self._json({"ok": True})
+            if method == "GET" and route == "/api/remote/commands":
+                try:
+                    after = int(query.get("after", "0"))
+                    wait = max(0.0, min(30.0, float(query.get("wait", "25"))))
+                except ValueError:
+                    return self._api_error(400, "invalid_value", "'after' and 'wait' are numbers.")
+                return self._json({"commands": hub.commands(query.get("page", ""), owner, after, wait)})
+            return self._api_error(404, "not_found", f"No {method} {route}.")
 
         def _from_this_page(self) -> bool:
             """A request that changes something must come from the player's own page: JSON (another site's
@@ -1258,6 +1400,8 @@ def make_handler(
                     return self._error(413, f"a recording of at most {maker_rules.SOURCE_LIMIT // 2**20} MB")
                 return self._make("POST", route, {k: v[0] for k, v in parse_qs(parsed.query).items()}, upload)
             raw = self._body()
+            if route == "/api/v1" or route.startswith(("/api/v1/", "/api/remote/")):
+                return self._player_api("POST", route, {}, raw)
             if route.startswith("/api/make/"):
                 return self._make("POST", route, {}, raw)
             if route in ("/api/studio/start", "/api/studio/stop"):
@@ -1394,6 +1538,12 @@ def serve(
     ComfyUI that started it (where *Open in ComfyUI* goes); ``guests``: the guests' access; ``network``: the
     player and ComfyUI from the network; ``accounts``: the login; ``maker``: the party songs."""
 
+    remote = PlayerRemote()
+    if (
+        guests is not None
+    ):  # the guests' reactions are events of the Player API (the live playlist is the admin's)
+        guests.on_reaction = lambda entry: remote.reaction(entry, account_rules.ADMIN)
+
     class Server(ThreadingHTTPServer):
         daemon_threads = True
         # On Windows SO_REUSEADDR lets a second player bind the same port, and the first one keeps
@@ -1417,6 +1567,7 @@ def serve(
                     accounts=accounts,
                     maker=maker,
                     launcher=launcher,
+                    remote=remote,
                 )
 
     return Server(
@@ -1431,5 +1582,6 @@ def serve(
             accounts=accounts,
             maker=maker,
             launcher=launcher,
+            remote=remote,
         ),
     )
