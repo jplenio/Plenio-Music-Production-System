@@ -34,7 +34,7 @@ from . import player_api
 from .guest import GuestHub
 from .library import RETIRED_DIR, Library, song_detail
 from .measured import measured_for, ratings_of
-from .network import REMOTE_HEADER, REMOTE_HOST_HEADER, NetworkAccess
+from .network import REMOTE_HEADER, REMOTE_HOST_HEADER, REMOTE_PEER_HEADER, NetworkAccess
 from .package import MAX_SONGS, PackageJobs, package_file, packages_dir
 from .package import listing as package_listing
 from .peaks import peaks
@@ -393,6 +393,12 @@ def make_handler(
             return self.headers.get(REMOTE_HEADER) == "1" and self.client_address[0] in ("127.0.0.1", "::1")
 
         @property
+        def here(self) -> bool:
+            """The request is this computer's own: a loopback address, not passed on by the gateway. A player started
+            with ``--host`` answers other computers directly - they are never this computer (review of phase 6)."""
+            return from_this_computer(self.client_address[0], self.remote)
+
+        @property
         def token(self) -> str:
             return account_rules.token_of(self.headers.get("Cookie"))
 
@@ -404,8 +410,8 @@ def make_handler(
                 return {"id": account_rules.ADMIN, "admin": True}
             found = accounts.session(self.token)
             if found is not None:
-                return found if not (found.get("admin") and self.remote) else None
-            return None if self.remote else accounts.admin()
+                return found if not (found.get("admin") and not self.here) else None
+            return accounts.admin() if self.here else None
 
         def _maker_who(self) -> tuple[dict[str, Any], str]:
             """Who makes a party song: the admin, a user - or a guest, known by a cookie of their own (set now
@@ -520,7 +526,7 @@ def make_handler(
 
         def _not_from_network(self, what: str) -> bool:
             """Answer 403 to a request from the network for what only this computer does; ``True``: answered."""
-            if not self.remote:
+            if self.here:
                 return False
             self._error(403, f"{what} - only on the computer itself, not from the network")
             return True
@@ -572,13 +578,13 @@ def make_handler(
                 self.wfile.write(body)
 
         def _json(self, data: Any, status: int = 200, cookie: str = "") -> None:
-            if self.remote:
+            if not self.here:
                 data = without_places(data)
             body = json.dumps(data, ensure_ascii=False).encode("utf-8")
             self._send(status, body, "application/json; charset=utf-8", cookie=cookie)
 
         def _error(self, status: int, message: str) -> None:
-            self._json({"error": REMOTE_FAILURE if status >= 500 and self.remote else message}, status)
+            self._json({"error": REMOTE_FAILURE if status >= 500 and not self.here else message}, status)
 
         def _unchanged(self, etag: str) -> bool:
             """The browser has this version already (``If-None-Match``): ``304`` answered."""
@@ -774,6 +780,8 @@ def make_handler(
                 # the guests' reactions per song, kept for good (apart from the favourites)
                 return self._json({"songs": guests.tallies() if guests else {}})
             if route == "/api/guests/wishes":
+                if not may_admin(self.account):
+                    return self._error(403, "the guests' wishes are for the host's page")
                 if guests is None:
                     return self._error(404, "no guests' access")
                 try:
@@ -946,6 +954,17 @@ def make_handler(
                 404, "not_found", f"No {method} {route} in the Player API.", "See /api/v1."
             )
 
+        def _inside_folders(self, path: Path) -> set[str]:
+            """A record's places relative to each song folder (and its parent: ComfyUI's output folder holds them)."""
+            out = set()
+            for root in library.folders:
+                for base in (root, root.parent):
+                    try:
+                        out.add(path.relative_to(base).as_posix())
+                    except ValueError:
+                        pass
+            return out
+
         def _summary_of(self, song_id: str) -> dict[str, Any] | None:
             song = library.song(song_id)
             return dict(song.summary) if song is not None else None
@@ -963,11 +982,8 @@ def make_handler(
             )
             songs: list[Any] = library.songs()
             record = query.get("record", "").replace("\\", "/").strip("/")
-            if (
-                record
-            ):  # the song whose record lies at this place inside a folder (the Song API's song id carries it)
-                ending = "/" + record
-                songs = [dict(s.summary) for s in library.every() if s.record.as_posix().endswith(ending)]
+            if record:  # the record at this place inside a song folder (a Song API song id carries it)
+                songs = [dict(s.summary) for s in library.every() if record in self._inside_folders(s.record)]
             found = search_songs(songs, words, context)
             return self._json(
                 {"songs": [player_api.song_view(s) for s in found[:limit]], "total": len(found)}
@@ -976,7 +992,9 @@ def make_handler(
         def _api_events(self, owner: str) -> None:
             """Server-Sent Events: a ``now`` first, then ``now``, ``queue``, ``live``, ``reaction`` as they come;
             ids ``<start>-<n>`` (a ``Last-Event-ID`` of another start of the player gets only what is new)."""
-            hub.open_stream()
+            if self.command == "HEAD":
+                return self._api_error(405, "bad_request", "GET the event stream.")
+            hub.open_stream(owner)
             try:
                 last = self.headers.get("Last-Event-ID") or ""
                 boot, _, number = last.partition("-")
@@ -1003,7 +1021,7 @@ def make_handler(
             except OSError:  # the client went away
                 return None
             finally:
-                hub.close_stream()
+                hub.close_stream(owner)
 
         def _event(self, event_id: str, kind: str, data: Any) -> bytes:
             text = json.dumps(without_places(data) if self.remote else data, ensure_ascii=False)
@@ -1019,7 +1037,7 @@ def make_handler(
                 return self._json({"ok": True})
             if method == "POST" and route == "/api/remote/leave":
                 if isinstance(body, dict) and isinstance(body.get("page"), str):
-                    hub.leave(body["page"])
+                    hub.leave(body["page"], owner)
                 return self._json({"ok": True})
             if method == "GET" and route == "/api/remote/commands":
                 try:
@@ -1105,6 +1123,9 @@ def make_handler(
                     return self._error(400 if network else 404, "the access from the network: on, regenerate")
                 return self._json(network.configure(changes))
             if route == "/api/guests":
+                # the party's way in is the host's (or a co-host's) to change - the grid of People & access says so
+                if not may_admin(self.account):
+                    return self._error(403, "only the host changes the guests' access")
                 try:
                     changes = json.loads(body.decode("utf-8")) if body else None
                 except ValueError:
@@ -1179,7 +1200,7 @@ def make_handler(
                 body = None
             if not isinstance(body, dict):
                 return self._error(400, "who logs in")
-            where = self.headers.get(REMOTE_HOST_HEADER, "network") if self.remote else self.client_address[0]
+            where = self._peer()
             try:
                 if body.get("admin"):
                     if self._not_from_network("The admin logs in"):
@@ -1194,6 +1215,13 @@ def make_handler(
             if self.token:
                 accounts.logout(self.token)
             return self._json({"user": user}, cookie=account_rules.session_cookie(token))
+
+        def _peer(self) -> str:
+            """The address wrong passwords and codes are counted by: the device's own (the gateway says it), never a
+            header the browser chose."""
+            if self.remote:
+                return "net:" + (self.headers.get(REMOTE_PEER_HEADER) or "network")
+            return str(self.client_address[0])
 
         def _invites(self, method: str, route: str, raw: bytes | None) -> None:
             """Invitations (People & access): the admin (or a helper) invites someone by name and role and gets a
@@ -1210,7 +1238,7 @@ def make_handler(
                 body = None
             if not isinstance(body, dict):
                 return self._error(400, "JSON, please")
-            where = self.headers.get(REMOTE_HOST_HEADER, "network") if self.remote else self.client_address[0]
+            where = self._peer()
             try:
                 if method == "POST" and route == "/api/invites/check":
                     found = accounts.invitation(str(body.get("code") or ""))
@@ -1494,9 +1522,11 @@ def make_handler(
                     status = error.status if isinstance(error, account_rules.AccountError) else 400
                     return self._error(status, str(error))
             if route == "/api/guests/live":
-                # what the page shows, for the guests: from the player's page only
+                # what the page shows, for the guests: from the host's page only (another user's queue is their own)
                 if not self._from_this_page():
                     return self._error(403, "only from the player's page")
+                if not may_admin(self.account):
+                    return self._error(403, "only the host's page shows the guests the live playlist")
                 try:
                     shown = json.loads(raw.decode("utf-8")) if raw else None
                 except ValueError:

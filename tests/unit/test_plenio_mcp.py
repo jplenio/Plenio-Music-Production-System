@@ -174,3 +174,19 @@ def test_only_this_computer_and_own_lyrics() -> None:
         tools.play_in_player("not-an-id")
     with pytest.raises(mcp.ToolError, match="does not answer"):
         tools.play_in_player(SONG_ID)
+
+
+def test_bad_input_does_not_end_the_server(player: str) -> None:
+    """Review of phase 6: a number as text, params as a list, a refusal in the page's own shape."""
+    tools = mcp.Tools("http://127.0.0.1:8188", player)
+    tools.plenio = FakeSongApi()
+    answers = session(
+        tools,
+        call(1, "job_status", id="job_1", wait_seconds="2.5"),
+        {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": ["a"]},
+        {"jsonrpc": "2.0", "id": 3, "method": "ping"},
+    )
+    by_id = {a.get("id"): a for a in answers}
+    assert by_id[1]["result"]["isError"] is True
+    assert by_id[2]["error"]["code"] == -32602
+    assert by_id[3]["result"] == {}

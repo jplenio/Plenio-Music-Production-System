@@ -41,6 +41,10 @@ AVATAR_LIMIT = 2 * 2**20
 AVATAR_TYPES = {b"\x89PNG\r\n\x1a\n": ".png", b"\xff\xd8\xff": ".jpg", b"GIF87a": ".gif", b"GIF89a": ".gif"}
 FAILURES_PER_10_MIN = 8
 """Wrong passwords (and invitation codes) one address may try in ten minutes."""
+FAILURES_PER_USER = 20
+"""Wrong passwords for one user in ten minutes, from any number of devices (a four-digit PIN tried from many)."""
+FAILURES_KEPT = 4096
+"""Addresses and users with wrong tries remembered at once (older ones are forgotten first)."""
 INVITE_SECONDS = 15 * 60
 """How long an invitation's code is valid."""
 INVITES_OPEN = 20
@@ -275,7 +279,7 @@ class Accounts:
             if not isinstance(entry, dict) or float(entry.get("until", 0)) <= at:
                 self._forget_invites(data, at)
                 self._save(data)
-                self._failures.setdefault(address, deque()).append(time.monotonic())
+                self._failed(address)
                 raise AccountError("This invitation is used up or too old - ask for a new one.", 410)
             user = self._add(data, str(entry["name"]), secret, str(entry["group"]))
             user["last_login"] = int(at)
@@ -376,16 +380,26 @@ class Accounts:
 
     # --- sessions -------------------------------------------------------------------------------------
 
-    def _limited(self, address: str) -> bool:
+    def _limited(self, address: str, limit: int = FAILURES_PER_10_MIN) -> bool:
         now = time.monotonic()
-        tries = self._failures.setdefault(address, deque())
+        tries = self._failures.get(address)
         while tries and now - tries[0] > 600:
             tries.popleft()
-        return len(tries) >= FAILURES_PER_10_MIN
+        return tries is not None and len(tries) >= limit
+
+    def _failed(self, key: str) -> None:
+        """A wrong password or code, counted for ``key`` (an address, a user); old keys are forgotten."""
+        now = time.monotonic()
+        if len(self._failures) > FAILURES_KEPT:
+            for gone in [k for k, v in self._failures.items() if not v or now - v[-1] > 600]:
+                del self._failures[gone]
+            while len(self._failures) > FAILURES_KEPT:
+                del self._failures[next(iter(self._failures))]
+        self._failures.setdefault(key, deque()).append(now)
 
     def login(self, user_id: str, password: str, address: str = "") -> tuple[str, dict[str, Any]]:
         """A new session for a user whose password is right: its token (for the cookie) and the user."""
-        if self._limited(address):
+        if self._limited(address) or self._limited(f"user:{user_id}", FAILURES_PER_USER):
             raise AccountError("Too many wrong passwords - wait a few minutes.", 429)
         with self.lock:
             data = self._load()
@@ -399,7 +413,8 @@ class Accounts:
                 str(user["hash"]),
             )
             if user is None or not ok:
-                self._failures.setdefault(address, deque()).append(time.monotonic())
+                self._failed(address)
+                self._failed(f"user:{user_id}")
                 raise AccountError("The name or the password is not right.", 401)
             user["last_login"] = int(time.time())
             token = self._open(data, user["id"])

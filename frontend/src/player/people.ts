@@ -64,6 +64,9 @@ const setMakes = (who: 'users' | 'guests') => (on: boolean, s: Settings): Change
 const reactions: Cell = { kind: 'setting', key: 'guests.reactions', read: (s) => s.guests.reactions, write: (on) => ({ guests: { reactions: on } }) }
 const changeLive: Cell = { kind: 'setting', key: 'guests.mode', read: (s) => s.guests.mode === 'change', write: (on) => ({ guests: { mode: on ? 'change' : 'view' } }) }
 const covers: Cell = { kind: 'setting', key: 'make.covers', read: (s) => !!s.make.covers, write: (on) => ({ make: { covers: on } }), needs: (s) => !!s.make.on }
+/** *In your network* gives the whole studio - every field, no party limits, at any time - to whoever comes in by
+ * it, also when logged in (the server's ``remote`` setting); off, they keep the party's rules. One setting for all. */
+const studio: Cell = { kind: 'setting', key: 'make.remote', read: (s) => !!s.make.remote, write: (on) => ({ make: { remote: on } }) }
 const noApproval: Cell = { kind: 'setting', key: 'make.approve', read: (s) => !s.make.approve, write: (on) => ({ make: { approve: !on } }), needs: (s) => !!s.make.on }
 
 /** The grid of PD §9.1: ✓ and - fixed, the rest a setting. The guests' page is everyone's way into the live
@@ -84,6 +87,7 @@ export const GRID: Row[] = [
     },
   },
   { id: 'covers', label: 'make covers', cells: { guest: covers, listener: never, maker: covers, cohost: yes, host: yes } },
+  { id: 'studio', label: 'the whole studio when they come by the network link (every field, no limits)', cells: { guest: studio, listener: never, maker: studio, cohost: yes, host: studio } },
   { id: 'approval', label: 'their song plays without approval', cells: { guest: noApproval, listener: never, maker: noApproval, cohost: yes, host: yes } },
   { id: 'approve', label: 'approve songs, invite people', cells: { guest: never, listener: never, maker: never, cohost: yes, host: yes } },
   { id: 'settings', label: 'remove songs, change settings', cells: { guest: never, listener: never, maker: never, cohost: yes, host: yes } },
@@ -107,11 +111,12 @@ export const STARTS: { id: Start; name: string; text: string }[] = [
 export function startChanges(start: Start): Changes {
   switch (start) {
     case 'me':
-      return { guests: { on: false }, make: { on: false } }
+      // only your own devices: they have the whole studio by the network link
+      return { guests: { on: false }, make: { on: false, remote: true } }
     case 'family':
-      return { guests: { on: false }, make: { on: true, users: true, guests: false, approve: false } }
+      return { guests: { on: false }, make: { on: true, users: true, guests: false, approve: false, remote: false } }
     case 'party':
-      return { guests: { on: true, mode: 'change', reactions: true }, make: { on: true, users: true, guests: true, approve: true } }
+      return { guests: { on: true, mode: 'change', reactions: true }, make: { on: true, users: true, guests: true, approve: true, remote: false } }
   }
 }
 
@@ -124,7 +129,7 @@ export function startOf(s: Settings): Start | null {
         const now = (have as Record<string, unknown>)[k]
         return typeof v === 'boolean' ? !!now === v : now === v
       })
-    return same(s.guests, want.guests) && (want.make?.on === false ? !s.make.on : same(s.make, want.make))
+    return same(s.guests, want.guests) && (want.make?.on === false ? !s.make.on && !!s.make.remote : same(s.make, want.make))
   }) ?? null
 }
 

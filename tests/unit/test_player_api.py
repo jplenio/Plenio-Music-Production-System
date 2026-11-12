@@ -286,3 +286,25 @@ def test_reactions_are_events_and_the_checks() -> None:
     for bad in ({}, {"color": "red"}, {"insert": "middle"}):
         with pytest.raises(RemoteError):
             check_live(bad)
+
+
+def test_one_account_cannot_take_another_s_page_or_every_stream() -> None:
+    """Review of phase 6: a page id reported by another account replaced the page, and one account could hold
+    every event stream."""
+    from plenio.player import remote as remote_module
+
+    hub = PlayerRemote()
+    hub.report("tv", "admin", {"playing": True, "now": {"id": "a"}, "secret": "x" * 1000})
+    with pytest.raises(RemoteError):
+        hub.report("tv", "anna", {"playing": False})
+    hub.leave("tv", "anna")  # not hers: stays
+    now = hub.now("admin")
+    assert now is not None and now["playing"] is True and "secret" not in now
+    for _ in range(remote_module.STREAMS_PER_OWNER):
+        hub.open_stream("anna")
+    with pytest.raises(RemoteError):
+        hub.open_stream("anna")
+    hub.open_stream("admin")  # the host still gets one
+    for n in range(remote_module.PAGES_PER_OWNER + 3):
+        hub.report(f"p{n}", "ben", {"playing": False})
+    assert sum(p.owner == "ben" for p in hub._pages.values()) == remote_module.PAGES_PER_OWNER

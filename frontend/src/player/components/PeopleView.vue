@@ -275,6 +275,7 @@ const groupName = (g: Group | undefined): string => GROUPS.find(([id]) => id ===
         <p>{{ made.name }} scans this code with their phone and chooses a password or a PIN. It works once, for {{ minutesLeft(made.until) }} minutes.</p>
         <QrCode :text="made.link" :size="220" />
         <p class="link-text">{{ made.link }}</p>
+        <p class="hint">The code also carries the link of <i>My devices</i>, so the phone reaches the player: it stays in the player as a guest even after the invitation is used - <i>New link</i> under My devices shuts every such device out.</p>
         <p v-if="!network?.on" class="warn">My devices is off: a phone reaches this address only on this computer. Switch on My devices first, or open the link here.</p>
         <div class="row end"><button class="primary" @click="made = null">Done</button></div>
       </div>

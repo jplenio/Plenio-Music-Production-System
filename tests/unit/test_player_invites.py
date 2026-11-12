@@ -147,3 +147,81 @@ def test_a_users_file_of_1_6_0_keeps_its_permissions(tmp_path: Path) -> None:
         assert found is not None and found["group"] == group and found["helper"] == (group == "admin")
         assert again.login(user["id"], "secret1", "10.0.0.1")[1]["group"] == group
     assert again.invitations() == []
+
+
+def test_wrong_pins_are_counted_by_device_and_by_user(player: int, tmp_path: Path) -> None:
+    """Review of phase 6: the limit followed the Host header the browser sent through the gateway - a new one each
+    try went on for ever. It follows the device's address (the gateway's own header) and each user as well."""
+    port = player
+    made = call(port, "POST", "/api/invites", {"name": "Ada", "group": "admin"}, **JSON)[2]
+    status, _, user = call(
+        port, "POST", "/api/invites/accept", {"code": made["code"], "password": "1234"}, **JSON
+    )
+    ada = user["user"]["id"]
+    for n in range(8):  # one device, a new Host header each time
+        headers = {
+            **FROM_NETWORK,
+            "X-Plenio-Remote-Host": f"10.0.0.{n}:8780",
+            "X-Plenio-Remote-Peer": "192.168.1.50",
+        }
+        assert (
+            call(port, "POST", "/api/login", {"user": ada, "password": f"{n:04d}"}, **JSON, **headers)[0]
+            == 401
+        )
+    headers = {**FROM_NETWORK, "X-Plenio-Remote-Peer": "192.168.1.50"}
+    assert call(port, "POST", "/api/login", {"user": ada, "password": "1234"}, **JSON, **headers)[0] == 429
+    # another device is not held back by the first one
+    other = {**FROM_NETWORK, "X-Plenio-Remote-Peer": "192.168.1.51"}
+    assert call(port, "POST", "/api/login", {"user": ada, "password": "1234"}, **JSON, **other)[0] == 200
+
+
+def test_many_devices_cannot_try_every_pin_of_one_user(tmp_path: Path) -> None:
+    accounts = Accounts(tmp_path)
+    user = accounts.create("Ben", "4711", "admin")
+    for n in range(20):
+        with pytest.raises(AccountError):
+            accounts.login(user["id"], f"{n:04d}", f"10.0.{n}.1")
+    with pytest.raises(AccountError) as wait:
+        accounts.login(user["id"], "4711", "10.9.9.9")
+    assert wait.value.status == 429
+
+
+def test_only_the_host_changes_the_guests_access(player: int) -> None:
+    """Review of phase 6: a listener's session (or no login) from the network could switch the party's page."""
+    port = player
+    made = call(port, "POST", "/api/invites", {"name": "Leo", "group": "listener"}, **JSON)[2]
+    _, headers, _ = call(
+        port, "POST", "/api/invites/accept", {"code": made["code"], "password": "1234"}, **JSON
+    )
+    leo = {"Cookie": headers["Set-Cookie"].split(";")[0], **FROM_NETWORK}
+    for who in (leo, FROM_NETWORK):
+        assert (
+            call(port, "PUT", "/api/guests", {"mode": "change", "regenerate": True}, **JSON, **who)[0] == 403
+        )
+        assert call(port, "POST", "/api/guests/live", {"live": True}, **JSON, **who)[0] == 403
+        assert call(port, "GET", "/api/guests/wishes", **who)[0] == 403
+
+
+def test_a_player_started_with_host_never_takes_another_computer_for_this_one(tmp_path: Path) -> None:
+    """Review of phase 6 (owner's decision 2026-11-12, security over rule 9): with ``--host`` a device in the network
+    reached the player directly and counted as this computer - the admin, without a login."""
+    from email.message import Message
+
+    from plenio.player import server as server_module
+
+    accounts = Accounts(tmp_path)
+    library = Library([tmp_path / "songs"], cache=tmp_path / "cache.json")
+    handler = server_module.make_handler(library, State(tmp_path / "state.json"), accounts=accounts)
+
+    def request(address: str) -> Any:
+        found = object.__new__(handler)
+        found.client_address = (address, 50000)
+        found.headers = Message()
+        return found
+
+    lan, here = request("192.168.1.77"), request("127.0.0.1")
+    assert lan.here is False and lan.account is None
+    assert here.here is True and here.account["admin"] is True
+    token, _ = accounts.login_admin()
+    lan.headers["Cookie"] = f"plenio_session={token}"
+    assert lan.account is None  # the admin's session counts on this computer only

@@ -367,3 +367,12 @@ def test_two_pages_saving_at_once_are_told_and_merge(player: tuple[int, NetworkA
     assert "rev" not in json.loads(state.path.read_text(encoding="utf-8"))
     # without a change named (a backup put back), it saves
     assert call(port, "PUT", "/api/state", json.dumps({"favorites": []}).encode(), **headers)[0] == 200
+
+
+def test_the_gateway_says_the_devices_own_address_and_drops_a_forged_one() -> None:
+    head = network_module.Head(
+        "POST", "/api/login", "HTTP/1.1",
+        [("Host", "spoofed.example:8780"), ("X-Plenio-Remote-Peer", "127.0.0.1"), ("Content-Type", "application/json")],
+    )  # fmt: skip
+    sent = network_module.forwarded_head(head, ("127.0.0.1", 8765), remote=True, peer="192.168.1.50").decode()
+    assert "X-Plenio-Remote-Peer: 192.168.1.50" in sent and "X-Plenio-Remote-Peer: 127.0.0.1" not in sent

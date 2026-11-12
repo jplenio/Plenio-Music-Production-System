@@ -7,6 +7,7 @@
  */
 import { ref, watch } from 'vue'
 
+import { canAdmin } from './account'
 import { api, type GuestStatus, type GuestWish } from './api'
 import { addLive, isNew, liveLog } from './live'
 import { isPortable } from './portable'
@@ -152,7 +153,7 @@ function stop(): void {
 
 if (!isPortable) {
   watch(
-    () => guestStatus.value?.on,
+    () => !!guestStatus.value?.on && canAdmin.value,
     (on) => (on ? void start() : stop())
   )
   // every change of the live playlist reaches the guests at once

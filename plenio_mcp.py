@@ -192,9 +192,10 @@ class Tools:
         except urllib.error.HTTPError as error:
             try:
                 problem = json.loads(error.read()).get("error") or {}
-            except ValueError:
+            except (ValueError, AttributeError):
                 problem = {}
-            raise ToolError(f"The player refused: {problem.get('message') or error.reason}") from None
+            text = problem.get("message") if isinstance(problem, dict) else str(problem)
+            raise ToolError(f"The player refused: {text or error.reason}") from None
         except (urllib.error.URLError, TimeoutError, ConnectionError):
             raise ToolError(
                 f"The Plenio Player does not answer at {self.player}. Start it from ComfyUI (Plenio Player button) "
@@ -207,10 +208,14 @@ class Tools:
             raise ToolError(f"There is no tool {name!r}.")
         try:
             return tool(**arguments)
-        except TypeError as error:
+        except (TypeError, ValueError) as error:
             raise ToolError(f"The arguments do not fit {name}: {error}") from None
         except PlenioError as error:
             raise ToolError(f"{error.message} {error.hint}".strip()) from None
+        except ToolError:
+            raise
+        except Exception as error:  # noqa: BLE001 - told to the assistant; the server goes on
+            raise ToolError(f"{name} failed: {type(error).__name__}: {error}") from None
 
 
 NAMES = frozenset(tool["name"] for tool in TOOLS)
@@ -254,6 +259,8 @@ def handle(message: dict[str, Any], tools: Tools) -> dict[str, Any] | None:
     method = message.get("method")
     ident = message.get("id")
     params = message.get("params") or {}
+    if not isinstance(params, dict):
+        params = {}
     if ident is None:  # a notification: notifications/initialized, notifications/cancelled
         return None
 
@@ -302,7 +309,15 @@ def serve(tools: Tools, source: TextIO, sink: TextIO) -> None:
             answer: dict[str, Any] | None = {"jsonrpc": "2.0", "id": None,
                                              "error": {"code": -32700, "message": "not JSON"}}  # fmt: skip
         else:
-            answer = handle(message, tools) if isinstance(message, dict) else None
+            try:
+                answer = handle(message, tools) if isinstance(message, dict) else None
+            except Exception as error:  # noqa: BLE001 - one bad message never ends the server
+                ident = message.get("id") if isinstance(message, dict) else None
+                answer = {
+                    "jsonrpc": "2.0",
+                    "id": ident,
+                    "error": {"code": -32603, "message": type(error).__name__},
+                }
         if answer is not None:
             sink.write(json.dumps(answer, ensure_ascii=False) + "\n")
             sink.flush()

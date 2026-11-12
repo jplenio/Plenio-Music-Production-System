@@ -27,9 +27,11 @@ page reports what it plays - on each change and every few seconds - and takes co
 ## Access
 
 - **This computer** needs nothing.
-- **Another device** logs in to the player (the player's login page) and sends the session cookie it got
-  (`Cookie: plenio_session=…`). A device in the network without a login gets `401` with the code `unauthorized`.
-  A player without users answers every device that reaches it, as its page does.
+- **Another device** comes in by the player's link of *My devices* (it reaches the player through that way in,
+  with the link's cookie) and logs in to the player (the player's login page), then sends both cookies it got
+  (`Cookie: plenio_net=…; plenio_session=…`). A device in the network without a login gets `401` with the code
+  `unauthorized`. A player started with `--host` treats a device of the network the same way - it is never this
+  computer.
 - Requests that change something send **JSON** (`Content-Type: application/json`). A page of another site
   cannot send that without asking first, and the player never says yes - so a web page you visit cannot pause
   your music.
@@ -133,7 +135,7 @@ start of the player gets what is new from now. At most 16 streams are open at on
 
 ## Errors
 
-Every refusal is `{"error": {"code", "message", "hint"}}`:
+Every refusal of the API's routes is `{"error": {"code", "message", "hint"}}` (a request the player refuses before it reaches them - an unknown `Host`, a failure of the player itself - answers `{"error": "<text>"}`):
 
 | Status | `code` | When |
 |---|---|---|

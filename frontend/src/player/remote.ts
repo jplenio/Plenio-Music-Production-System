@@ -13,7 +13,14 @@ import { isPortable } from './portable'
 import { current, duration, enqueue, index, loadError, loading, next, playing, previous, queue, settings, time, toggleCurrent } from './store'
 
 /** This page's own id among the open player pages (a new one each time the page opens). */
-export const PAGE_ID = (globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`).slice(0, 40)
+export const PAGE_ID = pageId()
+
+/** 128 random bits (``getRandomValues`` exists on a page served over plain HTTP too, ``randomUUID`` does not). */
+function pageId(): string {
+  const bytes = new Uint8Array(16)
+  globalThis.crypto.getRandomValues(bytes)
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
+}
 
 /** What this page reports (``remote.PlayerRemote.report``). */
 export function shownToRemote(): Record<string, unknown> {

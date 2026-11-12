@@ -24,6 +24,12 @@ COMMANDS_KEPT = 50
 EVENTS_KEPT = 200
 STREAMS = 16
 """Event streams open at once (each holds a thread of the player's server)."""
+STREAMS_PER_OWNER = 4
+"""Streams one account may hold (the rest stay for the others)."""
+PAGES_PER_OWNER = 8
+"""Pages one account may report at once (an older one gives way)."""
+REPORTED = ("page", "playing", "position", "duration", "now", "next", "queue_length", "live")
+"""What a page's report keeps: what the Player API shows, nothing else of the body."""
 TRANSPORT = ("play", "pause", "toggle", "next", "previous", "seek")
 WHERE = ("next", "end")
 LIVE_KEYS = {"on": bool, "auto": bool, "insert": ("next", "end", "random"), "atEnd": ("again", "wait")}
@@ -136,6 +142,7 @@ class PlayerRemote:
         self._numbers = itertools.count(1)
         self._events: deque[Event] = deque(maxlen=EVENTS_KEPT)
         self._streams = 0
+        self._owned: dict[str, int] = {}
 
     # -- the page's side ---------------------------------------------------------------------------------------
 
@@ -149,12 +156,23 @@ class PlayerRemote:
             self._forget(now)
             before = self._latest(owner)
             old = before.shown if before else {}
+            kept = {k: shown[k] for k in REPORTED if k in shown}
+            if isinstance(kept.get("next"), list):
+                kept["next"] = [str(i) for i in kept["next"][:3] if isinstance(i, str)]
             known = self._pages.get(page)
-            if known is None or known.owner != owner:
-                known = Page(page, owner, dict(shown), now)
+            if known is not None and known.owner != owner:
+                # another account's page id: not taken over (review of phase 6)
+                raise RemoteError(
+                    409, "invalid_value", "This page id is another page's.", "A page makes its own id."
+                )
+            if known is None:
+                mine = sorted((p for p in self._pages.values() if p.owner == owner), key=lambda p: p.at)
+                for oldest in mine[: max(0, len(mine) - PAGES_PER_OWNER + 1)]:
+                    del self._pages[oldest.id]
+                known = Page(page, owner, kept, now)
                 self._pages[page] = known
             else:
-                known.shown, known.at = dict(shown), now
+                known.shown, known.at = kept, now
             if shown.get("playing") and not (known.playing_since and old.get("playing")):
                 known.playing_since = now
             if not shown.get("playing"):
@@ -180,10 +198,12 @@ class PlayerRemote:
                     return found
                 self._changed.wait(min(left, 1.0))
 
-    def leave(self, page: str) -> None:
-        """A page that closes (``pagehide``): commands go to another one at once."""
+    def leave(self, page: str, owner: str) -> None:
+        """A page that closes (``pagehide``): commands go to another one at once (only its own account's)."""
         with self._changed:
-            self._pages.pop(page, None)
+            known = self._pages.get(page)
+            if known is not None and known.owner == owner:
+                del self._pages[page]
 
     # -- the API's side ----------------------------------------------------------------------------------------
 
@@ -230,15 +250,17 @@ class PlayerRemote:
 
     # -- events ------------------------------------------------------------------------------------------------
 
-    def open_stream(self) -> None:
+    def open_stream(self, owner: str = "") -> None:
         with self._changed:
-            if self._streams >= STREAMS:
+            if self._streams >= STREAMS or self._owned.get(owner, 0) >= STREAMS_PER_OWNER:
                 raise TooManyStreamsError()
             self._streams += 1
+            self._owned[owner] = self._owned.get(owner, 0) + 1
 
-    def close_stream(self) -> None:
+    def close_stream(self, owner: str = "") -> None:
         with self._changed:
             self._streams = max(0, self._streams - 1)
+            self._owned[owner] = max(0, self._owned.get(owner, 0) - 1)
 
     def last_event(self) -> int:
         with self._changed:

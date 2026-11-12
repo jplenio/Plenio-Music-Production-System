@@ -49,6 +49,9 @@ FIND_EVERY = 5.0
 DEFAULTS: dict[str, Any] = {"on": False, "token": "", "port": 0, "comfy_port": 0}
 REMOTE_HEADER = "X-Plenio-Remote"
 REMOTE_HOST_HEADER = "X-Plenio-Remote-Host"
+REMOTE_PEER_HEADER = "X-Plenio-Remote-Peer"
+"""The address the request came from (the gateway's socket peer): what limits wrong passwords - the Host header
+is the browser's word and the same for every device."""
 _HOP = {"connection", "keep-alive", "proxy-connection", "te", "trailer", "upgrade", "transfer-encoding"}
 
 
@@ -121,13 +124,15 @@ def without_cookie(header: str, name: str) -> str:
     )
 
 
-def forwarded_head(head: Head, target: tuple[str, int], *, remote: bool) -> bytes:
+def forwarded_head(head: Head, target: tuple[str, int], *, remote: bool, peer: str = "") -> bytes:
     """The head passed on: addressed to ``target`` (and so the origin, when it was the gateway's own), the
     cookie of the way in taken out, the connection closed after the answer - unless it is a WebSocket."""
     here = head.get("Host")
     there = f"{target[0]}:{target[1]}"
     upgrade = head.get("Upgrade").lower() == "websocket"
-    headers = head.without("Host", REMOTE_HEADER, REMOTE_HOST_HEADER, "Cookie", *([] if upgrade else _HOP))
+    headers = head.without(
+        "Host", REMOTE_HEADER, REMOTE_HOST_HEADER, REMOTE_PEER_HEADER, "Cookie", *([] if upgrade else _HOP)
+    )
     out = [f"{head.method} {head.target} {head.version}", f"Host: {there}"]
     for name, value in headers:
         if name.lower() == "origin" and here and value in (f"http://{here}", f"https://{here}"):
@@ -141,6 +146,7 @@ def forwarded_head(head: Head, target: tuple[str, int], *, remote: bool) -> byte
     if remote:
         out.append(f"{REMOTE_HEADER}: 1")
         out.append(f"{REMOTE_HOST_HEADER}: {here}")
+        out.append(f"{REMOTE_PEER_HEADER}: {peer or 'network'}")
     if not upgrade:
         out.append("Connection: close")
     # a body sent in chunks keeps its framing (the header went with the hop-by-hop ones)
@@ -258,7 +264,10 @@ class GatewayHandler(socketserver.BaseRequestHandler):
         except OSError:
             return self.answer("503 Service Unavailable", self.server.missing)
         try:
-            upstream.sendall(forwarded_head(head, target, remote=self.server.remote) + rest)
+            upstream.sendall(
+                forwarded_head(head, target, remote=self.server.remote, peer=str(self.client_address[0]))
+                + rest
+            )
             sock.settimeout(None)
             upstream.settimeout(None)
             pump(sock, upstream)
