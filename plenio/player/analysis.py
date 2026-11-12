@@ -20,6 +20,7 @@ import base64
 import hashlib
 import json
 import math
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -57,6 +58,10 @@ def decode(audio: Path, rate: int = DECODE_RATE) -> Any:
     return np.concatenate(chunks) if chunks else None
 
 
+FRAMES_PER_BLOCK = 2000
+"""Frames of the band analysis computed together (about 16 MB of spectrum)."""
+
+
 def band_envelopes(mono: Any, rate: int, out_rate: int = RATE) -> dict[str, Any]:
     """Energy of three bands at ``out_rate`` Hz, each scaled to 0..255 by its own 99th percentile."""
     import numpy as np
@@ -64,11 +69,18 @@ def band_envelopes(mono: Any, rate: int, out_rate: int = RATE) -> dict[str, Any]
     hop, size = max(1, rate // out_rate), 2048
     padded = np.pad(mono.astype(np.float32), (size // 2, size // 2))
     frames = np.lib.stride_tricks.sliding_window_view(padded, size)[::hop]
-    power = np.abs(np.fft.rfft(frames * np.hanning(size).astype(np.float32), axis=1)) ** 2
+    window = np.hanning(size).astype(np.float32)
     hz = np.fft.rfftfreq(size, 1 / rate)
+    masks = {name: (hz >= lo) & (hz < hi) for name, (lo, hi) in BANDS.items()}
+    energy = {name: np.empty(len(frames), dtype=np.float64) for name in BANDS}
+    # a block of frames at a time: a 15-minute song would need gigabytes for its whole spectrum at once
+    for start in range(0, len(frames), FRAMES_PER_BLOCK):
+        power = np.abs(np.fft.rfft(frames[start : start + FRAMES_PER_BLOCK] * window, axis=1)) ** 2
+        for name, mask in masks.items():
+            energy[name][start : start + len(power)] = np.sqrt(power[:, mask].sum(axis=1))
     out = {}
-    for name, (lo, hi) in BANDS.items():
-        e = np.sqrt(power[:, (hz >= lo) & (hz < hi)].sum(axis=1))
+    for name in BANDS:
+        e = energy[name]
         top = max(float(np.percentile(e, 99)), 1e-9)
         out[name] = np.clip(255 * e / top, 0, 255).astype(np.uint8)
     return out
@@ -215,9 +227,17 @@ def downbeats_of(beats: list[float], low: Any, per_bar: int = 4, out_rate: int =
     return beats[best::per_bar]
 
 
-def from_bars(bars: dict[str, Any]) -> tuple[list[float], list[float]] | None:
-    """Beats and downbeats from measured bars (``bars.audio`` and ``bars.meters``), ``None`` without them."""
-    times = [float(x) for x in (bars.get("audio") or []) if isinstance(x, (int, float))]
+def from_bars(bars: dict[str, Any], seconds: float | None = None) -> tuple[list[float], list[float]] | None:
+    """Beats and downbeats from measured bars (``bars.audio`` and ``bars.meters``), ``None`` without them. Bars at or
+    past the end of the analysed audio (a stale bars file, a song longer than what is analysed) are left out, and a
+    time that does not move on is dropped."""
+    raw = [
+        float(x) for x in (bars.get("audio") or []) if isinstance(x, (int, float)) and math.isfinite(float(x))
+    ]
+    times: list[float] = []
+    for x in raw:
+        if (seconds is None or x < seconds) and (not times or x > times[-1]):
+            times.append(x)
     meters = bars.get("meters") or []
     if len(times) < 2:
         return None
@@ -296,6 +316,16 @@ def drops_of(low: Any, downbeats: list[float], out_rate: int = RATE) -> list[dic
     return [{key: value for key, value in d.items() if key != "k"} for d in out]
 
 
+def _bpm(beats: list[float]) -> float | None:
+    """The tempo from the median beat length (``None`` with too few beats, or beats that do not move on)."""
+    import numpy as np
+
+    if len(beats) <= 2:
+        return None
+    step = float(np.median(np.diff(beats)))
+    return round(60 / step, 2) if step > 0 else None
+
+
 def analyse(mono: Any, rate: int = DECODE_RATE, bars: dict[str, Any] | None = None) -> dict[str, Any]:
     """The track of ``mono`` audio (and its measured bars, when known)."""
     import numpy as np
@@ -303,7 +333,7 @@ def analyse(mono: Any, rate: int = DECODE_RATE, bars: dict[str, Any] | None = No
     seconds = len(mono) / rate
     bands = band_envelopes(mono, rate)
     novelty = flux(bands["low"]).astype(np.float64) + 0.6 * flux(bands["mid"]).astype(np.float64)
-    measured = from_bars(bars) if bars else None
+    measured = from_bars(bars, seconds) if bars else None
     if measured:
         beats, downbeats = measured
         confidence = 1.0
@@ -320,7 +350,7 @@ def analyse(mono: Any, rate: int = DECODE_RATE, bars: dict[str, Any] | None = No
         "seconds": round(seconds, 3),
         "source": source,
         "confidence": confidence,
-        "bpm": round(60 / float(np.median(np.diff(beats))), 2) if len(beats) > 2 else None,
+        "bpm": _bpm(beats),
         "beats": beats,
         "downbeats": downbeats,
         "sections": sections_of(bands, downbeats, seconds),
@@ -344,19 +374,38 @@ def measured_bars(record: Path | None) -> dict[str, Any] | None:
     return bars if isinstance(bars, dict) else None
 
 
+_COMPUTING = threading.Lock()
+"""One track computed at a time: a few requests for long songs at once would each take hundreds of megabytes."""
+
+
 def track(audio: Path, cache: Path, record: Path | None = None) -> dict[str, Any] | None:
-    """The song's track, computed once and kept in ``cache`` until its audio (or measured bars) change."""
+    """The song's track, computed once and kept in ``cache`` until its audio (or measured bars) change; one at a
+    time (a request that waited finds the track the one before it computed)."""
+    found = _cached(audio, cache, record)
+    if found is not None:
+        return found
+    with _COMPUTING:
+        return _cached(audio, cache, record) or _compute(audio, cache, record)
+
+
+def _key(audio: Path, cache: Path, record: Path | None) -> Path:
     stat = audio.stat()
     bars_file = record.with_name(record.name.removesuffix(".plenio.json") + ".bars.json") if record else None
     bars_stamp = int(bars_file.stat().st_mtime) if bars_file and bars_file.exists() else 0
     stamp = f"{SCHEMA}|{audio}|{stat.st_size}|{int(stat.st_mtime)}|{bars_stamp}"
-    key = cache / f"analysis-{hashlib.sha1(stamp.encode()).hexdigest()[:16]}.json"
+    return cache / f"analysis-{hashlib.sha1(stamp.encode()).hexdigest()[:16]}.json"
+
+
+def _cached(audio: Path, cache: Path, record: Path | None) -> dict[str, Any] | None:
     try:
-        found: dict[str, Any] = json.loads(key.read_text(encoding="utf-8"))
-        if found.get("schema") == SCHEMA:
-            return found
+        found: dict[str, Any] = json.loads(_key(audio, cache, record).read_text(encoding="utf-8"))
     except (OSError, ValueError):
-        pass
+        return None
+    return found if found.get("schema") == SCHEMA else None
+
+
+def _compute(audio: Path, cache: Path, record: Path | None) -> dict[str, Any] | None:
+    key = _key(audio, cache, record)
     mono = decode(audio)
     if mono is None or len(mono) < DECODE_RATE:
         return None
@@ -366,8 +415,13 @@ def track(audio: Path, cache: Path, record: Path | None = None) -> dict[str, Any
     try:
         cache.mkdir(parents=True, exist_ok=True)
         temp = key.with_suffix(".tmp")
-        temp.write_text(json.dumps(result), encoding="utf-8")
+        # no NaN or infinity: a browser's JSON.parse refuses them (and the cache would keep them)
+        temp.write_text(json.dumps(result, allow_nan=False), encoding="utf-8")
         temp.replace(key)
-    except OSError:
+    except (OSError, ValueError):
         pass
+    try:
+        json.dumps(result, allow_nan=False)
+    except ValueError:
+        return None
     return result

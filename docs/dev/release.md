@@ -10,7 +10,8 @@ A version is three numbers - there are no pre-release versions. `tools/release.p
 python tools/bench.py --api http://127.0.0.1:8188 --label <version> --card "<card>"     # on the reference card
 python tools/release.py prepare <version> --bench docs/test-reports/data/bench-<version>.json
 git diff                                   # review: the version, the dated CHANGELOG, the generated files,
-git commit -am "Release <version>"         # docs/releases/<version>.md, docs/security/review-<version>.md
+git add docs/releases docs/security        # the two new files: the notes and the review request
+git commit -am "Release <version>"
 python tools/release.py verify             # the checks again on the committed tree
 git tag v<version> && git push origin main v<version>    # the owner's step: it publishes
 ```

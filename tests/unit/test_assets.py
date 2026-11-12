@@ -199,7 +199,9 @@ def test_a_partial_file_asks_only_for_the_rest_and_progress_counts_on(recording:
     assert seen[0] > 1000 and seen[-1] == len(PAYLOAD)
 
 
-def test_a_host_that_sends_everything_again_overwrites_the_partial_file(recording: str, tmp_path: Path) -> None:
+def test_a_host_that_sends_everything_again_overwrites_the_partial_file(
+    recording: str, tmp_path: Path
+) -> None:
     RecordingHandler.ignore_range = True
     destination = tmp_path / "model.bin.part"
     destination.write_bytes(PAYLOAD[:1000])
@@ -234,7 +236,9 @@ def test_progress_runs_over_every_file_of_an_asset_and_the_message_names_its_siz
         (AssetFile("a.bin", len(PAYLOAD), None), AssetFile("b.bin", len(PAYLOAD), None)),
     )
     seen: list[tuple[int, int]] = []
-    ensure_asset(two, tmp_path, PlenioConfig(), fetch=FakeFetcher(), progress=lambda d, t, m: seen.append((d, t)))
+    ensure_asset(
+        two, tmp_path, PlenioConfig(), fetch=FakeFetcher(), progress=lambda d, t, m: seen.append((d, t))
+    )
     assert seen == [(len(PAYLOAD), 2 * len(PAYLOAD)), (2 * len(PAYLOAD), 2 * len(PAYLOAD))]
     big = Asset("big", "asr", "org/big", REVISION, "MIT", "", (AssetFile("x.bin", 3 * 2**20, None),))
     with pytest.raises(PlenioAssetError, match=r"'big' \(asr, 3\.0 MiB, licence MIT\)"):

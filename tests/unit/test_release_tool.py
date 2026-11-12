@@ -88,3 +88,22 @@ def test_the_review_request_names_the_launch_sites_and_the_delta_against_the_las
 
 def test_the_version_strings_of_the_tree_agree() -> None:
     assert len(set(release.versions().values())) == 1, release.versions()
+
+
+def test_prepare_takes_only_this_versions_benchmark_with_every_brief(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import bench
+
+    monkeypatch.setattr(
+        release.subprocess, "run", lambda *a, **k: type("R", (), {"stdout": "", "returncode": 0})()
+    )
+    with pytest.raises(SystemExit, match="not of 2.0.0"):
+        release.prepare("2.0.0", bench.BUDGETS, "2026-12-01")  # 1.6.0's report
+    partial = json.loads(bench.BUDGETS.read_text(encoding="utf-8"))
+    partial["label"] = "2.0.0"
+    partial["briefs"].pop("sung-90")
+    path = tmp_path / "bench-2.0.0.json"
+    path.write_text(json.dumps(partial), encoding="utf-8")
+    with pytest.raises(SystemExit, match=r"no successful run of \['sung-90'\]"):
+        release.prepare("2.0.0", path, "2026-12-01")

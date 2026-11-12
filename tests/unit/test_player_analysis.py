@@ -104,3 +104,67 @@ def test_the_route_answers_a_songs_track_and_keeps_it(tmp_path) -> None:  # noqa
     finally:
         running.shutdown()
         running.server_close()
+
+
+# --- the review at checkpoint 5 -------------------------------------------------------------------------------------
+
+
+def test_the_spectrum_in_blocks_is_the_spectrum_at_once(monkeypatch: pytest.MonkeyPatch) -> None:
+    rng = np.random.default_rng(3)
+    mono = rng.normal(0, 0.2, analysis.DECODE_RATE * 20).astype(np.float32)
+    whole = analysis.band_envelopes(mono, analysis.DECODE_RATE)
+    monkeypatch.setattr(analysis, "FRAMES_PER_BLOCK", 37)  # many small blocks, one short at the end
+    blocked = analysis.band_envelopes(mono, analysis.DECODE_RATE)
+    for name in analysis.BANDS:
+        assert np.array_equal(whole[name], blocked[name]), name
+
+
+def test_bars_past_the_audio_or_on_one_time_give_no_nan_and_no_error() -> None:
+    import json
+
+    rate = analysis.DECODE_RATE
+    mono = np.zeros(rate * 10, dtype=np.float32)
+    mono[:: rate // 2] = 1.0
+    stale = {
+        "audio": [0.0, 2.0, 4.0, 6.0, 8.0, 12.0, 14.0],
+        "meters": [[4]] * 7,
+    }  # bars past the 10 s analysed
+    track = analysis.analyse(mono, rate, stale)
+    json.dumps(track, allow_nan=False)
+    assert max(track["downbeats"]) < 10.0
+    repeated = {"audio": [1.0, 1.0, 1.0], "meters": [[4]] * 3}  # a time that does not move on
+    flat = analysis.analyse(mono, rate, repeated)
+    json.dumps(flat, allow_nan=False)
+
+
+def test_two_requests_at_once_compute_the_track_once(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:  # noqa: ANN001
+    import threading
+    import wave
+
+    audio = tmp_path / "song.wav"
+    rate = 44100
+    with wave.open(str(audio), "wb") as out:
+        out.setnchannels(1)
+        out.setsampwidth(2)
+        out.setframerate(rate)
+        clicks = np.zeros(rate * 8, dtype=np.int16)
+        clicks[:: rate // 2] = 20000
+        out.writeframes(clicks.tobytes())
+    calls = []
+    real = analysis.analyse
+
+    def counted(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
+        calls.append(1)
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(analysis, "analyse", counted)
+    results = []
+    threads = [
+        threading.Thread(target=lambda: results.append(analysis.track(audio, tmp_path / "cache")))
+        for _ in range(3)
+    ]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    assert len(calls) == 1 and len(results) == 3 and all(r == results[0] for r in results)

@@ -21,6 +21,10 @@ on:
         type: boolean
         default: false
 
+# read only: dependencies installed here (npm, pip, ComfyUI's requirements) never hold a write token
+permissions:
+  contents: read
+
 env:
   HYPOTHESIS_PROFILE: ${{ inputs.hypothesis || 'push' }}
 

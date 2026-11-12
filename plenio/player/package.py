@@ -346,7 +346,12 @@ def build(
         }
         level = peaks(song.files["audio"], cache / "peaks")
         # the visuals' analysis track goes along (phase 7.3): the shared player knows the music ahead too
-        track = analysis_track(song.files["audio"], cache / "analysis", None if song.other else song.record)
+        try:  # a song without a track still goes into the shared player
+            track = analysis_track(
+                song.files["audio"], cache / "analysis", None if song.other else song.record
+            )
+        except Exception:  # noqa: BLE001 - the track is an extra; the song is the point
+            track = None
         text = json.dumps(
             {"detail": page, "peaks": level or None, "analysis": track},
             ensure_ascii=False,

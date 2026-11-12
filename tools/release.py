@@ -139,8 +139,15 @@ def verify(version: str | None = None) -> int:
         PROJECT / "docs" / "releases" / f"{version}.md",
         PROJECT / "docs" / "security" / f"review-{version}.md",
     ):
+        rel = path.relative_to(PROJECT).as_posix()
+        tracked = subprocess.run(  # noqa: S603, S607 - git, fixed arguments
+            ["git", "ls-files", "--error-unmatch", rel], cwd=PROJECT, capture_output=True, check=False
+        )
         if not path.exists():
-            problems.append(f"{path.relative_to(PROJECT)} is missing (release.py prepare writes it)")
+            problems.append(f"{rel} is missing (release.py prepare writes it)")
+        elif tracked.returncode != 0:
+            # the tag's release job reads them from the commit: a file left untracked fails it after the push
+            problems.append(f"{rel} is not committed: git add docs/releases docs/security before the commit")
     python = sys.executable
     for command in (
         [python, "tools/facts.py", "--check"],
@@ -150,8 +157,18 @@ def verify(version: str | None = None) -> int:
         [python, "tools/workflow_validation.py"],
         [python, "tools/package_gate.py", "--tree", "."],
     ):
-        if subprocess.run(command, cwd=PROJECT, check=False, capture_output=True).returncode != 0:  # noqa: S603
-            problems.append(f"failed: {' '.join(command[1:])}")
+        done = subprocess.run(  # noqa: S603 - this Python and the repository's own tools
+            command,
+            cwd=PROJECT,
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        if done.returncode != 0:
+            said = (done.stderr or done.stdout).strip().splitlines()[-8:]
+            problems.append(f"failed: {' '.join(command[1:])}" + "".join(f"\n    {line}" for line in said))
     for problem in problems:
         print(problem, file=sys.stderr)
     print(f"verify {version}: {'ok' if not problems else f'{len(problems)} problem(s)'}")
@@ -173,7 +190,15 @@ def prepare(version: str, bench: Path | None, today: str) -> int:
         raise SystemExit(
             f"prepare asks for a benchmark report of {version}: --bench docs/test-reports/data/bench-<label>.json"
         )
-    over = [row for row in bench_tool.check_report(bench) if row["slower"]]
+    report = json.loads(bench.read_text(encoding="utf-8"))
+    if not str(report.get("label", "")).startswith(version):
+        raise SystemExit(f"{bench.name} is the benchmark of {report.get('label')!r}, not of {version}")
+    rows = bench_tool.check_report(bench)
+    budgets = set(json.loads(bench_tool.BUDGETS.read_text(encoding="utf-8")).get("briefs", {}))
+    missing = sorted(budgets - {row["brief"] for row in rows})
+    if missing:
+        raise SystemExit(f"the report has no successful run of {missing}: run those briefs of tools/bench.py")
+    over = [row for row in rows if row["slower"]]
     if over:
         raise SystemExit(
             f"over budget: {[row['brief'] for row in over]} - give the reason in the release checklist, or fix it"
@@ -191,7 +216,9 @@ def prepare(version: str, bench: Path | None, today: str) -> int:
     print(f"wrote {review.relative_to(PROJECT)}")
     status = verify(version)
     print(
-        f"\nReview the diff (git diff), commit it, then the owner tags and pushes: git tag v{version} && git push origin main v{version}"
+        "\nReview the diff (git diff; the notes and the review request are new files), then:\n"
+        f'  git add docs/releases docs/security && git commit -am "Release {version}" && python tools/release.py verify\n'
+        f"and the owner tags and pushes: git tag v{version} && git push origin main v{version}"
     )
     return status
 

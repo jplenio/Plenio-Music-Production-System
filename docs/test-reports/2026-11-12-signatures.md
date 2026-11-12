@@ -1,6 +1,6 @@
 # The twelve signature visuals (2026-11-12)
 
-Phase 7.9, decision D-11: the owner left the choice to the agent ("search them out yourself"). Chosen across the
+Phase 7.9, decision D-11. Chosen across the
 collections and the three engines, each offered on an integrated graphics chip (the measured Nova timings: *Black
 hole* and *Outrun* are too heavy there and are not among them):
 

@@ -43,8 +43,10 @@ is above 5 % of a run. [The report](../test-reports/2026-11-12-bench-2.0.md) has
 | Brief | 1.6.0 | 2.0.0 | Per second of song |
 |---|---|---|---|
 | `instrumental-60` | 54.1 s | 57.0 s | -2.8 % |
-| `sung-90` | 153.5 s | 165.8 s | -12.4 % |
-| `sung-180-hq-cover` | 534.3 s | 591.5 s | -0.1 % |
+| `sung-90` | 153.5 s | 165.8 s | -12.3 % |
+| `sung-180-hq-cover` | 534.3 s | 591.5 s | -0.2 % |
+
+Peak memory on the card is higher in 2.0 (measured, the same briefs): 2.3 GiB for `instrumental-60` as before, 6.5 GiB for `sung-90` (1.6.0: 5.0) and 7.3 GiB for `sung-180-hq-cover` (1.6.0: 6.5) - within the 16 GB card; why is not measured.
 
 The same seeds make songs of other lengths in 2.0, so a release is compared per second of song (`bench.py`
 does so where both reports know the lengths); by the raw median the long brief is 10.7 % longer with 15 % longer
