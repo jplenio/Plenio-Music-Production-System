@@ -21,7 +21,7 @@ const ADDED_2026_10_23 = [...MORE_CLASSIC.map((p) => p.id), ...MILKDROP.map((f) 
 /** Plenio Nova's visuals (2026-10-29): the same. */
 const ADDED_NOVA = NOVA.map((def) => def.id)
 
-export type VisualMode = 'auto' | 'random' | 'cycle' | 'fixed'
+export type VisualMode = 'auto' | 'director' | 'random' | 'cycle' | 'fixed'
 export type SwitchOn = 'song' | 'section' | 'interval' | 'drop'
 
 export interface VisualSettings {

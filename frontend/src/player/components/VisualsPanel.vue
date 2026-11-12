@@ -128,6 +128,7 @@ function shortName(name: string): string {
 const v = settings.visuals
 const MODES: [VisualMode, string, string][] = [
   ['auto', 'Match the music', 'A visual that suits the song’s genre, mood and tempo'],
+  ['director', 'Director', 'One visual per kind of section - every chorus the same - changing on the downbeat; a drop flashes'],
   ['random', 'Random', 'From the visuals ticked below'],
   ['cycle', 'Cycle', 'Through the ticked visuals in turn'],
   ['fixed', 'Fixed', 'Always the same visual'],

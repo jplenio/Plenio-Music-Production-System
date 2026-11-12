@@ -26,8 +26,9 @@ import { myPresets } from '../visuals/drop'
 import { tellRenderer } from '../visuals/drop/story'
 import { governor, leaveOut, loadTimings, medianTiming, novaTimings, tierOf } from '../visuals/gpu'
 import { cueAt, loadTrack, trackOf } from '../visuals/conductor'
+import { type Change, changeAt, changeDue, directorPlan } from '../visuals/director'
 import { isPortable, portablePage } from '../portable'
-import { SceneMixer } from '../visuals/mixer'
+import { type FadeStyle, SceneMixer } from '../visuals/mixer'
 import { NOVA_VERSION, checkNova, novaOptions, novaScaleFor } from '../visuals/nova'
 import { makeColors, miniScene, presetById, type Scene } from '../visuals/presets'
 
@@ -68,13 +69,13 @@ watch(
 
 /** Play a visual (``again``: the same one anew - a preset file saved while it plays): the change as the
  * visuals' settings say (a crossfade of so many seconds, a zoom, a slide, a flash on the beat, a cut). */
-function use(id: string, again = false): void {
+function use(id: string, again = false, fade?: { style: FadeStyle; seconds: number }): void {
   const preset = presetById(id) ?? presetById('bars')
   if (!preset || (preset.id === presetId.value && !again)) return
   smoothBefore = !presetId.value || smoothFor > 5
   smoothFor = 0
   governor.fresh()
-  mixer.use(preset, { style: settings.visuals.fade, seconds: settings.visuals.fadeSeconds }, again)
+  mixer.use(preset, fade ?? { style: settings.visuals.fade, seconds: settings.visuals.fadeSeconds }, again)
   presetId.value = preset.id
   lastSwitch = performance.now()
   if (!props.mini) emit('change', preset.id)
@@ -90,6 +91,12 @@ function pick(newTurn = false, asked = false): void {
   if (props.force) return use(props.force)
   if (newTurn) turn += 1
   const v = settings.visuals
+  // the Director: the change of the song's form in force now (its track not there or not sure: Match the music)
+  const plan = directorFor()
+  if (plan && !asked) {
+    const now = changeAt(plan, engine.heard(settings.syncOffset / 1000))
+    if (now) return use(now.preset, false, { style: 'cut', seconds: 0 })
+  }
   use(
     chooseVisual({
       settings: asked ? { ...v, songs: {}, mode: v.mode === 'fixed' ? 'cycle' : v.mode } : v,
@@ -116,6 +123,31 @@ function resize(): void {
 }
 
 let drawnAt = 0
+/** The Director's plan for the song that plays (``null``: another mode, no track, or not sure enough). */
+let directed: { id: string; plan: Change[] | null } | null = null
+let heardBefore = 0
+function directorFor(): Change[] | null {
+  const song = current.value
+  const known = trackOf.value
+  if (props.mini || props.force || settings.visuals.mode !== 'director' || !song || !known?.analysis || known.id !== song.id) return null
+  if (directed?.id !== song.id) {
+    const v = settings.visuals
+    const kinds: string[] = []
+    directed = {
+      id: song.id,
+      plan: directorPlan(known.analysis, (key, _energy, taken) => {
+        kinds.push(key)
+        // as Match the music would choose, a turn for each kind of section, never a visual another kind has
+        for (let k = 0; k < 24; k++) {
+          const id = chooseVisual({ settings: { ...v, mode: 'auto', songs: {} }, song, turn: kinds.length - 1 + k * 7 })
+          if (!taken.has(id)) return id
+        }
+        return chooseVisual({ settings: { ...v, mode: 'auto', songs: {} }, song, turn: kinds.length })
+      }, settings.visuals.fadeSeconds),
+    }
+  }
+  return directed.plan
+}
 /** The frame with the cue of the song's track at the heard time (phase 7.5): the visuals may read it. */
 function withCue(frame: Frame): Frame {
   const song = current.value
@@ -143,6 +175,14 @@ function loop(now: number = performance.now()): void {
   dropOptions.scale = settings.visuals.dropScale * Math.sqrt(governor.factor)
   novaOptions.scale = novaScaleFor(settings.visuals.dropScale)
   const frame = withCue(engine.frame())
+  // the Director's changes, each started so that it is half through on its section's downbeat
+  const plan = directorFor()
+  const heardNow = engine.heard(settings.syncOffset / 1000)
+  if (plan) {
+    const due = changeDue(plan, heardBefore, heardNow)
+    if (due) use(due.preset, false, { style: due.style, seconds: due.seconds })
+  }
+  heardBefore = heardNow
   const colors = makeColors(hue.value, props.mini ? 'song' : settings.visuals.scheme, frame.time)
   if (props.mini && mini) {
     ctx.save()
@@ -198,7 +238,7 @@ function keepSmooth(frame: Frame, palette: Uint8ClampedArray): void {
 watch(() => current.value?.id, (id) => {
   turn = 0
   pick()
-  if (id && !props.mini) void loadTrack(id, fetchTrack)
+  if (id && !props.mini) void loadTrack(id, fetchTrack).then(() => settings.visuals.mode === 'director' && pick())
 }, { immediate: true })
 watch(() => props.section, (now, before) => {
   if (now && before && now !== before && settings.visuals.switchOn === 'section') pick(true)
