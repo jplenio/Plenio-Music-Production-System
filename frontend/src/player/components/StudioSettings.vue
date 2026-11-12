@@ -14,6 +14,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { api, type StudioStatus } from '../api'
 import { lookForComfyUI, say } from '../store'
 import Icon from './Icon.vue'
+import { WARM_UP } from '../warmUp'
 
 /** ComfyUI came up or went: the page's other places that say where ComfyUI is look again. */
 const emit = defineEmits<{ running: [running: boolean] }>()
@@ -90,6 +91,7 @@ onBeforeUnmount(() => window.clearInterval(timer))
       <i />
       {{ studio.running ? `ComfyUI is running at ${studio.url}${studio.own ? ' - started by the player' : ''}` : studio.starting ? 'ComfyUI is starting …' : 'ComfyUI is not running' }}
     </p>
+    <p v-if="studio.running || studio.starting" class="hint">{{ WARM_UP }}</p>
     <div class="row-buttons">
       <button v-if="launches && !studio.running && !studio.starting" class="primary" :disabled="busy || !studio.can_start" @click="act(() => api.studioStart(), 'ComfyUI is starting')"><Icon name="power" :size="16" /> Start the studio</button>
       <button v-if="studio.own" class="ghost" :disabled="busy" @click="act(() => api.studioStop(), 'ComfyUI was stopped')"><Icon name="close" :size="16" /> Stop it</button>

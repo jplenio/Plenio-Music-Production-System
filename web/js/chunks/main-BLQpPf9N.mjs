@@ -1,5 +1,5 @@
-import { api as Br } from "../../../../scripts/api.js";
-import { app as fs } from "../../../../scripts/app.js";
+import { api as Dr } from "../../../../scripts/api.js";
+import { app as ps } from "../../../../scripts/app.js";
 class Q extends Error {
   constructor(t, n = null) {
     super(t), this.hint = n;
@@ -18,18 +18,18 @@ async function re(e, t, n) {
   }
   return s;
 }
-function Dr(e, t) {
+function qr(e, t) {
   return re(e, "/plenio/sheet/resolve", t);
 }
-async function Uu(e, t) {
+async function Xu(e, t) {
   if (!/^[0-9a-f]{64}$/.test(t)) return null;
   const n = await e.fetchApi(`/plenio/asr/notes/${t}`);
   return n.ok ? (await n.json())?.note ?? null : null;
 }
-const ps = "Plenio.SectionTags";
-async function Yu(e) {
+const hs = "Plenio.SectionTags";
+async function Ku(e) {
   try {
-    const t = await e.fetchApi(`/settings/${ps}`);
+    const t = await e.fetchApi(`/settings/${hs}`);
     if (!t.ok) return [];
     const n = await t.json();
     return Array.isArray(n) ? n.filter((o) => typeof o == "string") : [];
@@ -37,8 +37,8 @@ async function Yu(e) {
     return [];
   }
 }
-async function Xu(e, t) {
-  const n = await e.fetchApi(`/settings/${ps}`, {
+async function Qu(e, t) {
+  const n = await e.fetchApi(`/settings/${hs}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(t)
@@ -48,45 +48,45 @@ async function Xu(e, t) {
 function Fn(e, t, n) {
   return t ? n?.length ? { ...e, lyrics: t, lyric_spans: n } : { ...e, lyrics: t } : e;
 }
-function Ku(e, t, n, o) {
+function Ju(e, t, n, o) {
   return re(e, "/plenio/score/analyze", Fn({ abc: t }, n, o));
 }
-function Qu(e, t, n, o, s) {
+function Zu(e, t, n, o, s) {
   return re(e, "/plenio/score/transform", Fn({ abc: t, operation: n }, o, s));
 }
-function Ju(e, t) {
+function ed(e, t) {
   const { lyrics: n, spans: o, ...s } = t;
   return re(e, "/plenio/score/musicxml/export", Fn(s, n, o));
 }
-function Zu(e, t) {
+function td(e, t) {
   const { lyrics: n, ...o } = t;
   return re(e, "/plenio/score/musicxml/import", n ? { ...o, lyrics: n } : o);
 }
-function ed(e, t) {
+function nd(e, t) {
   return re(e, "/plenio/score/midi/export", t);
 }
-function td(e, t) {
+function od(e, t) {
   return re(e, "/plenio/score/midi/import", t);
 }
-function nd(e, t) {
+function sd(e, t) {
   return re(e, "/plenio/lyrics/analyze", t);
 }
-function od(e, t) {
+function rd(e, t) {
   const o = `/view?${new URLSearchParams({ filename: t.filename, subfolder: t.subfolder, type: t.type }).toString()}`;
   return e.apiURL ? e.apiURL(o) : `/api${o}`;
 }
 function no(e, t, n, o = 200) {
   return re(e, "/plenio/eq/response", { settings: t, sample_rate: n, points: o });
 }
-function qr(e, t) {
+function zr(e, t) {
   return re(e, "/plenio/brief/fields", t);
 }
-async function zr(e) {
+async function Hr(e) {
   const t = await e.fetchApi("/plenio/presets/eq");
   if (!t.ok) throw new Q(`Request failed (${t.status})`);
   return await t.json();
 }
-async function sd(e) {
+async function id(e) {
   const t = await e.fetchApi("/plenio/records"), n = await t.json();
   if (!t.ok) {
     const o = n?.error ?? {};
@@ -94,10 +94,10 @@ async function sd(e) {
   }
   return n?.records ?? [];
 }
-function Hr(e, t) {
+function Fr(e, t) {
   return re(e, "/plenio/records/continue", t);
 }
-function hs(e, t, n = !1) {
+function ms(e, t, n = !1) {
   return re(e, "/plenio/workflow/blocks", n ? { workflow: t, models: !0 } : { workflow: t });
 }
 function Y(e, t) {
@@ -105,21 +105,21 @@ function Y(e, t) {
     e?.apply(this, n), t.apply(this, n);
   };
 }
-const Sn = "Plenio · ", Fr = /* @__PURE__ */ new Set(["YuE2GenerateABC", "YuE2GenerateMusic", "PlenioComposePrompt", "PlenioComposeArrangement"]), Wr = "PlenioCreativity";
-function ms(e) {
+const Sn = "Plenio · ", Wr = /* @__PURE__ */ new Set(["YuE2GenerateABC", "YuE2GenerateMusic", "PlenioComposePrompt", "PlenioComposeArrangement"]), jr = "PlenioCreativity";
+function gs(e) {
   const t = e?.definitions?.subgraphs;
   return Array.isArray(t) ? t : [];
 }
-function jr(e) {
-  return ms(e).some((t) => {
+function Gr(e) {
+  return gs(e).some((t) => {
     if (typeof t?.name != "string" || !t.name.startsWith(Sn)) return !1;
     const n = new Set((t.nodes ?? []).map((o) => o?.type));
-    return !n.has(Wr) && [...n].some((o) => Fr.has(String(o)));
+    return !n.has(jr) && [...n].some((o) => Wr.has(String(o)));
   });
 }
-async function Gr(e, t) {
-  if (!e || typeof e != "object" || !jr(e)) return null;
-  const n = await hs(t, e);
+async function Vr(e, t) {
+  if (!e || typeof e != "object" || !Gr(e)) return null;
+  const n = await ms(t, e);
   if (n.workflow) {
     const o = e;
     for (const s of Object.keys(o)) delete o[s];
@@ -127,19 +127,19 @@ async function Gr(e, t) {
   }
   return n;
 }
-const Pt = (e) => e.startsWith(Sn) ? e.slice(Sn.length) : e, Nt = (e) => e.map(Pt).join(", "), Vr = /* @__PURE__ */ new Set(["Plenio · YuE2 Model", "Plenio · MiniMax Model", "Plenio · Cover Art"]), en = "Plenio.ModelBlocksUpToDate";
-function Ur(e) {
-  return ms(e).filter((t) => typeof t?.name == "string" && Vr.has(t.name)).filter((t) => !(t.nodes ?? []).some((n) => n?.type === "PlenioModelChoice")).map((t) => String(t.name));
-}
+const Pt = (e) => e.startsWith(Sn) ? e.slice(Sn.length) : e, Nt = (e) => e.map(Pt).join(", "), Ur = /* @__PURE__ */ new Set(["Plenio · YuE2 Model", "Plenio · MiniMax Model", "Plenio · Cover Art"]), en = "Plenio.ModelBlocksUpToDate";
 function Yr(e) {
-  const t = Ur(e);
+  return gs(e).filter((t) => typeof t?.name == "string" && Ur.has(t.name)).filter((t) => !(t.nodes ?? []).some((n) => n?.type === "PlenioModelChoice")).map((t) => String(t.name));
+}
+function Xr(e) {
+  const t = Yr(e);
   return t.length ? {
     severity: "info",
     summary: "Model blocks of Plenio 1.x",
     detail: `${Nt(t)} load the files they name, as before. Plenio › Bring the model blocks up to date gives them Model Choice - the field shows what the file is and what auto would take - and keeps your files.`
   } : null;
 }
-function Xr(e) {
+function Kr(e) {
   if (!e) return [];
   const t = [];
   return e.updated.length && t.push({
@@ -152,7 +152,7 @@ function Xr(e) {
     detail: `${e.kept.map(([n, o]) => `${Pt(n)} (${o})`).join("; ")}. They load the files they name.`
   }), !e.updated.length && !e.kept.length && t.push({ severity: "info", summary: "Nothing to bring up to date", detail: "The model blocks are the current ones." }), t;
 }
-function Kr(e) {
+function Qr(e) {
   if (!e) return [];
   const t = [];
   if (e.updated.length) {
@@ -173,22 +173,22 @@ function Kr(e) {
     detail: `${n.join("; ")}. The template, opened again from the template browser, has the current blocks.`
   }), t;
 }
-const Qr = "Plenio · ", Mn = 16384, Jr = 24576, oo = [1024, 2048, 6144], Zr = [8192, 12288], ei = {
+const Jr = "Plenio · ", Mn = 16384, Zr = 24576, oo = [1024, 2048, 6144], ei = [8192, 12288], ti = {
   TextGenerate: [[1, oo, Mn]],
   PlenioLocalLLM: [
     [4, oo, Mn],
-    [7, Zr, Jr]
+    [7, ei, Zr]
   ]
 };
-function ti(e) {
+function ni(e) {
   const t = e?.definitions?.subgraphs;
   if (!Array.isArray(t)) return [];
   const n = [];
   for (const o of t) {
-    if (typeof o?.name != "string" || !o.name.startsWith(Qr)) continue;
+    if (typeof o?.name != "string" || !o.name.startsWith(Jr)) continue;
     let s = !1;
     for (const r of o.nodes ?? []) {
-      const i = r?.widgets_values, a = ei[String(r?.type)];
+      const i = r?.widgets_values, a = ti[String(r?.type)];
       if (!(!a || !Array.isArray(i)))
         for (const [c, l, d] of a)
           typeof i[c] == "number" && l.includes(i[c]) && (i[c] = d, s = !0);
@@ -197,32 +197,32 @@ function ti(e) {
   }
   return n;
 }
-const Ot = "✎ type your own …", gs = ["genre", "mood", "tempo", "key", "meter", "language", "voice", "theme", "lead_instrument"], ni = ["C", "G", "D", "A", "E", "B", "F#", "F", "Bb", "Eb", "Ab", "Db"].flatMap((e) => [`${e} major`]), oi = ["A", "E", "B", "F#", "C#", "G#", "D", "G", "C", "F", "Bb", "Eb"].map((e) => `${e} minor`), si = {
-  key: [...ni, ...oi],
+const Ot = "✎ type your own …", ws = ["genre", "mood", "tempo", "key", "meter", "language", "voice", "theme", "lead_instrument"], oi = ["C", "G", "D", "A", "E", "B", "F#", "F", "Bb", "Eb", "Ab", "Db"].flatMap((e) => [`${e} major`]), si = ["A", "E", "B", "F#", "C#", "G#", "D", "G", "C", "F", "Bb", "Eb"].map((e) => `${e} minor`), ri = {
+  key: [...oi, ...si],
   meter: ["4/4", "3/4", "6/8", "2/4", "12/8", "5/4", "7/8"],
   language: ["English", "German", "Spanish", "French", "Italian", "Portuguese", "Dutch", "Japanese", "Korean", "Chinese"],
   tempo: ["60 BPM", "80 BPM", "90 BPM", "100 BPM", "110 BPM", "120 BPM", "128 BPM", "140 BPM", "174 BPM"]
 };
-function ri(e, t) {
+function ii(e, t) {
   const n = /* @__PURE__ */ new Map();
-  for (const s of [...t[e] ?? [], ...si[e] ?? []]) {
+  for (const s of [...t[e] ?? [], ...ri[e] ?? []]) {
     const r = String(s).replace(/\s+/g, " ").trim();
     r && !n.has(r.toLowerCase()) && n.set(r.toLowerCase(), r);
   }
   const o = [...n.values()].sort((s, r) => s.localeCompare(r, void 0, { sensitivity: "base" }));
   return ["", Ot, ...o];
 }
-function ii(e, t) {
+function ai(e, t) {
   if (!Array.isArray(e) || e[0] !== "STRING") return e;
   const n = e[1] ?? {};
   return n.multiline ? e : ["COMBO", { ...n, options: t, default: typeof n.default == "string" ? n.default : "" }];
 }
-function ai(e, t) {
+function ci(e, t) {
   const n = [], o = (s, r) => {
     if (s)
       for (const [i, a] of Object.entries(s)) {
-        if (gs.includes(i)) {
-          const d = ii(a, ri(i, t));
+        if (ws.includes(i)) {
+          const d = ai(a, ii(i, t));
           d !== a && (s[i] = d, n.push(r + i));
           continue;
         }
@@ -236,20 +236,20 @@ function ai(e, t) {
   };
   return o(e.input?.required, ""), o(e.input?.optional, ""), [...new Set(n)];
 }
-const ws = (e) => e.name.split(".").pop() ?? e.name;
-function ci(e) {
-  return gs.includes(ws(e)) && Array.isArray(e.options?.values);
+const ys = (e) => e.name.split(".").pop() ?? e.name;
+function li(e) {
+  return ws.includes(ys(e)) && Array.isArray(e.options?.values);
 }
 function so(e) {
   const t = e.options.values, n = typeof e.value == "string" ? e.value : "";
   n && n !== Ot && !t.includes(n) && t.splice(2, 0, n);
 }
 function _n(e, t) {
-  ys.set(e, t);
+  bs.set(e, t);
   const n = ro.get(e) ?? /* @__PURE__ */ new WeakSet();
   ro.set(e, n);
   for (const o of e.widgets ?? []) {
-    if (!ci(o) || (so(o), n.has(o))) continue;
+    if (!li(o) || (so(o), n.has(o))) continue;
     n.add(o);
     let s = typeof o.value == "string" && o.value !== Ot ? o.value : "";
     const r = o.callback;
@@ -258,28 +258,28 @@ function _n(e, t) {
         s = typeof i == "string" ? i : "", r?.call(this, i);
         return;
       }
-      o.value = s, t(ws(o), s).then((a) => {
+      o.value = s, t(ys(o), s).then((a) => {
         const c = a?.replace(/\s+/g, " ").trim();
         c && (o.value = c, so(o), o.callback?.(c), e.setDirtyCanvas?.(!0, !0));
       });
     };
   }
 }
-const ro = /* @__PURE__ */ new WeakMap(), ys = /* @__PURE__ */ new WeakMap();
-function li(e) {
-  const t = ys.get(e);
+const ro = /* @__PURE__ */ new WeakMap(), bs = /* @__PURE__ */ new WeakMap();
+function ui(e) {
+  const t = bs.get(e);
   t && _n(e, t);
 }
 let io = null;
-const ui = 8e3;
-function di(e) {
+const di = 8e3;
+function fi(e) {
   const t = e.fetchApi("/plenio/brief/choices").then(async (n) => n.ok ? (await n.json()).values ?? {} : {}).catch(() => ({}));
-  return io ??= Promise.race([t, new Promise((n) => setTimeout(() => n({}), ui))]), io;
+  return io ??= Promise.race([t, new Promise((n) => setTimeout(() => n({}), di))]), io;
 }
-async function fi(e, t, n, o) {
-  const s = await di(n);
+async function pi(e, t, n, o) {
+  const s = await fi(n);
   if (!Object.keys(s).length) return;
-  ai(t, s);
+  ci(t, s);
   const r = e.prototype;
   r.onNodeCreated = Y(r.onNodeCreated, function() {
     _n(this, o);
@@ -299,7 +299,7 @@ const Ft = [
   "theme",
   "lyrics",
   "lead_instrument"
-], bs = ["length", "vocals", "melody"], Wn = {
+], vs = ["length", "vocals", "melody"], Wn = {
   description: "description",
   genre: "genre",
   mood: "mood",
@@ -315,18 +315,18 @@ const Ft = [
   lyrics_from: "vocals.lyrics_from",
   melody: "vocals.melody",
   lead_instrument: "vocals.lead_instrument"
-}, pi = "my own, sung as written below", hi = "custom";
-function vs(e) {
-  return typeof e == "string" && e.trim().toLowerCase() === hi;
+}, hi = "my own, sung as written below", mi = "custom";
+function xs(e) {
+  return typeof e == "string" && e.trim().toLowerCase() === mi;
 }
 function ce(e, t) {
   const n = Wn[t];
   if (n)
     return (e.widgets ?? []).find((o) => o.name === n);
 }
-function mi(e) {
+function gi(e) {
   const t = {};
-  for (const n of [...Ft, ...bs, "lyrics_from"]) {
+  for (const n of [...Ft, ...vs, "lyrics_from"]) {
     const o = ce(e, n);
     o && (t[n] = typeof o.value == "string" ? o.value : String(o.value ?? ""));
   }
@@ -339,7 +339,7 @@ const _e = (e) => typeof e == "string" ? e : String(e ?? "");
 function Wt(e) {
   return Object.keys(e.sources).filter((t) => Ft.includes(t));
 }
-function gi(e, t, n = {}) {
+function wi(e, t, n = {}) {
   const o = [];
   for (const i of Wt(t)) {
     const a = ce(e, i);
@@ -348,7 +348,7 @@ function gi(e, t, n = {}) {
     (!c.trim() || d) && c !== l && o.push({ field: i, value: l });
   }
   const s = ce(e, "lyrics"), r = [...n.lyrics ?? [], t.fields.lyrics ?? ""].filter(Boolean);
-  return s && _e(ce(e, "lyrics_from")?.value) === pi && r.includes(_e(s.value)) && o.push({ field: "lyrics", value: "" }), o;
+  return s && _e(ce(e, "lyrics_from")?.value) === hi && r.includes(_e(s.value)) && o.push({ field: "lyrics", value: "" }), o;
 }
 function co(e, t) {
   const n = [];
@@ -358,7 +358,7 @@ function co(e, t) {
   }
   return n;
 }
-function wi(e, t) {
+function yi(e, t) {
   const n = { template: [], own: [] };
   for (const o of Wt(t)) {
     const s = _e(ce(e, o)?.value).trim();
@@ -369,22 +369,22 @@ function wi(e, t) {
 function kt(e) {
   return e.choices.filter((t) => t.suggested && t.suggested !== t.current).map((t) => ({ field: t.field, value: t.suggested }));
 }
-function yi(e, t, n) {
+function bi(e, t, n) {
   if (!n || !t || t.template === "none") return null;
-  const { template: o, own: s } = wi(e, t), r = [
+  const { template: o, own: s } = yi(e, t), r = [
     o.length ? `From the template: ${o.join(", ")}` : "",
     s.length ? `your own: ${s.join(", ")}` : ""
   ].filter(Boolean);
   return r.length ? r.join(" · ") : "The template has no text for these fields.";
 }
-function bi(e) {
+function vi(e) {
   const t = e ? kt(e) : [];
   return t.length ? `The template suggests: ${t.map((n) => `${n.field} = ${n.value}`).join(", ")}` : null;
 }
-function vi(e) {
+function xi(e) {
   return e?.notes.length ? e.notes.join("; ") : null;
 }
-function xi(e) {
+function ki(e) {
   const t = e?.mode;
   return t?.description ? `Creative mode ${t.name} (experimental): ${t.description}` : null;
 }
@@ -395,16 +395,16 @@ function at(e, t) {
   }
   e.setDirtyCanvas?.(!0, !0);
 }
-function xs(e) {
+function ks(e) {
   const t = [];
   for (const n of Ft) {
     const o = ce(e, n);
-    !o || !vs(o.value) || (o.value = "", o.callback?.(""), t.push(n));
+    !o || !xs(o.value) || (o.value = "", o.callback?.(""), t.push(n));
   }
   return t.length && e.setDirtyCanvas?.(!0, !0), t;
 }
-const lo = "plenio_brief_template", ki = 400;
-function Si(e, t) {
+const lo = "plenio_brief_template", Si = 400;
+function Mi(e, t) {
   let n = null, o = null;
   const s = {};
   let r = !1, i = null, a;
@@ -434,9 +434,9 @@ function Si(e, t) {
   }), O = g("↻", "Ask again what the template fills", () => {
     v();
   }), V = () => {
-    l.textContent = i ?? yi(e, n, r) ?? "No template: the fields hold your values only.", l.dataset.state = i ? "error" : r && n ? "ok" : "empty";
-    const y = bi(n), E = vi(n);
-    d.textContent = [y, E].filter(Boolean).join(" · "), d.style.display = d.textContent ? "" : "none", f.textContent = xi(n) ?? "", f.style.display = f.textContent ? "" : "none", h.style.display = r && n && n.template !== "none" ? "" : "none", x.disabled = !n || !kt(n).length, M.disabled = !n || !co(e, n).length, O.disabled = !1, e.setDirtyCanvas?.(!0, !0);
+    l.textContent = i ?? bi(e, n, r) ?? "No template: the fields hold your values only.", l.dataset.state = i ? "error" : r && n ? "ok" : "empty";
+    const y = vi(n), E = xi(n);
+    d.textContent = [y, E].filter(Boolean).join(" · "), d.style.display = d.textContent ? "" : "none", f.textContent = ki(n) ?? "", f.style.display = f.textContent ? "" : "none", h.style.display = r && n && n.template !== "none" ? "" : "none", x.disabled = !n || !kt(n).length, M.disabled = !n || !co(e, n).length, O.disabled = !1, e.setDirtyCanvas?.(!0, !0);
   }, u = (y) => {
     const E = String(e.widgets?.find((P) => P.name === "template")?.value ?? "none");
     if (y.template !== (E || "none")) return;
@@ -444,28 +444,28 @@ function Si(e, t) {
       const P = ao(e) === "cover", N = (D) => P || (s[D] ?? []).includes(_e(ce(e, D)?.value));
       at(e, kt(y).filter((D) => N(D.field)));
     }
-    const S = gi(e, y, s);
+    const S = wi(e, y, s);
     S.length && at(e, S);
-    for (const P of [...Wt(y), ...bs]) {
+    for (const P of [...Wt(y), ...vs]) {
       const N = _e(ce(e, P)?.value);
       N && N === (y.fields[P] ?? "") && !(s[P] ??= []).includes(N) && s[P].push(N);
     }
     o = y.template;
-  }, k = /* @__PURE__ */ new WeakSet(), L = () => {
-    _i(e);
+  }, k = /* @__PURE__ */ new WeakSet(), T = () => {
+    Ei(e);
     for (const y of ["template", "arrangement", ...Object.keys(Wn)]) {
       const E = y === "template" || y === "arrangement" ? e.widgets?.find((S) => S.name === y) : ce(e, y);
       !E || k.has(E) || (k.add(E), E.callback = Y(E.callback, () => {
-        L(), v();
+        T(), v();
       }));
     }
-    li(e);
+    ui(e);
   }, b = async () => {
-    L();
+    T();
     const y = String(e.widgets?.find((E) => E.name === "template")?.value ?? "none");
     try {
       const E = String(e.widgets?.find((S) => S.name === "arrangement")?.value ?? "");
-      n = await qr(t, { fields: mi(e), template: y, kind: ao(e), arrangement: E }), i = null, u(n);
+      n = await zr(t, { fields: gi(e), template: y, kind: ao(e), arrangement: E }), i = null, u(n);
     } catch (E) {
       n = null, i = `The template fields could not be read: ${E instanceof Error ? E.message : String(E)}`;
     }
@@ -474,9 +474,9 @@ function Si(e, t) {
   function v() {
     clearTimeout(a), a = setTimeout(() => {
       b();
-    }, ki);
+    }, Si);
   }
-  L();
+  T();
   const _ = e.addDOMWidget(lo, lo, c, {
     serialize: !1,
     getValue: () => "",
@@ -485,35 +485,35 @@ function Si(e, t) {
     getMinHeight: () => 64,
     getMaxHeight: () => 128
   });
-  return _.serialize = !1, xs(e), V(), v(), {
+  return _.serialize = !1, ks(e), V(), v(), {
     widget: _,
     refresh: v,
     answer: () => n,
     dispose: () => clearTimeout(a)
   };
 }
-const Mi = {
+const _i = {
   "vocals.lyrics_from": "lyrics",
   "vocals.lyrics": "lyrics idea or text"
 };
-function _i(e) {
+function Ei(e) {
   for (const t of e.widgets ?? []) {
-    const n = Mi[t.name];
+    const n = _i[t.name];
     n && t.label !== n && (t.label = n);
   }
 }
 const uo = /* @__PURE__ */ new Set(["PlenioSongBrief", "PlenioCoverBrief"]);
-function Ei(e, t) {
+function $i(e, t) {
   const n = /* @__PURE__ */ new WeakMap(), o = e.prototype, s = o.onNodeCreated;
   o.onNodeCreated = function() {
-    s?.call(this), n.set(this, Si(this, t));
+    s?.call(this), n.set(this, Mi(this, t));
   };
   const r = o.onConfigure;
   o.onConfigure = function(i) {
-    r?.call(this, i), xs(this), n.get(this)?.refresh();
+    r?.call(this, i), ks(this), n.get(this)?.refresh();
   };
 }
-const fo = "plenio.record/1", $i = 2, Ai = "PLNO", ct = new TextEncoder().encode(`${Ai}plenio.project/1\0`), po = 32 * 2 ** 20;
+const fo = "plenio.record/1", Ai = 2, Ti = "PLNO", ct = new TextEncoder().encode(`${Ti}plenio.project/1\0`), po = 32 * 2 ** 20;
 class pe extends Error {
 }
 async function tn(e, t, n) {
@@ -538,14 +538,14 @@ async function Li(e) {
     s.set(i, r), r += i.length;
   return new TextDecoder().decode(s);
 }
-async function ks(e) {
+async function Ss(e) {
   if (!nn(await tn(e, 0, 4), new TextEncoder().encode("fLaC"))) throw new pe("it is not a FLAC file");
   let t = 4;
   for (; ; ) {
     const n = await tn(e, t, 4);
     if (n.length < 4) throw new pe("the file ends inside its metadata");
     const o = n[1] << 16 | n[2] << 8 | n[3];
-    if ((n[0] & 127) === $i && o >= 4) {
+    if ((n[0] & 127) === Ai && o >= 4) {
       const s = await tn(e, t + 4, Math.min(o, ct.length));
       if (nn(s, ct.subarray(0, 4))) {
         if (!nn(s, ct)) throw new pe("it holds a Plenio project of an unknown layout (made by a newer Plenio)");
@@ -570,7 +570,7 @@ async function ks(e) {
     t += 4 + o;
   }
 }
-function Ss(e) {
+function Ms(e) {
   return /\.flac$/i.test(e.name ?? "") || e.type === "audio/flac" || e.type === "audio/x-flac";
 }
 const jn = "plenio.sheet_state/1", Ze = ["title", "style", "lyrics", "score", "artwork_prompt"];
@@ -600,14 +600,14 @@ function Xe(e) {
 function on(e, t) {
   return e.docs[t]?.state ?? "auto";
 }
-function Ti(e) {
+function Ci(e) {
   if (e === null) return "Song Sheet state is unreadable - open the editor to repair it.";
   const t = Ze.filter((o) => on(e, o) !== "auto").map(
     (o) => o === "lyrics" && on(e, o) === "manual" ? "lyrics: yours (manual)" : `${o.replace("_", " ")} ${on(e, o)}`
   ), n = e.review?.approved_fingerprint ? " · approved" : "";
   return (t.length ? t.join(" · ") : "all documents automatic") + n;
 }
-function rd(e) {
+function ad(e) {
   const t = e.harmony?.after;
   if (!t) return "";
   const n = (s) => `${Math.round(s * 100)} %`, o = [
@@ -618,13 +618,13 @@ function rd(e) {
   ];
   return `Harmony check (${e.harmony?.genre ?? "pop"}): ${o.join(" · ")}`;
 }
-const id = "Creative modes are experimental: the writer’s plan can surprise - listen, change the score here, or run again with another arrangement seed; arrangement off keeps the music model’s own plan.";
-function ad(e) {
+const cd = "Creative modes are experimental: the writer’s plan can surprise - listen, change the score here, or run again with another arrangement seed; arrangement off keeps the music model’s own plan.";
+function ld(e) {
   const t = /* @__PURE__ */ new Map();
   for (const n of e) t.set(n, (t.get(n) ?? 0) + 1);
   return [...t].map(([n, o]) => o > 1 ? `${n} (${o} times)` : n);
 }
-function cd(e) {
+function ud(e) {
   const t = e.kind === "cover" ? "song flow closeness" : "genre closeness";
   return `${e.mode} (${t} ${e.closeness})`;
 }
@@ -632,7 +632,7 @@ function ho(e) {
   const t = Math.max(0, e), n = Math.floor(t / 60), o = Math.round(t - n * 60);
   return `${n}:${String(o).padStart(2, "0")}`;
 }
-function ld(e) {
+function dd(e) {
   return e?.bars?.length ? (e.sections ?? []).map(([t, n, o]) => {
     const s = e.bars[Math.max(0, n - 1)], r = e.bars[Math.min(e.bars.length - 1, n - 1 + o - 1)];
     return { label: t, bars: o, start: ho(s?.[0] ?? 0), end: ho(r?.[1] ?? e.duration_s) };
@@ -648,14 +648,14 @@ function Ee(e) {
   return t.slice(n, o).join(`
 `);
 }
-function Ci(e, t, n) {
+function Pi(e, t, n) {
   const o = e.docs[n];
   return o ? o.text : t?.docs[n]?.upstream ?? "";
 }
-function ud(e, t, n) {
-  return n.map((o) => ({ kind: o, text: Ci(e, t, o), intent: "keep" }));
+function fd(e, t, n) {
+  return n.map((o) => ({ kind: o, text: Pi(e, t, o), intent: "keep" }));
 }
-function Ms(e, t, n) {
+function _s(e, t, n) {
   const o = { ...e.docs };
   for (const r of n) {
     const i = e.docs[r.kind], a = t?.docs[r.kind], c = Ee(r.text);
@@ -676,33 +676,33 @@ function Ms(e, t, n) {
   const s = { ...jt(), docs: o };
   return e.review?.approved_fingerprint && (s.review = { approved_fingerprint: e.review.approved_fingerprint }), s;
 }
-function Pi(e, t) {
+function Ni(e, t) {
   return t ? { ...e, review: { approved_fingerprint: t } } : { ...e, review: void 0 };
 }
-function _s(e, t) {
+function Es(e, t) {
   return Ze.filter((n) => e.includes(n) || t.docs[n]?.state === "manual");
 }
-function Ni(e) {
+function Oi(e) {
   const t = {};
   for (const n of e?.owned ?? []) t[n] = e?.docs[n]?.upstream ?? null;
   return t;
 }
-const Oi = "PlenioSongSheet";
-function Es(e) {
+const Ii = "PlenioSongSheet";
+function $s(e) {
   return e.nodes ?? e._nodes ?? [];
 }
-function Ii(e, t) {
-  return e.getNodeById?.(t) ?? e.getNodeById?.(Number(t)) ?? Es(e).find((o) => String(o.id) === t) ?? null;
+function Ri(e, t) {
+  return e.getNodeById?.(t) ?? e.getNodeById?.(Number(t)) ?? $s(e).find((o) => String(o.id) === t) ?? null;
 }
 function sn(e, t) {
   let n = e, o = null;
   for (const s of t.split(":")) {
-    if (!n || (o = Ii(n, s), !o)) return null;
+    if (!n || (o = Ri(n, s), !o)) return null;
     n = o.subgraph;
   }
   return o;
 }
-function Ri(e, t) {
+function Bi(e, t) {
   const n = [], o = Object.keys(t).sort((s, r) => s.split(".").length - r.split(".").length);
   for (const s of o) {
     const r = e.widgets?.find((a) => a.name === s);
@@ -715,7 +715,7 @@ function Ri(e, t) {
   }
   return n;
 }
-function Bi(e, t) {
+function Di(e, t) {
   const n = { values: 0, missing: [], sheets: 0, activated: 0 };
   for (const o of t.activate) {
     const s = sn(e, o);
@@ -727,7 +727,7 @@ function Bi(e, t) {
       n.missing.push(...Object.keys(s).map((a) => `${o}: ${a}`));
       continue;
     }
-    const i = Ri(r, s);
+    const i = Bi(r, s);
     n.values += Object.keys(s).length - i.length, n.missing.push(...i.map((a) => `${r.type}: ${a}`));
   }
   for (const [o, s] of Object.entries(t.sheets)) {
@@ -736,13 +736,13 @@ function Bi(e, t) {
   }
   return n;
 }
-function Di(e, t) {
+function qi(e, t) {
   let n = 0;
-  for (const o of Es(e)) {
-    if (o.type !== Oi) continue;
+  for (const o of $s(e)) {
+    if (o.type !== Ii) continue;
     const s = o.widgets?.find((f) => f.name === "sheet_state");
     if (!s) continue;
-    const r = $e(s.value) ?? { schema: "plenio.sheet_state/1", docs: {} }, i = (o.inputs ?? []).filter((f) => f.link != null).map((f) => f.name), a = _s(i, r), c = (a.length ? a : [...Ze]).filter((f) => !!t[f]);
+    const r = $e(s.value) ?? { schema: "plenio.sheet_state/1", docs: {} }, i = (o.inputs ?? []).filter((f) => f.link != null).map((f) => f.name), a = Es(i, r), c = (a.length ? a : [...Ze]).filter((f) => !!t[f]);
     if (!c.length) continue;
     const l = { ...r.docs };
     for (const f of c) l[f] = { state: "manual", text: t[f] };
@@ -751,7 +751,7 @@ function Di(e, t) {
   }
   return n;
 }
-function qi(e, t) {
+function zi(e, t) {
   return (e.split(/[\\/]/).pop() ?? "").replace(/\.plenio\.json$/i, "").replace(/\.(json|flac)$/i, "") || t || "Plenio song";
 }
 function rn(e, t) {
@@ -764,18 +764,18 @@ function rn(e, t) {
   return `The workflow "${e.title}" was made with cannot be rebuilt (a workflow of your own, from before records kept it).`;
 }
 const En = "Plenio was updated while this page was open: reload the page (F5).";
-function zi(e) {
+function Hi(e) {
   const t = /\/chunks\/(main-[^/?#]+\.mjs)(?:[?#].*)?$/.exec(e);
   return t ? t[1] : null;
 }
-function Hi(e) {
+function Fi(e) {
   return /chunks\/(main-[^"'?#\s]+\.mjs)/.exec(e)?.[1] ?? null;
 }
 async function Gn(e, t) {
-  const n = zi(e);
+  const n = Hi(e);
   if (!n) return !1;
   try {
-    const o = await t(new URL("../plenio.js", e).href), s = o ? Hi(o) : null;
+    const o = await t(new URL("../plenio.js", e).href), s = o ? Fi(o) : null;
     return s !== null && s !== n;
   } catch {
     return !1;
@@ -792,22 +792,22 @@ async function Pe(e, t, n = "") {
     throw await t() ? new Error(n ? `${En} ${n}` : En) : o;
   }
 }
-const an = "Plenio.ContinueSong", Fi = "plenio.record/1";
+const an = "Plenio.ContinueSong", Wi = "plenio.record/1";
 function $n(e, t, n, o, s = 2e4) {
   e.app.extensionManager?.toast?.add({ severity: t, summary: n, detail: o, life: s });
 }
 async function It(e, t) {
-  const n = await Hr(e.fetcher, t);
+  const n = await Fr(e.fetcher, t);
   if (n.workflow) {
     if (!e.app.loadGraphData) throw new Error("This ComfyUI frontend cannot load a workflow for Plenio.");
-    await e.app.loadGraphData(n.workflow, !0, !0, qi("path" in t ? t.path : t.name, n.title));
+    await e.app.loadGraphData(n.workflow, !0, !0, zi("path" in t ? t.path : t.name, n.title));
     const r = e.app.graph;
     if (!r) throw new Error("The workflow did not load.");
-    const i = Bi(r, n);
+    const i = Di(r, n);
     r.setDirtyCanvas?.(!0, !0), i.missing.length && console.warn("Plenio: settings of the song without a field in this workflow", i.missing), $n(e, "success", "Song opened", rn(n, i));
     return;
   }
-  const o = e.app.graph, s = o ? Di(o, n.documents) : 0;
+  const o = e.app.graph, s = o ? qi(o, n.documents) : 0;
   if (!s)
     throw new Q(
       rn(n, null),
@@ -815,12 +815,12 @@ async function It(e, t) {
     );
   $n(e, "success", "Song texts taken", `${rn(n, null)} Its texts and score went into this workflow's Song Sheets (${s}, manual).`);
 }
-async function Wi(e) {
-  if (Ss(e)) return ks(e);
+async function ji(e) {
+  if (Ms(e)) return Ss(e);
   if (!/\.json$/i.test(e.name ?? "")) return null;
   try {
     const t = JSON.parse(await e.text());
-    return t?.schema === Fi ? t : null;
+    return t?.schema === Wi ? t : null;
   } catch {
     return null;
   }
@@ -829,25 +829,25 @@ function mo(e) {
   const t = [...e.dataTransfer?.files ?? []];
   return t.length === 1 && /\.plenio\.json$/i.test(t[0].name) ? t[0] : null;
 }
-function ji(e, t) {
+function Gi(e, t) {
   const n = [...e.dataTransfer?.files ?? []];
-  if (n.length !== 1 || !Ss(n[0]) || e.shiftKey) return null;
+  if (n.length !== 1 || !Ms(n[0]) || e.shiftKey) return null;
   const o = t.canvas, s = t.graph;
   if (!o?.canvas || e.target !== o.canvas || !o.convertEventToCanvasOffset || !s?.getNodeOnPos) return null;
   const [r, i] = o.convertEventToCanvasOffset(e);
   return s.getNodeOnPos(r, i) ? null : n[0];
 }
-function Gi(e, t = window) {
+function Vi(e, t = window) {
   const n = (o) => {
-    const s = mo(o) ? null : ji(o, e.app), r = s ?? mo(o);
+    const s = mo(o) ? null : Gi(o, e.app), r = s ?? mo(o);
     r && (o.preventDefault(), o.stopImmediatePropagation(), (async () => {
       if (s) {
-        const a = await ks(s);
+        const a = await Ss(s);
         if (a) return It(e, { record: a, name: s.name });
         if (!e.app.handleFile) throw new Q(`${s.name} carries no Plenio project.`, "Drop it with Shift held to give it to ComfyUI.");
         return e.app.handleFile(s);
       }
-      const i = await Wi(r);
+      const i = await ji(r);
       if (!i) throw new Q(`${r.name} is no Plenio release record.`, "Drop the <name>.plenio.json that Export Release wrote next to the song.");
       await It(e, { record: i, name: r.name });
     })().catch((i) => {
@@ -858,26 +858,26 @@ function Gi(e, t = window) {
   return t.addEventListener("drop", n, !0), () => t.removeEventListener("drop", n, !0);
 }
 async function go(e) {
-  const t = () => Gn(import.meta.url, Vn), { openContinueDialog: n } = await Pe(() => import("./openContinue-CE5WnoHX.mjs"), t);
+  const t = () => Gn(import.meta.url, Vn), { openContinueDialog: n } = await Pe(() => import("./openContinue-BSHHSKER.mjs"), t);
   n(e.fetcher, (o) => It(e, o));
 }
-const Vi = "COMFY_DYNAMICCOMBO_V3";
-function Ui(e) {
+const Ui = "COMFY_DYNAMICCOMBO_V3";
+function Yi(e) {
   const t = e?.widgets_values_named;
   return t && typeof t == "object" && !Array.isArray(t) ? { ...t } : Array.isArray(e?.widgets_values) ? [...e.widgets_values] : void 0;
 }
-function Yi(e) {
+function Xi(e) {
   return (e.widgets ?? []).filter((t) => t.serialize !== !1);
 }
-function Xi(e, t) {
-  const n = Yi(e);
+function Ki(e, t) {
+  const n = Xi(e);
   return Array.isArray(t) ? n.length === t.length && n.every((o, s) => o.value === t[s]) : n.every((o) => !(o.name in t) || o.value === t[o.name]);
 }
-function Ki(e, t) {
+function Qi(e, t) {
   return (e.options?.values ?? []).includes(t);
 }
-function Qi(e, t, n) {
-  if (!t || !e.widgets || Xi(e, t)) return !1;
+function Ji(e, t, n) {
+  if (!t || !e.widgets || Ki(e, t)) return !1;
   let o = 0;
   for (let s = 0; s < e.widgets.length; s++) {
     const r = e.widgets[s];
@@ -890,28 +890,28 @@ function Qi(e, t, n) {
       i = t[r.name];
     else
       continue;
-    if (n.has(r.name) && !Ki(r, i)) return !0;
+    if (n.has(r.name) && !Qi(r, i)) return !0;
     r.value !== i && (r.value = i);
   }
   return !0;
 }
-function Ji(e) {
+function Zi(e) {
   const t = /* @__PURE__ */ new Set();
   for (const n of Object.values(e ?? {}))
     for (const [o, s] of Object.entries(n ?? {}))
-      Array.isArray(s) && s[0] === Vi && t.add(o);
+      Array.isArray(s) && s[0] === Ui && t.add(o);
   return t;
 }
-const $s = "plenio.eq/1", St = 8, xe = 20, Zi = 2e4, De = 12, As = 15, Oe = ["peak", "low_shelf", "high_shelf"], Ls = ["peak", "notch", "highpass", "lowpass"], wo = [0.2, 10], yo = [0.25, 1];
+const As = "plenio.eq/1", St = 8, xe = 20, ea = 2e4, De = 12, Ts = 15, Oe = ["peak", "low_shelf", "high_shelf"], Ls = ["peak", "notch", "highpass", "lowpass"], wo = [0.2, 10], yo = [0.25, 1];
 function Ce() {
-  return { schema: $s, preamp_db: 0, bands: [] };
+  return { schema: As, preamp_db: 0, bands: [] };
 }
-function ea(e) {
+function ta(e) {
   if (typeof e != "string" || !e.trim()) return Ce();
   try {
     const t = JSON.parse(e);
     return typeof t != "object" || t === null || !Array.isArray(t.bands) ? null : {
-      schema: $s,
+      schema: As,
       preamp_db: typeof t.preamp_db == "number" ? t.preamp_db : 0,
       bands: t.bands.map((n, o) => ({
         id: typeof n.id == "string" && n.id ? n.id : `band-${o + 1}`,
@@ -934,12 +934,12 @@ const oe = (e, t) => Number(e.toFixed(t));
 function ee(e, t, n) {
   return Math.min(n, Math.max(t, e));
 }
-function Ts(e) {
-  return e.db ?? As;
+function Cs(e) {
+  return e.db ?? Ts;
 }
-const bo = [6, 12, 18], ta = { 6: 8, 12: 14, 18: 20 };
-function na(e, t) {
-  return { ...e, db: ta[t] ?? As };
+const bo = [6, 12, 18], na = { 6: 8, 12: 14, 18: 20 };
+function oa(e, t) {
+  return { ...e, db: na[t] ?? Ts };
 }
 function Me(e, t) {
   return Math.log(ee(t, xe, e.maxHz) / xe) / Math.log(e.maxHz / xe) * e.width;
@@ -948,11 +948,11 @@ function vo(e, t) {
   return xe * (e.maxHz / xe) ** ee(t / e.width, 0, 1);
 }
 function be(e, t) {
-  const n = Ts(e);
+  const n = Cs(e);
   return (1 - (ee(t, -n, n) + n) / (2 * n)) * e.height;
 }
 function xo(e, t) {
-  const n = Ts(e);
+  const n = Cs(e);
   return (1 - ee(t / e.height, 0, 1)) * 2 * n - n;
 }
 function ko(e, t, n) {
@@ -962,18 +962,18 @@ function So(e, t, n) {
   return t.map((o, s) => `${s ? "L" : "M"}${Me(e, o).toFixed(1)},${be(e, n[s] ?? 0).toFixed(1)}`).join(" ");
 }
 function Un(e) {
-  return Math.min(Zi, 0.45 * e);
+  return Math.min(ea, 0.45 * e);
 }
-function oa(e) {
+function sa(e) {
   const t = new Set(e.bands.map((o) => o.id));
   let n = e.bands.length + 1;
   for (; t.has(`band-${n}`); ) n++;
   return `band-${n}`;
 }
-function sa(e, t, n = 0, o = 48e3) {
+function ra(e, t, n = 0, o = 48e3) {
   if (e.bands.length >= St) return null;
   const s = {
-    id: oa(e),
+    id: sa(e),
     enabled: !0,
     type: "peak",
     frequency_hz: oe(ee(t, xe, Un(o)), 1),
@@ -1008,11 +1008,11 @@ function je(e) {
   const t = e.frequency_hz >= 1e3 ? `${oe(e.frequency_hz / 1e3, 2)} kHz` : `${Math.round(e.frequency_hz)} Hz`, n = Oe.includes(e.type) ? ` ${e.gain_db > 0 ? "+" : ""}${oe(e.gain_db, 1)} dB` : "";
   return `${e.type.replace("_", " ")} ${t}${n}, Q ${oe(e.q, 2)}`;
 }
-function ra(e, t) {
-  const n = Cs[e.type] ?? e.type, o = e.frequency_hz >= 1e3 ? `${(e.frequency_hz / 1e3).toFixed(2)} kHz` : `${Math.round(e.frequency_hz)} Hz`, s = Oe.includes(e.type) ? ` ${e.gain_db > 0 ? "+" : ""}${e.gain_db.toFixed(1)} dB` : "", r = Ls.includes(e.type) ? ` Q ${oe(e.q, 2)}` : "";
+function ia(e, t) {
+  const n = Ps[e.type] ?? e.type, o = e.frequency_hz >= 1e3 ? `${(e.frequency_hz / 1e3).toFixed(2)} kHz` : `${Math.round(e.frequency_hz)} Hz`, s = Oe.includes(e.type) ? ` ${e.gain_db > 0 ? "+" : ""}${e.gain_db.toFixed(1)} dB` : "", r = Ls.includes(e.type) ? ` Q ${oe(e.q, 2)}` : "";
   return `● ${t + 1} ${n} ${o}${s}${r}${e.enabled ? "" : " (off)"}`;
 }
-const Cs = {
+const Ps = {
   peak: "Bell",
   low_shelf: "Low shelf",
   high_shelf: "High shelf",
@@ -1060,7 +1060,7 @@ function _o(e, t, n, { heightFraction: o = 0.7 } = {}) {
     return `${Me(e, f).toFixed(1)},${(c - x * (c - l)).toFixed(1)}`;
   }).join(" L")} L${e.width.toFixed(1)},${c.toFixed(1)} L0,${c.toFixed(1)} Z`;
 }
-class ia {
+class aa {
   constructor(t, n = 50) {
     this.limit = n, this.entries = [t];
   }
@@ -1090,10 +1090,10 @@ class ia {
     this.entries = [t], this.index = 0;
   }
 }
-const aa = "http://www.w3.org/2000/svg", Eo = "plenio_eq_panel", ut = "mode.bands", ge = { capture: !0 }, ie = { width: 560, height: 260 }, dt = ["#4aa3ff", "#f0a35e", "#6fbf73", "#d873c8", "#e0c65a", "#5ac8c8", "#b28df0", "#e08a8a"];
+const ca = "http://www.w3.org/2000/svg", Eo = "plenio_eq_panel", ut = "mode.bands", ge = { capture: !0 }, ie = { width: 560, height: 260 }, dt = ["#4aa3ff", "#f0a35e", "#6fbf73", "#d873c8", "#e0c65a", "#5ac8c8", "#b28df0", "#e08a8a"];
 let dn = null;
 function de(e, t) {
-  const n = document.createElementNS(aa, e);
+  const n = document.createElementNS(ca, e);
   for (const [o, s] of Object.entries(t)) n.setAttribute(o, String(s));
   return n;
 }
@@ -1108,13 +1108,13 @@ function Se(e, t, n) {
 function fe(e, t) {
   return e.widgets?.find((n) => n.name === t);
 }
-function ca(e, t) {
+function la(e, t) {
   return e.bands.length === t.bands.length && e.bands.every((n, o) => {
     const s = t.bands[o];
     return s !== void 0 && n.type === s.type && n.enabled === s.enabled && Math.abs(n.frequency_hz - s.frequency_hz) < 0.5 && Math.abs(n.gain_db - s.gain_db) < 0.05 && Math.abs(n.q - s.q) < 0.01;
   });
 }
-function la(e, t) {
+function ua(e, t) {
   const n = K("div", "plenio-eq"), o = K("div", "plenio-eq-tools"), s = K("select");
   s.setAttribute("aria-label", "EQ preset"), s.title = "EQ preset: sets every band at once (the list comes from resources/presets/eq.json)";
   const r = K("select");
@@ -1140,10 +1140,10 @@ function la(e, t) {
     getMaxHeight: () => 620
   });
   V.serialize = !1;
-  let u = { sampleRate: 48e3, frequencies: [], response: [], settings: Ce(), readonly: !0, note: "" }, k = null, L = null, b = !1, v = 12, _ = null, y = [], E = 0, S, P, N = null, D = !1;
+  let u = { sampleRate: 48e3, frequencies: [], response: [], settings: Ce(), readonly: !0, note: "" }, k = null, T = null, b = !1, v = 12, _ = null, y = [], E = 0, S, P, N = null, D = !1;
   const j = /* @__PURE__ */ new Map();
   let X = null;
-  const H = new ia(Ce()), Z = () => fe(e, ut), U = () => v, R = () => na({ ...ie, maxHz: Math.min(2e4, u.sampleRate / 2) }, U());
+  const H = new aa(Ce()), Z = () => fe(e, ut), U = () => v, R = () => oa({ ...ie, maxHz: Math.min(2e4, u.sampleRate / 2) }, U());
   function B(p, { record: w = !0 } = {}) {
     const m = Z();
     if (!m) return;
@@ -1169,7 +1169,7 @@ function la(e, t) {
         } : u = { ...u, readonly: !0 }, J();
         return;
       }
-      const m = ea(Z()?.value);
+      const m = ta(Z()?.value);
       if (!m) {
         u = { ...u, readonly: !0, note: "the bands are not valid JSON" }, J();
         return;
@@ -1177,18 +1177,18 @@ function la(e, t) {
       Ne(m) !== Ne(H.current) && H.reset(m);
       const $ = ++E;
       try {
-        const T = await no(t, m, u.sampleRate);
+        const L = await no(t, m, u.sampleRate);
         if ($ !== E) return;
         u = {
           ...u,
-          frequencies: T.frequency_hz,
-          response: T.response_db,
-          settings: T.settings,
+          frequencies: L.frequency_hz,
+          response: L.response_db,
+          settings: L.settings,
           readonly: !1,
           note: ""
         };
-      } catch (T) {
-        u = { ...u, readonly: !1, note: T instanceof Error ? T.message : String(T) };
+      } catch (L) {
+        u = { ...u, readonly: !1, note: L instanceof Error ? L.message : String(L) };
       }
       J();
     }, p);
@@ -1200,7 +1200,7 @@ function la(e, t) {
   function He() {
     if (!_) return "";
     const p = y.find((w) => w.name === _);
-    return p && ca(nt(p), u.settings) ? _ : "";
+    return p && la(nt(p), u.settings) ? _ : "";
   }
   function J() {
     g.replaceChildren(), j.clear(), X = null;
@@ -1212,16 +1212,16 @@ function la(e, t) {
     for (const m of [100, 1e3, 1e4])
       g.append(de("line", { x1: Me(p, m), x2: Me(p, m), y1: 0, y2: p.height, class: "grid" }));
     u.beforeDb?.length === u.frequencies.length && g.append(de("path", { d: _o(p, u.frequencies, u.beforeDb), class: "spectrum before" })), u.afterDb?.length === u.frequencies.length && g.append(de("path", { d: _o(p, u.frequencies, u.afterDb), class: "spectrum after" })), b ? g.append(de("line", { x1: 0, x2: p.width, y1: be(p, 0), y2: be(p, 0), class: "curve flat" })) : u.frequencies.length && (X = de("path", { d: So(p, u.frequencies, u.response), class: "curve" }), g.append(X)), !u.readonly && !b && u.settings.bands.forEach((m, $) => {
-      const T = dt[$ % dt.length], q = Oe.includes(m.type) ? m.gain_db : 0, A = de("circle", {
+      const L = dt[$ % dt.length], q = Oe.includes(m.type) ? m.gain_db : 0, A = de("circle", {
         cx: Me(p, m.frequency_hz),
         cy: be(p, q),
-        r: m.id === L ? 9 : 7,
-        class: m.id === L ? "handle selected" : "handle",
-        style: `stroke: ${T}`,
+        r: m.id === T ? 9 : 7,
+        class: m.id === T ? "handle selected" : "handle",
+        style: `stroke: ${L}`,
         tabindex: 0,
         "data-band": m.id
       });
-      A.setAttribute("aria-label", `Band ${$ + 1}: ${je(m)}`), m.enabled || A.classList.add("disabled"), A.append(de("title", {})), A.lastChild.textContent = `Band ${$ + 1}: ${je(m)}`, A.addEventListener("pointerdown", (F) => Ar(F, m.id)), A.addEventListener("dblclick", (F) => {
+      A.setAttribute("aria-label", `Band ${$ + 1}: ${je(m)}`), m.enabled || A.classList.add("disabled"), A.append(de("title", {})), A.lastChild.textContent = `Band ${$ + 1}: ${je(m)}`, A.addEventListener("pointerdown", (F) => Tr(F, m.id)), A.addEventListener("dblclick", (F) => {
         F.stopPropagation(), B(Mo(u.settings, m.id));
       }), A.addEventListener("focus", () => Xt(m.id)), A.addEventListener("keydown", (F) => Jn(F, m.id)), A.addEventListener("wheel", (F) => {
         F.preventDefault();
@@ -1230,9 +1230,9 @@ function la(e, t) {
       }), A.addEventListener("contextmenu", (F) => {
         F.preventDefault(), B(ln(u.settings, m.id));
       }), g.append(A), j.set(m.id, A);
-    }), ot(), Le(), Yt();
-    const w = u.settings.bands.find((m) => m.id === L);
-    f.textContent = u.note || (b ? "compare: the curve is off (the node still applies it)" : w ? je(w) : u.readonly ? `${u.settings.bands.length} band(s)` : `drag a handle, Shift = fine, wheel = Q, double-click = add · ${u.settings.bands.length}/${St}`), s.disabled = u.readonly, i.disabled = !H.canUndo, a.disabled = !H.canRedo, c.disabled = u.readonly || !u.settings.bands.length, D && (D = !1, L && j.get(L)?.focus({ preventScroll: !0 })), r.value = String(v), s.value = He(), l.classList.toggle("active", b), d.classList.toggle("active", Kt()), e.setDirtyCanvas?.(!0, !0);
+    }), ot(), Te(), Yt();
+    const w = u.settings.bands.find((m) => m.id === T);
+    f.textContent = u.note || (b ? "compare: the curve is off (the node still applies it)" : w ? je(w) : u.readonly ? `${u.settings.bands.length} band(s)` : `drag a handle, Shift = fine, wheel = Q, double-click = add · ${u.settings.bands.length}/${St}`), s.disabled = u.readonly, i.disabled = !H.canUndo, a.disabled = !H.canRedo, c.disabled = u.readonly || !u.settings.bands.length, D && (D = !1, T && j.get(T)?.focus({ preventScroll: !0 })), r.value = String(v), s.value = He(), l.classList.toggle("active", b), d.classList.toggle("active", Kt()), e.setDirtyCanvas?.(!0, !0);
   }
   function ot() {
     if (x.replaceChildren(), u.readonly && !u.settings.bands.length) {
@@ -1240,15 +1240,15 @@ function la(e, t) {
       return;
     }
     u.settings.bands.forEach((p, w) => {
-      const m = K("button", "plenio-eq-chip", ra(p, w));
-      m.style.borderLeftColor = dt[w % dt.length], m.classList.toggle("selected", p.id === L), m.classList.toggle("disabled", !p.enabled), m.setAttribute("aria-label", `Edit band ${w + 1}`), m.title = `Band ${w + 1}: ${je(p)} - click to open its fields`, m.addEventListener("click", ($) => {
-        $.stopPropagation(), L = L === p.id ? null : p.id, J();
+      const m = K("button", "plenio-eq-chip", ia(p, w));
+      m.style.borderLeftColor = dt[w % dt.length], m.classList.toggle("selected", p.id === T), m.classList.toggle("disabled", !p.enabled), m.setAttribute("aria-label", `Edit band ${w + 1}`), m.title = `Band ${w + 1}: ${je(p)} - click to open its fields`, m.addEventListener("click", ($) => {
+        $.stopPropagation(), T = T === p.id ? null : p.id, J();
       }), x.append(m);
     });
   }
-  function Le() {
+  function Te() {
     O.replaceChildren();
-    const p = u.settings.bands.find((A) => A.id === L);
+    const p = u.settings.bands.find((A) => A.id === T);
     if (!p || u.readonly) {
       M.style.display = "none";
       return;
@@ -1258,11 +1258,11 @@ function la(e, t) {
     w.title = "The selected band";
     const m = K("select");
     m.setAttribute("aria-label", "Band type"), m.title = "Band type: bell and shelves change the gain, the cuts and the notch do not";
-    for (const [A, F] of Object.entries(Cs)) m.append(new Option(F, A));
+    for (const [A, F] of Object.entries(Ps)) m.append(new Option(F, A));
     m.value = p.type, m.addEventListener("change", () => B(Mt(u.settings, p.id, { type: m.value })));
     const $ = K("input");
     $.type = "checkbox", $.checked = p.enabled, $.setAttribute("aria-label", "Band enabled"), $.title = "Band enabled: off keeps the band in the list but out of the response", $.addEventListener("change", () => B(Mt(u.settings, p.id, { enabled: $.checked })));
-    const T = [
+    const L = [
       [
         "Hz",
         `${p.frequency_hz}`,
@@ -1273,7 +1273,7 @@ function la(e, t) {
       ["Q", `${p.q}`, 60, (A) => Jt(p.id, "q", un(A))]
     ];
     O.append(w, m, $);
-    for (const [A, F, ke, st] of T) {
+    for (const [A, F, ke, st] of L) {
       const te = K("input", "number");
       te.value = F, te.style.width = `${ke}px`, te.setAttribute("aria-label", `Band ${A}`), te.title = A === "Hz" ? "Frequency of the band in Hz (the centre of a bell, the corner of a shelf)" : A === "dB" ? "Gain in dB (bell and shelves; the cuts and the notch have none)" : "Q: how narrow the band is - higher Q, smaller range";
       const rt = () => {
@@ -1285,7 +1285,7 @@ function la(e, t) {
     }
     const q = Se("", "remove", "Remove this band");
     q.addEventListener("click", (A) => {
-      A.stopPropagation(), L = null, B(ln(u.settings, p.id));
+      A.stopPropagation(), T = null, B(ln(u.settings, p.id));
     }), O.append(q);
   }
   function Yt() {
@@ -1308,32 +1308,32 @@ function la(e, t) {
       const $ = fe(e, "mode");
       if (!$) return;
       $.value = "manual", $.callback?.("manual");
-      const T = Z();
-      if (T) {
+      const L = Z();
+      if (L) {
         const q = Ne(u.settings);
-        T.value = q, T.callback?.(q);
+        L.value = q, L.callback?.(q);
       }
       H.reset(u.settings), Zt(), G(0);
     }), h.append(w);
   }
   function Xt(p) {
-    L = p, D = !0, J();
+    T = p, D = !0, J();
   }
   function me(p) {
-    L = p, Fe();
+    T = p, Fe();
   }
   function Fe() {
     const p = R();
     u.settings.bands.forEach((m) => {
       const $ = j.get(m.id);
       if (!$) return;
-      const T = Oe.includes(m.type) ? m.gain_db : 0;
-      $.setAttribute("cx", String(Me(p, m.frequency_hz))), $.setAttribute("cy", String(be(p, T))), $.classList.toggle("selected", m.id === L), $.setAttribute("r", m.id === L ? "9" : "7");
+      const L = Oe.includes(m.type) ? m.gain_db : 0;
+      $.setAttribute("cx", String(Me(p, m.frequency_hz))), $.setAttribute("cy", String(be(p, L))), $.classList.toggle("selected", m.id === T), $.setAttribute("r", m.id === T ? "9" : "7");
     }), X && u.frequencies.length && X.setAttribute("d", So(p, u.frequencies, u.response));
-    const w = u.settings.bands.find((m) => m.id === L);
+    const w = u.settings.bands.find((m) => m.id === T);
     w && (f.textContent = je(w));
   }
-  function $r() {
+  function Ar() {
     clearTimeout(P), P = setTimeout(async () => {
       const p = u.settings, w = ++E;
       try {
@@ -1353,15 +1353,15 @@ function la(e, t) {
   }
   function Jt(p, w, m) {
     if (m === null) return !1;
-    const $ = u.settings.bands.find((T) => T.id === p);
+    const $ = u.settings.bands.find((L) => L.id === p);
     return $ && $[w] === m || B(Mt(u.settings, p, { [w]: m })), !0;
   }
-  function Ar(p, w) {
-    p.preventDefault(), p.stopPropagation(), L !== w && me(w);
+  function Tr(p, w) {
+    p.preventDefault(), p.stopPropagation(), T !== w && me(w);
     const m = u.settings.bands.find((se) => se.id === w);
     if (!m) return;
     N = { hz: m.frequency_hz, db: m.gain_db };
-    let $ = !1, T = !1;
+    let $ = !1, L = !1;
     const q = p.currentTarget;
     try {
       q?.setPointerCapture?.(p.pointerId);
@@ -1369,8 +1369,8 @@ function la(e, t) {
     }
     const A = g.getBoundingClientRect(), F = A.width ? A.left : 0, ke = A.height ? A.top : 0, st = A.width || ie.width, te = A.height || ie.height, rt = (se, it) => se >= F - 1 && se <= F + st + 1 && it >= ke - 1 && it <= ke + te + 1;
     function ue() {
-      if (!T) {
-        T = !0;
+      if (!L) {
+        L = !0;
         try {
           q?.releasePointerCapture?.(p.pointerId);
         } catch {
@@ -1379,31 +1379,31 @@ function la(e, t) {
       }
     }
     const to = (se) => {
-      if (T || !N) return;
+      if (L || !N) return;
       if (se.buttons === 0) {
         ue();
         return;
       }
       if (!rt(se.clientX, se.clientY)) return;
-      const it = ie.width / st, Tr = ie.height / te, Cr = (se.clientX - F) * it, Pr = (se.clientY - ke) * Tr, Nr = Me(R(), N.hz), Or = be(R(), N.db), Ir = vo(R(), ko(Nr, Cr, se.shiftKey)), Rr = xo(R(), ko(Or, Pr, se.shiftKey));
-      u = { ...u, settings: We(u.settings, w, Ir, Rr, u.sampleRate) }, $ = !0, Fe(), $r();
+      const it = ie.width / st, Cr = ie.height / te, Pr = (se.clientX - F) * it, Nr = (se.clientY - ke) * Cr, Or = Me(R(), N.hz), Ir = be(R(), N.db), Rr = vo(R(), ko(Or, Pr, se.shiftKey)), Br = xo(R(), ko(Ir, Nr, se.shiftKey));
+      u = { ...u, settings: We(u.settings, w, Rr, Br, u.sampleRate) }, $ = !0, Fe(), Ar();
     };
     window.addEventListener("pointermove", to, ge), window.addEventListener("pointerup", ue, ge), window.addEventListener("pointercancel", ue, ge), window.addEventListener("blur", ue, ge);
   }
   function Jn(p, w) {
     const m = u.settings.bands.find((A) => A.id === w);
     if (!m) return;
-    const $ = p.shiftKey ? 0.1 : 0.5, T = p.shiftKey ? 1.01 : 1.06;
+    const $ = p.shiftKey ? 0.1 : 0.5, L = p.shiftKey ? 1.01 : 1.06;
     let q = null;
-    p.key === "ArrowUp" ? q = We(u.settings, w, m.frequency_hz, m.gain_db + $, u.sampleRate) : p.key === "ArrowDown" ? q = We(u.settings, w, m.frequency_hz, m.gain_db - $, u.sampleRate) : p.key === "ArrowRight" ? q = We(u.settings, w, m.frequency_hz * T, m.gain_db, u.sampleRate) : p.key === "ArrowLeft" ? q = We(u.settings, w, m.frequency_hz / T, m.gain_db, u.sampleRate) : p.key === "+" ? q = cn(u.settings, w, 1.15) : p.key === "-" ? q = cn(u.settings, w, 1 / 1.15) : p.key === "0" ? q = Mo(u.settings, w) : (p.key === "Delete" || p.key === "Backspace") && (q = ln(u.settings, w)), q && (p.preventDefault(), B(q));
+    p.key === "ArrowUp" ? q = We(u.settings, w, m.frequency_hz, m.gain_db + $, u.sampleRate) : p.key === "ArrowDown" ? q = We(u.settings, w, m.frequency_hz, m.gain_db - $, u.sampleRate) : p.key === "ArrowRight" ? q = We(u.settings, w, m.frequency_hz * L, m.gain_db, u.sampleRate) : p.key === "ArrowLeft" ? q = We(u.settings, w, m.frequency_hz / L, m.gain_db, u.sampleRate) : p.key === "+" ? q = cn(u.settings, w, 1.15) : p.key === "-" ? q = cn(u.settings, w, 1 / 1.15) : p.key === "0" ? q = Mo(u.settings, w) : (p.key === "Delete" || p.key === "Backspace") && (q = ln(u.settings, w)), q && (p.preventDefault(), B(q));
   }
   g.addEventListener("keydown", (p) => {
-    L && p.target === g && Jn(p, L);
+    T && p.target === g && Jn(p, T);
   }), g.addEventListener("dblclick", (p) => {
     if (u.readonly || b) return;
-    const w = g.getBoundingClientRect(), m = ie.width / (w.width || ie.width), $ = ie.height / (w.height || ie.height), T = (p.clientX - w.left) * m, q = (p.clientY - w.top) * $, A = sa(u.settings, vo(R(), T), xo(R(), q), u.sampleRate);
-    A ? (L = A.bands[A.bands.length - 1].id, B(A)) : (u = { ...u, note: `the EQ has at most ${St} bands` }, J());
-  }), s.append(new Option("preset…", "")), dn ??= zr(t).then((p) => p.manual).catch(() => []), dn.then((p) => {
+    const w = g.getBoundingClientRect(), m = ie.width / (w.width || ie.width), $ = ie.height / (w.height || ie.height), L = (p.clientX - w.left) * m, q = (p.clientY - w.top) * $, A = ra(u.settings, vo(R(), L), xo(R(), q), u.sampleRate);
+    A ? (T = A.bands[A.bands.length - 1].id, B(A)) : (u = { ...u, note: `the EQ has at most ${St} bands` }, J());
+  }), s.append(new Option("preset…", "")), dn ??= Hr(t).then((p) => p.manual).catch(() => []), dn.then((p) => {
     y = p;
     for (const w of p) s.append(new Option(w.name, w.name));
     s.value = He();
@@ -1420,7 +1420,7 @@ function la(e, t) {
     const p = H.redo();
     p && B(p, { record: !1 });
   }), c.addEventListener("click", () => {
-    L = null, B(Ce());
+    T = null, B(Ce());
   }), l.addEventListener("click", () => {
     b = !b, J();
   }), d.addEventListener("click", () => {
@@ -1453,32 +1453,32 @@ function la(e, t) {
     showExecuted(p) {
       const w = p?.plenio_eq, m = w?.[w.length - 1];
       if (!m) return;
-      const $ = String(fe(e, "mode")?.value ?? "flat"), T = $ === "manual";
-      k = T || $ === "flat" ? null : $, u = {
+      const $ = String(fe(e, "mode")?.value ?? "flat"), L = $ === "manual";
+      k = L || $ === "flat" ? null : $, u = {
         sampleRate: m.sample_rate,
         frequencies: m.frequency_hz,
         response: m.response_db,
         settings: m.settings,
-        readonly: !T,
-        note: T ? "" : `applied: ${m.settings.bands.length} band(s)`,
+        readonly: !L,
+        note: L ? "" : `applied: ${m.settings.bands.length} band(s)`,
         beforeDb: m.spectrum_before_db,
         afterDb: m.spectrum_after_db
-      }, T ? G(0) : J();
+      }, L ? G(0) : J();
     }
   };
 }
 const Yn = {
   PlenioSongBrief: "one song, stop to review",
   PlenioCoverBrief: "one cover, stop to review"
-}, ua = new Set(Ft.map((e) => Wn[e]));
-function da(e, t) {
-  return !(e in Yn) || !t || typeof t != "object" || Array.isArray(t) ? [] : Object.entries(t).filter(([n, o]) => ua.has(n) && vs(o)).map(([n]) => n);
+}, da = new Set(Ft.map((e) => Wn[e]));
+function fa(e, t) {
+  return !(e in Yn) || !t || typeof t != "object" || Array.isArray(t) ? [] : Object.entries(t).filter(([n, o]) => da.has(n) && xs(o)).map(([n]) => n);
 }
-const $o = ["written from the idea below", "my own, sung as written below"], Ps = 7, fn = Ps + 4;
-function fa(e) {
-  return !["sung", "sparse vocals"].includes(String(e[Ps])) || $o.includes(e[fn]) ? e : [...e.slice(0, fn), $o[0], "", ...e.slice(fn)];
+const $o = ["written from the idea below", "my own, sung as written below"], Ns = 7, fn = Ns + 4;
+function pa(e) {
+  return !["sung", "sparse vocals"].includes(String(e[Ns])) || $o.includes(e[fn]) ? e : [...e.slice(0, fn), $o[0], "", ...e.slice(fn)];
 }
-function pa(e, t) {
+function ha(e, t) {
   for (const n of Object.values(e.input ?? {})) {
     const o = n?.[t];
     if (!Array.isArray(o)) continue;
@@ -1488,12 +1488,12 @@ function pa(e, t) {
   }
   return [];
 }
-const ha = {
+const ma = {
   PlenioSongBrief: { arrangement: { simple: "off" } },
   PlenioCoverBrief: { arrangement: { simple: "off" } }
 };
-function ma(e, t) {
-  const n = ha[e];
+function ga(e, t) {
+  const n = ma[e];
   if (!n) return [];
   const o = [];
   for (const s of t ?? []) {
@@ -1502,57 +1502,57 @@ function ma(e, t) {
   }
   return o;
 }
-const Ao = 6, ga = 8, wa = 18;
-function ya(e) {
-  if (e[Ao] !== "tags" || e.length > wa) return e;
-  const t = Ao + 1 + ga;
+const Ao = 6, wa = 8, ya = 18;
+function ba(e) {
+  if (e[Ao] !== "tags" || e.length > ya) return e;
+  const t = Ao + 1 + wa;
   return [...e.slice(0, t), "", ...e.slice(t)];
 }
-function ba(e, t) {
+function va(e, t) {
   if (e.name === "PlenioExportRelease" && t && Array.isArray(t.widgets_values)) {
-    const c = ya(t.widgets_values);
+    const c = ba(t.widgets_values);
     return c === t.widgets_values ? t : { ...t, widgets_values: c };
   }
   const n = Yn[e.name];
   if (!n || !t) return t;
-  const o = pa(e, "mode"), s = t.widgets_values, r = t.widgets_values_named;
+  const o = ha(e, "mode"), s = t.widgets_values, r = t.widgets_values_named;
   let i = t;
   Array.isArray(s) && s.length && !o.includes(s[0]) && (i = { ...i, widgets_values: [n, ...s] }), r && typeof r == "object" && !Array.isArray(r) && !("mode" in r) && (i = { ...i, widgets_values_named: { mode: n, ...r } });
-  const a = da(e.name, i.widgets_values_named);
+  const a = fa(e.name, i.widgets_values_named);
   if (a.length) {
     const c = { ...i.widgets_values_named };
     for (const l of a) c[l] = "";
     i = { ...i, widgets_values_named: c };
   }
   if (e.name === "PlenioSongBrief" && Array.isArray(i.widgets_values)) {
-    const c = fa(i.widgets_values);
+    const c = pa(i.widgets_values);
     c !== i.widgets_values && (i = { ...i, widgets_values: c });
   }
   return i;
 }
-const qe = "PlenioModelChoice", va = "plenio.models_missing", _t = "auto", Lo = "component.file";
-function xa(e) {
+const qe = "PlenioModelChoice", xa = "plenio.models_missing", _t = "auto", To = "component.file";
+function ka(e) {
   return e.replace(/\.(safetensors|ckpt|bin|gguf|pt|pth)$/i, "");
 }
-function ka(e) {
+function Sa(e) {
   return (e.includes(": ") ? e.slice(e.indexOf(": ") + 2) : e).split(",")[0].trim();
 }
-function Sa(e, t) {
+function Ma(e, t) {
   const n = String(e ?? "");
   if (n === _t) {
     const s = t?.pick;
     if (!s?.file) return _t;
-    const r = s.source === "config" ? "pinned in config.toml" : ka(s.reason);
-    return `${_t} · ${xa(s.file)} · ${r}${s.installed ? "" : " · to download"}`;
+    const r = s.source === "config" ? "pinned in config.toml" : Sa(s.reason);
+    return `${_t} · ${ka(s.file)} · ${r}${s.installed ? "" : " · to download"}`;
   }
   const o = t?.files?.[n];
   return o ? `${n} · does not fit: ${o}` : n;
 }
-function Ma(e) {
+function _a(e) {
   const t = e.file || "a model file", n = e.folder ? `models/${e.folder}` : "its model folder", o = e.url ? `Download it from ${e.url} into ${n}, then run again.` : `It is a file of your own: put it into ${n}, or set the field to auto.`;
   return { summary: `Model missing: ${t}`, detail: o };
 }
-function _a(e, t) {
+function Ea(e, t) {
   if (!t) return !1;
   const n = String(e ?? "");
   return n === _t ? t.pick ? !t.pick.installed : !1 : !(n in t.files);
@@ -1560,10 +1560,10 @@ function _a(e, t) {
 function An(e) {
   return String(e.widgets?.find((t) => t.name === "component")?.value ?? "");
 }
-function To(e, t) {
-  e.options = { ...e.options, getOptionLabel: (n) => Sa(n, t()) };
+function Lo(e, t) {
+  e.options = { ...e.options, getOptionLabel: (n) => Ma(n, t()) };
 }
-async function Ea(e) {
+async function $a(e) {
   try {
     const t = await e.fetchApi("/plenio/models/files");
     return t.ok ? (await t.json()).components ?? {} : {};
@@ -1571,7 +1571,7 @@ async function Ea(e) {
     return {};
   }
 }
-class $a {
+class Aa {
   constructor(t) {
     this.fetcher = t;
   }
@@ -1581,56 +1581,56 @@ class $a {
     return this.files[t];
   }
   async refresh() {
-    this.files = await Ea(this.fetcher);
+    this.files = await $a(this.fetcher);
   }
   /** The node's file field shows the labels of its current component (its child widget is made anew when the
    * component changes: called again then). */
   label(t) {
-    const n = t.widgets?.find((o) => o.name === Lo);
-    n && To(n, () => this.info(An(t)));
+    const n = t.widgets?.find((o) => o.name === To);
+    n && Lo(n, () => this.info(An(t)));
   }
   /** A block's promoted fields that show a Model Choice inside it: the field whose list is that node's list. */
   labelBlock(t) {
     const n = (t.subgraph?.nodes ?? []).filter((s) => s.type === qe || s.comfyClass === qe), o = /* @__PURE__ */ new Set();
     for (const s of n) {
-      const i = s.widgets?.find((l) => l.name === Lo)?.options?.values;
+      const i = s.widgets?.find((l) => l.name === To)?.options?.values;
       if (!Array.isArray(i)) continue;
       const a = (t.widgets ?? []).find(
-        (l) => !o.has(l) && l.type === "combo" && Aa(l.options?.values, i)
+        (l) => !o.has(l) && l.type === "combo" && Ta(l.options?.values, i)
       );
       if (!a) continue;
       o.add(a);
       const c = An(s);
-      To(a, () => this.info(c));
+      Lo(a, () => this.info(c));
     }
   }
 }
-function Aa(e, t) {
+function Ta(e, t) {
   return Array.isArray(e) && e.length === t.length && e.every((n, o) => n === t[o]);
 }
-const Ns = /* @__PURE__ */ new Map(), Ln = /* @__PURE__ */ new Set();
+const Os = /* @__PURE__ */ new Map(), Tn = /* @__PURE__ */ new Set();
 function Co(e, t) {
-  Ns.set(e, t);
-  for (const n of Ln) n(e);
+  Os.set(e, t);
+  for (const n of Tn) n(e);
 }
-function Te(e) {
-  return Ns.get(e) ?? null;
+function Le(e) {
+  return Os.get(e) ?? null;
 }
 function La(e) {
-  return Ln.add(e), () => Ln.delete(e);
+  return Tn.add(e), () => Tn.delete(e);
 }
-const Os = /* @__PURE__ */ new Map();
-function Ta(e) {
-  e?.draft_sha256 && Os.set(e.draft_sha256, e);
-}
+const Is = /* @__PURE__ */ new Map();
 function Ca(e) {
-  return e ? Os.get(e) ?? null : null;
+  e?.draft_sha256 && Is.set(e.draft_sha256, e);
 }
-const Po = "Plenio.OpenPlayer", No = "plenio-player", Pa = "▶ Open in the Plenio Player";
-function Tn(e, t, n, o, s = 12e3) {
+function Pa(e) {
+  return e ? Is.get(e) ?? null : null;
+}
+const Po = "Plenio.OpenPlayer", No = "plenio-player", Na = "▶ Open in the Plenio Player";
+function Ln(e, t, n, o, s = 12e3) {
   e.extensionManager?.toast?.add({ severity: t, summary: n, detail: o, life: s });
 }
-async function Na(e) {
+async function Oa(e) {
   const t = await e.fetchApi("/plenio/player/open", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -1660,19 +1660,19 @@ async function Et(e, t = null, n = window) {
     } catch {
     }
   try {
-    const r = await Na(e.fetcher);
-    o ? ((s || t) && (o.location.href = Oo(r.url, t)), o.focus()) : n.open(Oo(r.url, t), No), r.started && Tn(e.app, "success", "Plenio Player started", `${r.url} - it keeps running when ComfyUI stops; stop it on its Settings page.`);
+    const r = await Oa(e.fetcher);
+    o ? ((s || t) && (o.location.href = Oo(r.url, t)), o.focus()) : n.open(Oo(r.url, t), No), r.started && Ln(e.app, "success", "Plenio Player started", `${r.url} - it keeps running when ComfyUI stops; stop it on its Settings page.`);
   } catch (r) {
     o && s && o.close();
     const i = r instanceof Q && r.hint ? ` ${r.hint}` : "";
-    Tn(e.app, "error", "Plenio Player", `${r instanceof Error ? r.message : String(r)}${i}`, 2e4);
+    Ln(e.app, "error", "Plenio Player", `${r instanceof Error ? r.message : String(r)}${i}`, 2e4);
   }
 }
-function Oa(e, t) {
+function Ia(e, t) {
   const n = /* @__PURE__ */ new WeakMap(), o = e.prototype, s = o.onNodeCreated;
   o.onNodeCreated = function() {
     s?.call(this);
-    const i = this.addWidget?.("button", Pa, null, () => {
+    const i = this.addWidget?.("button", Na, null, () => {
       Et(t, n.get(this) ?? null);
     }, { serialize: !1 });
     i && (i.serialize = !1);
@@ -1681,17 +1681,17 @@ function Oa(e, t) {
     a && n.set(this, a);
   });
 }
-const Ia = /* @__PURE__ */ new Set(["127.0.0.1", "localhost", "[::1]"]);
-function Ra(e, t) {
+const Ra = /* @__PURE__ */ new Set(["127.0.0.1", "localhost", "[::1]"]);
+function Ba(e, t) {
   if (e === t) return !0;
   try {
     const n = new URL(e);
-    return n.protocol !== "http:" && n.protocol !== "https:" ? !1 : Ia.has(n.hostname) || n.hostname === new URL(t).hostname;
+    return n.protocol !== "http:" && n.protocol !== "https:" ? !1 : Ra.has(n.hostname) || n.hostname === new URL(t).hostname;
   } catch {
     return !1;
   }
 }
-function Ba(e, t = window, n = 1500) {
+function Da(e, t = window, n = 1500) {
   const o = new URLSearchParams(t.location.search);
   if (o.get("plenio") !== "continue") return !1;
   o.delete("plenio");
@@ -1701,25 +1701,25 @@ function Ba(e, t = window, n = 1500) {
   if (!r) return !0;
   const i = (a) => {
     const c = a.data;
-    c?.type !== "plenio-continue" || a.source !== r || !Ra(a.origin, t.location.origin) || (t.removeEventListener("message", i), It(e, { record: c.record, name: String(c.name || "the Plenio Player") }).catch((l) => {
+    c?.type !== "plenio-continue" || a.source !== r || !Ba(a.origin, t.location.origin) || (t.removeEventListener("message", i), It(e, { record: c.record, name: String(c.name || "the Plenio Player") }).catch((l) => {
       const d = l instanceof Q && l.hint ? ` ${l.hint}` : "";
-      Tn(e.app, "error", "Continue a song", `${l instanceof Error ? l.message : String(l)}${d}`, 2e4);
+      Ln(e.app, "error", "Continue a song", `${l instanceof Error ? l.message : String(l)}${d}`, 2e4);
     }));
   };
   return t.addEventListener("message", i), t.setTimeout(() => r.postMessage({ type: "plenio-ready" }, "*"), n), !0;
 }
-const Da = {
+const qa = {
   "one song, stop to review": "new song every run",
   "one cover, stop to review": "new cover every run"
-}, qa = 2e3, za = 3e4;
-function Ha(e, t, n, o) {
-  const s = Da[t];
+}, za = 2e3, Ha = 3e4;
+function Fa(e, t, n, o) {
+  const s = qa[t];
   return !s || n <= 0 && o <= 1 ? null : {
     summary: "These runs stop for your review",
     detail: `${e}: "${t}" - each run waits at the Song Sheets until you press Approve, so queued runs render nothing by themselves. For runs that go through, choose "${s}" in the brief's mode.`
   };
 }
-class Fa {
+class Wa {
   constructor(t, n = Date.now) {
     this.notify = t, this.now = n;
   }
@@ -1735,9 +1735,9 @@ class Fa {
   /** A run of a brief in ``mode`` is being queued. */
   queuing(t, n) {
     const o = this.now();
-    this.recent = [...this.recent.filter((r) => o - r < qa), o];
-    const s = Ha(t, n, this.queued, this.recent.length);
-    !s || o - this.lastNotice < za || (this.lastNotice = o, this.notify(s));
+    this.recent = [...this.recent.filter((r) => o - r < za), o];
+    const s = Fa(t, n, this.queued, this.recent.length);
+    !s || o - this.lastNotice < Ha || (this.lastNotice = o, this.notify(s));
   }
   /** Hear of every run queued with this brief node (its *mode* widget's ``beforeQueued``). */
   watch(t) {
@@ -1758,32 +1758,32 @@ const pn = {
   error: { icon: "✖", label: "error", color: "#c0392b", frame: !0 },
   skipped: { icon: "–", label: "not needed", color: "#5d6b80", frame: !1 }
 };
-function Wa(e) {
+function ja(e) {
   return e === "ok" || e === "warning" || e === "error" || e === "skipped" ? e : null;
 }
-function ja(e, t) {
+function Ga(e, t) {
   return e === "stop for review" ? !0 : e === "as the brief says" ? !!t && t.includes("stop to review") : !1;
 }
-let Is = !0;
-function Rs(e) {
-  Is = e;
+let Rs = !0;
+function Bs(e) {
+  Rs = e;
 }
-function Bs(e, t, n) {
+function Ds(e, t, n) {
   return e === "waiting" && t && n !== !1;
 }
-function Ds(e) {
+function qs(e) {
   if (/^(conflict|invalid)/.test(e.status)) return "error";
   if (e.waiting) return "waiting";
   if (e.review === "stop for review" && e.approved) return "approved";
   const t = new Set(e.findings.map((n) => n.severity));
   return t.has("error") ? "error" : t.has("warning") ? "warning" : "ok";
 }
-function Ga(e) {
+function Va(e) {
   switch (e) {
     case "stop":
       return "⏸ stops here for review";
     case "waiting":
-      return Is ? "⏸ waiting for your approval: Edit, Approve - the run goes on" : "⏸ waiting for your approval: Edit, Approve, run again";
+      return Rs ? "⏸ waiting for your approval: Edit, Approve - the run goes on" : "⏸ waiting for your approval: Edit, Approve, run again";
     case "approved":
       return "✓ approved";
     case "error":
@@ -1806,22 +1806,22 @@ function Ie(e, t) {
   t ? Rt.set(e, t) : Rt.delete(e), e.setDirtyCanvas?.(!0, !0);
   for (const n of Ke) n(e);
 }
-function Va(e) {
+function Ua(e) {
   for (const t of e) Rt.delete(t);
   for (const t of Ke) t(null);
 }
-function Ua() {
+function Ya() {
   for (const e of Ke) e(null);
 }
-function Ya(e) {
+function Xa(e) {
   return Ke.add(e), () => Ke.delete(e);
 }
 const Io = "600 12px sans-serif", ft = 20, hn = 7;
-function Xa(e) {
+function Ka(e) {
   return e.label ? `${e.icon} ${e.label}` : e.icon;
 }
-function Ka(e) {
-  const t = e ? Xa(e) : "";
+function Qa(e) {
+  const t = e ? Ka(e) : "";
   return {
     height: e ? ft : 0,
     getWidth(n) {
@@ -1838,58 +1838,58 @@ function Ka(e) {
     }
   };
 }
-const Qa = "PlenioSongSheet", Ja = 30;
-function qs(e, t) {
+const Ja = "PlenioSongSheet", Za = 30;
+function zs(e, t) {
   const n = e.widgets?.find((o) => o.name === t);
   return n ? String(n.value ?? "") : null;
 }
-function Za(e) {
+function ec(e) {
   const t = e.inputs?.findIndex((n) => n.name === "brief") ?? -1;
   if (t < 0) return null;
   try {
     const n = e.getInputNode?.(t);
-    return n ? qs(n, "mode") : null;
+    return n ? zs(n, "mode") : null;
   } catch {
     return null;
   }
 }
 function Pn(e) {
   const t = Cn(e);
-  return t || (e.type !== Qa ? null : ja(qs(e, "review") ?? "continue", Za(e)) ? "stop" : null);
+  return t || (e.type !== Ja ? null : Ga(zs(e, "review") ?? "continue", ec(e)) ? "stop" : null);
 }
-function ec(e) {
+function tc(e) {
   const t = e?.plenio_sheet, n = t?.[t.length - 1];
-  if (n) return Ds(n);
+  if (n) return qs(n);
   const o = e?.plenio_summary;
-  return Wa(o?.[o.length - 1]?.status);
+  return ja(o?.[o.length - 1]?.status);
 }
-function tc(e, t) {
+function nc(e, t) {
   const n = e.prototype, o = n.onNodeCreated;
   n.onNodeCreated = function() {
     o?.call(this);
     const s = this;
     s.badges?.push(() => {
       const r = Pn(s);
-      return Ka(r ? pn[r] : null);
+      return Qa(r ? pn[r] : null);
     });
   }, n.onDrawForeground = Y(n.onDrawForeground, function(s) {
     const r = Pn(this);
-    !r || !pn[r].frame || this.flags?.collapsed || !this.size || nc(s, pn[r], this.size, Ja, t.scale());
+    !r || !pn[r].frame || this.flags?.collapsed || !this.size || oc(s, pn[r], this.size, Za, t.scale());
   }), n.onExecuted = Y(n.onExecuted, function(s) {
-    const r = ec(s);
+    const r = tc(s);
     r && (Ie(this, r), r === "waiting" && t.toast(
       `Stopped at ${this.title || "the Song Sheet"}`,
       "Waiting for your approval: open it with its Edit button, check the documents, press Approve, then run again."
     ));
   });
 }
-function nc(e, t, n, o, s) {
+function oc(e, t, n, o, s) {
   const r = Math.max(3, 3 / Math.max(s, 0.05));
   e.save(), e.strokeStyle = t.color, e.lineWidth = r, e.beginPath();
   const i = r / 2 + 3;
   typeof e.roundRect == "function" ? e.roundRect(-i, -o - i, n[0] + 2 * i, n[1] + o + 2 * i, 10) : e.rect(-i, -o - i, n[0] + 2 * i, n[1] + o + 2 * i), e.stroke(), e.restore();
 }
-function dd(e, t) {
+function pd(e, t) {
   const n = [];
   let o = 0;
   return e.bars.forEach((s, r) => {
@@ -1897,7 +1897,7 @@ function dd(e, t) {
     n.push({ scoreStart: s.start_s, scoreDur: s.duration_s, realStart: o, realDur: c, source: a }), o += c;
   }), n;
 }
-function zs(e, t, n) {
+function Hs(e, t, n) {
   let o = null;
   for (const s of e)
     if (s[n] <= t + ne) o = s;
@@ -1905,18 +1905,18 @@ function zs(e, t, n) {
   return o ?? e[0] ?? null;
 }
 function Ae(e, t) {
-  const n = zs(e, t, "scoreStart");
+  const n = Hs(e, t, "scoreStart");
   if (!n) return t;
   const o = n.scoreDur > 0 ? (t - n.scoreStart) / n.scoreDur : 0;
   return n.realStart + o * n.realDur;
 }
-function oc(e, t) {
-  const n = zs(e, t, "realStart");
+function sc(e, t) {
+  const n = Hs(e, t, "realStart");
   if (!n) return t;
   const o = n.realDur > 0 ? (t - n.realStart) / n.realDur : 0;
   return n.scoreStart + o * n.scoreDur;
 }
-function fd(e, t, n) {
+function hd(e, t, n) {
   const o = Ae(e, t), s = n == null ? 1 / 0 : Ae(e, n), r = [];
   for (const i of e) {
     if (!i.source) continue;
@@ -1930,11 +1930,11 @@ function fd(e, t, n) {
   }
   return r;
 }
-const Hs = 0.04, ne = 1e-3, sc = 0.25, rc = 2;
+const Fs = 0.04, ne = 1e-3, rc = 0.25, ic = 2;
 function Bt(e) {
-  return Math.min(rc, Math.max(sc, Number.isFinite(e) ? e : 1));
+  return Math.min(ic, Math.max(rc, Number.isFinite(e) ? e : 1));
 }
-function pd(e, t) {
+function md(e, t) {
   const n = Bt(t.speed), o = t.to ?? e.duration_s, s = [], r = t.clock?.length ? t.clock : null, i = r ? Ae(r, t.from) : t.from, a = (c) => (r ? Ae(r, c) : c) - i;
   for (const c of ["Vocal", "Ins"])
     if (t.voices[c])
@@ -1963,7 +1963,7 @@ function pd(e, t) {
         const f = c.start_s + d * c.duration_s / l;
         f < t.from - ne || f >= o - ne || s.push({
           at: Math.max(0, a(f)) / n,
-          duration: Hs,
+          duration: Fs,
           midi: d === 0 ? 96 : 89,
           part: "click"
         });
@@ -1971,30 +1971,30 @@ function pd(e, t) {
     }
   return s.sort((c, l) => c.at - l.at || c.midi - l.midi);
 }
-function hd(e, t) {
+function gd(e, t) {
   const n = Math.max(t.from, t.to ?? e.duration_s), o = t.clock?.length ? t.clock : null, s = o ? Ae(o, n) - Ae(o, t.from) : n - t.from;
   return Math.max(0, s) / Bt(t.speed);
 }
-function md(e, t, n, o, s, r) {
+function wd(e, t, n, o, s, r) {
   const i = e && t > 0 ? e.duration_s / t : 0, a = e && i > 0 ? Math.max(0, n - e.start_s) : 0, c = i > 0 ? Math.floor(a / i + 1e-6) : 0, l = i > 0 ? (a - c * i) / i * r : 0, d = l > 1e-3 ? 0 : 1, f = Math.max(0, o * t);
   return Array.from({ length: f }, (h, g) => {
     const x = d + f - 1 - g, M = ((c - x) % t + t) % t === 0;
-    return { at: Math.max(0, s - l - x * r), duration: Hs, midi: M ? 96 : 89, part: "click" };
+    return { at: Math.max(0, s - l - x * r), duration: Fs, midi: M ? 96 : 89, part: "click" };
   });
 }
-function gd(e, t) {
+function yd(e, t) {
   const n = e.clock?.length ? e.clock : null;
-  return n ? oc(n, Ae(n, e.from) + t * Bt(e.speed)) : e.from + t * Bt(e.speed);
+  return n ? sc(n, Ae(n, e.from) + t * Bt(e.speed)) : e.from + t * Bt(e.speed);
 }
-function wd(e, t, n) {
+function bd(e, t, n) {
   return (e.elements ?? []).filter(
     (o) => o.kind === "note" && n[o.voice] && o.start_s <= t + ne && t < o.start_s + o.duration_s - ne
   ).map((o) => o.id);
 }
-function ic(e) {
+function ac(e) {
   return 440 * 2 ** ((e - 69) / 12);
 }
-const ac = [
+const cc = [
   "plain",
   "soft",
   "piano",
@@ -2008,7 +2008,7 @@ const ac = [
   "lead",
   "bass",
   "mallets"
-], yd = {
+], vd = {
   plain: { label: "Plain", hint: "a plain sine tone (the editor’s classic sound)" },
   soft: { label: "Soft lead", hint: "a soft triangle tone" },
   piano: { label: "Piano", hint: "a struck string that fades and darkens" },
@@ -2024,13 +2024,13 @@ const ac = [
   mallets: { label: "Mallets", hint: "marimba / vibraphone (FM)" }
 };
 function pt(e) {
-  return typeof e == "string" && ac.includes(e);
+  return typeof e == "string" && cc.includes(e);
 }
-function Fs() {
+function Ws() {
   return { Vocal: "soft", Ins: "plain", chord: "plain", guide: "plain" };
 }
-function cc(e) {
-  const t = Fs(), n = typeof e == "object" && e !== null ? e : {};
+function lc(e) {
+  const t = Ws(), n = typeof e == "object" && e !== null ? e : {};
   return {
     Vocal: pt(n.Vocal) ? n.Vocal : t.Vocal,
     Ins: pt(n.Ins) ? n.Ins : t.Ins,
@@ -2038,7 +2038,7 @@ function cc(e) {
     guide: pt(n.guide) ? n.guide : t.guide
   };
 }
-const lc = {
+const uc = {
   plain: 1,
   soft: 1,
   piano: 1.35,
@@ -2064,7 +2064,7 @@ function mn(e, t, n) {
   return s;
 }
 const Bo = /* @__PURE__ */ new WeakMap();
-function Ws(e) {
+function js(e) {
   let t = Bo.get(e);
   if (!t) {
     t = e.createBuffer(1, e.sampleRate, e.sampleRate);
@@ -2096,7 +2096,7 @@ function Ge(e, t, n, o, s, r) {
 }
 function gn(e, t, n, o, s, r) {
   const i = e.createBufferSource();
-  i.buffer = Ws(e);
+  i.buffer = js(e);
   const a = ae(e, "bandpass", o, 1.2), c = e.createGain();
   return c.gain.setValueAtTime(s, n), c.gain.setTargetAtTime(0, n, r), i.connect(a).connect(c).connect(t), i;
 }
@@ -2193,7 +2193,7 @@ const $t = (e, t) => Math.min(t * 2.5, Math.max(t * 0.3, t * 2 ** ((60 - e) / 24
       const s = mn(e, "flute", [1, 0.13, 0.06, 0.02]), r = I(e, s, n);
       r.connect(t);
       const i = e.createBufferSource();
-      i.buffer = Ws(e), i.loop = !0;
+      i.buffer = js(e), i.loop = !0;
       const a = ae(e, "bandpass", Math.min(n * 2, 8e3), 1.5), c = we(e, 0.06);
       i.connect(a).connect(c).connect(t);
       const l = Ge(e, [r], o, 4.9, 9, 0.25);
@@ -2278,8 +2278,8 @@ const $t = (e, t) => Math.min(t * 2.5, Math.max(t * 0.3, t * 2 ** ((60 - e) / 24
 function qo(e, t) {
   return e.connect(t), e;
 }
-function bd(e, t, n, o, s, { velocity: r = 0.8, level: i = 1 } = {}) {
-  const a = Do[n] ?? Do.plain, c = ic(o), l = a.sustain === 0 ? $t(o, a.decay) : a.decay, d = i * lc[n] * (0.55 + 0.45 * Math.max(0, Math.min(1, r))), f = e.createGain();
+function xd(e, t, n, o, s, { velocity: r = 0.8, level: i = 1 } = {}) {
+  const a = Do[n] ?? Do.plain, c = ac(o), l = a.sustain === 0 ? $t(o, a.decay) : a.decay, d = i * uc[n] * (0.55 + 0.45 * Math.max(0, Math.min(1, r))), f = e.createGain();
   f.gain.setValueAtTime(0, s), f.gain.linearRampToValueAtTime(d, s + a.attack), f.gain.setTargetAtTime(d * a.sustain, s + a.attack, l), f.connect(t);
   const h = a.build(e, f, c, s, r, o);
   for (const O of h) O.start(s);
@@ -2312,22 +2312,22 @@ function bd(e, t, n, o, s, { velocity: r = 0.8, level: i = 1 } = {}) {
     }
   };
 }
-function uc(e) {
+function dc(e) {
   return typeof e == "number" && Number.isFinite(e) && Math.abs(e) <= 10 ? Math.round(e * 1e3) / 1e3 : 0;
 }
 function ze(e, t) {
   return `${e}:${t}`;
 }
-function dc(e) {
+function fc(e) {
   const t = /^(\d+):(\d+)$/.exec(e);
   return t ? { block: Number(t[1]), line: Number(t[2]) } : null;
 }
-const fc = 512;
+const pc = 512;
 function Gt(e) {
   if (!Array.isArray(e)) return [];
   const t = [];
   for (const n of e) {
-    if (!Array.isArray(n) || n.length === 3 || n.length < 2 || n.length > 4 + fc || !n.every((a) => Number.isInteger(a) && a >= 0)) continue;
+    if (!Array.isArray(n) || n.length === 3 || n.length < 2 || n.length > 4 + pc || !n.every((a) => Number.isInteger(a) && a >= 0)) continue;
     const [o, s] = n;
     if (s <= o) continue;
     if (n.length === 2) {
@@ -2339,19 +2339,19 @@ function Gt(e) {
   }
   return t.sort((n, o) => n[0] - o[0] || n[1] - o[1] || (n[2] ?? -1) - (o[2] ?? -1) || (n[3] ?? -1) - (o[3] ?? -1));
 }
-function pc(e, t) {
+function hc(e, t) {
   return e.length === t.length && e.every((n, o) => n.length === t[o].length && n.every((s, r) => s === t[o][r]));
 }
-function js(e, t) {
+function Gs(e, t) {
   return e.parts.find((n) => n.block === t);
 }
-function Gs(e, t) {
+function Vs(e, t) {
   return e.parts.find((n) => t >= n.start && t < n.end);
 }
 function Vt(e) {
   return e.syllables.length > 0 || e.pinned;
 }
-function Vs(e, t, n) {
+function Us(e, t, n) {
   let o = 0, s = n;
   for (const r of e.parts) {
     const i = r.lines.filter(Vt);
@@ -2359,8 +2359,8 @@ function Vs(e, t, n) {
   }
   return [o, Math.max(s, o + 1)];
 }
-function hc(e, t, n, o, s) {
-  const r = js(e, t), [i, a] = o, c = new Map((r?.lines ?? []).map((f) => [f.line, f])), l = [];
+function mc(e, t, n, o, s) {
+  const r = Gs(e, t), [i, a] = o, c = new Map((r?.lines ?? []).map((f) => [f.line, f])), l = [];
   let d = r ? Math.max(r.start, i) : i;
   return n.forEach((f, h) => {
     const g = c.get(h);
@@ -2373,7 +2373,7 @@ function hc(e, t, n, o, s) {
     }
   }), l;
 }
-function mc(e, t) {
+function gc(e, t) {
   const [n, o] = t, r = e.map((i, a) => {
     const c = Math.min(Math.max(i.start, n), Math.max(n, o - 1)), l = i.end > i.start ? Math.min(Math.max(i.end, c + 1), o) : c;
     return { line: { ...i, start: c, end: l }, index: a, placed: i.id.startsWith("*") };
@@ -2389,26 +2389,26 @@ function Xn(e) {
     (t) => t.lines.filter((n) => Vt(n) && n.end > n.start).map((n) => ({ key: ze(n.block, n.line), block: n.block, line: n.line, start: n.start, end: n.end, text: n.text }))
   ).sort((t, n) => t.start - n.start || t.block - n.block || t.line - n.line);
 }
-function gc(e, t, n = /* @__PURE__ */ new Set()) {
+function wc(e, t, n = /* @__PURE__ */ new Set()) {
   for (const o of t) {
     const s = e.find((r) => !n.has(r.key) && r.start < o.end && o.start < r.end);
     if (s) return s;
   }
   return null;
 }
-function wc(e, t, n, o = 1) {
+function yc(e, t, n, o = 1) {
   const s = e.parts.flatMap((u) => u.lines.map((k) => ({ ...k, key: ze(k.block, k.line) }))), r = t.kind === "move" ? new Set(t.keys) : /* @__PURE__ */ new Set([t.key]), i = s.filter((u) => r.has(u.key) && u.text).map((u) => ({ key: u.key, block: u.block, start: u.start, end: u.end > u.start ? u.end : Math.min(n, u.start + Math.max(1, o)) })), a = Xn(e).filter((u) => !r.has(u.key)), c = { moves: [], free: !0, stoppedAt: null };
   if (!i.length) return c;
   const l = (u) => {
-    let k = 0, L = n;
+    let k = 0, T = n;
     for (const b of a)
-      b.block < u ? k = Math.max(k, b.end) : b.block > u && (L = Math.min(L, b.start));
-    return [k, Math.max(k, L)];
+      b.block < u ? k = Math.max(k, b.end) : b.block > u && (T = Math.min(T, b.start));
+    return [k, Math.max(k, T)];
   };
   if (t.kind !== "move") {
-    const u = i[0], [k, L] = l(u.block);
+    const u = i[0], [k, T] = l(u.block);
     if (t.kind === "end") {
-      const E = a.filter((D) => D.start >= u.start).sort((D, j) => D.start - j.start)[0], S = Math.min(L, E ? E.start : n), P = u.end + t.delta, N = Math.max(u.start + 1, Math.min(P, S));
+      const E = a.filter((D) => D.start >= u.start).sort((D, j) => D.start - j.start)[0], S = Math.min(T, E ? E.start : n), P = u.end + t.delta, N = Math.max(u.start + 1, Math.min(P, S));
       return { moves: [{ key: u.key, start: u.start, end: N }], free: N === P, stoppedAt: P > S && E && E.start === S ? E : null };
     }
     const b = a.filter((E) => E.end <= u.end).sort((E, S) => S.end - E.end)[0], v = Math.max(k, b ? b.end : 0), _ = u.start + t.delta, y = Math.min(u.end - 1, Math.max(_, v));
@@ -2420,14 +2420,14 @@ function wc(e, t, n, o = 1) {
   }
   let d = -1 / 0, f = 1 / 0;
   for (const u of i) {
-    const [k, L] = l(u.block);
-    d = Math.max(d, k - u.start), f = Math.min(f, L - u.end);
+    const [k, T] = l(u.block);
+    d = Math.max(d, k - u.start), f = Math.min(f, T - u.end);
   }
   const h = a.flatMap((u) => i.map((k) => ({ other: u, from: u.start - k.end, to: u.end - k.start }))), g = (u) => u >= d && u <= f && !h.some((k) => u > k.from && u < k.to), x = t.delta, M = [x, 0, d, f, ...h.flatMap((u) => [u.from, u.to])].filter((u) => Number.isFinite(u) && g(u));
   if (!M.length) return { moves: [], free: !1, stoppedAt: null };
   const O = M.reduce((u, k) => {
-    const L = Math.abs(k - x) - Math.abs(u - x);
-    return L < 0 || L === 0 && Math.abs(k) < Math.abs(u) ? k : u;
+    const T = Math.abs(k - x) - Math.abs(u - x);
+    return T < 0 || T === 0 && Math.abs(k) < Math.abs(u) ? k : u;
   }), V = O === x ? null : h.find((u) => x > u.from && x < u.to)?.other ?? null;
   return {
     moves: O ? i.map((u) => ({ key: u.key, start: u.start + O, end: u.end + O })) : [],
@@ -2435,15 +2435,15 @@ function wc(e, t, n, o = 1) {
     stoppedAt: V
   };
 }
-function yc(e, t, n, o, s = 4 * Math.max(1, n)) {
-  const r = Gs(e, Math.min(Math.max(0, t), Math.max(0, o - 1)));
+function bc(e, t, n, o, s = 4 * Math.max(1, n)) {
+  const r = Vs(e, Math.min(Math.max(0, t), Math.max(0, o - 1)));
   if (!r) return null;
   const i = Xn(e);
   if (i.some((M) => t >= M.start && t < M.end)) return null;
   const a = [
     Math.max(0, ...i.filter((M) => M.end <= t).map((M) => M.end)),
     Math.min(o, ...i.filter((M) => M.start > t).map((M) => M.start))
-  ], [, c] = Vs(e, r.block, o), l = Math.max(1, n);
+  ], [, c] = Us(e, r.block, o), l = Math.max(1, n);
   let d = Math.max(a[0], Math.floor(t / l) * l);
   const f = r.phrases.find(([M, O]) => t >= M && t < O);
   f && !i.some((M) => M.start < f[1] && M.end > f[0]) && (d = Math.max(a[0], f[0]));
@@ -2452,7 +2452,7 @@ function yc(e, t, n, o, s = 4 * Math.max(1, n)) {
   const x = r.lines.length ? Math.max(...r.lines.map((M) => M.line)) + 1 : 0;
   return { block: r.block, line: x, start: d, end: g };
 }
-function bc(e, t, n, o = !1) {
+function vc(e, t, n, o = !1) {
   const s = e.filter((l) => l.length >= 4 && !n.has(l[2])), r = new Set(s.map((l) => ze(l[2], l[3]))), i = o || e.some((l) => l.length === 2) ? t.parts.flatMap(
     (l) => l.lines.filter((d) => (o ? Vt(d) : d.pinned) && d.end > d.start && !n.has(d.block) && !r.has(ze(d.block, d.line))).map((d) => [d.start, d.end, d.block, d.line])
   ) : [], a = new Map(e.filter((l) => l.length > 4).map((l) => [`${l[0]}:${l[1]}:${l[2]}`, l.slice(4)])), c = [...n].flatMap(
@@ -2460,7 +2460,7 @@ function bc(e, t, n, o = !1) {
   );
   return Gt([...s, ...i, ...c]);
 }
-function vc(e, t) {
+function xc(e, t) {
   const n = [];
   for (const o of e) {
     const [s, r] = o;
@@ -2472,7 +2472,7 @@ function vc(e, t) {
   }
   return Gt(n);
 }
-function xc(e, t, n, o, s) {
+function kc(e, t, n, o, s) {
   const r = [];
   for (const i of e) {
     if (i.length < 4) {
@@ -2486,45 +2486,45 @@ function xc(e, t, n, o, s) {
   }
   return Gt(r);
 }
-function kc(e) {
+function Sc(e) {
   const t = [...e].sort((o, s) => o.start - s.start), n = t[0]?.start ?? 0;
   return t.map((o) => ({ text: o.text, offset: o.start - n, length: Math.max(1, o.end - o.start) }));
 }
-const Sc = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Mc = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  clipOfLines: kc,
-  editRange: Vs,
-  fitLyricGesture: wc,
-  followSpans: xc,
+  clipOfLines: Sc,
+  editRange: Us,
+  fitLyricGesture: yc,
+  followSpans: kc,
   laneLines: Xn,
   lineKey: ze,
-  newLineAt: yc,
-  overlap: gc,
-  parseLineKey: dc,
-  parseShift: uc,
+  newLineAt: bc,
+  overlap: wc,
+  parseLineKey: fc,
+  parseShift: dc,
   parseSpans: Gt,
-  partAt: Gs,
-  partOf: js,
-  placedLines: hc,
-  remapSpans: vc,
-  sameSpans: pc,
-  settle: mc,
-  withBlockSpans: bc
-}, Symbol.toStringTag, { value: "Module" })), Us = 18, Mc = 24, Dt = Us + Mc, _c = 22, Ec = 34, et = 36, $c = 6, vd = 3, Ac = 12, Lc = 6, Tc = 28, Cc = 21, Pc = 108;
-function Nc(e) {
+  partAt: Vs,
+  partOf: Gs,
+  placedLines: mc,
+  remapSpans: xc,
+  sameSpans: hc,
+  settle: gc,
+  withBlockSpans: vc
+}, Symbol.toStringTag, { value: "Module" })), Ys = 18, _c = 24, Dt = Ys + _c, Ec = 22, $c = 34, et = 36, Ac = 6, kd = 3, Tc = 12, Lc = 6, Cc = 28, Pc = 21, Nc = 108;
+function Oc(e) {
   return [
     ...e.tracks.vocal.map((t) => ({ ...t, track: "vocal" })),
     ...e.tracks.ins.map((t) => ({ ...t, track: "ins" }))
   ];
 }
-function Oc(e) {
+function Ic(e) {
   const t = Number(e.unit.split("/")[1]);
   return Number.isFinite(t) && t > 0 ? t : 32;
 }
-function Ic(e, t) {
-  return t === "auto" ? Math.max(1, e.grid.snap) : Math.max(1, Math.round(Oc(e) / t));
+function Rc(e, t) {
+  return t === "auto" ? Math.max(1, e.grid.snap) : Math.max(1, Math.round(Ic(e) / t));
 }
-function Rc(e, t = 4, n = 24) {
+function Bc(e, t = 4, n = 24) {
   let o = e.length ? Math.min(...e.map((r) => r.pitch)) - t : 60, s = e.length ? Math.max(...e.map((r) => r.pitch)) + t : 79;
   if (s - o + 1 < n) {
     const r = n - (s - o + 1);
@@ -2532,18 +2532,18 @@ function Rc(e, t = 4, n = 24) {
   }
   return o < 0 && ([o, s] = [0, Math.min(127, s - o)]), s > 127 && ([o, s] = [Math.max(0, o - (s - 127)), 127]), [o, s];
 }
-function Bc(e) {
-  const t = e.map((s) => s.pitch), n = Math.max(0, Math.min(Cc, ...t.map((s) => s - 2))), o = Math.min(127, Math.max(Pc, ...t.map((s) => s + 2)));
+function Dc(e) {
+  const t = e.map((s) => s.pitch), n = Math.max(0, Math.min(Pc, ...t.map((s) => s - 2))), o = Math.min(127, Math.max(Nc, ...t.map((s) => s + 2)));
   return [n, o];
 }
-function xd(e, t) {
-  const n = Dt + (t.lyrics ? _c : 0), o = n + (t.source ? Ec : 0), s = Nc(e), [r, i] = Bc(s), a = i - r + 1, c = t.pxPerQuarter / Math.max(e.grid.units_per_quarter, 1e-9), l = Math.max(Lc, Math.min(Tc, Math.round(t.rowHeight ?? Ac))), d = Ic(e, t.snap), f = Math.max(1, Math.round(e.grid.units_per_quarter));
+function Sd(e, t) {
+  const n = Dt + (t.lyrics ? Ec : 0), o = n + (t.source ? $c : 0), s = Oc(e), [r, i] = Dc(s), a = i - r + 1, c = t.pxPerQuarter / Math.max(e.grid.units_per_quarter, 1e-9), l = Math.max(Lc, Math.min(Cc, Math.round(t.rowHeight ?? Tc))), d = Rc(e, t.snap), f = Math.max(1, Math.round(e.grid.units_per_quarter));
   return {
     pxPerUnit: c,
     rowHeight: l,
     high: i,
     low: r,
-    focus: Rc(s),
+    focus: Bc(s),
     total: e.total,
     snap: d,
     drawLength: Math.max(d, Math.round(f / d) * d),
@@ -2553,20 +2553,20 @@ function xd(e, t) {
     sourceTop: t.source ? n : null
   };
 }
-const Kn = (e, t) => et + e * t.pxPerUnit, Dc = (e, t) => (e - et) / t.pxPerUnit, qt = (e, t) => t.top + (t.high - e) * t.rowHeight;
-function qc(e, t, n, o) {
+const Kn = (e, t) => et + e * t.pxPerUnit, qc = (e, t) => (e - et) / t.pxPerUnit, qt = (e, t) => t.top + (t.high - e) * t.rowHeight;
+function zc(e, t, n, o) {
   const s = (qt(o, e) + qt(n, e) + e.rowHeight) / 2, r = Math.max(0, t - e.top), i = s - e.top - r / 2;
   return Math.round(Math.max(0, Math.min(Math.max(0, e.height - t), i)));
 }
-function kd(e, t, n, o) {
+function Md(e, t, n, o) {
   const s = qt(o, e);
-  return s >= t + e.top && s + e.rowHeight <= t + n ? null : qc(e, n, o, o);
+  return s >= t + e.top && s + e.rowHeight <= t + n ? null : zc(e, n, o, o);
 }
 function zo(e, t) {
   const n = t.high - Math.floor((e - t.top) / t.rowHeight);
   return Math.max(t.low, Math.min(t.high, n));
 }
-const zc = (e, t) => Math.floor(e / t) * t, ht = (e, t) => Math.round(e / t) * t;
+const Hc = (e, t) => Math.floor(e / t) * t, ht = (e, t) => Math.round(e / t) * t;
 function Nn(e, t) {
   return {
     x: Kn(e.onset, t),
@@ -2575,15 +2575,15 @@ function Nn(e, t) {
     height: Math.max(2, t.rowHeight - 1)
   };
 }
-function Ys(e, t, n) {
+function Xs(e, t, n) {
   const o = e.name.length * 7 + 10, s = t ? (t.onset - e.onset) * n.pxPerUnit - 2 : o;
   return Math.max(12, Math.min(o, s));
 }
-const Sd = (e) => [1, 3, 6, 8, 10].includes((e % 12 + 12) % 12);
-function Md(e) {
+const _d = (e) => [1, 3, 6, 8, 10].includes((e % 12 + 12) % 12);
+function Ed(e) {
   return `C${Math.floor(e / 12) - 1}`;
 }
-function _d(e) {
+function $d(e) {
   const t = [];
   for (const n of e.measures) {
     t.push({ unit: n.onset, kind: "bar", bar: n.n });
@@ -2592,15 +2592,15 @@ function _d(e) {
   }
   return t;
 }
-function Ed(e, t, n, o, s, r, i = 0, a = 0) {
-  const c = Math.max(0, Math.min(s.total, Dc(e, s))), l = t - i;
-  if (l < Us) return { area: "header", unit: c };
+function Ad(e, t, n, o, s, r, i = 0, a = 0) {
+  const c = Math.max(0, Math.min(s.total, qc(e, s))), l = t - i;
+  if (l < Ys) return { area: "header", unit: c };
   if (s.sourceTop !== null && l >= s.sourceTop && l < s.top) return { area: "source", unit: c };
   if (l >= Dt && l < s.top) return { area: "lyrics", unit: c };
   if (l < Dt) {
     for (let h = o.length - 1; h >= 0; h--) {
       const g = o[h], x = Kn(g.onset, s);
-      if (e >= x && e <= x + Ys(g, o[h + 1], s)) return { area: "chord", chord: g };
+      if (e >= x && e <= x + Xs(g, o[h + 1], s)) return { area: "chord", chord: g };
     }
     return { area: "lane", unit: c };
   }
@@ -2610,51 +2610,51 @@ function Ed(e, t, n, o, s, r, i = 0, a = 0) {
     return e >= g.x && e <= g.x + g.width && t >= g.y - 0.5 && t <= g.y + g.height + 0.5;
   }), f = d.find((h) => h.track === r) ?? d[0];
   if (f) {
-    const h = Nn(f, s), g = e >= h.x + h.width - Math.min($c, h.width / 3) ? "end" : "body";
+    const h = Nn(f, s), g = e >= h.x + h.width - Math.min(Ac, h.width / 3) ? "end" : "body";
     return { area: "note", note: f, edge: g };
   }
   return { area: "grid", unit: c, pitch: zo(t, s) };
 }
-function Xs(e, t, n) {
+function Ks(e, t, n) {
   return e.y0 < (e.from?.scrollTop ?? n) + t || e.y1 < n + t;
 }
-function Hc(e, t, n = 0, o = 0) {
+function Fc(e, t, n = 0, o = 0) {
   const s = e.from?.scrollTop ?? n, r = e.from?.scrollLeft ?? o, i = (h, g) => Math.max(g + et, Math.min(t.width, h)), a = (h, g) => Math.max(g + t.top, Math.min(t.height, h)), c = [i(e.x0, r), i(e.x1, o)], l = [a(e.y0, s), a(e.y1, n)], d = Math.min(...c), f = Math.min(...l);
   return { x: d, y: f, width: Math.max(...c) - d, height: Math.max(...l) - f };
 }
-function $d(e, t = 0, n = Dt) {
-  return Xs(e, n, t);
+function Td(e, t = 0, n = Dt) {
+  return Ks(e, n, t);
 }
-function Ad(e, t, n) {
+function Ld(e, t, n) {
   return t.width <= 0 || t.height <= 0 ? [] : e.filter((o) => {
     const s = Nn(o, n);
     return s.x < t.x + t.width && s.x + s.width > t.x && s.y < t.y + t.height && s.y + s.height > t.y;
   });
 }
-function Ld(e, t, n, o = 0, s = 0) {
-  if (!Xs(t, n.top, o)) return [];
-  const r = Hc(t, n, o, s);
+function Cd(e, t, n, o = 0, s = 0) {
+  if (!Ks(t, n.top, o)) return [];
+  const r = Fc(t, n, o, s);
   return r.width <= 0 ? [] : e.filter((i, a) => {
     const c = Kn(i.onset, n);
-    return c < r.x + r.width && c + Ys(i, e[a + 1], n) > r.x;
+    return c < r.x + r.width && c + Xs(i, e[a + 1], n) > r.x;
   });
 }
-function Td(e, t, n, o) {
+function Pd(e, t, n, o) {
   return { kind: "move", notes: e, anchor: t, fromUnit: n, fromPitch: o, delta: 0, semitones: 0 };
 }
-function Cd(e, t = [], n = 1 / 0) {
+function Nd(e, t = [], n = 1 / 0) {
   const o = t.filter((r) => r.track === e.track && r.onset > e.onset).map((r) => r.onset), s = Math.min(n, ...o);
   return { kind: "resize", note: e, end: e.onset + e.duration, overwrite: !1, limit: s };
 }
-function Pd(e, t, n, o) {
-  const s = Math.max(0, Math.min(zc(t, o.snap), o.total - 1));
+function Od(e, t, n, o) {
+  const s = Math.max(0, Math.min(Hc(t, o.snap), o.total - 1));
   return { kind: "draw", track: e, start: s, end: Math.min(o.total, s + o.snap), pitch: n };
 }
-function Nd(e, t = e.onset) {
+function Id(e, t = e.onset) {
   return { kind: "chord", chord: e, fromUnit: t, to: e.onset };
 }
 const Ve = (e, t, n) => Math.max(t, Math.min(n, e));
-function Od(e, t, n, o, s) {
+function Rd(e, t, n, o, s) {
   switch (e.kind) {
     case "move": {
       const r = e.anchor.onset + (t - e.fromUnit), i = Math.min(...e.notes.map((h) => h.onset)), a = Math.max(...e.notes.map((h) => h.onset + h.duration)), c = Ve(ht(r, o.snap) - e.anchor.onset, -i, o.total - a), l = Math.min(...e.notes.map((h) => h.pitch)), d = Math.max(...e.notes.map((h) => h.pitch)), f = Ve(n - e.fromPitch, -l, 127 - d);
@@ -2672,7 +2672,7 @@ function Od(e, t, n, o, s) {
       return { ...e, to: Ve(ht(e.chord.onset + t - e.fromUnit, o.snap), 0, o.total - 1) };
   }
 }
-function Id(e, t) {
+function Bd(e, t) {
   switch (e.kind) {
     case "move": {
       if (e.copy) {
@@ -2701,7 +2701,7 @@ function Id(e, t) {
       return e.to === e.chord.onset ? null : { op: "move_chord", onset: e.chord.onset, to: e.to };
   }
 }
-function Rd(e) {
+function Dd(e) {
   if (!e) return [];
   switch (e.kind) {
     case "move":
@@ -2719,10 +2719,10 @@ function Rd(e) {
       return [];
   }
 }
-function Bd(e) {
+function qd(e) {
   return e ? e.kind === "move" ? e.copy ? /* @__PURE__ */ new Set() : new Set(e.notes.map((t) => t.id)) : e.kind === "resize" ? /* @__PURE__ */ new Set([e.note.id]) : /* @__PURE__ */ new Set() : /* @__PURE__ */ new Set();
 }
-function Dd(e, t, n, o, s, r) {
+function zd(e, t, n, o, s, r) {
   const i = n.map((a) => a.id);
   switch (e) {
     case "ArrowUp":
@@ -2751,44 +2751,44 @@ function Dd(e, t, n, o, s, r) {
       return;
   }
 }
-const Fc = /^(vocal|ins):\d+$/;
-function Wc(e, t) {
+const Wc = /^(vocal|ins):\d+$/;
+function jc(e, t) {
   const n = e?.model?.tracks, o = /* @__PURE__ */ new Set();
   if (!n) return o;
   const s = /* @__PURE__ */ new Map();
   for (const r of [...n.vocal, ...n.ins]) for (const i of r.segments) s.set(i, r.id);
   for (const r of t)
-    if (Fc.test(r)) o.add(r);
+    if (Wc.test(r)) o.add(r);
     else {
       const i = s.get(r);
       i && o.add(i);
     }
   return o;
 }
-function qd(e) {
+function Hd(e) {
   return new Set(e.filter((t) => t.startsWith("chord:")));
 }
-function zd(e, t = []) {
+function Fd(e, t = []) {
   return [...e.flatMap((n) => n.segments.length ? n.segments : [n.id]), ...t.map((n) => n.id)];
 }
-const jc = ["auto", "omit", "ins"];
-function Ks(e) {
+const Gc = ["auto", "omit", "ins"];
+function Qs(e) {
   return e.wanted ? e.wanted - (new Set(e.syllables.map((t) => t.onset)).size + e.holds.length) : 0;
 }
-function Hd(e) {
-  return (e?.parts ?? []).flatMap((t) => t.lines.filter((n) => Ks(n) !== 0));
+function Wd(e) {
+  return (e?.parts ?? []).flatMap((t) => t.lines.filter((n) => Qs(n) !== 0));
 }
-function Fd(e) {
+function jd(e) {
   return e > 0 ? `+${e}` : `−${-e}`;
 }
-function Wd(e) {
-  const t = Ks(e);
+function Gd(e) {
+  const t = Qs(e);
   if (!t) return "";
   const n = e.wanted === 1 ? "1 syllable" : `${e.wanted} syllables`, o = e.wanted - t;
   return `${n} on ${o === 1 ? "1 note" : `${o} notes`}`;
 }
-function jd(e, t, n) {
-  const o = [], s = Wc(e ?? null, t);
+function Vd(e, t, n) {
+  const o = [], s = jc(e ?? null, t);
   for (const r of [...e?.model?.tracks.vocal ?? [], ...e?.model?.tracks.ins ?? []])
     s.has(r.id) && o.push([r.onset, r.onset + r.duration]);
   if (n.length) {
@@ -2799,12 +2799,12 @@ function jd(e, t, n) {
   }
   return o.length ? [Math.min(...o.map((r) => r[0])), Math.max(...o.map((r) => r[1]))] : null;
 }
-const Gc = { vocal: !1, ins: !1 }, Vc = { vocal: "Vocal", ins: "Instrument" }, Uc = { Vocal: "vocal", Ins: "ins" };
-function Yc(e) {
+const Vc = { vocal: !1, ins: !1 }, Uc = { vocal: "Vocal", ins: "Instrument" }, Yc = { Vocal: "vocal", Ins: "ins" };
+function Xc(e) {
   const t = typeof e == "object" && e !== null ? e : {};
   return { vocal: t.vocal === !0, ins: t.ins === !0 };
 }
-const Ue = (e) => `The ${Vc[e]} track is locked: unlock it to edit it.`;
+const Ue = (e) => `The ${Uc[e]} track is locked: unlock it to edit it.`;
 function Qn(e, t) {
   const n = /* @__PURE__ */ new Set();
   if (!t.vocal && !t.ins) return n;
@@ -2815,12 +2815,12 @@ function Qn(e, t) {
         for (const r of s.segments) n.add(r);
       }
   for (const o of e?.elements ?? []) {
-    const s = Uc[o.voice];
+    const s = Yc[o.voice];
     s && t[s] && n.add(o.id);
   }
   return n;
 }
-function Xc(e, t, n) {
+function Kc(e, t, n) {
   const o = Qn(e, n);
   return o.size ? t.filter((s) => !o.has(s)) : [...t];
 }
@@ -2828,14 +2828,14 @@ function At(e) {
   const t = String(e ?? "").toLowerCase();
   return t === "vocal" ? "vocal" : t === "ins" ? "ins" : null;
 }
-const Kc = /* @__PURE__ */ new Set(["delete", "delete_close_gap", "move_notes", "set_note_pitch", "join_notes", "quantize", "set_pitch", "shift_pitch", "note_to_rest"]), Qc = /* @__PURE__ */ new Set(["resize_note", "split_note", "set_duration", "rest_to_note"]), Jc = /* @__PURE__ */ new Set(["insert_note", "fill_rest", "place_notes", "shift_track"]);
+const Qc = /* @__PURE__ */ new Set(["delete", "delete_close_gap", "move_notes", "set_note_pitch", "join_notes", "quantize", "set_pitch", "shift_pitch", "note_to_rest"]), Jc = /* @__PURE__ */ new Set(["resize_note", "split_note", "set_duration", "rest_to_note"]), Zc = /* @__PURE__ */ new Set(["insert_note", "fill_rest", "place_notes", "shift_track"]);
 function ve(e) {
   return { operation: e, note: null };
 }
-function Gd(e, t, n) {
+function Ud(e, t, n) {
   if (!n.vocal && !n.ins) return ve(e);
   const o = e.op, s = (l) => ({ operation: null, note: Ue(l) }), r = n.vocal ? "vocal" : "ins";
-  if (Jc.has(o)) {
+  if (Zc.has(o)) {
     const l = At(e.track);
     if (l && n[l]) return s(l);
   }
@@ -2846,21 +2846,21 @@ function Gd(e, t, n) {
   if (o === "move_vocal_to_ins") return s(r);
   if (o === "fit_notes")
     return n.vocal ? s("vocal") : !n.ins || e.surplus === "omit" ? ve(e) : { operation: { ...e, surplus: "omit" }, note: `${Ue("ins")} Surplus notes were left out instead of moved there.` };
-  if (o === "paste") return Zc(e, n);
-  if (Qc.has(o)) {
+  if (o === "paste") return el(e, n);
+  if (Jc.has(o)) {
     const l = String(e.id ?? (Array.isArray(e.ids) ? e.ids[0] : ""));
     return Qn(t, n).has(l) ? s(Ho(l, t, n)) : ve(e);
   }
-  if (!Kc.has(o) || !Array.isArray(e.ids)) return ve(e);
+  if (!Qc.has(o) || !Array.isArray(e.ids)) return ve(e);
   const i = At(e.track);
   if (o === "move_notes" && i && n[i]) return s(i);
-  const a = e.ids, c = Xc(t, a, n);
+  const a = e.ids, c = Kc(t, a, n);
   return c.length === a.length ? ve(e) : c.length ? { operation: { ...e, ids: c }, note: `${Ue(r)} Its selected notes stayed as they are.` } : s(Ho(a[0], t, n));
 }
 function Ho(e, t, n) {
   return n.vocal && Qn(t, { vocal: !0, ins: !1 }).has(e) ? "vocal" : n.ins ? "ins" : "vocal";
 }
-function Zc(e, t) {
+function el(e, t) {
   if (e.mode === "insert") return ve(e);
   const n = Array.isArray(e.notes) ? e.notes : [], o = (l) => {
     const d = At(l);
@@ -2870,27 +2870,27 @@ function Zc(e, t) {
   const c = t.vocal ? "vocal" : "ins";
   return !s.length && !i ? { operation: null, note: Ue(c) } : { operation: { ...e, notes: s, tracks: r }, note: `${Ue(c)} Only the other notes were pasted.` };
 }
-const Vd = 12, mt = { width: 640, height: 420 }, el = { width: 1280, height: 900 }, Qs = 120, Js = 720, Zs = 0.25, er = 0.85, tr = 160, nr = 460, or = "plenio.sheet.dialog";
+const Yd = 12, mt = { width: 640, height: 420 }, tl = { width: 1280, height: 900 }, Js = 120, Zs = 720, er = 0.25, tr = 0.85, nr = 160, or = 460, sr = "plenio.sheet.dialog";
 function Qe(e, t, n) {
   return Number.isFinite(e) ? Math.min(Math.max(e, t), Math.max(t, n)) : t;
 }
-function tl(e, t) {
+function nl(e, t) {
   const n = Qe(e.width, mt.width, Math.max(mt.width, t.width - 16)), o = Qe(e.height, mt.height, Math.max(mt.height, t.height - 16));
   return { width: Math.round(n), height: Math.round(o) };
 }
-function Ud(e, t) {
-  return Math.round(Qe(e + t, Qs, Js));
+function Xd(e, t) {
+  return Math.round(Qe(e + t, Js, Zs));
 }
-function Yd(e, t, n) {
+function Kd(e, t, n) {
   return !Number.isFinite(n) || n <= 0 ? Fo(e) : Fo(e + t / n);
 }
 function Fo(e) {
-  return Math.round(Qe(e, Zs, er) * 1e3) / 1e3;
+  return Math.round(Qe(e, er, tr) * 1e3) / 1e3;
 }
-function Xd(e, t) {
-  return Math.round(Qe(e + t, tr, nr));
+function Qd(e, t) {
+  return Math.round(Qe(e + t, nr, or));
 }
-function Kd(e, t, n) {
+function Jd(e, t, n) {
   const o = e.clientX, s = e.clientY, r = e.currentTarget;
   let i = !1;
   try {
@@ -2915,16 +2915,16 @@ function Kd(e, t, n) {
   };
   window.addEventListener("pointermove", c), window.addEventListener("pointerup", a), window.addEventListener("pointercancel", a), window.addEventListener("blur", a);
 }
-function nl() {
-  return { ...el, maximized: !1 };
+function ol() {
+  return { ...tl, maximized: !1 };
 }
-function Qd(e = sr()) {
-  const t = nl();
+function Zd(e = rr()) {
+  const t = ol();
   try {
-    const n = e?.getItem(or);
+    const n = e?.getItem(sr);
     if (!n) return t;
     const o = JSON.parse(n);
-    return { ...tl(
+    return { ...nl(
       {
         width: typeof o.width == "number" ? o.width : t.width,
         height: typeof o.height == "number" ? o.height : t.height
@@ -2935,27 +2935,27 @@ function Qd(e = sr()) {
     return t;
   }
 }
-function Jd(e, t = sr()) {
+function ef(e, t = rr()) {
   try {
-    t?.setItem(or, JSON.stringify(e));
+    t?.setItem(sr, JSON.stringify(e));
   } catch {
   }
 }
-function sr() {
+function rr() {
   try {
     return window.localStorage;
   } catch {
     return null;
   }
 }
-function rr(e) {
+function ir(e) {
   return e === "large" || e === "standard" || e === "smaller" || e === "compact";
 }
-function ir() {
+function ar() {
   return { countIn: 1, quantize: 16, mode: "replace", mute: !0, thru: !0, stepLength: 8 };
 }
-function ol(e) {
-  const t = ir(), n = typeof e == "object" && e !== null ? e : {}, o = (s, r, i) => r.includes(s) ? s : i;
+function sl(e) {
+  const t = ar(), n = typeof e == "object" && e !== null ? e : {}, o = (s, r, i) => r.includes(s) ? s : i;
   return {
     countIn: o(n.countIn, [0, 1, 2], t.countIn),
     quantize: o(n.quantize, [0, 4, 8, 16, 32], t.quantize),
@@ -2965,14 +2965,14 @@ function ol(e) {
     stepLength: o(n.stepLength, [1, 2, 4, 8, 16], t.stepLength)
   };
 }
-const ar = "plenio.score-editor.prefs";
-function sl() {
+const cr = "plenio.score-editor.prefs";
+function rl() {
   return {
     layout: "review",
     advanced: !1,
     zoom: 1,
     voices: { Vocal: !0, Ins: !0, chords: !0, guide: !0 },
-    locks: { ...Gc },
+    locks: { ...Vc },
     fitSurplus: "auto",
     speed: 1,
     roll: !0,
@@ -2988,28 +2988,28 @@ function sl() {
     follow: !0,
     sung: !0,
     wave: !0,
-    sounds: Fs(),
+    sounds: Ws(),
     paper: "a4",
     notationSize: "standard",
-    record: ir(),
+    record: ar(),
     midiInput: "all"
   };
 }
-function rl(e) {
+function il(e) {
   const t = e.layout;
   return t === "text" ? { layout: "text", advanced: e.advanced === !0 } : t === "daw" ? { layout: "daw", advanced: e.advanced === !0 } : t === "both" ? { layout: "review", advanced: !0 } : { layout: "review", advanced: e.advanced === !0 };
 }
-function Zd(e = cr()) {
-  const t = sl();
+function tf(e = lr()) {
+  const t = rl();
   try {
-    const n = e?.getItem(ar);
+    const n = e?.getItem(cr);
     if (!n) return t;
     const o = JSON.parse(n);
     return {
-      ...rl(o),
+      ...il(o),
       zoom: typeof o.zoom == "number" && o.zoom >= 0.6 && o.zoom <= 1.8 ? o.zoom : t.zoom,
-      locks: Yc(o.locks),
-      fitSurplus: jc.includes(o.fitSurplus) ? o.fitSurplus : t.fitSurplus,
+      locks: Xc(o.locks),
+      fitSurplus: Gc.includes(o.fitSurplus) ? o.fitSurplus : t.fitSurplus,
       voices: {
         Vocal: o.voices?.Vocal !== !1,
         Ins: o.voices?.Ins !== !1,
@@ -3019,9 +3019,9 @@ function Zd(e = cr()) {
       speed: typeof o.speed == "number" && o.speed >= 0.25 && o.speed <= 2 ? o.speed : t.speed,
       roll: o.roll !== !1,
       rollZoom: typeof o.rollZoom == "number" && o.rollZoom >= 12 && o.rollZoom <= 240 ? o.rollZoom : t.rollZoom,
-      rollHeight: typeof o.rollHeight == "number" && o.rollHeight >= Qs && o.rollHeight <= Js ? Math.round(o.rollHeight) : t.rollHeight,
-      notationShare: typeof o.notationShare == "number" && o.notationShare >= Zs && o.notationShare <= er ? o.notationShare : t.notationShare,
-      sideWidth: typeof o.sideWidth == "number" && o.sideWidth >= tr && o.sideWidth <= nr ? Math.round(o.sideWidth) : t.sideWidth,
+      rollHeight: typeof o.rollHeight == "number" && o.rollHeight >= Js && o.rollHeight <= Zs ? Math.round(o.rollHeight) : t.rollHeight,
+      notationShare: typeof o.notationShare == "number" && o.notationShare >= er && o.notationShare <= tr ? o.notationShare : t.notationShare,
+      sideWidth: typeof o.sideWidth == "number" && o.sideWidth >= nr && o.sideWidth <= or ? Math.round(o.sideWidth) : t.sideWidth,
       metronome: o.metronome === !0,
       hear: o.hear === "notes" || o.hear === "source" ? o.hear : t.hear,
       sourceLevel: typeof o.sourceLevel == "number" && o.sourceLevel >= 0 && o.sourceLevel <= 1 ? o.sourceLevel : t.sourceLevel,
@@ -3030,30 +3030,30 @@ function Zd(e = cr()) {
       follow: o.follow !== !1,
       sung: o.sung !== !1,
       wave: o.wave !== !1,
-      sounds: cc(o.sounds),
+      sounds: lc(o.sounds),
       paper: o.paper === "letter" ? "letter" : "a4",
-      notationSize: rr(o.notationSize) ? o.notationSize : t.notationSize,
-      record: ol(o.record),
+      notationSize: ir(o.notationSize) ? o.notationSize : t.notationSize,
+      record: sl(o.record),
       midiInput: typeof o.midiInput == "string" && o.midiInput ? o.midiInput : "all"
     };
   } catch {
     return t;
   }
 }
-function ef(e, t = cr()) {
+function nf(e, t = lr()) {
   try {
-    t?.setItem(ar, JSON.stringify(e));
+    t?.setItem(cr, JSON.stringify(e));
   } catch {
   }
 }
-function cr() {
+function lr() {
   try {
     return window.localStorage;
   } catch {
     return null;
   }
 }
-function lr(e) {
+function ur(e) {
   if (!Array.isArray(e)) return [];
   const t = (n) => typeof n == "string" ? n : "";
   return e.filter((n) => !!n && typeof n == "object").map((n) => ({
@@ -3061,20 +3061,20 @@ function lr(e) {
     file: t(n.file),
     title: t(n.title),
     paper: n.paper === "letter" ? "letter" : "a4",
-    size: rr(n.size) ? n.size : "standard",
+    size: ir(n.size) ? n.size : "standard",
     display_abc: t(n.display_abc)
   })).filter((n) => n.token && n.file && n.display_abc);
 }
-function il(e) {
-  return lr(e?.plenio_notation);
+function al(e) {
+  return ur(e?.plenio_notation);
 }
-async function al(e) {
+async function cl(e) {
   const t = await e.fetchApi("/plenio/export/sheet-music/pending", { cache: "no-store" });
   if (!t.ok) return [];
   const n = await t.json().catch(() => ({}));
-  return lr(n.jobs);
+  return ur(n.jobs);
 }
-async function cl(e, t) {
+async function ll(e, t) {
   const n = await t.draw(e.display_abc, e.title, e.paper, e.size), o = new ArrayBuffer(n.length);
   new Uint8Array(o).set(n);
   const s = await t.fetcher.fetchApi(`/plenio/export/sheet-music?token=${encodeURIComponent(e.token)}`, {
@@ -3087,12 +3087,12 @@ async function cl(e, t) {
   return { file: r.file ?? e.file, bytes: r.bytes ?? n.length };
 }
 let Wo = Promise.resolve();
-function ll(e) {
+function ul(e) {
   const t = Wo.then(e, e);
   return Wo = t.catch(() => {
   }), t;
 }
-class ul {
+class dl {
   constructor(t, n) {
     this.host = t, this.report = n;
   }
@@ -3103,7 +3103,7 @@ class ul {
     const o = [];
     for (const s of t)
       this.seen.has(s.token) || (this.seen.add(s.token), o.push(
-        ll(() => cl(s, this.host)).then(
+        ul(() => ll(s, this.host)).then(
           (r) => this.report({ job: s, saved: r }),
           (r) => {
             const i = r instanceof Q && /can no longer be saved/.test(r.message);
@@ -3117,52 +3117,52 @@ class ul {
   async recover() {
     let t = [];
     try {
-      t = await al(this.host.fetcher);
+      t = await cl(this.host.fetcher);
     } catch {
       return;
     }
     await Promise.all(this.take(t, !0));
   }
 }
-const ur = "PlenioSeed", dl = 2 ** 32, dr = "plenio_part", Lt = "plenio_seed_hint", jo = 56, Go = {
+const dr = "PlenioSeed", fl = 2 ** 32, fr = "plenio_part", Tt = "plenio_seed_hint", jo = 56, Go = {
   fresh: { color: "#7a5418", bgcolor: "#3b2a10" },
   keep: { color: "#1f4e6e", bgcolor: "#14304a" }
 };
-function fl(e = Math.random) {
-  return Math.floor(e() * dl);
+function pl(e = Math.random) {
+  return Math.floor(e() * fl);
 }
-function pl(e, t) {
+function hl(e, t) {
   const n = t.trim() || "result";
   return e ? `🔒 Every run uses this seed again: the same ${n}.` : `🎲 Every run draws a new seed: a new ${n}. Liked it? Switch to 🔒.`;
 }
 function Re(e, t) {
   return e.widgets?.find((n) => n.name === t);
 }
-function fr(e) {
+function pr(e) {
   const t = e.inputs?.find((n) => n.name === "seed");
   return t?.link !== void 0 && t?.link !== null;
 }
 function zt(e) {
   const t = !!Re(e, "keep_seed")?.value, n = e, o = t ? Go.keep : Go.fresh;
   n.color = o.color, n.bgcolor = o.bgcolor;
-  const s = Re(e, Lt)?.element;
-  s && (s.textContent = pl(t, String(e.properties?.[dr] ?? ""))), e.setDirtyCanvas?.(!0, !0);
+  const s = Re(e, Tt)?.element;
+  s && (s.textContent = hl(t, String(e.properties?.[fr] ?? ""))), e.setDirtyCanvas?.(!0, !0);
 }
 function Vo(e, t = Math.random) {
   const n = Re(e, "seed");
-  !n || fr(e) || (n.value = fl(t), n.callback?.(n.value), e.setDirtyCanvas?.(!0, !0));
+  !n || pr(e) || (n.value = pl(t), n.callback?.(n.value), e.setDirtyCanvas?.(!0, !0));
 }
-function hl(e, t = Math.random) {
+function ml(e, t = Math.random) {
   const n = Re(e, "seed"), o = Re(e, "keep_seed");
   if (!n || !o) return;
   n.beforeQueued = () => {
     o.value || Vo(e, t);
   }, o.callback = Y(o.callback, () => zt(e));
   const r = e.addWidget?.("button", "🎲 new seed now", null, () => Vo(e, t), { serialize: !1 });
-  if (r && (r.serialize = !1), !Re(e, Lt)) {
+  if (r && (r.serialize = !1), !Re(e, Tt)) {
     const i = document.createElement("div");
     i.className = "plenio-seed-hint";
-    const a = e.addDOMWidget(Lt, Lt, i, {
+    const a = e.addDOMWidget(Tt, Tt, i, {
       serialize: !1,
       getValue: () => "",
       setValue: () => {
@@ -3175,22 +3175,22 @@ function hl(e, t = Math.random) {
   }
   zt(e);
 }
-function ml(e) {
+function gl(e) {
   const t = e.prototype, n = t.onNodeCreated;
   t.onNodeCreated = function() {
-    n?.call(this), hl(this);
+    n?.call(this), ml(this);
   }, e.prototype.onConfigure = Y(e.prototype.onConfigure, function() {
     zt(this);
   });
 }
-const tf = ["computer", "wants", "plan", "downloads", "test", "go"], nf = {
+const of = ["computer", "wants", "plan", "downloads", "test", "go"], sf = {
   computer: "This computer",
   wants: "What do you want?",
   plan: "Your plan",
   downloads: "Downloading",
   test: "Test song",
   go: "Go"
-}, gl = "1 · YuE2 · Song", wl = [
+}, wl = "1 · YuE2 · Song", yl = [
   { id: "cover-art", label: "Cover art", components: ["flux2-klein", "flux2-text-encoder", "flux2-vae"] },
   { id: "hq", label: "HQ mastering", components: ["audio-sr"] },
   { id: "stems", label: "Stems", components: ["stems"] }
@@ -3198,16 +3198,16 @@ const tf = ["computer", "wants", "plan", "downloads", "test", "go"], nf = {
 function wn(e) {
   return e > 0 ? e >= 1e9 ? `${(e / 1e9).toFixed(1)} GB` : `${Math.round(e / 1e6)} MB` : "0 MB";
 }
-function pr(e) {
+function hr(e) {
   if (e === null || !Number.isFinite(e)) return "";
   const t = Math.max(0, Math.round(e));
   return t >= 3600 ? `${Math.floor(t / 3600)} h ${Math.round(t % 3600 / 60)} min` : t >= 60 ? `${Math.floor(t / 60)} min ${t % 60} s` : `${t} s`;
 }
-function yl(e) {
-  return e.templates.length ? e.templates : [gl];
+function bl(e) {
+  return e.templates.length ? e.templates : [wl];
 }
-function of(e, t, n, o = {}) {
-  const s = new Set(wl.filter((i) => n.includes(i.id)).flatMap((i) => i.components)), r = /* @__PURE__ */ new Map();
+function rf(e, t, n, o = {}) {
+  const s = new Set(yl.filter((i) => n.includes(i.id)).flatMap((i) => i.components)), r = /* @__PURE__ */ new Map();
   for (const i of e.templates)
     if (t.includes(i.template))
       for (const a of i.picks) {
@@ -3233,7 +3233,7 @@ function of(e, t, n, o = {}) {
       }
   return [...r.values()];
 }
-function sf(e) {
+function af(e) {
   const t = e.filter((n) => !n.variant.installed);
   return {
     files: t.length,
@@ -3241,8 +3241,8 @@ function sf(e) {
     nonCommercial: e.filter((n) => n.variant.non_commercial).map((n) => n.title)
   };
 }
-const bl = /* @__PURE__ */ new Set(["gated", "pending", "token"]);
-function rf(e, t) {
+const vl = /* @__PURE__ */ new Set(["gated", "pending", "token"]);
+function cf(e, t) {
   if (t?.state === "installed" || e && !t)
     return { status: "Installed ✓", progress: null, detail: "verified", actions: [], tone: "ok" };
   if (!t || t.state === "cancelled")
@@ -3252,7 +3252,7 @@ function rf(e, t) {
     case "queued":
       return { status: "Waiting", progress: n, detail: o, actions: ["cancel"], tone: "busy" };
     case "downloading": {
-      const s = t.speed > 0 ? ` · ${wn(t.speed)}/s` : "", r = t.seconds_left !== null ? ` · ${pr(t.seconds_left)} left` : "";
+      const s = t.speed > 0 ? ` · ${wn(t.speed)}/s` : "", r = t.seconds_left !== null ? ` · ${hr(t.seconds_left)} left` : "";
       return { status: "Downloading", progress: n, detail: `${o}${s}${r}`, actions: ["pause", "cancel"], tone: "busy" };
     }
     case "paused":
@@ -3260,7 +3260,7 @@ function rf(e, t) {
     case "verifying":
       return { status: "Checking the file", progress: 1, detail: "size and SHA-256", actions: [], tone: "busy" };
     case "blocked": {
-      const s = t.refusal, r = s && bl.has(s.kind) ? ["access", "retry"] : ["retry"];
+      const s = t.refusal, r = s && vl.has(s.kind) ? ["access", "retry"] : ["retry"];
       return { status: "Needs you", progress: n || null, detail: Uo(s), actions: r, tone: "warn" };
     }
     case "failed":
@@ -3272,15 +3272,15 @@ function rf(e, t) {
 function Uo(e) {
   return e ? e.fix ? `${e.message} ${e.fix}` : e.message : "";
 }
-function vl(e, t, n) {
+function xl(e, t, n) {
   if (e.opened_for === t) return !1;
-  const o = yl(e);
+  const o = bl(e);
   return n.templates.some((s) => o.includes(s.template) && !s.ready);
 }
-function af(e, t) {
+function lf(e, t) {
   return e.done ? "go" : (e.step === "plan" || e.step === "downloads") && t.length && t.every((n) => n.variant.installed) ? "test" : e.step;
 }
-function cf(e) {
+function uf(e) {
   if (!e) return { accept: null, token: null, pending: !1 };
   switch (e.step) {
     case "ready":
@@ -3295,7 +3295,7 @@ function cf(e) {
       return { accept: null, token: null, pending: !1 };
   }
 }
-function lf(e, t = null) {
+function df(e, t = null) {
   if (t)
     return {
       state: "failed",
@@ -3311,7 +3311,7 @@ function lf(e, t = null) {
   if (!e) return { state: "idle", text: "", audio: null, finding: null };
   if (e.status === "succeeded") {
     const o = e.started_at && e.finished_at ? Math.round(e.finished_at - e.started_at) : null, s = e.result?.files?.find((r) => /\.(flac|mp3|wav)$/i.test(r.name))?.url ?? null;
-    return { state: "ok", text: `It works ✓${o !== null ? ` - the test song took ${pr(o)}` : ""}`, audio: s, finding: null };
+    return { state: "ok", text: `It works ✓${o !== null ? ` - the test song took ${hr(o)}` : ""}`, audio: s, finding: null };
   }
   if (e.status === "failed" || e.status === "cancelled") {
     const o = e.error, s = /model|not on this computer|does not find/i.test(`${o?.type ?? ""} ${o?.message ?? ""}`);
@@ -3330,19 +3330,19 @@ function lf(e, t = null) {
   const n = e.stage?.text ? ` - ${e.stage.text}` : "";
   return { state: "running", text: `${e.status === "queued" ? "Waiting in the queue" : "Making the test song"}${n}`, audio: null, finding: null };
 }
-const uf = [
+const ff = [
   { label: "Make a song", template: "1 · YuE2 · Song" },
   { label: "Cover a recording", template: "2 · YuE2 · Cover" },
   { label: "A song with MiniMax", template: "3 · MiniMax · Song" },
   { label: "Compose it yourself", template: "5 · YuE2 · DAW" },
   { label: "Master a file", template: "4 · Enhance & Master" }
-], yn = "https://github.com/jplenio/Plenio-Music-Production-System", df = [
+], yn = "https://github.com/jplenio/Plenio-Music-Production-System", pf = [
   { label: "New in 2.0", url: `${yn}/blob/main/CHANGELOG.md` },
   { label: "Tutorials", url: "https://www.youtube.com/playlist?list=PLAFqTtP59fgE" },
   { label: "Documentation", url: `${yn}/blob/main/docs/user/getting-started.md` },
   { label: "Where to report it", url: `${yn}/issues` }
 ];
-function ff(e, t) {
+function hf(e, t) {
   const n = /* @__PURE__ */ new Map(), o = /* @__PURE__ */ new Map();
   for (const a of e.templates)
     if (t.includes(a.template))
@@ -3354,8 +3354,8 @@ function ff(e, t) {
   const s = [...n.values()].filter(Boolean).length, r = [...o.values()].filter((a) => !a).length;
   return { line: `${s} of ${n.size} files for your templates` + (r ? ` · ${r} optional not installed` : ""), ready: s === n.size };
 }
-const bn = "plenio-setup", Yo = "Plenio.OpenSetup", xl = "plenio.download";
-async function kl(e, t) {
+const bn = "plenio-setup", Yo = "Plenio.OpenSetup", kl = "plenio.download";
+async function Sl(e, t) {
   const n = await e.fetchApi("/workflow_templates");
   if (!n.ok) return null;
   const o = await n.json();
@@ -3363,37 +3363,37 @@ async function kl(e, t) {
     if (r.includes(t)) return `/workflow_templates/${encodeURIComponent(s)}/${encodeURIComponent(t)}.json`;
   return null;
 }
-async function Sl(e, t) {
-  const n = await kl(e.fetcher, t);
+async function Ml(e, t) {
+  const n = await Sl(e.fetcher, t);
   if (!n) throw new Error(`ComfyUI does not list the template ${t}.`);
   const o = await e.fetcher.fetchApi(n);
   if (!o.ok) throw new Error(`The template ${t} could not be read (${o.status}).`);
   await e.app.loadGraphData?.(await o.json(), !0, !0, t);
 }
-async function Ml(e) {
+async function _l(e) {
   const [t, n] = await Promise.all([
     e.fetchApi("/plenio/setup/state"),
     e.fetchApi("/plenio/setup/plan")
   ]);
   if (!t.ok || !n.ok) return !1;
   const { state: o, version: s } = await t.json(), r = await n.json();
-  return vl(o, s, r) ? (await e.fetchApi("/plenio/setup/state", {
+  return xl(o, s, r) ? (await e.fetchApi("/plenio/setup/state", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ opened_for: s })
   }), !0) : !1;
 }
-function _l(e) {
+function El(e) {
   let t = null, n = null;
   const o = /* @__PURE__ */ new Set();
-  e.fetcher.addEventListener(xl, (a) => {
+  e.fetcher.addEventListener(kl, (a) => {
     for (const c of o) c(a.detail);
   });
   const s = {
     fetcher: e.fetcher,
     onDownloads: (a) => (o.add(a), () => o.delete(a)),
     openTemplate: (a) => {
-      Sl(e, a).catch(
+      Ml(e, a).catch(
         (c) => e.app.extensionManager?.toast?.add({
           severity: "error",
           summary: "Plenio Setup",
@@ -3414,7 +3414,7 @@ function _l(e) {
     type: "custom",
     iconBadge: () => e.lacksFiles() ? "•" : null,
     render: (a) => {
-      import("./mount-0OTEBmUn.mjs").then(({ mountSetup: c }) => {
+      import("./mount-BS4acyHs.mjs").then(({ mountSetup: c }) => {
         t = c(a, s, n);
       });
     },
@@ -3425,42 +3425,42 @@ function _l(e) {
   const i = (a = null) => {
     n = a, t?.focus(a), r?.sidebarTab?.activeSidebarTabId !== bn && r?.command?.execute(`Workspace.ToggleSidebarTab.${bn}`);
   };
-  return Ml(e.fetcher).then((a) => {
+  return _l(e.fetcher).then((a) => {
     a && i();
   }).catch((a) => console.warn("Plenio: Setup could not check the plan", a)), { open: i };
 }
-const hr = /* @__PURE__ */ new Set(["new song every run", "new cover every run"]), El = /* @__PURE__ */ new Set(["one song, stop to review", "one cover, stop to review"]);
-function $l(e, t) {
-  return hr.has(e) ? !1 : El.has(e) ? t.trim() !== "take" : null;
-}
+const mr = /* @__PURE__ */ new Set(["new song every run", "new cover every run"]), $l = /* @__PURE__ */ new Set(["one song, stop to review", "one cover, stop to review"]);
 function Al(e, t) {
+  return mr.has(e) ? !1 : $l.has(e) ? t.trim() !== "take" : null;
+}
+function Tl(e, t) {
   let n = 0;
   for (const o of e) {
-    if (o.type !== ur || fr(o)) continue;
-    const s = $l(t, String(o.properties?.[dr] ?? "")), r = o.widgets?.find((i) => i.name === "keep_seed");
+    if (o.type !== dr || pr(o)) continue;
+    const s = Al(t, String(o.properties?.[fr] ?? "")), r = o.widgets?.find((i) => i.name === "keep_seed");
     s === null || !r || !!r.value === s || (r.value = s, zt(o), n++);
   }
   return n;
 }
 function Ll(e, t) {
   const n = `${t} seed${t === 1 ? "" : "s"}`;
-  return hr.has(e) ? { summary: `${n} now 🎲 new seed`, detail: `"${e}": every run draws all its seeds anew - a new song each time. Switch a seed to 🔒 to keep that part.` } : { summary: `${n} now 🔒 same seed`, detail: `"${e}": the song's draft, plan, arrangement and cover stay while you review it; the take seed still draws anew.` };
+  return mr.has(e) ? { summary: `${n} now 🎲 new seed`, detail: `"${e}": every run draws all its seeds anew - a new song each time. Switch a seed to 🔒 to keep that part.` } : { summary: `${n} now 🔒 same seed`, detail: `"${e}": the song's draft, plan, arrangement and cover stay while you review it; the take seed still draws anew.` };
 }
-function Tl(e, t) {
+function Cl(e, t) {
   const n = e.widgets?.find((o) => o.name === "mode");
   n && (n.callback = Y(n.callback, (o) => {
-    const s = e.graph, r = String(o ?? n.value ?? ""), i = Al(s?.nodes ?? s?._nodes ?? [], r);
+    const s = e.graph, r = String(o ?? n.value ?? ""), i = Tl(s?.nodes ?? s?._nodes ?? [], r);
     if (i) {
       const a = Ll(r, i);
       t(a.summary, a.detail);
     }
   }));
 }
-const Cl = "PlenioSongSheet";
+const Pl = "PlenioSongSheet";
 function tt(e) {
   return e.widgets?.find((t) => t.name === "sheet_state") ?? null;
 }
-function mr(e, t) {
+function gr(e, t) {
   const n = e.inputs?.[t]?.link;
   if (n == null) return null;
   try {
@@ -3470,22 +3470,22 @@ function mr(e, t) {
     return null;
   }
 }
-function gr(e, t) {
-  const n = (e.inputs ?? []).findIndex((o) => o.name === t && o.link != null);
-  return n < 0 ? null : mr(e, n);
-}
 function wr(e, t) {
-  const n = gr(e, t);
-  return n && (n.comfyClass ?? n.type) === Cl && tt(n) ? n : null;
+  const n = (e.inputs ?? []).findIndex((o) => o.name === t && o.link != null);
+  return n < 0 ? null : gr(e, n);
 }
-function Pl(e) {
-  return wr(e, "context_lyrics");
+function yr(e, t) {
+  const n = wr(e, t);
+  return n && (n.comfyClass ?? n.type) === Pl && tt(n) ? n : null;
 }
 function Nl(e) {
-  return wr(e, "context_score");
+  return yr(e, "context_lyrics");
 }
-function Ol(e, t, n) {
-  const o = [], s = gr(t, n);
+function Ol(e) {
+  return yr(e, "context_score");
+}
+function Il(e, t, n) {
+  const o = [], s = wr(t, n);
   s && o.push(s);
   const r = /* @__PURE__ */ new Set();
   for (; o.length && r.size < 1e3; ) {
@@ -3493,48 +3493,48 @@ function Ol(e, t, n) {
     if (!r.has(a)) {
       if (r.add(a), i === e || a === String(e.id)) return !0;
       (i.inputs ?? []).forEach((c, l) => {
-        const d = mr(i, l);
+        const d = gr(i, l);
         d && o.push(d);
       });
     }
   }
   return !1;
 }
-function Il(e, t, n) {
-  const o = Pl(e), s = t?.context?.lyrics;
+function Rl(e, t, n) {
+  const o = Nl(e), s = t?.context?.lyrics;
   if (!o || !s) return null;
   const r = o.title || "Song Sheet", i = $e(tt(o)?.value), a = i?.docs.lyrics?.text ?? n(String(o.id))?.docs.lyrics?.upstream ?? null;
   let c = null;
-  return i === null ? c = `The state of ${r} is unreadable - open that sheet and apply it first.` : a !== null && Ee(a) !== Ee(s) && (c = `The lyrics in ${r} changed after the last run. Run the workflow again; then they can follow the sections.`), { owner: o, target: { title: r, blocked: c, replans: Ol(o, e, "score") } };
+  return i === null ? c = `The state of ${r} is unreadable - open that sheet and apply it first.` : a !== null && Ee(a) !== Ee(s) && (c = `The lyrics in ${r} changed after the last run. Run the workflow again; then they can follow the sections.`), { owner: o, target: { title: r, blocked: c, replans: Il(o, e, "score") } };
 }
-function Rl(e, t, n) {
+function Bl(e, t, n) {
   const o = tt(e);
   if (!o) return;
   const s = $e(o.value) ?? jt();
-  o.value = Xe(Ms(s, n, [{ kind: "lyrics", text: t, intent: "keep" }])), e.setDirtyCanvas?.(!0, !0);
+  o.value = Xe(_s(s, n, [{ kind: "lyrics", text: t, intent: "keep" }])), e.setDirtyCanvas?.(!0, !0);
 }
-function Bl(e, t, n) {
-  const o = Nl(e), s = t?.context?.score;
+function Dl(e, t, n) {
+  const o = Ol(e), s = t?.context?.score;
   if (!o || !s) return null;
   const r = o.title || "Song Sheet", i = $e(tt(o)?.value), a = i?.docs.score?.text ?? n(String(o.id))?.docs.score?.upstream ?? null;
   let c = null;
   return i === null ? c = `The state of ${r} is unreadable - open that sheet and apply it first.` : a !== null && Ee(a) !== Ee(s) && (c = `The score in ${r} changed after the last run. Run the workflow again; then it can be edited here.`), { owner: o, target: { title: r, blocked: c } };
 }
-function Dl(e, t) {
+function ql(e, t) {
   const n = String(e.widgets?.find((o) => o.name === "review")?.value ?? "continue");
   return n === "as the brief says" ? t?.review ?? "continue" : n;
 }
-async function ql(e, t, n, o = null) {
+async function zl(e, t, n, o = null) {
   const s = tt(e);
   if (!s) return null;
-  const r = $e(s.value) ?? jt(), i = Ms(r, n, [{ kind: "score", text: t, intent: "keep" }]);
+  const r = $e(s.value) ?? jt(), i = _s(r, n, [{ kind: "score", text: t, intent: "keep" }]);
   if (s.value = Xe(i), e.setDirtyCanvas?.(!0, !0), !o || !n) return i;
   try {
-    const a = await Dr(o.fetcher, {
+    const a = await qr(o.fetcher, {
       sheet_state: i,
-      upstream: Ni(n),
+      upstream: Oi(n),
       owned: n.owned,
-      review: Dl(e, n),
+      review: ql(e, n),
       engine: n.engine,
       instrumental: n.instrumental,
       context: n.context,
@@ -3542,13 +3542,13 @@ async function ql(e, t, n, o = null) {
       sparse: n.sparse ?? !1
     });
     if (!!a.findings.some((d) => d.severity === "error") || !a.fingerprint) return i;
-    const l = Pi(i, a.fingerprint);
+    const l = Ni(i, a.fingerprint);
     return s.value = Xe(l), e.setDirtyCanvas?.(!0, !0), l;
   } catch {
     return i;
   }
 }
-const zl = {
+const Hl = {
   text: {
     name: "Edit lyrics & text",
     what: "Title · style · lyrics · cover prompt",
@@ -3568,19 +3568,27 @@ const zl = {
     icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3.5h5v17H2z" opacity=".5"/><path d="M2 7.6h3.2v1.4H2zM2 12h3.2v1.4H2zM2 16.4h3.2v1.4H2z"/><rect x="9" y="4.5" width="6.5" height="2.8" rx="1.1"/><rect x="12.5" y="9" width="9" height="2.8" rx="1.1"/><rect x="9" y="13.5" width="4.5" height="2.8" rx="1.1"/><rect x="15" y="18" width="6.5" height="2.8" rx="1.1"/></svg>'
   }
 };
-function Hl(e) {
+function Fl(e) {
   return e.properties?.plenio_editor_layout === "daw" ? "daw" : (e.inputs ?? []).some((n) => n.name === "score" && n.link != null) ? "score" : "text";
 }
-const yr = "PLENIO_SHEET_STATE", Xo = 128;
-let Tt = null, br = null;
-function Fl(e) {
-  br = e;
+let Xo = !1;
+function Wl(e, t) {
+  return Xo ? !1 : (Xo = !0, (globalThis.requestIdleCallback?.bind(globalThis) ?? ((o) => setTimeout(o, 2e3)))(() => {
+    e().catch(() => {
+    });
+  }, { timeout: 1e4 }), !0);
 }
-function Wl(e) {
-  Tt = e;
+const br = "PLENIO_SHEET_STATE", Ko = 128;
+let Lt = null, vr = null;
+function jl(e) {
+  vr = e;
 }
-const jl = (e, t, n) => {
+function Gl(e) {
+  Lt = e;
+}
+const Vl = (e, t, n) => {
   let o = typeof n?.[1]?.default == "string" ? n[1].default : "";
+  Wl(() => import("./open-CdzBYQy7.mjs"));
   const s = document.createElement("div");
   s.className = "plenio-sheet-state";
   const r = document.createElement("div");
@@ -3591,32 +3599,32 @@ const jl = (e, t, n) => {
   a.className = "plenio-sheet-status", s.append(i, r, a);
   let c = !1, l = null;
   const d = () => {
-    const u = Hl(e);
+    const u = Fl(e);
     if (u === l) return;
     l = u;
-    const k = zl[u];
+    const k = Hl[u];
     i.dataset.kind = u, i.title = `${k.name} - opens the Song Sheet editor (${k.what.toLowerCase()})`, i.querySelector(".icon").innerHTML = k.icon, i.querySelector(".name").textContent = k.name, i.querySelector(".what").textContent = k.what;
   }, f = () => {
     d();
-    const u = Te(String(e.id)), k = Pn(e);
-    r.textContent = Ti($e(o)) + (u && k !== "approved" ? ` · ${u.status}` : ""), a.textContent = Ga(k), a.dataset.state = k ?? "";
-    const L = c ? null : e.widgets?.find((b) => b.name === "review");
-    if (L) {
+    const u = Le(String(e.id)), k = Pn(e);
+    r.textContent = Ci($e(o)) + (u && k !== "approved" ? ` · ${u.status}` : ""), a.textContent = Va(k), a.dataset.state = k ?? "";
+    const T = c ? null : e.widgets?.find((b) => b.name === "review");
+    if (T) {
       c = !0;
-      const b = L.callback;
-      L.callback = (v) => {
+      const b = T.callback;
+      T.callback = (v) => {
         b?.(v), f();
       };
     }
-  }, h = e.addDOMWidget(t, yr, s, {
+  }, h = e.addDOMWidget(t, br, s, {
     getValue: () => o,
     setValue: (u) => {
       o = typeof u == "string" ? u : "", f();
     },
     // two rows, always: the frontend lays a DOM widget out once, so a height that changes later is cut;
     // it also keeps a 10 px margin above and below the element (68 - 20 = the rows' 48 px)
-    getMinHeight: () => Xo,
-    getMaxHeight: () => Xo
+    getMinHeight: () => Ko,
+    getMaxHeight: () => Ko
   });
   i.addEventListener("click", (u) => {
     u.stopPropagation(), g().catch((k) => {
@@ -3626,29 +3634,29 @@ const jl = (e, t, n) => {
   async function g() {
     const u = $e(o);
     u === null && (r.textContent = "The stored state is unreadable; it will be replaced when you apply.");
-    const k = Te(String(e.id)), b = (e.inputs ?? []).filter((G) => G.link != null).map((G) => G.name), v = u ?? { schema: "plenio.sheet_state/1", docs: {} }, _ = k?.owned ?? _s(b, v), y = String(e.widgets?.find((G) => G.name === "review")?.value ?? "continue"), E = y === "as the brief says" ? k?.review ?? "continue" : y, S = () => Gn(import.meta.url, Vn), { openSheetDialog: P } = await Pe(() => import("./open-C712NN9z.mjs"), S), { parseGuide: N, serializeGuide: D } = await Pe(() => import("./tracks-ClAVjvds.mjs"), S), { parseShift: j, parseSpans: X } = await Pe(() => Promise.resolve().then(() => Sc), S), { parseBarSources: H } = await Pe(() => import("./barSources-Cq3VGvmq.mjs"), S);
-    if (!Tt) throw new Error("Plenio: API not initialised");
+    const k = Le(String(e.id)), b = (e.inputs ?? []).filter((G) => G.link != null).map((G) => G.name), v = u ?? { schema: "plenio.sheet_state/1", docs: {} }, _ = k?.owned ?? Es(b, v), y = String(e.widgets?.find((G) => G.name === "review")?.value ?? "continue"), E = y === "as the brief says" ? k?.review ?? "continue" : y, S = () => Gn(import.meta.url, Vn), { openSheetDialog: P } = await Pe(() => import("./open-CdzBYQy7.mjs"), S), { parseGuide: N, serializeGuide: D } = await Pe(() => import("./tracks-ClAVjvds.mjs"), S), { parseShift: j, parseSpans: X } = await Pe(() => Promise.resolve().then(() => Mc), S), { parseBarSources: H } = await Pe(() => import("./barSources-Cq3VGvmq.mjs"), S);
+    if (!Lt) throw new Error("Plenio: API not initialised");
     let Z = null;
     try {
-      Z = Il(e, k, Te);
+      Z = Rl(e, k, Le);
     } catch (G) {
       console.warn("Plenio: the lyrics sheet of this score was not found", G);
     }
     let U = null;
     try {
-      U = Bl(e, k, Te);
+      U = Dl(e, k, Le);
     } catch (G) {
       console.warn("Plenio: the score sheet of these lyrics was not found", G);
     }
-    const R = Tt, B = U?.owner ?? e;
+    const R = Lt, B = U?.owner ?? e;
     P({
       title: e.title || "Song Sheet",
       state: v,
       payload: k,
-      asrNote: Ca(k?.docs.lyrics?.upstream_sha256),
+      asrNote: Pa(k?.docs.lyrics?.upstream_sha256),
       owned: _.length ? _ : [...Ze],
       review: E,
-      fetcher: Tt,
+      fetcher: Lt,
       // a template's choice of the score editor's layout (review, text; daw with the DAW template)
       layout: typeof e.properties?.plenio_editor_layout == "string" ? e.properties.plenio_editor_layout : null,
       // the Guide track (playback and MIDI only), kept in the node's properties with the workflow
@@ -3660,22 +3668,22 @@ const jl = (e, t, n) => {
       barSources: H(B.properties?.plenio_bar_sources),
       lyricsTarget: Z?.target ?? null,
       scoreTarget: U?.target ?? null,
-      onApply: (G, nt, He, J, ot, Le) => {
+      onApply: (G, nt, He, J, ot, Te) => {
         const Yt = String(h.value ?? ""), Xt = Cn(e);
         if (h.value = Xe(G), e.properties = {
           ...e.properties ?? {},
           plenio_guide: D(nt),
-          plenio_lyric_spans: (Le?.lyricSpans ?? []).map((me) => [...me]),
-          plenio_source_shift: Le?.sourceShift ?? 0
-        }, Le?.barSources && !U?.target.blocked && (B.properties = { ...B.properties ?? {}, plenio_bar_sources: Le.barSources }), ot ? Ie(e, "approved") : String(h.value) !== Yt && x(e), He !== null && Z && !Z.target.blocked && (Rl(Z.owner, He, Te(String(Z.owner.id))), x(Z.owner)), J && U && !U.target.blocked) {
+          plenio_lyric_spans: (Te?.lyricSpans ?? []).map((me) => [...me]),
+          plenio_source_shift: Te?.sourceShift ?? 0
+        }, Te?.barSources && !U?.target.blocked && (B.properties = { ...B.properties ?? {}, plenio_bar_sources: Te.barSources }), ot ? Ie(e, "approved") : String(h.value) !== Yt && x(e), He !== null && Z && !Z.target.blocked && (Bl(Z.owner, He, Le(String(Z.owner.id))), x(Z.owner)), J && U && !U.target.blocked) {
           const me = U.owner;
-          ql(me, J.text, Te(String(me.id)), J.approved ? { fetcher: R } : null).then(
+          zl(me, J.text, Le(String(me.id)), J.approved ? { fetcher: R } : null).then(
             (Fe) => {
               Fe?.review?.approved_fingerprint ? Ie(me, "approved") : x(me);
             }
           );
         }
-        e.setDirtyCanvas?.(!0, !0), Bs(Xt, ot, !0) && br?.(e);
+        e.setDirtyCanvas?.(!0, !0), Ds(Xt, ot, !0) && vr?.(e);
       }
     });
   }
@@ -3686,7 +3694,7 @@ const jl = (e, t, n) => {
     La((u) => {
       u === String(e.id) && f();
     }),
-    Ya((u) => {
+    Xa((u) => {
       (u === null || u === e) && f();
     })
   ], O = e.onDrawForeground;
@@ -3698,7 +3706,7 @@ const jl = (e, t, n) => {
     for (const u of M) u();
     V?.call(this);
   }, f(), { widget: h };
-}, vr = "PLENIO_FINISH_SWITCH", Gl = "plenio_switch", Ko = 148, On = 0, Vl = 4, vn = [
+}, xr = "PLENIO_FINISH_SWITCH", Ul = "plenio_switch", Qo = 148, On = 0, Yl = 4, vn = [
   {
     id: "hq",
     name: "HQ Mastering",
@@ -3716,36 +3724,36 @@ const jl = (e, t, n) => {
     icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="9.5" r="1.8"/><path d="M4.5 18l5-5.5 3.5 3.5 2.5-2.5 4 4.5z"/></svg>'
   }
 ];
-function Ul(e) {
+function Xl(e) {
   return e?.nodes ?? e?._nodes ?? [];
 }
-function xr(e) {
-  return Ul(e).filter((t) => t.properties?.[Gl] === "cover");
+function kr(e) {
+  return Xl(e).filter((t) => t.properties?.[Ul] === "cover");
 }
 function gt(e) {
-  const t = xr(e);
+  const t = kr(e);
   return t.length ? t.some((n) => (n.mode ?? On) === On) : null;
 }
-function kr(e, t) {
-  for (const n of xr(e)) n.mode = t ? On : Vl;
+function Sr(e, t) {
+  for (const n of kr(e)) n.mode = t ? On : Yl;
   e?.setDirtyCanvas?.(!0, !0);
 }
-function Qo(e) {
+function Jo(e) {
   return e === !0 || typeof e == "string" && ["true", "1", "on"].includes(e.trim().toLowerCase());
 }
 const In = /* @__PURE__ */ new Set();
-function Sr() {
+function Mr() {
   for (const e of In) e();
 }
-const Yl = (e, t, n) => {
-  let o = Qo(n?.[1]?.default);
+const Kl = (e, t, n) => {
+  let o = Jo(n?.[1]?.default);
   const s = e, r = document.createElement("div");
   r.className = "plenio-switches";
   const i = /* @__PURE__ */ new Map();
   for (const g of vn) {
     const x = document.createElement("button");
     x.type = "button", x.className = "plenio-switch", x.dataset.switch = g.id, x.innerHTML = `<span class="icon">${g.icon}</span><span class="text"><span class="name"></span><span class="what"></span></span><span class="pill"></span>`, x.addEventListener("click", (M) => {
-      M.stopPropagation(), g.id === "hq" ? (o = !o, l.value = o, l.callback?.(o)) : kr(s.graph, !gt(s.graph)), c();
+      M.stopPropagation(), g.id === "hq" ? (o = !o, l.value = o, l.callback?.(o)) : Sr(s.graph, !gt(s.graph)), c();
     }), i.set(g.id, x), r.append(x);
   }
   function a(g, x) {
@@ -3755,13 +3763,13 @@ const Yl = (e, t, n) => {
   function c() {
     a(vn[0], o), a(vn[1], gt(s.graph));
   }
-  const l = e.addDOMWidget(t, vr, r, {
+  const l = e.addDOMWidget(t, xr, r, {
     getValue: () => o,
     setValue: (g) => {
-      o = Qo(g), c();
+      o = Jo(g), c();
     },
-    getMinHeight: () => Ko,
-    getMaxHeight: () => Ko
+    getMinHeight: () => Qo,
+    getMaxHeight: () => Qo
   });
   In.add(c);
   let d = gt(s.graph);
@@ -3775,8 +3783,8 @@ const Yl = (e, t, n) => {
   return e.onRemoved = function() {
     In.delete(c), h?.call(this);
   }, c(), { widget: l };
-}, Xl = "PlenioPreset", Kl = "none";
-function Ql(e, t, n) {
+}, Ql = "PlenioPreset", Jl = "none";
+function Zl(e, t, n) {
   const o = [];
   for (const s of t) {
     if (s.switch) {
@@ -3790,12 +3798,12 @@ function Ql(e, t, n) {
   return o;
 }
 const xn = /* @__PURE__ */ new Map();
-function Jl(e, t) {
+function eu(e, t) {
   let n = xn.get(t);
   return n || (n = e.fetchApi(`/plenio/presets?template=${encodeURIComponent(t)}`).then(async (o) => o.ok ? (await o.json()).changes ?? {} : {}), xn.set(t, n), n.catch(() => xn.delete(t))), n;
 }
-const Je = "plenio.stem_mix/1", Be = "rest", Zl = ["reverb", "delay"], Mr = -60, eu = 12;
-function tu() {
+const Je = "plenio.stem_mix/1", Be = "rest", tu = ["reverb", "delay"], _r = -60, nu = 12;
+function ou() {
   return { gain_db: 0, mute: !1, solo: !1, compression: 0, muted: [], reverb: 0, delay: 0, save: !1 };
 }
 function le(e, t) {
@@ -3811,15 +3819,15 @@ function le(e, t) {
     save: n.save === !0
   };
 }
-function _r(e) {
-  const t = tu();
+function Er(e) {
+  const t = ou();
   return e.gain_db === t.gain_db && e.mute === t.mute && e.solo === t.solo && e.compression === t.compression && e.muted.length === 0 && e.reverb === t.reverb && e.delay === t.delay && e.save === t.save;
 }
-const nu = ["vocals", "drums", "bass", "other"];
-function ou() {
-  return [...nu, Be];
+const su = ["vocals", "drums", "bass", "other"];
+function ru() {
+  return [...su, Be];
 }
-function su(e) {
+function iu(e) {
   if (typeof e != "string" || !e.trim()) return { schema: Je, strips: {} };
   try {
     const t = JSON.parse(e);
@@ -3828,10 +3836,10 @@ function su(e) {
     return null;
   }
 }
-function ru(e) {
+function au(e) {
   const t = {};
   for (const o of Object.keys(e.strips)) {
-    if (!o || _r(le(e, o))) continue;
+    if (!o || Er(le(e, o))) continue;
     const s = {}, r = le(e, o);
     r.gain_db && (s.gain_db = r.gain_db), r.mute && (s.mute = !0), r.solo && (s.solo = !0), r.compression && (s.compression = r.compression), r.muted.length && (s.muted = r.muted), r.reverb && (s.reverb = r.reverb), r.delay && (s.delay = r.delay), r.save && (s.save = !0), t[o] = s;
   }
@@ -3840,16 +3848,16 @@ function ru(e) {
 }
 function Ht(e, t, n) {
   const o = { ...e.strips };
-  return _r(n) ? delete o[t] : o[t] = n, { ...e, strips: o };
+  return Er(n) ? delete o[t] : o[t] = n, { ...e, strips: o };
 }
-function iu(e, t, n) {
+function cu(e, t, n) {
   const o = n.some((r) => le(e, r).solo), s = le(e, t);
   return o ? s.solo : !s.mute;
 }
-function Jo(e) {
-  return e <= Mr ? "-∞" : `${e > 0 ? "+" : ""}${e.toFixed(1)}`;
+function Zo(e) {
+  return e <= _r ? "-∞" : `${e > 0 ? "+" : ""}${e.toFixed(1)}`;
 }
-function au(e, t = null) {
+function lu(e, t = null) {
   const n = e.filter((s) => Array.isArray(s) && s.length === 2 && Number.isFinite(s[0]) && Number.isFinite(s[1])).map((s) => [Math.max(0, Math.min(s[0], s[1])), Math.max(s[0], s[1])]).filter((s) => s[1] - s[0] > 1e-6).sort((s, r) => s[0] - r[0]), o = [];
   for (const s of n) {
     const r = o[o.length - 1];
@@ -3857,24 +3865,24 @@ function au(e, t = null) {
   }
   return t !== null && t > 0 ? o.map(([s, r]) => [Math.min(s, t), Math.min(r, t)]).filter(([s, r]) => r - s > 1e-6) : o;
 }
-function cu(e, t, n) {
-  return au([...e, [t, n]]);
+function uu(e, t, n) {
+  return lu([...e, [t, n]]);
 }
-function lu(e, t) {
+function du(e, t) {
   return e.findIndex(([n, o]) => n <= t && t <= o);
 }
-function uu(e, t) {
+function fu(e, t) {
   return t < 0 ? e : e.filter((n, o) => o !== t);
 }
-function du(e, t, n, o) {
+function pu(e, t, n, o) {
   const s = le(e, t);
-  return Ht(e, t, { ...s, muted: cu(s.muted, n, o) });
+  return Ht(e, t, { ...s, muted: uu(s.muted, n, o) });
 }
-function fu(e, t, n) {
-  const o = le(e, t), s = lu(o.muted, n);
-  return s < 0 ? e : Ht(e, t, { ...o, muted: uu(o.muted, s) });
+function hu(e, t, n) {
+  const o = le(e, t), s = du(o.muted, n);
+  return s < 0 ? e : Ht(e, t, { ...o, muted: fu(o.muted, s) });
 }
-function pu(e) {
+function mu(e) {
   const t = e?.plenio_stems, n = t?.[t.length - 1];
   if (!n?.peaks) return {};
   const o = {};
@@ -3882,15 +3890,15 @@ function pu(e) {
     Array.isArray(r) && r.length && (o[s] = r.map((i) => Math.abs(Number(i) || 0)));
   return o;
 }
-function hu(e, t, n = 200) {
+function gu(e, t, n = 200) {
   const o = e[t];
   return o?.length ? o.length === n ? o : Array.from({ length: n }, (s, r) => o[Math.floor(r * o.length / n)] ?? 0) : new Array(n).fill(0);
 }
-function Zo(e, t) {
-  const o = (Array.isArray(t?.stems) && t.stems.length ? t.stems : ou()).filter((r) => r !== Be), s = Object.keys(e?.strips ?? {}).filter((r) => r !== Be && !o.includes(r));
+function es(e, t) {
+  const o = (Array.isArray(t?.stems) && t.stems.length ? t.stems : ru()).filter((r) => r !== Be), s = Object.keys(e?.strips ?? {}).filter((r) => r !== Be && !o.includes(r));
   return [...o, ...s, Be];
 }
-const es = "plenio_stem_mixer", ts = "mix", ye = 200, mu = ["room", "plate", "hall"];
+const ts = "plenio_stem_mixer", ns = "mix", ye = 200, wu = ["room", "plate", "hall"];
 function z(e, t, n) {
   const o = document.createElement(e);
   return t && (o.className = t), n !== void 0 && (o.textContent = n), o;
@@ -3899,22 +3907,22 @@ function wt(e, t, n, o, s) {
   const r = z("input");
   return r.type = "range", r.min = String(e), r.max = String(t), r.step = String(n), r.value = String(o), r.setAttribute("aria-label", s), r;
 }
-function gu(e) {
+function yu(e) {
   const t = z("div", "plenio-mix"), n = z("div", "plenio-mix-strips"), o = z("div", "plenio-mix-buses"), s = z("div", "plenio-mix-info"), r = z("div", "plenio-mix-advanced");
   t.append(n, o, r, s);
   let i = {
     mix: { schema: Je, strips: {} },
     // the documented stems are there before the first run (owner's request, 2026-09-28); a separation
     // replaces them with what the model actually produced
-    names: Zo(null, null),
+    names: es(null, null),
     peaks: {},
     seconds: 0
   }, a = !1;
-  const c = () => e.widgets?.find((b) => b.name === ts);
+  const c = () => e.widgets?.find((b) => b.name === ns);
   function l(b, { draw: v = !0 } = {}) {
     const _ = c();
     if (!_) return;
-    const y = ru(b);
+    const y = au(b);
     _.value = y, _.callback?.(y), i = { ...i, mix: b }, v && g();
   }
   function d(b, v, _ = {}) {
@@ -3937,9 +3945,9 @@ function gu(e) {
       y.dataset.strip = v;
       const E = z("span", "name", v === Be ? `${v} (missed)` : v);
       E.title = v === Be ? "What the separator missed: keeps a neutral mix exact" : "";
-      const S = wt(Mr, eu, 0.5, _.gain_db, `${v} gain`), P = z("span", "gain", `${Jo(_.gain_db)} dB`);
+      const S = wt(_r, nu, 0.5, _.gain_db, `${v} gain`), P = z("span", "gain", `${Zo(_.gain_db)} dB`);
       S.addEventListener("input", () => {
-        P.textContent = `${Jo(Number(S.value))} dB`, d(v, { gain_db: Number(S.value) }, { draw: !1 });
+        P.textContent = `${Zo(Number(S.value))} dB`, d(v, { gain_db: Number(S.value) }, { draw: !1 });
       }), S.addEventListener("change", () => d(v, { gain_db: Number(S.value) }));
       const N = z("button", _.mute ? "toggle active" : "toggle", "M");
       N.setAttribute("aria-label", `${v} mute`), N.addEventListener("click", (R) => {
@@ -3951,17 +3959,17 @@ function gu(e) {
       });
       const j = wt(0, 1, 0.05, _.compression, `${v} compression`);
       j.title = "Compression amount: one knob for the master compressor (threshold and ratio)", j.addEventListener("input", () => d(v, { compression: Number(j.value) }, { draw: !1 })), j.addEventListener("change", () => d(v, { compression: Number(j.value) }));
-      const X = Zl.map((R) => {
+      const X = tu.map((R) => {
         const B = wt(0, 1, 0.05, _[R], `${v} ${R} send`);
         return B.title = `${R} send: how much of this stem goes to the shared ${R} bus`, B.addEventListener("input", () => f(v, R, Number(B.value), { draw: !1 })), B.addEventListener("change", () => f(v, R, Number(B.value))), B;
       }), H = z("button", _.save ? "toggle active" : "toggle", "save");
       H.setAttribute("aria-label", `${v} save as its own file`), H.setAttribute("aria-pressed", String(_.save)), H.title = 'Save this stem as its own 24-bit FLAC file on the next run - next to the song, in the folder "<name>-stems" (without an Export Release: output/plenio/stems); its gain, compression and muted ranges are applied, mute/solo and the buses are not', H.addEventListener("click", (R) => {
         R.stopPropagation(), d(v, { save: !_.save });
       });
-      const Z = iu(i.mix, v, b);
+      const Z = cu(i.mix, v, b);
       y.classList.toggle("silent", !Z);
       const U = z("canvas", "plenio-mix-wave");
-      U.width = ye, U.height = 26, U.setAttribute("aria-label", `${v} waveform (drag to mute a time range)`), x(U, _, hu(i.peaks, v, ye)), U.addEventListener("pointerdown", (R) => M(R, U, v)), y.append(
+      U.width = ye, U.height = 26, U.setAttribute("aria-label", `${v} waveform (drag to mute a time range)`), x(U, _, gu(i.peaks, v, ye)), U.addEventListener("pointerdown", (R) => M(R, U, v)), y.append(
         E,
         S,
         P,
@@ -3999,14 +4007,14 @@ function gu(e) {
     if (b.preventDefault(), b.stopPropagation(), !i.seconds) return;
     const y = v.getBoundingClientRect(), E = (X) => Math.max(0, Math.min(1, (X - y.left) / (y.width || ye))) * i.seconds, S = E(b.clientX);
     if (le(i.mix, _).muted.some(([X, H]) => X <= S && S <= H)) {
-      l(fu(i.mix, _, S));
+      l(hu(i.mix, _, S));
       return;
     }
     let N = S;
     const D = (X) => {
       N = E(X.clientX);
     }, j = () => {
-      window.removeEventListener("pointermove", D), window.removeEventListener("pointerup", j), l(du(i.mix, _, Math.min(S, N), Math.max(S, N)));
+      window.removeEventListener("pointermove", D), window.removeEventListener("pointerup", j), l(pu(i.mix, _, Math.min(S, N), Math.max(S, N)));
     };
     window.addEventListener("pointermove", D), window.addEventListener("pointerup", j);
   }
@@ -4014,7 +4022,7 @@ function gu(e) {
     o.replaceChildren();
     const b = { preset: "room", ...i.mix.reverb ?? {} }, v = { time_ms: 375, feedback: 0.35, ...i.mix.delay ?? {} }, _ = z("select");
     _.setAttribute("aria-label", "Reverb preset"), _.title = "The room the reverb bus adds; the amount per stem is its verb send";
-    for (const S of mu) _.append(new Option(S, S));
+    for (const S of wu) _.append(new Option(S, S));
     _.value = String(b.preset ?? "room"), _.addEventListener("change", () => h("reverb", "preset", _.value));
     const y = z("input");
     y.type = "number", y.value = String(v.time_ms ?? 375), y.setAttribute("aria-label", "Delay time in ms"), y.title = "Delay time in ms: where the first echo of the delay bus sits", y.addEventListener("change", () => h("delay", "time_ms", Number(y.value)));
@@ -4028,7 +4036,7 @@ function gu(e) {
       E
     ), o.style.display = "flex";
   }
-  const V = e.addDOMWidget(es, es, t, {
+  const V = e.addDOMWidget(ts, ts, t, {
     serialize: !1,
     getValue: () => "",
     setValue: () => {
@@ -4037,50 +4045,50 @@ function gu(e) {
     getMaxHeight: () => 620
   });
   V.serialize = !1;
-  const u = e.widgets?.find((b) => b.name === ts), k = z("button", "toggle", "JSON");
+  const u = e.widgets?.find((b) => b.name === ns), k = z("button", "toggle", "JSON");
   k.title = "Show or hide the raw mixer value", k.addEventListener("click", (b) => {
     b.stopPropagation(), a = !a, k.classList.toggle("active", a), u && (u.plenioHidden = !a, a ? delete u.computeSize : u.computeSize = () => [0, -4]), e.setDirtyCanvas?.(!0, !0);
   }), r.append(z("span", "label", "Advanced"), k), u && (u.plenioHidden = !0, u.computeSize = () => [0, -4]);
-  function L() {
-    const b = su(c()?.value);
+  function T() {
+    const b = iu(c()?.value);
     i = { ...i, mix: b ?? { schema: Je, strips: {} } }, b || (s.textContent = "the mixer value is not readable; it will be replaced on the next edit"), g();
   }
-  return L(), {
+  return T(), {
     showExecuted(b) {
-      const v = b?.plenio_stems?.at(-1), _ = pu(b), y = Zo(i.mix, v ?? null);
-      i = { ...i, names: y, peaks: _, seconds: Number(v?.seconds ?? i.seconds) || 0 }, L();
+      const v = b?.plenio_stems?.at(-1), _ = mu(b), y = es(i.mix, v ?? null);
+      i = { ...i, names: y, peaks: _, seconds: Number(v?.seconds ?? i.seconds) || 0 }, T();
     }
   };
 }
-const Rn = "plenio-tip", ns = 12, yt = 8;
-function wu(e, t, n, o) {
-  let s = e.right + ns;
-  if (s + n.width > o.width - yt && (s = e.left - ns - n.width), s < yt) return null;
+const Rn = "plenio-tip", os = 12, yt = 8;
+function bu(e, t, n, o) {
+  let s = e.right + os;
+  if (s + n.width > o.width - yt && (s = e.left - os - n.width), s < yt) return null;
   const r = Math.max(yt, Math.min(t - 14, o.height - yt - n.height));
   return { x: s, y: r };
 }
-function yu(e) {
+function vu(e) {
   return !!e && (String(e.type ?? "").startsWith("Plenio") || String(e.title ?? "").startsWith("Plenio"));
 }
-const bu = 30;
-function vu(e) {
+const xu = 30;
+function ku(e) {
   const t = e.node_over, n = e.ds, o = e.canvas;
   if (!t || !n || !o) return null;
   const s = o.getBoundingClientRect(), r = t.flags?.collapsed ? 0 : t.size[1];
   return {
     left: s.left + (t.pos[0] + n.offset[0]) * n.scale,
-    top: s.top + (t.pos[1] - bu + n.offset[1]) * n.scale,
+    top: s.top + (t.pos[1] - xu + n.offset[1]) * n.scale,
     right: s.left + (t.pos[0] + t.size[0] + n.offset[0]) * n.scale,
     bottom: s.top + (t.pos[1] + r + n.offset[1]) * n.scale
   };
 }
-function xu(e) {
+function Su(e) {
   const t = document.body, n = () => t.classList.remove(Rn);
   let o = 0, s = null;
   const r = (a) => {
     const c = e();
-    if (a.style.display === "none" || !a.textContent?.trim() || !c || !yu(c.node_over)) return n();
-    const l = vu(c), d = a.getBoundingClientRect(), f = l && wu(l, o, d, { width: window.innerWidth, height: window.innerHeight });
+    if (a.style.display === "none" || !a.textContent?.trim() || !c || !vu(c.node_over)) return n();
+    const l = ku(c), d = a.getBoundingClientRect(), f = l && bu(l, o, d, { width: window.innerWidth, height: window.innerHeight });
     if (!f) return n();
     const h = a.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0 };
     t.style.setProperty("--plenio-tip-x", `${Math.round(f.x - h.left)}px`), t.style.setProperty("--plenio-tip-y", `${Math.round(f.y - h.top)}px`), t.classList.add(Rn);
@@ -4098,10 +4106,10 @@ function xu(e) {
     o = a.clientY, s?.isConnected || i();
   });
 }
-const ku = `
+const Mu = `
 body.${Rn} .node-tooltip { left: var(--plenio-tip-x) !important; top: var(--plenio-tip-y) !important;
   transform: none !important; }
-`, Su = `
+`, _u = `
 .plenio-sheet-state { display: flex; flex-direction: column; gap: 4px; font: 12px/18px var(--font-family, sans-serif);
   color: var(--descrip-text, #999); padding: 0 2px; white-space: nowrap; overflow: hidden; }
 .plenio-sheet-summary { min-width: 0; overflow: hidden; text-overflow: ellipsis; padding: 0 4px; }
@@ -4235,11 +4243,11 @@ body.${Rn} .node-tooltip { left: var(--plenio-tip-x) !important; top: var(--plen
 .plenio-switch[data-switch="cover"].on .pill { background: #5bb0e6; color: #071a2a; }
 .plenio-seed-hint { font: 11px/1.35 var(--font-family, sans-serif); color: var(--descrip-text, #aaa); padding: 2px 6px; white-space: normal; overflow-wrap: anywhere;
   overflow: hidden; }
-` + ku;
-function Mu() {
+` + Mu;
+function Eu() {
   if (document.getElementById("plenio-styles")) return;
   const e = document.createElement("style");
-  e.id = "plenio-styles", e.textContent = Su, document.head.append(e);
+  e.id = "plenio-styles", e.textContent = _u, document.head.append(e);
 }
 function Bn(e) {
   return e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
@@ -4247,11 +4255,11 @@ function Bn(e) {
 function bt(e) {
   return Bn(e).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
 }
-function _u(e) {
+function $u(e) {
   const t = e.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((n) => n.trim());
   return t.every((n) => /^:?-{3,}:?$/.test(n)) ? null : t;
 }
-function Eu(e) {
+function Au(e) {
   const t = [];
   let n = !1, o = null, s = null;
   const r = () => {
@@ -4272,7 +4280,7 @@ function Eu(e) {
     }
     if (a.trim().startsWith("|")) {
       r();
-      const d = _u(a);
+      const d = $u(a);
       d && (s ??= []).push(d);
       continue;
     }
@@ -4297,43 +4305,43 @@ function Eu(e) {
   return r(), i(), o !== null && t.push(`<pre><code>${Bn(o.join(`
 `))}</code></pre>`), t.join("");
 }
-const Ye = "plenio_summary", os = "plenio_summary", ss = 84, $u = 18, Au = 55, Lu = 16, rs = 10;
-function Tu(e) {
+const Ye = "plenio_summary", ss = "plenio_summary", rs = 84, Tu = 18, Lu = 55, Cu = 16, is = 10;
+function Pu(e) {
   const t = e.split(`
-`).filter((n) => n.trim()).reduce((n, o) => n + Math.max(1, Math.ceil(o.length / Au)), 0);
-  return Lu + t * $u;
+`).filter((n) => n.trim()).reduce((n, o) => n + Math.max(1, Math.ceil(o.length / Lu)), 0);
+  return Cu + t * Tu;
 }
-function Cu(e, t) {
-  const n = e.widgets?.find((i) => i.name === os);
+function Nu(e, t) {
+  const n = e.widgets?.find((i) => i.name === ss);
   if (n?.element) return n.element;
   const o = document.createElement("div");
   o.className = "plenio-summary";
-  let s = rs;
-  const r = e.addDOMWidget(os, "plenio_summary", o, {
+  let s = is;
+  const r = e.addDOMWidget(ss, "plenio_summary", o, {
     serialize: !1,
     getValue: () => "",
     setValue: () => {
     },
-    getMinHeight: () => ss,
+    getMinHeight: () => rs,
     // as tall as its text: a short summary leaves the rest of the node to the other widgets. The margins
     // count too - without them the element stayed 20 px short of its text and hid the last line
-    getMaxHeight: () => Math.max(ss, (o.scrollHeight ? o.scrollHeight + 2 : Tu(t.markdown)) + 2 * s)
+    getMaxHeight: () => Math.max(rs, (o.scrollHeight ? o.scrollHeight + 2 : Pu(t.markdown)) + 2 * s)
   });
-  return s = r.margin ?? rs, r.serialize = !1, o;
+  return s = r.margin ?? is, r.serialize = !1, o;
 }
-function Pu(e) {
+function Ou(e) {
   const t = e.computeSize?.();
   t && e.size && e.size[1] < t[1] && e.setSize?.([e.size[0], t[1]]);
 }
-const is = /* @__PURE__ */ new WeakMap();
+const as = /* @__PURE__ */ new WeakMap();
 function Dn(e, t) {
   if (!t.markdown) return;
-  const n = is.get(e) ?? { markdown: "" };
-  n.markdown = t.markdown, is.set(e, n);
-  const o = Cu(e, n);
-  o.dataset.status = t.status ?? "", o.innerHTML = Eu(t.markdown), Pu(e), e.setDirtyCanvas?.(!0, !0);
+  const n = as.get(e) ?? { markdown: "" };
+  n.markdown = t.markdown, as.set(e, n);
+  const o = Nu(e, n);
+  o.dataset.status = t.status ?? "", o.innerHTML = Au(t.markdown), Ou(e), e.setDirtyCanvas?.(!0, !0);
 }
-function as(e, t, n, o) {
+function cs(e, t, n, o) {
   const s = e.properties?.[Ye], r = (s?.markdown ?? "").split(`
 `), i = r.findIndex((c) => c.startsWith(t));
   i >= 0 ? r[i] = n : r.push(n);
@@ -4341,7 +4349,7 @@ function as(e, t, n, o) {
 `).trim(), status: o ?? s?.status ?? "" };
   e.properties = e.properties ?? {}, e.properties[Ye] = a, Dn(e, a);
 }
-function Nu(e) {
+function Iu(e) {
   e.prototype.onExecuted = Y(e.prototype.onExecuted, function(t) {
     const n = t?.[Ye], o = n?.[n.length - 1];
     o?.markdown && (this.properties = this.properties ?? {}, this.properties[Ye] = { markdown: o.markdown, status: o.status ?? "" }, Dn(this, o));
@@ -4350,26 +4358,26 @@ function Nu(e) {
     t?.markdown && Dn(this, t);
   });
 }
-const Ou = "Plenio.Core", W = Br;
-Wl(W);
-const C = fs, vt = { app: C, fetcher: W }, xt = { app: C, fetcher: W }, Ut = () => C.graph;
-async function Iu() {
+const Ru = "Plenio.Core", W = Dr;
+Gl(W);
+const C = ps, vt = { app: C, fetcher: W }, xt = { app: C, fetcher: W }, Ut = () => C.graph;
+async function Bu() {
   const e = (t) => C.extensionManager?.toast?.add({ ...t, life: 2e4 });
   try {
     const t = C.graph?.serialize?.();
     if (!t) return;
-    const n = await hs(W, t, !0), o = C.extensionManager?.workflow?.activeWorkflow ?? null;
+    const n = await ms(W, t, !0), o = C.extensionManager?.workflow?.activeWorkflow ?? null;
     n.workflow && C.loadGraphData && await C.loadGraphData(n.workflow, !1, !0, o);
-    for (const s of Xr(n)) e(s);
+    for (const s of Kr(n)) e(s);
   } catch (t) {
     const n = t instanceof Q && t.hint ? `${t.message} ${t.hint}` : String(t);
     e({ severity: "error", summary: "Model blocks not brought up to date", detail: n });
   }
 }
-const he = new $a(W);
-let cs;
-function Ru() {
-  window.clearTimeout(cs), cs = window.setTimeout(() => {
+const he = new Aa(W);
+let ls;
+function Du() {
+  window.clearTimeout(ls), ls = window.setTimeout(() => {
     he.refresh().then(Ct);
   }, 1500);
 }
@@ -4381,58 +4389,58 @@ function Ct() {
   }
   C.graph?.setDirtyCanvas?.(!0, !0);
 }
-function Bu() {
+function qu() {
   for (const e of Ut()?.nodes ?? [])
     for (const t of [e, ...e.subgraph?.nodes ?? []]) {
       if (t.type !== qe) continue;
       const n = t.widgets?.find((o) => o.name === "component.file")?.value;
-      if (_a(n, he.info(An(t)))) return !0;
+      if (Ea(n, he.info(An(t)))) return !0;
     }
   return !1;
 }
 let kn = null;
 const qn = "Plenio.Sheet.ApproveContinues";
-function Du() {
+function zu() {
   const e = C.extensionManager?.setting?.get(qn);
-  Rs(e !== !1), Bs("waiting", !0, e) && (C.queuePrompt?.(0, 1)?.catch((t) => console.error("Plenio: the run could not go on", t)), C.extensionManager?.toast?.add({ severity: "info", summary: "Approved", detail: "The run goes on.", life: 5e3 }));
+  Bs(e !== !1), Ds("waiting", !0, e) && (C.queuePrompt?.(0, 1)?.catch((t) => console.error("Plenio: the run could not go on", t)), C.extensionManager?.toast?.add({ severity: "info", summary: "Approved", detail: "The run goes on.", life: 5e3 }));
 }
-async function qu(e) {
-  if (e === Kl) return;
+async function Hu(e) {
+  if (e === Jl) return;
   const t = C.graph, n = t?.extra?.plenio_api?.id, o = C.extensionManager?.toast;
   if (!t || !n) {
     o?.add({ severity: "info", summary: "Preset", detail: "This workflow is not a Plenio template: the preset sets nothing here.", life: 8e3 });
     return;
   }
   try {
-    const s = (await Jl(W, n))[e] ?? [], r = Ql(t, s, (a, c) => {
-      a === "cover" && kr(t, c);
+    const s = (await eu(W, n))[e] ?? [], r = Zl(t, s, (a, c) => {
+      a === "cover" && Sr(t, c);
     });
-    Sr(), C.graph?.setDirtyCanvas?.(!0, !0), C.extensionManager?.workflow?.activeWorkflow?.changeTracker?.checkState?.(), o?.add({ severity: "success", summary: "Preset", detail: r.length ? `Set: ${r.join(", ")} (Ctrl+Z takes it back)` : "Everything was set already.", life: 6e3 });
+    Mr(), C.graph?.setDirtyCanvas?.(!0, !0), C.extensionManager?.workflow?.activeWorkflow?.changeTracker?.checkState?.(), o?.add({ severity: "success", summary: "Preset", detail: r.length ? `Set: ${r.join(", ")} (Ctrl+Z takes it back)` : "Everything was set already.", life: 6e3 });
   } catch (s) {
     console.error("Plenio: the preset could not be applied", s);
   }
 }
-let ls = null;
+let us = null;
 function zn(e) {
   if (e == null) return null;
   const t = String(e);
   return Ut()?.getNodeById?.(t.includes(":") ? t : Number(t)) ?? null;
 }
-async function zu(e, t) {
+async function Fu(e, t) {
   const n = `Your own ${e.replace("_", " ")} - any text; the list holds the style templates' values.`, o = C.extensionManager?.dialog;
   return o?.prompt ? o.prompt({ title: "Plenio · your own value", message: n, defaultValue: t }) : window.prompt(n, t);
 }
-const us = new Fa(
+const ds = new Wa(
   (e) => C.extensionManager?.toast?.add({ severity: "warn", summary: e.summary, detail: e.detail, life: 2e4 })
-), Hu = {
+), Wu = {
   scale: () => C.canvas?.ds?.scale ?? 1,
   toast: (e, t) => C.extensionManager?.toast?.add({ severity: "info", summary: e, detail: t, life: 12e3 })
-}, Er = () => Gn(import.meta.url, Vn), Fu = {
+}, $r = () => Gn(import.meta.url, Vn), ju = {
   fetcher: W,
   async draw(e, t, n, o) {
     const { notationPdf: s, renderLines: r } = await Pe(
       () => import("./notationExport-DkCMgjck.mjs").then((a) => a.c),
-      Er,
+      $r,
       "The sheet music is drawn and saved then."
     ), i = r(e, t, n, o);
     try {
@@ -4443,14 +4451,14 @@ const us = new Fa(
     }
   }
 };
-function Wu(e, t) {
+function Gu(e, t) {
   const n = zn(e), o = n?.properties?.plenio_summary;
   return n?.type === "PlenioExportRelease" && o?.markdown?.includes(`- sheet music: ${t}`) ? n : null;
 }
-function ju(e, t) {
-  const n = `- sheet music: ${e.job.file}`, o = Wu(t, e.job.file);
+function Vu(e, t) {
+  const n = `- sheet music: ${e.job.file}`, o = Gu(t, e.job.file);
   if ("saved" in e) {
-    o && as(o, n, `${n} - saved (${Math.max(1, Math.round(e.saved.bytes / 1024))} KB)`), C.extensionManager?.toast?.add({ severity: "success", summary: "Sheet music saved", detail: e.saved.file, life: 6e3 });
+    o && cs(o, n, `${n} - saved (${Math.max(1, Math.round(e.saved.bytes / 1024))} KB)`), C.extensionManager?.toast?.add({ severity: "success", summary: "Sheet music saved", detail: e.saved.file, life: 6e3 });
     return;
   }
   const { error: s } = e, r = s instanceof Q && s.hint ? `${s.message} ${s.hint}` : String(s instanceof Error ? s.message : s);
@@ -4458,14 +4466,14 @@ function ju(e, t) {
     console.info(`Plenio: ${e.job.file} was saved by another page`);
     return;
   }
-  o && as(o, n, `${n} - not saved: ${r}`, "warning"), C.extensionManager?.toast?.add({ severity: "error", summary: "Sheet music not saved", detail: `${e.job.file}: ${r}`, life: 15e3 });
+  o && cs(o, n, `${n} - not saved: ${r}`, "warning"), C.extensionManager?.toast?.add({ severity: "error", summary: "Sheet music not saved", detail: `${e.job.file}: ${r}`, life: 15e3 });
 }
-const Hn = /* @__PURE__ */ new Map(), ds = new ul(Fu, (e) => {
-  ju(e, Hn.get(e.job.token)), Hn.delete(e.job.token);
+const Hn = /* @__PURE__ */ new Map(), fs = new dl(ju, (e) => {
+  Vu(e, Hn.get(e.job.token)), Hn.delete(e.job.token);
 });
-fs.registerExtension({
-  name: Ou,
-  getCustomWidgets: () => ({ [yr]: jl, [vr]: Yl }),
+ps.registerExtension({
+  name: Ru,
+  getCustomWidgets: () => ({ [br]: Vl, [xr]: Kl }),
   // a song's release record opens its workflow again, its documents kept (continueSong.ts)
   commands: [
     {
@@ -4488,7 +4496,7 @@ fs.registerExtension({
       label: "Bring the model blocks up to date",
       icon: "pi pi-sync",
       function: () => {
-        Iu();
+        Bu();
       }
     }
   ],
@@ -4520,13 +4528,13 @@ fs.registerExtension({
   // a workflow saved before its blocks followed the brief's creativity: they are brought up to date before
   // the frontend configures it (blocks.ts); loading goes on as it was when that fails
   async beforeConfigureGraph(e) {
-    const t = ti(e);
+    const t = ni(e);
     t.length && console.info(`Plenio: longer LLM answers (${Mn} tokens) in ${t.join(", ")}`);
-    const n = Yr(e);
+    const n = Xr(e);
     n && C.extensionManager?.toast?.add({ ...n, life: 2e4 });
     try {
-      const o = await Gr(e, W);
-      for (const s of Kr(o)) C.extensionManager?.toast?.add({ ...s, life: 2e4 });
+      const o = await Vr(e, W);
+      for (const s of Qr(o)) C.extensionManager?.toast?.add({ ...s, life: 2e4 });
     } catch (o) {
       console.error("Plenio: the blocks of this workflow could not be brought up to date", o);
       const s = o instanceof Q && o.hint ? `${o.message} ${o.hint}` : String(o instanceof Error ? o.message : o);
@@ -4540,22 +4548,22 @@ fs.registerExtension({
   },
   // the sheets' review stops depend on the linked brief's mode: known once the links are in place
   afterConfigureGraph: () => {
-    Ct(), Ua(), Sr();
+    Ct(), Ya(), Mr();
   },
   async beforeRegisterNodeDef(e, t) {
     if (!t.name.startsWith("Plenio")) return;
-    uo.has(t.name) && await fi(e, t, W, zu), Nu(e), tc(e, Hu);
-    const n = Ji(t.input);
+    uo.has(t.name) && await pi(e, t, W, Fu), Iu(e), nc(e, Wu);
+    const n = Zi(t.input);
     if (n.size || t.name in Yn) {
       const o = e.prototype.configure;
       e.prototype.configure = function(s) {
-        const r = ba(t, s), i = Ui(r), a = o?.call(this, r);
-        return Qi(this, i, n), ma(t.name, this.widgets), a;
+        const r = va(t, s), i = Yi(r), a = o?.call(this, r);
+        return Ji(this, i, n), ga(t.name, this.widgets), a;
       };
     }
     if (t.name === "PlenioTranscribeLyrics" && (e.prototype.onExecuted = Y(e.prototype.onExecuted, function(o) {
-      for (const s of o?.plenio_asr ?? []) Ta(s);
-    })), t.name === Xl) {
+      for (const s of o?.plenio_asr ?? []) Ca(s);
+    })), t.name === Ql) {
       const o = e.prototype.onNodeCreated;
       e.prototype.onNodeCreated = function() {
         o?.call(this);
@@ -4563,14 +4571,14 @@ fs.registerExtension({
         if (!s) return;
         const r = s.callback;
         s.callback = (i) => {
-          r?.(i), qu(String(i));
+          r?.(i), Hu(String(i));
         };
       };
     }
     if (t.name === "PlenioEQ") {
       const o = /* @__PURE__ */ new WeakMap(), s = e.prototype.onNodeCreated;
       e.prototype.onNodeCreated = function() {
-        s?.call(this), o.set(this, la(this, W));
+        s?.call(this), o.set(this, ua(this, W));
       }, e.prototype.onExecuted = Y(e.prototype.onExecuted, function(r) {
         o.get(this)?.showExecuted(r);
       });
@@ -4582,14 +4590,14 @@ fs.registerExtension({
         const s = this.widgets?.find((r) => r.name === "component");
         s && (s.callback = Y(s.callback, () => window.setTimeout(() => he.label(this), 0)));
       }, e.prototype.onExecuted = Y(e.prototype.onExecuted, function() {
-        Ru();
+        Du();
       });
     }
-    if (t.name === "PlenioExportRelease" && Oa(e, xt), t.name === ur && ml(e), uo.has(t.name)) {
-      Ei(e, W);
+    if (t.name === "PlenioExportRelease" && Ia(e, xt), t.name === dr && gl(e), uo.has(t.name)) {
+      $i(e, W);
       const o = e.prototype.onNodeCreated;
       e.prototype.onNodeCreated = function() {
-        o?.call(this), us.watch(this), Tl(
+        o?.call(this), ds.watch(this), Cl(
           this,
           (s, r) => C.extensionManager?.toast?.add({ severity: "info", summary: s, detail: r, life: 1e4 })
         );
@@ -4598,7 +4606,7 @@ fs.registerExtension({
     if (t.name === "PlenioStemMixer") {
       const o = /* @__PURE__ */ new WeakMap(), s = e.prototype.onNodeCreated;
       e.prototype.onNodeCreated = function() {
-        s?.call(this), o.set(this, gu(this));
+        s?.call(this), o.set(this, yu(this));
       }, e.prototype.onExecuted = Y(e.prototype.onExecuted, function(r) {
         o.get(this)?.showExecuted(r);
       });
@@ -4614,7 +4622,7 @@ fs.registerExtension({
     await he.refresh(), Ct();
   },
   setup() {
-    Mu(), Fl(Du), Rs(C.extensionManager?.setting?.get(qn) !== !1), he.refresh().then(Ct), kn = _l({
+    Eu(), jl(zu), Bs(C.extensionManager?.setting?.get(qn) !== !1), he.refresh().then(Ct), kn = El({
       app: C,
       fetcher: W,
       openPlayer: (n) => {
@@ -4627,37 +4635,37 @@ fs.registerExtension({
       },
       problemContext: () => ({
         workflow: C.graph?.serialize?.() ?? null,
-        error: ls
+        error: us
       }),
-      lacksFiles: Bu
-    }), W.addEventListener(va, (n) => {
+      lacksFiles: qu
+    }), W.addEventListener(xa, (n) => {
       const o = n.detail ?? {};
-      C.extensionManager?.toast?.add({ severity: "warn", ...Ma(o), life: 3e4 }), o.variant && kn?.open(o.component ?? null);
-    }), xu(() => C.canvas), Gi(vt), Ba(vt), W.addEventListener("plenio.sheet", (n) => {
+      C.extensionManager?.toast?.add({ severity: "warn", ..._a(o), life: 3e4 }), o.variant && kn?.open(o.component ?? null);
+    }), Su(() => C.canvas), Vi(vt), Da(vt), W.addEventListener("plenio.sheet", (n) => {
       const o = n.detail;
       if (!o?.node_id) return;
       Co(String(o.node_id), o);
       const s = zn(o.node_id);
-      s && Ie(s, Ds(o));
+      s && Ie(s, qs(o));
     }), W.addEventListener("status", (n) => {
-      us.status(n.detail?.exec_info?.queue_remaining);
+      ds.status(n.detail?.exec_info?.queue_remaining);
     }), W.addEventListener("execution_start", () => {
-      Va(Ut()?.nodes ?? []);
+      Ua(Ut()?.nodes ?? []);
     }), W.addEventListener("execution_error", (n) => {
-      ls = n.detail ?? null;
+      us = n.detail ?? null;
       const o = zn(n.detail?.node_id);
       o && String(o.type).startsWith("Plenio") && Ie(o, "error");
     }), W.addEventListener("executed", (n) => {
-      const o = n.detail, s = il(o?.output), r = o?.display_node ?? o?.node;
+      const o = n.detail, s = al(o?.output), r = o?.display_node ?? o?.node;
       for (const i of s) Hn.set(i.token, r);
-      ds.take(s);
+      fs.take(s);
     });
     const e = () => {
-      ds.recover();
+      fs.recover();
     };
     let t = !1;
     W.addEventListener("reconnected", () => {
-      Er().then((n) => {
+      $r().then((n) => {
         n ? t || (t = !0, C.extensionManager?.toast?.add({ severity: "warn", summary: "Plenio was updated", detail: En })) : e();
       });
     }), document.addEventListener("visibilitychange", () => {
@@ -4666,148 +4674,148 @@ fs.registerExtension({
   }
 });
 export {
-  Ks as $,
-  kd as A,
+  Qs as $,
+  Md as A,
   qt as B,
-  Sd as C,
+  _d as C,
   Kn as D,
-  wl as E,
+  yl as E,
   Nn as F,
-  Md as G,
-  uf as H,
-  Us as I,
-  Ec as J,
+  Ed as G,
+  ff as H,
+  Ys as I,
+  $c as J,
   et as K,
-  Mc as L,
-  _c as M,
+  _c as L,
+  Ec as M,
   Dt as N,
-  Fd as O,
+  jd as O,
   Q as P,
-  Ys as Q,
-  xd as R,
-  nf as S,
+  Xs as Q,
+  Sd as R,
+  sf as S,
   ne as T,
-  Rd as U,
-  Hc as V,
-  Ad as W,
-  Ld as X,
-  $d as Y,
+  Dd as U,
+  Fc as V,
+  Ld as W,
+  Cd as X,
+  Td as Y,
   ze as Z,
-  Wd as _,
-  cf as a,
-  Gs as a$,
-  _d as a0,
-  Ed as a1,
-  Dc as a2,
-  zd as a3,
-  Cd as a4,
-  Td as a5,
+  Gd as _,
+  uf as a,
+  Vs as a$,
+  $d as a0,
+  Ad as a1,
+  qc as a2,
+  Fd as a3,
+  Nd as a4,
+  Pd as a5,
   zo as a6,
-  Nd as a7,
-  Pd as a8,
-  vd as a9,
-  rr as aA,
+  Id as a7,
+  Od as a8,
+  kd as a9,
+  ir as aA,
   Gt as aB,
-  Zd as aC,
-  ef as aD,
-  pc as aE,
-  Js as aF,
-  Qs as aG,
-  nr as aH,
-  tr as aI,
-  er as aJ,
-  Zs as aK,
+  tf as aC,
+  nf as aD,
+  hc as aE,
+  Zs as aF,
+  Js as aG,
+  or as aH,
+  nr as aI,
+  tr as aJ,
+  er as aK,
   Ee as aL,
-  jd as aM,
-  Hd as aN,
-  Vs as aO,
-  Kd as aP,
-  Ud as aQ,
+  Vd as aM,
+  Wd as aN,
+  Us as aO,
+  Jd as aP,
+  Xd as aQ,
   Fo as aR,
-  Xd as aS,
-  ed as aT,
-  Ju as aU,
-  Zu as aV,
-  mc as aW,
-  hc as aX,
-  bc as aY,
-  dc as aZ,
-  kc as a_,
-  Od as aa,
-  Id as ab,
-  zc as ac,
-  Dd as ad,
-  qc as ae,
+  Qd as aS,
+  nd as aT,
+  ed as aU,
+  td as aV,
+  gc as aW,
+  mc as aX,
+  vc as aY,
+  fc as aZ,
+  Sc as a_,
+  Rd as aa,
+  Bd as ab,
+  Hc as ac,
+  zd as ad,
+  zc as ae,
   Lc as af,
-  Tc as ag,
-  Bd as ah,
-  wc as ai,
-  yc as aj,
-  dd as ak,
-  pd as al,
-  fd as am,
-  gd as an,
-  wd as ao,
-  hd as ap,
-  md as aq,
+  Cc as ag,
+  qd as ah,
+  yc as ai,
+  bc as aj,
+  pd as ak,
+  md as al,
+  hd as am,
+  yd as an,
+  bd as ao,
+  gd as ap,
+  wd as aq,
   Bt as ar,
-  oc as as,
+  sc as as,
   Ae as at,
-  ac as au,
-  yd as av,
-  ir as aw,
+  cc as au,
+  vd as av,
+  ar as aw,
   pt as ax,
-  cc as ay,
-  ol as az,
-  of as b,
-  gc as b0,
+  lc as ay,
+  sl as az,
+  rf as b,
+  wc as b0,
   Xn as b1,
-  vc as b2,
-  xc as b3,
-  Xc as b4,
-  Gd as b5,
-  Yd as b6,
-  ud as b7,
-  Yu as b8,
-  Qd as b9,
-  Uu as ba,
-  id as bb,
-  cd as bc,
-  rd as bd,
-  ld as be,
+  xc as b2,
+  kc as b3,
+  Kc as b4,
+  Ud as b5,
+  Kd as b6,
+  fd as b7,
+  Ku as b8,
+  Zd as b9,
+  Xu as ba,
+  cd as bb,
+  ud as bc,
+  ad as bd,
+  dd as be,
   Xe as bf,
-  ad as bg,
-  Dr as bh,
-  Ni as bi,
-  Pi as bj,
-  Vd as bk,
-  tl as bl,
-  Jd as bm,
-  Xu as bn,
-  Ms as bo,
-  Ou as bp,
-  sf as c,
-  tf as d,
-  df as e,
+  ld as bg,
+  qr as bh,
+  Oi as bi,
+  Ni as bj,
+  Yd as bk,
+  nl as bl,
+  ef as bm,
+  Qu as bn,
+  _s as bo,
+  Ru as bp,
+  af as c,
+  of as d,
+  pf as e,
   wn as f,
-  nd as g,
-  ff as h,
-  Ss as i,
-  Wc as j,
-  qd as k,
-  sd as l,
-  Ku as m,
-  Nc as n,
-  Qu as o,
-  ks as p,
-  td as q,
-  rf as r,
-  af as s,
-  lf as t,
-  Oc as u,
-  od as v,
-  yl as w,
-  Fs as x,
-  bd as y,
-  ic as z
+  sd as g,
+  hf as h,
+  Ms as i,
+  jc as j,
+  Hd as k,
+  id as l,
+  Ju as m,
+  Oc as n,
+  Zu as o,
+  Ss as p,
+  od as q,
+  cf as r,
+  lf as s,
+  df as t,
+  Ic as u,
+  rd as v,
+  bl as w,
+  Ws as x,
+  xd as y,
+  ac as z
 };

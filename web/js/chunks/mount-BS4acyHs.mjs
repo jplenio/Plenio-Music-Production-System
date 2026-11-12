@@ -1,5 +1,5 @@
 import { d as fe, o as he, c as s, b as o, t as a, e as c, j as S, f as ye, w as le, v as me, g as v, h as E, i as l, l as ce, a as Ae, F as x, r as C, u as A, n as D, m as De, p as G, q as Ne, k as Ue, s as ze } from "./runtime-dom.esm-bundler-BuebSeFB.mjs";
-import { P as H, a as Le, l as Ie, s as Me, f as z, h as Fe, H as Be, t as Ve, w as de, b as He, c as We, S as Ye, d as qe, E as ve, e as Je, r as Ke } from "./main-DlcQk5dY.mjs";
+import { P as H, a as Ie, l as Le, s as Me, f as z, h as Fe, H as Be, t as Ve, w as de, b as He, c as We, S as qe, d as Ye, E as ve, e as Je, r as Ke } from "./main-BLQpPf9N.mjs";
 const Ge = ".plenio-setup{display:flex;flex-direction:column;gap:10px;padding:12px;font-size:13px;color:var(--fg-color, #ddd);overflow-y:auto;height:100%;box-sizing:border-box}.plenio-setup header{display:flex;align-items:baseline;gap:8px}.plenio-setup h2{margin:0;font-size:16px}.plenio-setup .version,.plenio-setup .hint{color:var(--descrip-text, #999);font-size:12px}.plenio-setup .steps{display:flex;flex-wrap:wrap;gap:4px}.plenio-setup .steps button{font-size:12px;padding:2px 8px;border-radius:10px;border:1px solid var(--border-color, #555);background:none;color:inherit;cursor:pointer}.plenio-setup .steps button.current{background:var(--comfy-menu-secondary-bg, #333);font-weight:600}.plenio-setup section{display:flex;flex-direction:column;gap:8px}.plenio-setup button{padding:4px 12px;border-radius:6px;border:1px solid var(--border-color, #555);background:var(--comfy-input-bg, #222);color:inherit;cursor:pointer}.plenio-setup button:disabled{opacity:.5;cursor:default}.plenio-setup button.primary{align-self:flex-start;background:var(--p-primary-color, #3b82f6);border-color:transparent;color:var(--p-primary-contrast-color, #fff)}.plenio-setup .row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:8px;border:1px solid var(--border-color, #444);border-radius:6px}.plenio-setup .row.focus{border-color:var(--p-primary-color, #3b82f6)}.plenio-setup .row .what{display:flex;flex-direction:column;gap:2px;flex:1 1 200px;min-width:0}.plenio-setup .row progress{width:100%}.plenio-setup .state.ok{color:#4ade80}.plenio-setup .state.warn,.plenio-setup .warn{color:#fbbf24}.plenio-setup .state.error,.plenio-setup .error{color:#f87171}.plenio-setup .ok{color:#4ade80}.plenio-setup .findings{margin:0;padding-left:16px;display:flex;flex-direction:column;gap:6px}.plenio-setup .choice,.plenio-setup .folder{display:flex;gap:6px;align-items:center}.plenio-setup select{max-width:100%;background:var(--comfy-input-bg, #222);color:inherit;border:1px solid var(--border-color, #555);border-radius:4px}.plenio-setup .go{display:flex;flex-direction:column;gap:6px}.plenio-access{border:1px solid var(--p-primary-color, #3b82f6);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px}.plenio-access header{display:flex;justify-content:space-between}.plenio-access .close{background:none;border:none;font-size:18px}.plenio-access ol{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px}.plenio-access .mark{display:inline-block;width:1.2em}.plenio-access form{display:flex;gap:6px}.plenio-access input{flex:1;min-width:0;background:var(--comfy-input-bg, #222);color:inherit;border:1px solid var(--border-color, #555);border-radius:4px;padding:3px 6px}.plenio-setup audio{width:100%}.plenio-setup .go.two{flex-direction:row;flex-wrap:wrap}.plenio-setup .go button{text-align:left}.plenio-setup .recent{display:flex;flex-direction:column;gap:2px}.plenio-setup .links{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px}.plenio-setup .links a{color:var(--p-primary-color, #60a5fa)}.plenio-setup button.link{background:none;border:none;padding:0 2px;color:var(--p-primary-color, #60a5fa);text-align:left}.plenio-setup .report pre{white-space:pre-wrap;max-height:240px;overflow:auto;font-size:11px;background:var(--comfy-input-bg, #1a1a1a);padding:6px}.plenio-setup .report-button{align-self:flex-start;font-size:12px}.plenio-setup .access code{word-break:break-all;user-select:all}.plenio-setup .access input{flex:1;min-width:0;background:var(--comfy-input-bg, #222);color:inherit;border:1px solid var(--border-color, #555);border-radius:4px;padding:3px 6px}.plenio-setup .tokens{margin:0;padding-left:16px}";
 async function k(r, i, p = "GET", b) {
   const d = await r.fetchApi(i, {
@@ -61,7 +61,7 @@ const m = {
   },
   emits: ["close", "ready"],
   setup(r, { emit: i }) {
-    const p = r, b = i, d = v(null), g = v(""), w = v(!1), O = v(null), L = E(() => Le(d.value));
+    const p = r, b = i, d = v(null), g = v(""), w = v(!1), O = v(null), I = E(() => Ie(d.value));
     function R(f) {
       return f instanceof H ? f.hint ? `${f.message} ${f.hint}` : f.message : f instanceof Error ? f.message : String(f);
     }
@@ -103,7 +103,7 @@ const m = {
       d.value && d.value.step !== "ready" ? (l(), s("p", Qe, a(d.value.message), 1)) : c("", !0),
       o("ol", null, [
         o("li", null, [
-          o("span", Xe, a(_(L.value.accept)), 1),
+          o("span", Xe, a(_(I.value.accept)), 1),
           y[3] || (y[3] = S(" Open the model's page and accept its terms. ", -1)),
           d.value?.page ? (l(), s("a", {
             key: 0,
@@ -114,7 +114,7 @@ const m = {
           y[4] || (y[4] = o("p", { class: "hint" }, "You need a free Hugging Face account. The makers see your user name and e-mail.", -1))
         ]),
         o("li", null, [
-          o("span", tt, a(_(L.value.token)), 1),
+          o("span", tt, a(_(I.value.token)), 1),
           y[5] || (y[5] = S(" Give this computer a token that may read it. ", -1)),
           d.value?.token_page ? (l(), s("a", {
             key: 0,
@@ -142,13 +142,13 @@ const m = {
           ], 32)
         ]),
         o("li", null, [
-          o("span", lt, a(L.value.pending ? "…" : "○"), 1),
+          o("span", lt, a(I.value.pending ? "…" : "○"), 1),
           o("button", {
             class: "primary",
             disabled: w.value,
             onClick: h
           }, "Check and download", 8, st),
-          L.value.pending ? (l(), s("p", at, "Your request is with the model's makers. This can take days.")) : c("", !0)
+          I.value.pending ? (l(), s("p", at, "Your request is with the model's makers. This can take days.")) : c("", !0)
         ])
       ]),
       O.value ? (l(), s("p", it, a(O.value), 1)) : c("", !0)
@@ -182,7 +182,7 @@ const m = {
 }, Ot = { class: "what" }, Rt = ["value", "onChange"], jt = ["value"], At = { class: "hint" }, Dt = { class: "hint" }, Nt = {
   key: 3,
   class: "folders"
-}, Ut = ["onUpdate:modelValue"], zt = ["value"], Lt = ["disabled"], It = { key: 5 }, Mt = { class: "what" }, Ft = { class: "hint" }, Bt = ["value"], Vt = { class: "hint" }, Ht = ["disabled", "onClick"], Wt = ["disabled"], Yt = { key: 6 }, qt = ["src"], Jt = {
+}, Ut = ["onUpdate:modelValue"], zt = ["value"], It = ["disabled"], Lt = { key: 5 }, Mt = { class: "what" }, Ft = { class: "hint" }, Bt = ["value"], Vt = { class: "hint" }, Ht = ["disabled", "onClick"], Wt = ["disabled"], qt = { key: 6 }, Yt = ["src"], Jt = {
   key: 2,
   class: "findings"
 }, Kt = ["disabled"], Gt = {
@@ -210,9 +210,9 @@ const m = {
     focus: {}
   },
   setup(r) {
-    const i = r, p = v(null), b = v(""), d = v(null), g = v(null), w = v({}), O = G({}), L = G({}), R = G({}), _ = v("computer"), h = v(null), M = v(!1), f = v(null), y = G(/* @__PURE__ */ new Set());
+    const i = r, p = v(null), b = v(""), d = v(null), g = v(null), w = v({}), O = G({}), I = G({}), R = G({}), _ = v("computer"), h = v(null), M = v(!1), f = v(null), y = G(/* @__PURE__ */ new Set());
     let F = null;
-    const W = v([]), B = v(null), se = v([]), Z = v(""), V = v(""), Y = v(null);
+    const W = v([]), B = v(null), se = v([]), Z = v(""), V = v(""), q = v(null);
     async function Q() {
       try {
         const t = await m.tokens(i.fetcher);
@@ -224,7 +224,7 @@ const m = {
     async function ge() {
       try {
         const t = await m.makeToken(i.fetcher, V.value);
-        Y.value = t.token, V.value = "", await Q();
+        q.value = t.token, V.value = "", await Q();
       } catch (t) {
         h.value = P(t);
       }
@@ -255,10 +255,10 @@ const m = {
         h.value = P(t);
       }
     }
-    const q = E(() => d.value ? Fe(d.value, K.value) : null), we = E(() => Be.filter((t) => te.value.includes(t.template)));
+    const Y = E(() => d.value ? Fe(d.value, K.value) : null), we = E(() => Be.filter((t) => te.value.includes(t.template)));
     async function ie() {
       try {
-        W.value = (await Ie(i.fetcher)).filter((t) => t.audio).slice(0, 5);
+        W.value = (await Le(i.fetcher)).filter((t) => t.audio).slice(0, 5);
       } catch {
         W.value = [];
       }
@@ -284,8 +284,8 @@ const m = {
       return t instanceof H ? t.hint ? `${t.message} ${t.hint}` : t.message : t instanceof Error ? t.message : String(t);
     }
     const K = E(() => p.value ? de(p.value) : []), N = E(
-      () => d.value && p.value ? He(d.value, K.value, p.value.extras, L) : []
-    ), I = E(() => We(N.value)), te = E(() => (d.value?.templates ?? []).map((t) => t.template)), ue = E(() => d.value?.policy.offline || d.value?.policy.downloads === "off");
+      () => d.value && p.value ? He(d.value, K.value, p.value.extras, I) : []
+    ), L = E(() => We(N.value)), te = E(() => (d.value?.templates ?? []).map((t) => t.template)), ue = E(() => d.value?.policy.offline || d.value?.policy.downloads === "off");
     async function Ce() {
       try {
         const [t, n, e, u] = await Promise.all([
@@ -399,11 +399,11 @@ const m = {
         b.value ? (l(), s("span", pt, a(b.value), 1)) : c("", !0)
       ]),
       o("nav", ct, [
-        (l(!0), s(x, null, C(A(qe), (e, u) => (l(), s("button", {
+        (l(!0), s(x, null, C(A(Ye), (e, u) => (l(), s("button", {
           key: e,
           class: D({ current: _.value === e }),
           onClick: ($) => j(e)
-        }, a(u + 1) + " " + a(A(Ye)[e]), 11, dt))), 128))
+        }, a(u + 1) + " " + a(A(qe)[e]), 11, dt))), 128))
       ]),
       h.value ? (l(), s("p", vt, a(h.value), 1)) : c("", !0),
       !p.value && !h.value ? (l(), s("p", ft, "Reading this computer…")) : c("", !0),
@@ -463,8 +463,8 @@ const m = {
         }, "Next")
       ])) : c("", !0),
       p.value && _.value === "plan" ? (l(), s("section", Tt, [
-        o("p", $t, a(N.value.length) + " files · " + a(I.value.files) + " to download · " + a(A(z)(I.value.bytes)), 1),
-        I.value.nonCommercial.length ? (l(), s("p", St, "Non-commercial licence: " + a(I.value.nonCommercial.join(", ")) + ".", 1)) : c("", !0),
+        o("p", $t, a(N.value.length) + " files · " + a(L.value.files) + " to download · " + a(A(z)(L.value.bytes)), 1),
+        L.value.nonCommercial.length ? (l(), s("p", St, "Non-commercial licence: " + a(L.value.nonCommercial.join(", ")) + ".", 1)) : c("", !0),
         d.value?.policy.offline ? (l(), s("p", Pt, "Offline mode is on: Setup fetches nothing. Place the files as each row says.")) : d.value?.policy.downloads === "off" ? (l(), s("p", Et, "Downloads are switched off in config.toml ([models] downloads).")) : c("", !0),
         (l(!0), s(x, null, C(N.value, (e) => (l(), s("div", {
           key: e.component,
@@ -475,7 +475,7 @@ const m = {
             e.variants.length > 1 ? (l(), s("select", {
               key: 0,
               value: e.variant.id,
-              onChange: (u) => L[e.component] = u.target.value
+              onChange: (u) => I[e.component] = u.target.value
             }, [
               (l(!0), s(x, null, C(e.variants, (u) => (l(), s("option", {
                 key: u.id,
@@ -515,16 +515,16 @@ const m = {
         ])) : c("", !0),
         o("button", {
           class: "primary",
-          disabled: M.value || ue.value || I.value.files === 0,
+          disabled: M.value || ue.value || L.value.files === 0,
           onClick: n[2] || (n[2] = (e) => oe(N.value.filter((u) => !u.variant.installed).map((u) => u.variant.id)))
-        }, " Download all (" + a(A(z)(I.value.bytes)) + ") ", 9, Lt),
-        I.value.files === 0 ? (l(), s("button", {
+        }, " Download all (" + a(A(z)(L.value.bytes)) + ") ", 9, It),
+        L.value.files === 0 ? (l(), s("button", {
           key: 4,
           class: "primary",
           onClick: n[3] || (n[3] = (e) => j("test"))
         }, "Next")) : c("", !0)
       ])) : c("", !0),
-      p.value && _.value === "downloads" ? (l(), s("section", It, [
+      p.value && _.value === "downloads" ? (l(), s("section", Lt, [
         (l(!0), s(x, null, C(N.value, (e) => (l(), s("div", {
           key: e.component,
           class: "row"
@@ -554,8 +554,8 @@ const m = {
           onClick: n[4] || (n[4] = (e) => j("test"))
         }, "Next", 8, Wt)
       ])) : c("", !0),
-      p.value && _.value === "test" ? (l(), s("section", Yt, [
-        n[19] || (n[19] = o("p", null, " The test song makes a one-minute instrumental with 1 · YuE2 · Song and your files - no cover art, no HQ - so that a problem shows here, not in your first song. ", -1)),
+      p.value && _.value === "test" ? (l(), s("section", qt, [
+        n[19] || (n[19] = o("p", null, " The test song makes a one-minute instrumental with 1 · YuE2 · Song and your files - no cover art, no HQ - so that a problem shows here, not in your first song. It also loads the models once, so the song you make next starts quicker. ", -1)),
         T.value.text ? (l(), s("p", {
           key: 0,
           class: D(T.value.state === "ok" ? "ok" : T.value.state === "failed" ? "error" : "hint")
@@ -565,7 +565,7 @@ const m = {
           src: T.value.audio,
           controls: "",
           preload: "none"
-        }, null, 8, qt)) : c("", !0),
+        }, null, 8, Yt)) : c("", !0),
         T.value.finding ? (l(), s("ul", Jt, [
           o("li", {
             class: D(T.value.finding.severity)
@@ -588,11 +588,11 @@ const m = {
         }, a(T.value.state === "ok" ? "Next" : "Skip"), 1)
       ])) : c("", !0),
       p.value && _.value === "go" ? (l(), s("section", Gt, [
-        q.value ? (l(), s("p", {
+        Y.value ? (l(), s("p", {
           key: 0,
-          class: D(q.value.ready ? "ok" : "warn")
+          class: D(Y.value.ready ? "ok" : "warn")
         }, [
-          S(a(q.value.ready ? "Everything ready ✓" : "Files are missing") + " · " + a(q.value.line) + " ", 1),
+          S(a(Y.value.ready ? "Everything ready ✓" : "Files are missing") + " · " + a(Y.value.line) + " ", 1),
           o("button", {
             class: "link",
             onClick: n[7] || (n[7] = (e) => j("plan"))
@@ -632,12 +632,12 @@ const m = {
             o("strong", null, a(Z.value === "open" ? "every computer, no token (as before 2.0)" : Z.value === "off" ? "this computer only" : "another computer with a token"), 1),
             n[22] || (n[22] = S(" ([api] remote in Plenio's config.toml). ", -1))
           ]),
-          Y.value ? (l(), s("p", on, [
+          q.value ? (l(), s("p", on, [
             n[23] || (n[23] = S(" The new token - copy it now, it is not shown again: ", -1)),
-            o("code", null, a(Y.value), 1),
+            o("code", null, a(q.value), 1),
             o("button", {
               class: "link",
-              onClick: n[10] || (n[10] = (e) => Y.value = null)
+              onClick: n[10] || (n[10] = (e) => q.value = null)
             }, "Done")
           ])) : c("", !0),
           o("ul", ln, [

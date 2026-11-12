@@ -6,6 +6,7 @@ import { lyricsTargetOf, scoreTargetOf, writeLyrics, writeScore } from './lyrics
 import { getAsrNote, getPayload, onPayload } from './payloads'
 import { continuesAfterApproval, displayState, onRunState, runState, setRunState, sheetLine } from './runStatus'
 import { SHEET_LOOKS, sheetKind, type SheetKind } from './sheetKind'
+import { preloadOnIdle } from './editorPreload'
 import { codeIsStale, importOrReload, loadFresh } from './staleCode'
 
 export const SHEET_STATE_TYPE = 'PLENIO_SHEET_STATE'
@@ -39,6 +40,8 @@ export function setFetcher(value: Fetcher): void {
  */
 export const sheetStateWidget: WidgetConstructor = (node: ComfyNode, inputName: string, inputData: InputSpec) => {
   let value = typeof inputData?.[1]?.default === 'string' ? (inputData[1].default as string) : ''
+  // a sheet is on the canvas: fetch the editor while the browser is idle (P8)
+  preloadOnIdle(() => import('../sheet-editor/open'))
   const element = document.createElement('div')
   element.className = 'plenio-sheet-state'
   const summary = document.createElement('div')

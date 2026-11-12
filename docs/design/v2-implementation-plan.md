@@ -483,7 +483,8 @@ For each hypothesis P1 to P6 and P8 of PD §6.2, in this order: measure with `be
 - [ ] **8.3 P3** workers on the second card (`[workers] device`), default: the largest card ComfyUI does not use.
 - [ ] **8.4 P4** the cover never runs between the music model's plan and take.
 - [ ] **8.5 P5** *a new take* hits ComfyUI's cache for writer and plan (a test compares prompts).
-- [ ] **8.6 P6, P8** the warm-up note; the editor chunk preloaded on idle.
+- [x] **8.6 P6, P8** the warm-up note; the editor chunk preloaded on idle.
+  *Done 2026-11-12:* the player's studio panel says the first song after a start takes longer, with the factor measured on 1.6.0 (`player/warmUp.ts`: first runs 1.0 to 1.5 times a brief's median); Setup says its test song loads the models once. A Sheet State widget on the canvas fetches the editor's chunk once when the browser is idle (`extension/editorPreload.ts`). Perception only: not measured as time, as PD §6.2 says.
 - [ ] **8.7 Budgets**: `docs/dev/performance.md` with the measured numbers of 1.6.0 and of this phase; `release.py prepare` asks for a `bench.py` report and compares.
 
 **Exit of phase 8:** a report with before and after per brief; no brief is slower than on 1.6.0.

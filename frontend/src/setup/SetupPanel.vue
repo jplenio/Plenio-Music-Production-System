@@ -455,7 +455,8 @@ onBeforeUnmount(() => {
     <section v-if="state && step === 'test'">
       <p>
         The test song makes a one-minute instrumental with 1 · YuE2 · Song and your files - no cover art, no HQ - so
-        that a problem shows here, not in your first song.
+        that a problem shows here, not in your first song. It also loads the models once, so the song you make next starts
+        quicker.
       </p>
       <p v-if="test.text" :class="test.state === 'ok' ? 'ok' : test.state === 'failed' ? 'error' : 'hint'">{{ test.text }}</p>
       <audio v-if="test.audio" :src="test.audio" controls preload="none" />
