@@ -5,7 +5,7 @@ import { mediaReady } from './api'
 import { coverHue, paletteFrom, songHue } from './colors'
 import { fontOf, litColor } from './lyricsStyle'
 import { chooseFor, linesFor, type LyricsVersion, sungOf, versionFor } from './lyricsVersion'
-import { current, detail, duration, queueSource, settings, state, time } from './store'
+import { current, detail, duration, heard, queueSource, settings, state } from './store'
 import { lineAt, sectionAt, sectionsInSong, songAnchors } from './timing'
 
 /** The lyrics as written, timed: their syllables carry the score's times, so the notation follows them. */
@@ -27,8 +27,8 @@ export const anchors = computed(() => songAnchors(writtenLines.value, detail.val
 export const sections = computed(() =>
   sectionsInSong(detail.value?.notation.sections, anchors.value, detail.value?.notation.warp, duration.value || Infinity)
 )
-export const section = computed(() => sectionAt(sections.value, time.value))
-export const lineIndex = computed(() => lineAt(lines.value, time.value))
+export const section = computed(() => sectionAt(sections.value, heard.value))
+export const lineIndex = computed(() => lineAt(lines.value, heard.value))
 
 /** The playlist the queue came from, for its visual. */
 export const playlistVisual = computed(() => state.playlists.find((p) => p.id === queueSource.value)?.visual ?? '')

@@ -68,6 +68,8 @@ export interface Settings {
   makeLast: Remembered | null
   /** Section tags of one's own for one's own lyrics. */
   makeTags: string[]
+  /** Picture and sound together: milliseconds the picture waits more (+) or less (-) than the reported latency. */
+  syncOffset: number
   /** A party started on People & access: its name, when, and the settings it changed as they were before (End the
    * party puts them back). */
   party: PartyNow | null
@@ -120,6 +122,7 @@ const DEFAULT_SETTINGS: Settings = {
   makeLast: null,
   makeTags: [],
   party: null,
+  syncOffset: 0,
 }
 
 /** Saved notation shifts, checked: numbers of at most a minute. */
@@ -312,13 +315,18 @@ window.addEventListener('pagehide', () => {
 })
 
 /** The settings as saved, checked and filled with the defaults. */
+function offsetOf(raw: unknown): number {
+  const n = Number(raw)
+  return Number.isFinite(n) ? Math.max(-300, Math.min(300, Math.round(n))) : 0
+}
+
 function partyOf(raw: unknown): PartyNow | null {
   const party = raw as Partial<PartyNow> | null | undefined
   return party && typeof party === 'object' && party.before && typeof party.before === 'object' ? { name: String(party.name ?? ''), since: Number(party.since) || 0, before: party.before } : null
 }
 
 function applySettings(stored: Partial<Settings>): void {
-  Object.assign(settings, { ...DEFAULT_SETTINGS, ...stored, visuals: withDefaults(stored.visuals), filters: filtersOf(stored.filters), live: liveWithDefaults(stored.live), lyrics: lyricsWithDefaults(stored.lyrics), lyricsChoice: choiceOf(stored.lyricsChoice), lyricsFor: choicesOf(stored.lyricsFor), lyricsView: stored.lyricsView === 'text' ? 'text' : 'timed', mp3: !!stored.mp3, notationShift: shiftsOf(stored.notationShift), savedFilters: savedFiltersOf(stored.savedFilters), moreFilters: !!stored.moreFilters, welcomed: !!stored.welcomed, phoneView: stored.phoneView === 'grid' ? 'grid' : 'list', makePresets: presetsOf(stored.makePresets), makeLast: rememberedOf(stored.makeLast), makeTags: ownTags(stored.makeTags), party: partyOf(stored.party) })
+  Object.assign(settings, { ...DEFAULT_SETTINGS, ...stored, visuals: withDefaults(stored.visuals), filters: filtersOf(stored.filters), live: liveWithDefaults(stored.live), lyrics: lyricsWithDefaults(stored.lyrics), lyricsChoice: choiceOf(stored.lyricsChoice), lyricsFor: choicesOf(stored.lyricsFor), lyricsView: stored.lyricsView === 'text' ? 'text' : 'timed', mp3: !!stored.mp3, notationShift: shiftsOf(stored.notationShift), savedFilters: savedFiltersOf(stored.savedFilters), moreFilters: !!stored.moreFilters, welcomed: !!stored.welcomed, phoneView: stored.phoneView === 'grid' ? 'grid' : 'list', makePresets: presetsOf(stored.makePresets), makeLast: rememberedOf(stored.makeLast), makeTags: ownTags(stored.makeTags), party: partyOf(stored.party), syncOffset: offsetOf(stored.syncOffset) })
 }
 
 /** The measured stars of the songs (song id -> stars; ``null``: measured, without stars) - for the library's filter
@@ -648,6 +656,8 @@ export const current = computed<SongSummary | null>(() => byId.value.get(queue.v
 export const detail = shallowRef<SongDetail | null>(null)
 export const playing = ref(false)
 export const time = ref(0)
+/** The time of the song the listener hears (engine.heard): what the lyrics and the notation follow. */
+export const heard = ref(0)
 export const duration = ref(0)
 export const nowPlayingOpen = ref(false)
 /** The song put back where it stopped when the page opened, and not played since: the bar's ▶ (and Space)
@@ -910,6 +920,7 @@ let lastResume = 0
 engine.on(() => {
   playing.value = !engine.paused
   time.value = engine.time
+  heard.value = engine.heard(settings.syncOffset / 1000)
   duration.value = engine.duration
 })
 /** Near the end of a song: the next one (fading over), or this one again (repeat one, at its very end). */
@@ -940,6 +951,7 @@ const backgroundTick = window.setInterval(() => {
 
 function tick(): void {
   time.value = engine.time
+  heard.value = engine.heard(settings.syncOffset / 1000)
   sleepTick()
   engine.keepInStep()
   const song = current.value

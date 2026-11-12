@@ -26,7 +26,7 @@ import {
   settings,
   songDetail,
   state,
-  time,
+  heard,
   toggleCurrent,
   toggleFavorite,
   videoFor,
@@ -94,7 +94,7 @@ function rate(value: number | null): void {
   setRating(props.id, value)
   say(value === null ? 'Your stars taken back' : `${value} of 5 - your stars`, 1800)
 }
-const songTime = computed(() => (isCurrent.value ? time.value : -1))
+const songTime = computed(() => (isCurrent.value ? heard.value : -1))
 
 watch(
   () => props.id,
@@ -325,7 +325,7 @@ function timingSourceText(source: string, note?: string): string {
         </details>
       </div>
       <div v-else-if="isCurrent && lyricsLines.length" class="karaoke-box">
-        <Karaoke :lines="lyricsLines" :time="time" :plain="song.lyrics" />
+        <Karaoke :lines="lyricsLines" :time="Math.max(0, songTime)" :plain="song.lyrics" />
       </div>
       <ol v-else-if="lyricsLines.length" class="timed">
         <li v-for="(line, i) in lyricsLines" :key="i" :class="{ now: isCurrent && lineIndex === i }" @click="playFrom(line.start)">

@@ -18,6 +18,7 @@ import LyricsPanel from './LyricsPanel.vue'
 import LyricsVersionSwitch from './LyricsVersionSwitch.vue'
 import { canAdmin, guest, me, session } from '../account'
 import StudioSettings from './StudioSettings.vue'
+import SyncSetting from './SyncSetting.vue'
 import { searchSettings, SECTIONS } from '../settingsIndex'
 import { isPortable, portable } from '../portable'
 
@@ -368,6 +369,7 @@ const index = computed(() =>
         <input v-model="settings.mp3" type="checkbox" /> Play the MP3 where a song has one (less data over the network)
       </label>
       <p class="hint">{{ countOf(withMp3, 'song') }} of {{ library.length }} have an MP3 besides their FLAC or WAV (Export Release: <i>mp3</i>). A/B plays the unmastered take as it was saved.</p>
+      <SyncSetting />
     </section>
 
     <section v-show="visible('tags')" id="tags" class="block">

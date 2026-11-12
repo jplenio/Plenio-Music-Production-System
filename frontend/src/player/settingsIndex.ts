@@ -44,6 +44,7 @@ export const LABELS: SettingLabel[] = [
   { section: 'comfyui', label: 'ComfyUI', words: 'address open in comfyui url' },
   { section: 'songs', label: 'Songs', words: 'folders folder add remove other music look for new songs' },
   { section: 'sound', label: 'Sound', words: 'mp3 crossfade speed volume' },
+  { section: 'sound', label: 'Picture and sound together', words: 'latency delay bluetooth television sync lyrics late early' },
   { section: 'tags', label: 'Tags', words: 'rename delete tag' },
   { section: 'lyrics', label: 'Lyrics', words: 'font size colour effect look' },
   { section: 'shared', label: 'Shared players', words: 'share package zip html' },
@@ -93,4 +94,5 @@ export const SETTING_HOMES: Record<string, { component: string } | { kept: strin
   makeLast: { kept: 'the last song’s values for Make a song' },
   makeTags: { kept: 'section tags of one’s own for own lyrics' },
   party: { component: 'PeopleView' },
+  syncOffset: { component: 'SyncSetting' },
 }

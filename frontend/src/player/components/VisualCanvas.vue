@@ -142,7 +142,7 @@ function loop(now: number = performance.now()): void {
     renderer.blendSeconds = settings.visuals.fade === 'cut' ? 0.05 : settings.visuals.fadeSeconds
     // the song for the pictures some presets draw: its cover, its title, the line and word sung
     const song = current.value
-    tellRenderer(renderer, song ? { id: song.id, title: song.title, cover: cover.value, lines: lines.value } : null, engine.time)
+    tellRenderer(renderer, song ? { id: song.id, title: song.title, cover: cover.value, lines: lines.value } : null, engine.heard(settings.syncOffset / 1000))
   }
   mixer.draw(ctx, frame, el.width, el.height, colors)
   keepSmooth(frame, colors.palette())

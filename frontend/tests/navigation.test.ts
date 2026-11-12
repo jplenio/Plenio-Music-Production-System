@@ -38,7 +38,7 @@ describe('the settings', () => {
   })
 
   it('every label is on the page, every section has an id there', () => {
-    const page = source('SettingsView').replaceAll('&amp;', '&')
+    const page = (source('SettingsView') + source('SyncSetting')).replaceAll('&amp;', '&')
     for (const { label } of LABELS) expect(page, label).toContain(label)
     for (const [id] of SECTIONS) {
       if (id === 'studio') expect(source('StudioSettings')).toContain('id="studio"')

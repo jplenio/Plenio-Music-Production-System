@@ -23,6 +23,12 @@ export interface DeckSource {
 
 type Listener = () => void
 
+/** The heard time from the playing time, the reported latency and the listener's offset (never below 0). */
+export function heardTime(current: number, latency: number, offset: number): number {
+  const lag = Number.isFinite(latency) && latency > 0 ? latency : 0
+  return Math.max(0, current - lag - (Number.isFinite(offset) ? offset : 0))
+}
+
 export class Engine {
   private ctx: AudioContext | null = null
   private decks: Deck[] = []
@@ -124,6 +130,19 @@ export class Engine {
 
   get time(): number {
     return this.deckNow?.main.currentTime ?? 0
+  }
+
+  /** How long the sound takes from the page to the ears, as the browser reports it (seconds; 0: nothing reported).
+   * A Bluetooth speaker or a television adds 100 to 250 ms that the spectrum and the playing time do not know. */
+  latency(): number {
+    const ctx = this.ctx
+    return ctx ? Number(ctx.outputLatency || ctx.baseLatency || 0) : 0
+  }
+
+  /** The time of the song the listener hears now (phase 7.4): the lyrics, the notation's cursor and the visuals' cue
+   * follow it. ``offset``: the listener's own correction, seconds (Settings › Sound › Picture and sound together). */
+  heard(offset = 0): number {
+    return heardTime(this.time, this.latency(), offset)
   }
 
   get duration(): number {

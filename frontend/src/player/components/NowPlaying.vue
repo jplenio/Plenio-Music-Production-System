@@ -10,7 +10,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import { engine } from '../engine'
 import { lineIndex, lines, paletteStyle, playlistVisual, section, sections, writtenLines } from '../now'
-import { current, detail, duration, go, isFavorite, next, nowPlayingOpen, openCurrentPage, playing, previous, settings, time, toggleFavorite, upNext } from '../store'
+import { current, detail, duration, go, isFavorite, next, nowPlayingOpen, openCurrentPage, playing, previous, settings, heard, time, toggleFavorite, upNext } from '../store'
 import { WAY_IN_SIDES } from '../liveSettings'
 import { formatTime, sectionName } from '../timing'
 import { partyMaker, partyWhen } from '../make/form'
@@ -91,7 +91,7 @@ const subtitle = computed(() => {
   const i = lineIndex.value
   if (i < 0) return null
   const line = lines.value[i]
-  return time.value <= line.end + 0.3 ? line : null
+  return heard.value <= line.end + 0.3 ? line : null
 })
 
 watch(view, () => wake())
@@ -199,18 +199,18 @@ defineExpose({ nextVisual: () => visual.value?.next(), setView: (v: View) => (vi
         </p>
       </section>
       <section v-if="view === 'stage' || view === 'lyrics'" class="lyrics-col">
-        <Karaoke :lines="lines" :time="time" :plain="detail?.lyrics_raw ? current.lyrics : ''" />
+        <Karaoke :lines="lines" :time="heard" :plain="detail?.lyrics_raw ? current.lyrics : ''" />
       </section>
       <section v-if="view === 'notation'" class="notation-col">
-        <Notation v-if="detail" :notation="detail.notation" :lines="writtenLines" :time="time" :following="true" :song-id="detail.id" />
+        <Notation v-if="detail" :notation="detail.notation" :lines="writtenLines" :time="heard" :following="true" :song-id="detail.id" />
       </section>
       <section v-if="view === 'notation'" class="side-lyrics">
-        <Karaoke :lines="lines" :time="time" :plain="current.lyrics" compact />
+        <Karaoke :lines="lines" :time="heard" :plain="current.lyrics" compact />
       </section>
     </main>
 
     <div v-if="view === 'visual' && settings.visuals.lyrics && subtitle" class="subtitle">
-      <LyricLine :line="subtitle" :time="time" :effect="settings.lyrics.effect" />
+      <LyricLine :line="subtitle" :time="heard" :effect="settings.lyrics.effect" />
     </div>
 
     <MakerCredit
