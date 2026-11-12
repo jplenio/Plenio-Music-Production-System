@@ -5,6 +5,8 @@
  * next, at the end, or anywhere at random. At its end it starts again from the top, or waits for the next
  * new song.
  */
+import { INTROS, introShown } from '../intro'
+const intro = introShown('live')
 import { computed, ref } from 'vue'
 
 import type { SongSummary } from '../api'
@@ -106,6 +108,7 @@ const ago = (at: number): string => {
     <header class="head">
       <div>
         <h1><Icon name="live" :size="30" /> Live Play <span v-if="live.on" class="on-air">LIVE</span></h1>
+        <p v-if="intro" class="intro">{{ INTROS.live }}</p>
         <p class="lead">A playlist that plays while you change it - and the songs ComfyUI makes now join it as soon as they are exported. Make songs at a party, and they play.</p>
       </div>
       <div class="head-right">
@@ -227,6 +230,10 @@ const ago = (at: number): string => {
 </template>
 
 <style scoped>
+.intro {
+  margin: 2px 0 10px;
+  color: var(--muted);
+}
 .live-page {
   padding: 26px 34px 40px;
   max-width: 1100px;

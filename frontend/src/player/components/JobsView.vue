@@ -3,6 +3,8 @@
  * In the making (owner's request 2026-10-18): the videos and shared players waiting, being made and made - each
  * with how far it is, a stop, and when it is done: watch or try it, download, open the folder.
  */
+import { INTROS, introShown } from '../intro'
+const intro = introShown('jobs')
 import { computed, ref } from 'vue'
 
 import { api } from '../api'
@@ -35,6 +37,7 @@ function stop(job: Job): void {
   <div class="jobs-page">
     <header>
       <h1><Icon name="layers" :size="30" /> In the making</h1>
+      <p v-if="intro" class="intro">{{ INTROS.jobs }}</p>
       <button v-if="finished.length" class="ghost" @click="forgetFinished"><Icon name="close" :size="16" /> Clear the finished</button>
     </header>
     <p class="lead">
@@ -76,6 +79,10 @@ function stop(job: Job): void {
 </template>
 
 <style scoped>
+.intro {
+  margin: 2px 0 10px;
+  color: var(--muted);
+}
 .jobs-page {
   padding: 26px 34px 40px;
   max-width: 1100px;

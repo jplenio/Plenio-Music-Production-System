@@ -10,6 +10,7 @@ import { active, jobs } from '../jobs'
 import { isPortable, loading, portable } from '../portable'
 import { avatarUrl, guest, initials, me, session, switchUser } from '../account'
 import { approvalsNow, makeShown, makingNow } from '../make/state'
+import { SMART_LISTS } from '../nav'
 
 const naming = ref(false)
 const name = ref('')
@@ -22,11 +23,9 @@ onMounted(() => {
 })
 onBeforeUnmount(() => window.clearInterval(comfyTimer))
 
+// the five places (nav.ts): Songs, Playlists (the smart lists inside), Live, Make - and More at the foot
 const LINKS = [
   ['/', 'Songs', 'music'],
-  ['/favorites', 'Favourites', 'heart'],
-  ['/top', 'Most played', 'star'],
-  ['/recent', 'Recently played', 'clock'],
   ['/playlists', 'Playlists', 'playlist'],
   ['/live', 'Live Play', 'live'],
 ] as const
@@ -80,9 +79,6 @@ function shortFolder(path: string): string {
     <a v-if="makeShown" class="link make" :class="{ on: route === '/make' }" title="Make a song of your own: a style, a few words - it plays at the party when it is ready" @click="go('/make')">
       <Icon name="wand" :size="18" /> Make a song <small v-if="approvalsNow" class="busy approvals" :title="`${approvalsNow} waiting for your approval`">{{ approvalsNow }} ✓</small><small v-else-if="makingNow" class="busy">{{ makingNow }}</small>
     </a>
-    <a v-if="jobs.length" class="link" :class="{ on: route === '/jobs' }" title="Videos and shared players being made, waiting and made" @click="go('/jobs')">
-      <Icon name="layers" :size="18" /> In the making <small v-if="active.length" class="busy">{{ active.length }}</small><small v-else>✓</small>
-    </a>
 
     <template v-if="settings.savedFilters.length">
       <h4>Saved filters</h4>
@@ -93,6 +89,9 @@ function shortFolder(path: string): string {
     </template>
 
     <h4>Playlists <button class="icon-btn" title="New playlist" @click="naming = !naming"><Icon name="plus" :size="16" /></button></h4>
+    <a v-for="[path, label, icon] in SMART_LISTS" :key="path" class="link" :class="{ on: route === path }" @click="go(path)">
+      <Icon :name="icon" :size="16" /> {{ label }} <small>{{ counts[path] || '' }}</small>
+    </a>
     <form v-if="naming" class="new" @submit.prevent="create">
       <input v-model="name" v-focus placeholder="Name" @keydown.esc="naming = false" />
     </form>
@@ -119,6 +118,13 @@ function shortFolder(path: string): string {
       <a v-if="comfyLink" class="link small-link comfy" :href="comfyLink" target="_blank" rel="noopener" title="ComfyUI, in a tab of its own"><Icon name="external" :size="16" /> ComfyUI <small>↗</small></a>
       <button v-if="!isPortable" class="ghost small" :class="{ wide: true }" @click="shareFor = { songs: [], title: '' }"><Icon name="download" :size="14" /> Share as a player…</button>
       <button v-if="!isPortable" class="ghost small" :disabled="scanning" @click="scan"><Icon name="refresh" :size="14" :class="{ spin: scanning }" /> {{ scanning ? 'Looking …' : 'Look for new songs' }}</button>
+      <h4 class="more">More</h4>
+      <a v-if="!isPortable" class="link small-link" :class="{ on: route === '/people' }" title="Who comes in and what each may do: your devices, a party, people with accounts" @click="go('/people')">
+        <Icon name="guests" :size="16" /> People &amp; access
+      </a>
+      <a v-if="jobs.length" class="link small-link" :class="{ on: route === '/jobs' }" title="Videos and shared players being made, waiting and made" @click="go('/jobs')">
+        <Icon name="layers" :size="16" /> In the making <small v-if="active.length" class="busy">{{ active.length }}</small><small v-else>✓</small>
+      </a>
       <a class="link small-link" :class="{ on: route.startsWith('/help') }" title="Short guides and every tutorial as a video (key H)" @click="go('/help')">
         <Icon name="help" :size="16" /> Help &amp; tutorials
       </a>

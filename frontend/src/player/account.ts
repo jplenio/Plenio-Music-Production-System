@@ -49,10 +49,11 @@ export const canAdmin = computed(() => !!me.value && (me.value.admin || !!me.val
 /** Songs may leave the library from this page: the admin's rights - or a player without the login, as its server
  * says (a listener, a maker or a guest keeps their own playlists, not the songs). */
 export const canRemoveSongs = computed(() => !session.value?.login || canAdmin.value)
+/** The groups by their role names (People & access; the stored ids stay). */
 export const GROUPS: [Group, string, string][] = [
-  ['listener', 'Listens', 'Listens only: may not make songs'],
-  ['maker', 'Makes songs', 'Listens and makes songs, when the party’s settings let users make them'],
-  ['admin', 'Admin - a helper', 'Everything the admin may - users, approvals, the party’s settings - from any device; their own playlists and likes stay theirs'],
+  ['listener', 'Listener', 'Listens and keeps their own playlists; does not make songs'],
+  ['maker', 'Maker', 'Listens and makes songs, when People & access lets makers make them'],
+  ['admin', 'Co-host', 'Everything the host may - people, approvals, settings - from any device; their own playlists and likes stay theirs'],
 ]
 export const guest = ref(false)
 export const loginShown = ref(false)
@@ -199,3 +200,49 @@ export async function setAvatar(id: string, file: Blob | null): Promise<Account>
   avatarStamp.value = Date.now()
   return account
 }
+
+// --- invitations (People & access) ---------------------------------------------------------------------------
+
+export interface Invite {
+  id: string
+  name: string
+  group: Group
+  /** Valid until (seconds since 1970). */
+  until: number
+}
+
+export async function listInvites(): Promise<Invite[]> {
+  return (await answer<{ invites: Invite[] }>(await fetch('/api/invites'))).invites
+}
+
+/** A one-time code for a new user (15 minutes); ``path``: the page that accepts it, on this player. */
+export async function inviteSomeone(name: string, group: Group): Promise<{ code: string; invite: Invite; path: string }> {
+  return answer(await sendJson('/api/invites', 'POST', { name, group }))
+}
+
+export async function withdrawInvite(id: string): Promise<void> {
+  await answer(await sendJson(`/api/invites/${id}`, 'DELETE'))
+}
+
+/** Whom a code invites (an error when it is used up or too old). */
+export async function checkInvite(code: string): Promise<{ name: string; group: Group }> {
+  return (await answer<{ invite: { name: string; group: Group } }>(await sendJson('/api/invites/check', 'POST', { code }))).invite
+}
+
+/** The invited person's password or PIN: they are a user now, logged in on this device. */
+export async function acceptInvite(code: string, password: string): Promise<Account> {
+  const { user } = await answer<{ user: Account }>(await sendJson('/api/invites/accept', 'POST', { code, password }))
+  me.value = user
+  guest.value = false
+  remember(false)
+  return user
+}
+
+/** The code of an invitation's link (``#/join/<code>``), ``''`` for any other address. */
+export function joinCode(hash: string): string {
+  const match = /^#\/join\/([A-Za-z0-9_-]{8,64})$/.exec(hash)
+  return match ? match[1] : ''
+}
+
+/** The invitation this page was opened with (its code), until it is accepted or set aside. */
+export const joining = ref(typeof location === 'undefined' ? '' : joinCode(location.hash))

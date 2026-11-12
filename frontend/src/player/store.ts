@@ -16,6 +16,7 @@ import { type MakePreset, presetsOf } from './make/presets'
 import { type Remembered, rememberedOf } from './make/remember'
 import { ownTags } from '../shared/lyricsTags'
 import { withTransition } from './layout'
+import type { Before } from './people'
 
 export interface Settings {
   volume: number
@@ -67,6 +68,15 @@ export interface Settings {
   makeLast: Remembered | null
   /** Section tags of one's own for one's own lyrics. */
   makeTags: string[]
+  /** A party started on People & access: its name, when, and the settings it changed as they were before (End the
+   * party puts them back). */
+  party: PartyNow | null
+}
+
+export interface PartyNow {
+  name: string
+  since: number
+  before: Before
 }
 
 export interface LibraryFilter {
@@ -109,6 +119,7 @@ const DEFAULT_SETTINGS: Settings = {
   makePresets: [],
   makeLast: null,
   makeTags: [],
+  party: null,
 }
 
 /** Saved notation shifts, checked: numbers of at most a minute. */
@@ -301,8 +312,13 @@ window.addEventListener('pagehide', () => {
 })
 
 /** The settings as saved, checked and filled with the defaults. */
+function partyOf(raw: unknown): PartyNow | null {
+  const party = raw as Partial<PartyNow> | null | undefined
+  return party && typeof party === 'object' && party.before && typeof party.before === 'object' ? { name: String(party.name ?? ''), since: Number(party.since) || 0, before: party.before } : null
+}
+
 function applySettings(stored: Partial<Settings>): void {
-  Object.assign(settings, { ...DEFAULT_SETTINGS, ...stored, visuals: withDefaults(stored.visuals), filters: filtersOf(stored.filters), live: liveWithDefaults(stored.live), lyrics: lyricsWithDefaults(stored.lyrics), lyricsChoice: choiceOf(stored.lyricsChoice), lyricsFor: choicesOf(stored.lyricsFor), lyricsView: stored.lyricsView === 'text' ? 'text' : 'timed', mp3: !!stored.mp3, notationShift: shiftsOf(stored.notationShift), savedFilters: savedFiltersOf(stored.savedFilters), moreFilters: !!stored.moreFilters, welcomed: !!stored.welcomed, phoneView: stored.phoneView === 'grid' ? 'grid' : 'list', makePresets: presetsOf(stored.makePresets), makeLast: rememberedOf(stored.makeLast), makeTags: ownTags(stored.makeTags) })
+  Object.assign(settings, { ...DEFAULT_SETTINGS, ...stored, visuals: withDefaults(stored.visuals), filters: filtersOf(stored.filters), live: liveWithDefaults(stored.live), lyrics: lyricsWithDefaults(stored.lyrics), lyricsChoice: choiceOf(stored.lyricsChoice), lyricsFor: choicesOf(stored.lyricsFor), lyricsView: stored.lyricsView === 'text' ? 'text' : 'timed', mp3: !!stored.mp3, notationShift: shiftsOf(stored.notationShift), savedFilters: savedFiltersOf(stored.savedFilters), moreFilters: !!stored.moreFilters, welcomed: !!stored.welcomed, phoneView: stored.phoneView === 'grid' ? 'grid' : 'list', makePresets: presetsOf(stored.makePresets), makeLast: rememberedOf(stored.makeLast), makeTags: ownTags(stored.makeTags), party: partyOf(stored.party) })
 }
 
 /** The measured stars of the songs (song id -> stars; ``null``: measured, without stars) - for the library's filter

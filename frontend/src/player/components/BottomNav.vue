@@ -8,6 +8,7 @@ import { computed } from 'vue'
 
 import { makeShown, makingNow } from '../make/state'
 import { isPortable } from '../portable'
+import { placeOf } from '../nav'
 import { go, route, settings } from '../store'
 import Icon from './Icon.vue'
 
@@ -15,9 +16,9 @@ const emit = defineEmits<{ more: [] }>()
 
 const TABS = computed(() =>
   [
-    { path: '/', label: 'Songs', icon: 'music', match: (r: string) => r === '/' || r === '/favorites' || r === '/top' || r === '/recent' || r.startsWith('/song/') },
-    { path: '/playlists', label: 'Playlists', icon: 'playlist', match: (r: string) => r.startsWith('/playlist') },
-    { path: '/live', label: 'Live', icon: 'live', match: (r: string) => r === '/live' },
+    { path: '/', label: 'Songs', icon: 'music', match: (r: string) => placeOf(r) === 'songs' },
+    { path: '/playlists', label: 'Playlists', icon: 'playlist', match: (r: string) => placeOf(r) === 'playlists' },
+    { path: '/live', label: 'Live', icon: 'live', match: (r: string) => placeOf(r) === 'live' },
     makeShown.value && !isPortable
       ? { path: '/make', label: 'Make', icon: 'wand', match: (r: string) => r.startsWith('/make') }
       : { path: '/help', label: 'Help', icon: 'help', match: (r: string) => r.startsWith('/help') },

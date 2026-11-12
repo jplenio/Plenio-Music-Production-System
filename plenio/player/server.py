@@ -755,6 +755,8 @@ def make_handler(
                 if accounts is None:
                     return self._error(404, "no login")
                 return self._json({"users": accounts.users(details=may_admin(self.account))})
+            if route == "/api/invites":
+                return self._invites("GET", route, None)
             avatar = re.fullmatch(r"/api/users/([0-9a-f]{12}|admin)/avatar", route)
             if avatar:
                 path = accounts.avatar(avatar.group(1)) if accounts else None
@@ -1193,6 +1195,48 @@ def make_handler(
                 accounts.logout(self.token)
             return self._json({"user": user}, cookie=account_rules.session_cookie(token))
 
+        def _invites(self, method: str, route: str, raw: bytes | None) -> None:
+            """Invitations (People & access): the admin (or a helper) invites someone by name and role and gets a
+            one-time code for a QR code (``GET``/``POST /api/invites``, ``DELETE /api/invites/<id>``); the invited
+            device asks whom a code invites (``POST /api/invites/check``) and sets a password or a PIN with it
+            (``POST /api/invites/accept``) - then it is logged in."""
+            if accounts is None:
+                return self._error(404, "no login")
+            if method != "GET" and not self._from_this_page():
+                return self._error(403, "only from the player's page")
+            try:
+                body = json.loads(raw.decode("utf-8")) if raw else {}
+            except (ValueError, UnicodeDecodeError):
+                body = None
+            if not isinstance(body, dict):
+                return self._error(400, "JSON, please")
+            where = self.headers.get(REMOTE_HOST_HEADER, "network") if self.remote else self.client_address[0]
+            try:
+                if method == "POST" and route == "/api/invites/check":
+                    found = accounts.invitation(str(body.get("code") or ""))
+                    if found is None:
+                        return self._error(410, "This invitation is used up or too old - ask for a new one.")
+                    return self._json({"invite": found})
+                if method == "POST" and route == "/api/invites/accept":
+                    token, user = accounts.accept(str(body.get("code") or ""), body.get("password"), where)
+                    if self.token:
+                        accounts.logout(self.token)
+                    return self._json({"user": user}, cookie=account_rules.session_cookie(token))
+                if not may_admin(self.account):
+                    return self._error(403, "only the admin invites people")
+                if method == "GET" and route == "/api/invites":
+                    return self._json({"invites": accounts.invitations()})
+                if method == "POST" and route == "/api/invites":
+                    code, invite = accounts.invite(body.get("name"), body.get("group"))
+                    return self._json({"code": code, "invite": invite, "path": f"/#/join/{code}"})
+                gone = re.fullmatch(r"/api/invites/([0-9a-f]{16})", route)
+                if method == "DELETE" and gone:
+                    accounts.withdraw(gone.group(1))
+                    return self._json({"ok": True})
+            except account_rules.AccountError as error:
+                return self._error(error.status, str(error))
+            return self._error(404, "not found")
+
         def _logout(self) -> None:
             if accounts is not None:
                 if not self._from_this_page():
@@ -1239,6 +1283,8 @@ def make_handler(
             route = unquote(urlparse(self.path).path)
             if route.startswith("/api/make/"):
                 return self._make("DELETE", route, {}, raw)
+            if route.startswith("/api/invites/"):
+                return self._invites("DELETE", route, raw)
             picture = re.fullmatch(r"/api/users/([0-9a-f]{12}|admin)/avatar", route)
             gone = re.fullmatch(r"/api/users/([0-9a-f]{12})", route)
             if accounts is None or not (picture or gone):
@@ -1420,6 +1466,8 @@ def make_handler(
                 return self._json({"songs": len(library.songs())})
             if route == "/api/login":
                 return self._login(raw)
+            if route.startswith("/api/invites"):
+                return self._invites("POST", route, raw)
             if route == "/api/logout":
                 return self._logout()
             if route == "/api/users":

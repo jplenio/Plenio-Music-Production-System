@@ -40,7 +40,11 @@ NAME_LIMIT = 40
 AVATAR_LIMIT = 2 * 2**20
 AVATAR_TYPES = {b"\x89PNG\r\n\x1a\n": ".png", b"\xff\xd8\xff": ".jpg", b"GIF87a": ".gif", b"GIF89a": ".gif"}
 FAILURES_PER_10_MIN = 8
-"""Wrong passwords one address may try in ten minutes."""
+"""Wrong passwords (and invitation codes) one address may try in ten minutes."""
+INVITE_SECONDS = 15 * 60
+"""How long an invitation's code is valid."""
+INVITES_OPEN = 20
+"""Invitations that may wait at once (an older one gives way)."""
 COLORS = ("#e4573d", "#e0a83c", "#4fbf7f", "#3fa7d6", "#7a6ff0", "#d65db1", "#2fb5a5", "#c46b2d")
 _USER_ID = re.compile(r"[0-9a-f]{12}")
 GROUPS = ("listener", "maker", "admin")
@@ -100,6 +104,7 @@ class Accounts:
             data = {}
         data.setdefault("users", [])
         data.setdefault("sessions", {})
+        data.setdefault("invites", {})
         data.setdefault("admin", {"name": "Admin", "avatar": "", "color": COLORS[0]})
         return data
 
@@ -170,23 +175,113 @@ class Accounts:
         clean, secret, kind = self._name(name), self._password(password), self._group(group)
         with self.lock:
             data = self._load()
-            if any(u["name"].lower() == clean.lower() for u in data["users"]) or clean.lower() == "admin":
-                raise AccountError(f"There is a user named {clean} already.", 409)
-            salt = secrets.token_bytes(16)
-            user = {
-                "id": secrets.token_hex(6),
-                "name": clean,
-                "salt": salt.hex(),
-                "hash": _hash(secret, salt),
-                "iterations": ITERATIONS,
-                "avatar": "",
-                "color": COLORS[(len(data["users"]) + 1) % len(COLORS)],
-                "created": int(time.time()),
-                "group": kind,
-            }
-            data["users"].append(user)
+            user = self._add(data, clean, secret, kind)
             self._save(data)
         return self._public(user)
+
+    @staticmethod
+    def _taken(data: dict[str, Any], name: str) -> bool:
+        return any(u["name"].lower() == name.lower() for u in data["users"]) or name.lower() == "admin"
+
+    def _add(self, data: dict[str, Any], clean: str, secret: str, kind: str) -> dict[str, Any]:
+        """A new user in ``data`` (not saved yet)."""
+        if self._taken(data, clean):
+            raise AccountError(f"There is a user named {clean} already.", 409)
+        salt = secrets.token_bytes(16)
+        user = {
+            "id": secrets.token_hex(6),
+            "name": clean,
+            "salt": salt.hex(),
+            "hash": _hash(secret, salt),
+            "iterations": ITERATIONS,
+            "avatar": "",
+            "color": COLORS[(len(data["users"]) + 1) % len(COLORS)],
+            "created": int(time.time()),
+            "group": kind,
+        }
+        data["users"].append(user)
+        return user
+
+    # --- invitations (People & access, phase 6.1) -----------------------------------------------------
+
+    def invite(self, name: Any, group: Any, *, now: float | None = None) -> tuple[str, dict[str, Any]]:
+        """A one-time code for a new user, valid ``INVITE_SECONDS``, kept only as its hash; the code and the
+        invitation as the admin's page lists it."""
+        clean, kind = self._name(name), self._group(group)
+        at = time.time() if now is None else now
+        code = secrets.token_urlsafe(12)  # 96 random bits
+        with self.lock:
+            data = self._load()
+            self._forget_invites(data, at)
+            if self._taken(data, clean):
+                raise AccountError(f"There is a user named {clean} already.", 409)
+            invites = data["invites"]
+            while len(invites) >= INVITES_OPEN:
+                del invites[min(invites, key=lambda k: invites[k].get("until", 0))]
+            entry = {"name": clean, "group": kind, "until": at + INVITE_SECONDS, "made": at}
+            invites[session_key(code)] = entry
+            self._save(data)
+        return code, self._invite_view(session_key(code), entry)
+
+    @staticmethod
+    def _invite_view(key: str, entry: dict[str, Any]) -> dict[str, Any]:
+        return {"id": key[:16], "name": entry["name"], "group": entry["group"], "until": entry["until"]}
+
+    @staticmethod
+    def _forget_invites(data: dict[str, Any], now: float) -> None:
+        data["invites"] = {k: v for k, v in data["invites"].items() if float(v.get("until", 0)) > now}
+
+    def invitations(self, *, now: float | None = None) -> list[dict[str, Any]]:
+        """The invitations still open, the newest first."""
+        at = time.time() if now is None else now
+        entries = [(k, v) for k, v in self._load()["invites"].items() if float(v.get("until", 0)) > at]
+        return [
+            self._invite_view(k, v) for k, v in sorted(entries, key=lambda kv: -float(kv[1].get("made", 0)))
+        ]
+
+    def withdraw(self, invite_id: str) -> None:
+        """An invitation taken back before it was used (its id: the start of its hash)."""
+        with self.lock:
+            data = self._load()
+            found = [
+                k for k in data["invites"] if invite_id and len(invite_id) >= 16 and k.startswith(invite_id)
+            ]
+            if not found:
+                raise AccountError("No such invitation.", 404)
+            for key in found:
+                del data["invites"][key]
+            self._save(data)
+
+    def invitation(self, code: str, *, now: float | None = None) -> dict[str, Any] | None:
+        """Whom a code invites (its name and group), ``None`` when it is used up, too old or not one."""
+        at = time.time() if now is None else now
+        entry = self._load()["invites"].get(session_key(code)) if code else None
+        if not isinstance(entry, dict) or float(entry.get("until", 0)) <= at:
+            return None
+        return {"name": entry["name"], "group": entry["group"]}
+
+    def accept(
+        self, code: str, password: Any, address: str = "", *, now: float | None = None
+    ) -> tuple[str, dict[str, Any]]:
+        """The invited person sets a password (or a four-digit PIN): the user is made, the code is spent, the
+        device is logged in - its session token and the user."""
+        if self._limited(address):
+            raise AccountError("Too many tries from this device - wait a few minutes.", 429)
+        secret = self._password(password)
+        at = time.time() if now is None else now
+        with self.lock:
+            data = self._load()
+            entry = data["invites"].pop(session_key(code), None) if code else None
+            if not isinstance(entry, dict) or float(entry.get("until", 0)) <= at:
+                self._forget_invites(data, at)
+                self._save(data)
+                self._failures.setdefault(address, deque()).append(time.monotonic())
+                raise AccountError("This invitation is used up or too old - ask for a new one.", 410)
+            user = self._add(data, str(entry["name"]), secret, str(entry["group"]))
+            user["last_login"] = int(at)
+            token = self._open(data, user["id"])
+            self._save(data)
+        return token, self._public(user)
 
     def update(self, user_id: str, changes: dict[str, Any]) -> dict[str, Any]:
         """A user's (or the admin's) new name and colour; a user's new password (their sessions end, but the
@@ -304,7 +399,7 @@ class Accounts:
                 str(user["hash"]),
             )
             if user is None or not ok:
-                self._failures[address].append(time.monotonic())
+                self._failures.setdefault(address, deque()).append(time.monotonic())
                 raise AccountError("The name or the password is not right.", 401)
             user["last_login"] = int(time.time())
             token = self._open(data, user["id"])

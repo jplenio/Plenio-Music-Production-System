@@ -23,6 +23,9 @@ import Sidebar from './components/Sidebar.vue'
 import SongView from './components/SongView.vue'
 import Icon from './components/Icon.vue'
 import GuestWayIn from './components/GuestWayIn.vue'
+import JoinView from './components/JoinView.vue'
+import PeopleView from './components/PeopleView.vue'
+import { movedRoute } from './nav'
 import LoginView from './components/LoginView.vue'
 import MiniPlayer from './components/MiniPlayer.vue'
 import BottomNav from './components/BottomNav.vue'
@@ -32,7 +35,7 @@ import { folderNote } from './folderNote'
 import Reactions from './components/Reactions.vue'
 import { loadCheers } from './reactions'
 import { layout, slimBar } from './layout'
-import { loginShown } from './account'
+import { begin, joining, loginShown } from './account'
 import { guestBig, loadGuests } from './guests'
 import { api } from './api'
 import { engine } from './engine'
@@ -88,12 +91,18 @@ const page = computed(() => {
   if (first === 'settings') return { kind: 'settings' as const, section: second }
   if (first === 'live') return { kind: 'live' as const }
   if (first === 'jobs') return { kind: 'jobs' as const }
+  if (first === 'people' && !isPortable) return { kind: 'people' as const }
   if (first === 'make' && !isPortable) return { kind: 'make' as const, from: second ? decodeURIComponent(second) : '' }
   if (first === 'help') return { kind: 'help' as const, topic: second ? decodeURIComponent(second) : '' }
   if (first === 'favorites' || first === 'top' || first === 'recent') return { kind: 'library' as const, collection: first as 'favorites' | 'top' | 'recent' }
   return { kind: 'library' as const, collection: 'all' as const }
 })
 watch(page, () => (drawer.value = false))
+// Settings' Accounts, Party songs and In your network live on People & access now: their old addresses lead there
+watch(route, (path) => {
+  const moved = movedRoute(path)
+  if (moved) go(moved, true)
+}, { immediate: true })
 // a page opens at its top - except a library page you come back to, which is where you left it; and when the
 // song that plays is not in sight there, the page goes to it (owner's request 2026-10-17: back from a song's
 // page with 1000 songs, the place of the song that plays - not the top again)
@@ -259,6 +268,19 @@ function visualFullscreen(): void {
   void nextTick(() => nowPlaying.value?.visualFullscreen())
 }
 
+/** An invitation accepted: the new user's state; set aside: the login page as without it. */
+function joined(): void {
+  joining.value = ''
+  loginShown.value = false
+  void load()
+}
+async function notJoining(): Promise<void> {
+  joining.value = ''
+  history.replaceState(null, '', '#/')
+  if (await begin()) void load()
+  else loginShown.value = true
+}
+
 /** Somebody chose who listens (the login page): now the page reads their state. */
 function loggedIn(): void {
   loginShown.value = false
@@ -314,7 +336,8 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="app" :class="[layout, { 'no-side': !settings.sidebar && layout === 'desktop' }]" :style="[paletteStyle, { '--bar-height': `${barHeight}px` }]">
-    <LoginView v-if="loginShown" @done="loggedIn" />
+    <JoinView v-if="joining" :code="joining" @done="joined" @away="notJoining" />
+    <LoginView v-else-if="loginShown" @done="loggedIn" />
     <div class="ambient" />
     <Sidebar v-if="settings.sidebar || layout !== 'desktop'" class="sidebar" :class="{ open: drawer }" />
     <button v-if="layout === 'tablet'" class="menu-btn icon-btn" :class="{ open: drawer }" :title="drawer ? 'Close the menu' : 'Menu: songs, playlists, Live Play, settings'" @click="drawer = !drawer"><Icon :name="drawer ? 'close' : 'list'" /></button>
@@ -337,6 +360,7 @@ onBeforeUnmount(() => {
         <SettingsView v-else-if="page.kind === 'settings'" :section="page.section" />
         <LiveView v-else-if="page.kind === 'live'" />
         <JobsView v-else-if="page.kind === 'jobs'" />
+        <PeopleView v-else-if="page.kind === 'people'" />
         <MakeView v-else-if="page.kind === 'make'" :key="page.from" :from="page.from" />
         <HelpView v-else-if="page.kind === 'help'" :topic="page.topic" />
         <LibraryView v-else ref="libraryView" :key="page.collection" :collection="page.collection" />

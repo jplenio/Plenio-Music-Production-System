@@ -21,6 +21,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } 
 import type { SongSummary } from '../api'
 import { isPhone, touch } from '../layout'
 import { isPortable } from '../portable'
+import { makeShown } from '../make/state'
 import { current, go, library, measuredStars, playSongs, saveFilter, say, settings, shareFor, state, toggleCurrent } from '../store'
 import { countOf, formatTime } from '../timing'
 import { chipFilter, chipParts, facetOf, filterRows, fold, lyricsSnippet, parseQuery, scoreWith, sortSongs, suggest, toggleFilterChip, valueLabel, type SortKey } from '../search'
@@ -348,11 +349,11 @@ defineExpose({ focus: () => input.value?.focus(), cardOfCurrent, filterByTag })
 
     <section v-if="welcome" class="welcome">
       <h2>Welcome to the Plenio Player</h2>
-      <ul>
-        <li><Icon name="play" :size="16" /> <span><b>Play</b>: ▶ on a cover{{ isPhone ? ', or tap a row' : '' }}; the card opens the song's page.</span></li>
-        <li><Icon name="sparkles" :size="16" /> <span><b>Now playing</b>: tap the song at the bottom - lyrics as sung, notation, visuals.</span></li>
-        <li><Icon name="live" :size="16" /> <span><b>Live Play</b>: the party's playlist - new songs join it.</span></li>
-      </ul>
+      <div class="first-cards">
+        <article><Icon name="music" :size="20" /><b>Your songs are here</b><span>▶ on a cover{{ isPhone ? ', or tap a row' : '' }} plays it; the card opens the song’s page - lyrics, notation, how it was made.</span></article>
+        <article><Icon name="sparkles" :size="20" /><b>Press F for the show</b><span>Now playing: the lyrics as sung, the notation, the visuals - {{ isPhone ? 'tap the song at the bottom' : 'F, or a click on the song at the bottom' }}.</span></article>
+        <article v-if="!isPortable"><Icon name="guests" :size="20" /><b>Having people over?</b><span>Start a party: guests scan a code, add songs and make their own.</span><button class="ghost small" @click="go('/people')">Start a party</button></article>
+      </div>
       <div class="row">
         <button class="ghost small" @click="go('/help')"><Icon name="help" :size="15" /> Help &amp; video tutorials</button>
         <button class="link" @click="settings.welcomed = true">Got it</button>
@@ -452,10 +453,16 @@ defineExpose({ focus: () => input.value?.focus(), cardOfCurrent, filterByTag })
       </template>
     </component>
 
-    <p v-if="!songs.length" class="empty">
-      {{ library.length ? 'No song matches - try fewer words or filters.' : 'No Plenio songs in this folder yet. Export one with Export Release, or start the player with --folder.' }}
-      <button v-if="library.length && filtered" class="ghost reset-empty" @click="resetFilters">Reset filters</button>
+    <p v-if="!songs.length && library.length" class="empty">
+      No song matches - try fewer words or filters.
+      <button v-if="filtered" class="ghost reset-empty" @click="resetFilters">Reset filters</button>
     </p>
+    <div v-else-if="!songs.length" class="empty first">
+      <h2>No songs here yet</h2>
+      <p>The player plays the songs Plenio makes in ComfyUI: each template ends with <b>Export Release</b>, which writes the song and its release record into ComfyUI’s output folder - the player finds it there by itself.</p>
+      <p>Songs of your own somewhere else? Add their folder under <a @click="go('/settings/songs')">Settings › Songs</a>.</p>
+      <button v-if="makeShown" class="primary" @click="go('/make')"><Icon name="wand" :size="16" /> Make your first song</button>
+    </div>
     <div :class="view === 'grid' ? 'grid' : 'rows'">
       <SongCard
         v-for="(song, i) in shown"
@@ -550,6 +557,36 @@ defineExpose({ focus: () => input.value?.focus(), cardOfCurrent, filterByTag })
   margin: -4px -16px 14px;
   padding: 0 16px 2px;
   scrollbar-width: none;
+}
+.first-cards {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  margin: 6px 0 10px;
+}
+.first-cards article {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+}
+.first-cards span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.first-cards button {
+  justify-self: start;
+}
+.empty.first {
+  display: grid;
+  gap: 10px;
+  max-width: 560px;
+}
+.empty.first h2,
+.empty.first p {
+  margin: 0;
 }
 .welcome {
   display: grid;

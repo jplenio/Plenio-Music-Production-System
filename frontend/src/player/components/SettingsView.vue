@@ -16,14 +16,31 @@ import FolderBrowser from './FolderBrowser.vue'
 import Icon from './Icon.vue'
 import LyricsPanel from './LyricsPanel.vue'
 import LyricsVersionSwitch from './LyricsVersionSwitch.vue'
-import AccountsPanel from './AccountsPanel.vue'
 import { canAdmin, guest, me, session } from '../account'
-import NetworkAccess from './NetworkAccess.vue'
-import MakeSettings from './MakeSettings.vue'
 import StudioSettings from './StudioSettings.vue'
+import { searchSettings, SECTIONS } from '../settingsIndex'
 import { isPortable, portable } from '../portable'
 
 const props = defineProps<{ section?: string }>()
+/** *Basic* (eight settings) or *Everything*; a section's tab or all; the search over the settings' labels. */
+const mode = ref<'basic' | 'everything'>('basic')
+const tab = ref('all')
+const query = ref('')
+const matched = computed(() => searchSettings(query.value))
+function visible(id: string): boolean {
+  if (query.value.trim()) return matched.value.has(id)
+  if (mode.value === 'basic') return id === 'basic'
+  return tab.value === 'all' || tab.value === id
+}
+function choose(id: string): void {
+  if (id === 'people') {
+    go('/people')
+    return
+  }
+  mode.value = id === 'basic' ? 'basic' : 'everything'
+  tab.value = id === 'basic' ? 'all' : id
+  query.value = ''
+}
 // #/settings/<section> opens at that section (the Make page's *Switch it on*, the studio's *How to start it*)
 // - also from one section's link to another (the page stays), and for a section that shows once its answer came
 // (The studio waits for the player's word on ComfyUI): looked for a few times, up to two seconds
@@ -31,6 +48,9 @@ let seeking = 0
 function seek(section: string | undefined): void {
   window.clearTimeout(seeking)
   if (!section) return
+  // a section named by the address: everything, that section's tab
+  mode.value = 'everything'
+  tab.value = SECTIONS.some(([id]) => id === section) ? section : 'all'
   let tries = 0
   const look = (): void => {
     const target = document.getElementById(section)
@@ -184,10 +204,8 @@ const studioShown = computed(() => !isPortable && !remote.value && (!session.val
 const index = computed(() =>
   (
     [
-      ['accounts', 'Accounts', !isPortable && !!session.value?.login],
+      ['people', 'People & access', !isPortable],
       ['kept', 'Kept', true],
-      ['network', 'In your network', !isPortable],
-      ['party', 'Party songs', !isPortable],
       ['studio', 'The studio', studioShown.value],
       ['comfyui', 'ComfyUI', !isPortable && !remote.value],
       ['songs', 'Songs', !isPortable],
@@ -200,9 +218,6 @@ const index = computed(() =>
     ] as [string, string, boolean][]
   ).filter(([, , shown]) => shown)
 )
-function jumpTo(id: string): void {
-  document.getElementById(id)?.scrollIntoView({ block: 'start', behavior: 'smooth' })
-}
 </script>
 
 <template>
@@ -216,10 +231,47 @@ function jumpTo(id: string): void {
       <span v-if="!isPortable && info && info.version !== pageVersion" class="stale">· this page is {{ pageVersion }} - reload it (Ctrl+F5)</span>
     </p>
 
-    <nav class="index" aria-label="Sections">
-      <button v-for="[id, label] in index" :key="id" class="chip" @click="jumpTo(id)">{{ label }}</button>
+    <div class="finder">
+      <div class="modes" role="tablist" aria-label="How much to show">
+        <button role="tab" class="chip" :class="{ on: mode === 'basic' && !query }" :aria-selected="mode === 'basic'" @click="choose('basic')">Basic</button>
+        <button role="tab" class="chip" :class="{ on: mode === 'everything' && tab === 'all' && !query }" :aria-selected="mode === 'everything'" @click="mode = 'everything'; tab = 'all'; query = ''">Everything</button>
+      </div>
+      <input v-model="query" class="search" type="search" placeholder="Find a setting" aria-label="Find a setting" />
+    </div>
+    <nav v-if="mode === 'everything' && !query" class="index" role="tablist" aria-label="Sections">
+      <button v-for="[id, label] in index" :key="id" role="tab" class="chip" :class="{ on: tab === id }" :aria-selected="tab === id" @click="choose(id)">{{ label }}</button>
       <button class="chip help" @click="go('/help')"><Icon name="help" :size="13" /> Help</button>
     </nav>
+    <p v-if="query && !matched.size" class="hint">No setting is called that - try another word.</p>
+
+    <section v-show="visible('basic')" id="basic" class="block basic">
+      <h3><Icon name="sliders" /> Basic</h3>
+      <label class="field">Crossfade between songs
+        <select v-model.number="settings.crossfade"><option v-for="s in [0, 1, 2, 3, 5, 8, 12]" :key="s" :value="s">{{ s ? `${s} s` : 'off' }}</option></select>
+      </label>
+      <label class="check"><input v-model="settings.shuffle" type="checkbox" /> Shuffle</label>
+      <label class="field">Repeat
+        <select v-model="settings.repeat"><option value="all">the whole playlist</option><option value="one">this song</option><option value="off">off</option></select>
+      </label>
+      <label class="field">Volume
+        <input v-model.number="settings.volume" type="range" min="0" max="1" step="0.05" />
+      </label>
+      <label v-if="!isPortable" class="check"><input v-model="settings.mp3" type="checkbox" /> Play the MP3 where a song has one</label>
+      <label class="check"><input v-model="settings.sidebar" type="checkbox" /> Show the sidebar</label>
+      <label class="field">Now playing opens with
+        <select v-model="settings.npView"><option value="stage">the stage</option><option value="lyrics">the lyrics</option><option value="notation">the notation</option><option value="visual">the visual</option></select>
+      </label>
+      <label class="field">Live Play: where a new song goes
+        <select v-model="settings.live.insert"><option value="next">next</option><option value="end">at the end</option><option value="random">somewhere after the song that plays</option></select>
+      </label>
+      <p class="hint">Everything else - folders, backups, the studio, lyrics, videos - is under <a @click="mode = 'everything'">Everything</a>.</p>
+    </section>
+
+    <section v-if="!isPortable" v-show="visible('people')" id="people" class="block">
+      <h3><Icon name="guests" /> People &amp; access</h3>
+      <p class="lead">Accounts, your devices in the network, the party and who may make songs are on one page now.</p>
+      <button class="ghost" @click="go('/people')">Open People &amp; access</button>
+    </section>
 
     <div v-if="stopped" class="block stopped">
       <h3>The player has stopped</h3>
@@ -232,12 +284,8 @@ function jumpTo(id: string): void {
       <p class="hint">Making songs, opening them in ComfyUI, Live Play's new songs from ComfyUI and saving videos are the Plenio Player's: <a href="https://github.com/jplenio/Plenio-Music-Production-System" target="_blank" rel="noopener">Plenio</a>.</p>
     </section>
 
-    <section v-if="!isPortable && session?.login" id="accounts" class="block">
-      <h3><Icon name="user" /> Accounts</h3>
-      <AccountsPanel />
-    </section>
 
-    <section id="kept" class="block">
+    <section v-show="visible('kept')" id="kept" class="block">
       <h3><Icon name="check" /> {{ isPortable || guest ? 'Kept in this browser' : me && !me.admin ? `Kept for ${me.name}` : 'Kept on this computer' }}</h3>
       <p v-if="guest" class="lead">
         As a guest, everything you set here - and everything below - is saved in this browser, half a second after each change and when the page closes. Another
@@ -266,13 +314,11 @@ function jumpTo(id: string): void {
       <p class="hint">The songs themselves are not in the backup: they stay in their folders.</p>
     </section>
 
-    <div v-if="!isPortable" id="network"><NetworkAccess /></div>
 
-    <div v-if="!isPortable" id="party"><MakeSettings /></div>
 
-    <StudioSettings v-if="studioShown" @running="look" />
+    <StudioSettings v-if="studioShown" v-show="visible('studio')" @running="look" />
 
-    <section v-if="!isPortable && !remote" id="comfyui" class="block">
+    <section v-if="!isPortable && !remote" v-show="visible('comfyui')" id="comfyui" class="block">
       <h3><Icon name="external" /> ComfyUI</h3>
       <p class="lead">A song's page opens the song's workflow in ComfyUI, with its lyrics, score and settings, to work on it - and ComfyUI itself opens here, in the browser, when it runs.</p>
       <p class="status" :class="{ ok: found }">
@@ -287,7 +333,7 @@ function jumpTo(id: string): void {
       </div>
     </section>
 
-    <section v-if="!isPortable" id="songs" class="block">
+    <section v-if="!isPortable" v-show="visible('songs')" id="songs" class="block">
       <h3><Icon name="folder" /> Songs</h3>
       <p class="lead">The player reads every release record (<code>.plenio.json</code>) below these folders: {{ countOf(library.length, 'song') }}.</p>
       <p v-if="remote" class="hint">The folders are chosen on the computer the player runs on.</p>
@@ -316,7 +362,7 @@ function jumpTo(id: string): void {
       <FolderBrowser v-if="browsing" @choose="addFolder" @close="browsing = false" />
     </section>
 
-    <section v-if="!isPortable" id="sound" class="block">
+    <section v-if="!isPortable" v-show="visible('sound')" id="sound" class="block">
       <h3><Icon name="volume" /> Sound</h3>
       <label class="check" title="A song exported as FLAC (or WAV) and MP3 plays its MP3: about a sixth of the data - for a phone or another computer in the network">
         <input v-model="settings.mp3" type="checkbox" /> Play the MP3 where a song has one (less data over the network)
@@ -324,7 +370,7 @@ function jumpTo(id: string): void {
       <p class="hint">{{ countOf(withMp3, 'song') }} of {{ library.length }} have an MP3 besides their FLAC or WAV (Export Release: <i>mp3</i>). A/B plays the unmastered take as it was saved.</p>
     </section>
 
-    <section id="tags" class="block">
+    <section v-show="visible('tags')" id="tags" class="block">
       <h3><Icon name="tag" /> Tags</h3>
       <p class="lead">Tags of your own: give them on a song's page, in a song's ⋯ menu, or to every song a filter shows (<b>Tag…</b> on the songs' page); find them with <code>#tag</code> or the filter row <i>Tags</i>. {{ allTags.length ? '' : 'None yet.' }}</p>
       <ul v-if="allTags.length" class="tag-list">
@@ -339,7 +385,7 @@ function jumpTo(id: string): void {
       </ul>
     </section>
 
-    <section id="lyrics" class="block">
+    <section v-show="visible('lyrics')" id="lyrics" class="block">
       <h3><Icon name="mic" /> Lyrics</h3>
       <p class="lead">How the lyrics look while a song plays: the font, the size, the colour - and how each syllable comes in as it is sung.</p>
       <p class="lead">Which lyrics to follow: <b>as written</b> - the song's lyrics - or <b>as sung</b> - what the take really sings, as heard when it was exported (a music model may repeat a line, make one up or leave one out). Every song shows its lyrics as written until you choose otherwise: what was heard is not always the word sung - a rare word, a name. Switch a song either way on its page or in the player bar (W) - like master and original; the choice is kept for that song. Here: the rule for every song. Songs exported before Plenio kept what was sung show their written lyrics.</p>
@@ -347,7 +393,7 @@ function jumpTo(id: string): void {
       <LyricsPanel />
     </section>
 
-    <section v-if="!isPortable" id="shared" class="block">
+    <section v-if="!isPortable" v-show="visible('shared')" id="shared" class="block">
       <h3><Icon name="download" /> Shared players</h3>
       <p class="lead">Songs to give away: one HTML file with the player and the songs, which plays by itself - <b>Share…</b> in a view or a playlist, or <b>Share as a player…</b> at the bottom of the sidebar. {{ shared?.files.length ? countOf(shared.files.length, 'player') + ' so far:' : 'None yet.' }}</p>
       <ul v-if="shared?.files.length" class="videos">
@@ -360,7 +406,7 @@ function jumpTo(id: string): void {
       <button v-if="!remote" class="ghost small" @click="api.openPackages().catch((e) => say(e.message, 5000))"><Icon name="folder" :size="14" /> Open the folder</button>
     </section>
 
-    <section v-if="!isPortable" id="videos" class="block">
+    <section v-if="!isPortable" v-show="visible('videos')" id="videos" class="block">
       <h3><Icon name="layers" /> Videos</h3>
       <p class="lead">A song as an MP4 video - its visual, lyrics and notation: <b>Video…</b> on a song's page. {{ videos?.files.length ? countOf(videos.files.length, 'video') + ' so far:' : 'None yet.' }}</p>
       <ul v-if="videos?.files.length" class="videos">
@@ -374,7 +420,7 @@ function jumpTo(id: string): void {
       <p v-if="videos" class="hint"><code>{{ videos.folder }}</code></p>
     </section>
 
-    <section v-if="!isPortable && !remote" id="player" class="block">
+    <section v-if="!isPortable && !remote" v-show="visible('player')" id="player" class="block">
       <h3><Icon name="info" /> The player</h3>
       <p class="lead">Plenio Player {{ info?.version }} - a program of its own, which runs without ComfyUI. Started from ComfyUI it has no window: stop it here.</p>
       <button class="ghost danger" @click="stop">Stop the player</button>
@@ -383,6 +429,35 @@ function jumpTo(id: string): void {
 </template>
 
 <style scoped>
+.finder {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 10px;
+}
+.modes {
+  display: flex;
+  gap: 6px;
+}
+.finder .search {
+  flex: 1 1 220px;
+  min-width: 0;
+  max-width: 420px;
+}
+.chip.on {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.basic {
+  display: grid;
+  gap: 12px;
+}
+.basic .field {
+  display: grid;
+  gap: 6px;
+  max-width: 420px;
+}
 .version {
   display: flex;
   flex-wrap: wrap;
