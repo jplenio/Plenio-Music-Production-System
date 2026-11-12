@@ -44,6 +44,7 @@ from pathlib import Path
 from typing import IO, Any
 
 from .. import __version__
+from .analysis import track as analysis_track
 from .library import Library, Song, song_detail
 from .peaks import peaks
 
@@ -344,7 +345,13 @@ def build(
             "versions": {"plenio": str(song.summary.get("plenio") or "")},
         }
         level = peaks(song.files["audio"], cache / "peaks")
-        text = json.dumps({"detail": page, "peaks": level or None}, ensure_ascii=False, separators=(",", ":"))
+        # the visuals' analysis track goes along (phase 7.3): the shared player knows the music ahead too
+        track = analysis_track(song.files["audio"], cache / "analysis", None if song.other else song.record)
+        text = json.dumps(
+            {"detail": page, "peaks": level or None, "analysis": track},
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
         details.append((song.id, text))
         seconds = float(song.summary.get("seconds") or 0.0)
         # a record without its length: from the file's size (lossless audio about 1000 kbit/s)

@@ -31,6 +31,7 @@ from . import folders as folder_choice
 from . import maker as maker_rules
 from . import other as other_music
 from . import player_api
+from .analysis import track as analysis_track
 from .guest import GuestHub, lan_addresses
 from .library import RETIRED_DIR, Library, song_detail
 from .measured import measured_for, ratings_of
@@ -860,6 +861,16 @@ def make_handler(
                 # the listener's own Plenio Drop presets (the page reads them again every few seconds)
                 folder = visuals_dir(state.path.parent)
                 return self._json({"folder": str(folder), "files": list_presets(folder)})
+            if route.startswith("/api/analysis/"):
+                # the song's analysis track for the visuals (analysis.py): computed once, kept in the cache
+                song = library.song(route.removeprefix("/api/analysis/"))
+                audio = song.files.get("audio") if song else None
+                if song is None or audio is None:
+                    return self._error(404, "no such song")
+                found = analysis_track(
+                    audio, state.path.parent / "cache" / "analysis", None if song.other else song.record
+                )
+                return self._json(found) if found else self._error(404, "no analysis")
             if route.startswith("/api/peaks/"):
                 song = library.song(route.removeprefix("/api/peaks/"))
                 audio = song.files.get("audio") if song else None

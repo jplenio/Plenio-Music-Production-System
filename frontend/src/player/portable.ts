@@ -138,15 +138,15 @@ export function ensureMedia(id: string, kind: string): Promise<string> {
 }
 
 /** A song's page and waveform: inside the data (first format), or from the loader as they arrive. */
-const pages = new Map<string, { detail: SongDetail; peaks: number[] | null }>()
-export async function portablePage(id: string): Promise<{ detail: SongDetail; peaks: number[] | null } | null> {
+const pages = new Map<string, { detail: SongDetail; peaks: number[] | null; analysis?: unknown }>()
+export async function portablePage(id: string): Promise<{ detail: SongDetail; peaks: number[] | null; analysis?: unknown } | null> {
   if (!portable) return null
   if (!loader) return portable.details[id] ? { detail: portable.details[id], peaks: portable.peaks[id] ?? null } : null
   const known = pages.get(id)
   if (known) return known
   const text = await loader.get(`d/${id}`)
   if (!text) return null
-  const page = JSON.parse(text) as { detail: SongDetail; peaks: number[] | null }
+  const page = JSON.parse(text) as { detail: SongDetail; peaks: number[] | null; analysis?: unknown }
   pages.set(id, page)
   return page
 }
