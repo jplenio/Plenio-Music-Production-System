@@ -86,7 +86,7 @@ def test_the_access_is_off_until_switched_on_and_answers_only_below_its_token(
     port, token = hub.settings["port"], hub.settings["token"]
     assert len(token) >= 16 and all(url.endswith(f":{port}/{token}/") for url in status["urls"])
     page = call(port, "GET", f"/{token}/")
-    assert page[0] == 200 and b"Plenio Live" in page[2]
+    assert page[0] == 200 and b'data-i18n="brand"' in page[2]  # its words come in the guest's language
     assert (
         "default-src 'none'" in page[1]["Content-Security-Policy"]
         and page[1]["Referrer-Policy"] == "no-referrer"

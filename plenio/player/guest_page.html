@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="referrer" content="no-referrer" />
 <meta name="theme-color" content="#0d0b17" />
-<title>Plenio Live</title>
+<title data-i18n="brand"></title>
 <style>
   /* The guests' page of the Plenio Player's Live Play (plenio/player/guest.py): the song that plays, what
      comes next, reactions that float over the host's screen, the party's songs to hear again on one's phone, and
@@ -105,19 +105,19 @@
 <body>
 <main>
   <header>
-    <div class="brand"><i><b></b><b></b><b></b></i> Plenio Live</div>
+    <div class="brand"><i><b></b><b></b><b></b></i> <span data-i18n="brand"></span></div>
     <span id="pill" class="pill off">…</span>
   </header>
-  <p id="note" class="note">Connecting …</p>
+  <p id="note" class="note" data-i18n="connecting"></p>
   <a id="makeBox" class="make" href="make/" hidden>
     <span class="spark">✨</span>
-    <span><b>Make your own song</b><small>Pick a style, say what it is about - it plays here when it is ready</small></span>
+    <span><b data-i18n="make.title"></b><small data-i18n="make.hint"></small></span>
     <span class="go">›</span>
   </a>
   <section id="now" class="now" hidden>
     <div id="nowArt" class="art"></div>
     <div>
-      <div class="label">Playing now</div>
+      <div class="label" data-i18n="now.label"></div>
       <h1 id="nowTitle"></h1>
       <div id="nowBy" class="by"></div>
       <div id="nowMade" class="made" hidden></div>
@@ -130,22 +130,22 @@
     <div id="tally" class="tally"></div>
   </section>
   <section id="nextBox" hidden>
-    <h2><span>Up next</span><span id="left"></span></h2>
+    <h2><span data-i18n="next.title"></span><span id="left"></span></h2>
     <ol id="next"></ol>
   </section>
   <section id="addBox" class="add" hidden>
-    <h2><span>Add a song</span></h2>
-    <input id="find" type="search" placeholder="Search: title, artist, genre …" autocomplete="off" enterkeyhint="search" />
+    <h2><span data-i18n="add.title"></span></h2>
+    <input id="find" type="search" data-i18n-placeholder="add.search" autocomplete="off" enterkeyhint="search" />
     <ol id="found" style="margin-top: 8px"></ol>
   </section>
   <section id="againBox" class="again" hidden>
-    <h2><span>Hear them again</span><span id="againCount"></span></h2>
-    <p class="hint">The songs made at this party, once they played - here on your phone.</p>
+    <h2><span data-i18n="again.title"></span><span id="againCount"></span></h2>
+    <p class="hint" data-i18n="again.hint"></p>
     <audio id="againPlayer" controls preload="none" hidden></audio>
     <ol id="again"></ol>
   </section>
   <details id="playedBox" hidden>
-    <summary>Played before</summary>
+    <summary data-i18n="played.title"></summary>
     <ol id="played" style="margin-top: 8px"></ol>
   </details>
   <footer id="foot"></footer>
@@ -155,6 +155,33 @@
   "use strict";
   // Everything shown comes from the player as text and is put in as text, never as HTML.
   const $ = (id) => document.getElementById(id);
+  // The page in the guest's language (ADR-0013): the phone's languages in order, the first of these that fits;
+  // English for every other and for a word a language lacks. The songs' titles stay as they are.
+  const LANGUAGES = ["en", "de", "es", "fr", "it", "pt", "ja"];
+  let words = {};
+  let english = {};
+  let lang = "en";
+  function t(key, vars) {
+    let text = words[key] ?? english[key] ?? key;
+    for (const [name, value] of Object.entries(vars || {})) text = text.split(`{${name}}`).join(String(value));
+    return text;
+  }
+  function chooseLanguage(wanted) {
+    for (const tag of wanted || []) {
+      const base = String(tag || "").toLowerCase().split("-")[0];
+      if (LANGUAGES.includes(base)) return base;
+    }
+    return "en";
+  }
+  async function loadWords() {
+    lang = chooseLanguage(navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language]);
+    const get = async (code) => (await fetch(`locales/${code}`, { cache: "force-cache" })).json();
+    try { english = await get("en"); } catch { english = {}; }
+    try { words = lang === "en" ? english : await get(lang); } catch { words = {}; }
+    document.documentElement.lang = lang;
+    for (const node of document.querySelectorAll("[data-i18n]")) node.textContent = t(node.dataset.i18n);
+    for (const node of document.querySelectorAll("[data-i18n-placeholder]")) node.placeholder = t(node.dataset.i18nPlaceholder);
+  }
   let view = null;
   let fetchedAt = 0;
   let busy = false;
@@ -196,14 +223,14 @@
       const answer = await fetch("api/live", { cache: "no-store" });
       if (answer.status === 404) {
         view = null;
-        show("This address no longer leads to the live playlist - ask the host for the new one.");
+        show(t("err.gone"));
         return;
       }
       view = await answer.json();
       fetchedAt = performance.now();
       render();
     } catch {
-      show("The player cannot be reached - same Wi-Fi? Trying again …");
+      show(t("err.unreachable"));
     }
   }
   function show(text) {
@@ -212,7 +239,7 @@
     $("note").textContent = text;
     for (const id of ["now", "reactBox", "nextBox", "addBox", "playedBox"]) $(id).hidden = true;
     $("pill").className = "pill off";
-    $("pill").textContent = "OFF";
+    $("pill").textContent = t("pill.off");
     loadAgain(false);
   }
 
@@ -220,12 +247,12 @@
     const v = view;
     const change = v.mode === "change";
     $("makeBox").hidden = !v.make;
-    if (!v.open) return show("The player's page is closed at the moment - the live playlist shows again when it is open.");
+    if (!v.open) return show(t("note.closed"));
     $("pill").className = v.live ? "pill" : "pill off";
-    $("pill").textContent = v.live ? "LIVE" : "NOT LIVE";
+    $("pill").textContent = v.live ? t("pill.live") : t("pill.notLive");
     const notes = [];
-    if (!v.live) notes.push("Live Play is not on - the host has not started the live playlist yet.");
-    else if (v.waiting) notes.push("Waiting for the next new song …");
+    if (!v.live) notes.push(t("note.notLive"));
+    else if (v.waiting) notes.push(t("note.waiting"));
     $("note").hidden = !notes.length;
     $("note").textContent = notes.join(" ");
     // playing now
@@ -236,7 +263,7 @@
       $("nowTitle").textContent = v.now.title;
       $("nowBy").textContent = v.now.by;
       $("nowMade").hidden = !v.now.made_by;
-      $("nowMade").textContent = v.now.made_by ? `✨ made by ${v.now.made_by} at the party ${partyDay(v.now.made_on)}` : "";
+      $("nowMade").textContent = v.now.made_by ? t("now.madeBy", { name: v.now.made_by, day: partyDay(v.now.made_on) }) : "";
       $("nowLen").textContent = time(v.now.seconds);
       tick();
     }
@@ -253,21 +280,21 @@
     $("left").textContent = next.length ? `${next.length} · ${time(next.reduce((t, s) => t + s.seconds, 0))}` : "";
     const list = $("next");
     list.replaceChildren();
-    if (!next.length) list.append(el("li", "", "Nothing yet."));
+    if (!next.length) list.append(el("li", "", t("next.empty")));
     next.forEach((song, k) => {
       const row = el("li");
       row.append(el("span", "n", String(k + 1)), art(song));
       const text = el("div", "t");
       const title = el("b", "", song.title);
-      if (song.new) title.append(el("span", "new", "new"));
-      text.append(title, el("small", "", song.made_by ? `made by ${song.made_by}` : song.by));
+      if (song.new) title.append(el("span", "new", t("new")));
+      text.append(title, el("small", "", song.made_by ? t("madeBy", { name: song.made_by }) : song.by));
       row.append(text);
       if (change && v.live) {
         const tools = el("div", "tools");
         tools.append(
-          button("↑", "Earlier", k === 0, () => wish({ op: "up", id: song.id, at: song.at }, `${song.title} - one up`)),
-          button("↓", "Later", k === next.length - 1, () => wish({ op: "down", id: song.id, at: song.at }, `${song.title} - one down`)),
-          button("✕", "Take it out", false, () => wish({ op: "remove", id: song.id, at: song.at }, `${song.title} - taken out`))
+          button("↑", t("btn.up"), k === 0, () => wish({ op: "up", id: song.id, at: song.at }, t("done.up", { title: song.title }))),
+          button("↓", t("btn.down"), k === next.length - 1, () => wish({ op: "down", id: song.id, at: song.at }, t("done.down", { title: song.title }))),
+          button("✕", t("btn.out"), false, () => wish({ op: "remove", id: song.id, at: song.at }, t("done.out", { title: song.title })))
         );
         row.append(tools);
       } else row.append(el("span", "dur", time(song.seconds)));
@@ -286,7 +313,7 @@
       row.append(art(song), text, el("span", "dur", time(song.seconds)));
       return row;
     }));
-    $("foot").textContent = change ? "You may move, take out and add songs - the host's player plays them." : "View only - the host chooses the songs.";
+    $("foot").textContent = change ? t("foot.change") : t("foot.view");
     loadAgain(false);
   }
 
@@ -319,9 +346,9 @@
       const row = el("li");
       if (song.id === hearing) row.className = "playing";
       const text = el("div", "t");
-      text.append(el("b", "", song.title), el("small", "", song.by ? `made by ${song.by} · ${time(song.seconds)}` : time(song.seconds)));
+      text.append(el("b", "", song.title), el("small", "", song.by ? t("again.madeBy", { name: song.by, time: time(song.seconds) }) : time(song.seconds)));
       const tools = el("div", "tools");
-      tools.append(Object.assign(button("▶", `Hear ${song.title} again`, false, () => hear(song, songs)), { className: "go" }));
+      tools.append(Object.assign(button("▶", t("again.hear", { title: song.title }), false, () => hear(song, songs)), { className: "go" }));
       row.append(art(song), text, tools);
       return row;
     }));
@@ -331,7 +358,7 @@
     player.hidden = false;
     player.src = `song/${song.id}`;
     hearing = song.id;
-    player.play().catch(() => say("Tap ▶ in the player to start"));
+    player.play().catch(() => say(t("again.tapPlay")));
     renderAgain(songs);
   }
   function button(text, title, disabled, act) {
@@ -356,10 +383,10 @@
     try {
       const answer = await fetch("api/wish", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       const data = await answer.json().catch(() => ({}));
-      say(answer.ok ? done : data.error || "That did not work");
+      say(answer.ok ? done : data.error || t("err.failed"));
       setTimeout(load, 900);
     } catch {
-      say("The player cannot be reached");
+      say(t("err.unreachableShort"));
     } finally {
       busy = false;
     }
@@ -369,15 +396,15 @@
   function partyDay(day) {
     if (!day) return "";
     const [y, m, d] = day.split("-").map(Number);
-    return "on " + new Date(y, m - 1, d).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" });
+    return t("partyDay", { date: new Date(y, m - 1, d).toLocaleDateString(lang, { day: "numeric", month: "long", year: "numeric" }) });
   }
   const REACTIONS = [["fire", "🔥"], ["heart", "❤️"], ["party", "🎉"], ["clap", "👏"], ["dance", "💃"], ["laugh", "😂"]];
   let reactedAt = -1e9;
   let onePerSong = false;
   function tally(cheers) {
     const parts = REACTIONS.filter(([kind]) => cheers[kind]).map(([kind, emoji]) => `${emoji} ${cheers[kind]}`);
-    const how = onePerSong ? "One per song - tap another to change yours" : "Tap to cheer - it floats over the big screen";
-    $("tally").textContent = parts.length ? `${parts.join("  ")}  - from everyone here${onePerSong ? " · one per song" : ""}` : how;
+    const how = onePerSong ? t("react.one") : t("react.tap");
+    $("tally").textContent = parts.length ? t(onePerSong ? "react.tallyOne" : "react.tally", { parts: parts.join("  ") }) : how;
   }
   /** One reaction per song: the guest's own is marked. */
   function markMine(kind) {
@@ -402,19 +429,21 @@
       if (answer.ok) {
         tally(data.cheers || {});
         if (data.mine) markMine(data.mine);
-        if (data.same) say("Already sent - one reaction per song (tap another to change it)");
+        if (data.same) say(t("react.same"));
       }
-      else if (answer.status === 403) { $("reactBox").hidden = true; say(data.error || "Reactions are off"); }
-      else say(data.error || "That did not work");
+      else if (answer.status === 403) { $("reactBox").hidden = true; say(data.error || t("react.off")); }
+      else say(data.error || t("err.failed"));
     } catch {
-      say("The player cannot be reached");
+      say(t("err.unreachableShort"));
     }
   }
-  $("reactions").replaceChildren(...REACTIONS.map(([kind, emoji]) => {
-    const b = button(emoji, `Send ${emoji} to the big screen`, false, () => react(kind, emoji, b));
-    b.dataset.kind = kind;
-    return b;
-  }));
+  function reactionButtons() {
+    $("reactions").replaceChildren(...REACTIONS.map(([kind, emoji]) => {
+      const b = button(emoji, t("react.send", { emoji }), false, () => react(kind, emoji, b));
+      b.dataset.kind = kind;
+      return b;
+    }));
+  }
 
   let findTimer = 0;
   $("find").addEventListener("input", () => {
@@ -435,20 +464,23 @@
         text.append(el("b", "", song.title), el("small", "", `${song.by} · ${time(song.seconds)}`));
         const tools = el("div", "tools");
         tools.append(
-          Object.assign(button("Next", "Plays next", false, () => wish({ op: "add", id: song.id, where: "next" }, `${song.title} - plays next`)), { className: "go" }),
-          button("End", "At the end", false, () => wish({ op: "add", id: song.id, where: "end" }, `${song.title} - at the end`))
+          Object.assign(button(t("add.next"), t("add.nextTitle"), false, () => wish({ op: "add", id: song.id, where: "next" }, t("done.next", { title: song.title }))), { className: "go" }),
+          button(t("add.end"), t("add.endTitle"), false, () => wish({ op: "add", id: song.id, where: "end" }, t("done.end", { title: song.title })))
         );
         row.append(art(song), text, tools);
         return row;
-      }) : [el("li", "", "No song found.")]));
+      }) : [el("li", "", t("add.none"))]));
     } catch {
-      list.replaceChildren(el("li", "", "The player cannot be reached."));
+      list.replaceChildren(el("li", "", t("add.unreachable")));
     }
   }
 
-  load();
-  setInterval(load, 2500);
-  setInterval(tick, 1000);
+  loadWords().then(() => {
+    reactionButtons();
+    load();
+    setInterval(load, 2500);
+    setInterval(tick, 1000);
+  });
   document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
 </script>
 </body>

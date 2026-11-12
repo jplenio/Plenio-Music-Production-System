@@ -50,6 +50,9 @@ from .library import Library
 
 PAGE = Path(__file__).resolve().parent / "guest_page.html"
 MAKER_PAGE = Path(__file__).resolve().parent / "guest_static"
+LOCALES = Path(__file__).resolve().parent / "guest_locales"
+LANGUAGES = ("en", "de", "es", "fr", "it", "pt", "ja")
+"""The languages of the guests' page (ADR-0013): English, German, Spanish, French, Italian, Portuguese, Japanese."""
 """The guests' song form (``frontend/src/guest``, built by ``npm run build:player``)."""
 SOURCES_PER_MINUTE = 6
 PORTS = range(8770, 8780)
@@ -864,6 +867,16 @@ def serve_guests(hub: GuestHub, host: str, port: int) -> ThreadingHTTPServer:
                     return self._send(200, PAGE.read_bytes(), "text/html; charset=utf-8")
                 except OSError:
                     return self._nothing()
+            if route.startswith("/locales/"):
+                # the page's words in the guest's language (guest_locales/<lang>.json; ADR-0013)
+                language = route.removeprefix("/locales/")
+                if language not in LANGUAGES:
+                    return self._nothing()
+                try:
+                    words = (LOCALES / f"{language}.json").read_bytes()
+                except OSError:
+                    return self._nothing()
+                return self._send(200, words, "application/json; charset=utf-8")
             if route == "/api/live":
                 who, cookie = self._guest()
                 return self._json(hub.view(guest, who["id"]), cookie=cookie)
