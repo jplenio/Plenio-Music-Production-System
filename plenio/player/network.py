@@ -47,6 +47,10 @@ IDLE = 15 * 60
 """Seconds a connection may stay quiet (a WebSocket of ComfyUI's waits long between messages)."""
 FIND_EVERY = 5.0
 DEFAULTS: dict[str, Any] = {"on": False, "token": "", "port": 0, "comfy_port": 0}
+BAD_HEAD = re.compile(r"[\x00-\x08\x0a-\x1f\x7f]")
+"""A head's lines hold no control character but a tab (CR and LF only between the lines)."""
+TOKEN = re.compile(r"[!#$%&'*+.^_`|~0-9A-Za-z-]+")
+"""A header's name, as HTTP has it (no space, no colon)."""
 REMOTE_HEADER = "X-Plenio-Remote"
 REMOTE_HOST_HEADER = "X-Plenio-Remote-Host"
 REMOTE_PEER_HEADER = "X-Plenio-Remote-Peer"
@@ -99,14 +103,19 @@ def read_head(sock: socket.socket) -> tuple[Head, bytes] | None:
         data += chunk
     raw, rest = data.split(b"\r\n\r\n", 1)
     lines = raw.decode("latin-1").split("\r\n")
+    # a lone CR or LF, a control character or a line without a name is refused: passed on, it could start a header
+    # line of its own on the far side - the gateway's own X-Plenio-Remote among them (review of phase 6)
+    if any(BAD_HEAD.search(line) for line in lines):
+        return None
     parts = lines[0].split(" ")
     if len(parts) != 3 or not parts[2].startswith("HTTP/"):
         return None
     headers: list[tuple[str, str]] = []
     for line in lines[1:]:
-        if ":" in line:
-            name, value = line.split(":", 1)
-            headers.append((name.strip(), value.strip()))
+        name, colon, value = line.partition(":")
+        if not colon or not TOKEN.fullmatch(name):
+            return None
+        headers.append((name, value.strip()))
     return Head(parts[0], parts[1], parts[2], headers), rest
 
 

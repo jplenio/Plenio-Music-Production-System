@@ -190,3 +190,14 @@ def test_bad_input_does_not_end_the_server(player: str) -> None:
     assert by_id[1]["result"]["isError"] is True
     assert by_id[2]["error"]["code"] == -32602
     assert by_id[3]["result"] == {}
+
+
+def test_deep_nesting_and_a_batch_are_answered(player: str) -> None:
+    tools = mcp.Tools("http://127.0.0.1:8188", player)
+    source = io.StringIO(
+        "[" * 100000 + "\n" + json.dumps([{"jsonrpc": "2.0", "id": 1, "method": "ping"}]) + "\n"
+    )
+    sink = io.StringIO()
+    mcp.serve(tools, source, sink)
+    codes = [json.loads(line)["error"]["code"] for line in sink.getvalue().splitlines()]
+    assert codes == [-32700, -32600]

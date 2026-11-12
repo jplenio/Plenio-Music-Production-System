@@ -376,3 +376,27 @@ def test_the_gateway_says_the_devices_own_address_and_drops_a_forged_one() -> No
     )  # fmt: skip
     sent = network_module.forwarded_head(head, ("127.0.0.1", 8765), remote=True, peer="192.168.1.50").decode()
     assert "X-Plenio-Remote-Peer: 192.168.1.50" in sent and "X-Plenio-Remote-Peer: 127.0.0.1" not in sent
+
+
+def test_a_head_with_a_lone_line_feed_is_refused() -> None:
+    """Review of phase 6: a bare LF in a value became a header line of its own behind the gateway - a forged
+    X-Plenio-Remote: 0 made a device of the network this computer, the admin."""
+    for raw in (
+        b"GET / HTTP/1.1\r\nHost: x\r\nX-A: b\nX-Plenio-Remote: 0\r\n\r\n",
+        b"GET / HTTP/1.1\r\nHost: x\r\nX-A: b\rX-B: c\r\n\r\n",
+        b"GET / HTTP/1.1\r\nHost: x\r\nno colon here\r\n\r\n",
+        b"GET / HTTP/1.1\r\nBad Name: x\r\n\r\n",
+    ):
+        left, right = socket.socketpair()
+        try:
+            left.sendall(raw)
+            assert network_module.read_head(right) is None, raw
+        finally:
+            left.close()
+            right.close()
+    left, right = socket.socketpair()
+    left.sendall(b"GET / HTTP/1.1\r\nHost: x\r\nX-A:\tb\r\n\r\n")
+    found = network_module.read_head(right)
+    left.close()
+    right.close()
+    assert found is not None and found[0].get("X-A") == "b"

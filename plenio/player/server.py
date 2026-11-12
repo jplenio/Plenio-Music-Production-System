@@ -31,7 +31,7 @@ from . import folders as folder_choice
 from . import maker as maker_rules
 from . import other as other_music
 from . import player_api
-from .guest import GuestHub
+from .guest import GuestHub, lan_addresses
 from .library import RETIRED_DIR, Library, song_detail
 from .measured import measured_for, ratings_of
 from .network import REMOTE_HEADER, REMOTE_HOST_HEADER, REMOTE_PEER_HEADER, NetworkAccess
@@ -149,11 +149,28 @@ class State:
             return self.rev
 
 
+_own: tuple[float, frozenset[str]] = (-1e9, frozenset())
+_own_lock = threading.Lock()
+
+
+def own_addresses() -> frozenset[str]:
+    """This computer's own network addresses (asked at most once a minute): a browser on this computer that opens a
+    player started with ``--host <its address>`` comes from one of them."""
+    global _own
+    with _own_lock:
+        if time.monotonic() - _own[0] > 60:
+            _own = (time.monotonic(), frozenset(lan_addresses()))
+        return _own[1]
+
+
 def from_this_computer(client: str, remote: bool) -> bool:
-    """A request of a browser on this computer itself: from a loopback address and not passed on by a gateway of
-    *In your network*. A player started with ``--host`` answers the network directly - its requests from other
-    computers are not this computer's, whatever the login says."""
-    return client in ("127.0.0.1", "::1") and not remote
+    """A request of a browser on this computer itself: from a loopback address or one of this computer's own, and
+    not passed on by a gateway of *In your network*. A player started with ``--host`` answers the network directly -
+    its requests from other computers are not this computer's, whatever the login says (a connection's address
+    cannot be chosen by the other side)."""
+    if remote:
+        return False
+    return client in ("127.0.0.1", "::1") or client.removeprefix("::ffff:") in own_addresses()
 
 
 PLACE_KEYS = frozenset(
@@ -390,7 +407,9 @@ def make_handler(
         @property
         def remote(self) -> bool:
             """The request came from the network, by the gateway (which says so, on this computer)."""
-            return self.headers.get(REMOTE_HEADER) == "1" and self.client_address[0] in ("127.0.0.1", "::1")
+            # any copy says so (a forged second one never makes it this computer's)
+            marked = any(value.strip() == "1" for value in self.headers.get_all(REMOTE_HEADER) or [])
+            return marked and self.client_address[0] in ("127.0.0.1", "::1")
 
         @property
         def here(self) -> bool:
@@ -683,23 +702,23 @@ def make_handler(
                         "retired": RETIRED_DIR,
                         "comfyui": comfyui,
                         "pid": os.getpid(),
-                        "remote": self.remote,
+                        "remote": not self.here,
                     }
                 )
             if route == "/api/network":
                 if network is None:
                     return self._error(404, "no access from the network")
-                return self._json(
-                    {
-                        **network.status(self.headers.get(REMOTE_HOST_HEADER, "") if self.remote else ""),
-                        "remote": self.remote,
-                    }
-                )
+                doors = network.status(self.headers.get(REMOTE_HOST_HEADER, "") if self.remote else "")
+                if not self.here and not self.remote:
+                    # a device that reached a --host player directly: the links are the way in - not for it
+                    for key in ("url", "urls", "comfyui_url", "comfyui_urls"):
+                        doors.pop(key, None)
+                return self._json({**doors, "remote": not self.here})
             if route == "/api/comfyui":
                 # also the one the player starts itself (Settings > The studio), on the port set there; an address of
                 # its own (a loopback one: the player asks no other computer) only from this computer - from the
                 # network it would let anyone knock at this computer's ports
-                asked = "" if self.remote else query.get("url", "")
+                asked = "" if not self.here else query.get("url", "")
                 found = find_comfyui(asked or comfyui, launcher.url if launcher else None)
                 return self._json({"found": found})
             if route == "/api/find":
@@ -723,7 +742,7 @@ def make_handler(
                                 "version": __version__,
                             }
                         )
-                etag, body, packed = library_answer(self.remote)
+                etag, body, packed = library_answer(not self.here)
                 if self._unchanged(etag):
                     return None
                 return self._send(
@@ -1024,7 +1043,7 @@ def make_handler(
                 hub.close_stream(owner)
 
         def _event(self, event_id: str, kind: str, data: Any) -> bytes:
-            text = json.dumps(without_places(data) if self.remote else data, ensure_ascii=False)
+            text = json.dumps(without_places(data) if not self.here else data, ensure_ascii=False)
             return f"id: {event_id}\nevent: {kind}\ndata: {text}\n\n".encode()
 
         def _remote_page(self, method: str, route: str, query: dict[str, str], body: Any, owner: str) -> None:
@@ -1173,19 +1192,19 @@ def make_handler(
             """Who is logged in here, and who could log in: the login page asks first."""
             if accounts is None:
                 return self._json(
-                    {"login": False, "user": None, "chosen": True, "local": not self.remote, "users": []}
+                    {"login": False, "user": None, "chosen": True, "local": self.here, "users": []}
                 )
             chosen = accounts.session(self.token)
-            if chosen is not None and chosen.get("admin") and self.remote:
+            if chosen is not None and chosen.get("admin") and not self.here:
                 chosen = None
             return self._json(
                 {
                     "login": True,
                     "user": chosen or self.account,
                     "chosen": chosen is not None,
-                    "local": not self.remote,
+                    "local": self.here,
                     "users": accounts.users(),
-                    "admin": accounts.admin() if not self.remote else None,
+                    "admin": accounts.admin() if self.here else None,
                 }
             )
 
@@ -1220,7 +1239,8 @@ def make_handler(
             """The address wrong passwords and codes are counted by: the device's own (the gateway says it), never a
             header the browser chose."""
             if self.remote:
-                return "net:" + (self.headers.get(REMOTE_PEER_HEADER) or "network")
+                peers = self.headers.get_all(REMOTE_PEER_HEADER) or ["network"]
+                return "net:" + peers[-1].strip()  # the gateway's own comes last
             return str(self.client_address[0])
 
         def _invites(self, method: str, route: str, raw: bytes | None) -> None:

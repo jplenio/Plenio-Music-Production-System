@@ -10,7 +10,7 @@ import guestAccessSource from '../src/player/components/GuestAccess.vue?raw'
 function base(): Settings {
   return {
     guests: { on: false, mode: 'view', reactions: true },
-    make: { on: false, users: true, guests: true, per_person: 3, max_length: 'about 4:00', covers: true, approve: false, listen_first: false },
+    make: { on: false, users: true, guests: true, per_person: 3, max_length: 'about 4:00', covers: true, approve: false, listen_first: false, remote: true },
   }
 }
 

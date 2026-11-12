@@ -63,7 +63,7 @@ However you start it, it is the same player with the same playlists and settings
 | `--port 8765` | Another port, if 8765 is taken |
 | `--no-browser` | Do not open the browser |
 | `--comfyui http://127.0.0.1:8188` | The ComfyUI that *Open in ComfyUI* goes to (the button in ComfyUI sets it) |
-| `--host 127.0.0.1` | Only this computer can open the player. `--host 0.0.0.0` opens it to your network. There is no login, so only do this on a network you trust |
+| `--host 127.0.0.1` | Only this computer can open the player. `--host 0.0.0.0` opens it to your network: another device there is a guest until it logs in (the admin only on this computer itself, by `127.0.0.1` or one of its own addresses). Prefer *My devices* (People & access), whose link keeps strangers out; open the network this way only on one you trust |
 
 Instead of `--folder` you can set `PLENIO_PLAYER_FOLDER` (several folders separated by `;` on Windows, `:`
 elsewhere).

@@ -305,12 +305,20 @@ def serve(tools: Tools, source: TextIO, sink: TextIO) -> None:
             continue
         try:
             message = json.loads(line)
-        except ValueError:
+        except (ValueError, RecursionError):  # not JSON, or nested past what Python reads
             answer: dict[str, Any] | None = {"jsonrpc": "2.0", "id": None,
                                              "error": {"code": -32700, "message": "not JSON"}}  # fmt: skip
         else:
             try:
-                answer = handle(message, tools) if isinstance(message, dict) else None
+                answer = (
+                    handle(message, tools)
+                    if isinstance(message, dict)
+                    else {
+                        "jsonrpc": "2.0",
+                        "id": None,
+                        "error": {"code": -32600, "message": "one request object a line"},
+                    }
+                )
             except Exception as error:  # noqa: BLE001 - one bad message never ends the server
                 ident = message.get("id") if isinstance(message, dict) else None
                 answer = {
@@ -329,7 +337,7 @@ def main() -> int:
         os.environ.get("PLENIO_PLAYER", "http://127.0.0.1:8765"),
     )
     sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[union-attr]
-    sys.stdin.reconfigure(encoding="utf-8")  # type: ignore[union-attr]
+    sys.stdin.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
     serve(tools, sys.stdin, sys.stdout)
     return 0
 

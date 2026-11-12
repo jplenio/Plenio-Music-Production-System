@@ -112,7 +112,9 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
     ports.append(server.server_address[1])
-    url = f"http://{args.host}:{server.server_address[1]}/"
+    # on every network (0.0.0.0, ::) the browser here opens it by the loopback address: this computer is then the admin
+    shown = "127.0.0.1" if args.host in ("0.0.0.0", "::", "") else args.host  # noqa: S104 - the bind address
+    url = f"http://{shown}:{server.server_address[1]}/"
     say(f"Plenio Player {__version__} is running at {url} - stop it with Ctrl+C")
 
     # The songs are read while the player already answers (owner's report 2026-10-23: with thousands of

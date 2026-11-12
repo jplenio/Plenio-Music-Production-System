@@ -225,3 +225,33 @@ def test_a_player_started_with_host_never_takes_another_computer_for_this_one(tm
     token, _ = accounts.login_admin()
     lan.headers["Cookie"] = f"plenio_session={token}"
     assert lan.account is None  # the admin's session counts on this computer only
+
+
+def test_a_forged_second_mark_or_peer_changes_nothing(tmp_path: Path) -> None:
+    from email.message import Message
+
+    from plenio.player import server as server_module
+
+    accounts = Accounts(tmp_path)
+    library = Library([tmp_path / "songs"], cache=tmp_path / "cache.json")
+    handler = server_module.make_handler(library, State(tmp_path / "state.json"), accounts=accounts)
+    found = object.__new__(handler)
+    found.client_address = ("127.0.0.1", 50000)
+    found.headers = Message()
+    found.headers["X-Plenio-Remote"] = "0"
+    found.headers["X-Plenio-Remote"] = "1"
+    found.headers["X-Plenio-Remote-Peer"] = "9.9.9.9"
+    found.headers["X-Plenio-Remote-Peer"] = "192.168.1.50"
+    assert found.remote is True and found.here is False and found.account is None
+    assert found._peer() == "net:192.168.1.50"
+    lan = object.__new__(handler)
+    lan.client_address = ("192.168.1.77", 50000)
+    lan.headers = Message()
+    monkeypatch_own = server_module._own
+    try:
+        server_module._own = (1e18, frozenset({"192.168.1.10"}))
+        assert lan.here is False
+        lan.client_address = ("192.168.1.10", 50000)  # this computer's own address: a --host player's owner
+        assert lan.here is True and lan.account["admin"] is True
+    finally:
+        server_module._own = monkeypatch_own

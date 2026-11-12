@@ -150,7 +150,7 @@ export const PARTY_DEFAULT: PartyPlan = { name: '', add: true, make: true, react
 /** Live Play's own switch is the page's (its settings), not the server's. */
 export interface Before {
   guests: Pick<GuestStatus, 'on' | 'mode' | 'reactions'>
-  make: Pick<MakeSettingsValues, 'on' | 'guests' | 'approve'>
+  make: Pick<MakeSettingsValues, 'on' | 'guests' | 'approve' | 'remote'>
   live: boolean
 }
 
@@ -158,7 +158,8 @@ export function partyChanges(plan: PartyPlan, s: Settings, liveOn: boolean): { c
   return {
     changes: {
       guests: { on: true, mode: plan.add ? 'change' : 'view', reactions: plan.react },
-      make: plan.make ? { on: true, guests: true, approve: plan.approve } : { guests: false },
+      // the party's rules for everyone who comes by the network too (its link is in every invitation's code)
+      make: plan.make ? { on: true, guests: true, approve: plan.approve, remote: false } : { guests: false, remote: false },
     },
     live: true,
     before: snapshot(s, liveOn),
@@ -168,7 +169,7 @@ export function partyChanges(plan: PartyPlan, s: Settings, liveOn: boolean): { c
 export function snapshot(s: Settings, live: boolean): Before {
   return {
     guests: { on: s.guests.on, mode: s.guests.mode, reactions: s.guests.reactions },
-    make: { on: !!s.make.on, guests: !!s.make.guests, approve: !!s.make.approve },
+    make: { on: !!s.make.on, guests: !!s.make.guests, approve: !!s.make.approve, remote: s.make.remote !== false },
     live,
   }
 }
