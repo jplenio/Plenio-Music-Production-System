@@ -14,6 +14,28 @@
  * light.
  */
 
+/** The light in a picture of bytes (``LOW8``, no half floats): stored as the square root of an eighth, dithered;
+ * read back squared. With half floats both are the light itself. */
+export const CODEC = `
+#ifdef LOW8
+float ditherAt() { return fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5; }
+vec3 enc(vec3 c) { return sqrt(clamp(c, 0.0, 8.0) * 0.125) + ditherAt() / 255.0; }
+vec3 dec(vec3 c) { return c * c * 8.0; }
+float dec(float c) { return c * c * 8.0; }
+#else
+vec3 enc(vec3 c) { return c; }
+vec3 dec(vec3 c) { return c; }
+float dec(float c) { return c; }
+#endif
+`
+
+/** The 8-bit path's define and the codec, put into a shader after its ``out vec4 o;``. */
+export function withCodec(source: string, low8: boolean): string {
+  const lines = source.split('\n')
+  if (low8) lines.splice(1, 0, '#define LOW8 1')
+  return lines.join('\n').replace('out vec4 o;', `out vec4 o;\n${CODEC}`)
+}
+
 export const QUAD_VS = `#version 300 es
 layout(location = 0) in vec2 a;
 out vec2 uv;
@@ -80,7 +102,7 @@ void main() {
   vec3 c = image(p, uv);
   bvec3 bad = bvec3(isnan(c.x) || isinf(c.x), isnan(c.y) || isinf(c.y), isnan(c.z) || isinf(c.z));
   if (any(bad)) c = vec3(0.0);
-  o = vec4(clamp(c, 0.0, 64.0), 1.0);
+  o = vec4(enc(clamp(c, 0.0, 64.0)), 1.0);
 }`
 
 export const STATE_MAIN = `
@@ -101,7 +123,7 @@ uniform float threshold;
 in vec2 uv;
 out vec4 o;
 vec3 tap(vec2 at, inout float weight) {
-  vec3 c = texture(src, at).rgb;
+  vec3 c = dec(texture(src, at).rgb);
   float w = 1.0 / (1.0 + max(c.r, max(c.g, c.b)));
   weight += w;
   return c * w;
@@ -115,7 +137,7 @@ void main() {
   float knee = threshold * 0.6;
   float soft = clamp(b - threshold + knee, 0.0, 2.0 * knee);
   soft = soft * soft / (4.0 * knee + 1e-4);
-  o = vec4(c * max(soft, b - threshold) / max(b, 1e-4), 1.0);
+  o = vec4(enc(c * max(soft, b - threshold) / max(b, 1e-4)), 1.0);
 }`
 
 /** Down a level: half the size, softly. */
@@ -126,10 +148,10 @@ uniform vec2 texel;
 in vec2 uv;
 out vec4 o;
 void main() {
-  vec3 c = texture(src, uv).rgb * 4.0;
-  c += texture(src, uv - texel).rgb + texture(src, uv + texel).rgb;
-  c += texture(src, uv + vec2(texel.x, -texel.y)).rgb + texture(src, uv - vec2(texel.x, -texel.y)).rgb;
-  o = vec4(c / 8.0, 1.0);
+  vec3 c = dec(texture(src, uv).rgb) * 4.0;
+  c += dec(texture(src, uv - texel).rgb) + dec(texture(src, uv + texel).rgb);
+  c += dec(texture(src, uv + vec2(texel.x, -texel.y)).rgb) + dec(texture(src, uv - vec2(texel.x, -texel.y)).rgb);
+  o = vec4(enc(c / 8.0), 1.0);
 }`
 
 /** Up a level: the smaller one spread wide, added to this one. */
@@ -140,11 +162,11 @@ uniform vec2 texel;
 in vec2 uv;
 out vec4 o;
 void main() {
-  vec3 c = texture(src, uv + vec2(-2.0 * texel.x, 0.0)).rgb + texture(src, uv + vec2(2.0 * texel.x, 0.0)).rgb
-         + texture(src, uv + vec2(0.0, -2.0 * texel.y)).rgb + texture(src, uv + vec2(0.0, 2.0 * texel.y)).rgb;
-  c += 2.0 * (texture(src, uv + vec2(-texel.x, texel.y)).rgb + texture(src, uv + vec2(texel.x, texel.y)).rgb
-            + texture(src, uv + vec2(-texel.x, -texel.y)).rgb + texture(src, uv + vec2(texel.x, -texel.y)).rgb);
-  o = vec4(c / 12.0 + texture(add, uv).rgb, 1.0);
+  vec3 c = dec(texture(src, uv + vec2(-2.0 * texel.x, 0.0)).rgb) + dec(texture(src, uv + vec2(2.0 * texel.x, 0.0)).rgb)
+         + dec(texture(src, uv + vec2(0.0, -2.0 * texel.y)).rgb) + dec(texture(src, uv + vec2(0.0, 2.0 * texel.y)).rgb);
+  c += 2.0 * (dec(texture(src, uv + vec2(-texel.x, texel.y)).rgb) + dec(texture(src, uv + vec2(texel.x, texel.y)).rgb)
+            + dec(texture(src, uv + vec2(-texel.x, -texel.y)).rgb) + dec(texture(src, uv + vec2(texel.x, -texel.y)).rgb));
+  o = vec4(enc(c / 12.0 + dec(texture(add, uv).rgb)), 1.0);
 }`
 
 /** To the screen: the picture with its glow, exposed, through a filmic tone curve (ACES), a touch of colour fringing
@@ -164,8 +186,8 @@ void main() {
   vec2 uv = at / R;
   vec2 d = uv - 0.5;
   float f = fringe * (0.35 + pulse) * dot(d, d);
-  vec3 c = vec3(texture(scene, uv - d * f).r, texture(scene, uv).g, texture(scene, uv + d * f).b);
-  c += texture(glow, uv).rgb * bloom;
+  vec3 c = vec3(dec(texture(scene, uv - d * f).r), dec(texture(scene, uv).g), dec(texture(scene, uv + d * f).b));
+  c += dec(texture(glow, uv).rgb) * bloom;
   c *= exposure * (1.0 + 0.1 * pulse);
   c = aces(c);
   float v = length(d * vec2(R.x / R.y, 1.0));

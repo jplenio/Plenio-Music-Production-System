@@ -58,7 +58,7 @@ const GROUPS = computed<Group[]>(() => {
   groups.push({ id: 'classic', label: 'Classic', all: CLASSIC, offered: CLASSIC.filter(offered), notes: [], unavailable: [] })
   if (support.webgl) {
     groups.push({ id: 'drop', label: 'Plenio Drop', all: drop, offered: drop.filter(offered), notes: [], unavailable: [] })
-    if (support.float) {
+    {
       const waiting = nova.filter((p) => novaTimings.value[p.id] === undefined)
       const heavy = nova.filter((p) => novaSmooth(p.id) === false && novaTimings.value[p.id] !== -1)
       const broken = nova.filter((p) => novaTimings.value[p.id] === -1)
@@ -89,7 +89,7 @@ const copying = ref(false)
 /** Why Plenio Drop or Nova are not offered at all here. */
 const gpuNote = computed(() => {
   if (!support.webgl) return `Plenio Drop and Plenio Nova are not offered here: ${support.why}`
-  if (!support.float) return 'Plenio Nova is not offered here: this graphics card cannot draw its light in WebGL2 (no pictures in half floats).'
+  if (!support.float) return 'Plenio Nova draws its light in eight bits here (this graphics card has no pictures in half floats): its glow is a little coarser.'
   return ''
 })
 

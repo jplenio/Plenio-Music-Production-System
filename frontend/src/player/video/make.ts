@@ -372,7 +372,7 @@ export class Composer {
     if (this.nova?.lost && !this.disposed) this.nova = undefined
     if (this.nova === undefined) {
       try {
-        this.nova = gpuSupport().float ? new NovaRenderer() : null
+        this.nova = gpuSupport().webgl ? new NovaRenderer() : null
       } catch {
         this.nova = null
       }

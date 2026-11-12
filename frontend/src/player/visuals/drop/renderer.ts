@@ -16,6 +16,7 @@
  * One renderer (one WebGL context) is shared by every Drop visual; it draws into an offscreen canvas at a
  * fraction of the visual's size (``dropOptions.scale``), which the visual then draws scaled into its own.
  */
+import { drawFormat } from '../gpu'
 import type { Frame } from '../analysis'
 
 /** What a preset sees of the music, per frame - MilkDrop's names where it has them. */
@@ -482,7 +483,7 @@ export class DropRenderer {
     if (!gl) throw new Error('WebGL2 is not available')
     this.gl = gl
     this.canvas.addEventListener('webglcontextlost', () => (this.lost = true))
-    this.half = !!gl.getExtension('EXT_color_buffer_float')
+    this.half = drawFormat(gl) === 'half'
     this.warp = this.program(QUAD_VS, WARP_FS)
     this.comp = this.program(QUAD_VS, COMP_FS)
     this.draw = this.program(DRAW_VS, DRAW_FS)

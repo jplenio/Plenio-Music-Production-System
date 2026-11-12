@@ -62,7 +62,6 @@ function jump(label: string): void {
 const gpuNote = (() => {
   const support = gpuSupport()
   if (!support.webgl) return `Plenio Drop and Plenio Nova are not offered here: ${support.why}`
-  if (!support.float) return 'Plenio Nova is not offered here: this graphics card cannot draw its light in WebGL2.'
   return ''
 })()
 /** A visual's name in its group. */

@@ -151,12 +151,14 @@ describe('what this device can draw (owner’s request 2026-10-30)', () => {
     expect(presetById(instead)?.kind, instead).toBeUndefined()
   })
 
-  it('offers Plenio Drop with WebGL2, Plenio Nova where it also has half floats', () => {
+  it('offers Plenio Drop and Nova with WebGL2 - Nova in eight bits where the card has no half floats', () => {
     setGpuSupport({ webgl: true, float: false, why: '', card: 'Old card' })
     timeAll(1)
     expect(offered(presetById('drop-nebula-swirl')!)).toBe(true)
+    expect(offered(presetById('nova-pulsar')!)).toBe(true)
+    expect(offeredForVideo(presetById('nova-pulsar')!)).toBe(true)
+    setGpuSupport({ webgl: false, float: false, why: 'no WebGL2', card: '' })
     expect(offered(presetById('nova-pulsar')!)).toBe(false)
-    expect(offeredForVideo(presetById('nova-pulsar')!)).toBe(false)
   })
 
   it('offers a Nova visual for the live picture only once timed smooth on this card', () => {

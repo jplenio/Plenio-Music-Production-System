@@ -14,7 +14,8 @@
  * It draws at as many pixels as a visual may have (gpu.ts) and the visual draws the picture scaled into its own canvas.
  */
 import type { Frame } from '../analysis'
-import { DOWN_FS, FINAL_FS, HEADER, IMAGE_MAIN, PREFILTER_FS, QUAD_VS, STATE_MAIN, UP_FS } from './glsl'
+import { DOWN_FS, FINAL_FS, HEADER, IMAGE_MAIN, PREFILTER_FS, QUAD_VS, STATE_MAIN, UP_FS, withCodec } from './glsl'
+import { drawFormat } from '../gpu'
 
 export interface NovaDef {
   id: string
@@ -199,7 +200,7 @@ export class NovaRenderer {
       event.preventDefault()
       this.lost = true
     })
-    this.half = !!gl.getExtension('EXT_color_buffer_float')
+    this.half = drawFormat(gl) === 'half'
     this.parallel = live ? gl.getExtension('KHR_parallel_shader_compile') : null
     this.quad = gl.createVertexArray() as WebGLVertexArrayObject
     gl.bindVertexArray(this.quad)
@@ -335,7 +336,7 @@ export class NovaRenderer {
   private link(fragment: string, shaders: WebGLShader[]): WebGLProgram {
     const gl = this.gl
     const vs = this.shader(gl.VERTEX_SHADER, QUAD_VS)
-    const fs = this.shader(gl.FRAGMENT_SHADER, fragment)
+    const fs = this.shader(gl.FRAGMENT_SHADER, withCodec(fragment, !this.half))
     shaders.push(vs, fs)
     const program = gl.createProgram() as WebGLProgram
     gl.attachShader(program, vs)

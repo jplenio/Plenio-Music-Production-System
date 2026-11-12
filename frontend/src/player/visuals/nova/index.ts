@@ -36,7 +36,7 @@ export function novaRenderer(): NovaRenderer | null {
   if (shared?.lost) shared = undefined
   if (shared === undefined) {
     try {
-      shared = gpuSupport().float ? new NovaRenderer(true) : null
+      shared = gpuSupport().webgl ? new NovaRenderer(true) : null
     } catch (error) {
       console.warn('Plenio Nova:', error)
       shared = null
@@ -105,7 +105,7 @@ export function toTime(defs: NovaDef[], timings: Record<string, number>, again: 
  * draw them.
  */
 export function checkNova(palette: Uint8ClampedArray): void {
-  if (checking || !gpuSupport().float) return
+  if (checking || !gpuSupport().webgl) return
   loadTimings(NOVA_VERSION)
   const waiting = toTime(NOVA, novaTimings.value, retimed)
   if (!waiting.length) return

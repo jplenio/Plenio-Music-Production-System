@@ -27,6 +27,15 @@ export interface GpuSupport {
   card: string
 }
 
+/** What a visual draws its light into (phase 7.1): half floats where the card renders them - ``EXT_color_buffer_float``
+ * on a desktop, ``EXT_color_buffer_half_float`` on many phones - else bytes, with the light stored as its square
+ * root and dithered, so that glow above white and dark gradients survive eight bits. */
+export type DrawFormat = 'half' | 'bytes'
+
+export function drawFormat(gl: Pick<WebGL2RenderingContext, 'getExtension'>): DrawFormat {
+  return gl.getExtension('EXT_color_buffer_float') || gl.getExtension('EXT_color_buffer_half_float') ? 'half' : 'bytes'
+}
+
 const SOFTWARE = /swiftshader|llvmpipe|softpipe|basic render|software|mesa offscreen/i
 const NONE: GpuSupport = { webgl: false, float: false, why: 'This browser has no WebGL2.', card: '' }
 let probed: GpuSupport | null = null
@@ -56,7 +65,7 @@ export function gpuSupport(): GpuSupport {
     const card = cardOf(gl)
     probed = SOFTWARE.test(card)
       ? { ...NONE, why: 'This browser draws WebGL with the processor, not the graphics card - too slow to play smoothly.', card }
-      : { webgl: true, float: !!gl.getExtension('EXT_color_buffer_float'), why: '', card }
+      : { webgl: true, float: drawFormat(gl) === 'half', why: '', card }
     gl.getExtension('WEBGL_lose_context')?.loseContext()
   } catch {
     probed = NONE
@@ -189,7 +198,7 @@ export function takeBackLeftOut(): void {
 export function offered(preset: Preset): boolean {
   if (leftOut.value.has(preset.id)) return false
   if (preset.kind === 'drop') return gpuSupport().webgl
-  if (preset.kind === 'nova') return gpuSupport().float && novaSmooth(preset.id) === true
+  if (preset.kind === 'nova') return gpuSupport().webgl && novaSmooth(preset.id) === true
   return true
 }
 
@@ -197,6 +206,6 @@ export function offered(preset: Preset): boolean {
  * can draw it at all. */
 export function offeredForVideo(preset: Preset): boolean {
   if (preset.kind === 'drop') return gpuSupport().webgl
-  if (preset.kind === 'nova') return gpuSupport().float && novaTimings.value[preset.id] !== -1
+  if (preset.kind === 'nova') return gpuSupport().webgl && novaTimings.value[preset.id] !== -1
   return true
 }
