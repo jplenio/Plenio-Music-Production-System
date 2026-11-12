@@ -1,0 +1,64 @@
+name: Release
+
+# A tag v<version> publishes (MP 8.2): the whole CI first, then the GitHub release with the committed notes
+# (docs/releases/<version>.md) and the release files, the Comfy Registry, and a check that the published package
+# installs into a fresh ComfyUI with everything it should register. `tools/release.py prepare` made the commit the
+# tag points at; tagging and pushing are the owner's. Needs the secret REGISTRY_ACCESS_TOKEN.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  checks:
+    uses: ./.github/workflows/ci.yml
+    with:
+      browser: true
+
+  release:
+    needs: checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: python -m pip install comfy-cli
+      - run: git config --global core.quotePath false
+      - name: The tag is the version, and the tree is as prepared
+        run: |
+          test "v$(python tools/release.py version)" = "${GITHUB_REF_NAME}"
+          python tools/release.py verify
+      - run: python tools/build_release_assets.py --out dist
+      - name: The GitHub release with the committed notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" dist/*/* --title "Plenio ${GITHUB_REF_NAME#v}" --notes-file "docs/releases/${GITHUB_REF_NAME#v}.md" --verify-tag
+      - name: Publish to the Comfy Registry
+        uses: Comfy-Org/publish-node-action@v1
+        with:
+          personal_access_token: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
+
+  verify-published:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: plenio
+      - uses: actions/checkout@v5
+        with:
+          repository: Comfy-Org/ComfyUI
+          ref: v0.44.2
+          path: ComfyUI
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+      - run: python -m pip install -r ComfyUI/requirements.txt comfy-cli
+      - name: The published package in a fresh ComfyUI
+        working-directory: plenio
+        run: python tools/verify_install.py --comfyui ../ComfyUI --version "${GITHUB_REF_NAME#v}"

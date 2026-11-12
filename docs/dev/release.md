@@ -2,20 +2,24 @@
 
 Published Registry versions are immutable: every fix is a new version.
 
-## Before a release
+## Preparing and publishing (2.0)
 
-1. Version in `pyproject.toml` (`[project].version`), `plenio/__init__.py` and `frontend/package.json` (+ `package-lock.json`); a `CHANGELOG.md` section with the date.
-2. All suites green: the CI on GitHub (Ubuntu + Windows, ComfyUI host job, frontend with the build check) and, on the owner's machine, the full suite with the real models (`PLENIO_SMOKE=1`, `docs/dev/testing.md`).
-3. `tools/build_graphs.py`, `tools/api_docs.py` (the Song API's reference in `docs/api`: its OpenAPI copy names the Plenio version) and `tools/build_thumbnails.py` leave no diff; `tools/workflow_validation.py` passes.
-4. Package check: `comfy node validate` and `comfy node pack` (comfy-cli: `python -m pip install comfy-cli` into the Python environment you work with; on Windows set `PYTHONUTF8=1` - its check prints characters the console code page cannot show). Run it **after committing**: `comfy node pack` takes the files git tracks, so an uncommitted new file is missing from `node.zip`. Then look into `node.zip`: the <!--fact:templates-->6<!--/fact--> templates, <!--fact:blueprints-->14<!--/fact--> blueprints, `plenio/`, `web/`, `resources/`, `locales/` (the blueprints' tooltips) and `docs/user/` must be there, `tests/`, `tools/`, `frontend/`, `assets/` and the rest of `docs/` must not (`.comfyignore`). Delete `node.zip` afterwards.
-5. No local paths, private addresses, personal prompt text or credentials in shipped files (`tests/unit/test_import_boundary.py`).
+A version is three numbers - there are no pre-release versions. `tools/release.py` prepares it, a tag publishes it.
 
-## Publishing
+```bash
+python tools/bench.py --api http://127.0.0.1:8188 --label <version> --card "<card>"     # on the reference card
+python tools/release.py prepare <version> --bench docs/test-reports/data/bench-<version>.json
+git diff                                   # review: the version, the dated CHANGELOG, the generated files,
+git commit -am "Release <version>"         # docs/releases/<version>.md, docs/security/review-<version>.md
+python tools/release.py verify             # the checks again on the committed tree
+git tag v<version> && git push origin main v<version>    # the owner's step: it publishes
+```
 
-1. Commit and push to `main`.
-2. Create a GitHub release with the tag `v<version>` (for example `v0.2.0`) and the changelog section as its text. The workflow `.github/workflows/publish.yml` attaches these files itself (`tools/build_release_assets.py`; locally: `python tools/build_release_assets.py`, needs comfy-cli, writes `dist/v<version>/`): the packed node as `Plenio-Music-Production-System-v<version>.zip` (the content of `comfy node pack` under one top folder, so it unpacks straight into `custom_nodes`), the six templates as `Plenio <template> v<version>.json`, and `SHA256SUMS.txt`. Install the zip once into a fresh ComfyUI after the release (<!--fact:nodes-->39<!--/fact--> nodes, <!--fact:blueprints-->14<!--/fact--> blueprints, <!--fact:templates-->6<!--/fact--> templates, no import error).
-3. Publishing the release runs `.github/workflows/publish.yml`, which uploads the version to the Comfy Registry (publisher `jplenio`, package `comfyui-plenio-music`). It needs the repository secret `REGISTRY_ACCESS_TOKEN` (a token from the Registry's publisher page). The workflow can also be started by hand (*Actions → Publish to Comfy Registry → Run workflow*).
-4. Check the package page on the Registry and install it once through the ComfyUI Manager.
+`prepare` needs a clean tree and a benchmark report within the budgets (`docs/dev/performance.md`); it writes the version into `pyproject.toml`, `plenio/__init__.py`, `frontend/package.json` and its lock file, dates the CHANGELOG section (which must have its intro: a paragraph before its first `###`), runs `tools/build_graphs.py`, `tools/api_docs.py`, `tools/facts.py --write` and `tools/media_links.py --write`, writes the release notes (`tools/release_notes.py`) and the review request with the package gate's delta against the last published version, then runs `verify`. It commits nothing.
+
+The tag starts `.github/workflows/release.yml`: the whole CI with the browser check, the check that the tag is the version and the tree is as prepared, the release files (`tools/build_release_assets.py`: the full download with the Studio add-on, the six templates, `SHA256SUMS.txt`), the GitHub release with the committed notes, the Comfy Registry (secret `REGISTRY_ACCESS_TOKEN`, publisher `jplenio`, package `comfyui-plenio-music`), and `tools/verify_install.py`, which installs the published package into a fresh ComfyUI and checks that it registers <!--fact:nodes-->39<!--/fact--> nodes, <!--fact:templates-->6<!--/fact--> templates and <!--fact:blueprints-->14<!--/fact--> blueprints with no import error and without the add-on.
+
+After publishing: `python tools/registry_status.py --version <version>` (the scheduled `registry.yml` opens an issue when a version's status changes); file the review request of `docs/security/review-<version>.md` if the version is flagged.
 
 The Registry's icon and banner are the raw GitHub URLs of `assets/branding/icon.png` and `assets/branding/banner.png` (`[tool.comfy]` in `pyproject.toml`); they must exist on `main` before publishing.
 

@@ -1,0 +1,46 @@
+name: Registry status
+
+# Twice a day: the Comfy Registry's status of every published version (tools/registry_status.py). A change - a
+# version flagged, cleared, banned - opens an issue (or comments on the open one); the last state is kept in the
+# Actions cache so only changes are reported.
+on:
+  schedule:
+    - cron: "23 6,18 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: actions/cache/restore@v4
+        with:
+          path: registry-status.json
+          key: registry-status-${{ github.run_id }}
+          restore-keys: registry-status-
+      - name: What changed
+        id: changed
+        run: |
+          python tools/registry_status.py --since registry-status.json > changes.txt
+          python tools/registry_status.py --json > registry-status.json
+          echo "count=$(grep -c . changes.txt || true)" >> "$GITHUB_OUTPUT"
+          cat changes.txt
+      - uses: actions/cache/save@v4
+        with:
+          path: registry-status.json
+          key: registry-status-${{ github.run_id }}
+      - if: steps.changed.outputs.count != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="The Comfy Registry's status changed"
+          body="$(printf 'The Registry status of comfyui-plenio-music changed:\n\n```\n%s\n```\n\n`python tools/registry_status.py` lists every version.' "$(cat changes.txt)")"
+          open=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "in:title \"$title\"" --json number --jq '.[0].number')
+          if [ -n "$open" ]; then gh issue comment "$open" --repo "$GITHUB_REPOSITORY" --body "$body"; else gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"; fi

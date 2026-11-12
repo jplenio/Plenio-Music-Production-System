@@ -42,6 +42,44 @@
     "114": "@@ -133,5 +133,5 @@\n-    return (parts.hostname or \"\") == (sent_to.hostname or \"\") and port == host_port\n+    return (parts.hostname or \"XXXX\") == (sent_to.hostname or \"\") and port == host_port",
     "117": "@@ -133,5 +133,5 @@\n-    return (parts.hostname or \"\") == (sent_to.hostname or \"\") and port == host_port\n+    return (parts.hostname or \"\") == (sent_to.hostname or \"XXXX\") and port == host_port"
    }
+  },
+  "plenio/core/modelplan.py": {
+   "mutants": 159,
+   "survived": 28,
+   "timed_out": 0,
+   "suspicious": 0,
+   "killed": 131,
+   "survived_percent": 17.6,
+   "survivors": {
+    "13": "@@ -24,7 +24,7 @@\n-_KEEP_WITHIN = {\"quality\": 0, \"balanced\": 1, \"speed\": 1, \"small\": 1}\n+_KEEP_WITHIN = {\"quality\": 0, \"balanced\": 1, \"speed\": 2, \"small\": 1}",
+    "14": "@@ -24,7 +24,7 @@\n-_KEEP_WITHIN = {\"quality\": 0, \"balanced\": 1, \"speed\": 1, \"small\": 1}\n+_KEEP_WITHIN = {\"quality\": 0, \"balanced\": 1, \"speed\": 1, \"XXsmallXX\": 1}",
+    "15": "@@ -24,7 +24,7 @@\n-_KEEP_WITHIN = {\"quality\": 0, \"balanced\": 1, \"speed\": 1, \"small\": 1}\n+_KEEP_WITHIN = {\"quality\": 0, \"balanced\": 1, \"speed\": 1, \"small\": 2}",
+    "17": "@@ -29,7 +29,7 @@\n-@dataclass(frozen=True)\n+@dataclass(frozen=False)",
+    "19": "@@ -39,7 +39,7 @@\n-    alternatives: tuple[Variant, ...] = ()\n+    alternatives: tuple[Variant, ...] = None",
+    "20": "@@ -40,7 +40,7 @@\n-    warning: str = \"\"\n+    warning: str = \"XXXX\"",
+    "21": "@@ -40,7 +40,7 @@\n-    warning: str = \"\"\n+    warning: str = None",
+    "22": "@@ -41,7 +41,7 @@\n-    better: Variant | None = None\n+    better: Variant & None = None",
+    "23": "@@ -41,7 +41,7 @@\n-    better: Variant | None = None\n+    better: Variant | None = \"\"",
+    "32": "@@ -57,7 +57,7 @@\n-        return (variant.speed, variant.quality, -variant.bytes)\n+        return (variant.speed, variant.quality, +variant.bytes)",
+    "36": "@@ -60,7 +60,7 @@\n-    return (variant.quality, variant.speed, -variant.bytes)\n+    return (variant.quality, variant.speed, +variant.bytes)",
+    "47": "@@ -95,7 +95,7 @@\n-        raise ValueError(f\"unknown preference {prefer!r}: one of {', '.join(PREFERENCES)}\")\n+        raise ValueError(f\"unknown preference {prefer!r}: one of {'XX, XX'.join(PREFERENCES)}\")",
+    "48": "@@ -95,7 +95,7 @@\n-        raise ValueError(f\"unknown preference {prefer!r}: one of {', '.join(PREFERENCES)}\")\n+        raise ValueError(f\"XXunknown preference {prefer!r}: one of {', '.join(PREFERENCES)}XX\")",
+    "56": "@@ -99,7 +99,7 @@\n-        low = known is not None and vram_gib is not None and vram_gib < known.vram_min_gib\n+        low = known is not None and vram_gib is not None and vram_gib <= known.vram_min_gib",
+    "69": "@@ -113,7 +113,7 @@\n-            else \"your choice (a file of your own, not in Plenio's catalogue)\",\n+            else \"XXyour choice (a file of your own, not in Plenio's catalogue)XX\",",
+    "70": "@@ -114,7 +114,7 @@\n-            tuple(v for v in variants if v is not known),\n+            tuple(v for v in variants if v is  known),",
+    "71": "@@ -117,7 +117,7 @@\n-    vram = vram_gib or 0.0\n+    vram = vram_gib or 1.0",
+    "76": "@@ -119,7 +119,7 @@\n-    runs = [v for v in variants if vram >= v.vram_min_gib]\n+    runs = [v for v in variants if vram > v.vram_min_gib]",
+    "84": "@@ -125,7 +125,7 @@\n-    kept = False\n+    kept = True",
+    "85": "@@ -125,7 +125,7 @@\n-    kept = False\n+    kept = None",
+    "97": "@@ -135,7 +135,7 @@\n-            runnable = [v for v in have_any if vram >= v.vram_min_gib] or have_any\n+            runnable = [v for v in have_any if vram > v.vram_min_gib] or have_any",
+    "122": "@@ -148,7 +148,7 @@\n-        warning = f\"{best.file} runs partly in the computer's memory on this card - expect it to be slower.\"\n+        warning = f\"XX{best.file} runs partly in the computer's memory on this card - expect it to be slower.XX\"",
+    "128": "@@ -152,7 +152,7 @@\n-            f\"{'none' if not vram_gib else f'{vram_gib:.1f}'} - expect it to be very slow.\"\n+            f\"{'none' if not vram_gib else f'XX{vram_gib:.1f}XX'} - expect it to be very slow.\"",
+    "132": "@@ -155,7 +155,7 @@\n-        offer = f\"{better.file} would suit this card better; Plenio Setup can fetch it.\"\n+        offer = f\"XX{better.file} would suit this card better; Plenio Setup can fetch it.XX\"",
+    "134": "@@ -156,7 +156,7 @@\n-        warning = f\"{warning} {offer}\" if warning else offer\n+        warning = f\"XX{warning} {offer}XX\" if warning else offer",
+    "137": "@@ -169,7 +169,7 @@\n-@dataclass(frozen=True)\n+@dataclass(frozen=False)",
+    "154": "@@ -227,7 +227,7 @@\n-    text = \"|\".join(\n+    text = \"XX|XX\".join(",
+    "155": "@@ -228,7 +228,7 @@\n-        f\"{p.component}={p.file}:{int(p.installed)}\" for p in sorted(picks, key=lambda p: p.component)\n+        f\"XX{p.component}={p.file}:{int(p.installed)}XX\" for p in sorted(picks, key=lambda p: p.component)"
+   }
   }
  }
 }

@@ -4,8 +4,10 @@
 
 Needs comfy-cli (`python -m pip install comfy-cli`) and git. Writes into ``dist/v<version>/``:
 
-- ``Plenio-Music-Production-System-v<version>.zip`` - the Registry package (`comfy node pack`, so the same
-  files as in the ComfyUI Manager) under one top folder, ready to unpack into ``ComfyUI/custom_nodes``;
+- ``Plenio-Music-Production-System-v<version>.zip`` - the full download (ADR-0012): the Registry package
+  (`comfy node pack`, so the same files as in the ComfyUI Manager) and the Studio add-on with the two start
+  scripts, which ``.comfyignore`` leaves out of the Registry package, under one top folder, ready to unpack into
+  ``ComfyUI/custom_nodes``;
 - ``Plenio <template> v<version>.json`` - the six templates;
 - ``SHA256SUMS.txt``.
 """
@@ -70,8 +72,25 @@ def main() -> int:
             names = [n for n in source.namelist() if not n.endswith("/")]
             for name in sorted(names):
                 zipped.writestr(f"{TOP}/{name}", source.read(name))
-    if not any(n.startswith("plenio/core/assets/") for n in names) or not any(
-        n.startswith("subgraphs/") for n in names
+            # the full download carries the Studio add-on (ADR-0012): the files git tracks of it
+            tracked = (
+                subprocess.run(  # noqa: S603, S607 - git, fixed arguments
+                    ["git", "ls-files", "-z", "--", "plenio/addons", "Plenio Player.bat", "plenio_player.sh"],
+                    cwd=PROJECT,
+                    env=env,
+                    capture_output=True,
+                    check=True,
+                )
+                .stdout.decode()
+                .split("\0")
+            )
+            addon = sorted(n for n in tracked if n and n not in names)
+            for name in addon:
+                zipped.write(PROJECT / name, f"{TOP}/{name}")
+    if (
+        not any(n.startswith("plenio/core/assets/") for n in names)
+        or not any(n.startswith("subgraphs/") for n in names)
+        or not any(n.startswith("plenio/addons/") for n in addon)
     ):
         print("the package is incomplete (see .comfyignore and [tool.comfy] includes)", file=sys.stderr)
         return 1
@@ -81,7 +100,9 @@ def main() -> int:
         f"{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}\n" for path in sorted(out.iterdir())
     )
     (out / "SHA256SUMS.txt").write_text(sums, encoding="utf-8")
-    print(f"wrote {len(list(out.iterdir()))} files ({len(names)} in the package) to {out}")
+    print(
+        f"wrote {len(list(out.iterdir()))} files ({len(names)} in the package, {len(addon)} of the add-on) to {out}"
+    )
     return 0
 
 

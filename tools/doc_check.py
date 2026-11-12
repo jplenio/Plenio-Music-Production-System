@@ -163,7 +163,9 @@ def finding_problems() -> list[str]:
 
 
 def main() -> int:
-    problems = broken_links() + variable_problems() + config_sections() + route_problems() + finding_problems()
+    problems = (
+        broken_links() + variable_problems() + config_sections() + route_problems() + finding_problems()
+    )
     for problem in problems:
         print(problem)
     print(f"doc check: {len(problems)} problem(s)" if problems else "doc check: no problem")

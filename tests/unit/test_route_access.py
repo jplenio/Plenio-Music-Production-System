@@ -4,6 +4,8 @@ bug's text stays in the log, it can name this computer's folders."""
 
 from __future__ import annotations
 
+import pytest
+
 from plenio.core.access import from_this_computer
 from plenio.core.errors import (
     INTERNAL_MESSAGE,
@@ -80,3 +82,43 @@ def test_a_page_of_another_site_in_a_browser_here_is_not_this_computer() -> None
     assert not from_this_computer("127.0.0.1", {"Host": "127.0.0.1:8188", "Sec-Fetch-Site": "same-site"})
     assert from_this_computer("127.0.0.1", {"Host": "127.0.0.1:8188", "Sec-Fetch-Site": "same-origin"})
     assert from_this_computer("127.0.0.1", {"Host": "127.0.0.1:8188"})  # a program: no Origin
+
+
+# --- found by the mutation run (phase 9.3) ---------------------------------------------------------------------------
+
+
+def test_an_origin_without_a_port_has_its_schemes_port() -> None:
+    here = {"Host": "localhost:80"}
+    assert from_this_computer("127.0.0.1", {**here, "Origin": "http://localhost"})
+    assert from_this_computer("127.0.0.1", {"Host": "localhost:443", "Origin": "https://localhost"})
+    assert from_this_computer("127.0.0.1", {"Host": "localhost", "Origin": "http://localhost:80"})
+    assert from_this_computer("127.0.0.1", {"Host": "localhost", "Origin": "https://localhost:443"})
+    assert not from_this_computer("127.0.0.1", {"Host": "localhost:81", "Origin": "http://localhost"})
+    assert not from_this_computer("127.0.0.1", {"Host": "localhost", "Origin": "https://localhost:444"})
+
+
+def test_a_port_that_is_no_port_is_refused() -> None:
+    assert not from_this_computer("127.0.0.1", {"Host": "localhost:8188", "Origin": "http://localhost:99999"})
+    assert not from_this_computer("127.0.0.1", {"Host": "localhost:99999", "Origin": "http://localhost:8188"})
+
+
+def test_an_origin_without_a_host_is_refused() -> None:
+    # a page's request names its origin; with no Host to compare it with it is not this computer's
+    assert not from_this_computer("127.0.0.1", {"Origin": "http://none"})
+
+
+def test_a_local_route_says_what_it_is_and_the_table_cannot_be_changed() -> None:
+    import dataclasses
+
+    from plenio.core.access import Route
+
+    def handler() -> None:
+        return None
+
+    with pytest.raises(ValueError, match="says what it is"):
+        Route("GET", "/plenio/x", handler, "local", hint="ask here")
+    with pytest.raises(ValueError, match="says what it is"):
+        Route("GET", "/plenio/x", handler, "local", what="the computer")
+    route = Route("GET", "/plenio/x", handler, "compute")
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        route.access = "local"  # type: ignore[misc]
