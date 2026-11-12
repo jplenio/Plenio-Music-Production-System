@@ -16,6 +16,7 @@
 import type { Frame } from '../analysis'
 import { DOWN_FS, FINAL_FS, HEADER, IMAGE_MAIN, PREFILTER_FS, QUAD_VS, STATE_MAIN, UP_FS, withCodec } from './glsl'
 import { drawFormat } from '../gpu'
+import { type Cue, NO_CUE } from '../conductor'
 
 export interface NovaDef {
   id: string
@@ -53,6 +54,8 @@ export class NovaMusic {
   beats = 0
   travel = 0
   spin = 0
+  /** The cue of this frame (conductor.ts): none without a track. */
+  cue: Cue = NO_CUE
   /** Seconds since the visual started (going round every hour), and since the last frame. */
   time = 0
   dt = 1 / 60
@@ -65,6 +68,7 @@ export class NovaMusic {
   private start = -1
 
   update(f: Frame, speed: [number, number]): void {
+    this.cue = f.cue ?? NO_CUE
     const dt = Math.max(0.001, Math.min(0.1, f.dt || 1 / 60))
     const k = (seconds: number) => 1 - Math.exp(-dt / seconds)
     const follow = (now: number, to: number, up: number, down: number) => now + (to - now) * k(to > now ? up : down)
@@ -412,6 +416,12 @@ export class NovaRenderer {
     set('travel', music.travel)
     set('spin', music.spin)
     set('Q', this.quality)
+    set('anticipation', music.cue.anticipation)
+    set('impact', music.cue.impact)
+    set('tension', music.cue.tension)
+    set('beatPhase', music.cue.beatPhase)
+    set('barPhase', music.cue.barPhase)
+    set('sectionEnergy', music.cue.sectionEnergy)
     gl.uniform1i(this.u(program, 'specTex'), 0)
     gl.uniform1i(this.u(program, 'waveTex'), 1)
     gl.uniform1i(this.u(program, 'palTex'), 2)

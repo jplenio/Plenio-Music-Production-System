@@ -43,6 +43,14 @@ export interface Music {
   songTime: number
   lineOn: number
   lineAge: number
+  /** The cue (conductor.ts), 0 without a track: anticipation, impact, tension, the beat's and the bar's phase,
+   * the section's energy. */
+  anticipation?: number
+  impact?: number
+  tension?: number
+  beatPhase?: number
+  barPhase?: number
+  sectionEnergy?: number
   /** The waveform (the mix, left, right) as -1..1, and the spectrum in 128 log bins as 0..1. */
   wave: Float32Array
   left: Float32Array
@@ -327,7 +335,7 @@ class Listener {
   private att = { bass: 1, mid: 1, treb: 1 }
   private frames = 0
   readonly music: Music = {
-    bass: 1, mid: 1, treb: 1, bassAtt: 1, midAtt: 1, trebAtt: 1, vol: 0, beat: false, pulse: 0, time: 0, dt: 0.016, frame: 0, aspect: 16 / 9, songTime: 0, lineOn: 0, lineAge: 0,
+    bass: 1, mid: 1, treb: 1, bassAtt: 1, midAtt: 1, trebAtt: 1, vol: 0, beat: false, pulse: 0, time: 0, dt: 0.016, frame: 0, aspect: 16 / 9, songTime: 0, lineOn: 0, lineAge: 0, anticipation: 0, impact: 0, tension: 0, beatPhase: 0, barPhase: 0, sectionEnergy: 0.5,
     wave: new Float32Array(WAVE_POINTS), left: new Float32Array(WAVE_POINTS), right: new Float32Array(WAVE_POINTS), spec: new Float32Array(SPEC_BINS),
   } // prettier-ignore
 
@@ -350,6 +358,13 @@ class Listener {
     m.songTime = this.story.songTime
     m.lineOn = this.story.lineOn
     m.lineAge = this.story.lineAge
+    const cue = f.cue
+    m.anticipation = cue?.anticipation ?? 0
+    m.impact = cue?.impact ?? 0
+    m.tension = cue?.tension ?? 0
+    m.beatPhase = cue?.beatPhase ?? 0
+    m.barPhase = cue?.barPhase ?? 0
+    m.sectionEnergy = cue?.sectionEnergy ?? 0.5
     m.beat = f.beat
     m.pulse = f.pulse
     m.time = f.time

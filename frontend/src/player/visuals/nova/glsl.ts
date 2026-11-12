@@ -49,6 +49,9 @@ uniform float T, bass, mid, treb, level, kick, pulse, beats, travel, spin;
 uniform sampler2D specTex, waveTex, palTex, state;
 uniform vec2 S;
 uniform float fresh, stepDt, lag;
+// the cue (conductor.ts; 0 without a track): anticipation and impact around a strong onset, tension before a louder
+// section, the beat's and the bar's phase, the section's energy
+uniform float anticipation, impact, tension, beatPhase, barPhase, sectionEnergy;
 // Q: the quality, 0.5 .. 1 (phase 7.2) - the march steps and the octaves a visual takes; the governor lowers it
 // before it takes pixels away
 uniform float Q;

@@ -291,6 +291,12 @@ export function compilePreset(file: PresetFile, id = `drop-${slug(file.name ?? '
       vars.songtime = m.songTime
       vars.line_on = m.lineOn
       vars.line_age = m.lineAge
+      vars.anticipation = m.anticipation ?? 0
+      vars.impact = m.impact ?? 0
+      vars.tension = m.tension ?? 0
+      vars.beat_phase = m.beatPhase ?? 0
+      vars.bar_phase = m.barPhase ?? 0
+      vars.section_energy = m.sectionEnergy ?? 0.5
       // every frame starts from the defaults and the preset's base
       for (const key of PARAMETERS) vars[key] = DEFAULTS[key] as number
       for (const [k, f] of base) vars[k] = f(vars)

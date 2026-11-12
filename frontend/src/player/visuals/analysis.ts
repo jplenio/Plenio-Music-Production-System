@@ -3,6 +3,7 @@
  * bands, the level, and beats - an onset of the bass energy above its recent average (as Winamp's AVS
  * "beat detection" does), with a short refractory time so one kick is one beat.
  */
+import type { Cue } from './conductor'
 
 export interface Frame {
   /** 0..255 per frequency bin (the analyser's byte spectrum). */
@@ -22,6 +23,8 @@ export interface Frame {
   time: number
   dt: number
   playing: boolean
+  /** What the song's analysis track says now (conductor.ts), when the song has one. */
+  cue?: Cue
 }
 
 export class BeatDetector {

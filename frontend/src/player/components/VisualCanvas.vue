@@ -25,6 +25,8 @@ import { dropOptions, dropRenderer } from '../visuals/drop/renderer'
 import { myPresets } from '../visuals/drop'
 import { tellRenderer } from '../visuals/drop/story'
 import { governor, leaveOut, loadTimings, medianTiming, novaTimings, tierOf } from '../visuals/gpu'
+import { cueAt, loadTrack, trackOf } from '../visuals/conductor'
+import { isPortable, portablePage } from '../portable'
 import { SceneMixer } from '../visuals/mixer'
 import { NOVA_VERSION, checkNova, novaOptions, novaScaleFor } from '../visuals/nova'
 import { makeColors, miniScene, presetById, type Scene } from '../visuals/presets'
@@ -114,6 +116,18 @@ function resize(): void {
 }
 
 let drawnAt = 0
+/** The frame with the cue of the song's track at the heard time (phase 7.5): the visuals may read it. */
+function withCue(frame: Frame): Frame {
+  const song = current.value
+  const known = trackOf.value
+  if (!song || !known || known.id !== song.id || !known.analysis) return frame
+  return { ...frame, cue: cueAt(known.analysis, engine.heard(settings.syncOffset / 1000)) }
+}
+async function fetchTrack(id: string): Promise<unknown> {
+  if (isPortable) return (await portablePage(id))?.analysis ?? null
+  const answer = await fetch(`/api/analysis/${encodeURIComponent(id)}`)
+  return answer.ok ? answer.json() : null
+}
 function loop(now: number = performance.now()): void {
   raf = requestAnimationFrame(loop)
   const el = canvas.value
@@ -128,7 +142,7 @@ function loop(now: number = performance.now()): void {
   engine.sensitivity = settings.visuals.sensitivity
   dropOptions.scale = settings.visuals.dropScale * Math.sqrt(governor.factor)
   novaOptions.scale = novaScaleFor(settings.visuals.dropScale)
-  const frame = engine.frame()
+  const frame = withCue(engine.frame())
   const colors = makeColors(hue.value, props.mini ? 'song' : settings.visuals.scheme, frame.time)
   if (props.mini && mini) {
     ctx.save()
@@ -181,10 +195,11 @@ function keepSmooth(frame: Frame, palette: Uint8ClampedArray): void {
   }
 }
 
-watch(() => current.value?.id, () => {
+watch(() => current.value?.id, (id) => {
   turn = 0
   pick()
-})
+  if (id && !props.mini) void loadTrack(id, fetchTrack)
+}, { immediate: true })
 watch(() => props.section, (now, before) => {
   if (now && before && now !== before && settings.visuals.switchOn === 'section') pick(true)
 })
