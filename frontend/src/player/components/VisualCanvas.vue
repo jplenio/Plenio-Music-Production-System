@@ -26,6 +26,7 @@ import { myPresets } from '../visuals/drop'
 import { tellRenderer } from '../visuals/drop/story'
 import { governor, leaveOut, loadTimings, medianTiming, novaTimings, tierOf } from '../visuals/gpu'
 import { cueAt, loadTrack, trackOf } from '../visuals/conductor'
+import { finisher, finishes } from '../visuals/finish'
 import { type Change, changeAt, changeDue, directorPlan } from '../visuals/director'
 import { isPortable, portablePage } from '../portable'
 import { type FadeStyle, SceneMixer } from '../visuals/mixer'
@@ -199,6 +200,11 @@ function loop(now: number = performance.now()): void {
     tellRenderer(renderer, song ? { id: song.id, title: song.title, cover: cover.value, lines: lines.value } : null, engine.heard(settings.syncOffset / 1000))
   }
   mixer.draw(ctx, frame, el.width, el.height, colors)
+  // one light (finish.ts): the finishing of Nova over every visual, Nova's own scenes already have it
+  if (!props.mini && finishes(settings.visuals.finish, mixer.preset?.kind, mixer.changing)) {
+    const done = finisher()?.finish(el, el.width, el.height)
+    if (done) ctx.drawImage(done, 0, 0, el.width, el.height)
+  }
   keepSmooth(frame, colors.palette())
   if (props.force) return
   // the switches during a song: every N seconds, or when the music drops in after a quiet passage

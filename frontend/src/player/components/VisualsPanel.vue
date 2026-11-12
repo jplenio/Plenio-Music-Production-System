@@ -325,6 +325,7 @@ async function editCopy(): Promise<void> {
     <label class="row">Sensitivity <input v-model.number="v.sensitivity" type="range" min="0.5" max="2" step="0.05" /></label>
     <label class="row switch"><input v-model="v.lyrics" type="checkbox" /> Lyrics over the visual</label>
     <label class="row switch"><input v-model="v.titles" type="checkbox" /> Title card when a song starts</label>
+    <label class="row switch" title="Plenio Nova's glow, tone curve, vignette and grain over every visual - the classics, Drop and Nova alike"><input v-model="v.finish" type="checkbox" /> One light over every visual</label>
     <label v-if="guestStatus?.on" class="row switch" title="The QR code and address of the live playlist over the visual (its corner and size: Live Play > Guests)"><input v-model="settings.live.overVisual" type="checkbox" /> The guests' way in over the visual</label>
     <p class="note">A song’s own visual wins, then the playlist’s, then the mode.</p>
   </aside>

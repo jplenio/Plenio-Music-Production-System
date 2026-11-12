@@ -50,6 +50,8 @@ export interface VisualSettings {
   /** How one visual changes into the next, and how long it takes (owner's request 2026-10-18: softly). */
   fade: FadeStyle
   fadeSeconds: number
+  /** One light (finish.ts): Nova's glow, tone curve, vignette and grain over every visual. */
+  finish: boolean
 }
 
 export const DEFAULT_VISUALS: VisualSettings = {
@@ -70,6 +72,7 @@ export const DEFAULT_VISUALS: VisualSettings = {
   novaOffered: true,
   fade: DEFAULT_FADE.style,
   fadeSeconds: DEFAULT_FADE.seconds,
+  finish: true,
 }
 
 export function withDefaults(raw: unknown): VisualSettings {
@@ -96,6 +99,7 @@ export function withDefaults(raw: unknown): VisualSettings {
   const fade = fadeWithDefaults(merged.fade, merged.fadeSeconds)
   merged.fade = fade.style
   merged.fadeSeconds = fade.seconds
+  merged.finish = merged.finish !== false
   return merged
 }
 
