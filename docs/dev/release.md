@@ -42,7 +42,7 @@ They are made in the separate workspace `Plenio-Media` beside this repository (i
 
 ## Demo gallery
 
-The listening page is GitHub Pages from the `docs/` folder of `main` (`docs/index.html`, `docs/.nojekyll` so the other documents are not processed); every push to `main` publishes it. From the top: two films with sound (`#sound`; `docs/assets/media/` - *Plenio in 30 seconds* and *Twelve genres*, 720p H.264 with a poster each, cut from the 1.4.0 social clips), the song videos on YouTube (`#videos`), new songs (`#new`, shown once there is one), how the songs were made (`#how`) and the archive (`#archive`) with its three collections.
+The listening page is GitHub Pages from the `docs/` folder of `main` (`docs/index.html`, `docs/.nojekyll` so the other documents are not processed); every push to `main` publishes it. From the top: two films with sound (`#sound`; `docs/assets/media/` - *Plenio 2.0* - the hero film of Plenio-Media, one real run, as a 720p cut - and *Twelve genres* from the 1.4.0 social clips, 720p H.264 with a poster each), the song videos on YouTube (`#videos`), new songs (`#new`, shown once there is one), how the songs were made (`#how`) and the archive (`#archive`) with its three collections.
 
 **Song videos and new songs** come from `docs/demo-showcase.js`, written by `tools/demo_showcase.py` - [docs/demo-showcase.md](../demo-showcase.md) says how to add a song (from its FLAC or record: SoundCloud, YouTube or its MP3 copied into `docs/assets/showcase/`) or a video, list and remove them. Only what the song's page in the player shows is copied.
 

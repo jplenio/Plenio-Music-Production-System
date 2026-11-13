@@ -93,7 +93,7 @@ Also new: six **recipes**, *Approve* goes on with the run, the same six **preset
 <tr><td align="center" width="33%"><a href="https://jplenio.github.io/Plenio-Music-Production-System/go/song-4/"><img src="https://i.ytimg.com/vi/UoQnC7ceOl8/mqdefault.jpg" alt="Chrome Heartbeat City Glow - Synth-Pop, a song made with Plenio, as a Plenio Player video" width="100%" /></a><br /><b>Chrome Heartbeat City Glow</b><br /><sub>Synth-Pop</sub></td><td align="center" width="33%"><a href="https://jplenio.github.io/Plenio-Music-Production-System/go/song-5/"><img src="https://i.ytimg.com/vi/r-X1GWI-BR0/mqdefault.jpg" alt="The Brass Floor - Swing / Big Band, a song made with Plenio, as a Plenio Player video" width="100%" /></a><br /><b>The Brass Floor</b><br /><sub>Swing / Big Band</sub></td><td align="center" width="33%"><a href="https://jplenio.github.io/Plenio-Music-Production-System/go/song-6/"><img src="https://i.ytimg.com/vi/4A_jQsZj8B4/mqdefault.jpg" alt="Lonely Quiet Ascent - Solo Piano, a song made with Plenio, as a Plenio Player video" width="100%" /></a><br /><b>Lonely Quiet Ascent</b><br /><sub>Solo Piano</sub></td></tr>
 </table>
 
-**🎧 [The demo page](https://jplenio.github.io/Plenio-Music-Production-System/)** - Plenio in 30 seconds, twelve genres with sound, the song videos and more than seventy songs and covers to play, each with everything the model received.
+**🎧 [The demo page](https://jplenio.github.io/Plenio-Music-Production-System/)** - Plenio 2.0 in 50 seconds, twelve genres with sound, the song videos and more than seventy songs and covers to play, each with everything the model received.
 
 ## ✨ From one sentence to a release
 
