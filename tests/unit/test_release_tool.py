@@ -69,7 +69,10 @@ def test_the_changelog_is_dated_only_with_its_intro(tmp_path: Path, monkeypatch:
 def test_the_notes_come_from_the_section_in_a_fixed_order() -> None:
     text = release_notes.notes("9.9.9", CHANGELOG.format(intro="Setup and more.\n\n"), "comfy node install x")
     assert text.startswith("# Plenio 9.9.9\n\nSetup and more.\n")
-    assert text.index("## Added") < text.index("## Fixed") < text.index("## Install")
+    # how to install stays open; every change follows, folded part by part with its count
+    assert text.index("## Install") < text.index("## Every change")
+    assert text.index("<b>Added</b> (1)") < text.index("<b>Fixed</b> (1)")
+    assert text.count("<details>") == text.count("</details>") == 2
     assert "- old" not in text and "`comfy node install x`" in text
     with pytest.raises(SystemExit, match="no intro"):
         release_notes.notes("9.9.9", CHANGELOG.format(intro=""), "x")
@@ -113,3 +116,91 @@ def test_the_notes_link_files_at_the_tag_not_relative() -> None:
     text = release_notes.absolute_links("[guide](docs/user/x.md) [site](https://a.b/) [here](#top)", "2.0.0")
     assert "](https://github.com/jplenio/Plenio-Music-Production-System/blob/v2.0.0/docs/user/x.md)" in text
     assert "](https://a.b/)" in text and "](#top)" in text
+
+
+SHOWN = """# Changelog
+
+## 9.9.9 - unreleased
+
+Setup and more.
+
+### Highlights
+
+- **Setup** - plans the files.
+- **Another thing** - with `code` and a [guide](docs/user/x.md).
+
+### Updating from 9.8
+
+- Nothing to migrate.
+
+### Added
+
+#### A group
+
+- **A thing** that helps,
+  on two lines.
+- **A second thing**.
+
+### Changed
+
+- **A change**.
+"""
+
+
+def test_the_highlights_and_the_update_stay_open_and_every_change_is_folded() -> None:
+    text = release_notes.notes("9.9.9", SHOWN, "x")
+    assert text.index("## Highlights") < text.index("## Updating from 9.8") < text.index("## Install")
+    assert "- **Setup** - plans the files." in text and "<table>" not in text
+    assert "<b>Added</b> (2)" in text and "#### A group" in text and "<b>Changed</b> (1)" in text
+    assert "<b>Highlights</b>" not in text and "<b>Updating" not in text
+    assert "blob/v9.9.9/docs/user/x.md" in text
+
+
+def test_a_highlight_gets_its_picture_and_only_registered_videos_are_linked() -> None:
+    look = {
+        "banner": "assets/b.png",
+        "watch": [{"key": "film-hero", "label": "The film"}, {"key": "not-uploaded", "label": "Later"}],
+        "pictures": {"Setup": "assets/setup.jpg"},
+    }
+    media = 'site = "https://example.org/p"\n[[video]]\nkey = "film-hero"\nyoutube = "abc"\n'
+    text = release_notes.notes("9.9.9", SHOWN, "x", look, media)
+    raw = "https://raw.githubusercontent.com/jplenio/Plenio-Music-Production-System/v9.9.9"
+    assert text.startswith(f'<p align="center"><img src="{raw}/assets/b.png"')
+    assert "▶ **[The film](https://example.org/p/go/film-hero/)**" in text and "Later" not in text
+    assert f'<img src="{raw}/assets/setup.jpg" alt="Setup"' in text
+    assert (
+        '<tr><td colspan="2">\n\n**Another thing**' in text
+    )  # a highlight without a picture spans the table
+    assert release_notes.items("- a\n  b\n- c\n\n#### h\n\n- d") == ["a\n  b", "c", "d"]
+    assert release_notes.lead_in("***Home***: x") == "Home"
+
+
+def test_the_registry_gets_a_square_icon_and_a_21_to_9_banner(tmp_path: Path) -> None:
+    import struct
+    import zlib
+
+    def chunk(kind: bytes, data: bytes) -> bytes:
+        return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", zlib.crc32(kind + data))
+
+    def png(path: Path, width: int, height: int) -> None:
+        raw = b"".join(b"\x00" + b"\x00\x00\x00" * width for _ in range(height))
+        header = struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(
+            b"\x89PNG\r\n\x1a\n"
+            + chunk(b"IHDR", header)
+            + chunk(b"IDAT", zlib.compress(raw))
+            + chunk(b"IEND", b"")
+        )
+
+    base = "https://raw.githubusercontent.com/jplenio/Plenio-Music-Production-System/main/"
+    pyproject = f'[tool.comfy]\nIcon = "{base}assets/icon.png"\nBanner = "{base}assets/banner.png"\n'
+    (tmp_path / "pyproject.toml").write_text(pyproject, encoding="utf-8")
+    png(tmp_path / "assets" / "icon.png", 400, 400)
+    png(tmp_path / "assets" / "banner.png", 84, 36)
+    assert release.branding_problems(tmp_path) == []
+    png(tmp_path / "assets" / "icon.png", 512, 512)
+    png(tmp_path / "assets" / "banner.png", 80, 36)
+    found = " ".join(release.branding_problems(tmp_path))
+    assert "at most 400 px" in found and "21:9" in found
+    assert release.branding_problems(ROOT) == []  # the repository's own

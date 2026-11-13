@@ -22,7 +22,23 @@ The tag starts `.github/workflows/release.yml`: the whole CI with the browser ch
 
 After publishing: `python tools/registry_status.py --version <version>` (the scheduled `registry.yml` opens an issue when a version's status changes); file the review request of `docs/security/review-<version>.md` if the version is flagged.
 
-The Registry's icon and banner are the raw GitHub URLs of `assets/branding/icon.png` and `assets/branding/banner.png` (`[tool.comfy]` in `pyproject.toml`); they must exist on `main` before publishing.
+The Registry's icon and banner are the raw GitHub URLs of `assets/branding/icon.png` and `assets/branding/banner.png` (`[tool.comfy]` in `pyproject.toml`); they must exist on `main` before publishing. `verify` checks that they are PNGs and that the Registry takes them: the icon square and at most 400 px, the banner 21:9.
+
+### The release page
+
+The notes are the CHANGELOG section, made for a reader of the release page: the banner, the intro, the films to watch, the **Highlights** (a picture beside each), **Updating from 1.x**, how to install - and then every change, folded part by part. How the page looks is `docs/releases/<version>.json`:
+
+```json
+{"banner": "assets/branding/banner-large.png",
+ "watch": [{"key": "film-hero", "label": "Plenio 2.0 in 50 seconds"}],
+ "pictures": {"Plenio Setup": "assets/branding/2.0.0/setup.jpg"}}
+```
+
+`pictures` go by a highlight's bold lead-in; a film in `watch` is linked only once `resources/media.toml` knows its key (it is uploaded). After the films are uploaded and their ids committed, run `python tools/release_notes.py <version>` again - `verify` fails until the notes link them. `python tools/release_notes.py <version> --print` shows the page without writing it.
+
+### Films, tutorials and pictures
+
+They are made in the separate workspace `Plenio-Media` beside this repository (its `docs/new-version-in-six-commands.md`). Before the tag: `node media.mjs install` there copies the banner, the icon, the mark and the README's pictures into `assets/` (review and commit them here), and `node media.mjs kit <version>` collects the films, tutorials, posts and the posting plan. After the tag: `node media.mjs publish youtube --apply` uploads them privately and writes their ids into `resources/media.toml` (commit it), `--release` makes them public.
 
 ## Demo gallery
 

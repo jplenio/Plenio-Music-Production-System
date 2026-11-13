@@ -125,6 +125,44 @@ def review_request(version: str) -> str:
     )
 
 
+REGISTRY_ICON_MAX = 400
+"""The Comfy Registry's icon: square, at most 400 x 400 (docs.comfy.org/registry/specifications)."""
+REGISTRY_BANNER_RATIO = 21 / 9
+
+
+def png_size(path: Path) -> tuple[int, int] | None:
+    """A PNG's width and height from its header (standard library only), or None when it is no PNG."""
+    head = path.read_bytes()[:24]
+    if len(head) < 24 or head[:8] != b"\x89PNG\r\n\x1a\n":
+        return None
+    return int.from_bytes(head[16:20], "big"), int.from_bytes(head[20:24], "big")
+
+
+def branding_problems(root: Path | None = None) -> list[str]:
+    """What the Registry would not take or would show badly: the icon and the banner that pyproject.toml names."""
+    root = root or PROJECT
+    problems = []
+    text = (root / "pyproject.toml").read_text(encoding="utf-8")
+    for field, rule in (("Icon", "icon"), ("Banner", "banner")):
+        match = re.search(rf'^{field} = "[^"]*?/main/([^"]+)"', text, re.M)
+        if not match:
+            problems.append(f"pyproject.toml: [tool.comfy] {field} names no file of this repository on main")
+            continue
+        path = root / match.group(1)
+        size = png_size(path) if path.exists() else None
+        if size is None:
+            problems.append(f"{match.group(1)}: missing or not a PNG ({field} of the Registry)")
+            continue
+        width, height = size
+        if rule == "icon" and (width != height or width > REGISTRY_ICON_MAX):
+            problems.append(
+                f"{match.group(1)}: {width} x {height} - the Registry's icon is square, at most {REGISTRY_ICON_MAX} px"
+            )
+        if rule == "banner" and abs(width / height - REGISTRY_BANNER_RATIO) > 0.01:
+            problems.append(f"{match.group(1)}: {width} x {height} - the Registry's banner is 21:9")
+    return problems
+
+
 def verify(version: str | None = None) -> int:
     """The checks on the tree as it is; nothing is written."""
     version = version or current()
@@ -148,6 +186,7 @@ def verify(version: str | None = None) -> int:
         elif tracked.returncode != 0:
             # the tag's release job reads them from the commit: a file left untracked fails it after the push
             problems.append(f"{rel} is not committed: git add docs/releases docs/security before the commit")
+    problems += branding_problems()
     python = sys.executable
     for command in (
         [python, "tools/facts.py", "--check"],
