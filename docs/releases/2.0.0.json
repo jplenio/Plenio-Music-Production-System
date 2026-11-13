@@ -1,0 +1,17 @@
+{
+ "banner": "assets/branding/banner-large.png",
+ "watch": [
+  {"key": "film-hero", "label": "Plenio 2.0 in 50 seconds"},
+  {"key": "film-whats-new-2", "label": "What is new"},
+  {"key": "film-party-2", "label": "Your party."},
+  {"key": "tutorial-2-setup", "label": "Install and Plenio Setup"}
+ ],
+ "pictures": {
+  "Plenio Setup": "assets/branding/2.0.0/setup.jpg",
+  "Every model on `auto`": "assets/branding/2.0.0/auto.jpg",
+  "Song API v2": "assets/branding/2.0.0/api.jpg",
+  "People & access": "assets/branding/2.0.0/people.jpg",
+  "The Director": "assets/branding/2.0.0/director.jpg",
+  "A package that starts nothing": "assets/branding/2.0.0/package.jpg"
+ }
+}
