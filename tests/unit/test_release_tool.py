@@ -204,3 +204,15 @@ def test_the_registry_gets_a_square_icon_and_a_21_to_9_banner(tmp_path: Path) ->
     found = " ".join(release.branding_problems(tmp_path))
     assert "at most 400 px" in found and "21:9" in found
     assert release.branding_problems(ROOT) == []  # the repository's own
+
+
+def test_the_checklist_says_where_the_release_stands_and_writes_nothing() -> None:
+    if shutil.which("git") is None:
+        pytest.skip("no git")
+    before = (ROOT / "CHANGELOG.md").read_bytes()
+    rows = release.checklist()
+    steps = [step for _, step, _ in rows]
+    assert any("the version is" in s for s in steps) and any("icon and banner" in s for s in steps)
+    assert rows[-1][0] is None and rows[-2][0] is None  # the workflow and the verdict are the owner's
+    assert all(todo for _, _, todo in rows)  # every step says what to do
+    assert (ROOT / "CHANGELOG.md").read_bytes() == before

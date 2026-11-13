@@ -13,6 +13,7 @@ git diff                                   # review: the version, the dated CHAN
 git add docs/releases docs/security        # the two new files: the notes and the review request
 git commit -am "Release <version>"
 python tools/release.py verify             # the checks again on the committed tree
+python tools/release.py checklist          # where the release stands, and what comes next
 git tag v<version> && git push origin main v<version>    # the owner's step: it publishes
 ```
 

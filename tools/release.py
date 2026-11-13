@@ -4,6 +4,7 @@
     python tools/release.py version 2.0.0              # write it everywhere it stands
     python tools/release.py prepare 2.0.0 --bench docs/test-reports/data/bench-<label>.json
     python tools/release.py verify                     # the checks again, nothing written
+    python tools/release.py checklist                  # where the release stands, and what comes next
 
 ``prepare`` writes the version into ``pyproject.toml``, ``plenio/__init__.py``, ``frontend/package.json`` and its lock
 file; dates the CHANGELOG section (it must have its intro); regenerates the generated files (graphs, API docs,
@@ -214,6 +215,83 @@ def verify(version: str | None = None) -> int:
     return 1 if problems else 0
 
 
+def _git(*args: str) -> str:
+    done = subprocess.run(["git", *args], cwd=PROJECT, capture_output=True, text=True, check=False)  # noqa: S603, S607
+    return done.stdout.strip() if done.returncode == 0 else ""
+
+
+def checklist(version: str | None = None) -> list[tuple[bool | None, str, str]]:
+    """Where a release stands, step by step: (done, the step, what to do next). ``None``: the owner's step, which
+    this computer cannot see. Nothing is written; the network is not asked."""
+    version = version or current()
+    rows: list[tuple[bool | None, str, str]] = []
+    same = len(set(versions().values())) == 1 and current() == version
+    rows.append(
+        (
+            same,
+            f"the version is {version} everywhere",
+            f"python tools/release.py prepare {version} --bench <report>",
+        )
+    )
+    changelog = (PROJECT / "CHANGELOG.md").read_text(encoding="utf-8")
+    dated = bool(re.search(rf"^## {re.escape(version)} - \d{{4}}-\d{{2}}-\d{{2}}\s*$", changelog, re.M))
+    rows.append(
+        (dated, "the CHANGELOG section is dated and has its intro", "write the intro, then prepare dates it")
+    )
+    for rel, what in (
+        (f"docs/releases/{version}.md", "the release notes are"),
+        (f"docs/security/review-{version}.md", "the review request is"),
+    ):
+        tracked = bool(_git("ls-files", rel))
+        rows.append((tracked, f"{what} committed ({rel})", "git add docs/releases docs/security, commit"))
+    look = PROJECT / "docs" / "releases" / f"{version}.json"
+    if look.exists():
+        data = json.loads(look.read_text(encoding="utf-8"))
+        media = (PROJECT / "resources" / "media.toml").read_text(encoding="utf-8")
+        keys = set(re.findall(r'^key = "([\w-]+)"', media, re.M))
+        films = [w["key"] for w in data.get("watch", [])]
+        linked = [k for k in films if k in keys]
+        rows.append(
+            (
+                len(linked) == len(films) if films else True,
+                f"the release page links its films ({len(linked)} of {len(films)} uploaded)",
+                f"Plenio-Media: node media.mjs publish youtube --apply, commit resources/media.toml, python tools/release_notes.py {version}",
+            )
+        )
+    rows.append(
+        (
+            not branding_problems(),
+            "the Registry's icon and banner fit",
+            "Plenio-Media: node media.mjs stills banner icon, node media.mjs install",
+        )
+    )
+    clean = not _git("status", "--porcelain", "--untracked-files=no")
+    rows.append((clean, "the tree is committed", "git status; commit what belongs to the release"))
+    tagged = bool(_git("tag", "--list", f"v{version}"))
+    rows.append(
+        (
+            tagged or None,
+            f"the tag v{version} exists here",
+            f"python tools/release.py verify, then: git tag v{version} && git push origin main v{version}",
+        )
+    )
+    rows.append(
+        (
+            None,
+            "the release workflow ran (GitHub, Registry, verify_install)",
+            "github.com/jplenio/Plenio-Music-Production-System/actions",
+        )
+    )
+    rows.append(
+        (
+            None,
+            "the Registry's verdict",
+            f"python tools/registry_status.py --version {version}; if flagged: file docs/security/review-{version}.md",
+        )
+    )
+    return rows
+
+
 def prepare(version: str, bench: Path | None, today: str) -> int:
     import bench as bench_tool
 
@@ -272,7 +350,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     p.add_argument("--bench", type=Path, help="the benchmark report of this version (bench.py's JSON)")
     p.add_argument("--date", default=datetime.date.today().isoformat())
     sub.add_parser("verify")
+    c = sub.add_parser("checklist", help="where the release stands, step by step, and what comes next")
+    c.add_argument("new", nargs="?")
     args = parser.parse_args(argv)
+    if args.command == "checklist":
+        rows = checklist(args.new)
+        for done, step, todo in rows:
+            mark = {True: "done", False: "TODO", None: "owner"}[done]
+            print(f"[{mark:>5}] {step}" + ("" if done else f"\n         -> {todo}"))
+        nxt = next((step for done, step, _ in rows if done is False), None)
+        print(
+            f"next: {nxt}" if nxt else "nothing left on this computer; the rest is the owner's (push the tag)"
+        )
+        return 0
     if args.command == "version":
         if args.new is None:
             print(current())
