@@ -56,6 +56,9 @@ jobs:
       - run: python tools/doc_check.py
       # every video by its key: go pages and the player's list as resources/media.toml says, no direct YouTube link
       - run: python tools/media_links.py --check
+      # the DAW plug-in (vst3/, built by vst3.yml): what it uses of the Song API is still there, its DAW guide is current
+      - run: python vst3/tools/plenio.py check
+      - run: python vst3/tools/docs/make_daws_md.py --check
       - run: python -m pytest tests/unit tests/workflows tests/contract/test_data_schemas.py -n auto -m "not io and not process"
 
   io:

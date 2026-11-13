@@ -59,6 +59,7 @@ known-first-party = ["plenio", "harness", "workflow_validation", "score_strategi
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["T20", "S101"]
 "tools/**" = ["T20"]
+"vst3/tools/**" = ["T20", "E731", "E741"]  # the plug-in's build, check and media tools
 "docs/api/examples/**" = ["T20"]  # example programs for the Song API: they print what they do
 "docs/api/v1/examples/**" = ["T20"]  # v1's, frozen
 

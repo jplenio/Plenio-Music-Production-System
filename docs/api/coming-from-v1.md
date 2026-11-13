@@ -87,18 +87,22 @@ on a job that does not wait), `unauthorized`, `remote_off`, `busy` (too many eve
 
 ## The Plenio VST3
 
-The VST3 is a repository of its own; this page is its change list. In the order of what it gains:
+The plug-in lives in this repository ([`vst3/`](../../vst3/README.md)) and moved with 2.0 - an example of the steps
+above in a program that has to keep working with an older Plenio:
 
-1. **Token field** in its settings and the `Authorization` header on every request (step 0) - needed for a DAW on
-   another computer than ComfyUI.
-2. **v2 when there**, v1 otherwise (step 1); store v2 job ids with the project, so a re-opened project finds its
-   songs (step 2).
-3. **`yue2-daw`** for stems and sheet music in one job (step 6).
-4. **A review screen** for the lyrics before the take (step 3), with `"review": []` when it is switched off.
-5. **`/songs/{id}/again`** for *another take* (step 5).
+1. **A token** in its settings, sent as the `Authorization` header with every request and kept in the system's
+   credential store (step 0) - for a DAW on another computer than ComfyUI.
+2. **v2 when there**, v1 otherwise (step 1): it asks `GET /plenio/api/v2` first; `404` means a Plenio before 2.0.
+3. **Jobs by their id** (step 2): a job is followed on the API that made it (`job_…` is v2's), so a project saved
+   with a v1 job in it still gets its take. `failed` with `interrupted` or `lost` is told as *ComfyUI stopped while
+   the take was being made*.
+4. **`"review": []`** with every v2 job (step 3): the plug-in's own way to change the words is to edit them and
+   generate again. A job that waits for a review anyway is approved as written.
 
-Not changed by 2.0 for the VST3: the fields, seeds, uploads (`POST /uploads?name=`), the files and their roles,
-`GET /jobs/{id}/bars`.
+Not used by the plug-in yet: `yue2-daw` (it orders `yue2-song` and `yue2-cover` with `"stems": true`), a review
+screen for the lyrics, `/songs/{id}/again`, the event stream (it follows a job with the long poll). Unchanged for
+it: the fields, seeds, uploads (`POST /uploads?name=`), the files and their roles, `GET /jobs/{id}/bars`.
+`python vst3/tools/plenio.py check` compares what the plug-in calls with this checkout on every build.
 
 ## The Plenio Player
 

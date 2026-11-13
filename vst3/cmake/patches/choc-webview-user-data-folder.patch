@@ -1,0 +1,17 @@
+diff --git a/choc/gui/choc_WebView.h b/choc/gui/choc_WebView.h
+index 57e1ebf..d9fbb89 100644
+--- a/choc/gui/choc_WebView.h
++++ b/choc/gui/choc_WebView.h
+@@ -2051,6 +2051,12 @@ private:
+     //==============================================================================
+     static std::wstring getUserDataFolder()
+     {
++       #ifdef CHOC_WEBVIEW_USER_DATA_FOLDER_FN
++        // Plenio VST3: a plug-in must not put its WebView2 data in a folder named after the host's exe
++        if (auto custom = CHOC_WEBVIEW_USER_DATA_FOLDER_FN(); ! custom.empty())
++            return custom;
++       #endif
++
+         wchar_t currentExePath[MAX_PATH] = {};
+         wchar_t dataPath[MAX_PATH] = {};
+ 

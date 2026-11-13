@@ -17,6 +17,8 @@
 /CLAUDE.md
 /.gitattributes
 /tests/
+# The DAW plug-in (C++ sources, its web UI, its installers): built by CI, shipped as release files.
+/vst3/
 /tools/
 /frontend/
 /assets/

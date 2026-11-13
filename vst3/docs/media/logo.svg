@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="title">
+  <title id="title">Plenio VST3</title>
+  <defs>
+    <radialGradient id="badge" cx="30%" cy="22%" r="95%">
+      <stop offset="0" stop-color="#2a1342"/>
+      <stop offset="0.55" stop-color="#140a24"/>
+      <stop offset="1" stop-color="#07040d"/>
+    </radialGradient>
+    <linearGradient id="neon" x1="96" y1="96" x2="440" y2="440" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffb23e"/>
+      <stop offset="0.45" stop-color="#ff3d8b"/>
+      <stop offset="1" stop-color="#8a4dff"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#badge)"/>
+  <rect x="17" y="17" width="478" height="478" rx="111" fill="none" stroke="#ffffff" stroke-opacity="0.09" stroke-width="2"/>
+  <g fill="none" stroke="url(#neon)" stroke-width="17" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
+    <!-- The P: three parallel lines, as in Plenio's own mark. -->
+    <path d="M136 418 V112 H282 A120 120 0 0 1 282 352 H212"/>
+    <path d="M168 418 V144 H282 A88 88 0 0 1 282 320 H232"/>
+    <path d="M200 418 V176 H282 A56 56 0 0 1 282 288 H252"/>
+    <!-- The sound: a waveform, as on a track. -->
+    <path d="M300 402 V390"/>
+    <path d="M330 414 V378"/>
+    <path d="M360 426 V366"/>
+    <path d="M390 410 V382"/>
+    <path d="M420 400 V392"/>
+  </g>
+</svg>

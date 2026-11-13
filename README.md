@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/runs-100%25%20local-ff2fa8" alt="Runs 100 % locally" />
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-ff9a3c" alt="Apache 2.0" /></a>
   <a href="https://www.youtube.com/playlist?list=PLAFqTtP59fgE"><img src="https://img.shields.io/badge/video%20tutorials-YouTube-ff0000?logo=youtube&logoColor=white" alt="Video tutorials on YouTube" /></a>
-  <a href="https://github.com/jplenio/Plenio-VST3"><img src="https://img.shields.io/badge/in%20your%20DAW-Plenio%20VST3-d61cf5" alt="Plenio VST3: Plenio in your DAW" /></a>
+  <a href="vst3/README.md"><img src="https://img.shields.io/badge/in%20your%20DAW-Plenio%20VST3-d61cf5" alt="Plenio VST3: Plenio in your DAW" /></a>
 </p>
 
 <p align="center">
@@ -111,7 +111,7 @@ Also new: six **recipes**, *Approve* goes on with the run, the same six **preset
 | **Polish** | **Audio HQ** (stereo cleanup, UniverSR regenerating the highs of a dull take), a tone match on the curve, **-14 LUFS / -1 dBTP** with a true-peak limiter, **stems** with a mixer. |
 | **Release** | FLAC, MP3 or WAV with tags and cover art (FLUX.2 Klein), lyrics subtitles timed by listening, the sheet music as PDF, **a page per song** - and the whole project inside the FLAC: drop it on ComfyUI and you are back in its workflow. |
 | **Listen and share** | The **Plenio Player**: visuals, the lyrics as they are sung, Live Play and party mode, music videos, one-file players to send. |
-| **Build on it** | The **Song API**, the **Player API** and an **MCP server** for your own programs and AI assistants; **[Plenio VST3](https://github.com/jplenio/Plenio-VST3)** for your DAW. |
+| **Build on it** | The **Song API**, the **Player API** and an **MCP server** for your own programs and AI assistants; **[Plenio VST3](vst3/README.md)** for your DAW. |
 
 ## 🎼 In ComfyUI
 
@@ -188,13 +188,15 @@ Guide: [Plenio Player](docs/user/player/README.md).
 <table>
 <tr>
 <td width="50%"><a href="https://jplenio.github.io/Plenio-Music-Production-System/go/vst3-teaser/"><img src="assets/media/vst3-teaser.jpg" alt="Watch the teaser: Plenio is in your DAW - 72 seconds on YouTube" width="100%" /></a></td>
-<td width="50%"><a href="https://github.com/jplenio/Plenio-VST3"><img src="assets/branding/1.6.0/plenio-vst3-reaper.jpg" alt="Plenio VST3 in REAPER: the song laid out on the project's tracks - every take as one of REAPER's takes, the stems, the melody, instrument line and chords as MIDI, the lyrics, the sections as regions and the tempo map from the measured bars" width="100%" /></a></td>
+<td width="50%"><a href="vst3/README.md"><img src="assets/branding/1.6.0/plenio-vst3-reaper.jpg" alt="Plenio VST3 in REAPER: the song laid out on the project's tracks - every take as one of REAPER's takes, the stems, the melody, instrument line and chords as MIDI, the lyrics, the sections as regions and the tempo map from the measured bars" width="100%" /></a></td>
 </tr>
 </table>
 
-**[Plenio VST3](https://github.com/jplenio/Plenio-VST3)** is a free VST3 instrument (with ARA 2) that brings Plenio into REAPER, Cubase, Studio One, Ableton Live, FL Studio, Bitwig and every other DAW that loads VST3 instruments. Pick a style, write an idea or your own lyrics, and your ComfyUI makes the song: up to four takes per run land on your track, in time with your project, each with its **stems**, its **MIDI** and a **tempo map** that follows the bars as they were measured in the take. Change the words, the notes or the chords in the plug-in and render again.
+*Optional - for people who work in a DAW; ComfyUI and the player need nothing of it.*
 
-▶ [Teaser](https://jplenio.github.io/Plenio-Music-Production-System/go/vst3-teaser/) (72 s) · ▶ [Tutorial: your first song in your DAW](https://jplenio.github.io/Plenio-Music-Production-System/go/vst3-first-song/) (2:51) · [Plenio VST3 on GitHub](https://github.com/jplenio/Plenio-VST3)
+**[Plenio VST3](vst3/README.md)** is a free VST3 instrument (with ARA 2) that brings Plenio into REAPER, Cubase, Studio One, Ableton Live, FL Studio, Bitwig and every other DAW that loads VST3 instruments. Pick a style, write an idea or your own lyrics, and your ComfyUI makes the song: up to four takes per run land on your track, in time with your project, each with its **stems**, its **MIDI** and a **tempo map** that follows the bars as they were measured in the take. Change the words, the notes or the chords in the plug-in and render again. The plug-in lives in this repository ([`vst3/`](vst3/README.md)), carries Plenio's version and speaks its Song API v2; its installer is among the files of every [release](https://github.com/jplenio/Plenio-Music-Production-System/releases/latest). ComfyUI may run on another computer than the DAW - a name and a token in the plug-in's settings.
+
+▶ [Teaser](https://jplenio.github.io/Plenio-Music-Production-System/go/vst3-teaser/) (72 s) · ▶ [Tutorial: your first song in your DAW](https://jplenio.github.io/Plenio-Music-Production-System/go/vst3-first-song/) (2:51) · [Plenio VST3: what it does, your DAW, the tutorial](vst3/README.md)
 
 ## 🔌 For your own programs
 

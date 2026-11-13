@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Plenio VST3 - banner</title>
+<link rel="stylesheet" href="brand.css">
+<style>
+  /* 1600 x 520: the README's header. */
+  .row.head { left: 90px; top: 88px; gap: 54px; }
+  .mark { width: 300px; height: 300px; }
+  .name { font-size: 158px; }
+  .sub { font-size: 33px; margin-top: 22px; }
+  .pill { font-size: 27px; margin-top: 30px; }
+  .tag { position: absolute; left: 0; right: 0; bottom: 30px; text-align: center; font-size: 19px; }
+</style>
+</head>
+<body>
+<div class="sky"></div>
+<svg class="stars" viewBox="0 0 1600 520" preserveAspectRatio="none" aria-hidden="true">
+  <g fill="#ffffff">
+    <circle cx="1040" cy="60" r="1.6" opacity="0.7"/><circle cx="1180" cy="120" r="1.1" opacity="0.5"/>
+    <circle cx="1320" cy="48" r="1.8" opacity="0.8"/><circle cx="1460" cy="150" r="1.2" opacity="0.5"/>
+    <circle cx="1540" cy="72" r="1.5" opacity="0.6"/><circle cx="1255" cy="210" r="1.0" opacity="0.4"/>
+    <circle cx="1395" cy="250" r="1.4" opacity="0.55"/><circle cx="980" cy="170" r="1.0" opacity="0.4"/>
+    <circle cx="1500" cy="300" r="1.1" opacity="0.45"/><circle cx="1120" cy="300" r="0.9" opacity="0.35"/>
+  </g>
+  <g fill="#ff3d8b">
+    <circle cx="1100" cy="380" r="2.2" opacity="0.7"/><circle cx="1230" cy="330" r="1.6" opacity="0.6"/>
+    <circle cx="1350" cy="360" r="2.6" opacity="0.7"/><circle cx="1480" cy="320" r="1.8" opacity="0.6"/>
+  </g>
+</svg>
+<svg class="waves" viewBox="0 0 1600 520" height="520" preserveAspectRatio="none" aria-hidden="true">
+  <defs>
+    <linearGradient id="w" x1="0" x2="1"><stop offset="0" stop-color="#ffb23e" stop-opacity="0"/><stop offset="0.25" stop-color="#ffb23e"/><stop offset="0.6" stop-color="#ff3d8b"/><stop offset="1" stop-color="#8a4dff"/></linearGradient>
+    <filter id="b"><feGaussianBlur stdDeviation="6"/></filter>
+  </defs>
+  <g fill="none" stroke="url(#w)" stroke-linecap="round">
+    <path d="M0 515 C 300 500, 520 520, 820 470 S 1200 340, 1600 300" stroke-width="10" filter="url(#b)" opacity="0.55"/>
+    <path d="M0 515 C 300 500, 520 520, 820 470 S 1200 340, 1600 300" stroke-width="2.5"/>
+    <path d="M0 525 C 340 515, 600 530, 900 490 S 1280 380, 1600 350" stroke-width="1.6" opacity="0.6"/>
+    <path d="M0 505 C 280 485, 500 505, 780 455 S 1180 310, 1600 270" stroke-width="1.2" opacity="0.45"/>
+  </g>
+</svg>
+<div class="row head">
+  <img class="mark" src="../logo.svg" alt="">
+  <div>
+    <div class="name">PLENIO</div>
+    <div class="sub">MUSIC PRODUCTION SYSTEM</div>
+    <div class="pill">VST3 &middot; IN YOUR DAW</div>
+  </div>
+</div>
+<div class="tag">SONGS &middot; TAKES &middot; STEMS &middot; LYRICS &middot; MELODY &middot; CHORDS &mdash; WHERE YOU ALREADY WORK</div>
+</body>
+</html>

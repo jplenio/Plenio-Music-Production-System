@@ -1,0 +1,157 @@
+{
+  "general": {
+    "add": "Insert Plenio as an instrument (VST3) on a new track.",
+    "tempo": "Drop the Tempo map file at bar 1 and let your DAW take its tempo. If it does not, set the song's tempo by hand: the Click file shows where the bars fall.",
+    "stems": "Activate Plenio's extra outputs (Vocals, Drums, Bass, Other, Rest): each stem plays on its own channel and leaves the main output. Or drag the Stems in.",
+    "midi": "Drag the MIDI file onto an instrument track, or route Plenio's MIDI out (melody on channel 1, instrument line 2, chords 3).",
+    "audio": "Drop every file at the project's start (bar 1): they all start there. If your DAW stretches audio to its tempo, switch that off for Plenio's audio: it keeps its own speed, and the tempo map makes the grid fit it."
+  },
+  "daws": [
+    {
+      "id": "reaper",
+      "name": "REAPER",
+      "match": [
+        "reaper"
+      ],
+      "table": {
+        "tempo": "from the file, or *Put on tracks*",
+        "ara": "yes"
+      },
+      "add": "Insert › Virtual instrument on new track… › VST3i: Plenio (Plenio). When REAPER offers new tracks for Plenio's outputs (Build Routing Confirmation), say No: Put on tracks makes the song's tracks later.",
+      "tempo": "DAW tab › Put on tracks sets the project's tempo map from the take's bars. Or drop the Tempo map file at bar 1 and say yes when REAPER asks to import its tempo. Plenio keeps its own audio in the project in time (timebase Time): the grid moves onto the song, the song keeps its speed.",
+      "stems": "Put on tracks gives every stem a track of its own. Plenio's extra outputs can also be routed with the plug-in's I/O (pin connector) button.",
+      "midi": "Put on tracks adds Melody, Instrument Line and Chords as MIDI items, muted: put an instrument on their tracks to hear them.",
+      "ara": "Plenio ARA goes on an item: select it › Item › Take › Show FX chain for active take (Shift+E) › add Plenio ARA.",
+      "audio": "Space plays and stops REAPER, also while Plenio's window has the focus. Choose a take on the Song track (its take lane, or T): Plenio follows, and the other way round. The cover art becomes the icon of the song's tracks."
+    },
+    {
+      "id": "cubase",
+      "name": "Cubase and Nuendo",
+      "match": [
+        "cubase",
+        "nuendo"
+      ],
+      "table": {
+        "tempo": "from the file (*File › Import › MIDI File*)",
+        "ara": "yes (Pro, Artist, Nuendo)"
+      },
+      "add": "Project › Add Track › Instrument › Plenio.",
+      "tempo": "File › Import › MIDI File… › the Tempo map file, with its tempo track. When you drag MIDI files in, the tempo comes along only with Preferences › MIDI › MIDI File › Ignore Master Track Events on Merge switched off.",
+      "stems": "Studio › VST Instruments (F11) › Plenio › activate the outputs Vocals, Drums, Bass, Other and Rest.",
+      "midi": "A MIDI track with its input set to Plenio: melody on channel 1, instrument line 2, chords 3.",
+      "ara": "Select the audio event › Audio › Extensions › Plenio ARA (Cubase Pro and Artist, Nuendo).",
+      "audio": "Audio on a musical time base only moves its start: Plenio's files start at bar 1 and keep their speed."
+    },
+    {
+      "id": "studio-one",
+      "name": "Studio One",
+      "match": [
+        "studio one",
+        "studioone"
+      ],
+      "table": {
+        "tempo": "from the file (onto the tempo track)",
+        "ara": "yes"
+      },
+      "add": "Browser › Instruments › drag Plenio into the arrangement.",
+      "tempo": "Drag the Tempo map file onto the tempo track: Studio One takes over its tempo.",
+      "stems": "In Plenio's instrument panel, switch on its outputs Vocals, Drums, Bass, Other and Rest: each becomes a channel in the mixer.",
+      "midi": "Drag the MIDI file onto an instrument track.",
+      "ara": "Right-click the audio event and choose Plenio ARA among its extensions.",
+      "audio": "Audio files without tempo information keep their speed: Plenio's carry none."
+    },
+    {
+      "id": "live",
+      "name": "Ableton Live",
+      "match": [
+        "ableton"
+      ],
+      "table": {
+        "tempo": "by hand",
+        "ara": "no"
+      },
+      "add": "Settings › Plug-Ins › Use VST3 Plug-in System Folders: on. Then Browser › Plug-Ins › VST3 › drag Plenio onto a MIDI track.",
+      "tempo": "Live takes no tempo from MIDI files: set Live's tempo to the song's (shown at the top of the song). For a song whose tempo drifts, the Click file shows where the bars fall.",
+      "stems": "An audio track per stem: Audio From › the Plenio track › Vocals, Drums, Bass, Other or Rest.",
+      "midi": "A MIDI track with MIDI From › the Plenio track: the melody, the instrument line and the chords.",
+      "ara": "Live has no ARA: Plenio ARA does not load there.",
+      "audio": "Switch Warp off on Plenio's audio clips: with Warp on, Live stretches them to its tempo."
+    },
+    {
+      "id": "fl-studio",
+      "name": "FL Studio",
+      "match": [
+        "fl studio",
+        "fruity",
+        "image-line"
+      ],
+      "table": {
+        "tempo": "by hand",
+        "ara": "–"
+      },
+      "add": "Options › Manage plugins › Find plugins; then Channel rack › + › Plenio.",
+      "tempo": "Set the project's tempo to the song's (shown at the top of the song); the Click file shows where the bars fall.",
+      "stems": "Plenio's wrapper › Processing (the gear) › send Plenio's outputs to mixer tracks of their own.",
+      "midi": "Drag the MIDI file onto the playlist, or into another instrument's piano roll.",
+      "audio": "Audio clips keep their speed as long as their time-stretching stays off."
+    },
+    {
+      "id": "bitwig",
+      "name": "Bitwig Studio",
+      "match": [
+        "bitwig"
+      ],
+      "table": {
+        "tempo": "by hand",
+        "ara": "–"
+      },
+      "add": "Browser › Plug-ins › drag Plenio onto an instrument track.",
+      "tempo": "Set Bitwig's tempo to the song's (shown at the top of the song); the Click file shows where the bars fall.",
+      "stems": "Plenio's extra outputs show as chains of the device: add the chains Vocals, Drums, Bass, Other and Rest.",
+      "midi": "A Note Receiver on another track, listening to the Plenio track.",
+      "audio": "If Bitwig stretches Plenio's audio to its tempo, switch the clip's time-stretching off in the Inspector."
+    },
+    {
+      "id": "cakewalk",
+      "name": "Cakewalk and Sonar",
+      "match": [
+        "cakewalk",
+        "sonar"
+      ],
+      "table": {
+        "tempo": "from the file, else by hand",
+        "ara": "yes"
+      },
+      "add": "Insert › Soft Synth › Plenio, as an instrument track.",
+      "tempo": "Import the Tempo map file (File › Import › MIDI); if the tempo does not come along, set it by hand (the Click file helps).",
+      "stems": "Synth Rack › Plenio › give its outputs Vocals, Drums, Bass, Other and Rest tracks of their own.",
+      "midi": "Drag the MIDI file onto a MIDI track.",
+      "ara": "Right-click the audio clip › Region FX › Plenio ARA."
+    },
+    {
+      "id": "logic",
+      "name": "Logic Pro",
+      "match": [
+        "logic"
+      ],
+      "table": {
+        "tempo": "–",
+        "ara": "–"
+      },
+      "unsupported": "Logic Pro loads Audio Units only: Plenio VST3 does not run in Logic. Plenio's files work there all the same: make the song in another DAW, or drag the files from the song's folder."
+    },
+    {
+      "id": "pro-tools",
+      "name": "Pro Tools",
+      "match": [
+        "pro tools",
+        "protools"
+      ],
+      "table": {
+        "tempo": "–",
+        "ara": "–"
+      },
+      "unsupported": "Pro Tools loads AAX plug-ins only: Plenio VST3 does not run in Pro Tools. Its files work there all the same: drag them in from the song's folder."
+    }
+  ]
+}

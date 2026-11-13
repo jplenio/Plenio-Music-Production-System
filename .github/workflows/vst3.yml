@@ -1,0 +1,134 @@
+name: Plenio VST3
+
+# The DAW plug-in in vst3/: built and tested on Windows (with Steinberg's VST3 validator), its core and tests on
+# Linux, and the macOS bundle (experimental until it has been tried on a Mac). Runs when the plug-in or the version
+# changes; release.yml calls it with `package` to make the installers that go onto the GitHub release.
+on:
+  push:
+    branches: [main]
+    paths: ["vst3/**", "pyproject.toml", ".github/workflows/vst3.yml"]
+  pull_request:
+    paths: ["vst3/**", "pyproject.toml", ".github/workflows/vst3.yml"]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      package:
+        description: also make the Windows installer (Inno Setup) and the macOS package
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vst3-${{ github.ref }}-${{ inputs.package || false }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: vst3
+
+jobs:
+  windows:
+    name: Windows (plug-in, tests, validator)
+    runs-on: windows-2022
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: vst3/webui/package-lock.json
+      - name: Dependencies (pinned versions)
+        shell: pwsh
+        run: tools/fetch_deps.ps1
+      - name: "Web UI: install, types, tests"
+        working-directory: vst3/webui
+        run: |
+          npm ci
+          npm run typecheck
+          npx vitest run
+      - name: Build (web UI, Plenio.vst3, tests; the validator runs after the plug-in)
+        shell: pwsh
+        run: tools/build.ps1
+      - name: Unit tests
+        shell: pwsh
+        run: build/bin/Release/plenio_tests.exe
+      - name: Inno Setup (the runner's own, else from Chocolatey)
+        if: inputs.package
+        shell: pwsh
+        run: |
+          $iscc = @((Get-Command iscc -ErrorAction SilentlyContinue).Source, "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+                    "$env:ProgramFiles\Inno Setup 6\ISCC.exe") | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
+          if (-not $iscc) { choco install innosetup --yes --no-progress }
+      - name: Installer and zip
+        if: inputs.package
+        shell: pwsh
+        run: tools/package.ps1
+      - name: Zip
+        if: ${{ !inputs.package }}
+        shell: pwsh
+        run: tools/package.ps1 -NoInstaller
+      - uses: actions/upload-artifact@v5
+        with:
+          name: plenio-vst3-windows-x64
+          path: |
+            vst3/dist/*.zip
+            vst3/dist/*.exe
+          retention-days: 14
+
+  linux:
+    name: Linux (core and tests)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Dependencies (pinned versions)
+        shell: pwsh
+        run: tools/fetch_deps.ps1
+      - name: Configure
+        run: >
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          -DSMTG_ENABLE_VST3_HOSTING_EXAMPLES=OFF -DSMTG_RUN_VST_VALIDATOR=OFF -DPLENIO_BUILD_WEBUI=OFF
+      - name: Build the tests
+        run: cmake --build build --target plenio_tests --parallel
+      - name: Unit tests
+        run: build/bin/Release/plenio_tests
+
+  macos:
+    name: macOS (universal bundle, experimental)
+    runs-on: macos-15
+    timeout-minutes: 45
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: vst3/webui/package-lock.json
+      - name: Dependencies (pinned versions)
+        shell: pwsh
+        run: tools/fetch_deps.ps1
+      - name: Web UI
+        working-directory: vst3/webui
+        run: npm ci
+      - name: Configure (arm64 and x86_64, macOS 13.3 or newer)
+        run: >
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=13.3 -DSMTG_BUILD_UNIVERSAL_BINARY=OFF
+      - name: Build (the validator runs after the plug-in)
+        run: cmake --build build --parallel
+      - name: Unit tests
+        run: build/bin/Release/plenio_tests
+      - name: Package
+        run: |
+          chmod +x installer/macos/build_pkg.sh
+          version=$(sed -n 's/#define PLENIO_VERSION_STRING "\(.*\)"/\1/p' build/generated/plenio_version.h)
+          installer/macos/build_pkg.sh build/VST3/Release/Plenio.vst3 "$version" dist
+      - uses: actions/upload-artifact@v5
+        with:
+          name: plenio-vst3-macos-universal
+          path: vst3/dist/*
+          retention-days: 14

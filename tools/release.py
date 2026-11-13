@@ -66,6 +66,12 @@ def set_version(version: str) -> None:
     data["version"] = version
     data.setdefault("packages", {}).setdefault("", {})["version"] = version
     lock.write_bytes((json.dumps(data, indent=2, ensure_ascii=False) + "\n").encode())
+    # the DAW plug-in reads its version from pyproject.toml when it is built; its record of the Plenio it was
+    # checked with follows (vst3/tools/plenio.py check compares what it calls with this checkout)
+    compat = PROJECT / "vst3" / "resources" / "plenio-compat.json"
+    data = json.loads(compat.read_text(encoding="utf-8"))
+    data["tested"] = version
+    compat.write_bytes((json.dumps(data, indent=2, ensure_ascii=False) + "\n").encode())
 
 
 def versions() -> dict[str, str]:
@@ -83,6 +89,10 @@ def versions() -> dict[str, str]:
         "frontend/package-lock.json": lock.get("version", ""),
         "frontend/package-lock.json (root package)": lock.get("packages", {}).get("", {}).get("version", ""),
         "docs/facts.json": facts.get("version", ""),
+        # the DAW plug-in takes its version from pyproject.toml at build time; this is the Plenio it was checked with
+        "vst3/resources/plenio-compat.json (tested)": json.loads(
+            (PROJECT / "vst3" / "resources" / "plenio-compat.json").read_text(encoding="utf-8")
+        ).get("tested", ""),
     }
 
 
@@ -196,6 +206,8 @@ def verify(version: str | None = None) -> int:
         [python, "tools/release_notes.py", version, "--check"],
         [python, "tools/workflow_validation.py"],
         [python, "tools/package_gate.py", "--tree", "."],
+        [python, "vst3/tools/plenio.py", "check"],
+        [python, "vst3/tools/docs/make_daws_md.py", "--check"],
     ):
         done = subprocess.run(  # noqa: S603 - this Python and the repository's own tools
             command,
@@ -327,6 +339,7 @@ def prepare(version: str, bench: Path | None, today: str) -> int:
     run(python, "tools/api_docs.py")
     run(python, "tools/facts.py", "--write")
     run(python, "tools/media_links.py", "--write")
+    run(python, "vst3/tools/plenio.py", "sync")
     run(python, "tools/release_notes.py", version)
     review = PROJECT / "docs" / "security" / f"review-{version}.md"
     review.write_bytes(review_request(version).encode())

@@ -1,0 +1,47 @@
+/* Plenio VST3's look for its banner and social preview: Plenio's neon on a night sky.
+   Rendered to PNG by tools/media/render_brand.py with a headless Chromium (Edge or Chrome).
+   The font is Montserrat (OFL-1.1), taken from this computer's fonts; it is not shipped. */
+:root {
+  --night: #07040d;
+  --amber: #ffb23e;
+  --pink: #ff3d8b;
+  --violet: #8a4dff;
+  --text: #ffffff;
+  --muted: #d9cfe9;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; background: var(--night); overflow: hidden; }
+body {
+  font-family: "Montserrat", "Segoe UI", sans-serif;
+  color: var(--text);
+  position: relative;
+}
+.sky {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(60% 90% at 88% 10%, rgba(138, 77, 255, 0.34), transparent 70%),
+    radial-gradient(50% 80% at 8% 95%, rgba(255, 61, 139, 0.22), transparent 70%),
+    radial-gradient(40% 60% at 55% 55%, rgba(255, 178, 62, 0.08), transparent 70%),
+    var(--night);
+}
+.waves { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; }
+.stars { position: absolute; inset: 0; }
+.row { position: absolute; display: flex; align-items: center; }
+.mark { filter: drop-shadow(0 0 28px rgba(255, 61, 139, 0.35)); }
+.name { font-weight: 800; letter-spacing: 0.04em; line-height: 0.9; }
+.sub { font-weight: 600; letter-spacing: 0.32em; color: var(--muted); }
+.pill {
+  display: inline-block; font-weight: 700; letter-spacing: 0.2em; color: var(--text);
+  border-radius: 999px; padding: 0.42em 1.05em 0.42em 1.25em;
+  border: 3px solid transparent;
+  background:
+    linear-gradient(var(--night), var(--night)) padding-box,
+    linear-gradient(90deg, var(--amber), var(--pink), var(--violet)) border-box;
+  box-shadow: 0 0 24px rgba(255, 61, 139, 0.35);
+}
+.tag { font-weight: 600; letter-spacing: 0.36em; color: var(--muted); }
+.line { height: 2px; background: linear-gradient(90deg, transparent, var(--pink), var(--violet), transparent); }
+.badge {
+  font-weight: 700; letter-spacing: 0.2em; color: var(--night); background: linear-gradient(90deg, var(--amber), var(--pink));
+  border-radius: 8px; padding: 0.3em 0.7em;
+}

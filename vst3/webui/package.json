@@ -1,0 +1,27 @@
+{
+  "name": "plenio-vst3-webui",
+  "private": true,
+  "version": "0.1.0",
+  "description": "The user interface of Plenio VST3 (built into the plug-in).",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:mock": "vite build --mode mock --outDir dist-mock",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm run test && npm run build"
+  },
+  "dependencies": {
+    "vue": "3.5.43"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "6.0.1",
+    "happy-dom": "20.14.5",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "3.2.7",
+    "vue-tsc": "3.1.0"
+  }
+}

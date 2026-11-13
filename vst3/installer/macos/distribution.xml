@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The installer's pages for Plenio VST3 on macOS (installer/macos/build_pkg.sh fills @VERSION@). -->
+<installer-gui-script minSpecVersion="2">
+    <title>Plenio VST3 @VERSION@</title>
+    <welcome file="welcome.html" mime-type="text/html"/>
+    <license file="LICENSE.txt" mime-type="text/plain"/>
+    <options customize="never" require-scripts="false" hostArchitectures="arm64,x86_64"/>
+    <domains enable_localSystem="true"/>
+    <choices-outline>
+        <line choice="plenio"/>
+    </choices-outline>
+    <choice id="plenio" visible="false">
+        <pkg-ref id="io.github.jplenio.plenio-vst3"/>
+    </choice>
+    <pkg-ref id="io.github.jplenio.plenio-vst3">plenio-vst3.pkg</pkg-ref>
+</installer-gui-script>

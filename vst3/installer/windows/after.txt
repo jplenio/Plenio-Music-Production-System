@@ -1,0 +1,11 @@
+Plenio VST3 is installed.
+
+Next
+1. Open your DAW and let it look for new plug-ins (REAPER: Options > Preferences > Plug-ins > VST > Re-scan;
+   most DAWs do it on their own at start).
+2. Put "Plenio" on a new instrument track and open its window.
+3. Start ComfyUI with Plenio (or let Plenio start it: Settings), then New song.
+
+The tutorial, with pictures: https://github.com/jplenio/Plenio-Music-Production-System/blob/main/vst3/docs/TUTORIAL.md
+Every DAW's own steps: https://github.com/jplenio/Plenio-Music-Production-System/blob/main/vst3/docs/DAWS.md
+Questions and problems: https://github.com/jplenio/Plenio-Music-Production-System/issues

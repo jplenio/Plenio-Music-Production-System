@@ -1,0 +1,59 @@
+name: "Plenio VST3: how it works in my DAW"
+description: Tried Plenio VST3 in a DAW? Tell what works and what does not; it decides which DAW gets tested next.
+labels: [daw-report]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Thank you! A short report is plenty, also when everything works. Every DAW's own steps are in
+        [docs/DAWS.md](https://github.com/jplenio/Plenio-Music-Production-System/blob/main/vst3/docs/DAWS.md).
+  - type: input
+    id: daw
+    attributes:
+      label: DAW and its version
+      placeholder: Cubase 14.0.20, Studio One 7.1, Ableton Live 12.1, FL Studio 2025 …
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Plenio VST3 and Plenio versions
+      description: Plenio VST3's version is in its Settings; Plenio's at the top right of its window.
+      placeholder: Plenio VST3 2.0.0, Plenio 2.0.0
+    validations:
+      required: true
+  - type: dropdown
+    id: system
+    attributes:
+      label: Operating system
+      options: [Windows 11, Windows 10, macOS (Apple silicon), macOS (Intel), Linux]
+    validations:
+      required: true
+  - type: checkboxes
+    id: works
+    attributes:
+      label: What works
+      description: Tick what you tried and what worked.
+      options:
+        - label: The DAW finds Plenio, and its window opens
+        - label: A song is made (Generate), and its takes arrive
+        - label: The chosen take plays in time with the project
+        - label: The stems on their own outputs
+        - label: Dragging files (take, stems, MIDI, tempo map) onto the timeline
+        - label: MIDI out (melody, instrument line, chords) to another instrument
+        - label: A saved project opens again, with its song
+        - label: Plenio ARA on a clip
+        - label: REAPER's Put on tracks
+  - type: textarea
+    id: notes
+    attributes:
+      label: What did not work, or worked differently
+      description: The steps, what you expected, what you saw. A screenshot helps; the DAW's own way of doing a step too.
+  - type: textarea
+    id: log
+    attributes:
+      label: The log, if something went wrong
+      description: >
+        The end of Plenio VST3's log: Windows %LOCALAPPDATA%\Plenio\VST3\plenio.log,
+        macOS ~/Library/Caches/Plenio/VST3/plenio.log.
+      render: text

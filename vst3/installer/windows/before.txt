@@ -1,0 +1,15 @@
+Plenio VST3 brings the Plenio Music Production System into your DAW: songs and covers made on your own graphics
+card, up to four takes per run, stems, and the words, melody and chords to change and render again.
+
+What it needs
+- A DAW that loads VST3 instruments: REAPER, Cubase, Nuendo, Studio One, Ableton Live, FL Studio, Bitwig Studio,
+  Cakewalk and others.
+- To make songs: ComfyUI with Plenio (1.6 or newer brings stems and the bars measured in each take) and its models.
+  Plenio VST3 finds a running ComfyUI by itself and can start it.
+- Songs you made play and edit without ComfyUI, also in a project opened later.
+
+The models' licences
+YuE2 and SheetSage2, which make the songs, are licensed CC BY-NC 4.0: what you make with them is for non-commercial
+use. Plenio VST3 itself is open source (Apache-2.0).
+
+The installer puts Plenio.vst3 into C:\Program Files\Common Files\VST3, where every DAW looks for VST3 plug-ins.

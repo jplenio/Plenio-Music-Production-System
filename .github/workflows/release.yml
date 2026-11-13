@@ -17,8 +17,14 @@ jobs:
     with:
       browser: true
 
+  # the DAW plug-in: the Windows installer and zip, the macOS package (experimental - the release goes on without it)
+  vst3:
+    uses: ./.github/workflows/vst3.yml
+    with:
+      package: true
+
   release:
-    needs: checks
+    needs: [checks, vst3]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -34,6 +40,17 @@ jobs:
           test "v$(python tools/release.py version)" = "${GITHUB_REF_NAME}"
           python tools/release.py verify
       - run: python tools/build_release_assets.py --out dist
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: plenio-vst3-*
+          path: dist/vst3-artifacts
+      - name: Plenio VST3's installers beside the release files, with their checksums
+        run: |
+          mkdir -p dist/vst3
+          find dist/vst3-artifacts -type f \( -name 'Plenio-VST3-*' \) -exec cp {} dist/vst3/ \;
+          rm -rf dist/vst3-artifacts
+          ls dist/vst3/Plenio-VST3-*-windows-x64-setup.exe dist/vst3/Plenio-VST3-*-windows-x64.zip
+          (cd dist/vst3 && sha256sum Plenio-VST3-* > Plenio-VST3-SHA256SUMS.txt)
       - name: The GitHub release with the committed notes
         env:
           GH_TOKEN: ${{ github.token }}

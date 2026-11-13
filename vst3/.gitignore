@@ -1,0 +1,15 @@
+# third-party sources are fetched by tools/fetch_deps.ps1 (pinned versions)
+/external/
+/build/
+/build-*/
+/out/
+/.dev/
+/dist/
+/webui/node_modules/
+/webui/dist/
+*.user
+.vs/
+.vscode/
+__pycache__/
+*.pyc
+/webui/dist-mock/

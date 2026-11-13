@@ -1,0 +1,3787 @@
+[
+ {
+  "id": "african/afrobeat-classic-instrumental",
+  "name": "Afrobeat classic (instrumental)",
+  "group": "African",
+  "fields": {
+   "genre": "afrobeat (classic)",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Classic 1970s Nigerian Afrobeat in the Fela Kuti tradition: long hypnotic groove built on tight interlocking guitar and clavinet riffs, deep repetitive bass, busy congas and shekere, a punchy tenor-sax and trumpet horn section with call-and-response riffs, and extended organ and sax solos. Raw analog live-band recording, slow-burning build over many bars."
+  }
+ },
+ {
+  "id": "african/afrobeats-vocal",
+  "name": "Afrobeats",
+  "group": "African",
+  "fields": {
+   "genre": "afrobeats",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal",
+   "theme": "celebration & party",
+   "lyrics": "Short, repetitive and uplifting, about joy, movement and living in the moment.",
+   "length": "long (about 4:30)",
+   "description": "Warm, sunny and irresistibly rhythmic modern Afrobeats: syncopated shaker and log-drum percussion, rolling melodic bass, bright brass stabs, clean highlife-style guitar licks and a relaxed, confident vocal hook with soft ad-libs. Laid-back swing behind the beat, spacious modern pop production."
+  }
+ },
+ {
+  "id": "african/amapiano-instrumental",
+  "name": "Amapiano (instrumental)",
+  "group": "African",
+  "fields": {
+   "genre": "amapiano",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Deep, soulful and hypnotic Amapiano: signature bouncing log-drum bass patterns, soft jazzy piano chords, airy pads, shaker-driven percussion and wide reverb space. Slow-building arrangement with long empty bars, gentle melodic hooks and a warm, elegant late-night South-African house feel."
+  }
+ },
+ {
+  "id": "african/desert-blues-vocal",
+  "name": "Desert blues",
+  "group": "African",
+  "fields": {
+   "genre": "desert blues",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal, raspy & raw",
+   "theme": "freedom & escape",
+   "lyrics": "About long journeys, home and freedom.",
+   "length": "long (about 4:30)",
+   "description": "Trance-like Saharan desert blues: droning electric guitar with hypnotic pentatonic riffs, loping camel-walk groove, hand percussion, calabash and hand claps, and a raw soulful vocal with call-and-response chants. Repetitive, wide open-space atmosphere, minimal chord changes, warm analog tone."
+  }
+ },
+ {
+  "id": "african/ethio-jazz-instrumental",
+  "name": "Ethio jazz (instrumental)",
+  "group": "African",
+  "fields": {
+   "genre": "ethio-jazz",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Hypnotic, modal and deeply soulful Ethio-Jazz: 1970s Ethiopian pentatonic scales over loose jazz harmony, breathy tenor saxophone lead, vibraphone, wah-guitar, Wurlitzer and swinging organic drums with a slight shuffle. Winding melodies, rich groove, mysterious timeless atmosphere and warm, slightly lo-fi analog recording."
+  }
+ },
+ {
+  "id": "african/gqom-instrumental",
+  "name": "Gqom (instrumental)",
+  "group": "African",
+  "fields": {
+   "genre": "gqom",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Raw, dark South-African Gqom: broken minimal drum patterns, heavy detuned kick, hard tribal toms, thin ominous synth stabs and percussive synth fragments used as rhythm. Stripped-back, repetitive and physically heavy, with abrupt drops and long hypnotic percussion sections."
+  }
+ },
+ {
+  "id": "african/highlife-instrumental",
+  "name": "Highlife (instrumental)",
+  "group": "African",
+  "fields": {
+   "genre": "highlife",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Bright, joyful West-African Highlife: two intertwined clean electric guitars, warm horn section, melodic bass, light dancing percussion with cowbell and congas. Celebratory swinging grooves, memorable call-and-response horn motifs and a relaxed, sunlit live-band feel."
+  }
+ },
+ {
+  "id": "african/soukous-instrumental",
+  "name": "Soukous (instrumental)",
+  "group": "African",
+  "fields": {
+   "genre": "soukous",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Bright, fast Congolese Soukous: intertwining clean electric guitars playing rapid melodic sebene patterns, driving snare-and-hi-hat groove, busy congas, melodic bass and warm horn accents. Joyful, dancing and virtuosic, building from a relaxed rumba intro into an ecstatic uptempo section."
+  }
+ },
+ {
+  "id": "alternative/alternative-rock-vocal",
+  "name": "Alternative rock",
+  "group": "Alternative",
+  "fields": {
+   "genre": "alternative rock",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal",
+   "theme": "self-discovery & growth",
+   "lyrics": "About alienation, change and trying to reconnect with someone.",
+   "length": "long (about 4:30)",
+   "description": "Emotional, slightly dark and highly melodic alternative rock: layered textured electric guitars with chorus and delay, driving melodic bass, dynamic live drums and an expressive intimate vocal. Strong recurring guitar motif, restrained verses, explosive memorable chorus, loud-quiet dynamics."
+  }
+ },
+ {
+  "id": "alternative/britpop-vocal",
+  "name": "Britpop",
+  "group": "Alternative",
+  "fields": {
+   "genre": "britpop",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal",
+   "theme": "self-discovery & growth",
+   "lyrics": "About ordinary life, ambition and youthful defiance.",
+   "length": "standard (about 3:00)",
+   "description": "Swaggering 1990s Britpop: jangly and slightly overdriven guitars, melodic bass, tight live drums, occasional Hammond organ and string accents, and a nasal charismatic lead vocal with big singalong backing harmonies. Bold anthemic chorus, classic verse-chorus-bridge structure, warm analog production."
+  }
+ },
+ {
+  "id": "alternative/new-wave-vocal",
+  "name": "New wave",
+  "group": "Alternative",
+  "fields": {
+   "genre": "new wave",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "cool & detached vocal",
+   "theme": "night & city lights",
+   "lyrics": "About modern life, distance and restless nights.",
+   "length": "standard (about 3:00)",
+   "description": "Nervous, danceable early-1980s new wave: clean chorused guitar stabs, bright analog synth lines, melodic driving bass, crisp gated drum machine and live drum blend, and a cool, slightly detached vocal. Tight arrangement, catchy hook, angular rhythm and glossy vintage production."
+  }
+ },
+ {
+  "id": "alternative/uk-garage-vocal",
+  "name": "Uk garage",
+  "group": "Alternative",
+  "fields": {
+   "genre": "uk garage",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal, soft & airy",
+   "theme": "night & city lights",
+   "lyrics": "Short, repetitive and focused on movement and attraction.",
+   "length": "long (about 4:30)",
+   "description": "Bouncy, stylish UK Garage: shuffled 2-step drums with swung hi-hats and syncopated snare, deep elastic sub bass, chopped and pitched vocal textures, warm organ chords and a catchy soulful vocal hook. Heavy swing, tight low end, infectious groove."
+  }
+ },
+ {
+  "id": "ambient/ambient-choir-vocalise",
+  "name": "Ambient choir vocalise",
+  "group": "Ambient",
+  "fields": {
+   "genre": "ambient",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "free time / rubato",
+   "vocals": "sung",
+   "voice": "female choir",
+   "theme": "wordless vocalise",
+   "lyrics": "No words: soft wordless 'aah' and 'ooh' carry the melody.",
+   "length": "long (about 4:30)",
+   "description": "Weightless ambient with wordless voices: layered airy vocalise and soft humming drifting over warm sustained pads, distant piano notes and deep reverb tails. Slowly unfolding harmonic movement, sacred and consoling, no percussion, endless space."
+  }
+ },
+ {
+  "id": "ambient/ambient-guitar",
+  "name": "Ambient guitar (instrumental)",
+  "group": "Ambient",
+  "fields": {
+   "genre": "ambient",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Deeply emotional, peaceful and spacious ambient: a clean electric guitar plays a simple memorable melody over a gentle groove with soft organic drums. Subtle strings, distant atmospheric textures, very restrained percussion. Slow development, lots of space, natural dynamics. No pad carpets, no cymbals, no bright metallic percussion. Wide stereo image."
+  }
+ },
+ {
+  "id": "ambient/chillout-pads-strings",
+  "name": "Chillout pads strings (instrumental)",
+  "group": "Ambient",
+  "fields": {
+   "genre": "chillout / downtempo",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Chillout, sentimental and atmospheric: warm evolving pads, soft string layers, gentle guitar, subtle piano and a wide stereo image. Very slow harmonic movement, no drums or only the faintest pulse, calm and dreamy with a long gradual swell and quiet resolution."
+  }
+ },
+ {
+  "id": "ambient/dark-ambient-drone",
+  "name": "Dark ambient drone (instrumental)",
+  "group": "Ambient",
+  "fields": {
+   "genre": "dark ambient",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "free time / rubato",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Dark ambient drone: deep sub-bass drones, slowly shifting dissonant textures, metallic resonances, distant processed field recordings and granular noise. No beat, no melody in the conventional sense; tension builds through density and slow filter movement. Cold, vast, unsettling and cinematic."
+  }
+ },
+ {
+  "id": "asian/anime-opening-vocal",
+  "name": "Anime opening",
+  "group": "Asian",
+  "fields": {
+   "genre": "anime / game music",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Japanese",
+   "voice": "female vocal, young & bright",
+   "theme": "storytelling & adventure",
+   "lyrics": "About new beginnings, courage and chasing a dream.",
+   "length": "short (about 1:30)",
+   "description": "Uplifting, fast anime opening theme: driving rock drums, distorted rhythm guitar, soaring strings, bright synth leads and a heroic singalong chorus. Short punchy intro riff, rapid pre-chorus build, dramatic key change and a big final chorus. Polished J-Rock production."
+  }
+ },
+ {
+  "id": "asian/bollywood-vocal",
+  "name": "Bollywood",
+  "group": "Asian",
+  "fields": {
+   "genre": "bollywood",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Hindi",
+   "voice": "duet (female & male)",
+   "theme": "love & romance",
+   "lyrics": "About love, celebration and destiny.",
+   "length": "long (about 4:30)",
+   "description": "Colorful, dramatic Bollywood playback song: lush orchestral strings, driving dhol and tabla rhythms, bright brass, dholak fills, harmonium and a passionate vocal duet with ornamented melismatic phrasing. Sweeping melodies, joyful dance interlude and an emotional cinematic arc."
+  }
+ },
+ {
+  "id": "asian/chinese-traditional-instrumental",
+  "name": "Chinese traditional (instrumental)",
+  "group": "Asian",
+  "fields": {
+   "genre": "chinese traditional",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Elegant and evocative Chinese traditional music: erhu lead, guzheng arpeggios, pipa tremolos and dizi bamboo flute over subtle ambient textures and soft frame drum. Pentatonic melodies, delicate ornaments and glissandi, spacious poetic atmosphere alternating between stillness and flowing motion."
+  }
+ },
+ {
+  "id": "asian/city-pop-vocal",
+  "name": "City pop",
+  "group": "Asian",
+  "fields": {
+   "genre": "j-pop / city pop",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Japanese",
+   "voice": "female vocal",
+   "theme": "nostalgia & memories",
+   "lyrics": "About summer nights, city lights and bittersweet memories.",
+   "length": "long (about 4:30)",
+   "description": "Smooth, glossy 1980s Japanese City Pop: slap-and-fingered funky bass, warm Rhodes and DX7 electric piano, breezy chorused guitar, punchy horn stabs, gated drums and polished layered backing vocals. Sophisticated jazzy chord changes, memorable chorus, chic nighttime feel."
+  }
+ },
+ {
+  "id": "asian/enka-vocal",
+  "name": "Enka",
+  "group": "Asian",
+  "fields": {
+   "genre": "enka",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Japanese",
+   "voice": "mature female vocal",
+   "theme": "melancholy & longing",
+   "lyrics": "About lost love, the sea and longing for home.",
+   "length": "standard (about 3:00)",
+   "description": "Traditional Japanese Enka ballad: dramatic vibrato-rich vocal with kobushi ornamentation, over shamisen, koto accents, lush strings, soft brushed drums and warm bass. Minor pentatonic melody, slow swelling emotional arc, theatrical and deeply nostalgic."
+  }
+ },
+ {
+  "id": "asian/game-jrpg-orchestral",
+  "name": "Game jrpg orchestral (instrumental)",
+  "group": "Asian",
+  "fields": {
+   "genre": "video game orchestral",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Sweeping JRPG orchestral theme: noble main melody carried by strings and French horn, harp and celesta arpeggios, timpani swells, warm synth pads and a heroic brass climax before an intimate solo-piano ending. Cinematic fantasy world-map atmosphere, memorable recurring theme, rich romantic harmony."
+  }
+ },
+ {
+  "id": "asian/indian-classical-instrumental",
+  "name": "Indian classical (instrumental)",
+  "group": "Asian",
+  "fields": {
+   "genre": "indian classical",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "free time / rubato",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Meditative Hindustani classical piece: tanpura drone, slow alap on sitar, gradual entry of tabla in a clear rhythmic cycle, soft bansuri flute answering the sitar. Slow melodic unfolding of one raga, microtonal ornaments, gradual acceleration toward an intense final section. Contemplative and spiritual."
+  }
+ },
+ {
+  "id": "asian/j-rock-vocal",
+  "name": "J-rock",
+  "group": "Asian",
+  "fields": {
+   "genre": "j-rock",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Japanese",
+   "voice": "male vocal, clear & passionate",
+   "theme": "self-discovery & growth",
+   "lyrics": "About running toward a dream against all odds, with a promise to a friend.",
+   "length": "standard (about 3:00)",
+   "description": "Energetic J-rock: twin distorted guitars with fast melodic riffs, punchy bass, driving drums and a soaring, emotional vocal. Dramatic pre-chorus, an explosive anthemic chorus and a virtuosic guitar solo; bright, high-energy production."
+  }
+ },
+ {
+  "id": "asian/kpop-vocal",
+  "name": "Kpop",
+  "group": "Asian",
+  "fields": {
+   "genre": "k-pop",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Korean",
+   "voice": "group vocals / gang vocals",
+   "theme": "celebration & party",
+   "lyrics": "About confidence, attraction and having fun - mostly Korean, with a few English hook lines.",
+   "length": "standard (about 3:00)",
+   "description": "Polished, punchy K-Pop: tight beat switches, sparkling synth hooks, deep 808 bass, crisp trap-influenced hi-hats, a dynamic rap section, an airy pre-chorus and an explosive singalong chorus with a post-chorus synth hook. Stadium-ready modern production."
+  }
+ },
+ {
+  "id": "asian/mandopop-ballad-vocal",
+  "name": "Mandopop ballad",
+  "group": "Asian",
+  "fields": {
+   "genre": "mandopop",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Chinese",
+   "voice": "male vocal",
+   "theme": "heartbreak & loss",
+   "lyrics": "About a love that had to end and the memory that stays.",
+   "length": "long (about 4:30)",
+   "description": "Sweeping Mandopop ballad: intimate piano intro, warm strings, soft acoustic guitar, restrained drums entering at the second verse and a large emotional final chorus with layered harmonies. Clean, emotive vocal, memorable singable melody, polished modern production."
+  }
+ },
+ {
+  "id": "blues/blues-ballad-vocal",
+  "name": "Blues ballad",
+  "group": "Blues",
+  "fields": {
+   "genre": "blues ballad",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "12/8 (shuffle / slow blues)",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal, powerful & belting",
+   "theme": "heartbreak & loss",
+   "lyrics": "About being left alone at the end of the night.",
+   "length": "standard (about 3:00)",
+   "description": "Aching slow blues ballad: open, clean guitar with reverb, Hammond organ pads, soft brushed drums, upright bass and a heartbroken, restrained vocal that grows into a raw belt. Long held notes, space between phrases, one soulful guitar solo."
+  }
+ },
+ {
+  "id": "blues/boogie-woogie-instrumental",
+  "name": "Boogie woogie (instrumental)",
+  "group": "Blues",
+  "fields": {
+   "genre": "boogie-woogie",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "High-energy boogie-woogie piano: relentless rolling left-hand bass figures, fast right-hand blues licks, tremolos and crushed notes, with upright bass and swinging brushed drums. Twelve-bar form, chorus after chorus of escalating variations, joyful barrelhouse party feel, live vintage recording."
+  }
+ },
+ {
+  "id": "blues/chicago-blues-vocal",
+  "name": "Chicago blues",
+  "group": "Blues",
+  "fields": {
+   "genre": "chicago blues",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "12/8 (shuffle / slow blues)",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal, raspy & raw",
+   "theme": "heartbreak & loss",
+   "lyrics": "About a woman who left, whiskey and getting back up.",
+   "length": "standard (about 3:00)",
+   "description": "Electric Chicago blues shuffle: overdriven tube-amp guitar, wailing amplified harmonica, walking upright-style bass, barrelhouse piano and swinging drums with rim shots. Classic twelve-bar changes, trading solos between harp and guitar, a gritty confident vocal. Smoky bar-room energy."
+  }
+ },
+ {
+  "id": "blues/delta-blues-vocal",
+  "name": "Delta blues",
+  "group": "Blues",
+  "fields": {
+   "genre": "delta blues",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "12/8 (shuffle / slow blues)",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "mature male vocal",
+   "theme": "melancholy & longing",
+   "lyrics": "About hard roads, trouble and holding on.",
+   "length": "standard (about 3:00)",
+   "description": "Raw acoustic Delta blues: single resonator slide guitar with a driving thumb-bass pattern, foot stomp, occasional harmonica, and a weathered, cracked vocal. Twelve-bar form, loose timing, call-and-response between voice and slide, dusty mono-style recording."
+  }
+ },
+ {
+  "id": "blues/electric-blues-instrumental",
+  "name": "Electric blues (instrumental)",
+  "group": "Blues",
+  "fields": {
+   "genre": "electric blues",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "12/8 (shuffle / slow blues)",
+   "vocals": "instrumental",
+   "key": "B minor",
+   "length": "long (about 4:30)",
+   "description": "Slow-burning electric blues: expressive lead guitar with wide vibrato and bends over warm Hammond organ, deep bass and brushed-to-heavy drums. Twelve-bar minor blues, long dynamic build from a whispered opening to a screaming climax and back down. Live-room feel, real amp tone."
+  }
+ },
+ {
+  "id": "cinematic/corporate-uplifting-instrumental",
+  "name": "Corporate uplifting (instrumental)",
+  "group": "Cinematic",
+  "fields": {
+   "genre": "corporate / advertising",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "short (about 1:30)",
+   "description": "Bright, optimistic corporate track: plucked staccato synth and marimba ostinato, clean muted guitar, warm piano chords, claps, soft four-on-the-floor kick and gentle strings. Clear build from minimal intro to a confident full chorus, positive and forward-looking, polished modern advertising sound."
+  }
+ },
+ {
+  "id": "cinematic/documentary-underscore-instrumental",
+  "name": "Documentary underscore (instrumental)",
+  "group": "Cinematic",
+  "fields": {
+   "genre": "documentary underscore",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Understated documentary underscore: soft repeating piano figure, warm sustained strings, subtle pulsing synth bass and light organic percussion. Neutral and observational, never overwhelming, with a gentle emotional lift in the middle and a calm resolution. Leaves room for narration."
+  }
+ },
+ {
+  "id": "cinematic/emotional-piano-underscore",
+  "name": "Emotional piano underscore (instrumental)",
+  "group": "Cinematic",
+  "fields": {
+   "genre": "cinematic / film score",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Deeply emotional cinematic underscore: simple felt-piano motif, gradually joined by solo cello, warm string bed and a distant solo flute. Very slow build to a single restrained climax, then a bare piano ending. Intimate, tender and heartbreaking rather than epic. Natural close-mic sound."
+  }
+ },
+ {
+  "id": "cinematic/epic-trailer-instrumental",
+  "name": "Epic trailer (instrumental)",
+  "group": "Cinematic",
+  "fields": {
+   "genre": "epic trailer",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Modern epic trailer cue in three acts: quiet ominous piano and pulsing sub hits, rising tension with staccato ostinato strings and taiko-style percussion, then a massive final section with full brass, braams, risers and huge impacts. Clear build-drop-build structure, dramatic silence before the last hit. Powerful, dark and heroic."
+  }
+ },
+ {
+  "id": "cinematic/fantasy-adventure-orchestral",
+  "name": "Fantasy adventure orchestral (instrumental)",
+  "group": "Cinematic",
+  "fields": {
+   "genre": "fantasy / adventure score",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "6/8",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Warm orchestral fantasy adventure: soaring French-horn main theme, dancing woodwinds, harp glissandi, rich strings, light triangle and tambourine, and a broad brass restatement at the end. Storybook wonder, clear memorable melody with two variations, natural concert-hall recording."
+  }
+ },
+ {
+  "id": "cinematic/horror-suspense-instrumental",
+  "name": "Horror suspense (instrumental)",
+  "group": "Cinematic",
+  "fields": {
+   "genre": "horror / suspense score",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "free time / rubato",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Horror and suspense score: dissonant string clusters, col legno and sul ponticello textures, detuned music box, low piano clusters, breathing metallic drones and sudden violent stingers. Long unbearable quiet passages, creeping crescendos, an unresolved ending. No groove, no melody, pure dread."
+  }
+ },
+ {
+  "id": "cinematic/orchestral-action-instrumental",
+  "name": "Orchestral action (instrumental)",
+  "group": "Cinematic",
+  "fields": {
+   "genre": "orchestral action",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Driving orchestral action cue: relentless string ostinato, aggressive low brass punches, snare and taiko percussion, hybrid synth pulses and a heroic horn theme cutting through. Constant forward motion, sudden meter and dynamic shifts, brief lyrical breather before a full-force finale."
+  }
+ },
+ {
+  "id": "cinematic/sports-stadium-anthem",
+  "name": "Sports stadium anthem",
+  "group": "Cinematic",
+  "fields": {
+   "genre": "sports / stadium anthem",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "voice": "group vocals / gang vocals",
+   "theme": "wordless vocalise",
+   "lyrics": "No verses: a wordless 'hey-oh' crowd hook and short shouted chants.",
+   "length": "short (about 1:30)",
+   "description": "Big stadium sports anthem: stomping four-on-the-floor kick, huge claps and gang chants, distorted guitar riff, brass stabs, rising synths and a wordless 'hey-oh' crowd hook. Confident, physical and instantly singable, with a short breakdown before a maximal final drop."
+  }
+ },
+ {
+  "id": "classical/baroque-concerto-instrumental",
+  "name": "Baroque concerto (instrumental)",
+  "group": "Classical",
+  "fields": {
+   "genre": "baroque",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "key": "D minor",
+   "length": "standard (about 3:00)",
+   "description": "Lively Baroque concerto movement: harpsichord continuo, string orchestra and a virtuosic solo violin. Clear ritornello form with contrasting solo episodes, running sixteenth-note figures, sequences, terraced dynamics and a strong cadential ending. Period-instrument sound, bright and energetic."
+  }
+ },
+ {
+  "id": "classical/cello-and-piano",
+  "name": "Cello and piano (instrumental)",
+  "group": "Classical",
+  "fields": {
+   "genre": "chamber music",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Intensely emotional romantic duo for cello and piano: warm expressive cello melody over a delicate grand piano accompaniment. Slow memorable phrases, intimate musical dialogue, gradual emotional development with rubato and natural dynamics. Tender sadness and quiet beauty, as if remembering someone deeply loved. Modern classical, close natural recording."
+  }
+ },
+ {
+  "id": "classical/choral-sacred-vocal",
+  "name": "Choral sacred",
+  "group": "Classical",
+  "fields": {
+   "genre": "choral / sacred choir",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Latin",
+   "voice": "mixed choir",
+   "theme": "spirituality & inner peace",
+   "lyrics": "A short Latin sacred text - a prayer for peace, its words repeated and drawn out across the voices.",
+   "length": "standard (about 3:00)",
+   "description": "Sacred choral work for mixed choir a cappella: rich four- to six-part harmony, suspensions and resolutions, antiphonal exchanges between high and low voices and a luminous final chord. Slow and reverent, recorded in a large stone church with long natural reverb."
+  }
+ },
+ {
+  "id": "classical/cinematic-romance",
+  "name": "Cinematic romance (instrumental)",
+  "group": "Classical",
+  "fields": {
+   "genre": "neoclassical",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Intimate modern classical love theme: expressive piano, warm strings, solo cello and subtle orchestral texture. One simple unforgettable melody develops through delicate variations into a powerful emotional climax before returning to quiet intimacy. Romantic and bittersweet rather than epic. Natural concert-hall ambience."
+  }
+ },
+ {
+  "id": "classical/gregorian-chant-vocal",
+  "name": "Gregorian chant",
+  "group": "Classical",
+  "fields": {
+   "genre": "gregorian chant",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "free time / rubato",
+   "vocals": "sung",
+   "language": "Latin",
+   "voice": "male choir",
+   "theme": "spirituality & inner peace",
+   "lyrics": "A Latin prayer or psalm verse, sung syllable by syllable.",
+   "length": "standard (about 3:00)",
+   "description": "Gregorian chant: unaccompanied male voices in unison, free-flowing modal melody following the rhythm of the Latin text, no fixed meter, no harmony, no instruments. Austere, meditative and ancient, sung in a vast stone abbey with enormous natural reverb."
+  }
+ },
+ {
+  "id": "classical/impressionist-piano-instrumental",
+  "name": "Impressionist piano (instrumental)",
+  "group": "Classical",
+  "fields": {
+   "genre": "impressionist classical",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "free time / rubato",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Impressionist solo piano in the spirit of Debussy and Ravel: floating whole-tone and modal harmony, shimmering pedal-blurred arpeggios, gentle rubato and a wandering melody that never quite resolves. Watery, dreamlike and delicate, with soft dynamics and a natural salon-piano tone."
+  }
+ },
+ {
+  "id": "classical/minimalism-instrumental",
+  "name": "Minimalism (instrumental)",
+  "group": "Classical",
+  "fields": {
+   "genre": "minimalism",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "changing time signatures",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Minimalist piece in the Glass and Reich tradition: fast repeating arpeggiated cells on piano and marimba, slowly shifting phase and additive rhythm, layered woodwinds and strings entering one by one. Hypnotic pulse, very gradual harmonic change, bright and mesmerizing."
+  }
+ },
+ {
+  "id": "classical/mystical-neoclassical",
+  "name": "Mystical neoclassical (instrumental)",
+  "group": "Classical",
+  "fields": {
+   "genre": "neoclassical",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Mysterious and deeply emotional neoclassical piece: delicate piano, expressive cello, gentle violin, subtle harp and distant atmospheric textures. Haunting recurring motif, unusual but harmonious chord changes, slow evolving development. Ancient and timeless yet modern, intimate and cinematic. Romantic melancholy with wonder and unresolved mystery."
+  }
+ },
+ {
+  "id": "classical/neoclassical-piano",
+  "name": "Neoclassical piano (instrumental)",
+  "group": "Classical",
+  "fields": {
+   "genre": "solo piano",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Deeply romantic solo piano: an expressive, highly memorable recurring theme with delicate dynamics, emotional pauses, subtle harmonic tension and graceful development through two variations. Modern classical with romantic influences, melancholic but warm and hopeful. Felt-piano intimacy with audible hammers and natural room sound."
+  }
+ },
+ {
+  "id": "classical/opera-aria-vocal",
+  "name": "Opera aria",
+  "group": "Classical",
+  "fields": {
+   "genre": "opera",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Italian",
+   "voice": "operatic soprano",
+   "theme": "heartbreak & loss",
+   "lyrics": "About love, loss and farewell.",
+   "length": "standard (about 3:00)",
+   "description": "A dramatic opera aria: soaring soprano over full romantic orchestra with lush strings, woodwind countermelodies and swelling brass. Recitative-like opening, sweeping melodic phrases, an intense high climax and a soft trailing close. Deep emotional pathos, authentic bel canto phrasing."
+  }
+ },
+ {
+  "id": "classical/piano-and-strings",
+  "name": "Piano and strings (instrumental)",
+  "group": "Classical",
+  "fields": {
+   "genre": "neoclassical",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Sentimental and elegant piece beginning with intimate piano and gradually introducing warm cello, violin and a soft string ensemble. Strong memorable main theme, subtle variations and a long natural emotional arc moving from loneliness toward quiet hope. Rich but never overblown, natural dynamics."
+  }
+ },
+ {
+  "id": "classical/romantic-string-ensemble",
+  "name": "Romantic string ensemble (instrumental)",
+  "group": "Classical",
+  "fields": {
+   "genre": "romantic classical",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Deeply emotional string ensemble led by expressive cello and violin with intimate piano accompaniment. Beautiful recurring themes, rich romantic harmonies, gentle crescendos and strong emotional development. Wistful and heartbreaking without becoming overly dramatic. Cinematic but intimate, warm hall reverb."
+  }
+ },
+ {
+  "id": "classical/string-quartet-instrumental",
+  "name": "String quartet (instrumental)",
+  "group": "Classical",
+  "fields": {
+   "genre": "string quartet",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Classical string quartet movement for two violins, viola and cello: elegant main theme stated by the first violin and passed through the instruments, clear counterpoint, a contrasting minor middle section and a graceful recapitulation. Refined dynamics, close chamber recording, no other instruments."
+  }
+ },
+ {
+  "id": "classical/symphonic-orchestral-instrumental",
+  "name": "Symphonic orchestral (instrumental)",
+  "group": "Classical",
+  "fields": {
+   "genre": "symphonic / orchestral",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Late-romantic symphonic movement for full orchestra: broad noble main theme in the strings, answered by horns and woodwinds, a stormy development with timpani and full brass, and a triumphant restatement. Rich orchestration, wide dynamic range, natural concert-hall recording."
+  }
+ },
+ {
+  "id": "comedy/comedy-rap-vocal",
+  "name": "Comedy rap",
+  "group": "Comedy",
+  "fields": {
+   "genre": "comedy / novelty",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "rap flow, male",
+   "lyrics": "Elaborate braggadocio about something completely mundane, with increasingly ludicrous punchlines and one repeated chant hook.",
+   "length": "standard (about 3:00)",
+   "description": "Deadpan comedy rap over a hard boom-bap beat: dusty drums, gritty bass, simple looped sample. Confident, aggressive delivery; the joke is the contrast between the serious beat and the trivial subject."
+  }
+ },
+ {
+  "id": "comedy/english-parody-pop-vocal",
+  "name": "English parody pop",
+  "group": "Comedy",
+  "fields": {
+   "genre": "comedy / novelty",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "funny & playful vocal",
+   "lyrics": "A trivial everyday annoyance treated as a life-defining tragedy, escalating into absurdity.",
+   "length": "standard (about 3:00)",
+   "description": "Straight-faced modern pop production - glossy synths, big drums, huge singalong chorus - used for completely ridiculous subject matter. The music takes itself completely seriously, with an over-dramatic key change in the last chorus."
+  }
+ },
+ {
+  "id": "comedy/german-absurd-novelty",
+  "name": "German absurd novelty",
+  "group": "Comedy",
+  "fields": {
+   "genre": "comedy / novelty",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "German",
+   "voice": "funny & playful vocal",
+   "lyrics": "Very short, catchy and deliberately nonsensical, about a random everyday topic: two or three absurd recurring phrases, playful callbacks and unexpected word combinations.",
+   "length": "short (about 1:30)",
+   "description": "Bizarre German novelty song with a strong rhythmic groove, quirky instrumentation (toy keyboard, tuba, banjo, slide whistle) and absurd comedic energy. Playful, slightly stupid, highly memorable, never serious."
+  }
+ },
+ {
+  "id": "country/americana-vocal",
+  "name": "Americana",
+  "group": "Country",
+  "fields": {
+   "genre": "americana",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male lead + female backing",
+   "theme": "storytelling & adventure",
+   "lyrics": "About leaving a place behind and looking for something better down the road.",
+   "length": "long (about 4:30)",
+   "description": "Warm Americana / roots song: layered acoustic and slide guitars, dobro, organ pads, upright bass, loose brushed drums and a plainspoken vocal with close male-female harmony. Organic, dusty, unpolished production with plenty of space."
+  }
+ },
+ {
+  "id": "country/bluegrass-instrumental",
+  "name": "Bluegrass (instrumental)",
+  "group": "Country",
+  "fields": {
+   "genre": "bluegrass",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Fast acoustic bluegrass breakdown: driving banjo rolls, chopping mandolin, flatpicked guitar runs, fiddle and slapped upright bass. Traditional head-solos-head form with each instrument taking a virtuosic break, tight ensemble timing, no drums, single-room live recording."
+  }
+ },
+ {
+  "id": "country/country-ballad-vocal",
+  "name": "Country ballad",
+  "group": "Country",
+  "fields": {
+   "genre": "country ballad",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "3/4 (waltz)",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal",
+   "theme": "nostalgia & memories",
+   "lyrics": "Simple, honest storytelling about a hometown, a parent and the years that passed too fast.",
+   "length": "standard (about 3:00)",
+   "description": "Tender country ballad: fingerpicked acoustic guitar, soft pedal steel swells, piano, upright bass and brushed drums, with an intimate, slightly cracked vocal and gentle harmony in the chorus. One memorable refrain, quiet ending."
+  }
+ },
+ {
+  "id": "country/honky-tonk-vocal",
+  "name": "Honky tonk",
+  "group": "Country",
+  "fields": {
+   "genre": "honky tonk",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "2/4 (march / polka)",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal",
+   "theme": "heartbreak & loss",
+   "lyrics": "About heartbreak, cheap beer and a jukebox.",
+   "length": "standard (about 3:00)",
+   "description": "Classic honky-tonk: shuffling two-beat drums, walking upright bass, barroom piano, crying pedal steel and twangy lead guitar, with a nasal traditional country vocal. Vintage 1960s production, call-and-response fills between steel and guitar, danceable and unpretentious."
+  }
+ },
+ {
+  "id": "country/modern-country-pop-vocal",
+  "name": "Modern country pop",
+  "group": "Country",
+  "fields": {
+   "genre": "modern country pop",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal",
+   "theme": "love & romance",
+   "lyrics": "About small-town summer nights, a pickup truck and falling for someone.",
+   "length": "standard (about 3:00)",
+   "description": "Bright modern country pop: acoustic strumming, clean electric guitar and slide licks, banjo accents, punchy programmed-plus-live drums, deep bass and a big polished singalong chorus with stacked harmonies. Warm, radio-ready Nashville production."
+  }
+ },
+ {
+  "id": "country/outlaw-country-vocal",
+  "name": "Outlaw country",
+  "group": "Country",
+  "fields": {
+   "genre": "outlaw country",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "mature male vocal",
+   "theme": "freedom & escape",
+   "lyrics": "Storytelling verses and a plain-spoken chorus about the road, bad decisions and refusing to be tamed.",
+   "length": "standard (about 3:00)",
+   "description": "Gritty outlaw country: twangy Telecaster, weeping pedal steel, walking bass, brushed shuffle drums and a weathered, world-worn baritone vocal. Open, honest arrangement and live-room warmth."
+  }
+ },
+ {
+  "id": "disco/classic-disco-vocal",
+  "name": "Classic disco",
+  "group": "Disco",
+  "fields": {
+   "genre": "disco",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal, powerful & belting",
+   "theme": "celebration & party",
+   "lyrics": "About dancing all night and losing yourself in the music.",
+   "length": "long (about 4:30)",
+   "description": "Euphoric 1970s disco: four-on-the-floor kick with open hi-hats, octave-jumping bassline, chicken-scratch guitar, lush string section, brass stabs, sparkling piano and a soaring lead vocal with a full backing-vocal chorus. Long string break, handclaps, warm analog tape production."
+  }
+ },
+ {
+  "id": "disco/italo-disco-vocal",
+  "name": "Italo disco",
+  "group": "Disco",
+  "fields": {
+   "genre": "italo disco",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal",
+   "theme": "night & city lights",
+   "lyrics": "About a night, a girl and neon lights.",
+   "length": "long (about 4:30)",
+   "description": "1980s Italo Disco: pulsing analog synth bass arpeggio, gated drum machine, bright cheesy synth lead hook, glittering arpeggios and a heavily accented, slightly naive vocal drenched in reverb. Simple repetitive chorus, dramatic minor-key melody, nostalgic and euphoric."
+  }
+ },
+ {
+  "id": "edm/big-room-festival-instrumental",
+  "name": "Big room festival (instrumental)",
+  "group": "EDM",
+  "fields": {
+   "genre": "big room / festival edm",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Massive big-room festival EDM: enormous distorted kick, simple hypnotic lead riff, huge white-noise build with snare roll and synth stab, and a stripped, hard-hitting drop. Anthemic, direct and designed for a main stage. Very loud, wide and punchy master."
+  }
+ },
+ {
+  "id": "edm/breakbeat-instrumental",
+  "name": "Breakbeat (instrumental)",
+  "group": "EDM",
+  "fields": {
+   "genre": "breakbeat",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Energetic, funky breakbeat: heavy syncopated broken drums, deep rolling bass, sharp filtered synth riffs and constantly evolving rhythmic detail. Strong recurring motif, dramatic transitions, powerful drops and a filtered breakdown. Raw club energy with polished modern production and wide stereo image."
+  }
+ },
+ {
+  "id": "edm/dance-anthem-instrumental",
+  "name": "Dance anthem (instrumental)",
+  "group": "EDM",
+  "fields": {
+   "genre": "edm",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Irresistibly groovy dance anthem: powerful four-on-the-floor beat, driving bassline, highly recognizable lead melody and riff, big filtered build-ups and a euphoric drop. Clear intro, breakdown, build and drop structure. Wide stereo atmosphere and loud, polished club mastering."
+  }
+ },
+ {
+  "id": "edm/drum-and-bass-instrumental",
+  "name": "Drum and bass (instrumental)",
+  "group": "EDM",
+  "fields": {
+   "genre": "drum & bass",
+   "tempo": "Very fast (175-200 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Fast, energetic drum & bass: deep sub bass, rolling two-step breakbeats, crisp snappy drums and a memorable melodic hook. Strong forward motion, atmospheric intro, half-time breakdown, powerful drop and evolving reese bass patterns. Modern, polished and club-ready."
+  }
+ },
+ {
+  "id": "edm/dubstep-instrumental",
+  "name": "Dubstep (instrumental)",
+  "group": "EDM",
+  "fields": {
+   "genre": "dubstep",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Heavy modern dubstep: half-time drums, enormous growling and wobbling bass, metallic sound-design stabs, sharp snare on the third beat and cinematic atmospheric intro. Tense build with pitch risers, two contrasting drops, filthy but controlled low end."
+  }
+ },
+ {
+  "id": "edm/eurodance-vocal",
+  "name": "Eurodance",
+  "group": "EDM",
+  "fields": {
+   "genre": "eurodance",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female lead + male backing",
+   "theme": "celebration & party",
+   "lyrics": "About dancing, freedom and the night.",
+   "length": "standard (about 3:00)",
+   "description": "1990s eurodance: pumping four-on-the-floor kick, bouncy synth bass, cheesy bright synth-brass hook, piano stabs, a rapped male verse and a euphoric female sung chorus. Simple catchy melody, big reverb, nostalgic and unashamedly commercial."
+  }
+ },
+ {
+  "id": "edm/future-bass-vocal",
+  "name": "Future bass",
+  "group": "EDM",
+  "fields": {
+   "genre": "future bass",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal, young & bright",
+   "theme": "dreams & fantasy",
+   "lyrics": "Short and dreamy, about missing someone and letting go.",
+   "length": "standard (about 3:00)",
+   "description": "Bright, emotional future bass: pitch-bending supersaw chord stacks, chopped and pitched vocal samples, trap-influenced hi-hats and 808s, soft piano intro and a euphoric detuned drop. Sweet, nostalgic and colourful, with a big singable pre-chorus."
+  }
+ },
+ {
+  "id": "edm/future-rave-sparse-vocals",
+  "name": "Future rave sparse vocals",
+  "group": "EDM",
+  "fields": {
+   "genre": "future rave",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "lyrics": "A few short hook phrases - a call to the crowd, a chant - never full verses.",
+   "length": "long (about 4:30)",
+   "description": "Dark, powerful festival future rave: huge distorted bass, relentless driving kick, tense hypnotic synth riff, dramatic build-ups with risers and snare rolls, explosive drop. Only processed vocal phrases as rhythmic hooks and effects, never full verses. Cinematic, energetic and instantly recognizable, mixed loud and wide."
+  }
+ },
+ {
+  "id": "edm/goa-trance-instrumental",
+  "name": "Goa trance (instrumental)",
+  "group": "EDM",
+  "fields": {
+   "genre": "goa trance",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Classic 1990s Goa trance: layered acid 303 lines, Middle-Eastern-flavoured minor melodies, rolling 16th bass, analog arpeggios and cosmic pads. Long hypnotic build, a huge melodic breakdown around the middle, then an ecstatic layered climax. Psychedelic, spiritual and endlessly evolving."
+  }
+ },
+ {
+  "id": "edm/hardgroove-techno-instrumental",
+  "name": "Hardgroove techno (instrumental)",
+  "group": "EDM",
+  "fields": {
+   "genre": "hardgroove techno",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Relentless hardgroove techno: powerful punchy kick, rolling bass, tribal percussion layers, metallic rhythmic loops and short repeating synth motifs. Minimal melody, maximum groove and forward motion. Dense club energy, dry percussive production and gradual layer-by-layer evolution."
+  }
+ },
+ {
+  "id": "edm/hardstyle-instrumental",
+  "name": "Hardstyle (instrumental)",
+  "group": "EDM",
+  "fields": {
+   "genre": "hardstyle",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Hard, euphoric hardstyle: distorted pitched-down kick with a heavy tail, screeching reverse bass, aggressive lead screeches and a euphoric melodic breakdown with piano and strings. Massive build with a long riser, then a hard-hitting drop. Raw energy, loud and heavily compressed."
+  }
+ },
+ {
+  "id": "edm/jungle-instrumental",
+  "name": "Jungle (instrumental)",
+  "group": "EDM",
+  "fields": {
+   "genre": "jungle",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Raw 1990s jungle: chopped and time-stretched amen breaks, deep rumbling sub bass, ragga-style percussion samples used as rhythmic stabs, dubwise delays and reverb throws. Vintage sampler grit, dark rolling energy, long breakdown into a heavy break-and-bass drop."
+  }
+ },
+ {
+  "id": "edm/liquid-drum-and-bass-sparse-vocals",
+  "name": "Liquid drum and bass sparse vocals",
+  "group": "EDM",
+  "fields": {
+   "genre": "liquid drum & bass",
+   "tempo": "Very fast (175-200 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal, soft & airy",
+   "lyrics": "A few airy phrases about distance and longing, used as hooks.",
+   "length": "long (about 4:30)",
+   "description": "Liquid drum & bass: warm round sub bass, fast flowing breakbeats with soft snares, lush atmospheric synths, Rhodes chords and a beautiful recurring melody. Only airy vocal phrases as texture and hook elements, no full verses. Smooth, emotional and uplifting with strong progression and a wide, polished mix."
+  }
+ },
+ {
+  "id": "edm/melodic-techno-instrumental",
+  "name": "Melodic techno (instrumental)",
+  "group": "EDM",
+  "fields": {
+   "genre": "melodic techno",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "key": "A minor",
+   "length": "long (about 4:30)",
+   "description": "Dark, emotional and driving melodic techno: deep bass, powerful kick, evolving arpeggios, filtered pads and a distinctive recurring synth theme. Strong tension and release, hypnotic progression, spacious breakdown and energetic peaks. Cinematic atmosphere but clearly built for the club."
+  }
+ },
+ {
+  "id": "edm/neurofunk-dnb-instrumental",
+  "name": "Neurofunk dnb (instrumental)",
+  "group": "EDM",
+  "fields": {
+   "genre": "neurofunk",
+   "tempo": "Very fast (175-200 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Dark technical neurofunk: metallic morphing reese bass, precise machine-tight drums, glitchy edits, sci-fi textures and razor-sharp transitions. Minimal melody, maximum sound design, aggressive half-time breakdown and a relentless second drop. Clinical, futuristic and heavy."
+  }
+ },
+ {
+  "id": "edm/progressive-trance-instrumental",
+  "name": "Progressive trance (instrumental)",
+  "group": "EDM",
+  "fields": {
+   "genre": "progressive trance",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Smooth progressive trance: hypnotic rolling bass, crisp minimal drums, layered plucks and pads, a gradually unfolding melodic theme and long filter automations. Restrained rather than euphoric, with a deep atmospheric breakdown and a warm, driving second half. Wide, clean and hypnotic."
+  }
+ },
+ {
+  "id": "edm/psytrance-instrumental",
+  "name": "Psytrance (instrumental)",
+  "group": "EDM",
+  "fields": {
+   "genre": "psytrance",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Hypnotic, intense psytrance: relentless driving kick and rolling triplet bass, twisting acid lines, swirling psychedelic pads, intricate percussion layers and heavily modulated FX. Long gradual build, atmospheric breakdown with a spoken sample, and a euphoric full-power final section."
+  }
+ },
+ {
+  "id": "edm/uplifting-trance-instrumental",
+  "name": "Uplifting trance (instrumental)",
+  "group": "EDM",
+  "fields": {
+   "genre": "uplifting trance",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "key": "A minor",
+   "length": "long (about 4:30)",
+   "description": "Euphoric uplifting trance: rolling offbeat bassline, driving kick, supersaw chords, sparkling arpeggios and a huge emotional lead melody. Long emotional breakdown with piano and pads, an epic build with snare roll and riser, and a soaring climax. Bright, hopeful and stadium-sized."
+  }
+ },
+ {
+  "id": "electronic/analog-space-electronic",
+  "name": "Analog space electronic (instrumental)",
+  "group": "Electronic",
+  "fields": {
+   "genre": "electronic",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "key": "D minor",
+   "length": "long (about 4:30)",
+   "description": "Analog synthesizer space music: slow-evolving pad layers, wide stereo reverb, filtered sawtooth lead with long portamento, gentle arpeggiated sequence, deep sub-bass drone, tape hiss and analog warmth. Dreamy and weightless, cosmic atmosphere. No drums. 1970s European electronic, cinematic and meditative."
+  }
+ },
+ {
+  "id": "electronic/berlin-school-sequencer",
+  "name": "Berlin school sequencer (instrumental)",
+  "group": "Electronic",
+  "fields": {
+   "genre": "berlin school / kosmische",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Berlin School / kosmische sequencer piece: interlocking 16th-note analog sequences slowly shifting in filter and pattern, Mellotron-style flute and string pads, a slow Moog lead melody and no drums apart from occasional analog percussion. Hypnotic 1970s Tangerine Dream atmosphere, long gradual evolution, deep stereo delay."
+  }
+ },
+ {
+  "id": "electronic/chiptune-instrumental",
+  "name": "Chiptune (instrumental)",
+  "group": "Electronic",
+  "fields": {
+   "genre": "chiptune / 8-bit",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "short (about 1:30)",
+   "description": "Upbeat 8-bit chiptune: square, pulse and triangle wave channels plus noise percussion, fast arpeggiated chords, a bouncy memorable melody and a driving bass line. Classic handheld-console sound with strict channel limits, looping A-B-A structure, joyful and nostalgic."
+  }
+ },
+ {
+  "id": "electronic/cinematic-electronica",
+  "name": "Cinematic electronica (instrumental)",
+  "group": "Electronic",
+  "fields": {
+   "genre": "electronic",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Mysterious, expansive cinematic electronica: warm analog synthesizers, deep electronic pulses, subtle strings and a haunting recurring melodic theme. Slowly building from intimate minimalism to a powerful wide climax, then gently resolving. Hybrid orchestral-electronic textures, film-score mood."
+  }
+ },
+ {
+  "id": "electronic/downtempo-electronica",
+  "name": "Downtempo electronica (instrumental)",
+  "group": "Electronic",
+  "fields": {
+   "genre": "downtempo / balearic",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Hypnotic, slightly exotic downtempo electronica: deep organic grooves, warm analog synths, unusual melodic motifs, subtle ethnic percussion and hand drums, plucked strings and a memorable repeating hook. Slowly evolving, immersive and cinematic without becoming ambient. Wide, warm production."
+  }
+ },
+ {
+  "id": "electronic/ebm-darkwave-vocal",
+  "name": "Ebm darkwave",
+  "group": "Electronic",
+  "fields": {
+   "genre": "ebm / darkwave",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "angry & aggressive vocal",
+   "theme": "mystery & darkness",
+   "lyrics": "About control, isolation and machines.",
+   "length": "long (about 4:30)",
+   "description": "Cold EBM / darkwave: relentless sequenced analog bass, hard gated drum machine, icy detuned pads, metallic percussion and a distorted, half-shouted vocal drenched in delay. Repetitive machine-like structure, minor key, industrial and hypnotic."
+  }
+ },
+ {
+  "id": "electronic/electro-swing-vocal",
+  "name": "Electro swing",
+  "group": "Electronic",
+  "fields": {
+   "genre": "electro swing",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "smoky & soulful vocal",
+   "theme": "celebration & party",
+   "lyrics": "About a wild night out in an old speakeasy.",
+   "length": "standard (about 3:00)",
+   "description": "Playful electro swing: sampled 1920s big-band brass and clarinet loops with crackle, over a modern four-on-the-floor beat, walking bass, ukulele-banjo chops and filtered breakdowns. Vintage-sounding crooning vocals with megaphone-style filtering. Fun, dancey and theatrical."
+  }
+ },
+ {
+  "id": "electronic/idm-experimental-instrumental",
+  "name": "Idm experimental (instrumental)",
+  "group": "Electronic",
+  "fields": {
+   "genre": "idm / experimental electronic",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "changing time signatures",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "IDM / experimental electronica: intricate glitched and stuttered drum programming, granular textures, detuned melancholic synth melodies, unstable time-stretching and sudden silences. Complex but emotional, cold and organic at once, with an unresolved ending. No conventional song structure."
+  }
+ },
+ {
+  "id": "electronic/lofi-hiphop-instrumental",
+  "name": "Lofi hiphop (instrumental)",
+  "group": "Electronic",
+  "fields": {
+   "genre": "lo-fi hip-hop",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Cozy lo-fi hip-hop beat: dusty swung drums with soft snare, warm upright-style bass, jazzy Rhodes and muted piano chords, vinyl crackle, tape saturation and distant rain ambience. Simple looping progression with small variations, no build-ups, perfect for studying and relaxing."
+  }
+ },
+ {
+  "id": "electronic/minimal-electronic-german-vocals",
+  "name": "Minimal electronic german vocals",
+  "group": "Electronic",
+  "fields": {
+   "genre": "electronic",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "German",
+   "voice": "cool & detached vocal",
+   "theme": "social commentary",
+   "lyrics": "About dystopian futures, technology, AI, robots and humans slowly delegating their memories and decisions to machines.",
+   "length": "long (about 4:30)",
+   "description": "Minimalist 1980s-style electronic music: precise machine rhythms, dry analog synthesizers, deep repetitive bass and distinctive short recurring riffs. Cool, mechanical and hypnotic; vocals are short repeated phrases, spoken-sung, with little reverb and no dramatic singing. German title."
+  }
+ },
+ {
+  "id": "electronic/peak-time-techno-sparse-vocals",
+  "name": "Peak time techno sparse vocals",
+  "group": "Electronic",
+  "fields": {
+   "genre": "peak time techno",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "lyrics": "A few spoken commands or dark phrases - 'move', 'the night is ours' - as rhythmic hooks.",
+   "length": "long (about 4:30)",
+   "description": "Dark, driving peak-time techno: massive kick, deep rumbling bass, tense modulating synth sequences and high-impact drops. Only spoken or heavily processed vocal phrases as dramatic rhythmic hooks. Long hypnotic build, industrial textures, dry and powerful club mix for maximum floor energy."
+  }
+ },
+ {
+  "id": "electronic/synth-pop-vocal",
+  "name": "Synth pop",
+  "group": "Electronic",
+  "fields": {
+   "genre": "synth-pop",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal",
+   "theme": "night & city lights",
+   "lyrics": "About neon nights, fleeting romance and chasing a feeling.",
+   "length": "standard (about 3:00)",
+   "description": "Bright, catchy synth-pop: analog synth hooks, punchy drum machines, melodic bass, glassy arpeggios and a clean polished vocal with layered harmonies in the chorus. Glossy 1980s character with modern production, strong verse-chorus structure."
+  }
+ },
+ {
+  "id": "electronic/synthwave",
+  "name": "Synthwave (instrumental)",
+  "group": "Electronic",
+  "fields": {
+   "genre": "synthwave / retro",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Nostalgic, cinematic synthwave: warm analog synthesizers, pulsing octave bass, LinnDrum-style vintage drum machine, shimmering arpeggios and a powerful memorable lead melody. Strong recurring motifs, gradual layering and a dreamy neon nighttime atmosphere. Authentic 1980s character with modern wide production."
+  }
+ },
+ {
+  "id": "electronic/trip-hop",
+  "name": "Trip hop (instrumental)",
+  "group": "Electronic",
+  "fields": {
+   "genre": "trip-hop",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Dark, sensual trip-hop: slow heavy broken groove, deep bass, dusty sampled drums with vinyl noise, warm electric piano, occasional tremolo guitar and mysterious cinematic textures. Distinctive recurring melodic motif, subtle tension and gradual evolution. Moody and hypnotic rather than aggressive."
+  }
+ },
+ {
+  "id": "electronic/vaporwave-instrumental",
+  "name": "Vaporwave (instrumental)",
+  "group": "Electronic",
+  "fields": {
+   "genre": "vaporwave",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Vaporwave: heavily slowed and pitched-down 1980s soft-rock or smooth-jazz sample, drowned in reverb and chorus, with tape wobble, wow-and-flutter, muffled drums and long looping sections. Nostalgic, hazy, slightly melancholic and deliberately lo-fi."
+  }
+ },
+ {
+  "id": "european/alpine-volksmusik-instrumental",
+  "name": "Alpine volksmusik (instrumental)",
+  "group": "European",
+  "fields": {
+   "genre": "alpine folk / volksmusik",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "3/4 (waltz)",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Traditional Alpine Volksmusik: diatonic button accordion and Steirische harmonika lead, tuba oompah bass, brass, zither and clarinet, with a simple cheerful major melody. Ländler lilt, clean acoustic recording, warm and homely. Perfect for a village festival."
+  }
+ },
+ {
+  "id": "european/balkan-brass-instrumental",
+  "name": "Balkan brass (instrumental)",
+  "group": "European",
+  "fields": {
+   "genre": "balkan folk",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "7/8",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "High-energy Balkan brass band: blaring trumpets in tight harmony, oompah tuba bass, snare and booming tupan drums, odd-meter grooves and virtuosic unison runs. Starts as a slow rubato lament, then accelerates into a frenzied, joyful, unstoppably danceable finale."
+  }
+ },
+ {
+  "id": "european/carnival-song-vocal",
+  "name": "German carnival song",
+  "group": "European",
+  "fields": {
+   "genre": "Karnevalslied, schunkel waltz",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "3/4",
+   "vocals": "sung",
+   "language": "German",
+   "voice": "warm male vocal with a singing crowd",
+   "theme": "celebration & party",
+   "lyrics": "About the hometown, its people and carnival: everyone arm in arm, swaying together, a chorus for the whole hall.",
+   "length": "standard (about 3:00)",
+   "description": "Rhineland carnival song: a swaying schunkel waltz with brass band, accordion, tuba bass, snare and a big singing crowd. Warm, sentimental verses and a rousing chorus that the whole hall sings, clapping on the beat."
+  }
+ },
+ {
+  "id": "european/chanson-vocal",
+  "name": "Chanson",
+  "group": "European",
+  "fields": {
+   "genre": "chanson",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "3/4 (waltz)",
+   "vocals": "sung",
+   "language": "French",
+   "voice": "smoky & soulful vocal",
+   "theme": "love & romance",
+   "lyrics": "About love, loss and the poetry of everyday life.",
+   "length": "standard (about 3:00)",
+   "description": "Elegant and theatrical French chanson: piano, accordion, double bass, brushed drums and a smoky expressive vocal with dramatic rubato phrasing. Waltzing lilt, intimate verses growing into a passionate refrain, warm vintage Parisian recording."
+  }
+ },
+ {
+  "id": "european/fado-vocal",
+  "name": "Fado",
+  "group": "European",
+  "fields": {
+   "genre": "fado",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Portuguese",
+   "voice": "female vocal, powerful & belting",
+   "theme": "melancholy & longing",
+   "lyrics": "About fate, the sea and missing someone.",
+   "length": "standard (about 3:00)",
+   "description": "Deeply emotional Portuguese fado: Portuguese guitarra with its shimmering tremolo lines, classical guitar and bass viola, and a dramatic heartbroken vocal full of rubato and sudden dynamic swells. No drums, minor key, aching saudade."
+  }
+ },
+ {
+  "id": "european/flamenco-instrumental",
+  "name": "Flamenco (instrumental)",
+  "group": "European",
+  "fields": {
+   "genre": "flamenco",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "12/8 (shuffle / slow blues)",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Passionate and virtuosic flamenco: fast rasgueado and picado nylon-string guitar, palmas handclaps, cajón, zapateado footwork and soaring Phrygian melodic lines. Free rubato falseta passages alternating with driving compás sections, dramatic pauses, intense Andalusian spirit."
+  }
+ },
+ {
+  "id": "european/irish-pub-session-instrumental",
+  "name": "Irish pub session (instrumental)",
+  "group": "European",
+  "fields": {
+   "genre": "celtic folk",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "6/8",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Lively Irish pub session: fiddle and tin whistle playing a reel in unison, bouncing bodhrán, strummed DADGAD guitar, button accordion and occasional uilleann pipes. Traditional two-tune set with repeats, accelerating energy, hand claps and a raw live-room recording."
+  }
+ },
+ {
+  "id": "european/italian-pop-vocal",
+  "name": "Italian pop",
+  "group": "European",
+  "fields": {
+   "genre": "italian pop, canzone",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Italian",
+   "voice": "male vocal, warm & passionate",
+   "theme": "love & romance",
+   "lyrics": "About a love remembered on a summer evening by the sea, with longing and gratitude.",
+   "length": "standard (about 3:00)",
+   "description": "Italian pop in the canzone tradition: piano and acoustic guitar, a lush string arrangement, warm bass and soft drums, building to a grand, emotional chorus. Melodic, romantic and elegant, with a passionate final chorus."
+  }
+ },
+ {
+  "id": "european/klezmer-instrumental",
+  "name": "Klezmer (instrumental)",
+  "group": "European",
+  "fields": {
+   "genre": "klezmer",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Expressive and festive klezmer: wailing clarinet lead with bent notes and krekhts sobs, over accordion, violin, upright bass and driving frame drum. Laughing-and-crying phrases in a freygish mode, a slow doina-style intro then an accelerating wedding-dance finale."
+  }
+ },
+ {
+  "id": "european/party-schlager-vocal",
+  "name": "Party Schlager",
+  "group": "European",
+  "fields": {
+   "genre": "party schlager, après-ski",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "German",
+   "voice": "loud, cheerful male vocal with a shouting crowd",
+   "theme": "celebration & party",
+   "lyrics": "A party anthem with a chorus of a few words to shout along: the night, friends and one more round.",
+   "length": "short (about 1:30)",
+   "description": "German party Schlager for a festival tent or après-ski: pounding four-on-the-floor kick, cheesy synth brass, accordion stabs, a huge 'oh-oh-oh' crowd hook and a call-and-response chorus. Simple, loud and euphoric, with a breakdown for clapping and a final key change."
+  }
+ },
+ {
+  "id": "european/polka-instrumental",
+  "name": "Polka (instrumental)",
+  "group": "European",
+  "fields": {
+   "genre": "polka",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "2/4 (march / polka)",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Fast traditional polka: accordion and clarinet melody, oompah tuba and snare backbeat, trumpet harmonies and a bouncing two-beat groove. Bright major key, clear A-B-C sections with repeats, joyful and irresistibly danceable."
+  }
+ },
+ {
+  "id": "european/russian-folk-vocal",
+  "name": "Russian folk",
+  "group": "European",
+  "fields": {
+   "genre": "russian folk",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Russian",
+   "voice": "male choir",
+   "theme": "nostalgia & memories",
+   "lyrics": "About home, the old village and a love left behind, remembered with longing - then a defiant toast to life.",
+   "length": "standard (about 3:00)",
+   "description": "Russian folk song: balalaika tremolo, bayan accordion, domra and a deep male choir answering a solo lead voice. Starts slow and mournful in a minor key, then accelerates into a wild, stomping dance with handclaps and shouts. Earthy, emotional and theatrical."
+  }
+ },
+ {
+  "id": "european/schlager-vocal",
+  "name": "Schlager",
+  "group": "European",
+  "fields": {
+   "genre": "schlager",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "German",
+   "voice": "happy & uplifting vocal",
+   "theme": "celebration & party",
+   "lyrics": "About love, sunshine and good times, very simple and repetitive.",
+   "length": "standard (about 3:00)",
+   "description": "Bright, cheerful German Schlager: bouncing four-on-the-floor beat, sparkling synth hooks, warm brass accents, simple major-key melody and a huge singalong chorus with layered backing vocals and a final key change. Polished, light-hearted and radio-friendly."
+  }
+ },
+ {
+  "id": "european/viennese-waltz-instrumental",
+  "name": "Viennese waltz (instrumental)",
+  "group": "European",
+  "fields": {
+   "genre": "waltz",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "3/4 (waltz)",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Elegant Viennese waltz for salon orchestra: soaring string melody, lilting anticipated second beat, harp glissandi, woodwind countermelodies and a graceful accelerando into the final section. Romantic 19th-century ballroom atmosphere, natural hall reverb."
+  }
+ },
+ {
+  "id": "folk/appalachian-folk-instrumental",
+  "name": "Appalachian folk (instrumental)",
+  "group": "Folk",
+  "fields": {
+   "genre": "appalachian folk",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Old-time Appalachian music: clawhammer banjo drone, fiddle double stops, flatpicked guitar and gentle upright bass. Modal mountain melody repeating with subtle variations, loose rhythmic lilt, front-porch atmosphere with a single-mic live sound."
+  }
+ },
+ {
+  "id": "folk/celtic-folk-vocal",
+  "name": "Celtic folk",
+  "group": "Folk",
+  "fields": {
+   "genre": "celtic folk",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "6/8",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal, soft & airy",
+   "theme": "love & romance",
+   "lyrics": "About two lovers separated by distance, remembering each other beneath the same moon.",
+   "length": "long (about 4:30)",
+   "description": "Intimate, mystical Celtic folk: acoustic guitar, Celtic harp, soft fiddle, low whistle and subtle bodhrán. Modal memorable melodies and a gently flowing arrangement that grows with each verse. Poetic and timeless, with a haunting recurring chorus."
+  }
+ },
+ {
+  "id": "folk/dark-fairytale-folk-vocal",
+  "name": "Dark fairytale folk",
+  "group": "Folk",
+  "fields": {
+   "genre": "folk",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "3/4 (waltz)",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal, soft & airy",
+   "theme": "dreams & fantasy",
+   "lyrics": "About entering an ancient forest where memories, dreams and reality slowly become indistinguishable.",
+   "length": "long (about 4:30)",
+   "description": "Enchanting and slightly eerie folk: soft close vocals, fingerpicked acoustic guitar, harp, cello, distant flute and restrained hand percussion. Beautiful recurring modal melody with a mysterious fairytale atmosphere. Romantic, poetic and haunting rather than frightening."
+  }
+ },
+ {
+  "id": "folk/folk-punk-vocal",
+  "name": "Folk punk",
+  "group": "Folk",
+  "fields": {
+   "genre": "folk punk",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "group vocals / gang vocals",
+   "theme": "friendship & togetherness",
+   "lyrics": "About broke friends, cheap nights and refusing to grow up.",
+   "length": "standard (about 3:00)",
+   "description": "Raucous folk punk: furiously strummed acoustic guitar, banjo, accordion, upright bass and a stomping snare, with a hoarse shouted lead and drunken gang-vocal chorus. Fast, ragged and joyous, getting faster toward the end."
+  }
+ },
+ {
+  "id": "folk/german-liedermacher-vocal",
+  "name": "German Liedermacher",
+  "group": "Folk",
+  "fields": {
+   "genre": "Liedermacher, singer-songwriter",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "German",
+   "voice": "male vocal, plain and close",
+   "theme": "social commentary",
+   "lyrics": "A wry, poetic story about everyday life that turns into a sharp observation about the times.",
+   "length": "standard (about 3:00)",
+   "description": "German Liedermacher song: a single fingerpicked acoustic guitar carrying the song, maybe a harmonica between verses, a close, unpolished voice in front. Many verses, a short refrain, the words in the spotlight; intimate, live and without studio gloss."
+  }
+ },
+ {
+  "id": "folk/melancholic-folk-ballad-vocal",
+  "name": "Melancholic folk ballad",
+  "group": "Folk",
+  "fields": {
+   "genre": "folk",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal",
+   "theme": "nostalgia & memories",
+   "lyrics": "About finding an old letter from a past relationship and realizing the memories remain even though both lives have moved on.",
+   "length": "long (about 4:30)",
+   "description": "Warm, intimate folk ballad: fingerpicked acoustic guitar, soft piano, cello and minimal brushed percussion, with a vulnerable close-mic vocal. Simple poetic language, memorable restrained chorus, bittersweet rather than tragic."
+  }
+ },
+ {
+  "id": "folk/mystical-medieval-folk-vocal",
+  "name": "Mystical medieval folk",
+  "group": "Folk",
+  "fields": {
+   "genre": "medieval / renaissance",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "6/8",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal, soft & airy",
+   "theme": "love & romance",
+   "lyrics": "About an impossible love remembered across centuries, using poetic imagery of old ruins, moonlight, rivers and forgotten names.",
+   "length": "long (about 4:30)",
+   "description": "Ethereal medieval folk: Celtic harp, lute, wooden flute, bowed vielle strings and gentle hand percussion. Ancient modal melodies with drone harmony, haunting recurring motifs and open fifths."
+  }
+ },
+ {
+  "id": "folk/nordic-folk-vocal",
+  "name": "Nordic folk",
+  "group": "Folk",
+  "fields": {
+   "genre": "nordic folk",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal, soft & airy",
+   "theme": "melancholy & longing",
+   "lyrics": "About waiting for someone who never returned from a journey through the northern wilderness.",
+   "length": "long (about 4:30)",
+   "description": "Haunting, minimal Nordic folk: intimate vocal, acoustic guitar, bowed strings, wooden flute and subtle frame drum, with occasional wordless calling. Cold mystical landscape atmosphere, ancient-sounding modal melodies and very restrained production with lots of space."
+  }
+ },
+ {
+  "id": "folk/romantic-solo-guitar",
+  "name": "Romantic solo guitar (instrumental)",
+  "group": "Folk",
+  "fields": {
+   "genre": "folk",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Warm, intimate fingerstyle acoustic guitar with a beautiful recurring melodic theme. Gentle classical influences, subtle harmonic complexity, expressive dynamics and natural string noise. Occasional soft cello and strings add depth without dominating the guitar. Tender, nostalgic and bittersweet. Spacious natural close recording."
+  }
+ },
+ {
+  "id": "folk/sea-shanty-vocal",
+  "name": "Sea shanty",
+  "group": "Folk",
+  "fields": {
+   "genre": "sea shanty",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "6/8",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "group vocals / gang vocals",
+   "theme": "storytelling & adventure",
+   "lyrics": "About the sea, hard labour and going home.",
+   "length": "standard (about 3:00)",
+   "description": "Rousing sea shanty: unaccompanied gang vocals in rough unison and harmony, with foot stomps, hand claps and a single concertina or fiddle joining later. Strict call-and-response between a lead voice and the crew, work-rhythm pulse, growing louder with each verse."
+  }
+ },
+ {
+  "id": "funk/classic-funk-instrumental",
+  "name": "Classic funk (instrumental)",
+  "group": "Funk",
+  "fields": {
+   "genre": "p-funk / classic funk",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Hard 1970s P-Funk: syncopated slap bass locked to a heavy one-drop kick and snare, wah-wah guitar sixteenths, clavinet stabs, greasy Hammond organ and a punchy horn section trading riffs. One repeating groove with breakdowns, vamps and a screaming sax solo. Raw analog live-band sound."
+  }
+ },
+ {
+  "id": "funk/nu-disco-funk",
+  "name": "Nu disco funk (instrumental)",
+  "group": "Funk",
+  "fields": {
+   "genre": "nu-disco",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Extremely groovy and joyful nu-disco funk: infectious slap-and-mute bassline, tight sixteenth-note funk guitar, rhythmic Rhodes and clavinet, punchy drums with open hi-hats, catchy synth riffs and string stabs. Highly recognizable hooks, playful interplay between instruments, filtered breakdown and a full-band final chorus. Polished, wide and irresistible."
+  }
+ },
+ {
+  "id": "gospel/contemporary-worship-vocal",
+  "name": "Contemporary worship",
+  "group": "Gospel",
+  "fields": {
+   "genre": "contemporary worship",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal",
+   "theme": "spirituality & inner peace",
+   "lyrics": "About trust, surrender and hope, in plain modern language.",
+   "length": "long (about 4:30)",
+   "description": "Contemporary worship song: atmospheric delay-drenched electric guitar, warm piano, pads, soft programmed and live drums building to a full band, and a sincere lead vocal with congregational backing voices. Simple singable melody, a quiet vulnerable bridge and a big anthemic final chorus."
+  }
+ },
+ {
+  "id": "gospel/german-worship-vocal",
+  "name": "German worship",
+  "group": "Gospel",
+  "fields": {
+   "genre": "contemporary worship",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "German",
+   "voice": "warm & comforting vocal",
+   "theme": "spirituality & inner peace",
+   "lyrics": "About trust, gratitude and hope, in simple, modern language.",
+   "length": "long (about 4:30)",
+   "description": "German-language modern worship song: warm piano, atmospheric electric guitar with delay, pads and subtle drums that build to the full band, and an honest, unpretentious lead voice with a congregation choir. Simple, very singable melody, calm bridge, big final chorus."
+  }
+ },
+ {
+  "id": "gospel/gospel-choir-vocal",
+  "name": "Gospel choir",
+  "group": "Gospel",
+  "fields": {
+   "genre": "gospel",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "12/8 (shuffle / slow blues)",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "gospel choir",
+   "theme": "spirituality & inner peace",
+   "lyrics": "About gratitude, deliverance and joy.",
+   "length": "long (about 4:30)",
+   "description": "Uplifting traditional gospel: powerful lead vocal answered by a full gospel choir, gospel piano with big chord runs, Hammond organ swells, walking bass, driving drums and tambourine. Call-and-response, hand claps, a modulation before the final chorus and an ecstatic vamp ending."
+  }
+ },
+ {
+  "id": "gospel/hymn-choir-vocal",
+  "name": "Hymn choir",
+  "group": "Gospel",
+  "fields": {
+   "genre": "hymn / sacred",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "mixed choir",
+   "theme": "spirituality & inner peace",
+   "lyrics": "Verses of praise and trust - a prayer for strength and peace, the last verse the most joyful.",
+   "length": "standard (about 3:00)",
+   "description": "Traditional church hymn: pipe organ and mixed four-part choir, stately harmonization, clear phrase-by-phrase structure with a short organ interlude between verses, and a full-organ final verse with a descant. Reverent, majestic, recorded in a large church."
+  }
+ },
+ {
+  "id": "hiphop/boom-bap-hiphop-vocal",
+  "name": "Boom bap hiphop",
+  "group": "Hiphop",
+  "fields": {
+   "genre": "boom bap",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "rap flow, male",
+   "theme": "social commentary",
+   "lyrics": "About street life, ambition and staying true to yourself.",
+   "length": "standard (about 3:00)",
+   "description": "Classic 1990s boom-bap: dusty hard-hitting drum break, chopped soul sample loop, warm vinyl crackle, deep upright bass and scratched hook. Laid-back but forceful flow, four-bar loop with subtle variations, gritty SP-1200 style sampling."
+  }
+ },
+ {
+  "id": "hiphop/cloud-rap-vocal",
+  "name": "Cloud rap",
+  "group": "Hiphop",
+  "fields": {
+   "genre": "cloud rap",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "auto-tuned vocal",
+   "theme": "melancholy & longing",
+   "lyrics": "About drifting, money, loneliness and late nights.",
+   "length": "standard (about 3:00)",
+   "description": "Hazy cloud rap: washed-out reverb-soaked synth pads, slow 808s, lazy hi-hats and pitched vocal samples floating in the background. Melodic, half-sung auto-tuned delivery, repetitive hypnotic hook, dreamy and detached."
+  }
+ },
+ {
+  "id": "hiphop/drill-instrumental",
+  "name": "Drill (instrumental)",
+  "group": "Hiphop",
+  "fields": {
+   "genre": "drill",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "UK drill: sliding distorted 808 patterns, skittering hi-hat triplets, thin dark piano or string motif and heavy reverb-drenched space. Menacing, minimal and rhythmically off-kilter, with sudden drum drop-outs and a cold, cinematic atmosphere."
+  }
+ },
+ {
+  "id": "hiphop/german-rap-vocal",
+  "name": "German rap",
+  "group": "Hiphop",
+  "fields": {
+   "genre": "hip-hop / rap",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "German",
+   "voice": "rap flow, male",
+   "theme": "self-discovery & growth",
+   "lyrics": "About roots, ambition and the way up, direct and vivid.",
+   "length": "standard (about 3:00)",
+   "description": "Modern German rap: hard 808 bass, driving hi-hats, a dark piano or string motif and a short sung hook. Precise, confident flow, clear verse-hook structure, punchy modern mix."
+  }
+ },
+ {
+  "id": "hiphop/melodic-trap-vocal",
+  "name": "Melodic trap",
+  "group": "Hiphop",
+  "fields": {
+   "genre": "melodic trap",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal, melodic rap with autotune",
+   "theme": "night & city lights",
+   "lyrics": "About the rise from nothing, late nights, loyalty and the people who doubted.",
+   "length": "standard (about 3:00)",
+   "description": "Melodic trap: booming 808 bass, crisp rolling hi-hats, snappy snares, a melancholic piano or bell melody and dark pads. Half-time feel, melodic auto-tuned rap verses and a catchy sung hook, with a short beat switch before the last hook."
+  }
+ },
+ {
+  "id": "hiphop/old-school-hiphop-vocal",
+  "name": "Old school hiphop",
+  "group": "Hiphop",
+  "fields": {
+   "genre": "old school hip-hop",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "rap flow, male",
+   "theme": "celebration & party",
+   "lyrics": "About the neighbourhood, the DJ and having a good time.",
+   "length": "standard (about 3:00)",
+   "description": "Old-school 1980s hip-hop: crisp electro drum machine, funky bassline, party-record horn stabs, scratching and simple synth hits. Playful call-and-response crowd chants and a straightforward rhyming flow on the beat. Bright, energetic block-party feel, vintage production."
+  }
+ },
+ {
+  "id": "hiphop/phonk-instrumental",
+  "name": "Phonk (instrumental)",
+  "group": "Hiphop",
+  "fields": {
+   "genre": "phonk",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Aggressive drift phonk: distorted cowbell melody, heavily saturated 808s, Memphis-style chopped synth sample, lo-fi tape hiss and hard-hitting drums. Dark, hypnotic and relentless, with a distorted drop and a crushed, loud master."
+  }
+ },
+ {
+  "id": "hiphop/rnb-vocal",
+  "name": "Rnb",
+  "group": "Hiphop",
+  "fields": {
+   "genre": "soul / r&b",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal, soft & airy",
+   "theme": "love & romance",
+   "lyrics": "About falling in love, trust and vulnerability.",
+   "length": "standard (about 3:00)",
+   "description": "Smooth, sensual modern R&B: warm Rhodes chords, deep sub bass, soft trap-flavoured drums, finger snaps and silky stacked vocal harmonies with ad-libs. Sultry melodic phrasing, intimate mix, a hushed bridge before the last chorus."
+  }
+ },
+ {
+  "id": "hiphop/trap-instrumental",
+  "name": "Trap (instrumental)",
+  "group": "Hiphop",
+  "fields": {
+   "genre": "trap",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Dark atmospheric trap: rolling triplet hi-hats, booming distorted 808 bass with glides, sharp snares and claps on the third beat, eerie plucked or bell synth melody and cinematic pads. Brooding energy, spacious mix, hypnotic four-bar repetition with drop-outs."
+  }
+ },
+ {
+  "id": "house/acid-house-instrumental",
+  "name": "Acid house (instrumental)",
+  "group": "House",
+  "fields": {
+   "genre": "acid house",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Raw 1988 acid house: squelching TB-303 bassline with constant filter and resonance tweaking, TR-909 drum machine, thin stabs and hypnotic minimal arrangement. Repetitive, psychedelic and physical, with the 303 slowly evolving over the whole track. Dry vintage sound."
+  }
+ },
+ {
+  "id": "house/afro-house-vocal",
+  "name": "Afro house",
+  "group": "House",
+  "fields": {
+   "genre": "afro house",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal",
+   "theme": "freedom & escape",
+   "lyrics": "Short, repetitive and uplifting, about movement, connection and freedom.",
+   "length": "long (about 4:30)",
+   "description": "Deep, warm Afro House: rolling melodic bass, layered organic percussion and congas, tribal shakers, atmospheric synth pads and a soulful vocal hook with chant-like answers. Hypnotic, elegant and highly danceable, with a long percussive breakdown."
+  }
+ },
+ {
+  "id": "house/bass-house-instrumental",
+  "name": "Bass house (instrumental)",
+  "group": "House",
+  "fields": {
+   "genre": "bass house",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Aggressive, groovy bass house: massive distorted bass riffs, hard punchy drums, sharp rhythmic synth hits and catchy recurring motifs. Strong drops, tight build-ups and relentless club momentum without becoming chaotic. Wide stereo production and a loud, punchy master."
+  }
+ },
+ {
+  "id": "house/deep-house",
+  "name": "Deep house (instrumental)",
+  "group": "House",
+  "fields": {
+   "genre": "deep house",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Warm, sophisticated deep house: deep rolling bassline, crisp understated drums with soft open hi-hats, soulful electric piano chords and a simple but highly recognizable melodic motif. Hypnotic repetition with subtle evolution, filtered breakdown, elegant late-night atmosphere."
+  }
+ },
+ {
+  "id": "house/disco-house-vocal",
+  "name": "Disco house",
+  "group": "House",
+  "fields": {
+   "genre": "disco house",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal",
+   "theme": "celebration & party",
+   "lyrics": "A short, joyful hook about dancing together until the sun comes up.",
+   "length": "long (about 4:30)",
+   "description": "Joyful disco house: filtered disco string and horn loops, four-on-the-floor kick with open hi-hats, slinky bassline, piano stabs and a soulful chopped vocal hook. Bright, uplifting and immediately danceable, with a filtered breakdown and a euphoric final chorus."
+  }
+ },
+ {
+  "id": "house/electro-house-instrumental",
+  "name": "Electro house (instrumental)",
+  "group": "House",
+  "fields": {
+   "genre": "electro house",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Bold, punchy electro house: huge bass, crunchy detuned synth riffs, tight drums and an instantly memorable main hook. Strong build-ups, energetic drops and a playful but powerful club character. Clear structure, wide stereo image and polished production."
+  }
+ },
+ {
+  "id": "house/french-house-instrumental",
+  "name": "French house (instrumental)",
+  "group": "House",
+  "fields": {
+   "genre": "french house",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Filtered French house: chopped and looped disco sample, heavy phaser and filter sweeps, compressed four-on-the-floor drums, funky guitar stabs and a rolling bassline. Hypnotic loop-based structure, big filter-opening moments, warm saturated Daft-Punk-era production."
+  }
+ },
+ {
+  "id": "house/melodic-house",
+  "name": "Melodic house (instrumental)",
+  "group": "House",
+  "fields": {
+   "genre": "melodic house",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Emotional, warm and deeply atmospheric melodic house: an unforgettable central melody, recurring synth motifs, soft driving bass and a hypnotic groove. Gradual development, spacious breakdown and uplifting but bittersweet peaks. Wide, lush stereo production."
+  }
+ },
+ {
+  "id": "house/organic-house",
+  "name": "Organic house (instrumental)",
+  "group": "House",
+  "fields": {
+   "genre": "organic house",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Warm, flowing organic house: gentle electronic groove combined with acoustic guitar, hand percussion, kalimba, melodic bass and subtle world-music textures. Beautiful recurring motifs, natural development and a spacious sunlit atmosphere. Relaxed but clearly danceable."
+  }
+ },
+ {
+  "id": "house/progressive-house-dreamy-bittersweet",
+  "name": "Progressive house dreamy bittersweet (instrumental)",
+  "group": "House",
+  "fields": {
+   "genre": "progressive house",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Atmospheric, dreamy and bittersweet progressive house: gradual progression, evolving arrangement, distinctive recurring signature riffs, melodic motifs and memorable hooks over a groovy rolling bassline. Long breakdown, patient build, emotional but restrained peak. Wide, airy production."
+  }
+ },
+ {
+  "id": "house/progressive-house-melodic-trance",
+  "name": "Progressive house melodic trance (instrumental)",
+  "group": "House",
+  "fields": {
+   "genre": "progressive house",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Progressive house with melodic trance influences: highly atmospheric and spacious, memorable signature motifs and distinctive recurring synth riffs, rolling bass and crisp drums. Emotional, smooth and modern, with strong progression, evolving layers and a euphoric but tasteful climax."
+  }
+ },
+ {
+  "id": "house/progressive-house-sparse-vocals",
+  "name": "Progressive house sparse vocals",
+  "group": "House",
+  "fields": {
+   "genre": "progressive house",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal, soft & airy",
+   "lyrics": "A few short phrases about letting go and drifting into the night.",
+   "length": "long (about 4:30)",
+   "description": "Melodic progressive house with an emotional, memorable lead motif, spacious analog-style synths, soft driving bass and a calm but clear development. Only short vocal phrases used as texture and effect, never full verses. Warm, hypnotic and wide."
+  }
+ },
+ {
+  "id": "house/tech-house-instrumental",
+  "name": "Tech house (instrumental)",
+  "group": "House",
+  "fields": {
+   "genre": "tech house",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Punchy, minimal tech house: deep rolling bassline, tight kick, crisp shuffled percussion and short addictive synth stabs. Strong groove, subtle build-ups, hypnotic repetition with small variations. Dry, wide and club-focused production."
+  }
+ },
+ {
+  "id": "jazz/bebop-instrumental",
+  "name": "Bebop (instrumental)",
+  "group": "Jazz",
+  "fields": {
+   "genre": "bebop",
+   "tempo": "Very fast (175-200 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Fast bebop quintet: trumpet and alto sax in unison on an intricate angular head, then blistering improvised solos over rapid ii-V changes, comping piano, walking bass and busy brushless drums with snare bombs. Head-solos-head form, live club atmosphere, raw energy and virtuosity."
+  }
+ },
+ {
+  "id": "jazz/cool-jazz-instrumental",
+  "name": "Cool jazz (instrumental)",
+  "group": "Jazz",
+  "fields": {
+   "genre": "cool jazz",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Cool, restrained modal jazz: muted trumpet stating a spare lyrical melody, tenor sax, understated piano voicings, upright bass and brushed drums. Slow harmonic rhythm over one or two modes, plenty of space, soft dynamics and an introspective late-1950s atmosphere."
+  }
+ },
+ {
+  "id": "jazz/dixieland-instrumental",
+  "name": "Dixieland (instrumental)",
+  "group": "Jazz",
+  "fields": {
+   "genre": "dixieland / new orleans jazz",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "2/4 (march / polka)",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "New Orleans Dixieland: collective improvisation between clarinet, cornet and trombone, with banjo, tuba or slap bass and a snare-driven two-beat. Joyful polyphony, breaks and stop-time choruses, a rousing final ride-out chorus. Raw, jubilant vintage recording."
+  }
+ },
+ {
+  "id": "jazz/gypsy-jazz-instrumental",
+  "name": "Gypsy jazz (instrumental)",
+  "group": "Jazz",
+  "fields": {
+   "genre": "gypsy jazz",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "key": "D minor",
+   "length": "standard (about 3:00)",
+   "description": "Gypsy jazz in the Django tradition: virtuosic acoustic lead guitar with fast arpeggios and tremolo, driving 'la pompe' rhythm guitar, upright bass and a lyrical violin trading solos. Minor swing feel, warm 1930s acoustic recording, accelerating excitement toward the end."
+  }
+ },
+ {
+  "id": "jazz/jazz-funk",
+  "name": "Jazz funk (instrumental)",
+  "group": "Jazz",
+  "fields": {
+   "genre": "jazz fusion",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Sophisticated, extremely groovy jazz-funk: Fender Rhodes, funky sixteenth-note guitar, warm tenor saxophone lead, syncopated melodic bass and tight acoustic drums with ghost notes. Catchy recurring riffs, rich extended harmony, tasteful solos and playful interaction between the instruments. Live-band feel with polished 1970s production."
+  }
+ },
+ {
+  "id": "jazz/smooth-jazz-instrumental",
+  "name": "Smooth jazz (instrumental)",
+  "group": "Jazz",
+  "fields": {
+   "genre": "smooth jazz",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Smooth, warm and soulful smooth jazz: warm tenor sax lead, clean electric guitar, Fender Rhodes, melodic fretless bass and soft drums. Rich extended chords, memorable melodic motifs, tasteful improvisation, subtle funk influence, spacious polished production and gradual development."
+  }
+ },
+ {
+  "id": "jazz/smooth-jazz-vocal-late-night",
+  "name": "Smooth jazz vocal late night",
+  "group": "Jazz",
+  "fields": {
+   "genre": "smooth jazz",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "smoky & soulful vocal",
+   "theme": "night & city lights",
+   "lyrics": "About quiet intimacy, longing and a relationship that feels close but uncertain.",
+   "length": "long (about 4:30)",
+   "description": "Contemporary smooth jazz with warm tenor saxophone, clean electric guitar, Fender Rhodes, upright bass and brushed drums, plus a silky intimate vocal. Relaxed groove, rich extended chords, soulful phrasing, tasteful solo interplay and an elegant late-night atmosphere. Mature, understated and bittersweet rather than dramatic."
+  }
+ },
+ {
+  "id": "jazz/smooth-jazz-vocal-positive-resolution",
+  "name": "Smooth jazz vocal positive resolution",
+  "group": "Jazz",
+  "fields": {
+   "genre": "smooth jazz",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal",
+   "theme": "hope & resilience",
+   "lyrics": "Deep and honest, about a difficult situation that finally finds a positive ending.",
+   "length": "standard (about 3:00)",
+   "description": "Intimate, soulful smooth jazz. Warm Rhodes, piano and clean guitar as lead instruments, upright bass and soft brushed drums. Include substantial sections without vocals where piano and guitar trade melodies. Gentle build from resignation to quiet confidence."
+  }
+ },
+ {
+  "id": "jazz/swing-big-band-instrumental",
+  "name": "Swing big band (instrumental)",
+  "group": "Jazz",
+  "fields": {
+   "genre": "swing / big band",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Roaring 1940s swing big band: full brass and saxophone sections trading riffs, walking upright bass, comping piano and swinging ride-cymbal drums with big band shout choruses. Head arrangement with trumpet and tenor sax solos, tight shout chorus and a punchy final ensemble hit. Vintage warm recording."
+  }
+ },
+ {
+  "id": "jazz/vocal-jazz-crooner",
+  "name": "Vocal jazz crooner",
+  "group": "Jazz",
+  "fields": {
+   "genre": "vocal jazz / crooner",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "baritone vocal",
+   "theme": "love & romance",
+   "lyrics": "About a love remembered across the years.",
+   "length": "standard (about 3:00)",
+   "description": "Classic crooner jazz ballad: velvety baritone vocal with relaxed behind-the-beat phrasing, over lush strings, muted trumpet fills, piano, upright bass and brushed drums. Great-American-Songbook form, one chorus without vocals in the middle, warm vintage mono-flavoured recording."
+  }
+ },
+ {
+  "id": "kids/birthday-song-vocal",
+  "name": "Birthday song",
+  "group": "Kids",
+  "fields": {
+   "genre": "birthday party pop",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "warm, cheerful vocal with a small group joining the chorus",
+   "theme": "celebration & party",
+   "lyrics": "A birthday song for one person - their name, what makes them special and a big wish for the year ahead; a chorus everybody can sing along.",
+   "length": "short (about 1:30)",
+   "description": "Joyful birthday party song: bouncy acoustic guitar and piano, handclaps, light drums, a little brass and a sing-along group chorus. Simple major-key melody, a short count-in, a cheering break and a big final chorus. Warm, festive and fun for every age."
+  }
+ },
+ {
+  "id": "kids/children-song-vocal",
+  "name": "Children song",
+  "group": "Kids",
+  "fields": {
+   "genre": "children's song",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "children's choir",
+   "theme": "friendship & togetherness",
+   "lyrics": "Very simple, repetitive words with an easy call-and-response part - nothing scary or complex.",
+   "length": "short (about 1:30)",
+   "description": "Cheerful children's song: simple major-key melody, acoustic guitar, ukulele, xylophone, hand claps and light percussion, sung by a warm friendly voice with a small children's choir joining the chorus. Clear diction. Bright and happy."
+  }
+ },
+ {
+  "id": "kids/german-birthday-song-vocal",
+  "name": "German birthday song",
+  "group": "Kids",
+  "fields": {
+   "genre": "Geburtstagslied, party pop",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "German",
+   "voice": "warm, cheerful vocal with a small group joining the chorus",
+   "theme": "celebration & party",
+   "lyrics": "A birthday song for one person - their name, what makes them special and good wishes for the new year of their life; an easy chorus to sing along.",
+   "length": "short (about 1:30)",
+   "description": "Cheerful German birthday song: bouncy acoustic guitar and piano, handclaps, light drums and a sing-along group chorus. Simple major-key melody, a cheering break with party noises and a big final chorus. Warm, festive and fun for every age."
+  }
+ },
+ {
+  "id": "kids/kids-adventure-song-vocal",
+  "name": "Kids adventure song",
+  "group": "Kids",
+  "fields": {
+   "genre": "children's song",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "group vocals / gang vocals",
+   "theme": "storytelling & adventure",
+   "lyrics": "About setting off on a journey, being brave and sticking together.",
+   "length": "short (about 1:30)",
+   "description": "Energetic kids adventure song: driving acoustic and light electric guitar, marching drums, brass stabs, whistling hook and an enthusiastic lead vocal with a shouting children's chorus. Playful, exciting and easy to sing along, with a rhythmic chant section."
+  }
+ },
+ {
+  "id": "kids/lullaby-vocal",
+  "name": "Lullaby",
+  "group": "Kids",
+  "fields": {
+   "genre": "lullaby",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "3/4 (waltz)",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "warm & comforting vocal",
+   "theme": "dreams & fantasy",
+   "lyrics": "Only a few soothing lines about sleep, stars and being watched over.",
+   "length": "standard (about 3:00)",
+   "description": "Gentle lullaby: soft music box, warm felt piano, subtle strings and a tender humming voice singing a simple rocking melody. Very quiet dynamics, slow tempo, no percussion, comforting and safe."
+  }
+ },
+ {
+  "id": "kids/nursery-rhyme-german-vocal",
+  "name": "Nursery rhyme german",
+  "group": "Kids",
+  "fields": {
+   "genre": "nursery rhyme",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "German",
+   "voice": "children's choir",
+   "theme": "nature & seasons",
+   "lyrics": "Very short, repetitive verses to sing along, about animals, the seasons or everyday life.",
+   "length": "short (about 1:30)",
+   "description": "Simple German children's song: cheerful major-key melody, acoustic guitar, recorder, glockenspiel, handclaps and light percussion, sung by a friendly voice with a children's choir in the chorus. Clear pronunciation."
+  }
+ },
+ {
+  "id": "latin/bachata-vocal",
+  "name": "Bachata",
+  "group": "Latin",
+  "fields": {
+   "genre": "bachata",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Spanish",
+   "voice": "male vocal",
+   "theme": "love & romance",
+   "lyrics": "About longing, devotion and a love that hurts and heals.",
+   "length": "long (about 4:30)",
+   "description": "Romantic bachata: nylon and requinto guitar arpeggios with the characteristic lead fills, bongó and güira percussion, warm bass and a heartfelt slightly nasal vocal. Four-beat pattern with the hip accent on beat four, intimate verses and a soaring chorus."
+  }
+ },
+ {
+  "id": "latin/bossa-nova-vocal",
+  "name": "Bossa nova",
+  "group": "Latin",
+  "fields": {
+   "genre": "bossa nova",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Portuguese",
+   "voice": "female vocal, soft & airy",
+   "theme": "love & romance",
+   "lyrics": "About quiet romance, the sea and simple beauty.",
+   "length": "standard (about 3:00)",
+   "description": "Warm, gentle bossa nova: nylon-string guitar with the classic syncopated comping pattern, soft brushed drums and shaker, subtle piano, muted trumpet or flute fills and a light, airy, almost whispered vocal. Rich jazz harmony, relaxed and unhurried, warm intimate recording."
+  }
+ },
+ {
+  "id": "latin/cumbia-instrumental",
+  "name": "Cumbia (instrumental)",
+  "group": "Latin",
+  "fields": {
+   "genre": "cumbia",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Hypnotic, warm cumbia: shuffling güira and guacharaca percussion, deep bouncing bass, accordion melodies, bright trumpet lines and tremolo guitar. Laid-back but danceable, dreamy sunlit Latin atmosphere, repeating melodic hook with call-and-response between accordion and horns."
+  }
+ },
+ {
+  "id": "latin/latin-pop-vocal",
+  "name": "Latin pop",
+  "group": "Latin",
+  "fields": {
+   "genre": "latin pop",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Spanish",
+   "voice": "female vocal, bright & sensual",
+   "theme": "love & romance",
+   "lyrics": "About a summer romance - a glance across the dance floor, a night by the sea, a love that burns fast.",
+   "length": "standard (about 3:00)",
+   "description": "Modern Latin pop: Spanish guitar, a light reggaeton-influenced groove, warm bass, shimmering synths and percussion. Sensual verses and a bright, catchy chorus made for the dance floor and the radio."
+  }
+ },
+ {
+  "id": "latin/merengue-instrumental",
+  "name": "Merengue (instrumental)",
+  "group": "Latin",
+  "fields": {
+   "genre": "merengue",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "2/4 (march / polka)",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Fast Dominican merengue: driving two-beat tambora and güira groove, jumping bass, bright saxophone riffs in harmony, piano montuno and accordion. Relentless energy, a jaleo section with escalating sax mambos and horn hits. Pure dancefloor joy."
+  }
+ },
+ {
+  "id": "latin/norteno-corrido-vocal",
+  "name": "Norteno corrido",
+  "group": "Latin",
+  "fields": {
+   "genre": "norteño / corrido",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "2/4 (march / polka)",
+   "vocals": "sung",
+   "language": "Spanish",
+   "voice": "duet (female & male)",
+   "theme": "storytelling & adventure",
+   "lyrics": "A story told in verses: one person and a decisive event in their life.",
+   "length": "standard (about 3:00)",
+   "description": "Norteño corrido: lead diatonic accordion and bajo sexto, tuba or electric bass and a marching polka-style drum beat. Two voices in close parallel harmony, with accordion answers between lines. Proud, narrative and rustic, live-band recording."
+  }
+ },
+ {
+  "id": "latin/reggaeton-vocal",
+  "name": "Reggaeton",
+  "group": "Latin",
+  "fields": {
+   "genre": "reggaeton",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Spanish",
+   "voice": "male vocal",
+   "theme": "night & city lights",
+   "lyrics": "About attraction, nightlife and self-confidence.",
+   "length": "standard (about 3:00)",
+   "description": "Urban, confident reggaeton: classic dembow beat with syncopated snare, deep sub bass, dark synth stabs, pitched vocal chops and a smooth melodic vocal alternating with rhythmic rapping. Club-ready, catchy hook repeated often, modern loud mix."
+  }
+ },
+ {
+  "id": "latin/salsa-vocal",
+  "name": "Salsa",
+  "group": "Latin",
+  "fields": {
+   "genre": "salsa",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Spanish",
+   "voice": "male lead + female backing",
+   "theme": "celebration & party",
+   "lyrics": "About dancing, celebration and passion.",
+   "length": "long (about 4:30)",
+   "description": "Hot, energetic salsa: powerful montuno piano groove, punchy brass section, congas, timbales, bongó and driving tumbao bass. Clave-based swing, a sung verse leading into an extended montuno / coro call-and-response section with brass mambos and a timbale solo."
+  }
+ },
+ {
+  "id": "latin/samba-instrumental",
+  "name": "Samba (instrumental)",
+  "group": "Latin",
+  "fields": {
+   "genre": "samba",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "2/4 (march / polka)",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Joyful Brazilian samba batucada: surdo heartbeat, tamborim and repinique patterns, cuíca accents, agogô bells, bright cavaquinho comping, seven-string guitar and melodic horns. Driving carnival spirit, tight call-and-response breaks and an irresistible sense of forward movement."
+  }
+ },
+ {
+  "id": "latin/son-cubano-vocal",
+  "name": "Son cubano",
+  "group": "Latin",
+  "fields": {
+   "genre": "son cubano",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Spanish",
+   "voice": "mature male vocal",
+   "theme": "nostalgia & memories",
+   "lyrics": "About home, a woman and the passing of time.",
+   "length": "standard (about 3:00)",
+   "description": "Classic son cubano: tres guitar tumbao, upright bass anticipating the beat, bongó and claves, subtle trumpet obbligato and a warm lead voice answered by a coro. Relaxed clave swing, verse section leading into a montuno call-and-response, vintage Havana recording warmth."
+  }
+ },
+ {
+  "id": "latin/tango-instrumental",
+  "name": "Tango (instrumental)",
+  "group": "Latin",
+  "fields": {
+   "genre": "tango",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "key": "A minor",
+   "length": "standard (about 3:00)",
+   "description": "Passionate tango: bandoneón and violin leading over staccato piano and a strong double-bass pulse, with sharp marcato accents and dramatic rubato passages. Dark elegant minor melody, sudden dynamic contrasts, sensual phrasing and a decisive final chord."
+  }
+ },
+ {
+  "id": "meditation/focus-study-instrumental",
+  "name": "Focus study (instrumental)",
+  "group": "Meditation",
+  "fields": {
+   "genre": "focus / study music",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Minimal focus music: steady soft pulse, gentle repeating piano or marimba pattern, warm bass note and light airy pads. Consistent dynamics, no surprises, no sharp transients. Designed to stay in the background and support concentration for long periods."
+  }
+ },
+ {
+  "id": "meditation/meditation-healing-instrumental",
+  "name": "Meditation healing (instrumental)",
+  "group": "Meditation",
+  "fields": {
+   "genre": "meditation / healing",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "free time / rubato",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Deep meditation music: sustained warm drone, Tibetan bowls, soft bells, gentle Rhodes or harp notes and very slow evolving pads. No beat, no sudden events, extremely slow harmonic movement and long reverb tails. Calming, spacious and safe, designed for breathing and stillness."
+  }
+ },
+ {
+  "id": "meditation/nature-soundscape-instrumental",
+  "name": "Nature soundscape (instrumental)",
+  "group": "Meditation",
+  "fields": {
+   "genre": "nature soundscape",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "free time / rubato",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Ambient nature soundscape: gentle rain, distant thunder, a flowing stream and soft birdsong layered under very quiet sustained pads and occasional distant piano notes. Almost no musical development, pure atmosphere, wide natural stereo field, deeply relaxing."
+  }
+ },
+ {
+  "id": "meditation/sleep-music-instrumental",
+  "name": "Sleep music (instrumental)",
+  "group": "Meditation",
+  "fields": {
+   "genre": "sleep music",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "free time / rubato",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Sleep music: extremely soft low-frequency pads, distant muted piano, subtle sub-bass warmth and almost inaudible movement. No percussion, no melody that draws attention, very gradual fade-in and fade-out. Dark, warm and enveloping."
+  }
+ },
+ {
+  "id": "metal/black-metal-instrumental",
+  "name": "Black metal (instrumental)",
+  "group": "Metal",
+  "fields": {
+   "genre": "black metal",
+   "tempo": "Very fast (175-200 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Atmospheric black metal: cold tremolo-picked tremolo guitar walls, relentless blast beats, buried bass and distant icy synth pads. Repetitive hypnotic minor melodies, raw lo-fi production, a long ambient middle section with clean guitar, then a return to the freezing storm."
+  }
+ },
+ {
+  "id": "metal/death-metal-vocal",
+  "name": "Death metal",
+  "group": "Metal",
+  "fields": {
+   "genre": "death metal",
+   "tempo": "Very fast (175-200 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "growled / screamed vocal",
+   "theme": "mystery & darkness",
+   "lyrics": "About ancient horror, decay and a darkness that cannot be escaped.",
+   "length": "standard (about 3:00)",
+   "description": "Brutal death metal: heavily downtuned tremolo-picked riffs, blast beats and rapid double-kick, thick distorted bass and deep guttural growled vocals. Frequent tempo shifts, dissonant harmony, a crushing slow breakdown and a chaotic sweep-picked solo. Dense, dark and uncompromising."
+  }
+ },
+ {
+  "id": "metal/doom-metal-instrumental",
+  "name": "Doom metal (instrumental)",
+  "group": "Metal",
+  "fields": {
+   "genre": "doom metal",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Slow, massive doom metal: crushing low-tuned downtuned guitars, thick fuzz bass, huge slow drums and a haunting melodic lead guitar. Dark recurring riff motifs, long sustained chords, enormous space between hits, gradual build to a monolithic climax. Mournful and cinematic rather than chaotic."
+  }
+ },
+ {
+  "id": "metal/folk-metal-vocal",
+  "name": "Folk metal",
+  "group": "Metal",
+  "fields": {
+   "genre": "folk metal",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "6/8",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "group vocals / gang vocals",
+   "theme": "storytelling & adventure",
+   "lyrics": "About feasts, journeys and old legends.",
+   "length": "long (about 4:30)",
+   "description": "Folk metal: heavy distorted riffs interlocked with fiddle, tin whistle and accordion playing a joyful folk melody, driving drums and a rough shouted lead with a huge drunken gang-vocal chorus. Accelerating dance section in the middle, festival energy."
+  }
+ },
+ {
+  "id": "metal/grunge-vocal",
+  "name": "Grunge",
+  "group": "Metal",
+  "fields": {
+   "genre": "grunge",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal, raspy & raw",
+   "theme": "melancholy & longing",
+   "lyrics": "About frustration, disillusionment and feeling trapped between anger and apathy.",
+   "length": "standard (about 3:00)",
+   "description": "Raw, heavy grunge: dirty distorted guitars with loose bends, thick bass, powerful sloppy drums and a rough expressive vocal moving between mumbled verses and a screamed chorus. Simple but unforgettable riff, extreme quiet-loud dynamics, unpolished early-1990s production."
+  }
+ },
+ {
+  "id": "metal/heavy-metal-vocal",
+  "name": "Heavy metal",
+  "group": "Metal",
+  "fields": {
+   "genre": "heavy metal",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal, powerful & belting",
+   "theme": "hope & resilience",
+   "lyrics": "About facing fear, standing firm and pushing through darkness.",
+   "length": "long (about 4:30)",
+   "description": "Powerful, melodic classic heavy metal: galloping palm-muted riffs, harmonized twin-guitar leads, tight bass, hard-hitting drums and a commanding clean vocal with high sustained notes. Strong memorable chorus, energetic transitions and an expressive shredding guitar solo."
+  }
+ },
+ {
+  "id": "metal/industrial-metal-vocal",
+  "name": "Industrial metal",
+  "group": "Metal",
+  "fields": {
+   "genre": "industrial metal",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "angry & aggressive vocal",
+   "theme": "social commentary",
+   "lyrics": "About technology, control, identity and humans becoming part of the system.",
+   "length": "long (about 4:30)",
+   "description": "Mechanical, dark industrial metal: crushing detuned guitar riffs locked to rigid programmed drums, deep bass, electronic pulses, samples and cold synthetic textures. Aggressive half-shouted vocals, repetitive hook phrases and a relentless machine-like groove."
+  }
+ },
+ {
+  "id": "metal/melodic-metal-instrumental",
+  "name": "Melodic metal (instrumental)",
+  "group": "Metal",
+  "fields": {
+   "genre": "melodic metal",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Powerful, highly melodic metal: heavy rhythm guitars, soaring harmonized lead guitar, tight bass and energetic double-kick drums. Strong recurring themes, dramatic build-ups, a lyrical clean-guitar middle section and a memorable extended solo. Heavy but beautiful, cinematic and uplifting rather than brutal."
+  }
+ },
+ {
+  "id": "metal/metalcore-vocal",
+  "name": "Metalcore",
+  "group": "Metal",
+  "fields": {
+   "genre": "metalcore",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "growled / screamed vocal",
+   "theme": "self-discovery & growth",
+   "lyrics": "About inner struggle, betrayal and fighting back.",
+   "length": "standard (about 3:00)",
+   "description": "Modern metalcore: chugging downtuned riffs, melodic lead guitar over screamed verses, a soaring clean-sung chorus, tight double-kick drums and a heavy half-time breakdown at the end. Sharp modern production, strong contrast between aggression and melody."
+  }
+ },
+ {
+  "id": "metal/nu-metal-vocal",
+  "name": "Nu metal",
+  "group": "Metal",
+  "fields": {
+   "genre": "nu metal",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal, raspy & raw",
+   "theme": "social commentary",
+   "lyrics": "About alienation, anger and not being heard.",
+   "length": "standard (about 3:00)",
+   "description": "Late-1990s nu metal: seven-string downtuned guitar riffs, heavy syncopated groove, slapped and sliding bass, turntable scratches, subtle samples and drums with a hip-hop swing. Rapped and half-shouted verses, big melodic sung chorus, quiet whispered bridge."
+  }
+ },
+ {
+  "id": "metal/power-metal-vocal",
+  "name": "Power metal",
+  "group": "Metal",
+  "fields": {
+   "genre": "power metal",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal, powerful & belting",
+   "theme": "storytelling & adventure",
+   "lyrics": "About legends, battles and triumph.",
+   "length": "long (about 4:30)",
+   "description": "Fast, heroic power metal: twin-guitar harmonies, galloping double-bass drums, symphonic keyboards, driving bass and a soaring clean high vocal. Epic layered chorus, fantasy imagery, neoclassical guitar and keyboard solo trade-off, unstoppable energy."
+  }
+ },
+ {
+  "id": "metal/progressive-djent-instrumental",
+  "name": "Progressive djent (instrumental)",
+  "group": "Metal",
+  "fields": {
+   "genre": "progressive metal / djent",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "changing time signatures",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Progressive metal / djent: precise polyrhythmic palm-muted riffs in shifting odd meters, extended-range guitar, ambient clean interludes with lush pads, fretless bass and technical drumming. Long-form structure with a heavy opening, atmospheric middle and a soaring melodic lead climax. Clinical modern production."
+  }
+ },
+ {
+  "id": "metal/sludge-post-metal-instrumental",
+  "name": "Sludge post metal (instrumental)",
+  "group": "Metal",
+  "fields": {
+   "genre": "sludge / post-metal",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Sludge / post-metal: enormous slow fuzzed-out riffs, feedback, thick bass and thunderous drums, alternating with long clean atmospheric passages of tremolo guitar and reverb. Very gradual crescendo structure, oceanic and crushing, emotional rather than aggressive."
+  }
+ },
+ {
+  "id": "metal/symphonic-metal-vocal",
+  "name": "Symphonic metal",
+  "group": "Metal",
+  "fields": {
+   "genre": "symphonic metal",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "operatic soprano",
+   "theme": "hope & resilience",
+   "lyrics": "About fate, loss and finding light within darkness.",
+   "length": "long (about 4:30)",
+   "description": "Dramatic symphonic metal: heavy guitars and double-kick drums combined with full orchestral strings, brass and choir textures, plus a strong operatic-leaning female lead vocal. Memorable melodic themes, huge cinematic chorus, dynamic contrast with a quiet orchestral bridge and a soaring guitar solo."
+  }
+ },
+ {
+  "id": "metal/thrash-metal-vocal",
+  "name": "Thrash metal",
+  "group": "Metal",
+  "fields": {
+   "genre": "thrash metal",
+   "tempo": "Very fast (175-200 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "angry & aggressive vocal",
+   "theme": "social commentary",
+   "lyrics": "About chaos, corruption and loss of control.",
+   "length": "long (about 4:30)",
+   "description": "Fast, aggressive thrash metal: razor-sharp palm-muted riffs, relentless double-kick and fast snare, energetic bass and an intense shouted vocal. Abrupt tempo changes, a half-time breakdown, wild whammy-bar solo and a precise machine-gun rhythm section. Raw and rhythmically precise."
+  }
+ },
+ {
+  "id": "musical/broadway-ballad-vocal",
+  "name": "Broadway ballad",
+  "group": "Musical",
+  "fields": {
+   "genre": "musical / broadway",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal, powerful & belting",
+   "theme": "dreams & fantasy",
+   "lyrics": "About longing for a different life and finally deciding to reach for it.",
+   "length": "standard (about 3:00)",
+   "description": "Classic Broadway 'I want' ballad: solo piano intro, gradually adding strings, woodwinds and a full orchestral swell, with a powerful theatrical belt in the final chorus and a held last note. Clear dramatic build, rubato phrasing, one recurring hook line."
+  }
+ },
+ {
+  "id": "musical/german-musical-vocal",
+  "name": "German musical",
+  "group": "Musical",
+  "fields": {
+   "genre": "musical / broadway",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "German",
+   "voice": "male vocal, powerful & belting",
+   "theme": "self-discovery & growth",
+   "lyrics": "About a difficult decision and the courage to make it.",
+   "length": "standard (about 3:00)",
+   "description": "German-language musical number: dramatic piano intro, a growing orchestra with strings and brass, a driving rhythm section and a big, theatrical chorus with a key change. Clear pronunciation, narrative verses, emotional climax at the end."
+  }
+ },
+ {
+  "id": "musical/musical-theatre-ensemble-vocal",
+  "name": "Musical theatre ensemble",
+  "group": "Musical",
+  "fields": {
+   "genre": "musical / broadway",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "mixed choir",
+   "theme": "storytelling & adventure",
+   "lyrics": "A scene: a crowd, a decision, a turning point.",
+   "length": "standard (about 3:00)",
+   "description": "Big musical theatre ensemble number: pit orchestra with brass, strings, piano and drum kit, a spoken-sung opening verse, a driving patter section, a soaring key-change finale and a full company chorus with counter-melodies. Theatrical, narrative and larger than life."
+  }
+ },
+ {
+  "id": "pop/art-pop-vocal",
+  "name": "Art pop",
+  "group": "Pop",
+  "fields": {
+   "genre": "art pop",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "changing time signatures",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal",
+   "theme": "dreams & fantasy",
+   "lyrics": "Abstract and image-driven, about transformation.",
+   "length": "long (about 4:30)",
+   "description": "Adventurous art pop: unconventional song structure, layered vocal harmonies used as instruments, processed drums, orchestral and electronic hybrids, sudden textural shifts and an unexpected harmonic turn in the chorus. Theatrical, detailed and cinematic without losing a memorable hook."
+  }
+ },
+ {
+  "id": "pop/bedroom-pop-vocal",
+  "name": "Bedroom pop",
+  "group": "Pop",
+  "fields": {
+   "genre": "bedroom pop",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "breathy & sensual vocal",
+   "theme": "melancholy & longing",
+   "lyrics": "About lying awake, overthinking and small hopes.",
+   "length": "standard (about 3:00)",
+   "description": "Lo-fi bedroom pop: slightly detuned chorus guitar, warm tape-saturated synths, soft muffled drums, simple bass and a close, breathy double-tracked vocal. Hazy, intimate and imperfect, with vinyl noise and a woozy pitch drift."
+  }
+ },
+ {
+  "id": "pop/dance-pop-vocal",
+  "name": "Dance pop",
+  "group": "Pop",
+  "fields": {
+   "genre": "dance-pop",
+   "tempo": "Dancefloor (120-130 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal",
+   "theme": "celebration & party",
+   "lyrics": "Simple, confident and about a night that changes everything.",
+   "length": "standard (about 3:00)",
+   "description": "Modern dance-pop: four-on-the-floor kick, bright plucky synths, deep sidechained bass, claps, a tight pre-chorus build and an explosive chorus combining a sung hook with a post-chorus drop. Glossy radio production, huge and immediate."
+  }
+ },
+ {
+  "id": "pop/dream-pop-electronic-vocal",
+  "name": "Dream pop electronic",
+  "group": "Pop",
+  "fields": {
+   "genre": "dream pop",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal, soft & airy",
+   "theme": "nostalgia & memories",
+   "lyrics": "About remembering a place and time that can never quite be experienced again.",
+   "length": "long (about 4:30)",
+   "description": "Dreamy electronic pop: warm intimate vocal, shimmering reverb-heavy guitars, soft analog synths, deep melodic bass and restrained electronic drums. Beautiful memorable chorus, bittersweet atmosphere and gradual emotional development with a washed-out bridge. Poetic, simple and understated."
+  }
+ },
+ {
+  "id": "pop/german-pop-vocal",
+  "name": "German pop",
+  "group": "Pop",
+  "fields": {
+   "genre": "pop",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "German",
+   "voice": "male vocal",
+   "theme": "hope & resilience",
+   "lyrics": "About new beginnings, friendship and the courage to start something new.",
+   "length": "standard (about 3:00)",
+   "description": "Modern German pop: a clear piano or guitar motif, warm synth pads, programmed and live drums, a driving bass and a big, very catchy chorus with stacked voices. Clear pronunciation, simple vivid language, a calm bridge before the last chorus."
+  }
+ },
+ {
+  "id": "pop/hyperpop-vocal",
+  "name": "Hyperpop",
+  "group": "Pop",
+  "fields": {
+   "genre": "hyperpop",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "auto-tuned vocal",
+   "theme": "dreams & fantasy",
+   "lyrics": "About being online, overstimulated and in love.",
+   "length": "short (about 1:30)",
+   "description": "Maximalist hyperpop: pitched-up chipmunk vocals, distorted 808 bass, glitchy edits, blown-out saturated drums, sugary supersaw chords and abrupt beat switches. Extremely loud, chaotic and euphoric, with an unexpectedly emotional bridge. Very short repetitive hook."
+  }
+ },
+ {
+  "id": "pop/indie-pop-vocal",
+  "name": "Indie pop",
+  "group": "Pop",
+  "fields": {
+   "genre": "indie pop",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal, young & bright",
+   "theme": "friendship & togetherness",
+   "lyrics": "About a small everyday moment that feels enormous.",
+   "length": "standard (about 3:00)",
+   "description": "Bright indie pop: jangly clean guitars, bouncing bass, live drums with tambourine, warm analog synth accents and a slightly imperfect, charming lead vocal with layered 'ooh' harmonies. Catchy hook, handclaps, warm and slightly lo-fi production."
+  }
+ },
+ {
+  "id": "pop/power-ballad-vocal",
+  "name": "Power ballad",
+  "group": "Pop",
+  "fields": {
+   "genre": "power ballad",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal, powerful & belting",
+   "theme": "love & romance",
+   "lyrics": "About holding on to someone across distance and time.",
+   "length": "long (about 4:30)",
+   "description": "Classic power ballad: gentle piano and clean guitar intro, softly sung verse, strings entering in the second verse, full band and huge distorted guitars in the final chorus, a soaring guitar solo and a key change before the last chorus. Enormous emotional dynamic range."
+  }
+ },
+ {
+  "id": "pop/singer-songwriter-acoustic-vocal",
+  "name": "Singer songwriter acoustic",
+  "group": "Pop",
+  "fields": {
+   "genre": "singer-songwriter",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "whispered & intimate vocal",
+   "theme": "self-discovery & growth",
+   "lyrics": "Plain-spoken and personal, about a conversation that never happened.",
+   "length": "standard (about 3:00)",
+   "description": "Honest acoustic singer-songwriter song: fingerpicked or gently strummed acoustic guitar, subtle piano, upright bass and brushed drums entering late, plus a close, unpolished vocal with audible breath. Conversational verses, one quietly devastating refrain, minimal production and lots of space."
+  }
+ },
+ {
+  "id": "punk/pop-punk-vocal",
+  "name": "Pop punk",
+  "group": "Punk",
+  "fields": {
+   "genre": "pop-punk / emo",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal, young & energetic",
+   "theme": "nostalgia & memories",
+   "lyrics": "About growing up in a boring town, a summer and a broken heart.",
+   "length": "standard (about 3:00)",
+   "description": "Bright pop-punk: fast palm-muted power chords, octave lead riffs, galloping bass, driving drums with a skate-punk beat and a nasal earnest vocal with big 'whoa-oh' gang harmonies. Huge singalong chorus, a half-time bridge, polished but energetic production."
+  }
+ },
+ {
+  "id": "punk/post-punk-vocal",
+  "name": "Post punk",
+  "group": "Punk",
+  "fields": {
+   "genre": "post-punk",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "baritone vocal",
+   "theme": "mystery & darkness",
+   "lyrics": "Fragmentary, about distance, cities and dread.",
+   "length": "standard (about 3:00)",
+   "description": "Cold post-punk: driving melodic bass leading the song, angular chorus-drenched guitar stabs, motorik drums with heavy toms and a detached, half-spoken baritone vocal. Repetitive hypnotic structure, minor key, cavernous reverb and a stark, gray atmosphere."
+  }
+ },
+ {
+  "id": "punk/punk-rock-vocal",
+  "name": "Punk rock",
+  "group": "Punk",
+  "fields": {
+   "genre": "punk rock",
+   "tempo": "Very fast (175-200 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "angry & aggressive vocal",
+   "theme": "social commentary",
+   "lyrics": "About frustration, freedom and fighting back.",
+   "length": "short (about 1:30)",
+   "description": "Fast, raw and rebellious punk rock: three-chord power-chord riffs, driving eighth-note bass, hammering drums with a fast snare and an energetic shouted vocal with gang-vocal backups. Short punchy sections, no solos, no-frills live production, short and furious."
+  }
+ },
+ {
+  "id": "punk/ska-punk-vocal",
+  "name": "Ska punk",
+  "group": "Punk",
+  "fields": {
+   "genre": "ska punk",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "group vocals / gang vocals",
+   "theme": "friendship & togetherness",
+   "lyrics": "About friends, bad jobs and not caring.",
+   "length": "standard (about 3:00)",
+   "description": "Energetic ska punk: upstroke offbeat guitar skanks in the verses exploding into distorted power chords in the chorus, punchy horn section riffs, walking bass, fast drums and an enthusiastic shouted vocal. Constant tempo and feel switches, playful and hyperactive."
+  }
+ },
+ {
+  "id": "reggae/dancehall-vocal",
+  "name": "Dancehall",
+  "group": "Reggae",
+  "fields": {
+   "genre": "dancehall",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal",
+   "theme": "celebration & party",
+   "lyrics": "About dancing, style and celebration.",
+   "length": "standard (about 3:00)",
+   "description": "Energetic modern dancehall: digital riddim, punchy programmed drums, syncopated bass, bright synth stabs and a rapid-fire melodic vocal with plenty of ad-libs. Repetitive catchy hook, direct and bright production with a lot of attitude."
+  }
+ },
+ {
+  "id": "reggae/dub-instrumental",
+  "name": "Dub (instrumental)",
+  "group": "Reggae",
+  "fields": {
+   "genre": "dub",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Deep, spacious dub: rumbling bass leading everything, stripped-back one-drop drums, offbeat skank fragments drifting in and out through enormous tape echo and spring reverb, sudden drop-outs and filter sweeps. Meditative, psychedelic mixing-desk performance built on reggae's heartbeat."
+  }
+ },
+ {
+  "id": "reggae/rocksteady-vocal",
+  "name": "Rocksteady",
+  "group": "Reggae",
+  "fields": {
+   "genre": "rocksteady",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male lead + female backing",
+   "theme": "love & romance",
+   "lyrics": "About love, waiting and better days.",
+   "length": "standard (about 3:00)",
+   "description": "Sweet 1960s rocksteady: relaxed shuffling drums, prominent melodic bassline, offbeat guitar and piano, warm horn lines and a soulful lead vocal with close three-part harmony backing. Slower and more soulful than ska, vintage Jamaican studio warmth."
+  }
+ },
+ {
+  "id": "reggae/roots-reggae-vocal",
+  "name": "Roots reggae",
+  "group": "Reggae",
+  "fields": {
+   "genre": "reggae",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal",
+   "theme": "hope & resilience",
+   "lyrics": "About unity, inner strength and holding on through hard times.",
+   "length": "long (about 4:30)",
+   "description": "Laid-back roots reggae: offbeat guitar and piano skanks, deep rolling melodic bass, warm Hammond organ bubble, steady one-drop drums and a soulful lead vocal with harmony backing. Spacious dub-flavoured mix, long solo section with melodica or horns."
+  }
+ },
+ {
+  "id": "reggae/ska-jamaican-instrumental",
+  "name": "Ska jamaican (instrumental)",
+  "group": "Reggae",
+  "fields": {
+   "genre": "ska (jamaican)",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Original Jamaican ska: fast offbeat guitar and piano skanks, walking bass, shuffle drums with rim clicks, and a punchy trombone, trumpet and tenor-sax front line trading solos. Joyful, brisk and irresistibly danceable, warm vintage recording."
+  }
+ },
+ {
+  "id": "rock/blues-rock-instrumental",
+  "name": "Blues rock (instrumental)",
+  "group": "Rock",
+  "fields": {
+   "genre": "blues rock",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Raw, soulful blues rock: expressive electric guitar with warm overdriven tube tone, deep bass, Hammond organ pads and relaxed but powerful drums. Memorable riff, emotional bends, dynamic extended solo and strong call-and-response phrasing. Organic live-band feel with gradual development."
+  }
+ },
+ {
+  "id": "rock/classic-rock-vocal",
+  "name": "Classic rock",
+  "group": "Rock",
+  "fields": {
+   "genre": "classic rock",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal, raspy & raw",
+   "theme": "freedom & escape",
+   "lyrics": "About freedom, taking risks and leaving the past behind.",
+   "length": "long (about 4:30)",
+   "description": "Energetic, timeless classic rock: crunchy electric guitars, driving bass, powerful acoustic drums and a charismatic lead vocal. Memorable opening riff, catchy chorus with harmony vocals, a tasteful guitar solo and a natural live-band feel with warm analog production."
+  }
+ },
+ {
+  "id": "rock/garage-rock-vocal",
+  "name": "Garage rock",
+  "group": "Rock",
+  "fields": {
+   "genre": "garage rock",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal, raspy & raw",
+   "theme": "freedom & escape",
+   "lyrics": "Simple and snarling, about a girl and a bad night.",
+   "length": "standard (about 3:00)",
+   "description": "Raw garage rock: overdriven fuzzy guitar, simple pounding drums, growling bass and a shouted, distorted vocal recorded hot and close. Two-chord riff, handclaps, tambourine, sloppy energy and a short screaming solo. Deliberately lo-fi, live and loud."
+  }
+ },
+ {
+  "id": "rock/hard-rock-vocal",
+  "name": "Hard rock",
+  "group": "Rock",
+  "fields": {
+   "genre": "hard rock",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal, raspy & raw",
+   "theme": "hope & resilience",
+   "lyrics": "About resilience, pressure and refusing to give up.",
+   "length": "long (about 4:30)",
+   "description": "Heavy, punchy hard rock: massive guitar riffs, tight bass, hard-hitting drums and a powerful rough vocal. Strong groove, memorable hooks, explosive chorus, a melodic guitar solo and a stomping half-time breakdown. Big, loud and confident."
+  }
+ },
+ {
+  "id": "rock/indie-rock-vocal",
+  "name": "Indie rock",
+  "group": "Rock",
+  "fields": {
+   "genre": "indie rock",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal",
+   "theme": "self-discovery & growth",
+   "lyrics": "About growing up, doubt and finding your way.",
+   "length": "standard (about 3:00)",
+   "description": "Warm, melodic and slightly melancholic indie rock: jangly interlocking guitars, steady melodic bass, live drums and an earnest, slightly fragile vocal. Memorable hooks, gentle dynamics, a lift in the last chorus, honest and heartfelt production."
+  }
+ },
+ {
+  "id": "rock/pop-rock-vocal",
+  "name": "Pop rock",
+  "group": "Rock",
+  "fields": {
+   "genre": "pop rock",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal, warm & powerful",
+   "theme": "hope & resilience",
+   "lyrics": "About not giving up when things fall apart, and the people who carry you through.",
+   "length": "standard (about 3:00)",
+   "description": "Radio-ready pop rock: crunchy electric guitars with a catchy riff, solid live drums, driving bass and a warm piano underneath. Restrained verses, a lift in the pre-chorus and a big, open singalong chorus with harmonies; a short guitar solo before the last chorus."
+  }
+ },
+ {
+  "id": "rock/post-rock-instrumental",
+  "name": "Post rock (instrumental)",
+  "group": "Rock",
+  "fields": {
+   "genre": "post-rock",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Post-rock crescendo: clean delay-and-reverb guitars building layered arpeggios over a slow hypnotic bass and gradually intensifying drums, joined by strings and tremolo-picked guitar walls in a cathartic climax before falling back to near-silence. Instrumental throughout, no verse-chorus form, one long emotional arc."
+  }
+ },
+ {
+  "id": "rock/progressive-rock-instrumental",
+  "name": "Progressive rock (instrumental)",
+  "group": "Rock",
+  "fields": {
+   "genre": "progressive rock",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "changing time signatures",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Atmospheric, sophisticated progressive rock: expressive electric guitars, melodic bass, acoustic drums, Hammond organ and Mellotron, with evolving recurring themes. Strong contrast between calm passages and powerful sections, unusual but musical meter changes and memorable motifs. Cinematic, emotional and highly developed multi-part structure."
+  }
+ },
+ {
+  "id": "rock/psychedelic-rock-instrumental",
+  "name": "Psychedelic rock (instrumental)",
+  "group": "Rock",
+  "fields": {
+   "genre": "psychedelic rock",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "1960s psychedelic rock: fuzz guitar with wah and heavy phasing, swirling Hammond organ, sitar-like drones, backwards tape effects, loose live drums and a long hypnotic modal jam. Wide panning trickery, a slow build into a chaotic peak and a woozy fade. Warm analog tape sound."
+  }
+ },
+ {
+  "id": "rock/rockabilly-vocal",
+  "name": "Rockabilly",
+  "group": "Rock",
+  "fields": {
+   "genre": "rockabilly",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal, young & energetic",
+   "theme": "love & romance",
+   "lyrics": "About cars, dancing and a girl who won't call back.",
+   "length": "standard (about 3:00)",
+   "description": "1950s rockabilly: slap upright bass, twangy Gretsch-style guitar with heavy slapback echo, brushed snare shuffle and a hiccupping, echo-drenched vocal. Twelve-bar structure, wild guitar break, handclaps and vintage mono tape production."
+  }
+ },
+ {
+  "id": "rock/shoegaze-vocal",
+  "name": "Shoegaze",
+  "group": "Rock",
+  "fields": {
+   "genre": "shoegaze",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "whispered & intimate vocal",
+   "theme": "dreams & fantasy",
+   "lyrics": "Indistinct and impressionistic, about longing.",
+   "length": "long (about 4:30)",
+   "description": "Shoegaze wall of sound: heavily layered fuzz and reverb guitars with pitch-bending tremolo, buried melodic bass, steady live drums and a soft androgynous vocal mixed low inside the noise. Beautiful melody hidden under distortion, hazy dreamlike production."
+  }
+ },
+ {
+  "id": "rock/southern-rock-vocal",
+  "name": "Southern rock",
+  "group": "Rock",
+  "fields": {
+   "genre": "southern rock",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal, raspy & raw",
+   "theme": "storytelling & adventure",
+   "lyrics": "About home, the highway and hard-won pride.",
+   "length": "long (about 4:30)",
+   "description": "Southern rock: twin harmonized lead guitars, slide guitar, boogie piano, thick bass and swinging drums, with a gritty soulful vocal and a gospel-flavoured backing chorus. Long dual-guitar solo section building to a euphoric finish. Warm, live and organic."
+  }
+ },
+ {
+  "id": "rock/stoner-rock-instrumental",
+  "name": "Stoner rock (instrumental)",
+  "group": "Rock",
+  "fields": {
+   "genre": "stoner rock",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "long (about 4:30)",
+   "description": "Heavy stoner rock: enormous fuzzed-out downtuned riff repeating hypnotically, thick bass, loose swinging drums and a bluesy wah-drenched lead guitar. Desert groove, huge amp room sound, long jam section and a slow massive outro. Warm, dirty analog production."
+  }
+ },
+ {
+  "id": "rock/surf-rock-instrumental",
+  "name": "Surf rock (instrumental)",
+  "group": "Rock",
+  "fields": {
+   "genre": "surf rock",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "key": "E minor",
+   "length": "standard (about 3:00)",
+   "description": "Classic surf rock: wet reverb-drenched tremolo-picked lead guitar, staccato rhythm guitar, driving bass and energetic drums with tom rolls. Minor-key exotic melody, whammy-bar dives, handclaps and a relentless forward drive. Vintage 1960s recording."
+  }
+ },
+ {
+  "id": "seasonal/christmas-carol-vocal",
+  "name": "Christmas carol",
+  "group": "Seasonal",
+  "fields": {
+   "genre": "christmas / holiday",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "3/4 (waltz)",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "mixed choir",
+   "theme": "spirituality & inner peace",
+   "lyrics": "About winter night, light and quiet wonder.",
+   "length": "standard (about 3:00)",
+   "description": "Traditional Christmas carol: mixed choir in warm four-part harmony, church organ, sleigh bells, harp and gentle strings. Stately verse structure with a descant on the final verse, reverent and joyful, recorded in a church with generous natural reverb."
+  }
+ },
+ {
+  "id": "seasonal/christmas-pop-vocal",
+  "name": "Christmas pop",
+  "group": "Seasonal",
+  "fields": {
+   "genre": "christmas / holiday",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "12/8 (shuffle / slow blues)",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "happy & uplifting vocal",
+   "theme": "nostalgia & memories",
+   "lyrics": "About coming home for the holidays and snow outside the window.",
+   "length": "standard (about 3:00)",
+   "description": "Cheerful retro Christmas pop: sleigh bells, brushed shuffle drums, walking bass, jazzy piano, warm horns, glockenspiel and a smooth crooning vocal with a big backing-vocal chorus. Nostalgic 1960s festive production, key change before the last chorus."
+  }
+ },
+ {
+  "id": "seasonal/german-christmas-vocal",
+  "name": "German christmas",
+  "group": "Seasonal",
+  "fields": {
+   "genre": "christmas / holiday",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "German",
+   "voice": "warm & comforting vocal",
+   "theme": "nostalgia & memories",
+   "lyrics": "About candlelight, home and the silence of Christmas Eve.",
+   "length": "standard (about 3:00)",
+   "description": "Calm German Christmas song: warm piano, strings, gentle acoustic guitar, glockenspiel and subtle choir voices in the chorus. Simple, very singable melody, festive and peaceful mood, a clear build from quiet to full."
+  }
+ },
+ {
+  "id": "seasonal/wedding-ceremony-instrumental",
+  "name": "Wedding ceremony (instrumental)",
+  "group": "Seasonal",
+  "fields": {
+   "genre": "wedding / ceremonial",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Wedding ceremony piece: solo piano stating a tender theme, joined by string quartet, soft harp and a distant solo violin. Gradual warm build to a radiant climax, then a gentle close. Elegant, hopeful and timeless, natural acoustic recording with no percussion."
+  }
+ },
+ {
+  "id": "seasonal/wedding-first-dance-vocal",
+  "name": "Wedding first dance",
+  "group": "Seasonal",
+  "fields": {
+   "genre": "romantic pop ballad",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "6/8",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "warm, intimate vocal",
+   "theme": "love & romance",
+   "lyrics": "A promise to one person for a lifetime: how they met, small moments that matter and the vow to stay.",
+   "length": "standard (about 3:00)",
+   "description": "Tender wedding ballad for a first dance: soft piano and fingerpicked guitar, a gentle string section swelling in the chorus, light brushed drums. A gentle sway, an intimate first verse and a warm, full final chorus."
+  }
+ },
+ {
+  "id": "soul/doo-wop-vocal",
+  "name": "Doo wop",
+  "group": "Soul",
+  "fields": {
+   "genre": "doo-wop",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "12/8 (shuffle / slow blues)",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "falsetto vocal",
+   "theme": "love & romance",
+   "lyrics": "About a sweetheart, a first dance and a promise made under the streetlight.",
+   "length": "standard (about 3:00)",
+   "description": "1950s doo-wop: close four-part vocal harmony with bass-voice 'dip-da-dip' patterns and a soaring falsetto lead, over a simple I-vi-IV-V progression with triplet piano, brushed drums, upright bass and a lonely saxophone solo. Innocent, romantic and nostalgic, vintage reverb-heavy recording."
+  }
+ },
+ {
+  "id": "soul/motown-soul-vocal",
+  "name": "Motown soul",
+  "group": "Soul",
+  "fields": {
+   "genre": "motown / classic soul",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male lead + female backing",
+   "theme": "love & romance",
+   "lyrics": "About falling in love and not being able to hide it.",
+   "length": "standard (about 3:00)",
+   "description": "Classic 1960s Motown soul: driving tambourine and backbeat drums, melodic walking bass, bright piano and vibraphone, punchy horn stabs, sweeping strings and a joyful lead vocal answered by a tight female backing trio. Simple irresistible hook, warm vintage mono-flavoured mix."
+  }
+ },
+ {
+  "id": "soul/neo-soul-vocal",
+  "name": "Neo soul",
+  "group": "Soul",
+  "fields": {
+   "genre": "neo-soul",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "female vocal",
+   "theme": "self-discovery & growth",
+   "lyrics": "About self-worth, patience and choosing yourself.",
+   "length": "long (about 4:30)",
+   "description": "Neo-soul: loose behind-the-beat drums with ghost notes, warm round bass, lush Rhodes chords with extended jazz harmony, muted guitar and layered improvised vocal stacks. Relaxed, organic and harmonically rich, with a floating wordless outro."
+  }
+ },
+ {
+  "id": "soul/soul-ballad-vocal",
+  "name": "Soul ballad",
+  "group": "Soul",
+  "fields": {
+   "genre": "soul ballad",
+   "tempo": "Slow (40-70 BPM)",
+   "meter": "12/8 (shuffle / slow blues)",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "male vocal, powerful & belting",
+   "theme": "heartbreak & loss",
+   "lyrics": "About begging someone to stay.",
+   "length": "standard (about 3:00)",
+   "description": "Deep southern soul ballad: slow triplet feel, warm Hammond organ, gospel piano, clean guitar, restrained horns and a raw, aching lead vocal that grows into a full-throated cry. Simple chord changes, huge emotional dynamics, vintage Memphis recording."
+  }
+ },
+ {
+  "id": "world/andean-folk-instrumental",
+  "name": "Andean folk (instrumental)",
+  "group": "World",
+  "fields": {
+   "genre": "andean folk",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "2/4 (march / polka)",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Andean folk: breathy quena and zampoña panpipes carrying a pentatonic melody, charango tremolo, nylon guitar, bombo legüero drum and gentle shaker. Wide mountain-air atmosphere, melancholic yet dancing, a slow lament opening into a lively huayno rhythm."
+  }
+ },
+ {
+  "id": "world/arabic-pop-vocal",
+  "name": "Arabic pop",
+  "group": "World",
+  "fields": {
+   "genre": "arabic pop",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Arabic",
+   "voice": "male vocal",
+   "theme": "love & romance",
+   "lyrics": "About love, distance and devotion.",
+   "length": "long (about 4:30)",
+   "description": "Modern Arabic pop: oud and qanun melodic lines over a driving darbuka and riq rhythm, lush unison strings playing ornamented maqam phrases, synth bass and modern drums. Melismatic passionate vocal, big singable chorus, glossy production."
+  }
+ },
+ {
+  "id": "world/bhangra-instrumental",
+  "name": "Bhangra (instrumental)",
+  "group": "World",
+  "fields": {
+   "genre": "bhangra",
+   "tempo": "Uptempo (130-145 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "High-energy Bhangra: booming dhol double-headed drum pattern, tumbi twang riff, algoza flute, hand claps, deep modern bass and bright synth stabs. Relentless celebratory groove, call-and-response shouts used rhythmically, joyous and irresistibly danceable."
+  }
+ },
+ {
+  "id": "world/calypso-soca-vocal",
+  "name": "Calypso soca",
+  "group": "World",
+  "fields": {
+   "genre": "calypso / soca",
+   "tempo": "Fast (145-175 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "English",
+   "voice": "group vocals / gang vocals",
+   "theme": "celebration & party",
+   "lyrics": "About carnival, dancing and letting go.",
+   "length": "standard (about 3:00)",
+   "description": "Bright Caribbean soca: fast driving drum-machine-and-live percussion groove, iron and cowbell, syncopated bass, staccato horn riffs, bright synth stabs and an exuberant lead vocal with crowd chants. Carnival energy, simple repeated hook, huge and joyful."
+  }
+ },
+ {
+  "id": "world/gamelan-instrumental",
+  "name": "Gamelan (instrumental)",
+  "group": "World",
+  "fields": {
+   "genre": "gamelan",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Balinese gamelan: interlocking kotekan patterns on bronze metallophones and gangsa, resonant gongs marking the cycle, kendang drum leading sudden tempo and dynamic changes, shimmering detuned tuning. Cyclical structure, explosive unison accents, hypnotic and ceremonial."
+  }
+ },
+ {
+  "id": "world/gnawa-instrumental",
+  "name": "Gnawa",
+  "group": "World",
+  "fields": {
+   "genre": "gnawa",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "6/8",
+   "vocals": "sung",
+   "voice": "group vocals / gang vocals",
+   "theme": "wordless vocalise",
+   "lyrics": "No words: call-and-response chanted syllables in a trance.",
+   "length": "long (about 4:30)",
+   "description": "Moroccan Gnawa trance: deep booming guembri bass lute repeating a hypnotic riff, metallic qraqeb castanets driving a relentless shuffle, and call-and-response wordless group chanting. Very gradual acceleration, hypnotic repetition, ceremonial and entrancing."
+  }
+ },
+ {
+  "id": "world/hawaiian-slack-key-instrumental",
+  "name": "Hawaiian slack key (instrumental)",
+  "group": "World",
+  "fields": {
+   "genre": "hawaiian",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Hawaiian slack-key guitar: warm open-tuned acoustic guitar fingerpicking a gentle melody with hammer-ons and harmonics, soft steel guitar swells, ukulele and light shaker. Relaxed, sunlit and nostalgic, with ocean-breeze calm and a natural close recording."
+  }
+ },
+ {
+  "id": "world/mariachi-vocal",
+  "name": "Mariachi",
+  "group": "World",
+  "fields": {
+   "genre": "mariachi",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "3/4 (waltz)",
+   "vocals": "sung",
+   "language": "Spanish",
+   "voice": "male vocal, powerful & belting",
+   "theme": "love & romance",
+   "lyrics": "About love, pride and heartbreak.",
+   "length": "standard (about 3:00)",
+   "description": "Traditional mariachi: trumpet duet in bright harmony, violin section, vihuela and guitarrón, with a powerful passionate vocal using long held notes and grito shouts. Alternating free-rubato opening and a lilting ranchera waltz feel, festive and proudly emotional."
+  }
+ },
+ {
+  "id": "world/mongolian-throat-singing-instrumental",
+  "name": "Mongolian throat singing",
+  "group": "World",
+  "fields": {
+   "genre": "mongolian throat singing",
+   "tempo": "Laid-back (70-100 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "voice": "throat singing",
+   "theme": "wordless vocalise",
+   "lyrics": "No words: overtone throat singing on held vowels.",
+   "length": "standard (about 3:00)",
+   "description": "Mongolian steppe music: deep khoomei overtone throat singing over morin khuur horsehead fiddle, tovshuur lute and a slow galloping frame-drum pulse. Wide, windswept open-plain atmosphere, pentatonic melodies, ancient and hypnotic, with long sustained drones."
+  }
+ },
+ {
+  "id": "world/qawwali-vocal",
+  "name": "Qawwali",
+  "group": "World",
+  "fields": {
+   "genre": "qawwali",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "4/4",
+   "vocals": "sung",
+   "language": "Urdu",
+   "voice": "male choir",
+   "theme": "spirituality & inner peace",
+   "lyrics": "Devotional praise of the divine beloved, a refrain repeated with growing ecstasy.",
+   "length": "long (about 4:30)",
+   "description": "Devotional Qawwali: harmonium and tabla groove with insistent group handclaps, a lead voice improvising ecstatic melismatic phrases answered by a male chorus. Starts slow and meditative, then accelerates through repeated refrains into a trance-like ecstatic climax. Live gathering feel."
+  }
+ },
+ {
+  "id": "world/turkish-folk-instrumental",
+  "name": "Turkish folk (instrumental)",
+  "group": "World",
+  "fields": {
+   "genre": "turkish folk",
+   "tempo": "Midtempo (100-120 BPM)",
+   "meter": "9/8",
+   "vocals": "instrumental",
+   "length": "standard (about 3:00)",
+   "description": "Anatolian Turkish folk: bağlama / saz lead with fast tremolo and microtonal ornaments, ney flute, kemençe, darbuka and davul percussion in an asymmetric rhythm. Modal makam melody, a free-rhythm improvised opening, then a driving dance section."
+  }
+ }
+]

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Plenio VST3 - social preview</title>
+<link rel="stylesheet" href="brand.css">
+<style>
+  /* 1280 x 640: GitHub's social preview (and a post's picture). */
+  .row.head { left: 80px; top: 92px; gap: 44px; }
+  .mark { width: 232px; height: 232px; }
+  .name { font-size: 118px; }
+  .pill { font-size: 22px; margin-top: 22px; }
+  .claim { position: absolute; left: 80px; top: 400px; font-size: 38px; font-weight: 700; line-height: 1.25; }
+  .claim span { background: linear-gradient(90deg, var(--amber), var(--pink), var(--violet)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .daws { position: absolute; left: 80px; top: 520px; font-size: 18px; letter-spacing: 0.22em; }
+</style>
+</head>
+<body>
+<div class="sky"></div>
+<svg class="stars" viewBox="0 0 1280 640" preserveAspectRatio="none" aria-hidden="true">
+  <g fill="#ffffff">
+    <circle cx="860" cy="70" r="1.6" opacity="0.7"/><circle cx="990" cy="140" r="1.1" opacity="0.5"/>
+    <circle cx="1110" cy="60" r="1.8" opacity="0.8"/><circle cx="1220" cy="170" r="1.2" opacity="0.5"/>
+    <circle cx="930" cy="250" r="1.0" opacity="0.4"/><circle cx="1160" cy="290" r="1.4" opacity="0.55"/>
+  </g>
+  <g fill="#ff3d8b">
+    <circle cx="1010" cy="420" r="2.2" opacity="0.7"/><circle cx="1140" cy="380" r="1.6" opacity="0.6"/>
+    <circle cx="1230" cy="440" r="2.4" opacity="0.6"/>
+  </g>
+</svg>
+<svg class="waves" viewBox="0 0 1280 640" height="640" preserveAspectRatio="none" aria-hidden="true">
+  <defs>
+    <linearGradient id="w" x1="0" x2="1"><stop offset="0" stop-color="#ffb23e" stop-opacity="0"/><stop offset="0.3" stop-color="#ffb23e"/><stop offset="0.65" stop-color="#ff3d8b"/><stop offset="1" stop-color="#8a4dff"/></linearGradient>
+    <filter id="b"><feGaussianBlur stdDeviation="6"/></filter>
+  </defs>
+  <g fill="none" stroke="url(#w)" stroke-linecap="round">
+    <path d="M0 636 C 260 625, 460 640, 700 600 S 1000 480, 1280 440" stroke-width="10" filter="url(#b)" opacity="0.55"/>
+    <path d="M0 636 C 260 625, 460 640, 700 600 S 1000 480, 1280 440" stroke-width="2.5"/>
+    <path d="M0 646 C 300 636, 520 650, 760 615 S 1060 520, 1280 490" stroke-width="1.5" opacity="0.6"/>
+  </g>
+</svg>
+<div class="row head">
+  <img class="mark" src="../logo.svg" alt="">
+  <div>
+    <div class="name">PLENIO</div>
+    <div class="pill">VST3 &middot; IN YOUR DAW</div>
+  </div>
+</div>
+<div class="claim">Generate the song. <span>Keep working in your DAW.</span></div>
+<div class="daws tag">REAPER &middot; CUBASE &middot; STUDIO ONE &middot; LIVE &middot; FL STUDIO &middot; BITWIG</div>
+</body>
+</html>

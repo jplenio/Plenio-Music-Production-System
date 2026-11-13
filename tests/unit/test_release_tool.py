@@ -46,6 +46,9 @@ def skeleton(tmp: Path, intro: str = "") -> Path:
     (tmp / "frontend" / "package-lock.json").write_text(json.dumps(lock), encoding="utf-8")
     (tmp / "docs" / "facts.json").write_text(json.dumps({"version": "9.9.9"}), encoding="utf-8")
     (tmp / "CHANGELOG.md").write_text(CHANGELOG.format(intro=intro), encoding="utf-8")
+    (tmp / "vst3" / "resources").mkdir(parents=True)
+    compat = {"minimum": "9.0.0", "recommended": "9.9.0", "tested": "9.9.8"}
+    (tmp / "vst3" / "resources" / "plenio-compat.json").write_text(json.dumps(compat), encoding="utf-8")
     return tmp
 
 
@@ -54,6 +57,9 @@ def test_the_version_is_written_everywhere_it_stands(tmp_path: Path, monkeypatch
     release.set_version("9.9.9")
     assert set(release.versions().values()) == {"9.9.9"}
     assert '"version": "9.9.9"' in (tmp_path / "frontend" / "package.json").read_text(encoding="utf-8")
+    # the DAW plug-in's record of the Plenio it was checked with follows; what it needs at least stays
+    compat = json.loads((tmp_path / "vst3" / "resources" / "plenio-compat.json").read_text(encoding="utf-8"))
+    assert compat == {"minimum": "9.0.0", "recommended": "9.9.0", "tested": "9.9.9"}
 
 
 def test_the_changelog_is_dated_only_with_its_intro(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
