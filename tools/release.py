@@ -20,6 +20,7 @@ import argparse
 import datetime
 import json
 import re
+import shutil
 import subprocess
 import sys
 from collections.abc import Sequence
@@ -347,6 +348,13 @@ def prepare(version: str, bench: Path | None, today: str, *, earlier_bench: bool
         )
     set_version(version)
     date_changelog(version, today)
+    # the frontend's builds carry the version (frontend/package.json): built again, or the CI's comparison of the
+    # committed builds with the sources fails on the release commit (2.0.1)
+    npm = shutil.which("npm")
+    if npm is None:
+        raise SystemExit("prepare builds the frontend with the new version: npm is not on the PATH")
+    run(npm, "run", "build", cwd=PROJECT / "frontend")
+    run(npm, "run", "build:player", cwd=PROJECT / "frontend")
     python = sys.executable
     run(python, "tools/build_graphs.py")
     run(python, "tools/api_docs.py")
