@@ -434,17 +434,29 @@ def broadcast(event: str, data: dict[str, Any]) -> None:
     PromptServer.instance.send_sync(event, data)
 
 
+def writable(folder: Path) -> bool:
+    """Whether this process may write into ``folder`` - or, when it is not made yet, create it in its nearest
+    existing parent. A shared or system-wide model folder (extra_model_paths.yaml, a container's mount) often is
+    readable only."""
+    for place in (folder, *folder.parents):
+        if place.exists():
+            return place.is_dir() and os.access(place, os.W_OK | os.X_OK)
+    return False
+
+
 def model_folder(folder: str) -> Path | None:
-    """ComfyUI's own folder for a kind of model - the first one it registered for ``folder``, where a download
-    goes (``None``: this ComfyUI knows no such folder)."""
-    paths = _registered().get(folder) or []
-    return Path(paths[0]) if paths else None
+    """The folder a download of a kind of model goes to: the first one ComfyUI registered for ``folder`` that this
+    process may write into (``None``: this ComfyUI knows no such folder)."""
+    paths = model_folders(folder)
+    return paths[0] if paths else None
 
 
 def model_folders(folder: str) -> list[Path]:
-    """Every folder ComfyUI registered for a kind of model, the download target first (Setup lets the user choose
-    among them - never another)."""
-    return [Path(path) for path in _registered().get(folder) or []]
+    """Every folder ComfyUI registered for a kind of model, the download target first: the first one this process
+    may write into, then the others in ComfyUI's order (Setup lets the user choose among them - never another).
+    When none is writable the first stays the target, and the download says why it cannot write there."""
+    paths = [Path(path) for path in _registered().get(folder) or []]
+    return sorted(paths, key=lambda path: not writable(path))
 
 
 def drive_of(folder: Path) -> tuple[int | None, int | None]:

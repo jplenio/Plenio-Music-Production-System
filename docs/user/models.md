@@ -181,6 +181,8 @@ Qwen3-ASR runs on ComfyUI's own `transformers` (5.5 or newer): Plenio ships the 
 
 If your models live outside `ComfyUI/models`, add the folders to ComfyUI's `extra_model_paths.yaml` (the standard ComfyUI way). Plenio's templates and the System Check find files there too.
 
+**Plenio Setup downloads into the first of these folders that ComfyUI may write into** (step 3 shows it and lets you choose another). A shared or system-wide folder that the user ComfyUI runs as may only read - common on Linux and in containers - is passed over. If none of the folders of a kind is writable, the download stops with *ComfyUI may not write into this model folder*: give that user write access, or place the file by hand; the plan names each file, its folder and its address. Setup recognises a file you already have by its **name** in any folder of its kind (for example `flux2-vae.safetensors` in a `vae` folder); a copy under another name is not counted, but Model Choice can be set to it.
+
 ComfyUI searches a folder of such a location only when the file names it - one line per folder, such as `checkpoints: checkpoints`. Plenio's own folders need no line: **`audio_separation`**, **`audio_sr`** and **`LLM`** are also searched beside every model folder ComfyUI knows. With
 
 ```yaml

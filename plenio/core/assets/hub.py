@@ -37,7 +37,8 @@ KINDS = (
     "offline",  # no connection
     "disk",  # no room
     "damaged",  # the file that arrived is not the catalogue's
-    "locked",  # another program holds the file
+    "locked",  # another program holds the file (Windows, for a moment)
+    "permission",  # this process may not write into the folder
     "occupied",  # a different file of the catalogued name is in the folder (Plenio leaves it alone)
     "other",
 )
@@ -146,10 +147,19 @@ def classify_error(error: BaseException, *, host: str = HUB_HOST) -> Refusal:
         if found is not None:
             return found
     if isinstance(error, PermissionError):
+        # Windows' sharing violations (32, 33): another program holds the file for a moment - trying again helps.
+        # Everything else is a missing right to write there (Linux and macOS always say so), which no retry cures.
+        if getattr(error, "winerror", None) in (32, 33):
+            return Refusal(
+                "locked",
+                "Another program is using the file (often a virus scanner, for a moment).",
+                "Try again in a few seconds.",
+            )
         return Refusal(
-            "locked",
-            "Another program is using the file (often a virus scanner, for a moment).",
-            "Try again in a few seconds.",
+            "permission",
+            "ComfyUI may not write into this model folder.",
+            "Choose another of its folders in Plenio Setup's plan (step 3), give the user ComfyUI runs as write "
+            "access to it, or place the file there by hand - the plan names the file and its address.",
         )
     if isinstance(error, OSError) and error.errno == errno.ENOSPC:
         return Refusal("disk", "The disk is full.", "Free some room, or choose another folder.")

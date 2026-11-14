@@ -250,7 +250,7 @@ class DownloadManager:
             # what the user can fix is blocked; what trying again may cure has failed
             item.state = (
                 "blocked"
-                if refusal.kind in ("gated", "pending", "token", "moved", "disk", "occupied")
+                if refusal.kind in ("gated", "pending", "token", "moved", "disk", "occupied", "permission")
                 else "failed"
             )
 

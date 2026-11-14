@@ -80,6 +80,12 @@ class Host(BaseHTTPRequestHandler):
         self.wfile.write(body[start:])
 
 
+class SharingViolationError(PermissionError):
+    """A Windows sharing violation (another program holds the file), on any system."""
+
+    winerror = 32
+
+
 @pytest.fixture
 def host() -> Iterator[str]:
     Host.requests, Host.busy_left = [], 1
@@ -340,7 +346,7 @@ def test_a_file_another_program_holds_is_tried_again_then_said(
     def held(source: Any, target: Any) -> None:
         tries.append(1)
         if len(tries) < 3:
-            raise PermissionError(13, "in use")
+            raise SharingViolationError(13, "in use")
         real(source, target)
 
     monkeypatch.setattr(module.os, "replace", held)
@@ -349,9 +355,29 @@ def test_a_file_another_program_holds_is_tried_again_then_said(
     assert downloads.wait() and item.state == "installed" and len(tries) == 3
     assert downloads.waits == [2.0, 2.0]  # type: ignore[attr-defined]
     monkeypatch.setattr(
-        module.os, "replace", lambda s, t: (_ for _ in ()).throw(PermissionError(13, "in use"))
+        module.os, "replace", lambda s, t: (_ for _ in ()).throw(SharingViolationError(13, "in use"))
     )
     stuck = downloads.add("other", f"{host}/ok", tmp_path / "other.bin", len(DATA), DIGEST)
     assert downloads.wait()
     assert stuck.state == "failed" and stuck.refusal is not None and stuck.refusal.kind == "locked"
     assert stuck.part.exists()  # the verified part stays: the next try only renames
+
+
+def test_a_folder_it_may_not_write_into_blocks_with_the_way_out(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Linux and macOS say "Permission denied" for a model folder ComfyUI may not write into: no retry cures that,
+    so the download is blocked (not failed, to be tried again) and says what helps."""
+    from plenio.core.assets import downloads as module
+
+    def denied(*_: Any, **__: Any) -> None:
+        raise PermissionError(13, "Permission denied")
+
+    monkeypatch.setattr(module.Path, "mkdir", denied)
+    downloads, _ = manager()
+    item = downloads.add(
+        "vae", "https://example.invalid/vae", tmp_path / "shared" / "vae.bin", len(DATA), DIGEST
+    )
+    assert downloads.wait()
+    assert item.state == "blocked" and item.refusal is not None and item.refusal.kind == "permission"
+    assert "Plenio Setup" in item.refusal.fix

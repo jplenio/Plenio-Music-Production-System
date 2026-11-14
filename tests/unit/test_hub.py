@@ -67,11 +67,20 @@ def test_only_a_busy_host_is_waited_for() -> None:
     assert moved is not None and not moved.retries_by_itself and "retry_after" not in moved.to_dict()
 
 
+class SharingViolationError(PermissionError):
+    """A Windows sharing violation (another program holds the file), on any system."""
+
+    winerror = 32
+
+
 def test_exceptions_are_refusals_too() -> None:
     assert hub.classify_error(urllib.error.URLError("no route")).kind == "offline"
     assert hub.classify_error(TimeoutError()).kind == "offline"
     assert hub.classify_error(ConnectionResetError()).kind == "offline"
-    assert hub.classify_error(PermissionError(13, "in use")).kind == "locked"
+    # a Windows sharing violation passes; any other PermissionError is a missing right, which no retry cures
+    assert hub.classify_error(SharingViolationError(13, "in use")).kind == "locked"
+    denied = hub.classify_error(PermissionError(13, "Permission denied"))
+    assert denied.kind == "permission" and "Plenio Setup" in denied.fix and "/" not in denied.message
     assert hub.classify_error(OSError(errno.ENOSPC, "no space")).kind == "disk"
     http = urllib.error.HTTPError("https://huggingface.co/x", 401, "Unauthorized", GATED, None)  # type: ignore[arg-type]
     assert hub.classify_error(http).kind == "gated"
