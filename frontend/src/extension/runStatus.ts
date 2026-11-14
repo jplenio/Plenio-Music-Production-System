@@ -209,6 +209,8 @@ export function displayState(node: ComfyNode): RunState | null {
   const state = runState(node)
   if (state) return state
   if (node.type !== SHEET_TYPE) return null
+  // a muted (2) or bypassed (4) sheet does not run, so it stops nowhere - whatever its review says
+  if (node.mode === 2 || node.mode === 4) return null
   return stopsForReview(widgetValue(node, 'review') ?? 'continue', briefMode(node)) ? 'stop' : null
 }
 

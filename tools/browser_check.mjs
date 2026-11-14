@@ -325,8 +325,12 @@ for (const name of names) {
       .map((n) => {
         const brief = n.getInputNode?.(n.inputs.findIndex((s) => s.name === 'brief'))
         const mode = String(brief?.widgets?.find((w) => w.name === 'mode')?.value ?? '')
+        const review = String(n.widgets?.find((w) => w.name === 'review')?.value ?? '')
         const line = n.widgets?.find((w) => w.name === 'sheet_state')?.element?.querySelector('.plenio-sheet-status')?.textContent ?? ''
-        return { title: n.title, stops: mode.includes('stop to review'), line, badges: (n.badges ?? []).length }
+        // the sheet's own review, or with *as the brief says* the brief's mode; a muted or bypassed sheet never runs
+        const runs = n.mode !== 2 && n.mode !== 4
+        const stops = runs && (review === 'stop for review' || (review === 'as the brief says' && mode.includes('stop to review')))
+        return { title: n.title, stops, line, badges: (n.badges ?? []).length }
       })
   )
   const wrong = holding.filter((s) => s.badges < 1 || s.line !== (s.stops ? '⏸ stops here for review' : '▶ runs through, no review stop'))
@@ -423,7 +427,9 @@ const queueSheetExport = (folder, title, elsewhere = false) =>
 const sheetOutcome = (folder, title, exporterId, status = 'saved') =>
   page.evaluate(async ([folder, title, exporterId, status]) => {
     const view = (name) => fetch(`/view?filename=${encodeURIComponent(name)}&type=output&subfolder=${encodeURIComponent(folder)}`)
-    const deadline = Date.now() + 120000
+    // the first export on a CPU runner pays the cold start (imports, the score's first drawing): passed in one run
+    // and timed out after 120 s in the next on GitHub, so the wait is generous
+    const deadline = Date.now() + 300000
     while (Date.now() < deadline) {
       const response = await view(`${title}.plenio.json`)
       if (response.ok) {

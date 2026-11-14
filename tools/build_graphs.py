@@ -2042,6 +2042,9 @@ COVER_SWITCH = {"plenio_switch": "cover"}
 """The nodes the Cover Art switch bypasses (``frontend/src/extension/finishSwitch.ts``)."""
 ABOUT_SIZE = (480, 760)
 SUMMARY_ROOM = 100
+COVER_TEXT_ROOM = 40
+"""The Cover Brief's text fields: ComfyUI 0.41's frontend (1.55) lays its combos out taller and left the
+description 51 px after a run, under the 60 px a field may shrink to (the browser check on GitHub)."""
 """Height every node with a run summary keeps free for it (about five lines). Without the room the
 frontend squeezed the summary into what was left after a run - one clipped line on Score Tools and
 the EQ - and shrank the brief's description field; ``frontend/src/extension/summary.ts`` gives the
@@ -3088,7 +3091,7 @@ def yue2_cover(bp: dict[str, Blueprint]) -> tuple[Graph, App]:
         (COVER_BRIEF_X, 0),
         size=(
             BRIEF_WIDTH,
-            640 + CREATIVITY_ROW + COVER_FIELD_ROWS * SLOT_HEIGHT + SUMMARY_ROOM,
+            640 + CREATIVITY_ROW + COVER_FIELD_ROWS * SLOT_HEIGHT + SUMMARY_ROOM + COVER_TEXT_ROOM,
         ),  # + field outputs
         # the owner's defaults since 0.4.3: a pop style template (genre and mood come from it), the
         # original lyrics in the language detected from the singing, the original chords

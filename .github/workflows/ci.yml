@@ -174,7 +174,7 @@ jobs:
     # pushes to main, and the weekly run
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || inputs.browser
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     env:
       PLENIO_COMFYUI_ROOT: ${{ github.workspace }}/ComfyUI
     steps:

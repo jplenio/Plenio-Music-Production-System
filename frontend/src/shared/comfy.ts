@@ -29,6 +29,8 @@ export interface ComfyNode {
   type: string
   title: string
   comfyClass?: string
+  /** 0 always, 2 never (muted), 4 bypassed. */
+  mode?: number
   widgets?: ComfyWidget[]
   properties: Record<string, unknown>
   /** ``[width, height]`` of the node body. */

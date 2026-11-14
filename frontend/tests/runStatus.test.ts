@@ -130,6 +130,12 @@ describe('the states', () => {
     expect(displayState(sheetNode('stop for review', null, 'PlenioEQ'))).toBeNull() // only sheets stop
   })
 
+  it('says a muted or bypassed sheet stops nowhere (it does not run)', () => {
+    const sheet = sheetNode('stop for review', null)
+    expect(displayState(sheet)).toBe('stop')
+    for (const mode of [2, 4]) expect(displayState({ ...sheet, mode })).toBeNull()
+  })
+
   it('says it in words for App mode', () => {
     expect(sheetLine('stop')).toContain('stops here for review')
     expect(sheetLine('waiting')).toContain('waiting for your approval')
