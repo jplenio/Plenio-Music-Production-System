@@ -41,8 +41,10 @@ def test_editor_view_grows_about_linearly_with_the_score() -> None:
     so every editor action on a long YuE2 plan took about a second (quadratic)."""
     short, long = long_score(10), long_score(40)  # 80 and 320 bars
     assert len(native.analyze(long).bars) == 4 * len(native.analyze(short).bars)
-    ratio = fastest(operations.editor_view, long) / fastest(operations.editor_view, short)
-    assert ratio < 9, f"4x the bars took {ratio:.1f}x the time (quadratic would be about 16x)"
+    # the fastest of seven: a shared CI runner (GitHub's Windows one, under pytest-xdist) measured 9.6x with three
+    # runs once; linear is about 4x, quadratic about 16x - 12 still tells them apart
+    ratio = fastest(operations.editor_view, long, runs=7) / fastest(operations.editor_view, short, runs=7)
+    assert ratio < 12, f"4x the bars took {ratio:.1f}x the time (quadratic would be about 16x)"
 
 
 def test_bar_counts_and_chords_are_unchanged_by_the_faster_analysis() -> None:
