@@ -16,7 +16,15 @@ pytestmark = pytest.mark.host
 
 sys.path.insert(0, str(PROJECT / "tools"))
 
-from api_v1_golden import DELTAS, differences, normalise, series, series_v2, unexplained  # noqa: E402
+from api_v1_golden import (  # noqa: E402
+    DELTAS,
+    TIMING_V2,
+    differences,
+    normalise,
+    series,
+    series_v2,
+    unexplained,
+)
 
 GOLDEN = PROJECT / "tests" / "fixtures" / "api-v1"
 GOLDEN_V2 = PROJECT / "tests" / "fixtures" / "api-v2"
@@ -61,7 +69,8 @@ def test_v2_answers_as_recorded(server: ComfyServer) -> None:
     try:
         for case, answer in series_v2(server.url):
             golden = json.loads((GOLDEN_V2 / f"{case}.json").read_text(encoding="utf-8"))
-            problems += [f"{case}{d}" for d in differences(golden, normalise(answer, str(server.base)))]
+            found = list(differences(golden, normalise(answer, str(server.base))))
+            problems += [f"{case}{d}" for d in unexplained(case, found, TIMING_V2)]
     finally:
         for path in made:
             path.unlink(missing_ok=True)

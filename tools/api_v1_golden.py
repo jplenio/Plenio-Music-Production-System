@@ -292,6 +292,19 @@ DELTAS: list[tuple[str, str, str]] = [
 gets is as 1.6.0 answered it."""
 
 
+TIMING_V2: list[tuple[str, str, str]] = [
+    (
+        case,
+        r"/body/(status|queue_position|started_at|ended_at|updated_at|error|progress|stage)(/|: )",
+        "the state of a job just made is taken while ComfyUI runs it: queued, running or - with the empty stand-in "
+        "models - already failed, by a few milliseconds (the tag's run of 2.0.1 found it failed at the second POST)",
+    )
+    for case in ("v2_job_create", "v2_job_create_again")
+]
+"""What of API v2's recorded answers follows the clock, not the code: the id and the shape of the answer are compared,
+the moment the job is in is not."""
+
+
 def unexplained(case: str, found: list[str], deltas: list[tuple[str, str, str]] = DELTAS) -> list[str]:
     return [d for d in found if not any(case == c and re.match(pattern, d) for c, pattern, _why in deltas)]
 
