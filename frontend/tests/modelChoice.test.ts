@@ -123,6 +123,24 @@ describe('the labels on the fields', () => {
     expect(block.widgets[1].options.getOptionLabel).toBeUndefined()
   })
 
+  it('go on a field whose options are a getter only (ComfyUI 0.41: frontend 1.55)', async () => {
+    const labels = new ModelChoiceLabels(fetcher)
+    await labels.refresh()
+    const node = choice('yue2', ['auto', 'yue2_3b_int8_convrot.safetensors'])
+    const options = { values: ['auto', 'yue2_3b_int8_convrot.safetensors'] } as Record<string, unknown>
+    Object.defineProperty(node.widgets![1], 'options', { get: () => options, configurable: true })
+    expect(() => labels.label(node)).not.toThrow()
+    const label = options.getOptionLabel as (v: string) => string
+    expect(label('auto')).toBe('auto · yue2_3b_int8_convrot · runs on the card')
+  })
+
+  it('are left out, without an error, when the options can be neither changed nor replaced', () => {
+    const labels = new ModelChoiceLabels(fetcher)
+    const node = choice('yue2', ['auto'])
+    Object.defineProperty(node.widgets![1], 'options', { get: () => Object.freeze({ values: ['auto'] }), configurable: true })
+    expect(() => labels.label(node)).not.toThrow()
+  })
+
   it('are left out when the server has no such route', async () => {
     const labels = new ModelChoiceLabels({ fetchApi: async () => new Response('', { status: 404 }) })
     await labels.refresh()

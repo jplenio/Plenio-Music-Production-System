@@ -93,7 +93,22 @@ export function componentOf(node: ComfyNode): string {
 }
 
 function labelWidget(widget: ComfyWidget, info: () => ComponentFiles | undefined): void {
-  widget.options = { ...widget.options, getOptionLabel: (value?: string | null) => optionLabel(value, info()) }
+  const getOptionLabel = (value?: string | null): string => optionLabel(value, info())
+  // ComfyUI's frontend before 1.56 (ComfyUI 0.41) gives a combo widget's ``options`` as a getter only: the object it
+  // returns is changed in place there; a newer frontend lets it be replaced
+  if (widget.options && typeof widget.options === 'object') {
+    try {
+      ;(widget.options as Record<string, unknown>).getOptionLabel = getOptionLabel
+      return
+    } catch {
+      // a frozen object: replaced below
+    }
+  }
+  try {
+    widget.options = { ...widget.options, getOptionLabel }
+  } catch {
+    // neither: the plain file names stay, which is how an older Plenio showed them
+  }
 }
 
 /** The facts of every component (empty when the server has no such route: an older Plenio). */

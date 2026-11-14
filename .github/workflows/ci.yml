@@ -39,6 +39,9 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v5
+        with:
+          # the release tool's test compares the package with the last published version's commit (git archive)
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"

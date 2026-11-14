@@ -858,7 +858,7 @@ function Vi(e, t = window) {
   return t.addEventListener("drop", n, !0), () => t.removeEventListener("drop", n, !0);
 }
 async function go(e) {
-  const t = () => Gn(import.meta.url, Vn), { openContinueDialog: n } = await Pe(() => import("./openContinue-C-FNab67.mjs"), t);
+  const t = () => Gn(import.meta.url, Vn), { openContinueDialog: n } = await Pe(() => import("./openContinue-BoOp3PZ2.mjs"), t);
   n(e.fetcher, (o) => It(e, o));
 }
 const Ui = "COMFY_DYNAMICCOMBO_V3";
@@ -1561,7 +1561,17 @@ function An(e) {
   return String(e.widgets?.find((t) => t.name === "component")?.value ?? "");
 }
 function Lo(e, t) {
-  e.options = { ...e.options, getOptionLabel: (n) => Ma(n, t()) };
+  const n = (o) => Ma(o, t());
+  if (e.options && typeof e.options == "object")
+    try {
+      e.options.getOptionLabel = n;
+      return;
+    } catch {
+    }
+  try {
+    e.options = { ...e.options, getOptionLabel: n };
+  } catch {
+  }
 }
 async function $a(e) {
   try {
@@ -3414,7 +3424,7 @@ function El(e) {
     type: "custom",
     iconBadge: () => e.lacksFiles() ? "•" : null,
     render: (a) => {
-      import("./mount-r_mUSL6a.mjs").then(({ mountSetup: c }) => {
+      import("./mount-dN5CpckP.mjs").then(({ mountSetup: c }) => {
         t = c(a, s, n);
       });
     },
@@ -3588,7 +3598,7 @@ function Gl(e) {
 }
 const Vl = (e, t, n) => {
   let o = typeof n?.[1]?.default == "string" ? n[1].default : "";
-  Wl(() => import("./open-Djgm5YYK.mjs"));
+  Wl(() => import("./open-BWqLjpXu.mjs"));
   const s = document.createElement("div");
   s.className = "plenio-sheet-state";
   const r = document.createElement("div");
@@ -3634,7 +3644,7 @@ const Vl = (e, t, n) => {
   async function g() {
     const u = $e(o);
     u === null && (r.textContent = "The stored state is unreadable; it will be replaced when you apply.");
-    const k = Le(String(e.id)), b = (e.inputs ?? []).filter((G) => G.link != null).map((G) => G.name), v = u ?? { schema: "plenio.sheet_state/1", docs: {} }, _ = k?.owned ?? Es(b, v), y = String(e.widgets?.find((G) => G.name === "review")?.value ?? "continue"), E = y === "as the brief says" ? k?.review ?? "continue" : y, S = () => Gn(import.meta.url, Vn), { openSheetDialog: P } = await Pe(() => import("./open-Djgm5YYK.mjs"), S), { parseGuide: N, serializeGuide: D } = await Pe(() => import("./tracks-ClAVjvds.mjs"), S), { parseShift: j, parseSpans: X } = await Pe(() => Promise.resolve().then(() => Mc), S), { parseBarSources: H } = await Pe(() => import("./barSources-Cq3VGvmq.mjs"), S);
+    const k = Le(String(e.id)), b = (e.inputs ?? []).filter((G) => G.link != null).map((G) => G.name), v = u ?? { schema: "plenio.sheet_state/1", docs: {} }, _ = k?.owned ?? Es(b, v), y = String(e.widgets?.find((G) => G.name === "review")?.value ?? "continue"), E = y === "as the brief says" ? k?.review ?? "continue" : y, S = () => Gn(import.meta.url, Vn), { openSheetDialog: P } = await Pe(() => import("./open-BWqLjpXu.mjs"), S), { parseGuide: N, serializeGuide: D } = await Pe(() => import("./tracks-ClAVjvds.mjs"), S), { parseShift: j, parseSpans: X } = await Pe(() => Promise.resolve().then(() => Mc), S), { parseBarSources: H } = await Pe(() => import("./barSources-Cq3VGvmq.mjs"), S);
     if (!Lt) throw new Error("Plenio: API not initialised");
     let Z = null;
     try {
