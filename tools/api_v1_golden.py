@@ -280,6 +280,13 @@ DELTAS: list[tuple[str, str, str]] = [
         r"/body/progress/nodes: ",
         "3.3, 4.6: the templates hold Model Choice nodes and the Preset field - the prompt has more nodes",
     ),
+    (
+        "job_create",
+        r"/body/(status|queue_position|started_at): ",
+        "no change of the API: the answer to a new job is taken while ComfyUI starts it, so it says 'queued' (with "
+        "its place) or 'running' (with its start) by a few milliseconds - 1.6.0 answered either way (the tag's run "
+        "of 2.0.1 got 'queued' where the recording has 'running')",
+    ),
 ]
 """The differences of 2.0 against 1.6.0 that are reviewed: (case, a pattern of the path and key, why). Everything else a local caller
 gets is as 1.6.0 answered it."""
