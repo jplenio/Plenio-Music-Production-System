@@ -268,7 +268,17 @@ Plenio installs no Python packages. One package is optional: `python -m pip inst
 
 ## 📺 Watch the tutorials
 
-**▶ [All tutorials as a YouTube playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE)** - one narrated video for every template, the creative modes, the Plenio Player, party songs, the Song API and LoRAs (English, with chapters), recorded in ComfyUI with the real models: every song you hear in them was made right there.
+**New in 2.0 - five tutorials** (English, a synthetic narrator, subtitles and chapters), recorded in the real program with songs made by Plenio:
+
+| | Tutorial | What you will see |
+|:---:|---|---|
+| <a href="https://jplenio.github.io/Plenio-Music-Production-System/go/tutorial-2-setup/"><img src="assets/media/tutorial-2-setup.jpg" alt="Plenio 2.0 tutorial 1 · Install and Plenio Setup" width="180" /></a> | **[1 · Install and Plenio Setup](https://jplenio.github.io/Plenio-Music-Production-System/go/tutorial-2-setup/)** (2:07) | Plenio installed, Plenio Setup reading your graphics card, the model files that suit it downloaded and checked, and a test song. |
+| <a href="https://jplenio.github.io/Plenio-Music-Production-System/go/tutorial-2-first-song/"><img src="assets/media/tutorial-2-first-song.jpg" alt="Plenio 2.0 tutorial 2 · Your first song" width="180" /></a> | **[2 · Your first song](https://jplenio.github.io/Plenio-Music-Production-System/go/tutorial-2-first-song/)** (2:44) | From one sentence to a finished, mastered song - with the two stops of the Song Sheet to see and change the words and the notes before anything is sung. |
+| <a href="https://jplenio.github.io/Plenio-Music-Production-System/go/tutorial-2-player/"><img src="assets/media/tutorial-2-player.jpg" alt="Plenio 2.0 tutorial 3 · The Plenio Player" width="180" /></a> | **[3 · The Plenio Player](https://jplenio.github.io/Plenio-Music-Production-System/go/tutorial-2-player/)** (2:11) | Your songs on a stage: the lyrics as they are sung, notation that follows, and visuals that know the song's beats and sections. |
+| <a href="https://jplenio.github.io/Plenio-Music-Production-System/go/tutorial-2-party/"><img src="assets/media/tutorial-2-party.jpg" alt="Plenio 2.0 tutorial 4 · A party with Plenio" width="180" /></a> | **[4 · A party with Plenio](https://jplenio.github.io/Plenio-Music-Production-System/go/tutorial-2-party/)** (1:43) | *Start a party*, the guests join from their phones with a QR code - and order songs of their own. |
+| <a href="https://jplenio.github.io/Plenio-Music-Production-System/go/tutorial-2-api/"><img src="assets/media/tutorial-2-api.jpg" alt="Plenio 2.0 tutorial 5 · Song API and AI assistants" width="180" /></a> | **[5 · Song API and AI assistants](https://jplenio.github.io/Plenio-Music-Production-System/go/tutorial-2-api/)** (1:30) | One request makes a song: the Song API v2, the Python client, and Plenio as a tool for Claude Desktop or Claude Code. |
+
+**The template tutorials** - one narrated video for every template, the creative modes, the Plenio Player, party songs, the Song API and LoRAs (English, with chapters). They were recorded with Plenio 1.x: the templates and the editors work as shown; installing and the model files are now Plenio Setup's job (tutorial 1 above), and the model fields say `auto`. **▶ [All tutorials as a YouTube playlist](https://www.youtube.com/playlist?list=PLAFqTtP59fgE)**
 
 | | Tutorial | What you will see |
 |:---:|---|---|
