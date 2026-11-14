@@ -304,7 +304,7 @@ def checklist(version: str | None = None) -> list[tuple[bool | None, str, str]]:
     return rows
 
 
-def prepare(version: str, bench: Path | None, today: str) -> int:
+def prepare(version: str, bench: Path | None, today: str, *, earlier_bench: bool = False) -> int:
     import bench as bench_tool
 
     if subprocess.run(
@@ -320,8 +320,21 @@ def prepare(version: str, bench: Path | None, today: str) -> int:
             f"prepare asks for a benchmark report of {version}: --bench docs/test-reports/data/bench-<label>.json"
         )
     report = json.loads(bench.read_text(encoding="utf-8"))
-    if not str(report.get("label", "")).startswith(version):
-        raise SystemExit(f"{bench.name} is the benchmark of {report.get('label')!r}, not of {version}")
+    label = str(report.get("label", ""))
+    if not label.startswith(version):
+        # a patch release that leaves the making of a song alone may keep its minor version's benchmark - said
+        # out loud (--earlier-bench), and only one of the same major.minor
+        same_line = label.split(".")[:2] == version.split(".")[:2]
+        if not (earlier_bench and same_line):
+            raise SystemExit(
+                f"{bench.name} is the benchmark of {label!r}, not of {version}"
+                + (
+                    ""
+                    if earlier_bench
+                    else " (a patch release that does not touch how songs are made: --earlier-bench)"
+                )
+            )
+        print(f"prepare: the benchmark of {label} stands for {version} (--earlier-bench)")
     rows = bench_tool.check_report(bench)
     budgets = set(json.loads(bench_tool.BUDGETS.read_text(encoding="utf-8")).get("briefs", {}))
     missing = sorted(budgets - {row["brief"] for row in rows})
@@ -361,6 +374,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     p = sub.add_parser("prepare")
     p.add_argument("new")
     p.add_argument("--bench", type=Path, help="the benchmark report of this version (bench.py's JSON)")
+    p.add_argument(
+        "--earlier-bench",
+        action="store_true",
+        help="take the benchmark of an earlier version of the same minor (a patch that leaves song making alone)",
+    )
     p.add_argument("--date", default=datetime.date.today().isoformat())
     sub.add_parser("verify")
     c = sub.add_parser("checklist", help="where the release stands, step by step, and what comes next")
@@ -388,7 +406,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "prepare":
         if not VERSION.fullmatch(args.new):
             raise SystemExit("a version is three numbers: 2.0.0 (no pre-release versions)")
-        return prepare(args.new, args.bench, args.date)
+        return prepare(args.new, args.bench, args.date, earlier_bench=args.earlier_bench)
     return verify()
 
 

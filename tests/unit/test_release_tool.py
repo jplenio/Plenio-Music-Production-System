@@ -118,6 +118,27 @@ def test_prepare_takes_only_this_versions_benchmark_with_every_brief(
         release.prepare("2.0.0", path, "2026-12-01")
 
 
+def test_a_patch_may_keep_its_minors_benchmark_when_it_says_so(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import bench
+
+    monkeypatch.setattr(
+        release.subprocess, "run", lambda *a, **k: type("R", (), {"stdout": "", "returncode": 0})()
+    )
+    report = json.loads(bench.BUDGETS.read_text(encoding="utf-8"))
+    report["label"] = "2.0.0-phase-8-before"
+    report["briefs"].pop("sung-90")  # stops right after the label is taken: nothing is written
+    path = tmp_path / "bench-2.0.0.json"
+    path.write_text(json.dumps(report), encoding="utf-8")
+    with pytest.raises(SystemExit, match="--earlier-bench"):
+        release.prepare("2.0.1", path, "2026-12-01")
+    with pytest.raises(SystemExit, match="no successful run"):  # past the label check
+        release.prepare("2.0.1", path, "2026-12-01", earlier_bench=True)
+    with pytest.raises(SystemExit, match="not of 2.1.0"):  # another minor never
+        release.prepare("2.1.0", path, "2026-12-01", earlier_bench=True)
+
+
 def test_the_notes_link_files_at_the_tag_not_relative() -> None:
     text = release_notes.absolute_links("[guide](docs/user/x.md) [site](https://a.b/) [here](#top)", "2.0.0")
     assert "](https://github.com/jplenio/Plenio-Music-Production-System/blob/v2.0.0/docs/user/x.md)" in text
