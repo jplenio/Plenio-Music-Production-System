@@ -76,6 +76,9 @@ class Host(BaseHTTPRequestHandler):
                     return
                 if offset >= 262144:
                     Host.gate.wait(10)  # holds here until the test lets it go on
+                    # then block by block, as a real line does: everything at once could arrive in one read before
+                    # the worker sees a pause or a cancel (seen on GitHub's Windows runner)
+                    time.sleep(0.05)
             return
         self.wfile.write(body[start:])
 
