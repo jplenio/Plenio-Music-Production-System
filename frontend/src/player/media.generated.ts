@@ -23,6 +23,14 @@ export const MEDIA: Record<string, string> = {
   "song-4": "UoQnC7ceOl8",
   "song-5": "r-X1GWI-BR0",
   "song-6": "4A_jQsZj8B4",
+  "film-hero": "i42fhMIBHc0",
+  "film-party-2": "x0yeGBXZGZc",
+  "film-whats-new-2": "xUL_VnoNiDU",
+  "tutorial-2-api": "skmDvaZVHXk",
+  "tutorial-2-first-song": "YVh6Cv3mzNk",
+  "tutorial-2-party": "p6Ar65xv7G4",
+  "tutorial-2-player": "4c2ox8Tl50g",
+  "tutorial-2-setup": "jzapUm4K0QQ",
 }
 
 export const PLAYLISTS: Record<string, string> = {
