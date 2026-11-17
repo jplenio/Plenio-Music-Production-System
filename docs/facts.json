@@ -13,8 +13,8 @@
  },
  "tests": {
   "python": 1801,
-  "frontend": 777,
-  "all": 2578
+  "frontend": 778,
+  "all": 2579
  },
  "comfyui": {
   "minimum": "0.41.0",

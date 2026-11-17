@@ -212,6 +212,9 @@ export function clearLegacyPlaceholders(node: ComfyNode): string[] {
 
 const PANEL = 'plenio_brief_template'
 const REFRESH_MS = 400
+/** How soon after the panel wrote a field (or a rebuilt vocals child appeared) a change counts as the frontend's
+ * restoring, not the user's choice: no one picks from a list that fast, the frontend does it within a frame. */
+const RESTORE_MS = 250
 
 export interface TemplatePanel {
   widget: ComfyWidget
@@ -231,6 +234,25 @@ export function addBriefTemplatePanel(node: ComfyNode, fetcher: Fetcher): Templa
   let filled: string | null = null
   /** Per field, the templates' values it showed (kept while a vocals choice hides the field). */
   const shown: Record<string, string[]> = {}
+  /** The fields the user set by hand: their values are the user's, also when a template once showed the same one
+   * ("english" picked again after other templates had shown it was taken for a template's and set back). */
+  const own = new Set<string>()
+  /** True while the panel itself writes into the fields: those callbacks are not the user's. */
+  let writing = false
+  /** When the panel last wrote each field, or first saw its widget (a vocals child rebuilt). */
+  const touched: Record<string, number> = {}
+  const write = (changes: { field: string; value: unknown }[]): void => {
+    writing = true
+    try {
+      writeValues(node, changes)
+      for (const change of changes) touched[change.field] = Date.now()
+    } finally {
+      writing = false
+    }
+  }
+  /** ``shown`` without the fields the user set: what may still count as a template's value. */
+  const templateShown = (): Record<string, string[]> =>
+    Object.fromEntries(Object.entries(shown).filter(([field]) => !own.has(field)))
   let answered = false
   let problem: string | null = null
   let timer: ReturnType<typeof setTimeout> | undefined
@@ -260,7 +282,9 @@ export function addBriefTemplatePanel(node: ComfyNode, fetcher: Fetcher): Templa
   }
   const choices = make('Use template choices', 'Set length, vocals and melody to the template’s choices', () => {
     if (!current) return
-    writeValues(node, choicePlan(current))
+    const plan = choicePlan(current)
+    write(plan)
+    for (const item of plan) own.delete(item.field) // the template's choices, taken on purpose
     render()
   })
   const refill = make('Refill from template', 'Put the template’s value back into every text field you changed', () => {
@@ -269,7 +293,8 @@ export function addBriefTemplatePanel(node: ComfyNode, fetcher: Fetcher): Templa
     if (!plan.length) return
     const names = plan.map((item) => item.field).join(', ')
     if (!window.confirm(`Replace your values in ${names} with the template's?`)) return
-    writeValues(node, plan)
+    write(plan)
+    for (const item of plan) own.delete(item.field) // the template's values again, on purpose
     render()
   })
   const again = make('↻', 'Ask again what the template fills', () => void refresh())
@@ -299,11 +324,12 @@ export function addBriefTemplatePanel(node: ComfyNode, fetcher: Fetcher): Templa
       // a song's choice follows where it holds a template's value (the length set for short test songs stays); a
       // cover's in its own words (a sung template: the original lyrics, an instrumental one: instrumental)
       const cover = briefKind(node) === 'cover'
-      const follow = (field: string): boolean => cover || (shown[field] ?? []).includes(text(widgetOf(node, field)?.value))
-      writeValues(node, choicePlan(answer).filter((choice) => follow(choice.field)))
+      const follow = (field: string): boolean =>
+        !own.has(field) && (cover || (shown[field] ?? []).includes(text(widgetOf(node, field)?.value)))
+      write(choicePlan(answer).filter((choice) => follow(choice.field)))
     }
-    const plan = templatePlan(node, answer, shown)
-    if (plan.length) writeValues(node, plan)
+    const plan = templatePlan(node, answer, templateShown()).filter((item) => !own.has(item.field) || !text(widgetOf(node, item.field)?.value).trim())
+    if (plan.length) write(plan)
     for (const field of [...answeredFields(answer), ...CHOICE_FIELDS]) {
       const value = text(widgetOf(node, field)?.value)
       if (value && value === (answer.fields[field] ?? '') && !(shown[field] ??= []).includes(value)) shown[field].push(value)
@@ -324,7 +350,12 @@ export function addBriefTemplatePanel(node: ComfyNode, fetcher: Fetcher): Templa
           : widgetOf(node, name)
       if (!widget || wired.has(widget)) continue
       wired.add(widget)
+      touched[name] = Date.now()
       widget.callback = chain(widget.callback, () => {
+        // a value the user set is theirs; one the panel wrote is the template's, and so is one the frontend puts
+        // back right after the panel filled a rebuilt vocals child (it restores what the field held before)
+        const restoring = Date.now() - (touched[name] ?? 0) < RESTORE_MS
+        if (!writing && !restoring && name !== 'template' && name !== 'arrangement') own.add(name)
         wire()
         refresh()
       })
@@ -364,7 +395,12 @@ export function addBriefTemplatePanel(node: ComfyNode, fetcher: Fetcher): Templa
     getMaxHeight: () => 128
   })
   widget.serialize = false
-  clearLegacyPlaceholders(node)
+  writing = true
+  try {
+    clearLegacyPlaceholders(node)
+  } finally {
+    writing = false
+  }
   render()
   refresh()
 

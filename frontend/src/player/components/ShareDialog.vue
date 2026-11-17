@@ -187,6 +187,7 @@ const sizeText = (bytes: number): string => (bytes > 2 ** 30 ? `${(bytes / 2 ** 
 .dialog {
   width: min(1060px, 96vw);
   max-height: 92vh;
+  max-height: 92dvh;
   display: flex;
   flex-direction: column;
   border-radius: 18px;
@@ -222,7 +223,10 @@ h3 {
   grid-template-columns: minmax(0, 1.3fr) minmax(300px, 1fr);
   gap: 20px;
   padding: 14px 20px;
-  overflow: hidden;
+  /* the body scrolls when the dialog is taller than the screen (a phone, upright or on its side) */
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   min-height: 0;
 }
 .left {
@@ -248,13 +252,15 @@ select {
 }
 .list {
   overflow-y: auto;
+  overscroll-behavior: contain;
   max-height: 46vh;
+  max-height: 46dvh;
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 10px;
 }
 .row {
   display: grid;
-  grid-template-columns: auto 36px 1fr;
+  grid-template-columns: auto 48px 1fr;
   gap: 10px;
   align-items: center;
   padding: 5px 10px;
@@ -338,5 +344,52 @@ input[type='checkbox'] {
 .link {
   color: var(--accent);
   cursor: pointer;
+}
+
+/* a phone: the whole screen, one column - the songs to tick first, then the choices, the button always at hand.
+   Also a phone on its side, where the screen is wide but low. */
+@media (max-width: 760px), (max-height: 560px) {
+  .veil {
+    place-items: stretch;
+  }
+  .dialog {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+    border: 0;
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px)
+      env(safe-area-inset-left, 0px);
+  }
+  header,
+  footer {
+    padding: 10px 14px;
+  }
+  .lead {
+    padding: 0 14px;
+    font-size: 12px;
+  }
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+    /* each part as tall as it is - the body scrolls; without it the list's row shrank to nothing on a low screen
+       and the choices lay over it */
+    grid-auto-rows: max-content;
+    align-content: start;
+    gap: 14px;
+    padding: 10px 14px;
+  }
+  .list {
+    max-height: 58vh;
+    max-height: 58dvh;
+    min-height: 180px;
+  }
+  .row {
+    padding: 8px 10px;
+  }
+  input[type='checkbox'] {
+    width: 20px;
+    height: 20px;
+  }
 }
 </style>

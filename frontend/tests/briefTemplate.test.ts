@@ -312,12 +312,54 @@ describe('the panel', () => {
     await choose('jazz/c')
     const back = widget('vocals.language', '')
     target.widgets!.push(back)
-    await choose('pop/a')
+    const template = target.widgets!.find((w) => w.name === 'template')!
+    template.value = 'pop/a'
+    template.callback?.('pop/a')
+    await vi.advanceTimersByTimeAsync(450) // the panel has answered and filled the field
     expect(back.value).toBe('English')
+    // the frontend restores the rebuilt field's old value at once
     back.value = 'German'
     back.callback?.('German')
     await vi.advanceTimersByTimeAsync(1500)
     expect(back.value).toBe('English')
+  })
+
+  it('keeps a value the user picks, also one an earlier template once showed in that field', async () => {
+    vi.useFakeTimers()
+    const LANGUAGES: Record<string, string> = { 'pop/a': 'English', 'jazz/c': '' }
+    const fetcher: Fetcher = {
+      fetchApi: (_route, options) => {
+        const body = JSON.parse(String(options?.body)) as { template: string }
+        const answer: BriefFields = {
+          ...ANSWER,
+          template: body.template,
+          sources: { language: LANGUAGES[body.template] ? 'template' : 'empty' },
+          fields: { language: LANGUAGES[body.template] ?? '' },
+          choices: []
+        }
+        return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(answer) } as Response)
+      }
+    }
+    const target = node({ template: 'pop/a' })
+    target.addDOMWidget = () => widget('plenio_brief_template', '')
+    addBriefTemplatePanel(target, fetcher)
+    await vi.advanceTimersByTimeAsync(1500)
+    const language = widgetOf(target, 'language')!
+    const template = target.widgets!.find((w) => w.name === 'template')!
+    expect(language.value).toBe('English')
+    template.value = 'jazz/c' // a template without a language: the field is emptied
+    template.callback?.('jazz/c')
+    await vi.advanceTimersByTimeAsync(1500)
+    expect(language.value).toBe('')
+    // the user picks English - the value pop/a once showed - and it stays, through every answer after it
+    language.value = 'English'
+    language.callback?.('English')
+    await vi.advanceTimersByTimeAsync(1500)
+    expect(language.value).toBe('English')
+    template.value = 'jazz/c'
+    template.callback?.('jazz/c')
+    await vi.advanceTimersByTimeAsync(1500)
+    expect(language.value).toBe('English')
   })
 })
 
