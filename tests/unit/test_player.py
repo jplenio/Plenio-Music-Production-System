@@ -557,6 +557,13 @@ def test_the_player_says_who_it_is_and_finds_a_song_by_its_record(
     assert status == 200 and json.loads(body)["id"] == song_id_of(server, "River")
     other = urllib.parse.quote(str(songs / "plenio" / "Nope.plenio.json"))
     assert request(server, "GET", f"/api/find?record={other}")[0] == 404
+    # as ComfyUI's Export Release names it now: its place inside a folder of the library - never outside
+    status, _, body = request(
+        server, "GET", f"/api/find?record={urllib.parse.quote('plenio/River.plenio.json')}"
+    )
+    assert status == 200 and json.loads(body)["id"] == song_id_of(server, "River")
+    outside = urllib.parse.quote("../songs/plenio/River.plenio.json")
+    assert request(server, "GET", f"/api/find?record={outside}")[0] == 404
 
 
 def test_the_player_asks_only_this_computer_for_comfyui() -> None:

@@ -1178,14 +1178,23 @@ class Library:
         return at or 0.0
 
     def find_record(self, record: Path) -> Song | None:
-        """The song of a release record file (``None``: not in the library)."""
+        """The song of a release record file (``None``: not in the library): an absolute path, or - as ComfyUI's
+        Export Release names it - its place inside one of the library's folders (ComfyUI's output folder)."""
         self._refresh()
+        record = Path(record)
+        if not record.is_absolute() and ".." in record.parts:
+            return None
         try:
-            wanted = Path(record).resolve()
+            wanted = (
+                {record.resolve()}
+                if record.is_absolute()
+                else {(folder / record).resolve() for folder in self.folders}
+            )
         except OSError:
             return None
+        names = {path.name for path in wanted}
         for song in list(self._songs.values()):
-            if not song.other and song.record.name == wanted.name and song.record.resolve() == wanted:
+            if not song.other and song.record.name in names and song.record.resolve() in wanted:
                 return song
         return None
 

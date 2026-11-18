@@ -789,7 +789,13 @@ class TemplateLibrary:
                         raise  # shipped templates are tested; a broken one is a packaging bug
                     # A hand-edited user file must not stop Plenio from loading (the brief nodes list
                     # the templates when ComfyUI registers them): skip it and say why.
-                    reason = str(error).splitlines()[0]
+                    # the reason as /plenio/templates answers it to anyone: Plenio's own words, or for a file
+                    # that cannot be read only what kept it - an OSError's text is the file's absolute path
+                    reason = (
+                        str(error).splitlines()[0]
+                        if isinstance(error, PlenioUserError)
+                        else f"the file could not be read ({type(error).__name__})"
+                    )
                     self.problems[template_id] = reason
                     log.warning("Plenio: skipped the user template %s: %s", path, reason)
         return templates

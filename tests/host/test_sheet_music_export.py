@@ -227,8 +227,10 @@ def test_a_record_keeps_its_workflow_and_continues_the_song(server: ComfyServer)
     outputs, folder = export(server, docs, sheet_music="off", workflow=workflow)
     record = json.loads((folder / "Continue Me.plenio.json").read_text(encoding="utf-8"))
     assert record["workflow"] == workflow and record["fingerprint"] == record_fingerprint(record)
-    # the node names its record for the "Open in the Plenio Player" button (owner's request 2026-10-16)
-    assert Path(outputs["plenio_player"][0]["record"]) == folder / "Continue Me.plenio.json"
+    # the node names its record for the "Open in the Plenio Player" button - by its place inside the output folder:
+    # ComfyUI keeps the output in /history, which everyone who reaches ComfyUI reads (no absolute path goes there)
+    named = outputs["plenio_player"][0]["record"]
+    assert server.output_dir / named == folder / "Continue Me.plenio.json" and not Path(named).is_absolute()
 
     relative = f"{folder.relative_to(server.output_dir).as_posix()}/Continue Me.plenio.json"
     row = next(r for r in server.get("/plenio/records")["records"] if r["path"] == relative)

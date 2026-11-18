@@ -1445,7 +1445,9 @@ class PartySongs:
         movers = [j for j in line if admin or self._mine(who, j)]
         place = next((k for k, j in enumerate(movers) if j is job), -1) if waiting else -1
         when = timeline.get(job["id"])
-        result = dict(job.get("result") or {}) or None
+        # the record's place stays the player's own: a view goes to the guests' page too, which everyone in the
+        # network reaches without a login (the pages find a song by ``song``)
+        result = {key: value for key, value in (job.get("result") or {}).items() if key != "record"} or None
         out: dict[str, Any] = {
             "id": job["id"],
             "kind": job["kind"],

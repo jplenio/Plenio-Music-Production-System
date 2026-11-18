@@ -131,7 +131,7 @@ export interface MakeJob {
   estimate: number
   stage: Stage | null
   progress: { nodes_done?: number; nodes?: number; step?: number; steps?: number } | null
-  result: { title?: string; record?: string; song?: string } | null
+  result: { title?: string; song?: string } | null
   error: string
   note: string
   /** Waiting to be released (owner's request 2026-10-29): for its maker to hear it first, for an admin to approve it;

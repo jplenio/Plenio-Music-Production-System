@@ -224,8 +224,9 @@ class ModeLibrary:
                 except (PlenioUserError, OSError, UnicodeDecodeError) as error:
                     if source == "package":
                         raise  # shipped modes are tested; a broken one is a packaging bug
-                    self.problems[str(path)] = str(error).splitlines()[0]
-                    log.warning("Plenio: skipped the creative mode %s: %s", path, self.problems[str(path)])
+                    # by the file's name: a place of this computer stays in the log
+                    self.problems[path.name] = str(error).splitlines()[0]
+                    log.warning("Plenio: skipped the creative mode %s: %s", path, self.problems[path.name])
                     continue
                 if any(existing.name == mode.name for existing in modes.values()):
                     if source == "package":

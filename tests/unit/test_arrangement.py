@@ -174,7 +174,7 @@ def test_user_modes_join_the_list_and_broken_ones_are_skipped(tmp_path: Path) ->
     names = library.names()
     assert names[:3] == ["off", "standard", "calm"]
     assert "varied (mine)" in names and names.count("varied") == 1
-    assert list(library.problems) == [str(tmp_path / "broken.md")]
+    assert list(library.problems) == ["broken.md"]  # by its name: where it lies stays in the log
 
 
 # --- the policy ------------------------------------------------------------------------------------

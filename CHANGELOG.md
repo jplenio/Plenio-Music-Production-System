@@ -4,7 +4,11 @@ All notable changes of the current version and the one before. Versions follow s
 
 ## 2.0.2 - 2026-11-18
 
-**A list field of a brief keeps what you choose, and a playlist to share is made on a phone too.**
+**No place on this computer reaches the network, a list field of a brief keeps what you choose, and a playlist to share is made on a phone too.**
+
+### Security
+
+- **Nothing that answers the network names a place on this computer.** ComfyUI has no login: with `--listen` everyone in the network reaches its routes and its history. Export Release named its release record by its absolute path in its output, which ComfyUI keeps in `/history` - it now names it by its place inside the output folder (the Plenio Player finds the song by that too). A user template that could not be read was listed with the error's text, which for a file is its absolute path - now with the kind of error only. Plenio's error answers to a request from another computer keep a path's last two parts. A party song's record path no longer reaches the guests' page.
 
 ### Fixed
 

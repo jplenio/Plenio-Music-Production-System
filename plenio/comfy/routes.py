@@ -44,9 +44,25 @@ log = logging.getLogger("plenio")
 Handler = Callable[[web.Request], Awaitable[web.StreamResponse]]
 
 
-def error_response(error: Exception) -> web.Response:
+def error_response(error: Exception, here: bool = True) -> web.Response:
+    """Plenio's error answer; to a request from the network (``here`` false) every path in its words keeps its last
+    two parts - a message of Plenio's may quote a file, and where it lies is this computer's."""
     status, body = public_error(error)
+    if not here:
+        body = _without_paths(body)
     return web.json_response({"error": body}, status=status)
+
+
+def _without_paths(value: Any) -> Any:
+    from ..core.problem_report import clean_text
+
+    if isinstance(value, str):
+        return clean_text(value)
+    if isinstance(value, dict):
+        return {key: _without_paths(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_without_paths(item) for item in value]
+    return value
 
 
 @functools.cache
@@ -90,10 +106,10 @@ def guarded(route: Route) -> Handler:
                 only_here(request, route.what, route.hint)
             return await handler(request)
         except PlenioError as error:
-            return error_response(error)
+            return error_response(error, is_here(request))
         except Exception as error:
             log.exception("Plenio route %s failed", request.path)
-            return error_response(error)
+            return error_response(error, is_here(request))
 
     return wrapper
 

@@ -907,8 +907,10 @@ class PlenioExportRelease(io.ComfyNode):
             ui={
                 "plenio_summary": [{"status": summary.status.value, "markdown": markdown}],
                 "plenio_notation": notation,
-                # the record, for the node's "Open in the Plenio Player" button
-                "plenio_player": [{"record": str(record_path)}],
+                # the record, for the node's "Open in the Plenio Player" button: its place inside the output
+                # folder (ComfyUI keeps a node's output in /history, which everyone who reaches ComfyUI can read -
+                # no absolute path of this computer goes there; the player finds the song by this place too)
+                "plenio_player": [{"record": _output_place(record_path, base)}],
                 "audio": [
                     {
                         "filename": Path(p).name,
@@ -919,6 +921,14 @@ class PlenioExportRelease(io.ComfyNode):
                 ],
             },
         )
+
+
+def _output_place(path: Path, base: Path) -> str:
+    """``path`` as its place inside the output folder (``/``-separated), else its file name alone."""
+    try:
+        return path.resolve().relative_to(base.resolve()).as_posix()
+    except (OSError, ValueError):
+        return path.name
 
 
 def _song_tempo(values: dict[str, str], sheet: dict[str, Any]) -> tuple[float, tuple[int, int]]:

@@ -351,7 +351,9 @@ def test_a_repeated_title_gets_a_number_and_the_record_says_why_there_are_no_tim
             },
         }
         outputs = server.run(prompt)["outputs"]["3"]
-        record = json.loads(Path(outputs["plenio_player"][0]["record"]).read_text(encoding="utf-8"))
+        record = json.loads(
+            (server.output_dir / outputs["plenio_player"][0]["record"]).read_text(encoding="utf-8")
+        )
         return outputs["plenio_summary"][0], record
 
     first, record = export("number")

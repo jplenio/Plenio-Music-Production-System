@@ -536,6 +536,10 @@ def _result(item: dict[str, Any], prompt_id: str = "") -> dict[str, Any] | None:
             path = Path(str((entry or {}).get("record") or ""))
             if not path.name:
                 continue
+            if not path.is_absolute():
+                # since 2.0.2 Export Release names the record by its place inside the output folder (its output is
+                # kept in /history, which everyone who reaches ComfyUI reads); the answer to this computer is as before
+                path = host.output_directory() / path
             result: dict[str, Any] = {
                 "record": str(path),
                 "folder": str(path.parent),

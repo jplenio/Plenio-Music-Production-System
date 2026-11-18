@@ -1003,6 +1003,8 @@ def test_the_whole_studio_orders_several_takes_and_they_follow_the_song(again: A
     songs.tick()
     done, *takes = songs.listing(ADMIN)
     assert done["status"] == "done" and done["takes_left"] == 0
+    # the record's place is the player's own: no view names it - the guests' page shows these views too
+    assert "record" not in done["result"] and str(folder) not in json.dumps(songs.listing(ADMIN))
     assert [t["again"] for t in takes] == ["take", "take"] and [t["number"] for t in takes] == [2, 3]
     assert {t["group"] for t in takes} == {done["group"]} and all(t["of"] == 3 for t in takes)
     assert all(t["from"]["song"] == done["result"]["song"] and t["status"] == "waiting" for t in takes)
