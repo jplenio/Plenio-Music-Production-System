@@ -5,7 +5,7 @@ A ComfyUI custom-node pack: song writing with local LLMs, YuE2 and MiniMax Music
 ## Rules that always hold
 
 1. **Languages.** Answer the owner in German. Code, comments, UI strings, docs and commit messages are English (ADR-0008).
-2. **Git.** Commit locally, one task or a coherent part per commit. **Never push, never tag.** Never commit `.codewhale/`, `.claude/` or `dist/`. End commit messages with the `Co-Authored-By` line of the session.
+2. **Git.** Commit locally, one task or a coherent part per commit. **Never push, never tag.** Never commit `.codewhale/`, `.claude/` or `dist/`. Commits, tags and releases are the owner's (`jplenio`): **no `Co-Authored-By` line and no other mention of Claude or an AI** in commit messages, tag messages, release notes or PR texts (owner's decision 2026-11-18). A GitHub release is created with the owner's account (`gh release create … --draft` before the tag's workflow attaches the files), not left to `github-actions[bot]`.
 3. **No pre-release versions.** Everything goes into 2.0.0 on `main`; the owner tests it from the repository before publishing (decision 2026-11-11). `pyproject.toml` stays at 1.6.0 until the release is prepared; the CHANGELOG collects changes under *2.0.0 - unreleased*.
 4. **Private material.** The owner's release records and songs (ComfyUI's output folder) are read-only study input: report aggregates only; never copy lyrics, titles or sung lines into code, tests, docs, commits or the CHANGELOG. Invent examples.
 5. **Downloads and installs** (Python or npm packages, model files, browsers) need the owner's explicit permission, each time.
