@@ -276,7 +276,8 @@ def build(
     ``options``: ``title``, ``bitrate`` (128, 160, 192), ``pdf`` (the sheet music), ``settings`` (the
     visuals' and the lyrics' look to start with), ``presets`` (the listener's own visuals: name, text),
     ``playlists`` (``[{"name", "songs"}]``, the songs among those packed), ``tags`` (song id -> the
-    listener's tags of it), ``part_mb`` (parts of at most so many MB; 0: one file). ``progress(done, total,
+    listener's tags of it), ``part_mb`` (parts of at most so many MB; 0: one file), ``ordered`` (the songs in the
+    order of ``ids``, an album: the shared player lists and plays them so). ``progress(done, total,
     stage)``: ``reading`` the songs, then ``packing`` their sound. ``cancelled``: asked as it goes; when it says
     so, the files of this player go and ``Cancelled`` is raised."""
     from .server import STATIC
@@ -287,7 +288,7 @@ def build(
     if int(options.get("part_mb") or 0) not in PART_SIZES:
         raise ValueError(f"parts of {', '.join(map(str, PART_SIZES[1:]))} MB, or one file")
     songs: list[Song] = []
-    for song_id in ids[:MAX_SONGS]:
+    for song_id in list(dict.fromkeys(ids))[:MAX_SONGS]:  # in their order, each once
         song = library.song(song_id)
         if song is None or "audio" not in song.files:
             continue
@@ -407,6 +408,8 @@ def build(
                 ],
                 "playlists": [p for p in playlists if p["songs"]],
                 "tags": tags_of(options.get("tags"), packed),
+                # the songs are in the order of ``ids`` (always); ``ordered``: the shared player starts in it
+                "ordered": bool(options.get("ordered")),
                 "files": {"audio": len(group), "cover": len(part_covers), "pdf": len(part_pdfs)},
                 "part": {"index": k + 1, "count": count, "files": [p.name for p in targets]}
                 if count > 1

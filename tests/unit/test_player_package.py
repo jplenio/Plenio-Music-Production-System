@@ -191,6 +191,25 @@ def test_no_songs_or_a_bit_rate_above_192_make_no_player(songs: Path, tmp_path: 
         build(library, [library.songs()[0]["id"]], {"bitrate": 320}, tmp_path / "state")
 
 
+@pytest.mark.parametrize("ordered", [True, False])
+def test_the_songs_go_in_the_order_given_each_once(songs: Path, tmp_path: Path, ordered: bool) -> None:
+    library = Library([songs])
+    library.scan(force=True)
+    by_title = {s["title"]: s["id"] for s in library.songs()}
+    wanted = [by_title["Second"], by_title["First"]]
+    [path] = build(
+        library, [*wanted, by_title["Second"]], {"bitrate": 128, "ordered": ordered}, tmp_path / "state"
+    )
+    html = path.read_text(encoding="utf-8")
+    data = json.loads(
+        re.search(r'<script type="application/json" id="plenio-portable">(.*?)</script>', html, re.S).group(1)
+    )
+    # an album's running order: the list, and the sound in the file, as given
+    assert [s["id"] for s in data["songs"]] == wanted and data["ordered"] is ordered
+    sound = [key for _d, short, key, _m, _l in PIECE_SCRIPT.findall(html) if short == "a"]
+    assert list(dict.fromkeys(sound)) == wanted
+
+
 @pytest.fixture
 def server(songs: Path, tmp_path: Path) -> Iterator[tuple[str, int, Library, Path]]:
     library = Library([songs])

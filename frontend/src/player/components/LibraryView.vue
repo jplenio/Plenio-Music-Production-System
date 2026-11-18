@@ -20,7 +20,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } 
 
 import type { SongSummary } from '../api'
 import { isPhone, touch } from '../layout'
-import { isPortable } from '../portable'
+import { isPortable, portable } from '../portable'
 import { makeShown } from '../make/state'
 import { current, go, library, measuredStars, playSongs, saveFilter, say, settings, shareFor, state, toggleCurrent } from '../store'
 import { countOf, formatTime } from '../timing'
@@ -371,6 +371,7 @@ defineExpose({ focus: () => input.value?.focus(), cardOfCurrent, filterByTag })
       </label>
       <button v-if="isPhone" class="ghost filters-btn" :class="{ on: chips.length > 0 }" @click="filtersOpen = true"><Icon name="sliders" :size="16" /> Filters <b v-if="chips.length">{{ chips.length }}</b></button>
       <select v-if="collection === 'all' || collection === 'favorites'" v-model="settings.sort" title="Sort" aria-label="Sort">
+        <option v-if="portable?.ordered" value="shared">In order (as shared)</option>
         <option value="newest">Newest</option>
         <option value="oldest">Oldest</option>
         <option value="title">Title</option>

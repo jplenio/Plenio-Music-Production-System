@@ -244,7 +244,8 @@ function matches(song: SongSummary, term: Term, context: Context): number {
   }
 }  // prettier-ignore
 
-export type SortKey = 'newest' | 'oldest' | 'title' | 'length' | 'bpm' | 'loudness' | 'plays' | 'recent' | 'relevance'
+/** ``shared``: as the songs came (a shared player's album order). */
+export type SortKey = 'newest' | 'oldest' | 'title' | 'length' | 'bpm' | 'loudness' | 'plays' | 'recent' | 'relevance' | 'shared'
 
 export interface Facts {
   plays: Record<string, number>
@@ -268,6 +269,7 @@ export function sortSongs(songs: SongSummary[], key: SortKey, facts: Facts, rele
     case 'loudness': return by((s) => s.loudness.lufs ?? -99, true)
     case 'plays': return by((s) => facts.plays[s.id] ?? 0, true)
     case 'recent': return by((s) => facts.lastPlayed[s.id] ?? '', true)
+    case 'shared': return list
     case 'relevance': return relevance ? by((s) => relevance.get(s.id) ?? 0, true) : by((s) => s.created, true)
     default: return by((s) => s.created, true)
   }

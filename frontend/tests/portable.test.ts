@@ -59,4 +59,11 @@ describe('a shared player', () => {
     expect(JSON.parse(localStorage.getItem('plenio-portable:abc123') ?? '{}').favorites).toEqual(['s2'])
     expect((await api.state()).favorites).toEqual(['s2'])
   })
+
+  it('starts in the order it was shared in when it is an album', async () => {
+    document.body.innerHTML = `<div id="app"></div><script type="application/json" id="plenio-portable">${JSON.stringify({ ...DATA, ordered: true })}</script>`
+    vi.resetModules()
+    const { api } = await import('../src/player/api')
+    expect((await api.state()).settings).toEqual({ lyrics: { effect: 'neon' }, sort: 'shared' })
+  })
 })

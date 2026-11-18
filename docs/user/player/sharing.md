@@ -13,6 +13,12 @@ installing anything, without Plenio or ComfyUI.
 
 - **Choose the songs**: tick them, or take all of the view, your favourites or a playlist at once; search to
   find some. The dialog shows how long and how large the file gets.
+- **Order**: under the songs, the chosen ones are numbered in the order they go into the file - a playlist's
+  order, or the order you ticked them in. Drag a song to another place or move it with the arrows; *album &
+  track* sorts by the album and track number of the songs' tags (as Export Release writes them), *title* by
+  title (2 before 10), *reverse* turns the list round. With **keep the order** (on by default) the shared
+  player lists and plays the songs as numbered - an album keeps its running order. The listener can still sort
+  otherwise; *In order (as shared)* in the sort list brings the order back.
 - **Sound**: MP3 at 128, 160 or 192 kbit/s (about 1-1.5 MB a minute). Never the FLAC or WAV.
 - **Also**: the sheet music (PDF), your look (the visuals' and the lyrics' settings), your own Plenio Drop
   visuals, your playlists and your tags of these songs.

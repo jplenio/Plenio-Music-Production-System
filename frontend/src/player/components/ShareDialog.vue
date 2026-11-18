@@ -4,7 +4,9 @@
  * favourites, any - packed with the player into one HTML file that plays by itself anywhere, also a large one
  * on a phone: send it, and the other one double-clicks it. MP3 of 128-192 kbit/s, optionally the sheet music,
  * your own visuals, your look, the playlists and tags of these songs. *Make the player* puts it in the queue
- * (owner's request 2026-10-18): made by the player in the background - close this, it goes on.
+ * (owner's request 2026-10-18): made by the player in the background - close this, it goes on. The songs go in
+ * the order shown under *Order* (owner's request 2026-11-18: an album keeps its running order) - by album and
+ * track, by title, dragged or moved one by one - and the shared player lists and plays them so.
  */
 import { computed, ref } from 'vue'
 
@@ -13,6 +15,7 @@ import { jobs, progressOf, progressText, queuePackage, stopJob } from '../jobs'
 import { parseQuery, score } from '../search'
 import { byId, go, library, settings, state } from '../store'
 import { formatTime } from '../timing'
+import { arranged, moved, type Arrangement } from '../shareOrder'
 import { myPresetTexts } from '../visuals/drop'
 import CoverArt from './CoverArt.vue'
 import Icon from './Icon.vue'
@@ -21,7 +24,12 @@ const props = defineProps<{ songs: string[]; title: string }>()
 const emit = defineEmits<{ close: [] }>()
 
 const title = ref(props.title || 'My Plenio songs')
-const chosen = ref(new Set(props.songs.filter((id) => byId.value.has(id))))
+/** The songs chosen, in the order they go into the file (a playlist's or a view's order to begin with). */
+const order = ref<string[]>([...new Set(props.songs.filter((id) => byId.value.has(id)))])
+const chosen = computed(() => new Set(order.value))
+/** The shared player lists and plays the songs in this order (an album). */
+const ordered = ref(true)
+const dragFrom = ref(-1)
 const find = ref('')
 const bitrate = ref(192)
 const pdf = ref(true)
@@ -45,7 +53,7 @@ const shown = computed(() => {
   const context = { favorites: new Set(state.favorites) }
   return library.value.filter((s) => score(s, terms, context) > 0)
 })
-const picked = computed(() => library.value.filter((s) => chosen.value.has(s.id)))
+const picked = computed(() => order.value.map((id) => byId.value.get(id)).filter((s): s is NonNullable<typeof s> => !!s))
 const seconds = computed(() => picked.value.reduce((t, s) => t + (s.seconds || 0), 0))
 // MP3 at the bit rate, as base64 in the page (4/3), and a little for the player itself
 const megabytes = computed(() => (seconds.value * bitrate.value * 1000) / 8 / 2 ** 20 * 1.34 + 1.2)
@@ -53,21 +61,29 @@ const megabytes = computed(() => (seconds.value * bitrate.value * 1000) / 8 / 2 
 const parts = computed({ get: () => partMb.value ?? (megabytes.value > 600 ? 500 : 0), set: (v: number) => (partMb.value = v) })
 const partCount = computed(() => (parts.value ? Math.max(1, Math.ceil(megabytes.value / (parts.value - 1.2))) : 1))
 
+/** A song ticked goes to the end of the order; one unticked leaves it. */
 function toggle(id: string): void {
-  const next = new Set(chosen.value)
-  if (next.has(id)) next.delete(id)
-  else next.add(id)
-  chosen.value = next
+  order.value = chosen.value.has(id) ? order.value.filter((i) => i !== id) : [...order.value, id]
 }
 function pick(ids: string[], name = ''): void {
-  chosen.value = new Set(ids.filter((id) => byId.value.has(id)))
+  order.value = [...new Set(ids.filter((id) => byId.value.has(id)))]
   if (name) title.value = name
+}
+function arrange(how: Arrangement): void {
+  order.value = arranged(order.value, byId.value, how)
+}
+function move(from: number, to: number): void {
+  order.value = moved(order.value, from, to)
+}
+function drop(to: number): void {
+  if (dragFrom.value >= 0) move(dragFrom.value, to)
+  dragFrom.value = -1
 }
 
 async function make(): Promise<void> {
   error.value = ''
   starting.value = true
-  const ids = library.value.filter((s) => chosen.value.has(s.id)).map((s) => s.id)
+  const ids = [...order.value]
   try {
     const queued = await queuePackage({
       songs: ids,
@@ -79,6 +95,7 @@ async function make(): Promise<void> {
       playlists: playlists.value ? state.playlists.map((p) => ({ name: p.name, songs: p.songs.filter((id) => chosen.value.has(id)) })).filter((p) => p.songs.length) : [],
       tags: tags.value ? Object.fromEntries(ids.filter((id) => state.tags[id]?.length).map((id) => [id, state.tags[id]])) : {},
       part_mb: parts.value,
+      ordered: ordered.value,
     })
     jobId.value = queued.id
   } catch (e) {
@@ -122,6 +139,26 @@ const sizeText = (bytes: number): string => (bytes > 2 ** 30 ? `${(bytes / 2 ** 
               <span class="t">{{ s.title }}<small>{{ s.other ? s.artist || 'other music' : s.genre }} · {{ formatTime(s.seconds) }}</small></span>
             </label>
           </div>
+          <section v-if="order.length > 1" class="order" aria-label="Order of the songs">
+            <div class="order-head">
+              <b>Order</b>
+              <span class="hint">drag a song, or move it with the arrows</span>
+              <span class="arrange">
+                <button class="chip" title="By album, then track number (from the songs' tags), then title" @click="arrange('album')">album &amp; track</button>
+                <button class="chip" title="By title - 2 before 10" @click="arrange('title')">title</button>
+                <button class="chip" title="The other way round" @click="arrange('reverse')">reverse</button>
+              </span>
+            </div>
+            <ol>
+              <li v-for="(id, k) in order" :key="id" draggable="true" :class="{ dragging: dragFrom === k }" @dragstart="dragFrom = k" @dragend="dragFrom = -1" @dragover.prevent @drop.prevent="drop(k)">
+                <Icon name="grip" :size="14" class="grip" />
+                <span class="n">{{ k + 1 }}</span>
+                <span class="name">{{ byId.get(id)?.title }}</span>
+                <button class="icon-btn" :disabled="k === 0" :aria-label="`${byId.get(id)?.title}: earlier`" title="Earlier" @click="move(k, k - 1)"><Icon name="chevron" :size="14" class="up" /></button>
+                <button class="icon-btn" :disabled="k === order.length - 1" :aria-label="`${byId.get(id)?.title}: later`" title="Later" @click="move(k, k + 1)"><Icon name="chevron" :size="14" /></button>
+              </li>
+            </ol>
+          </section>
         </div>
         <form class="right" @submit.prevent>
           <label>Name <input v-model="title" class="text" maxlength="120" /></label>
@@ -137,6 +174,7 @@ const sizeText = (bytes: number): string => (bytes > 2 ** 30 ? `${(bytes / 2 ** 
           <label class="check"><input v-model="presets" type="checkbox" :disabled="!myPresetTexts.length" /> my own Plenio Drop visuals ({{ myPresetTexts.length }})</label>
           <label class="check"><input v-model="playlists" type="checkbox" /> my playlists of these songs</label>
           <label class="check"><input v-model="tags" type="checkbox" :disabled="!tagged" /> my tags of these songs ({{ tagged }} tagged)</label>
+          <label class="check"><input v-model="ordered" type="checkbox" /> keep the order: the shared player lists and plays the songs as numbered (an album)</label>
           <label>Files
             <select v-model.number="parts">
               <option :value="0">one file{{ megabytes > 1000 ? ' - for a computer' : '' }}</option>
@@ -281,6 +319,68 @@ select {
   font-weight: 400;
   color: var(--muted);
 }
+.order {
+  display: grid;
+  gap: 6px;
+}
+.order-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+.arrange {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+}
+.order ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  max-height: 30vh;
+  max-height: 30dvh;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+}
+.order li {
+  display: grid;
+  grid-template-columns: auto 2.2em minmax(0, 1fr) auto auto;
+  gap: 6px;
+  align-items: center;
+  padding: 3px 8px;
+  font-size: 13px;
+  cursor: grab;
+}
+.order li:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.order li.dragging {
+  opacity: 0.5;
+}
+.order .grip {
+  color: var(--muted);
+}
+.order .n {
+  color: var(--muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.order .name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.order .up {
+  transform: rotate(180deg);
+}
+.order .icon-btn {
+  width: 28px;
+  height: 28px;
+}
 .right {
   display: grid;
   gap: 10px;
@@ -386,6 +486,17 @@ input[type='checkbox'] {
   }
   .row {
     padding: 8px 10px;
+  }
+  .order ol {
+    max-height: 40vh;
+    max-height: 40dvh;
+  }
+  .order li {
+    padding: 4px 8px;
+  }
+  .order .icon-btn {
+    width: 38px;
+    height: 38px;
   }
   input[type='checkbox'] {
     width: 20px;

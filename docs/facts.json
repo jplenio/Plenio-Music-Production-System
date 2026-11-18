@@ -12,9 +12,9 @@
   "all": 99
  },
  "tests": {
-  "python": 1804,
-  "frontend": 778,
-  "all": 2582
+  "python": 1805,
+  "frontend": 784,
+  "all": 2589
  },
  "comfyui": {
   "minimum": "0.41.0",

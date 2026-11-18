@@ -375,6 +375,8 @@ export interface PackageOptions {
   tags?: Record<string, string[]>
   /** Parts of at most so many MB (250, 500, 1000) - for phones; 0: one file. */
   part_mb?: number
+  /** The songs in the order of ``songs`` (an album): the shared player lists and plays them so. */
+  ordered?: boolean
 }
 
 /** The guests' access to the live playlist (``plenio/player/guest.py``). */

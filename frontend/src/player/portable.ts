@@ -34,6 +34,8 @@ export interface PortableData {
   files?: { audio: number; cover: number; pdf: number }
   /** One of several parts (a large share, for phones): which, of how many, and every part's file name. */
   part?: { index: number; count: number; files: string[] } | null
+  /** The songs are in the order they were shared in (an album): the list starts sorted so (``shared``). */
+  ordered?: boolean
 }
 
 /** The loader the file brings (``plenio.portable/2``). */
@@ -171,7 +173,8 @@ export function portableState(): PlayerState {
     plays: {},
     last_played: {},
     tags: { ...(portable?.tags ?? {}) },
-    settings: { ...(portable?.settings ?? {}) },
+    // an album's songs start in their order; the listener may sort otherwise (and keeps that)
+    settings: { ...(portable?.settings ?? {}), ...(portable?.ordered ? { sort: 'shared' } : {}) },
   }
 }
 
