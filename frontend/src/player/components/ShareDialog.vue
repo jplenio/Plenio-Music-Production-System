@@ -6,14 +6,17 @@
  * your own visuals, your look, the playlists and tags of these songs. *Make the player* puts it in the queue
  * (owner's request 2026-10-18): made by the player in the background - close this, it goes on. The songs go in
  * the order shown under *Order* (owner's request 2026-11-18: an album keeps its running order) - by album and
- * track, by title, dragged or moved one by one - and the shared player lists and plays them so.
+ * track, by title, dragged or moved one by one - and the shared player lists and plays them so. With thousands of
+ * songs (owner's request 2026-11-20) the list shows the songs it was opened with - a filtered view's, a playlist's -
+ * or the favourites, a playlist or all; the search takes the library's words (``#tag``, ``bpm:>100``, ``is:fav`` …),
+ * and the list grows by a page at a time.
  */
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import { api } from '../api'
 import { jobs, progressOf, progressText, queuePackage, stopJob } from '../jobs'
 import { parseQuery, score } from '../search'
-import { byId, go, library, settings, state } from '../store'
+import { byId, go, library, measuredStars, settings, state } from '../store'
 import { formatTime } from '../timing'
 import { arranged, moved, type Arrangement } from '../shareOrder'
 import { myPresetTexts } from '../visuals/drop'
@@ -46,13 +49,39 @@ const job = computed(() => jobs.value.find((j) => j.id === jobId.value) ?? null)
 const working = computed(() => job.value?.state === 'working' || job.value?.state === 'waiting')
 const starting = ref(false)
 
-const shown = computed(() => {
-  const q = find.value.trim()
-  if (!q) return library.value
-  const terms = parseQuery(q)
-  const context = { favorites: new Set(state.favorites) }
-  return library.value.filter((s) => score(s, terms, context) > 0)
+/** Which songs the list offers: those the dialog was opened with (a view's, a playlist's), the favourites, a
+ * playlist or all. */
+const given = [...new Set(props.songs.filter((id) => byId.value.has(id)))]
+const pool = ref<string>(given.length ? 'given' : 'all')
+const poolSongs = computed(() => {
+  const ids = pool.value === 'given' ? given : pool.value === 'favorites' ? state.favorites : pool.value.startsWith('playlist:') ? (state.playlists.find((p) => `playlist:${p.id}` === pool.value)?.songs ?? []) : null
+  if (!ids) return library.value
+  return ids.map((id) => byId.value.get(id)).filter((s): s is NonNullable<typeof s> => !!s)
 })
+const PAGE = 150
+const limit = ref(PAGE)
+const shownAll = computed(() => {
+  const q = find.value.trim()
+  if (!q) return poolSongs.value
+  const terms = parseQuery(q)
+  const context = { favorites: new Set(state.favorites), tags: state.tags, plays: state.plays, ratings: state.ratings, measured: measuredStars.value }
+  return poolSongs.value.filter((s) => score(s, terms, context) > 0)
+})
+/** A page at a time: thousands of rows with their covers would hold the dialog up. */
+const shown = computed(() => shownAll.value.slice(0, limit.value))
+watch([pool, find], () => (limit.value = PAGE))
+const allShownTicked = computed(() => shownAll.value.length > 0 && shownAll.value.every((s) => chosen.value.has(s.id)))
+/** Tick every song the list shows (also those further down), or untick them. */
+function tickShown(): void {
+  if (allShownTicked.value) {
+    const away = new Set(shownAll.value.map((s) => s.id))
+    order.value = order.value.filter((id) => !away.has(id))
+  } else order.value = [...new Set([...order.value, ...shownAll.value.map((s) => s.id)])]
+}
+function choosePool(which: string, name = ''): void {
+  pool.value = which
+  if (name && title.value === (props.title || 'My Plenio songs')) title.value = name
+}
 const picked = computed(() => order.value.map((id) => byId.value.get(id)).filter((s): s is NonNullable<typeof s> => !!s))
 const seconds = computed(() => picked.value.reduce((t, s) => t + (s.seconds || 0), 0))
 // MP3 at the bit rate, as base64 in the page (4/3), and a little for the player itself
@@ -64,10 +93,6 @@ const partCount = computed(() => (parts.value ? Math.max(1, Math.ceil(megabytes.
 /** A song ticked goes to the end of the order; one unticked leaves it. */
 function toggle(id: string): void {
   order.value = chosen.value.has(id) ? order.value.filter((i) => i !== id) : [...order.value, id]
-}
-function pick(ids: string[], name = ''): void {
-  order.value = [...new Set(ids.filter((id) => byId.value.has(id)))]
-  if (name) title.value = name
 }
 function arrange(how: Arrangement): void {
   order.value = arranged(order.value, byId.value, how)
@@ -125,19 +150,27 @@ const sizeText = (bytes: number): string => (bytes > 2 ** 30 ? `${(bytes / 2 ** 
       <p class="lead">One HTML file with the player and the songs you choose: send it, and the other one opens it with a double-click - in any current browser, without installing anything, without ComfyUI. The lyrics, the notation following the music, the visuals, playlists and Live Play all play; the songs go as MP3, never as FLAC.</p>
       <div class="body">
         <div class="left">
-          <div class="quick">
-            <button class="chip" @click="pick(library.map((s) => s.id))">all {{ library.length }}</button>
-            <button class="chip" @click="pick(state.favorites, 'My favourites')">favourites</button>
-            <button v-for="p in state.playlists" :key="p.id" class="chip" @click="pick(p.songs, p.name)">{{ p.name }}</button>
-            <button class="chip" @click="pick([])">none</button>
+          <div class="quick" role="group" aria-label="Choose from">
+            <span class="from">Choose from</span>
+            <button v-if="given.length" class="chip" :class="{ on: pool === 'given' }" :aria-pressed="pool === 'given'" title="The songs you opened this with: the view, its search and filters" @click="choosePool('given')">these {{ given.length }}</button>
+            <button class="chip" :class="{ on: pool === 'all' }" :aria-pressed="pool === 'all'" @click="choosePool('all')">all {{ library.length }}</button>
+            <button class="chip" :class="{ on: pool === 'favorites' }" :aria-pressed="pool === 'favorites'" @click="choosePool('favorites', 'My favourites')">favourites</button>
+            <button v-for="p in state.playlists" :key="p.id" class="chip" :class="{ on: pool === `playlist:${p.id}` }" :aria-pressed="pool === `playlist:${p.id}`" @click="choosePool(`playlist:${p.id}`, p.name)">{{ p.name }}</button>
           </div>
-          <input v-model="find" class="find" placeholder="Search: title, genre, mood …" />
+          <input v-model="find" class="find" type="search" placeholder="Search as in the library: title, genre, #tag, bpm:>100, is:fav …" />
+          <div class="ticks">
+            <span class="hint">{{ shownAll.length }} {{ shownAll.length === 1 ? 'song' : 'songs' }} here · {{ chosen.size }} chosen</span>
+            <button class="chip" :disabled="!shownAll.length" @click="tickShown">{{ allShownTicked ? 'untick these' : `tick these ${shownAll.length}` }}</button>
+            <button class="chip" :disabled="!chosen.size" @click="order = []">none</button>
+          </div>
+          <p v-if="pool === 'all' && !given.length && library.length > 500" class="hint">Tip: search and filter in the library first, then <b>Share…</b> there - this list then shows just those songs.</p>
           <div class="list">
             <label v-for="s in shown" :key="s.id" class="row" :class="{ on: chosen.has(s.id) }">
               <input type="checkbox" :checked="chosen.has(s.id)" @change="toggle(s.id)" />
               <CoverArt :song="s" rounded :size="48" />
               <span class="t">{{ s.title }}<small>{{ s.other ? s.artist || 'other music' : s.genre }} · {{ formatTime(s.seconds) }}</small></span>
             </label>
+            <button v-if="shownAll.length > shown.length" class="more ghost small" @click="limit += PAGE">Show {{ Math.min(PAGE, shownAll.length - shown.length) }} more ({{ shownAll.length - shown.length }} left)</button>
           </div>
           <section v-if="order.length > 1" class="order" aria-label="Order of the songs">
             <div class="order-head">
@@ -278,6 +311,29 @@ h3 {
   flex-wrap: wrap;
   gap: 6px;
 }
+.from {
+  color: var(--muted);
+  font-size: 12px;
+  margin-right: 2px;
+  align-self: center;
+}
+.quick .chip.on {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  border-color: var(--accent);
+}
+.ticks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.ticks .hint {
+  margin-right: auto;
+}
+.more {
+  display: block;
+  margin: 8px auto;
+}
 .find,
 .text,
 select {
@@ -293,6 +349,9 @@ select {
   overscroll-behavior: contain;
   max-height: 46vh;
   max-height: 46dvh;
+  /* a long order below does not squeeze the songs to a few rows: the dialog's body scrolls instead */
+  flex: 0 0 auto;
+  min-height: min(260px, 46vh);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 10px;
 }
@@ -341,8 +400,8 @@ select {
   padding: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  max-height: 30vh;
-  max-height: 30dvh;
+  max-height: 26vh;
+  max-height: 26dvh;
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 10px;
 }
