@@ -28,7 +28,7 @@ async function startComfy(): Promise<void> {
   <div v-if="show" class="banner" :class="store.connection?.state">
     <Icon :name="store.connection?.state === 'offline' ? 'power' : 'refresh'" :size="15" />
     <span v-if="store.connection?.state === 'offline' && elsewhere">
-      <b>{{ store.connection?.problem === 'token' ? 'Token needed.' : 'Studio offline.' }}</b> {{ store.connection?.message }}
+      <b>{{ store.connection?.problem === 'token' ? 'Token needed.' : store.connection?.problem === 'no_plenio' ? 'Plenio missing in ComfyUI.' : 'Studio offline.' }}</b> {{ store.connection?.message }}
     </span>
     <span v-else-if="store.connection?.state === 'offline'">
       <b>Studio offline.</b> Playing and editing work as always; to make new takes, start ComfyUI with Plenio.

@@ -32,7 +32,7 @@ struct Connection
     std::string plenio;   // Plenio's version
     std::string api;      // the Song API's version ("2.0"; "1.4" for a Plenio before 2.0)
     int apiMajor = 2;
-    std::string problem;  // why it is not connected, when Plenio said so: "token" (it asks for one), "remote_off"
+    std::string problem;  // why it is not connected: "token" (Plenio asks for one), "remote_off", "no_plenio" (a ComfyUI without it)
     std::string comfyui;
     std::set<std::string> features; // "stems", "bars", "models" (Song API 1.4)
     std::string message;  // what the UI says about it

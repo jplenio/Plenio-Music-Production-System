@@ -315,7 +315,20 @@ bool Studio::probe (const std::string& host, int port, Connection& into) const
         return false;
     }
     if (status != 200)
+    {
+        // something answers on the port: a ComfyUI without Plenio (not installed there, or its import failed - a
+        // portable ComfyUI started by its own .bat) is said as such instead of "not running"
+        if (status != 0)
+            if (auto stats = PlenioClient (host, port, token, secret, major).get ("/system_stats", 3); ok (stats))
+                if (const auto* system = json::find (std::get<Json> (stats), "system"); system != nullptr && system->is_object())
+                {
+                    into.host = host;
+                    into.port = port;
+                    into.problem = "no_plenio";
+                    into.comfyui = json::str (*system, "comfyui_version", {}, 40);
+                }
         return false;
+    }
     PlenioClient c (host, port, token, secret, major);
     auto info = c.get (c.api (""), 5);
     if (! ok (info))
@@ -406,6 +419,9 @@ void Studio::monitor()
                 if (found.problem == "token")
                     current.message = bearer.empty() ? "The ComfyUI on " + host + " asks for a token. Make one there in Plenio Setup > API access and enter it in the settings."
                                                      : "The ComfyUI on " + host + " does not accept the token. Make a new one there in Plenio Setup > API access.";
+                else if (found.problem == "no_plenio")
+                    current.message = "ComfyUI" + (found.comfyui.empty() ? std::string() : " " + found.comfyui) + " runs on " + host + ":" + std::to_string (found.port)
+                                      + ", but without Plenio: install Plenio Music Production System there (ComfyUI-Manager, or custom_nodes with its requirements in ComfyUI's own Python) and restart ComfyUI. If it is installed, ComfyUI's window says why it did not load (IMPORT FAILED).";
                 else if (found.problem == "remote_off")
                     current.message = "The ComfyUI on " + host + " answers no other computer ([api] remote = \"off\" in its Plenio configuration).";
                 else if (! isThisComputer (host))

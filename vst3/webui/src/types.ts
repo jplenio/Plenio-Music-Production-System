@@ -15,7 +15,7 @@ export interface Connection {
   startComfyUI?: boolean
   /** Song API major version: 2 from Plenio 2.0 on. */
   apiMajor?: number
-  /** Why Plenio answers but does not let this computer in: 'token' or 'remote_off'. */
+  /** Why it is not connected: Plenio does not let this computer in ('token', 'remote_off'), or ComfyUI runs without Plenio ('no_plenio'). */
   problem?: string
   /** ComfyUI runs on another computer. */
   remote?: boolean
