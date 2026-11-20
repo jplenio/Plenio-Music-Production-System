@@ -33,6 +33,7 @@ from .transcribe_lyrics import PlenioTranscribeLyrics
 from .transcribe_score import PlenioTranscribeScore
 from .vocal_check import PlenioVocalCheck
 from .writer_choice import PlenioWriterChoice
+from .yue2_decoder import PlenioYuE2Decoder
 
 NODES = (
     PlenioSongBrief,
@@ -75,6 +76,8 @@ NODES = (
     PlenioRefine,
     PlenioSeparateStems,
     PlenioStemMixer,
+    # experimental: Ruach Studio's YuE2-VAE-RS x3 decoder in place of the checkpoint's
+    PlenioYuE2Decoder,
     # retired, kept so that workflows saved with Check Sung Words still run (they do nothing)
     PlenioComposeSungCheck,
     PlenioApplySungCheck,

@@ -137,6 +137,15 @@ The music model, the text side, the audio decoder and the Engine Profile then al
 
 **Licences** are per model - read the card: the RS-FW finetunes are CC BY-NC-SA 4.0, the IRA merges CC BY-NC 4.0, both non-commercial. **Quality:** Plenio tests the choice and the loading with its own files; it has not measured how a finetune sounds.
 
+## YuE2-VAE-RS decoders (experimental)
+
+A YuE2 checkpoint carries m-a-p's Standard audio decoder. Ruach Studio's **YuE2-VAE-RS x3** decoders decode the same latents with a decoder grown three times over and trained on music; they are separate files, not checkpoints.
+
+1. Download `VAE-RS/YuE2-VAE-RS-x3_v1.safetensors` (or `_v2`, 0.75 GB each) from [goldhub/YuE2-RS-Finetunes](https://huggingface.co/goldhub/YuE2-RS-Finetunes/tree/main/VAE-RS) into `ComfyUI/models/vae` and press **R**.
+2. Add **YuE2 Decoder (VAE-RS)** (*Plenio/Model*), connect the YuE2 model block's **VAE** to it, choose the file under **decoder**, and connect its **VAE** wherever the block's VAE went.
+
+Encoding (covers) keeps the checkpoint's encoder. Do not load these files with ComfyUI's own *Load VAE*: it does not know the layout. Licence **CC BY-NC 4.0**. Plenio tests the loading and the decode path with the released files; how x3 sounds is for your ear - see the study on the repository.
+
 ## The writer: Gemma 4 12B
 
 The templates' **Writer model** is *Gemma 4 12B (auto)*: the model that writes title, style, lyrics, arrangement plan and cover-art prompt. It takes, in this order:

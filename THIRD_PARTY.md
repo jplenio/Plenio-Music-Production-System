@@ -5,6 +5,7 @@ Everything that is **shipped** with Plenio and was not written for Plenio. Devel
 | Component | Version | Where | Licence | Notes |
 |---|---|---|---|---|
 | YuE `abc_tools.py` | commit `e76a8753` | `plenio/third_party/yue2_abc_tools.py` | Apache-2.0 (`plenio/third_party/LICENSE-YuE.txt`) | unchanged; provenance and hash in `plenio/third_party/README.md` |
+| YuE2-VAE-RS `yue2_vae_rs.py` (Ruach Studio) | 1.0.0 | `plenio/third_party/yue2_vae_rs.py` | Apache-2.0 (`plenio/third_party/LICENSE-YuE2-VAE-RS.txt`, notice `NOTICE-YuE2-VAE-RS.txt`) | unchanged; provenance and hash in `plenio/third_party/README.md`; loaded only by YuE2 Decoder (experimental) |
 | Upstream example scores | YuE `main` @ `09a1e8a8` | `tests/fixtures/abc/upstream-*.abc` | Apache-2.0 | test fixtures only |
 | Vue (`vue`, `@vue/runtime-dom`, `@vue/runtime-core`, `@vue/reactivity`, `@vue/shared`) | 3.5.43 | bundled into `web/js/chunks/*.mjs` (Song Sheet editor) | MIT (text below) | loaded only when the editor opens |
 | abcjs | 6.7.1 | bundled into `web/js/chunks/open-*.mjs` (score notation) | MIT (text below) | rendering only; its synth and soundfonts are not used (Plenio plays simple WebAudio tones, nothing is downloaded) |
