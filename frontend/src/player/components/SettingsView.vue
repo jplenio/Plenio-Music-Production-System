@@ -21,6 +21,7 @@ import StudioSettings from './StudioSettings.vue'
 import SyncSetting from './SyncSetting.vue'
 import { searchSettings, SECTIONS } from '../settingsIndex'
 import { isPortable, portable } from '../portable'
+import SaveFilesPanel from './SaveFilesPanel.vue'
 
 const props = defineProps<{ section?: string }>()
 /** *Basic* (eight settings) or *Everything*; a section's tab or all; the search over the settings' labels. */
@@ -284,6 +285,7 @@ const index = computed(() =>
       <p class="lead">“{{ portable?.title }}” - {{ countOf(library.length, 'song') }}, shared {{ portable?.created.slice(0, 10) }} with the Plenio Player {{ portable?.plenio }}. It plays by itself in this browser, without installing anything; your playlists, favourites and settings are kept in this browser.</p>
       <p class="hint">Making songs, opening them in ComfyUI, Live Play's new songs from ComfyUI and saving videos are the Plenio Player's: <a href="https://github.com/jplenio/Plenio-Music-Production-System" target="_blank" rel="noopener">Plenio</a>.</p>
     </section>
+    <SaveFilesPanel v-if="isPortable" id="save-files" />
 
 
     <section v-show="visible('kept')" id="kept" class="block">

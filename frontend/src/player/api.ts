@@ -366,6 +366,8 @@ async function post<T>(url: string, body: unknown): Promise<T> {
 export interface PackageOptions {
   songs: string[]
   title: string
+  /** ``mp3`` (92-320 kbit/s; the default) or ``aac`` (M4A, 48-96 kbit/s: the smallest files). */
+  codec?: 'mp3' | 'aac'
   bitrate: number
   pdf: boolean
   settings?: Record<string, unknown>
@@ -431,6 +433,7 @@ export interface PackageStatus {
   done: number
   total: number
   title?: string
+  codec?: string
   bitrate?: number
   file?: string
   /** Every file made: one, or the parts. */

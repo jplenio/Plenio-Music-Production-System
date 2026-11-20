@@ -36,7 +36,7 @@ from .guest import GuestHub, lan_addresses
 from .library import RETIRED_DIR, Library, song_detail
 from .measured import measured_for, ratings_of
 from .network import REMOTE_HEADER, REMOTE_HOST_HEADER, REMOTE_PEER_HEADER, NetworkAccess
-from .package import MAX_SONGS, PackageJobs, package_file, packages_dir
+from .package import MAX_SONGS, PackageJobs, package_file, packages_dir, sound_of
 from .package import listing as package_listing
 from .peaks import peaks
 from .remote import PlayerRemote, RemoteError, check_live, check_queue, check_transport
@@ -1416,8 +1416,10 @@ def make_handler(
             if not isinstance(body, dict) or not isinstance(body.get("songs"), list) or not body["songs"]:
                 return self._error(400, "the songs to pack")
             ids = [str(i) for i in body["songs"]][:MAX_SONGS]
-            if int(body.get("bitrate") or 192) not in (128, 160, 192):
-                return self._error(400, "MP3 at 128, 160 or 192 kbit/s")
+            try:
+                sound_of(body)
+            except ValueError as error:
+                return self._error(400, str(error))
             job = packages.start(library, ids, body, state.path.parent)
             return self._json({"job": job})
 

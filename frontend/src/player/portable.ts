@@ -22,6 +22,8 @@ export interface PortableData {
   created: string
   plenio: string
   bitrate: number
+  /** The sound's codec: ``mp3`` (also when not said: before 2.0.4) or ``aac`` (M4A). */
+  codec?: 'mp3' | 'aac'
   songs: SongSummary[]
   details: Record<string, SongDetail>
   peaks: Record<string, number[]>

@@ -22,7 +22,10 @@ installing anything, without Plenio or ComfyUI.
   title (2 before 10), *reverse* turns the list round. With **keep the order** (on by default) the shared
   player lists and plays the songs as numbered - an album keeps its running order. The listener can still sort
   otherwise; *In order (as shared)* in the sort list brings the order back.
-- **Sound**: MP3 at 128, 160 or 192 kbit/s (about 1-1.5 MB a minute). Never the FLAC or WAV.
+- **Sound**: MP3 at 92, 128, 160, 192, 256 or 320 kbit/s (about 0.7-2.4 MB a minute), or - for the smallest
+  files - AAC in an M4A at 48, 64 or 96 kbit/s (about 0.4-0.7 MB a minute; AAC at 96 sounds about as good as
+  MP3 at 128). Both play on every current phone, tablet and computer and in every current browser. MP3 at 92
+  is an average rate (an MP3 frame has no 92). Never the FLAC or WAV.
 - **Also**: the sheet music (PDF), your look (the visuals' and the lyrics' settings), your own Plenio Drop
   visuals, your playlists and your tags of these songs.
 - **Files**: one file, or **parts** of at most 250 MB, 500 MB or 1 GB - see below. Above about 600 MB the dialog
@@ -42,6 +45,12 @@ each part is a whole player of its songs (*All my songs (1 of 6).html* …), ope
 size (a 500 MB part: under 600 MB), and favourites and playlists are the same in all of them. Phones open an HTML
 file from their files app in Chrome or Firefox; on an iPhone a files app that opens web pages may be needed -
 or open the whole player from your network instead ([see below](people.md#the-player-in-your-network)).
+
+**Saving the files out of it.** The listener can save the files inside a shared player as they are - nothing
+is made again: in its Settings, **Save the files** packs the sound, the covers and the sheet music of all its
+songs, the favourites or a playlist into one ZIP (numbered *01*, *02* … in the order shared, if wanted; up to
+4 GB). One song's sound: its menu (⋯ or a right click), *Save its sound*; its sound, cover and sheet music one
+by one: its page, *Details*, *Files*.
 
 In the shared player everything that needs no Plenio plays as here: the library with its search and filters,
 a page per song with the lyrics and the notation following the music, Now playing with its four views, every

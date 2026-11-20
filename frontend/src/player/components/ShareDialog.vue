@@ -2,7 +2,8 @@
 /**
  * Share songs as a player (owner's request 2026-10-16): the songs chosen - all of a view, a playlist, the
  * favourites, any - packed with the player into one HTML file that plays by itself anywhere, also a large one
- * on a phone: send it, and the other one double-clicks it. MP3 of 128-192 kbit/s, optionally the sheet music,
+ * on a phone: send it, and the other one double-clicks it. MP3 of 92-320 kbit/s or, smallest, AAC (M4A) of 48-96
+ * kbit/s - both play on every device -, optionally the sheet music,
  * your own visuals, your look, the playlists and tags of these songs. *Make the player* puts it in the queue
  * (owner's request 2026-10-18): made by the player in the background - close this, it goes on. The songs go in
  * the order shown under *Order* (owner's request 2026-11-18: an album keeps its running order) - by album and
@@ -34,7 +35,10 @@ const chosen = computed(() => new Set(order.value))
 const ordered = ref(true)
 const dragFrom = ref(-1)
 const find = ref('')
-const bitrate = ref(192)
+/** The sound: ``codec:kbit/s``. */
+const sound = ref('mp3:192')
+const codec = computed(() => sound.value.split(':')[0] as 'mp3' | 'aac')
+const bitrate = computed(() => Number(sound.value.split(':')[1]))
 const pdf = ref(true)
 const look = ref(true)
 const presets = ref(true)
@@ -113,6 +117,7 @@ async function make(): Promise<void> {
     const queued = await queuePackage({
       songs: ids,
       title: title.value,
+      codec: codec.value,
       bitrate: bitrate.value,
       pdf: pdf.value,
       settings: look.value ? JSON.parse(JSON.stringify({ visuals: settings.visuals, lyrics: settings.lyrics })) : {},
@@ -196,10 +201,20 @@ const sizeText = (bytes: number): string => (bytes > 2 ** 30 ? `${(bytes / 2 ** 
         <form class="right" @submit.prevent>
           <label>Name <input v-model="title" class="text" maxlength="120" /></label>
           <label>Sound
-            <select v-model.number="bitrate">
-              <option :value="128">MP3, 128 kbit/s - smallest</option>
-              <option :value="160">MP3, 160 kbit/s</option>
-              <option :value="192">MP3, 192 kbit/s - best</option>
+            <select v-model="sound">
+              <optgroup label="MP3 - plays everywhere">
+                <option value="mp3:320">MP3, 320 kbit/s - best</option>
+                <option value="mp3:256">MP3, 256 kbit/s</option>
+                <option value="mp3:192">MP3, 192 kbit/s</option>
+                <option value="mp3:160">MP3, 160 kbit/s</option>
+                <option value="mp3:128">MP3, 128 kbit/s</option>
+                <option value="mp3:92">MP3, 92 kbit/s</option>
+              </optgroup>
+              <optgroup label="AAC (M4A) - smaller, plays on every current device">
+                <option value="aac:96">AAC, 96 kbit/s - as good as MP3 at 128</option>
+                <option value="aac:64">AAC, 64 kbit/s</option>
+                <option value="aac:48">AAC, 48 kbit/s - smallest</option>
+              </optgroup>
             </select>
           </label>
           <label class="check"><input v-model="pdf" type="checkbox" /> the sheet music (PDF)</label>

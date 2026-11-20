@@ -3,8 +3,9 @@ others very easily). Double-click it - no server, no install, no ComfyUI - and i
 these songs: the library, the song pages, the karaoke lyrics, the notation following the music, the visuals,
 playlists, Live Play; the recipient's playlists and settings are kept in their browser.
 
-Only what is meant for listening goes in: each song as an MP3 of at most 192 kbit/s (never the FLAC, the WAV
-or the unmastered take), a small cover, the timed lyrics and the score's notation, its waveform, optionally
+Only what is meant for listening goes in: each song as an MP3 (92-320 kbit/s) or, smaller still, an AAC in
+an M4A (48-96 kbit/s) - both play in every browser and on every phone - (never the FLAC, the WAV or the
+unmastered take), a small cover, the timed lyrics and the score's notation, its waveform, optionally
 the sheet music PDF; no release record, no workflow, no paths of this computer.
 
 Large files open (owner's request 2026-10-18: a 2 GB file on a phone). The browser reads an HTML file from top
@@ -49,7 +50,13 @@ from .library import Library, Song, song_detail
 from .peaks import peaks
 
 PACKAGES_DIR = "packages"
-BITRATES = (128, 160, 192)
+SOUNDS: dict[str, tuple[int, ...]] = {"mp3": (92, 128, 160, 192, 256, 320), "aac": (48, 64, 96)}
+"""The sound a shared player may carry: kbit/s by codec. MP3 plays everywhere; AAC-LC in an M4A too (iPhone,
+Android, Windows, macOS, every current browser) and sounds better than MP3 at a low rate - the smallest files.
+Opus and HE-AAC would be smaller still, but older iPhones do not play Opus and FFmpeg's own encoder makes no
+HE-AAC. MP3 at 92 kbit/s is an average rate (ABR): 92 is no rate an MP3 frame has."""
+SOUND_FILES = {"mp3": ("mp3", "audio/mpeg"), "aac": ("m4a", "audio/mp4")}
+"""A codec's file name ending and media type."""
 COVER_SIDE = 512
 FORMAT = "plenio.portable/2"
 MAX_SONGS = 2000
@@ -152,18 +159,48 @@ def packages_dir(state_dir: Path) -> Path:
     return state_dir / PACKAGES_DIR
 
 
+def sound_of(options: dict[str, Any]) -> tuple[str, int]:
+    """The codec and the kbit/s ``options`` ask for (``codec``: ``mp3``, the default, or ``aac``; ``bitrate``);
+    a ``ValueError`` that names what may be asked for else."""
+    codec = str(options.get("codec") or "mp3")
+    rates = SOUNDS.get(codec)
+    if rates is None:
+        raise ValueError(f"the sound as {' or '.join(SOUNDS)}")
+    try:
+        bitrate = int(options.get("bitrate") or (192 if codec == "mp3" else 64))
+    except (TypeError, ValueError):
+        bitrate = 0
+    if bitrate not in rates:
+        raise ValueError(f"{codec.upper()} at {', '.join(map(str, rates))} kbit/s")
+    return codec, bitrate
+
+
 def encode_mp3(audio: Path, bitrate: int, tags: dict[str, str]) -> bytes:
     """The song as an MP3 (44.1 kHz stereo, ``bitrate`` kbit/s, its title and artist in the tags)."""
+    return encode_sound(audio, "mp3", bitrate, tags)
+
+
+def encode_sound(audio: Path, codec: str, bitrate: int, tags: dict[str, str]) -> bytes:
+    """The song as an MP3 or an AAC in an M4A (44.1 kHz stereo, ``bitrate`` kbit/s, its title and artist in
+    the tags)."""
     import av
 
     out = io.BytesIO()
-    with av.open(str(audio)) as source, av.open(out, "w", format="mp3") as target:
+    fmt = "ipod" if codec == "aac" else "mp3"  # ipod: the M4A flavour of MP4
+    with av.open(str(audio)) as source, av.open(out, "w", format=fmt) as target:
         for key, value in tags.items():
             if value:
                 target.metadata[key] = value
-        stream = target.add_stream("libmp3lame" if "libmp3lame" in av.codecs_available else "mp3", rate=44100)
+        if codec == "aac":
+            stream = target.add_stream("aac", rate=44100)
+        else:
+            stream = target.add_stream(
+                "libmp3lame" if "libmp3lame" in av.codecs_available else "mp3", rate=44100
+            )
         stream.layout = "stereo"
         stream.bit_rate = bitrate * 1000
+        if codec == "mp3" and bitrate not in (32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320):
+            stream.codec_context.options = {"abr": "1"}  # a rate between an MP3 frame's: on average
         fmt = stream.codec_context.format.name if stream.codec_context.format else "s16p"
         resampler = av.AudioResampler(format=fmt, layout="stereo", rate=44100)
         position = 0
@@ -273,7 +310,7 @@ def build(
     """Write the portable player with the songs ``ids`` into the packages folder - one file, or parts; their
     paths back.
 
-    ``options``: ``title``, ``bitrate`` (128, 160, 192), ``pdf`` (the sheet music), ``settings`` (the
+    ``options``: ``title``, ``codec`` and ``bitrate`` (``SOUNDS``), ``pdf`` (the sheet music), ``settings`` (the
     visuals' and the lyrics' look to start with), ``presets`` (the listener's own visuals: name, text),
     ``playlists`` (``[{"name", "songs"}]``, the songs among those packed), ``tags`` (song id -> the
     listener's tags of it), ``part_mb`` (parts of at most so many MB; 0: one file), ``ordered`` (the songs in the
@@ -282,9 +319,8 @@ def build(
     so, the files of this player go and ``Cancelled`` is raised."""
     from .server import STATIC
 
-    bitrate = int(options.get("bitrate") or 192)
-    if bitrate not in BITRATES:
-        raise ValueError(f"MP3 at {', '.join(map(str, BITRATES))} kbit/s")
+    codec, bitrate = sound_of(options)
+    ending = SOUND_FILES[codec][0]
     if int(options.get("part_mb") or 0) not in PART_SIZES:
         raise ValueError(f"parts of {', '.join(map(str, PART_SIZES[1:]))} MB, or one file")
     songs: list[Song] = []
@@ -336,10 +372,15 @@ def build(
         summary["file"] = ""
         summaries.append(summary)
         name = str(summary.get("title") or "song")
+        files = {"audio": f"{name}.{ending}"}
+        if cover:
+            files["cover"] = f"{name}.jpg"
+        if has_pdf:
+            files["pdf"] = f"{name}.pdf"
         page = {
             **{k: detail[k] for k in DETAIL_KEYS if k in detail},
             "has": summary["has"],
-            "files": {"audio": f"{name}.mp3", **({"pdf": f"{name}.pdf"} if has_pdf else {})},
+            "files": files,
             "owned_files": [],
             "retire_to": "",
             "record_path": "",
@@ -397,6 +438,7 @@ def build(
                 "created": created,
                 "plenio": __version__,
                 "bitrate": bitrate,
+                "codec": codec,
                 "songs": part_summaries,
                 "details": {},
                 "peaks": {},
@@ -432,6 +474,7 @@ def build(
                 part_pdfs,
                 [songs[i] for i in group],
                 part_summaries,
+                codec,
                 bitrate,
                 step,
                 cancelled,
@@ -486,6 +529,7 @@ def _write_part(
     pdfs: list[tuple[str, Path]],
     songs: list[Song],
     summaries: list[dict[str, Any]],
+    codec: str,
     bitrate: int,
     progress: Callable[..., None],
     cancelled: Callable[[], bool],
@@ -511,7 +555,7 @@ def _write_part(
                 out.write(f'<script>__plenio.d("{song_id}",{_script_text(text)})</script>\n')
             for song_id, cover in covers:
                 out.writelines(_pieces("c", song_id, cover, "image/jpeg"))
-            _write_sound(out, songs, summaries, bitrate, progress, cancelled)
+            _write_sound(out, songs, summaries, codec, bitrate, progress, cancelled)
             for song_id, pdf in pdfs:
                 if cancelled():
                     raise Cancelled
@@ -528,11 +572,12 @@ def _write_sound(
     out: IO[str],
     songs: list[Song],
     summaries: list[dict[str, Any]],
+    codec: str,
     bitrate: int,
     progress: Callable[..., None],
     cancelled: Callable[[], bool],
 ) -> None:
-    """Every song's MP3, made in a few threads at once and written in the songs' order - only as many held in
+    """Every song's MP3 (or M4A), made in a few threads at once and written in the songs' order - only as many held in
     memory as threads are busy."""
     total = len(songs)
 
@@ -541,8 +586,8 @@ def _write_sound(
             raise Cancelled
         song, summary = songs[k], summaries[k]
         artist = str(song.summary.get("artist") or song.summary.get("tags", {}).get("artist") or "")
-        return encode_mp3(
-            song.files["audio"], bitrate, {"title": str(summary.get("title") or ""), "artist": artist}
+        return encode_sound(
+            song.files["audio"], codec, bitrate, {"title": str(summary.get("title") or ""), "artist": artist}
         )
 
     workers = _workers()
@@ -555,10 +600,10 @@ def _write_sound(
                     waiting.append(pool.submit(encode, submitted))
                     submitted += 1
                 progress(k, total, "packing")
-                mp3 = waiting.popleft().result()
+                sound = waiting.popleft().result()
                 if cancelled():
                     raise Cancelled
-                out.writelines(_pieces("a", songs[k].id, mp3, "audio/mpeg"))
+                out.writelines(_pieces("a", songs[k].id, sound, SOUND_FILES[codec][1]))
         finally:
             for future in waiting:
                 future.cancel()
@@ -580,6 +625,10 @@ class PackageJobs:
     def start(self, library: Library, ids: list[str], options: dict[str, Any], state_dir: Path) -> str:
         job = secrets.token_hex(8)
         title = str(options.get("title") or "Plenio songs").strip()[:120] or "Plenio songs"
+        try:
+            codec, bitrate = sound_of(options)
+        except ValueError:  # the job says so when it runs
+            codec, bitrate = str(options.get("codec") or "mp3")[:8], 0
         with self.lock:
             self.jobs[job] = {
                 "job": job,
@@ -588,7 +637,8 @@ class PackageJobs:
                 "done": 0,
                 "total": len(ids),
                 "title": title,
-                "bitrate": int(options.get("bitrate") or 192),
+                "codec": codec,
+                "bitrate": bitrate,
                 "part_mb": int(options.get("part_mb") or 0),
                 "created": time.time(),
                 "order": self.made,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /** The menu of a song (right click or ⋯): play next, add to the queue or a playlist, a radio of songs alike,
- * favourite, open. */
+ * favourite, open; in a shared player, save its sound out of the file. */
 import { computed, ref } from 'vue'
 
 import type { SongSummary } from '../api'
@@ -9,6 +9,8 @@ import { similarSongs } from '../similar'
 import { addToPlaylist, enqueue, go, isFavorite, library, newPlaylist, openInComfyUI, playSongs, removing, say, settings, songTags, state, toggleFavorite, videoFor } from '../store'
 import { makeShown } from '../make/state'
 import { isPortable } from '../portable'
+import { fileNames, songFile, soundEnding } from '../portableExport'
+import { saveBlob } from '../zip'
 import { isPhone } from '../layout'
 import { canRemoveSongs } from '../account'
 import BottomSheet from './BottomSheet.vue'
@@ -41,6 +43,14 @@ function radio(): void {
   void playSongs([props.song.id, ...similarSongs(props.song, library.value, 40).map((s) => s.id)])
   done()
 }
+/** The song's sound as the shared player carries it (MP3 or M4A), saved by the browser. */
+async function saveSound(): Promise<void> {
+  done()
+  const [file] = fileNames([props.song], ['audio'], false)
+  const data = await songFile(props.song.id, 'audio')
+  if (data) saveBlob(data, file.name)
+  else say('The sound is not there yet - the file is still being read', 4000)
+}
 function create(): void {
   addToPlaylist(newPlaylist(name.value || props.song.title), [props.song.id])
   done()
@@ -62,6 +72,7 @@ function create(): void {
       <div v-if="tagging" class="tags"><TagEditor :ids="[song.id]" autofocus @filter="songsTagged" /></div>
       <button v-if="!song.other && !isPortable" @click="comfy">Open in ComfyUI</button>
       <button v-if="!isPortable" @click="videoFor = song; done()">Save as a video…</button>
+      <button v-if="isPortable" @click="saveSound">Save its sound ({{ soundEnding().toUpperCase() }})</button>
       <button v-if="!isPortable && canRemoveSongs" class="remove" @click="removing = song; done()">Remove from the library…</button>
       <p class="head small">Add to a playlist</p>
       <button v-for="p in state.playlists" :key="p.id" @click="addToPlaylist(p, [song.id]); done()">

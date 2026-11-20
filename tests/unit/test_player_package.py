@@ -156,7 +156,12 @@ def test_a_shared_player_has_the_songs_as_mp3_and_nothing_of_this_computer(
     assert (
         detail["record_path"] == ""
         and detail["owned_files"] == []
-        and detail["files"] == {"audio": "First.mp3", "pdf": "First.pdf"}
+        and detail["files"]
+        == {
+            "audio": "First.mp3",
+            "pdf": "First.pdf",
+            **({"cover": "First.jpg"} if first["has"]["cover"] else {}),
+        }
     )
     assert sorted(pages(html)) == sorted(ids) and isinstance(page["peaks"], list)
     # no "<" inside the JSON: it could close or bend the script element
@@ -182,13 +187,54 @@ def test_a_long_song_goes_in_pieces_and_the_file_is_written_as_it_is_made(
     assert not list((tmp_path / "state" / "packages").glob("*.part"))
 
 
-def test_no_songs_or_a_bit_rate_above_192_make_no_player(songs: Path, tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    "options",
+    [
+        {"bitrate": 512},
+        {"bitrate": 100},
+        {"codec": "aac", "bitrate": 192},
+        {"codec": "opus"},
+        {"bitrate": "x"},
+    ],
+)
+def test_no_songs_or_a_sound_not_offered_make_no_player(songs: Path, tmp_path: Path, options: dict) -> None:
     library = Library([songs])
     library.scan(force=True)
     with pytest.raises(ValueError):
         build(library, [], {"bitrate": 192}, tmp_path / "state")
     with pytest.raises(ValueError):
-        build(library, [library.songs()[0]["id"]], {"bitrate": 320}, tmp_path / "state")
+        build(library, [library.songs()[0]["id"]], options, tmp_path / "state")
+
+
+@pytest.mark.parametrize(
+    ("codec", "bitrate", "container", "mime", "ending"),
+    [
+        ("mp3", 320, "mp3", "audio/mpeg", "mp3"),
+        ("mp3", 92, "mp3", "audio/mpeg", "mp3"),
+        ("aac", 48, "mov,mp4,m4a,3gp,3g2,mj2", "audio/mp4", "m4a"),
+    ],
+)
+def test_the_sound_goes_in_as_asked_mp3_or_aac(
+    songs: Path, tmp_path: Path, codec: str, bitrate: int, container: str, mime: str, ending: str
+) -> None:
+    library = Library([songs])
+    library.scan(force=True)
+    ids = [s["id"] for s in library.songs()]
+    [path] = build(library, ids, {"codec": codec, "bitrate": bitrate}, tmp_path / "state")
+    html = path.read_text(encoding="utf-8")
+    data = json.loads(
+        re.search(r'<script type="application/json" id="plenio-portable">(.*?)</script>', html, re.S).group(1)
+    )
+    assert data["codec"] == codec and data["bitrate"] == bitrate
+    assert {m[3] for m in PIECE_SCRIPT.findall(html) if m[1] == "a"} == {mime}
+    for sound in blocks(html, "audio").values():
+        with av.open(io.BytesIO(sound)) as opened:
+            assert opened.format.name == container
+            assert 3.5 < opened.duration / 1e6 < 4.5
+    # about the rate asked for: the file's size over its length (a test tone; an average rate for MP3 at 92)
+    sizes = [len(s) * 8 / 4 / 1000 for s in blocks(html, "audio").values()]
+    assert all(bitrate * 0.6 < rate < bitrate * 1.35 for rate in sizes), sizes
+    assert all(p["detail"]["files"]["audio"].endswith(f".{ending}") for p in pages(html).values())
 
 
 @pytest.mark.parametrize("ordered", [True, False])
@@ -241,7 +287,8 @@ def test_the_player_makes_a_shared_player_on_its_pages_request(
     request = {"songs": ids, "title": "Share", "bitrate": 160, "pdf": False}
     assert call(server, "POST", "/api/package", body=None)[0] == 403  # not JSON
     assert call(server, "POST", "/api/package", request, Origin="http://evil.example")[0] == 403
-    assert call(server, "POST", "/api/package", {**request, "bitrate": 320})[0] == 400
+    assert call(server, "POST", "/api/package", {**request, "bitrate": 512})[0] == 400
+    assert call(server, "POST", "/api/package", {**request, "codec": "aac", "bitrate": 320})[0] == 400
     assert call(server, "POST", "/api/package", {**request, "songs": []})[0] == 400
     status, answer, _ = call(server, "POST", "/api/package", request)
     assert status == 200
@@ -277,14 +324,14 @@ def test_shared_players_are_made_in_turn_and_one_can_be_stopped(songs: Path, tmp
     library.scan(force=True)
     ids = [s["id"] for s in library.songs()]
     gate = threading.Event()
-    real = package.encode_mp3
+    real = package.encode_sound
 
-    def slow(audio, bitrate, tags):  # the first player waits here until the test lets it go
+    def slow(audio, codec, bitrate, tags):  # the first player waits here until the test lets it go
         gate.wait(10)
-        return real(audio, bitrate, tags)
+        return real(audio, codec, bitrate, tags)
 
     jobs = package.PackageJobs()
-    package.encode_mp3 = slow
+    package.encode_sound = slow
     try:
         first = jobs.start(library, ids, {"title": "First"}, tmp_path / "state")
         second = jobs.start(library, ids, {"title": "Second"}, tmp_path / "state")
@@ -302,7 +349,7 @@ def test_shared_players_are_made_in_turn_and_one_can_be_stopped(songs: Path, tmp
                 break
             time.sleep(0.1)
     finally:
-        package.encode_mp3 = real
+        package.encode_sound = real
         gate.set()
     assert jobs.status(first)["state"] == "stopped"
     assert jobs.status(third)["state"] == "done" and jobs.status(third)["file"] == "Third.html"

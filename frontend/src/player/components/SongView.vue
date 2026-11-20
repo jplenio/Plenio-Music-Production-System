@@ -48,7 +48,7 @@ import SongCard from './SongCard.vue'
 import SongMenu from './SongMenu.vue'
 import Stars from './Stars.vue'
 import TagEditor from './TagEditor.vue'
-import { isPortable } from '../portable'
+import { isPortable, portable } from '../portable'
 
 const props = defineProps<{ id: string }>()
 
@@ -153,7 +153,7 @@ const seedNames: Record<string, string> = { take: 'Take seed', draft: 'Draft see
 const downloads = computed(() => {
   const files = detail.value?.files ?? {}
   const names: [string, string][] = [
-    ['audio', 'MP3'],
+    ['audio', portable?.codec === 'aac' ? 'M4A (AAC)' : 'MP3'],
     ['audio_flac', 'FLAC'],
     ['audio_mp3', 'MP3'],
     ['audio_wav', 'WAV'],
@@ -164,7 +164,7 @@ const downloads = computed(() => {
     ['cover', 'Cover'],
     ['record', 'Plenio record (JSON)'],
   ]
-  // the Plenio Player lists the files by format; a shared player has the MP3 (and the sheet music)
+  // the Plenio Player lists the files by format; a shared player has the MP3 or M4A (its cover, the sheet music)
   return names
     .filter(([kind]) => files[kind] && (kind !== 'audio' || isPortable))
     .map(([kind, label]) => ({ kind, label, name: files[kind], url: media(props.id, kind) }))

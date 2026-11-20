@@ -152,7 +152,7 @@ export const TOPICS: HelpTopic[] = [
     lead: 'A song as an MP4, your songs as one file that plays anywhere.',
     body: [
       '**Video…** on a song\'s page makes an MP4: Full HD, 4K, square or upright for Shorts, Reels and TikTok - the visuals planned over the song, the lyrics as subtitles, karaoke or word by word, the notation, the cover.',
-      '**Share as a player…** packs the player and the songs you choose into one HTML file: anyone double-clicks it and listens - with the lyrics, the notation and the visuals, without installing anything. Under *Order* you put the songs in their running order (by album and track, by title, or by dragging): an album plays in that order.',
+      '**Share as a player…** packs the player and the songs you choose into one HTML file: anyone double-clicks it and listens - with the lyrics, the notation and the visuals, without installing anything. Under *Order* you put the songs in their running order (by album and track, by title, or by dragging): an album plays in that order. The sound: MP3 up to 320 kbit/s, or AAC (M4A) down to 48 kbit/s for the smallest files. The listener saves the files back out of it: *Save the files* in its Settings (a ZIP), *Save its sound* in a song’s menu.',
       'Both are made in the background: **In the making** in the menu shows how far they are.',
     ],
     more: `${DOCS}/videos.md#save-a-song-as-a-video`,
