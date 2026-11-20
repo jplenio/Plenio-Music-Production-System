@@ -8,6 +8,7 @@ AS-10 (blueprints from ``subgraphs/`` are served).
 from __future__ import annotations
 
 import json
+import re
 import uuid
 from pathlib import Path
 from typing import Any
@@ -112,6 +113,13 @@ def test_system_check_node_runs_every_time(server: ComfyServer) -> None:
         summary = entry["outputs"]["1"]["plenio_summary"][0]
         assert "### Raw facts" in summary["markdown"]
         assert summary["status"] in ("ok", "warning")
+    # ComfyUI keeps the output in /history, which everyone who reaches it reads: no folder of this computer in it
+    # (the Registry's information-disclosure) - the models folder, the home folder, the settings
+    markdown = summary["markdown"]
+    for place in (str(Path.home()), str(server.base), str(server.base).replace("\\", "/")):
+        assert place not in markdown
+    assert '"config"' not in markdown and '"models_root"' not in markdown
+    assert not re.search(r"[A-Za-z]:[\/](?:[^\/\s]+[\/]){2,}", markdown)
 
 
 def test_frontend_extension_is_served(server: ComfyServer) -> None:

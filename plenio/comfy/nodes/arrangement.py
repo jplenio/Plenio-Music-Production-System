@@ -20,6 +20,7 @@ from ...core import arrangement
 from ...core.brief import CoverBrief
 from ...core.engines import yue2
 from ...core.errors import PlenioError, PlenioUserError
+from ...core.problem_report import public_reason
 from ...core.reports import Report, Status
 from ...core.score import canonical as c
 from ...core.score import native
@@ -216,7 +217,7 @@ def _failed(text: str, rules: arrangement.Policy, error: Exception) -> arrangeme
     """The score as it was after an unexpected error in the arrangement code (experimental: it must not stop
     the run); the traceback goes to the console for a bug report."""
     LOG.exception("Plenio Apply Arrangement: the arrangement failed; the score is used as it was")
-    reason = f"an internal error ({type(error).__name__}: {error})"
+    reason = f"an internal error ({public_reason(error)})"
     return arrangement.Arrangement(
         text,
         "fallback",

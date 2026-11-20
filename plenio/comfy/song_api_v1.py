@@ -179,7 +179,7 @@ def _without_places(data: Any) -> Any:
     """A job as another computer gets it: a path in its error message, its record and its folder keeps its last two
     parts (a model file that failed names its folder on this computer), the error's type is the exception's class
     name alone."""
-    from ..core.problem_report import clean_text
+    from ..core.problem_report import for_the_network as clean_text
 
     if isinstance(data, list):
         return [_without_places(item) for item in data]

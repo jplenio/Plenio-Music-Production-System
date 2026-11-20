@@ -54,10 +54,10 @@ def error_response(error: Exception, here: bool = True) -> web.Response:
 
 
 def _without_paths(value: Any) -> Any:
-    from ..core.problem_report import clean_text
+    from ..core.problem_report import for_the_network
 
     if isinstance(value, str):
-        return clean_text(value)
+        return for_the_network(value)
     if isinstance(value, dict):
         return {key: _without_paths(item) for key, item in value.items()}
     if isinstance(value, list):
@@ -589,7 +589,10 @@ async def player_open(request: web.Request) -> web.StreamResponse:
     this computer - started now when none runs, as a program of its own that plays ComfyUI's output folder
     and keeps running when ComfyUI stops (``plenio.player.launch``). ComfyUI never serves the player. It starts a
     program, so only for a browser on this computer - where the answer's address (``127.0.0.1``) leads, too."""
-    comfyui = f"{request.scheme}://{request.host}"
+    from .song_api_v1 import _self_url
+
+    # ComfyUI's own address, never a request header: nothing a request says goes into a program's command line
+    comfyui = _self_url()
     try:
         found = await asyncio.to_thread(ensure_player, host.output_directory(), comfyui, state_dir())
     except RuntimeError as error:

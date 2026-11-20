@@ -16,7 +16,18 @@ from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from typing import Any
 
-PASSED_ON = ("forwarded", "x-forwarded-for", "x-real-ip", "x-plenio-remote")
+PASSED_ON = (
+    "forwarded",
+    "x-forwarded-for",
+    "x-forwarded-host",
+    "x-forwarded-proto",
+    "x-real-ip",
+    "x-client-ip",
+    "true-client-ip",
+    "cf-connecting-ip",
+    "via",
+    "x-plenio-remote",
+)
 """Headers of a request a proxy passed on - from another computer, whatever address it comes from. The Plenio
 Player's gateways (*In your network*) say ``X-Plenio-Remote``; a browser's own value never gets through them."""
 

@@ -4,6 +4,12 @@ All notable changes of the current version and the one before. Versions follow s
 
 ## 2.0.3 - unreleased
 
+### Security
+
+- **System Check names no folder of this computer in its output.** ComfyUI keeps every node's output in `/history`, which everyone who reaches ComfyUI reads (with `--listen`, everyone in the network). The System Check's report named the models folder, the asset and LLM folders and misplaced files by their absolute paths, and its full report added the settings with their folders. It now names a folder by its last two parts (`…/models/vae`), the home folder as `~` and the user's name as `<user>`, and leaves the settings and folders out of the raw facts; Plenio Setup still shows them in full, on this computer only.
+- **An unexpected error in a node's output is named without its place.** Export Release (quality, song page, vocal stem), Apply Arrangement, Fit Lyrics, Match Song Form and Sung Pitch go on after an unexpected error and say so in their output; they now give the error's kind and text with every path cut to its last two parts.
+- **Hardening.** The *Plenio Player* button passes the player ComfyUI's own address instead of the request's `Host` header. More proxy headers (`X-Forwarded-Host`, `X-Forwarded-Proto`, `X-Client-IP`, `True-Client-IP`, `CF-Connecting-IP`, `Via`) mark a request as one from the network. The fallback LLM server answers no web page: no request with an `Origin`, a `Host` other than its loopback address, or a POST that is not JSON. Answers to the network also take the home folder and the user's name out of a path with a space.
+
 ### Added
 
 - **Share as a player in your order.** The dialog numbers the songs chosen and lets you arrange them: drag a song or move it with the arrows, or sort by album and track number (from the songs' tags), by title or the other way round. The shared player lists and plays them in that order, so an album keeps its running order when someone opens the file; *In order (as shared)* in its sort list brings the order back after the listener has sorted otherwise. Before, the songs went in the library's order and the shared player started with the newest first.

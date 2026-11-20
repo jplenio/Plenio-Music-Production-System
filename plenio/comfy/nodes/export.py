@@ -29,6 +29,7 @@ from ...core.engines import ENGINES
 from ...core.errors import PlenioCancelledError, PlenioError, PlenioUserError
 from ...core.files import atomic_write_bytes, atomic_write_text
 from ...core.models import AUDIO_MODEL_FOLDERS
+from ...core.problem_report import public_reason
 from ...core.quality import song_quality, summary_line
 from ...core.release import (
     FORMATS,
@@ -784,7 +785,7 @@ class PlenioExportRelease(io.ComfyNode):
             record["quality"] = song_quality(np.asarray(items[0], dtype=np.float32), rate, record)
         except Exception as error:  # noqa: BLE001 - the measure is a reading aid
             LOG.warning("Plenio: the song's quality was not measured: %s", error, exc_info=True)
-            notes.append(f"quality: not measured ({type(error).__name__}: {error})")
+            notes.append(f"quality: not measured ({public_reason(error)})")
         for path in carriers:
             embed_project(path, record)
         clock.lap("quality")
@@ -799,7 +800,7 @@ class PlenioExportRelease(io.ComfyNode):
                 atomic_write_text(page_path, page_for(record_path))
             except Exception as error:  # noqa: BLE001 - the song is exported; the page is a reading aid
                 LOG.warning("Plenio: the song page was not written: %s", error, exc_info=True)
-                notes.append(f"song page: not written ({type(error).__name__}: {error})")
+                notes.append(f"song page: not written ({public_reason(error)})")
                 page_path = None
         clock.lap("record and page")
         took = clock.line()
@@ -982,7 +983,7 @@ def vocal_stem(samples: Any, rate: int) -> tuple[Any | None, str]:
         Exception
     ) as error:  # the times then come from the song: a failed separation never stops the export
         LOG.warning("Export Release: the vocal stem for the lyrics failed: %s", error)
-        return None, f"the separation failed ({error})"
+        return None, f"the separation failed ({public_reason(error)})"
     vocals = stems.get("vocals")
     return (vocals, "") if vocals is not None else (None, "the separation gave no vocal stem")
 

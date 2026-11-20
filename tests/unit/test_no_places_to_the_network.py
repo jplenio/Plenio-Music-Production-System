@@ -8,6 +8,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from plenio.comfy import routes
 from plenio.core.brief import TemplateLibrary
 from plenio.core.errors import PlenioUserError
@@ -50,3 +52,66 @@ def test_a_user_template_that_cannot_be_read_is_named_without_its_place(
     assert "user/mine" in reasons
     assert reasons["user/mine"] == "the file could not be read (UnicodeDecodeError)"
     assert str(tmp_path) not in json.dumps(reasons)
+
+
+def test_a_text_for_the_network_has_no_home_folder_no_user_name_and_short_paths(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from plenio.core import problem_report
+
+    monkeypatch.setattr(problem_report, "_home", lambda: r"C:\Users\Ana Maria")
+    text = problem_report.for_the_network(
+        r"no file in C:\Users\Ana Maria\ComfyUI\models\vae, D:\AI\ComfyUI\models\checkpoints\x.safetensors"
+    )
+    assert "Ana" not in text and "Maria" not in text and r"D:\AI" not in text
+    assert "models/vae" in text and "checkpoints/x.safetensors" in text
+    reason = problem_report.public_reason(PermissionError(13, "Permission denied", PLACE))
+    assert (
+        reason.startswith("PermissionError: ") and "ana" not in reason and "Night Drive.plenio.json" in reason
+    )
+
+
+@pytest.mark.parametrize(
+    "header",
+    ["Forwarded", "X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Proto", "X-Real-IP", "X-Client-IP",
+     "True-Client-IP", "CF-Connecting-IP", "Via"],
+)  # fmt: skip
+def test_a_request_a_proxy_passed_on_is_not_from_this_computer(header: str) -> None:
+    from plenio.core.access import from_this_computer
+
+    assert from_this_computer("127.0.0.1", {"Host": "127.0.0.1:8188"})
+    assert not from_this_computer("127.0.0.1", {"Host": "127.0.0.1:8188", header: "192.168.1.20"})
+
+
+def test_the_llama_server_answers_plenio_and_no_web_page() -> None:
+    """The fallback LLM server (llama-cpp-python) listens on a loopback port while it runs: a web page may send it a
+    text/plain POST or reach it by DNS rebinding - it answers neither, and runs no model for them."""
+    import http.client
+    import threading
+    from http.server import ThreadingHTTPServer
+
+    from plenio.workers import llama_http
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), llama_http._Handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    port = server.server_address[1]
+
+    def ask(method: str, path: str, headers: dict[str, str], body: bytes | None = None) -> int:
+        connection = http.client.HTTPConnection("127.0.0.1", port, timeout=10)
+        connection.request(method, path, body=body, headers=headers)
+        status = connection.getresponse().status
+        connection.close()
+        return status
+
+    try:
+        own = {"Host": f"127.0.0.1:{port}"}
+        assert ask("GET", "/v1/models", own) == 200
+        # Plenio's client: JSON to the loopback address (no model loaded here: 503, not 403)
+        assert ask("POST", "/v1/chat/completions", {**own, "Content-Type": "application/json"}, b"{}") == 503
+        page = {**own, "Origin": "http://example.com"}
+        assert ask("GET", "/v1/models", page) == 403
+        assert ask("POST", "/v1/chat/completions", {**own, "Content-Type": "text/plain"}, b"{}") == 403
+        assert ask("GET", "/health", {"Host": f"rebound.example:{port}"}) == 403
+    finally:
+        server.shutdown()
+        server.server_close()

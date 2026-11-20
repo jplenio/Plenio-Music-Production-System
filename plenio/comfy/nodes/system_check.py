@@ -7,8 +7,13 @@ from typing import Any
 
 from comfy_api.latest import io
 
+from ...core.problem_report import for_the_network
 from ..shared import system_report
 from ..types import ReportType
+
+PRIVATE_FACTS = frozenset({"config", "models_root", "misplaced"})
+"""Facts the full report leaves out: this computer's settings and folders (Plenio Setup shows them, on this
+computer only)."""
 
 
 class PlenioSystemCheck(io.ComfyNode):
@@ -46,9 +51,11 @@ class PlenioSystemCheck(io.ComfyNode):
     def execute(cls, detail: str) -> io.NodeOutput:
         report, markdown = system_report()
         if detail == "full":
-            markdown += (
-                "\n\n### Raw facts\n\n```json\n" + json.dumps(report.data["facts"], indent=2) + "\n```"
-            )
+            facts = {k: v for k, v in report.data["facts"].items() if k not in PRIVATE_FACTS}
+            markdown += "\n\n### Raw facts\n\n```json\n" + json.dumps(facts, indent=2) + "\n```"
+        # ComfyUI keeps a node's output in /history, which everyone who reaches ComfyUI reads: no place on this
+        # computer in it (the Registry's information-disclosure class); /plenio/system answers this computer only
         return io.NodeOutput(
-            report, ui={"plenio_summary": [{"status": report.status.value, "markdown": markdown}]}
+            report,
+            ui={"plenio_summary": [{"status": report.status.value, "markdown": for_the_network(markdown)}]},
         )

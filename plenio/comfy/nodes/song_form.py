@@ -15,6 +15,7 @@ from typing import Any
 from comfy_api.latest import io
 
 from ...core import song_form
+from ...core.problem_report import public_reason
 from ...core.reports import Report, Status
 from ..types import ReportType
 
@@ -29,7 +30,7 @@ def _unchecked(score: str, error: Exception) -> io.NodeOutput:
     """The plan as it is after an unexpected error (every sung YuE2 song passes here: it must not stop the run);
     the traceback goes to the console for a bug report."""
     LOG.exception("Plenio Match Song Form: the check failed; the plan is used as it is")
-    reason = f"{type(error).__name__}: {error}"
+    reason = public_reason(error)
     summary = f"Song form: not checked (an internal error, {reason}); the plan is used as it is"
     data = {"category": "error", "lyrics": [], "plan": [], "changes": [], "notes": [reason]}
     report = Report("song_form", Status.WARNING, summary + ".", (), data)

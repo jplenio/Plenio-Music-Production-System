@@ -19,6 +19,7 @@ from comfy_api.latest import io
 
 from ...core.audio.pitch import SungPitch, missing, track
 from ...core.models import AUDIO_MODEL_FOLDERS
+from ...core.problem_report import public_reason
 from .. import audio_models, host
 from ..types import PitchType
 
@@ -106,7 +107,9 @@ class PlenioSungPitch(io.ComfyNode):
             stems = model.engine.separate(samples, rate)
         except Exception as error:  # display only: a failed separation must not stop the cover
             LOG.warning("Sung Pitch: the separation failed: %s", error)
-            return missing(f"The separation failed ({error}); the editor shows no sung pitch."), None
+            return missing(
+                f"The separation failed ({public_reason(error)}); the editor shows no sung pitch."
+            ), None
         vocals = stems.get("vocals")
         if vocals is None:
             return missing(f"{model.engine.name} gives no vocal stem ({', '.join(stems)})."), None

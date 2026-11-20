@@ -11,11 +11,13 @@ Standard library only.
 
 from __future__ import annotations
 
+import functools
 import io
 import json
 import re
 import zipfile
 from collections.abc import Iterable, Mapping
+from pathlib import Path
 from typing import Any
 
 LOG_LINES = 200
@@ -55,6 +57,27 @@ def user_names(home: str) -> list[str]:
     """The user's name as the home folder gives it (``C:\\Users\\Ana`` -> ``Ana``)."""
     name = re.split(r"[\\/]+", home.rstrip("\\/"))[-1] if home else ""
     return [name] if name and name.lower() not in ("root", "home", "users") else []
+
+
+@functools.cache
+def _home() -> str:
+    try:
+        return str(Path.home())
+    except (RuntimeError, OSError):  # no home folder known: the paths are still cut
+        return ""
+
+
+def for_the_network(text: str) -> str:
+    """``text`` as it may leave this computer - in a node's output (ComfyUI keeps it in ``/history``, which everyone
+    who reaches ComfyUI reads), an error ComfyUI keeps, an answer to another computer: every path cut to its last two
+    parts, the home folder ``~``, the user's name ``<user>``."""
+    home = _home()
+    return clean_text(text, user_names(home), home)
+
+
+def public_reason(error: BaseException) -> str:
+    """An unexpected error as a node may show it: its kind and its text, without a place on this computer."""
+    return f"{type(error).__name__}: {for_the_network(str(error))}"
 
 
 def _emptied(value: Any) -> Any:

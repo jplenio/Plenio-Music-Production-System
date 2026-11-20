@@ -67,7 +67,23 @@ class _Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _foreign(self) -> bool:
+        """A request no Plenio client sends: one a web page made (it carries an ``Origin``), one addressed to another
+        name than this loopback address (DNS rebinding), or a POST that is not JSON (a form or a text/plain body,
+        which a page may send without asking). It gets 403 and no model is run."""
+        if self.headers.get("Origin"):
+            return True
+        port = self.server.server_address[1]
+        host = (self.headers.get("Host") or "").strip().lower()
+        if host not in {f"127.0.0.1:{port}", f"localhost:{port}", f"[::1]:{port}"}:
+            return True
+        kind = (self.headers.get("Content-Type") or "").split(";")[0].strip().lower()
+        return self.command == "POST" and kind != "application/json"
+
     def do_GET(self) -> None:  # noqa: N802 - http.server's naming
+        if self._foreign():
+            self._send(403, {"error": {"message": "only for Plenio on this computer"}})
+            return
         if self.path == "/health":
             if _state["llama"] is None:
                 self._send(503, {"error": {"message": "Loading model"}})
@@ -79,6 +95,9 @@ class _Handler(BaseHTTPRequestHandler):
             self._send(404, {"error": {"message": f"unknown path {self.path}"}})
 
     def do_POST(self) -> None:  # noqa: N802 - http.server's naming
+        if self._foreign():
+            self._send(403, {"error": {"message": "only for Plenio on this computer"}})
+            return
         if self.path != "/v1/chat/completions":
             self._send(404, {"error": {"message": f"unknown path {self.path}"}})
             return

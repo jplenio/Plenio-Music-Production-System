@@ -18,6 +18,7 @@ from comfy_api.latest import io
 from ...core import lyrics_fit, syllables
 from ...core.brief import CoverBrief
 from ...core.errors import PlenioError
+from ...core.problem_report import public_reason
 from ...core.reports import Report, Status
 from ...core.score import native
 from ...core.writing import lyrics_closeness_text
@@ -52,7 +53,7 @@ def _unfitted(lyrics: str, previous: dict[str, Any], round_number: int, error: E
     """The lyrics as they are after an unexpected error in the fitting (they are sung as written: a melisma
     or a squeeze where a line does not fit); the traceback goes to the console for a bug report."""
     LOG.exception("Plenio Fit Lyrics: the fitting failed; the lyrics are used as they are")
-    reason = f"{type(error).__name__}: {error}"
+    reason = public_reason(error)
     notes = [*previous.get("notes", []), f"round {round_number}: not fitted (an internal error, {reason})"]
     out = {"round": round_number, "asked": [], "notes": notes, "draft": previous.get("draft")}
     summary = f"Lyrics fit: not checked (an internal error, {reason}); the lyrics are used as they are"

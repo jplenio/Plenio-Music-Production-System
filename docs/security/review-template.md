@@ -40,14 +40,27 @@ request names a place on this computer:
   it keep no place either (`song_api_v1._for_caller`: a job's record, folder and error text by their last parts).
 - **ComfyUI's `/history`**, which keeps every node's UI output: Export Release names its release record by its place
   inside the output folder (`plenio/2026-11-11 Song.plenio.json`), never by an absolute path; the summaries name
-  files by their names.
+  files by their names. **System Check** (the first template) writes its report through
+  `core/problem_report.py: for_the_network` - every folder by its last two parts (`…/models/vae`), the home folder as
+  `~`, the user's name as `<user>` - and its full report leaves out this computer's settings and folders (`config`,
+  `models_root`, misplaced files); Plenio Setup shows them, on this computer only. A node that goes on after an
+  unexpected error (Export Release's quality and song page, the arrangement, the lyrics fit, the song form, the sung
+  pitch) names it by `public_reason`: its kind and its text without a place.
+- **No request value reaches a command line.** The *Plenio Player* button (`/plenio/player/open`, `local`) passes the
+  player ComfyUI's own address (`song_api_v1._self_url`), not the request's `Host`.
+- **Cross-site requests.** ComfyUI answers a cross-site request with 403 (its origin middleware); Plenio's `local`
+  routes check `Origin`, `Sec-Fetch-Site` and `Host` themselves too, and count a request a proxy passed on
+  (`Forwarded`, `X-Forwarded-*`, `X-Real-IP`, `X-Client-IP`, `True-Client-IP`, `CF-Connecting-IP`, `Via`) as one from
+  the network. The fallback LLM server (`plenio/workers/llama_http.py`, loopback only, while a GGUF writer runs)
+  answers no request with an `Origin`, a `Host` other than its loopback address (DNS rebinding) or a POST that is not
+  JSON.
 - **`/plenio/templates`** names a user template that cannot be read by its id and the kind of error only - not the
   error's text, which for a file that cannot be read is its absolute path.
 - **The Plenio Player** (a program of its own, on 127.0.0.1 unless its owner opens it to the network, then with a
   login): its answers to the network name folders and files by their names (`player/server.py: without_places`);
   the guests' page gets no record path of a party song (`player/maker.py: view`).
 
-Tests: `tests/unit/test_no_places_to_the_network.py`, `tests/unit/test_route_access.py`,
+Tests: `tests/unit/test_no_places_to_the_network.py`, `tests/host/test_foundation.py` (System Check), `tests/unit/test_route_access.py`,
 `tests/unit/test_player_maker.py`, `tests/host/test_sheet_music_export.py`.
 
 ## Network
