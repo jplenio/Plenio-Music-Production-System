@@ -4,6 +4,8 @@ All notable changes of the current version and the one before. Versions follow s
 
 ## 2.0.3 - unreleased
 
+**No folder of this computer in a node's output, an album shared as a player keeps its running order, sharing from a large library starts from the songs in view, and Plenio VST3 says when ComfyUI runs without Plenio.**
+
 ### Security
 
 - **System Check names no folder of this computer in its output.** ComfyUI keeps every node's output in `/history`, which everyone who reaches ComfyUI reads (with `--listen`, everyone in the network). The System Check's report named the models folder, the asset and LLM folders and misplaced files by their absolute paths, and its full report added the settings with their folders. It now names a folder by its last two parts (`…/models/vae`), the home folder as `~` and the user's name as `<user>`, and leaves the settings and folders out of the raw facts; Plenio Setup still shows them in full, on this computer only.
