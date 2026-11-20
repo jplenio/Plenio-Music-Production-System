@@ -174,7 +174,7 @@ jobs:
     # pushes to main, and the weekly run
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || inputs.browser
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     env:
       PLENIO_COMFYUI_ROOT: ${{ github.workspace }}/ComfyUI
     steps:
@@ -195,8 +195,6 @@ jobs:
       - run: python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
       - run: python -m pip install -r ComfyUI/requirements.txt
       - run: npm install --global playwright@1 && npx playwright install --with-deps chromium
-      # the runner images no longer ship ffmpeg; the recordings below need it
-      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
       - name: Empty model files of the catalogue's names, two short recordings
         working-directory: plenio
         run: |
@@ -209,8 +207,27 @@ jobs:
                   target.parent.mkdir(parents=True, exist_ok=True)
                   target.write_bytes(b"")
           PY
-          mkdir -p ../check/base/input
-          for name in cover_source browser-check; do ffmpeg -loglevel error -f lavfi -i sine=frequency=440:duration=4 "../check/base/input/$name.flac"; done
+          # two four-second recordings, written with PyAV (ComfyUI's requirement): no ffmpeg from apt, whose install
+          # took 15 of the job's minutes on the Ubuntu 26.04 runners
+          python - <<'PY'
+          import math
+          from pathlib import Path
+
+          import av
+          import numpy as np
+
+          folder = Path("../check/base/input")
+          folder.mkdir(parents=True, exist_ok=True)
+          rate = 44100
+          wave = (np.sin(2 * math.pi * 440 * np.arange(4 * rate) / rate) * 0.5 * 32767).astype(np.int16)
+          for name in ("cover_source", "browser-check"):
+              with av.open(str(folder / f"{name}.flac"), "w") as out:
+                  stream = out.add_stream("flac", rate=rate, layout="mono")
+                  frame = av.AudioFrame.from_ndarray(wave.reshape(1, -1), format="s16", layout="mono")
+                  frame.sample_rate = rate
+                  for packet in [*stream.encode(frame), *stream.encode(None)]:
+                      out.mux(packet)
+          PY
       - name: Start ComfyUI with Plenio
         working-directory: plenio
         run: |
